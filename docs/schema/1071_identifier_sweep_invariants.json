@@ -1,0 +1,97 @@
+{
+  "already_in_deals_classified": {
+    "NO": 3,
+    "YES": 3
+  },
+  "built_by": "code/1071_identifier_driven_deal_sweep.py",
+  "candidates_by_axis": {
+    "N1": 1,
+    "S1": 4,
+    "S2": 1
+  },
+  "candidates_new_axes": 6,
+  "consolidated_by_workstream": {
+    "1010/prime_parent_uei": 98,
+    "1032/sec_edgar": 15,
+    "1071/N1": 1,
+    "1071/S1": 4,
+    "1071/S2": 1,
+    "992/tribal_newsletters": 30,
+    "993/tribal_wp_posts": 111
+  },
+  "consolidated_dropped_terms_restricted_source": {},
+  "consolidated_duplicates_suppressed": {
+    "992/tribal_newsletters": 27,
+    "993/tribal_wp_posts": 99
+  },
+  "consolidated_rows": 260,
+  "constellation_edges_name_only_from_side": 2408,
+  "constellation_edges_total": 3153,
+  "constellation_edges_used_in_uid_closure": 745,
+  "constellation_edges_with_a_from_cedar_uid": 745,
+  "folded_rows_retested_against_tierA_only": {
+    "1010/prime_parent_uei:NO": 72,
+    "1010/prime_parent_uei:YES": 26,
+    "1071/N1:YES": 1,
+    "1071/S1:YES": 4,
+    "1071/S2:YES": 1
+  },
+  "identifier_ledger_tier_census": {
+    "A": 2286,
+    "B": 5443,
+    "C": 12380,
+    "X": 468
+  },
+  "invariants": [
+    "I1_every_candidate_has_an_identifier",
+    "I2_no_nan_sentinel_in_identifier_columns",
+    "I3_every_candidate_has_an_evidence_note_naming_file_and_years",
+    "I4_no_contracting_candidate_carries_an_inferred_value",
+    "I5_refusals_actually_fired",
+    "I6_no_duplicate_dedup_key_in_consolidated",
+    "I7_no_candidate_is_intra_family"
+  ],
+  "rejections_by_axis_and_reason": {
+    "A1/GOVERNMENT_BODY_AS_DECLARED_PARENT": 39,
+    "A1/NEAR_IDENTICAL_NAME": 73,
+    "A1/SOURCE_VINTAGE_SEAM": 48,
+    "C1/INTRA_FAMILY_SAME_HUB": 1,
+    "C1/INTRA_FAMILY_SHARED_BRAND": 1,
+    "C1/SAME_DISTINCTIVE_TOKENS": 2,
+    "N1/GOVERNMENT_BODY_AS_DECLARED_PARENT": 2,
+    "N1/INTRA_FAMILY_SAME_HUB": 25,
+    "N1/INTRA_FAMILY_SHARED_BRAND": 363,
+    "N1/NEAR_IDENTICAL_NAME": 256,
+    "N1/NO_NATIVE_SIDE_AT_TIER_A": 149,
+    "N1/SAME_DISTINCTIVE_TOKENS": 11,
+    "N1/SOURCE_VINTAGE_SEAM": 263,
+    "S1/GOVERNMENT_BODY_AS_DECLARED_PARENT": 19,
+    "S1/INTRA_FAMILY_ACRONYM": 2,
+    "S1/INTRA_FAMILY_SAME_HUB": 32,
+    "S1/INTRA_FAMILY_SHARED_BRAND": 57,
+    "S1/NEAR_IDENTICAL_NAME": 2,
+    "S1/NO_NATIVE_SIDE_AT_TIER_A": 101,
+    "S1/SAME_DISTINCTIVE_TOKENS": 74,
+    "S1/SIDE_NAME_MISSING": 67,
+    "S1/SOURCE_VINTAGE_SEAM": 30,
+    "S2/GOVERNMENT_BODY_AS_DECLARED_PARENT": 2,
+    "S2/INTRA_FAMILY_SAME_HUB": 42,
+    "S2/INTRA_FAMILY_SHARED_BRAND": 13,
+    "S2/NEAR_IDENTICAL_NAME": 4,
+    "S2/NO_NATIVE_SIDE_AT_TIER_A": 24,
+    "S2/SAME_DISTINCTIVE_TOKENS": 79,
+    "S2/SIDE_NAME_MISSING": 31,
+    "S2/SOURCE_VINTAGE_SEAM": 9
+  },
+  "rejections_by_bucket": {
+    "intra_family_relabelling": 536,
+    "out_of_scope_no_tierA_native_side": 274,
+    "pass_through_not_an_owner": 62,
+    "same_entity_re_registration": 501,
+    "source_artefact_not_an_event": 350,
+    "untestable_one_side_unnamed": 98
+  },
+  "rejections_intra_family_relabelling": 536,
+  "rejections_total": 1821,
+  "spine_parenthetical_name_variants_indexed": 561
+}

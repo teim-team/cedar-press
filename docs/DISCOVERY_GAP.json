@@ -1,0 +1,1145 @@
+{
+  "generated": "2026-08-26T23:09:35Z",
+  "script": "code/276_measure_discovery_gap.py",
+  "network_requests": 0,
+  "identifier_route": {
+    "known_uei_incl_tier_C": 13532,
+    "tier_c_uei": 9335,
+    "tier_c_cage": 3043,
+    "ledger_rows_by_tier": {
+      "A": 2286,
+      "B": 5448,
+      "C": 12382,
+      "X": 461
+    },
+    "ledger_rows_by_identifier_type": {
+      "UEI": 13507,
+      "CAGE": 5966,
+      "EIN": 1104
+    },
+    "tier_ab_uei": 4056,
+    "tier_ab_cage": 2891,
+    "uei_resolved_from_cage": 1816,
+    "tier_x_uei_excluded": 116,
+    "known_uei_total": 4276
+  },
+  "A_assistance_population_basis": {
+    "source": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\usaspending_archive_2026-08-07\\assistance_filtered",
+    "files_read": 20,
+    "restricted_to": "115's per-FY archive extracts, the only rows that went through BOTH legs",
+    "excluded_and_why": "the FY2008-2023 API-route spine in the clean table is NOT read here: 115's merge back-stamps population_basis='recipient_type' on rows that never had a ledger leg evaluated, and counting them manufactures a type-filter share out of a default",
+    "population_basis_rows": {
+      "both": 504696,
+      "ledger_uei": 76943,
+      "recipient_type": 119819
+    },
+    "leg_definitions": {
+      "type_leg": [
+        "both",
+        "recipient_type"
+      ],
+      "identifier_leg": [
+        "both",
+        "ledger_uei",
+        "ledger_uei_withheld"
+      ]
+    },
+    "by_fiscal_year": {
+      "2007": {
+        "type_only": 776,
+        "id_only": 303,
+        "both": 571,
+        "entities_total": 1650,
+        "rows_by_population_basis": {
+          "both": 3041,
+          "ledger_uei": 5519,
+          "recipient_type": 2883
+        },
+        "usd_by_population_basis": {
+          "both": 315325088.0,
+          "ledger_uei": 1703105866.6,
+          "recipient_type": 171407491.0
+        },
+        "usd_type_leg_only_rows": 171407491.0,
+        "pct_of_universe_invisible_to_identifier_leg": 47.03,
+        "multiplier_type_filter_over_identifier_only": 1.888
+      },
+      "2008": {
+        "type_only": 993,
+        "id_only": 94,
+        "both": 781,
+        "entities_total": 1868,
+        "rows_by_population_basis": {
+          "both": 8222,
+          "recipient_type": 6031,
+          "ledger_uei": 1416
+        },
+        "usd_by_population_basis": {
+          "both": 1287954014.34,
+          "recipient_type": 807856914.0,
+          "ledger_uei": 422093383.26
+        },
+        "usd_type_leg_only_rows": 807856914.0,
+        "pct_of_universe_invisible_to_identifier_leg": 53.16,
+        "multiplier_type_filter_over_identifier_only": 2.135
+      },
+      "2009": {
+        "type_only": 786,
+        "id_only": 104,
+        "both": 825,
+        "entities_total": 1715,
+        "rows_by_population_basis": {
+          "recipient_type": 10715,
+          "both": 13133,
+          "ledger_uei": 2996
+        },
+        "usd_by_population_basis": {
+          "recipient_type": 2221739581.0,
+          "both": 3096085188.12,
+          "ledger_uei": 907165936.0
+        },
+        "usd_type_leg_only_rows": 2221739581.0,
+        "pct_of_universe_invisible_to_identifier_leg": 45.83,
+        "multiplier_type_filter_over_identifier_only": 1.846
+      },
+      "2010": {
+        "type_only": 1049,
+        "id_only": 157,
+        "both": 799,
+        "entities_total": 2005,
+        "rows_by_population_basis": {
+          "ledger_uei": 3184,
+          "both": 15836,
+          "recipient_type": 7899
+        },
+        "usd_by_population_basis": {
+          "ledger_uei": 1105050640.48,
+          "both": 2792504792.26,
+          "recipient_type": 1125684387.0
+        },
+        "usd_type_leg_only_rows": 1125684387.0,
+        "pct_of_universe_invisible_to_identifier_leg": 52.32,
+        "multiplier_type_filter_over_identifier_only": 2.097
+      },
+      "2011": {
+        "type_only": 1137,
+        "id_only": 214,
+        "both": 786,
+        "entities_total": 2137,
+        "rows_by_population_basis": {
+          "both": 15501,
+          "ledger_uei": 3107,
+          "recipient_type": 7495
+        },
+        "usd_by_population_basis": {
+          "both": 2603653457.62,
+          "ledger_uei": 1209939953.62,
+          "recipient_type": 768622313.76
+        },
+        "usd_type_leg_only_rows": 768622313.76,
+        "pct_of_universe_invisible_to_identifier_leg": 53.21,
+        "multiplier_type_filter_over_identifier_only": 2.137
+      },
+      "2012": {
+        "type_only": 339,
+        "id_only": 235,
+        "both": 771,
+        "entities_total": 1345,
+        "rows_by_population_basis": {
+          "ledger_uei": 4637,
+          "both": 13311,
+          "recipient_type": 4906
+        },
+        "usd_by_population_basis": {
+          "ledger_uei": 1563964296.01,
+          "both": 2745447100.25,
+          "recipient_type": 761569038.07
+        },
+        "usd_type_leg_only_rows": 761569038.07,
+        "pct_of_universe_invisible_to_identifier_leg": 25.2,
+        "multiplier_type_filter_over_identifier_only": 1.337
+      },
+      "2013": {
+        "type_only": 356,
+        "id_only": 197,
+        "both": 836,
+        "entities_total": 1389,
+        "rows_by_population_basis": {
+          "both": 21349,
+          "ledger_uei": 3961,
+          "recipient_type": 5640
+        },
+        "usd_by_population_basis": {
+          "both": 4212322552.43,
+          "ledger_uei": 2184019496.87,
+          "recipient_type": 948017815.02
+        },
+        "usd_type_leg_only_rows": 948017815.02,
+        "pct_of_universe_invisible_to_identifier_leg": 25.63,
+        "multiplier_type_filter_over_identifier_only": 1.345
+      },
+      "2014": {
+        "type_only": 972,
+        "id_only": 178,
+        "both": 849,
+        "entities_total": 1999,
+        "rows_by_population_basis": {
+          "recipient_type": 6377,
+          "both": 24176,
+          "ledger_uei": 2960
+        },
+        "usd_by_population_basis": {
+          "recipient_type": 1071682182.22,
+          "both": 4688304696.79,
+          "ledger_uei": 1287311553.19
+        },
+        "usd_type_leg_only_rows": 1071682182.22,
+        "pct_of_universe_invisible_to_identifier_leg": 48.62,
+        "multiplier_type_filter_over_identifier_only": 1.946
+      },
+      "2015": {
+        "type_only": 435,
+        "id_only": 210,
+        "both": 814,
+        "entities_total": 1459,
+        "rows_by_population_basis": {
+          "both": 23950,
+          "recipient_type": 4196,
+          "ledger_uei": 3045
+        },
+        "usd_by_population_basis": {
+          "both": 4838643879.91,
+          "recipient_type": 965234744.28,
+          "ledger_uei": 1217945674.51
+        },
+        "usd_type_leg_only_rows": 965234744.28,
+        "pct_of_universe_invisible_to_identifier_leg": 29.81,
+        "multiplier_type_filter_over_identifier_only": 1.425
+      },
+      "2016": {
+        "type_only": 1067,
+        "id_only": 175,
+        "both": 855,
+        "entities_total": 2097,
+        "rows_by_population_basis": {
+          "both": 26026,
+          "recipient_type": 7710,
+          "ledger_uei": 3477
+        },
+        "usd_by_population_basis": {
+          "both": 5195798184.0,
+          "recipient_type": 1370174353.91,
+          "ledger_uei": 1300697910.94
+        },
+        "usd_type_leg_only_rows": 1370174353.91,
+        "pct_of_universe_invisible_to_identifier_leg": 50.88,
+        "multiplier_type_filter_over_identifier_only": 2.036
+      },
+      "2017": {
+        "type_only": 377,
+        "id_only": 177,
+        "both": 835,
+        "entities_total": 1389,
+        "rows_by_population_basis": {
+          "both": 28657,
+          "recipient_type": 4120,
+          "ledger_uei": 3342
+        },
+        "usd_by_population_basis": {
+          "both": 5721458129.76,
+          "recipient_type": 1612910167.94,
+          "ledger_uei": 1047536024.61
+        },
+        "usd_type_leg_only_rows": 1612910167.94,
+        "pct_of_universe_invisible_to_identifier_leg": 27.14,
+        "multiplier_type_filter_over_identifier_only": 1.373
+      },
+      "2018": {
+        "type_only": 976,
+        "id_only": 184,
+        "both": 819,
+        "entities_total": 1979,
+        "rows_by_population_basis": {
+          "both": 33904,
+          "recipient_type": 5567,
+          "ledger_uei": 4311
+        },
+        "usd_by_population_basis": {
+          "both": 6596176726.22,
+          "recipient_type": 1383626622.08,
+          "ledger_uei": 1356996041.61
+        },
+        "usd_type_leg_only_rows": 1383626622.08,
+        "pct_of_universe_invisible_to_identifier_leg": 49.32,
+        "multiplier_type_filter_over_identifier_only": 1.973
+      },
+      "2019": {
+        "type_only": 1011,
+        "id_only": 161,
+        "both": 852,
+        "entities_total": 2024,
+        "rows_by_population_basis": {
+          "both": 32062,
+          "recipient_type": 5895,
+          "ledger_uei": 3447
+        },
+        "usd_by_population_basis": {
+          "both": 7215776485.41,
+          "recipient_type": 1882944351.11,
+          "ledger_uei": 1502497158.09
+        },
+        "usd_type_leg_only_rows": 1882944351.11,
+        "pct_of_universe_invisible_to_identifier_leg": 49.95,
+        "multiplier_type_filter_over_identifier_only": 1.998
+      },
+      "2020": {
+        "type_only": 958,
+        "id_only": 172,
+        "both": 864,
+        "entities_total": 1994,
+        "rows_by_population_basis": {
+          "both": 37724,
+          "recipient_type": 5984,
+          "ledger_uei": 5484
+        },
+        "usd_by_population_basis": {
+          "both": 15885259424.66,
+          "recipient_type": 2260197780.51,
+          "ledger_uei": 2443701478.47
+        },
+        "usd_type_leg_only_rows": 2260197780.51,
+        "pct_of_universe_invisible_to_identifier_leg": 48.04,
+        "multiplier_type_filter_over_identifier_only": 1.925
+      },
+      "2021": {
+        "type_only": 1098,
+        "id_only": 82,
+        "both": 1015,
+        "entities_total": 2195,
+        "rows_by_population_basis": {
+          "ledger_uei": 4268,
+          "both": 37730,
+          "recipient_type": 6412
+        },
+        "usd_by_population_basis": {
+          "ledger_uei": 2495932702.19,
+          "both": 34601616155.88,
+          "recipient_type": 3699990285.37
+        },
+        "usd_type_leg_only_rows": 3699990285.37,
+        "pct_of_universe_invisible_to_identifier_leg": 50.02,
+        "multiplier_type_filter_over_identifier_only": 2.001
+      },
+      "2022": {
+        "type_only": 993,
+        "id_only": 116,
+        "both": 971,
+        "entities_total": 2080,
+        "rows_by_population_basis": {
+          "both": 38559,
+          "recipient_type": 6190,
+          "ledger_uei": 5701
+        },
+        "usd_by_population_basis": {
+          "both": 10113858359.09,
+          "recipient_type": 1987991533.79,
+          "ledger_uei": 2550109042.32
+        },
+        "usd_type_leg_only_rows": 1987991533.79,
+        "pct_of_universe_invisible_to_identifier_leg": 47.74,
+        "multiplier_type_filter_over_identifier_only": 1.914
+      },
+      "2023": {
+        "type_only": 1052,
+        "id_only": 109,
+        "both": 979,
+        "entities_total": 2140,
+        "rows_by_population_basis": {
+          "ledger_uei": 5364,
+          "recipient_type": 5620,
+          "both": 38341
+        },
+        "usd_by_population_basis": {
+          "ledger_uei": 2372179322.22,
+          "recipient_type": 2462814428.19,
+          "both": 9990980510.38
+        },
+        "usd_type_leg_only_rows": 2462814428.19,
+        "pct_of_universe_invisible_to_identifier_leg": 49.16,
+        "multiplier_type_filter_over_identifier_only": 1.967
+      },
+      "2024": {
+        "type_only": 1215,
+        "id_only": 72,
+        "both": 986,
+        "entities_total": 2273,
+        "rows_by_population_basis": {
+          "recipient_type": 6328,
+          "both": 39709,
+          "ledger_uei": 4653
+        },
+        "usd_by_population_basis": {
+          "recipient_type": 2744875136.68,
+          "both": 11700434190.55,
+          "ledger_uei": 1790748400.04
+        },
+        "usd_type_leg_only_rows": 2744875136.68,
+        "pct_of_universe_invisible_to_identifier_leg": 53.45,
+        "multiplier_type_filter_over_identifier_only": 2.148
+      },
+      "2025": {
+        "type_only": 1181,
+        "id_only": 61,
+        "both": 991,
+        "entities_total": 2233,
+        "rows_by_population_basis": {
+          "ledger_uei": 3993,
+          "recipient_type": 6225,
+          "both": 34261
+        },
+        "usd_by_population_basis": {
+          "ledger_uei": 1702238848.76,
+          "recipient_type": 2942091962.84,
+          "both": 12029812372.85
+        },
+        "usd_type_leg_only_rows": 2942091962.84,
+        "pct_of_universe_invisible_to_identifier_leg": 52.89,
+        "multiplier_type_filter_over_identifier_only": 2.123
+      },
+      "2026": {
+        "type_only": 1073,
+        "id_only": 47,
+        "both": 904,
+        "entities_total": 2024,
+        "rows_by_population_basis": {
+          "recipient_type": 3626,
+          "both": 19204,
+          "ledger_uei": 2078
+        },
+        "usd_by_population_basis": {
+          "recipient_type": 2339645140.75,
+          "both": 8777473946.28,
+          "ledger_uei": 1003567760.28
+        },
+        "usd_type_leg_only_rows": 2339645140.75,
+        "pct_of_universe_invisible_to_identifier_leg": 53.01,
+        "multiplier_type_filter_over_identifier_only": 2.128
+      }
+    },
+    "distinct_entities_all_years": {
+      "type_filter_only": 4866,
+      "identifier_only": 598,
+      "both": 1392,
+      "union": 6390,
+      "identifier_leg_alone_would_have_found": 1524,
+      "pct_invisible_to_identifier_leg": 76.15,
+      "multiplier_union_over_identifier_only": 4.193
+    },
+    "decomposition_of_the_type_filter_only_entities": {
+      "total": 4866,
+      "on_file_at_tier_C_unadjudicated_a_REVIEW_backlog": 156,
+      "absent_from_the_ledger_entirely_TRUE_DISCOVERY": 4696,
+      "in_the_pull_set_but_the_ledger_leg_did_not_fire_on_these_rows": 14,
+      "note": "the middle row is the number a discovery sweep would surface and a reviewer would already recognise; the TRUE_DISCOVERY row is what no Cedar file has ever held"
+    }
+  },
+  "B_prime_flag_at_award": {
+    "source": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 4-5-2023 File 1.csv",
+    "rows_streamed": 1101796,
+    "distinct_uei": 12643,
+    "flag_columns_used": [
+      "alaskan_native_corporation_owned_firm",
+      "american_indian_owned_business",
+      "indian_tribe_federally_recognized",
+      "native_hawaiian_organization_owned_firm",
+      "tribally_owned_firm",
+      "native_american_owned_business",
+      "us_tribal_government",
+      "housing_authorities_public_tribal",
+      "tribal_college",
+      "alaskan_native_servicing_institution",
+      "native_hawaiian_servicing_institution"
+    ],
+    "entities_carrying_a_native_business_type_flag": 12643,
+    "of_those_already_known_to_identifier_route": 2886,
+    "of_those_rescued_only_by_the_parent_uei_leg": 38,
+    "THE_DISCOVERY_GAP_entities_the_flag_finds_that_the_identifier_list_would_have_missed": 9719,
+    "pct_of_flagged_entities_unknown": 76.87,
+    "SENSITIVITY_gap_if_tier_C_counted_as_known": 565,
+    "usd_on_flagged_entities": 238802101192.42,
+    "usd_on_flagged_entities_unknown_to_identifier_route": 70964517074.43,
+    "by_fiscal_year": {
+      "1989": {
+        "flagged_entities": 38,
+        "flagged_entities_unknown_to_identifier_route": 37,
+        "pct_unknown": 97.37,
+        "usd_on_flagged_rows": 730950000.0,
+        "usd_on_flagged_rows_unknown_entities": 730985000.0
+      },
+      "1997": {
+        "flagged_entities": 5,
+        "flagged_entities_unknown_to_identifier_route": 5,
+        "pct_unknown": 100.0,
+        "usd_on_flagged_rows": 1287012.0,
+        "usd_on_flagged_rows_unknown_entities": 1287012.0
+      },
+      "1998": {
+        "flagged_entities": 15,
+        "flagged_entities_unknown_to_identifier_route": 13,
+        "pct_unknown": 86.67,
+        "usd_on_flagged_rows": 9578089.0,
+        "usd_on_flagged_rows_unknown_entities": 8924718.0
+      },
+      "1999": {
+        "flagged_entities": 407,
+        "flagged_entities_unknown_to_identifier_route": 342,
+        "pct_unknown": 84.03,
+        "usd_on_flagged_rows": 734071694.38,
+        "usd_on_flagged_rows_unknown_entities": 468688385.38
+      },
+      "2000": {
+        "flagged_entities": 461,
+        "flagged_entities_unknown_to_identifier_route": 362,
+        "pct_unknown": 78.52,
+        "usd_on_flagged_rows": 900041355.01,
+        "usd_on_flagged_rows_unknown_entities": 456138117.98
+      },
+      "2001": {
+        "flagged_entities": 530,
+        "flagged_entities_unknown_to_identifier_route": 395,
+        "pct_unknown": 74.53,
+        "usd_on_flagged_rows": 1391534306.37,
+        "usd_on_flagged_rows_unknown_entities": 783775277.42
+      },
+      "2002": {
+        "flagged_entities": 670,
+        "flagged_entities_unknown_to_identifier_route": 488,
+        "pct_unknown": 72.84,
+        "usd_on_flagged_rows": 1707183740.5,
+        "usd_on_flagged_rows_unknown_entities": 647649239.2
+      },
+      "2003": {
+        "flagged_entities": 840,
+        "flagged_entities_unknown_to_identifier_route": 598,
+        "pct_unknown": 71.19,
+        "usd_on_flagged_rows": 3179892203.96,
+        "usd_on_flagged_rows_unknown_entities": 1076158151.71
+      },
+      "2004": {
+        "flagged_entities": 1684,
+        "flagged_entities_unknown_to_identifier_route": 1207,
+        "pct_unknown": 71.67,
+        "usd_on_flagged_rows": 4201378918.27,
+        "usd_on_flagged_rows_unknown_entities": 1297970586.91
+      },
+      "2005": {
+        "flagged_entities": 2098,
+        "flagged_entities_unknown_to_identifier_route": 1523,
+        "pct_unknown": 72.59,
+        "usd_on_flagged_rows": 5132222120.2,
+        "usd_on_flagged_rows_unknown_entities": 1662641820.66
+      },
+      "2006": {
+        "flagged_entities": 2348,
+        "flagged_entities_unknown_to_identifier_route": 1695,
+        "pct_unknown": 72.19,
+        "usd_on_flagged_rows": 5383002090.14,
+        "usd_on_flagged_rows_unknown_entities": 1544242737.0
+      },
+      "2007": {
+        "flagged_entities": 2720,
+        "flagged_entities_unknown_to_identifier_route": 1997,
+        "pct_unknown": 73.42,
+        "usd_on_flagged_rows": 6655905397.71,
+        "usd_on_flagged_rows_unknown_entities": 2133427768.66
+      },
+      "2008": {
+        "flagged_entities": 2976,
+        "flagged_entities_unknown_to_identifier_route": 2160,
+        "pct_unknown": 72.58,
+        "usd_on_flagged_rows": 9485137910.91,
+        "usd_on_flagged_rows_unknown_entities": 3139947702.64
+      },
+      "2009": {
+        "flagged_entities": 3156,
+        "flagged_entities_unknown_to_identifier_route": 2275,
+        "pct_unknown": 72.08,
+        "usd_on_flagged_rows": 11183315595.57,
+        "usd_on_flagged_rows_unknown_entities": 3473532509.4
+      },
+      "2010": {
+        "flagged_entities": 3327,
+        "flagged_entities_unknown_to_identifier_route": 2374,
+        "pct_unknown": 71.36,
+        "usd_on_flagged_rows": 11877196263.82,
+        "usd_on_flagged_rows_unknown_entities": 3575455323.06
+      },
+      "2011": {
+        "flagged_entities": 3287,
+        "flagged_entities_unknown_to_identifier_route": 2308,
+        "pct_unknown": 70.22,
+        "usd_on_flagged_rows": 11594287739.64,
+        "usd_on_flagged_rows_unknown_entities": 3365950594.55
+      },
+      "2012": {
+        "flagged_entities": 3097,
+        "flagged_entities_unknown_to_identifier_route": 2132,
+        "pct_unknown": 68.84,
+        "usd_on_flagged_rows": 12658444355.31,
+        "usd_on_flagged_rows_unknown_entities": 3248848701.1
+      },
+      "2013": {
+        "flagged_entities": 2931,
+        "flagged_entities_unknown_to_identifier_route": 1971,
+        "pct_unknown": 67.25,
+        "usd_on_flagged_rows": 9569604092.73,
+        "usd_on_flagged_rows_unknown_entities": 3150926519.24
+      },
+      "2014": {
+        "flagged_entities": 3010,
+        "flagged_entities_unknown_to_identifier_route": 1999,
+        "pct_unknown": 66.41,
+        "usd_on_flagged_rows": 11554869847.1,
+        "usd_on_flagged_rows_unknown_entities": 3719939647.91
+      },
+      "2015": {
+        "flagged_entities": 2897,
+        "flagged_entities_unknown_to_identifier_route": 1916,
+        "pct_unknown": 66.14,
+        "usd_on_flagged_rows": 11247667460.23,
+        "usd_on_flagged_rows_unknown_entities": 3572274625.77
+      },
+      "2016": {
+        "flagged_entities": 3004,
+        "flagged_entities_unknown_to_identifier_route": 1955,
+        "pct_unknown": 65.08,
+        "usd_on_flagged_rows": 11956826228.79,
+        "usd_on_flagged_rows_unknown_entities": 3505488059.25
+      },
+      "2017": {
+        "flagged_entities": 3112,
+        "flagged_entities_unknown_to_identifier_route": 2006,
+        "pct_unknown": 64.46,
+        "usd_on_flagged_rows": 13346040145.71,
+        "usd_on_flagged_rows_unknown_entities": 3786756569.26
+      },
+      "2018": {
+        "flagged_entities": 3004,
+        "flagged_entities_unknown_to_identifier_route": 1873,
+        "pct_unknown": 62.35,
+        "usd_on_flagged_rows": 14245690823.58,
+        "usd_on_flagged_rows_unknown_entities": 3948411343.54
+      },
+      "2019": {
+        "flagged_entities": 2901,
+        "flagged_entities_unknown_to_identifier_route": 1768,
+        "pct_unknown": 60.94,
+        "usd_on_flagged_rows": 15820199992.24,
+        "usd_on_flagged_rows_unknown_entities": 4026415336.1
+      },
+      "2020": {
+        "flagged_entities": 2982,
+        "flagged_entities_unknown_to_identifier_route": 1820,
+        "pct_unknown": 61.03,
+        "usd_on_flagged_rows": 17851581207.13,
+        "usd_on_flagged_rows_unknown_entities": 4700659130.04
+      },
+      "2021": {
+        "flagged_entities": 3025,
+        "flagged_entities_unknown_to_identifier_route": 1799,
+        "pct_unknown": 59.47,
+        "usd_on_flagged_rows": 19661607643.12,
+        "usd_on_flagged_rows_unknown_entities": 4777215150.67
+      },
+      "2022": {
+        "flagged_entities": 2982,
+        "flagged_entities_unknown_to_identifier_route": 1773,
+        "pct_unknown": 59.46,
+        "usd_on_flagged_rows": 21332673849.75,
+        "usd_on_flagged_rows_unknown_entities": 6417487525.35
+      },
+      "2023": {
+        "flagged_entities": 1988,
+        "flagged_entities_unknown_to_identifier_route": 1128,
+        "pct_unknown": 56.74,
+        "usd_on_flagged_rows": 5389911109.25,
+        "usd_on_flagged_rows_unknown_entities": 1743319521.63
+      }
+    },
+    "caveat": "A self-certification is not a determination. These are CANDIDATES for adjudication, never rows to attribute. Goldbelt Raven, an ANC subsidiary, certifies alaskanNativeCorporationOwnedFirm = NO."
+  },
+  "C_prime_registration_match": {
+    "source": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 4-5-2023 File 2.csv",
+    "rows_streamed": 1078021,
+    "distinct_uei": 7145,
+    "flag_columns_used": [
+      "alaskan_native_corporation_owned_firm",
+      "american_indian_owned_business",
+      "indian_tribe_federally_recognized",
+      "native_hawaiian_organization_owned_firm",
+      "tribally_owned_firm",
+      "native_american_owned_business",
+      "us_tribal_government",
+      "housing_authorities_public_tribal",
+      "tribal_college",
+      "alaskan_native_servicing_institution",
+      "native_hawaiian_servicing_institution"
+    ],
+    "entities_carrying_a_native_business_type_flag": 6582,
+    "of_those_already_known_to_identifier_route": 2303,
+    "of_those_rescued_only_by_the_parent_uei_leg": 28,
+    "THE_DISCOVERY_GAP_entities_the_flag_finds_that_the_identifier_list_would_have_missed": 4251,
+    "pct_of_flagged_entities_unknown": 64.59,
+    "SENSITIVITY_gap_if_tier_C_counted_as_known": 272,
+    "usd_on_flagged_entities": 236706378156.74,
+    "usd_on_flagged_entities_unknown_to_identifier_route": 59366987356.41,
+    "by_fiscal_year": {
+      "1989": {
+        "flagged_entities": 1,
+        "flagged_entities_unknown_to_identifier_route": 0,
+        "pct_unknown": 0.0,
+        "usd_on_flagged_rows": -35000.0,
+        "usd_on_flagged_rows_unknown_entities": 0
+      },
+      "1997": {
+        "flagged_entities": 1,
+        "flagged_entities_unknown_to_identifier_route": 1,
+        "pct_unknown": 100.0,
+        "usd_on_flagged_rows": 1012952.0,
+        "usd_on_flagged_rows_unknown_entities": 1012952.0
+      },
+      "1998": {
+        "flagged_entities": 3,
+        "flagged_entities_unknown_to_identifier_route": 2,
+        "pct_unknown": 66.67,
+        "usd_on_flagged_rows": 6406511.0,
+        "usd_on_flagged_rows_unknown_entities": 6259601.0
+      },
+      "1999": {
+        "flagged_entities": 88,
+        "flagged_entities_unknown_to_identifier_route": 49,
+        "pct_unknown": 55.68,
+        "usd_on_flagged_rows": 266829501.0,
+        "usd_on_flagged_rows_unknown_entities": 94245461.0
+      },
+      "2000": {
+        "flagged_entities": 131,
+        "flagged_entities_unknown_to_identifier_route": 61,
+        "pct_unknown": 46.56,
+        "usd_on_flagged_rows": 367624611.26,
+        "usd_on_flagged_rows_unknown_entities": 93771859.03
+      },
+      "2001": {
+        "flagged_entities": 175,
+        "flagged_entities_unknown_to_identifier_route": 84,
+        "pct_unknown": 48.0,
+        "usd_on_flagged_rows": 663692082.68,
+        "usd_on_flagged_rows_unknown_entities": 273928020.18
+      },
+      "2002": {
+        "flagged_entities": 232,
+        "flagged_entities_unknown_to_identifier_route": 113,
+        "pct_unknown": 48.71,
+        "usd_on_flagged_rows": 1005422395.41,
+        "usd_on_flagged_rows_unknown_entities": 264420405.45
+      },
+      "2003": {
+        "flagged_entities": 320,
+        "flagged_entities_unknown_to_identifier_route": 147,
+        "pct_unknown": 45.94,
+        "usd_on_flagged_rows": 2088058436.4,
+        "usd_on_flagged_rows_unknown_entities": 408459556.02
+      },
+      "2004": {
+        "flagged_entities": 677,
+        "flagged_entities_unknown_to_identifier_route": 341,
+        "pct_unknown": 50.37,
+        "usd_on_flagged_rows": 2827086097.33,
+        "usd_on_flagged_rows_unknown_entities": 450779169.85
+      },
+      "2005": {
+        "flagged_entities": 859,
+        "flagged_entities_unknown_to_identifier_route": 450,
+        "pct_unknown": 52.39,
+        "usd_on_flagged_rows": 3520428612.88,
+        "usd_on_flagged_rows_unknown_entities": 619459205.34
+      },
+      "2006": {
+        "flagged_entities": 998,
+        "flagged_entities_unknown_to_identifier_route": 525,
+        "pct_unknown": 52.61,
+        "usd_on_flagged_rows": 3957600180.22,
+        "usd_on_flagged_rows_unknown_entities": 704362685.73
+      },
+      "2007": {
+        "flagged_entities": 1201,
+        "flagged_entities_unknown_to_identifier_route": 669,
+        "pct_unknown": 55.7,
+        "usd_on_flagged_rows": 4690988021.47,
+        "usd_on_flagged_rows_unknown_entities": 829297866.82
+      },
+      "2008": {
+        "flagged_entities": 1420,
+        "flagged_entities_unknown_to_identifier_route": 789,
+        "pct_unknown": 55.56,
+        "usd_on_flagged_rows": 7159878724.41,
+        "usd_on_flagged_rows_unknown_entities": 1459798592.36
+      },
+      "2009": {
+        "flagged_entities": 1633,
+        "flagged_entities_unknown_to_identifier_route": 917,
+        "pct_unknown": 56.15,
+        "usd_on_flagged_rows": 9130065172.46,
+        "usd_on_flagged_rows_unknown_entities": 2116187077.34
+      },
+      "2010": {
+        "flagged_entities": 1866,
+        "flagged_entities_unknown_to_identifier_route": 1076,
+        "pct_unknown": 57.66,
+        "usd_on_flagged_rows": 10233814456.42,
+        "usd_on_flagged_rows_unknown_entities": 2387856964.52
+      },
+      "2011": {
+        "flagged_entities": 2002,
+        "flagged_entities_unknown_to_identifier_route": 1182,
+        "pct_unknown": 59.04,
+        "usd_on_flagged_rows": 10203243009.99,
+        "usd_on_flagged_rows_unknown_entities": 2331190683.38
+      },
+      "2012": {
+        "flagged_entities": 2066,
+        "flagged_entities_unknown_to_identifier_route": 1234,
+        "pct_unknown": 59.73,
+        "usd_on_flagged_rows": 11484201465.99,
+        "usd_on_flagged_rows_unknown_entities": 2397530505.19
+      },
+      "2013": {
+        "flagged_entities": 2110,
+        "flagged_entities_unknown_to_identifier_route": 1258,
+        "pct_unknown": 59.62,
+        "usd_on_flagged_rows": 8538314916.4,
+        "usd_on_flagged_rows_unknown_entities": 2396166755.03
+      },
+      "2014": {
+        "flagged_entities": 2295,
+        "flagged_entities_unknown_to_identifier_route": 1365,
+        "pct_unknown": 59.48,
+        "usd_on_flagged_rows": 10371123590.34,
+        "usd_on_flagged_rows_unknown_entities": 2879837445.44
+      },
+      "2015": {
+        "flagged_entities": 2312,
+        "flagged_entities_unknown_to_identifier_route": 1399,
+        "pct_unknown": 60.51,
+        "usd_on_flagged_rows": 10203913839.66,
+        "usd_on_flagged_rows_unknown_entities": 2812966872.24
+      },
+      "2016": {
+        "flagged_entities": 2442,
+        "flagged_entities_unknown_to_identifier_route": 1458,
+        "pct_unknown": 59.71,
+        "usd_on_flagged_rows": 11003996959.7,
+        "usd_on_flagged_rows_unknown_entities": 2779982824.36
+      },
+      "2017": {
+        "flagged_entities": 2574,
+        "flagged_entities_unknown_to_identifier_route": 1532,
+        "pct_unknown": 59.52,
+        "usd_on_flagged_rows": 12391969826.81,
+        "usd_on_flagged_rows_unknown_entities": 3051612101.14
+      },
+      "2018": {
+        "flagged_entities": 2570,
+        "flagged_entities_unknown_to_identifier_route": 1484,
+        "pct_unknown": 57.74,
+        "usd_on_flagged_rows": 13478873501.45,
+        "usd_on_flagged_rows_unknown_entities": 3395863622.95
+      },
+      "2019": {
+        "flagged_entities": 2522,
+        "flagged_entities_unknown_to_identifier_route": 1431,
+        "pct_unknown": 56.74,
+        "usd_on_flagged_rows": 14924237145.08,
+        "usd_on_flagged_rows_unknown_entities": 3420682083.94
+      },
+      "2020": {
+        "flagged_entities": 2642,
+        "flagged_entities_unknown_to_identifier_route": 1518,
+        "pct_unknown": 57.46,
+        "usd_on_flagged_rows": 17157443777.54,
+        "usd_on_flagged_rows_unknown_entities": 4204637863.03
+      },
+      "2021": {
+        "flagged_entities": 2704,
+        "flagged_entities_unknown_to_identifier_route": 1513,
+        "pct_unknown": 55.95,
+        "usd_on_flagged_rows": 19105299349.94,
+        "usd_on_flagged_rows_unknown_entities": 4356970439.6
+      },
+      "2022": {
+        "flagged_entities": 2722,
+        "flagged_entities_unknown_to_identifier_route": 1533,
+        "pct_unknown": 56.32,
+        "usd_on_flagged_rows": 20909065888.31,
+        "usd_on_flagged_rows_unknown_entities": 6106704284.04
+      },
+      "2023": {
+        "flagged_entities": 1853,
+        "flagged_entities_unknown_to_identifier_route": 1003,
+        "pct_unknown": 54.13,
+        "usd_on_flagged_rows": 5304276798.87,
+        "usd_on_flagged_rows_unknown_entities": 1656753580.63
+      }
+    },
+    "caveat": "A self-certification is not a determination. These are CANDIDATES for adjudication, never rows to attribute. Goldbelt Raven, an ANC subsidiary, certifies alaskanNativeCorporationOwnedFirm = NO."
+  },
+  "BC_union": {
+    "entities_unknown_to_identifier_route_in_either_file": 9721,
+    "in_both_files": 4249
+  },
+  "D_uei_only_narrowness": {
+    "source": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\contracts\\usaspending_archive_2026-08-07\\filtered",
+    "by_fiscal_year": {
+      "2007": {
+        "rows_total": 39498,
+        "rows_by_match_key": {
+          "cage_code": 40,
+          "excluded_tier_X": 1462,
+          "recipient_parent_uei": 555,
+          "recipient_uei": 37441
+        },
+        "rows_a_uei_only_pull_would_lose": 595,
+        "pct_rows_lost": 1.51,
+        "entities_a_uei_only_pull_would_lose": 20
+      },
+      "2008": {
+        "rows_total": 43157,
+        "rows_by_match_key": {
+          "cage_code": 33,
+          "excluded_tier_X": 1630,
+          "recipient_parent_uei": 730,
+          "recipient_uei": 40764
+        },
+        "rows_a_uei_only_pull_would_lose": 763,
+        "pct_rows_lost": 1.77,
+        "entities_a_uei_only_pull_would_lose": 22
+      },
+      "2009": {
+        "rows_total": 44938,
+        "rows_by_match_key": {
+          "cage_code": 22,
+          "excluded_tier_X": 1579,
+          "recipient_parent_uei": 807,
+          "recipient_uei": 42530
+        },
+        "rows_a_uei_only_pull_would_lose": 829,
+        "pct_rows_lost": 1.84,
+        "entities_a_uei_only_pull_would_lose": 23
+      },
+      "2010": {
+        "rows_total": 47317,
+        "rows_by_match_key": {
+          "cage_code": 13,
+          "excluded_tier_X": 1568,
+          "recipient_parent_uei": 373,
+          "recipient_uei": 45363
+        },
+        "rows_a_uei_only_pull_would_lose": 386,
+        "pct_rows_lost": 0.82,
+        "entities_a_uei_only_pull_would_lose": 26
+      },
+      "2011": {
+        "rows_total": 48481,
+        "rows_by_match_key": {
+          "cage_code": 9,
+          "excluded_tier_X": 1519,
+          "recipient_parent_uei": 272,
+          "recipient_uei": 46681
+        },
+        "rows_a_uei_only_pull_would_lose": 281,
+        "pct_rows_lost": 0.58,
+        "entities_a_uei_only_pull_would_lose": 23
+      },
+      "2012": {
+        "rows_total": 43991,
+        "rows_by_match_key": {
+          "cage_code": 48,
+          "excluded_tier_X": 1669,
+          "recipient_parent_uei": 319,
+          "recipient_uei": 41955
+        },
+        "rows_a_uei_only_pull_would_lose": 367,
+        "pct_rows_lost": 0.83,
+        "entities_a_uei_only_pull_would_lose": 21
+      },
+      "2013": {
+        "rows_total": 37876,
+        "rows_by_match_key": {
+          "cage_code": 32,
+          "excluded_tier_X": 1464,
+          "recipient_parent_uei": 201,
+          "recipient_uei": 36179
+        },
+        "rows_a_uei_only_pull_would_lose": 233,
+        "pct_rows_lost": 0.62,
+        "entities_a_uei_only_pull_would_lose": 18
+      },
+      "2014": {
+        "rows_total": 37812,
+        "rows_by_match_key": {
+          "cage_code": 19,
+          "excluded_tier_X": 1505,
+          "recipient_parent_uei": 68,
+          "recipient_uei": 36220
+        },
+        "rows_a_uei_only_pull_would_lose": 87,
+        "pct_rows_lost": 0.23,
+        "entities_a_uei_only_pull_would_lose": 12
+      },
+      "2015": {
+        "rows_total": 38771,
+        "rows_by_match_key": {
+          "cage_code": 34,
+          "excluded_tier_X": 1462,
+          "recipient_parent_uei": 59,
+          "recipient_uei": 37216
+        },
+        "rows_a_uei_only_pull_would_lose": 93,
+        "pct_rows_lost": 0.24,
+        "entities_a_uei_only_pull_would_lose": 18
+      },
+      "2016": {
+        "rows_total": 39317,
+        "rows_by_match_key": {
+          "cage_code": 29,
+          "excluded_tier_X": 1505,
+          "recipient_parent_uei": 60,
+          "recipient_uei": 37723
+        },
+        "rows_a_uei_only_pull_would_lose": 89,
+        "pct_rows_lost": 0.23,
+        "entities_a_uei_only_pull_would_lose": 15
+      },
+      "2017": {
+        "rows_total": 43695,
+        "rows_by_match_key": {
+          "cage_code": 957,
+          "excluded_tier_X": 1499,
+          "recipient_parent_uei": 56,
+          "recipient_uei": 41183
+        },
+        "rows_a_uei_only_pull_would_lose": 1013,
+        "pct_rows_lost": 2.32,
+        "entities_a_uei_only_pull_would_lose": 85
+      },
+      "2018": {
+        "rows_total": 43530,
+        "rows_by_match_key": {
+          "cage_code": 1946,
+          "excluded_tier_X": 1121,
+          "recipient_parent_uei": 23,
+          "recipient_uei": 40440
+        },
+        "rows_a_uei_only_pull_would_lose": 1969,
+        "pct_rows_lost": 4.52,
+        "entities_a_uei_only_pull_would_lose": 119
+      },
+      "2019": {
+        "rows_total": 44845,
+        "rows_by_match_key": {
+          "cage_code": 2422,
+          "excluded_tier_X": 1051,
+          "recipient_parent_uei": 378,
+          "recipient_uei": 40994
+        },
+        "rows_a_uei_only_pull_would_lose": 2800,
+        "pct_rows_lost": 6.24,
+        "entities_a_uei_only_pull_would_lose": 135
+      },
+      "2020": {
+        "rows_total": 46680,
+        "rows_by_match_key": {
+          "cage_code": 2788,
+          "excluded_tier_X": 967,
+          "recipient_parent_uei": 138,
+          "recipient_uei": 42787
+        },
+        "rows_a_uei_only_pull_would_lose": 2926,
+        "pct_rows_lost": 6.27,
+        "entities_a_uei_only_pull_would_lose": 144
+      },
+      "2021": {
+        "rows_total": 45090,
+        "rows_by_match_key": {
+          "cage_code": 2611,
+          "excluded_tier_X": 963,
+          "recipient_parent_uei": 127,
+          "recipient_uei": 41389
+        },
+        "rows_a_uei_only_pull_would_lose": 2738,
+        "pct_rows_lost": 6.07,
+        "entities_a_uei_only_pull_would_lose": 146
+      },
+      "2022": {
+        "rows_total": 46634,
+        "rows_by_match_key": {
+          "cage_code": 3027,
+          "excluded_tier_X": 1125,
+          "recipient_parent_uei": 128,
+          "recipient_uei": 42354
+        },
+        "rows_a_uei_only_pull_would_lose": 3155,
+        "pct_rows_lost": 6.77,
+        "entities_a_uei_only_pull_would_lose": 153
+      },
+      "2023": {
+        "rows_total": 46727,
+        "rows_by_match_key": {
+          "cage_code": 3337,
+          "excluded_tier_X": 980,
+          "recipient_parent_uei": 164,
+          "recipient_uei": 42246
+        },
+        "rows_a_uei_only_pull_would_lose": 3501,
+        "pct_rows_lost": 7.49,
+        "entities_a_uei_only_pull_would_lose": 188
+      },
+      "2024": {
+        "rows_total": 53966,
+        "rows_by_match_key": {
+          "cage_code": 4525,
+          "excluded_tier_X": 910,
+          "recipient_parent_uei": 189,
+          "recipient_uei": 48342
+        },
+        "rows_a_uei_only_pull_would_lose": 4714,
+        "pct_rows_lost": 8.74,
+        "entities_a_uei_only_pull_would_lose": 233
+      },
+      "2025": {
+        "rows_total": 49789,
+        "rows_by_match_key": {
+          "cage_code": 5985,
+          "excluded_tier_X": 910,
+          "recipient_parent_uei": 316,
+          "recipient_uei": 42578
+        },
+        "rows_a_uei_only_pull_would_lose": 6301,
+        "pct_rows_lost": 12.66,
+        "entities_a_uei_only_pull_would_lose": 275
+      },
+      "2026": {
+        "rows_total": 62168,
+        "rows_by_match_key": {
+          "cage_code": 3459,
+          "excluded_tier_X": 355,
+          "recipient_parent_uei": 39004,
+          "recipient_uei": 19350
+        },
+        "rows_a_uei_only_pull_would_lose": 42463,
+        "pct_rows_lost": 68.3,
+        "entities_a_uei_only_pull_would_lose": 252
+      }
+    }
+  }
+}

@@ -1,0 +1,5103 @@
+{
+ "generated_at": "2026-08-29T10:10:28+00:00",
+ "commit": "6c92a41f7b3275f3e4ee8edafd03cfb8e65be5ce",
+ "definition": "a column whose every non-blank value across the whole table is one single ISO date. Detected by full scan, never sampled.",
+ "caveat": "a single-date column in a table that legitimately covers one day is a FALSE POSITIVE of this test. The constant value is printed beside every column so a reader can tell the two apart; nothing here is auto-fixed.",
+ "worked_example": "code/77_build_nagpra_dataset.py::cache_fetched_date - derive the date from the cached artifact, leave it BLANK when the artifact cannot say. That single change made nagpra_notices.csv byte-reproducible.",
+ "total_stamp_columns": 283,
+ "distinct_tables_scanned": 255,
+ "collections": [
+  {
+   "collection": "funding",
+   "shelf": "standard",
+   "n_tables_scanned": 17,
+   "n_tables_with_stamps": 9,
+   "n_stamp_columns": 9,
+   "tables": [
+    {
+     "table": "assistance_tribe_id_crosswalk.csv",
+     "path": "data/clean/assistance_tribe_id_crosswalk.csv",
+     "rows": 361,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "152_build_assistance_id_crosswalk.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "152_build_assistance_id_crosswalk.py",
+        "503_identity.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "bie_uio_dollars_by_entity.csv",
+     "path": "data/clean/bie_uio_dollars_by_entity.csv",
+     "rows": 114,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "75_add_bie_schools_and_uios.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "75_add_bie_schools_and_uios.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "bie_uio_identifier_links.csv",
+     "path": "data/clean/bie_uio_identifier_links.csv",
+     "rows": 302,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "75_add_bie_schools_and_uios.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "75_add_bie_schools_and_uios.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "faads_entity_attribution.csv",
+     "path": "data/clean/faads_entity_attribution.csv",
+     "rows": 29594,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "attributed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "73_faads_name_attribution.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "73_faads_name_attribution.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "faads_transactions.csv",
+     "path": "data/clean/faads_transactions.csv",
+     "rows": 60661,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "30_funding_pre2008.py",
+        "75_add_bie_schools_and_uios.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "faads_transactions_all_agencies.csv",
+     "path": "data/clean/faads_transactions_all_agencies.csv",
+     "rows": 2769748,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "30_funding_pre2008.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "30_funding_pre2008.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "inflation_deflator.csv",
+     "path": "data/clean/inflation_deflator.csv",
+     "rows": 27,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "121_pull_subawards_api.py",
+        "391_triage_unshipped_tables.py",
+        "40_build_prime_contracts.py",
+        "83_build_resource_ledger.py",
+        "84_build_nigc_regions.py",
+        "84_resource_recipient_side.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "native_passthrough.csv",
+     "path": "data/clean/native_passthrough.csv",
+     "rows": 1262,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "81_build_passthrough_dataset.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "81_build_passthrough_dataset.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "native_passthrough_pairs.csv",
+     "path": "data/clean/native_passthrough_pairs.csv",
+     "rows": 212,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "81_build_passthrough_dataset.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "81_build_passthrough_dataset.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "federal-register",
+   "shelf": "standard",
+   "n_tables_scanned": 26,
+   "n_tables_with_stamps": 16,
+   "n_stamp_columns": 24,
+   "tables": [
+    {
+     "table": "consultation_agency_coverage.csv",
+     "path": "data/clean/consultation_agency_coverage.csv",
+     "rows": 66,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "96_build_consultation_events.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "96_build_consultation_events.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "consultation_events.csv",
+     "path": "data/clean/consultation_events.csv",
+     "rows": 11402,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "105_build_florida_gaming.py",
+        "110_build_harmonized_views.py",
+        "130_build_section_106_consultation.py",
+        "133_build_ferc_advocacy.py",
+        "151_rebuild_entity_evidence_profile.py",
+        "301_source_freshness_probe.py",
+        "96_build_consultation_events.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "105_build_florida_gaming.py",
+        "110_build_harmonized_views.py",
+        "130_build_section_106_consultation.py",
+        "133_build_ferc_advocacy.py",
+        "301_source_freshness_probe.py",
+        "35_coverage_audit.py",
+        "96_build_consultation_events.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "correspondence_foia_source_coverage.csv",
+     "path": "data/clean/correspondence_foia_source_coverage.csv",
+     "rows": 124,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "checked_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "136_build_congressional_correspondence_and_foia_index.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "federal_actions_entity_bridge.csv",
+     "path": "data/clean/federal_actions_entity_bridge.csv",
+     "rows": 5786,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "70_key_unjoined_datasets.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "fr_content_classification.csv",
+     "path": "data/clean/fr_content_classification.csv",
+     "rows": 156452,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "classifier_version",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "78_content_analysis.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "78_content_analysis.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fr_ex_parte_notices.csv",
+     "path": "data/clean/fr_ex_parte_notices.csv",
+     "rows": 7820,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fr_ex_parte_parties.csv",
+     "path": "data/clean/fr_ex_parte_parties.csv",
+     "rows": 112,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fr_ex_parte_party_entity_links.csv",
+     "path": "data/clean/fr_ex_parte_party_entity_links.csv",
+     "rows": 9,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fr_recognized_entities.csv",
+     "path": "data/clean/fr_recognized_entities.csv",
+     "rows": 575,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "parsed",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "69_enrich_spine_from_federal_register.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "69_enrich_spine_from_federal_register.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nepa_administrative_record_parties.csv",
+     "path": "data/clean/nepa_administrative_record_parties.csv",
+     "rows": 36,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "134_build_nepa_eplanning.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "134_build_nepa_eplanning.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "134_build_nepa_eplanning.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "134_build_nepa_eplanning.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nepa_eplanning_projects.csv",
+     "path": "data/clean/nepa_eplanning_projects.csv",
+     "rows": 312,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "134_build_nepa_eplanning.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "134_build_nepa_eplanning.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "134_build_nepa_eplanning.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "134_build_nepa_eplanning.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nepa_project_documents.csv",
+     "path": "data/clean/nepa_project_documents.csv",
+     "rows": 789,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "134_build_nepa_eplanning.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "134_build_nepa_eplanning.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "134_build_nepa_eplanning.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "134_build_nepa_eplanning.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nepa_source_coverage.csv",
+     "path": "data/clean/nepa_source_coverage.csv",
+     "rows": 5,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "checked_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "134_build_nepa_eplanning.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "134_build_nepa_eplanning.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "section_106_consultation_events.csv",
+     "path": "data/clean/section_106_consultation_events.csv",
+     "rows": 1363,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "130_build_section_106_consultation.py",
+        "133_build_ferc_advocacy.py",
+        "151_rebuild_entity_evidence_profile.py",
+        "301_source_freshness_probe.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "130_build_section_106_consultation.py",
+        "133_build_ferc_advocacy.py",
+        "301_source_freshness_probe.py",
+        "35_coverage_audit.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "section_106_project_parties.csv",
+     "path": "data/clean/section_106_project_parties.csv",
+     "rows": 51,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "130_build_section_106_consultation.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "130_build_section_106_consultation.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "section_106_source_coverage.csv",
+     "path": "data/clean/section_106_source_coverage.csv",
+     "rows": 5,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "130_build_section_106_consultation.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "legislation",
+   "shelf": "standard",
+   "n_tables_scanned": 13,
+   "n_tables_with_stamps": 11,
+   "n_stamp_columns": 12,
+   "tables": [
+    {
+     "table": "bill_votes.csv",
+     "path": "data/clean/bill_votes.csv",
+     "rows": 423,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "build_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "14_build_bills_votes.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "14_build_bills_votes.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "bill_votes_entity_bridge.csv",
+     "path": "data/clean/bill_votes_entity_bridge.csv",
+     "rows": 75,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "70_key_unjoined_datasets.py",
+        "73_bills_votes_completion.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "bill_votes_official_verification.csv",
+     "path": "data/clean/bill_votes_official_verification.csv",
+     "rows": 305,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "73_bills_votes_completion.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "congressional_correspondence_systems.csv",
+     "path": "data/clean/congressional_correspondence_systems.csv",
+     "rows": 257,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "136_build_congressional_correspondence_and_foia_index.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "136_build_congressional_correspondence_and_foia_index.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "member_positions.csv",
+     "path": "data/clean/member_positions.csv",
+     "rows": 136119,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "build_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "14_build_bills_votes.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "14_build_bills_votes.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "native_bill_outcomes.csv",
+     "path": "data/clean/native_bill_outcomes.csv",
+     "rows": 3069,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "build_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "41_build_codebooks.py",
+        "73_bills_votes_completion.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "native_bills_entity_bridge.csv",
+     "path": "data/clean/native_bills_entity_bridge.csv",
+     "rows": 676,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "70_key_unjoined_datasets.py",
+        "73_bills_votes_completion.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "native_bills_entity_class.csv",
+     "path": "data/clean/native_bills_entity_class.csv",
+     "rows": 2694,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "build_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "41_build_codebooks.py",
+        "73_bills_votes_completion.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "native_bills_subject_sweep.csv",
+     "path": "data/clean/native_bills_subject_sweep.csv",
+     "rows": 2414,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "build_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "41_build_codebooks.py",
+        "73_bills_votes_completion.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "native_issue_litigation_coverage.csv",
+     "path": "data/clean/native_issue_litigation_coverage.csv",
+     "rows": 8,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "139_build_litigation_positions.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "139_build_litigation_positions.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "native_issue_litigation_positions.csv",
+     "path": "data/clean/native_issue_litigation_positions.csv",
+     "rows": 197,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "139_build_litigation_positions.py",
+        "140_build_grantmaker_funding_flows.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "139_build_litigation_positions.py",
+        "140_build_grantmaker_funding_flows.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "139_build_litigation_positions.py",
+        "140_build_grantmaker_funding_flows.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "139_build_litigation_positions.py",
+        "140_build_grantmaker_funding_flows.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "deals",
+   "shelf": "standard",
+   "n_tables_scanned": 19,
+   "n_tables_with_stamps": 15,
+   "n_stamp_columns": 24,
+   "tables": [
+    {
+     "table": "deals_2000_2019_additions.csv",
+     "path": "data/clean/deals_2000_2019_additions.csv",
+     "rows": 40,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "deals_anc_reports_additions.csv",
+     "path": "data/clean/deals_anc_reports_additions.csv",
+     "rows": 28,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "deals_ancsa_portal_additions.csv",
+     "path": "data/clean/deals_ancsa_portal_additions.csv",
+     "rows": 34,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "deals_ancsa_portal_v2_additions.csv",
+     "path": "data/clean/deals_ancsa_portal_v2_additions.csv",
+     "rows": 42,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "54_reconcile_deals_duplicates.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "deals_federal_awards_additions.csv",
+     "path": "data/clean/deals_federal_awards_additions.csv",
+     "rows": 594,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "build_federal_award_rows.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "build_federal_award_rows.py"
+       ]
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "build_federal_award_rows.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "build_federal_award_rows.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "deals_historical_additions.csv",
+     "path": "data/clean/deals_historical_additions.csv",
+     "rows": 30,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "deals_party_attribution.csv",
+     "path": "data/clean/deals_party_attribution.csv",
+     "rows": 56,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "ruled_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "33_apply_party_rulings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "33_apply_party_rulings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "deals_party_attribution_agent.csv",
+     "path": "data/clean/deals_party_attribution_agent.csv",
+     "rows": 530,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "ruled_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "53_apply_agent_deals_rulings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "53_apply_agent_deals_rulings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "deals_sec_2010_2017_additions.csv",
+     "path": "data/clean/deals_sec_2010_2017_additions.csv",
+     "rows": 16,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "deals_source_index.csv",
+     "path": "data/clean/deals_source_index.csv",
+     "rows": 533,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "59_build_deal_source_index.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "59_build_deal_source_index.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "deals_taxonomy.csv",
+     "path": "data/clean/deals_taxonomy.csv",
+     "rows": 48,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "88_build_deals_taxonomy.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "88_build_deals_taxonomy.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "deals_tribal_debt_additions.csv",
+     "path": "data/clean/deals_tribal_debt_additions.csv",
+     "rows": 6,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "Data_As_Of",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "Date_Added",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "ownership_events.csv",
+     "path": "data/clean/ownership_events.csv",
+     "rows": 98,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "31_build_dataset5_linked.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "31_build_dataset5_linked.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "seminole_bond_disclosures.csv",
+     "path": "data/clean/seminole_bond_disclosures.csv",
+     "rows": 29,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "105_build_florida_gaming.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "105_build_florida_gaming.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "tribal_resolution_financings.csv",
+     "path": "data/clean/tribal_resolution_financings.csv",
+     "rows": 1,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "149_build_tribal_resolution_financings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "149_build_tribal_resolution_financings.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "149_build_tribal_resolution_financings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "149_build_tribal_resolution_financings.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "nagpra",
+   "shelf": "standard",
+   "n_tables_scanned": 4,
+   "n_tables_with_stamps": 0,
+   "n_stamp_columns": 0,
+   "tables": []
+  },
+  {
+   "collection": "lobbying",
+   "shelf": "standard",
+   "n_tables_scanned": 37,
+   "n_tables_with_stamps": 29,
+   "n_stamp_columns": 38,
+   "tables": [
+    {
+     "table": "admin_appeal_decisions.csv",
+     "path": "data/clean/admin_appeal_decisions.csv",
+     "rows": 15613,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "144_build_admin_appeals.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "144_build_admin_appeals.py",
+        "168_link_adjudication_hubs.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "admin_appeal_parties.csv",
+     "path": "data/clean/admin_appeal_parties.csv",
+     "rows": 20027,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "144_build_admin_appeals.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "144_build_admin_appeals.py",
+        "168_link_adjudication_hubs.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "admin_appeal_positions.csv",
+     "path": "data/clean/admin_appeal_positions.csv",
+     "rows": 1,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "decision_date",
+       "constant_value": "1973-06-29",
+       "written_by": [
+        "144_build_admin_appeals.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "144_build_admin_appeals.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "144_build_admin_appeals.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "144_build_admin_appeals.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "advocacy_passthrough.csv",
+     "path": "data/clean/advocacy_passthrough.csv",
+     "rows": 1620,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "111_build_advocacy_passthrough.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "111_build_advocacy_passthrough.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "advocacy_passthrough_2026-08-07.csv",
+     "path": "data/clean/advocacy_passthrough_2026-08-07.csv",
+     "rows": 1620,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "earmarks.csv",
+     "path": "data/clean/earmarks.csv",
+     "rows": 1002,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "105_build_florida_gaming.py",
+        "108_build_tribal_tax_bases.py",
+        "110_build_harmonized_views.py",
+        "99_build_earmarks_and_schedc.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "105_build_florida_gaming.py",
+        "108_build_tribal_tax_bases.py",
+        "110_build_harmonized_views.py",
+        "99_build_earmarks_and_schedc.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "ferc_docket_filings.csv",
+     "path": "data/clean/ferc_docket_filings.csv",
+     "rows": 102615,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "133_build_ferc_advocacy.py",
+        "168_link_adjudication_hubs.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "133_build_ferc_advocacy.py",
+        "168_link_adjudication_hubs.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "ferc_docket_parties.csv",
+     "path": "data/clean/ferc_docket_parties.csv",
+     "rows": 11563,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "168_link_adjudication_hubs.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "168_link_adjudication_hubs.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "ferc_ex_parte_communications.csv",
+     "path": "data/clean/ferc_ex_parte_communications.csv",
+     "rows": 713,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "133_build_ferc_advocacy.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "133_build_ferc_advocacy.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "ferc_ex_parte_parties.csv",
+     "path": "data/clean/ferc_ex_parte_parties.csv",
+     "rows": 4246,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "133_build_ferc_advocacy.py",
+        "168_link_adjudication_hubs.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "133_build_ferc_advocacy.py",
+        "168_link_adjudication_hubs.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "133_build_ferc_advocacy.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "133_build_ferc_advocacy.py",
+        "168_link_adjudication_hubs.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "ferc_tribal_dockets.csv",
+     "path": "data/clean/ferc_tribal_dockets.csv",
+     "rows": 307,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "133_build_ferc_advocacy.py",
+        "168_link_adjudication_hubs.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "133_build_ferc_advocacy.py",
+        "168_link_adjudication_hubs.py",
+        "175_restore_ferc_docket_table_after_rebuild_revert.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fr_ex_parte_notices.csv",
+     "path": "data/clean/fr_ex_parte_notices.csv",
+     "rows": 7820,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fr_ex_parte_parties.csv",
+     "path": "data/clean/fr_ex_parte_parties.csv",
+     "rows": 112,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fr_ex_parte_party_entity_links.csv",
+     "path": "data/clean/fr_ex_parte_party_entity_links.csv",
+     "rows": 9,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "154_build_fr_ex_parte_notices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "154_build_fr_ex_parte_notices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "hearing_appearances.csv",
+     "path": "data/clean/hearing_appearances.csv",
+     "rows": 2674,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "400_promote_stranded_hearing_appearances.py",
+        "98_build_oira_and_hearings.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "400_promote_stranded_hearing_appearances.py",
+        "98_build_oira_and_hearings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "hearing_bill_links.csv",
+     "path": "data/clean/hearing_bill_links.csv",
+     "rows": 465,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "98_build_oira_and_hearings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "lobbying_client_attribution.csv",
+     "path": "data/clean/lobbying_client_attribution.csv",
+     "rows": 458,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "ruled_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "58_apply_lobbying_rulings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "58_apply_lobbying_rulings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "lobbying_issue_families_filing.csv",
+     "path": "data/clean/lobbying_issue_families_filing.csv",
+     "rows": 27796,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "classifier_version",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "78_content_analysis.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "353_propagate_lobbying_corrections_to_consumers.py",
+        "78_content_analysis.py"
+       ]
+      },
+      {
+       "column": "entity_id_withdrawn_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "353_propagate_lobbying_corrections_to_consumers.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "353_propagate_lobbying_corrections_to_consumers.py",
+        "78_content_analysis.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "lobbying_registrant_client_relationships.csv",
+     "path": "data/clean/lobbying_registrant_client_relationships.csv",
+     "rows": 1309,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "180_build_lobbying_registrant_hub.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "180_build_lobbying_registrant_hub.py",
+        "353_propagate_lobbying_corrections_to_consumers.py"
+       ]
+      },
+      {
+       "column": "native_entity_id_withdrawn_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "353_propagate_lobbying_corrections_to_consumers.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "180_build_lobbying_registrant_hub.py",
+        "353_propagate_lobbying_corrections_to_consumers.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "lobbying_registrant_concentration.csv",
+     "path": "data/clean/lobbying_registrant_concentration.csv",
+     "rows": 36,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "180_build_lobbying_registrant_hub.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "180_build_lobbying_registrant_hub.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "lobbying_registrant_identifiers.csv",
+     "path": "data/clean/lobbying_registrant_identifiers.csv",
+     "rows": 525,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "181_enrich_lobbying_registrant_identifiers.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "181_enrich_lobbying_registrant_identifiers.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "lobbying_registrant_native_ownership_evidence.csv",
+     "path": "data/clean/lobbying_registrant_native_ownership_evidence.csv",
+     "rows": 27,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "182_rule_lobbying_registrant_native_ownership.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "182_rule_lobbying_registrant_native_ownership.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "lobbying_registrants.csv",
+     "path": "data/clean/lobbying_registrants.csv",
+     "rows": 653,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "180_build_lobbying_registrant_hub.py",
+        "182_rule_lobbying_registrant_native_ownership.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "180_build_lobbying_registrant_hub.py",
+        "182_rule_lobbying_registrant_native_ownership.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "native_entity_lobbying_disclosures.csv",
+     "path": "data/clean/native_entity_lobbying_disclosures.csv",
+     "rows": 27796,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "attribution_withdrawn_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "350_withdraw_false_lobbying_attributions.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "350_withdraw_false_lobbying_attributions.py",
+        "65_lobbying_organization_type_guard.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nrc_meeting_participants.csv",
+     "path": "data/clean/nrc_meeting_participants.csv",
+     "rows": 407,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "145_build_nrc_public_meetings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "145_build_nrc_public_meetings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nrc_public_meetings.csv",
+     "path": "data/clean/nrc_public_meetings.csv",
+     "rows": 251,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "145_build_nrc_public_meetings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "145_build_nrc_public_meetings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "oira_federal_action_links.csv",
+     "path": "data/clean/oira_federal_action_links.csv",
+     "rows": 145,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "98_build_oira_and_hearings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "oira_meeting_participants.csv",
+     "path": "data/clean/oira_meeting_participants.csv",
+     "rows": 1128,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "98_build_oira_and_hearings.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "98_build_oira_and_hearings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "oira_meetings.csv",
+     "path": "data/clean/oira_meetings.csv",
+     "rows": 72,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "98_build_oira_and_hearings.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "98_build_oira_and_hearings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "98_build_oira_and_hearings.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "contractors",
+   "shelf": "pro",
+   "n_tables_scanned": 11,
+   "n_tables_with_stamps": 8,
+   "n_stamp_columns": 9,
+   "tables": [
+    {
+     "table": "contractor_ranking.csv",
+     "path": "data/clean/contractor_ranking.csv",
+     "rows": 1429,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "269_build_contractor_ranking.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "269_build_contractor_ranking.py"
+       ]
+      },
+      {
+       "column": "source_vintage",
+       "constant_value": "2026-08-26T18:45:37",
+       "written_by": [
+        "269_build_contractor_ranking.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "269_build_contractor_ranking.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "prime_contracts.csv",
+     "path": "data/clean/prime_contracts.csv",
+     "rows": 1217768,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "ruling_applied_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "174_apply_rulings_to_source_tables.py",
+        "227_anomaly_sweep.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "114_pull_prime_archive.py",
+        "131_merge_archive_backfill.py",
+        "174_apply_rulings_to_source_tables.py",
+        "206_profile_prime_vocabulary_seams.py",
+        "207_normalize_extent_competed.py",
+        "227_anomaly_sweep.py",
+        "269_build_contractor_ranking.py",
+        "366_courtlistener_ownership_adjudication.py",
+        "374_build_cedar_taxonomy_export.py",
+        "40_build_prime_contracts.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "prime_contracts_archive_backfill.csv",
+     "path": "data/clean/prime_contracts_archive_backfill.csv",
+     "rows": 631507,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "114_pull_prime_archive.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "114_pull_prime_archive.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "prime_contracts_awards.csv",
+     "path": "data/clean/prime_contracts_awards.csv",
+     "rows": 455080,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "79_build_award_level_contracts.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "79_build_award_level_contracts.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "prime_contracts_entity_year.csv",
+     "path": "data/clean/prime_contracts_entity_year.csv",
+     "rows": 8464,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "114_pull_prime_archive.py",
+        "131_merge_archive_backfill.py",
+        "40_build_prime_contracts.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "114_pull_prime_archive.py",
+        "131_merge_archive_backfill.py",
+        "40_build_prime_contracts.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "sam_prime_contracts_fy2000_2007.csv",
+     "path": "data/clean/sam_prime_contracts_fy2000_2007.csv",
+     "rows": 269312,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "163_load_sam_contract_awards.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "163_load_sam_contract_awards.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
+     "path": "data/clean/sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
+     "rows": 269312,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "163_load_sam_contract_awards.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "163_load_sam_contract_awards.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "sam_prime_contracts_fy2000_2007_reconciliation.csv",
+     "path": "data/clean/sam_prime_contracts_fy2000_2007_reconciliation.csv",
+     "rows": 6,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "generated",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "163_load_sam_contract_awards.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "163_load_sam_contract_awards.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "subcontracting",
+   "shelf": "pro",
+   "n_tables_scanned": 5,
+   "n_tables_with_stamps": 1,
+   "n_stamp_columns": 1,
+   "tables": [
+    {
+     "table": "prime_sub_network.csv",
+     "path": "data/clean/prime_sub_network.csv",
+     "rows": 220,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "20_build_subcontracts.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "20_build_subcontracts.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "native-owned-businesses",
+   "shelf": "pro",
+   "n_tables_scanned": 7,
+   "n_tables_with_stamps": 6,
+   "n_stamp_columns": 10,
+   "tables": [
+    {
+     "table": "individual_native_exclusion_pairs.csv",
+     "path": "data/clean/individual_native_exclusion_pairs.csv",
+     "rows": 5,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "flagged_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "241_promote_individual_native_firms_in_place.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "241_promote_individual_native_firms_in_place.py"
+       ]
+      },
+      {
+       "column": "ruled_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "241_promote_individual_native_firms_in_place.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "241_promote_individual_native_firms_in_place.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "individual_native_firm_contracts.csv",
+     "path": "data/clean/individual_native_firm_contracts.csv",
+     "rows": 324,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "242_build_individual_native_firm_contracts.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "242_build_individual_native_firm_contracts.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "individual_native_firm_contracts_published.csv",
+     "path": "data/clean/individual_native_firm_contracts_published.csv",
+     "rows": 613,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "242_build_individual_native_firm_contracts.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "242_build_individual_native_firm_contracts.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "individual_native_firm_register.csv",
+     "path": "data/clean/individual_native_firm_register.csv",
+     "rows": 45,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "241_promote_individual_native_firms_in_place.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "241_promote_individual_native_firms_in_place.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "individual_native_ownership_verification.csv",
+     "path": "data/clean/individual_native_ownership_verification.csv",
+     "rows": 335,
+     "n_stamp_columns": 4,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "171_build_individual_native_verification.py",
+        "269_build_contractor_ranking.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "171_build_individual_native_verification.py",
+        "269_build_contractor_ranking.py"
+       ]
+      },
+      {
+       "column": "self_description_fetch_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "171_build_individual_native_verification.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "171_build_individual_native_verification.py",
+        "269_build_contractor_ranking.py"
+       ]
+      },
+      {
+       "column": "third_party_fetch_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "171_build_individual_native_verification.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "171_build_individual_native_verification.py",
+        "269_build_contractor_ranking.py"
+       ]
+      },
+      {
+       "column": "verification_built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "171_build_individual_native_verification.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "171_build_individual_native_verification.py",
+        "269_build_contractor_ranking.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "individual_native_verification_candidates.csv",
+     "path": "data/clean/individual_native_verification_candidates.csv",
+     "rows": 335,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "170_build_individual_native_candidates.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "170_build_individual_native_candidates.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "natural-resources",
+   "shelf": "pro",
+   "n_tables_scanned": 9,
+   "n_tables_with_stamps": 7,
+   "n_stamp_columns": 10,
+   "tables": [
+    {
+     "table": "anc_ceiling_roster.csv",
+     "path": "data/clean/anc_ceiling_roster.csv",
+     "rows": 196,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "07_parse_ancsa_ceiling.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "07_parse_ancsa_ceiling.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "ancsa_filings_index.csv",
+     "path": "data/clean/ancsa_filings_index.csv",
+     "rows": 19269,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "84_resource_recipient_side.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "84_resource_recipient_side.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nd_severance_allocation.csv",
+     "path": "data/clean/nd_severance_allocation.csv",
+     "rows": 7,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "113_build_nd_severance.py",
+        "116_build_nd_tribal_taxes.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "113_build_nd_severance.py",
+        "116_build_nd_tribal_taxes.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "resource_assets.csv",
+     "path": "data/clean/resource_assets.csv",
+     "rows": 35,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "135_build_resource_assets.py",
+        "83_build_resource_ledger.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "135_build_resource_assets.py",
+        "83_build_resource_ledger.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "resource_revenue.csv",
+     "path": "data/clean/resource_revenue.csv",
+     "rows": 10482,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "83_build_resource_ledger.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "149_apply_resource_entity_links.py",
+        "83_build_resource_ledger.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "tribal_bond_issuances.csv",
+     "path": "data/clean/tribal_bond_issuances.csv",
+     "rows": 29,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "issue_date",
+       "constant_value": "2021-01-26",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "105_build_florida_gaming.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "tribal_tax_bases.csv",
+     "path": "data/clean/tribal_tax_bases.csv",
+     "rows": 1712,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "108_build_tribal_tax_bases.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "108_build_tribal_tax_bases.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "108_build_tribal_tax_bases.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "108_build_tribal_tax_bases.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "nonprofits",
+   "shelf": "pro",
+   "n_tables_scanned": 12,
+   "n_tables_with_stamps": 12,
+   "n_stamp_columns": 19,
+   "tables": [
+    {
+     "table": "fac_tribal_single_audits.csv",
+     "path": "data/clean/fac_tribal_single_audits.csv",
+     "rows": 6780,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "147_build_fac_single_audits.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "147_build_fac_single_audits.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "147_build_fac_single_audits.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "147_build_fac_single_audits.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "grantmaker_funding_coverage.csv",
+     "path": "data/clean/grantmaker_funding_coverage.csv",
+     "rows": 27,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "140_build_grantmaker_funding_flows.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "140_build_grantmaker_funding_flows.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "grantmaker_funding_flows.csv",
+     "path": "data/clean/grantmaker_funding_flows.csv",
+     "rows": 18656,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "140_build_grantmaker_funding_flows.py",
+        "167_link_nonprofit_family_via_ein_hub.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "140_build_grantmaker_funding_flows.py",
+        "167_link_nonprofit_family_via_ein_hub.py"
+       ]
+      },
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "140_build_grantmaker_funding_flows.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "140_build_grantmaker_funding_flows.py",
+        "167_link_nonprofit_family_via_ein_hub.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "grantmaker_funding_overlap.csv",
+     "path": "data/clean/grantmaker_funding_overlap.csv",
+     "rows": 69,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "140_build_grantmaker_funding_flows.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "140_build_grantmaker_funding_flows.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "np_ein_entity_hub.csv",
+     "path": "data/clean/np_ein_entity_hub.csv",
+     "rows": 2303,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "167_link_nonprofit_family_via_ein_hub.py",
+        "169_build_identifier_graph.py",
+        "173_consolidate_rulings_ledger.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "np_ein_uei_bridge.csv",
+     "path": "data/clean/np_ein_uei_bridge.csv",
+     "rows": 28,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "17_build_nonprofit_990.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "17_build_nonprofit_990.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "np_financials.csv",
+     "path": "data/clean/np_financials.csv",
+     "rows": 8507,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "33_nonprofit_financials.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "181_enrich_lobbying_registrant_identifiers.py",
+        "33_nonprofit_financials.py",
+        "99_build_earmarks_and_schedc.py"
+       ]
+      },
+      {
+       "column": "schedc_built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "99_build_earmarks_and_schedc.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "181_enrich_lobbying_registrant_identifiers.py",
+        "33_nonprofit_financials.py",
+        "99_build_earmarks_and_schedc.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "np_grantee_financials.csv",
+     "path": "data/clean/np_grantee_financials.csv",
+     "rows": 4058,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "112_pull_grantee_990s.py",
+        "181_enrich_lobbying_registrant_identifiers.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "112_pull_grantee_990s.py",
+        "181_enrich_lobbying_registrant_identifiers.py"
+       ]
+      },
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "112_pull_grantee_990s.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "112_pull_grantee_990s.py",
+        "181_enrich_lobbying_registrant_identifiers.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "np_org_scale.csv",
+     "path": "data/clean/np_org_scale.csv",
+     "rows": 1157,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "33_nonprofit_financials.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "33_nonprofit_financials.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "np_orgs.csv",
+     "path": "data/clean/np_orgs.csv",
+     "rows": 12764,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "bmf_vintage_fetched",
+       "constant_value": "2026-04-29",
+       "written_by": [
+        "17_build_nonprofit_990.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "17_build_nonprofit_990.py",
+        "20_fix_nonprofit_authority.py",
+        "251_apply_np_ein_exclusions_to_np_orgs.py",
+        "34_apply_nonprofit_rulings.py",
+        "70_key_unjoined_datasets.py",
+        "99_build_earmarks_and_schedc.py"
+       ]
+      },
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "17_build_nonprofit_990.py",
+        "99_build_earmarks_and_schedc.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "17_build_nonprofit_990.py",
+        "20_fix_nonprofit_authority.py",
+        "251_apply_np_ein_exclusions_to_np_orgs.py",
+        "34_apply_nonprofit_rulings.py",
+        "70_key_unjoined_datasets.py",
+        "99_build_earmarks_and_schedc.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "np_schedule_i_filers.csv",
+     "path": "data/clean/np_schedule_i_filers.csv",
+     "rows": 10314,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "132_build_schedule_i_layer.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "132_build_schedule_i_layer.py"
+       ]
+      },
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "132_build_schedule_i_layer.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "132_build_schedule_i_layer.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "np_schedule_i_grants.csv",
+     "path": "data/clean/np_schedule_i_grants.csv",
+     "rows": 58685,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "132_build_schedule_i_layer.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "132_build_schedule_i_layer.py"
+       ]
+      },
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "132_build_schedule_i_layer.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "132_build_schedule_i_layer.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "gaming",
+   "shelf": "grove",
+   "n_tables_scanned": 53,
+   "n_tables_with_stamps": 46,
+   "n_stamp_columns": 93,
+   "tables": [
+    {
+     "table": "ca_gaming_facilities_official.csv",
+     "path": "data/clean/ca_gaming_facilities_official.csv",
+     "rows": 245,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "103_build_california_gaming.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "103_build_california_gaming.py",
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ]
+      },
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "103_build_california_gaming.py",
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "103_build_california_gaming.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "103_build_california_gaming.py",
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "ca_gaming_payments.csv",
+     "path": "data/clean/ca_gaming_payments.csv",
+     "rows": 40164,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "103_build_california_gaming.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "103_build_california_gaming.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "103_build_california_gaming.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "103_build_california_gaming.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "compact_events.csv",
+     "path": "data/clean/compact_events.csv",
+     "rows": 31,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "15b_build_compact_index.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "15b_build_compact_index.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "compact_obligation_tribal_agency_bridge.csv",
+     "path": "data/clean/compact_obligation_tribal_agency_bridge.csv",
+     "rows": 927,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "127_bridge_compact_obligations_to_tribal_agency.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "127_bridge_compact_obligations_to_tribal_agency.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "compact_required_reports.csv",
+     "path": "data/clean/compact_required_reports.csv",
+     "rows": 4121,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "95_parse_compact_terms.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "95_parse_compact_terms.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "compact_structured_terms.csv",
+     "path": "data/clean/compact_structured_terms.csv",
+     "rows": 2887,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "95_parse_compact_terms.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "95_parse_compact_terms.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "compact_terms.csv",
+     "path": "data/clean/compact_terms.csv",
+     "rows": 1311,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "15e_finalize_terms.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "15e_finalize_terms.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "compacts.csv",
+     "path": "data/clean/compacts.csv",
+     "rows": 707,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "15b_build_compact_index.py",
+        "15e_finalize_terms.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "15b_build_compact_index.py",
+        "15e_finalize_terms.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "digital_gaming_relationships.csv",
+     "path": "data/clean/digital_gaming_relationships.csv",
+     "rows": 154,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "digital_gaming_revenue.csv",
+     "path": "data/clean/digital_gaming_revenue.csv",
+     "rows": 10661,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py",
+        "174_backfill_digital_gaming_tiers.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "119_build_digital_and_loyalty.py",
+        "174_backfill_digital_gaming_tiers.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py",
+        "174_backfill_digital_gaming_tiers.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py",
+        "174_backfill_digital_gaming_tiers.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fac_audit_gaming_disclosures.csv",
+     "path": "data/clean/fac_audit_gaming_disclosures.csv",
+     "rows": 1521,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "147_build_fac_single_audits.py",
+        "212_mine_sealed_state_audits_for_property_figures.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "147_build_fac_single_audits.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "fac_audit_sefa_gaming_programs.csv",
+     "path": "data/clean/fac_audit_sefa_gaming_programs.csv",
+     "rows": 1,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "147_build_fac_single_audits.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "147_build_fac_single_audits.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "147_build_fac_single_audits.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "147_build_fac_single_audits.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "fl_gaming_payments.csv",
+     "path": "data/clean/fl_gaming_payments.csv",
+     "rows": 9756,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "105_build_florida_gaming.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "105_build_florida_gaming.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "105_build_florida_gaming.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "105_build_florida_gaming.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_capacity_official.csv",
+     "path": "data/clean/gaming_capacity_official.csv",
+     "rows": 6461,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "106_build_revenue_bounds.py",
+        "92_build_gaming_capacity_official.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "106_build_revenue_bounds.py",
+        "92_build_gaming_capacity_official.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_decision_events.csv",
+     "path": "data/clean/gaming_decision_events.csv",
+     "rows": 265,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "23b_build_gaming_land_decisions.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "23b_build_gaming_land_decisions.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_device_observations.csv",
+     "path": "data/clean/gaming_device_observations.csv",
+     "rows": 1326,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "117_build_gaming_devices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "117_build_gaming_devices.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "117_build_gaming_devices.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "117_build_gaming_devices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_employment_observations.csv",
+     "path": "data/clean/gaming_employment_observations.csv",
+     "rows": 3246,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "attribution_repair_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "262_repair_form5500_tribe_attribution.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "158_merge_staged_labor_employment.py",
+        "262_repair_form5500_tribe_attribution.py",
+        "265_merge_osha_relift_rows.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "262_repair_form5500_tribe_attribution.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "158_merge_staged_labor_employment.py",
+        "262_repair_form5500_tribe_attribution.py",
+        "265_merge_osha_relift_rows.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "100_finish_declinations_and_employment.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "158_merge_staged_labor_employment.py",
+        "262_repair_form5500_tribe_attribution.py",
+        "265_merge_osha_relift_rows.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_facilities.csv",
+     "path": "data/clean/gaming_facilities.csv",
+     "rows": 787,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "interim_open_date",
+       "constant_value": "1998-05-20",
+       "written_by": [
+        "143_build_gaming_property_locations.py",
+        "158_extend_gaming_facilities.py",
+        "162_resource_dates_from_cedar_evidence.py",
+        "172_key_unkeyed_gaming_facility_hubs.py",
+        "23d_build_gaming_facilities.py",
+        "264_add_missing_osha_tribal_facilities.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "143_build_gaming_property_locations.py",
+        "158_extend_gaming_facilities.py",
+        "162_resource_dates_from_cedar_evidence.py",
+        "172_key_unkeyed_gaming_facility_hubs.py",
+        "23d_build_gaming_facilities.py",
+        "264_add_missing_osha_tribal_facilities.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_field_coverage.csv",
+     "path": "data/clean/gaming_field_coverage.csv",
+     "rows": 110,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "102_build_coverage_profile.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "102_build_coverage_profile.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_financing_events.csv",
+     "path": "data/clean/gaming_financing_events.csv",
+     "rows": 293,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_game_finder_observations.csv",
+     "path": "data/clean/gaming_game_finder_observations.csv",
+     "rows": 6851,
+     "n_stamp_columns": 5,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "102_build_coverage_profile.py",
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "164_link_facility_hub_sources.py",
+        "166_register_entity_link_block_fragments.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "first_seen",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "last_seen",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "gaming_game_finder_systems.csv",
+     "path": "data/clean/gaming_game_finder_systems.csv",
+     "rows": 3,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "142_build_property_site_observations.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_land_decisions.csv",
+     "path": "data/clean/gaming_land_decisions.csv",
+     "rows": 138,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "23b_build_gaming_land_decisions.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "23b_build_gaming_land_decisions.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "23b_build_gaming_land_decisions.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "23b_build_gaming_land_decisions.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_manufacturer_facts.csv",
+     "path": "data/clean/gaming_manufacturer_facts.csv",
+     "rows": 62,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "117_build_gaming_devices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "117_build_gaming_devices.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "117_build_gaming_devices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "117_build_gaming_devices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_nigc_roster_link.csv",
+     "path": "data/clean/gaming_nigc_roster_link.csv",
+     "rows": 453,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "nigc_listed_as_of",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "157_reconcile_nigc_roster.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "157_reconcile_nigc_roster.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_ordinance_ocr.csv",
+     "path": "data/clean/gaming_ordinance_ocr.csv",
+     "rows": 263,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "ocr_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "122_ocr_ordinance_scans.py",
+        "153_merge_ordinance_ocr.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "122_ocr_ordinance_scans.py",
+        "153_merge_ordinance_ocr.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_ordinances.csv",
+     "path": "data/clean/gaming_ordinances.csv",
+     "rows": 1155,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "118_build_gaming_ordinances.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "118_build_gaming_ordinances.py",
+        "153_merge_ordinance_ocr.py",
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ]
+      },
+      {
+       "column": "entity_keyed_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "118_build_gaming_ordinances.py",
+        "153_merge_ordinance_ocr.py",
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ]
+      },
+      {
+       "column": "ocr_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "153_merge_ordinance_ocr.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "118_build_gaming_ordinances.py",
+        "153_merge_ordinance_ocr.py",
+        "266_apply_gaming_hub_spillover_rulings.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_properties.csv",
+     "path": "data/clean/gaming_properties.csv",
+     "rows": 784,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "interim_open_date",
+       "constant_value": "1998-05-20",
+       "written_by": [
+        "82_build_gaming_property_dataset.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "160_sync_published_gaming_view.py",
+        "175_sync_published_property_view_entities.py",
+        "255_fix_gaming_property_deal_counts.py",
+        "82_build_gaming_property_dataset.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_property_capacity_history.csv",
+     "path": "data/clean/gaming_property_capacity_history.csv",
+     "rows": 64181,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "82_build_gaming_property_dataset.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "82_build_gaming_property_dataset.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "82_build_gaming_property_dataset.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "82_build_gaming_property_dataset.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_property_coverage.csv",
+     "path": "data/clean/gaming_property_coverage.csv",
+     "rows": 787,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "102_build_coverage_profile.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "102_build_coverage_profile.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_property_federal_traces.csv",
+     "path": "data/clean/gaming_property_federal_traces.csv",
+     "rows": 774,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "88_gaming_property_federal_traces.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "88_gaming_property_federal_traces.py"
+       ]
+      },
+      {
+       "column": "nigc_listed_as_of",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "88_gaming_property_federal_traces.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "88_gaming_property_federal_traces.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_property_labor_demand.csv",
+     "path": "data/clean/gaming_property_labor_demand.csv",
+     "rows": 43,
+     "n_stamp_columns": 5,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "102_build_coverage_profile.py",
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "164_link_facility_hub_sources.py",
+        "166_register_entity_link_block_fragments.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "first_seen",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "last_seen",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "gaming_property_locations.csv",
+     "path": "data/clean/gaming_property_locations.csv",
+     "rows": 2212,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "143_build_gaming_property_locations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "143_build_gaming_property_locations.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_property_site_observations.csv",
+     "path": "data/clean/gaming_property_site_observations.csv",
+     "rows": 262,
+     "n_stamp_columns": 6,
+     "columns": [
+      {
+       "column": "as_of_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "142_build_property_site_observations.py"
+       ]
+      },
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "142_build_property_site_observations.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "142_build_property_site_observations.py"
+       ]
+      },
+      {
+       "column": "first_seen",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "142_build_property_site_observations.py"
+       ]
+      },
+      {
+       "column": "last_seen",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "142_build_property_site_observations.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "142_build_property_site_observations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "142_build_property_site_observations.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_property_universe_events.csv",
+     "path": "data/clean/gaming_property_universe_events.csv",
+     "rows": 10,
+     "n_stamp_columns": 4,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "89_nigc_map_wayback_universe.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "89_nigc_map_wayback_universe.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "89_nigc_map_wayback_universe.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "89_nigc_map_wayback_universe.py"
+       ]
+      },
+      {
+       "column": "from_snapshot_date",
+       "constant_value": "2015-10-02",
+       "written_by": [
+        "89_nigc_map_wayback_universe.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "89_nigc_map_wayback_universe.py"
+       ]
+      },
+      {
+       "column": "to_snapshot_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "89_nigc_map_wayback_universe.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "89_nigc_map_wayback_universe.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_revenue_bounds.csv",
+     "path": "data/clean/gaming_revenue_bounds.csv",
+     "rows": 13803,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "106_build_revenue_bounds.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "106_build_revenue_bounds.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_source_claims.csv",
+     "path": "data/clean/gaming_source_claims.csv",
+     "rows": 113,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "100_finish_declinations_and_employment.py",
+        "510_assertions.py",
+        "91_build_nigc_declinations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "510_assertions.py",
+        "91_build_nigc_declinations.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "510_assertions.py",
+        "91_build_nigc_declinations.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "gaming_vendor_tribal_licenses.csv",
+     "path": "data/clean/gaming_vendor_tribal_licenses.csv",
+     "rows": 740,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "148_build_gaming_vendor_tribal_licenses.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "148_build_gaming_vendor_tribal_licenses.py"
+       ]
+      },
+      {
+       "column": "retrieved_at",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "148_build_gaming_vendor_tribal_licenses.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "148_build_gaming_vendor_tribal_licenses.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "loyalty_program_property.csv",
+     "path": "data/clean/loyalty_program_property.csv",
+     "rows": 48,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      },
+      {
+       "column": "observation_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "loyalty_programs.csv",
+     "path": "data/clean/loyalty_programs.csv",
+     "rows": 18,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      },
+      {
+       "column": "entity_link_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      },
+      {
+       "column": "observation_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "119_build_digital_and_loyalty.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "119_build_digital_and_loyalty.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nigc_declination_letters.csv",
+     "path": "data/clean/nigc_declination_letters.csv",
+     "rows": 327,
+     "n_stamp_columns": 3,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ]
+      },
+      {
+       "column": "ocr_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "100_finish_declinations_and_employment.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "100_finish_declinations_and_employment.py",
+        "91_build_nigc_declinations.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nigc_region_assignments.csv",
+     "path": "data/clean/nigc_region_assignments.csv",
+     "rows": 2438,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "102_build_coverage_profile.py",
+        "106_build_revenue_bounds.py",
+        "84_build_nigc_regions.py",
+        "88_gaming_property_federal_traces.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "106_build_revenue_bounds.py",
+        "84_build_nigc_regions.py",
+        "88_gaming_property_federal_traces.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "nigc_regional_ggr.csv",
+     "path": "data/clean/nigc_regional_ggr.csv",
+     "rows": 198,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "106_build_revenue_bounds.py",
+        "84_build_nigc_regions.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "106_build_revenue_bounds.py",
+        "84_build_nigc_regions.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "nigc_revenue_bands.csv",
+     "path": "data/clean/nigc_revenue_bands.csv",
+     "rows": 20,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "106_build_revenue_bounds.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "106_build_revenue_bounds.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "106_build_revenue_bounds.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "106_build_revenue_bounds.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "state_gaming_observations.csv",
+     "path": "data/clean/state_gaming_observations.csv",
+     "rows": 494,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "107_pull_remaining_states.py",
+        "117_build_gaming_devices.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "107_pull_remaining_states.py",
+        "117_build_gaming_devices.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "wa_machine_allocations.csv",
+     "path": "data/clean/wa_machine_allocations.csv",
+     "rows": 75,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "104_build_wa_allocations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "104_build_wa_allocations.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "104_build_wa_allocations.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "104_build_wa_allocations.py"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "collection": "_entity_layer",
+   "shelf": "infrastructure",
+   "n_tables_scanned": 47,
+   "n_tables_with_stamps": 30,
+   "n_stamp_columns": 34,
+   "tables": [
+    {
+     "table": "admin_region_assignments.csv",
+     "path": "data/clean/admin_region_assignments.csv",
+     "rows": 2124,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "425_establish_bristol_bay_entities.py",
+        "85_build_admin_region_crosswalk.py"
+       ]
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "425_establish_bristol_bay_entities.py",
+        "85_build_admin_region_crosswalk.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "admin_region_overlap_derived.csv",
+     "path": "data/clean/admin_region_overlap_derived.csv",
+     "rows": 28,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "85_build_admin_region_crosswalk.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "admin_region_systems.csv",
+     "path": "data/clean/admin_region_systems.csv",
+     "rows": 6,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "admin_regional_observations.csv",
+     "path": "data/clean/admin_regional_observations.csv",
+     "rows": 27,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "names_column_only",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "admin_regions.csv",
+     "path": "data/clean/admin_regions.csv",
+     "rows": 155,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "85_build_admin_region_crosswalk.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "85_build_admin_region_crosswalk.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "bie_uio_dollars_by_entity.csv",
+     "path": "data/clean/bie_uio_dollars_by_entity.csv",
+     "rows": 114,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "75_add_bie_schools_and_uios.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "75_add_bie_schools_and_uios.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "bie_uio_identifier_links.csv",
+     "path": "data/clean/bie_uio_identifier_links.csv",
+     "rows": 302,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "75_add_bie_schools_and_uios.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "75_add_bie_schools_and_uios.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "cedar_entity_identity_crosswalk.csv",
+     "path": "data/clean/cedar_entity_identity_crosswalk.csv",
+     "rows": 10107,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "417_build_entity_identity_crosswalk.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "417_build_entity_identity_crosswalk.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "cedar_identifier_graph_edges.csv",
+     "path": "data/clean/cedar_identifier_graph_edges.csv",
+     "rows": 46051,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "169_build_identifier_graph.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "169_build_identifier_graph.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "cedar_identifier_graph_nodes.csv",
+     "path": "data/clean/cedar_identifier_graph_nodes.csv",
+     "rows": 115471,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "169_build_identifier_graph.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "169_build_identifier_graph.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "cedar_identifier_propagation.csv",
+     "path": "data/clean/cedar_identifier_propagation.csv",
+     "rows": 1157,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "169_build_identifier_graph.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": [
+        "169_build_identifier_graph.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "cedar_rulings.csv",
+     "path": "data/spine/cedar_rulings.csv",
+     "rows": 8,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "ruled_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "UNATTRIBUTED"
+       ],
+       "attribution": "none",
+       "writer_in_this_collections_plan": false,
+       "all_declared_writers": []
+      }
+     ]
+    },
+    {
+     "table": "cross_dataset_ruling_map.csv",
+     "path": "data/clean/cross_dataset_ruling_map.csv",
+     "rows": 7507,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "applied_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "23_cross_dataset_propagation.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "23_cross_dataset_propagation.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "entity_evidence_profile.csv",
+     "path": "data/clean/entity_evidence_profile.csv",
+     "rows": 1282,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "110_build_harmonized_views.py",
+        "151_rebuild_entity_evidence_profile.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "110_build_harmonized_views.py",
+        "151_rebuild_entity_evidence_profile.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "entity_hierarchy.csv",
+     "path": "data/clean/entity_hierarchy.csv",
+     "rows": 952,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "66_build_entity_hierarchy.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "66_build_entity_hierarchy.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "entity_relationships.csv",
+     "path": "data/clean/entity_relationships.csv",
+     "rows": 2292,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "created_at",
+       "constant_value": "2026-08-07",
+       "written_by": [
+        "97_build_aliases_and_relationships.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "310_correct_overstated_owned_by_edge_tiers.py",
+        "97_build_aliases_and_relationships.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "federal_recognition_events.csv",
+     "path": "data/clean/federal_recognition_events.csv",
+     "rows": 366,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "76_build_recognition_history.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "76_build_recognition_history.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "federal_recognition_roster.csv",
+     "path": "data/clean/federal_recognition_roster.csv",
+     "rows": 17058,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "76_build_recognition_history.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "76_build_recognition_history.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "foia_discovery_targets.csv",
+     "path": "data/clean/foia_discovery_targets.csv",
+     "rows": 122,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "discovered_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "136_build_congressional_correspondence_and_foia_index.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "136_build_congressional_correspondence_and_foia_index.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "foia_request_index.csv",
+     "path": "data/clean/foia_request_index.csv",
+     "rows": 9481,
+     "n_stamp_columns": 2,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "136_build_congressional_correspondence_and_foia_index.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "136_build_congressional_correspondence_and_foia_index.py",
+        "168_link_adjudication_hubs.py",
+        "352_unlink_false_foia_entity_links.py"
+       ]
+      },
+      {
+       "column": "tribe_entity_link_withdrawn_date",
+       "constant_value": "2026-08-26",
+       "written_by": [
+        "352_unlink_false_foia_entity_links.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "136_build_congressional_correspondence_and_foia_index.py",
+        "168_link_adjudication_hubs.py",
+        "352_unlink_false_foia_entity_links.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "intertribal_orgs.csv",
+     "path": "data/clean/intertribal_orgs.csv",
+     "rows": 57,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "36_build_nho_intertribal.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "36_build_nho_intertribal.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "native_fi_roster.csv",
+     "path": "data/clean/native_fi_roster.csv",
+     "rows": 94,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "73_add_tcu_and_cdfi.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "73_add_tcu_and_cdfi.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nho_doi_notification_roster.csv",
+     "path": "data/clean/nho_doi_notification_roster.csv",
+     "rows": 190,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "05_parse_doi_nho_list.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "05_parse_doi_nho_list.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nho_ownership_changes.csv",
+     "path": "data/clean/nho_ownership_changes.csv",
+     "rows": 9,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "61_add_nho_intertribal_to_spine.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "61_add_nho_intertribal_to_spine.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nho_parents.csv",
+     "path": "data/clean/nho_parents.csv",
+     "rows": 21,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "first_ruled",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "19_rebuild_nho_layer.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "19_rebuild_nho_layer.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nho_register.csv",
+     "path": "data/clean/nho_register.csv",
+     "rows": 218,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "36_build_nho_intertribal.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "36_build_nho_intertribal.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "nho_verified_entities.csv",
+     "path": "data/clean/nho_verified_entities.csv",
+     "rows": 36,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "rebuilt_date",
+       "constant_value": "2026-08-05",
+       "written_by": [
+        "19_rebuild_nho_layer.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "19_rebuild_nho_layer.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "tcu_roster.csv",
+     "path": "data/clean/tcu_roster.csv",
+     "rows": 37,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-06",
+       "written_by": [
+        "73_add_tcu_and_cdfi.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "73_add_tcu_and_cdfi.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "visitor_access_events.csv",
+     "path": "data/clean/visitor_access_events.csv",
+     "rows": 20,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "146_build_visitor_access_records.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "146_build_visitor_access_records.py"
+       ]
+      }
+     ]
+    },
+    {
+     "table": "visitor_record_foia_requests.csv",
+     "path": "data/clean/visitor_record_foia_requests.csv",
+     "rows": 667,
+     "n_stamp_columns": 1,
+     "columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-12",
+       "written_by": [
+        "146_build_visitor_access_records.py"
+       ],
+       "attribution": "declared_writer_names_column",
+       "writer_in_this_collections_plan": true,
+       "all_declared_writers": [
+        "146_build_visitor_access_records.py"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

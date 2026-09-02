@@ -1,0 +1,1833 @@
+{
+ "artefact": "CEDAR_TAXONOMY",
+ "contract": {
+  "forbidden_keys": [
+   "cedar_verdict",
+   "counts_as_native",
+   "is_really_native",
+   "legitimate",
+   "meets_threshold",
+   "native_enough",
+   "our_determination",
+   "really_native",
+   "sufficient_ownership",
+   "valid_certification"
+  ],
+  "principle": "DESCRIPTIVE, NEVER PRESCRIPTIVE. Build the fact, never the verdict.",
+  "tier_rule": "A tier is INHERITED from the source row, never assigned by the consumer. A RULED method says a HUMAN DECIDED; it never says the answer was YES."
+ },
+ "gaps_and_contradictions": [
+  {
+   "detail": "15 of 17 classes (1,279 of 1,534 rows) carry NO value in `verification_route`, so how membership was established is not answerable FROM THE FILE - only from a build log: ['ANCSA Group Corporation', 'Alaska Native Regional Corporation', 'Alaska Native Village Corporation', 'BIE School', 'Federal-level constituency entity', 'Federal-level self-governance consortium', 'Federally recognized Alaska Native Village', 'Federally recognized tribe', 'Intertribal Organization', 'Native Community Development Financial Institution', 'Native Financial Institution', 'State-level constituency entity', 'State-recognized tribe', 'Tribal College or University', 'Urban Indian Organization']",
+   "id": "ENTITY_CLASS_WITH_NO_STATED_VERIFICATION_ROUTE"
+  },
+  {
+   "detail": "12 of 17 classes (1,070 rows) appear in NO set in cedar_domain.py, so no shared predicate can branch on them - including the largest class in the spine: ['BIE School', 'Federal-level constituency entity', 'Federal-level self-governance consortium', 'Federally recognized tribe', 'Intertribal Organization', 'Native Community Development Financial Institution', 'Native Financial Institution', 'Native Hawaiian Organization', 'State-level constituency entity', 'State-recognized tribe', 'Tribal College or University', 'Urban Indian Organization']",
+   "id": "SPINE_CLASS_ABSENT_FROM_CEDAR_DOMAIN"
+  },
+  {
+   "detail": "42 scripts carry two or more spine entity-class literals of their own, against a shared module that declares none of them: ['100_finish_declinations_and_employment.py', '103_build_california_gaming.py', '104_build_wa_allocations.py', '105_build_florida_gaming.py', '107_pull_remaining_states.py', '111_build_advocacy_passthrough.py', '112_pull_grantee_990s.py', '118_build_gaming_ordinances.py', '119_build_digital_and_loyalty.py', '144_build_admin_appeals.py', '157_stage_osha_tribe_level_employment.py', '167_link_nonprofit_family_via_ein_hub.py', '168_link_adjudication_hubs.py', '191_apply_ancsa_ownership_ruling.py', '193_scan_adjacent_families_against_ancsa_ruling.py', '221_probe_regulations_gov_comments.py', '241_promote_individual_native_firms_in_place.py', '269_build_contractor_ranking.py', '33_apply_party_rulings.py', '358_measure_sam_individual_native_class_delta.py', '52_add_village_corporations.py', '53_apply_agent_deals_rulings.py', '61_add_nho_intertribal_to_spine.py', '62_no_regression_check.py', '68_build_decisions_page.py', '70_key_unjoined_datasets.py', '73_add_tcu_and_cdfi.py', '73_bills_votes_completion.py', '73_faads_name_attribution.py', '74_add_organization_acronyms.py', '75_add_bie_schools_and_uios.py', '77_build_nagpra_dataset.py', '85_build_admin_region_crosswalk.py', '91_build_nigc_declinations.py', '92_build_gaming_capacity_official.py', '94_match_raw_subawards.py', '94_rescan_universes.py', '96_build_consultation_events.py', '97_build_aliases_and_relationships.py', '98_build_oira_and_hearings.py', '_agent_akvillagecorp_build.py', 'cedar_match_guard.py']",
+   "id": "ENTITY_CLASS_VOCABULARY_REDECLARED_IN_BUILD_SCRIPTS",
+   "instances": [
+    {
+     "file": "100_finish_declinations_and_employment.py",
+     "n_class_literals": 5
+    },
+    {
+     "file": "103_build_california_gaming.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "104_build_wa_allocations.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "105_build_florida_gaming.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "107_pull_remaining_states.py",
+     "n_class_literals": 8
+    },
+    {
+     "file": "111_build_advocacy_passthrough.py",
+     "n_class_literals": 15
+    },
+    {
+     "file": "112_pull_grantee_990s.py",
+     "n_class_literals": 2
+    },
+    {
+     "file": "118_build_gaming_ordinances.py",
+     "n_class_literals": 2
+    },
+    {
+     "file": "119_build_digital_and_loyalty.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "144_build_admin_appeals.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "157_stage_osha_tribe_level_employment.py",
+     "n_class_literals": 6
+    },
+    {
+     "file": "167_link_nonprofit_family_via_ein_hub.py",
+     "n_class_literals": 16
+    },
+    {
+     "file": "168_link_adjudication_hubs.py",
+     "n_class_literals": 11
+    },
+    {
+     "file": "191_apply_ancsa_ownership_ruling.py",
+     "n_class_literals": 5
+    },
+    {
+     "file": "193_scan_adjacent_families_against_ancsa_ruling.py",
+     "n_class_literals": 4
+    },
+    {
+     "file": "221_probe_regulations_gov_comments.py",
+     "n_class_literals": 6
+    },
+    {
+     "file": "241_promote_individual_native_firms_in_place.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "269_build_contractor_ranking.py",
+     "n_class_literals": 7
+    },
+    {
+     "file": "33_apply_party_rulings.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "358_measure_sam_individual_native_class_delta.py",
+     "n_class_literals": 17
+    },
+    {
+     "file": "52_add_village_corporations.py",
+     "n_class_literals": 2
+    },
+    {
+     "file": "53_apply_agent_deals_rulings.py",
+     "n_class_literals": 6
+    },
+    {
+     "file": "61_add_nho_intertribal_to_spine.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "62_no_regression_check.py",
+     "n_class_literals": 2
+    },
+    {
+     "file": "68_build_decisions_page.py",
+     "n_class_literals": 9
+    },
+    {
+     "file": "70_key_unjoined_datasets.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "73_add_tcu_and_cdfi.py",
+     "n_class_literals": 14
+    },
+    {
+     "file": "73_bills_votes_completion.py",
+     "n_class_literals": 4
+    },
+    {
+     "file": "73_faads_name_attribution.py",
+     "n_class_literals": 7
+    },
+    {
+     "file": "74_add_organization_acronyms.py",
+     "n_class_literals": 5
+    },
+    {
+     "file": "75_add_bie_schools_and_uios.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "77_build_nagpra_dataset.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "85_build_admin_region_crosswalk.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "91_build_nigc_declinations.py",
+     "n_class_literals": 5
+    },
+    {
+     "file": "92_build_gaming_capacity_official.py",
+     "n_class_literals": 5
+    },
+    {
+     "file": "94_match_raw_subawards.py",
+     "n_class_literals": 5
+    },
+    {
+     "file": "94_rescan_universes.py",
+     "n_class_literals": 9
+    },
+    {
+     "file": "96_build_consultation_events.py",
+     "n_class_literals": 7
+    },
+    {
+     "file": "97_build_aliases_and_relationships.py",
+     "n_class_literals": 10
+    },
+    {
+     "file": "98_build_oira_and_hearings.py",
+     "n_class_literals": 3
+    },
+    {
+     "file": "_agent_akvillagecorp_build.py",
+     "n_class_literals": 2
+    },
+    {
+     "file": "cedar_match_guard.py",
+     "n_class_literals": 3
+    }
+   ]
+  },
+  {
+   "detail": "a class name that is not in the spine, used as a refusal, a filter, a fixture or a display label. Where it is a GUARD it reads as live and filters nothing - failing OPEN, silently. Where it is a LABEL it is harmless to correctness and still means the product prints a class name the data does not use. Read the call site before treating an instance as either: 103/105 and cedar_match_guard are guards and fixtures; 73_bills_votes_completion.py is a display label in a bill-subject map and is NOT a dead guard.",
+   "id": "CODE_USES_A_CLASS_STRING_THE_SPINE_DOES_NOT_HAVE",
+   "instances": [
+    {
+     "branches_on": "Native CDFI",
+     "file": "103_build_california_gaming.py",
+     "spine_actually_says": "Native Community Development Financial Institution"
+    },
+    {
+     "branches_on": "Native financial institution",
+     "file": "103_build_california_gaming.py",
+     "spine_actually_says": "Native Financial Institution"
+    },
+    {
+     "branches_on": "Native CDFI",
+     "file": "105_build_florida_gaming.py",
+     "spine_actually_says": "Native Community Development Financial Institution"
+    },
+    {
+     "branches_on": "Native financial institution",
+     "file": "105_build_florida_gaming.py",
+     "spine_actually_says": "Native Financial Institution"
+    },
+    {
+     "branches_on": "Alaska Native Village Government",
+     "file": "73_bills_votes_completion.py",
+     "spine_actually_says": "Federally recognized Alaska Native Village"
+    },
+    {
+     "branches_on": "Federally Recognized Tribe",
+     "file": "73_bills_votes_completion.py",
+     "spine_actually_says": "Federally recognized tribe"
+    },
+    {
+     "branches_on": "Native CDFI",
+     "file": "cedar_match_guard.py",
+     "spine_actually_says": "Native Community Development Financial Institution"
+    }
+   ]
+  },
+  {
+   "detail": "9 of 10 ownership-bearing types carry no edge: ['controlled_by', 'enterprise_of', 'holding_company_for', 'indirect_subsidiary_of', 'instrumentality_of', 'majority_owned_by', 'section_17_entity_of', 'subsidiary_of', 'wholly_owned_by']",
+   "id": "OWNERSHIP_BEARING_TYPES_WITH_ZERO_ROWS"
+  },
+  {
+   "detail": "6,005 ledger rows carry an `entity_class` that is not a spine class: {'TRIBAL_UNCROSSWALKED_SBA': 3133, 'FEDERAL_TRIBE_LOWER48': 1370, 'BGOV tribal vendor': 878, 'FEDERAL_AK_VILLAGE': 341, 'ANC_REGIONAL': 140, 'STATE_TRIBE': 96, 'STATE_TRIBE_CONSTITUENCY': 19, 'TRIBAL_COLLEGE': 15, 'FEDERAL_TRIBE_CONSTITUENCY': 9, 'INTERTRIBAL_ORG_AK_CONSORTIUM': 4}",
+   "id": "LEDGER_ENTITY_CLASS_IS_A_SECOND_VOCABULARY"
+  },
+  {
+   "detail": "measured 59.75% / $146.238B on 1,217,768 prime rows; cedar_domain.SELF_CERTIFICATION_IS_NOT_A_VERDICT says 57.2% / $140.00B on the SAME base; AGENTS.md says 60.9% / $86.19B on an older, smaller base. Three figures, one concept, and the two sharing a base still differ. AND the measured value is an UPPER BOUND: it reads `reported_native_preference` as recorded, and a set-aside is a property of the AWARD, not of each modification - filling forward from `contract_award_unique_key` moves rows OUT of 'no preference'. Quote the Native-specific $1.2005B instead; it is a floor and does not move on this question.",
+   "id": "NO_NATIVE_PREFERENCE_SHARE_DISAGREES_ACROSS_THREE_SOURCES"
+  },
+  {
+   "detail": "43 U.S.C. 1607(c) names Village, Urban and Group Corporations; Cedar has a class for two of the three. ['Urban Corporation'] is folded into `Alaska Native Village Corporation`. Goldbelt (Juneau), Shee Atika (Sitka), Natives of Kodiak and Kenai Natives Association are Urban Corporations sitting in the Village class. NOT an ownership defect - 1607(c) applies 1606(g)/(h)/(o) identically to all three - but a LABEL defect, and a class that does not exist cannot be added to ANCSA_CORPORATION_CLASSES when someone finally separates them.",
+   "id": "ANCSA_STATUTORY_CATEGORY_HAS_NO_CEDAR_CLASS"
+  },
+  {
+   "detail": "cedar_domain.bears_ownership() accepts owner_class and owned_class, and RULE 2 (a village government never owns an ANC) and RULE 4 (nor the reverse) fire ONLY when both are passed. Callers found: ['111_build_advocacy_passthrough.py', '112_pull_grantee_990s.py', '132_build_schedule_i_layer.py', '241_promote_individual_native_firms_in_place.py', '243_write_individual_native_class_codebook_fragment.py', '27_build_dataset_manifests.py', '94_match_raw_subawards.py', '97_build_aliases_and_relationships.py']; callers passing the classes: ['241_promote_individual_native_firms_in_place.py'] - and that one is a module-load self-test on constants, not an attribution. ANCSA_CORPORATION_CLASSES and ALASKA_VILLAGE_GOVERNMENT_CLASSES have ZERO importers. The $24.52B ruling was applied by 191_apply_ancsa_ownership_ruling.py using its OWN local copy of the class sets, so the ruling was enforced and the REUSABLE guard was not. That is the shape AGENTS.md names: a defect fixed in one place leaves no trace in the other nine.",
+   "id": "ANCSA_CLASS_GUARD_UNCALLED",
+   "instances": [
+    "111_build_advocacy_passthrough.py",
+    "112_pull_grantee_990s.py",
+    "132_build_schedule_i_layer.py",
+    "241_promote_individual_native_firms_in_place.py",
+    "243_write_individual_native_class_codebook_fragment.py",
+    "27_build_dataset_manifests.py",
+    "94_match_raw_subawards.py",
+    "97_build_aliases_and_relationships.py"
+   ]
+  }
+ ],
+ "generated": "2026-08-26",
+ "human_companion": "docs/CEDAR_TAXONOMY.md",
+ "layers": {
+  "absence": {
+   "288_build_collection_descriptors.ABSENCE_VOCABULARY": {
+    "scope": "product-wide, shipped in every collection descriptor",
+    "values": [
+     "NOT_IN_SOURCE",
+     "BELOW_REPORTING_THRESHOLD",
+     "OUT_OF_SCOPE_BY_CONSTRUCTION",
+     "SUPPRESSED",
+     "REPORTED_EMPTY",
+     "NOT_CHECKED"
+    ]
+   },
+   "AGENTS.md source-coverage vocabulary": {
+    "declared_in_code": false,
+    "scope": "whether a SOURCE publishes a fact",
+    "values": [
+     "PUBLISHES",
+     "WITHHOLDS",
+     "NOT_FOUND",
+     "NOT_CHECKED"
+    ]
+   },
+   "_reading": "FOUR absence vocabularies. `NOT_CHECKED` is the ONLY token in all four. The first two are DELIBERATELY not merged and 288 says why in its own source. The third and fourth are not declared in code at all.",
+   "cedar_domain.ABSENCE_VALUES": {
+    "forbidden": [
+     "FALSE_CLAIM",
+     "NON_NATIVE",
+     "NOT_INDIAN",
+     "NOT_NATIVE",
+     "NOT_VERIFIED_NATIVE"
+    ],
+    "scope": "individual-Native ownership evidence only",
+    "values": [
+     "NOT_CHECKED",
+     "NO_CLAIM_FOUND",
+     "NO_SITE_FOUND",
+     "SITE_UNREACHABLE",
+     "UNDETERMINED"
+    ]
+   },
+   "tribal_vendor_list_registry.verdict": {
+    "declared_in_code": false,
+    "scope": "whether a tribal AUTHORITY publishes a certification list",
+    "values": [
+     "LIST_FOUND_MACHINE_READABLE",
+     "LIST_FOUND_PDF",
+     "LIST_FOUND_HTML",
+     "LIST_BEHIND_LOGIN",
+     "LIST_REFERENCED_NOT_PUBLISHED",
+     "NO_LIST_FOUND",
+     "SITE_UNREACHABLE",
+     "NOT_CHECKED"
+    ]
+   }
+  },
+  "ancsa_statutory_category": {
+   "Group Corporation": {
+    "authority": "named in 43 U.S.C. 1607(c)",
+    "cedar_entity_class": "ANCSA Group Corporation"
+   },
+   "Regional Corporation": {
+    "authority": "ANCSA sec. 7, 43 U.S.C. 1606",
+    "cedar_entity_class": "Alaska Native Regional Corporation"
+   },
+   "Urban Corporation": {
+    "authority": "named in 43 U.S.C. 1607(c) alongside Village and Group Corporations",
+    "cedar_entity_class": null
+   },
+   "Village Corporation": {
+    "authority": "ANCSA sec. 8, 43 U.S.C. 1607",
+    "cedar_entity_class": "Alaska Native Village Corporation"
+   }
+  },
+  "attribution_method": {
+   "ALGORITHMIC": {
+    "definition": "Machine-proposed. Never tier A alone.",
+    "values": [
+     "agent_research_one_leg",
+     "cluster_v3",
+     "cross_dataset_propagation",
+     "need_v6",
+     "sam_namematch_2026_05_06",
+     "subsidiary_lookup",
+     "unmatched"
+    ],
+    "what_it_is_not": "NOT interchangeable with each other: measured accuracy against the owner's rulings spans `need_v6` 6.5% to `cluster_v3` 97.7%."
+   },
+   "RULED": {
+    "definition": "A HUMAN DECIDED. Permanent; only a new ruling reverses it.",
+    "values": [
+     "bgov_manual",
+     "elijah_ruling",
+     "elijah_ruling_redirect",
+     "hand",
+     "ruling",
+     "web_verified"
+    ],
+    "what_it_is_not": "NOT a statement that the answer was YES. All 317 `elijah_ruling` EIN rows in the ledger are tier X - NEGATIVE rulings. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided."
+   },
+   "TWO_LEG": {
+    "definition": "Two independent legs of evidence. Tier A.",
+    "values": [
+     "agent_research_two_leg"
+    ],
+    "what_it_is_not": "NOT one leg. 49 single-leg rows were correctly demoted A -> B on 2026-08-06."
+   }
+  },
+  "deals_axis": {
+   "capital_source": {
+    "Federal": 655,
+    "Philanthropic": 0,
+    "Private": 106,
+    "State": 0,
+    "Tribal": 0
+   },
+   "deal_status_std": {
+    "Agreed": 2,
+    "Allocated": 2,
+    "Announced": 19,
+    "Awarded": 552,
+    "Closed": 86,
+    "Completed": 79,
+    "Proposed": 2,
+    "Recommended": 48
+   },
+   "native_party_role": {
+    "Acquirer": 156,
+    "Borrower": 9,
+    "Grantee": 530,
+    "Investor": 54,
+    "Issuer": 17,
+    "Partner": 3,
+    "Seller": 14
+   },
+   "record_class": {
+    "PUBLIC_AWARD": 616,
+    "TRANSACTION": 174
+   },
+   "sector": {
+    "Agriculture & Food": 2,
+    "Broadband & Telecom": 280,
+    "Economic Development (general)": 0,
+    "Education": 0,
+    "Energy": 67,
+    "Federal Contracting": 28,
+    "Financial Services": 12,
+    "Gaming": 48,
+    "Health Care": 10,
+    "Hospitality & Retail": 7,
+    "Housing & Community Development": 226,
+    "Media & Technology": 4,
+    "Natural Resources": 19,
+    "Real Estate & Land": 15,
+    "Transportation & Infrastructure": 53
+   },
+   "transaction_type": {
+    "Acquisition": 122,
+    "Commercial Partnership": 3,
+    "Contract Termination": 0,
+    "Debt Issuance": 16,
+    "Debt Refinancing": 5,
+    "Divestiture": 16,
+    "Equity Investment": 4,
+    "Financing (other)": 7,
+    "Grant / Public Award": 616,
+    "Joint Venture": 1,
+    "Land Transaction": 0
+   }
+  },
+  "entity_class": {
+   "ANCSA Group Corporation": {
+    "definition": "A corporation organised for a Native GROUP under ANCSA rather than for a village.",
+    "how_membership_is_evidenced": "`entity_master.csv`, joined by 52_add_village_corporations.",
+    "id_prefixes": {
+     "ANVC": 6
+    },
+    "known_to_cedar_domain": true,
+    "n_spine_rows": 6,
+    "tier_implication": "No tier. Inside `ANCSA_CORPORATION_CLASSES`.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT a village corporation, though it shares the `ANVC` prefix - a second place where the prefix does not identify the class."
+   },
+   "Alaska Native Regional Corporation": {
+    "definition": "One of the twelve in-state corporations organised under ANCSA section 7, 43 U.S.C. 1606.",
+    "how_membership_is_evidenced": "NEID seed.",
+    "id_prefixes": {
+     "ANRC": 12
+    },
+    "known_to_cedar_domain": true,
+    "n_spine_rows": 12,
+    "tier_implication": "No tier.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT the owner of the village corporations in its region (rule 5) and NOT a place. `associated_with_region` is geography; treating it as ownership once moved $32.87B wrongly."
+   },
+   "Alaska Native Village Corporation": {
+    "definition": "A corporation organised under ANCSA section 8, 43 U.S.C. 1607, for a named Alaska Native village.",
+    "how_membership_is_evidenced": "Joined from `entity_master.csv`, which already carried 173 village and 6 group corporations with `A-` ids and a regional parent. Nothing was invented; a tribe_id collision aborts rather than overwrites.",
+    "id_prefixes": {
+     "ANVC": 173
+    },
+    "known_to_cedar_domain": true,
+    "n_spine_rows": 173,
+    "tier_implication": "No tier. It IS one of the three classes `bears_ownership()` can refuse an edge on - when a caller passes the class arguments, which no production caller does. See the gap `ANCSA_CLASS_GUARD_UNCALLED`.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT the village government. NOT a subsidiary of its regional corporation - rule 5, the regional corporation does not own the village corporation; they are two corporations with an overlapping shareholder base. AND, TODAY, NOT ONLY VILLAGE CORPORATIONS: this class also carries the four ANCSA URBAN Corporations, for which 43 U.S.C. 1607(c) provides no separate Cedar class. See the gap `ANCSA_URBAN_CORPORATION_HAS_NO_CLASS`."
+   },
+   "BIE School": {
+    "definition": "An elementary or secondary school in the Bureau of Indian Education directory, split by BIE's own `bie_operation_type` into Bureau-Operated and Tribally-Controlled.",
+    "how_membership_is_evidenced": "bie.edu/schools -> the BIE ArcGIS schools directory feature service, with the operation-type split read from the source roster and never inferred. Cross-checked against the page's own og:description.",
+    "id_prefixes": {
+     "BIE": 185
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 185,
+    "tier_implication": "No tier. The operation-type split governs ROLL-UP, not confidence.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT tribally owned by default. 56 of 185 are FEDERALLY operated and their blank parent is A RULING, not unfinished research - booking those dollars to a tribe would attribute federal spending to a tribal government. `Navajo_Operation` in BIE data is an administrative grouping, not ownership; trusting it books 35 schools to the Navajo Nation."
+   },
+   "Federal-level constituency entity": {
+    "definition": "A constituent band, community or pueblo that is itself named on the federal list while sitting inside an umbrella tribal government.",
+    "how_membership_is_evidenced": "NEID seed, `CNSF` prefix.",
+    "id_prefixes": {
+     "CNSF": 22
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 22,
+    "tier_implication": "No tier. 42 `CONSTITUENT_BAND_VS_UMBRELLA_TRIBE` defects on $1,297.8M remain untouched, and no dollar rolls through them today because the edge is already refused.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT a subsidiary. `constituent_band_of` is in `GOVERNMENTAL_RELATIONSHIPS` and therefore in `NEVER_OWNERSHIP`: a band's contracts are not the umbrella's. Mapping the old flat parent column wholesale would have rolled 22 of these into their umbrellas."
+   },
+   "Federal-level self-governance consortium": {
+    "definition": "A consortium of tribes exercising self-governance authority jointly.",
+    "how_membership_is_evidenced": "NEID seed, `SGVF` prefix.",
+    "id_prefixes": {
+     "SGVF": 9
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 9,
+    "tier_implication": "No tier.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT an owner of its member tribes' activity and NOT owned by them."
+   },
+   "Federally recognized Alaska Native Village": {
+    "definition": "An Alaska Native village GOVERNMENT - a federally recognized tribe that happens to be a village. It may own an enterprise directly (ANCSA ruling rule 3), and then that enterprise is an ordinary tribal enterprise.",
+    "how_membership_is_evidenced": "Same NEID seed. The namesake corporation pairs are staged in `review/village_corp_namesake_pairs.csv` by 52_add_village_corporations.",
+    "id_prefixes": {
+     "AKNF": 228
+    },
+    "known_to_cedar_domain": true,
+    "n_spine_rows": 228,
+    "tier_implication": "No tier. See rule 3: a village-government ownership claim is an EXCEPTION that must be evidenced per identifier, never assumed from a name.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT an ANCSA corporation, in either direction. A village government NEVER owns an ANC (rule 2) and an ANC never owns the village government (rule 4). The two share a name and a place BY STATUTE, so a shared name is not weak evidence of one owner - it is no evidence."
+   },
+   "Federally recognized tribe": {
+    "definition": "A tribal government on the Secretary's list published under 25 U.S.C. 5131, EXCLUDING the Alaska Native villages, which this taxonomy holds as a separate class.",
+    "how_membership_is_evidenced": "Seeded from the CICD NEID canonical tribe table (`canonical_tribe_table.csv`, 687 entities) by 01_build_entity_spine, not read directly from the Federal Register list. `fr_official_name` carries the FR long form where it is held.",
+    "id_prefixes": {
+     "AKNF": 1,
+     "TRBF": 348
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 349,
+    "tier_implication": "Class membership confers NO tier. A tier is inherited from the source row that made a link, never from the class of the entity linked to.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT the whole federally recognized universe. 349 here plus 228 Alaska Native villages is 577; a reader who quotes 349 as 'the federally recognized tribes' understates it by 40%. NOT a state-recognized tribe. NOT a tribal enterprise - the government, not its companies."
+   },
+   "Individually Native-owned business": {
+    "definition": "An ordinary firm - LLC, S-corp, sole proprietorship - whose OWNER is an individual Native person. Ruled into existence by the owner on 2026-08-07 on Hidden Water Inc.",
+    "how_membership_is_evidenced": "The owner's 45 per-UEI rulings, extracted from `hci_analysis.do` and the 2026-08 rulings inboxes. `verification_route` is populated on all 45 - CAGE registry lookup, company website, or an owner note with a URL.",
+    "id_prefixes": {
+     "CEDAR": 45
+    },
+    "known_to_cedar_domain": true,
+    "n_spine_rows": 45,
+    "tier_implication": "`elijah_ruling` is in `RULED_METHODS`, so these are tier A as ATTRIBUTIONS. That does NOT make them publishable as NAMES: `may_publish_individual_native_field()` withholds every name, address, and - for a firm whose legal name is a person's - the UEI and CAGE, absent recorded `OPTED_IN` consent.",
+    "verification_route_populated": 45,
+    "what_it_is_not": "NOT a tribal entity, NOT a false positive, and NOT excluded from the product. It never rolls up to a tribe, an ANC or an NHO; `parent_native_entity` is permanently NULL and that blank is a RULING. Read the ruling text carefully: five of the 45 read 'Not a Native entity - individually Native-owned firm', which refuses the TRIBAL LINK and AFFIRMS Native ownership. Read literally as 'not Native' it inverts the owner's meaning, and it already has - CAGE 9DVK5 sits in the ledger at tier X bound to a tribe that does not own it."
+   },
+   "Intertribal Organization": {
+    "definition": "An organisation whose members are tribes.",
+    "how_membership_is_evidenced": "`intertribal_orgs.csv` (57 verified) plus 989 membership rows, every row carrying `evidence_url` and a quote.",
+    "id_prefixes": {
+     "ITO": 55
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 55,
+    "tier_implication": "No tier. 9 of the 334 ANCSA one-to-many defects resolved to an intertribal organisation rather than a corporation.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT owned by its member tribes. Membership is `member_of` / `affiliated_with`, both in `NEVER_OWNERSHIP`. Also NOT reachable through `native_entity_lobbying_disclosures.csv`: ZERO of these 55 appear in it, and NCAI, NIGA, USET, NIHB, NARF, NAIHC and NCUIH sit in `lobbying_unmatched_clients.csv` instead."
+   },
+   "Native Community Development Financial Institution": {
+    "definition": "An institution carrying Treasury CDFI Fund certification with the `Native CDFI (Y/N)` flag set.",
+    "how_membership_is_evidenced": "Treasury's 'List of Currently Certified CDFIs' - 'Total Number of Certified Native CDFIs as of July 16, 2026: 65' - cross-read against the Minneapolis Fed nafi-map dataset (91 institutions, `ncdfi` / `nmdi` flags), which is the CICD NAFI map the owner named.",
+    "id_prefixes": {
+     "CDFI": 64
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 64,
+    "tier_implication": "No tier. 97_build_aliases_and_relationships writes `chartered_by` for this class and NEVER `subsidiary_of`, so no dollar rolls through it.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT the same as `Native Financial Institution`, which is the broader Minneapolis Fed NAFI universe. Both live under the `CDFI` prefix, so THE PREFIX DOES NOT IDENTIFY THE CLASS here."
+   },
+   "Native Financial Institution": {
+    "definition": "A Native-controlled financial institution in the Minneapolis Fed NAFI universe that is NOT a certified Native CDFI.",
+    "how_membership_is_evidenced": "Minneapolis Fed `nafi-map-data_current.xlsx`, `ncdfi` and `nmdi` flags.",
+    "id_prefixes": {
+     "CDFI": 29
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 29,
+    "tier_implication": "No tier.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT a Native CDFI. The distinction is Treasury certification and it is the whole reason the two classes exist separately. Shares the `CDFI` prefix with Native CDFIs."
+   },
+   "Native Hawaiian Organization": {
+    "definition": "A Native Hawaiian community organization. 13 C.F.R. 124.110 requires an NHO to be a NON-PROFIT organization.",
+    "how_membership_is_evidenced": "DOI Office of Native Hawaiian Relations notification roster (179 rows) plus the NHOA member directory, each with `evidence_url` and a verbatim quote. This class and `Individually Native-owned business` are the ONLY two that populate `verification_route`.",
+    "id_prefixes": {
+     "NHO": 210
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 210,
+    "tier_implication": "The DOI roster rows land at tier C on their own. A tier arrives with a link, not with a listing.",
+    "verification_route_populated": 210,
+    "what_it_is_not": "NOT a state agency - the Department of Hawaiian Home Lands is a State of Hawaii agency and was refused. NOT an LLC: `Hoilina Ranch LLC` was refused because an LLC cannot satisfy 124.110. An NHO-OWNED firm is a subsidiary, not an NHO."
+   },
+   "State-level constituency entity": {
+    "definition": "A constituent group inside a state-recognized tribe.",
+    "how_membership_is_evidenced": "NEID seed, `CNSS` prefix.",
+    "id_prefixes": {
+     "CNSS": 3
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 3,
+    "tier_implication": "No tier.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT federally recognized and NOT a subsidiary."
+   },
+   "State-recognized tribe": {
+    "definition": "A tribe recognised by a state and not by the United States.",
+    "how_membership_is_evidenced": "NEID seed. Separate `TRBS` prefix.",
+    "id_prefixes": {
+     "TRBS": 64
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 64,
+    "tier_implication": "No tier.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT federally recognized. It has no ISDEAA relationship, no 25 U.S.C. 5131 listing, and it is NOT eligible under the SLFRF definition of 'Tribal government' at 42 U.S.C. 802(g)(7). Pooling it with the federal class changes the recipient universe."
+   },
+   "Tribal College or University": {
+    "definition": "A tribally chartered or federally chartered college in the AIHEC roster.",
+    "how_membership_is_evidenced": "aihec.org TCU roster and profiles - 37 members in three tiers (34 regular, 1 associate, 2 developing) - each with a chartering statement in its own profile paragraph, cross-read against aihec.org/tcu-locations.",
+    "id_prefixes": {
+     "TCU": 37
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 37,
+    "tier_implication": "No tier. The edge written is `chartered_by`, which is NOT in `OWNERSHIP_BEARING`: a tribe chartering a college does not own it and the college's federal dollars are not the tribe's.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT its chartering tribe. Before this class existed, containment resolved `Bay Mills Community College` onto the Bay Mills Indian Community and `United Tribes Technical College` onto United Auburn Rancheria. NOT a BIE School - BIE post-secondary institutions belong to this roster, not that one."
+   },
+   "Urban Indian Organization": {
+    "definition": "An organisation in the IHS Urban Indian Organization programme, serving Native people in an urban area.",
+    "how_membership_is_evidenced": "ihs.gov/urban/urban-indian-organizations plus its twelve area pages, cross-checked against the NCUIH directory ('There are 41 Urban Indian Organizations').",
+    "id_prefixes": {
+     "UIO": 43
+    },
+    "known_to_cedar_domain": false,
+    "n_spine_rows": 43,
+    "tier_implication": "No tier.",
+    "verification_route_populated": 0,
+    "what_it_is_not": "NOT tribally owned. Serving a population is not being owned by it - `serves_native_entities` is never evidence of ownership. NOT resolvable by place name: `Riverside San Bernardino County Indian Health Inc` was refused an autoresolution to `UIO-HEALTH-00`, which is 'Native Health', ARIZONA."
+   }
+  },
+  "federal_native_category": {
+   "8(a)": {
+    "attributed_obligations_usd": 97327112765.01,
+    "column": "reported_8a",
+    "definition": "SBA's 8(a) Business Development programme. The `setaside` value and the `reported_8a` flag.",
+    "is_native_specific": false,
+    "n_prime_rows": 364150,
+    "share_of_attributed_dollars_pct": 39.7634,
+    "what_it_is_not": "**NOT A NATIVE CATEGORY.** 8(a) is open to any socially and economically disadvantaged owner. An 8(a) award carries NO Native signal on its own, and yet it supplies the overwhelming majority of everything `reported_native_preference` counts."
+   },
+   "Buy Indian": {
+    "attributed_obligations_usd": 493580540.14,
+    "column": "reported_buy_indian",
+    "definition": "The Buy Indian Act set-aside, 25 U.S.C. 47. Native-specific by statute.",
+    "is_native_specific": true,
+    "n_prime_rows": 9498,
+    "share_of_attributed_dollars_pct": 0.2017,
+    "what_it_is_not": "NOT the whole Native-specific surface, and NOT comparable across 2013. The DOI Buy Indian rule of 2013-07-08 created a second tier recorded under `Indian Business`; `Buy Indian` read alone says Native set-asides collapsed 62% after 2015, and summed with Indian Business they rose 44%."
+   },
+   "Indian Business": {
+    "attributed_obligations_usd": 706933970.73,
+    "column": "reported_indian_business",
+    "definition": "The second DOI set-aside code, live from FY2014 and overtaking Buy Indian in FY2016.",
+    "is_native_specific": true,
+    "n_prime_rows": 9934,
+    "share_of_attributed_dollars_pct": 0.2888,
+    "what_it_is_not": "NOT a separate instrument. ONE instrument under TWO codes; **always sum it with Buy Indian.** Zero in every year FY2000-2013."
+   },
+   "_measured": {
+    "attributed_obligations_usd": 244765639853.98,
+    "native_specific_only_share_of_attributed_pct": 0.4905,
+    "native_specific_only_usd": 1200514510.87,
+    "no_native_preference_pct": 59.75,
+    "no_native_preference_usd": 146238012578.1,
+    "prime_rows": 1217768,
+    "reading": "`reported_native_preference` is the exact union INCLUDING 8(a). Buy Indian + Indian Business is the Native-specific subset. The two must never be quoted interchangeably.",
+    "setaside_value_counts": {
+     "8(a)": 364150,
+     "Buy Indian": 9498,
+     "HUBZone": 17362,
+     "Indian Business": 9934,
+     "None reported": 598321,
+     "Other": 55439,
+     "Small Business": 163064
+    },
+    "union_is_exact": true
+   },
+   "reported_native_preference": {
+    "attributed_obligations_usd": 98527627275.89,
+    "column": "reported_native_preference",
+    "definition": "Cedar's own union column over the three above.",
+    "is_native_specific": false,
+    "n_prime_rows": 383582,
+    "share_of_attributed_dollars_pct": 40.2539,
+    "what_it_is_not": "**NOT A MEASURE OF NATIVE PREFERENCE, despite its name.** It is the strict union INCLUDING 8(a), and 8(a) supplies almost all of it. The genuinely Native-specific subset is Buy Indian + Indian Business alone. Anyone filtering on this column to find Native set-asides gets the 8(a) programme."
+   }
+  },
+  "identifier_type": {
+   "CAGE": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "CEDAR_INTERNAL": {
+    "is_official": false,
+    "licensed_never_publishes": false
+   },
+   "DUNS": {
+    "is_official": true,
+    "licensed_never_publishes": true
+   },
+   "EIN": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "IRS": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "LDA_CLIENT": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "LDA_REGISTRANT": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "SAM": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "SEC": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "SOURCE_NATIVE": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "STATE_CORP": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "TRIBAL_CHARTER": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   },
+   "UEI": {
+    "is_official": true,
+    "licensed_never_publishes": false
+   }
+  },
+  "instrument_taxonomy": [
+   {
+    "code": "A/B/C/D",
+    "family": "PROCUREMENT",
+    "subtype": "Definitive contract",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "IDV_*",
+    "family": "PROCUREMENT",
+    "subtype": "Indefinite delivery vehicle",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "sub",
+    "family": "PROCUREMENT",
+    "subtype": "Subaward (FSRS)",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "02",
+    "family": "ASSISTANCE",
+    "subtype": "Block grant",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "03",
+    "family": "ASSISTANCE",
+    "subtype": "Formula grant",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "04",
+    "family": "ASSISTANCE",
+    "subtype": "Project grant",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "05",
+    "family": "ASSISTANCE",
+    "subtype": "Cooperative agreement",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "06",
+    "family": "ASSISTANCE",
+    "subtype": "Direct payment for specified use",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "10",
+    "family": "ASSISTANCE",
+    "subtype": "Direct payment unrestricted",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "11",
+    "family": "ASSISTANCE",
+    "subtype": "Other reimbursable / contingent",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "07",
+    "family": "CREDIT",
+    "subtype": "Direct loan",
+    "sum_obligations_directly": "0"
+   },
+   {
+    "code": "08",
+    "family": "CREDIT",
+    "subtype": "Guaranteed / insured loan",
+    "sum_obligations_directly": "0"
+   },
+   {
+    "code": "09",
+    "family": "CREDIT",
+    "subtype": "Insurance",
+    "sum_obligations_directly": "0"
+   },
+   {
+    "code": "93.210",
+    "family": "SELF_DETERMINATION",
+    "subtype": "IHS self-governance compact",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "15.022",
+    "family": "SELF_DETERMINATION",
+    "subtype": "Interior self-governance",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "93.441",
+    "family": "SELF_DETERMINATION",
+    "subtype": "Indian self-determination (638)",
+    "sum_obligations_directly": "1"
+   },
+   {
+    "code": "15.024",
+    "family": "SELF_DETERMINATION",
+    "subtype": "Contract support costs",
+    "sum_obligations_directly": "1"
+   }
+  ],
+  "method_accuracy_measured_against_owner_rulings": {
+   "cluster_v3": 0.977,
+   "need_v6": 0.065
+  },
+  "other_imported_vocabularies": {
+   "ALIAS_TYPES": {
+    "values": [
+     "abbreviation",
+     "acronym",
+     "brand",
+     "common",
+     "dba",
+     "diacritic_folded",
+     "former_legal",
+     "full_form_federal_filing",
+     "governmental_unit_variation",
+     "historical",
+     "informal",
+     "known_typo",
+     "legal",
+     "operating_name",
+     "shortened",
+     "source_specific",
+     "translated"
+    ]
+   },
+   "AdvocacyChannel": {
+    "values": {
+     "ADMINISTRATIVE_APPEAL": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": false
+     },
+     "ADMINISTRATIVE_COMMENT": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": false
+     },
+     "AGENCY_CALENDAR": {
+      "event_class": "ACCESS",
+      "is_lobbying": false
+     },
+     "CONGRESSIONAL_CORRESPONDENCE": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": false
+     },
+     "CONSULTATION": {
+      "event_class": "GOVERNMENT_ENGAGEMENT",
+      "is_lobbying": false
+     },
+     "FACA": {
+      "event_class": "GOVERNMENT_ENGAGEMENT",
+      "is_lobbying": false
+     },
+     "HEARING_TESTIMONY": {
+      "event_class": "GOVERNMENT_ENGAGEMENT",
+      "is_lobbying": false
+     },
+     "LDA_FILING": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": true
+     },
+     "LITIGATION_BRIEF": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": false
+     },
+     "OIRA_MEETING": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": false
+     },
+     "REGULATORY_EX_PARTE": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": false
+     },
+     "SECTION_106_CONSULTATION": {
+      "event_class": "GOVERNMENT_ENGAGEMENT",
+      "is_lobbying": false
+     },
+     "SPONSORED_TRAVEL": {
+      "event_class": "ACCESS",
+      "is_lobbying": false
+     },
+     "STATE_FILING": {
+      "event_class": "ADVOCACY",
+      "is_lobbying": true
+     },
+     "VISITOR_RECORD": {
+      "event_class": "ACCESS",
+      "is_lobbying": false
+     }
+    }
+   },
+   "EventClass": {
+    "values": [
+     "ADVOCACY",
+     "GOVERNMENT_ENGAGEMENT",
+     "ACCESS"
+    ]
+   },
+   "EvidenceClass": {
+    "values": {
+     "AFFILIATED_INDIVIDUAL": {
+      "carries_institutional_position": false
+     },
+     "FUNDER_ACTIVITY": {
+      "carries_institutional_position": false
+     },
+     "INSTITUTIONAL_ACTION": {
+      "carries_institutional_position": true
+     }
+    }
+   },
+   "InstrumentFamily": {
+    "values": {
+     "ASSISTANCE": {
+      "obligations_are_summable": true
+     },
+     "CREDIT": {
+      "obligations_are_summable": false
+     },
+     "PROCUREMENT": {
+      "obligations_are_summable": true
+     },
+     "SELF_DETERMINATION": {
+      "obligations_are_summable": true
+     }
+    }
+   },
+   "LICENSED": {
+    "identifier_types": [
+     "DUNS"
+    ],
+    "source_files": [
+     "gaming_facility_metrics.csv",
+     "gaming_property_capacity_history.csv"
+    ]
+   },
+   "LOBBYING_WITHDRAWAL_MARKS": {
+    "confidences": [
+     "withdrawn_false_attribution",
+     "withdrawn_org_type"
+    ],
+    "values": [
+     "org_type_barred",
+     "attribution_withdrawn"
+    ]
+   },
+   "MeasurementType": {
+    "values": {
+     "ACTIVE_FLOOR_COUNT": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "AUTHORIZED_MAXIMUM": {
+      "is_observed": false,
+      "never_promotes_to_active": true
+     },
+     "COMPACT_REPORTED_COUNT": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "DERIVED_BOUND": {
+      "is_observed": false,
+      "never_promotes_to_active": true
+     },
+     "ENVIRONMENTAL_REVIEW_COUNT": {
+      "is_observed": false,
+      "never_promotes_to_active": true
+     },
+     "FORM5500_ACTIVE_PARTICIPANTS": {
+      "is_observed": true,
+      "never_promotes_to_active": true
+     },
+     "GAME_FINDER_OBSERVATION": {
+      "is_observed": false,
+      "never_promotes_to_active": true
+     },
+     "LODES_BLOCK_WORKPLACE_JOBS": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "MANUFACTURER_PLACEMENT": {
+      "is_observed": false,
+      "never_promotes_to_active": false
+     },
+     "OPENING_INVENTORY": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "OSHA_ESTABLISHMENT_REPORTED": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "OSHA_TRIBE_LEVEL_REPORTED": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "PROJECTED": {
+      "is_observed": false,
+      "never_promotes_to_active": true
+     },
+     "PROPERTY_REPORTED_COUNT": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "REGULATORY_REPORTED_COUNT": {
+      "is_observed": true,
+      "never_promotes_to_active": false
+     },
+     "SELF_PUBLISHED_EMPLOYMENT_CLAIM": {
+      "is_observed": true,
+      "never_promotes_to_active": true
+     },
+     "SELF_PUBLISHED_MARKETING_CLAIM": {
+      "is_observed": true,
+      "never_promotes_to_active": true
+     }
+    }
+   },
+   "NAME_TRAPS": {
+    "n": 51,
+    "values": [
+     "advantage",
+     "alliance",
+     "apache",
+     "bradley",
+     "bristol",
+     "cato",
+     "central",
+     "cherokee",
+     "cheyenne",
+     "colorado",
+     "coors",
+     "creek",
+     "eagle",
+     "frontier",
+     "goldwater",
+     "hoover",
+     "indian",
+     "kiowa",
+     "kirby",
+     "koch",
+     "little",
+     "mason",
+     "miami",
+     "minnesota",
+     "modoc",
+     "mountain",
+     "ojibwe",
+     "omaha",
+     "oneida",
+     "ottawa",
+     "pacific",
+     "peoria",
+     "pontiac",
+     "rancheria",
+     "river",
+     "san",
+     "santa",
+     "scaife",
+     "seminole",
+     "shawnee",
+     "spencer",
+     "stanford",
+     "summit",
+     "tacoma",
+     "templeton",
+     "three",
+     "united",
+     "wichita",
+     "wind",
+     "wyandotte",
+     "yuma"
+    ]
+   },
+   "NP_CLASSIFICATION": {
+    "negative": [
+     "not_a_native_entity",
+     "not_native",
+     "place_name_coincidence"
+    ],
+    "positive": [
+     "native_controlled",
+     "native_serving",
+     "tribally_controlled"
+    ],
+    "undecided": [
+     "",
+     "CONFLICT",
+     "UNRULED",
+     "UNSURE"
+    ],
+    "what_it_is_not": "An unrecognised token is NOT Native. The polarity is an ALLOW-LIST OF POSITIVES, because an allow-list of negatives read `not_a_native_entity` as *ruled Native*."
+   },
+   "PLACE_SUFFIXES": {
+    "values": [
+     "bay",
+     "beach",
+     "borough",
+     "city",
+     "county",
+     "falls",
+     "harbor",
+     "heights",
+     "hills",
+     "island",
+     "junction",
+     "lake",
+     "lakes",
+     "park",
+     "plains",
+     "ridge",
+     "river",
+     "springs",
+     "township",
+     "valley",
+     "village"
+    ]
+   },
+   "PROMOTED_TABLES": {
+    "data/clean/deals_classified.csv": [
+     "data/clean/deals_*_additions.csv",
+     "deals_2026_ytd.csv",
+     "deals_historical_2020_2025.csv"
+    ]
+   },
+   "Position": {
+    "key": [
+     "organisation_id",
+     "matter_id",
+     "native_entity_id"
+    ],
+    "values": [
+     "SUPPORTS",
+     "OPPOSES",
+     "MIXED",
+     "UNDETERMINED"
+    ],
+    "what_it_is_not": "NOT a property of an organisation. A position needs all three legs; two is a generalisation."
+   },
+   "REVENUE_EVIDENCE": {
+    "values": [
+     "REPORTED_PROPERTY_REVENUE",
+     "EXACT_DERIVED_PROPERTY_REVENUE",
+     "BOUNDED_DERIVED_REVENUE",
+     "TRIBE_LEVEL_REVENUE",
+     "REGIONAL_GGR_CONTEXT",
+     "REGIONAL_GGR_CEILING",
+     "NO_REVENUE_OBSERVATION"
+    ]
+   }
+  },
+  "relationship_type": {
+   "acquired_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "affiliated_with": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INSTITUTIONAL",
+    "n_rows_in_entity_relationships": 148,
+    "never_ownership": true
+   },
+   "agency_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "associated_with_region": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 391,
+    "never_ownership": true
+   },
+   "associated_with_village": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "authority_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "brand_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 106,
+    "never_ownership": false
+   },
+   "chartered_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 30,
+    "never_ownership": false
+   },
+   "commission_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "component_government_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "constituent_band_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 22,
+    "never_ownership": true
+   },
+   "constituent_tribe_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "controlled_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "department_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "division_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "doing_business_as": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "enterprise_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "federated_with": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "fiscally_sponsored_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INSTITUTIONAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "formerly_known_as": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "HISTORICAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "formerly_owned_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "governed_under_constitution_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "governmental_unit_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "holding_company_for": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "indirect_subsidiary_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "instrumentality_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "joint_venture_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "legislative_body_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "located_in_region": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "majority_owned_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "member_government_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "member_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INSTITUTIONAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "membership_organization_for": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INSTITUTIONAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "merged_into": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "HISTORICAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "operated_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INSTITUTIONAL",
+    "n_rows_in_entity_relationships": 56,
+    "never_ownership": true
+   },
+   "operating_group_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "owned_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 1462,
+    "never_ownership": false
+   },
+   "owner_self_identifies_with": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INDIVIDUAL_NATIVE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "partner_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INSTITUTIONAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "predecessor_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "HISTORICAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "program_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "GOVERNMENTAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "regional_corporation_for": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "reorganized_as": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "HISTORICAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "section_17_entity_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "serves_native_entities": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "INSTITUTIONAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "serves_region": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "serves_shareholders_from": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "shareholder_base_overlaps_with": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "shares_ancestral_base_with": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": true
+   },
+   "spun_out_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "HISTORICAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "subsidiary_of": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "successor_to": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": false,
+    "family": "HISTORICAL",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   },
+   "village_corporation_for": {
+    "ancsa_association_not_ownership": true,
+    "bears_ownership": false,
+    "family": "ALASKA_GEOGRAPHIC",
+    "n_rows_in_entity_relationships": 77,
+    "never_ownership": true
+   },
+   "wholly_owned_by": {
+    "ancsa_association_not_ownership": false,
+    "bears_ownership": true,
+    "family": "CORPORATE",
+    "n_rows_in_entity_relationships": 0,
+    "never_ownership": false
+   }
+  },
+  "sam_business_type_variant": {
+   "n_class_conflict": 57266,
+   "n_rows": 269312,
+   "self_certification_is_not_a_verdict": "SAM socio-economic flags are the filer's own self-certification. They are recorded in `sam_self_certification` and are never a tier, a class or a leg of evidence. Measured: americanIndianOwned = YES on 2,846 of 8,273 rows of the TRIBAL extract, so the flag does not separate individual from entity ownership; and 57.2% of attributed prime dollars carry no Native set-aside at all, so its absence is not evidence against.",
+   "variant_class_counts": {
+    "ENTITY_OWNED": 163795,
+    "INDIVIDUAL_NATIVE_OWNED": 105517
+   },
+   "variants": {
+    "ALASKAN NATIVE": {
+     "cedar_class": "ENTITY_OWNED",
+     "n_american_indian_owned_yes": 319,
+     "n_in_native_universe": 3716,
+     "n_rows": 3716
+    },
+    "AMERICAN INDIAN": {
+     "cedar_class": "INDIVIDUAL_NATIVE_OWNED",
+     "n_american_indian_owned_yes": 52713,
+     "n_in_native_universe": 52713,
+     "n_rows": 52714
+    },
+    "INDIAN": {
+     "cedar_class": "ENTITY_OWNED",
+     "n_american_indian_owned_yes": 52713,
+     "n_in_native_universe": 54505,
+     "n_rows": 157093
+    },
+    "NATIVE AMERICAN": {
+     "cedar_class": "INDIVIDUAL_NATIVE_OWNED",
+     "n_american_indian_owned_yes": 48129,
+     "n_in_native_universe": 158198,
+     "n_rows": 158199
+    },
+    "NATIVE HAWAIIAN": {
+     "cedar_class": "ENTITY_OWNED",
+     "n_american_indian_owned_yes": 0,
+     "n_in_native_universe": 379,
+     "n_rows": 379
+    },
+    "TRIBAL": {
+     "cedar_class": "ENTITY_OWNED",
+     "n_american_indian_owned_yes": 2846,
+     "n_in_native_universe": 8186,
+     "n_rows": 8273
+    }
+   },
+   "what_it_is_not": "The two variant classes DO NOT PARTITION. A row matched by both an entity variant and an individual variant carries `class_conflict = 1`. And the `INDIAN` variant is majority NOISE: most of its rows are Subcontinent Asian Indian American owned firms, excluded by `include_in_native_universe = 0`."
+  },
+  "tier": {
+   "A": {
+    "definition": "Publishable. Verified or human-ruled.",
+    "publishes": true
+   },
+   "B": {
+    "definition": "Visible internally; never publishes.",
+    "publishes": false
+   },
+   "C": {
+    "definition": "Unattributed. In the corpus, not linked.",
+    "publishes": false
+   },
+   "X": {
+    "definition": "Ruled out. Never resurfaces.",
+    "publishes": false
+   }
+  },
+  "tribal_certification": {
+   "axes_measured": {
+    "is_graded": {
+     "N": 7,
+     "Y": 7
+    },
+    "ownership_pct_required": {
+     "NO": 1,
+     "NOT_STATED": 3,
+     "YES": 10
+    },
+    "rule_list_mismatch_is_yes": 2,
+    "rule_verdict": {
+     "RULE_FOUND": 11,
+     "RULE_PARTIAL": 3
+    },
+    "whose_ownership": {
+     "ANY_FEDERALLY_RECOGNIZED_TRIBE_MEMBER": 3,
+     "MIXED_SEE_TIERS": 7,
+     "PARENT_CORPORATION": 3,
+     "SHAREHOLDER_OR_DESCENDANT_OR_SPOUSE": 1
+    }
+   },
+   "declared_value_domains": {
+    "ownership_pct_required": [
+     "NO",
+     "NOT_CHECKED",
+     "NOT_STATED",
+     "YES"
+    ],
+    "rule_verdict": [
+     "BEHIND_LOGIN",
+     "NOT_CHECKED",
+     "RULE_FOUND",
+     "RULE_NOT_PUBLISHED",
+     "RULE_PARTIAL",
+     "SITE_REFUSED"
+    ],
+    "whose_ownership": [
+     "ANY_FEDERALLY_RECOGNIZED_TRIBE_MEMBER",
+     "ANY_NATIVE_PERSON",
+     "MIXED_SEE_TIERS",
+     "NOT_CHECKED",
+     "NOT_STATED",
+     "PARENT_CORPORATION",
+     "SHAREHOLDER_OR_DESCENDANT_OR_SPOUSE",
+     "THIS_TRIBE_MEMBER",
+     "TRIBAL_GOVERNMENT_ENTITY"
+    ]
+   },
+   "governing_principle": "DESCRIPTIVE, NEVER PRESCRIPTIVE. Cedar Press publishes the rule beside the certification so a subscriber can apply THEIR OWN threshold. A tribe's determination of who counts as a Native-owned business is an exercise of sovereignty and is not ours to adjudicate. We may say 'Colville's Title 10 certification does not require an ownership percentage'. We may NOT say 'therefore this firm is not really Native-owned'.",
+   "n_authorities_with_a_rule": 14,
+   "n_authorities_with_an_ownership_list": 21,
+   "publication_state": "STAGED, NOT SHIPPED. Every row is `consent_status = UNRESOLVED` and `publishable = N`; silence is UNRESOLVED, never permission. Enforced by code/321_gate_tribal_source_restriction.py."
+  },
+  "variable_registry": [
+   {
+    "canonical_name": "cedar_entity_id",
+    "concept": "entity_key",
+    "definition": "The Native entity this record belongs to. A stable Cedar Press identifier that does not change between releases, so a panel joins across datasets and across vintages."
+   },
+   {
+    "canonical_name": "cedar_entity_name",
+    "concept": "entity_name",
+    "definition": "The entity's canonical name as Cedar Press records it. Source documents often use a longer official name or a shorter common one; both are kept as aliases."
+   },
+   {
+    "canonical_name": "reported_name",
+    "concept": "source_name",
+    "definition": "The name exactly as the source document printed it, before resolution. Kept so any attribution can be checked against what the record actually said."
+   },
+   {
+    "canonical_name": "amount_usd",
+    "concept": "money",
+    "definition": "A dollar figure as reported by the source. Negative means money was taken back (a deobligation) and belongs in totals; zero means an action occurred that moved no money; blank means not reported, which is not the same as zero."
+   },
+   {
+    "canonical_name": "amount_usd_real2025",
+    "concept": "money_real",
+    "definition": "The same figure rebased to constant 2025 dollars using the BEA GDP deflator, so a long series can be read without inflation distorting it."
+   },
+   {
+    "canonical_name": "fiscal_year",
+    "concept": "fiscal_year",
+    "definition": "The federal or state fiscal year the record falls in. Not a calendar year - the federal fiscal year runs October to September."
+   },
+   {
+    "canonical_name": "as_of_date",
+    "concept": "observed_date",
+    "definition": "The date the measurement was true, not the date we retrieved it. A capacity count with no as-of date cannot be interpreted."
+   },
+   {
+    "canonical_name": "source_url",
+    "concept": "source_url",
+    "definition": "The document this row came from. Every published row has one, so any figure can be traced to the record that states it."
+   },
+   {
+    "canonical_name": "source_quote",
+    "concept": "source_quote",
+    "definition": "The verbatim wording from the source that supports this row. A claim that cannot be quoted is not recorded."
+   },
+   {
+    "canonical_name": "fetched_date",
+    "concept": "fetched",
+    "definition": "When Cedar Press retrieved the source. Distinct from the as-of date: a 2026 retrieval can describe a 2003 fact."
+   },
+   {
+    "canonical_name": "state",
+    "concept": "state",
+    "definition": "Two-letter state code. Where a record has both a recipient location and a place of performance, this is the recipient's."
+   },
+   {
+    "canonical_name": "federal_agency",
+    "concept": "agency",
+    "definition": "The federal agency that awarded, funded or published the record."
+   },
+   {
+    "canonical_name": "tier",
+    "concept": "tier",
+    "definition": "What may be done with this row. A = verified or human-ruled, and publishable. B = visible for analysis but never published on its own. C = in the corpus but not linked to an entity. X = ruled out, permanently."
+   },
+   {
+    "canonical_name": "measurement_type",
+    "concept": "measurement_type",
+    "definition": "What kind of number this is. An authorised maximum is not a count of what operates; a projection is not an observation. Cedar never promotes one to another."
+   },
+   {
+    "canonical_name": "measurement_status",
+    "concept": "measurement_status",
+    "definition": "How the figure was established: reported by the source, derived exactly by arithmetic from a published rate, bounded, or not reported at all."
+   },
+   {
+    "canonical_name": "bound_basis",
+    "concept": "bound_basis",
+    "definition": "What stops this from being an exact figure - a minimum-payment clause, a bracketed rate schedule, or a total that covers more than one thing. A factual bound is not a statistical confidence interval."
+   },
+   {
+    "canonical_name": "parent_native_entity",
+    "concept": "parent_native_entity",
+    "definition": "The Native entity that OWNS this firm. Distinct from an entity a firm merely serves - ownership and service are never collapsed."
+   },
+   {
+    "canonical_name": "serves_native_entities",
+    "concept": "serves_native_entities",
+    "definition": "Native entities this organisation serves without being owned by them. Never evidence of ownership."
+   },
+   {
+    "canonical_name": "ultimate_parent_entity_id",
+    "concept": "ultimate_parent_entity_id",
+    "definition": "The top of the ownership chain - the Native government or corporation a roll-up should group by. Intermediate holding layers are recorded separately and are not published as a settled org chart."
+   },
+   {
+    "canonical_name": "attribution_method",
+    "concept": "attribution_method",
+    "definition": "The method that connected this record to an entity. A human ruling outranks every automated method, including an exact identifier match."
+   },
+   {
+    "canonical_name": "duplicate_status",
+    "concept": "duplicate_status",
+    "definition": "Whether this row is the primary record or a repeat of one already counted. Repeats are flagged rather than deleted so our totals can be reproduced."
+   },
+   {
+    "canonical_name": "reported_8a",
+    "concept": "reported_8a",
+    "definition": "Whether the FEDERAL RECORD reports 8(a) participation. This is a self-report, not Cedar's determination - 60.9% of the Native contracting dollars we identify carry no Native preference flag at all."
+   }
+  ]
+ },
+ "produced_by": "374_build_cedar_taxonomy_export.py"
+}

@@ -1,0 +1,5128 @@
+{
+ "generated": "2026-08-26",
+ "generated_at": "2026-08-26T19:42:45",
+ "ingest_ready": 220,
+ "licensed_columns_refused": [
+  {
+   "column": "duns_internal_only",
+   "n_populated": 144,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "bie_uio_identifier_links.csv"
+  },
+  {
+   "column": "pct_with_duns",
+   "n_populated": 77,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "faads_identifier_coverage_by_agency_year.csv"
+  },
+  {
+   "column": "pct_with_duns_tribal_rows_only",
+   "n_populated": 77,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "faads_identifier_coverage_by_agency_year.csv"
+  },
+  {
+   "column": "recipient_duns",
+   "n_populated": 1,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "faads_transactions.csv"
+  },
+  {
+   "column": "recipient_duns",
+   "n_populated": 152899,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "faads_transactions_all_agencies.csv"
+  },
+  {
+   "column": "recipient_duns",
+   "n_populated": 253453,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "federal_funding_transactions.csv"
+  },
+  {
+   "column": "recipient_duns",
+   "n_populated": 9015,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "funding_identifier_harvest.csv"
+  },
+  {
+   "column": "casino_city_id",
+   "n_populated": 595,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "gaming_facilities.csv"
+  },
+  {
+   "column": "duns",
+   "n_populated": 0,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "subaward_identifier_harvest.csv"
+  },
+  {
+   "column": "duns",
+   "n_populated": 0,
+   "reason": "licensed identifier (cedar_codebook.is_licensed_col)",
+   "table": "subaward_identifier_netnew.csv"
+  }
+ ],
+ "produced_by": "285_build_table_schemas.py",
+ "status_counts": {
+  "BLOCKED_NO_STABLE_KEY": 21,
+  "BLOCKED_UNSTABLE_KEY": 28,
+  "READY": 220,
+  "REFUSED_LICENSED_SOURCE": 2
+ },
+ "tables": {
+  "admin_appeal_decisions.csv": {
+   "codebook_block": null,
+   "columns": 51,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "decision_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 15613,
+   "scan": "full",
+   "status": "READY",
+   "table": "admin_appeal_decisions"
+  },
+  "admin_appeal_parties.csv": {
+   "codebook_block": null,
+   "columns": 32,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "party_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 20027,
+   "scan": "full",
+   "status": "READY",
+   "table": "admin_appeal_parties"
+  },
+  "admin_appeal_positions.csv": {
+   "codebook_block": null,
+   "columns": 19,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "position_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1,
+   "scan": "full",
+   "status": "READY",
+   "table": "admin_appeal_positions"
+  },
+  "admin_region_assignments.csv": {
+   "codebook_block": "13_admin_regions",
+   "columns": 22,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "assignment_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 2124,
+   "scan": "full",
+   "status": "READY",
+   "table": "admin_region_assignments"
+  },
+  "admin_region_overlap_derived.csv": {
+   "codebook_block": "13_admin_regions",
+   "columns": 10,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "administrative_region_id_a",
+    "administrative_region_id_b"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 28,
+   "scan": "full",
+   "status": "READY",
+   "table": "admin_region_overlap_derived"
+  },
+  "admin_region_systems.csv": {
+   "codebook_block": "13_admin_regions",
+   "columns": 17,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "region_system_code"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 6,
+   "scan": "full",
+   "status": "READY",
+   "table": "admin_region_systems"
+  },
+  "admin_regional_observations.csv": {
+   "codebook_block": "13_admin_regions",
+   "columns": 16,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 27,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "admin_regional_observations"
+  },
+  "admin_regions.csv": {
+   "codebook_block": "13_admin_regions",
+   "columns": 17,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "administrative_region_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 155,
+   "scan": "full",
+   "status": "READY",
+   "table": "admin_regions"
+  },
+  "advocacy_passthrough.csv": {
+   "codebook_block": "04c_advocacy_passthrough",
+   "columns": 27,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "passthrough_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 1620,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "advocacy_passthrough"
+  },
+  "advocacy_passthrough_2026-08-07.csv": {
+   "codebook_block": "04c_advocacy_passthrough",
+   "columns": 27,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "passthrough_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 1620,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "advocacy_passthrough_2026-08-07"
+  },
+  "agency_attention_vs_advocacy.csv": {
+   "codebook_block": null,
+   "columns": 11,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "department"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 22,
+   "scan": "full",
+   "status": "READY",
+   "table": "agency_attention_vs_advocacy"
+  },
+  "agency_attention_vs_advocacy_year.csv": {
+   "codebook_block": null,
+   "columns": 4,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "lobbying_filings_targeting",
+    "fr_documents",
+    "year",
+    "department"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 698,
+   "scan": "full",
+   "status": "READY",
+   "table": "agency_attention_vs_advocacy_year"
+  },
+  "anc_ceiling_roster.csv": {
+   "codebook_block": null,
+   "columns": 12,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "anc_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 196,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "anc_ceiling_roster"
+  },
+  "ancsa_filings_index.csv": {
+   "codebook_block": null,
+   "columns": 17,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "portal_url"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 19269,
+   "scan": "full",
+   "status": "READY",
+   "table": "ancsa_filings_index"
+  },
+  "assistance_tribe_id_crosswalk.csv": {
+   "codebook_block": null,
+   "columns": 15,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "legacy_tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 361,
+   "scan": "full",
+   "status": "READY",
+   "table": "assistance_tribe_id_crosswalk"
+  },
+  "bie_uio_dollars_by_entity.csv": {
+   "codebook_block": null,
+   "columns": 14,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 114,
+   "scan": "full",
+   "status": "READY",
+   "table": "bie_uio_dollars_by_entity"
+  },
+  "bie_uio_identifier_links.csv": {
+   "codebook_block": null,
+   "columns": 18,
+   "documented": false,
+   "licensed_columns_dropped": [
+    "duns_internal_only"
+   ],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "tribe_id",
+    "obligations_usd"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 302,
+   "scan": "full",
+   "status": "READY",
+   "table": "bie_uio_identifier_links"
+  },
+  "bill_votes.csv": {
+   "codebook_block": "10_bills_votes",
+   "columns": 60,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 9,
+   "primary_key_columns": [
+    "vote_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 423,
+   "scan": "full",
+   "status": "READY",
+   "table": "bill_votes"
+  },
+  "bill_votes_entity_bridge.csv": {
+   "codebook_block": "06_nonprofit",
+   "columns": 10,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 5,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "vote_id",
+    "bill_id",
+    "tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 75,
+   "scan": "full",
+   "status": "READY",
+   "table": "bill_votes_entity_bridge"
+  },
+  "bill_votes_official_verification.csv": {
+   "codebook_block": null,
+   "columns": 26,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "vote_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 305,
+   "scan": "full",
+   "status": "READY",
+   "table": "bill_votes_official_verification"
+  },
+  "brand_family_proposals.csv": {
+   "codebook_block": null,
+   "columns": 12,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "identifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 609,
+   "scan": "full",
+   "status": "READY",
+   "table": "brand_family_proposals"
+  },
+  "brand_family_registry.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "brand"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 106,
+   "scan": "full",
+   "status": "READY",
+   "table": "brand_family_registry"
+  },
+  "ca_gaming_facilities_official.csv": {
+   "codebook_block": "07d_california_gaming",
+   "columns": 29,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 3,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "record_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 245,
+   "scan": "full",
+   "status": "READY",
+   "table": "ca_gaming_facilities_official"
+  },
+  "ca_gaming_payments.csv": {
+   "codebook_block": "07d_california_gaming",
+   "columns": 45,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "payment_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 40164,
+   "scan": "full",
+   "status": "READY",
+   "table": "ca_gaming_payments"
+  },
+  "cedar_cage_backfill.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "cage_code",
+    "uei"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 4362,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_cage_backfill"
+  },
+  "cedar_identifier_graph_edges.csv": {
+   "codebook_block": "05b_identifier_graph_edges",
+   "columns": 13,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "from_node",
+    "evidence",
+    "asserting_source",
+    "edge_tier_source"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 46051,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "cedar_identifier_graph_edges"
+  },
+  "cedar_identifier_graph_nodes.csv": {
+   "codebook_block": "05b_identifier_graph_nodes",
+   "columns": 16,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 7,
+   "primary_key_columns": [
+    "node"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 115471,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_identifier_graph_nodes"
+  },
+  "cedar_identifier_ledger_final.csv": {
+   "codebook_block": null,
+   "columns": 21,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "identifier_type",
+    "identifier",
+    "tribe_id",
+    "canonical_name",
+    "legal_business_name",
+    "entity_class",
+    "attribution_method",
+    "confidence_tier",
+    "tier_rationale",
+    "is_authority",
+    "exclusion_id",
+    "exclusion_evidence",
+    "evidence_url",
+    "verified_date",
+    "state",
+    "prime_dollars_M",
+    "source_file",
+    "joint_ownership_flag",
+    "joint_ownership_note",
+    "evidence_source_file",
+    "evidence_url_integrity"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 20577,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "cedar_identifier_ledger_final"
+  },
+  "cedar_identifier_ledger_tiered.csv": {
+   "codebook_block": null,
+   "columns": 21,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "identifier_type",
+    "identifier",
+    "tribe_id",
+    "canonical_name",
+    "legal_business_name",
+    "entity_class",
+    "attribution_method",
+    "confidence_tier",
+    "tier_rationale",
+    "is_authority",
+    "exclusion_id",
+    "exclusion_evidence",
+    "evidence_url",
+    "verified_date",
+    "state",
+    "prime_dollars_M",
+    "source_file",
+    "joint_ownership_flag",
+    "joint_ownership_note",
+    "evidence_source_file",
+    "evidence_url_integrity"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 19232,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "cedar_identifier_ledger_tiered"
+  },
+  "cedar_identifier_propagation.csv": {
+   "codebook_block": "05b_identifier_propagation",
+   "columns": 17,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "dataset",
+    "identifier_type",
+    "identifier",
+    "observed_name",
+    "proposed_entity_id",
+    "derived_tier",
+    "derived_tier_rule",
+    "weakest_edge_source",
+    "path_through_low_accuracy_method",
+    "identity_hops",
+    "path",
+    "rows_unattributed_in_dataset",
+    "usd_unattributed_in_dataset",
+    "publishable",
+    "caveat",
+    "built_by",
+    "built_date"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 1157,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_identifier_propagation"
+  },
+  "cedar_inherited_from_rulings_2026-08-05.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "via_confirmed_uei",
+    "ultimate_parent_uei",
+    "identifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 80,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_inherited_from_rulings_2026-08-05"
+  },
+  "cedar_inherited_from_rulings_2026-08-06.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "via_confirmed_uei",
+    "ultimate_parent_uei",
+    "identifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 80,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_inherited_from_rulings_2026-08-06"
+  },
+  "cedar_inherited_from_rulings_2026-08-07.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "via_confirmed_uei",
+    "ultimate_parent_uei",
+    "identifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 100,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_inherited_from_rulings_2026-08-07"
+  },
+  "cedar_publishable_identifiers.csv": {
+   "codebook_block": null,
+   "columns": 17,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "identifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1577,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_publishable_identifiers"
+  },
+  "cedar_ruling_ledger_consolidated.csv": {
+   "codebook_block": "02g_ruling_ledger",
+   "columns": 15,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "subject_key",
+    "ruling",
+    "source_file",
+    "outcome"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 15587,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "cedar_ruling_ledger_consolidated"
+  },
+  "cedar_spiderweb_v2.csv": {
+   "codebook_block": null,
+   "columns": 15,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "identifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 79,
+   "scan": "full",
+   "status": "READY",
+   "table": "cedar_spiderweb_v2"
+  },
+  "codebook_master.csv": {
+   "codebook_block": null,
+   "columns": 10,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "variable",
+    "dataset"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 2798,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "codebook_master"
+  },
+  "compact_events.csv": {
+   "codebook_block": "08_compacts",
+   "columns": 19,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "event_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 31,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "compact_events"
+  },
+  "compact_obligation_tribal_agency_bridge.csv": {
+   "codebook_block": null,
+   "columns": 19,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "bridge_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 927,
+   "scan": "full",
+   "status": "READY",
+   "table": "compact_obligation_tribal_agency_bridge"
+  },
+  "compact_required_reports.csv": {
+   "codebook_block": "08_compacts",
+   "columns": 33,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "report_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 4121,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "compact_required_reports"
+  },
+  "compact_structured_terms.csv": {
+   "codebook_block": "08_compacts",
+   "columns": 39,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "term_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 2887,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "compact_structured_terms"
+  },
+  "compact_terms.csv": {
+   "codebook_block": "08_compacts",
+   "columns": 21,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "version_id",
+    "compact_id",
+    "tribe_id",
+    "quote"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1311,
+   "scan": "full",
+   "status": "READY",
+   "table": "compact_terms"
+  },
+  "compact_versions.csv": {
+   "codebook_block": "08_compacts",
+   "columns": 25,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 7,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "version_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1158,
+   "scan": "full",
+   "status": "READY",
+   "table": "compact_versions"
+  },
+  "compacts.csv": {
+   "codebook_block": "08_compacts",
+   "columns": 33,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 3,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "compact_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 707,
+   "scan": "full",
+   "status": "READY",
+   "table": "compacts"
+  },
+  "congressional_correspondence_log.csv": {
+   "codebook_block": "13_congressional_correspondence_log",
+   "columns": 23,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 0,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "congressional_correspondence_log"
+  },
+  "congressional_correspondence_systems.csv": {
+   "codebook_block": "13_congressional_correspondence",
+   "columns": 18,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "system_id",
+    "agency",
+    "agency_code",
+    "bureau_or_office",
+    "system_name",
+    "system_number",
+    "system_named_terms",
+    "evidence_type",
+    "citation",
+    "fr_document_number",
+    "publication_date",
+    "verbatim_quote",
+    "source_url",
+    "fetched_date",
+    "log_publicly_posted",
+    "confidence_tier",
+    "notes",
+    "source_parse_quality"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 257,
+   "scan": "full",
+   "status": "READY",
+   "table": "congressional_correspondence_systems"
+  },
+  "consultation_agency_coverage.csv": {
+   "codebook_block": null,
+   "columns": 25,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "agency"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 66,
+   "scan": "full",
+   "status": "READY",
+   "table": "consultation_agency_coverage"
+  },
+  "consultation_events.csv": {
+   "codebook_block": "04b_section_106_consultation",
+   "columns": 28,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 9,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "consultation_event_id",
+    "channel",
+    "agency",
+    "sub_agency",
+    "program",
+    "consultation_type",
+    "topic",
+    "notice_date",
+    "event_start_date",
+    "event_end_date",
+    "location",
+    "format",
+    "tribe_id",
+    "tribe_name",
+    "participant_name_as_published",
+    "participant_role",
+    "comment_deadline",
+    "has_written_comments",
+    "has_summary",
+    "has_transcript",
+    "federal_register_citation",
+    "source_url",
+    "source_quote",
+    "fetched_date",
+    "tier",
+    "confidence",
+    "built_date",
+    "match_method"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 11402,
+   "scan": "full",
+   "status": "READY",
+   "table": "consultation_events"
+  },
+  "content_analysis_accuracy.csv": {
+   "codebook_block": null,
+   "columns": 16,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "classifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 4,
+   "scan": "full",
+   "status": "READY",
+   "table": "content_analysis_accuracy"
+  },
+  "content_audit_fr_relevance.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 120,
+   "scan": "full",
+   "status": "READY",
+   "table": "content_audit_fr_relevance"
+  },
+  "content_audit_fr_theme.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 110,
+   "scan": "full",
+   "status": "READY",
+   "table": "content_audit_fr_theme"
+  },
+  "content_audit_lobbying_family.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "filing_uuid"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 120,
+   "scan": "full",
+   "status": "READY",
+   "table": "content_audit_lobbying_family"
+  },
+  "contractor_ranking.csv": {
+   "codebook_block": "02h_contractor_ranking",
+   "columns": 43,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "owner_rank",
+    "owner_entity_id",
+    "owner_name",
+    "owner_class",
+    "owner_entity_class_as_recorded",
+    "owner_state",
+    "owner_obligations_usd",
+    "owner_share_of_publishable_pct",
+    "owner_n_operating_companies",
+    "owner_n_identifiers",
+    "owner_n_uei_links",
+    "owner_first_fy",
+    "owner_last_fy",
+    "owner_native_setaside_usd",
+    "owner_8a_usd",
+    "owner_native_specific_setaside_usd",
+    "owner_no_setaside_usd_award_level",
+    "owner_no_setaside_share_pct",
+    "operating_company_name",
+    "operating_company_uei",
+    "publishable_operating_name",
+    "privacy_class",
+    "link_identifier_type",
+    "link_identifier",
+    "link_tier",
+    "link_join_route",
+    "link_ledger_method",
+    "link_is_ruling",
+    "link_tier_rationale",
+    "link_ledger_source_file",
+    "link_evidence_url",
+    "link_legal_business_name_internal_only",
+    "firm_obligations_usd",
+    "firm_transaction_rows",
+    "firm_first_fy",
+    "firm_last_fy",
+    "firm_native_setaside_usd",
+    "firm_carries_any_native_setaside",
+    "firm_8a_usd",
+    "measured_from",
+    "source_vintage",
+    "built_date",
+    "built_by"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 1429,
+   "scan": "full",
+   "status": "READY",
+   "table": "contractor_ranking"
+  },
+  "correspondence_foia_source_coverage.csv": {
+   "codebook_block": "13_foia_coverage",
+   "columns": 8,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "url"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 124,
+   "scan": "full",
+   "status": "READY",
+   "table": "correspondence_foia_source_coverage"
+  },
+  "coverage_audit.csv": {
+   "codebook_block": null,
+   "columns": 6,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "rows",
+    "year",
+    "dataset"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 716,
+   "scan": "full",
+   "status": "READY",
+   "table": "coverage_audit"
+  },
+  "cross_dataset_ruling_map.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "identifier",
+    "ruling",
+    "dataset",
+    "source_file"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 7507,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "cross_dataset_ruling_map"
+  },
+  "deals_2000_2019_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 40,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_2000_2019_additions"
+  },
+  "deals_2026_ytd_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 31,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 0,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "deals_2026_ytd_additions"
+  },
+  "deals_anc_reports_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 28,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_anc_reports_additions"
+  },
+  "deals_ancsa_portal_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 34,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_ancsa_portal_additions"
+  },
+  "deals_ancsa_portal_v2_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 42,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_ancsa_portal_v2_additions"
+  },
+  "deals_classified.csv": {
+   "codebook_block": "01_deals",
+   "columns": 51,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 20,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 935,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_classified"
+  },
+  "deals_federal_awards_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 594,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_federal_awards_additions"
+  },
+  "deals_historical_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 30,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_historical_additions"
+  },
+  "deals_party_attribution.csv": {
+   "codebook_block": null,
+   "columns": 13,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "native_party"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 56,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_party_attribution"
+  },
+  "deals_party_attribution_agent.csv": {
+   "codebook_block": null,
+   "columns": 19,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "native_party"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 530,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_party_attribution_agent"
+  },
+  "deals_party_autoresolved.csv": {
+   "codebook_block": null,
+   "columns": 11,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "native_party"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 502,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_party_autoresolved"
+  },
+  "deals_party_matches.csv": {
+   "codebook_block": null,
+   "columns": 6,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "native_party"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 481,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_party_matches"
+  },
+  "deals_sec_2010_2017_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 16,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_sec_2010_2017_additions"
+  },
+  "deals_source_index.csv": {
+   "codebook_block": null,
+   "columns": 10,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "native_party"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 533,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_source_index"
+  },
+  "deals_taxonomy.csv": {
+   "codebook_block": null,
+   "columns": 4,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "value"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 48,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_taxonomy"
+  },
+  "deals_tribal_debt_additions.csv": {
+   "codebook_block": "01_deals",
+   "columns": 32,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "Deal_ID"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 6,
+   "scan": "full",
+   "status": "READY",
+   "table": "deals_tribal_debt_additions"
+  },
+  "digital_gaming_relationships.csv": {
+   "codebook_block": "16_digital_gaming",
+   "columns": 39,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 9,
+   "primary_key_columns": [
+    "digital_gaming_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 154,
+   "scan": "full",
+   "status": "READY",
+   "table": "digital_gaming_relationships"
+  },
+  "digital_gaming_revenue.csv": {
+   "codebook_block": "16b_digital_gaming_revenue",
+   "columns": 33,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 6,
+   "n_type_mismatches": 7,
+   "primary_key_columns": [
+    "revenue_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 10661,
+   "scan": "full",
+   "status": "READY",
+   "table": "digital_gaming_revenue"
+  },
+  "earmarks.csv": {
+   "codebook_block": null,
+   "columns": 22,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "source_quote"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1002,
+   "scan": "full",
+   "status": "READY",
+   "table": "earmarks"
+  },
+  "entity_aliases.csv": {
+   "codebook_block": "05_entities",
+   "columns": 15,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "alias_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 5943,
+   "scan": "full",
+   "status": "READY",
+   "table": "entity_aliases"
+  },
+  "entity_candidates_new.csv": {
+   "codebook_block": null,
+   "columns": 26,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 2874,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "entity_candidates_new"
+  },
+  "entity_candidates_rejected.csv": {
+   "codebook_block": null,
+   "columns": 27,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 1045,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "entity_candidates_rejected"
+  },
+  "entity_evidence_profile.csv": {
+   "codebook_block": null,
+   "columns": 10,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "cedar_entity_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1282,
+   "scan": "full",
+   "status": "READY",
+   "table": "entity_evidence_profile"
+  },
+  "entity_hierarchy.csv": {
+   "codebook_block": "05_entities",
+   "columns": 10,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 952,
+   "scan": "full",
+   "status": "READY",
+   "table": "entity_hierarchy"
+  },
+  "entity_name_harvest.csv": {
+   "codebook_block": null,
+   "columns": 14,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "raw_name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 31728,
+   "scan": "full",
+   "status": "READY",
+   "table": "entity_name_harvest"
+  },
+  "entity_relationships.csv": {
+   "codebook_block": "05_entities",
+   "columns": 16,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "relationship_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 2292,
+   "scan": "full",
+   "status": "READY",
+   "table": "entity_relationships"
+  },
+  "entity_year_coverage.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "n_entities_observed",
+    "year",
+    "component"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 196,
+   "scan": "full",
+   "status": "READY",
+   "table": "entity_year_coverage"
+  },
+  "entity_year_panel.csv": {
+   "codebook_block": null,
+   "columns": 41,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "tribe_id",
+    "canonical_name",
+    "year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 12534,
+   "scan": "full",
+   "status": "READY",
+   "table": "entity_year_panel"
+  },
+  "faads_attribution_audit_sample.csv": {
+   "codebook_block": null,
+   "columns": 12,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "recipient_name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 2287,
+   "scan": "full",
+   "status": "READY",
+   "table": "faads_attribution_audit_sample"
+  },
+  "faads_entity_attribution.csv": {
+   "codebook_block": "03_federal_funding",
+   "columns": 26,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 9,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "faads_row_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 29594,
+   "scan": "full",
+   "status": "READY",
+   "table": "faads_entity_attribution"
+  },
+  "faads_identifier_coverage_by_agency_year.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [
+    "pct_with_duns",
+    "pct_with_duns_tribal_rows_only"
+   ],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "n_rows"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 77,
+   "scan": "full",
+   "status": "READY",
+   "table": "faads_identifier_coverage_by_agency_year"
+  },
+  "faads_transactions.csv": {
+   "codebook_block": "03_federal_funding",
+   "columns": 23,
+   "documented": true,
+   "licensed_columns_dropped": [
+    "recipient_duns"
+   ],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "source_url",
+    "award_id_fain",
+    "obligated_usd",
+    "recipient_name"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 60661,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "faads_transactions"
+  },
+  "faads_transactions_all_agencies.csv": {
+   "codebook_block": "03_federal_funding",
+   "columns": 23,
+   "documented": true,
+   "licensed_columns_dropped": [
+    "recipient_duns"
+   ],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "source_url",
+    "award_id_fain",
+    "recipient_name",
+    "obligated_usd"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 300000,
+   "scan": "sample:300000",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "faads_transactions_all_agencies"
+  },
+  "fac_audit_gaming_disclosures.csv": {
+   "codebook_block": null,
+   "columns": 24,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "source_url",
+    "report_id",
+    "verbatim_quote",
+    "source_page"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1521,
+   "scan": "full",
+   "status": "READY",
+   "table": "fac_audit_gaming_disclosures"
+  },
+  "fac_audit_sefa_gaming_programs.csv": {
+   "codebook_block": null,
+   "columns": 24,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "report_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1,
+   "scan": "full",
+   "status": "READY",
+   "table": "fac_audit_sefa_gaming_programs"
+  },
+  "fac_tribal_single_audits.csv": {
+   "codebook_block": null,
+   "columns": 35,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "report_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 6780,
+   "scan": "full",
+   "status": "READY",
+   "table": "fac_tribal_single_audits"
+  },
+  "federal_actions.csv": {
+   "codebook_block": "09_federal_actions",
+   "columns": 33,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 4,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 156452,
+   "scan": "full",
+   "status": "READY",
+   "table": "federal_actions"
+  },
+  "federal_actions_entity_bridge.csv": {
+   "codebook_block": null,
+   "columns": 13,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "document_number",
+    "tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 5786,
+   "scan": "full",
+   "status": "READY",
+   "table": "federal_actions_entity_bridge"
+  },
+  "federal_actions_raw.csv": {
+   "codebook_block": "09_federal_actions",
+   "columns": 25,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 2,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 156452,
+   "scan": "full",
+   "status": "READY",
+   "table": "federal_actions_raw"
+  },
+  "federal_funding_transactions.csv": {
+   "codebook_block": "03_federal_funding",
+   "columns": 47,
+   "documented": true,
+   "licensed_columns_dropped": [
+    "recipient_duns"
+   ],
+   "n_columns_with_no_definition": 5,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "assistance_transaction_unique_key"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 300000,
+   "scan": "sample:300000",
+   "status": "READY",
+   "table": "federal_funding_transactions"
+  },
+  "federal_funding_tribe_year_panel.csv": {
+   "codebook_block": "03_federal_funding",
+   "columns": 15,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "tribe_id",
+    "canonical_name",
+    "tribe_id_scheme",
+    "fiscal_year",
+    "fy_partial_flag",
+    "total_obligated_usd",
+    "obl_type_02_block_grant",
+    "obl_type_03_formula_grant",
+    "obl_type_04_project_grant",
+    "obl_type_05_cooperative_agreement",
+    "obl_type_06_direct_payment_specified_use",
+    "obl_type_10_direct_payment_unrestricted",
+    "obl_type_11_other_reimbursable_or_indirect",
+    "n_transactions",
+    "n_recipients"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 5496,
+   "scan": "full",
+   "status": "READY",
+   "table": "federal_funding_tribe_year_panel"
+  },
+  "federal_funding_year_comparison_2026-08-05.csv": {
+   "codebook_block": null,
+   "columns": 10,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "fiscal_year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 26,
+   "scan": "full",
+   "status": "READY",
+   "table": "federal_funding_year_comparison_2026-08-05"
+  },
+  "federal_recognition_events.csv": {
+   "codebook_block": null,
+   "columns": 30,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "entity_key",
+    "quote_url",
+    "fr_document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 366,
+   "scan": "full",
+   "status": "READY",
+   "table": "federal_recognition_events"
+  },
+  "federal_recognition_roster.csv": {
+   "codebook_block": null,
+   "columns": 21,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "fr_document_number",
+    "source_url",
+    "entry_raw_source",
+    "entry_raw"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 17058,
+   "scan": "full",
+   "status": "READY",
+   "table": "federal_recognition_roster"
+  },
+  "ferc_docket_filings.csv": {
+   "codebook_block": null,
+   "columns": 38,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "accession_number",
+    "source_url",
+    "document_description_verbatim",
+    "docket_number"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 102615,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "ferc_docket_filings"
+  },
+  "ferc_docket_parties.csv": {
+   "codebook_block": "04g_ferc_docket_parties",
+   "columns": 17,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 5,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "ferc_docket_party_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 11563,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "ferc_docket_parties"
+  },
+  "ferc_ex_parte_communications.csv": {
+   "codebook_block": null,
+   "columns": 33,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "ferc_ex_parte_id",
+    "docket_number",
+    "subdocket",
+    "accession_number",
+    "filed_date",
+    "issued_date",
+    "event_class",
+    "channel",
+    "is_lobbying",
+    "filed_or_issued_by_as_recorded",
+    "filed_or_issued_by_type",
+    "communicating_parties_named_in_notice_text",
+    "communicating_parties_basis",
+    "resolved_native_entity_id",
+    "resolved_native_entity_name",
+    "ex_parte_quote",
+    "document_description_verbatim",
+    "rule_basis",
+    "source_url",
+    "fetched_date",
+    "confidence_tier",
+    "built_date",
+    "built_by_script",
+    "off_the_record_communications_in_notice",
+    "prohibited_communications_in_notice",
+    "exempt_communications_in_notice",
+    "dockets_named_in_notice",
+    "fr_document_number",
+    "fr_citation",
+    "fr_publication_date",
+    "fr_source_url",
+    "fr_notice_date_quote",
+    "fr_join_basis"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 713,
+   "scan": "full",
+   "status": "READY",
+   "table": "ferc_ex_parte_communications"
+  },
+  "ferc_ex_parte_parties.csv": {
+   "codebook_block": null,
+   "columns": 44,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "ferc_ex_parte_party_id",
+    "linked_ferc_ex_parte_id",
+    "linked_accession_number",
+    "elibrary_link_basis",
+    "notice_date",
+    "fr_document_number",
+    "fr_citation",
+    "fr_publication_date",
+    "item_number",
+    "prohibited_or_exempt",
+    "docket_numbers_as_printed",
+    "primary_docket_number",
+    "communication_file_date",
+    "communication_file_date_as_printed",
+    "presenter_or_requester_as_printed",
+    "presenter_or_requester_type",
+    "natural_person_caution",
+    "footnote_markers",
+    "footnote_text_verbatim",
+    "footnote_reading",
+    "event_class",
+    "channel",
+    "is_lobbying",
+    "resolved_native_entity_id",
+    "resolved_native_entity_name",
+    "resolution_method",
+    "position_relative_to_native_interest",
+    "position_basis",
+    "table_row_quote",
+    "rule_basis",
+    "source_url",
+    "raw_text_url",
+    "retrieved_at",
+    "confidence_tier",
+    "built_date",
+    "built_by_script",
+    "party_role",
+    "party_role_basis",
+    "entity_link_tier",
+    "entity_link_refusal_reason",
+    "docket_native_party_ids",
+    "docket_native_party_names",
+    "docket_has_native_party",
+    "entity_link_built_by_script"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 4246,
+   "scan": "full",
+   "status": "READY",
+   "table": "ferc_ex_parte_parties"
+  },
+  "ferc_source_coverage.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "source"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 9,
+   "scan": "full",
+   "status": "READY",
+   "table": "ferc_source_coverage"
+  },
+  "ferc_tribal_dockets.csv": {
+   "codebook_block": null,
+   "columns": 30,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "docket_number",
+    "subdocket",
+    "docket_prefix",
+    "docket_program",
+    "applicant_or_licensee_as_recorded",
+    "documents_retrieved",
+    "total_hits_reported_by_source",
+    "date_window_queried",
+    "tribal_filer_documents",
+    "ex_parte_documents",
+    "comment_or_protest_documents",
+    "section_106_cross_ref",
+    "discovery_source",
+    "discovery_quote",
+    "seed_source_url",
+    "source_url",
+    "fetched_date",
+    "confidence_tier",
+    "built_date",
+    "built_by_script",
+    "applicant_resolved_native_entity_id",
+    "applicant_resolved_native_entity_name",
+    "applicant_entity_link_method",
+    "applicant_entity_link_tier",
+    "applicant_entity_link_refusal_reason",
+    "docket_native_party_ids",
+    "docket_native_party_names",
+    "docket_native_party_roles",
+    "docket_native_party_count",
+    "entity_link_built_by_script"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 307,
+   "scan": "full",
+   "status": "READY",
+   "table": "ferc_tribal_dockets"
+  },
+  "fl_gaming_payments.csv": {
+   "codebook_block": "07e_fl_gaming",
+   "columns": 55,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "payment_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 9756,
+   "scan": "full",
+   "status": "READY",
+   "table": "fl_gaming_payments"
+  },
+  "foia_discovery_targets.csv": {
+   "codebook_block": "13_foia_targets",
+   "columns": 12,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "url"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 122,
+   "scan": "full",
+   "status": "READY",
+   "table": "foia_discovery_targets"
+  },
+  "foia_request_index.csv": {
+   "codebook_block": "13_foia_index",
+   "columns": 39,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 8,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "foia_request_id",
+    "source_url",
+    "agency_code",
+    "request_description"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 9481,
+   "scan": "full",
+   "status": "READY",
+   "table": "foia_request_index"
+  },
+  "fpds_uei_cage_map.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "uei",
+    "legal_business_name",
+    "n_observations",
+    "first_year"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 24977,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "fpds_uei_cage_map"
+  },
+  "fpds_uei_edges.csv": {
+   "codebook_block": null,
+   "columns": 14,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "child_uei",
+    "child_name",
+    "parent_uei",
+    "parent_name",
+    "edge_type",
+    "source_file",
+    "n_observations",
+    "first_year",
+    "last_year",
+    "pre_2000_flag",
+    "floor_basis_field",
+    "blocklisted_parent",
+    "blocklist_reason",
+    "blocklist_note"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 2290,
+   "scan": "full",
+   "status": "READY",
+   "table": "fpds_uei_edges"
+  },
+  "fr_abstract_availability_year.csv": {
+   "codebook_block": null,
+   "columns": 4,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "publication_year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 33,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_abstract_availability_year"
+  },
+  "fr_consultation_by_agency.csv": {
+   "codebook_block": null,
+   "columns": 3,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "normalized_department",
+    "n_consultation_notices",
+    "share_of_notices"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 21,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_consultation_by_agency"
+  },
+  "fr_consultation_notices.csv": {
+   "codebook_block": "09_federal_actions",
+   "columns": 11,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 4,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 484,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_consultation_notices"
+  },
+  "fr_consultation_referenced.csv": {
+   "codebook_block": "11_nagpra",
+   "columns": 5,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1829,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_consultation_referenced"
+  },
+  "fr_consultation_year.csv": {
+   "codebook_block": null,
+   "columns": 3,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "publication_year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 33,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_consultation_year"
+  },
+  "fr_content_classification.csv": {
+   "codebook_block": null,
+   "columns": 13,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 156452,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_content_classification"
+  },
+  "fr_ex_parte_notices.csv": {
+   "codebook_block": "04d_fr_ex_parte_notices",
+   "columns": 27,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "fr_ex_parte_notice_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 7820,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_ex_parte_notices"
+  },
+  "fr_ex_parte_parties.csv": {
+   "codebook_block": "04d_fr_ex_parte_parties",
+   "columns": 28,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "fr_ex_parte_party_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 112,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_ex_parte_parties"
+  },
+  "fr_ex_parte_party_entity_links.csv": {
+   "codebook_block": "04d_fr_ex_parte_links",
+   "columns": 12,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "link_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 9,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_ex_parte_party_entity_links"
+  },
+  "fr_nagpra_title_index.csv": {
+   "codebook_block": null,
+   "columns": 10,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 6606,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_nagpra_title_index"
+  },
+  "fr_nagpra_title_index_year.csv": {
+   "codebook_block": null,
+   "columns": 4,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "publication_year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 33,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_nagpra_title_index_year"
+  },
+  "fr_recognized_entities.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "fr_name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 575,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_recognized_entities"
+  },
+  "fr_relevance_stratum_audit.csv": {
+   "codebook_block": null,
+   "columns": 5,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "tier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 4,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_relevance_stratum_audit"
+  },
+  "fr_relevance_tier_year.csv": {
+   "codebook_block": null,
+   "columns": 3,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "n_documents",
+    "publication_year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 132,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_relevance_tier_year"
+  },
+  "fr_theme_year.csv": {
+   "codebook_block": null,
+   "columns": 5,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "theme",
+    "publication_year",
+    "n_documents",
+    "n_classifiable_documents_that_year",
+    "share_of_classifiable"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 627,
+   "scan": "full",
+   "status": "READY",
+   "table": "fr_theme_year"
+  },
+  "funding_identifier_harvest.csv": {
+   "codebook_block": null,
+   "columns": 15,
+   "documented": false,
+   "licensed_columns_dropped": [
+    "recipient_duns"
+   ],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "recipient_uei",
+    "recipient_duns",
+    "recipient_ein",
+    "cage_code",
+    "recipient_name",
+    "recipient_state",
+    "recipient_city",
+    "recipient_zip",
+    "n_awards",
+    "first_year",
+    "last_year",
+    "total_obligated_usd",
+    "assistance_types",
+    "source_lineage",
+    "source_file",
+    "malformed_flag"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 37704,
+   "scan": "full",
+   "status": "READY",
+   "table": "funding_identifier_harvest"
+  },
+  "funding_identifier_netnew_ueis.csv": {
+   "codebook_block": "03_federal_funding",
+   "columns": 1,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "recipient_uei"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 4249,
+   "scan": "full",
+   "status": "READY",
+   "table": "funding_identifier_netnew_ueis"
+  },
+  "gaming_capacity_official.csv": {
+   "codebook_block": "14_state_gaming",
+   "columns": 33,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 3,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 6461,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "gaming_capacity_official"
+  },
+  "gaming_decision_compact_join.csv": {
+   "codebook_block": null,
+   "columns": 16,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "decision_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 138,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_decision_compact_join"
+  },
+  "gaming_decision_events.csv": {
+   "codebook_block": "08_compacts",
+   "columns": 13,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 5,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "event_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 265,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "gaming_decision_events"
+  },
+  "gaming_device_observations.csv": {
+   "codebook_block": "07h_gaming_device_observations",
+   "columns": 25,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1326,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_device_observations"
+  },
+  "gaming_employment_observations.csv": {
+   "codebook_block": "07n_gaming_employment",
+   "columns": 62,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 16,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 3246,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "gaming_employment_observations"
+  },
+  "gaming_facilities.csv": {
+   "codebook_block": "07_gaming",
+   "columns": 103,
+   "documented": true,
+   "licensed_columns_dropped": [
+    "casino_city_id"
+   ],
+   "n_columns_with_no_definition": 5,
+   "n_type_mismatches": 27,
+   "primary_key_columns": [
+    "facility_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 787,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_facilities"
+  },
+  "gaming_facility_metrics.csv": {
+   "codebook_block": null,
+   "columns": 0,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": null,
+   "primary_key_kind": null,
+   "rows_scanned": 0,
+   "scan": null,
+   "status": "REFUSED_LICENSED_SOURCE",
+   "table": "gaming_facility_metrics"
+  },
+  "gaming_field_coverage.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "field_or_source"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 109,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_field_coverage"
+  },
+  "gaming_financing_events.csv": {
+   "codebook_block": null,
+   "columns": 38,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "financing_event_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 293,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_financing_events"
+  },
+  "gaming_game_finder_observations.csv": {
+   "codebook_block": null,
+   "columns": 37,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 6851,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_game_finder_observations"
+  },
+  "gaming_game_finder_systems.csv": {
+   "codebook_block": null,
+   "columns": 16,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "platform_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 3,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_game_finder_systems"
+  },
+  "gaming_land_decisions.csv": {
+   "codebook_block": "07_gaming",
+   "columns": 36,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 2,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "decision_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 138,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_land_decisions"
+  },
+  "gaming_manufacturer_facts.csv": {
+   "codebook_block": "07i_gaming_manufacturer_facts",
+   "columns": 20,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "fact_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 62,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "gaming_manufacturer_facts"
+  },
+  "gaming_mitigation_agreements.csv": {
+   "codebook_block": null,
+   "columns": 20,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "section_ref",
+    "source_url",
+    "project_id",
+    "service"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 24,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_mitigation_agreements"
+  },
+  "gaming_nigc_roster_link.csv": {
+   "codebook_block": null,
+   "columns": 17,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "facility_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 453,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_nigc_roster_link"
+  },
+  "gaming_ordinance_ocr.csv": {
+   "codebook_block": "07f_gaming_ordinances",
+   "columns": 18,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 4,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "ordinance_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 263,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "gaming_ordinance_ocr"
+  },
+  "gaming_ordinances.csv": {
+   "codebook_block": "07f_gaming_ordinances",
+   "columns": 73,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 3,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "ordinance_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 1155,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "gaming_ordinances"
+  },
+  "gaming_project_facilities.csv": {
+   "codebook_block": null,
+   "columns": 39,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "notes"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 19,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_project_facilities"
+  },
+  "gaming_projections.csv": {
+   "codebook_block": null,
+   "columns": 22,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "project_id",
+    "metric",
+    "value",
+    "unit",
+    "impact_type",
+    "geography",
+    "time_period",
+    "reported_or_calculated",
+    "source_document",
+    "page",
+    "table_ref",
+    "confidence",
+    "tribe",
+    "alternative",
+    "derivation",
+    "observation_status",
+    "modelling_basis",
+    "page_label",
+    "source_url",
+    "notes",
+    "source_document_date",
+    "source_document_date_basis"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 116,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_projections"
+  },
+  "gaming_properties.csv": {
+   "codebook_block": null,
+   "columns": 54,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "facility_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 784,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_properties"
+  },
+  "gaming_property_capacity_history.csv": {
+   "codebook_block": null,
+   "columns": 0,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": null,
+   "primary_key_kind": null,
+   "rows_scanned": 0,
+   "scan": null,
+   "status": "REFUSED_LICENSED_SOURCE",
+   "table": "gaming_property_capacity_history"
+  },
+  "gaming_property_coverage.csv": {
+   "codebook_block": null,
+   "columns": 35,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "facility_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 784,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_property_coverage"
+  },
+  "gaming_property_federal_traces.csv": {
+   "codebook_block": null,
+   "columns": 67,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "facility_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 774,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_property_federal_traces"
+  },
+  "gaming_property_labor_demand.csv": {
+   "codebook_block": null,
+   "columns": 29,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 43,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_property_labor_demand"
+  },
+  "gaming_property_locations.csv": {
+   "codebook_block": null,
+   "columns": 32,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "location_observation_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 2212,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "gaming_property_locations"
+  },
+  "gaming_property_site_observations.csv": {
+   "codebook_block": null,
+   "columns": 32,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 262,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_property_site_observations"
+  },
+  "gaming_property_universe_events.csv": {
+   "codebook_block": null,
+   "columns": 32,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "event_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 10,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_property_universe_events"
+  },
+  "gaming_revenue_bounds.csv": {
+   "codebook_block": "07p_revenue_bounds",
+   "columns": 19,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "bound_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 13803,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_revenue_bounds"
+  },
+  "gaming_source_claims.csv": {
+   "codebook_block": null,
+   "columns": 25,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "source_claim_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 113,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_source_claims"
+  },
+  "gaming_vendor_tribal_licenses.csv": {
+   "codebook_block": null,
+   "columns": 30,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "vendor_name",
+    "vendor_cik",
+    "vendor_is_native_entity",
+    "vendor_native_entity_id",
+    "tribal_gaming_regulator",
+    "tribal_gaming_regulator_tribe_string",
+    "entity_id",
+    "entity_name",
+    "entity_match_method",
+    "entity_tier",
+    "license_type",
+    "license_number",
+    "application_date",
+    "approval_date",
+    "dates_in_quote",
+    "status",
+    "status_basis",
+    "property_inference",
+    "property_inference_basis",
+    "measurement_type",
+    "measurement_type_basis",
+    "confidence_tier",
+    "source_authority",
+    "source_document_type",
+    "form_type",
+    "filed_date",
+    "source_url",
+    "retrieved_at",
+    "verbatim_quote",
+    "built_date"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 740,
+   "scan": "full",
+   "status": "READY",
+   "table": "gaming_vendor_tribal_licenses"
+  },
+  "grantmaker_funding_coverage.csv": {
+   "codebook_block": null,
+   "columns": 15,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "funder_key"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 27,
+   "scan": "full",
+   "status": "READY",
+   "table": "grantmaker_funding_coverage"
+  },
+  "grantmaker_funding_flows.csv": {
+   "codebook_block": "17_grantmaker_funding_flows",
+   "columns": 59,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 16,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "flow_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 18656,
+   "scan": "full",
+   "status": "READY",
+   "table": "grantmaker_funding_flows"
+  },
+  "grantmaker_funding_overlap.csv": {
+   "codebook_block": null,
+   "columns": 20,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "funder_key",
+    "funder_ein",
+    "cash_grant_usd_total",
+    "recipient_unit_identified_breakdown"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 69,
+   "scan": "full",
+   "status": "READY",
+   "table": "grantmaker_funding_overlap"
+  },
+  "hearing_appearances.csv": {
+   "codebook_block": "04b_advocacy_channels",
+   "columns": 23,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "hearing_appearance_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 2667,
+   "scan": "full",
+   "status": "READY",
+   "table": "hearing_appearances"
+  },
+  "hearing_bill_links.csv": {
+   "codebook_block": "04b_advocacy_channels",
+   "columns": 16,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "bill_id",
+    "event_id",
+    "source_url",
+    "bill_title"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 465,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "hearing_bill_links"
+  },
+  "individual_native_exclusion_pairs.csv": {
+   "codebook_block": "02l_individual_native_exclusion_pairs",
+   "columns": 17,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "firm_surrogate_entity_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 5,
+   "scan": "full",
+   "status": "READY",
+   "table": "individual_native_exclusion_pairs"
+  },
+  "individual_native_firm_contracts.csv": {
+   "codebook_block": "02j_individual_native_firm_contracts",
+   "columns": 28,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "awardee_uei",
+    "piid",
+    "modification_number"
+   ],
+   "primary_key_kind": "privacy_surrogate",
+   "rows_scanned": 324,
+   "scan": "full",
+   "status": "READY",
+   "table": "individual_native_firm_contracts"
+  },
+  "individual_native_firm_contracts_published.csv": {
+   "codebook_block": "02k_individual_native_firm_contracts_published",
+   "columns": 11,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "cell_type",
+    "dimension_1",
+    "dimension_2",
+    "entity_class",
+    "n_firms",
+    "n_contract_rows",
+    "total_obligations_usd",
+    "value_suppressed_small_cell",
+    "suppression_rule",
+    "note",
+    "built_date"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 613,
+   "scan": "full",
+   "status": "READY",
+   "table": "individual_native_firm_contracts_published"
+  },
+  "individual_native_firm_register.csv": {
+   "codebook_block": "02i_individual_native_firm_register",
+   "columns": 55,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 8,
+   "primary_key_columns": [
+    "awardee_uei"
+   ],
+   "primary_key_kind": "privacy_surrogate",
+   "rows_scanned": 45,
+   "scan": "full",
+   "status": "READY",
+   "table": "individual_native_firm_register"
+  },
+  "individual_native_ownership_verification.csv": {
+   "codebook_block": "02f_individual_native_verification",
+   "columns": 63,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "verification_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 335,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "individual_native_ownership_verification"
+  },
+  "individual_native_prior_rulings.csv": {
+   "codebook_block": null,
+   "columns": 13,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "identifier"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 45,
+   "scan": "full",
+   "status": "READY",
+   "table": "individual_native_prior_rulings"
+  },
+  "individual_native_verification_candidates.csv": {
+   "codebook_block": "02f_individual_native_verification",
+   "columns": 42,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "verification_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 335,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "individual_native_verification_candidates"
+  },
+  "inflation_deflator.csv": {
+   "codebook_block": null,
+   "columns": 6,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 27,
+   "scan": "full",
+   "status": "READY",
+   "table": "inflation_deflator"
+  },
+  "instrument_taxonomy.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "code"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 17,
+   "scan": "full",
+   "status": "READY",
+   "table": "instrument_taxonomy"
+  },
+  "intertribal_memberships.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "org_id",
+    "org_name",
+    "member_entity_name",
+    "member_entity_id",
+    "membership_status",
+    "year_observed",
+    "source_url"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 989,
+   "scan": "full",
+   "status": "READY",
+   "table": "intertribal_memberships"
+  },
+  "intertribal_orgs.csv": {
+   "codebook_block": "05_entities",
+   "columns": 15,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "proposed_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 57,
+   "scan": "full",
+   "status": "READY",
+   "table": "intertribal_orgs"
+  },
+  "lobbying_client_attribution.csv": {
+   "codebook_block": null,
+   "columns": 11,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "client_name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 458,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_client_attribution"
+  },
+  "lobbying_disclosure_verbosity_year.csv": {
+   "codebook_block": null,
+   "columns": 4,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "filing_year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 27,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_disclosure_verbosity_year"
+  },
+  "lobbying_issue_families_filing.csv": {
+   "codebook_block": null,
+   "columns": 14,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "filing_uuid"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 27796,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_issue_families_filing"
+  },
+  "lobbying_issue_family_year.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "issue_family",
+    "filing_year",
+    "n_filings",
+    "n_filings_with_any_family",
+    "share_of_classified_filings",
+    "n_family_mentions_that_year",
+    "share_of_family_mentions",
+    "n_filings_total_that_year",
+    "preferred_series_for_trend"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 476,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_issue_family_year"
+  },
+  "lobbying_registrant_client_relationships.csv": {
+   "codebook_block": "18b_lobbying_registrant_client_relationships",
+   "columns": 35,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 13,
+   "primary_key_columns": [
+    "client_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1309,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_registrant_client_relationships"
+  },
+  "lobbying_registrant_concentration.csv": {
+   "codebook_block": "18e_lobbying_registrant_concentration",
+   "columns": 29,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 9,
+   "primary_key_columns": [
+    "scope_value"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 36,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_registrant_concentration"
+  },
+  "lobbying_registrant_identifiers.csv": {
+   "codebook_block": "18c_lobbying_registrant_identifiers",
+   "columns": 47,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 15,
+   "primary_key_columns": [
+    "registrant_id",
+    "registrant_name",
+    "registrant_state",
+    "identifier_type",
+    "identifier",
+    "asserted_by_source",
+    "source_name_as_recorded",
+    "source_state",
+    "match_basis",
+    "confidence_tier",
+    "tier_rationale",
+    "tier_assigned_not_inherited",
+    "reading",
+    "built_by_script",
+    "built_date",
+    "n_asserting_sources",
+    "corroboration_note",
+    "irs_bmf_subsection",
+    "irs_bmf_filing_requirement",
+    "irs_bmf_ntee",
+    "irs_bmf_city",
+    "irs_bmf_ruling_yyyymm",
+    "irs_bmf_asset_amt",
+    "irs_bmf_revenue_amt",
+    "np_990_tax_year",
+    "np_990_form_type",
+    "np_990_filing_regime",
+    "np_990_total_revenue",
+    "np_990_total_expenses",
+    "np_990_lobbying_expenditure",
+    "np_990_lobbying_field_basis",
+    "np_990_schedc_total_lobbying",
+    "np_990_source_url",
+    "np_990_caveat",
+    "np_orgs_classification_ruling",
+    "np_orgs_confidence_tier",
+    "schedule_i_filer_ein",
+    "schedule_i_filer_name",
+    "graph_node_resolved_entity",
+    "graph_node_resolved_tier",
+    "graph_node_datasets",
+    "graph_node_usd_observed",
+    "prime_tribe_id",
+    "prime_confidence_tier",
+    "assistance_total_obligated_usd",
+    "subaward_total_usd",
+    "fpds_uei"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 525,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_registrant_identifiers"
+  },
+  "lobbying_registrant_native_ownership_evidence.csv": {
+   "codebook_block": "18d_lobbying_registrant_native_ownership_evidence",
+   "columns": 21,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "registrant_id",
+    "native_entity_id",
+    "evidence_verbatim",
+    "match_basis"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 27,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "lobbying_registrant_native_ownership_evidence"
+  },
+  "lobbying_registrants.csv": {
+   "codebook_block": "18a_lobbying_registrants",
+   "columns": 52,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 25,
+   "primary_key_columns": [
+    "registrant_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 653,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_registrants"
+  },
+  "lobbying_target_entities.csv": {
+   "codebook_block": null,
+   "columns": 3,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "government_entity_as_filed"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 116,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_target_entities"
+  },
+  "lobbying_unmatched_clients.csv": {
+   "codebook_block": null,
+   "columns": 13,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "client_name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 515,
+   "scan": "full",
+   "status": "READY",
+   "table": "lobbying_unmatched_clients"
+  },
+  "loyalty_program_property.csv": {
+   "codebook_block": "16_digital_gaming",
+   "columns": 19,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 5,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "facility_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 48,
+   "scan": "full",
+   "status": "READY",
+   "table": "loyalty_program_property"
+  },
+  "loyalty_programs.csv": {
+   "codebook_block": "16c_loyalty_programs",
+   "columns": 38,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 6,
+   "n_type_mismatches": 12,
+   "primary_key_columns": [
+    "loyalty_program_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 18,
+   "scan": "full",
+   "status": "READY",
+   "table": "loyalty_programs"
+  },
+  "member_positions.csv": {
+   "codebook_block": "10_bills_votes",
+   "columns": 17,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "bioguide_id",
+    "vote_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 136119,
+   "scan": "full",
+   "status": "READY",
+   "table": "member_positions"
+  },
+  "nagpra_notice_entity_bridge.csv": {
+   "codebook_block": "11_nagpra",
+   "columns": 14,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "document_number",
+    "publication_date",
+    "notice_type",
+    "institution_name",
+    "relationship",
+    "party_name_verbatim",
+    "party_name_as_published",
+    "tribe_id",
+    "canonical_name",
+    "resolve_method",
+    "resolve_status",
+    "confidence_tier",
+    "source_span_label",
+    "source_span_text"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 51338,
+   "scan": "full",
+   "status": "READY",
+   "table": "nagpra_notice_entity_bridge"
+  },
+  "nagpra_notices.csv": {
+   "codebook_block": "11_nagpra",
+   "columns": 66,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 8,
+   "primary_key_columns": [
+    "document_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 6729,
+   "scan": "full",
+   "status": "READY",
+   "table": "nagpra_notices"
+  },
+  "native_bill_outcomes.csv": {
+   "codebook_block": "10_bills_votes",
+   "columns": 25,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "bill_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 3069,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_bill_outcomes"
+  },
+  "native_bills.csv": {
+   "codebook_block": "10_bills_votes",
+   "columns": 29,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "bill_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 3069,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_bills"
+  },
+  "native_bills_entity_bridge.csv": {
+   "codebook_block": null,
+   "columns": 12,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "bill_id",
+    "tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 676,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_bills_entity_bridge"
+  },
+  "native_bills_entity_class.csv": {
+   "codebook_block": "10_bills_votes",
+   "columns": 13,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "bill_id",
+    "congress",
+    "bill_type",
+    "number",
+    "title",
+    "entity_class",
+    "entity_id_prefix",
+    "n_spine_entities_in_class",
+    "subject_family",
+    "matched_phrase",
+    "class_match_basis",
+    "named_entities_also_in_bridge",
+    "build_date"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 2694,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_bills_entity_class"
+  },
+  "native_bills_subject_sweep.csv": {
+   "codebook_block": "10_bills_votes",
+   "columns": 21,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "bill_id",
+    "number",
+    "latest_action_date",
+    "title"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 2414,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "native_bills_subject_sweep"
+  },
+  "native_entity_lobbying_disclosures.csv": {
+   "codebook_block": "04_lobbying",
+   "columns": 34,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 3,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "filing_uuid"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 27796,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_entity_lobbying_disclosures"
+  },
+  "native_fi_roster.csv": {
+   "codebook_block": null,
+   "columns": 23,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 94,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_fi_roster"
+  },
+  "native_issue_litigation_coverage.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "source_or_forum"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 8,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_issue_litigation_coverage"
+  },
+  "native_issue_litigation_positions.csv": {
+   "codebook_block": null,
+   "columns": 39,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "position_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 197,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_issue_litigation_positions"
+  },
+  "native_passthrough.csv": {
+   "codebook_block": null,
+   "columns": 18,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "subaward_number",
+    "prime_award_id",
+    "to_tribe_id",
+    "from_tribe_id"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 1262,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "native_passthrough"
+  },
+  "native_passthrough_pairs.csv": {
+   "codebook_block": null,
+   "columns": 10,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "to_tribe_id",
+    "from_tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 212,
+   "scan": "full",
+   "status": "READY",
+   "table": "native_passthrough_pairs"
+  },
+  "nd_severance_allocation.csv": {
+   "codebook_block": null,
+   "columns": 17,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "allocation_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 7,
+   "scan": "full",
+   "status": "READY",
+   "table": "nd_severance_allocation"
+  },
+  "nepa_administrative_record_parties.csv": {
+   "codebook_block": null,
+   "columns": 22,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "party_id",
+    "nepa_number",
+    "eplanning_project_id",
+    "event_class",
+    "channel",
+    "is_lobbying",
+    "party_name_as_published",
+    "party_role",
+    "party_organization_type",
+    "resolved_native_entity_id",
+    "resolved_native_entity_name",
+    "resolution_method",
+    "administrative_record_position",
+    "administrative_record_position_quote",
+    "lobbying_position",
+    "lobbying_position_basis",
+    "supporting_quote",
+    "source_url",
+    "fetched_date",
+    "confidence_tier",
+    "built_date",
+    "built_by_script"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 36,
+   "scan": "full",
+   "status": "READY",
+   "table": "nepa_administrative_record_parties"
+  },
+  "nepa_eplanning_projects.csv": {
+   "codebook_block": null,
+   "columns": 27,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "nepa_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 312,
+   "scan": "full",
+   "status": "READY",
+   "table": "nepa_eplanning_projects"
+  },
+  "nepa_project_documents.csv": {
+   "codebook_block": null,
+   "columns": 21,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "nepa_number",
+    "eplanning_project_id",
+    "source_url",
+    "document_name_verbatim"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 789,
+   "scan": "full",
+   "status": "READY",
+   "table": "nepa_project_documents"
+  },
+  "nepa_source_coverage.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "url"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 5,
+   "scan": "full",
+   "status": "READY",
+   "table": "nepa_source_coverage"
+  },
+  "nho_doi_notification_roster.csv": {
+   "codebook_block": null,
+   "columns": 12,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "nho_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 190,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "nho_doi_notification_roster"
+  },
+  "nho_ito_spine_crosswalk.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "proposed_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 269,
+   "scan": "full",
+   "status": "READY",
+   "table": "nho_ito_spine_crosswalk"
+  },
+  "nho_ownership_changes.csv": {
+   "codebook_block": null,
+   "columns": 19,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "event_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 9,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "nho_ownership_changes"
+  },
+  "nho_parents.csv": {
+   "codebook_block": null,
+   "columns": 4,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "parent_name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 21,
+   "scan": "full",
+   "status": "READY",
+   "table": "nho_parents"
+  },
+  "nho_register.csv": {
+   "codebook_block": "05_entities",
+   "columns": 19,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "proposed_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 218,
+   "scan": "full",
+   "status": "READY",
+   "table": "nho_register"
+  },
+  "nho_verified_entities.csv": {
+   "codebook_block": null,
+   "columns": 13,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "uei"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 36,
+   "scan": "full",
+   "status": "READY",
+   "table": "nho_verified_entities"
+  },
+  "nigc_declination_letters.csv": {
+   "codebook_block": "07o_nigc_declinations",
+   "columns": 60,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "cedar_opinion_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 327,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "nigc_declination_letters"
+  },
+  "nigc_region_assignments.csv": {
+   "codebook_block": "07m_nigc_regions",
+   "columns": 20,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "facility_id",
+    "administrative_region_id",
+    "region_system_code",
+    "region_name",
+    "region_system_version",
+    "effective_start_year",
+    "effective_end_year",
+    "assignment_method",
+    "assignment_geography_basis",
+    "igra_coverage_status",
+    "nigc_operation_match_status",
+    "is_primary",
+    "confidence",
+    "facility_state",
+    "facility_city",
+    "tribe_id",
+    "nigc_marker_id",
+    "source_url",
+    "fetched_date",
+    "built_date"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 2438,
+   "scan": "full",
+   "status": "READY",
+   "table": "nigc_region_assignments"
+  },
+  "nigc_regional_ggr.csv": {
+   "codebook_block": "07m_nigc_regions",
+   "columns": 27,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "administrative_region_id",
+    "region_system_code",
+    "source_url",
+    "ggr_usd_real2025"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 198,
+   "scan": "full",
+   "status": "READY",
+   "table": "nigc_regional_ggr"
+  },
+  "nigc_revenue_bands.csv": {
+   "codebook_block": "07p_revenue_bounds",
+   "columns": 29,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "band_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 20,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "nigc_revenue_bands"
+  },
+  "np_ein_entity_hub.csv": {
+   "codebook_block": "06b_np_entity_hub",
+   "columns": 16,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "ein"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 2303,
+   "scan": "full",
+   "status": "READY",
+   "table": "np_ein_entity_hub"
+  },
+  "np_ein_uei_bridge.csv": {
+   "codebook_block": null,
+   "columns": 17,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "ein"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 28,
+   "scan": "full",
+   "status": "READY",
+   "table": "np_ein_uei_bridge"
+  },
+  "np_financials.csv": {
+   "codebook_block": "06_nonprofit",
+   "columns": 77,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 8,
+   "n_type_mismatches": 24,
+   "primary_key_columns": [
+    "ein",
+    "org_name",
+    "tax_year",
+    "form_type",
+    "total_revenue",
+    "total_expenses",
+    "total_assets",
+    "total_liabilities",
+    "program_service_revenue",
+    "contributions_grants",
+    "lobbying_expenditure",
+    "n_employees",
+    "pdf_url",
+    "source_url",
+    "retrieved_date",
+    "tax_period",
+    "form_type_raw",
+    "has_financial_data",
+    "pre_2000_flag",
+    "lobbying_indicator_990pf",
+    "propaganda_indicator_990pf",
+    "lobbying_field_basis",
+    "n_employees_basis",
+    "net_assets_end",
+    "officer_compensation",
+    "state",
+    "confidence_tier",
+    "bmf_990_tier",
+    "in_tier_a",
+    "in_recheck_candidate",
+    "in_placename_risk",
+    "source_dataset",
+    "filing_updated",
+    "filing_regime",
+    "schedc_expected",
+    "schedc_basis",
+    "schedc_source_url",
+    "schedc_object_id",
+    "schedc_present",
+    "schedc_501h_election",
+    "schedc_501h_basis",
+    "schedc_total_lobbying",
+    "schedc_direct_lobbying",
+    "schedc_grassroots_lobbying",
+    "schedc_nonelecting_total",
+    "schedc_lobbying_nontaxable",
+    "schedc_grassroots_nontaxable",
+    "schedc_exempt_purpose_expend",
+    "schedc_political_expenditure",
+    "schedc_527_amount",
+    "schedc_dues_lobbying_political",
+    "schedc_dues_received",
+    "schedc_used_volunteers",
+    "schedc_used_paid_staff",
+    "schedc_used_media",
+    "schedc_used_mailings",
+    "schedc_used_publications",
+    "schedc_used_grants",
+    "schedc_used_direct_contact",
+    "schedc_used_rallies",
+    "schedc_used_other",
+    "form990_lobbying_activities_ind",
+    "form990_political_activity_ind",
+    "form990_part9_lobbying_fees",
+    "form990pf_influence_legislation_ind",
+    "form990pf_legislative_political_ind",
+    "schedc_lobbying_usd",
+    "schedc_lobbying_basis",
+    "schedc_built_date",
+    "cedar_spine_entity_id",
+    "cedar_spine_canonical_name",
+    "cedar_spine_entity_class",
+    "cedar_native_entity_class",
+    "cedar_link_tier",
+    "cedar_link_basis",
+    "cedar_link_key",
+    "cedar_link_sources"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 8507,
+   "scan": "full",
+   "status": "READY",
+   "table": "np_financials"
+  },
+  "np_grantee_financials.csv": {
+   "codebook_block": "06_nonprofit",
+   "columns": 19,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 7,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "source_url",
+    "ein"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 4058,
+   "scan": "full",
+   "status": "READY",
+   "table": "np_grantee_financials"
+  },
+  "np_org_scale.csv": {
+   "codebook_block": "06_nonprofit",
+   "columns": 30,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 10,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "ein"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1157,
+   "scan": "full",
+   "status": "READY",
+   "table": "np_org_scale"
+  },
+  "np_orgs.csv": {
+   "codebook_block": "06_nonprofit",
+   "columns": 52,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 15,
+   "n_type_mismatches": 6,
+   "primary_key_columns": [
+    "EIN"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 12764,
+   "scan": "full",
+   "status": "READY",
+   "table": "np_orgs"
+  },
+  "np_schedule_i_filers.csv": {
+   "codebook_block": null,
+   "columns": 39,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "object_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 10314,
+   "scan": "full",
+   "status": "READY",
+   "table": "np_schedule_i_filers"
+  },
+  "np_schedule_i_grants.csv": {
+   "codebook_block": "04e_schedule_i_grants",
+   "columns": 63,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 19,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "recipient_name_as_filed",
+    "recipient_address",
+    "cash_grant_usd",
+    "object_id"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 58685,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "np_schedule_i_grants"
+  },
+  "nrc_meeting_participants.csv": {
+   "codebook_block": null,
+   "columns": 31,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "participant_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 407,
+   "scan": "full",
+   "status": "READY",
+   "table": "nrc_meeting_participants"
+  },
+  "nrc_public_meetings.csv": {
+   "codebook_block": null,
+   "columns": 34,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "nrc_meeting_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 251,
+   "scan": "full",
+   "status": "READY",
+   "table": "nrc_public_meetings"
+  },
+  "oira_federal_action_links.csv": {
+   "codebook_block": "04b_advocacy_channels",
+   "columns": 10,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "federal_action_document_number",
+    "oira_meeting_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 145,
+   "scan": "full",
+   "status": "READY",
+   "table": "oira_federal_action_links"
+  },
+  "oira_meeting_participants.csv": {
+   "codebook_block": "04b_advocacy_channels",
+   "columns": 19,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "oira_participant_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1128,
+   "scan": "full",
+   "status": "READY",
+   "table": "oira_meeting_participants"
+  },
+  "oira_meetings.csv": {
+   "codebook_block": "04b_advocacy_channels",
+   "columns": 21,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "oira_meeting_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 72,
+   "scan": "full",
+   "status": "READY",
+   "table": "oira_meetings"
+  },
+  "ownership_events.csv": {
+   "codebook_block": null,
+   "columns": 32,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "event_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 98,
+   "scan": "full",
+   "status": "READY",
+   "table": "ownership_events"
+  },
+  "prime_contracts.csv": {
+   "codebook_block": "02_prime_contracting",
+   "columns": 43,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 11,
+   "primary_key_columns": [
+    "contract_number",
+    "parent_contract_number",
+    "fiscal_year",
+    "pre_2000_flag",
+    "awardee_name",
+    "awardee_uei",
+    "cage_code",
+    "parent_name",
+    "parent_uei",
+    "total_obligations",
+    "total_award_value",
+    "total_obligations_real2025",
+    "total_award_value_real2025",
+    "deflator_factor_2025",
+    "inflation_base_year",
+    "setaside",
+    "reported_8a",
+    "reported_buy_indian",
+    "reported_indian_business",
+    "reported_native_preference",
+    "setaside_reported",
+    "extent_competed",
+    "funding_agency",
+    "sector",
+    "supersector",
+    "defense",
+    "recipient_city_name",
+    "recipient_state_code",
+    "place_of_perform_city",
+    "place_of_perform_state",
+    "tribe_id",
+    "canonical_name",
+    "attribution_method",
+    "confidence_tier",
+    "attributed_flag",
+    "source_file",
+    "source_authority",
+    "built_date",
+    "ruling_status",
+    "ruling_source_file",
+    "ruling_applied_date",
+    "extent_competed_normalized",
+    "extent_competed_normalized_basis"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 300000,
+   "scan": "sample:300000",
+   "status": "READY",
+   "table": "prime_contracts"
+  },
+  "prime_contracts_archive_backfill.csv": {
+   "codebook_block": "02_prime_contracting",
+   "columns": 38,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 11,
+   "primary_key_columns": [
+    "contract_number",
+    "total_award_value",
+    "total_award_value_real2025",
+    "total_obligations"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 300000,
+   "scan": "sample:300000",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "prime_contracts_archive_backfill"
+  },
+  "prime_contracts_awards.csv": {
+   "codebook_block": "02_prime_contracting",
+   "columns": 30,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 7,
+   "n_type_mismatches": 7,
+   "primary_key_columns": [
+    "contract_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 300000,
+   "scan": "sample:300000",
+   "status": "READY",
+   "table": "prime_contracts_awards"
+  },
+  "prime_contracts_entity_year.csv": {
+   "codebook_block": "02_prime_contracting",
+   "columns": 7,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "tribe_id",
+    "canonical_name",
+    "fiscal_year",
+    "confidence_tier",
+    "obligations_usd",
+    "n_contracts",
+    "built_date"
+   ],
+   "primary_key_kind": "deterministic_surrogate",
+   "rows_scanned": 8464,
+   "scan": "full",
+   "status": "READY",
+   "table": "prime_contracts_entity_year"
+  },
+  "prime_contracts_published.csv": {
+   "codebook_block": "02_prime_contracting",
+   "columns": 24,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 7,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "contract_number"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 300000,
+   "scan": "sample:300000",
+   "status": "READY",
+   "table": "prime_contracts_published"
+  },
+  "prime_sub_network.csv": {
+   "codebook_block": "02b_subcontracting",
+   "columns": 12,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "prime_uei",
+    "sub_uei"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 220,
+   "scan": "full",
+   "status": "READY",
+   "table": "prime_sub_network"
+  },
+  "resource_asset_source_coverage.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "attribute"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 18,
+   "scan": "full",
+   "status": "READY",
+   "table": "resource_asset_source_coverage"
+  },
+  "resource_assets.csv": {
+   "codebook_block": "12_resources",
+   "columns": 44,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 16,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "resource_asset_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 35,
+   "scan": "full",
+   "status": "READY",
+   "table": "resource_assets"
+  },
+  "resource_parties.csv": {
+   "codebook_block": "12_resources",
+   "columns": 14,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "party_link_id",
+    "object_id",
+    "source_url",
+    "entity_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1436,
+   "scan": "full",
+   "status": "READY",
+   "table": "resource_parties"
+  },
+  "resource_revenue.csv": {
+   "codebook_block": "12_resources",
+   "columns": 40,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 7,
+   "primary_key_columns": [
+    "resource_revenue_event_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 10482,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "resource_revenue"
+  },
+  "sam_prime_contracts_fy2000_2007.csv": {
+   "codebook_block": "02e_sam_contract_awards",
+   "columns": 88,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 28,
+   "primary_key_columns": [
+    "sam_transaction_key"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 8273,
+   "scan": "full",
+   "status": "READY",
+   "table": "sam_prime_contracts_fy2000_2007"
+  },
+  "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv": {
+   "codebook_block": "02e_sam_contract_awards",
+   "columns": 78,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 28,
+   "primary_key_columns": [
+    "sam_transaction_key"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 8273,
+   "scan": "full",
+   "status": "READY",
+   "table": "sam_prime_contracts_fy2000_2007_PUBLISHABLE"
+  },
+  "sam_prime_contracts_fy2000_2007_reconciliation.csv": {
+   "codebook_block": null,
+   "columns": 13,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "distinct_piid"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 3,
+   "scan": "full",
+   "status": "READY",
+   "table": "sam_prime_contracts_fy2000_2007_reconciliation"
+  },
+  "section_106_consultation_events.csv": {
+   "codebook_block": "04b_section_106_consultation",
+   "columns": 42,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 9,
+   "primary_key_columns": [
+    "consultation_event_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 1363,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "section_106_consultation_events"
+  },
+  "section_106_project_parties.csv": {
+   "codebook_block": "04b_section_106_consultation",
+   "columns": 24,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "party_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 51,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "section_106_project_parties"
+  },
+  "section_106_source_coverage.csv": {
+   "codebook_block": "04b_section_106_consultation",
+   "columns": 9,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 3,
+   "primary_key_columns": [
+    "source"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 5,
+   "scan": "full",
+   "status": "READY",
+   "table": "section_106_source_coverage"
+  },
+  "seminole_bond_disclosures.csv": {
+   "codebook_block": "07e_fl_gaming",
+   "columns": 36,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "disclosure_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 29,
+   "scan": "full",
+   "status": "READY",
+   "table": "seminole_bond_disclosures"
+  },
+  "series_breaks.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "what_changed"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 24,
+   "scan": "full",
+   "status": "READY",
+   "table": "series_breaks"
+  },
+  "source_coverage_admin_appeals.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "year",
+    "board"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 114,
+   "scan": "full",
+   "status": "READY",
+   "table": "source_coverage_admin_appeals"
+  },
+  "source_coverage_fac.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "facet"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 62,
+   "scan": "full",
+   "status": "READY",
+   "table": "source_coverage_fac"
+  },
+  "source_coverage_nrc_meetings.csv": {
+   "codebook_block": null,
+   "columns": 8,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "source_url"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 37,
+   "scan": "full",
+   "status": "READY",
+   "table": "source_coverage_nrc_meetings"
+  },
+  "source_coverage_tribal_legislative.csv": {
+   "codebook_block": null,
+   "columns": 10,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "tribe"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 17,
+   "scan": "full",
+   "status": "READY",
+   "table": "source_coverage_tribal_legislative"
+  },
+  "source_coverage_vendor_disclosure.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "source"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 2,
+   "scan": "full",
+   "status": "READY",
+   "table": "source_coverage_vendor_disclosure"
+  },
+  "source_coverage_visitor_records.csv": {
+   "codebook_block": null,
+   "columns": 7,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "note"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 11,
+   "scan": "full",
+   "status": "READY",
+   "table": "source_coverage_visitor_records"
+  },
+  "state_gaming_observations.csv": {
+   "codebook_block": "14_state_gaming",
+   "columns": 31,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 1,
+   "primary_key_columns": [
+    "observation_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 494,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "state_gaming_observations"
+  },
+  "subaward_entity_rollup.csv": {
+   "codebook_block": null,
+   "columns": 9,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 450,
+   "scan": "full",
+   "status": "READY",
+   "table": "subaward_entity_rollup"
+  },
+  "subaward_identifier_harvest.csv": {
+   "codebook_block": null,
+   "columns": 15,
+   "documented": false,
+   "licensed_columns_dropped": [
+    "duns"
+   ],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "uei"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 304,
+   "scan": "full",
+   "status": "READY",
+   "table": "subaward_identifier_harvest"
+  },
+  "subaward_identifier_netnew.csv": {
+   "codebook_block": null,
+   "columns": 20,
+   "documented": false,
+   "licensed_columns_dropped": [
+    "duns"
+   ],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "uei"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 210,
+   "scan": "full",
+   "status": "READY",
+   "table": "subaward_identifier_netnew"
+  },
+  "subawards.csv": {
+   "codebook_block": "02b_subcontracting",
+   "columns": 52,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 4,
+   "n_type_mismatches": 5,
+   "primary_key_columns": [
+    "subaward_number",
+    "subaward_amount",
+    "description",
+    "source_url"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 63548,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "subawards"
+  },
+  "tcu_cdfi_added.csv": {
+   "codebook_block": "05_entities",
+   "columns": 27,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 1,
+   "n_type_mismatches": 4,
+   "primary_key_columns": [
+    "tribe_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 130,
+   "scan": "full",
+   "status": "READY",
+   "table": "tcu_cdfi_added"
+  },
+  "tcu_cdfi_ownership_evidence.csv": {
+   "codebook_block": null,
+   "columns": 6,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "evidence_url",
+    "quote",
+    "institution",
+    "pattern"
+   ],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 130,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "tcu_cdfi_ownership_evidence"
+  },
+  "tcu_roster.csv": {
+   "codebook_block": null,
+   "columns": 12,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "name"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 37,
+   "scan": "full",
+   "status": "READY",
+   "table": "tcu_roster"
+  },
+  "tribal_bond_issuances.csv": {
+   "codebook_block": null,
+   "columns": 14,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "notes"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 29,
+   "scan": "full",
+   "status": "READY",
+   "table": "tribal_bond_issuances"
+  },
+  "tribal_resolution_financings.csv": {
+   "codebook_block": null,
+   "columns": 32,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "entity_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1,
+   "scan": "full",
+   "status": "READY",
+   "table": "tribal_resolution_financings"
+  },
+  "tribal_tax_bases.csv": {
+   "codebook_block": "15_tribal_tax",
+   "columns": 22,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "tax_observation_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 1712,
+   "scan": "full",
+   "status": "READY",
+   "table": "tribal_tax_bases"
+  },
+  "tribe_year_lobbying_panel.csv": {
+   "codebook_block": "04_lobbying",
+   "columns": 13,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "entity_id",
+    "filing_year"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 5051,
+   "scan": "full",
+   "status": "READY",
+   "table": "tribe_year_lobbying_panel"
+  },
+  "variable_registry.csv": {
+   "codebook_block": null,
+   "columns": 11,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "concept"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 22,
+   "scan": "full",
+   "status": "READY",
+   "table": "variable_registry"
+  },
+  "visitor_access_events.csv": {
+   "codebook_block": null,
+   "columns": 37,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "visitor_access_event_id"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 20,
+   "scan": "full",
+   "status": "READY",
+   "table": "visitor_access_events"
+  },
+  "visitor_record_foia_requests.csv": {
+   "codebook_block": "13_foia_index",
+   "columns": 20,
+   "documented": true,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 4,
+   "n_type_mismatches": 2,
+   "primary_key_columns": [
+    "request_description_verbatim"
+   ],
+   "primary_key_kind": "natural",
+   "rows_scanned": 667,
+   "scan": "full",
+   "status": "READY",
+   "table": "visitor_record_foia_requests"
+  },
+  "wa_machine_allocations.csv": {
+   "codebook_block": null,
+   "columns": 16,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [
+    "allocation_id"
+   ],
+   "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+   "rows_scanned": 75,
+   "scan": "full",
+   "status": "BLOCKED_UNSTABLE_KEY",
+   "table": "wa_machine_allocations"
+  },
+  "wa_machine_transfers.csv": {
+   "codebook_block": null,
+   "columns": 18,
+   "documented": false,
+   "licensed_columns_dropped": [],
+   "n_columns_with_no_definition": 0,
+   "n_type_mismatches": 0,
+   "primary_key_columns": [],
+   "primary_key_kind": "BLOCKED",
+   "rows_scanned": 0,
+   "scan": "full",
+   "status": "BLOCKED_NO_STABLE_KEY",
+   "table": "wa_machine_transfers"
+  }
+ },
+ "tables_total": 271
+}

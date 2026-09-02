@@ -1,0 +1,62 @@
+{
+ "tribe": {
+  "count": 12910,
+  "next_page": 518,
+  "done": true
+ },
+ "tribal": {
+  "count": 2237,
+  "next_page": 91,
+  "done": true
+ },
+ "pueblo": {
+  "count": 1645,
+  "next_page": 67,
+  "done": true
+ },
+ "rancheria": {
+  "count": 1040,
+  "next_page": 43,
+  "done": true
+ },
+ "band of": {
+  "count": 5595,
+  "next_page": 225,
+  "done": true
+ },
+ "indian community": {
+  "count": 1694,
+  "next_page": 69,
+  "done": true
+ },
+ "indian nation": {
+  "count": 2355,
+  "next_page": 96,
+  "done": true
+ },
+ "alaska native": {
+  "count": 490,
+  "next_page": 21,
+  "done": true
+ },
+ "native hawaiian": {
+  "count": 36,
+  "next_page": 3,
+  "done": true
+ },
+ "village corporation": {
+  "count": 19,
+  "next_page": 2,
+  "done": true
+ },
+ "regional corporation": {
+  "count": 509,
+  "next_page": 22,
+  "done": true
+ },
+ "intertribal": {
+  "count": 118,
+  "next_page": 6,
+  "done": true
+ }
+}

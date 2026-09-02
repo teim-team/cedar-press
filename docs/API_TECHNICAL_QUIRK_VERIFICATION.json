@@ -1,0 +1,343 @@
+{
+ "generated_utc": "2026-08-27T01:14:55.842809+00:00",
+ "script": "code/449_verify_documented_api_quirks.py",
+ "network_requests": 0,
+ "shared_tables_written": 0,
+ "companion": "docs/API_TECHNICAL_NOTES.md",
+ "checks": [
+  {
+   "key": "Q1_LDA_PAGE_SIZE_25",
+   "source": "lda.senate.gov",
+   "claim": "Senate LDA API page_size is capped SERVER-SIDE at 25; requesting 100 still returns 25 (measured 2026-08-05, recorded in code/lobbying_pull/01_pull_lda_filings.py docstring).",
+   "verdict": "PARTIAL",
+   "evidence": {
+    "tribe": {
+     "count": 12910,
+     "pages_fetched": 517,
+     "implied_page_size": 24.97
+    },
+    "tribal": {
+     "count": 2237,
+     "pages_fetched": 90,
+     "implied_page_size": 24.86
+    },
+    "pueblo": {
+     "count": 1645,
+     "pages_fetched": 66,
+     "implied_page_size": 24.92
+    },
+    "rancheria": {
+     "count": 1040,
+     "pages_fetched": 42,
+     "implied_page_size": 24.76
+    },
+    "band of": {
+     "count": 5595,
+     "pages_fetched": 224,
+     "implied_page_size": 24.98
+    },
+    "indian community": {
+     "count": 1694,
+     "pages_fetched": 68,
+     "implied_page_size": 24.91
+    },
+    "indian nation": {
+     "count": 2355,
+     "pages_fetched": 95,
+     "implied_page_size": 24.79
+    },
+    "alaska native": {
+     "count": 490,
+     "pages_fetched": 20,
+     "implied_page_size": 24.5
+    },
+    "native hawaiian": {
+     "count": 36,
+     "pages_fetched": 2,
+     "implied_page_size": 18.0
+    },
+    "village corporation": {
+     "count": 19,
+     "pages_fetched": 1,
+     "implied_page_size": 19.0
+    },
+    "regional corporation": {
+     "count": 509,
+     "pages_fetched": 21,
+     "implied_page_size": 24.24
+    },
+    "intertribal": {
+     "count": 118,
+     "pages_fetched": 5,
+     "implied_page_size": 23.6
+    }
+   },
+   "note": "9 of 12 keywords imply a page size in [24,25]. A value at 25 with no keyword above it is the server cap; PAGE_SIZE in the puller is set to 25 and the docstring records that 100 was requested and 25 served."
+  },
+  {
+   "key": "Q2_BUSINESS_TYPE_TWO_RENDERINGS",
+   "source": "api.usaspending.gov award archive",
+   "claim": "USAspending `business_types_description` renders the federally-recognized tribal government token in TWO ways - one missing a space, one missing a hyphen - so an exact-string filter silently drops rows (START_HERE.md, seam 3).",
+   "verdict": "REPRODUCED",
+   "evidence": {
+    "rows_scanned": 701955,
+    "distinct_renderings_containing_TRIBAL_GOVERNMENT": 63,
+    "renderings": {
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED)": 116437,
+     "INDIAN/NATIVE AMERICANTRIBAL GOVERNMENT (FEDERALLY RECOGNIZED)": 7160,
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (OTHER THAN FEDERALLY-RECOGNIZED)": 1889,
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED);INDIAN/NATIVE AMERICAN TRIBAL DESIGNATED ORGANIZATION": 759,
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED);INDIVIDUAL;INDIAN/NATIVE AMERICAN TRIBAL DESIGNATED ORGANIZATION": 265,
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED);SMALL BUSINESS;NON-DOMESTIC (NON-U.S.) ENTITY": 234,
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED);NONPROFIT WITH 501C3 IRS STATUS (OTHER THAN AN INSTITUTION OF HIGHER EDUCATION)": 228,
+     "REGIONAL ORGANIZATION;INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED)": 80,
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED);TRIBALLY CONTROLLED COLLEGE OR UNIVERSITY (TCCU)": 58,
+     "INDEPENDENT SCHOOL DISTRICT;INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (OTHER THAN FEDERALLY-RECOGNIZED)": 55,
+     "INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED);FOR-PROFIT ORGANIZATION (OTHER THAN SMALL BUSINESS)": 38,
+     "INDIVIDUAL;SMALL BUSINESS;INDIAN/NATIVE AMERICAN TRIBAL GOVERNMENT (FEDERALLY-RECOGNIZED)": 38
+    }
+   },
+   "note": "Two or more renderings of one token is the quirk. The normalised column is business_types_description_normalized; the raw column is kept as the evidence of vintage."
+  },
+  {
+   "key": "Q3_EXTENT_COMPETED_TWO_VOCABULARIES",
+   "source": "USAspending award archive / DAIMS-DEC v2.2 (2022-06-03)",
+   "claim": "`extent_competed` holds TWO vocabularies - raw FPDS codes (A..G, CDO, NDO) and rendered DAIMS description tags - split at the FY2016/FY2017 archive-vintage boundary, so filtering the raw column selects an ERA and not a competition status (START_HERE.md item 5; docs/EXTENT_COMPETED_CROSSWALK.md).",
+   "verdict": "PARTIAL",
+   "evidence": {
+    "fiscal_year_column": "fiscal_year",
+    "by_fiscal_year": {
+     "2000": {
+      "code": 0,
+      "label": 2496,
+      "blank": 9
+     },
+     "2001": {
+      "code": 0,
+      "label": 3793,
+      "blank": 10
+     },
+     "2002": {
+      "code": 0,
+      "label": 5946,
+      "blank": 20
+     },
+     "2003": {
+      "code": 0,
+      "label": 9852,
+      "blank": 30
+     },
+     "2004": {
+      "code": 0,
+      "label": 15045,
+      "blank": 279
+     },
+     "2005": {
+      "code": 0,
+      "label": 16650,
+      "blank": 796
+     },
+     "2006": {
+      "code": 0,
+      "label": 24406,
+      "blank": 1402
+     },
+     "2007": {
+      "code": 0,
+      "label": 26051,
+      "blank": 2793
+     },
+     "2008": {
+      "code": 38634,
+      "label": 18859,
+      "blank": 2953
+     },
+     "2009": {
+      "code": 41487,
+      "label": 17630,
+      "blank": 714
+     },
+     "2010": {
+      "code": 44901,
+      "label": 18982,
+      "blank": 209
+     },
+     "2011": {
+      "code": 46238,
+      "label": 19111,
+      "blank": 78
+     },
+     "2012": {
+      "code": 41885,
+      "label": 18249,
+      "blank": 43
+     },
+     "2013": {
+      "code": 36063,
+      "label": 14545,
+      "blank": 25
+     },
+     "2014": {
+      "code": 36039,
+      "label": 15732,
+      "blank": 9
+     },
+     "2015": {
+      "code": 37100,
+      "label": 17511,
+      "blank": 8
+     },
+     "2016": {
+      "code": 37562,
+      "label": 20000,
+      "blank": 12
+     },
+     "2017": {
+      "code": 0,
+      "label": 61652,
+      "blank": 16
+     },
+     "2018": {
+      "code": 0,
+      "label": 59342,
+      "blank": 13
+     },
+     "2019": {
+      "code": 0,
+      "label": 59808,
+      "blank": 0
+     },
+     "2020": {
+      "code": 0,
+      "label": 62114,
+      "blank": 1
+     },
+     "2021": {
+      "code": 0,
+      "label": 61291,
+      "blank": 0
+     },
+     "2022": {
+      "code": 0,
+      "label": 69879,
+      "blank": 0
+     },
+     "2023": {
+      "code": 0,
+      "label": 45747,
+      "blank": 0
+     },
+     "2024": {
+      "code": 0,
+      "label": 53056,
+      "blank": 0
+     },
+     "2025": {
+      "code": 0,
+      "label": 48879,
+      "blank": 0
+     },
+     "2026": {
+      "code": 0,
+      "label": 61813,
+      "blank": 0
+     }
+    },
+    "last_majority_code_fy": "2016",
+    "first_majority_label_fy": "2000"
+   },
+   "note": "The crosswalk is quoted verbatim in code/cedar_extent_competed.py and must never be re-derived from the data. Filter extent_competed_normalized instead."
+  },
+  {
+   "key": "Q4_SOCRATA_LIMIT_SILENT_TRUNCATION",
+   "source": "data.ct.gov (Socrata SODA)",
+   "claim": "Socrata SODA 2.0 `/resource/<id>.json` caps `$limit` and truncates SILENTLY at the cap. Cedar requests `$limit=50000` in code/159_extend_gaming_metrics.py and code/119_build_digital_and_loyalty.py.",
+   "verdict": "LATENT_NOT_TRIGGERED",
+   "evidence": {
+    "limit_requested_in_code": 50000,
+    "artefacts": {
+     "ct_slot_revenue_monthly_2026-08-26.json": 748,
+     "ct_slot_revenue_monthly_probe_2026-08-26.json": 748
+    },
+    "rows_on_disk": 748,
+    "headroom_to_requested_limit": 49252
+   },
+   "note": "The ceiling is real and is NOT currently reached - the CT series is small. It is recorded because code/343_refresh_ct_gaming_monthly.py asks the source for count(1) FIRST and compares retrieved against reported, while code/119 issues the bare $limit=50000 with no such comparison. 119 is on the NEVER-RUN list for other reasons; if it is ever revived, that request is a silent ceiling (defect class 4)."
+  },
+  {
+   "key": "Q5_SAM_PARTIAL_MATCH",
+   "source": "api.sam.gov contract-awards extract",
+   "claim": "SAM `awardeeBusinessTypeName` is a PARTIAL string match: the business type \"Subcontinent Asian (Asian-INDIAN) American Owned Business\" contains \"INDIAN\", and \"HOUSING AUTHORITIES PUBLIC/TRIBAL\" contains \"TRIBAL\" (docs/SAM_EXTRACTION_PLAN.md).",
+   "verdict": "NOT_REPRODUCIBLE",
+   "evidence": {
+    "sam_files_in_clean": [
+     "sam_prime_contracts_fy2000_2007.csv",
+     "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
+     "sam_prime_contracts_fy2000_2007_reconciliation.csv"
+    ]
+   },
+   "note": "no expected SAM extract filename found; the measurement of record is docs/SAM_EXTRACTION_PLAN.md (102,587 rows / 3,774 UEIs / $11,129,475,544 on SUBCONTINENT_ASIAN_INDIAN_AMERICAN_ONLY)."
+  },
+  {
+   "key": "Q6_FAC_API_FLOOR_VS_BULK_FLOOR",
+   "source": "api.fac.gov / app.fac.gov historical archive",
+   "claim": "The FAC Census-era historical index links 1998-2015, but the objects are served from s3-us-gov-west-1 and do not all answer alike; api.fac.gov itself begins at audit_year 2016.",
+   "verdict": "REPRODUCED",
+   "evidence": {
+    "index_years_linked": [
+     "1998",
+     "1999",
+     "2000",
+     "2001",
+     "2002",
+     "2003",
+     "2004",
+     "2005",
+     "2006",
+     "2007",
+     "2008",
+     "2009",
+     "2010",
+     "2011",
+     "2012",
+     "2013",
+     "2014",
+     "2015"
+    ],
+    "boundary_probes": {
+     "1997": {
+      "status": 404,
+      "final_host": "app.fac.gov"
+     },
+     "2015": {
+      "status": 403,
+      "final_host": "s3-us-gov-west-1.amazonaws.com"
+     }
+    },
+    "downloads": {
+     "1998": {
+      "status": 200,
+      "bytes": 15180572
+     },
+     "2005": {
+      "status": 200,
+      "bytes": 23080466
+     }
+    },
+    "api_earliest_audit_year_any": "2016",
+    "api_pre2016_count_content_range": [
+     "*/0",
+     "*/0",
+     "*/0"
+    ]
+   },
+   "note": "An API's floor is a fact about the API, not about the source. The 403 on census-2015.zip is a fact about ONE OBJECT at one route and is not evidence the year is absent."
+  }
+ ],
+ "tally": {
+  "PARTIAL": 2,
+  "REPRODUCED": 2,
+  "LATENT_NOT_TRIGGERED": 1,
+  "NOT_REPRODUCIBLE": 1
+ }
+}

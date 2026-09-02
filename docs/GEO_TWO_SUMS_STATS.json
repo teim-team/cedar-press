@@ -1,0 +1,63 @@
+{
+  "built": "2026-09-02",
+  "script": "874_geography_two_sums.py",
+  "datasets": {
+    "faads_transactions_all_agencies.csv": {
+      "period": "FY2001-2007",
+      "money_column": "obligated_usd",
+      "total_rows": 2769748,
+      "total_usd": "1830639317707.66",
+      "counties": 3501,
+      "unallocated_pop_rows": 2250759,
+      "unallocated_pop_usd": "1699737123392.83",
+      "unallocated_recipient_rows": 367716,
+      "unallocated_recipient_usd": "329474133066.00",
+      "native_rows": 29594,
+      "native_usd": "4721685550.00",
+      "unallocated_native_rows": 258,
+      "unallocated_native_usd": "19394987.00",
+      "faads_ordinal_join_checked": 29594,
+      "faads_ordinal_join_matched": 29594,
+      "universe_note": "UNFILTERED. The whole federal assistance universe for FY2001-2007, every recipient in the country, Native and not. This is the only Cedar money table whose place-of-performance sum is a true 'all federal money to this area' figure.",
+      "native_basis": "faads_entity_attribution.csv joined on faads_row_id (0-based row ordinal), FY2001-2006"
+    },
+    "prime_contracts.csv": {
+      "period": "FY1979-2026",
+      "money_column": "total_obligations",
+      "total_rows": 1217768,
+      "total_usd": "310005258661.21",
+      "counties": 2249,
+      "unallocated_pop_rows": 157789,
+      "unallocated_pop_usd": "32753516457.25",
+      "unallocated_recipient_rows": 13745,
+      "unallocated_recipient_usd": "3075417903.23",
+      "native_rows": 888862,
+      "native_usd": "244765639853.72",
+      "unallocated_native_rows": 4550,
+      "unallocated_native_usd": "822613916.21",
+      "faads_ordinal_join_checked": 0,
+      "faads_ordinal_join_matched": 0,
+      "universe_note": "NATIVE-CANDIDATE CORPUS, NOT THE FEDERAL UNIVERSE. The recipient universe was pulled from Native entity lists, so the place-of-performance sum is 'Cedar's contracting corpus performed in this county', NOT all federal contracting performed there. Do not read the difference as money that bypassed Native entities.",
+      "native_basis": "attributed_flag == 1"
+    },
+    "federal_funding_transactions.csv": {
+      "period": "FY2007-2026",
+      "money_column": "obligated_usd",
+      "total_rows": 701955,
+      "total_usd": "219689020478.59",
+      "counties": 2035,
+      "unallocated_pop_rows": 609891,
+      "unallocated_pop_usd": "182043929833.49",
+      "unallocated_recipient_rows": 38854,
+      "unallocated_recipient_usd": "5180787170.33",
+      "native_rows": 550937,
+      "native_usd": "169072556167.99",
+      "unallocated_native_rows": 30870,
+      "unallocated_native_usd": "4441208294.92",
+      "faads_ordinal_join_checked": 0,
+      "faads_ordinal_join_matched": 0,
+      "universe_note": "NATIVE-CANDIDATE CORPUS, NOT THE FEDERAL UNIVERSE. Same caveat as prime_contracts.csv. Also overlaps FAADS at FY2007 - see the FY2007 seam in MONEY_TOTALLING_RULES.md.",
+      "native_basis": "tribe_id_neid non-empty AND excluded_flag != 1"
+    }
+  }
+}

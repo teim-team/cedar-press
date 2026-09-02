@@ -1,0 +1,28 @@
+{
+  "built": "2026-09-02",
+  "script": "872_promote_geo_keys_assistance.py",
+  "txn_keys_resolved": 749334,
+  "assistance_award_xwalk_keys": 9821,
+  "place_zip5": 21923,
+  "place_city_state": 20727,
+  "federal_funding_transactions": {
+    "rows": 701955,
+    "cents": 21968902047859,
+    "tiers": {
+      "derived_place_modal": 514061,
+      "unkeyed": 38782,
+      "exact_transaction": 139553,
+      "exact_award_summary": 9559
+    }
+  },
+  "faads_transactions_all_agencies": {
+    "rows": 2769748,
+    "cents": 183063931770766,
+    "tiers": {
+      "derived_place_zip5": 1707107,
+      "exact_transaction": 615012,
+      "derived_place_modal": 85458,
+      "unkeyed": 362171
+    }
+  }
+}

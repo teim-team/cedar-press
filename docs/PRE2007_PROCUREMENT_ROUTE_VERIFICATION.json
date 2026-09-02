@@ -1,0 +1,115 @@
+{
+ "generated_utc": "2026-08-26T22:43:57.715660+00:00",
+ "script": "code/202_verify_pre2007_procurement_routes.py",
+ "hosts_contacted": [
+  "www.fpds.gov",
+  "catalog.archives.gov"
+ ],
+ "note": "Independent verification of a research sweep's claims. Nothing downloaded; HEAD / first-bytes only.",
+ "route_A_fpds_atom": {
+  "full_window_FY1979_2007": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 1.838,
+   "final_url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=SIGNED_DATE%3A%5B1978%2F10%2F01%2C2007%2F09%2F30%5D&start=0",
+   "content_type": "application/xml; charset=utf-8",
+   "content_length": null,
+   "body_head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<feed xmlns=\"http://www.w3.org/2005/Atom\">\n  <title>FPDS-NG search results for<![CDATA[: SIGNED_DATE:[1978/10/01,2007/09/30]]]></title>\n  <link rel=\"alternate\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/search.do?s=FPDS&amp;indexName=awardfull&amp;templateName=1.5.3&amp;q=SIGNED_DATE%3A%5B1978%2F10%2F01%2C2007%2F09%2F30%5D&amp;start=0\"></link>\n  <link rel=\"last\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/FEEDS/ATOM?s=FPDS&amp;FEEDNAME=PUBLIC&amp;VERSION=1.5.3&amp;q=SIGNED_DATE%3A%5B1978%2F10%2F01%2C2007%2F09%2F30%5D&amp;start=26936840\"></link>\n  <link rel=\"next\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/FEEDS/ATOM?s=FPDS&amp;FEEDNAME=PUBLIC&amp;VERSION=1.5.3&amp;q=SIGNED_DATE%3A%5B1978%2F10%2F01%2C2007%2F09%2F30%5D&amp;start=10\"></link>\n  <modified/>\n  <author>\n    <name/>\n  </author>\n  <entry>\n    <title><![CDATA[New DELIVERY ORDER 000000000000000001 awarded to AERO COMPONENTS, INC for the amount of $31,426]]></title>\n    <link rel=\"alternate\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/search.do?s=FPDS&amp;indexName=awardfull&amp;templateName=1.5.3&amp;q=000000000000000001+9700+\"></link>\n    <modified>2007-12-01 16:36:17</modified>\n    <content xmlns:ns1=\"https://www.fpds.gov/FPDS\" type=\"application/xml\">\n      <ns1:award xmlns:ns1=\"https://www.fpds.gov/FPDS\" version=\"1.2\">\n        <ns1:awardID>\n          <ns1:awardContractID>\n            <ns1:agencyID name=\"DEPT OF DEFENSE\">9700</ns1:agencyID>\n ",
+   "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM",
+   "advertised_total": 26936840,
+   "has_entries": true
+  },
+  "FY1981": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 1.651,
+   "final_url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=SIGNED_DATE%3A%5B1980%2F10%2F01%2C1981%2F09%2F30%5D&start=0",
+   "content_type": "application/xml; charset=utf-8",
+   "content_length": null,
+   "body_head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<feed xmlns=\"http://www.w3.org/2005/Atom\">\n  <title>FPDS-NG search results for<![CDATA[: SIGNED_DATE:[1980/10/01,1981/09/30]]]></title>\n  <link rel=\"alternate\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/search.do?s=FPDS&amp;indexName=awardfull&amp;templateName=1.5.3&amp;q=SIGNED_DATE%3A%5B1980%2F10%2F01%2C1981%2F09%2F30%5D&amp;start=0\"></link>\n  <link rel=\"last\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/FEEDS/ATOM?s=FPDS&amp;FEEDNAME=PUBLIC&amp;VERSION=1.5.3&amp;q=SIGNED_DATE%3A%5B1980%2F10%2F01%2C1981%2F09%2F30%5D&amp;start=609820\"></link>\n  <link rel=\"next\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/FEEDS/ATOM?s=FPDS&amp;FEEDNAME=PUBLIC&amp;VERSION=1.5.3&amp;q=SIGNED_DATE%3A%5B1980%2F10%2F01%2C1981%2F09%2F30%5D&amp;start=10\"></link>\n  <modified/>\n  <author>\n    <name/>\n  </author>\n  <entry>\n    <title><![CDATA[New BOA 0000000000000 awarded to  for the amount of $0]]></title>\n    <link rel=\"alternate\" type=\"text/html\" href=\"https://www.fpds.gov/ezsearch/search.do?s=FPDS&amp;indexName=awardfull&amp;templateName=1.5.3&amp;q=0000000000000+2100+\"></link>\n    <modified></modified>\n    <content xmlns:ns1=\"https://www.fpds.gov/FPDS\" type=\"application/xml\">\n      <ns1:IDV xmlns:ns1=\"https://www.fpds.gov/FPDS\" version=\"1.0\">\n        <ns1:contractID>\n          <ns1:IDVID>\n            <ns1:agencyID name=\"DEPT OF THE ARMY\">2100</ns1:agencyID>\n            <ns1:PIID>0000000000000</ns1:PIID>\n            <ns1:modNumber>0<",
+   "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM",
+   "advertised_total": 609820,
+   "has_entries": true
+  },
+  "paging_probe_start_399990": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 2.117,
+   "final_url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=SIGNED_DATE%3A%5B1979%2F10%2F01%2C1980%2F09%2F30%5D&start=399990",
+   "content_type": "application/xml; charset=utf-8",
+   "content_length": null,
+   "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM",
+   "entry_count_in_first_1500b": 1
+  },
+  "paging_probe_start_400000": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 1.58,
+   "final_url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM?FEEDNAME=PUBLIC&q=SIGNED_DATE%3A%5B1979%2F10%2F01%2C1980%2F09%2F30%5D&start=400000",
+   "content_type": "application/xml; charset=utf-8",
+   "content_length": null,
+   "url": "https://www.fpds.gov/ezsearch/FEEDS/ATOM",
+   "entry_count_in_first_1500b": 0
+  },
+  "retired_api_fpds_gov": {
+   "outcome": "TRANSPORT",
+   "error": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.fpds.gov\\', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.fpds.gov\\', port=443): ",
+   "seconds": 0.005,
+   "reading": "EDGE BLOCK (sub-second) - stop, more requests extend it",
+   "url": "https://api.fpds.gov/"
+  },
+  "retired_ebiz_path": {
+   "outcome": "HTTP",
+   "status": 404,
+   "seconds": 1.584,
+   "final_url": "https://www.fpds.gov/ebiz/fpdsatomfeed/1.0/ATOM_FEED",
+   "content_type": "text/html;charset=ISO-8859-1",
+   "content_length": "1387",
+   "body_head": "\r\n\r\n<html>\r\n\r\n<head>\r\n\t<meta http-equiv=\"content-type\" content=\"text/html;charset=iso-8859-1\">\r\n\t<META HTTP-EQUIV=\"Expires\" CONTENT=\"Fri, Jun 12 1981 08:20:00 GMT\">\r\n\t<META HTTP-EQUIV=\"Pragma\" CONTENT=\"no-cache\" />\r\n\t<script src=\"/JavaScriptServlet\"></script>\r\n\t<META HTTP-EQUIV=\"Cache-Control\" CONTENT=\"no-cache\">\r\n\t<link rel=\"stylesheet\" href=\"/common/styles/fpds_text_style.css\">\r\n\t<title>Federal Procurement Data System (FPDS) - Page not found</title>\r\n</head>\r\n\r\n<body bgcolor=\"#5486be\" leftmargin=\"0\" marginwidth=\"0\" topmargin=\"0\"\r\n\tmarginheight=\"0\">\r\n\t<form action=\"/\" method=\"get\">\r\n\t\t<div align=\"center\">\r\n\t\t\t<table border=\"0\" bgcolor=\"white\">\r\n\t\t\t\t<tr>\r\n\t\t\t\t\t<td scope=\"row\" valign=\"top\" align=\"center\">\r\n\t\t\t\t\t\t<table width=\"755\" height=\"297\" frame=\"box\" bordercolor=\"#336699\" cellpadding=\"3\">\r\n\t\t\t\t\t\t\t<tr height=\"32\">\r\n\t\t\t\t\t\t\t\t<td scope=\"row\" valign=\"top\" height=\"32\" bgcolor=\"#5486be\"\r\n\t\t\t\t\t\t\t\t\twidth=\"743\">\r\n\t\t\t\t\t\t\t\t\t<img src=\"/common/images/fpds_front_stat_1.gif\" width=\"106\"\r\n\t\t\t\t\t\t\t\t\theight=\"40\" border=\"0\" alt=\"Federal Procurement Data System\">\r\n\t\t\t\t\t\t\t\t</td>\r\n\t\t\t\t\t\t\t</tr>\r\n\t\t\t\t\t\t\t<tr height=\"56\">\r\n\t\t\t\t\t\t\t\t<td scope=\"row\" valign=\"top\" height=\"100%\" bgcolor=\"white\"\r\n\t\t\t\t\t\t\t\t\twidth=\"743\">\r\n\t\t\t\t\t\t\t\t\t<p>\r\n\t\t\t\t\t\t\t\t\t\t<b>Page Not Found</b>\r\n\t\t\t\t\t\t\t\t\t</p>\r\n\t\t\t\t\t\t\t\t</td>\r\n\t\t\t\t\t\t\t</tr>\r\n\t\t\t\t\t\t</table>\r\n\t\t\t\t\t</td>\r\n\t\t\t\t</tr>\r\n\t\t\t</table>\r\n\t\t</div>\r\n\t</form>\r\n</body>\r\n</html>",
+   "url": "https://www.fpds.gov/ebiz/fpdsatomfeed/1.0/ATOM_FEED"
+  }
+ },
+ "route_B_nara_rg269": {
+  "catalog_search": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 1.678,
+   "final_url": "https://catalog.archives.gov/proxy/records/search?q=%22Records+of+Contracts+Awarded+by+Federal+Agencies%22&limit=5",
+   "content_type": "text/html",
+   "content_length": "5454",
+   "body_head": "<!doctype html><html lang=\"en\"><head><script>var hostname=window.location.hostname,scriptSources=\"'self' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com\";\"catalog.archives.gov\"===hostname&&(scriptSources+=\" https://dap.digitalgov.gov\");var meta=document.createElement(\"meta\");meta.httpEquiv=\"Content-Security-Policy\",meta.content=\"script-src \"+scriptSources,document.head.appendChild(meta)</script><script>\"catalog.archives.gov\"===window.location.hostname&&document.write('<script async type=\"text/javascript\" id=\"_fed_an_ua_tag\" src=\"https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NARA&subagency=catalog\"><\\/script>')</script><script>!function(e,t,a,n,g){e[n]=e[n]||[],e[n].push({\"gtm.start\":(new Date).getTime(),event:\"gtm.js\"});var m=t.getElementsByTagName(a)[0],r=t.createElement(a);r.async=!0,r.src=\"https://www.googletagmanager.com/gtm.js?id=GTM-WLMC86\",m.parentNode.insertBefore(r,m)}(window,document,\"script\",\"dataLayer\")</script><script>function updateTitle() {\n        const titleFromStorage = sessionStorage.getItem('titles')?.trim();\n        if (window.location.hostname) {\n          if (titleFromStorage == 'National Archives Catalog - National Archives Catalog Search') {\n            document.title = 'National Archives Catalog Search'\n          } else {\n            document.title = titleFromStorage\n            ? titleFromStorage\n            : 'National Archives Catalog'\n          }\n        } else {\n          document.title ",
+   "url": "https://catalog.archives.gov/proxy/records/search"
+  },
+  "zip_naid_1882845_FY1979": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 1.626,
+   "final_url": "https://catalog.archives.gov/medialive/45/8828/1882845/content/arcmedia/electronic-records/rg-269/FPDS/RG137.FEDPROC.Y79.zip",
+   "content_type": "",
+   "content_length": "13480059",
+   "body_head": null,
+   "url": "https://catalog.archives.gov/medialive/45/8828/1882845/content/arcmedia/electronic-records/rg-269/FPDS/RG137.FEDPROC.Y79.zip"
+  },
+  "zip_naid_1882874_FY1990": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 1.636,
+   "final_url": "https://catalog.archives.gov/medialive/74/8828/1882874/content/arcmedia/electronic-records/rg-269/FPDS/RG137.FEDPROC.Y90.zip",
+   "content_type": "",
+   "content_length": "22458880",
+   "body_head": null,
+   "url": "https://catalog.archives.gov/medialive/74/8828/1882874/content/arcmedia/electronic-records/rg-269/FPDS/RG137.FEDPROC.Y90.zip"
+  },
+  "zip_naid_1882866_FY1981_claimed_absent": {
+   "outcome": "HTTP",
+   "status": 200,
+   "seconds": 1.662,
+   "final_url": "https://catalog.archives.gov/medialive/66/8828/1882866/content/arcmedia/electronic-records/rg-269/FPDS/RG137.FEDPROC.Y81.zip",
+   "content_type": "text/html",
+   "content_length": "5454",
+   "body_head": null,
+   "url": "https://catalog.archives.gov/medialive/66/8828/1882866/content/arcmedia/electronic-records/rg-269/FPDS/RG137.FEDPROC.Y81.zip"
+  }
+ },
+ "requests_issued": 10
+}

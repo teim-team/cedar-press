@@ -1,0 +1,867 @@
+{
+ "release": "subcontracting-6c92a41",
+ "compared_at": "2026-08-29T10:22:39+00:00",
+ "replay_root": "C:\\Users\\esm247\\AppData\\Local\\Temp\\claude\\C--Users-esm247\\6f0cc363-573d-4f3a-97b1-c84e32f43c8b\\scratchpad\\replay_subcontracting",
+ "n_byte_identical": 2,
+ "n_identical_excluding_named_columns": 0,
+ "n_differing": 3,
+ "n_not_produced": 0,
+ "tables": [
+  {
+   "table": "prime_sub_network.csv",
+   "released_sha256": "4cfc9e5fe98f90da937f208918f4157e69bdd07474be633d2388abce5deeecc6",
+   "released_rows": 220,
+   "released_columns": [
+    "prime_uei",
+    "sub_uei",
+    "n_subawards",
+    "total_usd",
+    "first_year",
+    "last_year",
+    "naics_modal",
+    "prime_name",
+    "sub_name",
+    "self_edge_flag",
+    "source_file",
+    "fetched_date"
+   ],
+   "replay_sha256": "4cfc9e5fe98f90da937f208918f4157e69bdd07474be633d2388abce5deeecc6",
+   "replay_rows": 220,
+   "replay_columns": [
+    "prime_uei",
+    "sub_uei",
+    "n_subawards",
+    "total_usd",
+    "first_year",
+    "last_year",
+    "naics_modal",
+    "prime_name",
+    "sub_name",
+    "self_edge_flag",
+    "source_file",
+    "fetched_date"
+   ],
+   "schema_identical": true,
+   "row_count_identical": true,
+   "bytes_identical": true,
+   "verdict": "BYTE_IDENTICAL",
+   "replay_primary_key_holds": {
+    "columns": [
+     "prime_uei",
+     "sub_uei"
+    ],
+    "rows": 220,
+    "distinct": 220,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "subaward_entity_rollup.csv",
+   "released_sha256": "61ac5d4781960831d8df285a2093cb3229a33880f9e155621c5973d9e979a23c",
+   "released_rows": 450,
+   "released_columns": [
+    "tribe_id",
+    "confidence_tier",
+    "n_as_prime_a",
+    "usd_as_prime_a",
+    "n_as_subawardee_b",
+    "usd_as_subawardee_b",
+    "n_both_sides",
+    "usd_both_sides",
+    "basis",
+    "cedar_uid"
+   ],
+   "replay_sha256": "73ffcec346544658bc245be2586eb076402d452ced8c6518e2cc0f5faf03edcc",
+   "replay_rows": 507,
+   "replay_columns": [
+    "tribe_id",
+    "confidence_tier",
+    "n_as_prime_a",
+    "usd_as_prime_a",
+    "n_as_subawardee_b",
+    "usd_as_subawardee_b",
+    "n_both_sides",
+    "usd_both_sides",
+    "basis"
+   ],
+   "schema_identical": false,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "cedar_uid"
+   ],
+   "content_compared_columns": 9,
+   "content_identical_excluding": false,
+   "verdict": "DIFFERS_SCHEMA",
+   "first_differences": [
+    {
+     "row_index": 0,
+     "key": {
+      "tribe_id": "ANRC-ARCSLO-00"
+     },
+     "columns": {
+      "usd_as_subawardee_b": [
+       "1684411206.21",
+       "1705055214.41"
+      ],
+      "usd_both_sides": [
+       "36019667.78",
+       "26085172.76"
+      ],
+      "n_as_subawardee_b": [
+       "663",
+       "673"
+      ],
+      "usd_as_prime_a": [
+       "1740005674.45",
+       "1877117174.08"
+      ],
+      "n_as_prime_a": [
+       "3352",
+       "3675"
+      ],
+      "n_both_sides": [
+       "49",
+       "51"
+      ]
+     }
+    },
+    {
+     "row_index": 1,
+     "key": {
+      "tribe_id": "ANRC-NANARC-00"
+     },
+     "columns": {
+      "confidence_tier": [
+       "B",
+       "A"
+      ]
+     }
+    },
+    {
+     "row_index": 2,
+     "key": {
+      "tribe_id": "ANRC-CHGCCO-00"
+     },
+     "columns": {
+      "usd_both_sides": [
+       "34872197.07",
+       "35149572.07"
+      ],
+      "usd_as_prime_a": [
+       "943188202.83",
+       "942910827.83"
+      ],
+      "n_as_prime_a": [
+       "3651",
+       "3649"
+      ],
+      "n_both_sides": [
+       "30",
+       "32"
+      ]
+     }
+    },
+    {
+     "row_index": 3,
+     "key": {
+      "tribe_id": "TRBF-LWSXMN-00"
+     },
+     "columns": {
+      "usd_as_subawardee_b": [
+       "475415663.4",
+       "410940355.48"
+      ],
+      "usd_both_sides": [
+       "8716351.0",
+       "24544145.97"
+      ],
+      "n_as_subawardee_b": [
+       "2327",
+       "161"
+      ],
+      "usd_as_prime_a": [
+       "621066244.59",
+       "133886029.91"
+      ],
+      "n_as_prime_a": [
+       "1679",
+       "180"
+      ],
+      "n_both_sides": [
+       "19",
+       "45"
+      ]
+     }
+    },
+    {
+     "row_index": 5,
+     "key": {
+      "tribe_id": "ANRC-CKINLT-00"
+     },
+     "columns": {
+      "usd_as_subawardee_b": [
+       "398584922.48",
+       "216214521.83"
+      ],
+      "usd_both_sides": [
+       "24381295.97",
+       "900000.0"
+      ],
+      "n_as_subawardee_b": [
+       "156",
+       "171"
+      ],
+      "usd_as_prime_a": [
+       "133886029.91",
+       "6472058.86"
+      ],
+      "n_as_prime_a": [
+       "180",
+       "37"
+      ],
+      "n_both_sides": [
+       "44",
+       "2"
+      ]
+     }
+    }
+   ],
+   "replay_primary_key_holds": {
+    "columns": [
+     "tribe_id"
+    ],
+    "rows": 507,
+    "distinct": 507,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "subaward_identifier_harvest.csv",
+   "released_sha256": "d3b8550ac859ae64e21338e3664a3f905044fb3f04eaa2ea8101cdb93e9228a4",
+   "released_rows": 304,
+   "released_columns": [
+    "uei",
+    "cage_code",
+    "duns",
+    "legal_business_name",
+    "role",
+    "state",
+    "n_subawards",
+    "first_year",
+    "last_year",
+    "total_subaward_usd",
+    "malformed_flag",
+    "source_file",
+    "total_usd_as_sub",
+    "total_usd_as_prime",
+    "n_name_variants",
+    "name_variants"
+   ],
+   "replay_sha256": "d3b8550ac859ae64e21338e3664a3f905044fb3f04eaa2ea8101cdb93e9228a4",
+   "replay_rows": 304,
+   "replay_columns": [
+    "uei",
+    "cage_code",
+    "duns",
+    "legal_business_name",
+    "role",
+    "state",
+    "n_subawards",
+    "first_year",
+    "last_year",
+    "total_subaward_usd",
+    "malformed_flag",
+    "source_file",
+    "total_usd_as_sub",
+    "total_usd_as_prime",
+    "n_name_variants",
+    "name_variants"
+   ],
+   "schema_identical": true,
+   "row_count_identical": true,
+   "bytes_identical": true,
+   "verdict": "BYTE_IDENTICAL",
+   "replay_primary_key_holds": {
+    "columns": [
+     "uei"
+    ],
+    "rows": 304,
+    "distinct": 304,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "subaward_identifier_netnew.csv",
+   "released_sha256": "3cc3807156814c31beea779aa7fff05f91fcd6500899a7b0e384ba4672a35763",
+   "released_rows": 210,
+   "released_columns": [
+    "uei",
+    "cage_code",
+    "duns",
+    "legal_business_name",
+    "role",
+    "state",
+    "n_subawards",
+    "first_year",
+    "last_year",
+    "total_subaward_usd",
+    "malformed_flag",
+    "source_file",
+    "total_usd_as_sub",
+    "total_usd_as_prime",
+    "n_name_variants",
+    "name_variants",
+    "uei_new_vs_union",
+    "cage_new_vs_union",
+    "uei_new_vs_tiered_ledger",
+    "cage_new_vs_tiered_ledger",
+    "compared_against"
+   ],
+   "replay_sha256": "ce859a2aefcf1e69117f1e04f29e7179cef9efdfa86ebf7f5757302f25676594",
+   "replay_rows": 193,
+   "replay_columns": [
+    "uei",
+    "cage_code",
+    "duns",
+    "legal_business_name",
+    "role",
+    "state",
+    "n_subawards",
+    "first_year",
+    "last_year",
+    "total_subaward_usd",
+    "malformed_flag",
+    "source_file",
+    "total_usd_as_sub",
+    "total_usd_as_prime",
+    "n_name_variants",
+    "name_variants",
+    "uei_new_vs_union",
+    "cage_new_vs_union",
+    "uei_new_vs_tiered_ledger",
+    "cage_new_vs_tiered_ledger",
+    "compared_against"
+   ],
+   "schema_identical": true,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [],
+   "content_compared_columns": 21,
+   "content_identical_excluding": false,
+   "set_relation": {
+    "relation": "replay_is_subset",
+    "only_in_released": 17,
+    "only_in_replay": 0,
+    "shared_rows_that_disagree": 0,
+    "sample_only_in_replay": [],
+    "sample_only_in_released": [
+     [
+      "CVEMGYV2YJW1"
+     ],
+     [
+      "DGCQQJQCN4X8"
+     ],
+     [
+      "EGTJJJPLRT11"
+     ],
+     [
+      "EZAFPH5GL3E9"
+     ],
+     [
+      "F7LSWJF8A2W3"
+     ]
+    ]
+   },
+   "verdict": "DIFFERS_ROWS",
+   "first_differences": [
+    {
+     "row_index": 0,
+     "key": {
+      "uei": "GL6NEAEVM736"
+     },
+     "columns": {
+      "total_usd_as_sub": [
+       "77473251.00",
+       "0.00"
+      ],
+      "state": [
+       "Michigan",
+       ""
+      ],
+      "legal_business_name": [
+       "BAY Shore Steel Works",
+       "Grand Traverse Band Of Ottawa And Chippewa Indians"
+      ],
+      "role": [
+       "sub",
+       "sub_parent"
+      ],
+      "cage_code": [
+       "56WQ7",
+       "844F1"
+      ],
+      "uei": [
+       "GL6NEAEVM736",
+       "HCHWNDWBGWE5"
+      ]
+     }
+    },
+    {
+     "row_index": 1,
+     "key": {
+      "uei": "HCHWNDWBGWE5"
+     },
+     "columns": {
+      "uei_new_vs_tiered_ledger": [
+       "no",
+       "yes"
+      ],
+      "total_subaward_usd": [
+       "77473251.00",
+       "78545239.00"
+      ],
+      "legal_business_name": [
+       "Grand Traverse Band Of Ottawa And Chippewa Indians",
+       "General Dynamics"
+      ],
+      "role": [
+       "sub_parent",
+       "prime_parent"
+      ],
+      "cage_code": [
+       "844F1",
+       "95403"
+      ],
+      "uei": [
+       "HCHWNDWBGWE5",
+       "VF58HFRNGEL8"
+      ]
+     }
+    },
+    {
+     "row_index": 2,
+     "key": {
+      "uei": "VF58HFRNGEL8"
+     },
+     "columns": {
+      "total_usd_as_prime": [
+       "0.00",
+       "74571269.00"
+      ],
+      "total_subaward_usd": [
+       "78545239.00",
+       "74571269.00"
+      ],
+      "legal_business_name": [
+       "General Dynamics",
+       "General Dynamics Land Systems"
+      ],
+      "role": [
+       "prime_parent",
+       "prime"
+      ],
+      "cage_code": [
+       "95403",
+       "7W356"
+      ],
+      "uei": [
+       "VF58HFRNGEL8",
+       "HAWKSQF848W7"
+      ]
+     }
+    },
+    {
+     "row_index": 3,
+     "key": {
+      "uei": "HAWKSQF848W7"
+     },
+     "columns": {
+      "malformed_flag": [
+       "missing_duns",
+       "missing_cage|missing_duns"
+      ],
+      "total_usd_as_prime": [
+       "74571269.00",
+       "0.00"
+      ],
+      "cage_new_vs_tiered_ledger": [
+       "yes",
+       "no"
+      ],
+      "total_subaward_usd": [
+       "74571269.00",
+       "46311103.00"
+      ],
+      "legal_business_name": [
+       "General Dynamics Land Systems",
+       "BAE Systems"
+      ],
+      "role": [
+       "prime",
+       "prime_parent"
+      ]
+     }
+    },
+    {
+     "row_index": 4,
+     "key": {
+      "uei": "E5K9VR2A1MW9"
+     },
+     "columns": {
+      "malformed_flag": [
+       "missing_cage|missing_duns",
+       "missing_duns"
+      ],
+      "total_subaward_usd": [
+       "46311103.00",
+       "109583760.00"
+      ],
+      "legal_business_name": [
+       "BAE Systems",
+       "Cherokee Federal Solutions"
+      ],
+      "role": [
+       "prime_parent",
+       "sub_parent+prime_parent"
+      ],
+      "cage_code": [
+       "",
+       "57VT4"
+      ],
+      "uei": [
+       "E5K9VR2A1MW9",
+       "RLJHBANUMT78"
+      ]
+     }
+    }
+   ],
+   "replay_primary_key_holds": {
+    "columns": [
+     "uei"
+    ],
+    "rows": 193,
+    "distinct": 193,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "subawards.csv",
+   "released_sha256": "ae80c2aff2f3b8f0099a56a4f02a35a1ac229a032226b2de1a3016005aad128d",
+   "released_rows": 72837,
+   "released_columns": [
+    "sub_uei",
+    "sub_cage",
+    "sub_name",
+    "sub_state",
+    "prime_uei",
+    "prime_cage",
+    "prime_name",
+    "prime_award_id",
+    "subaward_amount",
+    "subaward_date",
+    "fiscal_year",
+    "naics",
+    "psc",
+    "description",
+    "direction",
+    "source_file",
+    "fetched_date",
+    "subaward_number",
+    "source_url",
+    "sub_parent_uei",
+    "sub_parent_cage",
+    "sub_parent_name",
+    "prime_parent_uei",
+    "prime_parent_cage",
+    "prime_parent_name",
+    "naics_title",
+    "psc_title",
+    "prime_top_awarding_agency",
+    "prime_set_aside",
+    "pre_2000_flag",
+    "floor_basis_field",
+    "source_dataset",
+    "source_population",
+    "award_kind",
+    "subaward_type",
+    "prime_award_unique_key",
+    "prime_award_amount",
+    "subaward_to_prime_ratio",
+    "subaward_exceeds_prime_flag",
+    "action_date_precedes_ffata_flag",
+    "subaward_sam_report_year",
+    "prime_native_tribe_id",
+    "prime_native_tier",
+    "sub_native_tribe_id",
+    "sub_native_tier",
+    "sub_business_types",
+    "prime_awarding_sub_agency",
+    "duplicate_status",
+    "promoted_date",
+    "subaward_amount_real2025",
+    "deflator_factor_2025",
+    "inflation_base_year",
+    "cedar_uid"
+   ],
+   "replay_sha256": "78eb7a06f15c995d49f33f03de6a6f8ec85776c59da648db9969e58abdcbc197",
+   "replay_rows": 56817,
+   "replay_columns": [
+    "sub_uei",
+    "sub_cage",
+    "sub_name",
+    "sub_state",
+    "prime_uei",
+    "prime_cage",
+    "prime_name",
+    "prime_award_id",
+    "subaward_amount",
+    "subaward_date",
+    "fiscal_year",
+    "naics",
+    "psc",
+    "description",
+    "direction",
+    "source_file",
+    "fetched_date",
+    "subaward_number",
+    "source_url",
+    "sub_parent_uei",
+    "sub_parent_cage",
+    "sub_parent_name",
+    "prime_parent_uei",
+    "prime_parent_cage",
+    "prime_parent_name",
+    "naics_title",
+    "psc_title",
+    "prime_top_awarding_agency",
+    "prime_set_aside",
+    "pre_2000_flag",
+    "floor_basis_field",
+    "source_dataset",
+    "source_population",
+    "award_kind",
+    "subaward_type",
+    "prime_award_unique_key",
+    "prime_award_amount",
+    "subaward_to_prime_ratio",
+    "subaward_exceeds_prime_flag",
+    "action_date_precedes_ffata_flag",
+    "subaward_sam_report_year",
+    "prime_native_tribe_id",
+    "prime_native_tier",
+    "sub_native_tribe_id",
+    "sub_native_tier",
+    "sub_business_types",
+    "prime_awarding_sub_agency",
+    "duplicate_status",
+    "promoted_date"
+   ],
+   "schema_identical": false,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "cedar_uid",
+    "deflator_factor_2025",
+    "inflation_base_year",
+    "subaward_amount_real2025"
+   ],
+   "content_compared_columns": 49,
+   "content_identical_excluding": false,
+   "verdict": "DIFFERS_SCHEMA",
+   "first_differences": [
+    {
+     "row_index": 0,
+     "key": {
+      "subaward_number": "DC-39-036",
+      "subaward_amount": "58505.94",
+      "description": "THE CACFP PROVIDES REIMBURSEMENT FOR WELL-BALANCED, NUTRITIOUS MEALS SERVED TO INDIVIDUALS ENROLLED IN DAY CARE CENTERS, FAMILY DAY CARE HOMES (FDCH), AFTER SCHOOL PROGRAMS, EMERGENCY SHELTERS, AND/OR HEAD START PROGRAMS.",
+      "source_url": "https://www.usaspending.gov/award/ASST_NON_226OK329N1199_012/"
+     },
+     "columns": {
+      "prime_award_id": [
+       "226OK329N1199",
+       "2402NVBCAP"
+      ],
+      "subaward_sam_report_year": [
+       "2022",
+       "2025"
+      ],
+      "subaward_date": [
+       "2002-06-08",
+       "2001-08-18"
+      ],
+      "fiscal_year": [
+       "2002",
+       "2001"
+      ],
+      "sub_parent_uei": [
+       "GNZLNKLREX72",
+       ""
+      ],
+      "prime_uei": [
+       "G8ZRG7PQB7A9",
+       "VHMAJPEDACJ6"
+      ]
+     }
+    },
+    {
+     "row_index": 1,
+     "key": {
+      "subaward_number": "DC-62-082",
+      "subaward_amount": "574955.68",
+      "description": "THE CACFP PROVIDES REIMBURSEMENT FOR WELL-BALANCED, NUTRITIOUS MEALS SERVED TO INDIVIDUALS ENROLLED IN DAY CARE CENTERS, FAMILY DAY CARE HOMES (FDCH), AFTER SCHOOL PROGRAMS, EMERGENCY SHELTERS, AND/OR HEAD START PROGRAMS.",
+      "source_url": "https://www.usaspending.gov/award/ASST_NON_226OK329N1199_012/"
+     },
+     "columns": {
+      "subaward_date": [
+       "2002-05-31",
+       "2002-06-08"
+      ],
+      "sub_parent_uei": [
+       "KS8HLVMJEMW9",
+       "GNZLNKLREX72"
+      ],
+      "subaward_number": [
+       "DC-62-082",
+       "DC-39-036"
+      ],
+      "sub_uei": [
+       "KS8HLVMJEMW9",
+       "GNZLNKLREX72"
+      ],
+      "sub_native_tribe_id": [
+       "TRBF-CHKSWN-00",
+       "TRBF-CTWNAT-00"
+      ],
+      "subaward_amount": [
+       "574955.68",
+       "58505.94"
+      ]
+     }
+    },
+    {
+     "row_index": 2,
+     "key": {
+      "subaward_number": "DC-39-036",
+      "subaward_amount": "3239.34",
+      "description": "THE CACFP PROVIDES REIMBURSEMENT FOR WELL-BALANCED, NUTRITIOUS MEALS SERVED TO INDIVIDUALS ENROLLED IN DAY CARE CENTERS, FAMILY DAY CARE HOMES (FDCH), AFTER SCHOOL PROGRAMS, EMERGENCY SHELTERS, AND/OR HEAD START PROGRAMS.",
+      "source_url": "https://www.usaspending.gov/award/ASST_NON_226OK349N2020_012/"
+     },
+     "columns": {
+      "prime_award_id": [
+       "226OK349N2020",
+       "226OK329N1199"
+      ],
+      "subaward_date": [
+       "2002-06-08",
+       "2002-05-31"
+      ],
+      "sub_parent_uei": [
+       "GNZLNKLREX72",
+       "KS8HLVMJEMW9"
+      ],
+      "subaward_number": [
+       "DC-39-036",
+       "DC-62-082"
+      ],
+      "sub_uei": [
+       "GNZLNKLREX72",
+       "KS8HLVMJEMW9"
+      ],
+      "prime_award_amount": [
+       "3057285.11",
+       "303821101.56"
+      ]
+     }
+    },
+    {
+     "row_index": 3,
+     "key": {
+      "subaward_number": "DC-56-001",
+      "subaward_amount": "945.62",
+      "description": "THE CACFP PROVIDES REIMBURSEMENT FOR WELL-BALANCED, NUTRITIOUS MEALS SERVED TO INDIVIDUALS ENROLLED IN DAY CARE CENTERS, FAMILY DAY CARE HOMES (FDCH), AFTER SCHOOL PROGRAMS, EMERGENCY SHELTERS, AND/OR HEAD START PROGRAMS.",
+      "source_url": "https://www.usaspending.gov/award/ASST_NON_226OK349N2020_012/"
+     },
+     "columns": {
+      "subaward_date": [
+       "2002-05-31",
+       "2002-06-08"
+      ],
+      "sub_parent_uei": [
+       "",
+       "GNZLNKLREX72"
+      ],
+      "subaward_number": [
+       "DC-56-001",
+       "DC-39-036"
+      ],
+      "sub_uei": [
+       "KDYABRXCN245",
+       "GNZLNKLREX72"
+      ],
+      "sub_native_tribe_id": [
+       "TRBF-MSENAT-00",
+       "TRBF-CTWNAT-00"
+      ],
+      "subaward_amount": [
+       "945.62",
+       "3239.34"
+      ]
+     }
+    },
+    {
+     "row_index": 4,
+     "key": {
+      "subaward_number": "DC-62-082",
+      "subaward_amount": "32759.48",
+      "description": "THE CACFP PROVIDES REIMBURSEMENT FOR WELL-BALANCED, NUTRITIOUS MEALS SERVED TO INDIVIDUALS ENROLLED IN DAY CARE CENTERS, FAMILY DAY CARE HOMES (FDCH), AFTER SCHOOL PROGRAMS, EMERGENCY SHELTERS, AND/OR HEAD START PROGRAMS.",
+      "source_url": "https://www.usaspending.gov/award/ASST_NON_226OK349N2020_012/"
+     },
+     "columns": {
+      "sub_parent_uei": [
+       "KS8HLVMJEMW9",
+       ""
+      ],
+      "subaward_number": [
+       "DC-62-082",
+       "DC-56-001"
+      ],
+      "sub_uei": [
+       "KS8HLVMJEMW9",
+       "KDYABRXCN245"
+      ],
+      "sub_native_tribe_id": [
+       "TRBF-CHKSWN-00",
+       "TRBF-MSENAT-00"
+      ],
+      "subaward_amount": [
+       "32759.48",
+       "945.62"
+      ],
+      "sub_name": [
+       "CHICKASAW NATION",
+       "MUSCOGEE CREEK NATION"
+      ]
+     }
+    }
+   ],
+   "replay_primary_key_holds": {
+    "columns": [
+     "subaward_number",
+     "subaward_amount",
+     "description",
+     "source_url"
+    ],
+    "rows": 56817,
+    "distinct": 42198,
+    "blank": 14,
+    "unique": false
+   }
+  }
+ ]
+}

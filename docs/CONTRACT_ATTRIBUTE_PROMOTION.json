@@ -1,0 +1,52 @@
+{
+  "built": "2026-09-02",
+  "script": "950_promote_contract_attributes.py",
+  "table": "data/clean/prime_contracts.csv",
+  "rows": 1217768,
+  "md5_original_fields": "8fe2b06e33a8c37c22a5fc371eb18375",
+  "base_columns": 47,
+  "columns_added": [
+    "contract_award_unique_key",
+    "naics_code",
+    "naics_description",
+    "action_date",
+    "award_type",
+    "product_or_service_code",
+    "product_or_service_code_description",
+    "award_base_description",
+    "award_attributes_basis"
+  ],
+  "fill": {
+    "contract_award_unique_key": 841002,
+    "naics_code": 838229,
+    "naics_description": 247987,
+    "action_date": 841002,
+    "award_type": 769868,
+    "product_or_service_code": 247987,
+    "product_or_service_code_description": 247987,
+    "award_base_description": 247987,
+    "award_attributes_basis": 1217768
+  },
+  "basis_counts": {
+    "FULL": 247987,
+    "ARCHIVE_ONLY": 593015,
+    "NO_TRANSACTION_KEY": 376766
+  },
+  "literal_nan_normalised_to_blank": {
+    "naics_code": 2773,
+    "award_type": 71134,
+    "action_date": 0,
+    "contract_award_unique_key": 0
+  },
+  "sector_naics_conflicts": 20,
+  "sector_naics_conflict_register": "review/prime_naics_sector_conflicts_2026-09-02.csv",
+  "archive_rows_scanned": 904282,
+  "archive_matched_prime_rows": 841002,
+  "gapfill_rows_scanned": 1094534,
+  "gapfill_awards_found": 87171,
+  "gapfill_awards_needed": 307671,
+  "sources": {
+    "archive": "data/raw/contracts/usaspending_archive_2026-08-07/filtered",
+    "gapfill": "data/raw/contracts/usaspending_gapfill_2026-08-05"
+  }
+}

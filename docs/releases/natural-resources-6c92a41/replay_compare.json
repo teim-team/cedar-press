@@ -1,0 +1,835 @@
+{
+ "release": "natural-resources-6c92a41",
+ "compared_at": "2026-08-29T10:27:18+00:00",
+ "replay_root": "C:\\Users\\esm247\\AppData\\Local\\Temp\\claude\\C--Users-esm247\\6f0cc363-573d-4f3a-97b1-c84e32f43c8b\\scratchpad\\replay_nr",
+ "n_byte_identical": 0,
+ "n_identical_excluding_named_columns": 1,
+ "n_differing": 5,
+ "n_not_produced": 3,
+ "tables": [
+  {
+   "table": "anc_ceiling_roster.csv",
+   "released_sha256": "61409f8a74838b6c35f08dcc1c5915ecd0da77fd0e231db3d5b5107463f2f41f",
+   "released_rows": 196,
+   "released_columns": [
+    "anc_id",
+    "corporation_name",
+    "anc_class",
+    "status",
+    "uei",
+    "cage_code",
+    "parent_entity_class",
+    "confidence_tier",
+    "note",
+    "source",
+    "source_url",
+    "fetched_date"
+   ],
+   "replay_sha256": "c6e434d57a59754f9f17b378dab4ffe06fbb4f3090cccbe50c9d545c4acbef4b",
+   "replay_rows": 196,
+   "replay_columns": [
+    "anc_id",
+    "corporation_name",
+    "anc_class",
+    "status",
+    "uei",
+    "cage_code",
+    "parent_entity_class",
+    "confidence_tier",
+    "note",
+    "source",
+    "source_url",
+    "fetched_date"
+   ],
+   "schema_identical": true,
+   "row_count_identical": true,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "fetched_date"
+   ],
+   "content_compared_columns": 11,
+   "content_identical_excluding": true,
+   "verdict": "IDENTICAL_EXCEPT fetched_date",
+   "first_differences": [],
+   "replay_primary_key_holds": {
+    "columns": [
+     "anc_id"
+    ],
+    "rows": 196,
+    "distinct": 196,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "ancsa_filings_index.csv",
+   "released_sha256": "53c48da9a30e8ba8c402ccf0055f60f482e7fec3157697ed73a7531d920f4f02",
+   "released_rows": 19269,
+   "released_columns": [
+    "corporation_name",
+    "anc_id",
+    "document_type",
+    "filing_date",
+    "period_covered",
+    "portal_url",
+    "downloaded",
+    "retrieved_date",
+    "anc_class",
+    "roster_name",
+    "document_description",
+    "description_date_token",
+    "portal_document_id",
+    "corporation_attribution",
+    "local_file",
+    "bytes",
+    "sha256"
+   ],
+   "verdict": "NOT_PRODUCED",
+   "why": "the replay did not write this table"
+  },
+  {
+   "table": "nd_severance_allocation.csv",
+   "released_sha256": "9da15d95add91ad858575ef0cfcfbace69f23efc718f6ac59272e4b62ba4476a",
+   "released_rows": 7,
+   "released_columns": [
+    "allocation_id",
+    "tribe_id",
+    "statute_cite",
+    "effective_start",
+    "effective_end",
+    "well_vintage_rule",
+    "trust_land_tribal_share",
+    "trust_land_state_share",
+    "fee_land_tribal_share",
+    "fee_land_state_share",
+    "superseded_by",
+    "source_url",
+    "source_quote",
+    "fetched_date",
+    "tier",
+    "confidence",
+    "built_date",
+    "cedar_uid"
+   ],
+   "replay_sha256": "e7c36af7c52d05eaed68d5704ba212e99ca3fde052c4897c9c4a6e71693b36d8",
+   "replay_rows": 7,
+   "replay_columns": [
+    "allocation_id",
+    "tribe_id",
+    "statute_cite",
+    "effective_start",
+    "effective_end",
+    "well_vintage_rule",
+    "trust_land_tribal_share",
+    "trust_land_state_share",
+    "fee_land_tribal_share",
+    "fee_land_state_share",
+    "superseded_by",
+    "source_url",
+    "source_quote",
+    "fetched_date",
+    "tier",
+    "confidence",
+    "built_date"
+   ],
+   "schema_identical": false,
+   "row_count_identical": true,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "built_date",
+    "cedar_uid",
+    "fetched_date"
+   ],
+   "content_compared_columns": 15,
+   "content_identical_excluding": false,
+   "verdict": "DIFFERS_SCHEMA",
+   "first_differences": [
+    {
+     "row_index": 4,
+     "key": {
+      "allocation_id": "ND-ALLOC-005"
+     },
+     "columns": {
+      "well_vintage_rule": [
+       "STRADDLE WELLS - wells located OUTSIDE the reservation with one or more laterals penetrating the boundary - drilled BEFORE 2019-07-01. The share is not a flat percentage: it is 50 percent of certified straddle-well taxes multiplied by the on-reservation trust lands acreage ratio, plus 50 percent multiplied by the non-trust ratio, both certified annually by the Industrial Commission and published by the Tax Commissioner. Certified ratios: FY2025: trust 0.1570093, non-trust 0.2298095 (July 1, 2024 through June 30, 2025); FY2026: trust 0.1615461, non-trust 0.2294837 (July 1, 2025 through June 30, 2026).",
+       "STRADDLE WELLS - wells located OUTSIDE the reservation with one or more laterals penetrating the boundary - drilled BEFORE 2019-07-01. The share is not a flat percentage: it is 50 percent of certified straddle-well taxes multiplied by the on-reservation trust lands acreage ratio, plus 50 percent multiplied by the non-trust ratio, both certified annually by the Industrial Commission and published by the Tax Commissioner. "
+      ]
+     }
+    },
+    {
+     "row_index": 5,
+     "key": {
+      "allocation_id": "ND-ALLOC-006"
+     },
+     "columns": {
+      "well_vintage_rule": [
+       "STRADDLE WELLS drilled ON OR AFTER 2019-07-01. 80 percent of certified straddle-well taxes times the on-reservation trust lands acreage ratio, plus 20 percent times the non-trust ratio. Same vintage boundary as ND-ALLOC-004, so the straddle-well distribution is a blend for the same reason - but a NARROW one, because both vintages are multiplied by the same published acreage ratios. Certified ratios: FY2025: trust 0.1570093, non-trust 0.2298095 (July 1, 2024 through June 30, 2025); FY2026: trust 0.1615461, non-trust 0.2294837 (July 1, 2025 through June 30, 2026).",
+       "STRADDLE WELLS drilled ON OR AFTER 2019-07-01. 80 percent of certified straddle-well taxes times the on-reservation trust lands acreage ratio, plus 20 percent times the non-trust ratio. Same vintage boundary as ND-ALLOC-004, so the straddle-well distribution is a blend for the same reason - but a NARROW one, because both vintages are multiplied by the same published acreage ratios. "
+      ],
+      "confidence": [
+       "With the FY2026 certified ratios the effective share of certified straddle-well taxes lies between 0.1751336 (all wells post-2019) and 0.1955149 (all wells pre-2019) - a bound about eleven percent wide, which is the only place in this build where the vintage blend narrows to something tight.",
+       "acreage ratio certification not retrieved for this fiscal year"
+      ]
+     }
+    }
+   ],
+   "replay_primary_key_holds": {
+    "columns": [
+     "allocation_id"
+    ],
+    "rows": 7,
+    "distinct": 7,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "resource_asset_source_coverage.csv",
+   "released_sha256": "fc0d5f5405dd071c9456509b07a9975a7f46ae11d8c1892628e3cfda6d5d4596",
+   "released_rows": 18,
+   "released_columns": [
+    "source_system",
+    "publisher",
+    "attribute",
+    "coverage_state",
+    "what_was_swept",
+    "evidence",
+    "source_url",
+    "checked_date"
+   ],
+   "verdict": "NOT_PRODUCED",
+   "why": "the replay did not write this table"
+  },
+  {
+   "table": "resource_assets.csv",
+   "released_sha256": "6a83aa66ad216b3fdb5692d0946828f8ac210d6cd91dd17b3692624250cb4cd6",
+   "released_rows": 35,
+   "released_columns": [
+    "resource_asset_id",
+    "asset_type",
+    "asset_name",
+    "source_system",
+    "source_asset_id",
+    "niogems_lease_id",
+    "niogems_tract_id",
+    "niogems_agreement_id",
+    "niogems_well_id",
+    "resource_type",
+    "commodity",
+    "state",
+    "county",
+    "fips_code",
+    "latitude",
+    "longitude",
+    "reservation_name",
+    "land_status",
+    "land_status_source_url",
+    "operator_name",
+    "operator_entity_id",
+    "status",
+    "first_production_date",
+    "spud_date",
+    "geometry_basis",
+    "confidence",
+    "source_url",
+    "fetched_date",
+    "built_date",
+    "legal_title_holder",
+    "beneficial_interest_class",
+    "ownership_basis",
+    "area_acres",
+    "area_unit",
+    "area_basis",
+    "as_of_date",
+    "asset_count_in_source",
+    "evidence_document",
+    "evidence_document_type",
+    "evidence_quote",
+    "quote_verified",
+    "revenue_coverage_state",
+    "production_coverage_state",
+    "coverage_note",
+    "cedar_uid"
+   ],
+   "replay_sha256": "94e013f8512486b50d24a45b0c74c76a9e228cfc57dbf0c050c1ef3af10167b2",
+   "replay_rows": 0,
+   "replay_columns": [
+    "resource_asset_id",
+    "asset_type",
+    "asset_name",
+    "source_system",
+    "source_asset_id",
+    "niogems_lease_id",
+    "niogems_tract_id",
+    "niogems_agreement_id",
+    "niogems_well_id",
+    "resource_type",
+    "commodity",
+    "state",
+    "county",
+    "fips_code",
+    "latitude",
+    "longitude",
+    "reservation_name",
+    "land_status",
+    "land_status_source_url",
+    "operator_name",
+    "operator_entity_id",
+    "status",
+    "first_production_date",
+    "spud_date",
+    "geometry_basis",
+    "confidence",
+    "source_url",
+    "fetched_date",
+    "built_date"
+   ],
+   "schema_identical": false,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "area_acres",
+    "area_basis",
+    "area_unit",
+    "as_of_date",
+    "asset_count_in_source",
+    "beneficial_interest_class",
+    "built_date",
+    "cedar_uid",
+    "coverage_note",
+    "evidence_document",
+    "evidence_document_type",
+    "evidence_quote",
+    "legal_title_holder",
+    "ownership_basis",
+    "production_coverage_state",
+    "quote_verified",
+    "revenue_coverage_state"
+   ],
+   "content_compared_columns": 28,
+   "content_identical_excluding": false,
+   "verdict": "DIFFERS_SCHEMA",
+   "first_differences": [],
+   "replay_primary_key_holds": {
+    "columns": [
+     "resource_asset_id"
+    ],
+    "rows": 0,
+    "distinct": 0,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "resource_parties.csv",
+   "released_sha256": "7f09c3a15731090465f3ff484a6bfeae365ff2eb5c62c7fdd53f10b6dfe656ee",
+   "released_rows": 1436,
+   "released_columns": [
+    "party_link_id",
+    "object_type",
+    "object_id",
+    "entity_id",
+    "entity_name",
+    "entity_is_native",
+    "party_role",
+    "relationship",
+    "interest_share_pct",
+    "basis",
+    "confidence",
+    "source_url",
+    "fetched_date",
+    "built_date",
+    "cedar_uid"
+   ],
+   "replay_sha256": "8b7f30d06a8a6306833dfe902825e184592b2fb9eade40f8c8c16f6f81704d2f",
+   "replay_rows": 118,
+   "replay_columns": [
+    "party_link_id",
+    "object_type",
+    "object_id",
+    "entity_id",
+    "entity_name",
+    "entity_is_native",
+    "party_role",
+    "relationship",
+    "interest_share_pct",
+    "basis",
+    "confidence",
+    "source_url",
+    "fetched_date",
+    "built_date"
+   ],
+   "schema_identical": false,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "cedar_uid"
+   ],
+   "content_compared_columns": 14,
+   "content_identical_excluding": false,
+   "verdict": "DIFFERS_SCHEMA",
+   "first_differences": [
+    {
+     "row_index": 0,
+     "key": {
+      "party_link_id": "PL-RRE-ND-00001-RECIP",
+      "object_id": "RRE-ND-00001",
+      "source_url": "https://www.nd.gov/treasurer/tax-distribution-search",
+      "entity_id": "TRBF-MHATAT-00"
+     },
+     "columns": {
+      "object_id": [
+       "RRE-ND-00001",
+       "RRE-UT-2115-2025-REV"
+      ],
+      "built_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ],
+      "party_role": [
+       "recipient",
+       "fund_beneficiary_population"
+      ],
+      "entity_id": [
+       "TRBF-MHATAT-00",
+       "TRBF-NAVAJO-00"
+      ],
+      "entity_name": [
+       "Three Affiliated",
+       "Navajo"
+      ],
+      "source_url": [
+       "https://www.nd.gov/treasurer/tax-distribution-search",
+       "https://le.utah.gov/xcode/Title59/Chapter5/C59-5-S119_2026050620260701.html"
+      ]
+     }
+    },
+    {
+     "row_index": 1,
+     "key": {
+      "party_link_id": "PL-RRE-ND-00001-PAYER",
+      "object_id": "RRE-ND-00001",
+      "source_url": "https://www.nd.gov/treasurer/tax-distribution-search",
+      "entity_id": "PAYER-STATE-ND"
+     },
+     "columns": {
+      "entity_is_native": [
+       "0",
+       "1"
+      ],
+      "object_id": [
+       "RRE-ND-00001",
+       "RRE-UT-2115-2025-EXP"
+      ],
+      "built_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ],
+      "party_role": [
+       "payer",
+       "fund_beneficiary_population"
+      ],
+      "entity_id": [
+       "PAYER-STATE-ND",
+       "TRBF-NAVAJO-00"
+      ],
+      "entity_name": [
+       "State of North Dakota",
+       "Navajo"
+      ]
+     }
+    },
+    {
+     "row_index": 2,
+     "key": {
+      "party_link_id": "PL-RRE-ND-00002-RECIP",
+      "object_id": "RRE-ND-00002",
+      "source_url": "https://www.nd.gov/treasurer/tax-distribution-search",
+      "entity_id": "TRBF-MHATAT-00"
+     },
+     "columns": {
+      "object_id": [
+       "RRE-ND-00002",
+       "RRE-UT-2115-2024-REV"
+      ],
+      "built_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ],
+      "party_role": [
+       "recipient",
+       "fund_beneficiary_population"
+      ],
+      "entity_id": [
+       "TRBF-MHATAT-00",
+       "TRBF-NAVAJO-00"
+      ],
+      "entity_name": [
+       "Three Affiliated",
+       "Navajo"
+      ],
+      "source_url": [
+       "https://www.nd.gov/treasurer/tax-distribution-search",
+       "https://le.utah.gov/xcode/Title59/Chapter5/C59-5-S119_2026050620260701.html"
+      ]
+     }
+    },
+    {
+     "row_index": 3,
+     "key": {
+      "party_link_id": "PL-RRE-ND-00002-PAYER",
+      "object_id": "RRE-ND-00002",
+      "source_url": "https://www.nd.gov/treasurer/tax-distribution-search",
+      "entity_id": "PAYER-STATE-ND"
+     },
+     "columns": {
+      "entity_is_native": [
+       "0",
+       "1"
+      ],
+      "object_id": [
+       "RRE-ND-00002",
+       "RRE-UT-2115-2024-EXP"
+      ],
+      "built_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ],
+      "party_role": [
+       "payer",
+       "fund_beneficiary_population"
+      ],
+      "entity_id": [
+       "PAYER-STATE-ND",
+       "TRBF-NAVAJO-00"
+      ],
+      "entity_name": [
+       "State of North Dakota",
+       "Navajo"
+      ]
+     }
+    },
+    {
+     "row_index": 4,
+     "key": {
+      "party_link_id": "PL-RRE-ND-00003-RECIP",
+      "object_id": "RRE-ND-00003",
+      "source_url": "https://www.nd.gov/treasurer/tax-distribution-search",
+      "entity_id": "TRBF-MHATAT-00"
+     },
+     "columns": {
+      "object_id": [
+       "RRE-ND-00003",
+       "RRE-UT-2115-2023-REV"
+      ],
+      "built_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ],
+      "party_role": [
+       "recipient",
+       "fund_beneficiary_population"
+      ],
+      "entity_id": [
+       "TRBF-MHATAT-00",
+       "TRBF-NAVAJO-00"
+      ],
+      "entity_name": [
+       "Three Affiliated",
+       "Navajo"
+      ],
+      "source_url": [
+       "https://www.nd.gov/treasurer/tax-distribution-search",
+       "https://le.utah.gov/xcode/Title59/Chapter5/C59-5-S119_2026050620260701.html"
+      ]
+     }
+    }
+   ],
+   "replay_primary_key_holds": {
+    "columns": [
+     "party_link_id",
+     "object_id",
+     "source_url",
+     "entity_id"
+    ],
+    "rows": 118,
+    "distinct": 118,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "resource_revenue.csv",
+   "released_sha256": "20ae209fb1e9e7299f6d620ab25f0edd34e07ee7e9df989146d323de01b4fbec",
+   "released_rows": 10482,
+   "released_columns": [
+    "resource_revenue_event_id",
+    "recipient_entity_id",
+    "recipient_entity_name",
+    "beneficiary_entity_id",
+    "beneficiary_entity_name",
+    "beneficiary_note",
+    "payer_entity_id",
+    "payer_entity_name",
+    "operator_entity_id",
+    "operator_entity_name",
+    "related_asset_ids",
+    "source_system",
+    "source_record_id",
+    "revenue_type",
+    "resource_type",
+    "commodity",
+    "product",
+    "mineral_lease_type",
+    "period_type",
+    "period_start",
+    "period_end",
+    "payment_date",
+    "amount_usd",
+    "amount_usd_real2025",
+    "deflator_factor_2025",
+    "inflation_base_year",
+    "measurement_status",
+    "aggregation_level",
+    "land_status",
+    "land_status_basis",
+    "allocation_formula",
+    "allocation_formula_effective_start",
+    "allocation_formula_effective_end",
+    "allocation_formula_source_url",
+    "amount_sign_meaning",
+    "geography_note",
+    "confidence",
+    "source_url",
+    "fetched_date",
+    "built_date",
+    "cedar_uid"
+   ],
+   "replay_sha256": "c161f12f1e976c853066fded8faeb802ffa1a3055d9314fc09e8d9b85573b44d",
+   "replay_rows": 9562,
+   "replay_columns": [
+    "resource_revenue_event_id",
+    "recipient_entity_id",
+    "recipient_entity_name",
+    "beneficiary_entity_id",
+    "beneficiary_entity_name",
+    "beneficiary_note",
+    "payer_entity_id",
+    "payer_entity_name",
+    "operator_entity_id",
+    "operator_entity_name",
+    "related_asset_ids",
+    "source_system",
+    "source_record_id",
+    "revenue_type",
+    "resource_type",
+    "commodity",
+    "product",
+    "mineral_lease_type",
+    "period_type",
+    "period_start",
+    "period_end",
+    "payment_date",
+    "amount_usd",
+    "amount_usd_real2025",
+    "deflator_factor_2025",
+    "inflation_base_year",
+    "measurement_status",
+    "aggregation_level",
+    "land_status",
+    "land_status_basis",
+    "allocation_formula",
+    "allocation_formula_effective_start",
+    "allocation_formula_effective_end",
+    "allocation_formula_source_url",
+    "amount_sign_meaning",
+    "geography_note",
+    "confidence",
+    "source_url",
+    "fetched_date",
+    "built_date"
+   ],
+   "schema_identical": false,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "built_date",
+    "cedar_uid"
+   ],
+   "content_compared_columns": 39,
+   "content_identical_excluding": false,
+   "verdict": "DIFFERS_SCHEMA",
+   "first_differences": [
+    {
+     "row_index": 0,
+     "key": {
+      "resource_revenue_event_id": "RRE-ONRR-REV-000001"
+     },
+     "columns": {
+      "fetched_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ]
+     }
+    },
+    {
+     "row_index": 1,
+     "key": {
+      "resource_revenue_event_id": "RRE-ONRR-REV-000002"
+     },
+     "columns": {
+      "fetched_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ]
+     }
+    },
+    {
+     "row_index": 2,
+     "key": {
+      "resource_revenue_event_id": "RRE-ONRR-REV-000003"
+     },
+     "columns": {
+      "fetched_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ]
+     }
+    },
+    {
+     "row_index": 3,
+     "key": {
+      "resource_revenue_event_id": "RRE-ONRR-REV-000004"
+     },
+     "columns": {
+      "fetched_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ]
+     }
+    },
+    {
+     "row_index": 4,
+     "key": {
+      "resource_revenue_event_id": "RRE-ONRR-REV-000005"
+     },
+     "columns": {
+      "fetched_date": [
+       "2026-08-06",
+       "2026-08-29"
+      ]
+     }
+    }
+   ],
+   "replay_primary_key_holds": {
+    "columns": [
+     "resource_revenue_event_id"
+    ],
+    "rows": 9562,
+    "distinct": 9562,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "tribal_bond_issuances.csv",
+   "released_sha256": "2d07064ec374f7100b681caa194c84daad29b0dda8626ea41a8cc67acdd978d7",
+   "released_rows": 29,
+   "released_columns": [
+    "issuer",
+    "issuer_entity_id",
+    "cusip",
+    "issue_date",
+    "par_amount",
+    "instrument_type",
+    "maturity",
+    "use_of_proceeds",
+    "rating_at_issue",
+    "rating_agency",
+    "source_url",
+    "retrieved_date",
+    "date_basis",
+    "notes"
+   ],
+   "verdict": "NOT_PRODUCED",
+   "why": "the replay did not write this table"
+  },
+  {
+   "table": "tribal_tax_bases.csv",
+   "released_sha256": "e05ea9df079c86e7ab78711851b63846f05cd3685e0b140992d72418652cacd5",
+   "released_rows": 1712,
+   "released_columns": [
+    "tax_observation_id",
+    "tribe_id",
+    "tribe_name",
+    "state",
+    "tax_type",
+    "period_start",
+    "period_end",
+    "tax_remitted_usd",
+    "statutory_rate",
+    "rate_unit",
+    "derived_taxable_base",
+    "base_unit",
+    "rate_source_quote",
+    "amount_source_quote",
+    "agreement_or_statute_cite",
+    "measurement_status",
+    "bound_basis",
+    "source_url",
+    "fetched_date",
+    "tier",
+    "confidence",
+    "built_date",
+    "cedar_uid"
+   ],
+   "replay_sha256": "b3bfddbacaae37c2d4bdcca75a45fd4431841a60533d3918dc475fc498ac3d14",
+   "replay_rows": 96,
+   "replay_columns": [
+    "tax_observation_id",
+    "tribe_id",
+    "tribe_name",
+    "state",
+    "tax_type",
+    "period_start",
+    "period_end",
+    "tax_remitted_usd",
+    "statutory_rate",
+    "rate_unit",
+    "derived_taxable_base",
+    "base_unit",
+    "rate_source_quote",
+    "amount_source_quote",
+    "agreement_or_statute_cite",
+    "measurement_status",
+    "bound_basis",
+    "source_url",
+    "fetched_date",
+    "tier",
+    "confidence",
+    "built_date"
+   ],
+   "schema_identical": false,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [
+    "built_date",
+    "cedar_uid",
+    "fetched_date"
+   ],
+   "content_compared_columns": 20,
+   "content_identical_excluding": false,
+   "verdict": "DIFFERS_SCHEMA",
+   "first_differences": [],
+   "replay_primary_key_holds": {
+    "columns": [
+     "tax_observation_id"
+    ],
+    "rows": 96,
+    "distinct": 96,
+    "blank": 0,
+    "unique": true
+   }
+  }
+ ]
+}

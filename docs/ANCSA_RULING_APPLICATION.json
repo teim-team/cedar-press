@@ -1,0 +1,22 @@
+{
+  "built": "2026-08-26",
+  "script": "code/191_apply_ancsa_ownership_ruling.py",
+  "ruling": "docs/ANCSA_OWNERSHIP_RULING.md, Elijah 2026-08-26",
+  "family": "ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION",
+  "defects": 334,
+  "disposition_counts": {
+    "RESOLVED_TO_VILLAGE_CORPORATION_RULE_1": 322,
+    "HUMAN_NEEDED_SURVIVING_CORPORATION_UNVERIFIED": 8,
+    "RULE_3_CANDIDATE_HUMAN_NEEDED": 2,
+    "HELD_BY_AN_EXISTING_RULING_HUMAN_NEEDED": 2
+  },
+  "disposition_dollars_musd": {
+    "RESOLVED_TO_VILLAGE_CORPORATION_RULE_1": 24384.64,
+    "HUMAN_NEEDED_SURVIVING_CORPORATION_UNVERIFIED": 11.56,
+    "RULE_3_CANDIDATE_HUMAN_NEEDED": 0.41,
+    "HELD_BY_AN_EXISTING_RULING_HUMAN_NEEDED": 121.2
+  },
+  "rule2_refusals": 334,
+  "share_transfer_open_question_affects_any_row": false,
+  "share_transfer_predicates_used": []
+}

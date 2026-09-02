@@ -1,0 +1,296 @@
+{
+ "generated_utc": "2026-08-26T22:39:49.375403+00:00",
+ "script": "code/201_value_of_pre2007_fpds_netnew.py",
+ "network_requests_issued": 0,
+ "tier_policy": "Tier is INHERITED from cedar_identifier_ledger_final.csv, never assigned here. An exact UEI join onto a tier-B row is still tier B (START_HERE.md standing rule 1).",
+ "ledger_uei_keys": 13507,
+ "ledger_tier_counts": {
+  "A": 1265,
+  "B": 2751,
+  "C": 9344,
+  "X": 147
+ },
+ "prime_min_fiscal_year": 2000,
+ "netnew_pre2007": {
+  "rows_by_inherited_tier": {
+   "C": 22463,
+   "A": 17076,
+   "(no ledger link)": 3146,
+   "B": 5388,
+   "X": 970
+  },
+  "usd_by_inherited_tier": {
+   "C": 3312519091.51,
+   "A": 4234581376.27,
+   "(no ledger link)": 1181658939.27,
+   "B": 994057953.78,
+   "X": 105528558.18
+  },
+  "distinct_uei_by_inherited_tier": {
+   "C": 1356,
+   "A": 337,
+   "(no ledger link)": 450,
+   "B": 374,
+   "X": 39
+  },
+  "total_rows": 49043,
+  "total_usd": 9828345919.01
+ },
+ "netnew_by_source_file": {
+  "Data Request 4-5-2023 File 1.csv": {
+   "netnew_rows_by_inherited_tier": {
+    "C": 2124,
+    "A": 459,
+    "(no ledger link)": 296,
+    "B": 207,
+    "X": 81
+   },
+   "netnew_usd_by_inherited_tier": {
+    "C": 469342724.29,
+    "A": 229437818.31,
+    "(no ledger link)": 765994264.65,
+    "B": 82371015.09,
+    "X": 21954368.29
+   }
+  },
+  "Data Request 4-5-2023 File 2.csv": {
+   "netnew_rows_by_inherited_tier": {
+    "A": 15344,
+    "C": 17715,
+    "(no ledger link)": 2716,
+    "X": 656,
+    "B": 4601
+   },
+   "netnew_usd_by_inherited_tier": {
+    "A": 3898170981.13,
+    "C": 2689221826.47,
+    "(no ledger link)": 411961559.55,
+    "X": 81992290.73,
+    "B": 850275281.65
+   }
+  },
+  "Data Request 5-8-2023 IDVs.csv": {
+   "netnew_rows_by_inherited_tier": {
+    "C": 2624,
+    "A": 1273,
+    "B": 580,
+    "X": 233,
+    "(no ledger link)": 134
+   },
+   "netnew_usd_by_inherited_tier": {
+    "C": 153954540.75,
+    "A": 106972576.83,
+    "B": 61411657.04,
+    "X": 1581899.16,
+    "(no ledger link)": 3703115.07
+   }
+  }
+ },
+ "pre_fy2000_window": {
+  "note": "prime_contracts.csv min fiscal_year is 2000, so this window is absent from the clean table entirely.",
+  "rows": 6816,
+  "usd": 2611636699.23,
+  "rows_on_tier_A_ledger_uei": 1850,
+  "usd_on_tier_A_ledger_uei": 594557216.0,
+  "rows_by_fiscal_year": {
+   "1979": 6,
+   "1980": 2,
+   "1981": 4,
+   "1982": 4,
+   "1983": 8,
+   "1984": 6,
+   "1985": 7,
+   "1986": 7,
+   "1987": 6,
+   "1988": 6,
+   "1989": 109,
+   "1990": 25,
+   "1991": 11,
+   "1992": 15,
+   "1993": 17,
+   "1994": 16,
+   "1995": 17,
+   "1996": 9,
+   "1997": 37,
+   "1998": 139,
+   "1999": 6365
+  }
+ },
+ "top_netnew_entities_tierAB": [
+  {
+   "entity_id": "ANRC-ARCSLO-00",
+   "name": "Arctic Slope Regional Corporation",
+   "inherited_tier": "A",
+   "netnew_rows": 5597,
+   "netnew_usd": 1318269281.62
+  },
+  {
+   "entity_id": "ANRC-CHGCCO-00",
+   "name": "Chugach Alaska Corporation",
+   "inherited_tier": "A",
+   "netnew_rows": 1107,
+   "netnew_usd": 431392833.87
+  },
+  {
+   "entity_id": "ANRC-NANARC-00",
+   "name": "NANA Regional Corporation, Incorporated",
+   "inherited_tier": "A",
+   "netnew_rows": 1005,
+   "netnew_usd": 425138365.85
+  },
+  {
+   "entity_id": "ANVC-CHENEG-00",
+   "name": "Chenega Corporation",
+   "inherited_tier": "A",
+   "netnew_rows": 1248,
+   "netnew_usd": 345481475.34
+  },
+  {
+   "entity_id": "ANVC-AFOGNA-00",
+   "name": "Afognak Native Corporation",
+   "inherited_tier": "A",
+   "netnew_rows": 475,
+   "netnew_usd": 293741263.15
+  },
+  {
+   "entity_id": "ANRC-AHTNAI-00",
+   "name": "Ahtna, Incorporated",
+   "inherited_tier": "B",
+   "netnew_rows": 400,
+   "netnew_usd": 170002932.65
+  },
+  {
+   "entity_id": "ANRC-CALSTA-00",
+   "name": "Calista Corporation",
+   "inherited_tier": "A",
+   "netnew_rows": 197,
+   "netnew_usd": 148240789.01
+  },
+  {
+   "entity_id": "TRBF-CHKSWN-00",
+   "name": "The Chickasaw Nation",
+   "inherited_tier": "A",
+   "netnew_rows": 283,
+   "netnew_usd": 124747510.55
+  },
+  {
+   "entity_id": "ANVC-EYAKXX-00",
+   "name": "Eyak Corporation",
+   "inherited_tier": "A",
+   "netnew_rows": 190,
+   "netnew_usd": 85749550.53
+  },
+  {
+   "entity_id": "ANRC-BRBYCO-00",
+   "name": "Bristol Bay Native Corporation",
+   "inherited_tier": "B",
+   "netnew_rows": 240,
+   "netnew_usd": 83532386.05
+  },
+  {
+   "entity_id": "TRBF-CSKTFR-00",
+   "name": "Confederated Salish",
+   "inherited_tier": "A",
+   "netnew_rows": 305,
+   "netnew_usd": 81995680.14
+  },
+  {
+   "entity_id": "ANVC-KPVKPT-00",
+   "name": "Ukpea\u0121vik I\u00f1upiat Corporation",
+   "inherited_tier": "A",
+   "netnew_rows": 522,
+   "netnew_usd": 79313061.4
+  },
+  {
+   "entity_id": "CNSF-PSMQDY-IT",
+   "name": "Passamaquoddy Indian Township",
+   "inherited_tier": "A",
+   "netnew_rows": 37,
+   "netnew_usd": 78844526.0
+  },
+  {
+   "entity_id": "ANRC-CKINLT-00",
+   "name": "Cook Inlet Region, Incorporated",
+   "inherited_tier": "A",
+   "netnew_rows": 998,
+   "netnew_usd": 78037274.51
+  },
+  {
+   "entity_id": "TRBF-UNTHOR-00",
+   "name": "Ute",
+   "inherited_tier": "A",
+   "netnew_rows": 118,
+   "netnew_usd": 66475691.29
+  },
+  {
+   "entity_id": "TRBF-SPRTLK-00",
+   "name": "Spirit Lake",
+   "inherited_tier": "B",
+   "netnew_rows": 129,
+   "netnew_usd": 58395234.98
+  },
+  {
+   "entity_id": "ANVC-KYTLTS-00",
+   "name": "K'oyitl'ots'ina, Ltd.",
+   "inherited_tier": "A",
+   "netnew_rows": 393,
+   "netnew_usd": 57346089.6
+  },
+  {
+   "entity_id": "ANVC-CHGGNG-00",
+   "name": "Choggiung, Ltd.",
+   "inherited_tier": "A",
+   "netnew_rows": 86,
+   "netnew_usd": 53065445.0
+  },
+  {
+   "entity_id": "ANRC-NANARC-00",
+   "name": "NANA Regional Corporation, Incorporated",
+   "inherited_tier": "B",
+   "netnew_rows": 171,
+   "netnew_usd": 49505419.33
+  },
+  {
+   "entity_id": "AKNF-VEAGLE-00-DOYONL-TNNACH",
+   "name": "Eagle",
+   "inherited_tier": "B",
+   "netnew_rows": 311,
+   "netnew_usd": 48984988.68
+  },
+  {
+   "entity_id": "TRBF-NAVAJO-00",
+   "name": "Navajo",
+   "inherited_tier": "B",
+   "netnew_rows": 126,
+   "netnew_usd": 48247738.65
+  },
+  {
+   "entity_id": "TRBF-MHATAT-00",
+   "name": "Three Affiliated",
+   "inherited_tier": "A",
+   "netnew_rows": 289,
+   "netnew_usd": 46480445.69
+  },
+  {
+   "entity_id": "ANVC-GLDBLT-00",
+   "name": "Goldbelt, Incorporated",
+   "inherited_tier": "A",
+   "netnew_rows": 535,
+   "netnew_usd": 46398040.39
+  },
+  {
+   "entity_id": "TRBF-CHKSWN-00",
+   "name": "The Chickasaw Nation",
+   "inherited_tier": "B",
+   "netnew_rows": 70,
+   "netnew_usd": 43406608.67
+  },
+  {
+   "entity_id": "TRBF-LAGUNA-00",
+   "name": "Pueblo of Laguna",
+   "inherited_tier": "B",
+   "netnew_rows": 106,
+   "netnew_usd": 42018156.78
+  }
+ ]
+}

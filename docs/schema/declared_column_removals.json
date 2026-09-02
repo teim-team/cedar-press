@@ -1,0 +1,61 @@
+{
+ "_README": "Column removals that were DELIBERATE. `62`'s files_with_columns_lost_vs_backup compares a live table against its newest `.bak_*` and cannot tell an intentional removal from an accident, so without this file a deliberate removal keeps the gate red forever and the gate stops being read. A declaration is not a waiver: it must name the script that removed the column and why, and it only excuses THAT column on THAT file. Any other loss still fails.",
+ "declarations": [
+  {
+   "file": "cedar_entity_spine.csv",
+   "column": "cicd_verified",
+   "removed_by": "code/844_nuke_cicd.py",
+   "date": "2026-09-02",
+   "why": "The owner retired the CICD scheme outright: 'no one uses CICD data, so it's not like we have to link ours to theirs.' A boolean asserting that a third party's list agrees with us IS that dependency, and on the spine it is the strongest form of it."
+  },
+  {
+   "file": "native_fi_roster.csv",
+   "column": "in_cicd_nafi_map",
+   "removed_by": "code/844_nuke_cicd.py",
+   "date": "2026-09-02",
+   "why": "Same ruling. Provenance about a third party we no longer link to."
+  },
+  {
+   "file": "tcu_cdfi_added.csv",
+   "column": "cicd_verified",
+   "removed_by": "code/844_nuke_cicd.py",
+   "date": "2026-09-02",
+   "why": "Same ruling; additionally 100% blank on all 130 rows."
+  },
+  {
+   "file": "cedar_identity_register.csv",
+   "column": "same_as_legacy_cicd",
+   "removed_by": "code/843_retire_cicd_scheme.py",
+   "date": "2026-09-01",
+   "why": "The CICD id as a shipped identity. Its token matcher merged United Keetoowah Band into Cherokee Nation - 820 rows, $181,881,441.37 - and filed an Ohio county housing authority as a tribe."
+  },
+  {
+   "file": "federal_funding_transactions.csv",
+   "column": "tribe_id",
+   "removed_by": "code/843_retire_cicd_scheme.py",
+   "date": "2026-09-01",
+   "why": "The CICD integer. 365,491 of 365,535 rows already carried a cedar_uid, so dropping it cost 44 rows of identity and all 44 were non-Native county housing authorities."
+  },
+  {
+   "file": "federal_funding_transactions.csv",
+   "column": "tribe_id_scheme",
+   "removed_by": "code/843_retire_cicd_scheme.py",
+   "date": "2026-09-01",
+   "why": "Named the retired scheme. Renamed survivors: attribution_status/_basis."
+  },
+  {
+   "file": "federal_funding_tribe_year_panel.csv",
+   "column": "tribe_id",
+   "removed_by": "code/843_retire_cicd_scheme.py",
+   "date": "2026-09-01",
+   "why": "Same ruling as the transactions table."
+  },
+  {
+   "file": "federal_funding_tribe_year_panel.csv",
+   "column": "tribe_id_scheme",
+   "removed_by": "code/843_retire_cicd_scheme.py",
+   "date": "2026-09-01",
+   "why": "Same ruling as the transactions table."
+  }
+ ]
+}

@@ -1,0 +1,1220 @@
+{
+ "release_id": "native-owned-businesses-6c92a41",
+ "generated_at": "2026-08-29T10:31:51+00:00",
+ "generated_by": "code/516_release_manifest.py",
+ "commit": "6c92a41f7b3275f3e4ee8edafd03cfb8e65be5ce",
+ "commit_subject": "Integrator: dollar-discrepancy reconciled; owner decision queue consolidated",
+ "tree_clean_at_capture": false,
+ "code_in_scope_matches_commit": true,
+ "dirty_paths": [
+  "GENTS.md",
+  "code/510_assertions.py",
+  "code/512_build_dataset_contracts.py",
+  "code/516_release_manifest.py",
+  "docs/ASSERTION_LAYER.md",
+  "docs/DATASET_CONTRACTS.md",
+  "docs/SOURCE_RECORD_LAYER.md",
+  "docs/lint_bug_classes.json",
+  "docs/schema/dataset_contracts.json",
+  "docs/GRAIN_AUDIT.md",
+  "docs/releases/_analysis/",
+  "docs/releases/nagpra-6c92a41/",
+  "docs/releases/native-owned-businesses-6c92a41/",
+  "docs/releases/natural-resources-6c92a41/",
+  "docs/releases/subcontracting-6c92a41/",
+  "docs/schema/grain_evidence.json"
+ ],
+ "retention_policy": {
+  "store": "data/_release_inputs",
+  "retain_max_bytes": 1073741824,
+  "release_budget_bytes": 12884901888,
+  "budget_remaining_bytes": 12884901888,
+  "addressing": "content-addressed by sha256; blobs deduplicate across releases"
+ },
+ "environment": {
+  "python_version": "3.14.7",
+  "python_implementation": "CPython",
+  "python_executable": "C:\\Users\\esm247\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "filesystem_case_sensitive": false,
+  "cwd_at_capture": "C:\\Users\\esm247\\Desktop\\Cedar Press",
+  "packages": [
+   "Deprecated==1.3.1",
+   "Jinja2==3.1.6",
+   "MarkupSafe==3.0.3",
+   "PyMuPDF==1.27.2.2",
+   "PyYAML==6.0.3",
+   "Pygments==2.20.0",
+   "RapidFuzz==3.14.5",
+   "WMI==1.5.1",
+   "affine==2.4.0",
+   "annotated-doc==0.0.4",
+   "anyio==4.13.0",
+   "asttokens==3.0.1",
+   "attrs==26.1.0",
+   "babel==2.18.0",
+   "beautifulsoup4==4.14.3",
+   "brotli==1.2.0",
+   "browser-cookie3==0.20.1",
+   "certifi==2026.2.25",
+   "cffi==2.0.0",
+   "charset-normalizer==3.4.7",
+   "click==8.3.3",
+   "cligj==0.7.2",
+   "colorama==0.4.6",
+   "commonmark==0.9.1",
+   "contourpy==1.3.3",
+   "cryptography==46.0.7",
+   "curl_cffi==0.15.0",
+   "cycler==0.12.1",
+   "dbfread==2.0.7",
+   "decorator==5.2.1",
+   "duckdb==1.5.5",
+   "et_xmlfile==2.0.0",
+   "executing==2.2.1",
+   "faicons==0.2.2",
+   "filelock==3.29.0",
+   "flatbuffers==25.12.19",
+   "fonttools==4.62.1",
+   "formulaic==1.2.1",
+   "fsspec==2026.4.0",
+   "geopandas==1.1.3",
+   "great-tables==0.21.0",
+   "greenlet==3.4.0",
+   "h11==0.16.0",
+   "hf-xet==1.4.3",
+   "htmltools==0.6.1",
+   "httpcore==1.0.9",
+   "httplib2==0.31.2",
+   "httpx==0.28.1",
+   "huggingface_hub==1.12.2",
+   "idna==3.11",
+   "importlib_metadata==9.0.0",
+   "importlib_resources==7.1.0",
+   "inflate64==1.0.4",
+   "interface-meta==1.3.0",
+   "ipython==9.13.0",
+   "ipython_pygments_lexers==1.1.1",
+   "jedi==0.20.0",
+   "joblib==1.5.3",
+   "jsonschema-specifications==2025.9.1",
+   "jsonschema==4.26.0",
+   "kiwisolver==1.5.0",
+   "linearmodels==7.0",
+   "llvmlite==0.47.0",
+   "lxml==6.1.0",
+   "lz4==4.4.5",
+   "maketables==0.1.8",
+   "markdown-it-py==3.0.0",
+   "markdown_pdf==1.13.1",
+   "matplotlib-inline==0.2.2",
+   "matplotlib==3.10.8",
+   "mdurl==0.1.2",
+   "mpmath==1.3.0",
+   "multivolumefile==0.2.3",
+   "mypy_extensions==1.1.0",
+   "narwhals==2.19.0",
+   "networkx==3.6.1",
+   "numba==0.65.1",
+   "numpy==2.4.4",
+   "onnxruntime==1.28.0",
+   "opencv-python==5.0.0.93",
+   "openpyxl==3.1.5",
+   "packaging==26.1",
+   "pandas==3.0.2",
+   "parso==0.8.7",
+   "patool==4.0.4",
+   "patsy==1.0.2",
+   "pdf2image==1.17.0",
+   "pdfminer.six==20251230",
+   "pdfplumber==0.11.9",
+   "pikepdf==10.6.0",
+   "pillow-avif-plugin==1.5.5",
+   "pillow==12.2.0",
+   "pillow_heif==1.3.0",
+   "plantuml==0.3.0",
+   "playwright==1.58.0",
+   "prompt_toolkit==3.0.52",
+   "protobuf==7.35.1",
+   "psutil==7.2.2",
+   "pure_eval==0.2.3",
+   "py7zr==1.1.0",
+   "pyarrow==24.0.0",
+   "pybcj==1.0.7",
+   "pyclipper==1.4.0",
+   "pycparser==3.0",
+   "pycryptodome==3.23.0",
+   "pycryptodomex==3.23.0",
+   "pyee==13.0.1",
+   "pyfixest==0.50.1",
+   "pyhdfe==0.2.0",
+   "pyogrio==0.12.1",
+   "pyparsing==3.3.2",
+   "pypdf==6.10.2",
+   "pypdfium2==5.7.0",
+   "pyppmd==1.3.1",
+   "pyproj==3.7.2",
+   "pyreadstat==1.3.3",
+   "pyshp==3.0.3",
+   "pytesseract==0.3.13",
+   "python-dateutil==2.9.0.post0",
+   "python-docx==1.2.0",
+   "python-pptx==1.0.2",
+   "pywin32==311",
+   "rapidocr-onnxruntime==1.2.3",
+   "rarfile==4.2",
+   "rasterio==1.5.0",
+   "referencing==0.37.0",
+   "regex==2026.4.4",
+   "reportlab==4.4.10",
+   "requests==2.33.1",
+   "rich==15.0.0",
+   "rpds-py==2026.6.3",
+   "safetensors==0.7.0",
+   "scikit-learn==1.8.0",
+   "scipy==1.17.1",
+   "seaborn==0.13.2",
+   "sentencepiece==0.2.1",
+   "setuptools==81.0.0",
+   "shadowcopy==0.0.4",
+   "shapely==2.1.2",
+   "shellingham==1.5.4",
+   "six==1.17.0",
+   "soupsieve==2.8.3",
+   "stack-data==0.6.3",
+   "statsmodels==0.14.6",
+   "sympy==1.14.0",
+   "tabulate==0.10.0",
+   "texttable==1.7.0",
+   "threadpoolctl==3.6.0",
+   "tokenizers==0.22.2",
+   "torch==2.11.0",
+   "tqdm==4.67.3",
+   "traitlets==5.15.0",
+   "transformers==5.7.0",
+   "typer==0.25.0",
+   "typing_extensions==4.15.0",
+   "tzdata==2026.1",
+   "urllib3==2.6.3",
+   "wcwidth==0.7.0",
+   "wrapt==2.2.0rc10",
+   "xlrd==2.0.2",
+   "xlsxwriter==3.2.9",
+   "zipp==3.23.1"
+  ],
+  "packages_sha256": "fcffb05785cb1675b913df1fc7b1f737969106068b3ac53b236bd6eb5bd0affe",
+  "note": "The scripts in scope import only the standard library; the package lock is recorded so a future divergence is visible, not because a third-party version is currently load-bearing."
+ },
+ "collections": [
+  {
+   "collection": "native-owned-businesses",
+   "name": "Native-Owned Businesses",
+   "shelf": "pro",
+   "n_tables": 7,
+   "ambiguous_scripts": [
+    "241_promote_individual_native_firms_in_place.py"
+   ],
+   "blocked_scripts": [],
+   "code": [
+    {
+     "script": "242_build_individual_native_firm_contracts.py",
+     "sha256": "d61d74eae0224cff65a68da23281847139e64a004d171508f716af1125a627aa",
+     "git_blob_working": "fc2121a9c97946b6fd30caa9858b911823717c78",
+     "git_blob_at_commit": "fc2121a9c97946b6fd30caa9858b911823717c78",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase2_enricher"
+    }
+   ],
+   "inputs": [
+    {
+     "path": "data/clean/individual_native_firm_contracts.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "242_build_individual_native_firm_contracts.py"
+     ],
+     "written_in_scope": true,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "c70c2c479170f9122662c8ac810159cdddb8ba80f37575de8f8aa07e95c86ee6",
+     "bytes": 160469,
+     "mtime": "2026-08-29T03:44:08+00:00",
+     "rows": 324,
+     "n_columns": 29,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/c7/c70c2c479170f9122662c8ac810159cdddb8ba80f37575de8f8aa07e95c86ee6.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `native-owned-businesses` collection; replay that collection's manifest first",
+      "producing_collection": "native-owned-businesses",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/individual_native_firm_contracts_published.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "242_build_individual_native_firm_contracts.py"
+     ],
+     "written_in_scope": true,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "9460048795185ad84caa8f0d517f6d8c796a1a2b3927c5ddaf3c8f15b795ec38",
+     "bytes": 165372,
+     "mtime": "2026-08-26T23:23:17+00:00",
+     "rows": 613,
+     "n_columns": 11,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/94/9460048795185ad84caa8f0d517f6d8c796a1a2b3927c5ddaf3c8f15b795ec38.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `native-owned-businesses` collection; replay that collection's manifest first",
+      "producing_collection": "native-owned-businesses",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/individual_native_firm_register.csv",
+     "how_found": [
+      "declared_io",
+      "path_constant:REGISTER",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "242_build_individual_native_firm_contracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "c34c882a457cb361cfb456940c13d9c838e01eed369786ce3b781e2b55a76a53",
+     "bytes": 90897,
+     "mtime": "2026-08-29T03:44:08+00:00",
+     "rows": 45,
+     "n_columns": 56,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/c3/c34c882a457cb361cfb456940c13d9c838e01eed369786ce3b781e2b55a76a53.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `native-owned-businesses` collection; replay that collection's manifest first",
+      "producing_collection": "native-owned-businesses",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/prime_contracts.csv",
+     "how_found": [
+      "declared_io",
+      "path_constant:PRIME",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "242_build_individual_native_firm_contracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "50f17b6076d13d287531436ffcb7579d987cbad2b50504e361edd4ee6ffd9249",
+     "bytes": 815967130,
+     "mtime": "2026-08-29T03:44:30+00:00",
+     "rows": 1217768,
+     "n_columns": 44,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/50/50f17b6076d13d287531436ffcb7579d987cbad2b50504e361edd4ee6ffd9249.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `contractors` collection; replay that collection's manifest first",
+      "producing_collection": "contractors",
+      "confidence": "declared"
+     }
+    }
+   ],
+   "undiscovered_inputs": [],
+   "io_scan_unresolved_names": [],
+   "manual_decision_inputs": [],
+   "configuration": {},
+   "commands": [
+    {
+     "step": 1,
+     "argv": [
+      "py",
+      "-3",
+      "code/242_build_individual_native_firm_contracts.py"
+     ],
+     "phase": "enrich",
+     "exists": true
+    }
+   ],
+   "outputs": [
+    {
+     "table": "individual_native_exclusion_pairs.csv",
+     "present": true,
+     "path": "data/clean/individual_native_exclusion_pairs.csv",
+     "sha256": "dcd0aabec920f508c9f4f9b35be774d0920a99ec2f839030b335e9c35707cf2b",
+     "bytes": 4792,
+     "rows": 5,
+     "columns": [
+      "identifier_type",
+      "identifier",
+      "firm_surrogate_entity_id",
+      "firm_name_norm",
+      "firm_name_core",
+      "excluded_entity_id",
+      "excluded_entity_name",
+      "excluded_entity_name_norm",
+      "excluded_entity_name_core",
+      "exclusion_scope",
+      "blocks_identifier_path",
+      "blocks_name_path",
+      "ruling_outcome",
+      "reason",
+      "does_not_mean",
+      "ruled_date",
+      "flagged_date"
+     ],
+     "primary_key": [
+      "firm_surrogate_entity_id"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "firm_surrogate_entity_id: 5 distinct over 5 rows, 0 blank, full scan",
+     "codebook_block": "02l_individual_native_exclusion_pairs",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per (identifier, excluded entity) exclusion ruling",
+     "contract_key_columns": [],
+     "mtime": "2026-08-26T23:22:57+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "flagged_date",
+       "constant_value": "2026-08-26"
+      },
+      {
+       "column": "ruled_date",
+       "constant_value": "2026-08-05"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/individual_native_exclusion_pairs.csv.bak_2026-08-29_pre_241_promote_individual_native_firms_in_place",
+       "tag": "2026-08-29_pre_241_promote_individual_native_firms_in_place",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "241_promote_individual_native_firms_in_place.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 5,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "individual_native_firm_contracts.csv",
+     "present": true,
+     "path": "data/clean/individual_native_firm_contracts.csv",
+     "sha256": "c70c2c479170f9122662c8ac810159cdddb8ba80f37575de8f8aa07e95c86ee6",
+     "bytes": 160469,
+     "rows": 324,
+     "columns": [
+      "surrogate_entity_id",
+      "entity_class",
+      "fiscal_year",
+      "canonical_name",
+      "identifier_type",
+      "identifier",
+      "recipient_states",
+      "n_contract_rows",
+      "total_obligations_usd",
+      "total_obligations_real2025_usd",
+      "rows_with_a_native_setaside_flag",
+      "obligations_with_a_native_setaside_flag",
+      "n_funding_agencies",
+      "funding_agencies",
+      "sectors",
+      "top_setaside",
+      "extent_competed_modal",
+      "evidence_tier",
+      "evidence_grade",
+      "sam_self_certification",
+      "firm_legal_name_is_person",
+      "publish_name",
+      "publish_federal_identifier",
+      "publishable_contract_facts",
+      "temporal_caveat",
+      "source_table",
+      "built_date",
+      "built_by",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "awardee_uei",
+      "piid",
+      "modification_number"
+     ],
+     "primary_key_kind": "privacy_surrogate",
+     "primary_key_proven": null,
+     "primary_key_evidence": "same one-hop exposure; the contract facts publish, the identifier that resolves to a person does not",
+     "codebook_block": "02j_individual_native_firm_contracts",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per (individually-Native-owned firm, fiscal year)",
+     "contract_key_columns": [
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T03:44:08+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/individual_native_firm_contracts.csv.bak_2026-08-26_pre_242_build_individual_native_firm_contracts",
+       "tag": "2026-08-26_pre_242_build_individual_native_firm_contracts",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "242_build_individual_native_firm_contracts.py"
+       ]
+      },
+      {
+       "backup": "data/clean/individual_native_firm_contracts.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 324,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 40,
+       "blank": 0,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "individual_native_firm_contracts_published.csv",
+     "present": true,
+     "path": "data/clean/individual_native_firm_contracts_published.csv",
+     "sha256": "9460048795185ad84caa8f0d517f6d8c796a1a2b3927c5ddaf3c8f15b795ec38",
+     "bytes": 165372,
+     "rows": 613,
+     "columns": [
+      "cell_type",
+      "dimension_1",
+      "dimension_2",
+      "entity_class",
+      "n_firms",
+      "n_contract_rows",
+      "total_obligations_usd",
+      "value_suppressed_small_cell",
+      "suppression_rule",
+      "note",
+      "built_date"
+     ],
+     "primary_key": [
+      "cell_type",
+      "dimension_1",
+      "dimension_2",
+      "entity_class",
+      "n_firms",
+      "n_contract_rows",
+      "total_obligations_usd",
+      "value_suppressed_small_cell",
+      "suppression_rule",
+      "note",
+      "built_date"
+     ],
+     "primary_key_kind": "deterministic_surrogate",
+     "primary_key_proven": true,
+     "primary_key_evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (613 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+     "codebook_block": "02k_individual_native_firm_contracts_published",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per published aggregate CELL (cell type x dimension 1 x dimension 2) - not per firm",
+     "contract_key_columns": [],
+     "mtime": "2026-08-26T23:23:17+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/individual_native_firm_contracts_published.csv.bak_2026-08-26_pre_242_build_individual_native_firm_contracts",
+       "tag": "2026-08-26_pre_242_build_individual_native_firm_contracts",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "242_build_individual_native_firm_contracts.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 613,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "individual_native_firm_register.csv",
+     "present": true,
+     "path": "data/clean/individual_native_firm_register.csv",
+     "sha256": "c34c882a457cb361cfb456940c13d9c838e01eed369786ce3b781e2b55a76a53",
+     "bytes": 90897,
+     "rows": 45,
+     "columns": [
+      "surrogate_entity_id",
+      "entity_class",
+      "canonical_name",
+      "identifier_type",
+      "identifier",
+      "state",
+      "ruling_class",
+      "ruling_text",
+      "ruling_note",
+      "ruled_by",
+      "ruled_date",
+      "ruling_source_file",
+      "ruling_source_line",
+      "refuses_tribal_link_not_native_ownership",
+      "native_ownership_evidence_type",
+      "native_ownership_evidence_quote",
+      "native_ownership_evidence_url",
+      "native_ownership_evidence_date",
+      "native_ownership_evidence_n_legs",
+      "ruling_outcome",
+      "ruling_outcome_meaning",
+      "evidence_tier",
+      "tier_source",
+      "evidence_grade",
+      "web_pass_evidence_tier",
+      "web_pass_tier_basis",
+      "web_pass_independence",
+      "owner_tribal_affiliation_named",
+      "owner_tribal_affiliation_source",
+      "owner_tribal_affiliation_basis",
+      "owner_tribal_affiliation_resolved_to_tribe_id",
+      "owner_self_identifies_with_is_never_an_ownership_edge",
+      "sam_self_certification",
+      "sam_flags_asserted",
+      "sam_self_certification_note",
+      "ownership_asserted_as_of",
+      "contract_fy_min",
+      "contract_fy_max",
+      "temporal_gap_years",
+      "temporal_caveat",
+      "n_contract_rows",
+      "total_obligations_usd",
+      "privacy_class",
+      "firm_legal_name_is_person",
+      "consent_status",
+      "consent_date",
+      "consent_source",
+      "publish_name",
+      "publish_surrogate_id_only",
+      "publish_federal_identifier",
+      "publish_contract_facts",
+      "dnb_open_data_attaches",
+      "publication_policy_inherited_from",
+      "built_date",
+      "built_by",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "awardee_uei"
+     ],
+     "primary_key_kind": "privacy_surrogate",
+     "primary_key_proven": null,
+     "primary_key_evidence": "SAM's public entity search resolves a UEI to a legal name and a street address. For a firm whose legal name IS a person's name, publishing the UEI publishes the person by one hop. cedar_domain already withholds awardee_uei and cage_code for exactly this reason; the primary key must obey the same rule or it reintroduces what the field policy removed.",
+     "codebook_block": "02i_individual_native_firm_register",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per individually-Native-owned firm ruled into the class",
+     "contract_key_columns": [
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T03:44:08+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/individual_native_firm_register.csv.bak_2026-08-26_pre_241_promote_individual_native_firms_in_place",
+       "tag": "2026-08-26_pre_241_promote_individual_native_firms_in_place",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "241_promote_individual_native_firms_in_place.py"
+       ]
+      },
+      {
+       "backup": "data/clean/individual_native_firm_register.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      },
+      {
+       "backup": "data/clean/individual_native_firm_register.csv.bak_2026-08-29_pre_241_promote_individual_native_firms_in_place",
+       "tag": "2026-08-29_pre_241_promote_individual_native_firms_in_place",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "241_promote_individual_native_firms_in_place.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 45,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 45,
+       "blank": 0,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "individual_native_ownership_verification.csv",
+     "present": true,
+     "path": "data/clean/individual_native_ownership_verification.csv",
+     "sha256": "7252dd53ef9faff3295c909e9b071f4761a7bd6c2cb85dfffca549ec711afe61",
+     "bytes": 508249,
+     "rows": 335,
+     "columns": [
+      "verification_id",
+      "awardee_uei",
+      "cage_code_modal",
+      "awardee_name_modal",
+      "awardee_name_variants",
+      "recipient_state_modal",
+      "candidate_basis",
+      "n_contract_rows",
+      "total_obligations_usd",
+      "fy_min",
+      "fy_max",
+      "obligations_rank_among_unattributed",
+      "sam_self_certification",
+      "sam_flags_asserted",
+      "sam_flag_contract_rows",
+      "sam_flag_row_share",
+      "sam_setaside_values",
+      "self_description",
+      "self_description_sentence",
+      "self_description_url",
+      "self_description_fetch_date",
+      "self_description_http_status",
+      "self_description_ownership_kind",
+      "third_party",
+      "third_party_source_type",
+      "third_party_sentence",
+      "third_party_url",
+      "third_party_fetch_date",
+      "tribal_affiliation_named",
+      "tribal_affiliation_name",
+      "tribal_affiliation_source",
+      "prior_owner_ruling",
+      "prior_owner_ruling_note",
+      "prior_owner_ruling_evidence_url",
+      "prior_owner_ruling_source_file",
+      "prior_owner_ruling_date",
+      "prior_ruling_honored",
+      "name_trap_warning",
+      "temporal_caveat",
+      "prime_source_files",
+      "built_date",
+      "built_by",
+      "researcher_note",
+      "web_pass_batch",
+      "web_pass_matched_on",
+      "web_pass_verification_id",
+      "sam_fine_flags",
+      "sam_fine_flags_source",
+      "sam_individual_vs_entity",
+      "third_party_independence",
+      "prior_owner_ruling_evidence_type",
+      "evidence_tier",
+      "tier_basis",
+      "evidence_independence",
+      "ownership_class",
+      "ownership_class_source",
+      "privacy_class",
+      "publishable_entity_name",
+      "publishable_sentence",
+      "publishable_contract_facts",
+      "dnb_open_data_attaches",
+      "verification_built_date",
+      "verification_built_by"
+     ],
+     "primary_key": [
+      "verification_id"
+     ],
+     "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+     "primary_key_proven": true,
+     "primary_key_evidence": "verification_id: 335 distinct over 335 rows, 0 blank, full scan",
+     "codebook_block": "02f_individual_native_verification",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per verification candidate, with its four independent evidence fields - docs/INDIVIDUAL_NATIVE_OWNERSHIP_VERIFICATION_BUILD_LOG.md",
+     "contract_key_columns": [],
+     "mtime": "2026-08-26T22:01:33+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26"
+      },
+      {
+       "column": "self_description_fetch_date",
+       "constant_value": "2026-08-26"
+      },
+      {
+       "column": "third_party_fetch_date",
+       "constant_value": "2026-08-26"
+      },
+      {
+       "column": "verification_built_date",
+       "constant_value": "2026-08-26"
+      }
+     ],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 335,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "individual_native_prior_rulings.csv",
+     "present": true,
+     "path": "data/clean/individual_native_prior_rulings.csv",
+     "sha256": "046b33511d47ac546885f2a27485bf908ac7172df3671f2cc7d8806368ff066c",
+     "bytes": 11614,
+     "rows": 45,
+     "columns": [
+      "identifier_type",
+      "identifier",
+      "entity_name",
+      "ruling_text",
+      "ruling_class",
+      "ruling_note",
+      "evidence_type",
+      "evidence_url",
+      "ruled_by",
+      "ruled_date",
+      "source_file",
+      "source_line",
+      "n_propagated_rows"
+     ],
+     "primary_key": [
+      "identifier"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "identifier: 45 distinct over 45 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "internal-by-decision",
+     "declared_grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "contract_key_columns": [],
+     "mtime": "2026-08-26T22:00:46+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 45,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "individual_native_verification_candidates.csv",
+     "present": true,
+     "path": "data/clean/individual_native_verification_candidates.csv",
+     "sha256": "dfcc22f8ed7e502c134510c2e9f1d002db8bcd2f9e27bdf57109beea3666270b",
+     "bytes": 171093,
+     "rows": 335,
+     "columns": [
+      "verification_id",
+      "awardee_uei",
+      "cage_code_modal",
+      "awardee_name_modal",
+      "awardee_name_variants",
+      "recipient_state_modal",
+      "candidate_basis",
+      "n_contract_rows",
+      "total_obligations_usd",
+      "fy_min",
+      "fy_max",
+      "obligations_rank_among_unattributed",
+      "sam_self_certification",
+      "sam_flags_asserted",
+      "sam_flag_contract_rows",
+      "sam_flag_row_share",
+      "sam_setaside_values",
+      "self_description",
+      "self_description_sentence",
+      "self_description_url",
+      "self_description_fetch_date",
+      "self_description_http_status",
+      "self_description_ownership_kind",
+      "third_party",
+      "third_party_source_type",
+      "third_party_sentence",
+      "third_party_url",
+      "third_party_fetch_date",
+      "tribal_affiliation_named",
+      "tribal_affiliation_name",
+      "tribal_affiliation_source",
+      "prior_owner_ruling",
+      "prior_owner_ruling_note",
+      "prior_owner_ruling_evidence_url",
+      "prior_owner_ruling_source_file",
+      "prior_owner_ruling_date",
+      "prior_ruling_honored",
+      "name_trap_warning",
+      "temporal_caveat",
+      "prime_source_files",
+      "built_date",
+      "built_by"
+     ],
+     "primary_key": [
+      "verification_id"
+     ],
+     "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+     "primary_key_proven": true,
+     "primary_key_evidence": "verification_id: 335 distinct over 335 rows, 0 blank, full scan",
+     "codebook_block": "02f_individual_native_verification",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per candidate UEI staged for individual-Native verification",
+     "contract_key_columns": [],
+     "mtime": "2026-08-26T22:00:46+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-26"
+      }
+     ],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 335,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    }
+   ],
+   "rebuild_command": "py -3 code/build.py run native-owned-businesses --execute",
+   "replayability": {
+    "verdict": "not_exactly_replayable",
+    "blocking_components": [
+     {
+      "component": "released output predates a recorded input",
+      "class": "output_stale_vs_input",
+      "why": "7 output(s) were last written BEFORE an input this manifest records as consumed. The released bytes were not produced by those inputs, so a faithful replay CANNOT reproduce them and should not be expected to.",
+      "evidence_strength": "mtime only. A content-identical rewrite of an input moves its mtime without changing what it says, so this can flag a release that is in fact current. It stays blocking because the opposite error - shipping a stale table as replayable - is the one that costs money.",
+      "detail": [
+       {
+        "table": "individual_native_exclusion_pairs.csv",
+        "output_written": "2026-08-26T23:22:57+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/individual_native_firm_contracts.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_contracts_published.csv",
+          "written": "2026-08-26T23:23:17+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_register.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/prime_contracts.csv",
+          "written": "2026-08-29T03:44:30+00:00"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_firm_contracts.csv",
+        "output_written": "2026-08-29T03:44:08+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/prime_contracts.csv",
+          "written": "2026-08-29T03:44:30+00:00"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_firm_contracts_published.csv",
+        "output_written": "2026-08-26T23:23:17+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/individual_native_firm_contracts.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_register.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/prime_contracts.csv",
+          "written": "2026-08-29T03:44:30+00:00"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_firm_register.csv",
+        "output_written": "2026-08-29T03:44:08+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/prime_contracts.csv",
+          "written": "2026-08-29T03:44:30+00:00"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_ownership_verification.csv",
+        "output_written": "2026-08-26T22:01:33+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/individual_native_firm_contracts.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_contracts_published.csv",
+          "written": "2026-08-26T23:23:17+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_register.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/prime_contracts.csv",
+          "written": "2026-08-29T03:44:30+00:00"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_prior_rulings.csv",
+        "output_written": "2026-08-26T22:00:46+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/individual_native_firm_contracts.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_contracts_published.csv",
+          "written": "2026-08-26T23:23:17+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_register.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/prime_contracts.csv",
+          "written": "2026-08-29T03:44:30+00:00"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_verification_candidates.csv",
+        "output_written": "2026-08-26T22:00:46+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/individual_native_firm_contracts.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_contracts_published.csv",
+          "written": "2026-08-26T23:23:17+00:00"
+         },
+         {
+          "input": "data/clean/individual_native_firm_register.csv",
+          "written": "2026-08-29T03:44:08+00:00"
+         },
+         {
+          "input": "data/clean/prime_contracts.csv",
+          "written": "2026-08-29T03:44:30+00:00"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "component": "in-place enricher outside the collection's plan",
+      "class": "undeclared_enricher",
+      "why": "a script wrote these outputs AFTER the rebuilder and is not in the plan, so the manifest's command list does not reproduce the released columns. The evidence is the enricher's own .bak_ file, not an inference.",
+      "detail": [
+       {
+        "table": "individual_native_exclusion_pairs.csv",
+        "script": "241_promote_individual_native_firms_in_place.py",
+        "evidence": "data/clean/individual_native_exclusion_pairs.csv.bak_2026-08-29_pre_241_promote_individual_native_firms_in_place"
+       },
+       {
+        "table": "individual_native_firm_contracts.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/individual_native_firm_contracts.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "individual_native_firm_register.csv",
+        "script": "241_promote_individual_native_firms_in_place.py",
+        "evidence": "data/clean/individual_native_firm_register.csv.bak_2026-08-26_pre_241_promote_individual_native_firms_in_place"
+       },
+       {
+        "table": "individual_native_firm_register.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/individual_native_firm_register.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "individual_native_firm_register.csv",
+        "script": "241_promote_individual_native_firms_in_place.py",
+        "evidence": "data/clean/individual_native_firm_register.csv.bak_2026-08-29_pre_241_promote_individual_native_firms_in_place"
+       }
+      ]
+     },
+     {
+      "component": "run date stamped into output rows",
+      "class": "nondeterministic_output_column",
+      "why": "these columns hold one constant date - the day the build ran - so two faithful runs on two days produce different bytes. Compare with the column excluded, or make the column derive from the SOURCE's date rather than the clock.",
+      "detail": [
+       {
+        "table": "individual_native_exclusion_pairs.csv",
+        "columns": [
+         {
+          "column": "flagged_date",
+          "constant_value": "2026-08-26"
+         },
+         {
+          "column": "ruled_date",
+          "constant_value": "2026-08-05"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_firm_contracts.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-26"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_firm_contracts_published.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-26"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_firm_register.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-26"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_ownership_verification.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-26"
+         },
+         {
+          "column": "self_description_fetch_date",
+          "constant_value": "2026-08-26"
+         },
+         {
+          "column": "third_party_fetch_date",
+          "constant_value": "2026-08-26"
+         },
+         {
+          "column": "verification_built_date",
+          "constant_value": "2026-08-26"
+         }
+        ]
+       },
+       {
+        "table": "individual_native_verification_candidates.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-26"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "component": "absolute project root hardcoded in code",
+      "class": "code_not_relocatable",
+      "why": "1 script(s) in scope bind the project root to 'C:\\\\Users\\\\esm247\\\\Desktop\\\\Cedar Press', so a checkout at any other path reads and WRITES the live tree. A clean-room replay requires the documented root rewrite (see docs/RELEASE_REPLAY_LOG.md, adaptation A1).",
+      "detail": [
+       "242_build_individual_native_firm_contracts.py"
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "release_verdict": "not_exactly_replayable",
+ "capture_integrity": {
+  "inputs_rechecked": 4,
+  "outputs_rechecked": 7,
+  "input_check": "sha256 + (mtime, size)",
+  "output_check": "(mtime, size) only - see the note in cmd_build",
+  "changed_during_capture": [],
+  "inputs_rewritten_same_content": [],
+  "outputs_changed_during_capture": [],
+  "quiescent": true,
+  "enforced": true
+ }
+}

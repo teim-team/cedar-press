@@ -1,0 +1,73 @@
+{
+  "script": "1117_ladder_adjudication.py",
+  "date": "2026-09-02",
+  "method": "ladder_1117",
+  "tier": "B",
+  "rulings": {
+    "REFUSE": {
+      "rows": 140,
+      "dollars": 209642460.08
+    },
+    "REPOINT": {
+      "rows": 12,
+      "dollars": 229739161.06
+    },
+    "ACCEPT": {
+      "rows": 84,
+      "dollars": 467078666.95
+    },
+    "UNRESOLVED": {
+      "rows": 16,
+      "dollars": 51590042.94
+    }
+  },
+  "prime_contracts.csv": {
+    "rows": 1217768,
+    "cols": 75,
+    "rows_keyed": 0,
+    "rows_already_keyed_left_alone": 1210,
+    "money_before": {
+      "total_obligations": 310005258660.76,
+      "total_award_value": 5625791120829.37,
+      "total_obligations_real2025": 384984370260.79,
+      "total_award_value_real2025": 6580181965310.99
+    },
+    "money_after": {
+      "total_obligations": 310005258660.76,
+      "total_award_value": 5625791120829.37,
+      "total_obligations_real2025": 384984370260.79,
+      "total_award_value_real2025": 6580181965310.99
+    }
+  },
+  "prime_contracts_awards.csv": {
+    "rows": 455080,
+    "cols": 31,
+    "rows_keyed": 0,
+    "rows_already_keyed_left_alone": 543,
+    "money_before": {},
+    "money_after": {}
+  },
+  "prime_contracts_published.csv": {
+    "rows": 455080,
+    "cols": 25,
+    "rows_keyed": 0,
+    "rows_already_keyed_left_alone": 543,
+    "money_before": {},
+    "money_after": {}
+  },
+  "cedar_identifier_ledger_final.csv": {
+    "rows": 20577,
+    "cols": 29,
+    "rows_keyed": 0
+  },
+  "cedar_identifier_ledger_tiered.csv": {
+    "rows": 19232,
+    "cols": 22,
+    "rows_keyed": 0
+  },
+  "cedar_identifier_ledger.csv": {
+    "rows": 19232,
+    "cols": 14,
+    "rows_keyed": 96
+  }
+}

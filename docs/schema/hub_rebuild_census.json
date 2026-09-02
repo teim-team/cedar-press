@@ -1,0 +1,386 @@
+{
+ "generated": "2026-09-01",
+ "canonical_tribe_table_rows": 687,
+ "entities_a_direct_01_invocation_would_drop": 868,
+ "columns_a_direct_01_invocation_would_drop": 32,
+ "method": "row and column census read from the cedar_entity_spine.csv.bak_<date>_pre<NN> trail in data/spine, in modification-time order. Every spine enricher takes such a backup before writing, so the trail IS the applied order. Produced by 741_hub_grain_and_rebuild.py census. NEITHER 01 NOR 09 WAS RUN.",
+ "live": {
+  "rows": 1555,
+  "n_columns": 44,
+  "columns": [
+   "tribe_id",
+   "canonical_name",
+   "entity_class",
+   "state",
+   "bia_region",
+   "self_governance",
+   "cedar_entity_id",
+   "n_uei_tierA",
+   "n_uei_tierB",
+   "n_cage",
+   "n_ein",
+   "aliases",
+   "parent_entity_id",
+   "parent_entity_name",
+   "ultimate_parent_entity_id",
+   "ultimate_parent_entity_name",
+   "ancsa_region_entity_id",
+   "hierarchy_basis",
+   "cicd_verified",
+   "reconciliation_status",
+   "reconciliation_note",
+   "fr_official_name",
+   "parent_native_entity",
+   "serves_native_entities",
+   "ownership_basis",
+   "entity_source_url",
+   "entity_source_quote",
+   "bie_operation_type",
+   "source_url",
+   "source_quote",
+   "entity_website",
+   "city",
+   "built_by_script",
+   "evidence_tier",
+   "evidence_grade",
+   "verification_route",
+   "evidence_url",
+   "canonical_entity_id_column",
+   "cedar_entity_id_scheme",
+   "entity_master_register_id",
+   "entity_master_register_id_basis",
+   "constituent_band_of_entity_id",
+   "constituent_band_of_basis",
+   "cedar_uid"
+  ]
+ },
+ "rebuild_gate": {
+  "min_rows": 1555,
+  "required_columns": [
+   "tribe_id",
+   "canonical_name",
+   "entity_class",
+   "state",
+   "bia_region",
+   "self_governance",
+   "cedar_entity_id",
+   "n_uei_tierA",
+   "n_uei_tierB",
+   "n_cage",
+   "n_ein",
+   "aliases",
+   "parent_entity_id",
+   "parent_entity_name",
+   "ultimate_parent_entity_id",
+   "ultimate_parent_entity_name",
+   "ancsa_region_entity_id",
+   "hierarchy_basis",
+   "cicd_verified",
+   "reconciliation_status",
+   "reconciliation_note",
+   "fr_official_name",
+   "parent_native_entity",
+   "serves_native_entities",
+   "ownership_basis",
+   "entity_source_url",
+   "entity_source_quote",
+   "bie_operation_type",
+   "source_url",
+   "source_quote",
+   "entity_website",
+   "city",
+   "built_by_script",
+   "evidence_tier",
+   "evidence_grade",
+   "verification_route",
+   "evidence_url",
+   "canonical_entity_id_column",
+   "cedar_entity_id_scheme",
+   "entity_master_register_id",
+   "entity_master_register_id_basis",
+   "constituent_band_of_entity_id",
+   "constituent_band_of_basis",
+   "cedar_uid"
+  ],
+  "statement": "A replay is acceptable only if the post-replay spine has at least this many rows and every one of these columns. Anything less is a partial restore wearing a green build log."
+ },
+ "replay_order": [
+  "51_add_anc_acronym_aliases.py",
+  "52_add_village_corporations.py",
+  "61_add_nho_intertribal_to_spine.py",
+  "66_build_entity_hierarchy.py",
+  "69_enrich_spine_from_federal_register.py",
+  "71_fix_known_defects.py",
+  "74_add_organization_acronyms.py",
+  "73_add_tcu_and_cdfi.py",
+  "75_add_bie_schools_and_uios.py",
+  "163_promote_nho_universe_in_place.py",
+  "241_promote_individual_native_firms_in_place.py",
+  "416_reconcile_spine_id_columns.py",
+  "426_mint_bristol_bay_spine_entities.py",
+  "503_identity.py (via 504/505)",
+  "524_universe_gap.py"
+ ],
+ "enrichers_with_no_checkpoint": [
+  "08_build_review_page.py",
+  "115_pull_assistance_archive.py"
+ ],
+ "stages": [
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-05_pre51",
+   "state_before": "51_add_anc_acronym_aliases.py",
+   "rows": 687,
+   "n_columns": 12,
+   "rows_added_by_previous_stage": null,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-05_pre52",
+   "state_before": "52_add_village_corporations.py",
+   "rows": 687,
+   "n_columns": 12,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre61",
+   "state_before": "61_add_nho_intertribal_to_spine.py",
+   "rows": 866,
+   "n_columns": 12,
+   "rows_added_by_previous_stage": 179,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre66",
+   "state_before": "66_build_entity_hierarchy.py",
+   "rows": 952,
+   "n_columns": 12,
+   "rows_added_by_previous_stage": 86,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_alias",
+   "state_before": "alias",
+   "rows": 952,
+   "n_columns": 18,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [
+    "ancsa_region_entity_id",
+    "hierarchy_basis",
+    "parent_entity_id",
+    "parent_entity_name",
+    "ultimate_parent_entity_id",
+    "ultimate_parent_entity_name"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre_recon",
+   "state_before": "pre_recon",
+   "rows": 952,
+   "n_columns": 18,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre_srt_reopen",
+   "state_before": "pre_srt_reopen",
+   "rows": 952,
+   "n_columns": 21,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [
+    "cicd_verified",
+    "reconciliation_note",
+    "reconciliation_status"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre69",
+   "state_before": "69_enrich_spine_from_federal_register.py",
+   "rows": 952,
+   "n_columns": 21,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre71",
+   "state_before": "71_fix_known_defects.py",
+   "rows": 952,
+   "n_columns": 22,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [
+    "fr_official_name"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre_tlingit",
+   "state_before": "pre_tlingit",
+   "rows": 952,
+   "n_columns": 22,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre74",
+   "state_before": "74_add_organization_acronyms.py",
+   "rows": 952,
+   "n_columns": 22,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre73tcu",
+   "state_before": "73_add_tcu_and_cdfi.py",
+   "rows": 952,
+   "n_columns": 22,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-06_pre75",
+   "state_before": "75_add_bie_schools_and_uios.py",
+   "rows": 1082,
+   "n_columns": 27,
+   "rows_added_by_previous_stage": 130,
+   "columns_added_by_previous_stage": [
+    "entity_source_quote",
+    "entity_source_url",
+    "ownership_basis",
+    "parent_native_entity",
+    "serves_native_entities"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-26_pre163",
+   "state_before": "163_promote_nho_universe_in_place.py",
+   "rows": 1310,
+   "n_columns": 33,
+   "rows_added_by_previous_stage": 228,
+   "columns_added_by_previous_stage": [
+    "bie_operation_type",
+    "built_by_script",
+    "city",
+    "entity_website",
+    "source_quote",
+    "source_url"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-26_pre_241_promote_individual_native_firms_in_place",
+   "state_before": "241_promote_individual_native_firms_in_place.py",
+   "rows": 1489,
+   "n_columns": 37,
+   "rows_added_by_previous_stage": 179,
+   "columns_added_by_previous_stage": [
+    "evidence_grade",
+    "evidence_tier",
+    "evidence_url",
+    "verification_route"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-26_pre_416_reconcile_spine_id_columns",
+   "state_before": "416_reconcile_spine_id_columns.py",
+   "rows": 1534,
+   "n_columns": 37,
+   "rows_added_by_previous_stage": 45,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-26_pre_426_mint_bristol_bay_spine_entities",
+   "state_before": "426_mint_bristol_bay_spine_entities.py",
+   "rows": 1534,
+   "n_columns": 43,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [
+    "canonical_entity_id_column",
+    "cedar_entity_id_scheme",
+    "constituent_band_of_basis",
+    "constituent_band_of_entity_id",
+    "entity_master_register_id",
+    "entity_master_register_id_basis"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-28_pre504",
+   "state_before": "503_identity.py (via 504/505)",
+   "rows": 1536,
+   "n_columns": 43,
+   "rows_added_by_previous_stage": 2,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-29_pre71",
+   "state_before": "71_fix_known_defects.py",
+   "rows": 1536,
+   "n_columns": 44,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [
+    "cedar_uid"
+   ],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-29_pre504",
+   "state_before": "503_identity.py (via 504/505)",
+   "rows": 1536,
+   "n_columns": 44,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-08-29_pre_241_promote_individual_native_firms_in_place",
+   "state_before": "241_promote_individual_native_firms_in_place.py",
+   "rows": 1536,
+   "n_columns": 44,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-09-01_pre524",
+   "state_before": "524_universe_gap.py",
+   "rows": 1536,
+   "n_columns": 44,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv.bak_2026-09-01_pre504",
+   "state_before": "503_identity.py (via 504/505)",
+   "rows": 1555,
+   "n_columns": 44,
+   "rows_added_by_previous_stage": 19,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  },
+  {
+   "checkpoint": "cedar_entity_spine.csv",
+   "state_before": "LIVE",
+   "rows": 1555,
+   "n_columns": 44,
+   "rows_added_by_previous_stage": 0,
+   "columns_added_by_previous_stage": [],
+   "columns_lost_at_this_checkpoint": []
+  }
+ ]
+}

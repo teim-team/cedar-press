@@ -1,0 +1,3870 @@
+{
+ "fixture_164_detected": true,
+ "generated": "2026-08-26",
+ "generated_at": "2026-08-26T19:47:14",
+ "produced_by": "286_check_idempotence.py",
+ "rerun_residue": {
+  "admin_appeal_parties.csv": {
+   "columns_ignored": [
+    "fetched_date",
+    "party_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "decision_id=IBLA-127-181",
+     "board=IBLA",
+     "citation=127 IBLA 181",
+     "decision_date=1993-09-07"
+    ]
+   ],
+   "pct": 0.005,
+   "rows": 20027,
+   "scan": "full"
+  },
+  "ancsa_filings_index.csv": {
+   "columns_ignored": [
+    "portal_document_id",
+    "portal_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 734,
+   "examples": [
+    [
+     "corporation_name=Calista Corporation",
+     "anc_id=ANC-0006",
+     "document_type=ANCSA Proxy Materials",
+     "filing_date="
+    ],
+    [
+     "corporation_name=NANA Regional Corporation, Inc.",
+     "anc_id=ANC-0011",
+     "document_type=ANCSA Independent Candidate Proxy ",
+     "filing_date="
+    ]
+   ],
+   "pct": 3.809,
+   "rows": 19269,
+   "scan": "full"
+  },
+  "ca_gaming_payments.csv": {
+   "columns_ignored": [
+    "built_date",
+    "fetched_date",
+    "payment_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "fund=TNGF",
+     "direction=paid_out",
+     "recipient_type=tribe",
+     "tribe_id=TRBF-RNDVLY-00"
+    ]
+   ],
+   "pct": 0.002,
+   "rows": 40164,
+   "scan": "full"
+  },
+  "cedar_cage_backfill.csv": {
+   "columns_ignored": [
+    "cage_code",
+    "uei"
+   ],
+   "duplicate_rows_ignoring_volatile": 3628,
+   "examples": [
+    [
+     "legal_business_name=",
+     "source=fpds_uei_cage_map.csv",
+     "basis=CAGE observed on FPDS transactions",
+     "n_cages_for_uei=1"
+    ],
+    [
+     "legal_business_name=",
+     "source=fpds_uei_cage_map.csv",
+     "basis=CAGE observed on FPDS transactions",
+     "n_cages_for_uei=1"
+    ]
+   ],
+   "pct": 83.173,
+   "rows": 4362,
+   "scan": "full"
+  },
+  "cedar_identifier_graph_edges.csv": {
+   "columns_ignored": [
+    "built_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 2451,
+   "examples": [
+    [
+     "edge_kind=BLOCK",
+     "from_node=UEI:HKXNQ68KHVL9",
+     "to_node=",
+     "from_type=UEI"
+    ],
+    [
+     "edge_kind=BLOCK",
+     "from_node=UEI:KDGNQQAMNUD1",
+     "to_node=",
+     "from_type=UEI"
+    ]
+   ],
+   "pct": 5.322,
+   "rows": 46051,
+   "scan": "full"
+  },
+  "cedar_ruling_ledger_consolidated.csv": {
+   "columns_ignored": [],
+   "duplicate_rows_ignoring_volatile": 6325,
+   "examples": [
+    [
+     "subject_key=CAGE:1NCA6",
+     "subject_name=UNITED SOUTH & EASTERN TRIBES INC",
+     "outcome=ENTITY",
+     "verdict_kind=ENTITY"
+    ],
+    [
+     "subject_key=CAGE:1T6Y2",
+     "subject_name=NEZ PERCE TRIBE",
+     "outcome=ENTITY",
+     "verdict_kind=ENTITY"
+    ]
+   ],
+   "pct": 40.579,
+   "rows": 15587,
+   "scan": "full"
+  },
+  "codebook_master.csv": {
+   "columns_ignored": [
+    "generated"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "dataset=06_nonprofit",
+     "variable=ein",
+     "type=integer",
+     "units=code"
+    ]
+   ],
+   "pct": 0.036,
+   "rows": 2798,
+   "scan": "full"
+  },
+  "compact_obligation_tribal_agency_bridge.csv": {
+   "columns_ignored": [
+    "bridge_id",
+    "built_date",
+    "report_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 146,
+   "examples": [
+    [
+     "compact_id=CMP-AZ-fort-mcdowell-yavapai-natio",
+     "tribe_id=TRBF-FMCDWL-00",
+     "tribe_canonical_name=Fort McDowell",
+     "state=Arizona"
+    ],
+    [
+     "compact_id=CMP-AZ-pascua-yaqui-tribe-of-arizo",
+     "tribe_id=TRBF-PSQYQI-00",
+     "tribe_canonical_name=Pascua Yaqui",
+     "state=Arizona"
+    ]
+   ],
+   "pct": 15.75,
+   "rows": 927,
+   "scan": "full"
+  },
+  "content_audit_lobbying_family.csv": {
+   "columns_ignored": [
+    "filing_uuid"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "filing_year=2024",
+     "client_name=BURNS PAIUTE TRIBE",
+     "specific_issues_text=S.1890 - Malheur Community Empower",
+     "rule_families="
+    ]
+   ],
+   "pct": 0.833,
+   "rows": 120,
+   "scan": "full"
+  },
+  "correspondence_foia_source_coverage.csv": {
+   "columns_ignored": [
+    "url"
+   ],
+   "duplicate_rows_ignoring_volatile": 17,
+   "examples": [
+    [
+     "agency=Interior - Indian Affairs (AS-IA /",
+     "agency_code=BIA",
+     "source=FOIA_LOG_FILE",
+     "status=NOT_FOUND"
+    ],
+    [
+     "agency=Interior - Indian Affairs (AS-IA /",
+     "agency_code=BIA",
+     "source=FOIA_LOG_FILE",
+     "status=NOT_FOUND"
+    ]
+   ],
+   "pct": 13.71,
+   "rows": 124,
+   "scan": "full"
+  },
+  "cross_dataset_ruling_map.csv": {
+   "columns_ignored": [],
+   "duplicate_rows_ignoring_volatile": 2228,
+   "examples": [
+    [
+     "identifier_type=CAGE",
+     "identifier=4X1V0",
+     "dataset=Identifier ledger",
+     "source_file=cedar_identifier_ledger_final.csv"
+    ],
+    [
+     "identifier_type=CAGE",
+     "identifier=7RHF7",
+     "dataset=Identifier ledger",
+     "source_file=cedar_identifier_ledger_final.csv"
+    ]
+   ],
+   "pct": 29.679,
+   "rows": 7507,
+   "scan": "full"
+  },
+  "deals_party_attribution_agent.csv": {
+   "columns_ignored": [],
+   "duplicate_rows_ignoring_volatile": 3,
+   "examples": [
+    [
+     "native_party=NEZ PERCE TRIBE",
+     "tribe_id=TRBF-NEZPRC-00",
+     "canonical_name=Nez Perce",
+     "party_role=ENTITY_OWNED"
+    ],
+    [
+     "native_party=YUROK TRIBE",
+     "tribe_id=TRBF-YUROKT-00",
+     "canonical_name=Yurok",
+     "party_role=ENTITY_OWNED"
+    ]
+   ],
+   "pct": 0.566,
+   "rows": 530,
+   "scan": "full"
+  },
+  "deals_party_autoresolved.csv": {
+   "columns_ignored": [],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "native_party=NEZ PERCE TRIBE",
+     "n_deals=1",
+     "tribe_id=TRBF-NEZPRC-00",
+     "canonical_name=Nez Perce"
+    ]
+   ],
+   "pct": 0.199,
+   "rows": 502,
+   "scan": "full"
+  },
+  "faads_attribution_audit_sample.csv": {
+   "columns_ignored": [],
+   "duplicate_rows_ignoring_volatile": 40,
+   "examples": [
+    [
+     "recipient_name=BAY MILLS COMMUNITY COLLEGE",
+     "recipient_state=MI",
+     "recipient_type=I",
+     "tribe_id=TCU-BYMLL1-00"
+    ],
+    [
+     "recipient_name=CHEROKEE INDN /EASTERN B",
+     "recipient_state=NC",
+     "recipient_type=I",
+     "tribe_id=TRBF-ESTCHK-00"
+    ]
+   ],
+   "pct": 1.749,
+   "rows": 2287,
+   "scan": "full"
+  },
+  "faads_entity_attribution.csv": {
+   "columns_ignored": [
+    "award_id_fain",
+    "faads_row_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 140,
+   "examples": [
+    [
+     "fiscal_year=2002",
+     "action_date=2002-04-01",
+     "agency=Department of Agriculture",
+     "awarding_sub_agency=Food and Nutrition Service"
+    ],
+    [
+     "fiscal_year=2004",
+     "action_date=2004-01-01",
+     "agency=Department of Agriculture",
+     "awarding_sub_agency=Food and Nutrition Service"
+    ]
+   ],
+   "pct": 0.473,
+   "rows": 29594,
+   "scan": "full"
+  },
+  "faads_transactions.csv": {
+   "columns_ignored": [
+    "award_id_fain",
+    "fetched_date",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 1488,
+   "examples": [
+    [
+     "fiscal_year=2001",
+     "cfda_program=15.FFC",
+     "agency=Department of the Interior",
+     "recipient_name=STATE OF OREGON"
+    ],
+    [
+     "fiscal_year=2001",
+     "cfda_program=15.FFC",
+     "agency=Department of the Interior",
+     "recipient_name=RICHARD ERICKSON"
+    ]
+   ],
+   "pct": 2.453,
+   "rows": 60661,
+   "scan": "full"
+  },
+  "faads_transactions_all_agencies.csv": {
+   "columns_ignored": [
+    "award_id_fain",
+    "fetched_date",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 55648,
+   "examples": [
+    [
+     "fiscal_year=2001",
+     "cfda_program=15.FFC",
+     "agency=Department of the Interior",
+     "recipient_name=STATE OF OREGON"
+    ],
+    [
+     "fiscal_year=2001",
+     "cfda_program=15.FFC",
+     "agency=Department of the Interior",
+     "recipient_name=RICHARD ERICKSON"
+    ]
+   ],
+   "pct": 18.549,
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "federal_actions.csv": {
+   "columns_ignored": [
+    "docket_ids",
+    "document_number",
+    "fetched_date",
+    "html_url",
+    "json_url",
+    "pdf_url",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 1932,
+   "examples": [
+    [
+     "publication_date=1994-02-16",
+     "effective_on=",
+     "title=Biweekly Notice",
+     "abstract="
+    ],
+    [
+     "publication_date=1994-03-02",
+     "effective_on=",
+     "title=Applications and Amendments to Fac",
+     "abstract="
+    ]
+   ],
+   "pct": 1.235,
+   "rows": 156452,
+   "scan": "full"
+  },
+  "federal_actions_raw.csv": {
+   "columns_ignored": [
+    "docket_ids",
+    "document_number",
+    "fetched_date",
+    "html_url",
+    "json_url",
+    "pdf_url",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 1932,
+   "examples": [
+    [
+     "publication_date=1994-02-16",
+     "effective_on=",
+     "title=Biweekly Notice",
+     "abstract="
+    ],
+    [
+     "publication_date=1994-03-02",
+     "effective_on=",
+     "title=Applications and Amendments to Fac",
+     "abstract="
+    ]
+   ],
+   "pct": 1.235,
+   "rows": 156452,
+   "scan": "full"
+  },
+  "federal_funding_transactions.csv": {
+   "columns_ignored": [
+    "assistance_award_unique_key",
+    "assistance_transaction_unique_key",
+    "award_id_fain",
+    "fetched_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 7476,
+   "examples": [
+    [
+     "action_date=2020-11-18",
+     "fiscal_year=2021",
+     "fy_partial_flag=0",
+     "obligated_usd=0.00"
+    ],
+    [
+     "action_date=2020-11-06",
+     "fiscal_year=2021",
+     "fy_partial_flag=0",
+     "obligated_usd=0.00"
+    ]
+   ],
+   "pct": 2.492,
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "ferc_docket_filings.csv": {
+   "columns_ignored": [
+    "accession_number",
+    "built_date",
+    "ferc_filing_id",
+    "fetched_date",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 11179,
+   "examples": [
+    [
+     "docket_number=AD02-5",
+     "subdocket=000",
+     "filed_date=2001-12-11",
+     "issued_date="
+    ],
+    [
+     "docket_number=AD02-5",
+     "subdocket=000",
+     "filed_date=2001-12-11",
+     "issued_date="
+    ]
+   ],
+   "pct": 10.894,
+   "rows": 102615,
+   "scan": "full"
+  },
+  "ferc_docket_parties.csv": {
+   "columns_ignored": [
+    "built_date",
+    "ferc_docket_party_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 86,
+   "examples": [
+    [
+     "docket_number=CP23-516",
+     "subdocket=000",
+     "docket_program=natural gas certificate, LNG and p",
+     "party_name_as_recorded=Energy Alabama"
+    ],
+    [
+     "docket_number=CP23-516",
+     "subdocket=000",
+     "docket_program=natural gas certificate, LNG and p",
+     "party_name_as_recorded=Stand.earth"
+    ]
+   ],
+   "pct": 0.744,
+   "rows": 11563,
+   "scan": "full"
+  },
+  "ferc_tribal_dockets.csv": {
+   "columns_ignored": [
+    "built_date",
+    "docket_number",
+    "fetched_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 6,
+   "examples": [
+    [
+     "subdocket=001",
+     "docket_prefix=ER",
+     "docket_program=electric rates and transmission",
+     "applicant_or_licensee_as_recorded=South Carolina Electric & Gas Comp"
+    ],
+    [
+     "subdocket=000",
+     "docket_prefix=ER",
+     "docket_program=electric rates and transmission",
+     "applicant_or_licensee_as_recorded=Cinergy Capital & Trading, Inc."
+    ]
+   ],
+   "pct": 1.954,
+   "rows": 307,
+   "scan": "full"
+  },
+  "fl_gaming_payments.csv": {
+   "columns_ignored": [
+    "built_date",
+    "fetched_date",
+    "payment_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 2556,
+   "examples": [
+    [
+     "state=FL",
+     "fund=Florida Indian Gaming revenue shar",
+     "direction=paid_in",
+     "recipient_type=state_of_florida"
+    ],
+    [
+     "state=FL",
+     "fund=Florida Indian Gaming revenue shar",
+     "direction=paid_in",
+     "recipient_type=state_of_florida"
+    ]
+   ],
+   "pct": 26.199,
+   "rows": 9756,
+   "scan": "full"
+  },
+  "foia_discovery_targets.csv": {
+   "columns_ignored": [
+    "url"
+   ],
+   "duplicate_rows_ignoring_volatile": 15,
+   "examples": [
+    [
+     "agency=Department of Housing and Urban De",
+     "agency_code=HUD",
+     "found_on=https://www.hud.gov/foia",
+     "found_on_kind=FOIA_HOME"
+    ],
+    [
+     "agency=Department of Housing and Urban De",
+     "agency_code=HUD",
+     "found_on=https://www.hud.gov/foia",
+     "found_on_kind=FOIA_HOME"
+    ]
+   ],
+   "pct": 12.295,
+   "rows": 122,
+   "scan": "full"
+  },
+  "fpds_uei_cage_map.csv": {
+   "columns_ignored": [],
+   "duplicate_rows_ignoring_volatile": 2,
+   "examples": [
+    [
+     "uei=HB4MGNE6P4Y4",
+     "cage_code=",
+     "legal_business_name=Westar Medical Products",
+     "n_observations=1"
+    ],
+    [
+     "uei=QRLRV4CXZNE4",
+     "cage_code=",
+     "legal_business_name=eNOLA cONTRACTING sERVICE INCORPOR",
+     "n_observations=2"
+    ]
+   ],
+   "pct": 0.008,
+   "rows": 24977,
+   "scan": "full"
+  },
+  "fr_consultation_notices.csv": {
+   "columns_ignored": [
+    "document_number",
+    "html_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 2,
+   "examples": [
+    [
+     "publication_date=2010-01-11",
+     "publication_year=2010",
+     "type=Notice",
+     "title=Tribal Consultation on Proposed Re"
+    ],
+    [
+     "publication_date=2014-06-24",
+     "publication_year=2014",
+     "type=Notice",
+     "title=Notice of Inventory Completion: De"
+    ]
+   ],
+   "pct": 0.413,
+   "rows": 484,
+   "scan": "full"
+  },
+  "fr_consultation_referenced.csv": {
+   "columns_ignored": [
+    "document_number"
+   ],
+   "duplicate_rows_ignoring_volatile": 662,
+   "examples": [
+    [
+     "publication_year=2011",
+     "title=Notice of Inventory Completion: De",
+     "agency_names=Interior Department; National Park",
+     "basis=abstract reports consultation alre"
+    ],
+    [
+     "publication_year=2011",
+     "title=Notice of Inventory Completion: De",
+     "agency_names=Interior Department; National Park",
+     "basis=abstract reports consultation alre"
+    ]
+   ],
+   "pct": 36.195,
+   "rows": 1829,
+   "scan": "full"
+  },
+  "fr_content_classification.csv": {
+   "columns_ignored": [
+    "document_number",
+    "html_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 4771,
+   "examples": [
+    [
+     "publication_date=1994-01-06",
+     "publication_year=1994",
+     "type=Notice",
+     "title=Invitation to Participate; Explora"
+    ],
+    [
+     "publication_date=1994-01-06",
+     "publication_year=1994",
+     "type=Notice",
+     "title=Invitation to Participate; Explora"
+    ]
+   ],
+   "pct": 3.049,
+   "rows": 156452,
+   "scan": "full"
+  },
+  "fr_ex_parte_notices.csv": {
+   "columns_ignored": [
+    "built_date",
+    "document_number",
+    "fr_ex_parte_notice_id",
+    "raw_text_url",
+    "retrieved_at",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 4,
+   "examples": [
+    [
+     "publication_date=1994-07-11",
+     "title=47 CFR Part 73",
+     "fr_citation=",
+     "fr_type=Uncategorized Document"
+    ],
+    [
+     "publication_date=1994-08-26",
+     "title=Implementation of Section 309(j) o",
+     "fr_citation=",
+     "fr_type=Uncategorized Document"
+    ]
+   ],
+   "pct": 0.051,
+   "rows": 7820,
+   "scan": "full"
+  },
+  "fr_ex_parte_party_entity_links.csv": {
+   "columns_ignored": [
+    "built_date",
+    "link_id",
+    "source_row_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "source_dataset=ferc_ex_parte_parties.csv",
+     "document_number=2024-25001",
+     "publication_date=2024-10-28",
+     "party_as_printed=Kickapoo Traditional Tribe of Texa"
+    ]
+   ],
+   "pct": 11.111,
+   "rows": 9,
+   "scan": "full"
+  },
+  "fr_nagpra_title_index.csv": {
+   "columns_ignored": [
+    "document_number"
+   ],
+   "duplicate_rows_ignoring_volatile": 1145,
+   "examples": [
+    [
+     "publication_date=1997-06-11",
+     "publication_year=1997",
+     "title=Notice of Inventory Completion for",
+     "agency_names=Interior Department; National Park"
+    ],
+    [
+     "publication_date=1997-08-01",
+     "publication_year=1997",
+     "title=Notice of Inventory Completion for",
+     "agency_names=Interior Department; National Park"
+    ]
+   ],
+   "pct": 17.333,
+   "rows": 6606,
+   "scan": "full"
+  },
+  "gaming_decision_compact_join.csv": {
+   "columns_ignored": [
+    "decision_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 4,
+   "examples": [
+    [
+     "tribe=The Chickasaw Nation",
+     "state=Oklahoma",
+     "decision_status=Approved",
+     "legal_theory=Oklahoma - Within Former Reservati"
+    ],
+    [
+     "tribe=The Chickasaw Nation",
+     "state=Oklahoma",
+     "decision_status=Approved",
+     "legal_theory=Oklahoma - Within Former Reservati"
+    ]
+   ],
+   "pct": 2.899,
+   "rows": 138,
+   "scan": "full"
+  },
+  "gaming_employment_observations.csv": {
+   "columns_ignored": [
+    "built_date",
+    "fetched_date",
+    "observation_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 5,
+   "examples": [
+    [
+     "facility_id=CCP-364200",
+     "tribe_id=TRBF-SCROIX-00",
+     "year=2021",
+     "employment=98"
+    ],
+    [
+     "facility_id=CCP-14800",
+     "tribe_id=TRBF-SCROIX-00",
+     "year=2021",
+     "employment=194"
+    ]
+   ],
+   "pct": 0.154,
+   "rows": 3246,
+   "scan": "full"
+  },
+  "gaming_property_locations.csv": {
+   "columns_ignored": [
+    "built_date",
+    "location_observation_id",
+    "retrieved_at"
+   ],
+   "duplicate_rows_ignoring_volatile": 6,
+   "examples": [
+    [
+     "property_id=CCP-635200",
+     "property_name=Red Earth Casino",
+     "property_name_as_published=Red Earth Casino",
+     "address=3089 Norm Niver Rd"
+    ],
+    [
+     "property_id=CCP-874600",
+     "property_name=Running Creek Casino",
+     "property_name_as_published=Running Creek Casino",
+     "address=635 E Hwy 20"
+    ]
+   ],
+   "pct": 0.271,
+   "rows": 2212,
+   "scan": "full"
+  },
+  "gaming_source_claims.csv": {
+   "columns_ignored": [
+    "built_date",
+    "fetched_date",
+    "source_claim_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "source_record_id=NIGC-DL-20230424-01",
+     "source_type=nigc_ogc_declination_letter",
+     "subject_entity_id=NIGCP-E9A933B794",
+     "subject_value=Federal Charter of Incorporation"
+    ]
+   ],
+   "pct": 0.885,
+   "rows": 113,
+   "scan": "full"
+  },
+  "grantmaker_funding_flows.csv": {
+   "columns_ignored": [
+    "built_date",
+    "flow_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 411,
+   "examples": [
+    [
+     "funder_key=KOCHFDN",
+     "funder_ein=480918408",
+     "funder_name_as_filed=Charles Koch Foundation",
+     "funder_name_canonical=CHARLES KOCH FOUNDATION"
+    ],
+    [
+     "funder_key=KOCHFDN",
+     "funder_ein=480918408",
+     "funder_name_as_filed=Charles Koch Foundation",
+     "funder_name_canonical=CHARLES KOCH FOUNDATION"
+    ]
+   ],
+   "pct": 2.203,
+   "rows": 18656,
+   "scan": "full"
+  },
+  "hearing_appearances.csv": {
+   "columns_ignored": [
+    "built_date",
+    "fetched_date",
+    "hearing_appearance_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 7,
+   "examples": [
+    [
+     "channel=HEARING_TESTIMONY",
+     "congress=119",
+     "chamber=House",
+     "committee=House Natural Resources"
+    ],
+    [
+     "channel=HEARING_TESTIMONY",
+     "congress=119",
+     "chamber=House",
+     "committee=House Natural Resources"
+    ]
+   ],
+   "pct": 0.262,
+   "rows": 2667,
+   "scan": "full"
+  },
+  "hearing_bill_links.csv": {
+   "columns_ignored": [
+    "built_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "event_id=338549",
+     "congress=119",
+     "chamber=Senate",
+     "committee=Senate Energy and Natural Resource"
+    ]
+   ],
+   "pct": 0.215,
+   "rows": 465,
+   "scan": "full"
+  },
+  "lobbying_issue_families_filing.csv": {
+   "columns_ignored": [
+    "filing_uuid"
+   ],
+   "duplicate_rows_ignoring_volatile": 14306,
+   "examples": [
+    [
+     "filing_year=1999",
+     "client_name=NORTHERN CHEYENNE TRIBE",
+     "entity_id=TRBF-NORCHY-00",
+     "lda_issue_codes=IND"
+    ],
+    [
+     "filing_year=1999",
+     "client_name=HOPI TRIBE",
+     "entity_id=TRBF-HOPIAZ-00",
+     "lda_issue_codes=IND|LAW"
+    ]
+   ],
+   "pct": 51.468,
+   "rows": 27796,
+   "scan": "full"
+  },
+  "lobbying_registrant_native_ownership_evidence.csv": {
+   "columns_ignored": [
+    "built_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 4,
+   "examples": [
+    [
+     "registrant_id=25090",
+     "registrant_name=MICCOSUKEE TRIBE OF INDIANS OF FLO",
+     "evidence_route=R5_IDENTIFIER_ATTRIBUTED_IN_THE_LE",
+     "claim=NATIVE_OWNED"
+    ],
+    [
+     "registrant_id=301072",
+     "registrant_name=ARCTIC SLOPE REGIONAL CORP",
+     "evidence_route=R5_IDENTIFIER_ATTRIBUTED_IN_THE_LE",
+     "claim=NATIVE_OWNED"
+    ]
+   ],
+   "pct": 14.815,
+   "rows": 27,
+   "scan": "full"
+  },
+  "nagpra_notices.csv": {
+   "columns_ignored": [
+    "document_number",
+    "fetched_date",
+    "full_text_url",
+    "html_url",
+    "pdf_url",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 11,
+   "examples": [
+    [
+     "publication_date=1997-06-11",
+     "publication_year=1997",
+     "notice_type=inventory_completion",
+     "notice_title_form=Notice of Inventory Completion"
+    ],
+    [
+     "publication_date=1997-08-01",
+     "publication_year=1997",
+     "notice_type=inventory_completion",
+     "notice_title_form=Notice of Inventory Completion"
+    ]
+   ],
+   "pct": 0.163,
+   "rows": 6729,
+   "scan": "full"
+  },
+  "native_bills_subject_sweep.csv": {
+   "columns_ignored": [
+    "bill_id",
+    "build_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 5,
+   "examples": [
+    [
+     "congress=107",
+     "chamber=house",
+     "bill_type=hr",
+     "number=5108"
+    ],
+    [
+     "congress=110",
+     "chamber=house",
+     "bill_type=hr",
+     "number=5680"
+    ]
+   ],
+   "pct": 0.207,
+   "rows": 2414,
+   "scan": "full"
+  },
+  "native_entity_lobbying_disclosures.csv": {
+   "columns_ignored": [
+    "filing_url",
+    "filing_uuid"
+   ],
+   "duplicate_rows_ignoring_volatile": 16,
+   "examples": [
+    [
+     "entity_id=TRBF-ALCOUS-00",
+     "canonical_name=Alabama-Coushatta",
+     "entity_type=Federally recognized tribe",
+     "entity_state=TX"
+    ],
+    [
+     "entity_id=TRBF-FALLON-00",
+     "canonical_name=Paiute-Shoshone",
+     "entity_type=Federally recognized tribe",
+     "entity_state=NV"
+    ]
+   ],
+   "pct": 0.058,
+   "rows": 27796,
+   "scan": "full"
+  },
+  "native_passthrough.csv": {
+   "columns_ignored": [
+    "built_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 121,
+   "examples": [
+    [
+     "subaward_number=STS0053.22",
+     "prime_award_id=0022",
+     "fiscal_year=2010",
+     "subaward_date=2010-09-29"
+    ],
+    [
+     "subaward_number=STS0053.22",
+     "prime_award_id=0022",
+     "fiscal_year=2010",
+     "subaward_date=2010-09-29"
+    ]
+   ],
+   "pct": 9.588,
+   "rows": 1262,
+   "scan": "full"
+  },
+  "nepa_eplanning_projects.csv": {
+   "columns_ignored": [
+    "built_date",
+    "eplanning_project_id",
+    "fetched_date",
+    "nepa_number",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "project_name=Tribal 519 No. MV 23-6",
+     "agency=Bureau of Land Management",
+     "lead_office=Lander Field Office",
+     "nepa_document_type=DNA"
+    ]
+   ],
+   "pct": 0.321,
+   "rows": 312,
+   "scan": "full"
+  },
+  "np_ein_entity_hub.csv": {
+   "columns_ignored": [
+    "built_date",
+    "ein"
+   ],
+   "duplicate_rows_ignoring_volatile": 91,
+   "examples": [
+    [
+     "org_name=",
+     "entity_id=CNSF-PSMQDY-PP",
+     "entity_canonical_name=Passamaquoddy Pleasant Point",
+     "entity_class=Federal-level constituency entity"
+    ],
+    [
+     "org_name=",
+     "entity_id=CNSF-PSMQDY-PP",
+     "entity_canonical_name=Passamaquoddy Pleasant Point",
+     "entity_class=Federal-level constituency entity"
+    ]
+   ],
+   "pct": 3.951,
+   "rows": 2303,
+   "scan": "full"
+  },
+  "np_org_scale.csv": {
+   "columns_ignored": [
+    "ein",
+    "propublica_url",
+    "source_url"
+   ],
+   "duplicate_rows_ignoring_volatile": 1,
+   "examples": [
+    [
+     "org_name=Mojave Foursquare Church",
+     "state=CA",
+     "confidence_tier=A",
+     "bmf_990_tier=not_required_to_file"
+    ]
+   ],
+   "pct": 0.086,
+   "rows": 1157,
+   "scan": "full"
+  },
+  "np_orgs.csv": {
+   "columns_ignored": [
+    "EIN",
+    "built_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 83,
+   "examples": [
+    [
+     "entity_id=",
+     "org_name=MOJAVE FOURSQUARE CHURCH",
+     "classification_ruling=UNRULED",
+     "evidence=BMF name matched canonical tribe T"
+    ],
+    [
+     "entity_id=",
+     "org_name=RED PEAK INDIAN MISSION",
+     "classification_ruling=UNRULED",
+     "evidence=BMF name carries a tribal token; n"
+    ]
+   ],
+   "pct": 0.65,
+   "rows": 12764,
+   "scan": "full"
+  },
+  "np_schedule_i_grants.csv": {
+   "columns_ignored": [
+    "built_date"
+   ],
+   "duplicate_rows_ignoring_volatile": 101,
+   "examples": [
+    [
+     "filer_ein=562272253",
+     "filer_name_as_filed=CHEROKEE PRESERVATION FOUNDATION I",
+     "filer_state=NC",
+     "filer_population=np_orgs_EXCLUDED_by_prior_ruling"
+    ],
+    [
+     "filer_ein=562272253",
+     "filer_name_as_filed=CHEROKEE PRESERVATION FOUNDATION I",
+     "filer_state=NC",
+     "filer_population=np_orgs_EXCLUDED_by_prior_ruling"
+    ]
+   ],
+   "pct": 0.172,
+   "rows": 58685,
+   "scan": "full"
+  },
+  "nrc_meeting_participants.csv": {
+   "columns_ignored": [
+    "fetched_date",
+    "participant_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 220,
+   "examples": [
+    [
+     "nrc_meeting_id=NRC-PMNS-20140823",
+     "meeting_number=20140823",
+     "meeting_date=2014-05-16",
+     "external_participant_verbatim="
+    ],
+    [
+     "nrc_meeting_id=NRC-PMNS-20140823",
+     "meeting_number=20140823",
+     "meeting_date=2014-05-16",
+     "external_participant_verbatim="
+    ]
+   ],
+   "pct": 54.054,
+   "rows": 407,
+   "scan": "full"
+  },
+  "oira_meeting_participants.csv": {
+   "columns_ignored": [
+    "built_date",
+    "fetched_date",
+    "oira_participant_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 4,
+   "examples": [
+    [
+     "oira_meeting_id=OIRA-228723",
+     "meeting_date=2023-11-03",
+     "rin=1024-AE19",
+     "agency=1024-DOI/NPS"
+    ],
+    [
+     "oira_meeting_id=OIRA-748975",
+     "meeting_date=2024-12-05",
+     "rin=2120-AL82",
+     "agency=2120-DOT/FAA"
+    ]
+   ],
+   "pct": 0.355,
+   "rows": 1128,
+   "scan": "full"
+  },
+  "prime_contracts.csv": {
+   "columns_ignored": [
+    "built_date",
+    "contract_number",
+    "parent_contract_number",
+    "total_award_value",
+    "total_award_value_real2025"
+   ],
+   "duplicate_rows_ignoring_volatile": 31745,
+   "examples": [
+    [
+     "fiscal_year=2000",
+     "pre_2000_flag=0",
+     "awardee_name=All Cities Enterprises (Inc)",
+     "awardee_uei=RKVLB6AL6GP7"
+    ],
+    [
+     "fiscal_year=2000",
+     "pre_2000_flag=0",
+     "awardee_name=Petro Star, Inc.",
+     "awardee_uei=JGSGGJJTAMK1"
+    ]
+   ],
+   "pct": 10.582,
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "prime_contracts_archive_backfill.csv": {
+   "columns_ignored": [
+    "built_date",
+    "contract_number",
+    "total_award_value",
+    "total_award_value_real2025"
+   ],
+   "duplicate_rows_ignoring_volatile": 65885,
+   "examples": [
+    [
+     "parent_contract_number=NNC06BA07B",
+     "fiscal_year=2008",
+     "pre_2000_flag=0",
+     "awardee_name=ASRC AEROSPACE CORP"
+    ],
+    [
+     "parent_contract_number=NNC06BA07B",
+     "fiscal_year=2008",
+     "pre_2000_flag=0",
+     "awardee_name=ASRC AEROSPACE CORP"
+    ]
+   ],
+   "pct": 21.962,
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "prime_contracts_awards.csv": {
+   "columns_ignored": [
+    "built_date",
+    "contract_number",
+    "max_award_value_usd"
+   ],
+   "duplicate_rows_ignoring_volatile": 46043,
+   "examples": [
+    [
+     "first_award_fy=2000",
+     "last_action_fy=2000",
+     "n_transactions=1",
+     "awardee_name=Datatrac Information Services"
+    ],
+    [
+     "first_award_fy=2000",
+     "last_action_fy=2000",
+     "n_transactions=1",
+     "awardee_name=Datatrac Information Services"
+    ]
+   ],
+   "pct": 15.348,
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "prime_contracts_published.csv": {
+   "columns_ignored": [
+    "contract_number",
+    "max_award_value_usd"
+   ],
+   "duplicate_rows_ignoring_volatile": 46158,
+   "examples": [
+    [
+     "first_award_fy=2000",
+     "last_action_fy=2000",
+     "n_transactions=1",
+     "awardee_name=Datatrac Information Services"
+    ],
+    [
+     "first_award_fy=2000",
+     "last_action_fy=2000",
+     "n_transactions=1",
+     "awardee_name=Datatrac Information Services"
+    ]
+   ],
+   "pct": 15.386,
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "resource_revenue.csv": {
+   "columns_ignored": [
+    "built_date",
+    "fetched_date",
+    "resource_revenue_event_id",
+    "source_record_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 2,
+   "examples": [
+    [
+     "recipient_entity_id=",
+     "recipient_entity_name=",
+     "beneficiary_entity_id=",
+     "beneficiary_entity_name="
+    ],
+    [
+     "recipient_entity_id=",
+     "recipient_entity_name=",
+     "beneficiary_entity_id=",
+     "beneficiary_entity_name="
+    ]
+   ],
+   "pct": 0.019,
+   "rows": 10482,
+   "scan": "full"
+  },
+  "subaward_entity_rollup.csv": {
+   "columns_ignored": [
+    "tribe_id"
+   ],
+   "duplicate_rows_ignoring_volatile": 7,
+   "examples": [
+    [
+     "confidence_tier=B",
+     "n_as_prime_a=0",
+     "usd_as_prime_a=0.0",
+     "n_as_subawardee_b=1"
+    ],
+    [
+     "confidence_tier=B",
+     "n_as_prime_a=0",
+     "usd_as_prime_a=0.0",
+     "n_as_subawardee_b=1"
+    ]
+   ],
+   "pct": 1.556,
+   "rows": 450,
+   "scan": "full"
+  },
+  "subawards.csv": {
+   "columns_ignored": [
+    "fetched_date",
+    "subaward_number"
+   ],
+   "duplicate_rows_ignoring_volatile": 9937,
+   "examples": [
+    [
+     "sub_uei=Z4SUJJMSN8C3",
+     "sub_cage=",
+     "sub_name=EAGLE APPLIED SCIENCES, LLC",
+     "sub_state=TX"
+    ],
+    [
+     "sub_uei=Z4SUJJMSN8C3",
+     "sub_cage=",
+     "sub_name=EAGLE APPLIED SCIENCES, LLC",
+     "sub_state=TX"
+    ]
+   ],
+   "pct": 15.637,
+   "rows": 63548,
+   "scan": "full"
+  },
+  "tcu_cdfi_ownership_evidence.csv": {
+   "columns_ignored": [],
+   "duplicate_rows_ignoring_volatile": 4,
+   "examples": [
+    [
+     "institution=Little Priest Tribal College",
+     "layer=TCU",
+     "pattern=x_chartered_y",
+     "captured_owner=Winnebago Tribe of Nebraska"
+    ],
+    [
+     "institution=Native360 Loan Fund, Inc.",
+     "layer=FI",
+     "pattern=serves",
+     "captured_owner="
+    ]
+   ],
+   "pct": 3.077,
+   "rows": 130,
+   "scan": "full"
+  }
+ },
+ "scripts": {
+  "01_build_entity_spine.py": [
+   {
+    "line": 274,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"review_queue_{TODAY}.csv\", tierB,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 269,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"review_id\"] = f\"RV-{i:05d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "02_extract_exclusion_rulings.py": [
+   {
+    "line": 116,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"exclusion_id\"] = f\"EXCL-{i:04d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "03_apply_exclusions_and_tier.py": [
+   {
+    "line": 154,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"false_attributions_caught_{TODAY}.csv\", caught,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "04_spiderweb_expand.py": [
+   {
+    "line": 173,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"spiderweb_ambiguous_{TODAY}.csv\", ambiguous,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes cedar_identifier_ledger_tiered.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "05_parse_doi_nho_list.py": [
+   {
+    "line": 90,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"nho_id\"] = f\"NHO-DOI-{i:04d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "06_verify_nho_via_8a.py": [
+   {
+    "line": 144,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"nho_parent_unknown_{TODAY}.csv\", unknown,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "07_parse_ancsa_ceiling.py": [
+   {
+    "line": 163,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"anc_id\"] = f\"ANC-{i:04d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "08_build_review_page.py": [
+   {
+    "line": 269,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# NONPROFIT_DATASET_PLAN.md already has the middle categories, so",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 42,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "while (REVIEW / f\"cedar_review_{TODAY}_{n:02d}.html\").exists():",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 42,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 269; date-stamped log written at line 42",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "09_import_rulings.py": [
+   {
+    "line": 80,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "in the project. That function already carries the diacritic fold, the",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 289,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(CLEAN / f\"cedar_inherited_from_rulings_{TODAY}.csv\", inherited,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 289,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 80; date-stamped log written at line 289",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "100_finish_declinations_and_employment.py": [
+   {
+    "line": 408,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(IDX / f\"index_refresh_{TODAY}.csv\", new,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 941,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"candidate_claim_id\": f\"OCRCLM-{len(ocr_claims)+1:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1216,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": d[\"Deal_ID\"],",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1361,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": d[\"Deal_ID\"],",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1420,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": \"\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1580,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"observation_id\": f\"EMP-OSHA-{len(out)+1:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1673,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"observation_id\": f\"EMP-LODES-{n:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1894,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"observation_id\": f\"EMP-DOC-{n+1:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1953,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"observation_id\": f\"EMP-EA-{n:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "101_build_lodes_block_employment.py": [
+   {
+    "line": 98,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"101_lodes_{TODAY}.log\", \"a\", encoding=\"utf-8\") as fh:",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "103_build_california_gaming.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes ca_gaming_facilities_official.csv, ca_gaming_payments.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "104_build_wa_allocations.py": [
+   {
+    "line": 840,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"wa_allocation_unresolved_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 629,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: allocation_id=f\"WAALLOC-{n:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "105_build_florida_gaming.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes fl_gaming_payments.csv, seminole_bond_disclosures.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "106_build_revenue_bounds.py": [
+   {
+    "line": 1066,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"revenue_bounds_single_property_refusals_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 308,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"band_id\": f\"NIGCBAND-{fy}-{i+1}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes _revenue_bounds_summary.json with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "107_pull_remaining_states.py": [
+   {
+    "line": 1477,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "qout = REVIEW / f\"state_gaming_unresolved_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 991,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"observation_id\"] = f\"SG-{st}-{seq[st]:05d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "108_build_tribal_tax_bases.py": [
+   {
+    "line": 1305,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"tribal_tax_unresolved_{TODAY}.csv\", res.unresolved,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "109_build_variable_registry.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes variable_display.json, variable_registry.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "110_build_harmonized_views.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes entity_evidence_profile.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "111_build_advocacy_passthrough.py": [
+   {
+    "line": 103,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "OUT_REVIEW = REVIEW / f\"advocacy_passthrough_unresolved_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 961,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: review_id=f\"PT-{n:05d}\", queue=\"advocacy_passthrough\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 975,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: passthrough_id=f\"PT-{n:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1031,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: passthrough_id=f\"PT-{n:05d}\", funder_entity_id=\"\", funder_name=\"\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1052,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: review_id=f\"PT-{n:05d}\", queue=\"advocacy_passthrough\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "112_pull_grantee_990s.py": [
+   {
+    "line": 121,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "OUT_PASSTHROUGH = CLEAN / f\"advocacy_passthrough_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "113_build_nd_severance.py": [
+   {
+    "line": 1670,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"nd_severance_unresolved_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "114_pull_prime_archive.py": [
+   {
+    "line": 1838,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# already present.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1203,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"prime_archive_seam_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1203,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 1838; date-stamped log written at line 1203",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "115_pull_assistance_archive.py": [
+   {
+    "line": 1089,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "rp = REVIEW / f\"assistance_archive_unresolved_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "116_build_nd_tribal_taxes.py": [
+   {
+    "line": 1709,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"docs/TRIBAL_TAX_DECOMPOSITION.md already carries the \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1735,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"nd_tribal_tax_unresolved_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1735,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 1709; date-stamped log written at line 1735",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "117_build_gaming_devices.py": [
+   {
+    "line": 1253,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write(RAW / f\"manufacturer_kpi_refused_{TODAY}.csv\", refused,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 576,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"fact_id\": f\"GMF-{seq:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 623,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: f[\"fact_id\"] = f\"GMF-{i:05d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "118_build_gaming_ordinances.py": [
+   {
+    "line": 1394,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"ordinance_unresolved_{TODAY}.csv\", uq,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 295,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"ordinance_id\"] = (f\"NIGC-ORD-{r['index_date'].replace('-', '')}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "119_build_digital_and_loyalty.py": [
+   {
+    "line": 1761,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# universe already carries it under that tribe. Every other brand stays",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "120_normalize_rulings.py": [
+   {
+    "line": 134,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"rulings_inbox_NORMALISED_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "121_pull_subawards_api.py": [
+   {
+    "line": 1710,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# which every existing row already carries. Adding the deflated columns does",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 732,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(os.path.join(REVIEW, f\"_121_diagnosis_{TODAY}.json\"), \"w\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 732,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 1710; date-stamped log written at line 732",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "124_apply_rulings_in_place.py": [
+   {
+    "line": 235,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"ruling_redirect_unresolved_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "125_esm_native_entity_discovery.py": [
+   {
+    "line": 239,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"esm_native_entity_candidates_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "126_apply_deal_party_attribution.py": [
+   {
+    "line": 50,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "already has a `native_party_role` column from the classifier; this writes",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 204,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"deals_party_unmatched_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 204,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 50; date-stamped log written at line 204",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "130_build_section_106_consultation.py": [
+   {
+    "line": 338,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# pass; the lead agency already has its own column and must not be",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1045,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"section_106_unresolved_names_{TODAY}.csv\", uniq,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1045,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 338; date-stamped log written at line 1045",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 830,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"party_id\": f\"S106P-FR-{dn}-{len(parties)}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 974,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"consultation_event_id\": f\"S106-FR-{dn}-{i}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "131_merge_archive_backfill.py": [
+   {
+    "line": 130,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# target already carries an archive row for a year in scope.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 308,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "rp = REVIEW / f\"prime_merge_bgov_only_attributed_fy{scope}_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 308,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 130; date-stamped log written at line 308",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "133_build_ferc_advocacy.py": [
+   {
+    "line": 1832,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "PROCESS_HASH: \"ferc_filing_id\": f\"FERC-{d}-{sub}-{acc}-\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1833,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "PROCESS_HASH: f\"{abs(hash(aff)) % 10000:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "135_build_resource_assets.py": [
+   {
+    "line": 1088,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"resource_asset_revenue_linkage_proposals_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1031,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"proposal_id\": f\"RASL-{len(props)+1:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1070,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"proposal_id\": f\"RASL-{len(props)+1:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "137_link_resource_revenue_entities.py": [
+   {
+    "line": 168,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"resource_revenue_entity_proposals_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "139_build_litigation_positions.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes native_issue_litigation_coverage.csv, native_issue_litigation_positions.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "140_build_grantmaker_funding_flows.py": [
+   {
+    "line": 1346,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "tp = REVIEW / f\"grantmaker_name_trap_exclusions_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1317,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: flow_id=f\"{oid}-{i:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "141_pull_sam_contract_awards.py": [
+   {
+    "line": 349,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "print(\"  nothing to do - every variant already has a response on disk\")",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "143_build_gaming_property_locations.py": [
+   {
+    "line": 508,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# the roster row already carries the marker's own address; the JSON is",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 391,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "(RAW_OUT / f\"census_addressbatch_{TODAY}_{i//CH:03d}.csv\").write_text(",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 391,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 508; date-stamped log written at line 391",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 953,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"location_observation_id\"] = f\"GLOC-{pid}-{seq[pid]:02d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "148_resolve_schedule_i_recipients.py": [
+   {
+    "line": 444,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write(REVIEW / f\"schedule_i_recipient_resolution_{TODAY}.csv\", props)",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "149_build_tribal_resolution_financings.py": [
+   {
+    "line": 24,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "which is exactly the caution the declination build already carries for its own",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "14_copy_votingpatterns_sources.py": [
+   {
+    "line": 91,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "print(f\"  already present, size match: {s.name}\")",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "14_pull_cosponsors.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes _cosponsor_fetch_log.csv, _cosponsors.csv, native_bills.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "152_build_assistance_id_crosswalk.py": [
+   {
+    "line": 253,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"caveat\": \"A resolver match is tier B. The legacy id already carries \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 277,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"assistance_legacy_id_unresolved_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 277,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 253; date-stamped log written at line 277",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "153_merge_base_ledgers_into_classified.py": [
+   {
+    "line": 45,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "verbatim - the master already carries 521 float-formatted values, so",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "154_build_fr_ex_parte_notices.py": [
+   {
+    "line": 673,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# 133 already has the FERC bodies on disk. Reuse, never re-fetch.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 103,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "_LOG[0] = open(LOGS / f\"154_fr_ex_parte_{stage}_{TODAY}.log\", \"a\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 103,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 673; date-stamped log written at line 103",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 1353,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"candidate_id\": f\"FREXPU-{dn}-{len(unresolved)}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1442,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"candidate_id\": f\"FREXPU-{dn}-{j}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "154_extend_autoresolved_parties_additive.py": [
+   {
+    "line": 150,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"deals_party_refused_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "155_collect_deals_2026_08.py": [
+   {
+    "line": 790,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "f\"{len(new)} not already present\")",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 897,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"deals_skipped_leads_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 897,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 790; date-stamped log written at line 897",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "155_pull_nigc_roster.py": [
+   {
+    "line": 175,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "raw_path = RAW / f\"nigc_marker_listing_map6_{TODAY}.json\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "156_stage_form5500_gaming_employment.py": [
+   {
+    "line": 12,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "`cedar_domain.MeasurementType`. Precedent: the enum already carries",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 124,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"156_form5500_gaming_{TODAY}.log\", \"a\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 124,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 12; date-stamped log written at line 124",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 208,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"observation_id\": f\"EMP-F5500-{n:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "157_reconcile_nigc_roster.py": [
+   {
+    "line": 213,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "roster_path = RAWN / f\"nigc_roster_current_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "157_stage_osha_tribe_level_employment.py": [
+   {
+    "line": 132,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "is set on every row that the existing 364-row OSHA layer already carries at",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 261,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"157_osha_tribe_{TODAY}.log\", \"a\", encoding=\"utf-8\") as fh:",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 261,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 132; date-stamped log written at line 261",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 506,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"observation_id\": f\"EMP-OSHATRIBE-{n:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "158_extend_gaming_facilities.py": [
+   {
+    "line": 179,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "recon = read_csv(REVIEW / f\"gaming_nigc_additions_{TODAY}.csv\")",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "158_merge_staged_labor_employment.py": [
+   {
+    "line": 50,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "already carries at facility grain, flagged `already_facility_attached = 1`.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 109,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"158_merge_{TODAY}.log\", \"a\", encoding=\"utf-8\") as fh:",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 109,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 50; date-stamped log written at line 109",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "159_extend_gaming_metrics.py": [
+   {
+    "line": 125,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = RAW / f\"ct_slot_revenue_monthly_{TODAY}.json\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "15a_compacts_inventory.py": [
+   {
+    "line": 53,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "had_prefix = body != stem",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "15b_build_compact_index.py": [
+   {
+    "line": 262,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: event_id=f\"EVT-{st}-{tribe_slug}-{r['date_iso'].replace('-','')}-{len(events)+1:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes compact_events.csv, compact_versions.csv, compacts.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "15e_finalize_terms.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes compact_terms.csv, compacts.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "161_queue_gaming_date_resourcing.py": [
+   {
+    "line": 92,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "M.write_csv(CEDAR / \"review\" / f\"gaming_open_date_resourcing_{TODAY}.csv\", rows)",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "163_load_sam_contract_awards.py": [
+   {
+    "line": 891,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "f\"+{added:,} new, {dup:,} already present from another variant\")",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 916,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"sam_fy2000_2007_new_entities_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 916,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 891; date-stamped log written at line 916",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "163_promote_nho_universe_in_place.py": [
+   {
+    "line": 83,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "the PARENT the ruling names, at the tier the source row already carries",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 963,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_review(REVIEW / f\"nho_promotion_refused_{TODAY}.csv\", refused,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 963,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 83; date-stamped log written at line 963",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "164_link_facility_hub_sources.py": [
+   {
+    "line": 406,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "had_tier = \"entity_tier\" in mfields",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 487,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "rpath = REVIEW / f\"gaming_facility_hub_unlinked_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 487,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 406; date-stamped log written at line 487",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "165_link_universe_events_to_hub.py": [
+   {
+    "line": 189,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"gaming_universe_events_unlinked_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "167_link_nonprofit_family_via_ein_hub.py": [
+   {
+    "line": 651,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# links np_orgs ALREADY carries that a prior ruling forbids",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 875,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "wr(REVIEW / f\"np_ein_hub_conflicts_{TODAY}.csv\", conflicts)",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 875,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 651; date-stamped log written at line 875",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "168_link_adjudication_hubs.py": [
+   {
+    "line": 937,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"168_ferc_unresolved_parties_{TODAY}.csv\", rv, REVIEW_FIELDS)",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 753,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"ferc_docket_party_id\": f\"FDP-{len(hub) + 1:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 786,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"ferc_docket_party_id\": f\"FDP-{len(hub) + 1:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "169_build_identifier_graph.py": [
+   {
+    "line": 1147,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write(os.path.join(REVIEW, f\"identifier_one_to_many_defects_{TODAY}.csv\"),",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "16_federal_funding_recon.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes funding_identifier_netnew_ueis.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "170_build_individual_native_candidates.py": [
+   {
+    "line": 482,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "RANK_DERIVED: \"verification_id\": f\"INV-{rank:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "171_build_individual_native_verification.py": [
+   {
+    "line": 136,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# i.e. the same self-certification the project already has.\"* A federal-data",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "172_key_unkeyed_gaming_facility_hubs.py": [
+   {
+    "line": 68,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "* Idempotent: a row that already carries a tribe_id is SKIPPED and reported.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 722,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "lp = LOGS / f\"172_facility_hub_rulings_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 722,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 68; date-stamped log written at line 722",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "172_write_individual_native_codebook_fragment.py": [
+   {
+    "line": 94,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"`prime_contracts.csv` already carries `attributed_flag = 1` - the \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "173_consolidate_rulings_ledger.py": [
+   {
+    "line": 751,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "CONFLICT_OUT = REVIEW / f\"ruling_conflicts_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "174_apply_rulings_to_source_tables.py": [
+   {
+    "line": 383,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "for dest, recs in ((REVIEW / f\"ruling_vs_table_contradictions_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "174_backfill_digital_gaming_tiers.py": [
+   {
+    "line": 48,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "2. **`digital_gaming_relationships.csv` already carries B in a second column",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "175_sync_published_property_view_entities.py": [
+   {
+    "line": 116,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "ruling_log = LOGS / f\"172_facility_hub_rulings_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "176_write_ruling_codebook_fragments.py": [
+   {
+    "line": 28,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "already present, so a second run is a no-op.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "17_build_nonprofit_990.py": [
+   {
+    "line": 686,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "log(f\"  CONFLICT WITH BRIEF: the ledger already carries {led_types.get('EIN', 0):,} EIN rows \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes np_ein_uei_bridge.csv, np_orgs.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "180_build_lobbying_registrant_hub.py": [
+   {
+    "line": 14,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "`data/clean/native_entity_lobbying_disclosures.csv` already carries",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "18_spiderweb_v2_and_cage_backfill.py": [
+   {
+    "line": 192,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"spiderweb_multiparent_{TODAY}.csv\", multi,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "192_apply_ancsa_resolutions_in_place.py": [
+   {
+    "line": 34,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "The ledger already carries this exact correction, made by hand on 2026-08-06:",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "194_write_ancsa_ruling_codebook_fragment.py": [
+   {
+    "line": 30,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "appends only variables not already present.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "207_normalize_extent_competed.py": [
+   {
+    "line": 112,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "print(f\"\\ncolumns already present: {already or 'none'}\")",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "20_build_subcontracts.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes prime_sub_network.csv, subaward_identifier_harvest.csv, subaward_identifier_netnew.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "20_fix_nonprofit_authority.py": [
+   {
+    "line": 170,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"np_placename_risk_{TODAY}.csv\", risky,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "212_mine_sealed_state_audits_for_property_figures.py": [
+   {
+    "line": 142,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "outp = REVIEW / f\"sealed_state_property_figures_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "216_extract_nm_revshare_2023_2026.py": [
+   {
+    "line": 152,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "out = REVIEW / f\"nm_revshare_2023_2026_staged_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "218_stage_sealed_state_typed_rows.py": [
+   {
+    "line": 214,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "out = REVIEW / f\"sealed_state_typed_rows_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "21_flag_corrupt_cage_codes.py": [
+   {
+    "line": 129,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "out = REVIEW / f\"corrupt_cage_codes_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "227_anomaly_sweep.py": [
+   {
+    "line": 1034,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "PROCESS_HASH: ds[\"days\"][d] += 1",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "23b_build_gaming_land_decisions.py": [
+   {
+    "line": 380,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: event_id=f\"{did}-E{len([e for e in events if e['decision_id']==did]) + 1:02d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes gaming_decision_events.csv, gaming_land_decisions.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "23d_build_gaming_facilities.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes gaming_facilities.csv, gaming_facility_metrics.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "23e_join_decisions_to_compacts.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes gaming_decision_compact_join.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "23f_gaming_temporal.py": [
+   {
+    "line": 341,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# Rows RULED to be the SAME PROPERTY as another row that already carries the",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 112,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "bak = GRAVE / f\"{Path(name).stem}_pre_temporal_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 112,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 341; date-stamped log written at line 112",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "23g_gaming_duplicate_candidates.py": [
+   {
+    "line": 176,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "out = REVIEW / f\"gaming_facility_duplicate_candidates_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "241_promote_individual_native_firms_in_place.py": [
+   {
+    "line": 1303,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_atomic(REVIEW / f\"individual_native_promotion_refused_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "244_refresh_individual_native_review_queues.py": [
+   {
+    "line": 331,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_atomic(REVIEW / f\"individual_native_ownership_ambiguous_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "249_audit_ancsa_tierA_subaward_repoints.py": [
+   {
+    "line": 242,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"ancsa_tierA_subaward_disposition_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "250_demote_stale_tierA_subaward_rows.py": [
+   {
+    "line": 92,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"ancsa_tierA_subaward_disposition_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "251_apply_np_ein_exclusions_to_np_orgs.py": [
+   {
+    "line": 292,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "dest = REVIEW / f\"np_orgs_exclusions_applied_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "255_fix_gaming_property_deal_counts.py": [
+   {
+    "line": 41,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "So no name is compared here at all. `deals_classified.csv` already carries",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "262_repair_form5500_tribe_attribution.py": [
+   {
+    "line": 252,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"262_repair_{TODAY}.log\", \"a\", encoding=\"utf-8\") as fh:",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "263_register_attribution_repair_fragment.py": [
+   {
+    "line": 193,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"facility-grain OSHA layer already carries (317 rows). Both are kept \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "264_add_missing_osha_tribal_facilities.py": [
+   {
+    "line": 92,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "* idempotent: a facility already present by name+state is skipped",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 207,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"264_add_facilities_{TODAY}.log\", \"a\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 207,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 92; date-stamped log written at line 207",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "265_merge_osha_relift_rows.py": [
+   {
+    "line": 92,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"265_merge_{TODAY}.log\", \"a\", encoding=\"utf-8\") as fh:",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "266_apply_gaming_hub_spillover_rulings.py": [
+   {
+    "line": 222,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(LOGS / f\"266_spillover_{TODAY}.log\", \"a\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "286_check_idempotence.py": [
+   {
+    "line": 91,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "293_lint_bug_classes.py": [
+   {
+    "line": 359,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"\"\"Names assigned a dict that ALREADY carries every key it will ever have.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "309_apply_already_ruled_filter_to_review_queues.py": [
+   {
+    "line": 30,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "**1. A ROW THAT ALREADY CARRIES AN ANSWER IS NEVER REMOVED.** `review/` is not",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 299,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "rpath = REMOVALS_DIR / f\"{p.stem}_already_ruled_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 299,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 30; date-stamped log written at line 299",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "310_correct_overstated_owned_by_edge_tiers.py": [
+   {
+    "line": 318,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "audit = REVIEW / f\"overstated_owned_by_tier_corrections_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "318_measure_tribal_vendor_list_payoff.py": [
+   {
+    "line": 287,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"Tier-A upgrade headroom on identifiers ALREADY linked to the \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "31_build_dataset5_linked.py": [
+   {
+    "line": 767,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "Join keys used, in order: NEID `tribe_id` where the source already carries it",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "32_build_deals_party_queue.py": [
+   {
+    "line": 312,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"deals_party_queue_{TODAY}.csv\", queue,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "33_nonprofit_financials.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes np_financials.csv, np_org_scale.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "34_apply_nonprofit_rulings.py": [
+   {
+    "line": 233,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"np_needs_elijah_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "35_coverage_audit.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes coverage_audit.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "36_build_nho_intertribal.py": [
+   {
+    "line": 381,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"member and entity_master.csv already carries it as N-0002 'Native Hawaiian \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1406,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: rq.append({\"review_id\": f\"NHOIT-{i:03d}\", **r})",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "40_build_prime_contracts.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes prime_contracts.csv, prime_contracts_entity_year.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "40_pull_usaspending_subawards.py": [
+   {
+    "line": 414,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "log(f\"merge: {k} already present, keeping primary\")",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "41_build_codebooks.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes codebook_master.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "45_promote_subawards.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes subaward_entity_rollup.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "52_add_village_corporations.py": [
+   {
+    "line": 30,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "`entity_master.csv` already carries 173 village corporations and 6 ANCSA group",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "53_apply_agent_deals_rulings.py": [
+   {
+    "line": 53,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "Every party already present in `data/clean/deals_party_attribution.csv` is",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 611,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"deals_party_agent_needs_elijah_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 611,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 53; date-stamped log written at line 611",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "57_autoresolve_deal_parties.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes deals_party_autoresolved.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "58_apply_lobbying_rulings.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes lobbying_client_attribution.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "59_build_deal_source_index.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes deals_source_index.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "61_add_nho_intertribal_to_spine.py": [
+   {
+    "line": 177,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"The ledger already carries NHO-NAKUPUNA-00 on 'Nakupuna Solutions, \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 467,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"nho_ito_refused_{TODAY}.csv\", refused,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 467,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 177; date-stamped log written at line 467",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 496,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"event_id\": f\"OWN-NHO-2026-{i:03d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "63_cross_dataset_reconcile.py": [
+   {
+    "line": 104,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "print(f\"\\n[1] tribe_id backfilled from a name already present: {filled:,}\")",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 180,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"cross_dataset_conflicts_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 180,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 104; date-stamped log written at line 180",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "67_sam_entity_harvest.py": [
+   {
+    "line": 245,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"sam_selfdeclared_not_in_ledger_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "68_build_decisions_page.py": [
+   {
+    "line": 141,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"Added to the spine today. The 19 already linked carry $23.9B; \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 34,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "while (REVIEW / f\"cedar_decisions_{TODAY}_{n:02d}.html\").exists():",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 34,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 141; date-stamped log written at line 34",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "70_key_unjoined_datasets.py": [
+   {
+    "line": 545,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# Each already carries its own tier; we never raise one.",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1240,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "wr(REVIEW / f\"entity_key_refusals_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1240,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 545; date-stamped log written at line 1240",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "73_add_tcu_and_cdfi.py": [
+   {
+    "line": 938,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"ABORT: the spine already carries TCU-/CDFI- rows. Re-running \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ],
+  "73_bills_votes_completion.py": [
+   {
+    "line": 627,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "wr(REVIEW / f\"bill_votes_count_disagreements_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "73_faads_name_attribution.py": [
+   {
+    "line": 903,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"faads_attribution_refusals_{TODAY}.csv\", refusals, [",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes faads_attribution_summary.json with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "76_build_recognition_history.py": [
+   {
+    "line": 1480,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "_logfh = open(LOGS / f\"76_recognition_history_{TODAY}.log\", \"w\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "77_build_nagpra_dataset.py": [
+   {
+    "line": 130,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "LOG_PATH = LOGS / f\"77_nagpra_{TODAY}.log\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "78_content_analysis.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes _content_analysis_stats.json with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "79_build_award_level_contracts.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes prime_contracts_awards.csv, prime_contracts_published.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "80_build_instrument_taxonomy.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes instrument_taxonomy.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "81_build_passthrough_dataset.py": [
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes native_passthrough.csv, native_passthrough_pairs.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "82_build_gaming_property_dataset.py": [
+   {
+    "line": 74,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "`deals_classified.csv` already carries `native_party_entity_id`, written by",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes gaming_properties.csv, gaming_property_capacity_history.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "83_build_resource_ledger.py": [
+   {
+    "line": 2668,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"resource_series_breaks_{TODAY}.csv\", breaks,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 441,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"resource_revenue_event_id\": f\"RRE-ONRR-REV-{i:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 515,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"resource_revenue_event_id\": f\"RRE-ONRR-DISB-{fy}-{seq[fy]:02d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 524,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"source_record_id\": f\"FY{fy}|Native American tribes and individuals|\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1420,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"review_id\": f\"RESOURCE:{code}:BAD_MEASUREMENT_STATUS:{seq}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 2574,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"resource_asset_id\": f\"CEDAR-{kind}-{i:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "84_build_nigc_regions.py": [
+   {
+    "line": 766,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "wr(REVIEW / f\"nigc_roster_diff_{TODAY}.csv\", diff, list(diff[0].keys()))",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "84_resource_recipient_side.py": [
+   {
+    "line": 1039,
+    "severity": "BLOCKING",
+    "signal": "APPEND_MODE_TO_CLEAN",
+    "snippet": "with open(CLEAN / \"resource_revenue.csv\", \"a\", newline=\"\", encoding=\"utf-8\") as fh:",
+    "why": "opens a data/clean table in append mode. A second run appends the same rows again."
+   },
+   {
+    "line": 1043,
+    "severity": "BLOCKING",
+    "signal": "APPEND_MODE_TO_CLEAN",
+    "snippet": "with open(CLEAN / \"resource_parties.csv\", \"a\", newline=\"\", encoding=\"utf-8\") as fh:",
+    "why": "opens a data/clean table in append mode. A second run appends the same rows again."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes ancsa_filings_index.csv, resource_parties.csv, resource_revenue.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "85_build_admin_region_crosswalk.py": [
+   {
+    "line": 743,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"observation_id\": f\"CEDAR-ADMOBS-{len(observations)+1:06d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "86_build_series_breaks.py": [
+   {
+    "line": 90,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "\"recipient_type and recipient_state at 100.0% fill. FY2007 already has \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes series_breaks.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "88_build_deals_taxonomy.py": [
+   {
+    "line": 320,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p3 = CEDAR / \"review\" / f\"deals_unclassified_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes deals_classified.csv, deals_taxonomy.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "88_gaming_property_federal_traces.py": [
+   {
+    "line": 673,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"gaming_property_triage_{TODAY}.csv\", triage,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "89_build_master_review_queue.py": [
+   {
+    "line": 166,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "out = REVIEW / f\"MASTER_QUEUE_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "89_nigc_map_wayback_universe.py": [
+   {
+    "line": 339,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(WB / f\"_probe_log_{TODAY}.csv\", \"w\", encoding=\"utf-8\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 0,
+    "severity": "WARN",
+    "signal": "NO_PART_RENAME",
+    "snippet": "writes gaming_property_universe_events.csv with no .part-then-rename",
+    "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+   }
+  ],
+  "90_build_review_page.py": [
+   {
+    "line": 120,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "while (REVIEW / f\"cedar_review_{TODAY}_{n:02d}.html\").exists():",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "90_fetch_nigc_declinations.py": [
+   {
+    "line": 209,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: r[\"cedar_opinion_id\"] = f\"NIGC-DL-{r['index_date'].replace('-', '')}-{n:02d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "91_apply_existing_rulings.py": [
+   {
+    "line": 180,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "out = REVIEW / f\"MASTER_QUEUE_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "91_build_nigc_declinations.py": [
+   {
+    "line": 1554,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"nigc_declination_property_matches_{TODAY}.csv\", prop_rows,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "92_build_gaming_capacity_official.py": [
+   {
+    "line": 643,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# The unit column already carries the truth, so the metric is derived FROM",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 975,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"gaming_capacity_official_unresolved_{TODAY}.csv\", unresolved, ucols)",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 975,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 643; date-stamped log written at line 975",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 382,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: k[\"observation_id\"] = f\"GCO-{src}-{seq[src]:05d}\"",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "92_find_identifier_conflicts.py": [
+   {
+    "line": 99,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "p = REVIEW / f\"identifier_conflicts_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "92_stage_nigc_missing_properties.py": [
+   {
+    "line": 117,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "f\"{city.title()}, {st}, though each already carries its own \"",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 172,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"gaming_additions_{TODAY}.csv\", out, list(out[0].keys()))",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 172,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 117; date-stamped log written at line 172",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "93_build_leverage_cards.py": [
+   {
+    "line": 170,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "(REVIEW / f\"leverage_cards_{TODAY}.json\").write_text(",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "94_extract_mi_mgcb_revshare.py": [
+   {
+    "line": 307,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "outp = RAW / f\"mi_mgcb_revshare_extracted_{TODAY}.csv\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "94_match_raw_subawards.py": [
+   {
+    "line": 123,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "never rewritten. A row whose identity key is already present the same number of",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 529,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "stage_path = os.path.join(STAGE, f\"subawards_raw_match_{TODAY}.csv\")",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 529,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 123; date-stamped log written at line 529",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "94_rescan_universes.py": [
+   {
+    "line": 1120,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(CLEAN / f\"rescan_{TODAY}_proposals.csv\", proposals, PROPOSAL_FIELDS)",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "95_parse_compact_terms.py": [
+   {
+    "line": 1387,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# compacts.csv already carries a keyed tribe_id for 702 of 707. The five",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1636,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"compact_parse_unresolved_{TODAY}.csv\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1636,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 1387; date-stamped log written at line 1636",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 1472,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: review_id=f\"CPU-{v['version_id']}-{n['term_field']}-{n['source_page']}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1560,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: term_id=f\"CTM-{v['version_id']}-{j:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1614,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: report_id=f\"CRR-{v['version_id']}-{j:04d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "95_wayback_az_gaming_status.py": [
+   {
+    "line": 153,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "man = RAW / f\"wayback_az_cdx_{TODAY}.json\"",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "96_build_consultation_events.py": [
+   {
+    "line": 1558,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"consultation_unresolved_{TODAY}.csv\", unresolved,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "96_extract_sec_property_capacity.py": [
+   {
+    "line": 387,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(RAW / f\"agent_bond_sec_{TODAY}.csv\", \"w\", encoding=\"utf-8\", newline=\"\") as fh:",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "97_build_aliases_and_relationships.py": [
+   {
+    "line": 130,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# A canonical name ending in one of these already carries its governmental",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1083,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"relationship_migration_issues_{TODAY}.csv\", issues,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1083,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 130; date-stamped log written at line 1083",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   }
+  ],
+  "97_extract_az_status_archive.py": [
+   {
+    "line": 296,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "with open(RAW / f\"az_status_archive_extracted_{TODAY}.csv\", \"w\",",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "98_build_oira_and_hearings.py": [
+   {
+    "line": 1959,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"advocacy_unresolved_{TODAY}.csv\", dedup,",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   }
+  ],
+  "99_build_earmarks_and_schedc.py": [
+   {
+    "line": 21,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "`np_financials.csv` already has a `lobbying_expenditure` column and a",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   },
+   {
+    "line": 1927,
+    "severity": "WARN",
+    "signal": "DATED_LOG_OVERWRITE",
+    "snippet": "write_csv(REVIEW / f\"earmark_unresolved_{TODAY}.csv\", [],",
+    "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+   },
+   {
+    "line": 1927,
+    "severity": "BLOCKING",
+    "signal": "SILENT_LOG_REWRITE",
+    "snippet": "column-presence branch at line 21; date-stamped log written at line 1927",
+    "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+   },
+   {
+    "line": 1626,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"earmark_id\": f\"EMK-H{fy}-{n+1:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1661,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "POSITIONAL: \"earmark_id\": f\"EMK-S{fy}-{n+1:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   },
+   {
+    "line": 1887,
+    "severity": "BLOCKING",
+    "signal": "POSITIONAL_IDS",
+    "snippet": "PROCESS_HASH: \"earmark_id\": f\"EMK-E{fy}-{abs(hash(p.stem)) % 10**6}-{n:05d}\",",
+    "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+   }
+  ],
+  "cedar_match_guard.py": [
+   {
+    "line": 240,
+    "severity": "WARN",
+    "signal": "COLUMN_PRESENCE_BRANCH",
+    "snippet": "# being short. `NAME_TRAPS` already carries the measured ones: eagle,",
+    "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+   }
+  ]
+ },
+ "signal_counts": {
+  "APPEND_MODE_TO_CLEAN": 2,
+  "COLUMN_PRESENCE_BRANCH": 62,
+  "DATED_LOG_OVERWRITE": 110,
+  "NO_PART_RENAME": 34,
+  "POSITIONAL_IDS": 56,
+  "SILENT_LOG_REWRITE": 34
+ },
+ "signals": {
+  "APPEND_MODE_TO_CLEAN": {
+   "severity": "BLOCKING",
+   "why": "opens a data/clean table in append mode. A second run appends the same rows again."
+  },
+  "COLUMN_PRESENCE_BRANCH": {
+   "severity": "WARN",
+   "why": "changes behaviour depending on whether a column is already there. Fine on its own - that is what makes a build re-runnable - and dangerous next to a report write."
+  },
+  "DATED_LOG_OVERWRITE": {
+   "severity": "WARN",
+   "why": "writes a log or review file whose name embeds today's date, so a second run on the same day replaces the first run's record rather than adding to it."
+  },
+  "EARLY_RETURN_ON_COLUMN_TEST": {
+   "severity": "BLOCKING",
+   "why": "returns early when a column already exists. This is the 164 defect: the guard fires, the work is skipped, and whatever the script writes afterwards is written from an empty result."
+  },
+  "NO_PART_RENAME": {
+   "severity": "WARN",
+   "why": "writes its output directly rather than .part-then-rename, so an interruption looks like a completion."
+  },
+  "POSITIONAL_IDS": {
+   "severity": "BLOCKING",
+   "why": "mints ids from a position or a counter, so a re-run renumbers rows that did not change. 482 of 492 OSHA rows moved this way."
+  },
+  "SILENT_LOG_REWRITE": {
+   "severity": "BLOCKING",
+   "why": "THE 164 SHAPE. It branches on whether a column is ALREADY PRESENT, *and* it writes a date-stamped log that a second run on the same day overwrites. So a run that correctly skipped the work still replaces the record of the run that did it - which is how 187 facilities came to read '0 sources'. Either signal alone is ordinary; together they are the defect."
+  }
+ }
+}

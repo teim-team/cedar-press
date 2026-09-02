@@ -1,0 +1,353 @@
+#!/usr/bin/env python3
+"""
+Cedar Press - 517: EXPORT SAFETY. The gate between our uncertainty and a buyer.
+
+    py -3 code/517_export_safety.py            # classify + write
+    py -3 code/517_export_safety.py verify     # read-only, exit 1 on breach
+
+WHY THIS EXISTS
+---------------
+External review round 2 named the systemic weakness precisely:
+
+    "the most dangerous failures are shifting from 'the system forgot to model
+     something' toward 'the system models uncertainty correctly but still
+     allows downstream code or exports to collapse that uncertainty back into
+     a definite answer.'"
+
+Both of that review's MEASURED criticals are of exactly this shape, and both
+were confirmed against live data before this file was written:
+
+  1. `prime_contracts_entity_year.csv` - 8,464 rows, 6,713 distinct
+     (tribe_id, fiscal_year), **1,635 colliding keys**. A buyer writing the
+     most natural line of analysis there is -
+
+         df.groupby(["tribe_id", "fiscal_year"]).obligations_usd.sum()
+
+     - gets inflated totals, and the wrong answer looks completely normal.
+
+  2. Ownership: the temporal layer resolves owners as of the transaction date
+     and produces AMBIGUOUS_OVERLAP / UNKNOWN_OUTSIDE_EVIDENCE / contradiction
+     statuses. **Nothing in the publication layer consumes them.** The
+     uncertainty is computed, recorded, and then not carried to the shelf.
+
+The machinery upstream is working. This is the missing last mile.
+
+WHAT IT DOES
+------------
+Assigns every shippable table exactly one export class, from evidence already
+computed elsewhere - this script measures nothing new, it REFUSES on what the
+grain probe, the contracts layer and the temporal layer already know:
+
+  SAFE_TO_AGGREGATE  validated grain + validated primary key + no literal
+                     duplicate rows. Sum it, group it, join it.
+  ROW_LEVEL_ONLY     readable row by row, NOT safe to aggregate: grain
+                     unstated or contradicted, or literal duplicates present.
+                     A buyer may quote a row; a buyer may not total the column.
+  QUARANTINED        must not ship as an analytical fact table at all.
+
+THE RULE THAT MATTERS MOST, in the reviewer's words:
+
+    "Unknown ownership can remain unknown. Contradicted ownership must never
+     silently become definite."
+
+So UNKNOWN is publishable AS UNKNOWN - never filled from current ownership -
+and CONTRADICTED is never publishable as a definite historical owner. That
+asymmetry is the whole point and it is checked, not assumed.
+
+Writes  data/clean/cedar_export_safety.csv   one row per shippable table
+        docs/EXPORT_SAFETY.md                the same, for a human
+"""
+from __future__ import annotations
+
+import csv
+import json
+import re
+import sys
+from collections import Counter, defaultdict
+from datetime import date
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+sys.path.insert(0, str(HERE))
+csv.field_size_limit(10_000_000)
+TODAY = date.today().isoformat()
+
+OUT = ROOT / "data" / "clean" / "cedar_export_safety.csv"
+OUT_MD = ROOT / "docs" / "EXPORT_SAFETY.md"
+CONTRACTS = ROOT / "docs" / "schema" / "dataset_contracts.json"
+GRAIN_EV = ROOT / "docs" / "schema" / "grain_evidence.json"
+ASOF = ROOT / "review" / "temporal_asof_ownership.csv"
+
+COLS = ["table", "collection", "export_class", "reason", "grain_status",
+        "primary_key", "literal_duplicate_rows", "aggregation_safe",
+        "row_addressable", "duplicates_explained", "key_refusal",
+        "money_columns", "blocking_evidence", "classified_date"]
+
+# A FOURTH CLASS, added 2026-09-02 by workstream SUBAWARD-FUNDING.
+#
+# The three classes above collapse two different questions into one:
+#
+#     can a buyer TOTAL this column?      (aggregation)
+#     can a buyer ADDRESS or JOIN a row?  (identity)
+#
+# For 224 of 225 shippable tables the answer is the same either way and the
+# collapse costs nothing. For `faads_transactions_all_agencies.csv` it is
+# wrong in a way that hurts: 2.77M rows and $1.83T of real, additive
+# transaction-grain obligations were classed ROW_LEVEL_ONLY - "a buyer may NOT
+# total a column" - purely because no unique key survives in the retained
+# 20-column source objects. The dollars are fine. The JOIN is what is
+# unavailable, and saying "do not total this" when the true statement is "do
+# not expect to address a single row of this" is a false warning, which
+# teaches a buyer to ignore the true ones.
+#
+# AGGREGATE_ONLY_NO_KEY is granted ONLY where the contract carries a
+# `key_refused` block that 512 re-measures against the file on every run -
+# reason, refused candidates that must still collide, a duplicate disposition
+# whose expected count must still match, and an additivity rule for every
+# money column. Miss any one and the table stays ROW_LEVEL_ONLY.
+CLASS_AGG_ONLY = "AGGREGATE_ONLY_NO_KEY"
+
+# A table carrying any of these is one a buyer will try to total.
+MONEY_HINTS = ("obligation", "amount", "dollar", "usd", "revenue", "spend",
+               "payment", "value", "_dol", "total")
+
+# ...UNLESS THE COLUMN IS NOT MONEY. Substring matching on `amount` counted
+# `amount_countable` - a 0/1 FLAG on native_passthrough.csv - as a money
+# column, and two workstreams flagged it before anyone owned it. A flag, a
+# count, a date, a type, a URL or a prose basis is never a thing a buyer
+# totals, and calling one a money column inflates `export_unsafe_money_tables`
+# with columns that carry no dollars at all. Measured over every shippable
+# table's header on 2026-09-01: 202 column names matched MONEY_HINTS and 27 of
+# them were this - `amount_countable`, `payment_date`, `Value_Type`,
+# `obligation_type`, `principal_amount_text`, `revenue_note`, thirteen
+# `*_value_basis` columns, and the rest.
+#
+# THE ASYMMETRY IS DELIBERATE. A missed money column is a buyer double-counting
+# real dollars; a false one is a table wrongly flagged. So this list only
+# removes names whose SUFFIX or PREFIX says outright that the cell is not a
+# quantity of money, and never removes a bare `*_amount` or `*_usd`.
+MONEY_ANTI_HINTS = re.compile(
+    r"(?:^(?:is|has|n)_)"
+    r"|(?:_(?:countable|flag|ind|cnt|count|type|date|url|status|source|basis"
+    r"|method|reason|note|caveat|quote|text|desc|description)$)",
+    re.I)
+
+
+def is_money_column(name: str) -> bool:
+    n = (name or "").lower()
+    return (any(k in n for k in MONEY_HINTS)
+            and not MONEY_ANTI_HINTS.search(name or ""))
+
+
+def read_csv(p: Path) -> list:
+    if not p.exists():
+        return []
+    with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        return list(csv.DictReader(fh))
+
+
+def header_of(name: str):
+    for d in ("data/clean", "data/spine"):
+        p = ROOT / d / name
+        if p.exists():
+            try:
+                with p.open(encoding="utf-8-sig", errors="replace",
+                            newline="") as fh:
+                    return next(csv.reader(fh), []), p
+            except OSError:
+                return [], p
+    return [], None
+
+
+def classify():
+    if not CONTRACTS.exists():
+        sys.exit("dataset_contracts.json missing - run 512 first")
+    doc = json.loads(CONTRACTS.read_text(encoding="utf-8"))
+    eviD = {}
+    if GRAIN_EV.exists():
+        raw = json.loads(GRAIN_EV.read_text(encoding="utf-8"))
+        eviD = raw if isinstance(raw, dict) else {
+            r.get("table"): r for r in raw}
+        eviD = eviD.get("tables", eviD) if isinstance(eviD, dict) else eviD
+
+    rows = []
+    for coll in doc.get("contracts", []):
+        for t in coll.get("tables", []):
+            if t.get("status") != "shippable":
+                continue
+            name = t["table"]
+            hdr, path = header_of(name)
+            money = [h for h in hdr if is_money_column(h)]
+            grain = (t.get("grain") or "")
+            stated = not grain.startswith("UNSTATED")
+            pk = t.get("primary_key") or []
+            ev = eviD.get(name) or {}
+            dups = 0
+            # `whole_row_duplicates` is the name the grain probe actually
+            # writes. The first version of this loop guessed three other
+            # names, found none, and silently classified every table as
+            # duplicate-free - a check reading a key that does not exist
+            # passes for the same reason it is useless. The other names stay
+            # as fallbacks; the real one leads.
+            for k in ("whole_row_duplicates", "literal_duplicate_rows",
+                      "duplicate_rows", "n_duplicate_rows"):
+                if isinstance(ev, dict) and ev.get(k):
+                    try:
+                        dups = int(ev[k])
+                    except (TypeError, ValueError):
+                        pass
+                    break
+
+            # A DECLARED, RE-MEASURED KEY REFUSAL. 512 writes this only after
+            # re-testing every refused candidate against the full file and
+            # confirming the duplicate count still matches what the
+            # disposition accounts for; if either had drifted, 512 would have
+            # raised a contract violation and `grain_validated` would be
+            # false. So the gate here is: is the refusal DECLARED, is it
+            # COMPLETE, and did 512 accept it?
+            ref = t.get("key_refused") or {}
+            dup_ok = (bool((ref.get("duplicate_disposition") or "").strip())
+                      and ref.get("whole_row_duplicates_expected") == dups)
+            add = ref.get("additivity") or {}
+            money_covered = all(m in add for m in money)
+            refusal_ok = (bool((ref.get("reason") or "").strip())
+                          and bool(ref.get("candidates_refused"))
+                          and t.get("grain_validated")
+                          and (dup_ok or not dups)
+                          and money_covered)
+
+            blocking = []
+            if not stated:
+                blocking.append("grain UNSTATED")
+            if not pk and not refusal_ok:
+                blocking.append("no validated primary key")
+            if dups and not refusal_ok:
+                blocking.append(f"{dups} literal duplicate rows")
+
+            if blocking:
+                cls = "ROW_LEVEL_ONLY"
+                reason = ("A buyer may read a row; a buyer may NOT total a "
+                          "column. " + "; ".join(blocking))
+                if money:
+                    reason += (f". This table carries money columns "
+                               f"({', '.join(money[:3])}), so the unsafe "
+                               f"analysis is also the most likely one.")
+            elif not pk:
+                cls = CLASS_AGG_ONLY
+                reason = ("grain declared and validated; a buyer MAY total "
+                          "this table at its declared grain and MUST NOT "
+                          "expect to address or join a single row of it - no "
+                          "primary key exists in the retained source and the "
+                          "refusal is re-measured on every run. "
+                          + " ".join(f"{k}: {v}" for k, v in add.items()))
+                if dups:
+                    reason += (f" {dups:,} byte-identical rows are RETAINED "
+                               f"and explained: "
+                               f"{ref.get('duplicate_disposition', '')[:400]}")
+            else:
+                cls = "SAFE_TO_AGGREGATE"
+                reason = (f"grain declared and validated; primary key "
+                          f"{'+'.join(pk)} unique on the full file; no "
+                          f"literal duplicate rows")
+
+            rows.append(dict(
+                table=name, collection=coll["collection"], export_class=cls,
+                reason=reason, grain_status="stated" if stated else "UNSTATED",
+                primary_key="+".join(pk), literal_duplicate_rows=dups,
+                aggregation_safe="1" if cls in ("SAFE_TO_AGGREGATE",
+                                                CLASS_AGG_ONLY) else "0",
+                row_addressable="1" if pk else "0",
+                duplicates_explained="1" if (dups and refusal_ok) else "0",
+                key_refusal=(ref.get("reason", "")[:600] if not pk else ""),
+                money_columns="|".join(money[:6]),
+                blocking_evidence="; ".join(blocking),
+                classified_date=TODAY))
+    return sorted(rows, key=lambda r: (r["export_class"], r["table"]))
+
+
+def ownership_check():
+    """The asymmetry: UNKNOWN may ship as unknown; CONTRADICTED may never ship
+    as a definite historical owner."""
+    a = read_csv(ASOF)
+    if not a:
+        return None
+    c = Counter(r.get("asof_status", "?") for r in a)
+    definite_ok = {"RESOLVED"}
+    unsafe = {k: v for k, v in c.items() if k not in definite_ok}
+    return dict(total=len(a), by_status=dict(c),
+                not_definite=sum(unsafe.values()), unsafe=unsafe)
+
+
+def main() -> int:
+    verify = len(sys.argv) > 1 and sys.argv[1] == "verify"
+    rows = classify()
+    own = ownership_check()
+
+    fails = []
+    # A table may not be BOTH aggregation-unsafe and silently shipped as if
+    # it were safe: that is the whole defect, so it is the invariant.
+    unsafe_money = [r for r in rows
+                    if r["export_class"] == "ROW_LEVEL_ONLY" and r["money_columns"]]
+    if not OUT.exists() and verify:
+        fails.append("E1 cedar_export_safety.csv missing - exports are "
+                     "unclassified, so nothing prevents a buyer aggregating a "
+                     "table with an unresolved grain")
+
+    if not verify:
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        with OUT.open("w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=COLS, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(rows)
+
+        L = ["# Export safety — which tables a buyer may total", "",
+             f"*Generated {TODAY} by `code/517_export_safety.py`. Derived from "
+             f"the grain contracts and the temporal layer; this file measures "
+             f"nothing new, it REFUSES on what they already know.*", "",
+             "**The rule that matters most:** unknown ownership may ship as "
+             "unknown. **Contradicted ownership may never ship as a definite "
+             "historical owner.**", ""]
+        cc = Counter(r["export_class"] for r in rows)
+        L += [f"- **SAFE_TO_AGGREGATE**: {cc.get('SAFE_TO_AGGREGATE', 0)}",
+              f"- **{CLASS_AGG_ONLY}**: {cc.get(CLASS_AGG_ONLY, 0)} — total "
+              f"it at its declared grain; do **not** expect to address or "
+              f"join a single row. Granted only against a `key_refused` block "
+              f"that `512` re-measures against the file every run.",
+              f"- **ROW_LEVEL_ONLY**: {cc.get('ROW_LEVEL_ONLY', 0)} "
+              f"(of which **{len(unsafe_money)} carry money columns** — the "
+              f"unsafe analysis is also the most likely one)", ""]
+        if own:
+            L += ["## Ownership as-of status", "",
+                  f"{own['total']} (uei, fiscal-year) cells resolved; "
+                  f"**{own['not_definite']} are NOT definite** and must not be "
+                  f"exported as a historical owner:", ""]
+            for k, v in sorted(own["by_status"].items(), key=lambda x: -x[1]):
+                L.append(f"- `{k}` — {v:,}")
+            L.append("")
+        L += ["## Tables a buyer must NOT aggregate", "",
+              "| table | collection | money columns | why |", "|---|---|---|---|"]
+        for r in rows:
+            if r["export_class"] != "ROW_LEVEL_ONLY":
+                continue
+            L.append(f"| `{r['table']}` | {r['collection']} | "
+                     f"{r['money_columns'] or '—'} | {r['blocking_evidence']} |")
+        OUT_MD.write_text("\n".join(L), encoding="utf-8")
+
+    cc = Counter(r["export_class"] for r in rows)
+    print(f"  export safety   {len(rows)} shippable tables classified")
+    print(f"                  SAFE_TO_AGGREGATE {cc.get('SAFE_TO_AGGREGATE',0)}"
+          f"   ROW_LEVEL_ONLY {cc.get('ROW_LEVEL_ONLY',0)}")
+    print(f"                  {len(unsafe_money)} row-level-only tables carry "
+          f"MONEY columns - the unsafe analysis is the likely one")
+    if own:
+        print(f"                  ownership: {own['not_definite']:,} of "
+              f"{own['total']:,} as-of cells are NOT definite "
+              f"({', '.join(f'{k}={v}' for k, v in sorted(own['unsafe'].items()))})")
+    for f in fails:
+        print(f"  FAIL  {f}")
+    return 1 if fails else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

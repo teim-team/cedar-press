@@ -1,0 +1,97 @@
+{
+ "lift": [
+  {
+   "dataset": "prime_contracts",
+   "id_kind": "UEI",
+   "ids": 12491,
+   "rows": 1217768,
+   "usd": 310005258660.75464,
+   "unattributed_ids": 9277,
+   "unattributed_rows": 328965,
+   "unattributed_usd": 65240102268.65611,
+   "propagated_ids": 57,
+   "propagated_rows": 740,
+   "propagated_usd": 421709833.13202864,
+   "by_tier": {
+    "B": 57
+   }
+  },
+  {
+   "dataset": "federal_funding",
+   "id_kind": "UEI",
+   "ids": 6372,
+   "rows": 651576,
+   "usd": 208995579197.58002,
+   "unattributed_ids": 4870,
+   "unattributed_rows": 133128,
+   "unattributed_usd": 48178545439.67,
+   "propagated_ids": 207,
+   "propagated_rows": 21630,
+   "propagated_usd": 6039325177.440001,
+   "by_tier": {
+    "B": 185,
+    "A": 22
+   }
+  },
+  {
+   "dataset": "subawards",
+   "id_kind": "UEI",
+   "ids": 8829,
+   "rows": 63548,
+   "usd": 39433964351.81,
+   "unattributed_ids": 7504,
+   "unattributed_rows": 25212,
+   "unattributed_usd": 14091449150.88,
+   "propagated_ids": 31,
+   "propagated_rows": 196,
+   "propagated_usd": 111467469.88999999,
+   "by_tier": {
+    "B": 23,
+    "A": 8
+   }
+  },
+  {
+   "dataset": "faads",
+   "id_kind": "DUNS",
+   "ids": 70481,
+   "rows": 677021,
+   "usd": 415070965253.44,
+   "unattributed_ids": 70481,
+   "unattributed_rows": 677021,
+   "unattributed_usd": 415070965253.44,
+   "propagated_ids": 862,
+   "propagated_rows": 8310,
+   "propagated_usd": 2060626571.6,
+   "by_tier": {
+    "B": 862
+   }
+  }
+ ],
+ "n_conflicts": 874,
+ "n_shared_hubs": 16,
+ "n_resolved": 12086,
+ "n_blocked": 4857,
+ "n_parent_candidates": 20,
+ "irs_hypothesis": {
+  "ein_columns": {
+   "prime_contracts.csv": [],
+   "federal_funding_transactions.csv": [],
+   "subawards.csv": [],
+   "faads_transactions_all_agencies.csv": []
+  },
+  "np_orgs_eins": 12764,
+  "np_orgs_eins_with_native_ruling": 89,
+  "schedule_i_filer_eins": 627,
+  "schedule_i_recipient_eins": 18708,
+  "spending_ueis": 25419,
+  "eins_reaching_a_spending_uei": 28,
+  "np_orgs_eins_reaching_spending": 28,
+  "schedule_i_filer_eins_reaching_spending": 4,
+  "schedule_i_recipient_eins_reaching_spending": 12,
+  "spending_ueis_reached": 28,
+  "usd_on_reached_ueis": 2967198953.42,
+  "spending_ueis_with_any_ein_edge": 28,
+  "need_v6_rows_with_ein_and_uei": 0,
+  "need_v6_rows_with_ein_only": 1104
+ }
+}

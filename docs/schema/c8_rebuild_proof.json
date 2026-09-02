@@ -1,0 +1,118 @@
+{
+  "generated": "2026-09-01",
+  "by": "812_c8_rebuild_proof.py (workstream C8)",
+  "method": "each builder run with dry_run=True against the LIVE tables: full computation, full merge, no write. Compared to docs/schema/hub_rebuild_census.json.",
+  "census_gate": {
+    "min_rows": 1555,
+    "required_columns": [
+      "tribe_id",
+      "canonical_name",
+      "entity_class",
+      "state",
+      "bia_region",
+      "self_governance",
+      "cedar_entity_id",
+      "n_uei_tierA",
+      "n_uei_tierB",
+      "n_cage",
+      "n_ein",
+      "aliases",
+      "parent_entity_id",
+      "parent_entity_name",
+      "ultimate_parent_entity_id",
+      "ultimate_parent_entity_name",
+      "ancsa_region_entity_id",
+      "hierarchy_basis",
+      "cicd_verified",
+      "reconciliation_status",
+      "reconciliation_note",
+      "fr_official_name",
+      "parent_native_entity",
+      "serves_native_entities",
+      "ownership_basis",
+      "entity_source_url",
+      "entity_source_quote",
+      "bie_operation_type",
+      "source_url",
+      "source_quote",
+      "entity_website",
+      "city",
+      "built_by_script",
+      "evidence_tier",
+      "evidence_grade",
+      "verification_route",
+      "evidence_url",
+      "canonical_entity_id_column",
+      "cedar_entity_id_scheme",
+      "entity_master_register_id",
+      "entity_master_register_id_basis",
+      "constituent_band_of_entity_id",
+      "constituent_band_of_basis",
+      "cedar_uid"
+    ],
+    "statement": "A replay is acceptable only if the post-replay spine has at least this many rows and every one of these columns. Anything less is a partial restore wearing a green build log."
+  },
+  "never_run_remaining": [
+    "41_build_codebooks.py"
+  ],
+  "retired_from_never_run": [
+    "01_build_entity_spine.py",
+    "09_import_rulings.py",
+    "88_build_deals_taxonomy.py"
+  ],
+  "tables": {
+    "cedar_identifier_ledger.csv": {
+      "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\spine\\cedar_identifier_ledger.csv",
+      "rows_before": 19232,
+      "rows_after": 19232,
+      "rows_appended": 0,
+      "rows_matched": 19232,
+      "rows_lost": 0,
+      "n_cols_before": 14,
+      "n_cols_after": 14,
+      "cols_lost": [],
+      "cols_added": [],
+      "cells_filled": 0,
+      "cells_refreshed": 0,
+      "n_drift_cells": 0,
+      "ok": true
+    },
+    "cedar_entity_spine.csv": {
+      "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\spine\\cedar_entity_spine.csv",
+      "rows_before": 1555,
+      "rows_after": 1555,
+      "rows_appended": 0,
+      "rows_matched": 687,
+      "rows_lost": 0,
+      "n_cols_before": 44,
+      "n_cols_after": 44,
+      "cols_lost": [],
+      "cols_added": [],
+      "cells_filled": 0,
+      "cells_refreshed": 0,
+      "n_drift_cells": 512,
+      "ok": true
+    },
+    "cedar_identifier_ledger_final.csv": {
+      "rows_before": 20577,
+      "rows_after": 20577,
+      "n_cols_before": 22,
+      "n_cols_after": 22,
+      "cols_lost": [],
+      "rows_lost": 0,
+      "tierA_adjudications_before": 269,
+      "tierA_adjudications_after": 267,
+      "ok": true
+    },
+    "deals_classified.csv": {
+      "merge_report_line": "deals_classified.csv: 935 -> 935 rows (+0 new, 935 matched, 0 lost), 52 -> 52 cols (lost none), 0 blanks filled, 935 refreshed, 0 drift cells held back"
+    }
+  },
+  "enrichers_with_no_checkpoint": [
+    "08_build_review_page.py",
+    "115_pull_assistance_archive.py"
+  ],
+  "unevidenced_caveat": "08_build_review_page.py and 115_pull_assistance_archive.py leave no spine checkpoint, so the replay-from-nothing sequence is unevidenced for 2 of 17 stages. Non-destruction is unaffected: the merge is additive and diffs against the live table.",
+  "failures": [],
+  "passed": true
+}

@@ -1,0 +1,244 @@
+{
+ "generated": "2026-08-26T23:58:27.177806+00:00",
+ "script": "code/335_harmonize_assistance_seams_in_place.py",
+ "table": "federal_funding_transactions.csv",
+ "rows": 701955,
+ "columns_added": [
+  "tribe_id_scheme_resolved",
+  "tribe_id_scheme_resolved_basis",
+  "tribe_id_neid_proposed",
+  "tribe_id_neid_proposed_tier",
+  "tribe_id_neid_proposed_basis",
+  "source_vintage",
+  "source_vintage_basis",
+  "business_types_description_normalized",
+  "business_types_description_normalized_basis"
+ ],
+ "columns_modified": [],
+ "backup": "federal_funding_transactions.csv.bak_2026-08-26_pre335",
+ "IN_PLACE_ENRICHER": true,
+ "reverted_by": "any full rebuild of federal_funding_transactions.csv; re-run 335 afterwards",
+ "counts": {
+  "scheme::lineageA_dofile_integer": 365535,
+  "proposal_carried": 351822,
+  "vintage::usaspending_bulk_download_2023-04-09": 476924,
+  "scheme::unattributed": 152425,
+  "proposal_via_containment": 126964,
+  "proposal_none_no_spine_candidate": 13713,
+  "scheme::cedar_neid": 162302,
+  "vintage::usaspending_award_archive_20260706": 131495,
+  "business_types_repaired": 7160,
+  "unknown_scheme": 21693,
+  "scheme::UNKNOWN_SCHEME": 21693,
+  "vintage::usaspending_award_archive_20260806": 93536
+ },
+ "scheme_by_fiscal_year": {
+  "2007": {
+   "cedar_neid": 8039,
+   "unattributed": 3404
+  },
+  "2008": {
+   "lineageA_dofile_integer": 10253,
+   "unattributed": 4338,
+   "cedar_neid": 1078
+  },
+  "2009": {
+   "lineageA_dofile_integer": 18286,
+   "unattributed": 6380,
+   "cedar_neid": 2178
+  },
+  "2010": {
+   "lineageA_dofile_integer": 16819,
+   "unattributed": 7600,
+   "cedar_neid": 2500
+  },
+  "2011": {
+   "lineageA_dofile_integer": 15842,
+   "unattributed": 7889,
+   "cedar_neid": 2372
+  },
+  "2012": {
+   "lineageA_dofile_integer": 13328,
+   "unattributed": 5476,
+   "cedar_neid": 4050
+  },
+  "2013": {
+   "lineageA_dofile_integer": 20464,
+   "unattributed": 7282,
+   "cedar_neid": 3204
+  },
+  "2014": {
+   "lineageA_dofile_integer": 23196,
+   "unattributed": 8037,
+   "cedar_neid": 2280
+  },
+  "2015": {
+   "unattributed": 6792,
+   "lineageA_dofile_integer": 22078,
+   "cedar_neid": 2321
+  },
+  "2016": {
+   "unattributed": 10162,
+   "lineageA_dofile_integer": 24430,
+   "cedar_neid": 2621
+  },
+  "2017": {
+   "unattributed": 6799,
+   "lineageA_dofile_integer": 26593,
+   "cedar_neid": 2730
+  },
+  "2018": {
+   "unattributed": 9455,
+   "lineageA_dofile_integer": 30805,
+   "cedar_neid": 3529
+  },
+  "2019": {
+   "lineageA_dofile_integer": 29503,
+   "unattributed": 9004,
+   "cedar_neid": 2927
+  },
+  "2020": {
+   "lineageA_dofile_integer": 33744,
+   "unattributed": 10573,
+   "cedar_neid": 4878
+  },
+  "2021": {
+   "lineageA_dofile_integer": 33416,
+   "unattributed": 11247,
+   "cedar_neid": 3752
+  },
+  "2022": {
+   "lineageA_dofile_integer": 34652,
+   "unattributed": 11068,
+   "cedar_neid": 4877
+  },
+  "2023": {
+   "lineageA_dofile_integer": 12126,
+   "unattributed": 7969,
+   "cedar_neid": 29557
+  },
+  "2024": {
+   "unattributed": 7506,
+   "cedar_neid": 43180
+  },
+  "2025": {
+   "cedar_neid": 37207,
+   "unattributed": 7264
+  },
+  "2026": {
+   "unattributed": 4180,
+   "cedar_neid": 20715
+  }
+ },
+ "vintage_by_fiscal_year": {
+  "2007": {
+   "usaspending_award_archive_20260706": 11443
+  },
+  "2008": {
+   "usaspending_bulk_download_2023-04-09": 14157,
+   "usaspending_award_archive_20260806": 1512
+  },
+  "2009": {
+   "usaspending_bulk_download_2023-04-09": 23827,
+   "usaspending_award_archive_20260806": 3017
+  },
+  "2010": {
+   "usaspending_bulk_download_2023-04-09": 23558,
+   "usaspending_award_archive_20260806": 3361
+  },
+  "2011": {
+   "usaspending_bulk_download_2023-04-09": 22211,
+   "usaspending_award_archive_20260806": 3892
+  },
+  "2012": {
+   "usaspending_bulk_download_2023-04-09": 18141,
+   "usaspending_award_archive_20260806": 4713
+  },
+  "2013": {
+   "usaspending_bulk_download_2023-04-09": 26927,
+   "usaspending_award_archive_20260806": 4023
+  },
+  "2014": {
+   "usaspending_bulk_download_2023-04-09": 29913,
+   "usaspending_award_archive_20260806": 3600
+  },
+  "2015": {
+   "usaspending_bulk_download_2023-04-09": 28105,
+   "usaspending_award_archive_20260806": 3086
+  },
+  "2016": {
+   "usaspending_bulk_download_2023-04-09": 33701,
+   "usaspending_award_archive_20260806": 3512
+  },
+  "2017": {
+   "usaspending_bulk_download_2023-04-09": 32756,
+   "usaspending_award_archive_20260806": 3366
+  },
+  "2018": {
+   "usaspending_bulk_download_2023-04-09": 39432,
+   "usaspending_award_archive_20260806": 4357
+  },
+  "2019": {
+   "usaspending_bulk_download_2023-04-09": 37880,
+   "usaspending_award_archive_20260806": 3554
+  },
+  "2020": {
+   "usaspending_bulk_download_2023-04-09": 43274,
+   "usaspending_award_archive_20260806": 5921
+  },
+  "2021": {
+   "usaspending_bulk_download_2023-04-09": 43604,
+   "usaspending_award_archive_20260806": 4811
+  },
+  "2022": {
+   "usaspending_bulk_download_2023-04-09": 44297,
+   "usaspending_award_archive_20260806": 6300
+  },
+  "2023": {
+   "usaspending_bulk_download_2023-04-09": 15141,
+   "usaspending_award_archive_20260806": 34511
+  },
+  "2024": {
+   "usaspending_award_archive_20260706": 50686
+  },
+  "2025": {
+   "usaspending_award_archive_20260706": 44471
+  },
+  "2026": {
+   "usaspending_award_archive_20260706": 24895
+  }
+ },
+ "legacy_ids_without_a_proposal": {
+  "20": 334,
+  "134": 1781,
+  "85": 408,
+  "299": 1126,
+  "58": 3058,
+  "175": 975,
+  "305": 1083,
+  "99": 614,
+  "298": 2674,
+  "198": 444,
+  "97": 500,
+  "29": 440,
+  "379": 128,
+  "35": 110,
+  "344": 23,
+  "39": 7,
+  "313": 8
+ },
+ "crosswalk_applied_into_tribe_id": false,
+ "crosswalk_refusal_reason": "All 344 proposals are confidence tier B and 122 rest on the containment matcher, which AGENTS.md forbids from keying a dollar. 152_build_assistance_id_crosswalk.py and 24_funding_merge.py both decline to write them into the table; both refusals are honoured. The proposal travels in tribe_id_neid_proposed with its tier and basis so a consumer can adopt or refuse it explicitly.",
+ "corrected_by": "code/336_correct_scheme_resolution_by_spine_membership.py",
+ "corrected_at": "2026-08-27T00:01:51.037810+00:00",
+ "scheme_resolution_method": "spine membership against data/spine/cedar_entity_spine.csv, NOT an id-shape regex. 335 used a regex requiring a numeric tail and mislabelled 21,693 rows across 231 compound ids as UNKNOWN_SCHEME; all 231 are in the spine as full ids.",
+ "compound_neid_note": "AKNF-/CNSF- ids may carry an affiliation chain or a two-letter band suffix (AKNF-MTLKTL-00-TLNGHD, CNSF-MINNCH-LL). The COMPOUND FORM IS THE CANONICAL SPINE ID; the apparent 'base' (AKNF-MTLKTL-00) is NOT in the spine. Never strip the suffix to make a join work.",
+ "counts_after_336": {
+  "scheme::lineageA_dofile_integer": 365535,
+  "scheme::unattributed": 152425,
+  "scheme::cedar_neid": 183995
+ },
+ "reclassified_by_336": {
+  "UNKNOWN_SCHEME -> cedar_neid": 21693
+ }
+}

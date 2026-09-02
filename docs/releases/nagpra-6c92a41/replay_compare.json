@@ -1,0 +1,365 @@
+{
+ "release": "nagpra-6c92a41",
+ "compared_at": "2026-08-29T10:18:44+00:00",
+ "replay_root": "C:\\Users\\esm247\\AppData\\Local\\Temp\\claude\\C--Users-esm247\\6f0cc363-573d-4f3a-97b1-c84e32f43c8b\\scratchpad\\replay_nagpra",
+ "n_byte_identical": 2,
+ "n_identical_excluding_named_columns": 0,
+ "n_differing": 2,
+ "n_not_produced": 0,
+ "tables": [
+  {
+   "table": "fr_nagpra_title_index.csv",
+   "released_sha256": "39cef60c02315a165d104989c8395bade749c36aa4f9109c0f28cacb928d5b41",
+   "released_rows": 6606,
+   "released_columns": [
+    "document_number",
+    "publication_date",
+    "publication_year",
+    "title",
+    "agency_names",
+    "notice_kind",
+    "has_abstract",
+    "relevance_tier_from_tier_rule",
+    "missed_by_tier_rule",
+    "basis"
+   ],
+   "replay_sha256": "98e1d87aec9eeeff9ac51b9df00d762d6d05a991fa6107a2c78c7573b10252fe",
+   "replay_rows": 6644,
+   "replay_columns": [
+    "document_number",
+    "publication_date",
+    "publication_year",
+    "title",
+    "agency_names",
+    "notice_kind",
+    "has_abstract",
+    "relevance_tier_from_tier_rule",
+    "missed_by_tier_rule",
+    "basis"
+   ],
+   "schema_identical": true,
+   "row_count_identical": false,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [],
+   "content_compared_columns": 10,
+   "content_identical_excluding": false,
+   "set_relation": {
+    "relation": "replay_is_superset",
+    "only_in_released": 0,
+    "only_in_replay": 38,
+    "shared_rows_that_disagree": 0,
+    "sample_only_in_replay": [
+     [
+      "2026-16477"
+     ],
+     [
+      "2026-16478"
+     ],
+     [
+      "2026-16480"
+     ],
+     [
+      "2026-16481"
+     ],
+     [
+      "2026-16482"
+     ]
+    ],
+    "sample_only_in_released": []
+   },
+   "verdict": "SUPERSET +38",
+   "first_differences": [],
+   "replay_primary_key_holds": {
+    "columns": [
+     "document_number"
+    ],
+    "rows": 6644,
+    "distinct": 6644,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "fr_nagpra_title_index_year.csv",
+   "released_sha256": "ada95e749e233b4b4476398de29511245cbad19b920b69dc6089cee8ec906344",
+   "released_rows": 33,
+   "released_columns": [
+    "publication_year",
+    "n_nagpra_notices",
+    "n_with_abstract",
+    "share_with_abstract"
+   ],
+   "replay_sha256": "b48f443043959a56475b500ea2f55aa15b5c23dedca6ad28248838e20a5b04d9",
+   "replay_rows": 33,
+   "replay_columns": [
+    "publication_year",
+    "n_nagpra_notices",
+    "n_with_abstract",
+    "share_with_abstract"
+   ],
+   "schema_identical": true,
+   "row_count_identical": true,
+   "bytes_identical": false,
+   "excluded_from_content_compare": [],
+   "content_compared_columns": 4,
+   "content_identical_excluding": false,
+   "set_relation": {
+    "relation": "identical_key_set",
+    "only_in_released": 0,
+    "only_in_replay": 0,
+    "shared_rows_that_disagree": 1,
+    "sample_only_in_replay": [],
+    "sample_only_in_released": []
+   },
+   "verdict": "DIFFERS_ROWS",
+   "first_differences": [
+    {
+     "row_index": 32,
+     "key": {
+      "publication_year": "2026"
+     },
+     "columns": {
+      "n_nagpra_notices": [
+       "552",
+       "590"
+      ],
+      "n_with_abstract": [
+       "552",
+       "590"
+      ]
+     }
+    }
+   ],
+   "replay_primary_key_holds": {
+    "columns": [
+     "publication_year"
+    ],
+    "rows": 33,
+    "distinct": 33,
+    "blank": 0,
+    "unique": true
+   }
+  },
+  {
+   "table": "nagpra_notice_entity_bridge.csv",
+   "released_sha256": "b8b5a7744de101d2552766162d3e02be2210cbc1851a837b943454aaf4743a73",
+   "released_rows": 51521,
+   "released_columns": [
+    "document_number",
+    "publication_date",
+    "notice_type",
+    "institution_name",
+    "relationship",
+    "party_name_verbatim",
+    "party_name_as_published",
+    "tribe_id",
+    "canonical_name",
+    "resolve_method",
+    "resolve_status",
+    "confidence_tier",
+    "source_span_label",
+    "source_span_text"
+   ],
+   "replay_sha256": "b8b5a7744de101d2552766162d3e02be2210cbc1851a837b943454aaf4743a73",
+   "replay_rows": 51521,
+   "replay_columns": [
+    "document_number",
+    "publication_date",
+    "notice_type",
+    "institution_name",
+    "relationship",
+    "party_name_verbatim",
+    "party_name_as_published",
+    "tribe_id",
+    "canonical_name",
+    "resolve_method",
+    "resolve_status",
+    "confidence_tier",
+    "source_span_label",
+    "source_span_text"
+   ],
+   "schema_identical": true,
+   "row_count_identical": true,
+   "bytes_identical": true,
+   "verdict": "BYTE_IDENTICAL",
+   "replay_primary_key_holds": {
+    "columns": [
+     "document_number",
+     "publication_date",
+     "notice_type",
+     "institution_name",
+     "relationship",
+     "party_name_verbatim",
+     "party_name_as_published",
+     "tribe_id",
+     "canonical_name",
+     "resolve_method",
+     "resolve_status",
+     "confidence_tier",
+     "source_span_label",
+     "source_span_text"
+    ],
+    "rows": 51521,
+    "distinct": 51521,
+    "blank": 3467,
+    "unique": false
+   }
+  },
+  {
+   "table": "nagpra_notices.csv",
+   "released_sha256": "e6cc77950c626b7ec5556d366ac51c4b365b04780164458d91440e0e2c38b1dc",
+   "released_rows": 6772,
+   "released_columns": [
+    "document_number",
+    "publication_date",
+    "publication_year",
+    "notice_type",
+    "notice_title_form",
+    "statute_stage",
+    "is_correction",
+    "title",
+    "institution_name",
+    "institution_primary",
+    "institution_names_all",
+    "institution_city",
+    "institution_state",
+    "institution_count",
+    "institution_name_basis",
+    "institution_type_derived",
+    "responsible_party_statement",
+    "object_categories",
+    "mni_total_stated",
+    "mni_basis",
+    "mni_statement_count",
+    "mni_statements",
+    "n_associated_funerary_objects_stated",
+    "n_unassociated_funerary_objects_stated",
+    "n_sacred_objects_stated",
+    "n_objects_of_cultural_patrimony_stated",
+    "cultural_items_total_stated",
+    "removal_counties",
+    "removal_states",
+    "removal_location_statements",
+    "removal_location_basis",
+    "repatriation_eligible_date",
+    "response_deadline_date",
+    "window_days_derived",
+    "n_consulted_named",
+    "n_consulted_resolved",
+    "consulted_entity_ids",
+    "n_affiliated_named",
+    "n_affiliated_resolved",
+    "affiliated_entity_ids",
+    "n_disposition_priority_named",
+    "n_disposition_priority_resolved",
+    "disposition_priority_entity_ids",
+    "n_repatriation_recipient_named",
+    "n_repatriation_recipient_resolved",
+    "repatriation_recipient_entity_ids",
+    "n_letter_of_support_named",
+    "n_letter_of_support_resolved",
+    "letter_of_support_entity_ids",
+    "n_aboriginal_land_named",
+    "n_aboriginal_land_resolved",
+    "aboriginal_land_entity_ids",
+    "n_parties_named",
+    "n_entities_resolved",
+    "has_resolved_entity",
+    "lineal_descendant_determination",
+    "culturally_unidentifiable",
+    "parse_template",
+    "spans_found",
+    "agency_names",
+    "html_url",
+    "pdf_url",
+    "full_text_url",
+    "source_url",
+    "parent_dataset",
+    "fetched_date"
+   ],
+   "replay_sha256": "e6cc77950c626b7ec5556d366ac51c4b365b04780164458d91440e0e2c38b1dc",
+   "replay_rows": 6772,
+   "replay_columns": [
+    "document_number",
+    "publication_date",
+    "publication_year",
+    "notice_type",
+    "notice_title_form",
+    "statute_stage",
+    "is_correction",
+    "title",
+    "institution_name",
+    "institution_primary",
+    "institution_names_all",
+    "institution_city",
+    "institution_state",
+    "institution_count",
+    "institution_name_basis",
+    "institution_type_derived",
+    "responsible_party_statement",
+    "object_categories",
+    "mni_total_stated",
+    "mni_basis",
+    "mni_statement_count",
+    "mni_statements",
+    "n_associated_funerary_objects_stated",
+    "n_unassociated_funerary_objects_stated",
+    "n_sacred_objects_stated",
+    "n_objects_of_cultural_patrimony_stated",
+    "cultural_items_total_stated",
+    "removal_counties",
+    "removal_states",
+    "removal_location_statements",
+    "removal_location_basis",
+    "repatriation_eligible_date",
+    "response_deadline_date",
+    "window_days_derived",
+    "n_consulted_named",
+    "n_consulted_resolved",
+    "consulted_entity_ids",
+    "n_affiliated_named",
+    "n_affiliated_resolved",
+    "affiliated_entity_ids",
+    "n_disposition_priority_named",
+    "n_disposition_priority_resolved",
+    "disposition_priority_entity_ids",
+    "n_repatriation_recipient_named",
+    "n_repatriation_recipient_resolved",
+    "repatriation_recipient_entity_ids",
+    "n_letter_of_support_named",
+    "n_letter_of_support_resolved",
+    "letter_of_support_entity_ids",
+    "n_aboriginal_land_named",
+    "n_aboriginal_land_resolved",
+    "aboriginal_land_entity_ids",
+    "n_parties_named",
+    "n_entities_resolved",
+    "has_resolved_entity",
+    "lineal_descendant_determination",
+    "culturally_unidentifiable",
+    "parse_template",
+    "spans_found",
+    "agency_names",
+    "html_url",
+    "pdf_url",
+    "full_text_url",
+    "source_url",
+    "parent_dataset",
+    "fetched_date"
+   ],
+   "schema_identical": true,
+   "row_count_identical": true,
+   "bytes_identical": true,
+   "verdict": "BYTE_IDENTICAL",
+   "replay_primary_key_holds": {
+    "columns": [
+     "document_number"
+    ],
+    "rows": 6772,
+    "distinct": 6772,
+    "blank": 0,
+    "unique": true
+   }
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+{
+  "built": "2026-09-02",
+  "script": "870_build_geo_crosswalks.py",
+  "award_grain_source": "data/raw/contracts/usaspending_gapfill_2026-08-05/",
+  "place_grain_sources": {
+    "gapfill_award_summaries": {
+      "files_with_geo": 22,
+      "rows_read": 1124547,
+      "observations": 3341466
+    },
+    "faads_archive": {
+      "files_with_geo": 23,
+      "rows_read": 874201,
+      "observations": 1137878
+    },
+    "assistance_2023_2026": {
+      "files_with_geo": 16,
+      "rows_read": 273966,
+      "observations": 436916
+    },
+    "assistance_credit": {
+      "files_with_geo": 12,
+      "rows_read": 100,
+      "observations": 194
+    },
+    "subawards_2026_08_05": {
+      "files_with_geo": 44,
+      "rows_read": 6613471,
+      "observations": 10698367
+    }
+  },
+  "award_rows_read": 1104403,
+  "award_keys": 1050968,
+  "award_keys_conflicting": 0,
+  "award_recipient_fips_filled": 1048925,
+  "award_pop_fips_filled": 1045468,
+  "award_both_filled": 1045397,
+  "place_rows": 42650,
+  "place_by_grain": {
+    "city_state": 20727,
+    "zip5": 21923
+  },
+  "place_multi_county": 16239,
+  "counties_named": 3438,
+  "county_codes_by_class": {
+    "state_wide_placeholder_not_a_county": 56,
+    "county": 3434,
+    "county_code_observed_without_a_name": 37
+  }
+}

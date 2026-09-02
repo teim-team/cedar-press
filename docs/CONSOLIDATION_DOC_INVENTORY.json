@@ -1,0 +1,3154 @@
+{
+  "summary": {
+    "generated": "2026-08-28 14:17:52",
+    "live_window_minutes": 30,
+    "docs_md_count": 147,
+    "docs_total_lines": 66345,
+    "docs_off_limits": 1,
+    "scripts_count": 375,
+    "scripts_numbered": 334,
+    "scripts_named_modules": [
+      "code/107b_fill_source_urls.py",
+      "code/15a_compacts_inventory.py",
+      "code/15b_build_compact_index.py",
+      "code/15c_terms_pilot.py",
+      "code/15d_terms_extract.py",
+      "code/15e_finalize_terms.py",
+      "code/16b_extract_funding_rulings.py",
+      "code/16c_copy_funding_inputs.py",
+      "code/23a_fetch_gaming_land_decisions.py",
+      "code/23b_build_gaming_land_decisions.py",
+      "code/23c_copy_directory_core_sources.py",
+      "code/23d_build_gaming_facilities.py",
+      "code/23e_join_decisions_to_compacts.py",
+      "code/23f_gaming_temporal.py",
+      "code/23g_gaming_duplicate_candidates.py",
+      "code/32a_fetch_gaming_nepa_pilot.py",
+      "code/32b_build_gaming_nepa_pilot.py",
+      "code/_agent_akvillagecorp_build.py",
+      "code/_fix_british_spellings.py",
+      "code/build_federal_award_rows.py",
+      "code/build_source_manifest.py",
+      "code/cdx_eda_hud2.py",
+      "code/cdx_hud.py",
+      "code/cdx_round3.py",
+      "code/cedar_check.py",
+      "code/cedar_codebook.py",
+      "code/cedar_domain.py",
+      "code/cedar_extent_competed.py",
+      "code/cedar_ids.py",
+      "code/cedar_keys.py",
+      "code/cedar_match_guard.py",
+      "code/cedar_period_columns.py",
+      "code/cedar_pipeline.py",
+      "code/cedar_register_codebook.py",
+      "code/cedar_review_queue.py",
+      "code/cedar_schema.py",
+      "code/fetch_util.py",
+      "code/parse_hud_awards.py",
+      "code/parse_tbcp.py",
+      "code/scrape_doe_indian_energy.py",
+      "code/scrape_tbcp_awardees.py"
+    ],
+    "duplicate_numbers": 43,
+    "duplicate_number_map": {
+      "14": [
+        "14_build_bills_votes.py",
+        "14_copy_votingpatterns_sources.py",
+        "14_pull_cosponsors.py"
+      ],
+      "20": [
+        "20_build_subcontracts.py",
+        "20_fix_nonprofit_authority.py"
+      ],
+      "24": [
+        "24_funding_merge.py",
+        "24_generate_dataset_docs.py"
+      ],
+      "30": [
+        "30_funding_pre2008.py",
+        "30_probe_usaspending.py",
+        "30_wait_and_pull.py"
+      ],
+      "33": [
+        "33_apply_party_rulings.py",
+        "33_nonprofit_financials.py"
+      ],
+      "35": [
+        "35_coverage_audit.py",
+        "35_entity_harvest.py"
+      ],
+      "36": [
+        "36_build_nho_intertribal.py",
+        "36_cull_entity_candidates.py"
+      ],
+      "37": [
+        "37_contracts_gapfill.py",
+        "37_wait_then_pull.py"
+      ],
+      "40": [
+        "40_build_prime_contracts.py",
+        "40_contracts_ledger_pass.py",
+        "40_pull_usaspending_subawards.py"
+      ],
+      "41": [
+        "41_build_codebooks.py",
+        "41_match_subawards_to_ledger.py"
+      ],
+      "45": [
+        "45_contract_spiderweb_2026-08-06.py",
+        "45_promote_subawards.py"
+      ],
+      "70": [
+        "70_find_identifiers_for_unreconciled.py",
+        "70_key_unjoined_datasets.py"
+      ],
+      "73": [
+        "73_add_tcu_and_cdfi.py",
+        "73_bills_votes_completion.py",
+        "73_faads_name_attribution.py"
+      ],
+      "75": [
+        "75_add_bie_schools_and_uios.py",
+        "75_philanthropy_schedule_i.py"
+      ],
+      "76": [
+        "76_build_recognition_history.py",
+        "76_philanthropy_classify.py"
+      ],
+      "77": [
+        "77_build_nagpra_dataset.py",
+        "77_philanthropy_review_queue.py"
+      ],
+      "84": [
+        "84_build_nigc_regions.py",
+        "84_resource_recipient_side.py"
+      ],
+      "88": [
+        "88_build_deals_taxonomy.py",
+        "88_gaming_property_federal_traces.py"
+      ],
+      "89": [
+        "89_build_master_review_queue.py",
+        "89_nigc_map_wayback_universe.py"
+      ],
+      "90": [
+        "90_build_review_page.py",
+        "90_fetch_nigc_declinations.py"
+      ],
+      "91": [
+        "91_apply_existing_rulings.py",
+        "91_build_nigc_declinations.py",
+        "91_extract_compact_authorizations.py"
+      ],
+      "92": [
+        "92_build_gaming_capacity_official.py",
+        "92_find_identifier_conflicts.py",
+        "92_stage_nigc_missing_properties.py"
+      ],
+      "93": [
+        "93_build_leverage_cards.py",
+        "93_extract_az_gaming_status.py"
+      ],
+      "94": [
+        "94_extract_mi_mgcb_revshare.py",
+        "94_match_raw_subawards.py",
+        "94_rescan_universes.py"
+      ],
+      "95": [
+        "95_parse_compact_terms.py",
+        "95_wayback_az_gaming_status.py"
+      ],
+      "96": [
+        "96_build_consultation_events.py",
+        "96_extract_sec_property_capacity.py"
+      ],
+      "97": [
+        "97_build_aliases_and_relationships.py",
+        "97_extract_az_status_archive.py"
+      ],
+      "148": [
+        "148_build_gaming_vendor_tribal_licenses.py",
+        "148_resolve_schedule_i_recipients.py"
+      ],
+      "149": [
+        "149_apply_resource_entity_links.py",
+        "149_build_tribal_resolution_financings.py"
+      ],
+      "153": [
+        "153_merge_base_ledgers_into_classified.py",
+        "153_merge_ordinance_ocr.py"
+      ],
+      "154": [
+        "154_build_fr_ex_parte_notices.py",
+        "154_extend_autoresolved_parties_additive.py"
+      ],
+      "155": [
+        "155_collect_deals_2026_08.py",
+        "155_pull_nigc_roster.py"
+      ],
+      "156": [
+        "156_refresh_deals_codebook_fragment.py",
+        "156_stage_form5500_gaming_employment.py"
+      ],
+      "157": [
+        "157_reconcile_nigc_roster.py",
+        "157_stage_osha_tribe_level_employment.py"
+      ],
+      "158": [
+        "158_extend_gaming_facilities.py",
+        "158_merge_staged_labor_employment.py"
+      ],
+      "160": [
+        "160_ship_gap_report.py",
+        "160_sync_published_gaming_view.py"
+      ],
+      "163": [
+        "163_load_sam_contract_awards.py",
+        "163_promote_nho_universe_in_place.py"
+      ],
+      "164": [
+        "164_link_facility_hub_sources.py",
+        "164_refresh_nho_review_queues.py"
+      ],
+      "171": [
+        "171_build_individual_native_verification.py",
+        "171_credit_gap_measure.py"
+      ],
+      "172": [
+        "172_key_unkeyed_gaming_facility_hubs.py",
+        "172_probe_archive_stamp_per_year.py",
+        "172_write_individual_native_codebook_fragment.py"
+      ],
+      "173": [
+        "173_consolidate_rulings_ledger.py",
+        "173_fill_gaming_metrics_entity_for_newly_keyed_hubs.py",
+        "173_refresh_individual_native_results_section.py"
+      ],
+      "174": [
+        "174_apply_rulings_to_source_tables.py",
+        "174_backfill_digital_gaming_tiers.py",
+        "174_document_nigc_declination_codebook.py"
+      ],
+      "175": [
+        "175_restore_ferc_docket_table_after_rebuild_revert.py",
+        "175_sync_published_property_view_entities.py"
+      ]
+    },
+    "scripts_zero_inbound_refs": [
+      "code/135_build_resource_assets.py",
+      "code/138_fetch_scotus_dockets.py",
+      "code/216_extract_nm_revshare_2023_2026.py",
+      "code/21_flag_corrupt_cage_codes.py",
+      "code/23a_fetch_gaming_land_decisions.py",
+      "code/23e_join_decisions_to_compacts.py",
+      "code/32a_fetch_gaming_nepa_pilot.py",
+      "code/336_correct_scheme_resolution_by_spine_membership.py",
+      "code/368_courtlistener_party_roles_and_docs.py",
+      "code/370_type_courtlistener_ownership_verdicts.py",
+      "code/372_stage_caption_named_discovery_leads.py",
+      "code/416_reconcile_spine_id_columns.py",
+      "code/419_register_identity_layer_codebooks.py",
+      "code/434_pull_sam_entity_management.py",
+      "code/449_verify_documented_api_quirks.py",
+      "code/465_consolidation_inventory.py",
+      "code/55_stage_anc_subsidiary_rulings.py",
+      "code/58_apply_lobbying_rulings.py",
+      "code/68_build_decisions_page.py",
+      "code/69_enrich_spine_from_federal_register.py",
+      "code/74_add_organization_acronyms.py",
+      "code/_fix_british_spellings.py",
+      "code/cedar_check.py"
+    ]
+  },
+  "docs": [
+    {
+      "path": "docs/ACCESS_TECHNIQUES.md",
+      "bytes": 14195,
+      "lines": 293,
+      "mtime": "2026-08-26 19:52",
+      "mtime_epoch": 1787788379.5513206,
+      "off_limits_live_writer": false,
+      "heading": "Access Techniques",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 7,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/API_MANUALS_AND_QUIRKS.md",
+        "docs/BLOCKED_SOURCE_BYPASS_2026-08-26.md",
+        "docs/DEALS_PARTY_RESEARCH_LOG.md",
+        "docs/GAMING_TEMPORAL_BUILD_LOG.md",
+        "docs/INDIAN_INCENTIVE_PROGRAM_GAP.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "code/217_pull_az_adg_report_archive.py"
+      ]
+    },
+    {
+      "path": "docs/ADMIN_REGION_CROSSWALK_LOG.md",
+      "bytes": 16567,
+      "lines": 332,
+      "mtime": "2026-08-06 18:25",
+      "mtime_epoch": 1786055143.4001102,
+      "off_limits_live_writer": false,
+      "heading": "Federal Indian Program Geography \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/85_build_admin_region_crosswalk.py"
+      ]
+    },
+    {
+      "path": "docs/ADVOCACY_PASSTHROUGH_LOG.md",
+      "bytes": 19554,
+      "lines": 395,
+      "mtime": "2026-08-07 19:10",
+      "mtime_epoch": 1786144211.6287293,
+      "off_limits_live_writer": false,
+      "heading": "Nonprofit advocacy pass-through \u2014 build log, 2026-08-07",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/GRANTEE_990_LOG.md",
+        "code/112_pull_grantee_990s.py"
+      ]
+    },
+    {
+      "path": "docs/ALIAS_RELATIONSHIP_MIGRATION_LOG.md",
+      "bytes": 13185,
+      "lines": 262,
+      "mtime": "2026-08-07 16:04",
+      "mtime_epoch": 1786133090.5962546,
+      "off_limits_live_writer": false,
+      "heading": "Alias table and typed relationships \u2014 migration log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/ANCSA_OWNERSHIP_RULING.md",
+      "bytes": 35220,
+      "lines": 661,
+      "mtime": "2026-08-26 19:11",
+      "mtime_epoch": 1787785903.3771918,
+      "off_limits_live_writer": false,
+      "heading": "ANCSA ownership \u2014 the owner's ruling, 2026-08-26",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 24,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/CEDAR_TAXONOMY.md",
+        "docs/DRAFT_top_native_federal_contractors.md",
+        "docs/IDENTIFIER_GRAPH_BUILD_LOG.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "docs/WORK_QUEUE.md",
+        "AGENTS.md",
+        "code/191_apply_ancsa_ownership_ruling.py",
+        "code/192_apply_ancsa_resolutions_in_place.py",
+        "code/193_scan_adjacent_families_against_ancsa_ruling.py",
+        "code/194_write_ancsa_ruling_codebook_fragment.py",
+        "code/219_probe_courtlistener_recap.py",
+        "code/222_retrieve_ancsa_share_transfer_statute.py",
+        "code/249_audit_ancsa_tierA_subaward_repoints.py",
+        "code/250_demote_stale_tierA_subaward_rows.py",
+        "code/251_apply_np_ein_exclusions_to_np_orgs.py",
+        "code/269_build_contractor_ranking.py",
+        "code/366_courtlistener_ownership_adjudication.py",
+        "code/370_type_courtlistener_ownership_verdicts.py",
+        "code/425_establish_bristol_bay_entities.py",
+        "code/426_mint_bristol_bay_spine_entities.py",
+        "code/427_repoint_bristol_bay_attributions.py",
+        "code/70_key_unjoined_datasets.py",
+        "code/cedar_domain.py",
+        "code/cedar_match_guard.py"
+      ]
+    },
+    {
+      "path": "docs/ANCSA_PORTAL_BUILD_LOG.md",
+      "bytes": 22421,
+      "lines": 418,
+      "mtime": "2026-08-05 16:45",
+      "mtime_epoch": 1785962753.4295683,
+      "off_limits_live_writer": false,
+      "heading": "ANCSA Portal Build Log \u2014 Alaska DBS STAR, harvested 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ANCSA_PORTAL_V2_LOG.md",
+        "docs/COMPETITIVE_POSITION.md"
+      ]
+    },
+    {
+      "path": "docs/ANCSA_PORTAL_V2_LOG.md",
+      "bytes": 20678,
+      "lines": 326,
+      "mtime": "2026-08-05 17:23",
+      "mtime_epoch": 1785964984.9454656,
+      "off_limits_live_writer": false,
+      "heading": "ANCSA Portal v2 \u2014 OCR, village corporations and 2020\u20132026, harvested 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/24_generate_dataset_docs.py",
+        "code/54_reconcile_deals_duplicates.py"
+      ]
+    },
+    {
+      "path": "docs/ANNUAL_REPORT_ORG_DISCOVERY_LOG.md",
+      "bytes": 16299,
+      "lines": 302,
+      "mtime": "2026-08-06 17:03",
+      "mtime_epoch": 1786050191.1568303,
+      "off_limits_live_writer": false,
+      "heading": "Annual-Report Organisation Discovery",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/ANOMALY_REPORT.md",
+      "bytes": 250842,
+      "lines": 2766,
+      "mtime": "2026-08-26 20:40",
+      "mtime_epoch": 1787791231.3805826,
+      "off_limits_live_writer": false,
+      "heading": "ANOMALY REPORT \u2014 a standing year-over-year sweep of every Cedar Press collection",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 15,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/DRAFT_top_native_federal_contractors.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/HANDOFF.md",
+        "AGENTS.md",
+        "code/227_anomaly_sweep.py",
+        "code/234_measure_reporting_regime_signatures.py",
+        "code/269_build_contractor_ranking.py",
+        "code/27_build_dataset_manifests.py",
+        "code/351_rebuild_lobbying_panel_from_corrected_disclosures.py",
+        "code/352_unlink_false_foia_entity_links.py",
+        "code/354_correction_register.py",
+        "code/356_register_correction_register.py",
+        "code/425_establish_bristol_bay_entities.py",
+        "code/62_no_regression_check.py"
+      ]
+    },
+    {
+      "path": "docs/API_KEYS.md",
+      "bytes": 8130,
+      "lines": 150,
+      "mtime": "2026-08-26 17:19",
+      "mtime_epoch": 1787779182.5059586,
+      "off_limits_live_writer": false,
+      "heading": "API Keys \u2014 Cedar Press",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 10,
+      "inbound_refs_from_core": [
+        "START_HERE.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/GAMING_FINANCIAL_EXHAUST_BUILD_LOG.md",
+        "docs/PRE2007_SPENDING_SOURCES.md",
+        "docs/PULL_DISCIPLINE.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "START_HERE.md",
+        "AGENTS.md",
+        "code/141_pull_sam_contract_awards.py",
+        "code/147_build_fac_single_audits.py",
+        "code/221_probe_regulations_gov_comments.py",
+        "code/434_pull_sam_entity_management.py"
+      ]
+    },
+    {
+      "path": "docs/API_MANUALS_AND_QUIRKS.md",
+      "bytes": 46947,
+      "lines": 883,
+      "mtime": "2026-08-26 21:35",
+      "mtime_epoch": 1787794510.5415978,
+      "off_limits_live_writer": false,
+      "heading": "API manuals and source quirks \u2014 SAM \u00b7 FAC \u00b7 IRS \u00b7 GovInfo \u00b7 SEC",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md"
+      ],
+      "inbound_refs": [
+        "docs/HANDOFF.md",
+        "code/434_pull_sam_entity_management.py"
+      ]
+    },
+    {
+      "path": "docs/ASSISTANCE_ARCHIVE_PULL_LOG.md",
+      "bytes": 39366,
+      "lines": 789,
+      "mtime": "2026-08-26 18:19",
+      "mtime_epoch": 1787782745.866553,
+      "off_limits_live_writer": false,
+      "heading": "Assistance archive pull \u2014 `files.usaspending.gov`, 2026-08-07/08",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 11,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/PRE2007_SPENDING_SOURCES.md",
+        "docs/SUBAWARD_API_PULL_LOG.md",
+        "docs/USASPENDING_PROBLEM_BRIEF.md",
+        "code/115_pull_assistance_archive.py",
+        "code/121_pull_subawards_api.py",
+        "code/172_probe_archive_stamp_per_year.py",
+        "code/276_measure_discovery_gap.py",
+        "code/46_pull_funding_credit_types.py"
+      ]
+    },
+    {
+      "path": "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+      "bytes": 145545,
+      "lines": 2065,
+      "mtime": "2026-08-26 20:12",
+      "mtime_epoch": 1787789523.5344002,
+      "off_limits_live_writer": false,
+      "heading": "ASSUMPTIONS AND LIMITATIONS \u2014 the register that tells a reporting rule from a finding",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 13,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/ANOMALY_REPORT.md",
+        "docs/API_MANUALS_AND_QUIRKS.md",
+        "docs/DATABASE_INTEGRATION.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/DRAFT_top_native_federal_contractors.md",
+        "docs/HANDOFF.md",
+        "docs/NAGPRA_BUILD_LOG.md",
+        "docs/REFRESH_CADENCE.md",
+        "AGENTS.md",
+        "code/227_anomaly_sweep.py",
+        "code/234_measure_reporting_regime_signatures.py",
+        "code/288_build_collection_descriptors.py",
+        "code/449_verify_documented_api_quirks.py"
+      ]
+    },
+    {
+      "path": "docs/BIE_UIO_BUILD_LOG.md",
+      "bytes": 13756,
+      "lines": 137,
+      "mtime": "2026-08-06 17:49",
+      "mtime_epoch": 1786052948.4059234,
+      "off_limits_live_writer": false,
+      "heading": "BIE Schools and Urban Indian Organizations - build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "code/75_add_bie_schools_and_uios.py",
+        "code/86_build_series_breaks.py"
+      ]
+    },
+    {
+      "path": "docs/BILLS_VOTES_BUILD_LOG_2026-08-05.md",
+      "bytes": 23339,
+      "lines": 357,
+      "mtime": "2026-08-05 14:19",
+      "mtime_epoch": 1785953997.5103571,
+      "off_limits_live_writer": false,
+      "heading": "Cedar Press Dataset 10 \u2014 Native Bills & Congressional Votes",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/BILLS_VOTES_COMPLETION_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/BILLS_VOTES_COMPLETION_LOG.md",
+      "bytes": 16152,
+      "lines": 322,
+      "mtime": "2026-08-06 17:42",
+      "mtime_epoch": 1786052558.893135,
+      "off_limits_live_writer": false,
+      "heading": "Dataset 10 \u2014 completion pass, 2026-08-06",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/73_bills_votes_completion.py"
+      ]
+    },
+    {
+      "path": "docs/BLOCKED_SOURCE_BYPASS_2026-08-26.md",
+      "bytes": 29418,
+      "lines": 518,
+      "mtime": "2026-08-26 20:47",
+      "mtime_epoch": 1787791635.6857066,
+      "off_limits_live_writer": false,
+      "heading": "Blocked-source bypass \u2014 2026-08-26",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 6,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ACCESS_TECHNIQUES.md",
+        "docs/GAMING_CAPACITY_OFFICIAL_LOG.md",
+        "docs/GAMING_UNIVERSE_REBUILD_2026-08-26.md",
+        "code/366_courtlistener_ownership_adjudication.py",
+        "code/367_courtlistener_party_name_probe.py",
+        "code/371_stage_cedar_token_cluster_review.py"
+      ]
+    },
+    {
+      "path": "docs/CA_GAMING_BUILD_LOG.md",
+      "bytes": 23573,
+      "lines": 456,
+      "mtime": "2026-08-07 18:49",
+      "mtime_epoch": 1786142958.2626855,
+      "off_limits_live_writer": false,
+      "heading": "California gaming \u2014 the CGCC regulator layer",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/CEDAR_TAXONOMY.md",
+      "bytes": 52934,
+      "lines": 946,
+      "mtime": "2026-08-26 20:52",
+      "mtime_epoch": 1787791924.986542,
+      "off_limits_live_writer": false,
+      "heading": "CEDAR_TAXONOMY \u2014 every controlled vocabulary Cedar Press uses, in one place",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/HANDOFF.md",
+        "AGENTS.md",
+        "code/374_build_cedar_taxonomy_export.py",
+        "code/cedar_domain.py",
+        "code/cedar_ids.py"
+      ]
+    },
+    {
+      "path": "docs/CICD_BENCHMARK.md",
+      "bytes": 33522,
+      "lines": 208,
+      "mtime": "2026-08-26 18:52",
+      "mtime_epoch": 1787784727.2824407,
+      "off_limits_live_writer": false,
+      "heading": "CICD BENCHMARK \u2014 a standing reconciliation of Cedar Press against published figures",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 13,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/ANOMALY_REPORT.md",
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/DRAFT_top_native_federal_contractors.md",
+        "docs/EXTENT_COMPETED_CROSSWALK.md",
+        "docs/PULL_DISCIPLINE.md",
+        "AGENTS.md",
+        "code/186_cicd_benchmark.py",
+        "code/206_profile_prime_vocabulary_seams.py",
+        "code/207_normalize_extent_competed.py",
+        "code/227_anomaly_sweep.py",
+        "code/269_build_contractor_ranking.py",
+        "code/276_measure_discovery_gap.py",
+        "code/cedar_extent_competed.py"
+      ]
+    },
+    {
+      "path": "docs/CLASS7_KEY_MIGRATION_LOG.md",
+      "bytes": 16360,
+      "lines": 258,
+      "mtime": "2026-08-26 20:39",
+      "mtime_epoch": 1787791145.1680782,
+      "off_limits_live_writer": false,
+      "heading": "CLASS 7 \u2014 POSITIONAL / NON-DETERMINISTIC PRIMARY KEYS",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "AGENTS.md",
+        "code/392_write_unshipped_codebook_fragments.py"
+      ]
+    },
+    {
+      "path": "docs/CODE_HEALTH_AUDIT.md",
+      "bytes": 33582,
+      "lines": 586,
+      "mtime": "2026-08-26 19:55",
+      "mtime_epoch": 1787788539.870475,
+      "off_limits_live_writer": false,
+      "heading": "Code health audit \u2014 the seven named defect classes",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [
+        "START_HERE.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/WORK_QUEUE.md",
+        "START_HERE.md",
+        "AGENTS.md",
+        "code/248_audit_tier_inheritance_patterns.py"
+      ]
+    },
+    {
+      "path": "docs/COMPACT_TERMS_BUILD_LOG.md",
+      "bytes": 16633,
+      "lines": 323,
+      "mtime": "2026-08-07 17:23",
+      "mtime_epoch": 1786137782.5606287,
+      "off_limits_live_writer": false,
+      "heading": "Compact structured terms and reporting obligations \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/CA_GAMING_BUILD_LOG.md",
+        "code/95_parse_compact_terms.py"
+      ]
+    },
+    {
+      "path": "docs/COMPACTS_BUILD_LOG_2026-08-05.md",
+      "bytes": 23544,
+      "lines": 420,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.7416146,
+      "off_limits_live_writer": false,
+      "heading": "Compacts dataset \u2014 build log, 2026-08-05",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/COMPETITIVE_POSITION.md",
+      "bytes": 83814,
+      "lines": 1238,
+      "mtime": "2026-08-26 17:10",
+      "mtime_epoch": 1787778658.0859196,
+      "off_limits_live_writer": false,
+      "heading": "Competitive Position",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 7,
+      "inbound_refs_from_core": [
+        "README.md"
+      ],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/FACT_CHECK_2026-08-06.md",
+        "docs/PRE2007_SPENDING_SOURCES.md",
+        "docs/PUBLISHED_LANDSCAPE_2026-08-26.md",
+        "README.md"
+      ]
+    },
+    {
+      "path": "docs/CONGRESSIONAL_CORRESPONDENCE_FOIA_BUILD_LOG.md",
+      "bytes": 6124,
+      "lines": 127,
+      "mtime": "2026-08-12 18:33",
+      "mtime_epoch": 1786574016.1610785,
+      "off_limits_live_writer": false,
+      "heading": "Congressional correspondence logs + FOIA logs as a discovery index",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [
+        "START_HERE.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "START_HERE.md",
+        "AGENTS.md",
+        "code/136_build_congressional_correspondence_and_foia_index.py"
+      ]
+    },
+    {
+      "path": "docs/CONSULTATION_BUILD_LOG.md",
+      "bytes": 17495,
+      "lines": 362,
+      "mtime": "2026-08-07 17:10",
+      "mtime_epoch": 1786137042.588808,
+      "off_limits_live_writer": false,
+      "heading": "Tribal consultation \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/96_build_consultation_events.py"
+      ]
+    },
+    {
+      "path": "docs/CONTENT_ANALYSIS.md",
+      "bytes": 25427,
+      "lines": 472,
+      "mtime": "2026-08-06 17:21",
+      "mtime_epoch": 1786051304.459755,
+      "off_limits_live_writer": false,
+      "heading": "Content Analysis of the Cedar Press Text Corpora",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 6,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/STAGED_SHIP_CHAIN_2026-08-26.md",
+        "docs/UNSHIPPED_TABLE_TRIAGE.md",
+        "code/391_triage_unshipped_tables.py",
+        "code/78_content_analysis.py",
+        "code/cedar_codebook.py"
+      ]
+    },
+    {
+      "path": "docs/COVERAGE_AUDIT.md",
+      "bytes": 6924,
+      "lines": 103,
+      "mtime": "2026-08-26 20:04",
+      "mtime_epoch": 1787789093.8371222,
+      "off_limits_live_writer": false,
+      "heading": "Coverage Audit",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 13,
+      "inbound_refs_from_core": [
+        "README.md",
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "docs/ASSISTANCE_ARCHIVE_PULL_LOG.md",
+        "docs/DEALS_BUILD_LOG_2026-08-26.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/FAADS_NAME_ATTRIBUTION_LOG.md",
+        "docs/FACT_CHECK_2026-08-06.md",
+        "README.md",
+        "START_HERE.md",
+        "STATE_OF_BUILD.md",
+        "code/24_generate_dataset_docs.py",
+        "code/35_coverage_audit.py",
+        "code/73_faads_name_attribution.py",
+        "code/86_build_series_breaks.py"
+      ]
+    },
+    {
+      "path": "docs/COVERAGE_EXPANSION_OPTIONS.md",
+      "bytes": 5059,
+      "lines": 83,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.7431233,
+      "off_limits_live_writer": false,
+      "heading": "Coverage Expansion Options",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/24_generate_dataset_docs.py"
+      ]
+    },
+    {
+      "path": "docs/CROSS_DATASET_LEARNING.md",
+      "bytes": 2138,
+      "lines": 43,
+      "mtime": "2026-08-05 16:22",
+      "mtime_epoch": 1785961379.5676837,
+      "off_limits_live_writer": false,
+      "heading": "Cross-Dataset Learning",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 7,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/DATASET5_LINKED_FILE_BUILD_LOG.md",
+        "docs/FACT_CHECK_2026-08-06.md",
+        "docs/NHO_INTERTRIBAL_REGISTER_LOG.md",
+        "code/23_cross_dataset_propagation.py",
+        "code/24_generate_dataset_docs.py",
+        "code/31_build_dataset5_linked.py"
+      ]
+    },
+    {
+      "path": "docs/CROSS_SOURCE_VERIFICATION.md",
+      "bytes": 4598,
+      "lines": 111,
+      "mtime": "2026-08-06 17:38",
+      "mtime_epoch": 1786052295.6948102,
+      "off_limits_live_writer": false,
+      "heading": "Cross-Source Verification",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 18,
+      "inbound_refs_from_core": [
+        "README.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/ANCSA_OWNERSHIP_RULING.md",
+        "docs/ASSISTANCE_ARCHIVE_PULL_LOG.md",
+        "docs/CONSULTATION_BUILD_LOG.md",
+        "docs/DEALS_BUILD_LOG_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/GAMING_TEMPORAL_BUILD_LOG.md",
+        "docs/ND_SEVERANCE_BUILD_LOG.md",
+        "docs/PRE2007_SPENDING_SOURCES.md",
+        "docs/RESOURCE_LEDGER_STATES_LOG.md",
+        "docs/RESOURCE_RECIPIENT_SIDE_LOG.md",
+        "docs/SCHEDULE_I_BUILD_LOG.md",
+        "README.md",
+        "AGENTS.md",
+        "code/113_build_nd_severance.py",
+        "code/155_collect_deals_2026_08.py",
+        "code/425_establish_bristol_bay_entities.py",
+        "code/84_resource_recipient_side.py",
+        "code/91_build_nigc_declinations.py"
+      ]
+    },
+    {
+      "path": "docs/DATA_ODDITIES.md",
+      "bytes": 5808,
+      "lines": 140,
+      "mtime": "2026-08-06 16:56",
+      "mtime_epoch": 1786049768.4952002,
+      "off_limits_live_writer": false,
+      "heading": "Data Oddities",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 10,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ANOMALY_REPORT.md",
+        "docs/ASSISTANCE_ARCHIVE_PULL_LOG.md",
+        "docs/RESOURCE_LEDGER_BUILD_LOG.md",
+        "code/114_pull_prime_archive.py",
+        "code/115_pull_assistance_archive.py",
+        "code/121_pull_subawards_api.py",
+        "code/171_credit_gap_measure.py",
+        "code/227_anomaly_sweep.py",
+        "code/24_generate_dataset_docs.py",
+        "code/83_build_resource_ledger.py"
+      ]
+    },
+    {
+      "path": "docs/DATABASE_INTEGRATION.md",
+      "bytes": 31130,
+      "lines": 610,
+      "mtime": "2026-08-26 20:08",
+      "mtime_epoch": 1787789289.2041113,
+      "off_limits_live_writer": false,
+      "heading": "Database integration",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "path": "docs/DATASET5_LINKED_FILE_BUILD_LOG.md",
+      "bytes": 12854,
+      "lines": 297,
+      "mtime": "2026-08-06 15:56",
+      "mtime_epoch": 1786046190.9694476,
+      "off_limits_live_writer": false,
+      "heading": "Dataset 5 \u2014 The Linked Analytical File",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "STATE_OF_BUILD.md",
+        "code/31_build_dataset5_linked.py"
+      ]
+    },
+    {
+      "path": "docs/DATASET_SCAFFOLD.md",
+      "bytes": 7220,
+      "lines": 164,
+      "mtime": "2026-08-26 17:13",
+      "mtime_epoch": 1787778815.1431365,
+      "off_limits_live_writer": false,
+      "heading": "How Cedar Press datasets are scaffolded",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md"
+      ]
+    },
+    {
+      "path": "docs/DEALS_2000_2019_BUILD_LOG.md",
+      "bytes": 18451,
+      "lines": 299,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.746125,
+      "off_limits_live_writer": false,
+      "heading": "Deals Build Log \u2014 2000\u20132019 Backfill, 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DEALS_ANC_REPORTS_BUILD_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/DEALS_ANC_REPORTS_BUILD_LOG.md",
+      "bytes": 27589,
+      "lines": 461,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.7491295,
+      "off_limits_live_writer": false,
+      "heading": "Deals Build Log \u2014 ANC Annual Reports, 2000\u20132019, 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/DEALS_BUILD_LOG_2026-08-05.md",
+      "bytes": 14890,
+      "lines": 269,
+      "mtime": "2026-08-05 14:49",
+      "mtime_epoch": 1785955763.6028302,
+      "off_limits_live_writer": false,
+      "heading": "Deals Build Log \u2014 Entity Newsroom Sweep, 2026-08-05",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/DEALS_BUILD_LOG_2026-08-26.md",
+      "bytes": 15435,
+      "lines": 288,
+      "mtime": "2026-08-26 17:18",
+      "mtime_epoch": 1787779082.237215,
+      "off_limits_live_writer": false,
+      "heading": "Deals Build Log \u2014 base-ledger merge + August 2026 collection, 2026-08-26",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/DEALS_PARTY_RESEARCH_LOG.md",
+      "bytes": 19306,
+      "lines": 251,
+      "mtime": "2026-08-05 17:34",
+      "mtime_epoch": 1785965681.7821393,
+      "off_limits_live_writer": false,
+      "heading": "Deals Party Research Log \u2014 Dataset 1 (Indian Country Deals)",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/DEALS_SEC_2010_2017_BUILD_LOG.md",
+      "bytes": 18699,
+      "lines": 292,
+      "mtime": "2026-08-05 15:55",
+      "mtime_epoch": 1785959721.6995025,
+      "off_limits_live_writer": false,
+      "heading": "Deals Build Log \u2014 SEC EDGAR channel, 2010\u20132017 soft spot, 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/TRIBAL_DEBT_BUILD_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/DEPENDENCY_MANIFEST.md",
+      "bytes": 11527,
+      "lines": 90,
+      "mtime": "2026-08-26 19:52",
+      "mtime_epoch": 1787788357.8975124,
+      "off_limits_live_writer": false,
+      "heading": "Dependency manifest",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/287_build_dependency_manifest.py",
+        "code/cedar_check.py"
+      ]
+    },
+    {
+      "path": "docs/DEWEY_BRIEF_FOR_ANOTHER_INSTANCE.md",
+      "bytes": 12024,
+      "lines": 235,
+      "mtime": "2026-08-12 14:08",
+      "mtime_epoch": 1786558117.695608,
+      "off_limits_live_writer": false,
+      "heading": "Dewey Data \u2014 brief for another Claude instance",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "START_HERE.md"
+      ]
+    },
+    {
+      "path": "docs/DIGITAL_GAMING_BUILD_LOG.md",
+      "bytes": 26533,
+      "lines": 485,
+      "mtime": "2026-08-07 21:30",
+      "mtime_epoch": 1786152648.857531,
+      "off_limits_live_writer": false,
+      "heading": "Digital gaming and loyalty \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+      "bytes": 25144,
+      "lines": 454,
+      "mtime": "2026-08-26 20:07",
+      "mtime_epoch": 1787789237.990353,
+      "off_limits_live_writer": false,
+      "heading": "Documentation Contradictions Register \u2014 audited 2026-08-26",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 12,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md",
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/CEDAR_TAXONOMY.md",
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/FACT_CHECK_2026-08-06.md",
+        "docs/GAMING_SPEC_RECONCILIATION.md",
+        "docs/HANDOFF.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "START_HERE.md",
+        "STATE_OF_BUILD.md",
+        "STATE_OF_THE_LAND_2026-08-07.md",
+        "code/173_refresh_individual_native_results_section.py"
+      ]
+    },
+    {
+      "path": "docs/DRAFT_top_native_federal_contractors.md",
+      "bytes": 13565,
+      "lines": 206,
+      "mtime": "2026-08-26 19:14",
+      "mtime_epoch": 1787786052.4320848,
+      "off_limits_live_writer": false,
+      "heading": "The biggest Native federal contractors, and the ownership chains that hide them",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "path": "docs/EARMARKS_SCHEDC_BUILD_LOG.md",
+      "bytes": 29166,
+      "lines": 518,
+      "mtime": "2026-08-07 17:51",
+      "mtime_epoch": 1786139477.6592364,
+      "off_limits_live_writer": false,
+      "heading": "Earmarks + 990 Schedule C \u2014 build log, 2026-08-07",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ADVOCACY_PASSTHROUGH_LOG.md",
+        "docs/GRANTEE_990_LOG.md",
+        "code/99_build_earmarks_and_schedc.py"
+      ]
+    },
+    {
+      "path": "docs/EDITORIAL_PIPELINE.md",
+      "bytes": 249885,
+      "lines": 3888,
+      "mtime": "2026-08-26 20:42",
+      "mtime_epoch": 1787791354.0342612,
+      "off_limits_live_writer": false,
+      "heading": "Editorial Pipeline",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 8,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md"
+      ],
+      "inbound_refs": [
+        "docs/ANOMALY_REPORT.md",
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/HANDOFF.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "docs/WORK_QUEUE.md",
+        "code/269_build_contractor_ranking.py",
+        "code/276_measure_discovery_gap.py",
+        "code/350_withdraw_false_lobbying_attributions.py"
+      ]
+    },
+    {
+      "path": "docs/ENTITY_HARVEST_LOG.md",
+      "bytes": 22401,
+      "lines": 270,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.752633,
+      "off_limits_live_writer": false,
+      "heading": "Entity Name Harvest \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "code/35_entity_harvest.py"
+      ]
+    },
+    {
+      "path": "docs/ENTITY_KEY_PROPAGATION_LOG.md",
+      "bytes": 4480,
+      "lines": 100,
+      "mtime": "2026-08-06 15:56",
+      "mtime_epoch": 1786046210.1954734,
+      "off_limits_live_writer": false,
+      "heading": "Entity-key propagation log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "STATE_OF_BUILD.md",
+        "code/70_key_unjoined_datasets.py"
+      ]
+    },
+    {
+      "path": "docs/EXTENT_COMPETED_CROSSWALK.md",
+      "bytes": 20655,
+      "lines": 374,
+      "mtime": "2026-08-26 18:52",
+      "mtime_epoch": 1787784777.3559642,
+      "off_limits_live_writer": false,
+      "heading": "`extent_competed` \u2014 two vocabularies in one column, and the crosswalk that closes it",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "docs/CICD_BENCHMARK.md",
+        "START_HERE.md",
+        "code/186_cicd_benchmark.py",
+        "code/449_verify_documented_api_quirks.py"
+      ]
+    },
+    {
+      "path": "docs/FAADS_FEASIBILITY_2026-08-05.md",
+      "bytes": 17499,
+      "lines": 337,
+      "mtime": "2026-08-05 15:40",
+      "mtime_epoch": 1785958840.7782805,
+      "off_limits_live_writer": false,
+      "heading": "FAADS feasibility \u2014 can Dataset 3 reach the 2000 floor?",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 7,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/COVERAGE_EXPANSION_OPTIONS.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/FUNDING_PRE2008_BUILD_LOG.md",
+        "docs/PRE2007_SPENDING_SOURCES.md",
+        "code/199_faads_identifier_by_agency_year.py",
+        "code/30_funding_pre2008.py"
+      ]
+    },
+    {
+      "path": "docs/FAADS_NAME_ATTRIBUTION_LOG.md",
+      "bytes": 24097,
+      "lines": 462,
+      "mtime": "2026-08-06 17:50",
+      "mtime_epoch": 1786053047.8148003,
+      "off_limits_live_writer": false,
+      "heading": "FAADS pre-FY2007 name attribution",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/COVERAGE_AUDIT.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "code/35_coverage_audit.py",
+        "code/86_build_series_breaks.py"
+      ]
+    },
+    {
+      "path": "docs/FACT_CHECK_2026-08-06.md",
+      "bytes": 43750,
+      "lines": 718,
+      "mtime": "2026-08-26 17:14",
+      "mtime_epoch": 1787778842.747171,
+      "off_limits_live_writer": false,
+      "heading": "Fact Check \u2014 2026-08-06",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 19,
+      "inbound_refs_from_core": [
+        "START_HERE.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/CODE_HEALTH_AUDIT.md",
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/DEALS_BUILD_LOG_2026-08-26.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/GAMING_FACILITY_HUB_LINKAGE_2026-08-26.md",
+        "START_HERE.md",
+        "AGENTS.md",
+        "STATE_OF_BUILD.md",
+        "code/175_sync_published_property_view_entities.py",
+        "code/24_generate_dataset_docs.py",
+        "code/255_fix_gaming_property_deal_counts.py",
+        "code/31_build_dataset5_linked.py",
+        "code/33_apply_party_rulings.py",
+        "code/35_coverage_audit.py",
+        "code/59_build_deal_source_index.py",
+        "code/73_add_tcu_and_cdfi.py",
+        "code/82_build_gaming_property_dataset.py",
+        "code/cedar_domain.py"
+      ]
+    },
+    {
+      "path": "docs/FEDERAL_ACTIONS_BUILD_LOG_2026-08-05.md",
+      "bytes": 16042,
+      "lines": 317,
+      "mtime": "2026-08-26 20:06",
+      "mtime_epoch": 1787789195.9271934,
+      "off_limits_live_writer": false,
+      "heading": "Dataset 9 \u2014 Federal Actions Affecting Tribal Nations \u2014 Build Log",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "code/221_probe_regulations_gov_comments.py"
+      ]
+    },
+    {
+      "path": "docs/FEDERAL_AWARD_LISTS_LOG.md",
+      "bytes": 18996,
+      "lines": 307,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.756645,
+      "off_limits_live_writer": false,
+      "heading": "Federal Award Lists \u2014 retrieval log, 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/build_source_manifest.py"
+      ]
+    },
+    {
+      "path": "docs/FEDERAL_FUNDING_MERGE_LOG_2026-08-05.md",
+      "bytes": 15802,
+      "lines": 190,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.7586448,
+      "off_limits_live_writer": false,
+      "heading": "Federal Funding (Dataset 3) \u2014 Merge Log",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md",
+        "STATE_OF_BUILD.md",
+        "code/24_funding_merge.py"
+      ]
+    },
+    {
+      "path": "docs/FEDERAL_FUNDING_RECONCILIATION_2026-08-05.md",
+      "bytes": 29245,
+      "lines": 327,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.761644,
+      "off_limits_live_writer": false,
+      "heading": "Federal Funding (Dataset 3) \u2014 Lineage Reconciliation",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/FEDERAL_FUNDING_MERGE_LOG_2026-08-05.md",
+        "code/24_funding_merge.py"
+      ]
+    },
+    {
+      "path": "docs/FL_GAMING_BUILD_LOG.md",
+      "bytes": 16085,
+      "lines": 326,
+      "mtime": "2026-08-07 19:05",
+      "mtime_epoch": 1786143914.4234562,
+      "off_limits_live_writer": false,
+      "heading": "Florida / Seminole gaming \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DIGITAL_GAMING_BUILD_LOG.md",
+        "code/119_build_digital_and_loyalty.py"
+      ]
+    },
+    {
+      "path": "docs/FPDS_HIERARCHY_BUILD_LOG_2026-08-05.md",
+      "bytes": 10157,
+      "lines": 194,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.763156,
+      "off_limits_live_writer": false,
+      "heading": "FPDS Corporate-Hierarchy Rebuild \u2014 Build Log",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/13_build_fpds_hierarchy.py"
+      ]
+    },
+    {
+      "path": "docs/FR_EX_PARTE_BUILD_LOG.md",
+      "bytes": 18045,
+      "lines": 366,
+      "mtime": "2026-08-26 17:24",
+      "mtime_epoch": 1787779457.003453,
+      "off_limits_live_writer": false,
+      "heading": "FR EX PARTE NOTICES \u2014 BUILD LOG",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "START_HERE.md",
+        "code/154_build_fr_ex_parte_notices.py"
+      ]
+    },
+    {
+      "path": "docs/FUNDING_PRE2008_BUILD_LOG.md",
+      "bytes": 18552,
+      "lines": 330,
+      "mtime": "2026-08-05 18:50",
+      "mtime_epoch": 1785970226.71561,
+      "off_limits_live_writer": false,
+      "heading": "Dataset 3 \u2014 FY2001\u20132007 backfill, multi-agency build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md"
+      ]
+    },
+    {
+      "path": "docs/GAMING_BUILD_LOG_2026-08-05.md",
+      "bytes": 18291,
+      "lines": 350,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.7670226,
+      "off_limits_live_writer": false,
+      "heading": "Gaming Development & Markets \u2014 Phase 1 build log",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/GAMING_NEPA_PILOT_LOG.md",
+        "docs/GAMING_TEMPORAL_BUILD_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/GAMING_CAPACITY_OFFICIAL_LOG.md",
+      "bytes": 46705,
+      "lines": 754,
+      "mtime": "2026-08-26 19:52",
+      "mtime_epoch": 1787788347.6173024,
+      "off_limits_live_writer": false,
+      "heading": "Gaming capacity \u2014 the authoritative-source layer",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 10,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/BLOCKED_SOURCE_BYPASS_2026-08-26.md",
+        "docs/CA_GAMING_BUILD_LOG.md",
+        "docs/GAMING_DEVICE_BUILD_LOG.md",
+        "docs/STATE_GAMING_PULL_LOG.md",
+        "code/107_pull_remaining_states.py",
+        "code/117_build_gaming_devices.py",
+        "code/213_cdx_targeted_nm_az_documents.py",
+        "code/214_recover_nm_tribal_revenue_sharing_2023_2025.py",
+        "code/216_extract_nm_revshare_2023_2026.py",
+        "code/218_stage_sealed_state_typed_rows.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_DEVICE_BUILD_LOG.md",
+      "bytes": 16959,
+      "lines": 164,
+      "mtime": "2026-08-07 21:17",
+      "mtime_epoch": 1786151877.3625233,
+      "off_limits_live_writer": false,
+      "heading": "The gaming device layer \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/GAMING_FACILITY_HUB_LINKAGE_2026-08-26.md",
+        "code/117_build_gaming_devices.py",
+        "code/159_extend_gaming_metrics.py",
+        "code/164_link_facility_hub_sources.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_EMPLOYMENT_LOG.md",
+      "bytes": 13802,
+      "lines": 278,
+      "mtime": "2026-08-07 18:37",
+      "mtime_epoch": 1786142233.8712554,
+      "off_limits_live_writer": false,
+      "heading": "Gaming property employment observations \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/LABOR_SOURCES_FOR_GAMING_2026-08-26.md",
+        "code/157_stage_osha_tribe_level_employment.py",
+        "code/158_merge_staged_labor_employment.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_FACILITY_HUB_LINKAGE_2026-08-26.md",
+      "bytes": 34732,
+      "lines": 647,
+      "mtime": "2026-08-26 18:10",
+      "mtime_epoch": 1787782235.957869,
+      "off_limits_live_writer": false,
+      "heading": "The facility hub, wired to the entity \u2014 2026-08-26",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+        "code/172_key_unkeyed_gaming_facility_hubs.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_FINANCIAL_EXHAUST_BUILD_LOG.md",
+      "bytes": 13488,
+      "lines": 262,
+      "mtime": "2026-08-12 21:41",
+      "mtime_epoch": 1786585300.95934,
+      "off_limits_live_writer": false,
+      "heading": "Gaming financial exhaust \u2014 Steps 12-14 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_SPEC_RECONCILIATION.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "path": "docs/GAMING_LOCATION_LAYER.md",
+      "bytes": 13771,
+      "lines": 282,
+      "mtime": "2026-08-26 17:14",
+      "mtime_epoch": 1787778881.1455567,
+      "off_limits_live_writer": false,
+      "heading": "Gaming Property Location Layer",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+        "START_HERE.md",
+        "code/143_build_gaming_property_locations.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_NEPA_PILOT_LOG.md",
+      "bytes": 27686,
+      "lines": 465,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.7670226,
+      "off_limits_live_writer": false,
+      "heading": "Gaming Development & Markets \u2014 Phase 2: NEPA document extraction pilot",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/32b_build_gaming_nepa_pilot.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_ORDINANCE_BUILD_LOG.md",
+      "bytes": 27683,
+      "lines": 552,
+      "mtime": "2026-08-26 17:14",
+      "mtime_epoch": 1787778857.4931202,
+      "off_limits_live_writer": false,
+      "heading": "Tribal gaming ordinances \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_ORDINANCE_OCR_MERGE_LOG.md",
+        "docs/GAMING_SPEC_RECONCILIATION.md",
+        "code/153_merge_ordinance_ocr.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_ORDINANCE_OCR_MERGE_LOG.md",
+      "bytes": 16295,
+      "lines": 322,
+      "mtime": "2026-08-26 17:03",
+      "mtime_epoch": 1787778220.0365446,
+      "off_limits_live_writer": false,
+      "heading": "Ordinance OCR \u2014 merge and integration log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_ORDINANCE_BUILD_LOG.md",
+        "docs/GAMING_SPEC_RECONCILIATION.md"
+      ]
+    },
+    {
+      "path": "docs/GAMING_PROPERTY_SITE_BUILD_LOG.md",
+      "bytes": 15921,
+      "lines": 304,
+      "mtime": "2026-08-12 21:02",
+      "mtime_epoch": 1786582922.051357,
+      "off_limits_live_writer": false,
+      "heading": "Official property sites and public game finders \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md"
+      ]
+    },
+    {
+      "path": "docs/GAMING_PROPERTY_SITE_REMINE_2026-08-26.md",
+      "bytes": 19730,
+      "lines": 380,
+      "mtime": "2026-08-26 21:00",
+      "mtime_epoch": 1787792419.6348999,
+      "off_limits_live_writer": false,
+      "heading": "Re-mining the property-site corpus \u2014 build log",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "path": "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+      "bytes": 55203,
+      "lines": 946,
+      "mtime": "2026-08-26 21:03",
+      "mtime_epoch": 1787792603.753811,
+      "off_limits_live_writer": false,
+      "heading": "Gaming source audit \u2014 where the sources go",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 10,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/CODE_HEALTH_AUDIT.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_FACILITY_HUB_LINKAGE_2026-08-26.md",
+        "docs/GAMING_PROPERTY_SITE_REMINE_2026-08-26.md",
+        "docs/SHIPPING_RUNBOOK.md",
+        "code/160_ship_gap_report.py",
+        "code/166_register_entity_link_block_fragments.py",
+        "code/87_build_dataset_notes.py",
+        "code/cedar_codebook.py",
+        "code/cedar_register_codebook.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_SPEC_RECONCILIATION.md",
+      "bytes": 17252,
+      "lines": 326,
+      "mtime": "2026-08-26 17:19",
+      "mtime_epoch": 1787779193.1528525,
+      "off_limits_live_writer": false,
+      "heading": "Gaming Spec Reconciliation",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 7,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DEWEY_BRIEF_FOR_ANOTHER_INSTANCE.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_CAPACITY_OFFICIAL_LOG.md",
+        "docs/GAMING_ORDINANCE_BUILD_LOG.md",
+        "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+        "SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md",
+        "code/143_build_gaming_property_locations.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_TEMPORAL_BUILD_LOG.md",
+      "bytes": 104138,
+      "lines": 1810,
+      "mtime": "2026-08-06 18:41",
+      "mtime_epoch": 1786056084.2935002,
+      "off_limits_live_writer": false,
+      "heading": "Gaming \u2014 the time dimension",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 10,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/FACT_CHECK_2026-08-06.md",
+        "docs/GAMING_CAPACITY_OFFICIAL_LOG.md",
+        "STATE_OF_BUILD.md",
+        "code/23f_gaming_temporal.py",
+        "code/35_coverage_audit.py",
+        "code/82_build_gaming_property_dataset.py",
+        "code/86_build_series_breaks.py",
+        "code/88_gaming_property_federal_traces.py",
+        "code/92_build_gaming_capacity_official.py"
+      ]
+    },
+    {
+      "path": "docs/GAMING_UNIVERSE_REBUILD_2026-08-26.md",
+      "bytes": 17428,
+      "lines": 355,
+      "mtime": "2026-08-26 19:52",
+      "mtime_epoch": 1787788321.5600204,
+      "off_limits_live_writer": false,
+      "heading": "The gaming universe, rebuilt against the current NIGC roster \u2014 2026-08-26",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 7,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/BLOCKED_SOURCE_BYPASS_2026-08-26.md",
+        "docs/CICD_BENCHMARK.md",
+        "docs/GAMING_FACILITY_HUB_LINKAGE_2026-08-26.md",
+        "docs/GAMING_SPEC_RECONCILIATION.md",
+        "code/186_cicd_benchmark.py",
+        "code/211_cdx_enumerate_blocked_gaming_hosts.py",
+        "code/217_pull_az_adg_report_archive.py"
+      ]
+    },
+    {
+      "path": "docs/GRANTEE_990_LOG.md",
+      "bytes": 21316,
+      "lines": 441,
+      "mtime": "2026-08-07 19:58",
+      "mtime_epoch": 1786147116.8491924,
+      "off_limits_live_writer": false,
+      "heading": "Grantee 990 pull \u2014 build log, 2026-08-07",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/SCHEDULE_I_BUILD_LOG.md",
+        "code/132_build_schedule_i_layer.py"
+      ]
+    },
+    {
+      "path": "docs/GRANTMAKER_FUNDING_FLOWS_BUILD_LOG.md",
+      "bytes": 20107,
+      "lines": 376,
+      "mtime": "2026-08-12 18:32",
+      "mtime_epoch": 1786573956.776277,
+      "off_limits_live_writer": false,
+      "heading": "Grantmaker funding flows \u2014 build log, 2026-08-12",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md"
+      ]
+    },
+    {
+      "path": "docs/HANDOFF.md",
+      "bytes": 21195,
+      "lines": 391,
+      "mtime": "2026-08-28 14:13",
+      "mtime_epoch": 1787940822.592384,
+      "off_limits_live_writer": true,
+      "heading": "HANDOFF \u2014 read this first, then START_HERE.md",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/LABOR_SOURCES_FOR_GAMING_2026-08-26.md",
+        "code/465_consolidation_inventory.py"
+      ]
+    },
+    {
+      "path": "docs/IDENTIFIER_GRAPH_BUILD_LOG.md",
+      "bytes": 24175,
+      "lines": 457,
+      "mtime": "2026-08-26 18:42",
+      "mtime_epoch": 1787784158.2467632,
+      "off_limits_live_writer": false,
+      "heading": "The cross-identifier graph \u2014 UEI \u2194 CAGE \u2194 EIN \u2194 DUNS \u2194 tribe_id",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/LOBBYING_REGISTRANT_BUILD_LOG.md",
+        "docs/WORK_QUEUE.md",
+        "code/169_build_identifier_graph.py",
+        "code/181_enrich_lobbying_registrant_identifiers.py",
+        "code/182_rule_lobbying_registrant_native_ownership.py"
+      ]
+    },
+    {
+      "path": "docs/INDIAN_INCENTIVE_PROGRAM_GAP.md",
+      "bytes": 18256,
+      "lines": 350,
+      "mtime": "2026-08-06 17:42",
+      "mtime_epoch": 1786052564.8134375,
+      "off_limits_live_writer": false,
+      "heading": "The Indian Incentive Program: a measured gap",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md"
+      ]
+    },
+    {
+      "path": "docs/INDIVIDUAL_NATIVE_CLASS_PROPOSAL.md",
+      "bytes": 27892,
+      "lines": 520,
+      "mtime": "2026-08-26 20:31",
+      "mtime_epoch": 1787790665.4443967,
+      "off_limits_live_writer": false,
+      "heading": "The individually Native-owned business class \u2014 design proposal",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 6,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/INDIVIDUAL_NATIVE_OWNERSHIP_VERIFICATION_BUILD_LOG.md",
+        "docs/SAM_EXTRACTION_PLAN.md",
+        "code/163_load_sam_contract_awards.py",
+        "code/358_measure_sam_individual_native_class_delta.py",
+        "code/cedar_domain.py"
+      ]
+    },
+    {
+      "path": "docs/INDIVIDUAL_NATIVE_OWNERSHIP_VERIFICATION_BUILD_LOG.md",
+      "bytes": 33032,
+      "lines": 614,
+      "mtime": "2026-08-26 18:03",
+      "mtime_epoch": 1787781790.6862051,
+      "off_limits_live_writer": false,
+      "heading": "Individually Native-owned business verification \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 9,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/ANOMALY_REPORT.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "AGENTS.md",
+        "code/173_refresh_individual_native_results_section.py",
+        "code/208_register_extent_competed_codebook_fragment.py",
+        "code/227_anomaly_sweep.py",
+        "code/243_write_individual_native_class_codebook_fragment.py",
+        "code/244_refresh_individual_native_review_queues.py",
+        "code/419_register_identity_layer_codebooks.py"
+      ]
+    },
+    {
+      "path": "docs/LABOR_SOURCES_FOR_GAMING_2026-08-26.md",
+      "bytes": 41636,
+      "lines": 799,
+      "mtime": "2026-08-26 17:26",
+      "mtime_epoch": 1787779598.2246695,
+      "off_limits_live_writer": false,
+      "heading": "Labor data sources for the gaming collection",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 9,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/GAMING_FACILITY_HUB_LINKAGE_2026-08-26.md",
+        "docs/UNFINISHED_WORK_AUDIT.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "code/101_build_lodes_block_employment.py",
+        "code/157_stage_osha_tribe_level_employment.py",
+        "code/262_repair_form5500_tribe_attribution.py",
+        "code/264_add_missing_osha_tribal_facilities.py"
+      ]
+    },
+    {
+      "path": "docs/LOBBYING_BUILD_LOG_2026-08-05.md",
+      "bytes": 42028,
+      "lines": 672,
+      "mtime": "2026-08-05 17:29",
+      "mtime_epoch": 1785965363.8861456,
+      "off_limits_live_writer": false,
+      "heading": "Lobbying Build Log \u2014 Cedar Press Dataset 4 (Native Influence)",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/FACT_CHECK_2026-08-06.md",
+        "docs/LOBBYING_EXPANSION_RECONCILIATION.md"
+      ]
+    },
+    {
+      "path": "docs/LOBBYING_EXPANSION_RECONCILIATION.md",
+      "bytes": 25227,
+      "lines": 469,
+      "mtime": "2026-08-26 17:15",
+      "mtime_epoch": 1787778902.8741484,
+      "off_limits_live_writer": false,
+      "heading": "Lobbying Expansion \u2014 what exists, what to build, what to refuse",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 17,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ADVOCACY_PASSTHROUGH_LOG.md",
+        "docs/CEDAR_TAXONOMY.md",
+        "docs/CONSULTATION_BUILD_LOG.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EARMARKS_SCHEDC_BUILD_LOG.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/LOBBYING_REGISTRANT_BUILD_LOG.md",
+        "docs/OIRA_HEARINGS_BUILD_LOG.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "docs/WORK_QUEUE.md",
+        "SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md",
+        "code/134_build_nepa_eplanning.py",
+        "code/180_build_lobbying_registrant_hub.py",
+        "code/219_probe_courtlistener_recap.py",
+        "code/221_probe_regulations_gov_comments.py",
+        "code/374_build_cedar_taxonomy_export.py",
+        "code/98_build_oira_and_hearings.py"
+      ]
+    },
+    {
+      "path": "docs/LOBBYING_REGISTRANT_BUILD_LOG.md",
+      "bytes": 26466,
+      "lines": 506,
+      "mtime": "2026-08-26 18:35",
+      "mtime_epoch": 1787783715.1705792,
+      "off_limits_live_writer": false,
+      "heading": "The lobbying REGISTRANT as a first-class hub",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/METHODOLOGY_LOBBYING.md",
+      "bytes": 6032,
+      "lines": 134,
+      "mtime": "2026-08-06 14:45",
+      "mtime_epoch": 1786041931.3756988,
+      "off_limits_live_writer": false,
+      "heading": "Methodology \u2014 Lobbying (Dataset 4)",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md"
+      ]
+    },
+    {
+      "path": "docs/NAGPRA_BUILD_LOG.md",
+      "bytes": 23455,
+      "lines": 423,
+      "mtime": "2026-08-26 20:06",
+      "mtime_epoch": 1787789211.702562,
+      "off_limits_live_writer": false,
+      "heading": "NAGPRA Repatriation Notice Dataset \u2014 Build Log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/RECOGNITION_HISTORY_BUILD_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/ND_SEVERANCE_BUILD_LOG.md",
+      "bytes": 16627,
+      "lines": 134,
+      "mtime": "2026-08-07 21:06",
+      "mtime_epoch": 1786151180.4495368,
+      "off_limits_live_writer": false,
+      "heading": "North Dakota / Fort Berthold severance tax - build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ND_TRIBAL_TAX_LOG.md",
+        "code/113_build_nd_severance.py",
+        "code/116_build_nd_tribal_taxes.py"
+      ]
+    },
+    {
+      "path": "docs/ND_TRIBAL_TAX_LOG.md",
+      "bytes": 19973,
+      "lines": 198,
+      "mtime": "2026-08-07 21:04",
+      "mtime_epoch": 1786151088.728803,
+      "off_limits_live_writer": false,
+      "heading": "North Dakota per-tribe non-gaming tax distributions - build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/116_build_nd_tribal_taxes.py"
+      ]
+    },
+    {
+      "path": "docs/NHO_INTERTRIBAL_REGISTER_LOG.md",
+      "bytes": 22410,
+      "lines": 394,
+      "mtime": "2026-08-05 17:28",
+      "mtime_epoch": 1785965316.346279,
+      "off_limits_live_writer": false,
+      "heading": "NHO Register + Intertribal (`I-`) Layer \u2014 Build Log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/36_build_nho_intertribal.py"
+      ]
+    },
+    {
+      "path": "docs/NHO_SPINE_MERGE_LOG.md",
+      "bytes": 17235,
+      "lines": 314,
+      "mtime": "2026-08-06 14:25",
+      "mtime_epoch": 1786040732.740307,
+      "off_limits_live_writer": false,
+      "heading": "NHO + Intertribal Organization spine merge",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "STATE_OF_BUILD.md"
+      ]
+    },
+    {
+      "path": "docs/NIGC_DECLINATION_BUILD_LOG.md",
+      "bytes": 53034,
+      "lines": 1038,
+      "mtime": "2026-08-26 17:57",
+      "mtime_epoch": 1787781427.8836112,
+      "off_limits_live_writer": false,
+      "heading": "NIGC Declination Letters \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/100_finish_declinations_and_employment.py",
+        "code/174_document_nigc_declination_codebook.py"
+      ]
+    },
+    {
+      "path": "docs/NIGC_REGION_BUILD_LOG.md",
+      "bytes": 24496,
+      "lines": 515,
+      "mtime": "2026-08-06 18:08",
+      "mtime_epoch": 1786054097.5087729,
+      "off_limits_live_writer": false,
+      "heading": "NIGC Region Build Log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/GAMING_ORDINANCE_BUILD_LOG.md",
+        "docs/NIGC_DECLINATION_BUILD_LOG.md",
+        "code/118_build_gaming_ordinances.py",
+        "code/90_fetch_nigc_declinations.py",
+        "code/91_build_nigc_declinations.py"
+      ]
+    },
+    {
+      "path": "docs/NONPROFIT_BUILD_LOG_2026-08-05.md",
+      "bytes": 17562,
+      "lines": 318,
+      "mtime": "2026-08-05 14:14",
+      "mtime_epoch": 1785953690.9775167,
+      "off_limits_live_writer": false,
+      "heading": "Nonprofit & Philanthropy layer (Dataset 6) \u2014 build log, 2026-08-05",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/NONPROFIT_FINANCIALS_LOG.md",
+        "docs/PHILANTHROPY_DISCOVERY_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/NONPROFIT_CLASSIFICATION_RESEARCH_LOG.md",
+      "bytes": 28320,
+      "lines": 334,
+      "mtime": "2026-08-05 17:04",
+      "mtime_epoch": 1785963897.8746052,
+      "off_limits_live_writer": false,
+      "heading": "Nonprofit classification research log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/NONPROFIT_ENTITY_LINKAGE_BUILD_LOG.md",
+      "bytes": 26223,
+      "lines": 510,
+      "mtime": "2026-08-26 19:55",
+      "mtime_epoch": 1787788547.6233485,
+      "off_limits_live_writer": false,
+      "heading": "NONPROFIT ENTITY LINKAGE BUILD LOG \u2014 the EIN hub",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "path": "docs/NONPROFIT_FINANCIALS_LOG.md",
+      "bytes": 20520,
+      "lines": 395,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.772879,
+      "off_limits_live_writer": false,
+      "heading": "Nonprofit financial layer (Dataset 6) \u2014 build log, 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/33_nonprofit_financials.py"
+      ]
+    },
+    {
+      "path": "docs/OIRA_HEARINGS_BUILD_LOG.md",
+      "bytes": 20836,
+      "lines": 350,
+      "mtime": "2026-08-07 18:39",
+      "mtime_epoch": 1786142369.1651428,
+      "off_limits_live_writer": false,
+      "heading": "OIRA EO 12866 meetings and congressional hearings \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/OWNERSHIP_CHANGE_DETECTION.md",
+      "bytes": 4860,
+      "lines": 115,
+      "mtime": "2026-08-06 18:58",
+      "mtime_epoch": 1786057139.4923213,
+      "off_limits_live_writer": false,
+      "heading": "Ownership Change Detection",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md"
+      ]
+    },
+    {
+      "path": "docs/PHILANTHROPY_DISCOVERY_LOG.md",
+      "bytes": 23098,
+      "lines": 407,
+      "mtime": "2026-08-06 17:36",
+      "mtime_epoch": 1786052218.4864776,
+      "off_limits_live_writer": false,
+      "heading": "Philanthropy as a Native-entity discovery channel",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 7,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ADVOCACY_PASSTHROUGH_LOG.md",
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/GRANTEE_990_LOG.md",
+        "docs/SCHEDULE_I_BUILD_LOG.md",
+        "code/111_build_advocacy_passthrough.py",
+        "code/112_pull_grantee_990s.py"
+      ]
+    },
+    {
+      "path": "docs/PRE2007_SPENDING_SOURCES.md",
+      "bytes": 55398,
+      "lines": 838,
+      "mtime": "2026-08-26 18:52",
+      "mtime_epoch": 1787784776.4171188,
+      "off_limits_live_writer": false,
+      "heading": "Pre-FY2007 federal spending \u2014 every source, typed",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/PULL_DISCIPLINE.md",
+        "code/276_measure_discovery_gap.py"
+      ]
+    },
+    {
+      "path": "docs/PRIME_ARCHIVE_PULL_LOG.md",
+      "bytes": 20075,
+      "lines": 241,
+      "mtime": "2026-08-26 17:35",
+      "mtime_epoch": 1787780157.1289468,
+      "off_limits_live_writer": false,
+      "heading": "Prime contracts from the USAspending static archive",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 9,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/PRE2007_SPENDING_SOURCES.md",
+        "docs/PUBLISHED_LANDSCAPE_2026-08-26.md",
+        "docs/SUBAWARD_API_PULL_LOG.md",
+        "docs/USASPENDING_PROBLEM_BRIEF.md",
+        "code/114_pull_prime_archive.py",
+        "code/131_merge_archive_backfill.py"
+      ]
+    },
+    {
+      "path": "docs/PUBLISHED_LANDSCAPE_2026-08-26.md",
+      "bytes": 115555,
+      "lines": 1485,
+      "mtime": "2026-08-26 18:12",
+      "mtime_epoch": 1787782349.3750007,
+      "off_limits_live_writer": false,
+      "heading": "The Published Landscape \u2014 what already exists on Native/tribal economic data",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "code/417_build_entity_identity_crosswalk.py",
+        "code/cedar_ids.py"
+      ]
+    },
+    {
+      "path": "docs/PULL_DISCIPLINE.md",
+      "bytes": 26252,
+      "lines": 551,
+      "mtime": "2026-08-26 19:15",
+      "mtime_epoch": 1787786139.7225318,
+      "off_limits_live_writer": false,
+      "heading": "Pull Discipline \u2014 one poller per host",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 54,
+      "inbound_refs_from_core": [
+        "README.md",
+        "START_HERE.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/ACCESS_TECHNIQUES.md",
+        "docs/ADMIN_REGION_CROSSWALK_LOG.md",
+        "docs/ALIAS_RELATIONSHIP_MIGRATION_LOG.md",
+        "docs/ANNUAL_REPORT_ORG_DISCOVERY_LOG.md",
+        "docs/ASSISTANCE_ARCHIVE_PULL_LOG.md",
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/BLOCKED_SOURCE_BYPASS_2026-08-26.md",
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/CONSULTATION_BUILD_LOG.md",
+        "docs/GAMING_TEMPORAL_BUILD_LOG.md",
+        "docs/INDIVIDUAL_NATIVE_OWNERSHIP_VERIFICATION_BUILD_LOG.md",
+        "docs/NHO_SPINE_MERGE_LOG.md",
+        "docs/OIRA_HEARINGS_BUILD_LOG.md",
+        "docs/RESOURCE_LEDGER_BUILD_LOG.md",
+        "docs/RESOURCE_RECIPIENT_SIDE_LOG.md",
+        "docs/STATE_GAMING_PULL_LOG.md",
+        "docs/SUBAWARD_API_PULL_LOG.md",
+        "docs/SUBAWARD_RAW_MATCH_LOG.md",
+        "docs/TOOLING_AND_PIPELINE.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "docs/WORK_QUEUE.md",
+        "README.md",
+        "START_HERE.md",
+        "AGENTS.md",
+        "code/100_finish_declinations_and_employment.py"
+      ]
+    },
+    {
+      "path": "docs/RECOGNITION_HISTORY_BUILD_LOG.md",
+      "bytes": 15742,
+      "lines": 304,
+      "mtime": "2026-08-07 15:56",
+      "mtime_epoch": 1786132586.5668876,
+      "off_limits_live_writer": false,
+      "heading": "Federal Recognition History \u2014 Build Log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/RECOGNITION_HISTORY_LOG.md",
+      "bytes": 19046,
+      "lines": 212,
+      "mtime": "2026-08-06 19:04",
+      "mtime_epoch": 1786057443.8441508,
+      "off_limits_live_writer": false,
+      "heading": "Federal recognition history \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/76_build_recognition_history.py"
+      ]
+    },
+    {
+      "path": "docs/RECONCILIATION_TOOL.md",
+      "bytes": 8559,
+      "lines": 189,
+      "mtime": "2026-08-27 16:54",
+      "mtime_epoch": 1787864056.498124,
+      "off_limits_live_writer": false,
+      "heading": "The entity reconciliation tool \u2014 how it works, and how to keep it running",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md"
+      ],
+      "inbound_refs": [
+        "docs/HANDOFF.md",
+        "code/318_measure_tribal_vendor_list_payoff.py",
+        "code/370_type_courtlistener_ownership_verdicts.py",
+        "code/372_stage_caption_named_discovery_leads.py"
+      ]
+    },
+    {
+      "path": "docs/REFRESH_CADENCE.md",
+      "bytes": 50785,
+      "lines": 828,
+      "mtime": "2026-08-26 20:11",
+      "mtime_epoch": 1787789462.1934721,
+      "off_limits_live_writer": false,
+      "heading": "Refresh Cadence \u2014 measured, not cited",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 10,
+      "inbound_refs_from_core": [
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/FEDERAL_ACTIONS_BUILD_LOG_2026-08-05.md",
+        "docs/NAGPRA_BUILD_LOG.md",
+        "docs/WORK_QUEUE.md",
+        "START_HERE.md",
+        "code/24_generate_dataset_docs.py",
+        "code/342_pull_federal_register_incremental.py",
+        "code/343_refresh_ct_gaming_monthly.py",
+        "code/87_build_dataset_notes.py"
+      ]
+    },
+    {
+      "path": "docs/RESOURCE_ASSETS_BUILD_LOG.md",
+      "bytes": 17899,
+      "lines": 331,
+      "mtime": "2026-08-12 16:53",
+      "mtime_epoch": 1786567987.5882764,
+      "off_limits_live_writer": false,
+      "heading": "The natural resource ASSET layer \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "STATE_OF_THE_LAND_2026-08-07.md"
+      ]
+    },
+    {
+      "path": "docs/RESOURCE_LEDGER_BUILD_LOG.md",
+      "bytes": 31511,
+      "lines": 611,
+      "mtime": "2026-08-06 18:16",
+      "mtime_epoch": 1786054571.311791,
+      "off_limits_live_writer": false,
+      "heading": "Native Natural Resources Ledger \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/RESOURCE_ASSETS_BUILD_LOG.md",
+        "docs/RESOURCE_LEDGER_STATES_LOG.md",
+        "docs/RESOURCE_RECIPIENT_SIDE_LOG.md",
+        "code/86_build_series_breaks.py"
+      ]
+    },
+    {
+      "path": "docs/RESOURCE_LEDGER_STATES_LOG.md",
+      "bytes": 35787,
+      "lines": 640,
+      "mtime": "2026-08-06 18:58",
+      "mtime_epoch": 1786057121.5022051,
+      "off_limits_live_writer": false,
+      "heading": "Native Natural Resources Ledger \u2014 the state expansion",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/RESOURCE_ASSETS_BUILD_LOG.md",
+        "docs/UNFINISHED_WORK_AUDIT.md",
+        "docs/WORK_QUEUE.md",
+        "code/83_build_resource_ledger.py"
+      ]
+    },
+    {
+      "path": "docs/RESOURCE_RECIPIENT_SIDE_LOG.md",
+      "bytes": 24402,
+      "lines": 429,
+      "mtime": "2026-08-06 18:41",
+      "mtime_epoch": 1786056094.428628,
+      "off_limits_live_writer": false,
+      "heading": "Native resource revenue, read from the RECIPIENT",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/RESOURCE_ASSETS_BUILD_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/REVENUE_BOUNDS_LOG.md",
+      "bytes": 13071,
+      "lines": 142,
+      "mtime": "2026-08-07 18:46",
+      "mtime_epoch": 1786142775.3444407,
+      "off_limits_live_writer": false,
+      "heading": "Revenue bounds build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/BLOCKED_SOURCE_BYPASS_2026-08-26.md",
+        "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+        "code/106_build_revenue_bounds.py",
+        "code/cedar_register_codebook.py"
+      ]
+    },
+    {
+      "path": "docs/RULING_APPLICATION_LOG.md",
+      "bytes": 19808,
+      "lines": 383,
+      "mtime": "2026-08-26 18:04",
+      "mtime_epoch": 1787781847.0697863,
+      "off_limits_live_writer": false,
+      "heading": "Ruling application log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/WORK_QUEUE.md",
+        "code/62_no_regression_check.py"
+      ]
+    },
+    {
+      "path": "docs/SAM_EXTRACTION_PLAN.md",
+      "bytes": 37669,
+      "lines": 783,
+      "mtime": "2026-08-26 20:29",
+      "mtime_epoch": 1787790576.7531433,
+      "off_limits_live_writer": false,
+      "heading": "SAM.gov extraction plan",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "code/163_load_sam_contract_awards.py",
+        "code/449_verify_documented_api_quirks.py"
+      ]
+    },
+    {
+      "path": "docs/SCHEDULE_I_BUILD_LOG.md",
+      "bytes": 14921,
+      "lines": 299,
+      "mtime": "2026-08-12 16:55",
+      "mtime_epoch": 1786568118.1036155,
+      "off_limits_live_writer": false,
+      "heading": "Form 990 Schedule I layer \u2014 build log, 2026-08-12",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 6,
+      "inbound_refs_from_core": [
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+        "docs/WORK_QUEUE.md",
+        "START_HERE.md",
+        "code/220_test_nobmf_eins_against_efile_index.py"
+      ]
+    },
+    {
+      "path": "docs/SECTION_106_BUILD_AND_MERGE_PROPOSAL.md",
+      "bytes": 7541,
+      "lines": 144,
+      "mtime": "2026-08-12 17:15",
+      "mtime_epoch": 1786569316.2796247,
+      "off_limits_live_writer": false,
+      "heading": "Section 106 project consultation - built, and the merge proposed",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/130_build_section_106_consultation.py"
+      ]
+    },
+    {
+      "path": "docs/SELF_DISCLOSED_DERIVATION.md",
+      "bytes": 4866,
+      "lines": 115,
+      "mtime": "2026-08-07 17:53",
+      "mtime_epoch": 1786139596.5360153,
+      "off_limits_live_writer": false,
+      "heading": "Deriving revenue from what tribes say about themselves",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/108_build_tribal_tax_bases.py"
+      ]
+    },
+    {
+      "path": "docs/SHIPPING_RUNBOOK.md",
+      "bytes": 9648,
+      "lines": 190,
+      "mtime": "2026-08-26 20:59",
+      "mtime_epoch": 1787792368.3890367,
+      "off_limits_live_writer": false,
+      "heading": "Shipping runbook",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 17,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md",
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/CODE_HEALTH_AUDIT.md",
+        "docs/DATABASE_INTEGRATION.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/GAMING_FACILITY_HUB_LINKAGE_2026-08-26.md",
+        "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+        "docs/HANDOFF.md",
+        "docs/STAGED_SHIP_CHAIN_2026-08-26.md",
+        "docs/UNSHIPPED_TABLE_TRIAGE.md",
+        "docs/WORK_QUEUE.md",
+        "AGENTS.md",
+        "code/183_register_lobbying_registrant_layer.py",
+        "code/243_write_individual_native_class_codebook_fragment.py",
+        "code/289_update_collection.py",
+        "code/391_triage_unshipped_tables.py",
+        "code/392_write_unshipped_codebook_fragments.py",
+        "code/419_register_identity_layer_codebooks.py",
+        "code/62_no_regression_check.py"
+      ]
+    },
+    {
+      "path": "docs/SOURCING_STRATEGY.md",
+      "bytes": 6050,
+      "lines": 131,
+      "mtime": "2026-08-06 17:59",
+      "mtime_epoch": 1786053553.6524756,
+      "off_limits_live_writer": false,
+      "heading": "Sourcing Strategy: roster first, sweep second",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/NIGC_REGION_BUILD_LOG.md"
+      ]
+    },
+    {
+      "path": "docs/STAGED_SHIP_CHAIN_2026-08-26.md",
+      "bytes": 15791,
+      "lines": 319,
+      "mtime": "2026-08-26 21:12",
+      "mtime_epoch": 1787793124.2138166,
+      "off_limits_live_writer": false,
+      "heading": "The ship chain is STAGED, not run \u2014 2026-08-26 ~21:15",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/SHIPPING_RUNBOOK.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "path": "docs/STATE_GAMING_FRAMEWORKS.md",
+      "bytes": 8528,
+      "lines": 180,
+      "mtime": "2026-08-07 21:31",
+      "mtime_epoch": 1786152703.459278,
+      "off_limits_live_writer": false,
+      "heading": "State gaming frameworks are not variations on one model",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/STATE_GAMING_PULL_LOG.md",
+        "docs/TRIBAL_TAX_BUILD_LOG.md",
+        "code/105_build_florida_gaming.py"
+      ]
+    },
+    {
+      "path": "docs/STATE_GAMING_PULL_LOG.md",
+      "bytes": 41241,
+      "lines": 674,
+      "mtime": "2026-08-07 19:05",
+      "mtime_epoch": 1786143938.4269307,
+      "off_limits_live_writer": false,
+      "heading": "State gaming regulators \u2014 the remaining-states pull",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/GAMING_SOURCE_AUDIT_2026-08-26.md",
+        "docs/UNFINISHED_WORK_AUDIT.md",
+        "docs/WORK_QUEUE.md",
+        "code/107_pull_remaining_states.py",
+        "code/219_probe_courtlistener_recap.py"
+      ]
+    },
+    {
+      "path": "docs/STRANDED_DATA_DISPOSITION.md",
+      "bytes": 22080,
+      "lines": 401,
+      "mtime": "2026-08-26 21:14",
+      "mtime_epoch": 1787793257.5987382,
+      "off_limits_live_writer": false,
+      "heading": "STRANDED DATA \u2014 DISPOSITION",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "AGENTS.md",
+        "code/401_register_root_csv_parts.py",
+        "code/cedar_domain.py"
+      ]
+    },
+    {
+      "path": "docs/SUBAWARD_API_PULL_LOG.md",
+      "bytes": 16664,
+      "lines": 320,
+      "mtime": "2026-08-26 17:14",
+      "mtime_epoch": 1787778888.12069,
+      "off_limits_live_writer": false,
+      "heading": "Subaward API pull \u2014 FY2021\u2013FY2024 and the FY2020 contracts member",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [
+        "START_HERE.md"
+      ],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/SUBCONTRACTING_BUILD_LOG_2026-08-05.md",
+        "START_HERE.md"
+      ]
+    },
+    {
+      "path": "docs/SUBAWARD_RAW_MATCH_LOG.md",
+      "bytes": 15669,
+      "lines": 336,
+      "mtime": "2026-08-07 16:29",
+      "mtime_epoch": 1786134580.4400327,
+      "off_limits_live_writer": false,
+      "heading": "Subaward raw-corpus match \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 6,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/SUBAWARD_API_PULL_LOG.md",
+        "docs/SUBCONTRACTING_BUILD_LOG_2026-08-05.md",
+        "SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md",
+        "code/121_pull_subawards_api.py"
+      ]
+    },
+    {
+      "path": "docs/SUBCONTRACTING_BUILD_LOG_2026-08-05.md",
+      "bytes": 17442,
+      "lines": 337,
+      "mtime": "2026-08-26 17:13",
+      "mtime_epoch": 1787778803.5168736,
+      "off_limits_live_writer": false,
+      "heading": "Dataset 2b \u2014 Subcontracting \u2014 Build Log",
+      "name_carries_date": true,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md"
+      ]
+    },
+    {
+      "path": "docs/SUBCONTRACTING_USASPENDING_PULL_2026-08-05.md",
+      "bytes": 21316,
+      "lines": 417,
+      "mtime": "2026-08-06 14:37",
+      "mtime_epoch": 1786041463.4801583,
+      "off_limits_live_writer": false,
+      "heading": "Dataset 2b \u2014 fresh USAspending/FSRS subaward pull, 2026-08-05",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/SUBCONTRACTING_BUILD_LOG_2026-08-05.md",
+        "code/42_write_subaward_source_doc.py"
+      ]
+    },
+    {
+      "path": "docs/SUBSET_DATASETS.md",
+      "bytes": 6275,
+      "lines": 121,
+      "mtime": "2026-08-06 16:48",
+      "mtime_epoch": 1786049290.7900143,
+      "off_limits_live_writer": false,
+      "heading": "Subset Datasets",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 6,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/CONTENT_ANALYSIS.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/INDIAN_INCENTIVE_PROGRAM_GAP.md",
+        "docs/NAGPRA_BUILD_LOG.md",
+        "code/77_build_nagpra_dataset.py"
+      ]
+    },
+    {
+      "path": "docs/TCU_CDFI_BUILD_LOG.md",
+      "bytes": 53986,
+      "lines": 272,
+      "mtime": "2026-08-06 17:24",
+      "mtime_epoch": 1786051441.180796,
+      "off_limits_live_writer": false,
+      "heading": "TCU and Native CDFI build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/COMPETITIVE_POSITION.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "code/73_add_tcu_and_cdfi.py"
+      ]
+    },
+    {
+      "path": "docs/TOOLING_AND_PIPELINE.md",
+      "bytes": 5859,
+      "lines": 108,
+      "mtime": "2026-08-06 14:43",
+      "mtime_epoch": 1786041813.6597397,
+      "off_limits_live_writer": false,
+      "heading": "Tooling and the Review Pipeline",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/TRIBAL_DEBT_BUILD_LOG.md",
+      "bytes": 25859,
+      "lines": 393,
+      "mtime": "2026-08-05 17:43",
+      "mtime_epoch": 1785966181.7239368,
+      "off_limits_live_writer": false,
+      "heading": "Tribal Debt Build Log \u2014 Rule 144A / private tribal debt and tribal bond finance, 2026-08-05",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 0,
+      "inbound_refs_from_core": [],
+      "inbound_refs": []
+    },
+    {
+      "path": "docs/TRIBAL_TAX_BUILD_LOG.md",
+      "bytes": 11827,
+      "lines": 185,
+      "mtime": "2026-08-07 18:50",
+      "mtime_epoch": 1786143053.2155962,
+      "off_limits_live_writer": false,
+      "heading": "Tribal tax bases \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ND_SEVERANCE_BUILD_LOG.md",
+        "docs/ND_TRIBAL_TAX_LOG.md",
+        "code/108_build_tribal_tax_bases.py",
+        "code/113_build_nd_severance.py",
+        "code/116_build_nd_tribal_taxes.py"
+      ]
+    },
+    {
+      "path": "docs/TRIBAL_TAX_DECOMPOSITION.md",
+      "bytes": 8231,
+      "lines": 195,
+      "mtime": "2026-08-07 20:07",
+      "mtime_epoch": 1786147668.7182882,
+      "off_limits_live_writer": false,
+      "heading": "Isolating gaming revenue by subtracting what is separately taxed",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ND_TRIBAL_TAX_LOG.md",
+        "docs/TRIBAL_TAX_BUILD_LOG.md",
+        "code/108_build_tribal_tax_bases.py",
+        "code/113_build_nd_severance.py",
+        "code/116_build_nd_tribal_taxes.py"
+      ]
+    },
+    {
+      "path": "docs/TRIBAL_VENDOR_LISTS_FEASIBILITY.md",
+      "bytes": 62973,
+      "lines": 1040,
+      "mtime": "2026-08-26 20:51",
+      "mtime_epoch": 1787791866.743761,
+      "off_limits_live_writer": false,
+      "heading": "Tribal vendor and certification lists \u2014 feasibility study, now a build",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [
+        "AGENTS.md"
+      ],
+      "inbound_refs": [
+        "docs/WORK_QUEUE.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "path": "docs/UNFINISHED_WORK_AUDIT.md",
+      "bytes": 28486,
+      "lines": 533,
+      "mtime": "2026-08-26 21:02",
+      "mtime_epoch": 1787792546.1537724,
+      "off_limits_live_writer": false,
+      "heading": "Unfinished work audit \u2014 the 52 scripts that declare an output that does not exist",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/WORK_QUEUE.md",
+        "code/160_ship_gap_report.py"
+      ]
+    },
+    {
+      "path": "docs/UNSHIPPED_TABLE_TRIAGE.md",
+      "bytes": 29297,
+      "lines": 185,
+      "mtime": "2026-08-26 21:04",
+      "mtime_epoch": 1787792697.828062,
+      "off_limits_live_writer": false,
+      "heading": "Triage of the zero-ship tables",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 2,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "code/391_triage_unshipped_tables.py",
+        "code/87_build_dataset_notes.py"
+      ]
+    },
+    {
+      "path": "docs/UNTAPPED_FREE_SOURCES_2026-08-26.md",
+      "bytes": 45015,
+      "lines": 692,
+      "mtime": "2026-08-26 19:02",
+      "mtime_epoch": 1787785368.8234596,
+      "off_limits_live_writer": false,
+      "heading": "Untapped free federal corpora \u2014 reachability, verified samples, build plans",
+      "name_carries_date": true,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 5,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ANCSA_OWNERSHIP_RULING.md",
+        "docs/WORK_QUEUE.md",
+        "code/222_retrieve_ancsa_share_transfer_statute.py",
+        "code/366_courtlistener_ownership_adjudication.py",
+        "code/370_type_courtlistener_ownership_verdicts.py"
+      ]
+    },
+    {
+      "path": "docs/USASPENDING_PROBLEM_BRIEF.md",
+      "bytes": 11761,
+      "lines": 249,
+      "mtime": "2026-08-26 17:13",
+      "mtime_epoch": 1787778790.1449027,
+      "off_limits_live_writer": false,
+      "heading": "USAspending extraction \u2014 problem brief",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/ASSUMPTIONS_AND_LIMITATIONS.md",
+        "docs/DOC_CONTRADICTIONS_2026-08-26.md",
+        "docs/PRE2007_SPENDING_SOURCES.md"
+      ]
+    },
+    {
+      "path": "docs/VOTINGPATTERNS_BIA_INDEX_WARNING.md",
+      "bytes": 5112,
+      "lines": 114,
+      "mtime": "2026-08-05 16:38",
+      "mtime_epoch": 1785962323.7777936,
+      "off_limits_live_writer": false,
+      "heading": "Warning: the BIA compact index is misaligned at source",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 1,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "STATE_OF_BUILD.md"
+      ]
+    },
+    {
+      "path": "docs/WA_ALLOCATION_BUILD_LOG.md",
+      "bytes": 15562,
+      "lines": 323,
+      "mtime": "2026-08-07 18:46",
+      "mtime_epoch": 1786142765.496372,
+      "off_limits_live_writer": false,
+      "heading": "Washington machine allocation and inter-tribal transfer ledger \u2014 build log",
+      "name_carries_date": false,
+      "looks_like_build_log": true,
+      "inbound_ref_count": 3,
+      "inbound_refs_from_core": [],
+      "inbound_refs": [
+        "docs/GAMING_DEVICE_BUILD_LOG.md",
+        "code/104_build_wa_allocations.py",
+        "code/117_build_gaming_devices.py"
+      ]
+    },
+    {
+      "path": "docs/WORK_QUEUE.md",
+      "bytes": 29865,
+      "lines": 457,
+      "mtime": "2026-08-26 21:03",
+      "mtime_epoch": 1787792590.5279703,
+      "off_limits_live_writer": false,
+      "heading": "Work queue \u2014 live",
+      "name_carries_date": false,
+      "looks_like_build_log": false,
+      "inbound_ref_count": 4,
+      "inbound_refs_from_core": [
+        "docs/HANDOFF.md"
+      ],
+      "inbound_refs": [
+        "docs/EDITORIAL_PIPELINE.md",
+        "docs/HANDOFF.md",
+        "docs/RULING_APPLICATION_LOG.md",
+        "docs/UNFINISHED_WORK_AUDIT.md"
+      ]
+    }
+  ]
+}

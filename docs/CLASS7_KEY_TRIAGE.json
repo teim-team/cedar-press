@@ -1,0 +1,2093 @@
+{
+ "counts": {
+  "HIGH": 9,
+  "LOW": 28,
+  "MEDIUM": 15,
+  "UNTRACEABLE": 5
+ },
+ "findings": [
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/spine/cedar_rulings.csv",
+     "identifier"
+    ],
+    [
+     "data/spine/cedar_rulings.csv",
+     "supersedes"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 116,
+   "mint_prefix": "EXCL-",
+   "other_scripts_naming_the_column": [
+    "03_apply_exclusions_and_tier.py",
+    "08_build_review_page.py",
+    "09_import_rulings.py",
+    "167_link_nonprofit_family_via_ein_hub.py",
+    "17_build_nonprofit_990.py",
+    "241_promote_individual_native_firms_in_place.py",
+    "327_migrate_class7_keys_to_digests.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "exclusion_id",
+     "hits_in_sample": 42,
+     "rows_scanned": 4000,
+     "table": "data/clean/cedar_identifier_ledger_final.csv"
+    },
+    {
+     "column": "exclusion_id",
+     "hits_in_sample": 42,
+     "rows_scanned": 4000,
+     "table": "data/clean/cedar_identifier_ledger_tiered.csv"
+    },
+    {
+     "column": "exclusion_id",
+     "hits_in_sample": 123,
+     "rows_scanned": 123,
+     "table": "data/spine/cedar_exclusion_rulings.csv"
+    },
+    {
+     "column": "supersedes",
+     "hits_in_sample": 1,
+     "rows_scanned": 8,
+     "table": "data/spine/cedar_rulings.csv"
+    },
+    {
+     "column": "identifier",
+     "hits_in_sample": 1,
+     "rows_scanned": 8,
+     "table": "data/spine/cedar_rulings.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "02_extract_exclusion_rulings.py",
+   "scripts_naming_the_prefix": [
+    "17_build_nonprofit_990.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "_agent_akvillagecorp_build.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "r[\"exclusion_id\"] = f\"EXCL-{i:04d}\"",
+   "target_column": "exclusion_id",
+   "why": "the minted values are in 5 table/column location(s) and 2 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/spine/cedar_rulings.csv",
+     "identifier"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 90,
+   "mint_prefix": "NHO-DOI-",
+   "other_scripts_naming_the_column": [
+    "06_verify_nho_via_8a.py",
+    "163_promote_nho_universe_in_place.py",
+    "327_migrate_class7_keys_to_digests.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "nho_id",
+     "hits_in_sample": 190,
+     "rows_scanned": 190,
+     "table": "data/clean/nho_doi_notification_roster.csv"
+    },
+    {
+     "column": "identifier",
+     "hits_in_sample": 1,
+     "rows_scanned": 8,
+     "table": "data/spine/cedar_rulings.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "05_parse_doi_nho_list.py",
+   "scripts_naming_the_prefix": [
+    "164_refresh_nho_review_queues.py",
+    "327_migrate_class7_keys_to_digests.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "r[\"nho_id\"] = f\"NHO-DOI-{i:04d}\"",
+   "target_column": "nho_id",
+   "why": "the minted values are in 2 table/column location(s) and 1 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/clean/advocacy_passthrough.csv",
+     "passthrough_id"
+    ],
+    [
+     "data/clean/advocacy_passthrough_2026-08-07.csv",
+     "passthrough_id"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 961,
+   "mint_prefix": "PT-",
+   "other_scripts_naming_the_column": [
+    "01_build_entity_spine.py",
+    "08_build_review_page.py",
+    "09_import_rulings.py",
+    "103_build_california_gaming.py",
+    "105_build_florida_gaming.py",
+    "112_pull_grantee_990s.py",
+    "118_build_gaming_ordinances.py",
+    "120_normalize_rulings.py",
+    "124_apply_rulings_in_place.py",
+    "129_build_review_queue.py",
+    "164_refresh_nho_review_queues.py",
+    "173_consolidate_rulings_ledger.py",
+    "19_rebuild_nho_layer.py",
+    "23_cross_dataset_propagation.py",
+    "33_apply_party_rulings.py",
+    "34_apply_nonprofit_rulings.py",
+    "36_build_nho_intertribal.py",
+    "53_apply_agent_deals_rulings.py",
+    "55_stage_anc_subsidiary_rulings.py",
+    "56_apply_agent_identifier_rulings.py",
+    "58_apply_lobbying_rulings.py",
+    "77_philanthropy_review_queue.py",
+    "83_build_resource_ledger.py",
+    "95_parse_compact_terms.py",
+    "_agent_akvillagecorp_build.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough.csv"
+    },
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough_2026-08-07.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "111_build_advocacy_passthrough.py",
+   "scripts_naming_the_prefix": [
+    "106_build_revenue_bounds.py",
+    "72_fix_brand_and_government_misattribution.py",
+    "cedar_pipeline.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "review_id=f\"PT-{n:05d}\", queue=\"advocacy_passthrough\",",
+   "target_column": "review_id",
+   "why": "the minted values are in 2 table/column location(s) and 2 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/clean/advocacy_passthrough.csv",
+     "passthrough_id"
+    ],
+    [
+     "data/clean/advocacy_passthrough_2026-08-07.csv",
+     "passthrough_id"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 1052,
+   "mint_prefix": "PT-",
+   "other_scripts_naming_the_column": [
+    "01_build_entity_spine.py",
+    "08_build_review_page.py",
+    "09_import_rulings.py",
+    "103_build_california_gaming.py",
+    "105_build_florida_gaming.py",
+    "112_pull_grantee_990s.py",
+    "118_build_gaming_ordinances.py",
+    "120_normalize_rulings.py",
+    "124_apply_rulings_in_place.py",
+    "129_build_review_queue.py",
+    "164_refresh_nho_review_queues.py",
+    "173_consolidate_rulings_ledger.py",
+    "19_rebuild_nho_layer.py",
+    "23_cross_dataset_propagation.py",
+    "33_apply_party_rulings.py",
+    "34_apply_nonprofit_rulings.py",
+    "36_build_nho_intertribal.py",
+    "53_apply_agent_deals_rulings.py",
+    "55_stage_anc_subsidiary_rulings.py",
+    "56_apply_agent_identifier_rulings.py",
+    "58_apply_lobbying_rulings.py",
+    "77_philanthropy_review_queue.py",
+    "83_build_resource_ledger.py",
+    "95_parse_compact_terms.py",
+    "_agent_akvillagecorp_build.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough.csv"
+    },
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough_2026-08-07.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "111_build_advocacy_passthrough.py",
+   "scripts_naming_the_prefix": [
+    "106_build_revenue_bounds.py",
+    "72_fix_brand_and_government_misattribution.py",
+    "cedar_pipeline.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "review_id=f\"PT-{n:05d}\", queue=\"advocacy_passthrough\",",
+   "target_column": "review_id",
+   "why": "the minted values are in 2 table/column location(s) and 2 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/clean/compact_obligation_tribal_agency_bridge.csv",
+     "agency_source_ordinance_id"
+    ],
+    [
+     "data/clean/gaming_ordinances.csv",
+     "md5_duplicate_of"
+    ],
+    [
+     "data/clean/gaming_ordinances.csv",
+     "superseded_by_ordinance_id"
+    ],
+    [
+     "data/clean/gaming_ordinances.csv",
+     "supersedes_ordinance_id"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 295,
+   "mint_prefix": "NIGC-ORD-",
+   "other_scripts_naming_the_column": [
+    "122_ocr_ordinance_scans.py",
+    "127_bridge_compact_obligations_to_tribal_agency.py",
+    "153_merge_ordinance_ocr.py",
+    "266_apply_gaming_hub_spillover_rulings.py",
+    "327_migrate_class7_keys_to_digests.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "agency_source_ordinance_id",
+     "hits_in_sample": 927,
+     "rows_scanned": 927,
+     "table": "data/clean/compact_obligation_tribal_agency_bridge.csv"
+    },
+    {
+     "column": "ordinance_id",
+     "hits_in_sample": 263,
+     "rows_scanned": 263,
+     "table": "data/clean/gaming_ordinance_ocr.csv"
+    },
+    {
+     "column": "ordinance_id",
+     "hits_in_sample": 1155,
+     "rows_scanned": 1155,
+     "table": "data/clean/gaming_ordinances.csv"
+    },
+    {
+     "column": "superseded_by_ordinance_id",
+     "hits_in_sample": 834,
+     "rows_scanned": 1155,
+     "table": "data/clean/gaming_ordinances.csv"
+    },
+    {
+     "column": "supersedes_ordinance_id",
+     "hits_in_sample": 834,
+     "rows_scanned": 1155,
+     "table": "data/clean/gaming_ordinances.csv"
+    },
+    {
+     "column": "md5_duplicate_of",
+     "hits_in_sample": 3,
+     "rows_scanned": 1155,
+     "table": "data/clean/gaming_ordinances.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "118_build_gaming_ordinances.py",
+   "scripts_naming_the_prefix": [
+    "172_key_unkeyed_gaming_facility_hubs.py",
+    "266_apply_gaming_hub_spillover_rulings.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "r[\"ordinance_id\"] = (f\"NIGC-ORD-{r['index_date'].replace('-', '')}\"",
+   "target_column": "ordinance_id",
+   "why": "the minted values are in 6 table/column location(s) and 4 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/clean/gaming_employment_observations.csv",
+     "observation_id_as_staged"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 506,
+   "mint_prefix": "EMP-OSHATRIBE-",
+   "other_scripts_naming_the_column": [
+    "100_finish_declinations_and_employment.py",
+    "101_build_lodes_block_employment.py",
+    "107_pull_remaining_states.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "156_stage_form5500_gaming_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py",
+    "92_build_gaming_capacity_official.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 502,
+     "rows_scanned": 3246,
+     "table": "data/clean/gaming_employment_observations.csv"
+    },
+    {
+     "column": "observation_id_as_staged",
+     "hits_in_sample": 16,
+     "rows_scanned": 3246,
+     "table": "data/clean/gaming_employment_observations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "157_stage_osha_tribe_level_employment.py",
+   "scripts_naming_the_prefix": [
+    "227_anomaly_sweep.py",
+    "265_merge_osha_relift_rows.py",
+    "62_no_regression_check.py",
+    "cedar_schema.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"observation_id\": f\"EMP-OSHATRIBE-{n:05d}\",",
+   "target_column": "observation_id",
+   "why": "the minted values are in 2 table/column location(s) and 1 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/clean/individual_native_ownership_verification.csv",
+     "web_pass_verification_id"
+    ]
+   ],
+   "klass": "RANK_DERIVED",
+   "line": 482,
+   "mint_prefix": "INV-",
+   "other_scripts_naming_the_column": [
+    "171_build_individual_native_verification.py",
+    "172_write_individual_native_codebook_fragment.py",
+    "173_refresh_individual_native_results_section.py",
+    "327_migrate_class7_keys_to_digests.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "verification_id",
+     "hits_in_sample": 335,
+     "rows_scanned": 335,
+     "table": "data/clean/individual_native_ownership_verification.csv"
+    },
+    {
+     "column": "web_pass_verification_id",
+     "hits_in_sample": 334,
+     "rows_scanned": 335,
+     "table": "data/clean/individual_native_ownership_verification.csv"
+    },
+    {
+     "column": "verification_id",
+     "hits_in_sample": 335,
+     "rows_scanned": 335,
+     "table": "data/clean/individual_native_verification_candidates.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "170_build_individual_native_candidates.py",
+   "scripts_naming_the_prefix": [
+    "171_build_individual_native_verification.py",
+    "172_write_individual_native_codebook_fragment.py",
+    "227_anomaly_sweep.py",
+    "62_no_regression_check.py"
+   ],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "\"verification_id\": f\"INV-{rank:04d}\",",
+   "target_column": "verification_id",
+   "why": "the minted values are in 3 table/column location(s) and 1 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/clean/admin_region_assignments.csv",
+     "administrative_region_id"
+    ],
+    [
+     "data/clean/admin_region_assignments.csv",
+     "assignment_id"
+    ],
+    [
+     "data/clean/admin_region_overlap_derived.csv",
+     "administrative_region_id_a"
+    ],
+    [
+     "data/clean/admin_region_overlap_derived.csv",
+     "administrative_region_id_b"
+    ],
+    [
+     "data/clean/admin_region_systems.csv",
+     "id_block_end"
+    ],
+    [
+     "data/clean/admin_region_systems.csv",
+     "id_block_start"
+    ],
+    [
+     "data/clean/admin_regional_observations.csv",
+     "administrative_region_id"
+    ],
+    [
+     "data/clean/admin_regional_observations.csv",
+     "observation_id"
+    ],
+    [
+     "data/clean/admin_regions.csv",
+     "administrative_region_id"
+    ],
+    [
+     "data/clean/admin_regions.csv",
+     "parent_administrative_region_id"
+    ],
+    [
+     "data/clean/cedar_identifier_ledger_final.csv",
+     "tribe_id"
+    ],
+    [
+     "data/clean/entity_aliases.csv",
+     "alias_id"
+    ],
+    [
+     "data/clean/entity_relationships.csv",
+     "relationship_id"
+    ],
+    [
+     "data/clean/gaming_facilities.csv",
+     "facility_id"
+    ],
+    [
+     "data/clean/gaming_nigc_roster_link.csv",
+     "facility_id"
+    ],
+    [
+     "data/clean/gaming_properties.csv",
+     "facility_id"
+    ],
+    [
+     "data/clean/gaming_property_coverage.csv",
+     "facility_id"
+    ],
+    [
+     "data/clean/individual_native_exclusion_pairs.csv",
+     "firm_surrogate_entity_id"
+    ],
+    [
+     "data/clean/individual_native_firm_contracts.csv",
+     "surrogate_entity_id"
+    ],
+    [
+     "data/clean/individual_native_firm_contracts_published.csv",
+     "dimension_1"
+    ],
+    [
+     "data/clean/individual_native_firm_register.csv",
+     "surrogate_entity_id"
+    ],
+    [
+     "data/clean/nigc_region_assignments.csv",
+     "administrative_region_id"
+    ],
+    [
+     "data/clean/nigc_regional_ggr.csv",
+     "administrative_region_id"
+    ],
+    [
+     "data/spine/cedar_entity_spine.csv",
+     "tribe_id"
+    ],
+    [
+     "data/spine/cedar_entity_spine.csv",
+     "ultimate_parent_entity_id"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 2574,
+   "mint_prefix": "CEDAR-",
+   "other_scripts_naming_the_column": [
+    "135_build_resource_assets.py",
+    "41_build_codebooks.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "assignment_id",
+     "hits_in_sample": 2124,
+     "rows_scanned": 2124,
+     "table": "data/clean/admin_region_assignments.csv"
+    },
+    {
+     "column": "administrative_region_id",
+     "hits_in_sample": 2124,
+     "rows_scanned": 2124,
+     "table": "data/clean/admin_region_assignments.csv"
+    },
+    {
+     "column": "administrative_region_id_a",
+     "hits_in_sample": 28,
+     "rows_scanned": 28,
+     "table": "data/clean/admin_region_overlap_derived.csv"
+    },
+    {
+     "column": "administrative_region_id_b",
+     "hits_in_sample": 28,
+     "rows_scanned": 28,
+     "table": "data/clean/admin_region_overlap_derived.csv"
+    },
+    {
+     "column": "id_block_start",
+     "hits_in_sample": 6,
+     "rows_scanned": 6,
+     "table": "data/clean/admin_region_systems.csv"
+    },
+    {
+     "column": "id_block_end",
+     "hits_in_sample": 6,
+     "rows_scanned": 6,
+     "table": "data/clean/admin_region_systems.csv"
+    },
+    {
+     "column": "observation_id",
+     "hits_in_sample": 27,
+     "rows_scanned": 27,
+     "table": "data/clean/admin_regional_observations.csv"
+    },
+    {
+     "column": "administrative_region_id",
+     "hits_in_sample": 27,
+     "rows_scanned": 27,
+     "table": "data/clean/admin_regional_observations.csv"
+    },
+    {
+     "column": "administrative_region_id",
+     "hits_in_sample": 155,
+     "rows_scanned": 155,
+     "table": "data/clean/admin_regions.csv"
+    },
+    {
+     "column": "parent_administrative_region_id",
+     "hits_in_sample": 124,
+     "rows_scanned": 155,
+     "table": "data/clean/admin_regions.csv"
+    },
+    {
+     "column": "tribe_id",
+     "hits_in_sample": 19,
+     "rows_scanned": 4000,
+     "table": "data/clean/cedar_identifier_ledger_final.csv"
+    },
+    {
+     "column": "alias_id",
+     "hits_in_sample": 4000,
+     "rows_scanned": 4000,
+     "table": "data/clean/entity_aliases.csv"
+    },
+    {
+     "column": "relationship_id",
+     "hits_in_sample": 2292,
+     "rows_scanned": 2292,
+     "table": "data/clean/entity_relationships.csv"
+    },
+    {
+     "column": "facility_id",
+     "hits_in_sample": 13,
+     "rows_scanned": 787,
+     "table": "data/clean/gaming_facilities.csv"
+    },
+    {
+     "column": "facility_id",
+     "hits_in_sample": 10,
+     "rows_scanned": 453,
+     "table": "data/clean/gaming_nigc_roster_link.csv"
+    },
+    {
+     "column": "facility_id",
+     "hits_in_sample": 10,
+     "rows_scanned": 784,
+     "table": "data/clean/gaming_properties.csv"
+    },
+    {
+     "column": "facility_id",
+     "hits_in_sample": 13,
+     "rows_scanned": 787,
+     "table": "data/clean/gaming_property_coverage.csv"
+    },
+    {
+     "column": "firm_surrogate_entity_id",
+     "hits_in_sample": 5,
+     "rows_scanned": 5,
+     "table": "data/clean/individual_native_exclusion_pairs.csv"
+    },
+    {
+     "column": "surrogate_entity_id",
+     "hits_in_sample": 324,
+     "rows_scanned": 324,
+     "table": "data/clean/individual_native_firm_contracts.csv"
+    },
+    {
+     "column": "dimension_1",
+     "hits_in_sample": 45,
+     "rows_scanned": 613,
+     "table": "data/clean/individual_native_firm_contracts_published.csv"
+    },
+    {
+     "column": "surrogate_entity_id",
+     "hits_in_sample": 45,
+     "rows_scanned": 45,
+     "table": "data/clean/individual_native_firm_register.csv"
+    },
+    {
+     "column": "administrative_region_id",
+     "hits_in_sample": 2260,
+     "rows_scanned": 2438,
+     "table": "data/clean/nigc_region_assignments.csv"
+    },
+    {
+     "column": "administrative_region_id",
+     "hits_in_sample": 198,
+     "rows_scanned": 198,
+     "table": "data/clean/nigc_regional_ggr.csv"
+    },
+    {
+     "column": "tribe_id",
+     "hits_in_sample": 45,
+     "rows_scanned": 1534,
+     "table": "data/spine/cedar_entity_spine.csv"
+    },
+    {
+     "column": "ultimate_parent_entity_id",
+     "hits_in_sample": 45,
+     "rows_scanned": 1534,
+     "table": "data/spine/cedar_entity_spine.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "83_build_resource_ledger.py",
+   "scripts_naming_the_prefix": [
+    "158_extend_gaming_facilities.py",
+    "164_link_facility_hub_sources.py",
+    "172_key_unkeyed_gaming_facility_hubs.py",
+    "241_promote_individual_native_firms_in_place.py",
+    "243_write_individual_native_class_codebook_fragment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "264_add_missing_osha_tribal_facilities.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "328_audit_id_service_bypass.py",
+    "84_build_nigc_regions.py",
+    "85_build_admin_region_crosswalk.py",
+    "97_build_aliases_and_relationships.py",
+    "cedar_ids.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"resource_asset_id\": f\"CEDAR-{kind}-{i:06d}\",",
+   "target_column": "resource_asset_id",
+   "why": "the minted values are in 25 table/column location(s) and 25 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_AND_JOINED",
+   "foreign_key_locations": [
+    [
+     "data/clean/gaming_financing_events.csv",
+     "lineage_related_opinion_ids"
+    ],
+    [
+     "data/clean/gaming_source_claims.csv",
+     "source_record_id"
+    ],
+    [
+     "data/clean/nigc_declination_letters.csv",
+     "pdf_shared_with_opinion_ids"
+    ],
+    [
+     "data/clean/tribal_resolution_financings.csv",
+     "nigc_declination_cross_reference"
+    ]
+   ],
+   "klass": "POSITIONAL",
+   "line": 209,
+   "mint_prefix": "NIGC-DL-",
+   "other_scripts_naming_the_column": [
+    "100_finish_declinations_and_employment.py",
+    "119_build_digital_and_loyalty.py",
+    "149_build_tribal_resolution_financings.py",
+    "174_document_nigc_declination_codebook.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "91_build_nigc_declinations.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "cedar_opinion_id",
+     "hits_in_sample": 293,
+     "rows_scanned": 293,
+     "table": "data/clean/gaming_financing_events.csv"
+    },
+    {
+     "column": "lineage_related_opinion_ids",
+     "hits_in_sample": 25,
+     "rows_scanned": 293,
+     "table": "data/clean/gaming_financing_events.csv"
+    },
+    {
+     "column": "source_record_id",
+     "hits_in_sample": 113,
+     "rows_scanned": 113,
+     "table": "data/clean/gaming_source_claims.csv"
+    },
+    {
+     "column": "cedar_opinion_id",
+     "hits_in_sample": 327,
+     "rows_scanned": 327,
+     "table": "data/clean/nigc_declination_letters.csv"
+    },
+    {
+     "column": "pdf_shared_with_opinion_ids",
+     "hits_in_sample": 2,
+     "rows_scanned": 327,
+     "table": "data/clean/nigc_declination_letters.csv"
+    },
+    {
+     "column": "nigc_declination_cross_reference",
+     "hits_in_sample": 1,
+     "rows_scanned": 1,
+     "table": "data/clean/tribal_resolution_financings.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "HIGH",
+   "script": "90_fetch_nigc_declinations.py",
+   "scripts_naming_the_prefix": [
+    "100_finish_declinations_and_employment.py",
+    "174_document_nigc_declination_codebook.py",
+    "91_build_nigc_declinations.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "r[\"cedar_opinion_id\"] = f\"NIGC-DL-{r['index_date'].replace('-', '')}-{n:02d}\"",
+   "target_column": "cedar_opinion_id",
+   "why": "the minted values are in 6 table/column location(s) and 4 of them are under a DIFFERENT column name - that is a foreign key. Changing the id without migrating those breaks the reference silently."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1580,
+   "mint_prefix": "EMP-OSHA-",
+   "other_scripts_naming_the_column": [
+    "101_build_lodes_block_employment.py",
+    "107_pull_remaining_states.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "156_stage_form5500_gaming_employment.py",
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py",
+    "92_build_gaming_capacity_official.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 364,
+     "rows_scanned": 3246,
+     "table": "data/clean/gaming_employment_observations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"observation_id\": f\"EMP-OSHA-{len(out)+1:06d}\",",
+   "target_column": "observation_id",
+   "why": "positional id persisted into data/clean/gaming_employment_observations.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1673,
+   "mint_prefix": "EMP-LODES-",
+   "other_scripts_naming_the_column": [
+    "101_build_lodes_block_employment.py",
+    "107_pull_remaining_states.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "156_stage_form5500_gaming_employment.py",
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py",
+    "92_build_gaming_capacity_official.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 384,
+     "rows_scanned": 3246,
+     "table": "data/clean/gaming_employment_observations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [
+    "cedar_schema.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"observation_id\": f\"EMP-LODES-{n:06d}\",",
+   "target_column": "observation_id",
+   "why": "positional id persisted into data/clean/gaming_employment_observations.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1894,
+   "mint_prefix": "EMP-DOC-",
+   "other_scripts_naming_the_column": [
+    "101_build_lodes_block_employment.py",
+    "107_pull_remaining_states.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "156_stage_form5500_gaming_employment.py",
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py",
+    "92_build_gaming_capacity_official.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 11,
+     "rows_scanned": 3246,
+     "table": "data/clean/gaming_employment_observations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [
+    "cedar_schema.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"observation_id\": f\"EMP-DOC-{n+1:06d}\",",
+   "target_column": "observation_id",
+   "why": "positional id persisted into data/clean/gaming_employment_observations.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1953,
+   "mint_prefix": "EMP-EA-",
+   "other_scripts_naming_the_column": [
+    "101_build_lodes_block_employment.py",
+    "107_pull_remaining_states.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "156_stage_form5500_gaming_employment.py",
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py",
+    "92_build_gaming_capacity_official.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 10,
+     "rows_scanned": 3246,
+     "table": "data/clean/gaming_employment_observations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [
+    "cedar_schema.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"observation_id\": f\"EMP-EA-{n:06d}\",",
+   "target_column": "observation_id",
+   "why": "positional id persisted into data/clean/gaming_employment_observations.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 991,
+   "mint_prefix": "SG-",
+   "other_scripts_naming_the_column": [
+    "100_finish_declinations_and_employment.py",
+    "101_build_lodes_block_employment.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "156_stage_form5500_gaming_employment.py",
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py",
+    "92_build_gaming_capacity_official.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 494,
+     "rows_scanned": 494,
+     "table": "data/clean/state_gaming_observations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "107_pull_remaining_states.py",
+   "scripts_naming_the_prefix": [
+    "116_build_nd_tribal_taxes.py",
+    "85_build_admin_region_crosswalk.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "r[\"observation_id\"] = f\"SG-{st}-{seq[st]:05d}\"",
+   "target_column": "observation_id",
+   "why": "positional id persisted into data/clean/state_gaming_observations.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 975,
+   "mint_prefix": "PT-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough.csv"
+    },
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough_2026-08-07.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "111_build_advocacy_passthrough.py",
+   "scripts_naming_the_prefix": [
+    "106_build_revenue_bounds.py",
+    "72_fix_brand_and_government_misattribution.py",
+    "cedar_pipeline.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "passthrough_id=f\"PT-{n:05d}\",",
+   "target_column": "passthrough_id",
+   "why": "positional id persisted into data/clean/advocacy_passthrough.csv, data/clean/advocacy_passthrough_2026-08-07.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1031,
+   "mint_prefix": "PT-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough.csv"
+    },
+    {
+     "column": "passthrough_id",
+     "hits_in_sample": 1620,
+     "rows_scanned": 1620,
+     "table": "data/clean/advocacy_passthrough_2026-08-07.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "111_build_advocacy_passthrough.py",
+   "scripts_naming_the_prefix": [
+    "106_build_revenue_bounds.py",
+    "72_fix_brand_and_government_misattribution.py",
+    "cedar_pipeline.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "passthrough_id=f\"PT-{n:05d}\", funder_entity_id=\"\", funder_name=\"\",",
+   "target_column": "passthrough_id",
+   "why": "positional id persisted into data/clean/advocacy_passthrough.csv, data/clean/advocacy_passthrough_2026-08-07.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 957,
+   "mint_prefix": "GLOC-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [
+    {
+     "column": "location_observation_id",
+     "hits_in_sample": 2212,
+     "rows_scanned": 2212,
+     "table": "data/clean/gaming_property_locations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "143_build_gaming_property_locations.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "r[\"location_observation_id\"] = f\"GLOC-{pid}-{seq[pid]:02d}\"",
+   "target_column": "location_observation_id",
+   "why": "positional id persisted into data/clean/gaming_property_locations.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 208,
+   "mint_prefix": "EMP-F5500-",
+   "other_scripts_naming_the_column": [
+    "100_finish_declinations_and_employment.py",
+    "101_build_lodes_block_employment.py",
+    "107_pull_remaining_states.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py",
+    "92_build_gaming_capacity_official.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 1975,
+     "rows_scanned": 3246,
+     "table": "data/clean/gaming_employment_observations.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "156_stage_form5500_gaming_employment.py",
+   "scripts_naming_the_prefix": [
+    "cedar_schema.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"observation_id\": f\"EMP-F5500-{n:06d}\",",
+   "target_column": "observation_id",
+   "why": "positional id persisted into data/clean/gaming_employment_observations.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 753,
+   "mint_prefix": "FDP-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [
+    {
+     "column": "ferc_docket_party_id",
+     "hits_in_sample": 4000,
+     "rows_scanned": 4000,
+     "table": "data/clean/ferc_docket_parties.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "168_link_adjudication_hubs.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"ferc_docket_party_id\": f\"FDP-{len(hub) + 1:06d}\",",
+   "target_column": "ferc_docket_party_id",
+   "why": "positional id persisted into data/clean/ferc_docket_parties.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 786,
+   "mint_prefix": "FDP-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [
+    {
+     "column": "ferc_docket_party_id",
+     "hits_in_sample": 4000,
+     "rows_scanned": 4000,
+     "table": "data/clean/ferc_docket_parties.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "168_link_adjudication_hubs.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"ferc_docket_party_id\": f\"FDP-{len(hub) + 1:06d}\",",
+   "target_column": "ferc_docket_party_id",
+   "why": "positional id persisted into data/clean/ferc_docket_parties.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 441,
+   "mint_prefix": "RRE-ONRR-REV-",
+   "other_scripts_naming_the_column": [
+    "129_build_review_queue.py",
+    "135_build_resource_assets.py",
+    "137_link_resource_revenue_entities.py",
+    "149_apply_resource_entity_links.py",
+    "227_anomaly_sweep.py",
+    "41_build_codebooks.py",
+    "84_resource_recipient_side.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "resource_revenue_event_id",
+     "hits_in_sample": 4000,
+     "rows_scanned": 4000,
+     "table": "data/clean/resource_revenue.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "83_build_resource_ledger.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"resource_revenue_event_id\": f\"RRE-ONRR-REV-{i:06d}\",",
+   "target_column": "resource_revenue_event_id",
+   "why": "positional id persisted into data/clean/resource_revenue.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 382,
+   "mint_prefix": "GCO-",
+   "other_scripts_naming_the_column": [
+    "100_finish_declinations_and_employment.py",
+    "101_build_lodes_block_employment.py",
+    "107_pull_remaining_states.py",
+    "117_build_gaming_devices.py",
+    "142_build_property_site_observations.py",
+    "156_stage_form5500_gaming_employment.py",
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "265_merge_osha_relift_rows.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "85_build_admin_region_crosswalk.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "observation_id",
+     "hits_in_sample": 4000,
+     "rows_scanned": 4000,
+     "table": "data/clean/gaming_capacity_official.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "92_build_gaming_capacity_official.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "k[\"observation_id\"] = f\"GCO-{src}-{seq[src]:05d}\"",
+   "target_column": "observation_id",
+   "why": "positional id persisted into data/clean/gaming_capacity_official.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1560,
+   "mint_prefix": "CTM-",
+   "other_scripts_naming_the_column": [
+    "119_build_digital_and_loyalty.py",
+    "41_build_codebooks.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "term_id",
+     "hits_in_sample": 2887,
+     "rows_scanned": 2887,
+     "table": "data/clean/compact_structured_terms.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "95_parse_compact_terms.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "term_id=f\"CTM-{v['version_id']}-{j:04d}\",",
+   "target_column": "term_id",
+   "why": "positional id persisted into data/clean/compact_structured_terms.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "PERSISTED_NOT_YET_SHIPPING",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1614,
+   "mint_prefix": "CRR-",
+   "other_scripts_naming_the_column": [
+    "105_build_florida_gaming.py",
+    "127_bridge_compact_obligations_to_tribal_agency.py",
+    "147_build_fac_single_audits.py",
+    "200_probe_fac_historical_depth.py",
+    "212_mine_sealed_state_audits_for_property_figures.py",
+    "41_build_codebooks.py"
+   ],
+   "persisted_in": [
+    {
+     "column": "report_id",
+     "hits_in_sample": 927,
+     "rows_scanned": 927,
+     "table": "data/clean/compact_obligation_tribal_agency_bridge.csv"
+    },
+    {
+     "column": "report_id",
+     "hits_in_sample": 4000,
+     "rows_scanned": 4000,
+     "table": "data/clean/compact_required_reports.csv"
+    }
+   ],
+   "producer_is_never_run": false,
+   "risk": "MEDIUM",
+   "script": "95_parse_compact_terms.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "report_id=f\"CRR-{v['version_id']}-{j:04d}\",",
+   "target_column": "report_id",
+   "why": "positional id persisted into data/clean/compact_obligation_tribal_agency_bridge.csv, data/clean/compact_required_reports.csv, which does not ship today. It is still a key a database would load."
+  },
+  {
+   "disposition": "NO_LITERAL_PREFIX_TO_TRACE",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1317,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [
+    "227_anomaly_sweep.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "UNTRACEABLE",
+   "script": "140_build_grantmaker_funding_flows.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "flow_id=f\"{oid}-{i:05d}\",",
+   "target_column": "flow_id",
+   "why": "the minted id has no literal prefix (it begins with a formatted value), so a value scan cannot find where it landed. A column named 'flow_id' exists in 1 table(s) (grantmaker_funding_flows.csv) and 1 other script(s) name it. UNMEASURED is not the same as clean - this one needs a human to read the producing line."
+  },
+  {
+   "disposition": "NO_LITERAL_PREFIX_TO_TRACE",
+   "foreign_key_locations": [],
+   "klass": "PROCESS_RANDOM",
+   "line": 376,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "UNTRACEABLE",
+   "script": "143_build_gaming_property_locations.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "b = \"----cedar\" + uuid.uuid4().hex",
+   "target_column": null,
+   "why": "the minted id has no literal prefix (it begins with a formatted value), so a value scan cannot find where it landed. A column named '' exists in 0 table(s) (none) and 0 other script(s) name it. UNMEASURED is not the same as clean - this one needs a human to read the producing line."
+  },
+  {
+   "disposition": "NO_LITERAL_PREFIX_TO_TRACE",
+   "foreign_key_locations": [],
+   "klass": "PROCESS_HASH",
+   "line": 1038,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "UNTRACEABLE",
+   "script": "227_anomaly_sweep.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "k = hash(tuple(row[i] for i in dup_idx))",
+   "target_column": null,
+   "why": "the minted id has no literal prefix (it begins with a formatted value), so a value scan cannot find where it landed. A column named '' exists in 0 table(s) (none) and 0 other script(s) name it. UNMEASURED is not the same as clean - this one needs a human to read the producing line."
+  },
+  {
+   "disposition": "NO_LITERAL_PREFIX_TO_TRACE",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 380,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [
+    "15b_build_compact_index.py",
+    "165_link_universe_events_to_hub.py",
+    "31_build_dataset5_linked.py",
+    "327_migrate_class7_keys_to_digests.py",
+    "41_build_codebooks.py",
+    "61_add_nho_intertribal_to_spine.py",
+    "89_nigc_map_wayback_universe.py",
+    "98_build_oira_and_hearings.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "UNTRACEABLE",
+   "script": "23b_build_gaming_land_decisions.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "event_id=f\"{did}-E{len([e for e in events if e['decision_id']==did]) + 1:02d}\",",
+   "target_column": "event_id",
+   "why": "the minted id has no literal prefix (it begins with a formatted value), so a value scan cannot find where it landed. A column named 'event_id' exists in 6 table(s) (compact_events.csv, gaming_decision_events.csv, gaming_property_universe_events.csv, hearing_bill_links.csv) and 8 other script(s) name it. UNMEASURED is not the same as clean - this one needs a human to read the producing line."
+  },
+  {
+   "disposition": "NO_LITERAL_PREFIX_TO_TRACE",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 524,
+   "mint_prefix": "FY",
+   "other_scripts_naming_the_column": [
+    "100_finish_declinations_and_employment.py",
+    "135_build_resource_assets.py",
+    "144_build_admin_appeals.py",
+    "145_build_nrc_public_meetings.py",
+    "146_build_visitor_access_records.py",
+    "84_resource_recipient_side.py",
+    "91_build_nigc_declinations.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "UNTRACEABLE",
+   "script": "83_build_resource_ledger.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"source_record_id\": f\"FY{fy}|Native American tribes and individuals|\"",
+   "target_column": "source_record_id",
+   "why": "the minted id has no literal prefix (it begins with a formatted value), so a value scan cannot find where it landed. A column named 'source_record_id' exists in 8 table(s) (admin_appeal_decisions.csv, admin_appeal_parties.csv, admin_appeal_positions.csv, gaming_source_claims.csv) and 7 other script(s) name it. UNMEASURED is not the same as clean - this one needs a human to read the producing line."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 269,
+   "mint_prefix": "RV-",
+   "other_scripts_naming_the_column": [
+    "08_build_review_page.py",
+    "09_import_rulings.py",
+    "103_build_california_gaming.py",
+    "105_build_florida_gaming.py",
+    "111_build_advocacy_passthrough.py",
+    "112_pull_grantee_990s.py",
+    "118_build_gaming_ordinances.py",
+    "120_normalize_rulings.py",
+    "124_apply_rulings_in_place.py",
+    "129_build_review_queue.py",
+    "164_refresh_nho_review_queues.py",
+    "173_consolidate_rulings_ledger.py",
+    "19_rebuild_nho_layer.py",
+    "23_cross_dataset_propagation.py",
+    "33_apply_party_rulings.py",
+    "34_apply_nonprofit_rulings.py",
+    "36_build_nho_intertribal.py",
+    "53_apply_agent_deals_rulings.py",
+    "55_stage_anc_subsidiary_rulings.py",
+    "56_apply_agent_identifier_rulings.py",
+    "58_apply_lobbying_rulings.py",
+    "77_philanthropy_review_queue.py",
+    "83_build_resource_ledger.py",
+    "95_parse_compact_terms.py",
+    "_agent_akvillagecorp_build.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": true,
+   "risk": "LOW",
+   "script": "01_build_entity_spine.py",
+   "scripts_naming_the_prefix": [
+    "173_consolidate_rulings_ledger.py",
+    "17_build_nonprofit_990.py",
+    "262_repair_form5500_tribe_attribution.py",
+    "316_build_tribal_vendor_list_roster.py",
+    "319_load_tribal_vendor_list_verdicts.py",
+    "327_migrate_class7_keys_to_digests.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "r[\"review_id\"] = f\"RV-{i:05d}\"",
+   "target_column": "review_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'RV-', and no table has a column named 'review_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 941,
+   "mint_prefix": "OCRCLM-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"candidate_claim_id\": f\"OCRCLM-{len(ocr_claims)+1:05d}\",",
+   "target_column": "candidate_claim_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'OCRCLM-', and no table has a column named 'candidate_claim_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1216,
+   "mint_prefix": "DLC-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": d[\"Deal_ID\"],",
+   "target_column": "pair_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'DLC-', and no table has a column named 'pair_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1361,
+   "mint_prefix": "DLC-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": d[\"Deal_ID\"],",
+   "target_column": "pair_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'DLC-', and no table has a column named 'pair_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1420,
+   "mint_prefix": "DLC-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "100_finish_declinations_and_employment.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": \"\",",
+   "target_column": "pair_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'DLC-', and no table has a column named 'pair_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1216,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "103_build_california_gaming.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "seed[id(s)] = min(named, key=lambda nf: abs(nf[0] - c))[1]",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1224,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "103_build_california_gaming.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "f = seed[id(s)]",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1238,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "103_build_california_gaming.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "out[id(s)] = f",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1301,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "103_build_california_gaming.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "recs[j][fmap[id(s)]].append(s)",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1031,
+   "mint_prefix": "RASL-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "135_build_resource_assets.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"proposal_id\": f\"RASL-{len(props)+1:04d}\",",
+   "target_column": "proposal_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'RASL-', and no table has a column named 'proposal_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1070,
+   "mint_prefix": "RASL-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "135_build_resource_assets.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"proposal_id\": f\"RASL-{len(props)+1:04d}\",",
+   "target_column": "proposal_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'RASL-', and no table has a column named 'proposal_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1353,
+   "mint_prefix": "FREXPU-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "154_build_fr_ex_parte_notices.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"candidate_id\": f\"FREXPU-{dn}-{len(unresolved)}\",",
+   "target_column": "candidate_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'FREXPU-', and no table has a column named 'candidate_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1442,
+   "mint_prefix": "FREXPU-",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "154_build_fr_ex_parte_notices.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"candidate_id\": f\"FREXPU-{dn}-{j}\",",
+   "target_column": "candidate_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'FREXPU-', and no table has a column named 'candidate_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 486,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "171_build_individual_native_verification.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "used_web.add(id(w))",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 244,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "293_lint_bug_classes.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "owner[id(s)] = block",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 512,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "293_lint_bug_classes.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "block = owner.get(id(n))",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1406,
+   "mint_prefix": "NHOIT-",
+   "other_scripts_naming_the_column": [
+    "01_build_entity_spine.py",
+    "08_build_review_page.py",
+    "09_import_rulings.py",
+    "103_build_california_gaming.py",
+    "105_build_florida_gaming.py",
+    "111_build_advocacy_passthrough.py",
+    "112_pull_grantee_990s.py",
+    "118_build_gaming_ordinances.py",
+    "120_normalize_rulings.py",
+    "124_apply_rulings_in_place.py",
+    "129_build_review_queue.py",
+    "164_refresh_nho_review_queues.py",
+    "173_consolidate_rulings_ledger.py",
+    "19_rebuild_nho_layer.py",
+    "23_cross_dataset_propagation.py",
+    "33_apply_party_rulings.py",
+    "34_apply_nonprofit_rulings.py",
+    "53_apply_agent_deals_rulings.py",
+    "55_stage_anc_subsidiary_rulings.py",
+    "56_apply_agent_identifier_rulings.py",
+    "58_apply_lobbying_rulings.py",
+    "77_philanthropy_review_queue.py",
+    "83_build_resource_ledger.py",
+    "95_parse_compact_terms.py",
+    "_agent_akvillagecorp_build.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "36_build_nho_intertribal.py",
+   "scripts_naming_the_prefix": [
+    "163_promote_nho_universe_in_place.py",
+    "164_refresh_nho_review_queues.py",
+    "61_add_nho_intertribal_to_spine.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "rq.append({\"review_id\": f\"NHOIT-{i:03d}\", **r})",
+   "target_column": "review_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'NHOIT-', and no table has a column named 'review_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "COLUMN_EXISTS_VALUES_DO_NOT_MATCH",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 515,
+   "mint_prefix": "RRE-ONRR-DISB-",
+   "other_scripts_naming_the_column": [
+    "129_build_review_queue.py",
+    "135_build_resource_assets.py",
+    "137_link_resource_revenue_entities.py",
+    "149_apply_resource_entity_links.py",
+    "227_anomaly_sweep.py",
+    "41_build_codebooks.py",
+    "84_resource_recipient_side.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "83_build_resource_ledger.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"resource_revenue_event_id\": f\"RRE-ONRR-DISB-{fy}-{seq[fy]:02d}\",",
+   "target_column": "resource_revenue_event_id",
+   "why": "a column named 'resource_revenue_event_id' exists in 1 table(s) but NONE of the sampled values carries 'RRE-ONRR-DISB-', so this line is not the producer of what is in those files. Tables: resource_revenue.csv."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1420,
+   "mint_prefix": "RESOURCE:",
+   "other_scripts_naming_the_column": [
+    "01_build_entity_spine.py",
+    "08_build_review_page.py",
+    "09_import_rulings.py",
+    "103_build_california_gaming.py",
+    "105_build_florida_gaming.py",
+    "111_build_advocacy_passthrough.py",
+    "112_pull_grantee_990s.py",
+    "118_build_gaming_ordinances.py",
+    "120_normalize_rulings.py",
+    "124_apply_rulings_in_place.py",
+    "129_build_review_queue.py",
+    "164_refresh_nho_review_queues.py",
+    "173_consolidate_rulings_ledger.py",
+    "19_rebuild_nho_layer.py",
+    "23_cross_dataset_propagation.py",
+    "33_apply_party_rulings.py",
+    "34_apply_nonprofit_rulings.py",
+    "36_build_nho_intertribal.py",
+    "53_apply_agent_deals_rulings.py",
+    "55_stage_anc_subsidiary_rulings.py",
+    "56_apply_agent_identifier_rulings.py",
+    "58_apply_lobbying_rulings.py",
+    "77_philanthropy_review_queue.py",
+    "95_parse_compact_terms.py",
+    "_agent_akvillagecorp_build.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "83_build_resource_ledger.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "\"review_id\": f\"RESOURCE:{code}:BAD_MEASUREMENT_STATUS:{seq}\",",
+   "target_column": "review_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'RESOURCE:', and no table has a column named 'review_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 627,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "84_build_nigc_regions.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "matched_f = {id(p[0]) for p in pairs}",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 639,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "84_build_nigc_regions.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "if id(r) not in matched_f]",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 659,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "84_build_nigc_regions.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "matched_f.add(id(r))",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 917,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "85_build_admin_region_crosswalk.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "uniq = {id(a): a for a in agency_rows.values()}",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "NEVER_PERSISTED",
+   "foreign_key_locations": [],
+   "klass": "POSITIONAL",
+   "line": 1472,
+   "mint_prefix": "CPU-",
+   "other_scripts_naming_the_column": [
+    "01_build_entity_spine.py",
+    "08_build_review_page.py",
+    "09_import_rulings.py",
+    "103_build_california_gaming.py",
+    "105_build_florida_gaming.py",
+    "111_build_advocacy_passthrough.py",
+    "112_pull_grantee_990s.py",
+    "118_build_gaming_ordinances.py",
+    "120_normalize_rulings.py",
+    "124_apply_rulings_in_place.py",
+    "129_build_review_queue.py",
+    "164_refresh_nho_review_queues.py",
+    "173_consolidate_rulings_ledger.py",
+    "19_rebuild_nho_layer.py",
+    "23_cross_dataset_propagation.py",
+    "33_apply_party_rulings.py",
+    "34_apply_nonprofit_rulings.py",
+    "36_build_nho_intertribal.py",
+    "53_apply_agent_deals_rulings.py",
+    "55_stage_anc_subsidiary_rulings.py",
+    "56_apply_agent_identifier_rulings.py",
+    "58_apply_lobbying_rulings.py",
+    "77_philanthropy_review_queue.py",
+    "83_build_resource_ledger.py",
+    "_agent_akvillagecorp_build.py"
+   ],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "95_parse_compact_terms.py",
+   "scripts_naming_the_prefix": [
+    "150_run_ocr_overnight.py"
+   ],
+   "severity": "WARN",
+   "ships_in_dist": [],
+   "snippet": "review_id=f\"CPU-{v['version_id']}-{n['term_field']}-{n['source_page']}\",",
+   "target_column": "review_id",
+   "why": "no column of any sampled clean/spine table carries the prefix 'CPU-', and no table has a column named 'review_id'. The id is minted, used inside one run, and never leaves the process. Sampled 4,000 rows per table - a sample can prove presence, never absence, so this is a NOT-FOUND-IN-SAMPLE, not a proof."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 2013,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "99_build_earmarks_and_schedc.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "joined[id(rs[0])] = es[0]",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 2019,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "99_build_earmarks_and_schedc.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "joined[id(es[0])] = None          # consumed; drop the standalone",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 2033,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "99_build_earmarks_and_schedc.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "if id(s) in joined and joined[id(s)] is None:",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  },
+  {
+   "disposition": "OBJECT_IDENTITY",
+   "foreign_key_locations": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 2077,
+   "mint_prefix": "",
+   "other_scripts_naming_the_column": [],
+   "persisted_in": [],
+   "producer_is_never_run": false,
+   "risk": "LOW",
+   "script": "99_build_earmarks_and_schedc.py",
+   "scripts_naming_the_prefix": [],
+   "severity": "BLOCKING",
+   "ships_in_dist": [],
+   "snippet": "e = joined.get(id(s))",
+   "target_column": null,
+   "why": "`id(obj)` is Python object identity for an in-memory object, used as a within-process dict/set key. It is never written to a file and is not a primary key. 293 waives the same shape in its own source. Correct disposition: a waiver with this reason, not a rewrite."
+  }
+ ],
+ "generated": "2026-08-26",
+ "generated_at": "2026-08-26T20:23:33",
+ "note": "A sampled scan proves a prefix IS present. It can never prove it is absent - read `rows_scanned` on every claim.",
+ "produced_by": "326_triage_class7_key_risk.py",
+ "sample_rows_per_table": 4000,
+ "source_of_findings": "284_audit_nondeterministic_keys.lint_key_stability()"
+}

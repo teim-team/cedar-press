@@ -1,0 +1,9 @@
+{
+ "columns": [],
+ "file": "gaming_property_capacity_history.csv",
+ "note": "No column definitions are emitted for a vendor-licensed source. A downstream writer cannot emit a column it was never given - that is the point of gating here rather than at export.",
+ "primary_key": null,
+ "refusal_reason": "100% Casino City Press panel - internal fact-checking only",
+ "status": "REFUSED_LICENSED_SOURCE",
+ "table": "gaming_property_capacity_history"
+}

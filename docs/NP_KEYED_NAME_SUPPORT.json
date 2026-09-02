@@ -1,0 +1,151 @@
+{
+  "built": "2026-09-02",
+  "script": "1101_np_keyed_name_support.py",
+  "table": "data/clean/np_orgs.csv",
+  "columns_added": [
+    "name_match_support_measured_against",
+    "keyed_name_match_support",
+    "keyed_name_match_shared_tokens",
+    "keyed_name_match_residue",
+    "keyed_state_agreement",
+    "key_review_disposition",
+    "key_review_basis",
+    "key_redirect_proposed_entity_id",
+    "key_redirect_proposed_name"
+  ],
+  "base_fields_md5": "bfbad630de15215fe1dd9a2165b132b0",
+  "rows": 12764,
+  "live_keyed": 1423,
+  "support": {
+    "distinctive_token": 1359,
+    "generic_token_only": 63,
+    "no_shared_token_with_keyed_entity": 1
+  },
+  "dispo": {
+    "SUPPORTED": 888,
+    "HELD_STATE_DISAGREES": 461,
+    "REDIRECT_PROPOSED": 13,
+    "REFUSED_GENERIC_TOKEN_ONLY": 61
+  },
+  "recorded_support_disagrees_with_keyed": 123,
+  "recorded_no_shared_but_keyed_shares": 71,
+  "redirects": [
+    {
+      "EIN": "201886455",
+      "org_name": "YUROK ALLIANCE FOR NORTHERN CALIFORNIA HOUSING",
+      "state": "CA",
+      "from_entity_id": "TRBF-YUROKT-00",
+      "from_entity_name": "Yurok",
+      "to_entity_id": "CDFI-YRKLLN-00",
+      "to_entity_name": "Yurok Alliance for Northern California Housing"
+    },
+    {
+      "EIN": "161448788",
+      "org_name": "SENECA NATION OF INDIANS ECONOMIC DEVELOPMENT COMPANY",
+      "state": "NY",
+      "from_entity_id": "TRBF-SNCNAT-00",
+      "from_entity_name": "Seneca",
+      "to_entity_id": "CDFI-SNCNTN-00",
+      "to_entity_name": "Seneca Nation of Indians Economic Development Company"
+    },
+    {
+      "EIN": "582328510",
+      "org_name": "EASTERN CHEROKEE SOUTHERN IROQUOIS AND UNITED TRIBES OF SOUTH CAROLIN",
+      "state": "SC",
+      "from_entity_id": "ITO-NTDSTH-00",
+      "from_entity_name": "United South and Eastern Tribes, Inc.",
+      "to_entity_id": "TRBS-ECSIUT-00",
+      "to_entity_name": "Eastern Cherokee, Southern Iroquois, and United Tribes of South Carolina"
+    },
+    {
+      "EIN": "270177378",
+      "org_name": "CHEHALIS TRIBAL LOAN FUND",
+      "state": "WA",
+      "from_entity_id": "TRBF-CHEHLS-00",
+      "from_entity_name": "Chehalis",
+      "to_entity_id": "CDFI-CHHLST-00",
+      "to_entity_name": "Chehalis Tribal Loan Fund"
+    },
+    {
+      "EIN": "942476242",
+      "org_name": "INDIAN HEALTH CENTER OF SANTA CLARA VALLEY",
+      "state": "CA",
+      "from_entity_id": "TRBF-SCLARA-00",
+      "from_entity_name": "Pueblo of Santa Clara",
+      "to_entity_id": "UIO-HLTHSN-00",
+      "to_entity_name": "Indian Health Center of Santa Clara Valley"
+    },
+    {
+      "EIN": "263028625",
+      "org_name": "MAKAHA HAWAIIAN CIVIC CLUB",
+      "state": "HI",
+      "from_entity_id": "NHO-HAWAII-00",
+      "from_entity_name": "Hawaiian Native Corporation",
+      "to_entity_id": "NHO-MKHHWN-00",
+      "to_entity_name": "Makaha Hawaiian Civic Club"
+    },
+    {
+      "EIN": "800198123",
+      "org_name": "NATIVE HAWAIIAN EDUCATION ASSOCIATION",
+      "state": "HI",
+      "from_entity_id": "NHO-HAWAII-00",
+      "from_entity_name": "Hawaiian Native Corporation",
+      "to_entity_id": "NHO-HWNDCT-00",
+      "to_entity_name": "Native Hawaiian Education Council"
+    },
+    {
+      "EIN": "943274994",
+      "org_name": "NATIVE HAWAIIAN HOSPITALITY ASSOCIATION",
+      "state": "HI",
+      "from_entity_id": "NHO-HAWAII-00",
+      "from_entity_name": "Hawaiian Native Corporation",
+      "to_entity_id": "NHO-HWNHSP-00",
+      "to_entity_name": "Native Hawaiian Hospitality Association"
+    },
+    {
+      "EIN": "990161861",
+      "org_name": "NATIVE HAWAIIAN LEGAL CORPORATION",
+      "state": "HI",
+      "from_entity_id": "NHO-HAWAII-00",
+      "from_entity_name": "Hawaiian Native Corporation",
+      "to_entity_id": "NHO-HWNLGL-00",
+      "to_entity_name": "Native Hawaiian Legal Corporation"
+    },
+    {
+      "EIN": "810769698",
+      "org_name": "NATIVE HAWAIIAN PHILANTHROPY",
+      "state": "HI",
+      "from_entity_id": "NHO-HAWAII-00",
+      "from_entity_name": "Hawaiian Native Corporation",
+      "to_entity_id": "NHO-HWNPHL-00",
+      "to_entity_name": "Native Hawaiian Philanthropy"
+    },
+    {
+      "EIN": "462579700",
+      "org_name": "LEECH LAKE FINANCIAL SERVICES INC",
+      "state": "MN",
+      "from_entity_id": "CNSF-MINNCH-LL",
+      "from_entity_name": "Leech Lake",
+      "to_entity_id": "CDFI-LCHLKF-00",
+      "to_entity_name": "Leech Lake Financial Services, Inc."
+    },
+    {
+      "EIN": "010732253",
+      "org_name": "WHITE EARTH INVESTMENT INITIATIVE",
+      "state": "MN",
+      "from_entity_id": "CNSF-MINNCH-WE",
+      "from_entity_name": "White Earth",
+      "to_entity_id": "CDFI-WHTRT1-00",
+      "to_entity_name": "White Earth Investment Initiative"
+    },
+    {
+      "EIN": "237299512",
+      "org_name": "AMERICAN INDIAN COUNCIL ON ALCOHOLISM INC",
+      "state": "WI",
+      "from_entity_id": "ANVC-COUNCI-00",
+      "from_entity_name": "Council Native Corporation",
+      "to_entity_id": "UIO-MRCNCN-00",
+      "to_entity_name": "American Indian Council on Alcoholism, Inc."
+    }
+  ]
+}

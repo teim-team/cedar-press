@@ -1,0 +1,24 @@
+{
+  "measured_date": "2026-09-02",
+  "facilities": 787,
+  "columns_before": 116,
+  "columns_after": 119,
+  "jointly_operated": [
+    {
+      "facility_id": "CCP-305300",
+      "facility_name": "The Stables Casino",
+      "tribe": "Modoc Tribe of Oklahoma/Miami Tribe of Oklahoma",
+      "cedar_uid_primary": "CE-0016Y-PQ",
+      "operating_entity_cedar_uids": "CE-0016Y-PQ|CE-00175-5P",
+      "n": 2
+    }
+  ],
+  "unresolved_operator_names": [],
+  "separator_rule": "'/' only",
+  "false_positive_separators_rejected": {
+    "&": 23,
+    " and ": 35,
+    ",": 4,
+    "note": "all inside single tribes' own legal names"
+  }
+}
