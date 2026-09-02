@@ -3240,3 +3240,72 @@ link. `linkage_<d>_rows` is the absolute count of linked rows and has **no
 tolerance at all**, so links being lost while the ratio holds still fails.
 `1139 selftest` proves both fire.
 <!-- END ADR-037-LINKAGE-COVERAGE -->
+
+<!-- BEGIN ADR-038-PRIME-SUB-NEVER-COMBINED -->
+
+## ADR-038 — prime and sub are two numbers with two labels, never one
+
+**Status:** accepted, 2026-09-02, workstream MONEY-RECON-1144
+(`code/1144_money_reconciliation_prime_sub.py`).
+**Supersedes nothing. Settles a question that had been asserted and never
+measured.**
+
+### Context
+
+`docs/MONEY_TOTALLING_RULES.md` has said since 2026-09-01 that *"a subaward is
+a slice of a prime award Cedar already publishes… never add the two."* That was
+a correct instinct with no number behind it. A past article reported a combined
+prime+sub total while its chart showed primes only, and nobody could say by how
+much the article was wrong.
+
+### The measurement
+
+Of $34,906,694,737.65 in countable subaward dollars (69,921 filings), joined on
+`prime_award_unique_key` → `prime_contracts.contract_award_unique_key`:
+
+- **$13,612,271,637.21 (39.0%, 27,319 filings) sits on a prime award Cedar
+  already publishes**, and **$13,500,614,272.77 of that (99.2%) is on a prime
+  row that is itself `attributed_flag = 1`** — inside the published
+  $230,259,821,658.99 attributed prime total.
+- $21,294,423,100.44 does not, and it is **not one thing**:
+  $19,317,140,197.29 is `b_native_as_subawardee` (a non-Native prime paying a
+  Native sub), $1,439,559,118.53 is `a_native_as_prime` on awards missing from
+  the prime table, $499,305,405.62 is `both_sides_native`, $38,418,379.00 is
+  `unknown`.
+
+### Decision
+
+**Cedar publishes no combined prime+sub figure.** A naive sum fails three ways
+at once and only the first is a double-count:
+
+1. it re-counts $13.61B of federal dollars obligated once;
+2. it merges FPDS (**government-recorded**) with FSRS (**vendor self-reported
+   by the prime, unvalidated**) into one number a reader cannot discount;
+3. it launders a coverage gap into growth — the $1.44B of `a_native_as_prime`
+   on awards absent from `prime_contracts.csv` patches the prime table from the
+   sub table on 3,944 awards and nowhere else.
+
+**The permitted presentation is two labelled figures.** The only slice of the
+subaward file that is neither a re-slice of a published prime nor a patch over
+a prime-table gap is **`b_native_as_subawardee` on primes Cedar does not carry:
+$19,317,140,197.29 over 37,850 countable filings**. It may sit *beside* the
+prime total, never inside it, and its sentence must say "self-reported by the
+prime."
+
+### Consequences
+
+- Any product surface offering "total federal dollars" must pick FPDS or FSRS
+  and say which. A toggle is acceptable; an addition is not.
+- The reconciliation is a **ceiling, not an identity**: on the 7,305 awards
+  where both sides are present, subs total $13.61B inside $41.12B of prime
+  obligations, and **444 awards have subs exceeding their prime by
+  $1,737,942,789.89** — they pass `subaward_exceeds_prime_flag` because that
+  flag is per FILING against the source's `prime_award_amount`, not per AWARD
+  against Cedar's summed obligations. No product may claim the two tables
+  reconcile more tightly than that.
+- Re-derive, do not quote: `py -3 code/1144_money_reconciliation_prime_sub.py
+  measure`. `verify` exits 1 when any of ten recorded numbers stops
+  reproducing and `selftest` proves all ten fire on a perturbed value, so a
+  PASS is evidence the measurement ran rather than evidence nothing broke.
+
+<!-- END ADR-038-PRIME-SUB-NEVER-COMBINED -->

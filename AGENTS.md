@@ -8245,3 +8245,55 @@ workstream touched. `62` red metrics are the ones already owned in the table
 above — verified again here that the only one naming a file of ours,
 `class2c 846_session_audit.py: fails += 1`, is present in `HEAD` with 846
 stashed.
+
+---
+
+## GATE STATE AT THE CLOSE OF WORKSTREAM LINKAGE — 2026-09-02
+
+*`code/1139_linkage_coverage.py`, `code/1140_linkage_close.py`, ADR-037. Build
+log: `docs/LINKAGE_CLOSE_LOG_2026-09-02.md`.*
+
+**GREEN and new:** `62_no_regression_check.py` now carries
+`linkage_metrics_below_floor` (MUST_BE_ZERO), answered from `1139`'s own
+baseline — the 293/845 arrangement, so it needed no re-recording of 62's
+baseline. Measured **0**. Twenty-eight `linkage_*` counters print beside it.
+
+**GREEN:** `293_lint_bug_classes.py` reports **no finding in either new
+script**. One did land during the pass — `class2a` on `1140`'s
+`row.setdefault(c, "")` — and was fixed at source with an explicit `if c not
+in row` rather than waived; the call was genuinely not a no-op (the keys are
+new columns absent from the input header) but a detector that cannot see that
+is better answered with clearer code than with a waiver.
+
+**GREEN:** `1131_attribution_method_vocabulary.py verify` — **0 drifts**. This
+pass introduced `propagated_from_agent_ruling` on two tables and declared both
+through `1131 declare`, with the reason on the record. It is deliberately
+OUTSIDE `62`'s RULED set, the same choice `ladder_1122` made, so a propagation
+can never move `tier_A_ruled` — ENTITY_MATCH_RULES rule 8.
+
+**GREEN:** `1136_control_byte_gate.py verify` — 991 files, 0 control bytes.
+
+### The two `846_session_audit.py` failures are NAMED, MEASURED, and NOT THIS WORKSTREAM'S
+
+Standing rule: a red gate is not automatically yours, and saying so in writing
+is the price of walking past it.
+
+1. **`no NEW unsafe regenerating writer since the baseline`** —
+   `845_regenerate_guard.py verify` names exactly one new writer:
+   **`code/1143_methodology_papers.py`, markdown -> `docs/methodology/README.md`**.
+   Script number 1143 was claimed after 1140; it is not a file this workstream
+   wrote or touched. 3 of the 4 unsafe writers are pre-existing.
+2. **`13 datasets are built and current`** — `1137_customer_dataset_combine.py
+   verify` fails on *"contractors: NEVER BUILT - no spreadsheet exists"*.
+   `dist/customer/contractors.xlsx` was **already absent at the start of this
+   session** (as was `funding.xlsx`), because `1137.WORKBOOK_MAX_ROWS` is
+   200,000 and `prime_contracts` is 1,217,768 rows — the workbook is
+   deliberately not written and the verify asks for it anyway.
+   `1137` is the **gaming workstream's** file and this pass was instructed not
+   to edit it; it was not run either, because a build launched into another
+   agent's live edit is how a half-finished storefront ships.
+
+**Consequence that IS this workstream's to flag:** the ten new columns on
+`data/clean/native_bills.csv` are not yet in `dist/customer/legislation.csv`.
+A `1137 build` carries them through. Until then the storefront legislation
+file still has no way to reach a Native entity.

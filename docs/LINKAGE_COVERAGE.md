@@ -6,7 +6,7 @@
 
 | dataset | flagship | rows (denominator) | LINKED | % | unlinked | % of rows that CAN name an entity |
 |---|---|---:|---:|---:|---:|---:|
-| `contractors` | `prime_contracts.csv` | 1,217,768 | 791,394 | 64.99% | 426,374 | 68.50% of 1,153,140 |
+| `contractors` | `prime_contracts.csv` | 1,217,768 | 791,521 | 65.00% | 426,247 | 68.51% of 1,153,140 |
 | `subcontracting` | `subawards.csv` | 89,809 | 87,355 | 97.27% | 2,454 | — |
 | `funding` | `federal_funding_transactions.csv` | 701,955 | 549,136 | 78.23% | 152,819 | 78.47% of 699,836 |
 | `gaming` | `gaming_facilities.csv` | 787 | 785 | 99.75% | 2 | — |
@@ -20,7 +20,7 @@
 | `nagpra` | `nagpra_notices.csv` | 6,792 | 6,169 | 90.83% | 623 | — |
 | `nest` | `nest_enterprises.csv` | 4,798 | 4,798 | 100.00% | 0 | — |
 
-**Across the 13 measured flagships: 1,482,991 of 2,092,263 rows (70.88%) carry a resolved Cedar entity.** That total sums tables whose rows are not the same kind of thing - a contract award and a NAGPRA notice each count as one - so it is a SCALE figure and never a quality figure. Quote the per-dataset rows.
+**Across the 13 measured flagships: 1,483,118 of 2,092,263 rows (70.89%) carry a resolved Cedar entity.** That total sums tables whose rows are not the same kind of thing - a contract award and a NAGPRA notice each count as one - so it is a SCALE figure and never a quality figure. Quote the per-dataset rows.
 
 ---
 
@@ -28,17 +28,17 @@
 
 **Denominator: 1,217,768 rows.** One row is one prime contract award row (FPDS / USAspending), FY2000-2026.
 
-**Third denominator - the one that says whether a low figure is a DEFECT.** 64,628 rows can never name an individual Cedar entity, because an owner ruling says the awardee is not a Native entity, or that the award is a CLASS-level fact naming no individual entity. `RULED_OWNER_NOT_IN_SPINE` is deliberately NOT counted here - that one IS a Cedar gap (`ruling_status IN ('RULED_NOT_NATIVE','RULED_CLASS_ONLY')`). Against the 1,153,140 rows that CAN, this dataset is **68.50%** linked. The ratchet still runs on the raw 64.99%, so this reading can never be used to make a real fall look like a change of definition.
+**Third denominator - the one that says whether a low figure is a DEFECT.** 64,628 rows can never name an individual Cedar entity, because an owner ruling says the awardee is not a Native entity, or that the award is a CLASS-level fact naming no individual entity. `RULED_OWNER_NOT_IN_SPINE` is deliberately NOT counted here - that one IS a Cedar gap (`ruling_status IN ('RULED_NOT_NATIVE','RULED_CLASS_ONLY')`). Against the 1,153,140 rows that CAN, this dataset is **68.51%** linked. The ratchet still runs on the raw 65.00%, so this reading can never be used to make a real fall look like a change of definition.
 
-**LINKED: 791,394 (64.99%)** - `coalesce(trim(CAST(tribe_id AS VARCHAR)),'') <> '' AND attributed_flag = '1'`
+**LINKED: 791,521 (65.00%)** - `coalesce(trim(CAST(tribe_id AS VARCHAR)),'') <> '' AND attributed_flag = '1'`
 
 | alternative reading | rows | apart from LINKED |
 |---|---:|---:|
-| `key_only:tribe_id` | 791,490 | +96 |
-| `gate_only:attributed_flag` | 791,394 | +0 |
-| `display_only:cedar_uid` | 791,490 | +96 |
+| `key_only:tribe_id` | 791,617 | +96 |
+| `gate_only:attributed_flag` | 791,521 | +0 |
+| `display_only:cedar_uid` | 791,617 | +96 |
 
-**Money on unlinked rows: $79,760,452,306.21 of $310,005,258,660.75** in `total_obligations` (25.73%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $79,745,437,001.76 of $310,005,258,660.75** in `total_obligations` (25.72%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
 
 **The largest unlinked residue, by row count:**
 
@@ -190,7 +190,7 @@
 | Mohegan Tribe of Indians of Connecticut (Mohegan Tribal Gaming Authori | 4 | $638,913,000.00 |
 | Shee Atika, Incorporated | 4 | $18,300,000.00 |
 | Cook Inlet Housing Authority | 3 | $17,000,000.00 |
-| Natives of Kodiak, Incorporated | 3 | $5,999,500.00 |
+| Mohegan | 3 | $0.00 |
 
 ## `lobbying` - `native_entity_lobbying_disclosures.csv`
 
@@ -230,9 +230,9 @@
 |---|---:|
 | Unrecognized Southeast Alaska Native Communities Recognition and Compe | 17 |
 | Tribal Adoption Parity Act | 12 |
-| Endangered Species Management Self-Determination Act | 9 |
 | Alaska Native Veterans Land Allotment Equity Act | 9 |
-| To grant a Federal charter to the National American Indian Veterans, I | 8 |
+| Endangered Species Management Self-Determination Act | 9 |
+| Mowa Band of Choctaw Indians Recognition Act | 8 |
 
 ## `federal-register` - `consultation_events.csv`
 
@@ -269,7 +269,7 @@
 | American Museum of Natural History | 13 |
 | California Department of Transportation | 11 |
 | University of Nevada, Las Vegas | 9 |
-| Tennessee Valley Authority | 8 |
+| Arizona State Museum, University of Arizona | 8 |
 
 ## `nest` - `nest_enterprises.csv`
 

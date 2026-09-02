@@ -262,6 +262,28 @@ nine below them, and each is stated as a rule because each arrived twice.
     name nobody has, and where a tool can allocate it for you
     (`1050_preflight.py claim`, `adr`), let it.
 
+17. **A column that looks like the answer is not the answer, and three
+    of them can disagree on one row.** `prime_contracts.tribe_id` reads 96
+    rows higher than `attributed_flag` — $269,771,379 of
+    `RULED_TIER_C_NOT_ATTRIBUTED`, a NEGATIVE ruling counted as coverage.
+    `federal_funding_transactions` gave **three** answers to "how many rows
+    are attributed": 553,106 (`attribution_status`), 552,602
+    (`tribe_id_neid`), 549,530 (`attributed_flag`); 504 of the gap was the
+    FA-01 unlink clearing keys and leaving the status columns claiming an
+    attribution, half a billion dollars of it. **Take the CONJUNCTION of every
+    column the consumer branches on**, publish each sibling beside it with the
+    disagreement in rows, and name the ROLE the link fills —
+    `native_owned_businesses.business_entity_id` is 4 of 2,916 and reading it
+    as the numerator says 0.14% about a dataset that is 94.89% linked to its
+    certifying nation. `code/1139_linkage_coverage.py`, ADR-037.
+18. **A LIST-VALUED key column reads as zero to every scan that looks for
+    `cedar_uid`.** `nagpra_notices` has no single-id column at all: six
+    pipe-delimited role columns, because one notice names many parties. A scan
+    for the three usual id names reported **0% on a dataset that is 90.83%
+    linked**, and it was run on this product. Declare the list columns and
+    take their union; verified against the table's own `has_resolved_entity`
+    at 6,169 both ways, 0 disagreeing.
+
 **A standing gate for the rot these rules produce.**
 `py -3 code/1116_ruling_propagation_2026_09_02.py verify` scans every `.md` in
 `docs/` and `review/` for the superseded literals of 2026-09-02 and exits 1
@@ -389,6 +411,8 @@ were written, looking exactly as authoritative as current ones.
 | `py -3 code/518_dataset_readiness.py` | READY / BLOCKED / NOT_TESTED per dataset. **There is no fourth status** |
 | `py -3 code/287_build_dependency_manifest.py` | which script rebuilds a file another script enriches. The enricher runs LAST |
 | `py -3 code/1116_ruling_propagation_2026_09_02.py verify` | the 2026-09-02 corrections, still stated stale anywhere in `docs/` or `review/`. `derive` re-measures them from the live files; `selftest` proves the scanner fires and that an empty corpus reports UNMEASURED rather than clean |
+| `py -3 code/1139_linkage_coverage.py verify` | **linkage coverage per customer dataset, ratcheted.** The share of rows carrying a resolved Cedar entity, with the denominator stated per dataset in `docs/LINKAGE_COVERAGE.md`. `report` measures, `apply` writes the doc, `baseline` records the floor, `selftest` proves it fires. 62 carries it as `linkage_metrics_below_floor`. **A low figure is not automatically a defect** - `natural-resources` reads 6.24% because ONRR publishes in AGGREGATE, and is 73.67% of the rows that CAN name a recipient |
+| `py -3 code/1140_linkage_close.py verify` | the 2026-09-02 linkage closures - 591 bills, 154 McGrath rows, 2,034 stranded rulings, 163 bridged identifiers, 4 sibling repoints. **An IN-PLACE enricher on three flagships**: a rebuild of any of them reverts its share, and this is what tells you to re-run `apply` |
 | `py -3 code/1112_harvest_coverage_matrix.py verify` | what was actually looked for, per entity, per thing. **`untouched = 0` in `docs/SHARD_COVERAGE.md` is true and measures web-map membership, not harvest** — per thing, untouched runs 373 to **1,439 of 1,555 (92.5%) for CAGE / UEI / DUNS** |
 
 **Never re-baseline to clear a red gate.** `--baseline` records a floor while
