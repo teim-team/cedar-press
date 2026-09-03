@@ -336,11 +336,22 @@ def ev(**kw) -> dict:
 
 
 def load_events() -> list[dict]:
+    """Read the ledger, normalised to the CURRENT schema.
+
+    A column added to `COLS` after some events were written is absent from
+    those rows, and every rule below indexes by name. Rebuilding each row from
+    `COLS` fills the gap with a blank and NAMES what it filled, rather than
+    letting a later `KeyError` - or worse, a silent `.get()` default - decide
+    whether an old event is bound by a new rule.
+    """
     rows = read_csv(EVENTS)
-    for r in rows:
-        for c in COLS:
-            r.setdefault(c, "")
-    return rows
+    if not rows:
+        return []
+    added = [c for c in COLS if c not in rows[0]]
+    if added:
+        print(f"    schema note: {len(rows)} event(s) predate the column(s) "
+              f"{', '.join(added)} and read blank there")
+    return [{c: (r.get(c) or "") for c in COLS} for r in rows]
 
 
 # ===========================================================================
@@ -855,42 +866,166 @@ def _seed_asof() -> list[dict]:
     return out
 
 
-def _seed_subaward_dupes() -> list[dict]:
-    """846 subaward records superseded by a primary source.  `duplicate_of`.
+# `duplicate_of VERIFIED` IS IN THE VOCABULARY AND HAS ZERO SEEDS.  Measured,
+# and the measurement is the reason.
+#
+# The obvious seed was `data/clean/subawards.csv`, where 846 rows read
+# `duplicate_status = superseded_by_primary_source`.  A `duplicate_of` event
+# has to ADDRESS a record, and that file has no row-unique column: all 81 of
+# them repeat.  `subaward_source_record_id` comes closest at 89,462 distinct
+# values over 89,809 rows - and **346 of the 846 superseded records share their
+# source-record id with a row marked `primary`**, which is the file saying
+# plainly that the id names the SOURCE RECORD and not the Cedar row.
+#
+# Seeded on that key the gate reported 366 violations, 346 of them its own bad
+# key reading a primary row as its own duplicate.  A registry that cannot
+# address the thing it rules on is not a registry, so the seeder was removed
+# rather than weakened, and the 846 events it had written were deleted before
+# anything consumed them.  When subawards carries a row id, this is a
+# five-line seeder.
+#
+# `controlled_by DENIED` is likewise empty on purpose: nothing on disk rules at
+# the grain of control-without-ownership.  The nearest candidates -
+# `nonprofit_not_tribally_owned` in the exclusion rulings - are scope
+# decisions, and calling them control findings would be the invention this
+# whole file exists to avoid.
 
-    `data/clean/subawards.csv` `duplicate_status = superseded_by_primary_source`.
-    The source has no pointer column naming WHICH record supersedes it, so
-    `candidate_cedar_uid` is blank and the event is a record-level ruling: this
-    record is a duplicate and must not be published as a primary.  That is
-    exactly what the gate tests.
+
+def _seed_cedar_rulings() -> list[dict]:
+    """`cedar_rulings.csv` - eight hand-written owner rulings, four of them
+    negative, and the one real SUPERSESSION on disk.
+
+    RUL-0002 / RUL-0003.  `Cherokee General Corporation` (UEI YBZGKKUPSUD4) is
+    a wholly owned subsidiary of Doyon Government Group, quoted from Doyon's
+    own site.  Two sources had attributed it to Cherokee Nation and to the
+    Cherokee of Georgia Tribal Council on the token `cherokee` - which
+    `cedar_domain.NAME_TRAPS` has carried since the original list.  HARD:
+    a person ruled it.
+
+    RUL-0007.  `DO_NOT_CONFLATE`: Native Hawaiian Legal CORPORATION is a
+    different organisation from Native Hawaiian Legal Defense & Education Fund.
+    HARD and PERMANENT - and note what it is not.  Both are Native Hawaiian
+    organisations.
+
+    RUL-0008.  `ATTRIBUTION_NOT_ESTABLISHED`: the Lawelawe / Ho'omaka
+    hypothesis was tested and rejected.  This is exactly rule 2's case - the
+    owner did not find that Lawelawe is non-Native, he found that Cedar could
+    not establish the parent.  `native_ownership_status INSUFFICIENT_EVIDENCE`,
+    SOFT, queued, and it can never suppress anything.
+
+    RUL-0001 supersedes EXCL-0116.  Rule 3, from disk: EXCL-0116 excluded UEI
+    YBZGKKUPSUD4 with the reason text `ANC`, and the owner later ruled the firm
+    IS attributable, to Doyon.  The original exclusion event is not edited and
+    not deleted; a superseding event bounds it with `valid_to` the day before
+    the ruling, so the constraint reads EXPIRED and the original reads
+    SUPERSEDED.  Both stay on the record, which is what a history is.
     """
     out = []
-    for r in read_csv(CLEAN / "subawards.csv"):
-        if (r.get("duplicate_status") or "").strip() \
-                != "superseded_by_primary_source":
-            continue
-        srid = (r.get("subaward_source_record_id") or "").strip()
-        if not srid:
-            continue
-        out.append(ev(
-            decision_id=did("subdupe", srid),
-            subject_record_id=srid,
-            subject_entity_id="",
-            candidate_cedar_uid="",
-            predicate="duplicate_of", decision="VERIFIED",
-            reason_code="DUPLICATE_SOURCE_RECORD",
-            reason_detail=(
-                "subawards.duplicate_status=superseded_by_primary_source: the "
-                "same subaward is carried by a primary source and this record "
-                "must never be published as `primary` or summed alongside it."),
-            dataset_scope="subcontracting:duplicate_status",
-            as_of_date=TODAY,
-            evidence_id="data/clean/subawards.csv#duplicate_status",
-            evidence_strength="AUTHORITATIVE_REGISTRY",
-            review_status="ADJUDICATED", reviewer="Cedar dedup pass",
-            decided_at=TODAY,
-            source_table="data/clean/subawards.csv",
-        ))
+    for r in read_csv(SPINE / "cedar_rulings.csv"):
+        rid = (r.get("ruling_id") or "").strip()
+        ruling = (r.get("ruling") or "").strip()
+        ident = (r.get("identifier") or "").strip()
+        url = (r.get("evidence_url") or "").strip()
+        note = (r.get("note") or "").strip()
+        quote = (r.get("evidence_quote") or "").strip()
+        rdate = (r.get("ruled_date") or "").strip()
+        if ruling == "REJECT_ATTRIBUTION":
+            out.append(ev(
+                decision_id=did("rul", rid),
+                subject_record_id=ident,
+                subject_entity_id="",
+                candidate_cedar_uid=(r.get("parent_entity_id") or "").strip(),
+                predicate="owned_by", decision="DENIED",
+                reason_code="NAME_COLLISION",
+                reason_detail=(
+                    f"{(r.get('entity_name') or '').strip()} is not owned by "
+                    f"{(r.get('parent_native_entity') or '').strip()}. "
+                    f"Evidence: \"{quote}\". {note}")[:600],
+                dataset_scope="contractors",
+                as_of_date=rdate,
+                evidence_id=url, evidence_strength="ADJUDICATED_BY_OWNER",
+                review_status="ADJUDICATED",
+                reviewer=(r.get("ruled_by") or "").strip(), decided_at=rdate,
+                source_table="data/spine/cedar_rulings.csv",
+            ))
+        elif ruling == "DO_NOT_CONFLATE":
+            out.append(ev(
+                decision_id=did("rul", rid),
+                subject_record_id=ident,
+                subject_entity_id="",
+                candidate_cedar_uid="NHO-HOOMAKA",
+                predicate="same_entity_as", decision="DENIED",
+                reason_code="DIFFERENT_LEGAL_ENTITY",
+                reason_detail=(f"{(r.get('entity_name') or '').strip()}: "
+                               f"{note}")[:600],
+                dataset_scope="ALL", as_of_date=rdate,
+                evidence_id=url, evidence_strength="ADJUDICATED_BY_OWNER",
+                review_status="ADJUDICATED",
+                reviewer=(r.get("ruled_by") or "").strip(), decided_at=rdate,
+                source_table="data/spine/cedar_rulings.csv",
+            ))
+        elif ruling == "ATTRIBUTION_NOT_ESTABLISHED":
+            out.append(ev(
+                decision_id=did("rul", rid),
+                subject_record_id=ident,
+                subject_entity_id="",
+                candidate_cedar_uid="",
+                predicate="native_ownership_status",
+                decision="INSUFFICIENT_EVIDENCE",
+                reason_code="INSUFFICIENT_EVIDENCE",
+                reason_detail=(f"{(r.get('entity_name') or '').strip()}: "
+                               f"{note} Evidence: \"{quote}\"")[:600],
+                dataset_scope="ALL", as_of_date=rdate,
+                evidence_id=url, evidence_strength="ABSENCE_OF_EVIDENCE",
+                review_status="PENDING_REVIEW",
+                reviewer=(r.get("ruled_by") or "").strip(), decided_at=rdate,
+                recheck_after="",
+                source_table="data/spine/cedar_rulings.csv",
+            ))
+        elif ruling == "ATTRIBUTE" and (r.get("supersedes") or "").strip():
+            prior = (r.get("supersedes") or "").strip()
+            excl = {x.get("exclusion_id", "").strip(): x
+                    for x in read_csv(SPINE / "cedar_exclusion_rulings.csv")}
+            row = excl.get(prior)
+            if not row:
+                continue
+            vfrom = (row.get("extracted_date") or "").strip()
+            try:
+                vt = (date.fromisoformat(rdate) - timedelta(days=1)).isoformat()
+            except ValueError:
+                continue
+            # EXCL-0116 was recorded and reversed on the SAME day (both
+            # 2026-08-05), so `ruling date - 1` would write an empty window -
+            # a constraint that can never be true, which is not the same
+            # statement as "it was in force for one day".
+            if vfrom and vt < vfrom:
+                vt = vfrom
+            out.append(ev(
+                decision_id=did("rul", rid),
+                subject_record_id=(row.get("identifier") or "").strip(),
+                subject_entity_id="",
+                candidate_cedar_uid="",
+                predicate="eligible_for_collection", decision="DENIED",
+                reason_code="OUT_OF_DATASET_SCOPE",
+                reason_detail=(
+                    f"SUPERSEDES {prior}. The exclusion stood until {vt}. "
+                    f"{rid} ({rdate}) rules the firm IS attributable, to "
+                    f"{(r.get('parent_native_entity') or '').strip()} "
+                    f"({(r.get('parent_entity_id') or '').strip()}): "
+                    f"\"{quote}\". {note} The original exclusion event is not "
+                    f"edited and not deleted - it is bounded.")[:600],
+                dataset_scope="contractors",
+                valid_from=vfrom,
+                valid_to=vt,
+                as_of_date=rdate, evidence_id=url,
+                evidence_strength="ADJUDICATED_BY_OWNER",
+                review_status="ADJUDICATED",
+                reviewer=(r.get("ruled_by") or "").strip(), decided_at=rdate,
+                supersedes_decision_id=did(
+                    "excl", (row.get("identifier_type") or "").strip(),
+                    (row.get("identifier") or "").strip()),
+                source_table="data/spine/cedar_rulings.csv",
+            ))
     return out
 
 
@@ -904,8 +1039,10 @@ SEEDERS = (
     ("correction_register", _seed_corrections),
     ("link_layer_denials", _seed_link_denials),
     ("exclusion_rulings", _seed_exclusions),
+    # must follow exclusion_rulings: RUL-0001 supersedes EXCL-0116 and I7
+    # refuses a dangling supersedes_decision_id
+    ("cedar_rulings_hand", _seed_cedar_rulings),
     ("temporal_contradicted_asof", _seed_asof),
-    ("subaward_duplicates", _seed_subaward_dupes),
 )
 
 
@@ -982,18 +1119,37 @@ DERIVED_BANNER = ("DERIVED VIEW - regenerate with `py -3 " + SCRIPT
                   + " build`. Edit cedar_decision_events.csv, never this file.")
 
 
-def _in_window(e: dict, on: str) -> bool:
-    vf = (e.get("valid_from") or "").strip()[:10]
-    vt = (e.get("valid_to") or "").strip()[:10]
-    if vf and on < vf:
+def in_window(c: dict, when: str) -> bool:
+    """Is `when` inside the period this constraint is ABOUT?
+
+    `valid_from`/`valid_to` bound the FACT, not the decision.  A 2018
+    contradicted ownership is a permanently true statement about 2018 and it
+    must still suppress a 2018 row published in 2030 - so this is asked of the
+    ROW's date, never of the clock.  Whether the DECISION is still in force is
+    a different question and supersession answers it.
+    """
+    vf = (c.get("valid_from") or "").strip()[:10]
+    vt = (c.get("valid_to") or "").strip()[:10]
+    if not when:
+        return not (vf or vt)      # an undated row cannot be placed in a window
+    if vf and when < vf:
         return False
-    if vt and on > vt:
+    if vt and when > vt:
         return False
     return True
 
 
 def resolve(events=None, on: str | None = None) -> list[dict]:
-    """Events -> constraints.  Supersession, then temporal, then hardness."""
+    """Events -> constraints.  Supersession, then hardness, then staleness.
+
+    `on` is the clock and it decides exactly two things: whether a
+    `recheck_after` has passed, and nothing else.  It does NOT expire a
+    constraint: `valid_from`/`valid_to` bound the fact the constraint is about
+    and are tested against the published ROW in `release_check`.  An earlier
+    draft evaluated the window against today and quietly stood down 403 of 411
+    ownership contradictions the moment their fiscal year ended - a gate that
+    disarms itself with the calendar.
+    """
     on = on or TODAY
     events = events if events is not None else load_events()
     by_id = {e["decision_id"]: e for e in events}
@@ -1010,15 +1166,20 @@ def resolve(events=None, on: str | None = None) -> list[dict]:
         strength, why = hardness(e)
         if e["decision_id"] in retired:
             state, suppresses = "SUPERSEDED", "N"
-        elif not _in_window(e, on):
-            vt = (e.get("valid_to") or "").strip()[:10]
-            state = "EXPIRED" if vt and on > vt else "NOT_YET_IN_FORCE"
-            suppresses = "N"
         elif strength == "SOFT":
             state, suppresses = "REVIEW_ONLY", "N"
         else:
             ra = (e.get("recheck_after") or "").strip()[:10]
-            state = "ACTIVE_STALE" if (ra and on > ra) else "ACTIVE"
+            vt = (e.get("valid_to") or "").strip()[:10]
+            if ra and on > ra:
+                state = "ACTIVE_STALE"
+            elif vt and on > vt:
+                # still in force, still suppressing - but only for rows dated
+                # inside its window.  Named so nobody reads ACTIVE and assumes
+                # it covers today's rows.
+                state = "ACTIVE_HISTORICAL"
+            else:
+                state = "ACTIVE"
             suppresses = "Y"
         out.append({
             "THIS_FILE_IS_DERIVED": DERIVED_BANNER,
@@ -1074,28 +1235,62 @@ def stage_build() -> int:
 #: that goes looking for a plausible column will silently test nothing when the
 #: column is renamed.  A collection absent from this table is REPORTED as
 #: untested rather than passing quietly.
+#: `dates` is how a windowed constraint is placed against a published row.  A
+#: collection with no date column cannot be tested by a windowed constraint,
+#: and that is REPORTED as untested rather than passing quietly - rule 9, an
+#: absence of evidence must not print as evidence of absence.
 PROBES = {
     "nest": {"ids": ("enterprise_id", "uei", "cage_code"),
-             "uids": ("owner_hub_cedar_uid", "owner_hub_handle")},
+             "uids": ("owner_hub_cedar_uid", "owner_hub_handle"),
+             "dates": ()},
     "nonprofits": {"ids": ("EIN", "ein"),
-                   "uids": ("cedar_uid", "tribe_id")},
+                   "uids": ("cedar_uid", "tribe_id"),
+                   "dates": ("tax_period",)},
     "contractors": {"ids": ("awardee_uei", "cage_code"),
-                    "uids": ("cedar_uid", "tribe_id")},
+                    "uids": ("cedar_uid", "tribe_id"),
+                    "dates": ("action_date", "fiscal_year")},
     "native-owned-businesses": {"ids": ("federal_uei_linked",
                                         "federal_cage_linked"),
-                                "uids": ("cedar_uid", "tribe_id")},
+                                "uids": ("cedar_uid", "tribe_id"),
+                                "dates": ()},
     "subcontracting": {"ids": ("subaward_source_record_id",),
                        "uids": ("cedar_uid", "sub_cedar_uid",
-                                "prime_cedar_uid")},
-    "funding": {"ids": ("recipient_uei",), "uids": ("cedar_uid", "tribe_id")},
-    "lobbying": {"ids": ("client_name",), "uids": ("cedar_uid", "tribe_id")},
-    "deals": {"ids": (), "uids": ("cedar_uid",)},
-    "federal-register": {"ids": ("document_number",), "uids": ("cedar_uid",)},
-    "legislation": {"ids": (), "uids": ("cedar_uid",)},
-    "nagpra": {"ids": (), "uids": ("cedar_uid",)},
-    "natural-resources": {"ids": (), "uids": ("cedar_uid",)},
-    "gaming": {"ids": (), "uids": ("cedar_uid", "tribe_id")},
+                                "prime_cedar_uid"),
+                       "dates": ("subaward_action_date", "fiscal_year")},
+    "funding": {"ids": ("recipient_uei",), "uids": ("cedar_uid", "tribe_id"),
+                "dates": ("action_date", "fiscal_year")},
+    "lobbying": {"ids": ("client_name",), "uids": ("cedar_uid", "tribe_id"),
+                 "dates": ("filing_year",)},
+    "deals": {"ids": (), "uids": ("cedar_uid",), "dates": ("announced_date",)},
+    "federal-register": {"ids": ("document_number",), "uids": ("cedar_uid",),
+                         "dates": ("publication_date",)},
+    "legislation": {"ids": (), "uids": ("cedar_uid",), "dates": ()},
+    "nagpra": {"ids": (), "uids": ("cedar_uid",), "dates": ()},
+    "natural-resources": {"ids": (), "uids": ("cedar_uid",), "dates": ()},
+    "gaming": {"ids": (), "uids": ("cedar_uid", "tribe_id"), "dates": ()},
 }
+
+
+def _row_date(row, date_ix) -> str:
+    """The published row's own date, ISO, or ''.
+
+    A bare four-digit year is a FISCAL year here, because that is what every
+    `fiscal_year` column in this project means.  It is placed at its own
+    mid-point (1 April) rather than 1 January: FY2018 runs 2017-10-01 to
+    2018-09-30, and a January date would fall outside its own fiscal year's
+    window and silently disarm every constraint bounded that way.
+    """
+    for i in date_ix:
+        if i >= len(row):
+            continue
+        v = (row[i] or "").strip()
+        if not v:
+            continue
+        if len(v) >= 10 and v[4] == "-" and v[7] == "-":
+            return v[:10]
+        if len(v) == 4 and v.isdigit():
+            return f"{v}-04-01"
+    return ""
 
 #: Predicates whose violation is "this row keys subject to candidate".
 PAIR_PREDICATES = frozenset({"same_entity_as", "owned_by", "controlled_by"})
@@ -1158,12 +1353,24 @@ def release_check(dist_dir=None, on: str | None = None) -> tuple[int, str, list]
             _, _, col = c["dataset_scope"].partition(":")
             dup_idx[_norm(c["subject_record_id"])] = (c, col or "duplicate_status")
 
+        windowed_untestable = {c["constraint_id"] for c in pairs + bans + dup
+                               if (c["valid_from"] or c["valid_to"])
+                               and not probe["dates"]}
+
         with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
             rd = csv.reader(fh)
             hdr = next(rd, [])
             ix = {c: i for i, c in enumerate(hdr)}
             id_cols = [ix[c] for c in probe["ids"] if c in ix]
             uid_cols = [ix[c] for c in probe["uids"] if c in ix]
+            date_ix = [ix[c] for c in probe["dates"] if c in ix]
+            if windowed_untestable:
+                untested.append(f"{stem} ({len(windowed_untestable)} windowed "
+                                f"constraint(s), no date column)")
+            elif [c for c in pairs + bans + dup
+                  if (c["valid_from"] or c["valid_to"])] and not date_ix:
+                untested.append(f"{stem} (date column named in PROBES is "
+                                f"absent from the file)")
             for n, row in enumerate(rd, 2):
                 scanned += 1
                 subs = {_norm(row[i]) for i in id_cols if i < len(row)}
@@ -1173,6 +1380,7 @@ def release_check(dist_dir=None, on: str | None = None) -> tuple[int, str, list]
                     continue
                 uids = {_norm(row[i]) for i in uid_cols if i < len(row)}
                 uids.discard("")
+                when = _row_date(row, date_ix)
                 for s in subs:
                     for u in uids:
                         for c, col in pair_idx.get((s, u), ()):
@@ -1182,6 +1390,8 @@ def release_check(dist_dir=None, on: str | None = None) -> tuple[int, str, list]
                                 if j is None or j >= len(row) \
                                         or _norm(row[j]) != u:
                                     continue
+                            if not in_window(c, when):
+                                continue
                             viol.append({
                                 "file": p.name, "line": n,
                                 "constraint_id": c["constraint_id"],
@@ -1192,7 +1402,7 @@ def release_check(dist_dir=None, on: str | None = None) -> tuple[int, str, list]
                                 "why": c["reason_detail"][:200],
                             })
                     c = ban_idx.get(s)
-                    if c is not None and uids:
+                    if c is not None and uids and in_window(c, when):
                         viol.append({
                             "file": p.name, "line": n,
                             "constraint_id": c["constraint_id"],
@@ -1204,7 +1414,7 @@ def release_check(dist_dir=None, on: str | None = None) -> tuple[int, str, list]
                             "why": c["reason_detail"][:200],
                         })
                     hit = dup_idx.get(s)
-                    if hit is not None:
+                    if hit is not None and in_window(hit[0], when):
                         c, col = hit
                         j = ix.get(col)
                         if j is not None and j < len(row) \
@@ -1311,29 +1521,50 @@ def stage_selftest() -> int:
             fails.append(f"C: a SOFT constraint suppressed a published row. "
                          f"Rule 1 broken - this is how research gaps fossilize")
 
-        # D. rule 4 - an EXPIRED hard constraint must not suppress
-        exp = [c for c in cons if c["strength"] == "HARD" and c["valid_to"]
-               and c["dataset_scope"].split(":")[0] == "contractors"]
+        # D. rule 4 - a windowed constraint is tested against the ROW's date.
+        #    The same firm, the same uid, two different transaction dates: the
+        #    year the layer contradicted must fire and a later year must not.
+        #    This is the acquisition case in miniature - not tribally owned in
+        #    2018, acquired in 2024 - and the gate has to tell them apart.
+        cand = [c for c in cons if c["strength"] == "HARD"
+                and c["valid_from"] and c["valid_to"]
+                and c["valid_from"] < c["valid_to"]
+                and c["predicate"] in PAIR_PREDICATES
+                and c["subject_record_id"] and c["candidate_cedar_uid"]
+                and c["dataset_scope"].split(":")[0] == "contractors"]
+        # The same firm can be contradicted in SEVERAL fiscal years, and a
+        # date outside one window then lands inside the next - the first draft
+        # of this test read that as the gate ignoring the window. Take a pair
+        # constrained in exactly one year, so "outside" really is outside.
+        grp = defaultdict(list)
+        for c in cand:
+            grp[(c["subject_record_id"], c["candidate_cedar_uid"])].append(c)
+        exp = [v[0] for v in grp.values() if len(v) == 1]
         if exp:
             e = exp[0]
             (tmp / "nonprofits.csv").unlink()
-            write_csv(tmp / "contractors.csv",
-                      ["awardee_uei", "cedar_uid",
-                       "owner_as_of_transaction_cedar_uid"],
-                      [{"awardee_uei": e["subject_record_id"],
-                        "cedar_uid": e["candidate_cedar_uid"],
-                        "owner_as_of_transaction_cedar_uid":
-                            e["candidate_cedar_uid"]}])
-            n_in, _, _ = release_check(tmp, on=e["valid_from"][:10])
-            n_out, _, _ = release_check(
-                tmp, on=(date.fromisoformat(e["valid_to"][:10])
-                         + timedelta(days=1)).isoformat())
-            print(f"    D  temporal window    -> inside {n_in}, "
-                  f"outside {n_out}   [{e['constraint_id']} "
-                  f"{e['valid_from']}..{e['valid_to']}]")
+
+            def contractor(action_date):
+                write_csv(tmp / "contractors.csv",
+                          ["awardee_uei", "cedar_uid", "action_date",
+                           "owner_as_of_transaction_cedar_uid"],
+                          [{"awardee_uei": e["subject_record_id"],
+                            "cedar_uid": e["candidate_cedar_uid"],
+                            "action_date": action_date,
+                            "owner_as_of_transaction_cedar_uid":
+                                e["candidate_cedar_uid"]}])
+
+            contractor(e["valid_from"][:10])
+            n_in, _, _ = release_check(tmp)
+            contractor((date.fromisoformat(e["valid_to"][:10])
+                        + timedelta(days=400)).isoformat())
+            n_out, _, _ = release_check(tmp)
+            print(f"    D  row inside window  -> {n_in} violation(s); "
+                  f"row 400 days after it -> {n_out}   "
+                  f"[{e['constraint_id']} {e['valid_from']}..{e['valid_to']}]")
             if n_in != 1 or n_out != 0:
-                fails.append(f"D: temporal bound not honoured "
-                             f"(inside={n_in}, outside={n_out})")
+                fails.append(f"D: the window was not tested against the row's "
+                             f"own date (inside={n_in}, outside={n_out})")
         else:
             fails.append("D: no date-bounded hard constraint to test with")
     finally:
@@ -1438,6 +1669,15 @@ def stage_verify() -> int:
     else:
         bad.append("I9 cedar_negative_constraints.csv absent - run `build`")
 
+    # an empty window is a constraint that can never be true
+    b = [e for e in events if e["valid_from"].strip() and e["valid_to"].strip()
+         and e["valid_to"].strip()[:10] < e["valid_from"].strip()[:10]]
+    chk(not b, f"I11 {len(b)} events carry valid_to < valid_from - an empty "
+               f"window is a constraint that can never fire")
+    print(f"  I11 windows: "
+          f"{sum(1 for e in events if e['valid_from'].strip() or e['valid_to'].strip())} "
+          f"date-bounded events, {len(b)} inverted")
+
     # not a product
     try:
         sys.path.insert(0, str(CODE))
@@ -1453,7 +1693,7 @@ def stage_verify() -> int:
     print()
     for m in bad:
         print(f"  FAIL  {m}")
-    print(f"  {10 - len(bad)}/10 invariants hold")
+    print(f"  {11 - len(bad)}/11 invariants hold")
     return 1 if bad else 0
 
 

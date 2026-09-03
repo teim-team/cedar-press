@@ -36,6 +36,7 @@ identity checks run first and any failure there is reported as CRITICAL.
 from __future__ import annotations
 
 import csv
+import importlib.util
 import json
 import subprocess
 import sys
@@ -769,6 +770,38 @@ def _publication_rules():
     lines = [l.strip() for l in (r.stdout or "").splitlines() if l.strip()]
     return r.returncode == 0, (lines[-1] if lines else
                                f"cedar_publication verify exit {r.returncode}")
+
+
+@claim("no published row violates an ACTIVE HARD negative constraint")
+def _negative_constraints():
+    """The release check of the negative-decision registry (`code/1163`).
+
+    Cedar rules things OUT constantly - a wrong owner, a name collision, an
+    identity that is not that identity, a UEI outside a collection's scope -
+    and until 2026-09-02 each of those rulings lived in whatever column the
+    pass that made it happened to invent. Nothing could answer "is this pair
+    ruled out?" before an export, so a ruling the owner made in August could
+    ship in September and did.
+
+    `data/spine/cedar_decision_events.csv` is the append-only ledger of those
+    rulings and `cedar_negative_constraints.csv` is its derived view. Only HARD
+    constraints suppress - an authoritative identifier conflict, two different
+    legal entities, an adjudicated false match, an ownership contradicted on a
+    date. A name mismatch or an unsuccessful search is SOFT and is reported,
+    never enforced, because the owner's rule is that fossilizing a research gap
+    manufactures false negatives.
+
+    NOT a claim that any organisation is not Native. A constraint denies a
+    RELATIONSHIP, an IDENTITY MATCH, a CLASSIFICATION or DATASET ELIGIBILITY.
+
+    Watch it fire: `py -3 code/1163_negative_decision_registry.py selftest`.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "ndr1163", ROOT / "code" / "1163_negative_decision_registry.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    n, detail, _ = mod.release_check()
+    return n == 0, detail
 
 
 def main() -> int:
