@@ -15,9 +15,9 @@
 <!-- END GENERATED:IDENTITY -->
 
 <!-- BEGIN EDITORIAL:nest -->
-**`nest`. One delivered file, `nest.csv` — 4,798 rows × 91 columns, built from
-`nest_enterprises.csv` (4,798 × 68) with `nest_entity_dual_role.csv` folded in
-one-to-one and `nest_enterprise_relations.csv` (8,691 rows) counted rather than
+**`nest`. One delivered file, `nest.csv` — 5,820 rows × 88 columns, built from
+`nest_enterprises.csv` (5,820 × 68) with `nest_entity_dual_role.csv` folded in
+one-to-one and `nest_enterprise_relations.csv` (8,690 rows) counted rather than
 joined.** [measured 2026-09-02]
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from

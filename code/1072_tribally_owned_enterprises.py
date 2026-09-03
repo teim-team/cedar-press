@@ -613,6 +613,189 @@ GOVERNMENT_CLASSES = {
     "Federal-level constituency entity", "State-level constituency entity",
 }
 
+# ---------------------------------------------------------------------------
+# THE ANCSA BRAND GUARD - the SECOND route into the Goldbelt defect
+# ---------------------------------------------------------------------------
+# The `ANC_VILLAGE_*` repoint above closes the `ANC_TRIBE_LOOKUP` route. It is
+# not the only route. `OWNERV6` supplies a `cedar_uid` directly, so it never
+# passes the lookup's `parent_entity_type` field and the guard above cannot
+# see it. Measured 2026-09-02 on the 54 Goldbelt-named rows: **31 correct
+# under Goldbelt, Incorporated, 19 under Tlingit & Haida, 2 under the Native
+# Village of Eagle, 1 under Barrow, 1 under Paiute of Utah** - and the last
+# four are a different mechanism again, a token collision INSIDE the
+# subsidiary's own name (`Goldbelt Eagle` matched `Eagle`; `Goldbelt-Cedar`
+# matched the Cedar Band of Paiutes).
+#
+# THE TEST IS ENTITY IDENTITY, NOT STRING SHAPE, and that distinction is the
+# whole rule. Generalising the string shape - "an enterprise whose first
+# name-word is another hub's name" - returns 500 rows and its largest members
+# are `Alutiiq LLC`, `Alutiiq Business Services` and `Alutiiq Construction`
+# under Afognak, every one CORRECT, because Alutiiq is Afognak Native
+# Corporation's brand. The shape cannot tell a parent's brand from a
+# collision. What can: **Goldbelt IS a spine ANCSA corporation and Eagle,
+# Barrow and the Cedar Band are not it, whereas there is no ANCSA corporation
+# named Alutiiq at all** - so the Alutiiq rows never enter this test.
+#
+# So: an enterprise whose name BEGINS with the full distinctive name of a
+# spine ANCSA corporation, keyed to a GOVERNMENT hub, is that corporation's.
+# ANCSA_OWNERSHIP_RULING rule 2 (a government never owns an ANC) and rule 3
+# (direct government ownership is the exception you must EVIDENCE, and no
+# source on these rows evidences it).
+#
+# ONLY THE FULL DISTINCTIVE NAME. An earlier draft also indexed the head token
+# alone and matched `WHITE EARTH RESERVATION HOUSING AUTHORITY`,
+# `Arctic Catering, Inc`, `ALASKA FEDERATION OF NATIVES` and
+# `OLD PROS OF LAGUNA WOODS VILLAGE` - on `white`, `arctic`, `alaska`, `old` -
+# and would have repointed nine White Earth bodies to an Alaska corporation.
+# That is ENTITY_MATCH_RULES rule 1 rebuilt by hand. A single-token brand also
+# has to clear the generic/trap list, which is why `Council Native
+# Corporation` is excluded (the 41-link defect in that same rule).
+ANCSA_BRAND_STOP = {
+    "inc", "incorporated", "llc", "ltd", "limited", "liability", "corp",
+    "corporation", "company", "co", "the", "native", "natives", "of", "and",
+    "group", "holdings", "association", "tribe", "tribes", "tribal", "nation",
+    "indian", "indians", "village", "community", "band",
+}
+# Weak as a corporation's SOLE distinctive token. Place words that name many
+# things; a one-word brand on any of these may never award a repoint.
+ANCSA_BRAND_WEAK = {
+    "white", "arctic", "alaska", "old", "twin", "port", "council", "eagle",
+    "bering", "north", "northern", "south", "southern", "east", "west",
+    "central", "coastal", "pacific", "gold", "big", "little", "sea", "bay",
+    "united", "national", "american", "federal", "general", "global",
+}
+
+
+def _brand_toks(s):
+    return [t for t in norm(s).split() if t not in ANCSA_BRAND_STOP]
+
+
+NEG_CONSTRAINTS = SPINE / "cedar_negative_constraints.csv"
+
+
+def load_hard_ownership_denials():
+    """-> {(normalised enterprise name, forbidden owner uid): constraint row}.
+
+    `code/1163_negative_decision_registry.py` is the one place Cedar records
+    what it has RULED OUT, and `docs/NEGATIVE_DECISION_REGISTRY.md` makes
+    `cedar_decision_events.csv` the source of truth. A denial that only a
+    release check reads is a denial the builder can re-derive on the next run;
+    consuming it here is what stops that.
+
+    Only HARD + ACTIVE + `suppresses = Y` + `predicate = owned_by` bind, and
+    only in this dataset's scope. A SOFT constraint is review material and
+    must never silently remove a row.
+
+    THE SUBJECT IS KEYED TWO WAYS and both have to be handled: the seeds taken
+    from `anc_tribal_subsidiary_lookup.csv` carry the FIRM NAME in
+    `subject_record_id`, while the seed taken from `nest_enterprises.csv`
+    carries the ENTERPRISE_ID. The id form is resolved back to (hub, name)
+    through the append-only id register, so one lookup serves both.
+    """
+    denials = {}
+    if not NEG_CONSTRAINTS.exists():
+        return denials
+    eid_to_key = {}
+    for r in read_csv(IDREG):
+        eid_to_key[r["enterprise_id"]] = (r["enterprise_name_normalized"],
+                                          r["owner_hub_cedar_uid"])
+    for c in read_csv(NEG_CONSTRAINTS):
+        if (c.get("predicate") != "owned_by" or c.get("strength") != "HARD"
+                or c.get("constraint_state") != "ACTIVE"
+                or c.get("suppresses") != "Y"
+                or c.get("dataset_scope") not in ("nest", "ALL")):
+            continue
+        subj, cand = (c.get("subject_record_id") or ""), (c.get("candidate_cedar_uid") or "")
+        if not cand:
+            continue
+        if subj in eid_to_key:
+            # The id names WHICH enterprise; `candidate_cedar_uid` names the
+            # owner denied. Only that pair is ruled - deriving a second denial
+            # from the register's current hub would invent one nobody made.
+            denials[(eid_to_key[subj][0], cand)] = c
+        elif subj:
+            denials[(norm(subj), cand)] = c
+    return denials
+
+
+def build_ancsa_brand_index(hub_rows):
+    """full distinctive corporation name -> the spine row, where unambiguous."""
+    idx = {}
+    for s in hub_rows:
+        if s.get("entity_class") not in ANC_CLASSES:
+            continue
+        toks = _brand_toks(s.get("canonical_name", ""))
+        if not toks or (len(toks) == 1 and toks[0] in ANCSA_BRAND_WEAK):
+            continue
+        idx.setdefault(" ".join(toks), []).append(s)
+    return {k: v[0] for k, v in idx.items()
+            if len({x["cedar_uid"] for x in v}) == 1}
+
+
+def _own_names(row):
+    """Every full name this entity goes by, distinctive tokens only."""
+    out = set()
+    for c in ("canonical_name", "federal_register_legal_name", "former_names"):
+        for part in re.split(r"[|;]", row.get(c) or ""):
+            k = " ".join(_brand_toks(part))
+            if k:
+                out.add(k)
+    return out
+
+
+def ancsa_brand_owner(child_name, hub_row, brand_idx):
+    """-> (corporation row, note) or (None, veto reason / '').
+
+    TWO VETOES, both of which fire on real rows and both of which block rather
+    than award - blocking on weak evidence is safe in a way awarding on it is
+    not (ENTITY_MATCH_RULES rule 7).
+    """
+    if hub_row.get("entity_class") not in GOVERNMENT_CLASSES:
+        return None, ""
+    toks = norm(child_name).split()
+    corp = key = None
+    for n in (4, 3, 2, 1):
+        if len(toks) >= n and " ".join(toks[:n]) in brand_idx:
+            key = " ".join(toks[:n])
+            corp = brand_idx[key]
+            break
+    if corp is None or corp["cedar_uid"] == hub_row.get("cedar_uid"):
+        return None, ""
+
+    # VETO 1 - the enterprise IS the hub, spelled out. `SELDOVIA VILLAGE
+    # TRIBE`, `NEWTOK VILLAGE`, `KING ISLAND NATIVE COMMUNITY` are the
+    # government itself, and `CHITINA NATIVE CORP` / `Savoonga Native
+    # Corporation` / `Afognak Native Corporation` are the CORPORATION itself
+    # sitting on its own village government. Repointing either would assert
+    # self-ownership. 29 rows; they belong in review (1157 raises them as
+    # ANCSA_RULE_2_VIOLATION), never in an automatic repoint.
+    ekey = " ".join(_brand_toks(child_name))
+    if ekey in _own_names(hub_row) or ekey in _own_names(corp):
+        return None, "the enterprise is the hub or the corporation itself"
+
+    # VETO 2 - geography, and only where all three states are on the record.
+    # `White Mountain Apache Tribe` sits on the White Mountain Apache Tribe
+    # (AZ) and leads with the distinctive name of White Mountain Native
+    # Corporation (AK). Two rows, and without this the guard would have
+    # invented an Alaska owner for an Arizona tribe. A BLANK corporation state
+    # must never fire this - an earlier draft let it, and vetoed the two
+    # `Goldbelt Eagle` rows the owner had already ruled by hand.
+    se = (hub_row.get("_child_state") or "").strip().upper()[:2]
+    sh = (hub_row.get("state") or "").strip().upper()[:2]
+    sb = (corp.get("state") or "").strip().upper()[:2]
+    if se and sh and sb and se == sh and se != sb:
+        return None, f"the record's state {se} is the hub's, not {sb}"
+
+    return corp, (
+        f"REPOINTED from {hub_row.get('handle','')} "
+        f"({hub_row.get('canonical_name','')}, a GOVERNMENT of class "
+        f"{hub_row.get('entity_class','')!r}) to {corp['handle']} "
+        f"({corp['canonical_name']}): the enterprise name begins with that "
+        f"ANCSA corporation's full distinctive name {key!r}. "
+        f"ANCSA_OWNERSHIP_RULING rules 2 and 3 - a government never owns an "
+        f"ANC, and direct government ownership is an exception that must be "
+        f"evidenced, which no source on this row does")
+
 
 # ===========================================================================
 # STAGE `assemble` - every ownership assertion Cedar already holds, normalised
@@ -958,6 +1141,11 @@ def stage_assemble(argv) -> int:
         print(f"    {k:<42} {v}")
 
     held, kept = [], []
+    brand_idx = build_ancsa_brand_index(hubs.by_uid.values())
+    brand_vetoes = []
+    denials = load_hard_ownership_denials()
+    print(f"  hard ownership denials loaded from the negative-decision "
+          f"registry: {len(denials)}")
     for e in edges:
         # --- exclusion, first, by every route -----------------------------
         rx = restricted(e["parent_name"], e["hub_hint_name"], e["source_url"],
@@ -1056,6 +1244,38 @@ def stage_assemble(argv) -> int:
                              "hold_class": "ANCSA_VILLAGE_GOVERNMENT"})
                 continue
 
+        # --- the ANCSA brand guard - the OWNERV6 route into the same defect -
+        # Runs on every source, because the point of the Goldbelt case is that
+        # a second route existed. Sources that pass a `cedar_uid` straight
+        # through never touch the `parent_entity_type` guard above.
+        if not vg_note:
+            bcorp, bnote = ancsa_brand_owner(
+                e["child_name_raw"], {**row, "_child_state": e.get("child_state", "")},
+                brand_idx)
+            if bcorp is not None:
+                row, method = bcorp, "ancsa_brand_repointed_to_named_corporation"
+                vg_note = bnote
+            elif bnote:
+                brand_vetoes.append({**e, "veto_reason": bnote,
+                                     "hub_handle": row.get("handle", "")})
+
+        # --- a denial Cedar has already RULED may not be re-derived --------
+        # Checked AFTER the repoints above, so a row is judged on the owner it
+        # will actually be published with rather than the one it arrived with.
+        # The registry denies; it does not name a replacement. So the edge is
+        # HELD, never repointed to a guess - `docs/ANCSA_OWNERSHIP_RULING.md`
+        # "refuse, send to review", and the house rule that a wrong key is
+        # worse than no key.
+        dn = denials.get((norm(e["child_name_raw"]), row["cedar_uid"]))
+        if dn:
+            held.append({**e, "hold_reason":
+                         f"{dn['constraint_id']} ({dn['reason_code']}, "
+                         f"{dn['evidence_strength']}) is an ACTIVE HARD denial "
+                         f"of owned_by({e['child_name_raw']!r}, "
+                         f"{row['handle']}): {(dn.get('reason_detail') or '')[:240]}",
+                         "hold_class": "NEGATIVE_CONSTRAINT"})
+            continue
+
         # --- a child that IS a hub is not that hub's peer's subsidiary ----
         # `docs/ENTERPRISE_REGISTER_BUILD_LOG.md`: Doyon's own page names Huna
         # Totem and Klawock Heenya, two independent ANCSA village
@@ -1141,6 +1361,20 @@ def stage_assemble(argv) -> int:
         scols = ["nest_refusal"] + [k for k in sweep_refused[0] if k != "nest_refusal"]
         write_csv(SWEEP_REFUSED, scols, sweep_refused)
         print(f"  1070 refused {len(sweep_refused)} -> {SWEEP_REFUSED}")
+
+    # The brand guard's REFUSALS, written for the same reason the 1070
+    # refusals are: a veto that leaves no trace gets re-litigated. These are
+    # rows the guard declined to repoint, not rows it removed.
+    if brand_vetoes:
+        vcols = sorted({k for v in brand_vetoes for k in v})
+        write_csv(STAGE / "ancsa_brand_vetoes.csv", vcols, brand_vetoes)
+        print(f"  ANCSA brand guard vetoed {len(brand_vetoes)} "
+              f"-> {STAGE / 'ancsa_brand_vetoes.csv'}")
+    nbrand = sum(1 for e in kept
+                 if e.get("hub_resolution_method")
+                 == "ancsa_brand_repointed_to_named_corporation")
+    print(f"  ANCSA brand guard repointed {nbrand} edges to the corporation "
+          f"whose name the enterprise carries")
 
     print(f"\n  kept   {len(kept)}")
     print(f"  held   {len(held)}   {dict(Counter(h['hold_class'] for h in held))}")
@@ -1835,6 +2069,14 @@ INVARIANTS = """
       whose own parent_entity_type names an ANCSA corporation
       (ANCSA_OWNERSHIP_RULING rules 2 and 4; the Goldbelt/Tlingit & Haida
       class, 2026-09-02)
+  I12 no enterprise whose name BEGINS with a spine ANCSA corporation's full
+      distinctive name is published on a GOVERNMENT hub, unless one of the
+      brand guard's two vetoes applies. This is the OWNERV6 route into the
+      same defect - `ANC_TRIBE_LOOKUP` was not the only way in
+  I13 no published row violates an ACTIVE HARD `owned_by` denial in
+      `cedar_negative_constraints.csv`. The registry is CONSUMED by `assemble`,
+      so a survivor here means the guard was bypassed, not that a new denial
+      appeared
 """
 
 
@@ -1967,6 +2209,32 @@ def stage_verify(argv) -> int:
             f"parent_entity_type names an ANCSA corporation are still keyed "
             f"to a GOVERNMENT hub: {gov_edges[:3]}")
 
+    # I12 - the brand guard, re-asked on the published table.
+    spine_rows = read_csv(SPINE / "cedar_identity_register.csv")
+    bidx = build_ancsa_brand_index(spine_rows)
+    hub_by_uid = {r["cedar_uid"]: r for r in spine_rows if r.get("cedar_uid")}
+    brandbad = []
+    for r in ents:
+        h = hub_by_uid.get(r["owner_hub_cedar_uid"])
+        if h is None:
+            continue
+        corp, _n = ancsa_brand_owner(
+            r["enterprise_name"], {**h, "_child_state": r.get("state_province", "")},
+            bidx)
+        if corp is not None:
+            brandbad.append(r["enterprise_id"])
+    if brandbad:
+        fails.append(f"I12 {len(brandbad)} enterprises carry an ANCSA "
+                     f"corporation's own name on a GOVERNMENT hub: {brandbad[:3]}")
+
+    # I13 - the registry's hard denials, re-asked on the published table.
+    dn = load_hard_ownership_denials()
+    denied = [r["enterprise_id"] for r in ents
+              if (norm(r["enterprise_name"]), r["owner_hub_cedar_uid"]) in dn]
+    if denied:
+        fails.append(f"I13 {len(denied)} rows violate an ACTIVE HARD owned_by "
+                     f"denial in the negative-decision registry: {denied[:3]}")
+
     for f in fails:
         print("  FAIL " + f)
     if not fails:
@@ -2072,6 +2340,29 @@ def stage_selfcheck(argv) -> int:
             return False
         e["owner_hub_cedar_uid"] = gov["cedar_uid"]
     mutate_edge(_i11, "I11 ANCSA subsidiary re-keyed to a government fires", "I11 ")
+
+    def _i12(rs):
+        # Put a Goldbelt company back on Tlingit & Haida - the exact 2026-09-02
+        # defect, reached through the OWNERV6 route rather than the lookup.
+        spine_rows = read_csv(SPINE / "cedar_identity_register.csv")
+        gov = first(spine_rows, lambda x: x.get("handle") == "AKNF-TLNGHD-00-SEALSK")
+        r = first(rs, lambda x: norm(x["enterprise_name"]).startswith("goldbelt"))
+        if gov is None or r is None:
+            return False
+        r["owner_hub_cedar_uid"] = gov["cedar_uid"]
+        r["owner_hub_entity_class"] = gov["entity_class"]
+    mutate_ent(_i12, "I12 an ANCSA-named firm back on a government fires", "I12 ")
+
+    def _i13(rs):
+        dn = load_hard_ownership_denials()
+        if not dn:
+            return False
+        nk, cand = next(iter(dn))
+        r = first(rs, lambda x: True)
+        if r is None:
+            return False
+        r["enterprise_name"], r["owner_hub_cedar_uid"] = nk, cand
+    mutate_ent(_i13, "I13 a published row under a hard denial fires", "I13 ")
 
     for p, b in baks.items():
         shutil.copy2(b, p)
