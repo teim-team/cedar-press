@@ -1,0 +1,114 @@
+{
+  "built": "2026-09-02",
+  "rows_per_dataset": 100,
+  "datasets": [
+    {
+      "dataset": "contractors",
+      "rows": 100,
+      "columns": 11,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 80
+    },
+    {
+      "dataset": "deals",
+      "rows": 100,
+      "columns": 9,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 54
+    },
+    {
+      "dataset": "federal-register",
+      "rows": 100,
+      "columns": 8,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 43
+    },
+    {
+      "dataset": "funding",
+      "rows": 100,
+      "columns": 11,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 85
+    },
+    {
+      "dataset": "legislation",
+      "rows": 100,
+      "columns": 9,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 66
+    },
+    {
+      "dataset": "lobbying",
+      "rows": 100,
+      "columns": 8,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 62
+    },
+    {
+      "dataset": "nagpra",
+      "rows": 100,
+      "columns": 7,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 74
+    },
+    {
+      "dataset": "native-owned-businesses",
+      "rows": 100,
+      "columns": 8,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 70
+    },
+    {
+      "dataset": "natural-resources",
+      "rows": 100,
+      "columns": 8,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 26,
+      "full_columns": 52
+    },
+    {
+      "dataset": "nest",
+      "rows": 100,
+      "columns": 8,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 88
+    },
+    {
+      "dataset": "nonprofits",
+      "rows": 100,
+      "columns": 8,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 72
+    },
+    {
+      "dataset": "subcontracting",
+      "rows": 100,
+      "columns": 10,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 89
+    }
+  ]
+}
