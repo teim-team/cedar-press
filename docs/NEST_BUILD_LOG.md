@@ -1386,3 +1386,176 @@ in-place enricher on the same file. Run `1133 apply` → `1072 assemble` →
 under *in-place enrichers* rather than *full rebuilds*, which is wrong and is a
 defect in the dependency manifest, not in this ordering.
 <!-- END NEST-OWNER-V6-INPUT-2026-09-02 -->
+
+<!-- BEGIN NEST-RELATIONSHIP-RESOLUTION-QA-2026-09-02 -->
+## 2026-09-02 — relationship resolution QA (`1157`), and two fixes in `1072`
+
+Written against the owner's reconciliation of two independent reviews:
+
+> *"The ten-row review caught Goldbelt Hawk → Tlingit & Haida and United Tribes
+> Technical College → United Auburn, along with affiliation being promoted to
+> ownership. The 100-row sample continued to make me uneasy about ownership
+> versus affiliation relationships. So the Cedar UID design is fine, but
+> relationship resolution still needs serious QA."*
+
+Every number below was measured, and the command is named.
+
+### Defect 1 — "affiliation promoted to ownership". Real, but not where it looked
+
+Measured on the then-published `dist/customer/nest.csv` (4,798 rows):
+
+| what | measured |
+|---|---:|
+| `relation_class` = affiliation / ownership | **3,286 / 1,512** |
+| rows published `ownership` with **no** underlying edge asserting ownership | **0** |
+| edges with a blank `relationship_as_recorded` | **0** |
+| rows with `relationship` written literally `unspecified` | **3,187** |
+| rows with a **blank** `relationship` | **0** |
+| **rows whose `assertion_class` said OWNERSHIP while their own `relation_class` said `affiliation`** | **3,286** |
+
+So the two claims in the brief both need correcting. The build log's
+`1,512 / 98` does **not** reproduce; `3,286 / 1,512` does. And the feared
+defect — ownership published on rows that never asserted it — **is not in this
+table**: all 1,512 ownership rows carry an ownership edge, and the
+`unspecified`-written-literally guard holds at 0 blanks.
+
+The promotion the owner saw was **`assertion_class`**, which was the hard-coded
+string `"OWNERSHIP"` on every row. Two columns of one row contradicting each
+other, with the stronger claim in the summary column.
+
+**Fixed** in `1072`: `assertion_class = rel_class.upper()`. Held by new
+invariant **I9**, which fired at 3,286 on the pre-fix table.
+
+**One latent hazard closed alongside.** The enterprise-level collapse read
+`canon_rel(x.get("relationship") or "subsidiary")` — and `subsidiary` is in
+`OWNERSHIP_RELS` — while the *edge* rows for the same observation used
+`.get(k, default)` and so kept an empty string, which canonicalises to
+`unspecified`/`affiliation`. A blank would have been published as ownership on
+the enterprise and as affiliation on its own evidence. **Zero of 7,559 edges
+carry a blank `relationship`, so this was a guard and not a correction** — row
+counts are unchanged by it — but it is the same shape that has published
+ownership on 3,189 rows once already in this project.
+
+### Defect 2a — the wrong owner, structural. Fixed
+
+`data/raw/external/anc_tribal_subsidiary_lookup.csv` carries **118 rows whose
+`parent_entity_type` names an ANCSA corporation (`ANC_VILLAGE_*`) while
+`parent_entity_id` is a GOVERNMENT** — all 118 `AKNF-` ids. `1072` has a guard
+for exactly this, and it was gated on **the resolved hub's class** being
+`Federally recognized Alaska Native Village`:
+
+* 95 rows resolved to a Village government → guard fired, repointed;
+* **23 rows carry `ANC_VILLAGE_GOLDBELT` against `AKNF-TLNGHD-00-SEALSK`,
+  Tlingit & Haida, whose class is `Federally recognized tribe`** → guard
+  skipped entirely, and the Goldbelt family published as owned by a tribal
+  government.
+
+Goldbelt, Incorporated is the ANCSA **urban** corporation for Juneau and was
+already in the spine as `ANVC-GLDBLT-00`. ANCSA_OWNERSHIP_RULING rules 2 and 4:
+a government does not own an ANC, and the tie between the two is **ancestral
+association**, never a corporate ownership edge. The owner's own 2026-08-26
+ANCSA ruling already contains the pair —
+`AKNF-TLNGHD-00-SEALSK → ANVC-GLDBLT-00`, 18 attributions — so this repoint is
+corroborated by a ruling, not minted by an agent.
+
+**The trigger now reads the source's own field**, which is what the code's own
+comment at `ANC_VILLAGE_TYPE` always claimed it did. Blast radius is exactly
+the 23. After the change all 118 `ANC_VILLAGE_*` rows repoint (`assemble` prints
+the family breakdown) and the 22 published lookup edges move off the government
+hub. Held by new invariant **I11**.
+
+**I11 was wrong on its first draft and the wrong version is instructive.** It
+matched every enterprise whose *name* appeared among the lookup's ANCSA
+subsidiaries and reported **116 failures where the real number is 22**, because
+a second source (`OWNERV6`) independently names some of the same firms against
+a government hub — a different assertion by a different publisher. Testing a
+rule about one source's field by matching names is the containment defect
+ENTITY_MATCH_RULES rule 1 refuses; the invariant now tests the **edge**.
+
+### Defect 2b — the wrong owner, inherited. Measured, NOT edited
+
+Two mechanisms, both arriving through `OWNERV6` (the owner's v6 research
+dataset via `1133`), and both are **review material, not agent edits**:
+
+* **`ANCSA_VILLAGE_GOVERNMENT_HUB` — 1,086 rows** whose owner hub is an Alaska
+  Native Village GOVERNMENT, every one `relation_class = affiliation`, every
+  one `source_id = OWNERV6`. ANCSA rule 1 presumes the village **corporation**
+  owns an operating company. `Alutiiq LLC` sits under `Alutiiq` — the Native
+  Village — not Afognak Native Corporation. **584 of them carry a corporation
+  the owner's 2026-08-26 ruling already named.**
+  * **17 of those are `ANCSA_RULE_2_VIOLATION`**: the *enterprise itself* is an
+    ANCSA corporation in Cedar's spine — `Afognak Native Corporation` published
+    as an enterprise of the Native Village of Afognak; also
+    `AKHIOK-KAGUYAK, INC`, `KLUKWAN, INC`, `THE KUSKOKWIM CORPORATION`,
+    `EKWOK NATIVES LTD`. `village_government_owns_an_anc()` returns `False`
+    unconditionally and these rows assert it is `True`.
+* **`NAME_GUARD_REFUSED` — 2,298 rows** where `cedar_match_guard.guard()`
+  refuses the name match and no source names the edge. This is the
+  `CENTRAL`/`UNITED` class the ten-row review found: Tlingit & Haida is
+  officially the ***Central*** Council of the Tlingit and Haida Indian Tribes,
+  so it collects `CENTRAL BAPTIST CHURCH OF SIOUX CITY IOWA`, `CENTRAL DAKOTA
+  FFA ALUMNI`, `CENTRAL YAVAPAI TRANSIT FOUNDATION`; `United Auburn` collects
+  `UNITED BLIND OF WALLA WALLA`, `NAVY LEAGUE OF THE UNITED STATES WICHITA
+  COUNCIL` and **`United Tribes Technical College`**. Both `central` and
+  `united` are already in `cedar_domain.NAME_TRAPS`.
+
+**Why none of this was auto-applied.** Three measurements say don't:
+
+1. The same guard **refuses 1,513 of the 1,658 rows whose source NAMES the
+   edge** — an audited AS 45.55.139 filing listing its own wholly-owned
+   subsidiaries. `ASRC Federal Broadleaf` shares no token with `Arctic Slope
+   Regional Corporation` and is correct. A name guard cannot judge an edge a
+   publisher stated (rule 7; checklist step 2). So it is asked **only** where
+   no source names the edge.
+2. The owner's ANCSA crosswalk is **one-to-many**: `Barrow` was ruled to
+   Ukpeaġvik Iñupiat Corporation on 288 attributions **and** to Natives of
+   Kodiak on 133; `Pribilof Islands` to the Aleut Corporation on 11 and to
+   St. George Tanaq on 10. Which corporation owns a given firm is a fact about
+   that firm.
+3. Rule 8 (an agent ruling may not mint tier A) and rule 12 (acting on a raw
+   contradiction sweep would have repointed 126 correct rows to chase 3).
+
+These rows are **already published as `affiliation` / `unspecified`** — the
+weaker reading, and for the village-corporation/village-government pairs
+specifically that is what ANCSA rule 4 prescribes ("association, record as
+such"). The open question is whether the **owner** is right, and that is the
+owner's ladder (rule 13), not a matcher's. Nothing was demoted, repointed or
+deleted; every one of the 3,384 rows carries `proposed_disposition = REVIEW`.
+
+**A scoring mistake worth recording.** The first version ranked candidates by
+state disagreement and returned the Alutiiq/Afognak family as its strongest
+finding — a lower-48 subsidiary of an Alaska ANC disagrees with its parent's
+state *by design*. Geography is recorded on the row and no longer scored
+(rule 7: a corroborator, not a gate).
+
+### THE GATE
+
+```
+py -3 code/1072_tribally_owned_enterprises.py assemble    -> 118/118 ANC_VILLAGE_* repointed
+py -3 code/1072_tribally_owned_enterprises.py build       -> 5,888 enterprises, 8,691 edges
+py -3 code/1102_nest_corroboration_adjudication.py build  -> 0 breaches
+py -3 code/1072_tribally_owned_enterprises.py verify      -> PASS, 11 invariants
+py -3 code/1072_tribally_owned_enterprises.py selfcheck   -> 11/11, incl. I9, I10, I11 proved to FIRE
+py -3 code/1072_tribally_owned_enterprises.py conserve    -> exit 0
+py -3 code/1157_nest_relationship_resolution_qa.py apply  -> 3,384 candidates, all REVIEW
+py -3 code/1157_nest_relationship_resolution_qa.py verify -> PASS on C1-C6
+py -3 code/293_lint_bug_classes.py                        -> 0 findings in 1072 or 1157
+```
+
+**Attribution of the row-count move, because it is larger than this change.**
+The table went 4,798 → 5,888. Measured against the previously published table:
+**1,090 added, 0 removed, 0 rows repointed in place, 21 rows `ownership` →
+`affiliation`.** Of the 1,090 added, **1,086 carry `source_id = OWNERV6`** and
+arrive from `data/staging/nest/owner_v6_edges.jsonl` (written 14:59, one minute
+*after* the previous `data/clean` at 14:58) — i.e. the growth is `1133`'s newer
+output, not this change. The 21 demotions are the Goldbelt family: with the
+lookup's ownership edge repointed to Goldbelt, Incorporated, only the
+`OWNERV6` `unspecified` edge remains on the Tlingit & Haida cluster, so the
+class correctly drops to `affiliation`.
+
+**Left for the owner of `1137`.** `data/clean/nest_enterprises.csv` is now
+ahead of `dist/customer/nest.csv`; `1137 build nest` is the remaining step.
+`1137 verify` reports **four** stale datasets — `federal-register`, `nagpra`,
+`nest`, `nonprofits` — so `846` is at 29/30 for reasons three-quarters outside
+this workstream.
+<!-- END NEST-RELATIONSHIP-RESOLUTION-QA-2026-09-02 -->

@@ -991,8 +991,37 @@ def stage_assemble(argv) -> int:
             continue
 
         # --- the Alaska village-government guard --------------------------
+        # THE TRIGGER IS THE SOURCE'S OWN FIELD, NOT THE HUB'S CLASS.
+        # Until 2026-09-02 this read `if row.entity_class == VILLAGE_GOV`,
+        # which asks the wrong question. The defect the guard exists to stop
+        # is *the source keying an ANCSA corporation's subsidiaries to a
+        # GOVERNMENT*, and the source says so in `parent_entity_type`. Gating
+        # on the government's own sub-class then decides the case on a
+        # coincidence of how that particular government is classified.
+        #
+        # MEASURED COST OF THE OLD TRIGGER, 2026-09-02: all 118 `ANC_VILLAGE_*`
+        # rows in `anc_tribal_subsidiary_lookup.csv` carry an `AKNF-` parent
+        # id - a GOVERNMENT - but only 95 of them resolve to a hub of class
+        # `Federally recognized Alaska Native Village`. The other **23 carry
+        # `parent_entity_type = ANC_VILLAGE_GOLDBELT` against
+        # `AKNF-TLNGHD-00-SEALSK`, Tlingit & Haida, whose class is
+        # `Federally recognized tribe`** - so the guard was skipped entirely
+        # and the Goldbelt family was published as owned by a tribal
+        # government. Goldbelt, Incorporated is the ANCSA URBAN corporation
+        # for Juneau (`ANVC-GLDBLT-00`, already in the spine, and reached by
+        # this guard's own existing prefix route); Tlingit & Haida is a
+        # federally recognized TRIBE. ANCSA_OWNERSHIP_RULING rules 2 and 4:
+        # a government does not own an ANC, and the tie between the two is
+        # ANCESTRAL association, never a corporate ownership edge.
+        #
+        # The owner caught this by hand in the ten-row review ("Goldbelt Hawk
+        # -> Tlingit & Haida"). Reading the trigger out of the source's own
+        # field is what the comment at ANC_VILLAGE_TYPE always claimed the
+        # code did, and it is the structural predicate ENTITY_MATCH_RULES asks
+        # for rather than another denylist.
         vg_note = ""
-        if row.get("entity_class") == VILLAGE_GOV:
+        if (ANC_VILLAGE_TYPE.match(e["owner_class_hint"] or "")
+                and row.get("entity_class") in GOVERNMENT_CLASSES):
             m = ANC_VILLAGE_TYPE.match(e["owner_class_hint"] or "")
             corp, why = None, "the source names no corporation"
             if m:
@@ -1007,18 +1036,23 @@ def stage_assemble(argv) -> int:
                     corp = hubs.by_handle.get(h)
                     why = f"named acronym exception {token.upper()} -> {h}"
             if corp is not None:
-                vg_note = (f"REPOINTED from {row['handle']} ({row['canonical_name']}, a "
-                           f"Native Village GOVERNMENT) to {corp['handle']} on the "
+                vg_note = (f"REPOINTED from {row['handle']} ({row['canonical_name']}, "
+                           f"a GOVERNMENT of class {row.get('entity_class','')!r}) to "
+                           f"{corp['handle']} ({corp['canonical_name']}) on the "
                            f"source's own parent_entity_type={e['owner_class_hint']!r}; "
-                           f"ANCSA_OWNERSHIP_RULING rule 2 - a village government "
-                           f"does not own an ANCSA corporation")
+                           f"ANCSA_OWNERSHIP_RULING rules 2 and 4 - a government does "
+                           f"not own an ANCSA corporation, and the tie between the two "
+                           f"is ancestral association, not a corporate ownership edge")
                 row, method = corp, "ancsa_village_government_repointed_to_corporation"
             else:
                 held.append({**e, "hold_reason":
-                             f"parent resolves to a Native Village GOVERNMENT "
-                             f"({row['handle']}) which cannot own an ANCSA "
-                             f"corporation, and the corporation it means is not "
-                             f"uniquely in the spine ({why})",
+                             f"the source's parent_entity_type "
+                             f"{e['owner_class_hint']!r} names an ANCSA "
+                             f"corporation but its parent id resolves to a "
+                             f"GOVERNMENT ({row['handle']}, "
+                             f"{row.get('entity_class','')}), which cannot own "
+                             f"an ANCSA corporation, and the corporation it "
+                             f"means is not uniquely in the spine ({why})",
                              "hold_class": "ANCSA_VILLAGE_GOVERNMENT"})
                 continue
 
@@ -1415,7 +1449,20 @@ def stage_build(argv) -> int:
         hub = hubs.by_uid.get(hub_uid, {})
         eid = idreg[(hub_uid, norm(cname))]
 
-        rels = [canon_rel(x.get("relationship") or "subsidiary")[0] for x in es]
+        # A BLANK RELATIONSHIP MAY NEVER BECOME AN OWNERSHIP WORD. This read
+        # `or "subsidiary"` until 2026-09-02, and `subsidiary` is in
+        # OWNERSHIP_RELS - so an observation that said nothing about the
+        # relationship would have been published as ownership, while the SAME
+        # observation's edge row (which uses `.get(k, default)` and so keeps
+        # the empty string) was published as `unspecified` / `affiliation`.
+        # The enterprise and its own evidence would have contradicted each
+        # other by construction, in the fabricating direction.
+        # MEASURED 2026-09-02 BEFORE THE CHANGE: zero of 7,559 edges carry a
+        # blank `relationship`, so the defect was latent and this is a guard,
+        # not a correction - the row counts are unchanged by it. It is written
+        # down because the identical shape (blank defaulting to `subsidiary`)
+        # has already published ownership on 3,189 rows once in this project.
+        rels = [canon_rel(x.get("relationship") or "unspecified")[0] for x in es]
         rel = max(rels, key=lambda r: REL_RANK.get(r, 0))
         rel, rel_class = canon_rel(rel)
         best = max(es, key=lambda x: (EVID_RANK.get(x["evidence_class"], 0),
@@ -1546,7 +1593,16 @@ def stage_build(argv) -> int:
             "in_federal_contracting": present,
             "in_federal_contracting_basis": pres_basis,
             "identity_scope": best["identity_scope"],
-            "assertion_class": "OWNERSHIP",
+            # THE ROW SAYS WHICH ASSERTION IT IS MAKING. Hard-coded
+            # `"OWNERSHIP"` until 2026-09-02, which put the word OWNERSHIP on
+            # **3,286 of 4,798 published rows whose own `relation_class` said
+            # `affiliation` and whose `relationship` said `unspecified`**
+            # (measured on `dist/customer/nest.csv`, 2026-09-02). Two columns
+            # of the same row contradicting each other, with the stronger
+            # claim in the summary column - which is exactly the promotion the
+            # owner flagged in the ten-row review. A constant is not an
+            # assertion about a row; it is a label on the file.
+            "assertion_class": rel_class.upper(),
             "evidence_class": best["evidence_class"],
             "n_source_observations": len(es),
             "n_distinct_sources": len({x["source_id"] for x in es}),
@@ -1607,8 +1663,12 @@ def stage_build(argv) -> int:
                 "cedar_uid": hub_uid,       # the owner - see the note above
                 "owner_hub_handle": hub.get("handle", ""),
                 "owner_hub_name": hub.get("canonical_name", ""),
-                "relationship": canon_rel(x.get("relationship", "subsidiary"))[0],
-                "relation_class": canon_rel(x.get("relationship", "subsidiary"))[1],
+                # `unspecified`, never `subsidiary` - see the note on `rels`
+                # above. One default for the enterprise and a different one
+                # for its own edges is how a row and its evidence come to
+                # disagree.
+                "relationship": canon_rel(x.get("relationship") or "unspecified")[0],
+                "relation_class": canon_rel(x.get("relationship") or "unspecified")[1],
                 "relationship_as_recorded": x.get("relationship", ""),
                 "depth_as_recorded": x.get("depth_hint", 1),
                 "ownership_percent_stated": x.get("ownership_percent", ""),
@@ -1652,7 +1712,7 @@ def stage_build(argv) -> int:
         for x in es:
             fam["audited" if x["evidence_class"] ==
                 "audited_annual_report_as_45_55_139" else "web"].add(
-                    canon_rel(x.get("relationship") or "subsidiary")[0])
+                    canon_rel(x.get("relationship") or "unspecified")[0])
         if len(fam) < 2:
             continue
         aud, web = fam["audited"], fam["web"]
@@ -1764,6 +1824,17 @@ INVARIANTS = """
       blank would silently leave a row out of the headline count
   I8  no Alaska Native Village GOVERNMENT owns an ANCSA corporation
       (ANCSA_OWNERSHIP_RULING rule 2)
+  I9  assertion_class agrees with relation_class on every row. A row may not
+      be summarised as OWNERSHIP while its own relation_class says
+      affiliation - that is the promotion the 2026-09-02 review caught
+  I10 every row published `relation_class = ownership` has at least one edge
+      in the relations table that itself asserts ownership. Ownership on the
+      enterprise row must be something a source said, not something the
+      collapse produced
+  I11 no GOVERNMENT hub owns an enterprise whose edge came from a source
+      whose own parent_entity_type names an ANCSA corporation
+      (ANCSA_OWNERSHIP_RULING rules 2 and 4; the Goldbelt/Tlingit & Haida
+      class, 2026-09-02)
 """
 
 
@@ -1847,6 +1918,55 @@ def stage_verify(argv) -> int:
         fails.append(f"I8 {len(vg)} rows attach an ANCSA corporation to a "
                      f"village GOVERNMENT: {vg[:3]}")
 
+    # I9 - the summary column may not outrank the data column.
+    mism = [r["enterprise_id"] for r in ents
+            if (r.get("assertion_class") or "").strip().lower()
+            != (r.get("relation_class") or "").strip().lower()]
+    if mism:
+        fails.append(f"I9 {len(mism)} rows whose assertion_class contradicts "
+                     f"their own relation_class: {mism[:3]}")
+
+    # I10 - ownership on the enterprise row must be something a SOURCE said.
+    own_edge = {e["enterprise_id"] for e in edges
+                if e.get("relation_class") == "ownership"}
+    unbacked = [r["enterprise_id"] for r in ents
+                if r.get("relation_class") == "ownership"
+                and r["enterprise_id"] not in own_edge]
+    if unbacked:
+        fails.append(f"I10 {len(unbacked)} rows published as ownership with no "
+                     f"underlying edge that asserts it: {unbacked[:3]}")
+
+    # I11 - the Goldbelt class. TESTED ON THE ASSERTION, NOT ON THE NAME.
+    #
+    # The first draft of this check matched every enterprise whose NAME
+    # appeared among the lookup's ANCSA-corporation subsidiaries and reported
+    # **116 failures where the real number is the 22 lookup edges** - because
+    # a second source (`OWNERV6`) independently names some of the same firms
+    # against a government hub, and that is a different assertion by a
+    # different publisher. Testing a rule about one source's field by matching
+    # names is the containment defect ENTITY_MATCH_RULES rule 1 refuses, and
+    # writing it into an invariant would have made the guard manufacture the
+    # error class it exists to catch. Kept in the comment because the wrong
+    # version was plausible.
+    #
+    # The rule is about the EDGE: a row whose publisher's own
+    # `parent_entity_type` names an ANCSA corporation may not be keyed to a
+    # GOVERNMENT hub. So test exactly those edges.
+    hub_class = {r["cedar_uid"]: r.get("entity_class", "")
+                 for r in read_csv(SPINE / "cedar_identity_register.csv")}
+    anc_named = {norm(r.get("subsidiary_name") or "")
+                 for r in read_csv(RAW / "external" / "anc_tribal_subsidiary_lookup.csv")
+                 if ANC_VILLAGE_TYPE.match(r.get("parent_entity_type") or "")}
+    gov_edges = [e["enterprise_edge_id"] for e in edges
+                 if e.get("source_id") == "ANC_TRIBE_LOOKUP"
+                 and norm(e.get("child_name_as_recorded") or "") in anc_named
+                 and hub_class.get(e.get("owner_hub_cedar_uid"), "") in GOVERNMENT_CLASSES]
+    if gov_edges:
+        fails.append(
+            f"I11 {len(gov_edges)} ANC_TRIBE_LOOKUP edges whose own "
+            f"parent_entity_type names an ANCSA corporation are still keyed "
+            f"to a GOVERNMENT hub: {gov_edges[:3]}")
+
     for f in fails:
         print("  FAIL " + f)
     if not fails:
@@ -1897,6 +2017,61 @@ def stage_selfcheck(argv) -> int:
            "I5 dangling parent fires", "I5 ")
     mutate(lambda rs: rs[0].__setitem__("in_federal_contracting", ""),
            "I7 blank verdict fires", "I7 ")
+
+    # --- the three checks added 2026-09-02 for relationship resolution ----
+    # Each one is here because it caught a real defect on the live table this
+    # morning: I9 at 3,286 rows, I10 at 0, I11 at 22 edges.
+    def first(rows, pred):
+        return next((r for r in rows if pred(r)), None)
+
+    def mutate_ent(fn, label, expect):
+        rows = read_csv(OUT_ENT)
+        if fn(rows) is False:
+            results.append((label + " [NO FIXTURE ROW]", False))
+            return
+        write_csv(OUT_ENT, list(rows[0].keys()), rows)
+        rc2, out2 = run()
+        results.append((label, rc2 == 1 and expect in out2))
+        shutil.copy2(baks[OUT_ENT], OUT_ENT)
+
+    def mutate_edge(fn, label, expect):
+        rows = read_csv(OUT_EDGE)
+        if fn(rows) is False:
+            results.append((label + " [NO FIXTURE ROW]", False))
+            return
+        write_csv(OUT_EDGE, list(rows[0].keys()), rows)
+        rc2, out2 = run()
+        results.append((label, rc2 == 1 and expect in out2))
+        shutil.copy2(baks[OUT_EDGE], OUT_EDGE)
+
+    def _i9(rs):
+        r = first(rs, lambda x: x["relation_class"] == "affiliation")
+        if r is None:
+            return False
+        r["assertion_class"] = "OWNERSHIP"
+    mutate_ent(_i9, "I9 affiliation summarised as OWNERSHIP fires", "I9 ")
+
+    def _i10(rs):
+        own = {e["enterprise_id"] for e in read_csv(OUT_EDGE)
+               if e["relation_class"] == "ownership"}
+        r = first(rs, lambda x: x["enterprise_id"] not in own)
+        if r is None:
+            return False
+        r["relation_class"] = r["assertion_class"] = "ownership"
+    mutate_ent(_i10, "I10 ownership with no ownership edge fires", "I10 ")
+
+    def _i11(rs):
+        gov = first(read_csv(SPINE / "cedar_identity_register.csv"),
+                    lambda x: x.get("entity_class") in GOVERNMENT_CLASSES)
+        anc_named = {norm(x.get("subsidiary_name") or "")
+                     for x in read_csv(RAW / "external" / "anc_tribal_subsidiary_lookup.csv")
+                     if ANC_VILLAGE_TYPE.match(x.get("parent_entity_type") or "")}
+        e = first(rs, lambda x: x["source_id"] == "ANC_TRIBE_LOOKUP"
+                  and norm(x["child_name_as_recorded"]) in anc_named)
+        if gov is None or e is None:
+            return False
+        e["owner_hub_cedar_uid"] = gov["cedar_uid"]
+    mutate_edge(_i11, "I11 ANCSA subsidiary re-keyed to a government fires", "I11 ")
 
     for p, b in baks.items():
         shutil.copy2(b, p)
