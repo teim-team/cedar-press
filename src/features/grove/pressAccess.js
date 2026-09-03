@@ -36,9 +36,12 @@
  *   pro       Cedar Press+ and above
  *   grove     Cedar Grove only, and never on Cedar Press
  *
- * The shelves nest upward, so Cedar Press+ sees standard and pro, and Grove
- * sees all
- * three. A capped dataset is shown rather than hidden: a reader should be able
+ * The shelves nest upward, so Cedar Press+ reaches standard and pro, and Grove
+ * and Tree reach all three — which on this storefront means all twelve, since
+ * nothing Cedar Press sells sits on the grove shelf. A collection PLACED on
+ * the grove shelf opens for nobody here; see `canOpenDataset`.
+ *
+ * A capped dataset is shown rather than hidden: a reader should be able
  * to see what exists and what it would take to open it. `upgradeFor` names the
  * product that opens a given shelf, so the prompt in the card can say which
  * one rather than "upgrade".
@@ -116,14 +119,45 @@ export function shelfReach(user) {
 }
 
 /**
- * Whether this user can open a dataset. A dataset with no declared shelf is
- * treated as pro rather than standard: a new entry that nobody has classified
- * should not fall open by default.
+ * Whether this user can open a dataset ON CEDAR PRESS. A dataset with no
+ * declared shelf is treated as pro rather than standard: a new entry that
+ * nobody has classified should not fall open by default.
+ *
+ * NOTHING ON THE GROVE SHELF OPENS HERE, FOR ANY PLAN
+ * Codex, PR #41. Giving PLAN_REACH the `tree: SHELF.GROVE` key it lacked fixed
+ * the drift this file's header describes and exposed the disagreement beneath
+ * it: `PRESS_CATALOG` carries `gaming` and the launch collection does not, so
+ * a Grove or Tree session was told it could open a collection
+ * `repository.may_open` refuses — the same defect as the `tree` drift, in the
+ * other direction and one layer down.
+ *
+ * The client is the wrong side, and the reason is a product ruling rather than
+ * a symmetry. `code/cedar_publication.py` splits the shelves in two:
+ * STOREFRONT_SHELVES ("standard", "pro") is the twelve a paying Cedar Press
+ * customer sees and GROVE_SHELVES ("grove") is the one built to the same
+ * standard and sold through Cedar Grove; BUILD_SHELVES is the thirteen.
+ * `scripts/import_cedar_manifest.py` carries that split into the manifest, so
+ * a grove-shelf collection reaches this repository in `excluded` and never in
+ * the launch collection. The Cedar Press API therefore cannot serve one
+ * without the Cedar data workspace changing its ruling first, and a page that
+ * renders a download for it is offering a file no route will hand over.
+ *
+ * So the grove shelf stays in SHELF_ORDER and in PLAN_REACH — that is what
+ * makes Grove and Tree reach everything Cedar Press has, and it is the map
+ * `repository.SHELF_BY_TIER` is compared against — but a collection PLACED on
+ * it is not sold on this storefront and does not open on it. `upgradeFor`
+ * already answers this way: it names Cedar Grove, `sameProduct: false`, for a
+ * grove-shelf dataset whatever the reader's plan.
+ *
+ * `server/tests/test_access.py` compares this function's answers, per tier and
+ * per collection, against `repository.may_open`.
  */
 export function canOpenDataset(user, dataset) {
+  const shelf = shelfOf(dataset);
+  if (shelf === SHELF.GROVE) return false;
   const reach = shelfReach(user);
   if (!reach) return false;
-  const need = SHELF_ORDER.indexOf(shelfOf(dataset));
+  const need = SHELF_ORDER.indexOf(shelf);
   if (need < 0) return false;
   return SHELF_ORDER.indexOf(reach) >= need;
 }

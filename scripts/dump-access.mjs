@@ -26,7 +26,13 @@
 // mismatch should read as "this tier, this key".
 
 import { EXCLUDED_COLLECTIONS } from "../src/features/grove/collection.js";
-import { PLAN_REACH, SHELF, canReadCedarPress, shelfReach } from "../src/features/grove/pressAccess.js";
+import {
+  PLAN_REACH,
+  SHELF,
+  canOpenDataset,
+  canReadCedarPress,
+  shelfReach,
+} from "../src/features/grove/pressAccess.js";
 import { PRESS_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { WORKSPACE_TIERS } from "../src/workspaceTier.js";
 
@@ -62,6 +68,21 @@ process.stdout.write(
       // against the collections manifest, whose `excluded` entries carry the
       // shelf the Cedar data workspace assigned.
       catalogByShelf: Object.fromEntries(Object.entries(byShelf).sort()),
+      // What the CLIENT decides, collection by collection, over the whole
+      // catalog rather than the storefront subset. This is the decision the
+      // browser acts on -- it is what puts a download control on a tile --
+      // and until it was dumped nothing compared it to `may_open`. The shelf
+      // maps above agreeing is not enough: `PRESS_CATALOG` carries a
+      // collection the launch collection does not, so the two sides can hold
+      // identical tier maps and still disagree about a specific tile.
+      canOpen: Object.fromEntries(
+        TIERS.map((tier) => [
+          tier,
+          PRESS_CATALOG.filter((entry) => canOpenDataset(asUser(tier), entry))
+            .map((entry) => entry.id)
+            .sort(),
+        ]),
+      ),
       excluded: EXCLUDED_COLLECTIONS.map((entry) => ({
         id: entry.id,
         shelf: entry.shelf,

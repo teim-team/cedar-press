@@ -243,7 +243,11 @@
 /* Full width of the proof row above: the names run rail to rail between
  * the outer cards' edges instead of sitting in a narrower island. */
 .teim-rd .cp-cats { margin: 1.6rem auto 0; max-width: none; text-align: center; }
-.teim-rd .cp-cats__head { font-family: var(--mono); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); margin: 0 0 0.5rem; }
+/* 0.75 measured 3.46:1 against the panel teal at 0.62rem — the lowest
+ * contrast anywhere on the service, and well under the 4.5:1 WCAG 1.4.3
+ * asks for text this size. 0.95 measures 4.57:1; the caps, the tracking and
+ * the size still read as a label rather than as copy. */
+.teim-rd .cp-cats__head { font-family: var(--mono); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.95); margin: 0 0 0.5rem; }
 .teim-rd .cp-cats__names { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.9; color: #fff; margin: 0 0 0.7rem; }
 .teim-rd .cp-cats__dot { color: rgba(255, 255, 255, 0.55); }
 .teim-rd .cp-cats__how { font-family: var(--sans); font-size: 0.82rem; line-height: 1.5; color: rgba(255, 255, 255, 0.92); margin: 0 auto 0.8rem; max-width: none; }
@@ -547,6 +551,12 @@
  * everything is revealed immediately. */
 .teim-rd .cp-fade { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0, 0, 1); }
 .teim-rd .cp-fade.is-in { opacity: 1; transform: none; }
+/* Marked by useFadeIn on the sections that were already on the first screen
+ * when the page mounted. They are not revealed, they are simply there: the
+ * page's own cp-page-in rise is the one entrance the first screen gets, and a
+ * second 0.55s transition running underneath it is what made the page look
+ * like it arrived twice. Below the fold the transition above still applies. */
+.teim-rd .cp-fade--now { transition: none; }
 @media (prefers-reduced-motion: reduce) { .teim-rd .cp-fade { opacity: 1; transform: none; transition: none; } }
 /* The platform's .auth-hero paints a teal gradient whose upper stops carry
  * white text at under 3:1, and a gradient inside one surface breaks the flat
@@ -839,7 +849,11 @@
  * read panel, and this line says so instead of letting one year speak for
  * the shelf. */
 .teim-rd .cp-band__vary { font-family: var(--mono); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); margin: 0.3rem 0 0; }
-.teim-rd .cp-band--fill .cp-band__vary { color: rgba(255, 255, 255, 0.8); }
+/* 0.8 measured 3.72:1 against the band teal (#0A7F74) at 0.58rem, under the
+ * 4.5:1 WCAG 1.4.3 minimum for text this size. 0.95 measures 4.57:1. The
+ * quiet comes from the size and the mono face, not from the last 5% of
+ * alpha, so nothing about the hierarchy changes. */
+.teim-rd .cp-band--fill .cp-band__vary { color: rgba(255, 255, 255, 0.95); }
 
 /* The price stands with the tier's name, in the band's own ink. */
 .teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }
@@ -1040,6 +1054,15 @@
  * feel restless rather than alive. */
 .teim-rd .cp-band__grid > li { opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; transition-delay: calc(var(--i, 0) * 45ms); }
 .teim-rd .cp-band.is-in .cp-band__grid > li { opacity: 1; transform: none; }
+/* A band that was already on the first screen (PressShelf's useReveal marks
+ * it before paint) skips the sequence entirely. Twelve badges at 45ms apart
+ * is half a second of shelf filling in after the page has otherwise
+ * finished — right when a reader scrolls down to it, wrong as the thing
+ * that happens while the page is still arriving. */
+.teim-rd .cp-reveal--now .cp-band__grid > li,
+.teim-rd .cp-reveal--now .cp-band__id,
+.teim-rd .cp-reveal--now .cp-read,
+.teim-rd .cp-reveal--now .cp-gt__star { transition: none; }
 .teim-rd .cp-band__id, .teim-rd .cp-read { transition: opacity 0.5s ease, transform 0.5s ease; }
 .teim-rd .cp-band:not(.is-in) .cp-band__id, .teim-rd .cp-band:not(.is-in) .cp-read { opacity: 0; transform: translateY(10px); }
 .teim-rd .cp-badge.is-on, .teim-rd button.cp-badge--act:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; }
@@ -1932,7 +1955,9 @@
  * for a faded white than navy did. */
 .teim-rd .cp-surf--deep .cp-new__item { color: #fff; }
 .teim-rd .cp-surf--deep .cp-new__item b { color: #fff; }
-.teim-rd .cp-surf--deep .cp-new__date { color: rgba(255, 255, 255, 0.84); }
+/* Same measurement as .cp-band__vary above: 0.84 was 3.93:1 on the deep
+ * teal and needed 4.5:1. */
+.teim-rd .cp-surf--deep .cp-new__date { color: rgba(255, 255, 255, 0.95); }
 .teim-rd .cp-new { margin: 2rem 0 0; padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.18); list-style: none; }
 
 /* ══ Using the width ══════════════════════════════════════════════════════
@@ -2054,3 +2079,90 @@
 .teim-rd .cp-start { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: center; margin: 1.2rem auto 0; max-width: 46rem; }
 .teim-rd .cp-start__act { display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); padding: 0.55rem 1rem; font-family: var(--sans); font-size: 0.88rem; font-weight: 600; color: var(--dteal); text-decoration: none; cursor: pointer; transition: border-color 0.16s ease, background 0.16s ease, transform 0.12s ease; }
 .teim-rd .cp-start__act:hover { border-color: var(--dteal); background: var(--teal-tint); transform: translateY(-1px); }
+
+
+/* ── Touch targets ───────────────────────────────────────────────────────
+ * Several controls on this service are typed as links inside running text —
+ * "Ask Cedar about this collection", "View collection", a release's version
+ * number, "Sign out" beside the avatar. Set at 0.68–0.84rem they measure
+ * 16–20px tall, which is a comfortable thing to click and a poor thing to
+ * hit with a thumb. Measured at 390px with the touch media features actually
+ * emulated: .cp-split__linkbtn 51×16, .cp-feed__ver 30×16, .cp-feed__act
+ * 116×20 and 201×20, .cp-read__cedar 219×20, .cp-m__more 250×19.
+ *
+ * The fix is the one .cedar-widget__close already uses: an absolutely
+ * positioned ::after that extends the hit area beyond the box. Nothing moves
+ * and nothing grows — the type stays exactly where the design put it, and
+ * the finger gets 44px.
+ *
+ * Vertical only. Widening these would overlap the control beside them, and
+ * two targets that overlap is a worse defect than one that is small.
+ *
+ * The footer nav and the section nav are not here: they already carry their
+ * own touch sizing (40px, set where they are defined), and the tiles, chips
+ * and pills are 32px or more, which clears the 24px WCAG 2.5.8 minimum
+ * without a change that would reflow a layout nobody complained about. */
+@media (hover: none) {
+  .teim-rd .cp-split__linkbtn,
+  .teim-rd .cp-read__cedar,
+  .teim-rd .cp-feed__act,
+  .teim-rd .cp-feed__name a.cp-feed__ver,
+  .teim-rd .cp-m__more { position: relative; }
+  .teim-rd .cp-split__linkbtn::after,
+  .teim-rd .cp-read__cedar::after,
+  .teim-rd .cp-feed__act::after,
+  .teim-rd .cp-feed__name a.cp-feed__ver::after,
+  .teim-rd .cp-m__more::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* Exactly 44px, centred on the type, whatever height the type is: a
+       symmetric inset would have given the 16px controls 40px and the 20px
+       ones 48px, and 48px stacked at the feed's row pitch would overlap the
+       action on the next line. */
+    top: calc(50% - 22px);
+    height: 44px;
+  }
+  /* The two actions under a release can wrap onto separate lines, and at the
+     standing 0.3rem row gap their enlarged areas would have overlapped each
+     other. The gap is opened to clear both. */
+  .teim-rd .cp-feed__acts { gap: 1.6rem 1.4rem; }
+  /* The avatar is 37px, which is close enough that four pixels of overlay
+     settle it without touching the masthead's measure. */
+  .teim-rd .cp-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+  }
+}
+
+/* ── The collection filter's scroll edge ─────────────────────────────────
+ * On a phone the twelve collection chips run as one horizontal scroller
+ * (.cp-filter__set--scroll, above) rather than wrapping into a block taller
+ * than the first release. That decision is right — but measured at 390px the
+ * row is 1461px wide, so nine of the twelve chips are off-screen and the last
+ * visible one is cut dead against the edge with nothing to say the row moves.
+ * It is the same defect the section nav was rewritten to avoid, and the note
+ * there names it: "METHODS arrived as MET against the edge of the screen,
+ * with nothing on it to say it could be dragged."
+ *
+ * The row keeps scrolling; it just stops pretending it doesn't. A mask fades
+ * the last 2rem, which reads as more-to-the-right rather than as a chip that
+ * was chopped. Masking rather than a gradient overlay because the filter is
+ * sticky and opaque over a scrolling feed, and an overlay would have to know
+ * the background colour at every scroll position.
+ *
+ * The cost is that the final chip is still faded once the row is scrolled to
+ * its end. Scroll-driven animations would remove that and are not supported
+ * widely enough to depend on; a faded chip at the end of a row the reader has
+ * already dragged is a much smaller problem than an invisible one. */
+@media (max-width: 720px) {
+  .teim-rd .cp-filter__set--scroll {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
+  /* Room at the end so the last chip can clear the fade when dragged. */
+  .teim-rd .cp-filter__set--scroll::after { content: ''; flex: none; width: 1.4rem; }
+}

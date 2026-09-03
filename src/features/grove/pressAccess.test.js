@@ -82,9 +82,14 @@ test("the shelves nest upward", () => {
 // which served a Tree subscriber twelve collections and rendered none.
 test("Tree reaches every shelf and still does not read the page", () => {
   assert.equal(shelfReach(as("tree")), SHELF.GROVE);
-  for (const shelf of Object.values(SHELF)) {
+  for (const shelf of [SHELF.STANDARD, SHELF.PRO]) {
     assert.equal(canOpenDataset(as("tree"), { shelf }), true, shelf);
   }
+  // Reaching the grove shelf is not opening a collection placed on it. See
+  // "the Grove shelf opens for nobody on this storefront" below: Cedar Press
+  // does not sell a grove-shelf collection to any plan, and its API refuses
+  // one to every tier.
+  assert.equal(canOpenDataset(as("tree"), { shelf: SHELF.GROVE }), false);
   assert.equal(canReadCedarPress(as("tree")), false);
 });
 
@@ -119,9 +124,24 @@ test("Pro opens standard and pro, and still not the Grove shelf", () => {
   assert.equal(canOpenDataset(as("press_pro"), { shelf: SHELF.GROVE }), false);
 });
 
-test("Cedar Grove opens every shelf", () => {
-  for (const shelf of Object.values(SHELF)) {
+test("Cedar Grove opens everything this storefront sells", () => {
+  for (const shelf of [SHELF.STANDARD, SHELF.PRO]) {
     assert.equal(canOpenDataset(as("grove"), { shelf }), true, shelf);
+  }
+});
+
+// Codex, PR #41. This assertion used to read "every shelf, for grove and
+// tree", which is the same class of defect as the `tree` drift and not its
+// fix: `PRESS_CATALOG` carries `gaming` on the grove shelf, the launch
+// collection does not, so the browser opened a collection
+// `repository.may_open` refuses. `code/cedar_publication.py` settles which
+// side is wrong -- STOREFRONT_SHELVES is ("standard", "pro") and gaming
+// "ships through Cedar Grove, not the Press storefront" -- so nothing on the
+// grove shelf opens HERE, whatever the plan. The tier that owns Cedar Grove
+// opens it in Cedar Grove, which is a different product with its own surface.
+test("the Grove shelf opens for nobody on this storefront", () => {
+  for (const tier of ["press", "press_pro", "grove", "tree", "free"]) {
+    assert.equal(canOpenDataset(as(tier), { shelf: SHELF.GROVE }), false, tier);
   }
 });
 
@@ -310,8 +330,11 @@ test("the Grove-exclusive collection declares what it shows and withholds", () =
   assert.doesNotMatch(shows, /download/);
 });
 
-test("no Cedar Press plan opens the Grove-exclusive collection", () => {
-  for (const tier of ["press", "press_pro"]) {
+// `grove` and `tree` are the tiers this used to omit, and they are the two it
+// most needed: they are the only ones whose reach touches the grove shelf at
+// all, so they were the only ones that could ever have answered `true`.
+test("no plan opens the Grove-exclusive collection through Cedar Press", () => {
+  for (const tier of ["press", "press_pro", "grove", "tree"]) {
     assert.equal(canOpenDataset({ workspace_tier: tier }, PRESS_CATALOG_BY_ID.gaming), false, tier);
   }
   assert.equal(upgradeFor(PRESS_CATALOG_BY_ID.gaming).sameProduct, false);
