@@ -14,7 +14,12 @@ import { useFadeIn } from "../../features/grove/useFadeIn";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
-import { LUMECON_URL, PRESS_ARTICLES, TBN_URL } from "../../features/grove/pressArticles";
+import {
+  ARTICLE_IMAGE,
+  LUMECON_URL,
+  PRESS_ARTICLES,
+  TBN_URL,
+} from "../../features/grove/pressArticles";
 import { pressArticlePath } from "../../features/grove/pressRoutes";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
@@ -30,9 +35,29 @@ function ArticleCard({ article, compact = false }) {
   const inner = (
     <>
       {/* Sector photography stands in until the real brief publishes with
-          its own image. */}
+          its own image.
+
+          `width`/`height` are the intrinsic pixels of the lane images (all
+          1500×600), not a size: the CSS still lays the picture out at
+          `width: 100%`. What they buy is the aspect ratio BEFORE the bytes
+          arrive, so the card is its final height from the first layout. It
+          was measured without them: the lead card's body was laid out at
+          y=446 and moved to y=783 when the picture landed — a 337px jump,
+          and 0.051 of the 0.052 CLS this page recorded.
+
+          The lead card is the largest thing on the first screen, so it is
+          fetched eagerly and at high priority; the ones stacked beside and
+          below it stay lazy. */}
       <div className="cp-art__art">
-        <img className="cp-art__img" src={article.image} alt={article.imageAlt} loading="lazy" />
+        <img
+          className="cp-art__img"
+          src={article.image}
+          alt={article.imageAlt}
+          width={ARTICLE_IMAGE.width}
+          height={ARTICLE_IMAGE.height}
+          loading={compact ? "lazy" : "eager"}
+          fetchPriority={compact ? undefined : "high"}
+        />
       </div>
       <div className="cp-art__body">
         {/* A demonstration placeholder says so on the card: the body and its

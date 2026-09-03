@@ -40,7 +40,13 @@ import { EVENT, track } from "../../features/grove/telemetry.js";
 import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import { PRESS_FIGURES } from "../../components/grove/pressFigures";
 import { AD_SLOT } from "../../features/grove/pressAds";
-import { BLOCK, LUMECON_URL, PRESS_ARTICLES, TBN_URL } from "../../features/grove/pressArticles";
+import {
+  ARTICLE_IMAGE,
+  BLOCK,
+  LUMECON_URL,
+  PRESS_ARTICLES,
+  TBN_URL,
+} from "../../features/grove/pressArticles";
 import { canOpenDataset, canReadCedarPress, upgradeFor } from "../../features/grove/pressAccess";
 import PressGate from "./PressGate";
 import { downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
@@ -118,7 +124,15 @@ function Figure({ block }) {
 function BodyImage({ src, alt, caption, credit }) {
   return (
     <figure className="cp-ar__inline">
-      <img src={src} alt={alt} loading="lazy" />
+      {/* Sized so the column does not reflow when the picture lands: the
+          text below a body image is what a reader is in the middle of. */}
+      <img
+        src={src}
+        alt={alt}
+        width={ARTICLE_IMAGE.width}
+        height={ARTICLE_IMAGE.height}
+        loading="lazy"
+      />
       <figcaption className="cp-ar__cap">
         {caption}
         {credit ? <span className="cp-ar__credit">{credit}</span> : null}
@@ -276,7 +290,18 @@ export default function CedarPressArticle() {
               it. `credit` lands with the real photograph; until then the
               caption carries the description on its own. */}
           <figure className="cp-ar__figure">
-            <img className="cp-ar__art" src={article.image} alt={article.imageAlt} />
+            {/* The lead picture is the piece's largest element and sits at
+                the top of the column, so it is fetched at high priority and
+                reserves its box: everything a reader is about to read is
+                below it. */}
+            <img
+              className="cp-ar__art"
+              src={article.image}
+              alt={article.imageAlt}
+              width={ARTICLE_IMAGE.width}
+              height={ARTICLE_IMAGE.height}
+              fetchPriority="high"
+            />
             <figcaption className="cp-ar__cap">
               {article.caption ?? article.imageAlt}
               {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
