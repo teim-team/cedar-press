@@ -121,7 +121,16 @@ def check_cite_as():
 
 
 def check_internal_paths():
-    """CP: source fields exposing .py, .zip, local CSVs, Desktop paths."""
+    """CP: source fields exposing .py, .zip, local CSVs, Desktop paths.
+
+    READS THE FIRST 2,000 ROWS PER FILE and the cap is deliberate here -
+    running this regex over every cell of a 1.2M-row, 80-column file is 97M
+    matches. The counts below are therefore a LOWER BOUND, not a population:
+    `nest.source_document` reports 669 and is 3,189 on the whole file. For the
+    full measure, and for the split between a column that is build lineage and
+    a column whose values MIX evidence with a code path,
+    `code/1153_qa_publication_eligibility.py` reads every row.
+    """
     pat = re.compile(r"\.py\b|\.zip\b|[A-Za-z]:\\\\|/Desktop/|\\Desktop\\|"
                      r"data/staging|data\\staging|review/|review\\\\", re.I)
     hits = defaultdict(list)
@@ -137,28 +146,49 @@ def check_internal_paths():
 
 
 def check_blocked_states():
-    """CP-002: HOLD / quarantine / superseded / duplicate reaching the export."""
+    """CP-002: HOLD / quarantine / superseded / duplicate reaching the export.
+
+    CORRECTED 2026-09-02 by `1153`. This read `cap=5000` rows per file and
+    reported the result as a population, so every blocked-state count this
+    reconciliation published was a count of the first 5,000 rows:
+    `lobbying.is_superseded = 1` was reported 211 and is **1,064**;
+    `subcontracting.duplicate_status = superseded_by_primary_source` was
+    reported 38 and is **846**; `contractors.owner_attribution_status =
+    CONTRADICTED_AS_OF` was reported 8 and is **9,223**. Same defect as the
+    width claim below - a partial scan quoted as a whole.
+
+    The cap is gone. `contractors.csv` is 1.6 GB, so this pass reads it with
+    `csv.reader` and column indices rather than DictReader.
+    """
     words = ("quarantin", "superseded", "hold_open", "do_not_ship",
              "contradict", "redirect_pending", "awaiting_owner")
     hits = defaultdict(list)
     for p in sorted(CUST.glob("*.csv")):
         if p.name == "MANIFEST.csv":
             continue
-        hdr, rows = _rows(p.stem, cap=5000)
-        for c in hdr:
-            cl = c.lower()
-            if not any(k in cl for k in ("status", "flag", "state", "disposition",
-                                         "superseded", "duplicate")):
+        with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            rd = csv.reader(fh)
+            hdr = next(rd, [])
+            watch = [(i, c) for i, c in enumerate(hdr)
+                     if any(k in c.lower() for k in
+                            ("status", "flag", "state", "disposition",
+                             "superseded", "duplicate"))]
+            if not watch:
                 continue
-            bad = Counter()
-            for r in rows:
-                v = (r.get(c) or "").strip().lower()
-                if v and any(w in v for w in words):
-                    bad[v] += 1
-                if cl.startswith("is_superseded") and v in ("true", "1", "yes"):
-                    bad["is_superseded=true"] += 1
-            if bad:
-                hits[p.stem].append((c, dict(bad.most_common(3))))
+            bad = {c: Counter() for _, c in watch}
+            for row in rd:
+                w = len(row)
+                for i, c in watch:
+                    v = row[i].strip().lower() if i < w else ""
+                    if not v:
+                        continue
+                    if any(x in v for x in words):
+                        bad[c][v] += 1
+                    if c.lower().startswith("is_superseded") and                             v in ("true", "1", "yes"):
+                        bad[c]["is_superseded=true"] += 1
+        for _, c in watch:
+            if bad[c]:
+                hits[p.stem].append((c, dict(bad[c].most_common(3))))
     return hits
 
 
@@ -229,6 +259,26 @@ def check_width():
             for p in sorted(CUST.glob("*.csv")) if p.name != "MANIFEST.csv"}
 
 
+def check_preview_width():
+    """The OTHER width, and the one the earlier claim confused it with.
+
+    `dist/preview` is the 100-row curated preview and is 7-11 columns wide.
+    `dist/customer` is the delivered product. Reporting one range without
+    saying which directory it came from is how "the export has narrowed"
+    got written about an export that had widened.
+    """
+    d = ROOT / "dist" / "preview"
+    if not d.exists():
+        return {}
+    out = {}
+    for p in sorted(d.glob("*.csv")):
+        if p.name == "MANIFEST.csv":
+            continue
+        with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            out[p.stem] = len(next(csv.reader(fh), []))
+    return out
+
+
 def classify(f, ev):
     """One finding -> (verdict, evidence). Machine-checked where possible."""
     i, cat = f["id"], f["category"].lower()
@@ -262,15 +312,27 @@ def classify(f, ev):
     if any(k in text for k in ("python file", ".py", ".zip", "desktop", "local csv",
                                "code path", "pipeline artifact", "source_file")):
         h = ev["paths"]
-        return ((CONFIRMED, "internal paths still exported: "
-                 + "; ".join(f"{k}:{c[0][0]}({c[0][1]})" for k, c in list(h.items())[:3]))
+        return ((CONFIRMED, "internal paths still exported (first 2,000 rows "
+                 "per file, a lower bound): "
+                 + "; ".join(f"{k}:{c[0][0]}({c[0][1]})" for k, c in list(h.items())[:3])
+                 + ". Every PURE build-lineage column is now dropped by "
+                   "cedar_publication.LINEAGE_COLS; what remains are columns "
+                   "whose values MIX a real source statement with a code path, "
+                   "kept deliberately and listed in "
+                   "docs/PUBLICATION_ELIGIBILITY.md")
                 if h else (FIXED, "no delivered column exposes a .py/.zip/Desktop path"))
 
     if any(k in text for k in ("hold", "quarantin", "superseded", "duplicate",
                                "adjudication", "publication gate", "blocked")):
         h = ev["blocked"]
         return ((CONFIRMED, "blocked states still present: "
-                 + "; ".join(f"{k}.{c[0][0]}" for k, c in list(h.items())[:3]))
+                 + "; ".join(f"{k}.{c[0][0]}" for k, c in list(h.items())[:3])
+                 + ". Judged one by one in cedar_publication.BLOCKED_STATES: "
+                   "what remains is FLAG (a superseded LDA filing is a real "
+                   "filed record and ships with its supersession stated) or "
+                   "MASK (the row ships, the Cedar attribution on it does "
+                   "not). WITHHOLD states no longer ship - see "
+                   "docs/PUBLICATION_ELIGIBILITY.md")
                 if h else (FULLDATA,
                            "no blocked state found in the delivered columns - but "
                            "the curated export no longer carries most status "
@@ -291,9 +353,18 @@ def classify(f, ev):
     if any(k in text for k in ("column", "field", "debug", "residue", "internal")):
         w = ev["width"]
         wide = {k: v for k, v in w.items() if v > 40}
-        return (FULLDATA, f"export width now {min(w.values())}-{max(w.values())} "
-                          f"columns; {len(wide)} dataset(s) still over 40. "
-                          f"Whether a specific field survived needs a named check.")
+        pv = ev["preview_width"]
+        return (FULLDATA, f"dist/customer is {min(w.values())}-{max(w.values())} "
+                          f"columns (widest {max(w, key=w.get)}); {len(wide)} "
+                          f"dataset(s) over 40. The DELIVERED export is WIDER "
+                          f"than the review's 29-81, not narrower - only the "
+                          f"100-row previews are narrow"
+                          + (f" ({min(pv.values())}-{max(pv.values())})"
+                             if pv else " (dist/preview absent)")
+                          + ". Whether a specific field survived needs a named "
+                            "check; the build-lineage columns are now dropped "
+                            "by cedar_publication.LINEAGE_COLS and audited by "
+                            "1153.")
 
     return (FULLDATA, "not machine-checkable from the delivered export alone")
 
@@ -307,7 +378,7 @@ def main() -> int:
     ev = {"cite_as": check_cite_as(), "paths": check_internal_paths(),
           "blocked": check_blocked_states(), "uid": check_uid_role(),
           "dates": check_synthetic_dates(), "owned": check_owned_has_rows(),
-          "width": check_width()}
+          "width": check_width(), "preview_width": check_preview_width()}
 
     rows, tally = [], Counter()
     for f in fs:
@@ -325,9 +396,17 @@ def main() -> int:
     print(f"    internal paths exported : {len(ev['paths'])} dataset(s)")
     print(f"    blocked states exported : {len(ev['blocked'])} dataset(s)")
     print(f"    day-15 date clustering  : {len(ev['dates'])} column(s)")
-    w = ev["width"]
-    print(f"    export width            : {min(w.values())}-{max(w.values())} cols "
-          f"(the review saw 29-81)")
+    w, pv = ev["width"], ev["preview_width"]
+    # CORRECTED 2026-09-02. This line used to print one range and let the
+    # reader infer the export had narrowed toward the review's 29-81. It had
+    # not: `gaming` ships 309 columns and only `dist/preview` is narrow. Two
+    # ranges, each named for the directory it measures.
+    print(f"    dist/customer width     : {min(w.values())}-{max(w.values())} cols "
+          f"(widest {max(w, key=w.get)}) - the review saw 29-81 on the ten-row "
+          f"sample, so the delivered export is WIDER, not narrower")
+    print(f"    dist/preview width      : "
+          + (f"{min(pv.values())}-{max(pv.values())} cols" if pv
+             else "absent - rebuild with 1151"))
 
     if mode == "build":
         OUT.parent.mkdir(parents=True, exist_ok=True)

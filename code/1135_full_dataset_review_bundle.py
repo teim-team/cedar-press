@@ -187,6 +187,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (          # noqa: E402
     NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
+    is_publication_eligible, mask_attribution, MASK,
 )
 
 csv.field_size_limit(10_000_000)
@@ -327,6 +328,7 @@ def build(mode: str) -> int:
                     cols = publishable_columns(hdr)
                     dropped = [c for c in hdr if c not in cols]
                     kept, held = [], defaultdict(int)
+                    masked = defaultdict(int)
                     for r in rd:
                         # PROJECT BEFORE GATING. `row_ok`'s NEVER check is a
                         # backstop for a personal field under a name the drop
@@ -337,8 +339,14 @@ def build(mode: str) -> int:
                         # carrying a phone number that was never going to be
                         # published anyway.
                         r = {c: r.get(c, "") for c in cols}
-                        ok, why = row_ok(r)
+                        # CP-002: ONE gate, and all three of its outcomes.
+                        # `is_publication_eligible` is `row_ok` plus the
+                        # deny-by-default adjudication policy; a MASK keeps the
+                        # row and withholds the Cedar attribution on it.
+                        ok, why, disp = is_publication_eligible(r)
                         if ok:
+                            if disp == MASK and mask_attribution(r, why):
+                                masked[why] += 1
                             kept.append(r)
                         else:
                             held[why] += 1
@@ -419,6 +427,11 @@ def build(mode: str) -> int:
                 "rows_in": len(kept) + sum(held.values()),
                 "rows_published": len(kept), "rows_withheld": sum(held.values()),
                 "withheld_why": "; ".join(f"{k}={v}" for k, v in sorted(held.items())),
+                # A masked row SHIPS; what was withheld is the Cedar
+                # attribution on it. Different fact, separate column.
+                "rows_attribution_masked": sum(masked.values()),
+                "attribution_masked_why": "; ".join(
+                    f"{k}={v}" for k, v in sorted(masked.items())),
                 "columns_published": len(cols),
                 "columns_dropped_proprietary": "; ".join(dropped),
                 "sample_rows": len(s), "split": split_kind, "files": pieces,
@@ -427,7 +440,9 @@ def build(mode: str) -> int:
 
     OUT.mkdir(parents=True, exist_ok=True)
     keys = ["collection", "table", "shippable", "rows_in", "rows_published",
-            "rows_withheld", "withheld_why", "columns_published",
+            "rows_withheld", "withheld_why",
+            "rows_attribution_masked", "attribution_masked_why",
+            "columns_published",
             "columns_dropped_proprietary", "sample_rows", "split", "files",
             "largest_file_mb", "note"]
     with (OUT / "MANIFEST.csv").open("w", encoding="utf-8", newline="") as fh:

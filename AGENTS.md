@@ -8488,3 +8488,139 @@ supports verbatim, and put the public-domain fact in `source_terms_url` +
 the do-not-edit list. The vocabulary gap is real and belongs to the integrator.
 ADR-040 decision 1; `review`/queue entry 5 in `docs/WORK_QUEUE.md`.
 <!-- END MONEY-FED-2026-09-02 -->
+
+<!-- BEGIN QA-PUBLICATION-ELIGIBILITY-2026-09-02 -->
+
+## 2026-09-02 — CP-002 and CP-022: the export was publishing rows the pipeline had already marked unsafe
+
+**Scripts:** `code/1153_qa_publication_eligibility.py` (new, claimed atomically),
+`code/cedar_publication.py` (the rules), `code/1137_*` + `code/1135_*` (the two
+consumers that write customer files), `code/1152_*` (two corrections).
+**Doc:** `docs/PUBLICATION_ELIGIBILITY.md` — GENERATED, never hand-edit.
+
+### The finding, and why it is one defect and not two
+
+The outside QA review's two most serious confirmed classes are the same thing:
+the customer export shipped rows and columns that Cedar's own pipeline had
+already labelled. CP-002 is the ROW half (hold, quarantine, contradiction,
+supersession, duplicate, awaiting-owner-ruling), CP-022/031/033 the COLUMN half
+(the Python file or local CSV that BUILT the row, published as if it were the
+row's provenance). Both existed because each builder decided for itself. The
+fix is one deny-by-default policy in `cedar_publication`, beside `row_ok()` and
+`publishable_columns()`, and `verify` now fails if a customer-file writer calls
+half of it.
+
+### A blocked state is not one thing, and blanket-dropping would have been wrong
+
+Four dispositions, and the middle two are the whole point:
+
+| disposition | what it means | measured |
+|---|---|---:|
+| WITHHOLD | the row is not a record | 19,287 rows |
+| MASK | the ROW is a real public record; the CEDAR ATTRIBUTION on it is not | 54,409 attributions cleared |
+| FLAG | the state is a fact the buyer needs to see | 682,375 rows |
+| PUBLISH | not a blocker | 2,874,280 rows |
+
+**A prime contract whose ownership ruling was withdrawn is still a real federal
+award.** Dropping it would delete public record to hide a Cedar mistake, so
+`contractors` loses **no rows** and 53,878 attributions instead — `cedar_uid`,
+`tribe_id`, `canonical_name` blanked and `attributed_flag` set to `0`, with the
+state column left in the row so the file says WHY the owner is absent. Same
+shape in `nonprofits`: 531 contested KEYS masked, 0 organisations dropped.
+
+**START_HERE trap 1b in a fifth vocabulary.** `contractors.ruling_status` held
+**559 rows RULED_NOT_NATIVE shipping with `attributed_flag = 1`** — a NEGATIVE
+ruling published as a confident attribution, which is exactly the
+`elijah_ruling`/tier-X defect that cost this project a session in August. Also
+7,715 `RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED` and 96
+`RULED_TIER_C_NOT_ATTRIBUTED` — statuses whose own names say NOT ATTRIBUTED —
+carrying attributions.
+
+**Kept and flagged, deliberately:** 1,064 superseded LDA filings. A superseded
+filing was really filed and the amendment history is part of what a buyer buys.
+The danger is arithmetic, not existence, so it is fenced as money:
+`LOBBYING_FENCE`, and `lobbying_warning()` measures the overstatement from the
+delivered file on every build — **8.2% of the countable total**
+($725,743,974.52 unfiltered vs $670,894,573.51 countable) as of this run. Same
+treatment as `subaward_warning()`, for the same reason: the constant moves.
+
+**Withheld:** 19,212 `subcontracting` duplicates (18,366
+`exact_repeat_within_source` + 846 `superseded_by_primary_source`, $14.85B).
+`121` had already proved these are not second subawards — one $57,500 subaward
+re-filed to SAM 93 times between 2022-08 and 2025-01 — and the file's declared
+grain is one row per SUBAWARD. Plus 75 `nonprofits` rows: 73
+`NATIVE_PROPOSED_AWAITING_OWNER_RULING` and 2
+`CONFLICT_EXCLUDED_AND_RULED_NATIVE`. Publishing an unadjudicated
+Native/not-Native call is the one thing this project refuses to do. Nothing is
+deleted — every withheld row is in `data/clean` with its status and counted in
+`MANIFEST.csv` under `rows_withheld`.
+
+### `_basis` IS NOT A LINEAGE SUFFIX, and a value scan is the wrong detector
+
+The obvious implementation — regex the values for `.py` / `.csv` / a path and
+drop the column — deletes the best provenance in the product.
+`natural-resources.record_scope_basis` quotes Interior's aggregate-release rule
+verbatim with the URL beside it. `contractors.geo_key_basis` names the crosswalk
+the county came from. `gaming.gaming_class_basis` names the ordinance table
+**and warns that its grain is tribe, not facility**. Every one contains a
+filename; every one is evidence.
+
+So the column drop is **by NAME, enumerated, one measurement per entry**, and
+for each dropped column a real source column survives (`source_url`,
+`source_vintage`, `Source_1`, `federal_link_method`, `record_basis`,
+`ruling_status`). Columns whose VALUES mix evidence with a code path are
+**reported and kept** — 14 of them, in
+`review/1153_mixed_provenance_columns_2026-09-02.csv`. Worst three, all upstream
+data problems and none a reason to drop a column:
+`subcontracting.geo_subawardee_county_gap_reason` (every value opens `closed
+2026-09-02 by code/1109_subawardee_geo_promote:` and then states a real
+method), `nest.source_document` (3,189 of 4,014 are the owner's research
+dataset named by its path on this machine; the other 825 are real annual
+reports), `funding.attribution_basis` (184,077 of 701,955).
+
+**One trap inside the fix.** `nest_entity_dual_role.built_by` survived the first
+pass because 1137 prefixes a joined column with its source table, so the export
+saw `nest_entity_dual_role__built_by` and the rule was looking at the whole
+name. `is_lineage_column()` now tests the segment after `__` as well. A
+name-based rule has to know that names get prefixed.
+
+### Two corrections to `1152`, both the same defect class
+
+1. **The width claim was backwards.** `1152` reported "43-311 columns" against
+   the review's "29-81" in a way that read as narrowing. The delivered export is
+   **43-309 columns and WIDER than the review found**; only the 100-row previews
+   in `dist/preview` are narrow (**7-11**). Both ranges are now printed, each
+   named for the directory it measures.
+2. **`check_blocked_states()` read `cap=5000` rows and reported it as a
+   population.** Every blocked-state count in the reconciliation was a count of
+   the first 5,000 rows: `lobbying.is_superseded = 1` was 211 and is **1,064**;
+   `subcontracting.duplicate_status = superseded_by_primary_source` was 38 and
+   is **846**; `contractors.owner_attribution_status = CONTRADICTED_AS_OF` was 8
+   and is **9,223**. The cap is gone and the scan streams with `csv.reader`.
+   `check_internal_paths()` KEEPS its 2,000-row cap — 97M regex matches
+   otherwise — and now says in its own output that its numbers are a lower
+   bound and names `1153` as the full measure.
+
+### Left open, deliberately, because it is an owner ruling and not a builder's
+
+**QA-CP016.** `contractors.identifier_ruling_quarantined = Y` reaches **227,540
+rows carrying $30.26B of attribution**, and CP-016's release test would withhold
+all of it. But 39,459 of those are `RULED_TIER_UNSTATED` and 3,469 are
+`RULED_ATTRIBUTED` — positive rulings sitting inside a quarantined BATCH. What
+quarantine means for publication is a decision, not a derivation. Recorded in
+`docs/PUBLICATION_ELIGIBILITY.md`.
+
+Related and also refused: `RULED_TIER_UNSTATED` (40,590 rows, 39,790 attributed)
+is FLAG, not MASK. It is a positive human ruling missing a confidence
+annotation, and masking it would destroy real adjudication work over a metadata
+gap.
+
+### Delivered state after the rebuild
+
+`1137 build` (all 13) + `1151 build` (12 previews) + `1152 build` + `1153 build`.
+`846` 30/30, `845 verify` ok, `cedar_publication verify` PASS,
+`1137 verify` / `1151 verify` / `1152 verify` / `1153 verify` all ok. `293` was
+already failing at HEAD and none of its new-since-baseline findings are in this
+workstream's files.
+
+<!-- END QA-PUBLICATION-ELIGIBILITY-2026-09-02 -->
