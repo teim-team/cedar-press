@@ -1,0 +1,222 @@
+{#-
+  The shelf, rendered by Python.
+
+  Every class on this page is defined in src/styles/grove/press.css and
+  src/styles/redesign.css, both linked unchanged. Nothing was restyled and no
+  stylesheet was added: the point of the slice is that the design survives the
+  move, so a new rule here would be the slice failing quietly.
+
+  press.css scopes every rule under .teim-rd and reads its tokens from
+  redesign.css, which is why the wrapper carries both .teim-rd and the
+  publication's .teim-rd--paper.
+
+  WHAT THIS PAGE DOES NOT DO
+  The React shelf reveals a band's badges on scroll and swaps a reader panel
+  on hover. Both are JavaScript. The reveal is dropped by putting `is-in` on
+  every band, which is the correct resting state for a page with no observer;
+  the hover panel is replaced by showing every collection's detail at once,
+  which is more information rather than less and needs no script.
+
+  Collection marks are omitted. They live in
+  src/pages/grove/pressCollectionIcons.jsx as 210 lines of JSX, and copying
+  SVG into Jinja would add the seventh hand-kept mirror to a page whose whole
+  argument is that six is too many. docs/PYTHON_FIRST_SITE.md makes moving
+  them to a shared sprite a step.
+-#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shelves · Cedar Press</title>
+  {#- Not indexed. This is a review surface beside the real client, and two
+      URLs answering for one page is how a search result sends a reader to
+      the wrong one. -#}
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/styles/fonts.css">
+  <link rel="stylesheet" href="/styles/redesign.css">
+  <link rel="stylesheet" href="/styles/grove/press.css">
+</head>
+<body>
+<div class="teim-rd teim-rd--paper">
+<main class="cp">
+
+  <header class="cp-mast">
+    <span class="cp-mast__word">CEDAR PRESS</span>
+    <span class="cp-mast__page">SHELVES</span>
+    <span class="cp-mast__of">Rendered by FastAPI · {{ view.context_line }}</span>
+  </header>
+
+  <section class="cp-sec">
+    <span class="cp-sec__band">Showing the {{ view.reach }} shelf and below</span>
+    <p class="cp-band__promise">
+      This page is served by <code>cedar_press.app</code> and composed by
+      <code>cedar_press.shelf</code> from <code>collections.py</code>,
+      <code>repository.py</code> and <code>press_catalog.py</code>. No
+      JavaScript module was read to build it and no figure on it was typed by
+      hand.
+    </p>
+    <p class="cp-band__facts">
+      Plan
+      {%- for tier in tiers %}
+        · <a href="?tier={{ tier }}">{{ tier }}{% if tier == view.tier %} (shown){% endif %}</a>
+      {%- endfor %}
+    </p>
+    {% if view.catalog_gap %}
+      {#- Said on the page rather than swallowed. press_catalog.CATALOG is a
+          snapshot a human regenerates by hand with scripts/dump-press.mjs,
+          and it is behind: these collections are on the shelf and the Python
+          catalog has never heard of them, so they render from their
+          descriptor alone. -#}
+      <p class="cp-band__vary">
+        The Python catalog snapshot is behind
+        <code>src/features/grove/pressCatalog.js</code> by
+        {{ view.catalog_gap | length }} collection{{ "" if view.catalog_gap | length == 1 else "s" }}:
+        {{ view.catalog_gap | join(", ") }}. Rendered from the descriptor
+        manifest instead of dropped. Regenerate with
+        <code>node scripts/dump-press.mjs &gt; server/cedar_press/_press_data.json</code>.
+      </p>
+    {% endif %}
+  </section>
+
+  {% for band in view.bands %}
+    {% if band.entries %}
+      {#- fill and plain alternate so the shelves read as one set rather than
+          as an available thing and a greyed-out thing; press.css inverts the
+          badge palette between them. -#}
+      <section class="cp-band cp-band--{{ 'fill' if loop.index0 % 2 == 0 else 'plain' }} is-in"
+               aria-label="{{ band.shelf }} shelf">
+        <div class="cp-band__in">
+
+          <div class="cp-band__head">
+            <div class="cp-band__id">
+              <span class="cp-band__eyebrow">{{ "Your shelf" if band.reached else "Locked" }}</span>
+              {#- The shelf's own id, not a product name. The tier ladder's
+                  copy -- Cedar Press, Cedar Press+, their prices, questions
+                  and promises -- lives only in pressCatalog.js's PRESS_TIERS,
+                  which dump-press.mjs does not dump, so Python does not have
+                  it. It is named as missing rather than retyped. -#}
+              <h3 class="cp-band__name">{{ band.shelf | capitalize }} shelf</h3>
+              <p class="cp-band__q">
+                {{ band.entries | length }} collection{{ "" if band.entries | length == 1 else "s" }},
+                {{ "yours to download" if band.reached else "not included in this plan" }}.
+              </p>
+              <p class="cp-band__promise">
+                The band's product name, price and promise are not shown: they
+                exist only in <code>pressCatalog.js</code>, and retyping them
+                into Python would add a mirror rather than remove one.
+              </p>
+              <p class="cp-band__facts">
+                {{ band.entries | length }} collections
+                {%- if band.earliest %} · records as far back as {{ band.earliest }}*{% endif %}
+                {%- if band.reached %} · yours to download{% endif %}
+              </p>
+              {% if band.earliest %}
+                <p class="cp-band__vary">* Coverage varies by collection; each is dated in the panel.</p>
+              {% endif %}
+            </div>
+            <span class="cp-kind cp-kind--data">Collections you download</span>
+          </div>
+
+          <ul class="cp-band__grid">
+            {% for entry in band.entries %}
+              <li>
+                {% if entry.open %}
+                  {#- A GET form rather than an anchor: press.css styles the
+                      active badge as `button.cp-badge--act`, and the form
+                      needs no script. The action is the SAME authenticated
+                      route the React client posts a reader at, so this page
+                      grants nothing -- an unauthenticated click gets the
+                      route's own 401. -#}
+                  <form method="get" action="{{ entry.href }}" style="margin:0">
+                    <button type="submit" class="cp-badge cp-badge--act">
+                      <span class="cp-badge__name">{{ entry.short }}</span>
+                      <span class="cp-badge__cue" aria-hidden="true">&#8595;</span>
+                      <span class="cp-badge__sr">
+                        {%- if entry.unavailable_because -%}
+                          Download the {{ entry.name }} collection description; the sample file is pending
+                        {%- else -%}
+                          Download a ten-row sample of {{ entry.name }}
+                        {%- endif -%}
+                      </span>
+                    </button>
+                  </form>
+                {% else %}
+                  {#- Locked tiles are inert rather than links to a refusal.
+                      The band eyebrow and the panel below carry the lock,
+                      which is press.css's own rule: a locked tile looks like
+                      its shelf. -#}
+                  <span class="cp-badge cp-badge--locked">
+                    <span class="cp-badge__name">{{ entry.short }}</span>
+                    <span class="cp-badge__cue" aria-hidden="true">&#8594;</span>
+                  </span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+
+          {#- The React shelf shows one collection at a time, on hover. With no
+              script the honest substitute is all of them, in the same panel
+              and the same classes. -#}
+          <aside class="cp-read">
+            <div class="cp-read__idle">
+              <span class="cp-read__cap">{{ "Your collections" if band.reached else "Inside this shelf" }}</span>
+              <p class="cp-read__hint">
+                Every collection on this shelf, with what it holds and how far back it goes.
+              </p>
+            </div>
+            {% for entry in band.entries %}
+              <div class="cp-read__on">
+                <span class="cp-read__cap">Cedar collection</span>
+                <h4 class="cp-read__name">{{ entry.name }}</h4>
+                <p class="cp-read__blurb">{{ entry.blurb }}</p>
+                {% if entry.linkage %}
+                  <p class="cp-read__link">
+                    <span class="cp-read__linkcap">The link</span>{{ entry.linkage }}
+                  </p>
+                {% endif %}
+                <p class="cp-read__foot">
+                  {{ entry.coverage }}
+                  {%- if entry.freshness %} · {{ entry.freshness }}{% endif %}
+                  {%- if not band.reached %} · Locked{% endif %}
+                </p>
+                {% if entry.unavailable_because %}
+                  {#- Cedar's own reason, not a routing message. A collection
+                      the shelf shows and the file layer cannot serve is a
+                      named data problem and the reader is told which. -#}
+                  <p class="cp-read__foot">No sample file: {{ entry.unavailable_because }}</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </aside>
+
+        </div>
+      </section>
+    {% endif %}
+  {% endfor %}
+
+  {% if view.excluded %}
+    <section class="cp-sec">
+      <span class="cp-sec__band">Measured, not sold</span>
+      <p class="cp-band__promise">
+        Collections Cedar measures that the storefront does not carry. Held on
+        the page rather than dropped: an absence nobody can see is an absence
+        nobody can question.
+      </p>
+      <ul>
+        {% for entry in view.excluded %}
+          <li class="cp-read__blurb"><strong>{{ entry.id }}</strong> — {{ entry.reason }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  <footer class="cp-foot">
+    <span>{{ view.context_line }}</span>
+    <span>Server-rendered · plan {{ view.tier }} · shelf reach {{ view.reach }}</span>
+  </footer>
+
+</main>
+</div>
+</body>
+</html>

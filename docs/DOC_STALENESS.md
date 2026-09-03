@@ -23,7 +23,7 @@ None. Every live document agrees with the data.
 ## RECORD documents carrying superseded numbers — 21 (informational, do not 'fix')
 
 - `dist/04x_admin_appeal_parties/admin_appeal_parties.NOTES.md` L56 — entity count
-- `docs/ARCHITECTURE.md` L253 — ownership edges
+- `docs/DATA_ARCHITECTURE.md` L253 — ownership edges
 - `docs/DATASET_SCAFFOLD.md` L19 — entity count
 - `docs/datasets/federal-register.md` L254 — entity count
 - `docs/ENTITY_INVENTORY.md` L5 — entity count

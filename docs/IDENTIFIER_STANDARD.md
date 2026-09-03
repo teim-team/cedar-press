@@ -341,7 +341,7 @@ Never:
 - treat a `RULED` attribution method as a positive ruling — negative rulings are
   ruled too, and they are tier X.
 
-**Related:** `docs/NATIVE_ENTITY_NUANCES.md` (the domain knowledge that resolves names — FR parentheticals, renames, enterprises, exclusions) ·  `docs/ARCHITECTURE.md` (what exists, generated) ·
+**Related:** `docs/NATIVE_ENTITY_NUANCES.md` (the domain knowledge that resolves names — FR parentheticals, renames, enterprises, exclusions) ·  `docs/DATA_ARCHITECTURE.md` (what exists, generated) ·
 `docs/ENTITY_INVENTORY.md` (coverage per entity, generated) · `AGENTS.md` (the
 defect classes) · `docs/CEDAR_TAXONOMY.md` (entity classes).
 

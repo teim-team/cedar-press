@@ -13,9 +13,9 @@ numbers were found the same day in the registry docs.
 
 Every one of those is the same defect: a hand-maintained document describing a
 moving system. So this file does not describe the architecture - it MEASURES
-it, every run, and writes `docs/ARCHITECTURE.md`.
+it, every run, and writes `docs/DATA_ARCHITECTURE.md`.
 
-    py -3 code/500_build_architecture_map.py            # write docs/ARCHITECTURE.md
+    py -3 code/500_build_architecture_map.py            # write docs/DATA_ARCHITECTURE.md
     py -3 code/500_build_architecture_map.py --check    # exit 1 if the map is stale
 
 THE ONE THING YOU EDIT
@@ -33,6 +33,18 @@ NOT A GATE
 This reports; it does not fail a build. `62_no_regression_check.py` is the gate.
 Keeping them separate is deliberate - a reporting tool that can block work gets
 routed around, and this one is meant to be read.
+
+RENAMED 2026-09-02, AND THE RENAME IS THE POINT
+-----------------------------------------------
+This wrote `docs/ARCHITECTURE.md` until the data workspace was merged into the
+product-site repository, where a hand-written `docs/ARCHITECTURE.md` already
+described the web client. Two different documents, one name, and a generator
+that rewrites its target every run - so the site's document would have been
+silently destroyed on the next build.
+
+Moving the FILE would not have fixed that; the generator had to be repointed,
+which is why the constant changed here rather than in a one-off rename. The
+output is `docs/DATA_ARCHITECTURE.md`.
 """
 from __future__ import annotations
 
@@ -51,7 +63,7 @@ DIST = ROOT / "dist"
 CLEAN = ROOT / "data" / "clean"
 CODE = ROOT / "code"
 DOCS = ROOT / "docs"
-OUT = DOCS / "ARCHITECTURE.md"
+OUT = DOCS / "DATA_ARCHITECTURE.md"
 
 SCRIPT = "500_build_architecture_map.py"
 

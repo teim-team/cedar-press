@@ -1,0 +1,11 @@
+department,fr_documents,fr_share_of_agency_mentions,lobbying_filings_targeting,lobbying_share_of_targets,advocacy_minus_attention_pp,fr_share_executive_only,lobbying_share_executive_only,gap_pp_executive_only,fr_basis,lobbying_basis
+Interior,12524,0.5631,12334,0.2608,-30.24,0.5632,0.4517,-11.15,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+EPA,1795,0.0807,800,0.0169,-6.38,0.0807,0.0293,-5.14,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+Justice,197,0.0089,1022,0.0216,1.27,0.0089,0.0374,2.86,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+Defense,177,0.008,877,0.0185,1.06,0.008,0.0321,2.42,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+HUD,879,0.0395,508,0.0107,-2.88,0.0395,0.0186,-2.09,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+Energy,277,0.0125,700,0.0148,0.23,0.0125,0.0256,1.32,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+SBA,100,0.0045,432,0.0091,0.46,0.0045,0.0158,1.13,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+Transportation,392,0.0176,720,0.0152,-0.24,0.0176,0.0264,0.87,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+Homeland Security,479,0.0215,450,0.0095,-1.2,0.0215,0.0165,-0.51,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer
+Veterans Affairs,91,0.0041,48,0.001,-0.31,0.0041,0.0018,-0.23,agency_names on classifiable (title/abstract-subject) FR documents,government_entities as reported by the filer

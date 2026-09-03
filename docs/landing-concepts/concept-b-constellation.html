@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cedar Press — Concept B: The Constellation</title>
+<style>
+/* CONCEPT B — "THE CONSTELLATION"
+   The product's core claim is entity resolution: records connected to the
+   nations, corporations and businesses they touch. So the hero IS the
+   graph — a living constellation where a firing edge is a record being
+   connected, and the counters at left tick when edges land. Split layout:
+   the numbers read like an instrument panel beside the living system. */
+@font-face { font-family: 'Inter'; src: url('../../public/fonts/inter-400.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url('../../public/fonts/inter-600.woff2') format('woff2'); font-weight: 600; }
+@font-face { font-family: 'Inter'; src: url('../../public/fonts/inter-800.woff2') format('woff2'); font-weight: 800; }
+@font-face { font-family: 'JetBrains Mono'; src: url('../../public/fonts/jetbrains-mono-400.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'JetBrains Mono'; src: url('../../public/fonts/jetbrains-mono-700.woff2') format('woff2'); font-weight: 700; }
+:root { --teal:#0FB5A5; --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif; }
+* { box-sizing: border-box; margin: 0; }
+html,body { height: 100%; }
+body { background: radial-gradient(120% 120% at 78% 40%, #0a3f39 0%, #052220 52%, #03100f 100%);
+  color: #fff; font-family: var(--sans); overflow: hidden; }
+canvas { position: fixed; inset: 0; }
+
+.bar { position: fixed; inset: 0 0 auto 0; display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 2rem; z-index: 5; }
+.word { font-family: var(--mono); font-weight: 700; letter-spacing: 0.22em; font-size: 0.82rem; }
+.burger { background: none; border: 1px solid rgba(255,255,255,0.35); border-radius: 10px; padding: 0.55rem 0.7rem; cursor: pointer; }
+.burger span { display: block; width: 20px; height: 2px; background: #fff; margin: 4px 0; border-radius: 2px; }
+.menu { position: fixed; top: 0; right: 0; bottom: 0; width: min(22rem, 90vw); background: #04211e; border-left: 1px solid rgba(15,181,165,0.4); z-index: 9; padding: 5.5rem 2rem 2rem; transform: translateX(102%); transition: transform 0.3s cubic-bezier(0.2,0,0,1); }
+.menu.open { transform: none; }
+.menu a { display: block; color: #fff; text-decoration: none; font-weight: 600; font-size: 1.05rem; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.menu a small { display: block; font-weight: 400; font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 0.2rem; }
+
+.panel { position: fixed; left: clamp(1.5rem, 5vw, 5rem); top: 50%; transform: translateY(-50%); z-index: 4; max-width: 30rem; }
+h1 { font-weight: 800; font-size: clamp(2rem, 3.6vw, 3.2rem); line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 0.9rem; }
+h1 em { font-style: normal; color: var(--teal); }
+.sub { font-size: 1.02rem; line-height: 1.55; color: rgba(255,255,255,0.82); margin-bottom: 2rem; max-width: 26rem; }
+.stats { display: grid; gap: 1.05rem; }
+.stat { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 1rem; padding-left: 1rem; border-left: 2px solid rgba(15,181,165,0.55); }
+.fig { font-family: var(--mono); font-weight: 700; font-size: clamp(1.5rem, 2.4vw, 2.1rem); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; min-width: 7ch; }
+.fig.flut { animation: flut 0.55s cubic-bezier(0.2, 0.9, 0.2, 1.2); color: #7ef0e3; }
+@keyframes flut { 0% { transform: translateY(0.5em); opacity: 0; filter: blur(2px); } 100% { transform: none; opacity: 1; } }
+.lab { font-size: 0.82rem; line-height: 1.4; color: rgba(255,255,255,0.78); }
+.ctas { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 2.2rem; }
+.btn { font-weight: 600; font-size: 0.88rem; padding: 0.8rem 1.15rem; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+.btn-primary { background: var(--teal); color: #04211d; }
+.btn-ghost { color: #fff; border: 1px solid rgba(255,255,255,0.45); }
+.cadence { position: fixed; left: 0; right: 0; bottom: 1.4rem; text-align: center; z-index: 4;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+
+/* The connection ticker: what the graph just did, in words. */
+.tick { position: fixed; right: clamp(1.5rem, 4vw, 4rem); bottom: 4rem; z-index: 4; width: 21rem; max-width: 44vw; }
+.tick p { font-family: var(--mono); font-size: 0.66rem; line-height: 1.5; color: rgba(190,245,238,0.85);
+  border-left: 2px solid var(--teal); padding: 0.15rem 0 0.15rem 0.8rem; margin-bottom: 0.55rem;
+  opacity: 0; transform: translateY(6px); transition: 0.45s; }
+.tick p.in { opacity: 1; transform: none; }
+.tick p.old { opacity: 0.35; }
+</style>
+</head>
+<body>
+<canvas id="net"></canvas>
+
+<header class="bar">
+  <span class="word">CEDAR&nbsp;PRESS</span>
+  <button class="burger" aria-label="Menu" onclick="document.getElementById('m').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<nav class="menu" id="m">
+  <a href="#">Sign in<small>Already have Cedar Press</small></a>
+  <a href="#">Get Cedar Press<small>Through Tribal Business News</small></a>
+  <a href="#">Methods<small>How the collections are built</small></a>
+  <a href="#">Tribal data requests<small>No subscription required</small></a>
+</nav>
+
+<main class="panel">
+  <h1>Every record, connected to the <em>nation it touches.</em></h1>
+  <p class="sub">Cedar resolves twenty-five years of federal contracts, grants, deals and
+    filings to the tribal governments, corporations and Native-owned businesses behind them —
+    and keeps the connections current.</p>
+  <div class="stats" id="stats"></div>
+  <div class="ctas">
+    <a class="btn btn-primary" href="#">Get Cedar Press through Tribal Business News →</a>
+    <a class="btn btn-ghost" href="#">Sign in</a>
+  </div>
+</main>
+
+<aside class="tick" id="tick" aria-label="Latest connections"></aside>
+<p class="cadence">8.5M records maintained · figures update weekly · as of Sep 1, 2026</p>
+
+<script>
+const STATS = [
+  { fig: "$176.7B", lab: "in federal contracts traced to Native-owned firms since 2000" },
+  { fig: "$24.4B",  lab: "in federal subawards with a Native business as prime or sub" },
+  { fig: "3.5M",    lab: "grant and assistance payments to Indian Country on record" },
+  { fig: "2,386",   lab: "deals tracked — acquisitions, joint ventures, financings, bonds" },
+];
+const wrap = document.getElementById("stats");
+STATS.forEach(s => {
+  wrap.insertAdjacentHTML("beforeend",
+    `<div class="stat"><span class="fig">${s.fig}</span><span class="lab">${s.lab}</span></div>`);
+});
+
+/* Real connections, in words, from the sample rows. */
+const CONNECTIONS = [
+  "BOWHEAD PROGRAM MGMT → Ukpeaġvik Iñupiat Corporation · FY2023 contract",
+  "ASRC FEDERAL LOGISTICS → Arctic Slope Regional Corp · FY2025",
+  "$63,845 forestry award → Yurok Tribe · Interior",
+  "Acorn Ridge $110M financing → Ione Band of Miwok · confirmed",
+  "7(i) sharing $3.47M → Ahtna, Incorporated · 2022",
+  "Jamul Casino → Jamul Indian Village · facility record",
+  "NTIA broadband award → Santa Ynez Band of Chumash Indians",
+  "AHTNA DEVELOPMENT CORP → Ahtna, Incorporated · 8(a), FY2000",
+];
+const tick = document.getElementById("tick");
+let ti = 0;
+function pushTick() {
+  const p = document.createElement("p");
+  p.textContent = CONNECTIONS[ti % CONNECTIONS.length]; ti++;
+  tick.prepend(p);
+  requestAnimationFrame(() => requestAnimationFrame(() => p.classList.add("in")));
+  [...tick.children].forEach((el, i) => { el.classList.toggle("old", i > 0); if (i > 2) el.remove(); });
+  /* a stat flutters with the connection */
+  const figs = document.querySelectorAll(".fig");
+  const f = figs[Math.floor(Math.random() * figs.length)];
+  f.classList.remove("flut"); void f.offsetWidth; f.classList.add("flut");
+}
+
+/* ---- the constellation ---- */
+const cv = document.getElementById("net"), cx = cv.getContext("2d");
+let W, H, nodes = [], edges = [], pulses = [];
+function resize() { W = cv.width = innerWidth * devicePixelRatio; H = cv.height = innerHeight * devicePixelRatio; }
+resize(); addEventListener("resize", resize);
+const N = 74;
+/* Hubs (nations) larger, spokes (businesses/records) small — biased right of center. */
+for (let i = 0; i < N; i++) {
+  const hub = i < 12;
+  nodes.push({
+    x: (0.42 + Math.random() * 0.55) * innerWidth,
+    y: (0.08 + Math.random() * 0.84) * innerHeight,
+    r: hub ? 3.4 + Math.random() * 2.4 : 1 + Math.random() * 1.4,
+    hub, vx: (Math.random() - 0.5) * 0.05, vy: (Math.random() - 0.5) * 0.05,
+    tw: Math.random() * Math.PI * 2,
+  });
+}
+for (let i = 12; i < N; i++) {
+  /* each spoke joins its nearest hub, sometimes two */
+  const near = [...nodes.slice(0, 12)].sort((a, b) =>
+    ((a.x-nodes[i].x)**2 + (a.y-nodes[i].y)**2) - ((b.x-nodes[i].x)**2 + (b.y-nodes[i].y)**2));
+  edges.push([nodes[i], near[0]]);
+  if (Math.random() < 0.25) edges.push([nodes[i], near[1]]);
+}
+for (let a = 0; a < 12; a++) for (let b = a + 1; b < 12; b++)
+  if (Math.random() < 0.18) edges.push([nodes[a], nodes[b]]);
+
+function firePulse() {
+  const e = edges[Math.floor(Math.random() * edges.length)];
+  pulses.push({ e, t: 0 });
+  pushTick();
+}
+setInterval(firePulse, 2100);
+firePulse();
+
+function frame() {
+  cx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  cx.clearRect(0, 0, innerWidth, innerHeight);
+  const t = performance.now() / 1000;
+  for (const [a, b] of edges) {
+    cx.strokeStyle = "rgba(15,181,165,0.13)"; cx.lineWidth = 0.7;
+    cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
+  }
+  pulses = pulses.filter(p => p.t < 1);
+  for (const p of pulses) {
+    p.t += 0.016;
+    const [a, b] = p.e, x = a.x + (b.x - a.x) * p.t, y = a.y + (b.y - a.y) * p.t;
+    cx.strokeStyle = `rgba(126,240,227,${0.5 * (1 - p.t)})`; cx.lineWidth = 1.4;
+    cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(x, y); cx.stroke();
+    cx.fillStyle = "rgba(220,255,250,0.95)";
+    cx.beginPath(); cx.arc(x, y, 2.6, 0, 7); cx.fill();
+    cx.fillStyle = "rgba(15,181,165,0.25)";
+    cx.beginPath(); cx.arc(x, y, 8 * (1 - p.t) + 3, 0, 7); cx.fill();
+  }
+  for (const n of nodes) {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x < innerWidth * 0.38 || n.x > innerWidth) n.vx *= -1;
+    if (n.y < 0 || n.y > innerHeight) n.vy *= -1;
+    const glow = n.hub ? 0.85 : 0.45 + 0.25 * Math.sin(t * 1.3 + n.tw);
+    cx.fillStyle = `rgba(${n.hub ? "126,240,227" : "15,181,165"},${glow})`;
+    cx.beginPath(); cx.arc(n.x, n.y, n.r, 0, 7); cx.fill();
+    if (n.hub) {
+      cx.strokeStyle = "rgba(126,240,227,0.2)"; cx.lineWidth = 1;
+      cx.beginPath(); cx.arc(n.x, n.y, n.r + 4 + Math.sin(t + n.tw) * 1.5, 0, 7); cx.stroke();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>

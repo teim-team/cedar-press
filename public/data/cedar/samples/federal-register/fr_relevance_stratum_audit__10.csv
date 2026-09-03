@@ -1,0 +1,5 @@
+tier,corpus_documents,sampled,hand_coded_tribal_subject,stratum_positive_rate
+title_subject,9523,40,38,0.95
+abstract_subject,12855,40,19,0.475
+weak_term_only,1110,15,5,0.3333
+body_only_unverifiable,132964,25,1,0.04

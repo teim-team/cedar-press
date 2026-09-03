@@ -1,3 +1,49 @@
+# ============================================================
+# CEDAR PRESS - consolidated ignore file
+#
+# This repository holds TWO trees that were developed separately and
+# merged on 2026-09-02:
+#   * the product site (Vite + React, server/, src/, tests/)
+#   * the data workspace (code/, data/, dist/, review/)
+# Both sections are kept whole. Neither tree's rules are safe to prune
+# without reading the tree they belong to - the data workspace's rules in
+# particular carry deliberate `!` un-ignores for the two spine files that
+# ARE tracked, and losing one would start committing 6 GB of tables.
+# ============================================================
+
+# ---------------- product site ----------------
+node_modules
+# The web build's output. NOT `dist/`: the data workspace tracks 295 files
+# under that name, and vite empties its output directory before every build,
+# so the two cannot share one. See the note in vite.config.js.
+dist-site
+*.local
+.DS_Store
+
+# Playwright
+test-results/
+playwright-report/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Cedar dataset pipeline local state
+cedar_source_registry/data/
+
+# Restricted source material — NEVER commit to this repo.
+# github.com/teim-team/cedar-press is PUBLIC. Obtained rosters carry named
+# individuals with personal contact details and are held under unconfirmed
+# publication rights. They live outside the repo, under
+# "Cedar Press/data/restricted/". Referenced by registry rows, never contained
+# in them.
+cedar_source_registry/source_records/
+cedar_source_registry/research/white_earth_*/
+*.bak_*
+
+# ---------------- data workspace ----------------
 # Cedar Press - what git tracks and what it does not.
 #
 # THE RULE: git tracks SOURCE. Code, prose, schemas, manifests, contracts,

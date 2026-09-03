@@ -1,0 +1,11 @@
+uei,cage_code,legal_business_name,role,state,n_subawards,first_year,last_year,total_subaward_usd,malformed_flag,source_file,total_usd_as_sub,total_usd_as_prime,n_name_variants,name_variants
+GL6NEAEVM736,56WQ7,BAY Shore Steel Works,sub,Michigan,259,2011,2022,77473251.00,missing_duns,subcontract-05-09-23-22-23-37.csv,77473251.00,0.00,1,
+GV6WMAJUK1R9,53119,Sioux Manufacturing Corporation,sub,NORTH DAKOTA,60,2011,2023,11007761.00,missing_duns,subcontract-05-09-23-22-23-37.csv,11007761.00,0.00,1,
+MAACGN47KJE7,61GH1,Goshawk,sub+sub_parent,Texas,22,2019,2023,5593744.00,missing_duns,subcontract-05-09-23-22-23-37.csv,1679821.00,0.00,1,
+VJDCALPAA628,47P58,Cherokee Services Group,both,VIRGINIA,17,2011,2023,13017260.00,missing_duns,subcontract-05-09-23-22-23-37.csv,12918260.00,99000.00,1,
+ZCWUG5M95NL6,7G8Z7,Puyenpa Services,both+sub_parent+prime_parent,NEVADA,14,2019,2022,39849158.00,missing_duns,subcontract-05-09-23-22-23-37.csv,17190344.00,2734235.00,1,
+KWW1EMSN9EJ3,5WM56,Mill Creek,sub,Georgia,11,2013,2017,51084615.00,missing_duns,subcontract-05-09-23-22-23-37.csv,51084615.00,0.00,1,
+DW7MDKAD98F7,57ZF5,Cherokee Nation Construction Services,both+sub_parent+prime_parent,Delaware,8,2013,2021,4827866.00,missing_duns,subcontract-05-09-23-22-23-37.csv,2238913.00,175020.00,1,
+X1VVTNMDE2F5,5D1N1,Cherokee Nation Red Wing,sub,Alabama,8,2016,2020,13863033.00,missing_duns,subcontract-05-09-23-22-23-37.csv,13863033.00,0.00,1,
+JJM5BPY5NUK1,6VBP0,Sustainment & Restoration Services,sub,WISCONSIN,7,2015,2022,1845584.00,missing_duns,subcontract-05-09-23-22-23-37.csv,1845584.00,0.00,1,
+DNMMGRY367M7,3MZD8,HCI Construction Company,sub,Nebraska,5,2015,2018,240997.00,missing_duns,subcontract-05-09-23-22-23-37.csv,240997.00,0.00,1,

@@ -1,0 +1,820 @@
+{
+  "tbnUrl": "https://tribalbusinessnews.com",
+  "lumeconUrl": "https://lumecon.ai",
+  "articles": [
+    {
+      "id": "brief-owned",
+      "hosted": true,
+      "demonstration": false,
+      "image": "/pitch/lanes/construction-wide.webp",
+      "imageAlt": "Crews working a large construction site",
+      "caption": "White Earth Nation's certified list runs heavily to the building trades: construction, drywall, tile and site services, most of it first-preference certified.",
+      "datasetId": "owned",
+      "draws": [
+        "owned"
+      ],
+      "tag": "Original Research",
+      "title": "The first nation-shared roster of individually owned Native businesses is in",
+      "dek": "White Earth Nation's TERO shared its certified Indian-owned business list directly with the project, the first roster in a consent-first dataset of the businesses no federal register counts.",
+      "date": "August 2026",
+      "byline": "Elijah S. Moreno",
+      "minutes": 3,
+      "body": [
+        {
+          "kind": "p",
+          "text": "Federal datasets count Native entity-owned enterprises well: tribally owned firms, ANC and NHO subsidiaries, 8(a) participants. What they do not count is the individually owned side of Indian Country's economy, the businesses certified not by a federal registry but by their own nations' TERO and commerce offices. Those certification lists exist, office by office, and no public source collates them."
+        },
+        {
+          "kind": "p",
+          "text": "The Owned collection is built to close that gap the only defensible way: by asking. Each nation's office is approached directly, each decides whether and how its list may be used, and a roster enters the dataset only under the terms its office states. White Earth Nation's TERO answered first, sharing its current Certified Indian Owned Businesses list the morning after the request went out."
+        },
+        {
+          "kind": "pull",
+          "text": "Nothing overrides what a nation says about its own certified businesses."
+        },
+        {
+          "kind": "h2",
+          "text": "What one roster shows"
+        },
+        {
+          "kind": "p",
+          "text": "White Earth's list certifies 22 individually owned businesses, 17 of them at first preference, concentrated in the building trades: construction, drywall, tile, tree and site services. That is one nation's certified economy in a single sheet, and it is exactly the layer the federal registers miss, because none of these firms needs a federal registration to work tribal preference contracts at home."
+        },
+        {
+          "kind": "image",
+          "src": "/pitch/lanes/professional-wide.webp",
+          "alt": "A meeting around a conference table",
+          "caption": "Each nation's office decides the terms: publication, aggregates only, or a process of its own design."
+        },
+        {
+          "kind": "p",
+          "text": "One roster is a beginning, not a finding. The outreach wave behind it spans TERO and commerce offices across the country, and the early responses already sketch the range of governance the dataset has to respect: one office is taking the request to its commission for formal review, and another keeps its list confidential but is forwarding the invitation to its businesses so each can opt in itself. Both of those are good outcomes. A dataset assembled on those terms is slower, and it is the only version of this dataset worth building."
+        },
+        {
+          "kind": "p",
+          "text": "Until each nation confirms how its listings may appear, its businesses show up here in aggregates only, credited to the office that certified them. As terms land, the entity rows follow."
+        }
+      ]
+    },
+    {
+      "id": "brief-deals",
+      "hosted": true,
+      "demonstration": true,
+      "image": "/pitch/lanes/professional-wide.webp",
+      "imageAlt": "A negotiation around a conference table",
+      "caption": "Announced capital in energy and project finance is concentrated in a small number of large transactions, which makes the annual figure sensitive to a single closing.",
+      "datasetId": "deals",
+      "draws": [
+        "deals",
+        "funding"
+      ],
+      "tag": "Original Research",
+      "title": "Announced deals in Indian Country are running ahead of any year in the series",
+      "dek": "Energy and project finance lead 2026's announced transactions, the Deals database shows, with closings confirmed against primary sources before they enter totals.",
+      "date": "July 2026",
+      "byline": "Cedar Press research desk",
+      "minutes": 4,
+      "body": [
+        {
+          "kind": "p",
+          "text": "Announced transactions in Indian Country are running ahead of any comparable period in the series, and the composition has moved as much as the count. Energy and project finance carry most of the increase, with tribal governments and tribal enterprises appearing as principals rather than as counterparties. That is a change in kind as much as in volume: a nation financing its own generation capacity is a different economic actor from one leasing land to somebody else's project."
+        },
+        {
+          "kind": "p",
+          "text": "The distinction matters for anyone reading a total. Announced and closed are labeled separately in the Deals collection, and a transaction enters totals only once its status is confirmed against a primary source. A year that looks strong on announcements can settle differently, and the gap between the two lines is itself worth watching. In 2023 roughly a fifth of announced capital had not closed twelve months later, most of it in a single sector."
+        },
+        {
+          "kind": "figure",
+          "chart": "line",
+          "caption": "Announced against confirmed transactions, by quarter",
+          "source": "deals",
+          "series": [
+            "announced",
+            "confirmed"
+          ],
+          "points": [
+            {
+              "label": "Q2'25",
+              "announced": 31,
+              "confirmed": 24
+            },
+            {
+              "label": "Q3'25",
+              "announced": 38,
+              "confirmed": 29
+            },
+            {
+              "label": "Q4'25",
+              "announced": 34,
+              "confirmed": 28
+            },
+            {
+              "label": "Q1'26",
+              "announced": 47,
+              "confirmed": 33
+            },
+            {
+              "label": "Q2'26",
+              "announced": 52,
+              "confirmed": 35
+            }
+          ],
+          "notes": [
+            "Announced counts a transaction at first public report. Confirmed counts it once its status is verified against a primary source, which is usually one to three quarters later.",
+            "The most recent quarter is therefore always understated on the confirmed line.",
+            "Undisclosed values are counted as transactions and excluded from any dollar total."
+          ]
+        },
+        {
+          "kind": "h2",
+          "text": "Who is on the other side"
+        },
+        {
+          "kind": "p",
+          "text": "Resolving counterparties is where a transaction record becomes readable. A financing that names a subsidiary tells you very little until the subsidiary is joined to its parent nation or corporation, and the same acquisition can appear three times under three names across a decade of filings. Announcements name the entity as it was styled that week, which is rarely the entity a researcher is looking for."
+        },
+        {
+          "kind": "p",
+          "text": "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Contracting and Gaming. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible."
+        },
+        {
+          "kind": "pull",
+          "text": "The records are public. Knowing that four names over twelve years are one enterprise is the work."
+        },
+        {
+          "kind": "p",
+          "text": "The practical effect shows up in concentration. Read at face value, the transaction record looks more distributed than it is, because one buyer appears as several. Resolved to parents, the top ten acquirers account for a meaningfully larger share of announced capital than the unresolved list suggests, and the direction of that error is consistent across every year in the series."
+        },
+        {
+          "kind": "pair",
+          "images": [
+            {
+              "src": "/pitch/lanes/publicadmin-wide.webp",
+              "alt": "The United States Capitol",
+              "caption": "Federal programs remain the counterparty on a large share of project financings."
+            },
+            {
+              "src": "/pitch/lanes/construction-wide.webp",
+              "alt": "Crews working a large construction site",
+              "caption": "Construction starts trail announcements by two to four quarters in most of the series."
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "text": "What to watch"
+        },
+        {
+          "kind": "p",
+          "text": "Project finance in energy is the line to follow into next year. Announced capital is concentrated in a small number of large projects, so a single delay moves the annual figure more than the underlying rate of activity would suggest. Two of the largest announcements in the current period are at the permitting stage, where timelines are least predictable, and either one slipping would take the year below the prior period on announced capital while activity itself was flat."
+        },
+        {
+          "kind": "p",
+          "text": "Property and hospitality are the quieter half of the increase and the steadier one. Transactions there are smaller, more numerous and less exposed to a single closing, which makes them a better read on whether the underlying rate of activity has moved. They are also where tribal enterprises most often appear as buyers of operating businesses rather than as developers, which is a different capability and a different balance sheet."
+        },
+        {
+          "kind": "p",
+          "text": "Bond issuance is the third thread and the one most sensitive to conditions outside Indian Country. Issuance held up through the rate environment of the last two years, which was not the expectation, and the reasons are worth a separate piece. The collection carries issuance alongside the acquisitions and financings so the three can be read against each other rather than separately."
+        },
+        {
+          "kind": "h2",
+          "text": "How to read the totals"
+        },
+        {
+          "kind": "p",
+          "text": "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. Where a deal is reported but unconfirmed it sits as announced and is visible as such, which is the difference between a figure that can be cited and one that cannot. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into the total."
+        },
+        {
+          "kind": "p",
+          "text": "Anyone reproducing the numbers here should note the as-of date beside each figure. The collections update continuously, every correction is logged on the What’s New page, and a change that moves a total says so there. A figure cited with its date stays explainable: the log shows what has moved since and why."
+        },
+        {
+          "kind": "p",
+          "text": "One caution on comparison. Transaction counts across Indian Country cannot be read against a national deal index without adjusting for what each includes, and most published indices exclude the tribal enterprise structures that account for a large share of the activity here. The comparison people usually want is between periods within this series, which is why the reconstructed history matters more for this collection than a benchmark against somebody else's."
+        }
+      ]
+    },
+    {
+      "id": "brief-contractors",
+      "hosted": true,
+      "demonstration": true,
+      "image": "/pitch/lanes/construction-wide.webp",
+      "imageAlt": "Crews working a large construction site",
+      "caption": "Construction carries most of the obligation volume and almost none of the recent increase, which is in professional and technical services.",
+      "datasetId": "contractors",
+      "draws": [
+        "contractors",
+        "subcontracting"
+      ],
+      "tag": "Original Research",
+      "title": "Federal contracting to Native entities rises for a fourth straight quarter",
+      "dek": "Award histories rolled up to parent tribes, ANCs and NHOs show broad growth, led by 8(a) participants.",
+      "date": "June 2026",
+      "byline": "Cedar Press research desk",
+      "minutes": 4,
+      "body": [
+        {
+          "kind": "p",
+          "text": "Obligations to Native-owned firms rose for a fourth consecutive quarter, and the growth is broader than the headline suggests. Rolled up to parent tribes, ANCs and NHOs, the increase reaches more entities than in any quarter of the prior year rather than concentrating in the largest holders. The number of distinct parents winning at least one award is the highest in the series."
+        },
+        {
+          "kind": "p",
+          "text": "8(a) participants lead, which is the expected result and also the one most often misread. Participation is a status with a start and an end, so a firm that held it in 2019 and does not hold it now should not be counted as an 8(a) award today. Reading the program as a permanent attribute of a company overstates its current share and understates how many firms have graduated out of it and kept winning work."
+        },
+        {
+          "kind": "figure",
+          "chart": "stacked",
+          "caption": "Obligations by parent entity type, by quarter",
+          "source": "contractors",
+          "series": [
+            "Tribal enterprise",
+            "ANC subsidiary",
+            "NHO subsidiary"
+          ],
+          "points": [
+            {
+              "label": "Q3'25",
+              "Tribal enterprise": 41,
+              "ANC subsidiary": 33,
+              "NHO subsidiary": 9
+            },
+            {
+              "label": "Q4'25",
+              "Tribal enterprise": 44,
+              "ANC subsidiary": 34,
+              "NHO subsidiary": 10
+            },
+            {
+              "label": "Q1'26",
+              "Tribal enterprise": 49,
+              "ANC subsidiary": 35,
+              "NHO subsidiary": 11
+            },
+            {
+              "label": "Q2'26",
+              "Tribal enterprise": 56,
+              "ANC subsidiary": 36,
+              "NHO subsidiary": 13
+            }
+          ],
+          "notes": [
+            "These are obligations rather than receipts. An obligation is the government committing funds; the work and the payment can fall in later periods.",
+            "Each award is attributed to the parent the firm had at the date of award rather than the parent it has now.",
+            "Band order is fixed across every quarter, so only the bottom band and the total share a baseline."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Resolving the vendor list to parents is what turns a procurement record into an industry picture. Federal reporting names the awardee, and the awardee is frequently a subsidiary two or three levels below the nation or corporation that owns it. A single ANC can appear under a dozen names across agencies, none of which reference each other, and none of which are wrong."
+        },
+        {
+          "kind": "h2",
+          "text": "The subaward layer"
+        },
+        {
+          "kind": "p",
+          "text": "Prime awards are the visible half. Matching subaward activity to the same resolved entities shows work moving between Native firms that neither record describes on its own, and it is where the growth in the smaller tiers actually appears. A prime award to one tribal enterprise that subcontracts to three others is four firms working, and the prime record shows one."
+        },
+        {
+          "kind": "p",
+          "text": "The pattern is not uniform. In construction, subaward activity to other Native firms is a small share of the prime value. In professional and technical services it is substantially higher, which is consistent with how those contracts are staffed and is worth knowing before drawing conclusions about the depth of the sector from prime awards alone."
+        },
+        {
+          "kind": "pull",
+          "text": "The industry only appears once the vendors are joined to who owns them."
+        },
+        {
+          "kind": "p",
+          "text": "Both collections are maintained against the same entity layer, so a parent renaming or a subsidiary being acquired reaches every historical award at once rather than leaving two records that disagree. That is also why a correction filed in the Deals collection can move a figure here: the entity is the same entity, and the relationship is maintained in one place."
+        },
+        {
+          "kind": "image",
+          "src": "/pitch/lanes/professional-wide.webp",
+          "alt": "A meeting around a conference table",
+          "caption": "Professional and technical services carry the quarters that moved, on smaller awards spread across more firms."
+        },
+        {
+          "kind": "h2",
+          "text": "Where the growth is not"
+        },
+        {
+          "kind": "p",
+          "text": "Construction and facilities services carry most of the volume and almost none of the increase. The quarters that moved are professional services and information technology, where the average award is smaller and the number of distinct entities winning work is higher. Read only in dollars, the sector looks flat; read in entities and awards, it does not."
+        },
+        {
+          "kind": "p",
+          "text": "That composition is worth watching for a reason beyond the totals. A base of many small awards across many firms is a different kind of exposure from a base of few large ones, and it responds differently when an agency changes how it buys. Consolidation of small contracts into larger vehicles has been the direction of federal procurement for a decade, and the firms most exposed to it are the ones the headline number is least sensitive to."
+        },
+        {
+          "kind": "figure",
+          "chart": "sankey",
+          "caption": "Prime obligations reaching subcontracted work, by sector",
+          "source": "subcontracting",
+          "flows": [
+            {
+              "from": "Construction",
+              "to": "Native subcontractors",
+              "value": 12
+            },
+            {
+              "from": "Construction",
+              "to": "Other subcontractors",
+              "value": 46
+            },
+            {
+              "from": "Professional services",
+              "to": "Native subcontractors",
+              "value": 27
+            },
+            {
+              "from": "Professional services",
+              "to": "Other subcontractors",
+              "value": 19
+            },
+            {
+              "from": "Information technology",
+              "to": "Native subcontractors",
+              "value": 16
+            },
+            {
+              "from": "Information technology",
+              "to": "Other subcontractors",
+              "value": 14
+            }
+          ],
+          "notes": [
+            "Ribbon width is the only quantity. Vertical position carries no meaning.",
+            "Covers reported subawards only. Work performed in-house by the prime does not appear.",
+            "A subcontractor is counted as Native where ownership is established from filings or primary-source confirmation."
+          ]
+        },
+        {
+          "kind": "h2",
+          "text": "What the collection does and does not claim"
+        },
+        {
+          "kind": "p",
+          "text": "The collection publishes obligations as reported, with the entity resolution applied on top and documented. Where a firm's parent changed during the period covered, the award is attributed to the parent it had at the time of award rather than the one it has now. Both attributions are defensible and they answer different questions; the one used here is stated with the release so a figure can be reproduced or deliberately recomputed the other way."
+        },
+        {
+          "kind": "p",
+          "text": "Obligations are not receipts. An obligation is the government committing funds, and the timing of the work and the payment can sit in later periods or, on a terminated contract, never arrive. For questions about revenue rather than about award activity, the obligation series is the wrong instrument, and the methodology note says so rather than leaving a reader to find out from a discrepancy."
+        },
+        {
+          "kind": "p",
+          "text": "Nor does the collection assert that every Native-owned firm appears. Ownership is established from filings, registrations and primary-source confirmation, and a firm that is Native-owned but has never had to declare it in a record Cedar reads will be missing. That gap is documented with the release, it is smaller at the top of the award distribution than at the bottom, and it is the honest limit on any statement about the total size of the sector rather than about the awards themselves."
+        }
+      ]
+    },
+    {
+      "id": "brief-funding",
+      "demonstration": true,
+      "href": "https://tribalbusinessnews.com",
+      "image": "/pitch/lanes/publicadmin-wide.webp",
+      "imageAlt": "The United States Capitol",
+      "datasetId": "funding",
+      "tag": "Original Research",
+      "title": "Where federal dollars reached Indian Country in FY2025",
+      "dek": "Assistance awards by program and recipient, from the Funding collection's first full-year release.",
+      "date": "May 2026"
+    }
+  ],
+  "citations": [],
+  "reportCitationHref": "mailto:contact@lumecon.ai?subject=Cedar%20Press%20citation",
+  "catalog": [
+    {
+      "id": "funding",
+      "short": "Federal Funding",
+      "name": "Federal Funding to Indian Country",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "series",
+        "from": 2007
+      },
+      "blurb": "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
+      "linkage": "Recipients resolved to the Native entity behind them, so an award to a subsidiary, a housing authority or a consortium is attributed to the nation or organization it belongs to."
+    },
+    {
+      "id": "federal-register",
+      "short": "Federal Register",
+      "name": "Federal Register",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "series",
+        "from": 1994
+      },
+      "blurb": "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
+      "linkage": "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names."
+    },
+    {
+      "id": "legislation",
+      "short": "Legislation",
+      "name": "Congressional Votes and Proposed Legislation",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "series",
+        "from": 1973
+      },
+      "blurb": "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
+      "linkage": "Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them."
+    },
+    {
+      "id": "deals",
+      "short": "Deals",
+      "name": "Indian Country Deals",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "series",
+        "from": 2000
+      },
+      "blurb": "Announced transactions across Indian Country: acquisitions, property purchases, project financings, bond issuances and capital projects. See who bought, who financed, what closed and how a quarter compares with the last.",
+      "linkage": "Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs."
+    },
+    {
+      "id": "nagpra",
+      "short": "NAGPRA",
+      "name": "NAGPRA",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "series",
+        "from": 1994
+      },
+      "blurb": "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
+      "linkage": "Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades."
+    },
+    {
+      "id": "lobbying",
+      "short": "Lobbying",
+      "name": "Lobbying",
+      "shelf": "standard",
+      "coverage": {
+        "kind": "series",
+        "from": 1999
+      },
+      "blurb": "Federal lobbying registrations and the quarterly filings behind them. See who hired which firm, what they paid and which issues and bills the money is working.",
+      "linkage": "Registrants and clients resolved to the tribes and Native organizations behind them, including firms retained on their behalf."
+    },
+    {
+      "id": "contractors",
+      "short": "Prime Contracting",
+      "name": "Federal Prime Contracting",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "series",
+        "from": 2000
+      },
+      "blurb": "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
+      "linkage": "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation."
+    },
+    {
+      "id": "subcontracting",
+      "short": "Subcontracting",
+      "name": "Federal Subcontracting",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "series",
+        "from": 2010
+      },
+      "blurb": "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
+      "linkage": "Subawards matched to the same resolved entities as the prime contracts above them."
+    },
+    {
+      "id": "natural-resources",
+      "short": "Natural Resources",
+      "name": "Natural Resource Revenues",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "series",
+        "from": 1880
+      },
+      "blurb": "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
+      "linkage": "Production and disbursements matched to the nations and allottees they belong to."
+    },
+    {
+      "id": "owned",
+      "short": "Native-Owned Businesses",
+      "name": "Individually Owned Native Businesses",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "roster",
+        "captured": "2026-09-01"
+      },
+      "blurb": "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
+      "linkage": "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office."
+    },
+    {
+      "id": "nonprofits",
+      "short": "Native Nonprofits",
+      "name": "Native Nonprofits",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "roster",
+        "captured": "2026-04-29"
+      },
+      "blurb": "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
+      "linkage": "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately."
+    },
+    {
+      "id": "nest",
+      "short": "NEST",
+      "name": "Native Enterprise Structures and Ties",
+      "shelf": "pro",
+      "coverage": {
+        "kind": "series",
+        "from": 2016
+      },
+      "blurb": "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
+      "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
+    },
+    {
+      "id": "gaming",
+      "short": "Gaming",
+      "name": "Gaming Intelligence",
+      "shelf": "grove",
+      "coverage": {
+        "kind": "series",
+        "from": 1979
+      },
+      "blurb": "Facilities, ownership and affiliation over time, declination letters, environmental reviews, expansions, employment estimates and transaction history, cross-validated against Deals.",
+      "preview": {
+        "shows": [
+          "What it contains",
+          "Historical coverage",
+          "Selected aggregate findings",
+          "Related Cedar Press articles",
+          "A methodology summary"
+        ],
+        "withholds": [
+          "Record-level exploration",
+          "Downloads",
+          "Entity filters",
+          "Full historical records",
+          "Advanced queries"
+        ]
+      },
+      "linkage": "Facilities matched to their operators and their owners. This is the one collection where the counterparties are not all Native: management companies and outside operators are resolved and labeled as such."
+    }
+  ],
+  "releases": {
+    "funding": {
+      "version": "v4.2",
+      "updated": "2026-08-06",
+      "cadence": "Updated monthly",
+      "summary": "July awards added, with fourteen recipients resolved to existing tribal enterprises.",
+      "history": [
+        {
+          "version": "v4.2",
+          "date": "2026-08-06",
+          "kind": "data",
+          "changed": [
+            "Added 386 newly reported awards through July 2026.",
+            "Resolved 14 recipients to existing tribal enterprises.",
+            "Added two newly identified subsidiaries.",
+            "Corrected the historical affiliation of one recipient."
+          ]
+        },
+        {
+          "version": "v4.1",
+          "date": "2026-07-08",
+          "kind": "data",
+          "changed": [
+            "Added 412 awards through June 2026.",
+            "Entity updates from the maintained identity layer affected 28 historical records."
+          ]
+        },
+        {
+          "version": "v4.0",
+          "date": "2026-06-04",
+          "kind": "data",
+          "changed": [
+            "Extended the funding record back to FY2007 using additional federal and archival sources."
+          ]
+        },
+        {
+          "version": "v3.8",
+          "date": "2026-05-07",
+          "kind": "data",
+          "changed": [
+            "Routine monthly update."
+          ]
+        }
+      ]
+    },
+    "federal-register": {
+      "version": "v6.1",
+      "updated": "2026-08-04",
+      "cadence": "Updated as records arrive",
+      "summary": "Notices through early August, with three entities matched under former names.",
+      "history": [
+        {
+          "version": "v6.1",
+          "date": "2026-08-04",
+          "kind": "data",
+          "changed": [
+            "Added notices published through 1 August 2026.",
+            "Matched three notices to entities appearing under former names."
+          ]
+        },
+        {
+          "version": "v6.0",
+          "date": "2026-07-02",
+          "kind": "methodology",
+          "note": "Notices naming a parent and a subsidiary are now attributed to both rather than to the parent alone.",
+          "changed": [
+            "Revised attribution for notices naming more than one related entity.",
+            "Reprocessed the full archive under the revised rule."
+          ]
+        }
+      ]
+    },
+    "legislation": {
+      "version": "v3.4",
+      "updated": "2026-08-01",
+      "cadence": "Updated monthly",
+      "summary": "July roll-call votes and newly introduced bills.",
+      "history": [
+        {
+          "version": "v3.4",
+          "date": "2026-08-01",
+          "kind": "data",
+          "changed": [
+            "Added July roll-call votes and newly introduced bills.",
+            "Linked nine bills to the organizations they name."
+          ]
+        },
+        {
+          "version": "v3.3",
+          "date": "2026-07-01",
+          "kind": "data",
+          "changed": [
+            "Routine monthly update."
+          ]
+        }
+      ]
+    },
+    "deals": {
+      "version": "v9.0",
+      "updated": "2026-07-28",
+      "cadence": "Updated continuously",
+      "summary": "Twelve transactions added and three ownership relationships updated.",
+      "history": [
+        {
+          "version": "v9.0",
+          "date": "2026-07-28",
+          "kind": "data",
+          "changed": [
+            "Added 12 transactions confirmed against primary sources.",
+            "Updated three ownership relationships, which corrected records in Contracting and Gaming."
+          ]
+        },
+        {
+          "version": "v8.6",
+          "date": "2026-06-30",
+          "kind": "data",
+          "changed": [
+            "Added 9 transactions and one new subsidiary."
+          ]
+        }
+      ]
+    },
+    "nagpra": {
+      "version": "v2.7",
+      "updated": "2026-07-22",
+      "cadence": "Updated as records arrive",
+      "summary": "New notices and inventories, matched across three decades of naming changes.",
+      "history": [
+        {
+          "version": "v2.7",
+          "date": "2026-07-22",
+          "kind": "data",
+          "changed": [
+            "Added notices and inventories published since the last release.",
+            "Reconciled six historical notices to their current tribal names."
+          ]
+        }
+      ]
+    },
+    "lobbying": {
+      "version": "v5.2",
+      "updated": "2026-07-31",
+      "cadence": "Updated quarterly",
+      "summary": "Second-quarter filings added.",
+      "history": [
+        {
+          "version": "v5.2",
+          "date": "2026-07-31",
+          "kind": "data",
+          "changed": [
+            "Added Q2 2026 registrations and filings.",
+            "Resolved four registrants to the tribes that retained them."
+          ]
+        },
+        {
+          "version": "v5.1",
+          "date": "2026-04-30",
+          "kind": "data",
+          "changed": [
+            "Added Q1 2026 filings."
+          ]
+        }
+      ]
+    },
+    "contractors": {
+      "version": "v6.0",
+      "updated": "2026-08-05",
+      "cadence": "Updated monthly",
+      "summary": "July obligations added and 22 vendors rolled up to parent entities.",
+      "history": [
+        {
+          "version": "v6.0",
+          "date": "2026-08-05",
+          "kind": "data",
+          "changed": [
+            "Added obligations reported through July 2026.",
+            "Rolled 22 vendors up to their parent nation or corporation.",
+            "Entity updates from the maintained identity layer affected 41 historical records."
+          ]
+        },
+        {
+          "version": "v5.4",
+          "date": "2026-07-06",
+          "kind": "methodology",
+          "note": "8(a) participation is now recorded as a status with dates rather than a fixed flag.",
+          "changed": [
+            "Revised 8(a) participation to carry start and end dates.",
+            "Reprocessed the archive so historical awards reflect status at the time of award."
+          ]
+        }
+      ]
+    },
+    "subcontracting": {
+      "version": "v3.1",
+      "updated": "2026-08-05",
+      "cadence": "Updated monthly",
+      "summary": "Subaward activity matched to the same entities as the prime awards.",
+      "history": [
+        {
+          "version": "v3.1",
+          "date": "2026-08-05",
+          "kind": "data",
+          "changed": [
+            "Added July subaward activity and matched it to the prime awards above it."
+          ]
+        }
+      ]
+    },
+    "natural-resources": {
+      "version": "v4.0",
+      "updated": "2026-07-15",
+      "cadence": "Updated quarterly",
+      "summary": "Second-quarter production and disbursements.",
+      "history": [
+        {
+          "version": "v4.0",
+          "date": "2026-07-15",
+          "kind": "data",
+          "changed": [
+            "Added Q2 production, royalties and disbursements."
+          ]
+        }
+      ]
+    },
+    "nonprofits": {
+      "version": "v3.0",
+      "updated": "2026-06-25",
+      "cadence": "Updated annually",
+      "summary": "Native-serving classification rules revised. Read the note before reusing prior figures.",
+      "history": [
+        {
+          "version": "v3.0",
+          "date": "2026-06-25",
+          "kind": "methodology",
+          "note": "Native-serving nonprofit classification rules were revised, so counts in this release are not directly comparable with v2.x.",
+          "changed": [
+            "Separated Native-led from Native-serving where governance could be established from filings.",
+            "Reclassified 63 organizations under the revised rules.",
+            "Added the most recent filing year."
+          ]
+        }
+      ]
+    },
+    "gaming": {
+      "version": "v7.3",
+      "updated": "2026-08-02",
+      "cadence": "Updated continuously",
+      "summary": "Facility, operator and expansion activity reconciled against Deals.",
+      "history": [
+        {
+          "version": "v7.3",
+          "date": "2026-08-02",
+          "kind": "data",
+          "changed": [
+            "Added recent expansion filings and environmental review activity.",
+            "Reconciled two operator changes against Indian Country Deals.",
+            "Updated employment estimates for eleven facilities."
+          ]
+        }
+      ]
+    }
+  }
+}

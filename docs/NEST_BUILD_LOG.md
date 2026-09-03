@@ -1359,7 +1359,7 @@ the file is right. (The 212 is still the right order of magnitude for the
 The previous block left one line for an integrator: add
 `nest_entity_dual_role.csv` (358 rows, ADR-032) to `500`'s `nest` collection.
 **No edit was needed.** That collection's selector is the regex `^nest_`, which
-already claims the table; `docs/ARCHITECTURE.md` line 375 lists it under *NEST*
+already claims the table; `docs/DATA_ARCHITECTURE.md` line 375 lists it under *NEST*
 with its 358 rows and both writers. Verified by re-running
 `py -3 code/500_build_architecture_map.py`.
 

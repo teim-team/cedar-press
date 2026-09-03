@@ -1,0 +1,56 @@
+# The Cedar Press API, packaged. Mirrors the Cedar Grove package's setup so a
+# module that moves between the two is held to one standard.
+#
+#   pip install -e server[dev]
+#   ruff check server && ruff format --check server
+#   python3 -m unittest discover -s server/tests -t server
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cedar-press"
+version = "0.1.0"
+description = "The subscriber API behind cedarpress.ai: collections, releases, briefs and downloads."
+requires-python = ">=3.10"
+license = { text = "UNLICENSED" }
+authors = [{ name = "Lumecon" }]
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9",
+  # The shelf page is rendered here rather than in the browser; see
+  # docs/PYTHON_FIRST_SITE.md. Jinja2 over any of the Python-native web
+  # frameworks because it templates the stylesheet the client already has
+  # instead of generating markup of its own.
+  "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.8", "httpx>=0.27"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["cedar_press"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+# B008 forbids a call in an argument default, which is how FastAPI declares a
+# dependency: `session = Depends(current_session)` is the framework's own
+# spelling, and rewriting it inside every handler is what the rule is warning
+# against, not what it is asking for.
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Carried over from Cedar Grove's package as-is, and kept that way: these hold
+# the inclusion rules and the claim-linting phrase tables, and every line this
+# repository rewraps is a line that has to be reconciled by hand the next time
+# the copy still maintained there changes. Line length is the only rule
+# relaxed; the ones that catch bugs stay on.
+"**/claims.py" = ["E501"]
+"**/collections.py" = ["E501"]

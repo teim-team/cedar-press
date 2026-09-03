@@ -134,7 +134,7 @@ of them, which is why `01` is on NEVER_RUN.
 
 | doc | script |
 |---|---|
-| `docs/ARCHITECTURE.md` | `500_build_architecture_map.py` |
+| `docs/DATA_ARCHITECTURE.md` | `500_build_architecture_map.py` |
 | `docs/ENTITY_INVENTORY.md` + `docs/entity_dataset_coverage.csv` | `501_build_entity_inventory.py` |
 | `docs/ARCHIVE_CANDIDATES.md` | `502_archive_candidates.py` |
 | `docs/IDENTIFIER_STANDARD.md` | **policy, hand-written** — carries no counts on purpose |

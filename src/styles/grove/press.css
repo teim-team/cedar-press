@@ -1,0 +1,2056 @@
+/* REVIEW OWNER: Havala
+ *
+ * Cedar Press: every surface in the product.
+ *
+ * One stylesheet for seven pages (the gate, the reader, methods, the tribal
+ * data request, research access, what's new and a collection), because they
+ * share a type scale, a palette and a set of chrome registers, and splitting
+ * them is how two pages start disagreeing about what a section heading is.
+ *
+ * Reads from the same tokens as the app; redesign.css must be imported first.
+ *
+ * TWO RULES WORTH KNOWING BEFORE EDITING
+ * Colour is flat. A surface is one colour and ends where the next begins: no
+ * gradient between two surfaces and none inside one. Teal that carries white
+ * text is --dteal, never --teal or --teal-dark; both of those land under 4.5:1
+ * and the page has a contrast audit that will catch it.
+ *
+ * Source order matters more than usual here. Several rules are one class deep
+ * on both sides (`.cp-foot` vs `.cp-foot--deep`), so a modifier placed before
+ * the rule it modifies silently loses. Two real bugs have come from exactly
+ * that; put modifiers after their base. */
+
+/* min-width: 0 because .teim-rd is a column flex container: without it the
+ * collection strip's card minimums (3 x 360px) propagate up as this page's
+ * minimum width and the whole page scrolls sideways on narrow windows,
+ * instead of the strip scrolling inside its own box.
+ *
+ * The bottom padding clears the floating Cedar launcher. On the reader's
+ * Everything view the navy footer carries that clearance instead, so the
+ * colour reaches the bottom of the page: see .cp--deepfoot. */
+/* Full-bleed bands (.cp-band, .cp-surf, .cp-foot--deep) stretch with
+ * width: 100vw, and on platforms with a classic scrollbar 100vw includes
+ * the bar the layout viewport does not — a few pixels of permanent sideways
+ * scroll. Clip, not hidden: clip creates no scroll container, so the sticky
+ * view bar keeps sticking to the page scroll. */
+.teim-rd { overflow-x: clip; }
+/* The page measure. Wide screens were capped at 1320px and spent the rest
+ * on margin; the shelves and the index have real content to lay out, so the
+ * measure grows with the viewport and stops where a line of body copy would
+ * become hard to track. */
+.teim-rd .cp { --cp-measure: 1560px; max-width: var(--cp-measure); min-width: 0; width: 100%; margin: 0 auto; padding: 0 2.4rem 7.5rem; }
+
+/* The publication keeps its designed palette in either app theme. The app
+ * shell's dark remap swaps the tokens this stylesheet builds its solid fills
+ * from (--dteal, --ink under white text), and no dark equivalents exist
+ * here, so inheriting the remap produced white-on-teal near 1.8:1 and
+ * white-on-white sections. A publication has one designed look, like the
+ * marketing site; the pages opt into it with .teim-rd--paper, which re-pins
+ * the light tokens at higher specificity than the dark remap. */
+:root[data-theme="dark"] .teim-rd.teim-rd--paper {
+  --ink: #0A0F26; --ink-2: #353B5C; --muted: #6B6F8A;
+  --teal: #0FB5A5; --teal-dark: #0A8A7E; --teal-tint: #f2faf8; --teal-line: rgba(15,181,165,0.35);
+  --dteal: #0A7F74; --gold: #F0A91A; --amber: #C77A18;
+  --bg: #ffffff;
+  --line: rgba(10,15,38,0.12); --line-soft: rgba(10,15,38,0.07);
+  --focus-ring: 0 0 0 4px rgba(15,181,165,0.08);
+  background: var(--bg);
+}
+
+.teim-rd .cp-mast { display: flex; align-items: baseline; gap: 1rem; padding: 1.6rem 0 1.2rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-mast__word { font-weight: 800; font-size: 1.25rem; letter-spacing: 0.14em; color: var(--ink); }
+.teim-rd a.cp-mast__word { text-decoration: none; }
+.teim-rd a.cp-mast__word:hover { color: var(--dteal); }
+/* The page's own name where the partnership line sits on the hub, so the
+ * header answers "where am I" before the page does. */
+.teim-rd .cp-mast__page { color: var(--ink-2); font-weight: 700; letter-spacing: 0.14em; }
+/* The way back, stated rather than implied by a linked wordmark. */
+.teim-rd .cp-back { margin-top: 1.1rem; }
+.teim-rd .cp-mast__of { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-mast__cta { margin-left: auto; }
+
+/* The head opens across the page rather than down it: headline left, the
+ * intro beside it at a readable measure. Stacked, the intro ran about 105
+ * characters a line under a full-width title, which is the wall of text that
+ * makes an editorial page read as a dump, and it pushed everything below it
+ * a screen further down. */
+.teim-rd .cp-hero { padding: 1.7rem 0 1.1rem; display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 0.6rem 3rem; align-items: start; }
+.teim-rd .cp-hero__access { grid-column: 1 / -1; }
+.teim-rd .cp-hero h1 { font-size: clamp(2rem, 3.6vw, 3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.06; color: var(--ink); margin: 0; max-width: 16ch; }
+.teim-rd .cp-hero p { font-size: 1.04rem; line-height: 1.62; color: var(--ink-2); margin: 0; max-width: 58ch; }
+@media (max-width: 900px) {
+  .teim-rd .cp-hero { grid-template-columns: 1fr; gap: 0.9rem; }
+  .teim-rd .cp-hero h1 { max-width: none; }
+}
+
+/* ── On this page ─────────────────────────────────────────────────────────
+ * The contents of a long document. Mono uppercase is the chrome register the
+ * brand lock asks for, and it sticks under the masthead so a reader deep in
+ * the catalog can leave without scrolling back to the top. */
+.teim-rd .cp-view { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; padding: 0.7rem 0; background: var(--bg); border-bottom: 1px solid var(--line); }
+.teim-rd .cp-view__cap { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-right: 0.5rem; }
+/* The anchors land below the sticky bar rather than under it. */
+.teim-rd .cp-sec[id], .teim-rd .cp-sec[id] { scroll-margin-top: 3.6rem; }
+@media (prefers-reduced-motion: no-preference) { .teim-rd .cp { scroll-behavior: smooth; } }
+
+.teim-rd .cp-sec { margin-top: 2.6rem; }
+/* Sections divide the way the Lumecon site divides them: a short hairline,
+ * never a full-width line (the site's .rule-h, global.css: width
+ * clamp(120px, 18vw, 220px), 1px, rule-strong). The feedback band draws its
+ * own card border, so it goes without. */
+.teim-rd .cp-sec:not(.cp-feedback)::before,
+.teim-rd .cp-sec__band { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.9rem; }
+
+/* Articles: a horizontal strip the way news sites carry their latest. New
+ * pieces append; the strip scrolls; nothing reflows. */
+.teim-rd .cp-art { flex: 1 1 320px; min-width: 300px; scroll-snap-align: start; border: 1px solid var(--line-soft); border-radius: var(--radius-card); overflow: hidden; background: var(--bg); display: flex; flex-direction: column; transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
+/* A card is a link to a whole piece, so it answers a pointer the way the
+ * shelf tiles do: it rises, the edge turns teal and the title follows. The
+ * old response was a border one shade darker, which nobody registered. */
+.teim-rd .cp-art:hover, .teim-rd .cp-art:focus-visible { transform: translateY(-3px); border-color: var(--dteal); box-shadow: 0 14px 34px rgba(10, 15, 38, 0.14); }
+.teim-rd .cp-art:hover .cp-art__title, .teim-rd .cp-art:focus-visible .cp-art__title { color: var(--dteal); }
+.teim-rd .cp-art__title { transition: color 0.22s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-art, .teim-rd .cp-art__title { transition: none; }
+  .teim-rd .cp-art:hover, .teim-rd .cp-art:focus-visible { transform: none; }
+}
+.teim-rd .cp-art__art { background: var(--teal-tint); padding: 1rem 1.1rem 0.4rem; border-bottom: 1px solid var(--line-soft); }
+.teim-rd .cp-art__body { padding: 0.9rem 1.1rem 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.teim-rd .cp-art__tag { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-art__title { font-size: 1.08rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0; }
+.teim-rd .cp-art__dek { font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-art__meta { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); margin-top: auto; padding-top: 0.4rem; }
+
+/* The data: same figure cards as Grove, with the rows one click below. */
+@media (max-width: 1000px) { .teim-rd .cp-figs { grid-template-columns: 1fr; } }
+
+/* One upsell band, quiet on purpose. */
+/* One band across the width. This was a two-card grid until the second card
+ * (the economic impact platform) came out, and a single card in a two-column
+ * grid reads as a card with a hole beside it. */
+@media (max-width: 760px) {
+}
+
+.teim-rd .cp-foot { margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 0.8rem; display: flex; justify-content: space-between; gap: 1rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
+/* The map, then who publishes it, then the promise. Every page used to
+ * carry its own two-link footer, so where the footer took you depended on
+ * where you already were; it carries every page now, in one column so the
+ * nav reads as a list of places rather than a sentence of links. */
+.teim-rd .cp-foot__nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; }
+.teim-rd .cp-foot__nav a { display: inline-flex; align-items: center; min-height: 34px; color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
+/* A finger needs more than a line of 0.66rem mono: on touch every footer
+ * link gets a full-height target without the row growing taller. */
+@media (hover: none) {
+  .teim-rd .cp-foot__nav { gap: 0.1rem 1.4rem; }
+  .teim-rd .cp-foot__nav a, .teim-rd .cp-foot__meta a { min-height: 40px; }
+  .teim-rd .cp-foot__meta a { display: inline-flex; align-items: center; }
+}
+.teim-rd .cp-foot__nav a:hover { color: var(--dteal); border-bottom-color: currentColor; }
+.teim-rd .cp-foot__meta { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
+/* The governance pathway, discoverable from every page's ending without
+ * becoming a marketing element. */
+.teim-rd .cp-foot__gov a { color: var(--teal); }
+.teim-rd .cp-foot--deep .cp-foot__nav a { color: rgba(255, 255, 255, 0.82); }
+.teim-rd .cp-foot--deep .cp-foot__nav a:hover { color: #fff; }
+.teim-rd .cp-foot--deep .cp-foot__meta { border-top-color: rgba(255, 255, 255, 0.14); }
+/* On the reader the close is navy, so the footer continues it rather than
+ * cutting back to white for six lines of chrome. */
+/* Every page now ends in the navy footer, which carries its own clearance
+ * for the floating launcher, so no page keeps white padding below it. */
+.teim-rd .cp { padding-bottom: 0; }
+.teim-rd .cp--deepfoot { padding-bottom: 0; }
+/* The bottom padding clears the floating launcher. The footer is the last
+ * thing on the page, so its final line lands exactly where the pill sits;
+ * giving it room below is what keeps the two apart. Squeezing the meta line
+ * sideways instead was the other option, and on a phone it wraps the
+ * publisher line to make room for a control that is already labelled. */
+.teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 2.6rem; padding: 1.2rem 0 7rem; border-top: 3px solid var(--teal); background: var(--ink); color: rgba(255, 255, 255, 0.7); }
+/* Continuing a navy band: no edge, no gap — the band and the footer are one
+ * surface. */
+/* Flush removes the gap, never the seam: the footer owns its teal rule on
+ * every page, and --teal is bright enough to read against the dark-teal
+ * bands as well as white, so the same component means the same ending
+ * everywhere. */
+.teim-rd .cp-foot--flush { margin-top: 0; }
+@media (max-width: 640px) { .teim-rd .cp-foot--deep { padding-bottom: 5rem; } }
+.teim-rd .cp-foot__in { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 2rem; }
+.teim-rd .cp-foot--deep .cp-foot__in { max-width: 1560px; margin: 0 auto; padding-inline: 2.4rem; }
+@media (max-width: 720px) { .teim-rd .cp-foot--deep .cp-foot__in { padding-inline: 1.15rem; } }
+
+/* Links: quiet teal, underline on hover; article cards are links that keep
+ * their card presentation. */
+.teim-rd .cp-mast__of a, .teim-rd .cp-foot a { color: var(--dteal); text-decoration: none; }
+.teim-rd .cp-mast__of a:hover, .teim-rd .cp-foot a:hover { text-decoration: underline; }
+.teim-rd .cp-foot--deep a { color: rgba(255, 255, 255, 0.92); }
+.teim-rd a.cp-art { text-decoration: none; color: inherit; }
+
+/* The citation register: counts per dataset, the entries once they exist,
+ * and the report action. Quiet like everything else on the page. */
+
+/* Article art: 16:9 editorial images, edge to edge on the card. */
+.teim-rd .cp-art__art { padding: 0; border-bottom: 1px solid var(--line-soft); }
+.teim-rd .cp-art__img { display: block; width: 100%; height: auto; }
+
+
+/* Rotation: arrows appear only when the shelf outgrows the row. */
+
+/* ── Ask Cedar ───────────────────────────────────────────────────────────
+ * The platform's launcher, floating. These are teim-app's rules — its
+ * index.css base plus the .teim-rd retheme in its redesign.css — restated
+ * here because the standalone press page loads neither, and a subscriber who
+ * follows a collection into Cedar Grove should find the same control waiting
+ * for them rather than a second design of the same thing.
+ *
+ * Floating is the one deliberate difference from what this page used to do.
+ * The press copy welded the pill to the bottom edge (square top corners, no
+ * bottom border), which read as a browser bar rather than as something you
+ * can talk to. teim-app floats it clear at right/bottom 2rem, and so does
+ * this. */
+.teim-rd .cedar-widget { position: fixed; right: 2rem; bottom: 2rem; z-index: 120; display: flex; flex-direction: column; align-items: flex-end; }
+.teim-rd .cedar-widget__launcher { display: inline-flex; align-items: center; justify-content: flex-start; gap: 0.75rem; padding: 0.75rem 1.25rem; border: 1px solid var(--teal-line); border-radius: 12px; background: var(--bg); color: var(--ink); box-shadow: 0 8px 24px rgba(10, 15, 38, 0.1); cursor: pointer; transition: all 0.2s cubic-bezier(0.2, 0, 0, 1); }
+/* Guarded, because a touch browser leaves :hover stuck on the last thing
+ * tapped: unguarded, the pill stays lifted and tinted after one tap. */
+@media (hover: hover) {
+  .teim-rd .cedar-widget__launcher:hover { border-color: var(--teal); background: var(--teal-tint); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(10, 15, 38, 0.14); }
+}
+.teim-rd .cedar-widget__launcher:focus-visible { outline: 3px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cedar-widget__status-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--teal); flex: 0 0 auto; }
+.teim-rd .cedar-widget__launcher-copy { display: flex; flex-direction: column; text-align: left; }
+.teim-rd .cedar-widget__launcher-label { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; color: var(--ink); line-height: 1.2; }
+.teim-rd .cedar-widget__launcher-context { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--muted); line-height: 1.2; margin-top: 0.1rem; }
+/* Phones: the pill travels light over reading space — no context line, and
+ * tucked closer into the corner. */
+@media (max-width: 640px) {
+  .teim-rd .cedar-widget { right: 1rem; bottom: 1rem; }
+  .teim-rd .cedar-widget__launcher { padding: 0.6rem 0.95rem; gap: 0.5rem; }
+  .teim-rd .cedar-widget__launcher-context { display: none; }
+}
+
+/* The panel rises from the bottom of the window, anchored to the edge rather
+ * than to the button, so opening it reads as the surface coming up to meet
+ * you. Fixed, not absolute: anchored to the button it grew upward off the
+ * top of short windows. */
+@keyframes cedar-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+/* Stated in full, including the properties it does not want. index.css also
+ * ships a `.cedar-widget__panel` — the platform's resizable, fixed-height
+ * chat window — and this page loads it. Anything left unsaid here is
+ * inherited from that box, which is how the sheet ended up 358px wide inside
+ * a 390px window (its `max-width: calc(100vw - 2rem)`) and 36rem tall
+ * whatever it held (its `height`). Silence is not a default. */
+/* The shelves by name, on the gate: quiet mono names between the proof
+ * grid and the credibility strip, with Cedar as the way to ask about any
+ * of them. */
+/* Full width of the proof row above: the names run rail to rail between
+ * the outer cards' edges instead of sitting in a narrower island. */
+.teim-rd .cp-cats { margin: 1.6rem auto 0; max-width: none; text-align: center; }
+.teim-rd .cp-cats__head { font-family: var(--mono); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); margin: 0 0 0.5rem; }
+.teim-rd .cp-cats__names { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.9; color: #fff; margin: 0 0 0.7rem; }
+.teim-rd .cp-cats__dot { color: rgba(255, 255, 255, 0.55); }
+.teim-rd .cp-cats__how { font-family: var(--sans); font-size: 0.82rem; line-height: 1.5; color: rgba(255, 255, 255, 0.92); margin: 0 auto 0.8rem; max-width: none; }
+.teim-rd .cp-cats__cedar { border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 999px; background: rgba(0, 0, 0, 0.14); padding: 0.5rem 1rem; font-family: var(--sans); font-size: 0.85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.16s ease, border-color 0.16s ease; }
+.teim-rd .cp-cats__cedar:hover { background: rgba(0, 0, 0, 0.28); border-color: #fff; }
+
+/* Ask Cedar from a collection's description panel. */
+.teim-rd .cp-read__cedar { display: inline-block; margin-top: 0.6rem; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-read__cedar:hover { color: var(--ink); }
+/* The scope line inside the Cedar panel: which collection is being asked
+ * about, and the way back out. */
+.teim-rd .cedar-widget__scope { margin: 0.3rem 0 0.4rem; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cedar-widget__scopeclear { border: 0; background: none; padding: 0; font: inherit; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+/* The basis line under an answer: which release the answer came from. */
+.teim-rd .cedar-widget__basis { margin-top: 0.35rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+/* Example questions as quiet chips: they demonstrate what Cedar answers
+ * without pretending to be conversation history. */
+.teim-rd .cedar-widget__examples { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.55rem 0 0.7rem; }
+.teim-rd .cedar-widget__example { border: 1px solid var(--line); border-radius: 999px; background: var(--teal-tint); padding: 0.32rem 0.7rem; font-family: var(--sans); font-size: 0.78rem; line-height: 1.3; color: var(--dteal); cursor: pointer; text-align: left; transition: background 0.16s ease, border-color 0.16s ease; }
+.teim-rd .cedar-widget__example:hover { background: var(--bg); border-color: var(--dteal); }
+.teim-rd .cedar-widget__panel { position: fixed; right: 2rem; bottom: 6.4rem; width: min(24rem, calc(100vw - 4rem)); min-width: 0; max-width: none; height: auto; min-height: 0; max-height: min(30rem, calc(100vh - 10rem)); resize: none; display: block; overflow: hidden auto; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 0 1.2rem 1.1rem; box-shadow: 0 20px 52px rgba(10, 15, 38, 0.26); }
+/* The panel's header: the caption names the dialog and the close sits at
+ * its right end — the way out a phone needs when the browser toolbar sits
+ * over the launcher. Sticky with its own background, so a scrolled answer
+ * slides under it rather than carrying it away. */
+.teim-rd .cedar-widget__panelhead { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; background: var(--bg); padding: 0.7rem 0 0.45rem; margin-bottom: 0.45rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cedar-widget__panelcap { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cedar-widget__close { position: relative; flex: none; width: 1.9rem; height: 1.9rem; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+.teim-rd .cedar-widget__close:hover { color: var(--ink); background: var(--teal-tint); }
+.teim-rd .cedar-widget__close::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
+.teim-rd .cedar-widget__close:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+@media (prefers-reduced-motion: no-preference) {
+  .teim-rd .cedar-widget__panel { animation: cedar-rise 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+}
+/* Phones: the panel is the width of the window sitting on its bottom edge,
+ * which is where a sheet belongs on a phone. The launcher stays put on top of
+ * it as the way back out, so the sheet keeps its bottom-right corner clear
+ * rather than running its last line under the pill. */
+@media (max-width: 640px) {
+  .teim-rd .cedar-widget__panel { right: 0; left: 0; bottom: 0; width: 100%; max-width: none; height: auto; max-height: 70vh; border-radius: 16px 16px 0 0; border-bottom: 0; padding: 1.2rem 1.15rem calc(5.2rem + env(safe-area-inset-bottom)); }
+}
+.teim-rd .cedar-widget__ask { display: flex; flex-direction: column; gap: 0.55rem; }
+.teim-rd .cedar-widget__label { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cedar-widget__ask textarea { font: inherit; font-size: 0.95rem; padding: 0.6rem 0.75rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); resize: vertical; }
+.teim-rd .cedar-widget__ask textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.teim-rd .cedar-widget__answer { margin: 0.9rem 0 0; padding-top: 0.9rem; border-top: 1px solid var(--line-soft); font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); white-space: pre-wrap; }
+.teim-rd .cedar-widget__note { margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); }
+.teim-rd .cedar-widget__note a { color: var(--dteal); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cedar-widget__launcher { transition: none; }
+  .teim-rd .cedar-widget__launcher:hover { transform: none; }
+}
+
+/* The register, given the same weight as Cedar's band. */
+@media (max-width: 980px) { .teim-rd .cp-citeband { grid-template-columns: 1fr; } }
+
+
+/* The front page: the newest brief leads, the rest stack beside it. */
+.teim-rd .cp-artgrid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 1.4rem; align-items: stretch; }
+@media (max-width: 980px) { .teim-rd .cp-artgrid { grid-template-columns: 1fr; } }
+.teim-rd .cp-art--lead .cp-art__title { font-size: 1.62rem; line-height: 1.18; }
+.teim-rd .cp-art--lead .cp-art__dek { font-size: 1rem; }
+.teim-rd .cp-artstack { display: flex; flex-direction: column; gap: 1.2rem; }
+.teim-rd .cp-art--compact { flex-direction: row; min-width: 0; flex: 1; }
+.teim-rd .cp-art--compact .cp-art__art { flex: 0 0 176px; border-bottom: none; border-right: 1px solid var(--line-soft); }
+.teim-rd .cp-art--compact .cp-art__img { height: 100%; object-fit: cover; }
+.teim-rd .cp-art--compact .cp-art__title { font-size: 1.05rem; }
+.teim-rd .cp-art--compact .cp-art__dek { display: none; }
+.teim-rd .cp-artmore { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dteal); text-decoration: none; margin-top: auto; }
+.teim-rd .cp-artmore:hover { text-decoration: underline; }
+
+/* Feedback: one quiet band above the footer. */
+@media (max-width: 780px) { .teim-rd .cp-feedback { flex-direction: column; align-items: flex-start; } }
+
+/* The gate: the page states its price of admission before it shows anything.
+ * Sign-in is the app's own auth dressed for this page, so a TBN-provisioned
+ * account and an app account are one account. */
+.teim-rd .cp-gate { max-width: 560px; margin: 3.5rem auto 3rem; }
+.teim-rd .cp-gate h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.018em; line-height: 1.15; color: var(--ink); margin: 0 0 0.8rem; }
+.teim-rd .cp-gate__text { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.4rem; }
+.teim-rd .cp-gate__text a { color: var(--dteal); text-decoration: none; font-weight: 600; }
+.teim-rd .cp-gate__text a:hover { text-decoration: underline; }
+.teim-rd .cp-gate__form { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.6rem; }
+.teim-rd .cp-gate__form input { font: inherit; font-size: 0.95rem; padding: 0.65rem 0.85rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-gate__form input:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.teim-rd .cp-gate__form .gv-btn { align-self: flex-start; }
+.teim-rd .cp-gate__error { font-size: 0.88rem; color: #b42318; margin: 0; }
+.teim-rd .cp-gate__signedin { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.9rem; }
+.teim-rd .cp-gate__paths { border-top: 1px solid var(--line-soft); margin-top: 1.6rem; padding-top: 1.2rem; display: flex; flex-direction: column; gap: 0.55rem; }
+.teim-rd .cp-gate__path { font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-gate__path a { color: var(--dteal); text-decoration: none; font-weight: 600; }
+.teim-rd .cp-gate__path a:hover { text-decoration: underline; }
+
+/* Subscriber chrome: who is signed in, and what admission the page carries. */
+.teim-rd .cp-mast__user { margin-left: auto; display: inline-flex; align-items: center; gap: 0.7rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
+.teim-rd .cp-avatar { position: relative; display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; border: 1px solid var(--teal-line); background: var(--teal-tint); color: var(--dteal); font-family: var(--sans); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.02em; text-decoration: none; transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease; }
+.teim-rd .cp-avatar:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; transform: translateY(-1px); }
+.teim-rd .cp-avatar__sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-avatar { transition: none; } .teim-rd .cp-avatar:hover { transform: none; } }
+.teim-rd .cp-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1.5rem; }
+.teim-rd .cp-head .cp-sec__band { margin-bottom: 0; }
+/* The label, top right. Solid block, not an outline: an outlined chip beside
+ * an outlined chip is two rectangles arguing. */
+.teim-rd .cp-kind { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; padding: 0.35rem 0.7rem; white-space: nowrap; }
+.teim-rd .cp-kind--data { background: var(--dteal); }
+.teim-rd .cp-kind--art { background: var(--ink); }
+.teim-rd .cp-band--fill .cp-kind--data { background: var(--ink); }
+.teim-rd .cp-band__head { grid-column: 1 / -1; grid-row: 1; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0.8rem 2rem; }
+.teim-rd .cp-band__head .cp-band__id { flex: 1 1 22rem; min-width: 0; }
+.teim-rd .cp-band__head .cp-kind { flex: 0 0 auto; }
+.teim-rd .cp-hero__access { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); margin: 0 0 0.8rem; }
+
+/* ── Every figure is traceable ────────────────────────────────────────────
+ * The trust claim and the three ways to check it, on one rule directly under
+ * the hero. Links rather than assertions: the claim is only worth making if a
+ * reader can act on all three from here. */
+.teim-rd .cp-trace { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); align-items: center; gap: 0.9rem 3rem; margin: 2.4rem 0 0; padding: 1.2rem 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+.teim-rd .cp-trace__claim { font-family: var(--sans); font-size: clamp(1.1rem, 1.8vw, 1.35rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: var(--ink); margin: 0; }
+.teim-rd .cp-trace__list { list-style: none; display: flex; flex-wrap: wrap; gap: 0.6rem 2.4rem; margin: 0; padding: 0; justify-content: flex-end; }
+.teim-rd .cp-trace__list a, .teim-rd .cp-trace__list button { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 32px; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); text-decoration: none; }
+.teim-rd .cp-trace__list a:hover, .teim-rd .cp-trace__list button:hover { color: var(--dteal); }
+.teim-rd .cp-trace__list a:hover .cp-trace__tick, .teim-rd .cp-trace__list button:hover .cp-trace__tick { background: var(--dteal); color: #fff; border-color: var(--dteal); }
+.teim-rd .cp-trace__list button { border: 0; background: none; padding: 0; cursor: pointer; }
+.teim-rd .cp-trace__tick { display: inline-flex; align-items: center; justify-content: center; width: 1.35rem; height: 1.35rem; border: 1px solid var(--teal); color: var(--dteal); font-family: var(--sans); font-size: 0.8rem; line-height: 1; transition: background 0.15s ease, color 0.15s ease; }
+@media (max-width: 860px) { .teim-rd .cp-trace { grid-template-columns: 1fr; gap: 1rem; } .teim-rd .cp-trace__list { justify-content: flex-start; gap: 0.6rem 1.6rem; } }
+
+/* ── The method region ────────────────────────────────────────────────────
+ * What the collections are built from, how they stay current, how they feed
+ * one another, and the tribal data request policy. The argument is carried by
+ * the diagrams; every prose block beside them is one paragraph. Same tokens
+ * and the same short hairline as the rest of the page. */
+
+.teim-rd .cp-m__sub { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.6rem; }
+.teim-rd .cp-m__cap { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0.7rem 0 1.3rem; }
+/* The one line per section that is allowed to be a statement on its own. */
+.teim-rd .cp-m__pull { font-size: 1.18rem; font-weight: 600; line-height: 1.45; letter-spacing: -0.01em; color: var(--ink); margin: 1.4rem 0 0; padding-left: 1rem; border-left: 2px solid var(--teal); max-width: 52ch; }
+.teim-rd .cp-m__split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem 2.2rem; align-items: start; }
+@media (max-width: 860px) { .teim-rd .cp-m__split { grid-template-columns: minmax(0, 1fr); } }
+
+/* Domain chips: a long list reads faster as a field of labels than as bullets. */
+.teim-rd .cp-chips { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.2rem 0 0; padding: 0; }
+.teim-rd .cp-chips li { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 0.32rem 0.66rem; background: var(--bg); }
+
+/* The expertise strip. */
+.teim-rd .cp-exp { list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.9rem; margin: 1.2rem 0 1.6rem; padding: 0; }
+@media (max-width: 900px) { .teim-rd .cp-exp { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .teim-rd .cp-exp { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.teim-rd .cp-exp__item { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; min-width: 0; }
+.teim-rd .cp-exp__ic { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: var(--teal-tint); color: var(--dteal); }
+.teim-rd .cp-exp__ic svg { width: 21px; height: 21px; }
+.teim-rd .cp-exp__label { font-size: 0.86rem; font-weight: 600; line-height: 1.3; color: var(--ink); overflow-wrap: anywhere; }
+
+/* The build pipeline. Seven steps, so it reflows rather than insisting on one
+ * row: auto-fit gives 7 across on a wide screen and 1 on a phone, and the
+ * numbers keep the reading order unambiguous at every width. */
+.teim-rd .cp-pipe__label { font-size: 0.92rem; font-weight: 700; line-height: 1.28; letter-spacing: -0.01em; color: var(--ink); }
+.teim-rd .cp-pipe__note { font-size: 0.82rem; line-height: 1.45; color: var(--muted); }
+
+/* The lineage timeline. */
+.teim-rd .cp-tl { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.8rem; margin: 1.3rem 0 0; padding: 0.9rem 0 0; position: relative; }
+.teim-rd .cp-tl::before { content: ''; position: absolute; left: 0; right: 0; top: 0.9rem; height: 1px; background: var(--teal-line); }
+.teim-rd .cp-tl__item { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; position: relative; padding-top: 0.9rem; }
+.teim-rd .cp-tl__dot { position: absolute; top: 0; left: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--teal); transform: translateY(-4px); }
+.teim-rd .cp-tl__year { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; color: var(--dteal); }
+.teim-rd .cp-tl__event { font-size: 0.86rem; line-height: 1.38; color: var(--ink-2); }
+@media (max-width: 760px) {
+  .teim-rd .cp-tl { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; padding-left: 1rem; }
+  .teim-rd .cp-tl::before { left: 4px; right: auto; top: 0; bottom: 0; width: 1px; height: auto; }
+  .teim-rd .cp-tl__item { padding-top: 0; padding-left: 0.2rem; }
+  .teim-rd .cp-tl__dot { top: 0.35rem; left: -1rem; transform: none; }
+}
+
+/* The ecosystem map: collections on one side, the entity layer they share on
+ * the other, and the return path called out underneath because the arrows
+ * only ever point one way in a static drawing. The layout rules live with the
+ * other .cp-eco rules further down, beside the component that uses them. */
+
+/* Replication callouts. */
+
+/* The tribal data request. Four cards so the eligibility, the verification and
+ * both halves of the scope are read as one policy rather than a wall. */
+
+/* ── Narrow windows ───────────────────────────────────────────────────────
+ * The masthead is a nowrap flex row, and a signed-in reader's email address
+ * cannot shrink below its own min-content: at 390px it pushed the whole page
+ * 60px sideways, so every section scrolled horizontally on a phone. It wraps
+ * to its own line now and elides rather than growing. The page gutter also
+ * comes in: 2.4rem each side leaves under 320px of content on a 390px screen.
+ * The collection strip keeps scrolling inside its own box, which is what its
+ * min-width: 0 on .cp is for; only the card minimum comes down so one card
+ * fits the viewport instead of sitting 8px past it. */
+@media (max-width: 720px) {
+  .teim-rd .cp { padding-left: 1.15rem; padding-right: 1.15rem; }
+  /* The band's inner gutter changes on the container's breakpoint, not its
+     own, or band content steps off the masthead's left edge between them. */
+  .teim-rd .cp-mast__top { row-gap: 0.35rem; }
+  .teim-rd .cp-mast__user { margin-left: 0; flex: 1 1 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* The one link out of a section, for a reader who wants the method behind a
+ * figure. Quiet on purpose: the collection is what they came for. */
+.teim-rd .cp-m__more { display: inline-block; margin-top: 1rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); text-decoration: none; border-bottom: 1px solid var(--teal-line); padding-bottom: 2px; }
+.teim-rd .cp-m__more:hover { color: var(--teal); border-color: var(--teal); }
+/* The masthead word is a link on the secondary pages, back to the reader's page. */
+.teim-rd a.cp-mast__word { text-decoration: none; }
+.teim-rd a.cp-mast__word:hover { color: var(--dteal); }
+/* The lockup: the mark beside the wordmark, so the service has a logo in
+ * the chrome rather than only a faint ripple behind the gate. */
+.teim-rd .cp-mast__lockup { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+.teim-rd .cp-mast__mark { width: 2.5rem; height: 2.5rem; object-fit: contain; flex: none; }
+.teim-rd a.cp-mast__lockup:hover .cp-mast__word { color: var(--dteal); }
+/* The page's own name where the partnership line sits on the hub, so the
+ * header answers "where am I" before the page does. */
+.teim-rd .cp-mast__page { color: var(--ink-2); font-weight: 700; letter-spacing: 0.14em; }
+/* The way back, stated rather than implied by a linked wordmark. */
+.teim-rd .cp-back { margin-top: 1.1rem; }
+
+/* ── Desktop width ────────────────────────────────────────────────────────
+ * The method pages were set to a reading measure (40ch headlines, 62ch body)
+ * on every screen, which leaves most of a 1320px page empty and makes a
+ * diagram sit in a column beside nothing. The measure is a floor for prose,
+ * not a cap for the page: above 1100px the headline and the lede take the
+ * width they are given, and the body columns split rather than stack. */
+@media (min-width: 1100px) {
+  .teim-rd .cp-m__title { max-width: 30ch; font-size: clamp(1.7rem, 2.6vw, 2.5rem); }
+  .teim-rd .cp-m__body--lede { max-width: 78ch; font-size: 1.14rem; }
+  .teim-rd .cp-m__pull { font-size: 1.34rem; max-width: 64ch; }
+  /* Two real columns of prose instead of one column and a margin. */
+  .teim-rd .cp-m__split { gap: 1.6rem 3.4rem; }
+  .teim-rd .cp-hero p { max-width: 88ch; }
+}
+
+/* Redeem-a-code / sign-in tabs. Two equal ways in, not a primary with a link
+ * underneath: a fresh Tribal Business News subscriber has a code, a returning
+ * reader has a password, and neither is the exception. */
+.teim-rd .cp-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; padding: 0.28rem; margin-bottom: 1.1rem; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--teal-tint); }
+.teim-rd .cp-tabs__tab { min-height: 44px; border: 0; border-radius: 9px; background: none; cursor: pointer; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); transition: background 0.16s ease, color 0.16s ease; }
+.teim-rd .cp-tabs__tab:hover { color: var(--dteal); }
+.teim-rd .cp-tabs__tab--on { background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgba(10, 15, 38, 0.08); }
+/* The code is the entitlement, so it is typed like one: wide tracking and a
+ * mono face, which also makes an O against a 0 legible while typing. */
+.teim-rd .cp-code { font-family: var(--mono); letter-spacing: 0.16em; text-transform: uppercase; }
+.teim-rd .cp-code::placeholder { letter-spacing: 0.1em; text-transform: none; }
+/* A button that reads as a link, for switching mode mid-sentence. */
+.teim-rd .cp-split__linkbtn { border: 0; background: none; padding: 0; font: inherit; color: var(--dteal); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+/* ── The way in ───────────────────────────────────────────────────────────
+ * Cedar Press signs in on the app's own split (.auth-split / .auth-hero in
+ * redesign.css): the teal panel with the contour art and the mark on the
+ * left, access on the right. Only the press-specific pieces live here, so a
+ * change to the platform sign-in carries to this one.
+ *
+ * The left side answers why this is worth trusting. The right side does one
+ * thing: get an authorized member inside. Nothing about method beyond a
+ * single link, and no Cedar Grove pitch: the person is trying to get into
+ * Cedar Press, and Grove has its own conversations to have once they are. */
+.teim-rd .cp-split { min-height: 100vh; }
+/* The platform's split is fixed to the viewport (auth-split: fixed, inset 0)
+ * and centers each panel, clipping what overflows — fine for the platform's
+ * short hero, but the press hero carries the pillars and the credibility
+ * strip and runs far taller than most viewports. Fixed meant the bottom of
+ * the hero was simply unreachable on shorter screens. The gate flows and
+ * scrolls as a document at every width instead: the split survives, the
+ * page scrolls, nothing is cut off mid-tile. */
+.teim-rd .cp-split.auth-split { position: static; inset: auto; height: auto; min-height: 100dvh; overflow: visible; }
+/* Middle desktop widths: the hero gives ground before the access panel is
+ * pushed offscreen — the left content scales down, the split narrows toward
+ * the form. */
+@media (max-width: 1250px) {
+  .teim-rd .cp-split.auth-split { grid-template-columns: 1.02fr 0.98fr; }
+  .teim-rd .cp-hero2.auth-hero { padding: clamp(1.6rem, 3.2vw, 3rem); }
+  .teim-rd .cp-hero2__inner { max-width: 34rem; }
+}
+/* Below the stack point the split gives way entirely. Access leads: the
+ * person came to get in, so the form panel opens the page under its own
+ * wordmark and the teal case for the product reads below it. The
+ * editorial's desktop gutters come from its centered column, so the
+ * stacked panel draws its own. */
+@media (max-width: 1050px) {
+  .teim-rd .cp-split.auth-split { grid-template-columns: 1fr; }
+  .teim-rd .cp-split .auth-editorial { order: -1; padding: 1.6rem 1.15rem 2rem; }
+  .teim-rd .cp-split__brand--form { display: block; }
+  /* Without the ripple mark beside it, the teal panel's opening centers
+   * and takes the width the mark was holding. */
+  .teim-rd .cp-hero2__inner { margin-inline: auto; text-align: center; }
+  .teim-rd .cp-hero2__lede { max-width: none; margin-inline: auto; }
+  .teim-rd .cp-cred { justify-content: center; }
+  .teim-rd .cp-cred__note { margin-inline: auto; }
+}
+/* Phones: the door states, it does not lecture. The linkage sentence and
+ * the team strip live on Methods (and the Credible Research card already
+ * says the credentials one-liner), so the long read stays for the pages
+ * that are for reading. The hero's gutters drop to the page gutter so the
+ * headline uses the width. */
+@media (max-width: 640px) {
+  .teim-rd .cp-hero2.auth-hero { padding-inline: 1.15rem; }
+  .teim-rd .cp-cats__how { display: none; }
+}
+/* Reveal on scroll: a marked section arrives as it enters the viewport,
+ * once. The gate adds .is-in from an IntersectionObserver; without one,
+ * everything is revealed immediately. */
+.teim-rd .cp-fade { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-fade.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-fade { opacity: 1; transform: none; transition: none; } }
+/* The platform's .auth-hero paints a teal gradient whose upper stops carry
+ * white text at under 3:1, and a gradient inside one surface breaks the flat
+ * colour rule besides. Override to the one teal that holds 4.5:1 under white,
+ * and put the glow blobs out: depth belongs to the atmosphere layers. */
+.teim-rd .cp-hero2.auth-hero { background: var(--dteal); }
+.teim-rd .cp-hero2 .auth-hero__glow { display: none; }
+/* The proof grid carries a lot of type for a decorative field, so the
+ * contours run thinner and quieter here than on the platform sign-in. */
+.teim-rd .cp-hero2__contours { opacity: 0.1; }
+.teim-rd .cp-hero2__inner { max-width: 40rem; }
+.teim-rd .cp-split__brand { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; margin-bottom: 0.5rem; }
+/* The form panel's wordmark exists for the stacked order (the 880px block
+ * above): on phones the form leads the page, so it opens under the name.
+ * Beside the hero it would say the name twice, so it shows only stacked. */
+.teim-rd .cp-split__brand--form { display: none; color: var(--dteal); margin-bottom: 1.1rem; }
+@media (max-width: 880px) { .teim-rd .cp-split__brand--form { display: block; } }
+.teim-rd .cp-hero2__tagline { font-size: 1rem; font-weight: 600; color: #fff; margin: 0 0 1.6rem; }
+.teim-rd .cp-hero2__headline { font-size: clamp(2.1rem, 3.2vw, 3.1rem); margin-bottom: 1rem; }
+.teim-rd .cp-hero2__lede { font-size: clamp(1rem, 1.2vw, 1.12rem); max-width: 34rem; margin-bottom: 2.2rem; }
+
+/* Four pillars, 2x2. Not cards: a hairline rule over each one, so they read
+ * as part of the panel rather than as a SaaS feature grid dropped onto it. */
+/* Every card is a hoverable panel, and every word on the teal is white:
+ * hierarchy comes from size and weight rather than from fading the text,
+ * because faded white on a mid-teal is the first thing to go unreadable on a
+ * dim laptop screen. Hover lifts rather than slides: these sit in a 2x2, so a
+ * sideways nudge would break the column the neighbour is holding. */
+.teim-rd .cp-proof { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; margin: 0 auto; padding: 0; max-width: 27rem; }
+/* Square tiles, sized down so the column breathes. The title leads and
+ * holds the tile in both states; the swap zone under it trades the icon for
+ * the paragraph on hover (an opacity swap so the paragraph stays in the
+ * accessibility tree). Devices without hover get the paragraph outright
+ * further down. */
+.teim-rd .cp-proof__item { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; min-width: 0; aspect-ratio: 1 / 1;
+  padding: 0.95rem 1rem; border-radius: 16px; overflow: hidden; text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.34); background: rgba(0, 0, 0, 0.08);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+.teim-rd .cp-proof__item:hover { background: rgba(0, 0, 0, 0.16); border-color: rgba(255, 255, 255, 0.6); transform: translateY(-3px); box-shadow: 0 14px 32px rgba(6, 70, 63, 0.28); }
+.teim-rd .cp-proof__swap { flex: 1 1 auto; min-height: 0; width: 100%; display: grid; place-items: center; }
+.teim-rd .cp-proof__swap > * { grid-area: 1 / 1; }
+.teim-rd .cp-proof__ic { display: grid; place-items: center; color: #fff; opacity: 1; transition: opacity 0.2s ease, transform 0.2s ease; }
+.teim-rd .cp-proof__ic svg { width: 92px; height: 92px; transition: width 0.2s ease, height 0.2s ease; }
+/* Hover keeps the icon, small, above the paragraph: replacing it wholesale
+ * made the two states read as different objects. Title → small icon → body
+ * preserves the tile's identity through the reveal. Hover-capable devices
+ * only: on touch, tap-triggered :hover would override the hover:none
+ * layout's display:contents and collapse the tiles. */
+@media (hover: hover) {
+  .teim-rd .cp-proof__item:hover .cp-proof__swap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; }
+  .teim-rd .cp-proof__item:hover .cp-proof__ic svg { width: 30px; height: 30px; }
+}
+.teim-rd .cp-proof__body { font-size: 0.78rem; line-height: 1.45; color: #fff; min-width: 0; opacity: 0; transition: opacity 0.2s ease; }
+.teim-rd .cp-proof__item:hover .cp-proof__body { opacity: 1; }
+.teim-rd .cp-proof__label { flex: 0 0 auto; font-family: var(--sans); font-size: 0.92rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.24; color: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-proof__item, .teim-rd .cp-proof__ic, .teim-rd .cp-proof__body { transition: none; }
+  .teim-rd .cp-proof__item:hover { transform: none; }
+}
+/* No hover means no reveal: phones and tablets get the icon small, then the
+ * title, then the paragraph, at the tile's natural height rather than a
+ * forced square. */
+@media (hover: none) {
+  .teim-rd .cp-proof__item { aspect-ratio: auto; gap: 0.55rem; }
+  .teim-rd .cp-proof__swap { display: contents; }
+  .teim-rd .cp-proof__label { order: 0; }
+  .teim-rd .cp-proof__ic { order: 1; }
+  .teim-rd .cp-proof__ic svg { width: 34px; height: 34px; }
+  .teim-rd .cp-proof__body { order: 2; opacity: 1; }
+}
+/* Narrow panels: the 2x2 of squares becomes a list of compact rows — the
+ * icon beside the words, title over its sentence — so the four pillars read
+ * in one screen instead of four screens of stacked card. The grid placement
+ * overrides the (hover: none) ordering above, and both states show, so the
+ * hover swap stands down. */
+@media (max-width: 1180px) {
+  .teim-rd .cp-proof { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; max-width: 30rem; }
+  .teim-rd .cp-proof__item { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.95rem; row-gap: 0.3rem; align-items: center; aspect-ratio: auto; text-align: left; padding: 0.85rem 1rem; }
+  .teim-rd .cp-proof__item:hover { transform: none; box-shadow: none; }
+  .teim-rd .cp-proof__swap { display: contents; }
+  .teim-rd .cp-proof__ic { grid-column: 1; grid-row: 1 / span 2; opacity: 1; transform: none; }
+  .teim-rd .cp-proof__item:hover .cp-proof__ic { opacity: 1; transform: none; }
+  .teim-rd .cp-proof__ic svg { width: 30px; height: 30px; }
+  .teim-rd .cp-proof__label { grid-column: 2; grid-row: 1; }
+  .teim-rd .cp-proof__body { grid-column: 2; grid-row: 2; opacity: 1; }
+}
+/* On a wide desktop the four proofs run as one row, so the hero spends one
+ * card-height on them instead of two and everything below sits a screen
+ * higher. Narrower splits keep their layouts above: four across there
+ * crushes the hover text. The cards drop the square ratio for a shared
+ * fixed height, and the icons scale to the narrower column. After every
+ * other proof rule, so these overrides win the cascade. */
+@media (min-width: 1251px) {
+  /* The hero gives back some gutter so the row has real width to spend,
+   * and the lede runs the inner measure instead of a 27rem island. */
+  .teim-rd .cp-hero2.auth-hero { padding-inline: clamp(2rem, 3vw, 3.4rem); }
+  .teim-rd .cp-hero2__inner { max-width: 44rem; }
+  .teim-rd .cp-hero2__lede { max-width: none; }
+  .teim-rd .cp-proof { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: none; }
+  /* Actually square: the ratio rules and the height follows the column.
+   * On hover the swap gives the whole zone to the paragraph — the kept
+   * small icon was the height a square cannot spare. */
+  .teim-rd .cp-proof__item { aspect-ratio: 1 / 1; min-height: 0; padding: 0.85rem 0.7rem; }
+  .teim-rd .cp-proof__ic svg { width: 64px; height: 64px; }
+  .teim-rd .cp-proof__item:hover .cp-proof__swap { display: grid; }
+  .teim-rd .cp-proof__item:hover .cp-proof__ic { opacity: 0; }
+  .teim-rd .cp-proof__body { font-size: 0.69rem; line-height: 1.32; }
+  .teim-rd .cp-proof__item:hover .cp-proof__label { font-size: 0.84rem; }
+}
+
+.teim-rd .cp-split__method { display: inline-block; margin-top: 2rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.6); padding-bottom: 3px; transition: border-color 0.18s ease; }
+.teim-rd .cp-split__method:hover { border-color: #fff; }
+
+/* The column was one 25rem straitjacket and everything in it — headline,
+ * pathways, fine print — inherited the login box's width. Now the column
+ * breathes at 36rem and only the access controls themselves keep the
+ * tight measure a form wants; the copy above and the pathway cards below
+ * span the wider column. */
+.teim-rd .cp-split.auth-split .auth-editorial { width: min(100%, 38rem); }
+.teim-rd .cp-split__form { width: 100%; margin-inline: auto; }
+.teim-rd .cp-split__form .cp-tabs,
+.teim-rd .cp-split__form .cp-tabpanel,
+.teim-rd .cp-split__form .cp-gate__signedin,
+.teim-rd .cp-split__form > .cp-split__upgrade,
+.teim-rd .cp-split__form > .gv-btn { max-width: 25rem; margin-inline: auto; }
+/* The form column top-aligns with the hero's "CEDAR PRESS" brand line
+ * instead of floating at the panel's vertical center (the platform's
+ * .auth-editorial margin: auto): the sign-in block is short, and centering
+ * it pushed the non-subscription pathways below the fold. The mono partner
+ * line is the element that lands level with the mono brand line — the two
+ * eyebrows pair, and the big title pairs with the headline below them. The
+ * padding mirrors the hero's own top padding. Only on the actual
+ * two-column layout (the split stacks at 1050px, and the stacked form
+ * panel leads the page with its own compact padding — Codex caught this
+ * rule bleeding into that range and re-inflating it). */
+@media (min-width: 1051px) {
+  /* The narrowed split (to 1250px) shrinks the hero's padding, so the
+   * mirror shrinks with it. */
+  .teim-rd .cp-split.auth-split .auth-editorial { margin: 0 auto; padding-top: clamp(1.6rem, 3.2vw, 3rem); }
+}
+@media (min-width: 1251px) {
+  .teim-rd .cp-split.auth-split .auth-editorial { padding-top: clamp(2.5rem, 5.5vw, 5.5rem); }
+}
+/* The title states the entitlement rule in a full sentence, so it sets
+ * tighter than a two-word heading would. */
+.teim-rd .cp-split__form .auth-editorial__title { font-size: clamp(1.4rem, 2.4vw, 1.75rem); line-height: 1.2; letter-spacing: -0.02em; }
+.teim-rd .cp-gate__sub { font-family: var(--sans); font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 1.6rem 0 0.7rem; }
+.teim-rd .cp-split__form .cp-gate__form { margin-top: 0; }
+.teim-rd .cp-split__form .gv-btn--primary { width: 100%; padding: 0.8rem 1.5rem; font-size: 1rem; }
+.teim-rd .cp-gate__fine { margin: 0.7rem 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--muted); }
+/* The two non-subscription pathways, under the access box: side by side
+ * across the wider column — governance on the left, research on the
+ * right — as quiet cards, not competing calls to action; the
+ * subscription remains the primary door. */
+.teim-rd .cp-gate__other { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+.teim-rd .cp-gate__othercap { grid-column: 1 / -1; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-gate__otherlink { display: block; text-decoration: none; border: 1px solid var(--line); border-radius: 12px; padding: 0.9rem 1rem; transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease; }
+.teim-rd .cp-gate__otherlink:hover { border-color: var(--teal); background: var(--teal-tint); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(10, 15, 38, 0.08); }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-gate__otherlink:hover { transform: none; box-shadow: none; } }
+.teim-rd .cp-gate__otherlink b { display: block; font-size: 0.94rem; font-weight: 700; color: var(--dteal); margin-bottom: 0.15rem; }
+.teim-rd .cp-gate__otherdesc { display: block; font-size: 0.84rem; line-height: 1.5; color: var(--muted); }
+/* One under the other again where two cards would be two ribbons. */
+@media (max-width: 560px) { .teim-rd .cp-gate__other { grid-template-columns: 1fr; } }
+.teim-rd .cp-gate__aside { margin: 0.8rem 0 0; font-size: 0.9rem; color: var(--muted); }
+.teim-rd .cp-gate__aside a { color: var(--dteal); }
+/* The code came back good, so say so before asking for one more thing. */
+.teim-rd .cp-gate__ok { margin: 0 0 0.9rem; padding: 0.7rem 0.85rem; border: 1px solid var(--teal-line); background: var(--teal-tint); border-radius: 10px; font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); }
+/* The code is the entitlement, so it is typed like one: mono and tracked,
+ * which also makes an O legible against a 0 while typing. */
+.teim-rd .cp-code { font-family: var(--mono); letter-spacing: 0.16em; text-transform: uppercase; }
+.teim-rd .cp-code::placeholder { letter-spacing: 0.1em; text-transform: none; }
+.teim-rd .cp-split__linkbtn { border: 0; background: none; padding: 0; font: inherit; color: var(--dteal); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+/* The membership is the way in, so it leads the column rather than sitting
+ * under the form. Everything below it is for someone who already has one. */
+/* A quiet card with the teal drawn all the way around, not a highlighter
+ * stripe: the box holds the one action a wrong-membership visitor has, and
+ * the full border reads as a made thing rather than a callout. */
+.teim-rd .cp-split__upgrade { margin: 1.2rem 0 0; padding: 1.15rem 1.25rem; background: var(--bg); border: 1px solid var(--teal); border-radius: 12px; }
+.teim-rd .cp-split__upgrade p { margin: 0 0 0.9rem; font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-split__upgrade .gv-btn { min-height: 44px; }
+/* The hinge between the two halves of the column. */
+/* The plans-or-log-in switch. Same segmented shape the app's workspace
+ * views use, in the press register: mono, uppercase, teal when chosen. */
+.teim-rd .cp-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.25rem; margin: 1.4rem 0 0; padding: 0.25rem; background: var(--line-soft); border-radius: 12px; }
+.teim-rd .cp-tab { appearance: none; border: 0; background: transparent; cursor: pointer; min-height: 40px; padding: 0.5rem 0.9rem; border-radius: 9px; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); transition: background 0.14s ease, color 0.14s ease; }
+.teim-rd .cp-tab[aria-selected="true"] { background: var(--bg); color: var(--dteal, #0A7F74); box-shadow: 0 1px 3px rgba(10, 15, 38, 0.08); }
+.teim-rd .cp-tab:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+.teim-rd .cp-tabpanel { margin-top: 0.5rem; }
+.teim-rd .cp-tabpanel .cp-split__upgrade { margin-top: 0.7rem; }
+.teim-rd .cp-tabpanel .cp-gate__sub { margin-top: 0.9rem; }
+/* The arrows sit in their own span so they can breathe: without this they
+ * collide with the last word at every font size. */
+.teim-rd .cp-split__upgrade .gv-btn span,
+.teim-rd .cp-split__linkbtn span,
+.teim-rd .cp-split__method span { margin-left: 0.4em; }
+
+/* ── The ripple ───────────────────────────────────────────────────────────
+ * One ripple on this panel, and it is the mark's own. The platform sign-in's
+ * two nested contour rises came out: beside the logo they read as generic
+ * circles, and the mark is already a set of concentric rings, so it is the
+ * ripple rather than something drawn next to one.
+ *
+ * It breathes: a slow scale and opacity cycle, large and faint enough that
+ * the scaling cannot smear the hairlines the way it did at loading-indicator
+ * size. Nothing translates, so nothing drifts across the type. */
+.teim-rd .cp-hero2__ripple {
+  top: -18%;
+  right: -20%;
+  width: 78%;
+  opacity: 0.11;
+  transform-origin: 62% 46%;
+  animation: cp-ripple-breathe 11s ease-in-out infinite;
+}
+@keyframes cp-ripple-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.09; }
+  50% { transform: scale(1.045); opacity: 0.15; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-hero2__ripple { animation: none; opacity: 0.12; }
+}
+
+/* ── The credibility strip ────────────────────────────────────────────────
+ * The cards state the idea; this proves it. Text, not logos: a row of
+ * institutional marks reads as sponsorship, and none of these have given
+ * one. Two groups, each with a single restrained glyph, and the disclaimer
+ * sits with them rather than somewhere a reader has to go find it. */
+.teim-rd .cp-cred__head { margin: 1.7rem 0 0.7rem; padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.28); font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; }
+.teim-rd .cp-cred { display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; }
+.teim-rd .cp-cred__group { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.teim-rd .cp-cred__ic { display: grid; place-items: center; flex: none; color: #fff; }
+.teim-rd .cp-cred__ic svg { width: 18px; height: 18px; }
+.teim-rd .cp-cred__names { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.7; color: #fff; overflow-wrap: anywhere; }
+.teim-rd .cp-cred__note { margin: 0.5rem 0 0; font-size: 0.66rem; line-height: 1.45; color: #fff; max-width: 52ch; }
+/* Phones skip the team strip: the Credible Research card above already
+ * carries the credentials one-liner, and Methods holds the full
+ * treatment. After the base rules, so the hide wins the cascade. */
+@media (max-width: 640px) {
+  .teim-rd .cp-cred__head, .teim-rd .cp-cred, .teim-rd .cp-cred__note { display: none; }
+}
+
+/* A capped dataset keeps its figure and loses its controls. The reader can
+ * see the shape of what they do not have, and the way to open it sits where
+ * the buttons would be rather than as a banner elsewhere on the page. */
+.teim-rd .gvc-fig--capped { background: var(--teal-tint); border-color: var(--teal-line); }
+
+/* ── The shelves ──────────────────────────────────────────────────────────
+ * One band per tier, full bleed, alternating filled and plain. The tiers are
+ * what divide the page, so they run edge to edge; boxed inside the gutter
+ * they were three more cards on a white field.
+ *
+ * The band is two halves. Left: what the tier is, then its collections as
+ * squares. Right: the reader, which says what the collection under the
+ * cursor actually is. A square cannot carry a description without becoming a
+ * card, and the space beside the squares was empty anyway. */
+.teim-rd .cp-bands { margin-top: 0; }
+
+/* Full bleed out of the centred container, with the inner box repeating the
+ * container's max-width and gutter so band content lands on the same left
+ * edge as the masthead above it. */
+.teim-rd .cp-band { margin-inline: calc(50% - 50vw); width: 100vw; padding-block: 3rem; }
+/* One column. The hover reader that used to sit on the right is gone: a
+ * collection has its own page now, so the shelf does not need a panel that
+ * described one. Leaving the track behind left a third of every band empty. */
+/* The reader column is a FIXED width, never auto. The detail panel swaps
+ * content on every hover, and an auto column resizes to each new
+ * max-content line, which reflowed the tile grid from three columns to one
+ * the moment a long linkage sentence arrived. The grid must not move when
+ * the panel speaks; the panel wraps inside its own width instead. */
+.teim-rd .cp-band__in { max-width: 1560px; margin: 0 auto; padding-inline: 2.4rem; display: grid; grid-template-columns: minmax(0, 1fr) 26rem; gap: 2.2rem; }
+.teim-rd .cp-band--fill { background: var(--dteal); }
+.teim-rd .cp-band--plain { background: var(--bg); }
+
+.teim-rd .cp-band__id { grid-column: 1; max-width: 62ch; }
+.teim-rd .cp-band__eyebrow { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-band__name { font-family: var(--sans); font-size: clamp(1.6rem, 2.8vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; color: var(--ink); margin: 0.25rem 0 0; }
+.teim-rd .cp-band__q { font-size: 1.06rem; font-weight: 700; color: var(--dteal); margin: 0.3rem 0 0; }
+.teim-rd .cp-band__promise { font-size: 0.98rem; line-height: 1.6; color: var(--ink-2); margin: 0.6rem 0 0; max-width: 68ch; }
+.teim-rd .cp-band__caps { list-style: none; margin: 0.7rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
+.teim-rd .cp-band__caps li { font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); padding-left: 0.95rem; position: relative; }
+.teim-rd .cp-band__caps li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; background: var(--teal); }
+/* Cedar Press+ sets its plus raised and small, the way a tier mark reads.
+ * line-height 0 keeps it from adding leading to the line it sits in. */
+.teim-rd .cp-tname { display: inline; white-space: nowrap; }
+/* The raised plus. position:relative rather than vertical-align, so it
+ * holds even where a parent's line box is unusual; line-height 0 keeps it
+ * from inflating the line it sits on. */
+.teim-rd .cp-plus { display: inline-block; font-size: 0.58em; line-height: 0; position: relative; top: -0.55em; letter-spacing: 0; margin-left: 0.05em; }
+.teim-rd .cp-band__facts { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin: 0.9rem 0 0; }
+/* The asterisk's footnote: each collection's own start date lives in the
+ * read panel, and this line says so instead of letting one year speak for
+ * the shelf. */
+.teim-rd .cp-band__vary { font-family: var(--mono); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); margin: 0.3rem 0 0; }
+.teim-rd .cp-band--fill .cp-band__vary { color: rgba(255, 255, 255, 0.8); }
+
+/* The price stands with the tier's name, in the band's own ink. */
+.teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }
+.teim-rd .cp-band--fill .cp-band__price { color: #fff; }
+.teim-rd .cp-gt__pricehead { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.9rem 0 0; }
+/* ── Accessibility ───────────────────────────────────────────────────────
+ * The parts that are not a rule to satisfy but the difference between
+ * reading a page and traversing it. */
+
+/* The skip link: off-screen until it takes focus, then the first thing on
+ * the page. Every page's nav and masthead are identical, and a keyboard
+ * reader should not walk them again on each one. */
+.teim-rd .cp-skip { position: absolute; left: -9999px; top: 0; z-index: 200; padding: 0.75rem 1.1rem; background: var(--dteal); color: #fff; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+.teim-rd .cp-skip:focus { left: 0.6rem; top: 0.6rem; }
+
+/* One visible focus ring, on everything, in a colour that clears AA against
+ * both the paper and the teal panels. The browser default disappears
+ * against a dark surface and is easy to lose on a light one. */
+.teim-rd a:focus-visible,
+.teim-rd button:focus-visible,
+.teim-rd select:focus-visible,
+.teim-rd input:focus-visible,
+.teim-rd textarea:focus-visible,
+.teim-rd [tabindex]:focus-visible { outline: 3px solid var(--dteal); outline-offset: 2px; border-radius: 2px; }
+/* On the teal panels the ring inverts, because dark teal on mid teal is a
+ * ring nobody can see. */
+.teim-rd .cp-hero2 a:focus-visible,
+.teim-rd .cp-hero2 button:focus-visible,
+.teim-rd .cp-band--fill a:focus-visible,
+.teim-rd .cp-band--fill button:focus-visible,
+.teim-rd .cp-close a:focus-visible,
+.teim-rd .cp-gt a:focus-visible { outline-color: #fff; }
+
+/* A reader who has asked their system for less motion gets none of the
+ * page's own: transitions collapse rather than shorten, because a 1ms
+ * animation is still an animation to a vestibular system. */
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-hub__tile,
+  .teim-rd .cp-hub__tile::after,
+  .teim-rd .cp-hub__mark,
+  .teim-rd .cp-hub__name,
+  .teim-rd .cp-page { transition: none !important; animation: none !important; }
+  .teim-rd .cp-hub__tile:hover { transform: none; }
+  .teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: none; }
+}
+
+/* ── Page arrival ────────────────────────────────────────────────────────
+ * A short, single rise on each page, so moving between sections reads as
+ * one service rather than as separate documents slamming into place.
+ * Content-visibility is untouched: the animation is opacity and transform
+ * only, so nothing here delays what a screen reader can read. */
+@keyframes cp-page-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+/* backwards, not both. `both` retains the final keyframe, and a retained
+ * `transform: none` computes to the identity matrix rather than to the
+ * keyword — which leaves every page permanently transformed, and a
+ * transformed element is the containing block for its fixed-position
+ * descendants. Ask Cedar's bottom sheet was being laid out inside the page's
+ * measure instead of against the window because of it. `backwards` gives the
+ * same entrance and hands the property back when the animation ends. */
+@media (prefers-reduced-motion: no-preference) {
+  .teim-rd .cp-page { animation: cp-page-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+}
+
+/* ── The section nav ─────────────────────────────────────────────────────
+ * On every page, not handed out once by the front page: a reader who
+ * arrived from a citation or a shared brief can cross the service without
+ * going home first. Text, not icons — this is a professional intelligence
+ * service, and a row of glyphs reads as a phone launcher. */
+.teim-rd .cp-mast { display: block; padding: 1.4rem 0 0; }
+.teim-rd .cp-mast__top { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; padding-bottom: 1rem; }
+.teim-rd .cp-nav { display: flex; flex-wrap: wrap; gap: 0 1.8rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-nav__item { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease, border-color 0.15s ease; }
+.teim-rd .cp-nav__item:hover { color: var(--ink); }
+.teim-rd .cp-nav__item[aria-current="page"] { color: var(--dteal); border-bottom-color: var(--teal); }
+/* Phones: the row wraps onto a second line. It used to scroll sideways with
+ * its scrollbar hidden, which saved a line and cost the reader the last
+ * section — "METHODS" arrived as "MET" against the edge of the screen, with
+ * nothing on it to say it could be dragged. Five short labels on two lines is
+ * the whole nav, visible, which is what a nav is for. */
+@media (max-width: 640px) {
+  .teim-rd .cp-nav { gap: 0 1.3rem; }
+  .teim-rd .cp-nav__item { white-space: nowrap; min-height: 40px; }
+}
+
+/* ── The section index ───────────────────────────────────────────────────
+ * Squares in the collection tiles' own size, because those already proved
+ * the size on both pointers: one row where it fits, 2x3 on a phone, so the
+ * front page and the shelf read as one system. Each square states what the
+ * section is and what it currently holds; the ? in its corner puts the
+ * section's purpose in the line under the grid. */
+/* Explicit counts rather than auto-fit: six tiles into an auto-fit track
+ * lands five across and one alone on a second row, which reads as a
+ * mistake. Six, three, then two — every arrangement fills its rows. */
+.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.9rem; }
+@media (max-width: 1280px) { .teim-rd .cp-hub__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.teim-rd .cp-hub__grid > li { position: relative; display: block; }
+.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; min-height: 10.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1.1rem 0.7rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
+/* The teal rises from the floor of the tile on hover rather than washing
+ * over it: the mark and the name stay on paper, which keeps their contrast
+ * where it was measured. */
+.teim-rd .cp-hub__tile::after { content: ''; position: absolute; inset: auto 0 0 0; height: 3px; background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
+.teim-rd .cp-hub__tile:hover::after, .teim-rd .cp-hub__tile:focus-visible::after { transform: scaleX(1); }
+.teim-rd .cp-hub__tile:hover { border-color: var(--teal); box-shadow: 0 14px 34px rgba(10, 15, 38, 0.13); transform: translateY(-4px); }
+.teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: translateY(-2px) scale(1.06); }
+.teim-rd .cp-hub__tile:hover .cp-hub__name { color: var(--dteal); }
+.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
+.teim-rd .cp-hub__mark svg { width: 76px; height: 76px; }
+.teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.22rem; min-width: 0; }
+.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.2rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.18; transition: color 0.18s ease; }
+/* What the section holds right now, read from the catalog: a label alone
+ * says where a tap goes, this says whether it is worth taking. */
+.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+/* The line under the grid, painted by pointing at a tile — the same
+ * point-to-read language as the shelves, with no second control on the
+ * tile. min-height holds two lines so the page never jumps. */
+.teim-rd .cp-hub__note { max-width: 68ch; min-height: 2.6em; margin: 1rem 0 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
+/* Phones: a strict 2x3, the squares scaling with the screen rather than
+ * wrapping to a single column. */
+@media (max-width: 640px) {
+  .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; gap: 0.7rem; }
+  .teim-rd .cp-hub__tile { min-height: 9.5rem; }
+  .teim-rd .cp-hub__mark svg { width: 60px; height: 60px; }
+  .teim-rd .cp-hub__name { font-size: 1.05rem; }
+  .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+}
+
+/* ── Settings ────────────────────────────────────────────────────────────
+ * The account and the errands, in cards across the measure rather than a
+ * column down the left. */
+.teim-rd .cp-set { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.1rem; margin-top: 2rem; align-items: start; }
+.teim-rd .cp-set__card { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.3rem 1.4rem; background: var(--bg); display: flex; flex-direction: column; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+.teim-rd .cp-set__card:hover { border-color: var(--teal); box-shadow: 0 10px 26px rgba(10, 15, 38, 0.07); }
+.teim-rd .cp-set__cap { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.9rem; }
+.teim-rd .cp-set__rows { margin: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.teim-rd .cp-set__rows > div { display: flex; flex-direction: column; gap: 0.15rem; border-top: 1px solid var(--line-soft); padding-top: 0.7rem; }
+.teim-rd .cp-set__rows > div:first-child { border-top: 0; padding-top: 0; }
+.teim-rd .cp-set__rows dt { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-set__rows dd { margin: 0; font-size: 1rem; color: var(--ink); }
+.teim-rd .cp-set__rows dd a { color: var(--dteal); }
+.teim-rd .cp-set__acts { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
+.teim-rd .cp-set__fine { font-size: 0.86rem; line-height: 1.5; color: var(--muted); margin: 0.9rem 0 0; }
+.teim-rd .cp-set__form { display: flex; flex-direction: column; gap: 0.35rem; }
+.teim-rd .cp-set__form select { font: inherit; font-size: 0.95rem; min-height: 44px; padding: 0.5rem 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-set__form select:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.teim-rd .cp-who__label { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-set__body { font-size: 0.97rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.1rem; }
+.teim-rd .cp-set__links { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-set__links li { border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-set__links li:first-child { border-top: 0; }
+.teim-rd .cp-set__links a { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.85rem 0; text-decoration: none; }
+.teim-rd .cp-set__links b { font-size: 1rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-set__links span { font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-set__links a:hover b { color: var(--dteal); }
+
+/* ── The badges ───────────────────────────────────────────────────────────
+ * Literal squares. The width is fixed and the height is set from it, so a
+ * two-line name can never stretch one into a rectangle beside its
+ * neighbours: the name gets two lines and clips at the third. */
+.teim-rd .cp-band__grid { grid-column: 1; grid-row: 2; min-width: 0; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.7rem; }
+.teim-rd .cp-band__grid > li { display: block; }
+
+/* Centred, and the mark is most of the square. At 40px the icon was a label
+ * on a box; at 104px in a 168px square it is the thing you are pointing at,
+ * which is what makes a grid of these read as something to collect. */
+.teim-rd .cp-badge { position: relative; box-sizing: border-box; width: 100%; aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.5rem; border: 1px solid var(--line); border-radius: 0; background: var(--bg); text-align: center; font: inherit; color: var(--ink); }
+.teim-rd .cp-badge__mark { display: block; color: var(--dteal); }
+.teim-rd .cp-badge__mark { display: flex; }
+/* Proportional, not fixed: the square reserves room for a two-line name and
+ * the mark takes the rest. At a fixed 104px a name that wrapped ran off the
+ * bottom edge of its own badge. */
+.teim-rd .cp-badge__mark svg { width: 100%; height: auto; aspect-ratio: 1; display: block; }
+/* 72% of the content box, which lands the mark at about 65% of the
+ * square once padding is taken off. */
+.teim-rd .cp-badge__mark { width: 72%; }
+.teim-rd .cp-badge__name { flex: 0 0 auto; font-family: var(--sans); font-size: 0.87rem; font-weight: 700; letter-spacing: -0.005em; line-height: 1.18; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.teim-rd .cp-badge__cue { position: absolute; top: 0.6rem; right: 0.7rem; font-family: var(--mono); font-size: 0.9rem; font-weight: 700; color: var(--muted); opacity: 0.75; }
+.teim-rd .cp-badge__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* The figure's exact values, disclosed on demand. Visible (not sr-only): the
+ * hover tooltip needs a mouse, and sighted keyboard or touch readers cite
+ * these numbers too. */
+.teim-rd .pf__data { margin: 0.4rem 0 0; }
+.teim-rd .pf__data summary { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.teim-rd .pf__data p { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-2); margin: 0.35rem 0 0; line-height: 1.7; }
+
+/* Both badge kinds are buttons: the owned one downloads, the locked one
+ * walks to the panel that says what opens it. Reset the UA button chrome so
+ * a badge looks identical to the anchor it used to be. */
+.teim-rd button.cp-badge { cursor: pointer; appearance: none; -webkit-appearance: none; font: inherit; }
+.teim-rd button.cp-badge--act { border-color: var(--teal); background: var(--teal-tint); }
+.teim-rd .cp-badge { transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+.teim-rd button.cp-badge--act:hover { transform: translateY(-2px); }
+
+/* Arrival. The band's badges rise in sequence once it is scrolled to, and
+ * stay put afterwards: re-animating on the way back up is what makes a page
+ * feel restless rather than alive. */
+.teim-rd .cp-band__grid > li { opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; transition-delay: calc(var(--i, 0) * 45ms); }
+.teim-rd .cp-band.is-in .cp-band__grid > li { opacity: 1; transform: none; }
+.teim-rd .cp-band__id, .teim-rd .cp-read { transition: opacity 0.5s ease, transform 0.5s ease; }
+.teim-rd .cp-band:not(.is-in) .cp-band__id, .teim-rd .cp-band:not(.is-in) .cp-read { opacity: 0; transform: translateY(10px); }
+.teim-rd .cp-badge.is-on, .teim-rd button.cp-badge--act:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; }
+.teim-rd .cp-badge.is-on .cp-badge__mark, .teim-rd .cp-badge.is-on .cp-badge__cue { color: #fff; }
+.teim-rd .cp-badge:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-badge { transition: none; }
+  .teim-rd button.cp-badge--act:hover { transform: none; }
+  .teim-rd .cp-band__grid > li,
+  .teim-rd .cp-band__id,
+  .teim-rd .cp-read { opacity: 1 !important; transform: none !important; transition: none; }
+}
+.teim-rd .cp-band--plain .cp-badge { background: var(--dteal); border-color: var(--dteal); color: #fff; }
+.teim-rd .cp-band--plain .cp-badge__mark, .teim-rd .cp-band--plain .cp-badge__cue, .teim-rd .cp-band--plain .cp-badge__name { color: #fff; }
+/* A locked tile looks like its shelf. The band's own eyebrow says Locked
+ * and the reader panel says what opens it; a dashed edge on every tile read
+ * as a rendering fault rather than a state. */
+/* The hovered tile answers in ink on BOTH shelves. This rule must sit after
+ * the plain-band base above: the base repaints the badge dteal at the same
+ * specificity, so before this existed, hovering a Cedar Press+ tile changed
+ * nothing at all, dteal painted over dteal. */
+.teim-rd .cp-band--plain .cp-badge.is-on { background: var(--ink); border-color: var(--ink); }
+
+/* On the filled band everything inverts, and a downloadable square is solid
+ * against translucent neighbours so it reads as the one you can take. */
+.teim-rd .cp-band--fill .cp-band__eyebrow, .teim-rd .cp-band--fill .cp-band__facts { color: #fff; }
+.teim-rd .cp-band--fill .cp-band__name, .teim-rd .cp-band--fill .cp-band__q { color: #fff; }
+.teim-rd .cp-band--fill .cp-band__promise { color: #fff; }
+.teim-rd .cp-band--fill .cp-band__caps li { color: #fff; }
+.teim-rd .cp-band--fill .cp-band__caps li::before { background: #fff; }
+/* The pair inverts. On the teal band the tile is white with teal contents;
+ * on the white band the tile is teal with white contents. Same two colours
+ * both times, swapped, which is what makes the two shelves read as a set. */
+.teim-rd .cp-band--fill .cp-badge { background: #fff; border-color: #fff; color: var(--dteal); }
+.teim-rd .cp-band--fill .cp-badge__mark, .teim-rd .cp-band--fill .cp-badge__cue { color: var(--dteal); }
+.teim-rd .cp-band--fill .cp-badge__name { color: var(--dteal); }
+.teim-rd .cp-band--fill .cp-badge.is-on, .teim-rd .cp-band--fill button.cp-badge--act:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.teim-rd .cp-band--fill .cp-badge.is-on .cp-badge__mark, .teim-rd .cp-band--fill .cp-badge.is-on .cp-badge__cue, .teim-rd .cp-band--fill .cp-badge.is-on .cp-badge__name { color: #fff; }
+.teim-rd .cp-band--fill button.cp-badge--act:hover .cp-badge__mark, .teim-rd .cp-band--fill button.cp-badge--act:hover .cp-badge__cue, .teim-rd .cp-band--fill button.cp-badge--act:hover .cp-badge__name { color: #fff; }
+.teim-rd .cp-band--fill .cp-badge:focus-visible { outline-color: #fff; }
+
+/* ── The reader ───────────────────────────────────────────────────────────
+ * Spans both rows on the right, so it faces the squares rather than sitting
+ * over them, and holds its height so the band does not jump as the cursor
+ * moves from one collection to the next. */
+/* Sticky under the contents bar. Grove's band is sixteen squares tall, and
+ * a reader that scrolls away is no use to the badge you just pointed at. */
+/* Sticky under the contents bar, centred against the squares, and sized to
+ * whatever it is saying. A fixed height meant a two-line collection sat
+ * above a block of empty panel. */
+/* Anchored to the top of its area, not centered: the panel grows downward
+ * as a collection's detail replaces the idle hint, so its top edge and the
+ * grid beside it hold still while the information expands. */
+.teim-rd .cp-read { grid-column: 2; grid-row: 2 / span 2; align-self: start; min-width: 0; position: sticky; top: 3.6rem; display: flex; flex-direction: column; gap: 1rem; padding: 1.3rem 1.4rem; border: 1px solid var(--line); background: var(--bg); }
+.teim-rd .cp-read__cap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-read__name { font-family: var(--sans); font-size: 1.1rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.25; color: var(--ink); margin: 0.45rem 0 0; }
+.teim-rd .cp-read__blurb { font-size: 0.92rem; line-height: 1.55; color: var(--ink-2); margin: 0.5rem 0 0; }
+/* The join is the product, so the reader says it about every collection. */
+.teim-rd .cp-read__link { font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); margin: 0.7rem 0 0; padding-top: 0.7rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-read__linkcap { display: block; font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.3rem; }
+.teim-rd .cp-band--fill .cp-read__link { color: #fff; border-top-color: #fff; }
+.teim-rd .cp-band--fill .cp-read__linkcap { color: #fff; }
+.teim-rd .cp-read__foot { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0.8rem 0 0; }
+.teim-rd .cp-read__hint { font-size: 0.92rem; line-height: 1.55; color: var(--muted); margin: 0.5rem 0 0; }
+.teim-rd .cp-read .cp-band__cta { margin-top: auto; }
+.teim-rd .cp-band__cta { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; align-self: flex-start; padding: 0.55rem 1.1rem; background: var(--dteal); color: #fff; font-size: 0.92rem; font-weight: 700; text-decoration: none; }
+.teim-rd .cp-band__cta:hover { background: var(--ink); }
+/* The ring a locked tile's click paints around the panel it points at.
+ * Static, so reduced motion needs no branch. The opacity and transform
+ * pair restate the reveal transition declared earlier: this later rule
+ * replaces the whole property, so dropping them would break the band's
+ * arrival. */
+.teim-rd .cp-read { transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.35s ease; }
+.teim-rd .cp-read.is-pulse { box-shadow: 0 0 0 3px var(--dteal); }
+.teim-rd .cp-band--fill .cp-read { background: rgba(10, 15, 38, 0.14); border-color: #fff; }
+.teim-rd .cp-band--fill .cp-read.is-pulse { box-shadow: 0 0 0 3px #fff; }
+.teim-rd .cp-band--fill .cp-read__cap { color: #fff; }
+.teim-rd .cp-band--fill .cp-read__name { color: #fff; }
+.teim-rd .cp-band--fill .cp-read__blurb, .teim-rd .cp-band--fill .cp-read__hint { color: #fff; }
+.teim-rd .cp-band--fill .cp-read__foot { color: #fff; }
+/* The Ask Cedar link inherits the page's dark teal, which disappears into
+ * the filled band's tinted panel; on that band it wears the panel's white. */
+.teim-rd .cp-band--fill .cp-read__cedar { color: #fff; }
+.teim-rd .cp-band--fill .cp-read__cedar:hover { color: rgba(255, 255, 255, 0.72); }
+.teim-rd .cp-band--fill .cp-band__cta { background: #fff; color: var(--dteal); }
+.teim-rd .cp-band--fill .cp-band__cta:hover { background: var(--ink); color: #fff; }
+
+/* The instruction, under the grid where a reader looks after the squares. */
+.teim-rd .cp-band__hint { grid-column: 1 / -1; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 0.35rem; }
+.teim-rd .cp-band--fill .cp-band__hint { color: #fff; }
+.teim-rd .cp-band__all { grid-column: 1; grid-row: 3; margin: 1.1rem 0 0; }
+.teim-rd .cp-band__allbtn { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding: 0.55rem 1.1rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; }
+/* The read panel's own download, for touch: the first tap on a tile lands
+ * the reader here, and this button is the second tap. Same clothes as the
+ * download-all button so the shelf keeps one action language. */
+.teim-rd .cp-read__act { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; margin-top: 0.9rem; padding: 0.55rem 1.1rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; }
+.teim-rd .cp-band__allbtn:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; }
+.teim-rd .cp-band--fill .cp-band__allbtn { background: transparent; border-color: #fff; color: #fff; }
+.teim-rd .cp-band--fill .cp-band__allbtn:hover { background: #fff; border-color: #fff; color: var(--dteal); }
+
+/* ── What Cedar adds ──────────────────────────────────────────────────────
+ * The claim the catalog depends on. Set at display size because a reader
+ * who skims past it reads everything below as repackaged open data. */
+.teim-rd .cp-link__in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 0.8rem 3rem; align-items: start; }
+.teim-rd .cp-link__claim { font-family: var(--sans); font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0; }
+.teim-rd .cp-link__body { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-link__tiers { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 1rem 1.6rem; }
+.teim-rd .cp-link__tiers li { border-top: 2px solid var(--teal); padding-top: 0.6rem; }
+.teim-rd .cp-link__tiers b { display: block; font-size: 0.92rem; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
+.teim-rd .cp-link__tiers span { display: block; font-size: 0.86rem; line-height: 1.45; color: var(--muted); }
+@media (max-width: 900px) { .teim-rd .cp-link__in { grid-template-columns: 1fr; } }
+
+
+@media (max-width: 1040px) {
+  .teim-rd .cp-band__in { grid-template-columns: minmax(0, 1fr); }
+  .teim-rd .cp-read { grid-column: 1; grid-row: auto; min-height: 0; }
+  .teim-rd .cp-band__head, .teim-rd .cp-band__grid, .teim-rd .cp-band__all { grid-column: 1; grid-row: auto; }
+}
+/* The ≤720px shelf and badge sizing lives AFTER the "tiles, refined" block
+   near the end of this file: those refinements share its specificity, and a
+   media query adds none, so source order is the whole contest. Two real bugs
+   have come from a modifier sitting before its base; this was the third. */
+
+/* ── Cedar Grove, teased ───────────────────────────────────────────────── */
+/* A hairline between the last Cedar Press shelf and Cedar Grove, which is a
+ * different product rather than a further rung. */
+.teim-rd .cp-gt { max-width: 1560px; margin: 3.2rem auto 0; padding: 3rem 2.4rem 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-gt__head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 1rem 3rem; align-items: end; padding-bottom: 1.6rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-gt__title { font-family: var(--sans); font-size: clamp(1.6rem, 3vw, 2.3rem); font-weight: 800; letter-spacing: -0.022em; line-height: 1.1; color: var(--ink); margin: 0.3rem 0 0; }
+.teim-rd .cp-gt__q { font-size: 1.06rem; font-weight: 700; color: var(--dteal); margin: 0.3rem 0 0; }
+.teim-rd .cp-gt__body { font-size: 1rem; line-height: 1.62; color: var(--ink-2); margin: 0; }
+/* One artefact carries the tier. Census and BLS are infrastructure, and
+ * infrastructure is not why anyone crosses this line. */
+.teim-rd .cp-gt__star { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 2.5rem; margin-top: 2rem; padding: 1.8rem 2rem; background: var(--dteal); color: #fff; transition: opacity 0.5s ease, transform 0.5s ease; }
+.teim-rd .cp-gt__excl { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #fff; }
+.teim-rd .cp-gt__name { font-family: var(--sans); font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: #fff; margin: 0.35rem 0 0.7rem; }
+.teim-rd .cp-gt__blurb { font-size: 0.96rem; line-height: 1.6; color: #fff; margin: 0 0 0.9rem; }
+.teim-rd .cp-gt__fresh { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.11em; text-transform: uppercase; color: #fff; margin: 0; }
+.teim-rd .cp-gt__cta { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 48px; margin-top: 1.2rem; padding: 0.65rem 1.2rem; background: #fff; color: var(--dteal); font-size: 0.95rem; font-weight: 700; text-decoration: none; }
+.teim-rd .cp-gt__cta:hover { background: var(--ink); color: #fff; }
+.teim-rd .cp-gt__split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: 1.2rem 2rem; align-content: center; }
+.teim-rd .cp-gt__cap { display: block; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #fff; margin-bottom: 0.5rem; }
+.teim-rd .cp-gt__split ul { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-gt__split li { font-size: 0.9rem; line-height: 1.45; color: #fff; padding: 0.22rem 0 0.22rem 1rem; position: relative; }
+.teim-rd .cp-gt__split li::before { content: ''; position: absolute; left: 0; top: 0.78em; width: 6px; height: 1px; background: rgba(255, 255, 255, 0.6); }
+.teim-rd .cp-gt__opens li { font-weight: 700; }
+.teim-rd .cp-gt__opens li::before { width: 6px; height: 6px; top: 0.62em; background: #fff; }
+.teim-rd .cp-gt__caps { list-style: none; margin: 1.6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1rem 2.4rem; }
+.teim-rd .cp-gt__caps li { font-size: 0.94rem; line-height: 1.5; color: var(--ink-2); padding-left: 1.05rem; position: relative; }
+.teim-rd .cp-gt__caps li::before { content: ''; position: absolute; left: 0; top: 0.58em; width: 6px; height: 6px; background: var(--dteal); }
+.teim-rd .cp-gt__price { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin: 1.4rem 0 0; }
+.teim-rd .cp-gt:not(.is-in) .cp-gt__star { opacity: 0; transform: translateY(14px); }
+@media (max-width: 900px) {
+  .teim-rd .cp-gt__head, .teim-rd .cp-gt__star { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-gt__star { transition: none; }
+  .teim-rd .cp-gt:not(.is-in) .cp-gt__star { opacity: 1; transform: none; }
+}
+
+/* ── The end of the page ──────────────────────────────────────────────────
+ * Two teal cards on white, shut until asked. Both used to be open columns of
+ * prose, which is a wall of text at the end of a page nobody came here to
+ * read. Built on <details> so the open and shut state is the browser's and
+ * works without script. */
+.teim-rd .cp-ends { margin-top: 3rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; align-items: start; }
+.teim-rd .cp-card { background: var(--dteal); color: #fff; }
+.teim-rd .cp-card__top { list-style: none; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.3rem 1rem; padding: 1.4rem 1.6rem; }
+.teim-rd .cp-card__top::-webkit-details-marker { display: none; }
+.teim-rd .cp-card__cap { grid-column: 1; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #fff; }
+.teim-rd .cp-card__title { grid-column: 1; font-family: var(--sans); font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: #fff; }
+/* A plus that becomes a minus. Drawn rather than typed so it stays centred
+ * in its box at any font size. */
+.teim-rd .cp-card__more { grid-column: 2; grid-row: 1 / span 2; position: relative; width: 30px; height: 30px; border: 1px solid rgba(255, 255, 255, 0.5); }
+.teim-rd .cp-card__more::before, .teim-rd .cp-card__more::after { content: ''; position: absolute; left: 50%; top: 50%; width: 13px; height: 1.5px; background: #fff; transform: translate(-50%, -50%); }
+.teim-rd .cp-card__more::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform 0.18s ease; }
+.teim-rd .cp-card[open] .cp-card__more::after { transform: translate(-50%, -50%) rotate(0deg); }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-card__more::after { transition: none; } }
+.teim-rd .cp-card__top:hover .cp-card__more, .teim-rd .cp-card__top:focus-visible .cp-card__more { border-color: #fff; background: rgba(255, 255, 255, 0.16); }
+.teim-rd .cp-card__body { padding: 0 1.6rem 1.5rem; }
+.teim-rd .cp-card__body p { font-size: 0.94rem; line-height: 1.6; color: #fff; margin: 0 0 0.8rem; max-width: 62ch; }
+.teim-rd .cp-card__btn { display: inline-flex; align-items: center; min-height: 44px; margin-top: 0.4rem; padding: 0.55rem 1.1rem; background: #fff; color: var(--dteal); font-size: 0.92rem; font-weight: 700; text-decoration: none; }
+.teim-rd .cp-card__btn:hover { background: var(--ink); color: #fff; }
+@media (max-width: 860px) { .teim-rd .cp-ends { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+}
+
+/* ══ Methods, Tribal request, Research access, Collection detail ═══════════
+ * These four pages have different jobs and none of them is the reader, so
+ * they share a typographic system rather than the reader's band structure.
+ * Editorial composition, thin rules, navy type on white, teal used sparingly
+ * and never as a fill except where one panel has to carry the weight. */
+
+/* ── A page opening ─────────────────────────────────────────────────────── */
+/* Full width: the headline takes the page and the sub runs beside room to
+ * breathe. A 62ch cap here left half the page empty above the fold, which
+ * read as a mistake rather than restraint. */
+.teim-rd .cp-mh { padding: 3.4rem 0 1rem; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem 3.5rem; align-items: end; }
+.teim-rd .cp-mh .cp-hero__access { grid-column: 1 / -1; }
+@media (max-width: 900px) { .teim-rd .cp-mh { grid-template-columns: minmax(0, 1fr); align-items: start; } }
+.teim-rd .cp-mh__title { font-family: var(--sans); font-size: clamp(2.1rem, 4.6vw, 3.4rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.04; color: var(--ink); margin: 0.4rem 0 0; }
+.teim-rd .cp-mh__sub { font-size: 1.08rem; line-height: 1.6; color: var(--ink-2); margin: 1rem 0 0.35rem; max-width: 58ch; }
+/* The sentence the page exists to earn. It stands alone rather than being
+ * followed straight into another paragraph. */
+.teim-rd .cp-mh__claim { font-family: var(--sans); font-size: clamp(1.5rem, 3.2vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--dteal); margin: 2.6rem 0 3.4rem; padding-left: 1.4rem; border-left: 3px solid var(--teal); max-width: 34ch; }
+
+.teim-rd .cp-msec { margin-top: 4rem; }
+.teim-rd .cp-msec__title { font-family: var(--sans); font-size: clamp(1.5rem, 2.8vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0 0 1.4rem; max-width: 26ch; }
+.teim-rd .cp-msec__lede { font-size: 1.02rem; line-height: 1.62; color: var(--ink-2); margin: 0 0 1.2rem; max-width: 68ch; }
+.teim-rd .cp-msec__close { font-size: 1.02rem; line-height: 1.6; color: var(--ink); font-weight: 600; margin: 1.6rem 0 0; max-width: 60ch; }
+
+/* ── The process, as one run ────────────────────────────────────────────── */
+.teim-rd .cp-rail { list-style: none; margin: 0; padding: 2.4rem 0 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0 1.6rem; position: relative; }
+/* One rule behind all seven, so the eye reads a single process rather than
+ * seven separate things. */
+.teim-rd .cp-rail::before { content: ''; position: absolute; top: 2.4rem; left: 0; right: 0; height: 1px; background: var(--line); }
+.teim-rd .cp-rail__stage { position: relative; padding-top: 1.5rem; }
+
+/* Hover on the process rail: the step under the pointer answers in teal
+ * and the rest recede slightly, so a seven-step line can be read one step
+ * at a time. */
+.teim-rd .cp-rail__stage { transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-rail:hover .cp-rail__stage { opacity: 0.55; }
+.teim-rd .cp-rail:hover .cp-rail__stage:hover { opacity: 1; transform: translateY(-3px); }
+.teim-rd .cp-rail__stage:hover .cp-rail__name { color: var(--dteal); }
+.teim-rd .cp-rail__stage:hover::before { background: var(--dteal); width: 10px; height: 10px; }
+.teim-rd .cp-rail__name { transition: color 0.2s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-rail__stage { transition: none; }
+  .teim-rd .cp-rail:hover .cp-rail__stage:hover { transform: none; }
+}
+.teim-rd .cp-rail__stage::before { content: ''; position: absolute; top: -3px; left: 0; width: 7px; height: 7px; background: var(--teal); }
+.teim-rd .cp-rail__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; color: var(--dteal); }
+.teim-rd .cp-rail__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.3rem 0 0.4rem; }
+.teim-rd .cp-rail__body { font-size: 0.85rem; line-height: 1.5; color: var(--muted); margin: 0; }
+@media (max-width: 1100px) {
+  .teim-rd .cp-rail { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.4rem; }
+  .teim-rd .cp-rail::before { display: none; }
+  .teim-rd .cp-rail__stage { border-top: 1px solid var(--line); }
+}
+@media (max-width: 640px) { .teim-rd .cp-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ── Where reporting runs out: three stories, not three cards ──────────── */
+
+/* ── The ecosystem ─────────────────────────────────────────────────────── */
+/* The two-column base: figure beside its callouts. This rule went missing in
+ * a restyle and the drawing quietly fell to full container width with the
+ * notes stacked underneath, which is not the layout the comment above
+ * describes. Flat surface, no tint, per the visual rules. */
+/* One centred figure, given the room a centrepiece deserves: near the
+ * full content width on desktop. Everything inside the svg is in viewBox
+ * units, so the ring, the labels and the fans all scale together. */
+.teim-rd .cp-eco { margin: 1.6rem auto 0; max-width: 76rem; }
+.teim-rd .cp-eco__figure { min-width: 0; }
+.teim-rd .cp-eco__svg { width: 100%; height: auto; display: block; }
+.teim-rd .cp-eco__spoke line { stroke: var(--line); stroke-width: 1; }
+.teim-rd .cp-eco__dot { fill: var(--teal); }
+/* The collection's own point on the ring: every line ends here. */
+.teim-rd .cp-eco__node { fill: var(--teal); transition: fill 0.2s ease, r 0.2s ease; }
+.teim-rd .cp-eco__hit { cursor: pointer; outline: none; }
+.teim-rd .cp-eco__hit.is-on .cp-eco__node, .teim-rd .cp-eco__hit.is-pinned .cp-eco__node { fill: var(--dteal); }
+/* Dimmed, not gone: the unselected collections stay readable as the set the
+ * selected one belongs to. Nearly invisible read as unfinished. */
+.teim-rd .cp-eco__hit.is-dim { opacity: 0.35; }
+.teim-rd .cp-eco__hit:focus-visible .cp-eco__label { fill: var(--dteal); }
+.teim-rd .cp-eco__core { fill: var(--teal-tint); stroke: var(--teal); stroke-width: 1.5; }
+.teim-rd .cp-eco__float { filter: drop-shadow(0 22px 26px rgba(10, 15, 38, 0.16)); }
+@media (prefers-reduced-motion: no-preference) {
+  .teim-rd .cp-eco__float { animation: cp-eco-float 7s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+}
+@keyframes cp-eco-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+.teim-rd .cp-eco__core2 { fill: #fff; stroke: var(--dteal); stroke-width: 1.5; }
+.teim-rd .cp-eco__ringcap { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.22em; fill: var(--dteal); }
+/* The fan of real sources while a collection is pinned. */
+@keyframes cp-src-in { from { opacity: 0; } }
+.teim-rd .cp-eco__src { animation: cp-src-in 0.3s ease backwards; }
+.teim-rd .cp-eco__src line { stroke: var(--dteal); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.teim-rd .cp-eco__src circle { fill: var(--dteal); }
+.teim-rd .cp-eco__src text { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; fill: var(--ink-2); }
+.teim-rd .cp-eco__label.is-pinned { fill: var(--dteal); }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-eco__src { animation: none; } }
+.teim-rd .cp-eco__corecap { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; fill: var(--dteal); }
+.teim-rd .cp-eco__label { font-family: var(--sans); font-size: 15.5px; font-weight: 700; fill: var(--ink); cursor: pointer; transition: fill 0.2s ease, opacity 0.2s ease; outline: none; }
+/* The hover: the named collection and its feeds light teal, the chords draw
+ * through the middle and everything else steps back. */
+.teim-rd .cp-eco__spoke line, .teim-rd .cp-eco__spoke .cp-eco__dot { transition: stroke 0.2s ease, fill 0.2s ease, opacity 0.2s ease; }
+.teim-rd .cp-eco__spoke.is-on line { stroke: var(--dteal); stroke-width: 1.6; }
+.teim-rd .cp-eco__spoke.is-on .cp-eco__dot { fill: var(--dteal); }
+.teim-rd .cp-eco__spoke.is-dim, .teim-rd .cp-eco__label.is-dim { opacity: 0.35; }
+.teim-rd .cp-eco__label.is-on { fill: var(--dteal); }
+.teim-rd .cp-eco__label:focus-visible { fill: var(--dteal); }
+/* Dimmer than the fan on purpose: provenance is the point, the
+ * reinforcement is the bonus. */
+/* The fan arrives: lines grow out and labels follow, one beat. */
+@keyframes cp-fan-line { from { opacity: 0; } }
+.teim-rd .cp-eco__src line { animation: cp-fan-line 0.25s ease backwards; }
+.teim-rd .cp-eco__src text, .teim-rd .cp-eco__src circle { animation: cp-fan-line 0.3s ease 0.08s backwards; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-eco__src line, .teim-rd .cp-eco__src text, .teim-rd .cp-eco__src circle { animation: none; } }
+/* Centred and readable at a glance: this sentence IS the figure's note. */
+.teim-rd .cp-eco__say { min-height: 2.9em; margin: 0.4rem auto 0; max-width: 58ch; font-size: 1.08rem; line-height: 1.55; text-align: center; color: var(--ink-2); }
+.teim-rd .cp-eco:not(.is-lit) .cp-eco__say { color: var(--muted); }
+/* The key under the sentence: what a dashed branch and a lit dot mean. */
+.teim-rd .cp-eco__key { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem 2.2rem; margin: 0.7rem 0 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-eco__keyitem { display: inline-flex; align-items: center; gap: 0.5rem; }
+.teim-rd .cp-eco__keyitem svg { width: 30px; height: 10px; overflow: visible; }
+.teim-rd .cp-eco__keyitem svg:first-child { flex: none; }
+.teim-rd .cp-eco__keydash { stroke: var(--dteal); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.teim-rd .cp-eco__keydot { fill: var(--dteal); }
+/* On a phone the ring becomes a list: same facts, one disclosure per
+ * collection, instead of a diagram shrunk past legibility. The stylesheet
+ * decides which form shows, so the component carries no breakpoint logic. */
+.teim-rd .cp-eco__cards { display: none; }
+@media (max-width: 720px) {
+  .teim-rd .cp-eco__figure { display: none; }
+  .teim-rd .cp-eco__cards { display: block; border-top: 1px solid var(--ink); }
+  .teim-rd .cp-eco__card { border-bottom: 1px solid var(--line); }
+  .teim-rd .cp-eco__card summary { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0.2rem; font-family: var(--sans); font-size: 1rem; font-weight: 700; color: var(--ink); cursor: pointer; list-style: none; min-height: 44px; }
+  .teim-rd .cp-eco__card summary::-webkit-details-marker { display: none; }
+  .teim-rd .cp-eco__card summary::after { content: '+'; font-family: var(--mono); font-size: 1rem; color: var(--dteal); }
+  .teim-rd .cp-eco__card[open] summary::after { content: '\2212'; }
+  .teim-rd .cp-eco__card[open] summary { color: var(--dteal); }
+  .teim-rd .cp-eco__card p { margin: 0 0 0.7rem; padding: 0 0.2rem; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); }
+  .teim-rd .cp-eco__cardcap { display: block; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; }
+  .teim-rd .cp-eco__cardline { color: var(--muted); font-style: italic; }
+  .teim-rd .cp-eco__cardfoot { margin: 0.9rem 0 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dteal); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-eco__label, .teim-rd .cp-eco__spoke line, .teim-rd .cp-eco__spoke .cp-eco__dot { transition: none; }
+}
+
+.teim-rd .cp-eco__notes li { font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); padding-left: 1.1rem; border-left: 2px solid var(--teal); }
+@media (max-width: 900px) { .teim-rd .cp-eco { grid-template-columns: 1fr; } }
+
+/* ── An entity's life ──────────────────────────────────────────────────── */
+/* The sequence is an example of what the identity layer tracks, and the
+ * label says so before anyone reads it as a particular enterprise. */
+.teim-rd .cp-tl__cap { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 1.6rem 0 0; }
+.teim-rd .cp-tl { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: relative; }
+.teim-rd .cp-tl::before { content: ''; position: absolute; top: 6px; left: 0; right: 0; height: 1px; background: var(--line); }
+.teim-rd .cp-tl__point { position: relative; padding: 1.5rem 1rem 0 0; }
+.teim-rd .cp-tl__point::before { content: ''; position: absolute; top: 0; left: 0; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--teal); background: var(--bg); }
+.teim-rd .cp-tl__year { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--dteal); }
+.teim-rd .cp-tl__event { display: block; font-size: 0.92rem; line-height: 1.4; color: var(--ink); font-weight: 600; margin-top: 0.3rem; }
+@media (max-width: 900px) { .teim-rd .cp-tl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem 0; } .teim-rd .cp-tl::before { display: none; } }
+
+/* ── Expertise ─────────────────────────────────────────────────────────── */
+/* ── Methods by collection ──────────────────────────────────────────────
+ * The drilldown a researcher asks for after the philosophy: one disclosure
+ * row per catalog collection, assembled from the product's own declarations
+ * so a row cannot claim what the collection does not. */
+.teim-rd .cp-mbc { margin-top: 1.4rem; border-top: 1px solid var(--ink); }
+.teim-rd .cp-mbc__row { border-bottom: 1px solid var(--line); }
+.teim-rd .cp-mbc__row summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 1.2rem; padding: 0.9rem 0.2rem; cursor: pointer; list-style: none; min-height: 44px; }
+.teim-rd .cp-mbc__row summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-mbc__row summary::after { content: '+'; font-family: var(--mono); font-size: 1rem; color: var(--dteal); margin-left: auto; }
+.teim-rd .cp-mbc__row[open] summary::after { content: '\2212'; }
+.teim-rd .cp-mbc__row[open] .cp-mbc__name, .teim-rd .cp-mbc__row summary:hover .cp-mbc__name { color: var(--dteal); }
+.teim-rd .cp-mbc__name { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); transition: color 0.15s ease; }
+.teim-rd .cp-mbc__meta { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-mbc__body { padding: 0 0.2rem 1.1rem; max-width: 74ch; }
+.teim-rd .cp-mbc__body p { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 0.7rem; }
+.teim-rd .cp-mbc__cap { display: block; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; }
+.teim-rd .cp-mbc__facts { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); line-height: 1.8; }
+.teim-rd .cp-mbc .cp-read__cedar { margin-top: 0.1rem; }
+
+/* ── What Cedar will not do ─────────────────────────────────────────────
+ * Four commitments, each on its own rule: restraint set like the promises
+ * it is, not folded into a paragraph. */
+.teim-rd .cp-wont { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem 3rem; }
+.teim-rd .cp-wont li { font-size: 1rem; line-height: 1.6; color: var(--ink); border-top: 2px solid var(--teal); padding-top: 0.7rem; }
+@media (max-width: 720px) { .teim-rd .cp-wont { grid-template-columns: 1fr; gap: 1rem; } }
+
+.teim-rd .cp-exp { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 3rem; align-items: start; }
+.teim-rd .cp-exp__body { font-size: 0.98rem; line-height: 1.62; color: var(--ink-2); margin: 1rem 0 0; }
+.teim-rd .cp-exp__strip { display: flex; flex-direction: column; gap: 1rem; border-left: 1px solid var(--line); padding-left: 1.6rem; }
+.teim-rd .cp-exp__cap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+.teim-rd .cp-exp__names { font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.06em; color: var(--ink); line-height: 1.7; }
+.teim-rd .cp-exp__note { font-size: 0.78rem; line-height: 1.5; color: var(--muted); margin: 0; }
+.teim-rd .cp-trust { list-style: none; margin: 2rem 0 0; padding: 1rem 0 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; }
+.teim-rd .cp-trust li { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 900px) { .teim-rd .cp-exp { grid-template-columns: 1fr; gap: 1.6rem; } .teim-rd .cp-exp__strip { border-left: 0; padding-left: 0; } }
+
+/* ── Tribal request and research access ────────────────────────────────── */
+.teim-rd .cp-trh { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 1rem 3.5rem; align-items: end; padding: 3.4rem 0 2.6rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-trh__title { font-family: var(--sans); font-size: clamp(2rem, 4.4vw, 3.2rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; color: var(--ink); margin: 0.4rem 0 0; }
+.teim-rd .cp-trh__sub { font-size: 1.02rem; line-height: 1.62; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-trh__cta { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 48px; margin-top: 1.2rem; padding: 0.7rem 1.3rem; border: 0; background: var(--dteal); color: #fff; font: inherit; font-size: 0.98rem; font-weight: 700; text-decoration: none; cursor: pointer; }
+.teim-rd .cp-trh__cta:hover { background: var(--ink); }
+.teim-rd .cp-trh__cta:disabled { opacity: 0.5; cursor: not-allowed; }
+@media (max-width: 900px) { .teim-rd .cp-trh { grid-template-columns: 1fr; align-items: start; } }
+
+.teim-rd .cp-tr2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 3rem; margin-top: 3rem; align-items: start; }
+.teim-rd .cp-tr2__list { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-tr2__list li { font-size: 1.02rem; line-height: 1.5; color: var(--ink); padding: 0.8rem 0 0.8rem 1.5rem; border-bottom: 1px solid var(--line-soft); position: relative; }
+.teim-rd .cp-tr2__list li::before { content: ''; position: absolute; left: 0; top: 1.35em; width: 8px; height: 1px; background: var(--teal); }
+@media (max-width: 900px) { .teim-rd .cp-tr2 { grid-template-columns: 1fr; gap: 2rem; } }
+
+/* The one panel that carries weight on this page. */
+.teim-rd .cp-verify { border-top: 1px solid var(--ink); padding: 1.2rem 0 0; }
+.teim-rd .cp-verify__title { font-family: var(--sans); font-size: 1.24rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: var(--ink); margin: 0; }
+.teim-rd .cp-verify__body { font-size: 0.96rem; line-height: 1.6; color: var(--ink-2); margin: 0.7rem 0 1.2rem; }
+.teim-rd .cp-verify__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 1.2rem 2rem; }
+.teim-rd .cp-verify__cap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.5rem; }
+.teim-rd .cp-verify__cols ul { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-verify__cols li { font-size: 0.92rem; line-height: 1.45; color: var(--ink-2); padding: 0.22rem 0; }
+.teim-rd .cp-verify__hard { font-size: 0.96rem; line-height: 1.55; font-weight: 700; color: var(--ink); margin: 1.3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--teal-line); }
+
+.teim-rd .cp-flow { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.6rem; }
+.teim-rd .cp-flow__step { position: relative; padding: 1.1rem 1rem; border-top: 2px solid var(--teal); background: var(--surface, transparent); transition: background 0.18s ease, border-color 0.18s ease; }
+.teim-rd .cp-flow__step:hover { background: var(--teal-tint); border-top-color: var(--dteal); }
+.teim-rd .cp-flow__head { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.4rem; }
+.teim-rd .cp-flow__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; color: var(--dteal); }
+.teim-rd .cp-flow__cap { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-flow__body { font-size: 0.94rem; line-height: 1.45; color: var(--ink); font-weight: 600; }
+@media (max-width: 900px) { .teim-rd .cp-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Phones consolidate: one stacked, numbered list, and the eyebrow stands
+ * down because the sentence is the step. Five compact rows instead of a
+ * 2-2-1 grid of tiles. */
+@media (max-width: 640px) {
+  .teim-rd .cp-flow { grid-template-columns: 1fr; gap: 0; border-top: 2px solid var(--teal); }
+  .teim-rd .cp-flow__step { display: grid; grid-template-columns: 2rem minmax(0, 1fr); column-gap: 0.7rem; align-items: baseline; padding: 0.7rem 0.15rem; border-top: 1px solid var(--line); background: none; }
+  .teim-rd .cp-flow__step:first-child { border-top: 0; }
+  .teim-rd .cp-flow__step:hover { background: none; }
+  .teim-rd .cp-flow__head { margin: 0; }
+  .teim-rd .cp-flow__cap { display: none; }
+}
+
+.teim-rd .cp-limits { margin-top: 3.4rem; padding-top: 1.6rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-limits__body { font-size: 1.02rem; line-height: 1.65; color: var(--ink-2); margin: 0 0 1rem; max-width: 76ch; }
+.teim-rd .cp-limits__body b { color: var(--ink); font-weight: 600; }
+.teim-rd .cp-limits__scope { font-size: 0.94rem; line-height: 1.6; color: var(--muted); margin: 0; max-width: 76ch; }
+
+/* ── Research access: fit ──────────────────────────────────────────────── */
+.teim-rd .cp-fit { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); }
+.teim-rd .cp-fit__side { padding: 1.1rem 0 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-fit__side--yes { border-top: 2px solid var(--dteal); }
+.teim-rd .cp-fit__side--no { border-left: 0; }
+.teim-rd .cp-fit__cap { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.teim-rd .cp-fit__side--yes .cp-fit__cap { color: var(--dteal); }
+.teim-rd .cp-fit__side--no .cp-fit__cap { color: var(--muted); }
+.teim-rd .cp-fit__side p { font-size: 1.04rem; line-height: 1.5; color: var(--ink); margin: 0; }
+@media (max-width: 760px) { .teim-rd .cp-fit { grid-template-columns: 1fr; } .teim-rd .cp-fit__side--no { border-left: 0; border-top: 1px solid var(--line); } }
+
+.teim-rd .cp-prop { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 0.6rem 2rem; }
+.teim-rd .cp-prop li { display: flex; gap: 0.8rem; align-items: baseline; padding: 0.6rem 0; border-bottom: 1px solid var(--line-soft); font-size: 0.98rem; color: var(--ink); }
+.teim-rd .cp-prop__n { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; color: var(--dteal); }
+.teim-rd .cp-prop__policy { font-weight: 400; color: var(--muted); font-size: 0.94rem; }
+
+/* The per-collection page is gone: a tile downloads directly and What's
+   New tracks every change. Its styles went with it. */
+
+.teim-rd .cp-link__hard { font-family: var(--sans); font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 1.2rem 0 0; max-width: 52ch; }
+.teim-rd .cp-link__tiers { list-style: none; margin: 1.4rem 0 1.2rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.teim-rd .cp-link__tiers li { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: #fff; background: var(--dteal); border: 0; border-top: 0; padding: 0.5rem 0.85rem; }
+.teim-rd .cp-art__tag b { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
+/* Recently updated: three rows, because "maintained" is a reason to come back
+ * rather than another grid of things to look at. */
+.teim-rd .cp-fresh__list { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-fresh__list li { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 0.3rem 2rem; padding: 0.85rem 0; border-bottom: 1px solid var(--line-soft); align-items: baseline; }
+.teim-rd .cp-fresh__list a { font-size: 1rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+.teim-rd .cp-fresh__list a:hover { color: var(--dteal); text-decoration: underline; }
+.teim-rd .cp-fresh__list span { font-size: 0.92rem; line-height: 1.5; color: var(--muted); }
+@media (max-width: 760px) { .teim-rd .cp-fresh__list li { grid-template-columns: 1fr; } }
+
+/* ══ Atmosphere ═══════════════════════════════════════════════════════════
+ * Depth without movement in the reading plane. Background layers lean on a
+ * scroll signal written to --p (-1 to 1 as a node crosses the viewport);
+ * cards, copy and controls never move. A page whose text drifts is a page
+ * nobody can read, and the point of this is to feel expensive, not clever. */
+.teim-rd .cp-atmo { position: absolute; inset: 0; pointer-events: none; z-index: 0; will-change: transform; }
+.teim-rd .cp-atmo--contour { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1; opacity: 0.1; transform: translate3d(0, calc(var(--p, 0) * 46px), 0); }
+.teim-rd .cp-atmo--halo { inset: auto -14% 12% auto; width: 34rem; height: 34rem; border: 1px solid currentColor; border-radius: 50%; opacity: 0.1; transform: translate3d(0, calc(var(--p, 0) * 70px), 0); }
+.teim-rd .cp-atmo--halo::after { content: ''; position: absolute; inset: 18%; border: 1px solid currentColor; border-radius: 50%; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-atmo { transform: none !important; } }
+
+/* ══ Surfaces ═════════════════════════════════════════════════════════════
+ * Six steps rather than two. The page used to alternate the same teal and the
+ * same white, which is what made it read as stacked slides; a sequence needs
+ * somewhere to go. Paper and mist are only a few degrees apart on purpose:
+ * the change should be felt before it is noticed. */
+.teim-rd .cp-surf { position: relative; isolation: isolate; margin-inline: calc(50% - 50vw); width: 100vw; padding-block: 3.6rem; overflow: clip; }
+/* :not(.cp-atmo) matters. This rule and .cp-atmo have equal specificity, and
+ * this one comes later, so without the exclusion it re-positions the
+ * background layers to relative and they take flow space: the contour svg and
+ * the ghost word were adding 940px of empty section above the content. */
+.teim-rd .cp-surf > *:not(.cp-atmo) { position: relative; z-index: 1; }
+.teim-rd .cp-surf__in { max-width: 1560px; margin: 0 auto; padding-inline: 2.4rem; }
+.teim-rd .cp-surf--paper { background: var(--bg); color: var(--ink); }
+/* Flat colour, hard edge. One surface ends and the next begins; no shade in
+ * between and none inside a surface either. */
+.teim-rd .cp-surf--pale { background: #F1F8F6; color: var(--ink); }
+.teim-rd .cp-surf--teal { background: var(--dteal); color: #fff; }
+/* Deep is where the page opens into a larger product: the same teal the
+ * gate signs you in on, so arriving and staying are the same colour. It is
+ * darker than the surfaces above it only by being solid — flat colour, hard
+ * edge, like every other band.
+ *
+ * --dteal, never --teal: white on --teal is 2.6:1. And note what changes
+ * with the fill — every faded white below (0.85, 0.6, 0.5) cleared 4.5:1
+ * against navy and does not against teal, so they are pinned back up rather
+ * than carried over. */
+.teim-rd .cp-surf--deep { background: var(--dteal); color: #fff; }
+/* A hairline that spans a boundary, so two surfaces read as one page. */
+.teim-rd .cp-seam { position: relative; height: 0; }
+.teim-rd .cp-seam::before { content: ''; position: absolute; left: 50%; top: -1px; width: min(1560px, calc(100vw - 4.8rem)); height: 1px; transform: translateX(-50%); background: currentColor; opacity: 0.16; }
+@media (max-width: 720px) {
+  .teim-rd .cp-surf { padding-block: 2.4rem; }
+  .teim-rd .cp-surf__in { padding-inline: 1.15rem; }
+  .teim-rd .cp-seam::before { width: calc(100vw - 2.3rem); }
+}
+
+
+/* ── Tiles, refined rather than replaced ──────────────────────────────────
+ * Same square, better made: the mark comes down so the name is not shouted
+ * over, the square gets a considered inner rhythm, and the states are a
+ * lift and a fill rather than a border swap. */
+.teim-rd .cp-badge { padding: 0.85rem; gap: 0.55rem; box-shadow: 0 1px 0 rgba(10, 15, 38, 0.03); }
+.teim-rd .cp-badge__mark { width: 46%; }
+.teim-rd .cp-badge__name { font-size: 0.84rem; letter-spacing: -0.008em; }
+.teim-rd .cp-badge__cue { opacity: 0; transform: translateX(-3px); transition: opacity 0.22s ease, transform 0.22s ease; }
+.teim-rd .cp-badge { transition: background 0.24s cubic-bezier(0.2, 0, 0, 1), border-color 0.24s ease, color 0.24s ease, transform 0.24s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.24s ease; }
+.teim-rd button.cp-badge:hover, .teim-rd .cp-badge.is-on { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(10, 15, 38, 0.12); }
+.teim-rd button.cp-badge:hover .cp-badge__cue, .teim-rd .cp-badge.is-on .cp-badge__cue { opacity: 1; transform: none; }
+.teim-rd .cp-band__grid { gap: 0.85rem; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-badge, .teim-rd .cp-badge__cue { transition: none; }
+  .teim-rd button.cp-badge:hover, .teim-rd .cp-badge.is-on { transform: none; }
+}
+@media (max-width: 720px) {
+  .teim-rd .cp-band { padding-block: 2.2rem; }
+  .teim-rd .cp-band__in { padding-inline: 1.15rem; }
+  /* Fluid columns with a real minimum. auto-fill against a zero minimum
+     packs in as many tracks as will fit, which at 390px meant twenty-seven
+     32px slivers instead of squares. */
+  .teim-rd .cp-band__grid { grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: 0.5rem; }
+  /* aspect-ratio yields to content, so at this width the mark and a
+     two-line name have to be sized to fit inside the square or the badge
+     silently grows taller than it is wide. These sit after the unqualified
+     badge refinements above on purpose: same specificity, so the later rule
+     wins, and the mobile sizing has to be the later rule. */
+  .teim-rd .cp-badge { width: 100%; height: auto; aspect-ratio: 1; padding: 0.4rem; gap: 0.25rem; }
+  .teim-rd .cp-badge__mark { width: 62%; }
+  .teim-rd .cp-badge__name { font-size: 0.72rem; line-height: 1.15; }
+}
+
+/* ── The ending ───────────────────────────────────────────────────────────
+ * One closing statement and three quiet actions, rather than two equal
+ * boxes. A page that has just argued for a maintained research product
+ * should end on the maintenance, not on a pair of rectangles. */
+.teim-rd .cp-close { position: relative; }
+/* The band's own padding is all of it: .cp-surf adds 3.6rem block padding
+ * for the paper surfaces, which on top of this left a hand's width of empty
+ * navy under the mission line and made the close read as a second page. */
+.teim-rd .cp-surf.cp-close { padding-block: 0; }
+.teim-rd .cp-close__in { max-width: 1560px; margin: 0 auto; padding: 2.6rem 2.4rem 2.4rem; }
+/* A wrapper now, not the headline: .cp-close__head carries the type. Leaving
+ * the display rules here set the paragraph inside it in 800 weight. */
+.teim-rd .cp-close__say { min-width: 0; }
+/* No opacity here. Faded white cleared 4.5:1 on navy; on teal it lands
+ * around 4.1:1, and the fix is the text, not the band. */
+.teim-rd .cp-close__body { font-size: 1.02rem; line-height: 1.62; margin: 0.8rem 0 0; max-width: 56ch; }
+.teim-rd .cp-close__acts { display: flex; flex-wrap: wrap; gap: 0 2.5rem; margin-top: 1.4rem; }
+.teim-rd .cp-close__act { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 48px; font-family: var(--sans); font-size: 1rem; font-weight: 700; color: inherit; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease, gap 0.2s ease; }
+.teim-rd .cp-close__act:hover { border-bottom-color: currentColor; gap: 0.8rem; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-close__act { transition: none; } .teim-rd .cp-close__act:hover { gap: 0.5rem; } }
+@media (max-width: 720px) { .teim-rd .cp-close__in { padding: 2rem 1.15rem; } .teim-rd .cp-close__acts { flex-direction: column; gap: 0; } }
+
+/* ── Justified prose ──────────────────────────────────────────────────────
+ * Straight edges on both sides, wherever a paragraph runs long enough to have
+ * lines to justify. Hyphenation comes with it and is not optional: justify
+ * without it opens rivers of white down the middle of a column, which is
+ * worse than the ragged edge it replaced.
+ *
+ * Deliberately not applied to headings, to mono chrome, to card deks or to
+ * list items. A two-line block has one justified line, and one line stretched
+ * to the full measure beside one that is not looks like a mistake rather than
+ * like typesetting. */
+.teim-rd .cp-ar__body p,
+.teim-rd .cp-hero p,
+.teim-rd .cp-link__body,
+.teim-rd .cp-msec__lede,
+.teim-rd .cp-mh__sub,
+.teim-rd .cp-nh__sub,
+.teim-rd .cp-gt__body,
+.teim-rd .cp-close__body,
+.teim-rd .cp-ar__dek {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+/* The pull quote and the figure lines keep their ragged edge: both are short,
+ * and both are set to be read as an aside rather than as body. */
+.teim-rd .cp-ar__body .cp-ar__pull,
+.teim-rd .cp-ar__body .cp-ar__figsrc { text-align: left; hyphens: manual; }
+/* Justification needs a wide measure; on a phone it tears the lines into
+ * rivers, so narrow screens read ragged-right like every phone page. The
+ * hyphens stay: they help a ragged edge too. */
+@media (max-width: 640px) {
+  .teim-rd .cp-ar__body p,
+  .teim-rd .cp-hero p,
+  .teim-rd .cp-link__body,
+  .teim-rd .cp-msec__lede,
+  .teim-rd .cp-mh__sub,
+  .teim-rd .cp-nh__sub,
+  .teim-rd .cp-gt__body,
+  .teim-rd .cp-close__body,
+  .teim-rd .cp-ar__dek { text-align: left; }
+}
+
+/* ── A hosted article ─────────────────────────────────────────────────────
+ * Text at a reading measure with a rail beside it. The rail is the reason to
+ * host a piece here rather than on Tribal Business News: sponsorship sits
+ * next to the text without ever interrupting it, and it sticks so a reader
+ * who scrolls does not scroll away from it. */
+.teim-rd .cp-ar { display: block; }
+.teim-rd .cp-ar__head { padding: 1.6rem 0 1.3rem; }
+.teim-rd .cp-ar__title { font-family: var(--sans); font-size: clamp(2.1rem, 4.8vw, 3.7rem); font-weight: 800; letter-spacing: -0.028em; line-height: 1.06; color: var(--ink); margin: 0.3rem 0 0; }
+.teim-rd .cp-ar__dek { font-size: 1.2rem; line-height: 1.5; color: var(--ink-2); margin: 0.9rem 0 0; }
+.teim-rd .cp-ar__meta { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin: 1.2rem 0 0; }
+/* Same demonstration register on the What's New feed. */
+.teim-rd .cp-nh__demo { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0.9rem 0 0; max-width: 62ch; line-height: 1.6; }
+/* The demonstration notice: muted mono, sitting with the meta line rather
+ * than as a box. Not amber: amber is the data encoding, and a product-status
+ * notice must not borrow the color readers learn to read as data. */
+.teim-rd .cp-ar__demo { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0.9rem 0 0; max-width: 62ch; line-height: 1.6; }
+.teim-rd .cp-ar__art { display: block; width: 100%; height: auto; }
+.teim-rd .cp-ar__figure { margin: 0 0 2.4rem; }
+.teim-rd .cp-ar__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 19rem); gap: 2rem 1.75rem; align-items: start; }
+.teim-rd .cp-ar__body { max-width: 78ch; }
+.teim-rd .cp-ar__body p { font-size: 1.06rem; line-height: 1.68; color: var(--ink-2); margin: 0 0 1.2rem; }
+.teim-rd .cp-ar__h2 { font-family: var(--sans); font-size: clamp(1.3rem, 2.2vw, 1.6rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: var(--ink); margin: 2.2rem 0 0.9rem; }
+.teim-rd .cp-ar__pull { font-family: var(--sans); font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 700; letter-spacing: -0.015em; line-height: 1.35; color: var(--ink); margin: 1.8rem 0; padding-left: 1.2rem; border-left: 3px solid var(--teal); }
+.teim-rd .cp-ar__body .cp-ar__pull { color: var(--ink); }
+
+/* A figure is a chart, its assumptions and the line that says where it came
+ * from. The provenance is not decoration: a chart with a named collection, a
+ * release number and a route to rebuild it is the strongest case Cedar Grove
+ * has, and a chart with none of those is the fake dashboard this product
+ * avoids. */
+.teim-rd .cp-ar__fig { margin: 2rem 0; padding: 0; border: 0; border-top: 1px solid var(--ink); padding-top: 0.9rem; }
+.teim-rd .cp-ar__figcap { font-family: var(--sans); font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.4; color: var(--ink); }
+/* Full column width. The caption above it and the notes below it both run the
+ * measure, so a chart capped narrower reads as one that failed to load. */
+.teim-rd .cp-ar__chart { margin: 1rem 0 0.6rem; }
+.teim-rd .cp-ar__chart .pf { width: 100%; height: auto; display: block; overflow: visible; }
+/* One accent and greys behind it. Axis lines are structure, never decoration,
+ * so they sit at the weight of a rule and no heavier. */
+.teim-rd .pf__axis { stroke: var(--line); stroke-width: 1; }
+.teim-rd .pf__tick, .teim-rd .pf__ylab { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.06em; fill: var(--muted); }
+.teim-rd .pf__tile { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.04em; }
+.teim-rd .pf__node { font-family: var(--sans); font-size: 10px; font-weight: 700; fill: var(--ink-2); }
+/* ── Figure hover: the tooltip carries the answer ────────────────────────
+ * The mark answers in ink and a tooltip follows the cursor pairing the
+ * number with what it belongs to; a bare number floating over a bar
+ * answered nothing. Without a pointer (print, a screenshot) the figure is
+ * exactly the still it always was. */
+.teim-rd .pf-wrap { position: relative; }
+.teim-rd .pf__tip { position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 12px)); background: var(--ink); color: #fff; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; line-height: 1; padding: 0.42rem 0.55rem; white-space: nowrap; pointer-events: none; }
+.teim-rd .pf__tip::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--ink); }
+.teim-rd .pf .pf__hit:hover .pf__bar { fill: var(--ink); }
+.teim-rd .pf .pf__hit:hover .pf__dot { fill: var(--ink); r: 3.4px; }
+.teim-rd .pf .pf__seg { transition: opacity 0.15s ease; }
+.teim-rd .pf .pf__seg:hover rect { stroke: var(--ink); stroke-width: 1.4; }
+.teim-rd .pf .pf__tilehit:hover rect { stroke: var(--ink); stroke-width: 1.6; }
+/* Hovering one ribbon recedes the rest, so a crossing flow can be followed. */
+.teim-rd .pf--sankey .pf__ribbon path { fill-opacity: 0.28; transition: fill-opacity 0.15s ease; }
+.teim-rd .pf--sankey:hover .pf__ribbon path { fill-opacity: 0.12; }
+.teim-rd .pf--sankey .pf__ribbon:hover path { fill-opacity: 0.55; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .pf .pf__val, .teim-rd .pf .pf__seg, .teim-rd .pf--sankey .pf__ribbon path { transition: none; }
+}
+
+/* The assumptions, under the picture, where somebody about to cite it looks. */
+.teim-rd .cp-ar__body .cp-ar__fignotes { list-style: none; margin: 0.2rem 0 0.6rem; padding: 0; }
+.teim-rd .cp-ar__body .cp-ar__fignotes li { font-size: 0.84rem; line-height: 1.5; color: var(--muted); text-align: left; hyphens: manual; padding-left: 1rem; position: relative; margin-bottom: 0.25rem; }
+.teim-rd .cp-ar__body .cp-ar__fignotes li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 6px; height: 1px; background: var(--muted); }
+.teim-rd .cp-ar__body .cp-ar__figsrc { font-size: 0.88rem; line-height: 1.55; color: var(--muted); margin: 0.45rem 0 0; }
+.teim-rd .cp-ar__figsrc a { color: var(--dteal); text-decoration: none; white-space: nowrap; }
+.teim-rd .cp-ar__figsrc a:hover { text-decoration: underline; }
+.teim-rd .cp-ar__figsrc b { font-weight: 700; color: var(--ink-2); }
+
+/* The photograph's own attribution, under the picture. */
+.teim-rd .cp-ar__cap { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 1.5rem; font-size: 0.9rem; line-height: 1.5; color: var(--ink-2); margin: 0.6rem 0 0; }
+.teim-rd .cp-ar__credit { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-left: auto; }
+
+/* Back to the reader, above the piece and below it. */
+.teim-rd .cp-ar__back { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 40px; margin: 1.2rem 0 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-ar__back:hover { color: var(--dteal); border-color: var(--teal); }
+.teim-rd .cp-ar__end { margin-top: 2.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+
+/* Pictures inside the body, at the width of the text. A piece runs two or
+ * three: the lead has the page, these have the column. */
+.teim-rd .cp-ar__inline { margin: 1.9rem 0; }
+.teim-rd .cp-ar__inline img { display: block; width: 100%; height: auto; }
+/* minmax(0, …): a replaced element's intrinsic width sits under a bare 1fr
+ * track, so a wide photograph can push the article column out sideways
+ * between the 620px collapse and the 900px rail collapse. */
+.teim-rd .cp-ar__pair2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.1rem; margin: 1.9rem 0; }
+.teim-rd .cp-ar__pair2 .cp-ar__inline { margin: 0; }
+.teim-rd .cp-ar__pair2 img { aspect-ratio: 3 / 2; object-fit: cover; }
+/* Side by side, a caption has half the measure, so it stacks under its own
+ * picture rather than trying to share a line with a credit. */
+.teim-rd .cp-ar__pair2 .cp-ar__cap { display: block; font-size: 0.86rem; }
+@media (max-width: 620px) { .teim-rd .cp-ar__pair2 { grid-template-columns: 1fr; } }
+
+.teim-rd .cp-ar__rail { position: sticky; top: 1.4rem; display: flex; flex-direction: column; gap: 1.4rem; }
+.teim-rd .cp-ar__railbox { border-top: 1px solid var(--ink); padding-top: 0.9rem; }
+.teim-rd .cp-ar__railcap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-ar__raillist { list-style: none; margin: 0.6rem 0 0.8rem; padding: 0; }
+.teim-rd .cp-ar__raillist li { font-size: 0.94rem; line-height: 1.45; font-weight: 700; color: var(--ink); padding: 0.28rem 0; border-bottom: 1px solid var(--line-soft); }
+.teim-rd .cp-ar__rail .cp-m__more { margin-top: 0.2rem; }
+@media (max-width: 900px) {
+  .teim-rd .cp-ar__grid { grid-template-columns: minmax(0, 1fr); }
+  .teim-rd .cp-ar__rail { position: static; }
+}
+
+/* The end of the piece: what it was made from, resolved against this reader.
+ * Open collections offer the file; closed ones say what opens them. */
+.teim-rd .cp-ar__data { margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid var(--ink); }
+.teim-rd .cp-ar__draws { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1.4rem 2.4rem; }
+.teim-rd .cp-ar__draw { padding: 1.1rem 1.2rem; border: 1px solid var(--line); display: flex; flex-direction: column; }
+.teim-rd .cp-ar__draw.is-locked { border-style: dashed; }
+.teim-rd .cp-ar__drawcap { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-ar__drawname { font-family: var(--sans); font-size: 1.1rem; font-weight: 800; letter-spacing: -0.015em; margin: 0.35rem 0 0; }
+.teim-rd .cp-ar__drawname a { color: var(--ink); text-decoration: none; }
+.teim-rd .cp-ar__drawname a:hover { color: var(--dteal); text-decoration: underline; }
+.teim-rd .cp-ar__drawblurb { font-size: 0.94rem; line-height: 1.5; color: var(--ink-2); margin: 0.5rem 0 0.9rem; }
+/* A button now (it downloads), so the UA chrome resets here. */
+.teim-rd .cp-ar__take { border: 0; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 0.4rem; align-self: flex-start; min-height: 44px; margin-top: auto; padding: 0.55rem 1.1rem; background: var(--dteal); color: #fff; font-size: 0.92rem; font-weight: 700; text-decoration: none; }
+.teim-rd .cp-ar__take:hover { background: var(--ink); }
+.teim-rd .cp-ar__locked { font-size: 0.92rem; line-height: 1.5; color: var(--muted); margin: auto 0 0; }
+.teim-rd .cp-ar__locked .cp-m__more { display: inline-block; margin-top: 0.4rem; }
+
+/* ── Sponsorship ──────────────────────────────────────────────────────────
+ * A slot with nothing booked renders no element, so none of this applies to
+ * the live page today. The empty variant is the `?ads=demo` preview: a dashed
+ * outline for laying out and selling against, never a live state.
+ *
+ * The label is the page's own mono chrome and sits above the unit. It is part
+ * of the slot rather than part of the creative, so a buyer cannot supply an
+ * ad that fails to say it is one. */
+.teim-rd .cp-ad { display: block; margin: 1.6rem 0 0; }
+.teim-rd .cp-ad__cap { display: block; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+.teim-rd .cp-ad__unit { display: block; }
+.teim-rd .cp-ad__unit img { display: block; width: 100%; height: auto; }
+.teim-rd .cp-ad--strip { margin-top: 2rem; }
+/* The preview. Dashed, grey, and labelled with what it is and what fits. */
+.teim-rd .cp-ad--empty .cp-ad__slot { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem; min-height: 4.5rem; border: 1px dashed var(--muted); font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: center; padding: 0.9rem; }
+.teim-rd .cp-ad--empty .cp-ad__slot b { font-weight: 700; letter-spacing: 0.14em; color: var(--ink-2); }
+.teim-rd .cp-ad--empty .cp-ad__slot { max-width: 46rem; }
+
+/* The unsold slot, inviting a buyer. --teal-tint is the palette's lightest
+ * green and is already what the page uses for a surface that is present but
+ * not shouting; the hairline is the same teal at the weight the tiles use.
+ * Deliberately not white: the point of the panel is that the space reads as
+ * space, and against a white page a white panel is nothing at all.
+ *
+ * A strip lays out across the row and a box stacks, because the two shapes
+ * are a 728x90 band under a section and a 300x250 in an article rail, and
+ * one arrangement cannot serve both. */
+.teim-rd .cp-ad--house .cp-ad__house { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 2rem; padding: 1.15rem 1.4rem; border: 1px solid var(--teal-line); border-radius: 12px; background: var(--teal-tint); }
+.teim-rd .cp-ad__housetitle { flex: 0 0 auto; margin: 0; font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); }
+.teim-rd .cp-ad__housebody { flex: 1 1 22rem; min-width: 0; margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-ad__houseact { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; font-family: var(--sans); font-size: 0.94rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.18s ease, gap 0.18s ease; }
+.teim-rd .cp-ad__houseact:hover { border-bottom-color: var(--dteal); gap: 0.75rem; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-ad__houseact { transition: none; }
+  .teim-rd .cp-ad__houseact:hover { gap: 0.45rem; }
+}
+/* In a rail, and on a phone, the panel is a column: 300px wide has no room to
+ * put a title, a paragraph and a link beside each other.
+ *
+ * The flex bases have to be reset with the direction. `flex: 1 1 22rem` on
+ * the body is a width while the panel is a row and a *height* the moment it
+ * is a column, which gave the rail panel 22rem of empty green under two
+ * lines of text. Anything with a basis needs to lose it here. */
+.teim-rd .cp-ad--box.cp-ad--house .cp-ad__house { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 0.55rem; }
+.teim-rd .cp-ad--box.cp-ad--house .cp-ad__housebody { flex: 0 0 auto; }
+@media (max-width: 720px) {
+  .teim-rd .cp-ad--house .cp-ad__house { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 0.55rem; padding: 1.05rem 1.15rem; }
+  .teim-rd .cp-ad--house .cp-ad__housebody { flex: 0 0 auto; }
+}
+
+/* ── What's new: one feed, not a changelog per dataset ───────────────────── */
+.teim-rd .cp-new { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1.6rem; }
+.teim-rd .cp-new__item { font-size: 0.92rem; color: var(--ink-2); }
+.teim-rd .cp-new__item b { font-weight: 700; color: var(--ink); }
+.teim-rd .cp-new__date { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-left: 0.4rem; }
+/* The page opening runs across the full measure rather than down a 62ch
+ * column like the other secondary pages. This is the widest, plainest page
+ * in the set and a half-width title on it just looks like a column that ran
+ * out. Title on the left, the standing explanation on the right. */
+.teim-rd .cp-nh { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 18rem); align-items: end; gap: 1.2rem 4rem; padding: 2.2rem 0 1.4rem; }
+.teim-rd .cp-nh .cp-hero__access,
+.teim-rd .cp-nh__title { grid-column: 1 / -1; }
+/* No max-width: the headline is the one element on this page that should run
+ * the whole measure, and vw sizing keeps it to two lines at any width. Capped
+ * lower than the other openings so the first release still shows above the
+ * fold on a laptop — this page's job is the feed, not the greeting. */
+.teim-rd .cp-nh__title { font-family: var(--sans); font-size: clamp(2rem, 4.6vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; color: var(--ink); margin: 0.3rem 0 0; }
+.teim-rd .cp-nh__sub { font-size: 1rem; line-height: 1.62; color: var(--ink-2); margin: 0; max-width: 74ch; }
+/* The provenance principle, small and under the explanation: this page is
+ * where "a figure you cited still reproduces" is actually kept. */
+.teim-rd .cp-nh__why { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.7; color: var(--muted); margin: 0.7rem 0 0; max-width: 74ch; }
+/* The trailing month, on the right of the same line: a compact reading of
+ * the log itself, so the maintenance effort is a set of checkable numbers
+ * rather than a repeat of the feed's first row. */
+.teim-rd .cp-nh__pulse { display: flex; flex-direction: column; gap: 0.24rem; margin: 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-left: 2px solid var(--teal); padding-left: 0.9rem; }
+.teim-rd .cp-nh__pulse dt { font-size: 0.6rem; letter-spacing: 0.14em; }
+.teim-rd .cp-nh__pulse dd { margin: 0; }
+.teim-rd .cp-nh__pulselead { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
+@media (max-width: 860px) { .teim-rd .cp-nh { grid-template-columns: 1fr; align-items: start; gap: 1.1rem; } }
+
+/* The filter. Two independent sets on one rule: which collection, and whether
+ * the release changed the data or the method. The count is live because a
+ * chip that narrows to nothing should say so before the reader scrolls. */
+.teim-rd .cp-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 2rem; padding: 1rem 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+.teim-rd .cp-filter__set { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.teim-rd .cp-filter__cap { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-right: 0.3rem; }
+.teim-rd .cp-filter__count { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); margin: 0 0 0 auto; }
+.teim-rd .cp-chip { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); background: transparent; border: 1px solid var(--line); border-radius: 0; padding: 0.42rem 0.7rem; min-height: 32px; cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease; }
+.teim-rd .cp-chip:hover { border-color: var(--teal); color: var(--dteal); }
+.teim-rd .cp-chip.is-on { background: var(--dteal); border-color: var(--dteal); color: #fff; }
+.teim-rd .cp-chip:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+/* Sticky once the hero scrolls past: the feed will eventually hold hundreds
+ * of releases, and the way through them stays in reach. Opaque, because the
+ * feed scrolls underneath it. */
+.teim-rd .cp-filter--stick { position: sticky; top: 0; z-index: 6; background: var(--bg); }
+/* The search: one quiet field in the filter rule, matching the chips'
+ * height and voice rather than opening a search experience. */
+.teim-rd .cp-filter__search { font-family: var(--sans); font-size: 0.88rem; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 0; padding: 0.42rem 0.7rem; min-height: 32px; width: 13rem; }
+.teim-rd .cp-filter__search:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.teim-rd .cp-filter__search::placeholder { color: var(--muted); }
+@media (max-width: 720px) {
+  .teim-rd .cp-filter__count { margin-left: 0; }
+  .teim-rd .cp-filter__search { width: 100%; }
+  /* On a phone the collection chips run as one scrollable row instead of
+   * wrapping into a block taller than the feed's first release. */
+  .teim-rd .cp-filter__set--scroll { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 0.3rem; -webkit-overflow-scrolling: touch; }
+  .teim-rd .cp-filter__set--scroll > * { flex: none; }
+}
+
+/* One feed. Dates run down the left as a spine so a reader can scan by time,
+ * which is the only axis this page has. */
+.teim-rd .cp-feed { list-style: none; margin: 3rem 0 0; padding: 0; }
+/* Under the filter the feed is the answer to it, so it sits close rather than
+ * across the standing section gap. */
+.teim-rd .cp-filter + .cp-feed { margin-top: 1.4rem; }
+.teim-rd .cp-feed__item { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: 0.4rem 2.5rem; padding: 1.4rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.6rem; transition: border-color 0.18s ease; }
+.teim-rd .cp-feed__item:hover { border-top-color: var(--teal); }
+/* A permalink arrival lands mid-page; the tint says which release the link
+ * meant. scroll-margin keeps it clear of the sticky filter. */
+.teim-rd .cp-feed__item:target { background: var(--teal-tint); }
+.teim-rd .cp-feed__when { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding-top: 0.25rem; }
+.teim-rd .cp-feed__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 0.5rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; }
+.teim-rd .cp-feed__name a { color: var(--ink); text-decoration: none; }
+.teim-rd .cp-feed__name a:hover { color: var(--dteal); text-decoration: underline; }
+/* The version doubles as the release's permalink, so it stays quiet until
+ * pointed at. The later .cp-feed__name a rules would paint it ink; this is
+ * more specific and keeps the metadata voice. */
+.teim-rd .cp-feed__name a.cp-feed__ver { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); text-decoration: none; }
+.teim-rd .cp-feed__name a.cp-feed__ver:hover { color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
+/* The kind, on every entry: the filter knows the difference between a data
+ * update and a methodology release, and the entries themselves must too. */
+.teim-rd .cp-feed__kind { display: inline-block; font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+.teim-rd .cp-feed__kind--method { color: var(--dteal); background: var(--teal-tint); padding: 0.18rem 0.45rem; }
+.teim-rd .cp-feed__note { font-size: 0.94rem; line-height: 1.55; color: var(--ink); border-top: 1px solid var(--line); padding: 0.6rem 0 0; margin: 0 0 0.7rem; max-width: 70ch; }
+.teim-rd .cp-feed__list { list-style: none; margin: 0; padding: 0; max-width: 70ch; }
+.teim-rd .cp-feed__list li { font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); padding: 0.22rem 0 0.22rem 1.1rem; position: relative; }
+.teim-rd .cp-feed__list li::before { content: ''; position: absolute; left: 0; top: 0.92em; width: 7px; height: 1px; background: var(--teal); }
+/* The release's own actions: the collection it describes, and Cedar with the
+ * question already phrased. Same underlined voice as the shelf's Ask Cedar. */
+.teim-rd .cp-feed__acts { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.7rem 0 0; }
+.teim-rd .cp-feed__act { display: inline-block; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-feed__act:hover { color: var(--ink); }
+@media (max-width: 720px) { .teim-rd .cp-feed__item { grid-template-columns: 1fr; gap: 0.3rem; } }
+/* A page at a time. The feed only grows on request, so the page has a bottom
+ * a reader can actually reach. The count sits beside the control so pressing
+ * it is a decision rather than a guess. */
+.teim-rd .cp-feed__more { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 1.2rem; margin: 0; padding: 1.6rem 0 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-feed__left { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-feed__none { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 3rem 0 0; padding: 1.6rem 0; border-top: 1px solid var(--line); }
+/* The deep surface inverts too. Anything left on a default ink value is
+ * invisible on a solid fill, and the default is what a new element gets:
+ * the recently-updated names were painting ink on ink. Full white on the
+ * name and a date that still clears AA, because teal leaves less headroom
+ * for a faded white than navy did. */
+.teim-rd .cp-surf--deep .cp-new__item { color: #fff; }
+.teim-rd .cp-surf--deep .cp-new__item b { color: #fff; }
+.teim-rd .cp-surf--deep .cp-new__date { color: rgba(255, 255, 255, 0.84); }
+.teim-rd .cp-new { margin: 2rem 0 0; padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.18); list-style: none; }
+
+/* ══ Using the width ══════════════════════════════════════════════════════
+ * A single measure of text on a 1240px page paints about half of it and
+ * leaves the rest white. The fix is not a wider measure, which is unreadable
+ * past about 75 characters, but a second column: the section's own title on
+ * the left, its argument on the right. */
+.teim-rd .cp-two { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 1.4rem 4rem; align-items: start; }
+.teim-rd .cp-two__title { font-family: var(--sans); font-size: clamp(1.35rem, 2.4vw, 1.9rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.14; color: var(--ink); margin: 0.35rem 0 0; max-width: 18ch; }
+.teim-rd .cp-two .cp-msec__lede { max-width: none; }
+@media (max-width: 900px) { .teim-rd .cp-two { grid-template-columns: 1fr; gap: 1rem; } }
+
+/* The release notes and the release history read together rather than one
+ * under the other, which put a 70ch list above a full-width table. */
+
+.teim-rd .cp-limits.cp-two .cp-limits__body,
+.teim-rd .cp-limits.cp-two .cp-limits__scope { max-width: none; }
+
+/* The close: statement left, what is moving and where to go on the right. */
+.teim-rd .cp-close__in { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 0 4.5rem; align-items: start; }
+.teim-rd .cp-close__head { font-family: var(--sans); font-size: clamp(1.7rem, 3.4vw, 2.7rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; margin: 0; }
+.teim-rd .cp-close__body { max-width: none; }
+.teim-rd .cp-close .cp-new { grid-column: 2; margin: 0; border-top: 0; padding-top: 0; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+.teim-rd .cp-close .cp-new__item { display: block; }
+/* Under the statement, in its column. Spanning both and taking a rule of its
+ * own made two links read as a third section of the close and cost a band of
+ * height to say so. */
+.teim-rd .cp-close__acts { grid-column: 1; margin-top: 1.6rem; padding-top: 0; border-top: 0; }
+/* One column: the release list stops being the right-hand column and becomes
+ * the next thing down, so it needs back the separation the two-column layout
+ * was giving it for free. Without this the first release name butts straight
+ * onto the last line of the paragraph and reads as part of the sentence. */
+@media (max-width: 900px) {
+  .teim-rd .cp-close__in { grid-template-columns: 1fr; }
+  .teim-rd .cp-close .cp-new { grid-column: 1; margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.28); }
+}
+
+/* Hover on the trust pages' lists and cases: the row answers with ink and
+ * its rule turns teal, the same quiet language as the reader's tables. */
+.teim-rd .cp-tr2__list li, .teim-rd .cp-prop li { transition: color 0.18s ease, border-color 0.18s ease; }
+.teim-rd .cp-tr2__list li:hover, .teim-rd .cp-prop li:hover { border-color: var(--dteal); }
+.teim-rd .cp-fit__side { transition: border-color 0.18s ease; }
+.teim-rd .cp-fit__side:hover { border-top-color: var(--dteal); }
+.teim-rd .cp-trh__cta { transition: background 0.18s ease, transform 0.18s ease; }
+.teim-rd .cp-trh__cta:hover { transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-trh__cta:hover { transform: none; }
+}
+
+/* ── The overview, screen by screen ──────────────────────────────────────
+ * On a wide screen the overview is three things — what this is, where to go,
+ * and what keeps it current — and running them together made each read as a
+ * fragment of the one above it. Each takes the screen instead, and the
+ * scroll settles on section edges.
+ *
+ * Proximity, not mandatory: mandatory fights a reader scrolling deliberately
+ * past something, and traps anyone whose window is shorter than a section.
+ * Gated on a pointer, a wide screen and real height, so a split window and
+ * every phone keep the ordinary page.
+ *
+ * min-height rather than height, for the same reason: a section that outgrows
+ * the window keeps growing instead of clipping its own last line.
+ *
+ * align-content, and not a flex column, is the whole trick. Giving each
+ * section `display: flex` to centre it threw away the layout it already had:
+ * the hero is a two-column grid, and flexing it stacked the intro under the
+ * headline and left half the screen empty. align-content centres the rows a
+ * section already has without telling it what kind of box to be. Where a
+ * browser does not carry it on block containers the section simply sits at
+ * its top, which is the layout as it was. */
+@media (min-width: 1024px) and (min-height: 700px) and (pointer: fine) {
+  .teim-rd .cp--screens { scroll-snap-type: y proximity; }
+  .teim-rd .cp--screens > .cp-screen {
+    /* Short of the full window on purpose: the masthead takes the top of the
+       first screen, and the few centimetres left over at the bottom of each
+       one show the edge of the next, which is what tells a reader there is
+       one. A section that fills the window exactly reads as the end. */
+    min-height: calc(100dvh - 9rem);
+    align-content: center;
+    scroll-snap-align: center;
+  }
+  /* Screen one: the statement, then the board it introduces. The statement
+     gets the size it was written for, and the tiles grow into whatever height
+     is left rather than to a figure picked in advance — a screen shared with
+     a headline has less to give than one that was empty. */
+  .teim-rd .cp-open .cp-hero { padding-block: 0 2.4rem; }
+  .teim-rd .cp-open .cp-hero h1 { font-size: clamp(2.4rem, 3.8vw, 3.4rem); }
+  .teim-rd .cp-open .cp-hero p { font-size: 1.08rem; }
+  .teim-rd .cp-open .cp-hub__tile { min-height: clamp(10.5rem, 22vh, 15rem); gap: 1.1rem; }
+  .teim-rd .cp-open .cp-hub__mark svg { width: 84px; height: 84px; }
+  .teim-rd .cp-open .cp-hub__name { font-size: 1.3rem; }
+
+  /* Screen two: the close and the footer are one ending, so the teal takes
+     whatever height is left and the footer sits on the bottom edge under it.
+     Centring this one would float the band with white above and below it,
+     and a full-bleed colour with a margin above it reads as a mistake. */
+  .teim-rd .cp--screens > .cp-end {
+    align-content: normal;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+  /* The close sits at the top of its band, not in the middle of it. Centred,
+     the statement floated with teal above and below and read as though it had
+     been dropped there; against the top edge it reads as the start of the
+     ending, and the teal below it is the page running out. */
+  .teim-rd .cp--screens > .cp-end > .cp-close { align-content: start; }
+  .teim-rd .cp--screens > .cp-end > .cp-close .cp-close__in { padding-top: 4.2rem; }
+}
+/* A reader who asked for less motion gets the ordinary page: snapping moves
+ * the viewport out from under them, which is the thing that setting is for. */
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp--screens { scroll-snap-type: none; }
+}
+
+/* ── Start here ──────────────────────────────────────────────────────────
+ * The overview's verbs, between the hero and the section index: what a
+ * signed-in reader can do right now, before the doors describe what
+ * exists. Quiet pills, not a second hero. */
+.teim-rd .cp-start { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: center; margin: 1.2rem auto 0; max-width: 46rem; }
+.teim-rd .cp-start__act { display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); padding: 0.55rem 1rem; font-family: var(--sans); font-size: 0.88rem; font-weight: 600; color: var(--dteal); text-decoration: none; cursor: pointer; transition: border-color 0.16s ease, background 0.16s ease, transform 0.12s ease; }
+.teim-rd .cp-start__act:hover { border-color: var(--dteal); background: var(--teal-tint); transform: translateY(-1px); }

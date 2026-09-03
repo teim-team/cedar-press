@@ -583,7 +583,7 @@ the app's `SOURCE_ORIGIN` / `SOURCE_AVAILABILITY`. I cloned
 and `src/features/grove/collection.js` reference the vocabulary in a docstring
 (*"origin and level use the evidence registry's vocabulary (SOURCE_ORIGIN,
 SOURCE_AVAILABILITY in evidence.js)"*) and neither defines it. This is
-consistent with `docs/ARCHITECTURE.md`, which says the client **carries the
+consistent with `docs/DATA_ARCHITECTURE.md`, which says the client **carries the
 Lumecon platform's own modules rather than describing them twice** — so the
 authoritative enum lives in the Lumecon platform repository, which this machine
 does not have.

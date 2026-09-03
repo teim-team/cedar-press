@@ -1,0 +1,11 @@
+tribe_id,confidence_tier,n_as_prime_a,usd_as_prime_a,n_as_subawardee_b,usd_as_subawardee_b,n_both_sides,usd_both_sides,basis,cedar_uid
+ANRC-ARCSLO-00,B,3352,1740005674.45,663,1684411206.21,49,36019667.78,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-00078-KR
+TRBF-PRAIRB-00,B,28,3078487.42,82,406366896.53,0,0.0,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-0018M-4X
+AKNF-PRBLFC-00,B,635,228725907.54,717,198739263.01,19,20321621.58,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-00053-BV
+ANRC-AHTNAI-00,B,7,1169695.95,75,131203873.06,0,0.0,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-00076-76
+TRBF-CHKNAT-00,A,681,612469772.65,416,95304894.22,416,544639166.45,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-00134-BX
+AKNF-TYONEK-00-CKINLT,B,36,16748373.91,158,74002141.51,3,583595.77,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-0006K-GV
+TRBF-SPRTLK-00,B,0,0.0,300,65078625.59,0,0.0,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-001AN-MP
+TRBF-UMATLL-00,A,0,0.0,163,53713723.23,0,0.0,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-001BT-Q3
+TRBF-NAVAJO-00,B,4,17680136.98,182,38077465.79,2,663830.0,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-0017F-1G
+ANRC-BERSTR-00,B,292,166957344.84,82,32253151.13,17,20122661.73,duplicate_status==primary AND subaward_exceeds_prime_flag!=yes,CE-00079-SH

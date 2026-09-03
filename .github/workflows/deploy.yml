@@ -1,0 +1,91 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+      # Smoke tests run a browser over the built site. Chromium only: these
+      # are the critical paths, not a compatibility matrix, and the phone
+      # project runs the mobile profile on the same engine.
+      #
+      # This step BUILDS as well as tests: playwright.config.js starts the
+      # server with `npm run build`, configured with a throwaway demo account
+      # of its own. That is why the deployed build is the last step in this
+      # job and not this one — a build placed before the smoke run would be
+      # overwritten by it, and the site would ship the test fixture as its
+      # sign-in.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:smoke
+      # The API ships with the client, so its checks gate the same pipeline.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e server[dev] httpx
+      - run: ruff check server
+      - working-directory: server
+        run: python -m unittest discover -s tests -t .
+      # The build that is actually deployed, and the only place this
+      # repository's two settings are read.
+      #
+      #   vars.VITE_API_URL      Repository variable. Unset (the default) is
+      #                          STANDALONE: the client serves the bundled
+      #                          catalog and the demo gate below is the
+      #                          sign-in. Set it to the Cedar platform API and
+      #                          the deployment is CONNECTED — real sessions,
+      #                          signed HTTP-only cookies, activation — and
+      #                          the demo gate turns itself off, because every
+      #                          module discriminates on `isConnected()`.
+      #                          A settings change, deliberately, not a code
+      #                          change.
+      #
+      #   secrets.VITE_PRESS_DEMO_ACCOUNTS
+      #                          The standalone preview account: an email and
+      #                          a SALTED SHA-256 DIGEST, never a password.
+      #                          Unset means a build that signs nobody in,
+      #                          which is the correct default. Held as a
+      #                          secret so it stays out of the job log — not
+      #                          because it is protected: it ships in a public
+      #                          static bundle and anyone can read it there.
+      #                          See src/features/grove/pressDemoGate.js.
+      - run: npm run build
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_PRESS_DEMO_ACCOUNTS: ${{ secrets.VITE_PRESS_DEMO_ACCOUNTS }}
+      # `dist-site`, not `dist`: the data workspace tracks 295 files under
+      # `dist/` and vite empties its output directory before every build. The
+      # two must move together with `build.outDir` in vite.config.js.
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist-site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

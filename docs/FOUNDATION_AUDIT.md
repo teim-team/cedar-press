@@ -134,7 +134,7 @@ duplicating.
 | dependency cycle detection, pipeline | `cedar_pipeline.KNOWN_ORDERINGS` + `derived_orderings()` — **103 orderings across 48 tables** (27 curated with a paid cost written down, 76 derived from 293's class-6 scan). *Re-measured 2026-09-01; the figure here read 80/33 when written* | live |
 | "do not run this" enforcement | `cedar_pipeline.guard()` / `NEVER_RUN` (4 scripts), enforced in code not comment | live |
 | build entry point per dataset | `code/build.py plan|run|ship` — 12 collections + entity layer | live |
-| machine-readable dataset inventory | `docs/ARCHITECTURE.md` + `docs/schema/dependency_manifest.json` (401 KB), both generated | live |
+| machine-readable dataset inventory | `docs/DATA_ARCHITECTURE.md` + `docs/schema/dependency_manifest.json` (401 KB), both generated | live |
 | identity model documentation | `docs/IDENTIFIER_STANDARD.md` (policy) + `docs/NATIVE_ENTITY_NUANCES.md` (domain) | live |
 | canonical id stability | `cedar_uid`, meaning-free, 2 check chars, **100% substitution / 100% transposition** caught, deterministic re-mint verified by identical register digest | live |
 | id materialised on every dataset | `503_identity.py stamp` — **125 tables, 3,007,088 rows (100.0%)** | live |
@@ -330,7 +330,7 @@ Stated plainly, because the spec forbids claiming unverified behaviour.
   an owner ruling, 13 defective in the data, 0 unexplained**, with
   `contract_violations` gating at MUST_BE_ZERO and reading 0.
 - **NOT DONE:** the per-dataset trace table (source registration → … →
-  publication) for all 12. `docs/ARCHITECTURE.md` has the tables-and-scripts
+  publication) for all 12. `docs/DATA_ARCHITECTURE.md` has the tables-and-scripts
   half; the source-acquisition and snapshot half is not machine-readable.
 - **NOT DONE:** the three directed graphs as *separate* artifacts. Pipeline
   dependencies exist (80 orderings); identity and agent-task graphs do not.

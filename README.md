@@ -1,526 +1,82 @@
 # Cedar Press
 
-*Written 2026-08-26. This is the first document to read.*
+**Trusted intelligence for Indian Country.** Cedar Press is a subscriber
+intelligence service: original economic collections, data-driven research and
+transparent method, covering the money, policy, transactions, institutions and
+public actions that shape Indian Country's economy.
 
-Cedar Press is a **data project about the Native economy**: who owns which firms, what
-money moves to and through Native entities, and what evidence backs each claim. It builds
-**13 collections** (12 customer-facing products plus a shared entity layer) from federal,
-state and tribal sources, resolves them to a single entity spine, and ships them to a
-subscriber web application.
+Built by [Lumecon](https://lumecon.ai). Available exclusively through
+[Tribal Business News](https://tribalbusinessnews.com). Served at
+[cedarpress.ai](https://cedarpress.ai).
 
-> ### PICKING UP WORK? READ `NEXT_SESSION.md` FIRST.
-> One page: what landed, what is red and how to clear it, what is open in
-> priority order, and three things that were WRONG and are now right — do not
-> re-inherit them.
->
-> ### THE NORTH STAR, as of 2026-08-30
->
-> **`docs/DATASET_READINESS.md` — READY / BLOCKED / NOT_TESTED per dataset.**
->
-> The project's success metric is no longer invariants, assertions, commits or
-> architectural mechanisms. It is: **how many Cedar datasets can we confidently ship,
-> update later without heroics, and expect customers to join and aggregate correctly?**
->
-> Regenerate with `py -3 code/518_dataset_readiness.py`. There are exactly three statuses
-> and no fourth — no "mostly ready", no "substantially complete". A dataset either crosses
-> the ten-point production contract or it has **named** blockers. If you are picking up
-> work, start there and close the dataset nearest the line.
+## The service
 
-**This IS a git repository, as of 2026-08-29** (commit `2036e46`). It tracks **source
-only** — code, prose, schemas, manifests, and `data/spine/cedar_identity_register.csv` —
-about 1,000 files and ~39 MB. It does **not** track the ~46 GB of content: data is
-versioned by CHECKSUM in run manifests and retired by MOVE to `graveyard/`, which survives
-a file being rewritten in place in a way git would not.
+| Section | What it holds |
+| --- | --- |
+| Overview | The service at a glance, with each section's current standing. |
+| Articles | Data Briefs: original research built from the collections. |
+| Data | The collections themselves — coverage, method and the release. |
+| What's new | Every release, dated and versioned, for tracing a cited figure. |
+| Methods | How collections are sourced, resolved and kept current. |
 
-That changes one convention and not the others. There is now diff, blame and revert **for
-code and documents**. There is still none for data. And it does **not** fix the stale-prose
-hazard: a superseded figure in a committed document is still committed, so **the documents
-remain the operative record of state**, and corrections are still *recorded and dated*
-rather than silently applied — see [Conventions](#conventions-that-exist-for-a-reason).
+Alongside these, `/tribal-data-request` carries the tribal data request
+policy and `/research-access` the limited research access path — each on its
+own URL, so either can be sent to a council office or a researcher directly.
 
----
+Every collection begins with public records, is extended through original
+research and entity resolution, and stays current as new information arrives.
+Every download carries its own citation, so a figure can be traced back to the
+release it came from.
 
-## Read in this order
+## Access
 
-| # | Document | What it gives you |
-|---|---|---|
-| 1 | **`START_HERE.md`** | The four things that will bite you, the current verified dataset counts, the review queue, what to do next, and the licensing constraints that bind before anything ships. |
-| 2 | **`AGENTS.md`** | The operating guide. The Prime Directive (zero fabrication), the entity/attribution model, the containment defect, the hierarchy rules, and the per-dataset plans. Long, and its 2026-07-31 sections are superseded by its own `CURRENT STATE` section — that section says so explicitly and wins on conflict. |
-| 3 | **`docs/DATASET_READINESS.md`** | **The scoreboard — start here for what to work on.** READY / BLOCKED / NOT_TESTED per dataset, with named blockers. |
-| 4 | **`docs/INVENTORY.md`** | **What we have.** Every table in `data/clean` and `data/spine` — collection, rows, grain, primary key, keyed %, coverage year, who builds it, who enriches it, whether it ships — and every script, classified. Generated: `py -3 code/521_inventory.py`. **Do not hand-edit; regenerate.** |
-| 5 | **`docs/KNOWN_ISSUES.md`** | **What is wrong with it.** One deduplicated ledger of every open defect, each marked FIXED or OPEN with an owner, ranked by what a wrong answer costs a buyer. Also records, with measurements, every place two of our own documents disagreed and which one was right. |
-| 6 | **`docs/EXPORT_SAFETY.md`** | Which tables a buyer may AGGREGATE and which are row-level only. Read before anyone sums a column. |
-| 7 | **`docs/PULL_DISCIPLINE.md`** | Read before writing any script that touches a remote host. Non-optional. |
-| 8 | **`docs/*_BUILD_LOG.md`** (~110 files) | One per dataset or build episode. The reasoning, the dead ends, the measured costs of mistakes. Read the one for the dataset you are touching. |
-| 9 | **`docs/datasets/*.md`** and **`docs/codebooks/*.md`** | Generated maintenance docs and variable-level codebooks. Generated by `code/24_generate_dataset_docs.py` — **edit the script, not the output.** |
+Access follows the subscription. An eligible Tribal Business News membership
+issues an access code, the code establishes the entitlement, and the account
+follows: Cedar Press arrives with a membership, Cedar Press+ adds the deeper
+shelf, and [Cedar Grove](https://lumecon.ai) carries the same collections into
+the full analysis environment. Tribal Business News owns payment, renewals and
+issuance.
 
-Two older state documents, **`docs/STATE_OF_BUILD.md`** (2026-08-06) and
-**`docs/STATE_OF_THE_LAND_2026-08-07.md`**, are useful history and are **partly overtaken**
-by the 2026-08-12 build logs. Prefer `START_HERE.md` on any conflict.
+## Working on it
 
----
+The subscriber-facing web client is a [Vite](https://vite.dev) + React
+application deployed as a static build, with a Python API alongside it.
 
-## Layout
-
-```
-Cedar Press/
-├── README.md            ← you are here
-├── START_HERE.md        current state, verified counts, next actions
-├── AGENTS.md            operating guide, entity model, dataset plans
-├── code/                401 Python scripts (375 numbered) + 3 package dirs
-├── data/
-│   ├── raw/             fetched source material, never edited by hand
-│   ├── staging/         pulled-but-not-promoted derived output
-│   ├── interim/         intermediate build artifacts
-│   ├── spine/           the entity spine + rulings (cedar_entity_spine.csv)
-│   └── clean/           the published datasets — the product
-├── dist/                subscriber-facing bundle: notes contracts + manifests
-├── docs/                ~110 build logs, codebooks, policy documents
-├── review/              queues awaiting a human ruling
-├── logs/                run logs, one per script execution
-├── graveyard/           pre-change snapshots kept deliberately
-└── web_claude/          the rendered entity-reconciliation review page
+```sh
+npm install
+npm run dev        # development server
+npm run test       # unit tests
+npm run test:smoke # end-to-end checks against a build
+npm run build      # production build
 ```
 
-### `code/`
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) covers how the code is
+organized, how the client and the API fit together, and how to run the API.
+[`.env.example`](.env.example) lists every configuration value.
 
-**401 scripts at the top level, 375 of them numbered, plus 26 shared modules** —
-`cedar_*.py`, `build.py`, the scrapers. With the three package directories
-(`ancsa_portal`, `ancsa_v2`, `lobbying_pull`) the recursive count is **427**, which is
-what `62_no_regression_check.py` reports as `code_scripts_total`. Never quote a figure
-from this paragraph: regenerate it with `py -3 code/521_inventory.py`, which prints the
-live census and classifies every script. *(This paragraph read "222 scripts" until
-2026-09-01, by which point it was wrong by 180.)*
+## Security
 
-**The number no longer implies step order.** Numbers run past 520 and **43 of them
-collide inside a single directory** — `14_` is three different scripts, so are `91_`,
-`92_`, `94_`, `172_`, `173_`, `174_`. `62` ratchets `code_duplicate_numbers` at
-MUST_NOT_RISE for exactly that reason. Treat the number as an identifier, not a sequence,
-and run `ls code/<n>_*` before citing any script by number.
+Please report vulnerabilities as described in [SECURITY.md](SECURITY.md).
 
-Four things in `code/` are load-bearing across everything else:
+## Contact
 
-- **`code/33_apply_party_rulings.py` holds the ONE resolver.** Import `resolve_entity`.
-  Never write another name matcher — standing rule 8. Re-implementing matching guarantees
-  drift, and it has already produced two false "resolver defect" reports that were really
-  spine-data collisions.
-- **`code/62_no_regression_check.py` is the gate.** Ten standing rules live in its
-  docstring. Run it before and after any change to the ledger, the spine, the resolver or
-  the ruling importer. **A FAIL is a stop-work signal, not a warning.**
-- **`code/cedar_domain.py`** carries the shared domain vocabulary.
-- **`code/124_apply_rulings_in_place.py`** is the correct tool for applying rulings — see
-  the safety rules.
+[contact@lumecon.ai](mailto:contact@lumecon.ai)
 
-### `data/clean/`
+## The data workspace
 
-The product. Note that this directory also holds a large number of `.bak_<date>_<reason>`
-files. **These are deliberate** — backing up an output before re-running a build whose
-counts are asserted elsewhere is a standing rule — and they are not clutter to tidy away.
-Anything ending `.bak…` or living in `graveyard/` is a snapshot, not a live dataset.
+This repository also contains the Cedar data workspace, merged on 2026-09-02.
+It has its own entry points and its own conventions:
 
----
-
-## Running things
-
-Python is invoked as **`py -3`** on this machine. Not `python`, not `python3`.
-
-```bash
-# WHAT TO WORK ON
-py -3 code/518_dataset_readiness.py             # the scoreboard: READY / BLOCKED per dataset
-py -3 code/517_export_safety.py                 # which tables a buyer may aggregate
-
-# WHAT WE HAVE, AND WHAT IS WRONG WITH IT
-py -3 code/521_inventory.py                     # regenerate docs/INVENTORY.md (all tables + scripts)
-py -3 code/521_inventory.py check               # exit 1 if that document's headline is stale
-py -3 code/502_archive_candidates.py            # dead-script census, seven signals, moves nothing
-#   open defects live in docs/KNOWN_ISSUES.md - a ledger, not an audit: FIXED or OPEN with an owner
-
-# THE GATE
-py -3 code/62_no_regression_check.py            # check against baseline; exit 1 is STOP-WORK
-py -3 code/62_no_regression_check.py --baseline # new baseline (deliberate; only while GREEN)
-
-# BUILD, one entry point per collection
-py -3 code/build.py list                        # the 13 collections
-py -3 code/build.py plan <id>                   # rebuilders, enrichers, ordering, NEVER_RUN
-py -3 code/build.py run  <id> --execute
-py -3 code/build.py ship --execute              # refuses a dirty tree; stamps release commit
-
-# THE SHARED LAYERS (verify is read-only and safe on all of them)
-py -3 code/503_identity.py     verify           # permanent cedar_uid + handle history
-py -3 code/510_assertions.py   verify           # assertions, lineage, resolution, invariants
-py -3 code/512_build_dataset_contracts.py verify  # grain, primary keys, join cardinality
-py -3 code/514_source_records.py verify         # source record -> UID links, evidenced
-py -3 code/515_temporal.py     verify           # validity vs observation time
-py -3 code/516_release_manifest.py verify       # retained inputs, replay
-py -3 code/513_handoffs.py     list             # agent claims + independent verification
-
-py -3 code/129_build_review_queue.py            # rebuild the review queue + guesses
-py -3 code/128_build_review_page.py             # render it, then publish as an Artifact
-```
-
-Executable paths for R and Stata, if a task needs them, are recorded in the user's own
-notes rather than here.
-
-**Everything is run from the project root** with paths relative to it. Scripts no longer
-hardcode the project root: as of 2026-08-30 all 297 that did now derive it from
-`Path(__file__)`, each rewrite proven by evaluating the derived expression against the
-literal it replaced (307/307 reproduced exactly). Lint **class 8** fails the gate if a new
-root literal appears. The one deliberate exception is the replay tool, which must keep
-recognising the literal because it checks out past commits that still contain it.
-
----
-
-## The hard safety rules
-
-These are not style preferences. Each one encodes a failure that has already happened here
-and cost measurable work.
-
-### Never run these two scripts
-
-- **`code/09_import_rulings.py`** — rebuilds `cedar_identifier_ledger_final.csv` *from*
-  `cedar_identifier_ledger_tiered.csv`, which is stale and does not carry rows that later
-  scripts appended directly to `_final`. Running it on 2026-08-08 destroyed **1,327 ledger
-  rows** and **451 village-corporation links, 121 of them tier A** — lost, not moved. Use
-  **`code/124_apply_rulings_in_place.py`** instead; it applies rulings to `_final` in place
-  with no rebuild.
-- **`code/01_build_entity_spine.py`** — a full rebuild **drops every appended entity**: the
-  village corporations, NHOs, TCUs, CDFIs, BIE schools and UIOs added by scripts 52, 61, 73
-  and 75. Append-merge only, and re-read the spine immediately before writing so a
-  concurrent agent is not clobbered.
-
-Both are safe to **import**. Neither is safe to **run**.
-
-### Zero fabrication
-
-Never write a deal row, dollar amount, date or identifier that is not present in retrieved
-or uploaded evidence. When evidence lacks a date, skip the row and name it in the run log.
-**A smaller true dataset always beats a larger padded one.** When context runs low, stop
-adding rows and close out cleanly — degraded-context transcription is fabrication with
-extra steps.
-
-### One poller per host. Ever.
-
-Four concurrent pullers got this project IP-blocked by `api.usaspending.gov` for an hour.
-On Windows **`ps aux` cannot see command lines** — Git Bash's `ps` returned zero while four
-pullers were live, and an agent was told the host was free on the strength of it. Use
-`Win32_Process.CommandLine`. Full protocol in `docs/PULL_DISCIPLINE.md`.
-
-Related: **never kill a process by image name**, or by a substring that could appear in
-another run's arguments. A filter matching `--hosts www.winstar.com` killed the wrong
-process because that string sat in a different run's host list.
-
-### A tier is INHERITED from the source row, never assigned by the consumer
-
-The exactness of a *key* says nothing about the correctness of a *link*. Treating any EIN
-hit as tier A because an EIN is an exact identifier attributed a Wisconsin United Way
-chapter to a California tribe. 821 of 1,104 EIN rows are tier B via a method that is 6.5%
-accurate and never publishes alone.
-
-### Containment matching is defective and is not to be trusted
-
-`resolve_entity`'s containment tier matches whenever one name's token set contains the
-other's, and that is wrong in both directions. It has carried **$2.8B onto a school**
-(`CHICKASAW NATION` → *Chickasaw Children's Village*), resolved Alaska village governments
-onto ANCSA corporations, and resolved all 148 TDHEs onto their own tribes. Until it is
-fixed centrally, **containment may be used only to resolve an owner already named in
-evidence — never to detect a match, and never to key a dollar.** Two candidate guards were
-built, measured, and removed because they lost more correct rows than they saved. Do not
-re-add them.
-
-### Publication constraints
-
-- **Never publish DUNS.** It is D&B licensed. Join on it internally, crosswalk to UEI/CAGE,
-  publish the crosswalk.
-- **D&B Open Data** (legal name, street, city, state, ZIP) may not be disseminated in bulk
-  and attaches to every base award dated before 2022-04-04. Contract facts publish; entity
-  name and address do not.
-- **Casino City** may be read for QA and never published. `tribal_property_list` **is**
-  Casino City — the vendor share of the property universe is 610 of 774.
-- **Only tier A rows are publishable.** B is algorithmic and unreviewed, C is unattributed,
-  X is blocked by an exclusion ruling.
-- **A SAM socio-economic flag is self-certification**, not evidence of ownership.
-
-### Dollar rules that have been violated before
-
-- **Never sum FSRS subaward dollars unfiltered.** Total only rows with
-  `duplicate_status == 'primary'` **and** `subaward_exceeds_prime_flag != 'yes'`. Unfiltered
-  is $23.9B; the rule removes $5.96B of it.
-- **Never treat USAspending award summaries as transactional** — roughly 2.2× inflation.
-- **Never sum a dimension table into a row count.** `subaward_uei_netnew_2026-08-05.csv` is
-  252,078 rows of *one row per UEI*, not subawards. It has already fooled one reader into a
-  phantom ~317k figure.
-
-### Process hygiene
-
-- **An interruption must not look like a completion.** Write `.part`, then rename.
-- **Back up an output before re-running a build whose counts are asserted elsewhere.**
-- **Only 404 and 403 are facts about an object.** A 500 means try later.
-- **A number in a doc that is not recomputed from the data is a claim, not a fact.**
-
-### Built is not done. Run the ship-gap detector before declaring anything finished
-
-    py -3 code/160_ship_gap_report.py
-
-No arguments, no network, roughly two minutes on a cold cache. It reads only; it
-writes only `docs/SHIP_GAP_REPORT.json` (diff it against the last run) and
-`docs/.ship_gap_cache.json`. It touches no dataset, no codebook and nothing in `dist/`.
-
-**Why it exists.** On 2026-08-26 the same defect was found five times in five unrelated
-parts of the project in one day. `88_build_deals_taxonomy.py` globbed
-`deals_*_additions.csv` and never read the ledger it was adding to, so a 790-row master
-held one 2026 row while 131 sat in a root CSV — and the same glob bug was in three
-scripts. The OCR merge step promised in `122_ocr_ordinance_scans.py`'s docstring was
-never written, and 263 documents sat idle for 13 days.
-`code/46_pull_funding_credit_types.py` and `code/101_build_lodes_block_employment.py`
-were written and never run. Four gaming codebooks were written and never registered,
-making 17,555 rows invisible for 19 days. `LICENSED_SOURCE_FILES` was declared a HARD
-GATE in `87_build_dataset_notes.py` and referenced nowhere else in that file. Only
-**0.87% of publishable gaming rows** had reached a shipping artefact.
-
-Every one is the same shape: the work finished, the artefact never reached the shelf,
-and **nothing printed a number that would have shown it**. `87` counted its drops in a
-counter reading `"skipped: not a documented dataset"` and never printed the filename,
-which is why 29 tables and 33,817 rows stayed invisible for 20 days. **A silent counter
-is the bug.** Script 160 is the detector for that whole class, and it names every single
-thing it drops.
-
-**What it reports**, per dataset: rows in `data/clean/` against rows in `dist/` and the
-ship ratio; every registry the table is missing from, by name (codebook master, codebook
-fragment, `25_build_publication_layer.py`'s `TABLES`, `27_build_dataset_manifests.py`'s
-`SPEC`, its notes contract); orphaned artefacts (prose codebooks no registry can read,
-clean tables with no codebook, staging/interim never promoted, review rows with a blank
-ruling column, root CSVs no registry enumerates); scripts whose declared outputs do not
-exist or whose log is 0 bytes; dist artefacts whose row count disagrees with the current
-clean table; and the latest date in each table against today, so a collection that
-silently stopped is visible. It derives all of this by **reading the registries** — the
-codebook files as data, scripts 25 and 27 parsed with `ast` — because a detector holding
-its own copy of the dataset list would rebuild the exact defect it exists to find.
-
-**What a healthy report looks like.** Section 1 has no rows at 0% and a project ship
-ratio at 100%. Sections 2, 4 and 5 are empty: nothing missing from a registry, no script
-with a missing declared output, no `dist/` artefact disagreeing with `data/clean/`. The
-codebook reconciliation shows zero master-only blocks — a master-only block means
-`cedar_codebook.py build` would delete it. Section 6 shows no dataset stalled past its
-own collection cadence. The final line reads `HEALTHY: YES`.
-
-Section 3's review backlog is never zero and is not supposed to be — a human ruling
-queue is meant to have things in it. What matters is that it **shrinks between runs**,
-which is what the JSON is for.
-
-**The first run, 2026-08-26, for comparison:** 66.7% project ship ratio, **2,609,142
-unshipped rows**, 200 tables at 0%, 11 stale `dist/` artefacts, 4 prose codebooks no
-registry can read, 6 codebook blocks a fragment rebuild would delete, 37 scripts missing
-a declared output, and 38 colliding script numbers. `dist/cedar_press.db` did not exist
-at all. Anything better than that is progress; `HEALTHY: NO` is not a reason to skip
-running it.
-
-**One caution on the dollar column.** The `$ exposure` figure is the sum of one named
-column, printed beside it, and it is not an obligation total. Columns that restate an
-award value on every row are refused rather than summed, per `cedar_domain.SUM_COLUMNS`
-and `MAX_PER_AWARD_COLUMNS` — the first run of the detector summed
-`total_award_value_real2025` and reported $6.58T against prime contracting's true
-$310.01B. A `~` marks a column chosen by name rather than from the sanctioned list.
-Read the column before quoting the figure.
-
----
-
-## Where the data actually goes
-
-Cedar Press is the **build side**. The product ships to
-**`github.com/teim-team/cedar-press`** — a **Vite + React** client with a **FastAPI**
-server. Presentation lives in the app repo; facts live here. That split is deliberate and
-was set by the owner: *"this terminal I'm just focused on building the datasets and
-pipelines for them… then the wiring me and Havala will work on."*
-
-### A dataset becomes a Collection
-
-On the app side a dataset lands as a **Collection**, which is three things travelling
-together:
-
-**1. The descriptor** — the Collection's identity card:
-
-| field | is |
+| | |
 |---|---|
-| `id` | stable slug; the join key between build side and app side |
-| `origin` | where the underlying data came from |
-| `level` | the unit a row represents |
-| `name` | display name |
-| `tracks` | what the Collection follows over time |
-| `rowsLabel` | what one row *is*, in words — not a count, a unit |
-| `downloads` | the artifacts a subscriber can take away |
-| `vintage` | the as-of date of the data |
-| `version` | the Collection's own version |
-| `updated` | when this version was published |
-| `sources` | the upstream authorities |
-| `method` | how it was assembled |
+| Start here | [`START_HERE.md`](START_HERE.md) |
+| Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
+| Measured map of the collections | [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) |
+| The thirteen built datasets | `dist/customer/` (CSV + codebook + notes) |
+| Rebuild the deliverables | `py -3 code/1137_customer_dataset_combine.py build` |
+| Audit | `py -3 code/846_session_audit.py` |
 
-**2. A figure spec** — the declarative description of the Collection's headline chart.
-
-**3. A release entry** — what changed in this version, so a subscriber can see movement.
-
-### The catalog assigns a shelf
-
-Each Collection is placed on one of three shelves: **`standard`**, **`pro`**, or
-**`grove`**. The shelf is a catalog decision on the app side, not a property of the file.
-
-Local documents use an **older vocabulary** for the same idea — *Portal ($499)* and *Grove
-($2,500)* — which appears in `AGENTS.md` and is baked into `code/24_generate_dataset_docs.py`
-as a `tier` field per dataset. **`grove` maps across cleanly; `Portal` does not**, because
-the app splits it into `standard` and `pro`. Anyone touching the tier field should treat
-the app catalog as authoritative and the local `tier` strings as legacy.
-
-`AGENTS.md` records the architectural rule behind the shelves and it is worth keeping:
-**every Grove dataset is the "next question" of a lower-shelf dataset** — the cheaper tier
-generates the curiosity the expensive tier answers. New datasets debut Grove-first;
-lower-shelf additions are earned by subscriber request.
-
-### What this repo emits toward that pipeline today
-
-Three scripts produce the shippable layer, all writing to `dist/`:
-
-| script | emits | for |
-|---|---|---|
-| `code/87_build_dataset_notes.py` | `dist/<group>/<name>.notes.json` + `.NOTES.md`, and `dist/notes_index.json` | The **notes contract**: identity (rows, columns, sha256, vintage), coverage (year span, entity count), how to read negatives/zeros/blanks, and comparability breaks. The app renders it into a branded PDF. |
-| `code/86_*` (series breaks) | `data/clean/series_breaks.csv` | Every point where a source changed *what it counts*. Feeds the comparability section above. |
-| `code/27_build_dataset_manifests.py` | `dist/manifests/<id>.json` + `VALIDATION.md` | Dataset manifests validated in Python against the same rules as the app's own validator. |
-
-**Be aware of a real gap and do not paper over it.** These emitters target an *earlier*
-app contract — script 27's docstring names `teim-app/src/features/grove/datasetManifest.js`
-on branch `claude/cedar-press`, and its manifest fields (`geographyLevel`, `periodFrom`,
-`collectionMethod`, `reviewStatus`…) are **not** the Collection descriptor fields listed
-above. Nothing in this repo currently emits `rowsLabel`, `tracks`, `downloads`, a figure
-spec or a release entry. **Mapping the notes contract and the manifests onto the Collection
-descriptor is unbuilt work**, and it is the honest state of the pipeline as of 2026-08-26.
-
-Two judgments encoded in script 27 should survive any rewrite:
-
-- **`reviewStatus` ships as `submitted`, never `reviewed`.** Assembling a dataset and
-  vouching for it are different acts by different people. A named reviewer promotes it.
-- **The geography level is declared honestly.** Cedar Press rows key on an *entity*
-  (`tribe_id`, UEI, EIN), not on geography. Where a dataset carries no geographic key the
-  level is `nation` and a caveat says the join key is an entity identifier. Picking
-  `reservation` to look compliant would produce a dataset that *nearly* joins — the exact
-  failure the contract warns about.
-
-> **`dist/` is stale as of 2026-08-26 and must not ship.** `dist/notes_index.json` still
-> records `prime_contracts` at 617,142 rows / FY2000–2022, against an actual 1,217,768 rows
-> / FY2000–2026. It has not been rebuilt since the 2026-08-12 archive backfill.
-
----
-
-## The shared layers, and the document for each
-
-*Built 2026-08-29/30. Each layer owns one question, has a `verify` mode that exits 1 on
-breach, and every check in it was landed with a fixture proving it FIRES — inject the
-violation, exit 1, restore, exit 0. A check that has never failed on purpose is not
-known to work.*
-
-| layer | script | question it answers | document |
-|---|---|---|---|
-| Identity | `503_identity.py` | which Native entity is this, permanently? | `docs/IDENTIFIER_STANDARD.md` |
-| Source records | `514_source_records.py` | what did the source *say*, and separately, who do we think it *means*? | `docs/SOURCE_RECORD_LAYER.md` |
-| Assertions | `510_assertions.py` | who claims this fact, on what evidence, and which rule picked the winner? | `docs/ASSERTION_LAYER.md` |
-| Temporal | `515_temporal.py` | *when* was it true, vs when did we look? | `docs/TEMPORAL_MODEL.md` |
-| Contracts | `512_build_dataset_contracts.py` | what is one row, and what may you join on? | `docs/DATASET_CONTRACTS.md`, `docs/GRAIN_AUDIT.md` |
-| Export safety | `517_export_safety.py` | may a buyer AGGREGATE this table? | `docs/EXPORT_SAFETY.md` |
-| Readiness | `518_dataset_readiness.py` | can we ship this dataset? | `docs/DATASET_READINESS.md` |
-| Release | `516_release_manifest.py` | can we reproduce what we shipped? | `docs/RELEASE_REPLAY_LOG.md` |
-| Handoffs | `513_handoffs.py` | did another session *verify* that claim, or just read it? | rows in `review/agent_handoffs.csv` |
-
-Cross-cutting reading:
-
-- **`docs/ARCHITECTURE_DECISIONS.md`** — one entry per new primitive, plus the
-  workstream file-ownership table used when agents run in parallel.
-- **`docs/NATIVE_ENTITY_NUANCES.md`** — the domain knowledge that resolves names.
-  Village government vs village corporation, Oneida NY vs WI, constituency bands,
-  renames, ownership spiderwebs. **Read before matching anything.**
-- **`docs/EXTERNAL_REVIEW_PACKET.md`** / **`_R2.md`** / **`docs/EXTERNAL_REVIEW_RESPONSE.md`**
-  — two adversarial outside reviews and what each one changed. The response document
-  records where the reviewer was right and we were wrong, which is most of it.
-- **`docs/FOUNDATION_AUDIT.md`** — the forensic audit that started this arc.
-- **`review/OWNER_DECISION_QUEUE.md`** — **everything waiting on a human ruling**, one
-  page, each item with its evidence attached and the consequence of each answer stated.
-
----
-
-## Two things that decide whether the data is right
-
-Both were found by outside review and both were live, not theoretical.
-
-**1. Authority belongs to a source's CLAIM, never to our match.** The Federal Register is
-authoritative about what its own row says. It is *not* authoritative about which Cedar
-entity that row refers to — that is our inference and it carries its own evidence and its
-own status. Before this was separated, three ANCSA *corporations* were carrying "federally
-recognized" at tier A with `support_status = authoritative`, because the FR name had been
-written onto them as an alias and the matcher returned it *uniquely*. Every guard passed.
-
-**2. Modelling uncertainty is worthless if the export collapses it.** The temporal layer
-correctly reports that it cannot confirm an owner for 110,705 transactions ($32.1B) and
-actively contradicts one for 9,402 ($2.1B) — and nothing in the publication layer consumed
-any of it. `517_export_safety.py` is the answer, and its rule is asymmetric on purpose:
-**unknown ownership may ship as unknown; contradicted ownership may never ship as
-definite.**
-
----
-
-## Conventions that exist for a reason
-
-**Corrections are recorded, not applied silently.** When a claim in a document turns out to
-be wrong, the convention here is to strike it, state that it was false, date the
-correction, and say *why it went wrong*. The reasoning is usually worth more than the fix —
-a wrong number is a fact about the data, but a wrong *method* will produce more wrong
-numbers. `START_HERE.md` and `docs/COMPETITIVE_POSITION.md` both carry dated correction
-blocks in this style.
-
-**Two federal sources that agree is a verification; two that disagree is a finding.** One
-source alone is a claim. Standing policy in `docs/CROSS_SOURCE_VERIFICATION.md`.
-
-**We own the TOP of a hierarchy; the tribe owns the INSIDE.** Which Native entity
-*ultimately* owns a firm is ours to determine and publish — that is the product. Everything
-below the top level is internal corporate structure and is unverified unless the tribe says
-otherwise. Federal hierarchy fields (`ultimate_parent_uei`) are **evidence, not authority**:
-use them to group candidates, never to publish an org chart. Where a federal parent field
-disagrees with a tribal source, **the tribal source wins** and both are recorded.
-
-**A dead end recorded from one entity's behaviour needs a second entity before it is
-written down.** The tribal Single Audit "dead end" was generalised from one auditee's
-opt-out election and cost real coverage until it was overturned — 6,780 records exist and
-2,052 are public. Same error shape as "broken search ≠ absence".
-
-**Termination means loss of the federal relationship, not the destruction of tribal
-governance.** Frame it carefully; tribes maintained internal capacity throughout.
-
-**Blocking one bad-match path pushes it to the next.** A containment guard fixed
-"Denver Indian Health → Native Health" and the same wrong match then arrived via the token
-path. Fix the class, then check the neighbours.
-
----
-
-## Known-stale documents, as of 2026-08-30
-
-Staleness is still tracked by hand. Git gives code and prose a history, but **a superseded
-number in a committed document is still committed** — version control does not make a
-wrong sentence right, it only makes it traceable. So this table stays.
-
-**Cleared since 2026-08-26:**
-
-| Artifact | Was | Now |
-|---|---|---|
-| `dist/` | stale since 2026-08-12 | rebuilt; `ship` refuses a dirty tree and stamps the release commit |
-| README's "not a git repository" | true | **false since 2026-08-29** — corrected at the head of this file |
-| README's "several scripts hardcode the project root" | true (298 of 414) | **false since 2026-08-30** — 297 rewritten, lint class 8 guards it |
-| "grain is unstated on 207 shippable tables" | true | **25** — measured 2026-09-01; `docs/GRAIN_AUDIT.md`, and the gate ratchet in `data/clean/_regression_baseline.json` reads 25. This row said 28 until then |
-
-Currently flagged:
-
-| Artifact | Status |
-|---|---|
-| `data/clean/coverage_audit.csv` | ~~**Stale.** Dated 2026-08-06 … prime ending FY2022 and assistance ending FY2023~~ **CLEARED 2026-09-01.** The rebuild landed: the file is stamped `audited = 2026-08-28`, 912 rows across 25 datasets, and both series now run to FY2026 with non-zero rows (`prime_contracts` FY2000–2026; `federal_funding` FY2026 = 18,325 rows). The flag was describing a file that no longer exists. |
-| `docs/COVERAGE_AUDIT.md` | ~~**Stale**, quotes the above … `deals = 790` is a *method* error~~ **CLEARED 2026-09-01.** Regenerated 2026-08-28 by `code/35_coverage_audit.py`; the glob was repaired at source and `deals` now reads **930** dated rows of 935 (the 5 missing carry no usable date, which is the correct behaviour for a coverage audit). |
-| `docs/COMPETITIVE_POSITION.md` | **Corrected in place twice — 2026-08-26 and 2026-09-01.** First pass: "prime contracting ends FY2022" and "the promoted subaward file is 998 rows" were false. Second pass: its Finding 2, *"six of the ten datasets have a zero-percent-populated entity key — not 'sparse', zero"*, **is no longer true of any dataset** (compacts 99.3%, gaming facilities 99.7%, nonprofits 11.1%, bills and federal actions now keyed through bridges). A sales document that understates the product is as wrong as one that overstates it. |
-| `dist/` (all of it) | **Stale, but less so than this line said.** `dist/cedar_press.db` was rebuilt **2026-08-26**, not 2026-08-12 (date corrected 2026-09-01). It is still behind `data/clean`: `62` reports `ship_ratio_pct = 99.773%` with **19,232 rows unshipped** and 13 tables at zero, and 7 `federal-register` tables gained `cedar_uid` after the last ship — the advertised join key is live but not in the release. Closes on the next `build.py ship`. |
-| `docs/STATE_OF_BUILD.md`, `docs/STATE_OF_THE_LAND_2026-08-07.md` | Partly overtaken by the 2026-08-12 logs. Prefer `START_HERE.md`. |
-| `AGENTS.md` sections dated 2026-07-31 | Superseded by its own `CURRENT STATE` section, which says so. Findings remain true; counts and queues do not. |
-
-If you find another, **flag it in place with a dated banner** rather than fixing it
-quietly. That is the whole convention.
+The two trees were developed independently and share no history; the merge that
+brought them together is a deliberate `--allow-unrelated-histories` join, and
+only three paths collided. `docs/ARCHITECTURE.md` describes the **web client**;
+`docs/DATA_ARCHITECTURE.md` is the generated map of the **data collections**.
