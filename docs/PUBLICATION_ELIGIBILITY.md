@@ -61,11 +61,20 @@ An adjudication value this policy has never seen WITHHOLDS and names itself in t
 | nonprofits | `disposition` | `CANDIDATE_STATE_VALIDATED` | 105 | FLAG |
 | nonprofits | `disposition` | `NATIVE_RULED_VERIFIED` | 14 | PUBLISH |
 | nonprofits | `key_review_disposition` | `(blank)` | 11,307 | PUBLISH |
-| nonprofits | `key_review_disposition` | `SUPPORTED` | 851 | PUBLISH |
+| nonprofits | `key_review_disposition` | `SUPPORTED` | 559 | PUBLISH |
 | nonprofits | `key_review_disposition` | `HELD_STATE_DISAGREES` | 458 | MASK |
+| nonprofits | `key_review_disposition` | `REFUSED_PLACE_NAME_IS_THE_ADDRESS` | 292 | MASK |
 | nonprofits | `key_review_disposition` | `REFUSED_GENERIC_TOKEN_ONLY` | 61 | MASK |
 | nonprofits | `key_review_disposition` | `REDIRECT_PROPOSED` | 12 | MASK |
 | subcontracting | `duplicate_status` | `primary` | 70,597 | PUBLISH |
+
+## Conjunctions - where no single column carries the fact
+
+`BLOCKED_COMBINATIONS` in `cedar_publication`. CP-016 needed one: the defect is a quarantined METHOD, and the misleading `ruling_status` label is on only a fraction of the rows it produced.
+
+| dataset | rule | disposition | rows |
+|---|---|---|---:|
+| contractors | `quarantined_method_not_ruled_tier_A` | MASK | 227,540 |
 
 ## Build-lineage columns dropped by name
 
@@ -80,12 +89,12 @@ Reported, never dropped. A column here is an upstream DATA problem: the value sh
 | dataset | column | plumbing / filled | % | kind |
 |---|---|---:|---:|---|
 | funding | `attribution_basis` | 184,077 / 701,955 | 26.2 | SOME_VALUES |
-| nest | `source_document` | 3,189 / 4,014 | 79.4 | SOME_VALUES |
+| nest | `source_document` | 4,295 / 5,120 | 83.9 | SOME_VALUES |
 | legislation | `entity_link_basis` | 3,069 / 3,069 | 100.0 | EVERY_VALUE |
 | legislation | `native_bill_action_coverage__action_lookup_basis` | 3,061 / 3,069 | 99.7 | SOME_VALUES |
 | legislation | `entity_class_scope_basis` | 2,456 / 2,456 | 100.0 | EVERY_VALUE |
 | natural-resources | `cedar_uid_basis` | 586 / 586 | 100.0 | EVERY_VALUE |
-| nest | `nest_entity_dual_role__verification_sources` | 281 / 1,701 | 16.5 | SOME_VALUES |
+| nest | `nest_entity_dual_role__verification_sources` | 281 / 2,406 | 11.7 | SOME_VALUES |
 | deals | `Notes` | 141 / 1,039 | 13.6 | SOME_VALUES |
 | nonprofits | `exclusion_reason` | 27 / 4,960 | 0.5 | SOME_VALUES |
 | nonprofits | `entity_match_basis` | 27 / 12,689 | 0.2 | SOME_VALUES |
@@ -96,11 +105,11 @@ Reported, never dropped. A column here is an upstream DATA problem: the value sh
 
 ## Export width
 
-`dist/customer` is **43-309 columns**, widest `gaming`. The ten-row review saw 29-81. **The export is wider than the review found, not narrower** - only the 100-row previews in `dist/preview` are narrow (7-11).
+`dist/customer` is **46-309 columns**, widest `gaming`. The ten-row review saw 29-81. **The export is wider than the review found, not narrower** - only the 100-row previews in `dist/preview` are narrow (7-11).
 
 ## Still open, and why they are not decided here
 
-- **QA-CP016** `contractors.identifier_ruling_quarantined = Y` reaches 227,540 rows carrying $30.26B of attribution, including 39,459 `RULED_TIER_UNSTATED` and 3,469 `RULED_ATTRIBUTED` rows - positive rulings inside a quarantined BATCH. CP-016's release test would withhold all of it. What quarantine means for publication is an owner ruling, not a builder's guess.
+- **QA-CP016 is RESOLVED, not open.** It was logged here as needing an owner because 3,469 quarantined rows read `ruling_status = RULED_ATTRIBUTED` and a positive human ruling should not be discarded by a batch-level quarantine. **The premise was false.** Those rows are `cluster_v3` (3,330) and `need_v6` (139), and **no row anywhere in the quarantine is tier A** - 227,540 of 227,540 are tier B on `identifier_ruling_tier` and on `confidence_tier`, while `ENTITY_MATCH_RULES` rule 8 reserves tier A for an owner ruling. They are the quarantined method’s own output wearing an adjudication-shaped name. Masked by `BLOCKED_COMBINATIONS`, keyed on the method and the tier rather than on the status label - which matters, because the label is on 1,405 of the still-attributed rows and the unlabelled `cluster_v3` rows beside them carried $16.00B.
 
 - **QA-NEST-SOURCEDOC** `nest.source_document` is a real source-document column on 825 rows and the owner's own research dataset, named by its path on this machine, on 3,189. It is kept because dropping it would delete the 825; the fix is upstream.
 

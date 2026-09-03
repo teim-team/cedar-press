@@ -251,11 +251,21 @@ BLOCKED_STATES = {
     # MASK - the organisation is real and ships, the contested key does not.
     # `HELD_STATE_DISAGREES` is the place-name collision family measured in
     # `docs/ENTITY_LAYER_DEEPENING_2026-09-02.md` (461 of 1,423 live keys).
+    # `REFUSED_PLACE_NAME_IS_THE_ADDRESS` added 2026-09-02 by `code/1155` - the
+    # collision `HELD_STATE_DISAGREES` cannot see, because a town named after a
+    # nation is almost always IN that nation's state, so state agreement is
+    # anti-correlated with correctness here. Measured: of a seeded 150-row
+    # sample of the 888 keys reading SUPPORTED, 105 were wrong. It MASKs for the
+    # same reason the other three do - the IRS record is real and ships, the
+    # contested key does not. It is a ONE-LINE dependency of `1155`, whose
+    # `verify` fails if this entry is missing, because deny-by-default would
+    # otherwise WITHHOLD 293 real filings instead of masking their keys.
     "key_review_disposition": {
         "SUPPORTED": PUBLISH,
         "HELD_STATE_DISAGREES": MASK,
         "REDIRECT_PROPOSED": MASK,
         "REFUSED_GENERIC_TOKEN_ONLY": MASK,
+        "REFUSED_PLACE_NAME_IS_THE_ADDRESS": MASK,
     },
     # -- contractors --------------------------------------------------------
     # CP-020. `CONTRADICTED_AS_OF` is the temporal-ownership model saying the
@@ -332,11 +342,60 @@ BLOCKED_STATES = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# ONE STATE COLUMN IS NOT ALWAYS ENOUGH  (CP-016, resolved 2026-09-02)
+# ---------------------------------------------------------------------------
+# `BLOCKED_STATES` asks one question of one column. This asks a CONJUNCTION,
+# and CP-016 is why it has to exist.
+#
+# THE ESCALATION THAT SHOULD NOT HAVE HAPPENED. `1153` first logged
+# `identifier_ruling_quarantined = Y` - 227,540 rows, $30.26B of attribution -
+# as needing an owner ruling, on the reasoning that 3,469 of them read
+# `ruling_status = RULED_ATTRIBUTED` and a positive human ruling should not be
+# discarded by a batch-level quarantine. **The premise was false and it is
+# measurable.** Those 3,469 rows are `cluster_v3` (3,330) and `need_v6` (139),
+# every one of them tier B:
+#
+#   * `cluster_v3`'s own `tier_rationale` reads "Algorithmic name clustering,
+#     unreviewed". ADR: "a `cluster_v3` guess"; "a resolver output - Cedar
+#     agreeing with itself".
+#   * `need_v6` is START_HERE trap 1 by name - **6.5% accurate, never
+#     publishes alone**.
+#   * `ENTITY_MATCH_RULES` rule 8 reserves tier A for an owner ruling, and
+#     **no row anywhere inside the quarantine is tier A** - 227,540 of 227,540
+#     are B, on `identifier_ruling_tier` AND on `confidence_tier`.
+#
+# So `RULED_ATTRIBUTED` here is not an adjudication. It is the output of a
+# quarantined method wearing a status name that reads like one - START_HERE
+# trap 1b in a sixth vocabulary, and the naming defect is logged separately in
+# `docs/KNOWN_ISSUES.md` (QA-STATUS-VOCAB).
+#
+# AND THE STATUS NAME IS THE WRONG THING TO KEY ON. Masking only the rows
+# labelled `RULED_ATTRIBUTED` would have cleared 1,405 still-attributed rows
+# and left the 55,736 quarantined `cluster_v3` rows carrying **$16.00B** that
+# have no `ruling_status` at all - the same method, the same tier, the same
+# quarantine, and no misleading label to catch the eye. The defect is the
+# METHOD, so the rule is keyed on the method's quarantine and on the tier.
+#
+# WHY `!= A` AND NOT "EVERYTHING IN THE QUARANTINE". Nothing in the quarantine
+# is tier A today, so the two are the same set right now. They stop being the
+# same set the moment an owner rules on one of these identifiers, and at that
+# moment this rule must let go of it by itself. Read the SIGN, not the batch.
+BLOCKED_COMBINATIONS = (
+    {"reason": "quarantined_method_not_ruled_tier_A",
+     "when": {"identifier_ruling_quarantined": {"Y"}},
+     "unless": {"identifier_ruling_tier": {"A"}},
+     "disposition": MASK},
+)
+
 # What a MASK blanks, per state column. Named per column rather than globally
 # because `cedar_uid` is the only name these tables share and the rest differ:
 # masking `entity_id` in nonprofits would blank the ORGANISATION's own id,
 # which is the row's subject and must survive.
 MASK_COLS = {
+    # keyed by the state column, or by a `BLOCKED_COMBINATIONS` reason
+    "quarantined_method_not_ruled_tier_A": ("cedar_uid", "tribe_id",
+                                            "canonical_name"),
     "owner_attribution_status": ("cedar_uid", "tribe_id", "canonical_name"),
     "ruling_status": ("cedar_uid", "tribe_id", "canonical_name"),
     "identifier_ruling_review": ("cedar_uid", "tribe_id", "canonical_name"),
@@ -605,6 +664,18 @@ def adjudication(r) -> tuple[str, str]:
             return WITHHOLD, f"unknown_state:{col}={v}"
         if rank[d] > rank[best]:
             best, why = d, f"{col}={v}"
+    # Conjunctions last: they outrank a single-column PUBLISH or FLAG, because
+    # the whole reason one exists is that no single column carries the fact.
+    for rule in BLOCKED_COMBINATIONS:
+        if not all(c in r and (r.get(c) or "").strip() in vals
+                   for c, vals in rule["when"].items()):
+            continue
+        if any(c in r and (r.get(c) or "").strip() in vals
+               for c, vals in rule.get("unless", {}).items()):
+            continue
+        d = rule["disposition"]
+        if rank[d] > rank[best]:
+            best, why = d, rule["reason"]
     return best, why
 
 
@@ -615,6 +686,8 @@ def mask_attribution(r, state_reason: str) -> int:
     kept - it is a real public record - and the state column that caused the
     mask is left in the row, so the export still SAYS why the owner is absent.
     """
+    # A single-column reason is `<column>=<value>`; a conjunction reason is a
+    # bare name from `BLOCKED_COMBINATIONS`. Both index `MASK_COLS`.
     col = state_reason.split("=", 1)[0]
     cleared = 0
     for c in MASK_COLS.get(col, ()):
@@ -1000,7 +1073,7 @@ CONSUMERS = ("770_sample_extracts.py",
 SHARED = ("NEVER", "GATES", "FLAGSHIP", "PRODUCT_ID", "DROP_COLS",
           "CUSTOMER_SHELVES", "STOREFRONT_SHELVES", "GROVE_SHELVES",
           "BUILD_SHELVES", "SPINE_TABLES", "YEAR_COLS",
-          "BLOCKED_STATES", "MASK_COLS", "MASK_FLAGS",
+          "BLOCKED_STATES", "BLOCKED_COMBINATIONS", "MASK_COLS", "MASK_FLAGS",
           "LINEAGE_COLS", "LINEAGE_SUFFIXES")
 
 # Consumers that write a CUSTOMER file must apply the whole gate, not half of
@@ -1155,6 +1228,23 @@ def verify() -> int:
                        f"MASK_COLS names no column to blank - the mask would "
                        f"clear nothing and count as applied")
 
+    #  9b. Same for a conjunction: it must name a disposition, at least one
+    #      `when` column, and - if it masks - the columns it blanks.
+    for rule in BLOCKED_COMBINATIONS:
+        if not rule.get("when"):
+            bad.append(f"BLOCKED_COMBINATIONS {rule.get('reason')!r} has no "
+                       f"`when` clause and would fire on every row")
+        if rule.get("disposition") not in (PUBLISH, FLAG, MASK, WITHHOLD):
+            bad.append(f"BLOCKED_COMBINATIONS {rule.get('reason')!r} has no "
+                       f"valid disposition")
+        if rule.get("disposition") == MASK and not MASK_COLS.get(rule["reason"]):
+            bad.append(f"BLOCKED_COMBINATIONS {rule['reason']!r} MASKs and "
+                       f"MASK_COLS names no column to blank")
+        if "=" in (rule.get("reason") or ""):
+            bad.append(f"BLOCKED_COMBINATIONS reason {rule['reason']!r} "
+                       f"contains '=' - mask_attribution() splits on it and "
+                       f"would look up the wrong MASK_COLS key")
+
     # 10. Both halves of the gate, in every consumer that writes a customer
     #     file. Half the gate is worse than none, because it looks fixed.
     for stem in GATE_CALLERS:
@@ -1192,6 +1282,8 @@ def main() -> int:
     _d = Counter(d for v in BLOCKED_STATES.values() for d in v.values())
     print(f"    BLOCKED_STATES   : {len(BLOCKED_STATES)} columns, "
           + ", ".join(f"{k} {_d[k]}" for k in (PUBLISH, FLAG, MASK, WITHHOLD)))
+    print(f"    BLOCKED_COMBOS   : {len(BLOCKED_COMBINATIONS)} - "
+          + ", ".join(r["reason"] for r in BLOCKED_COMBINATIONS))
     print(f"    FLAGSHIP         : {len(FLAGSHIP)} collections")
     print(f"    PRODUCT_ID       : {PRODUCT_ID}")
     print(f"    CUSTOMER_SHELVES : {CUSTOMER_SHELVES}")

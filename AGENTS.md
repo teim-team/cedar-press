@@ -8624,3 +8624,104 @@ already failing at HEAD and none of its new-since-baseline findings are in this
 workstream's files.
 
 <!-- END QA-PUBLICATION-ELIGIBILITY-2026-09-02 -->
+
+<!-- BEGIN QA-CP016-RESOLVED-2026-09-02 -->
+
+## 2026-09-02 addendum — CP-016 did not need the owner, and the reason it looked like it did is a naming defect
+
+Supersedes the "Left open, deliberately" section of
+`QA-PUBLICATION-ELIGIBILITY-2026-09-02` above. That section is left standing
+because being wrong in public is the point of an append-only journal.
+
+**What that section said.** `identifier_ruling_quarantined = Y` reaches 227,540
+rows carrying $30.26B, and CP-016's release test would withhold all of it — but
+3,469 of those rows read `ruling_status = RULED_ATTRIBUTED`, so a positive human
+ruling would be discarded by a batch-level quarantine, and that is an owner
+call.
+
+**The reasoning was sound. The premise was false, and one query says so.** The
+3,469 are `cluster_v3` (3,330) and `need_v6` (139), every one tier B — and
+across the entire quarantine **227,540 of 227,540 rows are tier B**, on
+`identifier_ruling_tier` and on `confidence_tier`. There is no tier-A row inside
+it. `ENTITY_MATCH_RULES` rule 8 reserves tier A for an owner ruling;
+`cluster_v3`'s own `tier_rationale` reads *"Algorithmic name clustering,
+unreviewed"*; `need_v6` is START_HERE trap 1 by name, **6.5% accurate, never
+publishes alone**. `1079` — the script that *created* the quarantine — records
+what these methods did: 53 UEIs and $8.15B hung on Native Village of Barrow
+because the token was `Government Solutions`, and 60+ CAGE codes hung on the
+Lumbee Tribe of **North** Carolina because the token was `north`.
+
+The control makes it unmistakable. Unquarantined `RULED_ATTRIBUTED` is
+`agent_research_two_leg` 220,228 / `elijah_ruling` 152,701 / `hand` 6,125 —
+tier A, human. Quarantined `RULED_ATTRIBUTED` is `cluster_v3` and `need_v6`,
+tier B, machine. **Same status name, two unrelated populations.**
+
+### The correction inside the correction: do not key on the status name
+
+Masking the rows labelled `RULED_ATTRIBUTED` would have cleared **1,405**
+still-attributed rows and left **55,736 quarantined `cluster_v3` rows carrying
+$16.00B** untouched — same method, same tier, same quarantine, and no
+adjudication-shaped label to draw the eye. The misleading name is where the
+defect was *noticed*; the METHOD is where it *lives*.
+
+So the rule is a conjunction, `cedar_publication.BLOCKED_COMBINATIONS`:
+
+    identifier_ruling_quarantined == 'Y'  AND  identifier_ruling_tier != 'A'  ->  MASK
+
+`!= A` rather than "everything in the quarantine", even though the two are the
+same set today: the moment an owner rules on one of these identifiers the rule
+has to let go of it by itself. **Read the SIGN, not the batch** — trap 1b again,
+one level up.
+
+### `RULED_TIER_UNSTATED`, checked the same way — and it splits
+
+| | rows | method | tier |
+|---|---:|---|---|
+| inside the quarantine | 39,646 | `cluster_v3` 39,600, `need_v6` 38, `sam_namematch` 8 | **all B** |
+| outside | 936 | blank | blank |
+| outside | 6 | **`hand`** | **A** |
+| outside | 2 | `cross_dataset_propagation` | B |
+
+The hypothesis holds for the 39,646 and fails for the 944. Six of those are a
+human ruling by hand at tier A, and a rule keyed on the status name would have
+masked them. `RULED_TIER_UNSTATED` therefore stays **FLAG** in
+`BLOCKED_STATES`, and the conjunction masks the quarantined ones on the evidence
+that actually distinguishes them. That is the whole argument for keying on
+method-and-tier in one sentence.
+
+### What came off
+
+| | rows | attributed | attributed obligations |
+|---|---:|---:|---:|
+| delivered before this session | 1,217,768 | 791,839 | $230,347,747,685.93 |
+| after the CP-002 masks | 1,217,768 | 738,057 | $213,718,411,847.85 |
+| after the CP-016 conjunction | **1,217,768** | **636,459** | **$193,708,680,912.53** |
+
+**155,476 attributions masked in `contractors`, and not one row dropped.** The
+awards are all still there; 384 distinct Cedar entities remain attributed. Zero
+quarantined rows now carry a `cedar_uid`, which `1153 verify` asserts.
+
+Concentration, which is itself the argument: 1,638 of the 3,469 labelled rows
+were Susanville, 337 Eagle, 303 Cherokee Nation. One wrong cluster was doing
+most of the work.
+
+### The naming defect is logged, because it has a measured cost
+
+`docs/KNOWN_ISSUES.md` **QA-STATUS-VOCAB** (S1, OPEN). A value called
+`RULED_ATTRIBUTED` that can mean *"a quarantined resolver guessed"* made a
+reviewer with the whole file in front of them escalate a decision they could
+have answered. Escalation is the cheap failure; the expensive one is the same
+name persuading the next reader to publish. `ruling_status` currently mixes
+human verdicts, negative verdicts (`RULED_NOT_NATIVE` — 559 of which shipped
+`attributed_flag = 1`), explicit non-attributions
+(`RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED`) and machine output under one `RULED_`
+prefix. Splitting the prefix touches every script that reads the column and
+belongs to whoever owns `1079` and the ruling vocabulary.
+
+**Gates after the rebuild:** `846` **31/31** (the suite grew to 31 — `1156`'s
+doc-claim gate is another workstream's), `845 verify` ok, `cedar_publication`
+/ `1137` / `1151` / `1152` / `1153 verify` all ok. Four datasets
+(`federal-register`, `nagpra`, `nest`, `nonprofits`) had gone STALE from other
+agents' concurrent writes to `data/clean` and were rebuilt to clear it.
+
+<!-- END QA-CP016-RESOLVED-2026-09-02 -->

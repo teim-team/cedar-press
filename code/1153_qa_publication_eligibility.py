@@ -72,7 +72,8 @@ sys.path.insert(0, str(ROOT / "code"))
 csv.field_size_limit(10_000_000)
 
 from cedar_publication import (          # noqa: E402
-    BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
+    BLOCKED_STATES, BLOCKED_COMBINATIONS,
+    MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
     PUBLISH, FLAG, MASK, WITHHOLD,
     is_lineage_column, is_publication_eligible, lobbying_warning,
 )
@@ -129,6 +130,22 @@ def scan(cap=None):
             # check that the mask ran, as opposed to being defined: for every
             # state value dispositioned MASK, no attribution cell on the row
             # may still be filled.
+            # Conjunction rules: countable and leak-checkable the same way.
+            # A rule applies to this file only if every column it names is
+            # present, so a table that does not carry the quarantine columns is
+            # not silently reported as clean against a rule it cannot trip.
+            ci = []
+            for rule in BLOCKED_COMBINATIONS:
+                cols = list(rule["when"]) + list(rule.get("unless", {}))
+                if not all(c in hdr for c in rule["when"]):
+                    continue
+                tgt = [(hdr.index(x), x) for x in
+                       tuple(MASK_COLS.get(rule["reason"], ())) + MASK_FLAGS
+                       if x in hdr]
+                ci.append((rule,
+                           [(hdr.index(c), c) for c in cols if c in hdr],
+                           tgt))
+            combos = Counter()
             mi = {}
             for c in state_cols:
                 if not any(d == MASK for d in BLOCKED_STATES[c].values()):
@@ -160,17 +177,33 @@ def scan(cap=None):
                     if LOCAL_RE.search(URL_RE.sub("", v)):
                         k.append("localpath")
                     kinds[c]["+".join(k) if k else "prose"] += 1
-                for c, (ci, tgt) in mi.items():
-                    v = row[ci].strip() if ci < w else ""
+                for c, (idx, tgt) in mi.items():
+                    v = row[idx].strip() if idx < w else ""
                     if not v or BLOCKED_STATES[c].get(v) != MASK:
                         continue
                     for i, x in tgt:
                         cell = row[i].strip() if i < w else ""
                         if cell and not (x in MASK_FLAGS and cell == "0"):
                             leak[f"{c}={v} left {x}"] += 1
+                for rule, cols, tgt in ci:
+                    vals = {c: (row[i].strip() if i < w else "")
+                            for i, c in cols}
+                    if not all(vals.get(c) in s
+                               for c, s in rule["when"].items()):
+                        continue
+                    if any(vals.get(c) in s
+                           for c, s in rule.get("unless", {}).items()):
+                        continue
+                    combos[rule["reason"]] += 1
+                    if rule["disposition"] != MASK:
+                        continue
+                    for i, x in tgt:
+                        cell = row[i].strip() if i < w else ""
+                        if cell and not (x in MASK_FLAGS and cell == "0"):
+                            leak[f"{rule['reason']} left {x}"] += 1
         out[stem] = {"rows": n, "cols": len(hdr), "header": hdr,
                      "states": states, "lineage": lineage, "kinds": kinds,
-                     "mask_leak": leak}
+                     "mask_leak": leak, "combos": combos}
     return out
 
 
@@ -269,6 +302,18 @@ def report(st):
                   f"{r['value'][:40]:<41}{r['rows']:>9,}")
         print()
 
+    combos = {s: d["combos"] for s, d in st.items() if d.get("combos")}
+    if combos:
+        print("    CONJUNCTIONS (BLOCKED_COMBINATIONS - no single column "
+              "carries the fact)")
+        for s, ctr in combos.items():
+            for why, n in ctr.most_common():
+                rule = next(r for r in BLOCKED_COMBINATIONS
+                            if r["reason"] == why)
+                print(f"      {s:<26}{why[:44]:<45}{rule['disposition']:<9}"
+                      f"{n:>9,}")
+        print()
+
     leaks = {s: d["mask_leak"] for s, d in st.items() if d.get("mask_leak")}
     if leaks:
         print("    MASK LEAKS - the mask is defined and did not fire")
@@ -312,6 +357,7 @@ def report(st):
 
 
 def write(disp, mx, st):
+    combos = {s: d["combos"] for s, d in st.items() if d.get("combos")}
     OUT_STATES.parent.mkdir(parents=True, exist_ok=True)
     with OUT_STATES.open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(disp[0]))
@@ -351,6 +397,16 @@ def write(disp, mx, st):
                                          -r["rows"])):
         L.append(f"| {r['dataset']} | `{r['state_column']}` | "
                  f"`{r['value']}` | {r['rows']:,} | {r['disposition']} |")
+    L += ["", "## Conjunctions - where no single column carries the fact", "",
+          "`BLOCKED_COMBINATIONS` in `cedar_publication`. CP-016 needed one: "
+          "the defect is a quarantined METHOD, and the misleading "
+          "`ruling_status` label is on only a fraction of the rows it "
+          "produced.", "",
+          "| dataset | rule | disposition | rows |", "|---|---|---|---:|"]
+    for s, ctr in sorted(combos.items()):
+        for why, n in ctr.most_common():
+            rule = next(r for r in BLOCKED_COMBINATIONS if r["reason"] == why)
+            L.append(f"| {s} | `{why}` | {rule['disposition']} | {n:,} |")
     L += ["", "## Build-lineage columns dropped by name", "",
           "`LINEAGE_COLS` + `LINEAGE_SUFFIXES` in `cedar_publication`. "
           "**`_basis` is deliberately NOT a lineage suffix** - it carries the "
@@ -381,12 +437,20 @@ def write(disp, mx, st):
           f"narrow"
           + (f" ({min(pw.values())}-{max(pw.values())})." if pw else "."), "",
           "## Still open, and why they are not decided here", "",
-          "- **QA-CP016** `contractors.identifier_ruling_quarantined = Y` "
-          "reaches 227,540 rows carrying $30.26B of attribution, including "
-          "39,459 `RULED_TIER_UNSTATED` and 3,469 `RULED_ATTRIBUTED` rows - "
-          "positive rulings inside a quarantined BATCH. CP-016's release test "
-          "would withhold all of it. What quarantine means for publication is "
-          "an owner ruling, not a builder's guess.", "",
+          "- **QA-CP016 is RESOLVED, not open.** It was logged here as "
+          "needing an owner because 3,469 quarantined rows read "
+          "`ruling_status = RULED_ATTRIBUTED` and a positive human ruling "
+          "should not be discarded by a batch-level quarantine. **The premise "
+          "was false.** Those rows are `cluster_v3` (3,330) and `need_v6` "
+          "(139), and **no row anywhere in the quarantine is tier A** - "
+          "227,540 of 227,540 are tier B on `identifier_ruling_tier` and on "
+          "`confidence_tier`, while `ENTITY_MATCH_RULES` rule 8 reserves tier "
+          "A for an owner ruling. They are the quarantined method’s own "
+          "output wearing an adjudication-shaped name. Masked by "
+          "`BLOCKED_COMBINATIONS`, keyed on the method and the tier rather "
+          "than on the status label - which matters, because the label is on "
+          "1,405 of the still-attributed rows and the unlabelled "
+          "`cluster_v3` rows beside them carried $16.00B.", "",
           "- **QA-NEST-SOURCEDOC** `nest.source_document` is a real "
           "source-document column on 825 rows and the owner's own research "
           "dataset, named by its path on this machine, on 3,189. It is kept "

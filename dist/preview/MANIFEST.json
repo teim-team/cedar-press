@@ -27,7 +27,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 43
+      "full_columns": 46
     },
     {
       "dataset": "funding",
@@ -63,7 +63,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 74
+      "full_columns": 76
     },
     {
       "dataset": "native-owned-businesses",
@@ -99,7 +99,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 72
+      "full_columns": 75
     },
     {
       "dataset": "subcontracting",
