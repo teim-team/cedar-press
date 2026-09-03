@@ -48,8 +48,10 @@ and there is no Grove code in this repository to be distinguished from.
 **The rename is a named next step, not done here.**
 
 The measurement below is re-derived on every test run and compared against
-this table by `server/tests/test_rename_plan.py`, so it cannot go stale
-quietly again. The first version of it was taken on `cedar-consolidated` at
+this table by `server/tests/test_rename_plan.py` — every figure in it, the
+breakdowns included, and `test_rename_plan_gate.py` injects a stale one to
+prove that comparison fails when it should. So it cannot go stale quietly
+again. The first version of it was taken on `cedar-consolidated` at
 `05b438d` and left standing while the tree moved underneath it; by the time
 Codex checked, every row was wrong, and a number in a Markdown table is not
 compiled, not imported and not asserted by anything. Re-measured with:
@@ -63,8 +65,8 @@ git ls-files src/<dir>/grove                                   # files to move
 |---|---|
 | Files to move | 57 — `features/grove` 34, `pages/grove` 21, `components/grove` 1, `styles/grove` 1 |
 | Path references to rewrite | 209, across 55 files |
-| Referencing files inside `src/` | 23 — 17 pages, 2 features, 2 under `context/`, and one each of `components/` and `main.jsx` |
-| Referencing files outside `src/` | 32 — 7 under `server/cedar_press/`, 6 under `scripts/`, 6 under `docs/`, 4 under `code/`, 3 under `server/tests/`, 2 under `tests/`, 1 under `data/`, 1 under `.github/`, plus `package.json` and `.env.example` |
+| Referencing files inside `src/` | 23 — `pages/` 17, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 32 — `server/cedar_press/` 7, `scripts/` 6, `docs/` 6, `code/` 4, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a

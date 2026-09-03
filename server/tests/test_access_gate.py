@@ -45,15 +45,12 @@ invariant is named.
 
 from __future__ import annotations
 
-import os
 import shutil
-import subprocess
-import sys
 import unittest
-from collections.abc import Iterator
-from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
+
+from tests.treecopy import copy_paths, injected, run_unittest
 
 _REPO = Path(__file__).resolve().parents[2]
 
@@ -66,66 +63,13 @@ _TARGET = "tests.test_access.TestAccessParity"
 #: Everything the parity test reads, and nothing else. ``public`` is not here:
 #: the sample CSVs are read by ``collection_csv``, which this class does not
 #: reach, and copying 2.5 MB of fonts and imagery per run to prove a shelf map
-#: is the kind of cost that gets a check deleted.
+#: is the kind of cost that gets a check deleted. The rename gate next door
+#: needs the whole tracked tree and a real index; this one does not, and the
+#: two shapes of copy live together in ``treecopy.py``.
 _NEEDED = ("src", "scripts", "data/cedar", "server")
-
-_IGNORE = shutil.ignore_patterns("__pycache__", "*.egg-info", ".pytest_cache", "*.pyc")
 
 _CLIENT_TIER_MAP = "src/features/grove/pressAccess.js"
 _CLIENT_CATALOG = "src/features/grove/pressCatalog.js"
-
-
-def _copy_tree(destination: Path) -> None:
-    for relative in _NEEDED:
-        target = destination / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(_REPO / relative, target, ignore=_IGNORE)
-
-
-def _run_the_gate(root: Path) -> subprocess.CompletedProcess:
-    """The CI command, in ``root``'s copy of the tree."""
-    # `-m` already puts the working directory first on sys.path, so the copy's
-    # `cedar_press` and `tests` win over anything installed. PYTHONPATH says it
-    # again, because an editable install of this package is the normal
-    # developer environment and a silent fall-back to the REAL server package
-    # would make every assertion below vacuous.
-    env = dict(os.environ)
-    env["PYTHONPATH"] = str(root / "server")
-    return subprocess.run(  # noqa: S603
-        [sys.executable, "-m", "unittest", _TARGET],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        cwd=root / "server",
-        env=env,
-        check=False,
-    )
-
-
-@contextmanager
-def _injected(path: Path, old: str, new: str, *, after: str) -> Iterator[None]:
-    """Rewrite the first ``old`` at or after ``after``, then put it back.
-
-    The mismatch has to be a real one. If the source has been reshaped so the
-    string is not there any more, this fails loudly rather than inject nothing
-    and then report that the gate refused nothing.
-    """
-    original = path.read_text(encoding="utf-8")
-    start = original.index(after)
-    index = original.find(old, start)
-    if index < 0:
-        raise AssertionError(
-            f"{path.name} no longer contains {old!r} after {after!r}; this test "
-            f"injects a mismatch by rewriting it and has just injected nothing"
-        )
-    path.write_text(
-        original[:index] + new + original[index + len(old) :], encoding="utf-8"
-    )
-    try:
-        yield
-    finally:
-        path.write_text(original, encoding="utf-8")
 
 
 class TestTheParityGateFires(unittest.TestCase):
@@ -141,14 +85,14 @@ class TestTheParityGateFires(unittest.TestCase):
             )
         cls._tmp = TemporaryDirectory(prefix="cedar-press-gate-")
         cls.root = Path(cls._tmp.name) / "tree"
-        _copy_tree(cls.root)
+        copy_paths(_REPO, cls.root, _NEEDED)
 
     @classmethod
     def tearDownClass(cls) -> None:
         cls._tmp.cleanup()
 
     def _assert_green(self, why: str) -> None:
-        result = _run_the_gate(self.root)
+        result = run_unittest(self.root, _TARGET)
         self.assertEqual(
             result.returncode,
             0,
@@ -156,7 +100,7 @@ class TestTheParityGateFires(unittest.TestCase):
         )
 
     def _assert_red(self, invariant: str) -> None:
-        result = _run_the_gate(self.root)
+        result = run_unittest(self.root, _TARGET)
         self.assertNotEqual(
             result.returncode,
             0,
@@ -183,7 +127,7 @@ class TestTheParityGateFires(unittest.TestCase):
     def test_a_missing_tier_fails_the_gate_by_name(self) -> None:
         # The drift that shipped, reproduced exactly: the server keeps `tree`
         # and the client loses it.
-        with _injected(
+        with injected(
             self.root / _CLIENT_TIER_MAP,
             "  tree: SHELF.GROVE,\n",
             "",
@@ -197,7 +141,7 @@ class TestTheParityGateFires(unittest.TestCase):
         # browser's catalog alone. Every tier map is untouched and the twelve
         # storefront ids are unchanged; only which shelf one of them sits on
         # has moved, which is the mismatch that used to pass.
-        with _injected(
+        with injected(
             self.root / _CLIENT_CATALOG,
             '    shelf: "standard",\n',
             '    shelf: "pro",\n',
