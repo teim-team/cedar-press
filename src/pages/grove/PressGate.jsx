@@ -43,8 +43,6 @@ import {
   PRESS_RESEARCH_PATH,
 } from "../../features/grove/pressRoutes";
 import {
-  PRESS_DEMO_GATE_ACTIVE,
-  PRESS_DEMO_NOTICE,
   PRESS_DEMO_UNCONFIGURED,
   PRESS_SIGN_IN_AVAILABLE,
 } from "../../features/grove/pressDemoGate";
@@ -441,16 +439,23 @@ export default function PressGate({ user }) {
                   subscription, and your login details arrive by email.
                 </p>
               )}
-              {/* Said on the page, not only in the code. On a build with no
-                  server the password is checked in the reader's own browser,
-                  and everything the check reads is in the bundle they already
-                  downloaded — so this is a demonstration gate and the panel
-                  must not let anyone mistake it for access control. It
-                  disappears the moment the deployment connects, because the
-                  platform's session is what checks then. */}
-              {PRESS_DEMO_GATE_ACTIVE ? (
-                <p className="cp-gate__fine">{PRESS_DEMO_NOTICE}</p>
-              ) : null}
+              {/* The sign-in notice was removed 2026-09-02 at the owner's
+                  request: "you don't need the metatext on the website... it's
+                  kind of dumb, like, preview build." He briefs the reviewer
+                  himself, and copy explaining the build to a reader who was
+                  told already makes a real product read as a rehearsal.
+
+                  What it said is still TRUE and still recorded where it is
+                  load-bearing: `pressDemoGate.js`'s docstring, and SECURITY.md,
+                  which keeps this gate out of scope as a vulnerability while
+                  keeping "a record reachable through it that should not be
+                  public" firmly in scope. Nothing behind the gate is
+                  confidential — the bundle ships the catalog, the methods and
+                  sampled rows, never a collection.
+
+                  The article placeholder notice STAYS. That one is not about
+                  the build, it is about invented numbers, and a demonstration
+                  statistic that does not say so is a fabrication. */}
             </>
           ) : step === PRESS_STEP.SET_PASSWORD ? (
             <>
