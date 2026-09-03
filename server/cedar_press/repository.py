@@ -113,7 +113,24 @@ def collections_for(tier: str) -> list[dict[str, Any]]:
 
 
 def may_open(tier: str, collection_id: str) -> bool:
-    """Whether this plan includes this collection."""
+    """Whether this plan includes this collection.
+
+    ``LAUNCH_COLLECTION`` is the storefront -- the twelve on
+    ``cedar_publication.STOREFRONT_SHELVES`` -- so a collection the Cedar data
+    workspace placed on the ``grove`` shelf is refused to every tier here,
+    including ``grove`` and ``tree``. That is the ruling and not an oversight:
+    ``gaming`` "ships through Cedar Grove, not the Press storefront", and it
+    reaches this repository in the manifest's ``excluded`` rather than its
+    ``collections``.
+
+    The browser used to disagree. Codex, PR #41: its catalog is thirteen, it
+    reads the shelf ordering rather than the storefront, and a Grove or Tree
+    session was shown ``gaming`` as open while this function refused it.
+    ``canOpenDataset`` in ``features/grove/pressAccess.js`` now refuses a
+    grove-shelf collection for every plan, and
+    ``tests/test_access.py::TestNothingTheClientOpensIsRefused`` compares the
+    two answers per tier and per collection in both directions.
+    """
     return any(
         dataset.id == collection_id and _reaches(tier, dataset.shelf)
         for dataset in launch.LAUNCH_COLLECTION

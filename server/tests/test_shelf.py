@@ -384,7 +384,20 @@ class TestUnsupportedTiersReachNothing(unittest.TestCase):
                     f"{tier!r} was shown a shelf it cannot open")
 
     def test_the_page_and_the_download_route_agree(self):
-        """The real invariant: nothing rendered open may be refused."""
+        """The real invariant: nothing rendered open may be refused.
+
+        This half covers the SERVER-rendered shelf, and it covers only what
+        that page can render: ``view_for`` fills its bands from
+        ``LAUNCH_COLLECTION``, the twelve storefront collections. The browser
+        renders from ``PRESS_CATALOG``, which is thirteen, and it broke this
+        invariant on the entry the two do not share -- Codex, PR #41. The
+        client's half is
+        ``test_access.py::TestNothingTheClientOpensIsRefused``, which runs
+        ``canOpenDataset`` through ``scripts/dump-access.mjs`` and holds both
+        directions of the same rule. Neither half subsumes the other: this one
+        needs no ``node`` and covers the tiers ``shelf.py`` accepts; that one
+        covers the collection this page cannot show.
+        """
         for tier in ("press", "press_pro", "tree", "free", "sprout", None):
             view = shelf.view_for(tier)
             for band in view.bands:

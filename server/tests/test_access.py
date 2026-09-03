@@ -30,6 +30,14 @@ TWO QUESTIONS, COMPARED SEPARATELY
 If ``node`` is unavailable the test FAILS rather than skipping, for the reason
 ``test_collection.py`` gives: an unrun parity check is how the two drifted the
 first time.
+
+AND IT IS PROVEN TO FIRE
+``test_access_gate.py`` injects a mismatched tier and a mismatched shelf into
+a copy of the tree, runs this module as a command, and requires a nonzero exit
+naming the invariant. Codex, PR #41, on the version of this file that had
+never been seen to fail: a gate nobody has watched refuse anything is
+indistinguishable, from the outside, from a gate that reads one side twice --
+which is what ``test_the_same_collections_open_for_every_tier`` was doing.
 """
 
 from __future__ import annotations
@@ -123,19 +131,44 @@ class TestAccessParity(unittest.TestCase):
             list(self.js["shelves"].values()),
         )
 
+    def test_each_collection_sits_on_the_same_shelf_in_both(self) -> None:
+        # Codex, PR #41. The maps above agree on which shelf a TIER reaches
+        # and said nothing about which shelf a COLLECTION sits on, so moving
+        # an entry between `standard` and `pro` in `PRESS_CATALOG` left every
+        # assertion here green: the tier maps are untouched, and
+        # ``test_the_catalog_is_the_storefront_plus_the_grove_shelf`` compares
+        # the UNION of the two shelves, which a move between them does not
+        # change. Compared as a collection-to-shelf map so the report names
+        # the collection that moved.
+        by_id = {
+            collection_id: shelf
+            for shelf, ids in self.js["catalogByShelf"].items()
+            for collection_id in ids
+        }
+        # The grove shelf is not on the storefront and so is not in the launch
+        # collection at all; that side of the split is compared against the
+        # manifest by ``TestGroveDivergence``.
+        storefront = {i: s for i, s in by_id.items() if s != "grove"}
+        self.assertEqual({d.id: d.shelf for d in launch.LAUNCH_COLLECTION}, storefront)
+
     def test_the_same_collections_open_for_every_tier(self) -> None:
         # The end-to-end form of the drift, stated in collections rather than
         # in shelf names: this is the count a subscriber actually sees.
-        for tier, reach in self.js["shelfReach"].items():
+        #
+        # Codex, PR #41: ``expected`` used to be derived from
+        # ``launch.LAUNCH_COLLECTION`` and ``repository.SHELF_ORDER``, which
+        # is Python on both sides of an assertEqual -- a reimplementation of
+        # ``collections_for`` compared against ``collections_for``. The other
+        # side is now the JavaScript's own answer: `canOpen` is
+        # ``canOpenDataset`` run per tier over the whole catalog, which is the
+        # decision that actually puts a download control on a tile.
+        #
+        # Sorted rather than in catalog order: `canOpen` is emitted sorted,
+        # and the order the route serves in is pinned by ``test_collection``.
+        for tier, ids in self.js["canOpen"].items():
             with self.subTest(tier=tier):
-                order = list(repository.SHELF_ORDER)
-                expected = [
-                    d.id
-                    for d in launch.LAUNCH_COLLECTION
-                    if reach is not None and order.index(d.shelf) <= order.index(reach)
-                ]
-                served = [d["id"] for d in repository.collections_for(tier)]
-                self.assertEqual(served, expected)
+                served = sorted(d["id"] for d in repository.collections_for(tier))
+                self.assertEqual(served, sorted(ids))
 
     # -- who is sold the page ----------------------------------------------
 
@@ -168,6 +201,83 @@ class TestAccessParity(unittest.TestCase):
                 self.assertIsNone(repository.SHELF_BY_TIER.get(tier))
                 self.assertEqual(repository.collections_for(tier), [])
                 self.assertFalse(press_catalog.can_read_cedar_press(tier))
+
+
+class TestNothingTheClientOpensIsRefused(unittest.TestCase):
+    """The shelf invariant, extended across the language boundary.
+
+    ``test_shelf.py::TestUnsupportedTiersReachNothing`` already pins one half
+    of this: *nothing the server-rendered shelf shows as open may be refused
+    by ``may_open``*. It passed for a reason narrower than it looked. That
+    page is built from ``LAUNCH_COLLECTION``, `gaming` is not in
+    ``LAUNCH_COLLECTION``, so the page never rendered the one collection the
+    two sides disagreed about.
+
+    The browser is built from ``PRESS_CATALOG``, which has thirteen entries to
+    the launch collection's twelve, and it did render that collection. Codex,
+    PR #41: giving ``PLAN_REACH`` the ``tree: SHELF.GROVE`` key it lacked
+    closed the tier drift and uncovered this one underneath -- a Grove or Tree
+    session was shown `gaming` as open and ``may_open("tree", "gaming")``
+    returned False.
+
+    Which side was wrong is settled by ``code/cedar_publication.py``, not by
+    symmetry. It holds three constants, verified in this tree rather than
+    assumed: ``STOREFRONT_SHELVES = ("standard", "pro")`` (twelve collections,
+    what a paying Cedar Press customer sees), ``GROVE_SHELVES = ("grove",)``
+    (one, "built to the same standard, sold through Grove") and
+    ``BUILD_SHELVES`` (the thirteen). `gaming` "ships through **Cedar Grove**,
+    not the Press storefront". ``scripts/import_cedar_manifest.py`` carries
+    that split into the manifest as ``collections`` and ``excluded``, so the
+    Cedar Press API cannot serve `gaming` unless the Cedar data workspace
+    changes its ruling first. The client was the wrong side, and
+    ``canOpenDataset`` now refuses a grove-shelf collection for every plan.
+
+    Both directions are checked. One direction alone would let the fix be a
+    client that opens nothing.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        if shutil.which("node") is None:
+            raise AssertionError("node is not on PATH")
+        cls.js = _javascript()
+
+    def test_nothing_the_client_opens_is_refused_by_the_api(self) -> None:
+        for tier, ids in self.js["canOpen"].items():
+            for collection_id in ids:
+                with self.subTest(tier=tier, collection=collection_id):
+                    self.assertTrue(
+                        repository.may_open(tier, collection_id),
+                        f"the browser opens {collection_id} for {tier!r} and the "
+                        f"download route refuses it",
+                    )
+
+    def test_nothing_the_api_serves_is_hidden_by_the_client(self) -> None:
+        # The other direction, and not a formality: a reader served a
+        # collection the page will not show has paid for something they cannot
+        # reach, which is how the ``tree`` drift presented.
+        for tier in self.js["tiers"]:
+            opened = set(self.js["canOpen"][tier])
+            for row in repository.collections_for(tier):
+                with self.subTest(tier=tier, collection=row["id"]):
+                    self.assertIn(
+                        row["id"],
+                        opened,
+                        f"the API serves {row['id']} to {tier!r} and the browser "
+                        f"will not show it",
+                    )
+
+    def test_a_grove_shelf_collection_opens_for_no_tier_on_either_side(self) -> None:
+        # Stated by shelf rather than by name, so a second Grove-exclusive
+        # collection is covered the day it is added rather than the day
+        # somebody remembers to extend a list.
+        grove_shelf = set(self.js["catalogByShelf"].get("grove", []))
+        self.assertTrue(grove_shelf, "the fixture for this test has gone away")
+        for tier in self.js["tiers"]:
+            for collection_id in sorted(grove_shelf):
+                with self.subTest(tier=tier, collection=collection_id):
+                    self.assertNotIn(collection_id, self.js["canOpen"][tier])
+                    self.assertFalse(repository.may_open(tier, collection_id))
 
 
 class TestGroveDivergence(unittest.TestCase):
