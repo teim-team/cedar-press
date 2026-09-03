@@ -70,9 +70,45 @@ from build import TABLE_DIRS, _load_architecture, collection_tables  # noqa: E40
 
 # Join keys a consumer may rely on, in preference order - the same list
 # 25_build_publication_layer indexes, so the contract and the database agree.
+#
+# EVERY KEY HERE WAS AN ENTITY KEY UNTIL 2026-09-02, AND TWO COLLECTIONS PAID
+# FOR IT. `1137` folds a collection's side tables into its flagship using the
+# key columns THIS list derives. A collection whose flagship carries no entity
+# key therefore derives `key_columns = []`, no side table can match it, and
+# `1137` folds in NOTHING - silently, because there is nothing to report when
+# the candidate set is empty. Measured on the 2026-09-02 build:
+#
+#   legislation  3,069 rows x 39 cols, +0 joined, 0 counted. `native_bills.csv`
+#                keys on `bill_id`. Eleven side tables carry `bill_id` -
+#                including `native_bill_cosponsors` and `native_bill_actions`,
+#                the 57,061 rows that landed today - and not one reached the
+#                buyer's spreadsheet.
+#   nagpra       6,792 rows x 67 cols, +0 joined, 0 counted. `nagpra_notices`
+#                keys on `document_number`; `nagpra_notice_institutions` and
+#                `fr_nagpra_title_index` carry it.
+#
+# Both are DOCUMENT keys, which is why an entity-only vocabulary could not see
+# them. A bill and a Federal Register notice are each a thing the world already
+# has a stable public identifier for, exactly as a tribe or a facility is, and
+# a consumer joins on them for the same reason.
+#
+# THE BLAST RADIUS WAS MEASURED BEFORE THIS CHANGE, not after. `bill_id` occurs
+# in 12 legislation tables and 1 lobbying table; `document_number` in 4 nagpra,
+# 11 federal-register and 3 lobbying tables. Only legislation and nagpra change
+# what ships, because `1137` derives its join key from the FLAGSHIP's keys and
+# neither `consultation_events.csv` (federal-register) nor
+# `native_entity_lobbying_disclosures.csv` (lobbying) carries either column.
+# The other tables gain a declared key and no delivered file moves.
+#
+# APPENDED, NOT INSERTED. This tuple is in preference order and
+# `25_build_publication_layer.guess_index` takes the FIRST THREE. Putting a
+# document key ahead of `tribe_id` would silently re-choose the SQL indexes on
+# every table that carries both.
 JOIN_KEYS = ("tribe_id", "cedar_uid", "entity_id", "facility_id",
              "property_id", "compact_id", "uei", "ein", "cage_code",
-             "administrative_region_id")
+             "administrative_region_id",
+             # document keys, added 2026-09-02 - see above
+             "bill_id", "document_number")
 
 # ---------------------------------------------------------------------------
 # DECLARED GRAIN - only where an owner ruling or a build log has stated it.

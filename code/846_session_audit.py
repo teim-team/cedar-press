@@ -184,16 +184,40 @@ def _peer():
 def _artefact():
     """The Doyon Na-Deno' page scrape filed list punctuation and marketing copy
     as firms - ', Klawock Island Ventures, and' and 'Enjoy lunch at Kantishna
-    Roadhouse' were both publishable=Y."""
+    Roadhouse' were both publishable=Y.
+
+    EXTENDED 2026-09-02. The shape-matching regex below is a heuristic and it
+    caught the three Na-Dena' rows because they LOOK like prose. It does not
+    catch the three the Colville PDF produced - `Certified Title 10 Yes/No`,
+    `Yes`, `PDF Link` - which are a table's own header line and one shifted
+    cell, and which look exactly like short firm names. Those three were held
+    by nothing but a permission value until the owner's publish ruling removed
+    it, so this claim now ALSO reads the explicit registry
+    `615.NOT_A_FIRM` and fails if any row in it has gone publishable=Y. A
+    named row is worth more than a pattern that might match it.
+    """
     import re as _re
+    import importlib.util as _il
     BAD = _re.compile(r"^\s*,|^(enjoy|visit|book|explore|learn|read)\s|"
                       r"\bearns\b|\bawarded?\b.*\blodge\b", _re.I)
-    bad = [r.get("business_name_raw", "") for r in
-           rows(CLEAN / "native_owned_businesses.csv")
-           if (r.get("publishable") or "") == "Y"
-           and BAD.search(r.get("business_name_raw") or "")]
+    _p = ROOT / "code" / "615_set_publishable_native_owned_businesses.py"
+    _s = _il.spec_from_file_location("cedar615", _p)
+    _m = _il.module_from_spec(_s)
+    _s.loader.exec_module(_m)
+    named = getattr(_m, "NOT_A_FIRM", None)
+    if not named:
+        return (False, "615 declares no NOT_A_FIRM registry - the named "
+                       "artefacts are unguarded and this claim cannot be made")
+    bad = []
+    for r in rows(CLEAN / "native_owned_businesses.csv"):
+        if (r.get("publishable") or "") != "Y":
+            continue
+        nm = r.get("business_name_raw") or ""
+        if (r.get("business_source_id") or "").strip() in named or BAD.search(nm):
+            bad.append(nm)
     return (not bad, f"{len(bad)} publishable artefact(s)"
-                     + (f": {bad[0][:44]}" if bad else ""))
+                     + (f": {bad[0][:44]}" if bad else
+                        f"; {len(named)} named artefacts all withheld"))
 
 
 @claim("no nation is excluded on terms it never stated")

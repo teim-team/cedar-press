@@ -1,5 +1,5 @@
 {
-  "scanned_files": 639,
+  "scanned_files": 640,
   "counts": {
     "class1": 1,
     "class2a": 0,
@@ -864,7 +864,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 677,
+      "line": 701,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -3591,7 +3591,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 997 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 998 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {

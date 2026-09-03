@@ -139,8 +139,41 @@ NEVER = ("owner_name_raw", "email", "phone", "home_address", "personal_email",
 # Columns whose presence means the row is gated. Value -> keep only if match.
 # The empty string is in every allow-set on purpose: a blank gate column means
 # the gate was never evaluated for that row, not that it failed.
+#
+# `source_terms_status` WIDENED 2026-09-02, and this is the second half of a
+# change whose first half is `615.PERMISSION_OK`. The owner's second ruling of
+# 2026-09-02 - `<!-- BEGIN TERMS-OWNER-RULING-PUBLISH-2026-09-02 -->` in
+# docs/PUBLICATION_POLICY.md - released rows harvested from a Native entity's
+# OWN public page regardless of what its terms page says. 615 was extended and
+# re-applied, moving 1,282 `native_owned_businesses` rows to publishable=Y.
+#
+# THIS GATE WOULD HAVE SILENTLY UNDONE ALL OF IT. Measured against the live
+# table after 615 ran: 2,446 rows passed, **1,279 rows that 615 had just
+# released failed on `source_terms_status`** and 548 failed on `publishable`.
+# Two gates, and a ruling applied to only one of them releases nothing - the
+# release would have been visible in data/clean and absent from every delivered
+# spreadsheet, which is the worst of the three possible outcomes because it
+# looks like it worked.
+#
+# The three values added are the three the ruling names, and they carry the
+# same reasoning recorded at `615.PERMISSION_OK`. `NOT_CHECKED` is deliberately
+# NOT here: it records that nobody read the host's terms, which is the absence
+# of a decision rather than a permissive one.
+#
+# STILL AN ALLOW-LIST. An unknown status withholds. The other tables carrying
+# this column were checked before widening: the six `nagpra_nps_*` tables are
+# 21,658 rows of TERMS_STATED_NO_REUSE_RESTRICTION (already passing) and
+# `native_business_contract_links.csv` is the NBOA link table, whose 346
+# TERMS_STATED_RESTRICTIVE rows are Navajo's own directory and release with
+# their parents. EMMA/MSRB - the third-party licensor the ruling explicitly
+# does not reach - has no rows anywhere in data/clean, and must not acquire any
+# through this list.
 GATES = {"publishable": {"Y", "y", "1", "true", "TRUE", ""},
          "source_terms_status": {"SILENT", "TERMS_STATED_NO_REUSE_RESTRICTION",
+                                 # released 2026-09-02, see above
+                                 "TERMS_STATED_RESTRICTIVE",
+                                 "NO_TERMS_PAGE_SERVED",
+                                 "TERMS_STATED_COPYRIGHT_ONLY",
                                  ""}}
 
 # ---------------------------------------------------------------------------

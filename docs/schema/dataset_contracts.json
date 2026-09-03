@@ -999,7 +999,9 @@
     {
      "table": "federal_actions.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register document, classified",
      "primary_key": [
       "document_number"
@@ -1046,7 +1048,8 @@
      "status": "shippable",
      "key_columns": [
       "tribe_id",
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per (Federal Register document, entity named in it)",
      "primary_key": [
@@ -1102,7 +1105,9 @@
     {
      "table": "federal_actions_raw.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register document as pulled, before classification",
      "primary_key": [
       "document_number"
@@ -1209,7 +1214,9 @@
     {
      "table": "fr_consultation_notices.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register notice carrying a consultation signal",
      "primary_key": [
       "document_number"
@@ -1244,7 +1251,9 @@
     {
      "table": "fr_consultation_referenced.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register document that REFERENCES a consultation having been undertaken. 652 rows repeat (year, title, agency, basis) under a DIFFERENT document_number, because the Federal Register reissues an identically titled NAGPRA notice for different collections - each is its own document and none is a duplicate. COUNT DOCUMENTS, NOT DISTINCT TITLES",
      "primary_key": [
       "document_number"
@@ -1308,7 +1317,9 @@
     {
      "table": "fr_content_classification.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register document, with its relevance tier and themes",
      "primary_key": [
       "document_number"
@@ -1343,7 +1354,9 @@
     {
      "table": "fr_ex_parte_notices.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register ex parte notice",
      "primary_key": [
       "fr_ex_parte_notice_id"
@@ -1385,7 +1398,8 @@
      "table": "fr_ex_parte_parties.csv",
      "status": "shippable",
      "key_columns": [
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per party named in a Federal Register ex parte notice",
      "primary_key": [
@@ -1425,7 +1439,8 @@
      "table": "fr_ex_parte_party_entity_links.csv",
      "status": "shippable",
      "key_columns": [
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per resolved link from an ex parte party to a Cedar entity, across TWO source tables - `source_dataset` says which, and the join key is (source_dataset, source_row_id), never source_row_id alone. All 9 links currently come from `ferc_ex_parte_parties.csv`; `fr_ex_parte_parties.csv` resolves 0 of its 112 parties, so a join from fr_ex_parte_parties returns NOTHING and that is the data, not a broken key",
      "primary_key": [
@@ -1732,7 +1747,8 @@
      "status": "shippable",
      "key_columns": [
       "tribe_id",
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per Section 106 consultation event",
      "primary_key": [
@@ -1779,7 +1795,8 @@
      "table": "section_106_project_parties.csv",
      "status": "shippable",
      "key_columns": [
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per party named in a Section 106 undertaking",
      "primary_key": [
@@ -1865,7 +1882,9 @@
     {
      "table": "bill_votes.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per roll-call vote on a Native-relevant bill",
      "primary_key": [
       "vote_id"
@@ -1905,7 +1924,8 @@
      "status": "shippable",
      "key_columns": [
       "tribe_id",
-      "cedar_uid"
+      "cedar_uid",
+      "bill_id"
      ],
      "grain": "one row per (roll-call vote, entity named in the bill)",
      "primary_key": [
@@ -2064,7 +2084,9 @@
     {
      "table": "member_positions.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per (roll-call vote, member of Congress) - the member's cast position",
      "primary_key": [
       "vote_id",
@@ -2106,7 +2128,9 @@
     {
      "table": "native_bill_action_coverage.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per bill in `native_bills.csv` - ALL 3,069, including the 8 the source has no `/bill` path for. The DENOMINATOR for `native_bill_actions.csv`, which alone cannot tell a bill with no recorded action apart from a bill nobody looked up. `became_law` is derived from the presence of a `BecameLaw` action on that bill and is Y on **283 of 3,069** - the enactment rate for Native legislation, which no Cedar table stated before. `first_action_date` / `last_action_date` bound the bill's own history and are NOT the same as `native_bills.latest_action_date`, which was written on 2026-08-05 and does not move.",
      "primary_key": [
       "bill_id"
@@ -2131,7 +2155,9 @@
     {
      "table": "native_bill_actions.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
      "primary_key": [],
      "join_cardinality": {},
@@ -2150,7 +2176,9 @@
     {
      "table": "native_bill_cosponsor_coverage.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per bill in `native_bills.csv` - ALL 3,069, including every bill with no cosponsor and every bill the source has no record of. This is the DENOMINATOR table: `native_bill_cosponsors.csv` alone cannot tell a zero-cosponsor bill apart from an unfetched one, and that distinction is the whole difference between 'this bill had no backers' and 'we did not look'. `cosponsor_lookup_status` carries it: `ok` / `zero_cosponsors_reported` / `no_api_record` / `ok_legacy_only` / `SOURCE_DOES_NOT_PUBLISH_ON_BILL_ENDPOINT` / `NEVER_CHECKED`.\n`count_agrees_with_native_bills` is a CROSS-CHECK, not a filter: it compares the roster length against the `cosponsor_count` `native_bills.csv` has carried since 2026-08-05, and NOT_TESTABLE means one side is blank, never that the two agreed.",
      "primary_key": [
       "bill_id"
@@ -2175,7 +2203,9 @@
     {
      "table": "native_bill_cosponsors.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per (Native bill, cosponsoring member of Congress, sponsorship date). NOT one row per bill and NOT one row per member: a bill has a roster and a member appears on many bills, so any count of 'cosponsors' must say which. `is_original_cosponsor` separates a member who signed at introduction from one who joined later, and `sponsorship_withdrawn_date` is non-blank on a member who LEFT the bill - a withdrawn cosponsor is still a row and filtering it out is a decision the consumer makes, not one Cedar makes for them.\nTWO RECORD BASES IN ONE TABLE, DECLARED IN `record_basis`: `congress_gov_api_v3_cosponsors_1145` is this pass; `legacy__cosponsors_csv` is the 162-bill roster an earlier unnumbered pass left in `data/clean/_cosponsors.csv`, an ORPHAN file matching no COLLECTIONS pattern. A legacy row appears ONLY where this pass has no fetched roster for that bill, so the two never double-count a member.\nTHE SPONSOR IS NOT IN THIS TABLE. `native_bills.sponsor` and `sponsor_bioguide_id` hold the sponsor; cosponsors are a different relation and unioning them without saying so inflates every per-member count by one bill.",
      "primary_key": [
       "bill_id",
@@ -2204,7 +2234,9 @@
     {
      "table": "native_bill_outcomes.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per bill, with its final disposition - docs/BILLS_VOTES_COMPLETION_LOG.md",
      "primary_key": [
       "bill_id"
@@ -2236,7 +2268,9 @@
     {
      "table": "native_bills.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per Native-relevant bill",
      "primary_key": [
       "bill_id"
@@ -2276,7 +2310,8 @@
      "status": "shippable",
      "key_columns": [
       "tribe_id",
-      "cedar_uid"
+      "cedar_uid",
+      "bill_id"
      ],
      "grain": "one row per (bill, entity named in it)",
      "primary_key": [
@@ -2328,7 +2363,9 @@
     {
      "table": "native_bills_entity_class.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per (bill, class-match BASIS) where the bill names a class of Native entity rather than an entity. (bill_id, entity_class) is NOT unique - 34 collisions - because one class can be matched through more than one basis",
      "primary_key": [
       "bill_id",
@@ -2362,7 +2399,9 @@
     {
      "table": "native_bills_subject_sweep.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per BILL in the all_bill_intros corpus whose title, subjects or policy area matched a Native subject-family phrase. A SWEEP HIT IS NOT AN ADJUDICATED CLASSIFICATION - `sweep_basis` names the phrase and where it matched, and `already_in_native_bills` says whether the two-coder corpus had already reached the bill. The corpus repeats 595 bill ids byte-identically and each is now read once, so `bill_id` is unique here and a count of rows IS a count of bills. This table holds no money column",
      "primary_key": [
       "bill_id"
@@ -3199,7 +3238,9 @@
     {
      "table": "fr_nagpra_title_index.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register document whose TITLE is a NAGPRA notice heading. A title-only index of the parent FR corpus, not the notice product: its regex omits 'notice of intended disposition', so it is NOT a superset of nagpra_notices.csv (168 notices are in the product and not here; 2 are here and not there, having no cached full text). Use nagpra_notices.csv for the notices and this only for corpus-level coverage over time - docs/datasets/nagpra.md",
      "primary_key": [
       "document_number"
@@ -3273,7 +3314,8 @@
      "status": "shippable",
      "key_columns": [
       "tribe_id",
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per (notice, relationship, named party) - docs/NAGPRA_BUILD_LOG.md. (document_number, party) alone collides 12,800 times because one party can hold several relationships to one notice. `relationship` is a LEGAL FINDING and the values are not interchangeable: consulted (25 U.S.C. 3003-3004) is not culturally_affiliated, and filtering to one is mandatory before any count. `tribe_id` is blank wherever the resolver was not certain - 3,467 rows - and `resolve_method` says why (`ambiguous_containment:N:...` names every candidate it would not choose between)",
      "primary_key": [
@@ -3328,7 +3370,9 @@
     {
      "table": "nagpra_notice_institutions.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per (NAGPRA notice, institution named in that notice), in the order the notice's Federal Register title lists them. NOT one row per institution - an institution appearing in 22 notices has 22 rows - and NOT one row per notice: 392 of 6,792 notices name more than one holder. `institution_city` and `institution_state` are THIS institution's, parsed from its own segment of the title, which is the fact the single columns on nagpra_notices.csv cannot carry.",
      "primary_key": [
       "nagpra_notice_institution_id"
@@ -3384,7 +3428,9 @@
     {
      "table": "nagpra_notices.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per NAGPRA notice, keyed on the Federal Register document number - docs/NAGPRA_BUILD_LOG.md. A correction notice is its own row (is_correction=1) and does not supersede the row it amends. The `*_entity_ids` columns are PIPE-DELIMITED LISTS, not join keys: join to entities through nagpra_notice_entity_bridge.csv. `mni_total_stated` is blank wherever the notice did not state one total, and must never be defaulted to 0",
      "primary_key": [
       "document_number"
@@ -4149,7 +4195,9 @@
     {
      "table": "fr_ex_parte_notices.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "document_number"
+     ],
      "grain": "one row per Federal Register ex parte notice",
      "primary_key": [
       "fr_ex_parte_notice_id"
@@ -4191,7 +4239,8 @@
      "table": "fr_ex_parte_parties.csv",
      "status": "shippable",
      "key_columns": [
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per party named in a Federal Register ex parte notice",
      "primary_key": [
@@ -4231,7 +4280,8 @@
      "table": "fr_ex_parte_party_entity_links.csv",
      "status": "shippable",
      "key_columns": [
-      "cedar_uid"
+      "cedar_uid",
+      "document_number"
      ],
      "grain": "one row per resolved link from an ex parte party to a Cedar entity, across TWO source tables - `source_dataset` says which, and the join key is (source_dataset, source_row_id), never source_row_id alone. All 9 links currently come from `ferc_ex_parte_parties.csv`; `fr_ex_parte_parties.csv` resolves 0 of its 112 parties, so a join from fr_ex_parte_parties returns NOTHING and that is the data, not a broken key",
      "primary_key": [
@@ -4325,7 +4375,9 @@
     {
      "table": "hearing_bill_links.csv",
      "status": "shippable",
-     "key_columns": [],
+     "key_columns": [
+      "bill_id"
+     ],
      "grain": "one row per (committee meeting event, bill named in that event's relatedItems and present in native_bills.csv). NOT one row per hearing and NOT one row per bill: one event reaches 19 bills and one bill reaches 4 events. The link is Congress.gov's own related-item assertion - `link_basis` says so on every row - and it states that the meeting CONCERNS the bill, never that the bill was marked up, voted or reported. This table holds no money column",
      "primary_key": [
       "event_id",
