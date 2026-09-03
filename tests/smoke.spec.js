@@ -83,16 +83,32 @@ test.describe("the gate", () => {
     await expect(page.locator(".cp-split")).toBeVisible();
   });
 
-  // The copy is load-bearing, not decoration. This build has no server, so
-  // the password is checked in the visitor's own browser against a digest
-  // they already downloaded — and the panel has to say so, or the gate is
-  // pretending to be access control.
-  test("the standalone sign-in says it is a demonstration gate", async ({ page }) => {
+  // This asserted the opposite until 2026-09-02: that the panel explained it
+  // was a browser-checked preview gate. The owner had that copy removed
+  // (f9633b4 — "you don't need the metatext on the website... it's kind of
+  // dumb, like, preview build"), and the assertion was left behind, so main
+  // shipped with two red smoke tests describing copy the product no longer
+  // has.
+  //
+  // Deleting it would leave the decision unguarded, and this is exactly the
+  // kind of copy that creeps back: it reads as diligence, and the reasoning
+  // for removing it lives in a commit message nobody re-reads. So the test
+  // is turned around. It now holds the decision — no build meta-copy on the
+  // door — and holds the thing that copy was sitting next to, which is a
+  // sign-in that actually works.
+  //
+  // What the copy said is still true and still written down where it is
+  // load-bearing: pressDemoGate.js's docstring and SECURITY.md.
+  test("the sign-in panel offers a working form and no build meta-copy", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("tab", { name: "Log in" }).click();
     const panel = page.locator("#cp-panel-signin");
-    await expect(panel).toContainText(/not access control/i);
-    await expect(panel).toContainText(/your own browser/i);
+    await expect(panel.getByLabel("Email address")).toBeVisible();
+    await expect(panel.getByLabel("Password", { exact: true })).toBeVisible();
+    await expect(panel.getByRole("button", { name: "Log in" })).toBeVisible();
+    for (const gone of [/preview build/i, /not access control/i, /your own browser/i]) {
+      await expect(panel).not.toContainText(gone);
+    }
   });
 
   test("a deep link while signed out lands on the gate", async ({ page }) => {

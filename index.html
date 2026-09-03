@@ -16,6 +16,50 @@
     <link rel="canonical" href="https://cedarpress.ai/" />
     <link rel="icon" type="image/png" href="/brand/lumecon-logo-mark-teal.png" />
 
+    <!-- The faces every page paints its first screen with, fetched from the
+         document rather than discovered from the stylesheet.
+
+         Without these the chain is: HTML → stylesheet → React renders → the
+         browser finally sees text that wants Inter → font request. Measured
+         on a 4 Mbps / 4× CPU profile, that put the first font request at
+         659ms and the last arrival at 1108ms — about 270ms AFTER first
+         contentful paint. So every page painted once in the fallback and
+         then re-laid itself out: nav items 63px wide becoming 66px, a hero
+         section 222px tall becoming 184px, whole paragraphs stepping down
+         three pixels. That second pass was the page's entire measured
+         Cumulative Layout Shift, and on Collections it reached 0.119 on a
+         cold load, past the 0.1 that counts as good.
+
+         Preloading breaks the discovery chain: the fetch starts alongside
+         the stylesheet instead of after the first render, so the faces are
+         in cache before there is any text to paint and the page arrives
+         once. Measured A/B, both builds served side by side on their own
+         ports with the HTTP cache disabled and runs interleaved so machine
+         load hit both arms equally: CLS went to exactly 0 on all nine
+         routes, at both phone and desktop widths. It is not free — first
+         contentful paint moved 50–124ms later at 4 Mbps, 20–76ms at 30 Mbps,
+         because 140kB of font now competes with the bundle for the same
+         pipe. Paying a tenth of a second once to stop the page rearranging
+         itself under the reader is the trade this makes deliberately.
+
+         `crossorigin` is required even though these are same-origin: fonts
+         are fetched in CORS mode, and a preload without it is a second,
+         wasted download rather than a warm cache.
+
+         Only the faces the first screen uses. Inter 500 and Spectral are
+         deliberately absent — neither is requested on a first paint (Spectral
+         sets one italicised word), and preloading them would spend bandwidth
+         the paint needs. If a page starts using one above the fold it should
+         be added here, and if a face stops being used it should be removed:
+         an unused preload is pure cost, and the browser will say so in the
+         console. -->
+    <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-800.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin />
+
     <!-- How the service appears when a subscriber sends a link to a colleague,
          which is how a citation travels. Absolute URLs, because the crawlers
          that read these do not resolve relative ones. -->

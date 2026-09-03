@@ -37,7 +37,7 @@
 // header; the server has to answer identically before real data sits behind
 // any of this.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 // Whether this device points with a finger: no hover means the point-to-read
 // affordance below becomes tap-to-read, and a tile's download moves one tap
@@ -80,6 +80,21 @@ function useReveal() {
   // rather than corrected by an effect: a band that flashes in on a browser
   // that cannot observe it is worse than one that was simply always there.
   const [seen, setSeen] = useState(() => typeof IntersectionObserver === "undefined");
+  // A band that is already on the first screen was never scrolled to, so it
+  // is not a reveal — same reasoning as useFadeIn. It is marked seen before
+  // the browser paints and its badges do not run their staggered rise, so
+  // the shelf is part of the page arriving rather than a second arrival
+  // 45ms-per-badge behind it.
+  const [instant, setInstant] = useState(false);
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node || seen) return;
+    // Flushed before paint, so the band never renders at opacity 0 first.
+    if (node.getBoundingClientRect().top < (window.innerHeight || 0) * 1.1) {
+      setInstant(true);
+      setSeen(true);
+    }
+  }, [seen]);
   useEffect(() => {
     const node = ref.current;
     if (!node || seen) return undefined;
@@ -95,7 +110,7 @@ function useReveal() {
     observer.observe(node);
     return () => observer.disconnect();
   }, [seen]);
-  return [ref, seen];
+  return [ref, seen, instant];
 }
 
 function Badge({ entry, open, onEnter, active, index, onLocked, onOpen }) {
@@ -238,7 +253,7 @@ function Band({ tier, user, index }) {
   const starts = entries.map((entry) => coverageFrom(entry)).filter(Boolean);
   const from = starts.length ? Math.min(...starts) : null;
   const active = entries.find((entry) => entry.id === hovered) || null;
-  const [ref, seen] = useReveal();
+  const [ref, seen, instant] = useReveal();
 
   // A locked tile's click walks the reader to the answer: the panel that
   // says what the collection is and carries the way in. The ring is so the
@@ -273,7 +288,7 @@ function Band({ tier, user, index }) {
   return (
     <section
       ref={ref}
-      className={`cp-band cp-band--${index % 2 === 0 ? "fill" : "plain"}${seen ? " is-in" : ""}`}
+      className={`cp-band cp-band--${index % 2 === 0 ? "fill" : "plain"}${seen ? " is-in" : ""}${instant ? " cp-reveal--now" : ""}`}
       aria-label={tier.name}
     >
       <div className="cp-band__in">
@@ -394,13 +409,13 @@ function Band({ tier, user, index }) {
  */
 function GroveTeaser({ tier }) {
   const gaming = PRESS_CATALOG_BY_ID.gaming;
-  const [ref, seen] = useReveal();
+  const [ref, seen, instant] = useReveal();
   return (
     // id="grove": the address of the Cedar Grove case. Article figures say
     // "Built in Cedar Grove. Make your own" and land here, on the section
     // that argues for it, rather than on the app route a Press reader
     // cannot open.
-    <section ref={ref} id="grove" className={`cp-gt${seen ? " is-in" : ""}`} aria-label="Cedar Grove">
+    <section ref={ref} id="grove" className={`cp-gt${seen ? " is-in" : ""}${instant ? " cp-reveal--now" : ""}`} aria-label="Cedar Grove">
       <div className="cp-gt__head">
         <div>
           <span className="cp-sec__band">Cedar Grove</span>

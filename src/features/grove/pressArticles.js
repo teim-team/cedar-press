@@ -87,6 +87,26 @@ export const TBN_URL = "https://tribalbusinessnews.com";
 export const TBN_PLANS_URL = `${TBN_URL}/subscribe`;
 export const LUMECON_URL = "https://lumecon.ai";
 
+/**
+ * The intrinsic pixel size of every lane photograph in public/pitch/lanes/.
+ * All three are 1500×600; this is here so the pages that render them can put
+ * `width` and `height` on the tag and reserve the right box before the bytes
+ * arrive.
+ *
+ * That is not a styling hint — the stylesheet still lays the picture out at
+ * the width of its container. It is the ASPECT RATIO, which is the only thing
+ * a browser cannot know until the image decodes. Without it the card was laid
+ * out with a zero-height picture and re-laid-out when the picture landed: the
+ * lead card's body moved 337px down the page, which was 0.051 of the Articles
+ * page's measured 0.052 Cumulative Layout Shift.
+ *
+ * A replacement photograph of a different shape must update this, or it will
+ * reserve the wrong box and reintroduce the shift it exists to prevent. The
+ * lane images are cropped to one ratio on purpose, so the honest fix if that
+ * ever stops being true is a per-article size rather than a second constant.
+ */
+export const ARTICLE_IMAGE = Object.freeze({ width: 1500, height: 600 });
+
 export const PRESS_ARTICLES = Object.freeze([
   Object.freeze({
     id: "brief-owned",
