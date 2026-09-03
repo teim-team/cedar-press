@@ -305,16 +305,62 @@ def _split():
     """`institution_names_all` split on ` and `, turning ONE department into
     two institutions: 'Louisiana Department of Culture, Recreation' plus
     'Tourism, Division of Archaeology'. A fabricated institution shipped on 12
-    notices. Repaired 2026-09-02, leaving the 4 cases that ARE two institutions
-    (History Nebraska, the WSU Anthropology Museum) alone — rejoining those
-    would fabricate a merger, the same error inverted."""
+    notices.
+
+    THIS CLAIM READ ONE COLUMN AND SPOKE FOR SIX, AND IT PASSED FOR A DAY
+    WHILE THE FABRICATION SHIPPED. The 2026-09-02 repair was applied to
+    `institution_names_all` only. `institution_name`, `institution_primary`,
+    `institution_count`, `institution_city` and `institution_state` went on
+    carrying it — 02-7009 shipped `institution_primary = 'Louisiana Department
+    of Culture, Recreation'`, `institution_count = 2` and a BLANK city,
+    because Baton Rouge had gone to the half that is not an agency. A buyer
+    keys on `institution_primary`, not on the pipe-joined list. The claim's own
+    name says "no institution name", so it now reads every column that carries
+    one, and it re-derives from the notice's own TITLE rather than pattern-
+    matching four words that happened to be in the one example.
+
+    Fixed at the parser 2026-09-02: `code/cedar_nagpra_split.py` holds the one
+    split rule, imported by 77, 1077 and 1084. 15 of the 19 flagged pairs are
+    rejoined; the other 4 are left split and carry a stated reason in
+    `institution_split_flag`, because rejoining `California State University,
+    Long Beach` to `California State University, Sacramento` would fabricate a
+    merger — the same error inverted."""
     import re as _re
     p = CLEAN / "nagpra_notices.csv"
     if not p.exists():
         return (True, "table absent")
-    TAIL = _re.compile(r"\|\s*(Tourism|Recreation|Archaeology|Archeology)\b", _re.I)
-    bad = [r for r in rows(p) if TAIL.search(r.get("institution_names_all") or "")]
-    return (not bad, f"{len(bad)} notice(s) split a department name mid-name")
+    COLS = ["institution_name", "institution_primary", "institution_names_all"]
+    TAIL = _re.compile(r"(?:^|\||;)\s*(Tourism|Recreation|Archaeology|"
+                       r"Archeology|Anthropology|Historic Preservation)\s*"
+                       r"(?:$|\||;)", _re.I)
+    bad, why = [], []
+    for r in rows(p):
+        hit = [c for c in COLS if TAIL.search(r.get(c) or "")]
+        # A fragment the parser could not decide is FLAGGED, not fabricated;
+        # those rows carry their reason and are not a breach of this claim.
+        if hit and not (r.get("institution_split_flag") or "").strip():
+            bad.append(r.get("document_number", ""))
+            if len(why) < 3:
+                why.append(f"{r.get('document_number','')} in {','.join(hit)}")
+    # The city may not be stranded on a fragment either — that is how the
+    # Louisiana notices lost Baton Rouge. ONE-HOLDER NOTICES ONLY: where a
+    # notice names two or more institutions the trailing ', City, ST' belongs
+    # to the LAST of them, and a blank city on the primary is correct. A first
+    # draft of this test did not condition on the count and fired on 15
+    # legitimately joint notices (the two CSU campuses, the three Baylor
+    # museum names, USACE Omaha + the Hood Museum), which is this repo's
+    # signature defect in the check written to catch it.
+    CS = _re.compile(r",\s*([A-Za-z][A-Za-z .'\-]{1,30}?),\s*([A-Z]{2})\s*$")
+    stranded = [r.get("document_number", "") for r in rows(p)
+                if (r.get("institution_count") or "") == "1"
+                and CS.search(_re.sub(r"\s+", " ", (r.get("title") or "").strip()))
+                and not (r.get("institution_city") or "").strip()]
+    ok = not bad and not stranded
+    return (ok, f"{len(bad)} notice(s) split a department name mid-name across "
+                f"{len(COLS)} name columns"
+                + (f" ({'; '.join(why)})" if why else "")
+                + f"; {len(stranded)} notice(s) whose title names a city carry "
+                  f"no city on the primary institution")
 
 
 @claim("attribution_method matches its table's DECLARED vocabulary",
@@ -659,6 +705,43 @@ def _control_bytes():
                        "zero: " + blob.strip().splitlines()[-1][:70])
     line = ((r.stdout or "").strip().splitlines() or [""])[0].strip()
     return r.returncode == 0, line or f"1136 verify exit {r.returncode}"
+
+
+@claim("no document states a row count the live table disagrees with")
+def _doc_claims():
+    """The signature defect of this repo is a claim that outlived its
+    measurement, and it has never had a detector.
+
+    On 2026-09-02 alone: seven documents said the gaming denominator was 714
+    when it was 717; `MONEY_TOTALLING_RULES.md` described a gaming claims table
+    of 270 rows that held 584; `WHAT_IS_MISSING.md` headed three dataset
+    sections with row counts that had all moved, and
+    `code/1143_methodology_papers.py` faithfully copied two of them into
+    generated methodology papers, so one stale heading became three stale
+    documents.
+
+    `1116 verify` is the BLOCKLIST for one day's correction batch - it only
+    knows literals a human already noticed, and it was itself caught handing
+    out 714 in its own remediation text. `1156` is the inverse and needs no
+    prior knowledge: it reads the number out of the PROSE and the number out of
+    the CSV and compares them. It restates nothing, so it cannot become the
+    second drifting authority - the failure mode 1116's own docstring warns
+    about. Where a figure needs adjudication rather than counting, `_denom`
+    above remains the sole authority and 1156 does not touch it.
+    """
+    r = subprocess.run([sys.executable, str(ROOT / "code" /
+                        "1156_doc_claim_gate.py"), "verify"],
+                       capture_output=True, text=True, cwd=str(ROOT))
+    blob = (r.stdout or "") + (r.stderr or "")
+    if "Traceback (most recent call last)" in blob:
+        return False, ("1156 crashed - UNMEASURED, which is not the same as "
+                       "clean: " + blob.strip().splitlines()[-1][:70])
+    lines = [l.strip() for l in (r.stdout or "").splitlines() if l.strip()]
+    if r.returncode == 0:
+        return True, (lines[-1] if lines else "1156 verify exit 0")
+    stale = next((l for l in lines if "disagree with the live tables" in l),
+                 f"1156 verify exit {r.returncode}")
+    return False, stale + "  - run `py -3 code/1156_doc_claim_gate.py verify`"
 
 
 @claim("the publication rules have ONE copy and no consumer has diverged")

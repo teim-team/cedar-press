@@ -2163,3 +2163,202 @@ inconsistency inside that set is 524 rows / $208,029,567.40 where
 `attribution_status = 'cedar_neid'` and two populated keys.
 
 <!-- END MONEY-RECON-1144 -->
+
+<!-- BEGIN NAGPRA-FR-GRAIN-1154-1158 -->
+### NAGPRA institution split and Federal Register consultation grain (2026-09-02, `1154` / `1158`)
+
+**RESOLVED — the NAGPRA institution parser fabricated an agency, and the gate
+named after it read one column of six.** `institution_names_all` had been
+repaired on 2026-09-02; `institution_name`, `institution_primary`,
+`institution_count`, `institution_city` and `institution_state` had not, and
+`846::_split` read only the repaired one and passed. Fixed at the parser:
+`code/cedar_nagpra_split.py` is now the ONE split rule, imported by `77`,
+`1077` and `1084`. 15 of the 19 flagged `, and ` pairs are rejoined, 4 are left
+split and carry a stated reason in the new `institution_split_flag` /
+`institution_split_basis`. The gate now reads three name columns and also
+requires a single-holder notice whose title ends in `, City, ST` to carry that
+city; both halves are proven to fire. Detail and the before/after table:
+`docs/NAGPRA_BUILD_LOG.md`.
+
+**RESOLVED — `consultation_events.csv` said nothing about the document
+fan-out.** One Federal Register document becomes up to 50 rows (median 1, mean
+4.93; 10,098 of 11,402 rows sit on a multi-row document). The grain is
+legitimately `(document, participant)` — proven on 1,009 of 1,009 multi-row
+documents — so it was declared rather than collapsed, and
+`n_participant_rows_for_event` / `is_event_primary_row` now make
+`SUM(is_event_primary_row) = 2,313` the consultation count. `document_role`
+separates *a consultation is reported to have happened* (10,888 rows) from
+*a notice announcing one was published* (514). Fix at source in `96`.
+
+**STILL OPEN.**
+
+1. **36 `nagpra_notices` rows carry a fabrication that `1084` repairs only in
+   the bridge** (was 51). Detectors A2/A3/A4/A5/A7 — a delimiter inside a
+   parenthetical, `Republication` shipped as a holding institution, a fragment
+   beginning mid-sentence, the possession locution retained. Each has a
+   verbatim repair in `nagpra_notice_institutions.institution_name_repaired`
+   and each wants the same treatment the `, and ` rule just got: move the
+   decision to the moment of the split.
+2. **`dist/customer/nagpra.csv` is stale by 17 rows and
+   `dist/customer/federal-register.csv` is stale.** `846` reports
+   `1137 verify rc=1`. Run `py -3 code/1137_*.py build nagpra federal-register`
+   — republishing is outside this lane.
+3. **`2026-16826`** is in `fr_consultation_notices.csv` and produced no
+   consultation_events rows; 484 of 485 notice documents are represented.
+<!-- END NAGPRA-FR-GRAIN-1154-1158 -->
+
+
+
+<!-- BEGIN NP-PLACENAME-1155 -->
+# Nonprofits — the place-name collision, measured 2026-09-02 by `code/1155`
+
+*Full account and every command: `docs/NP_PLACENAME_PRECISION_1155.md`.
+Sample `review/np_placename_precision_sample_2026-09-02.csv`, labels
+`review/np_placename_precision_labels_2026-09-02.csv`, seed `20260902`.*
+
+## NP-1 · 78.8% of the LINKED nonprofit keys are wrong, measured
+
+Seeded stratified sample of 210 of the 1,423 rows carrying both `tribe_id` and
+`cedar_uid`, hand-classified from the record. Of the 888 reading
+`key_review_disposition = SUPPORTED` — the ones that ship a key —
+**150 sampled, 105 FALSE: strict precision 25.3%, upper bound 30.0%.**
+Stratum-weighted over all 1,423: **17.7% TRUE, 78.8% FALSE, 3.5% UNKNOWN.**
+
+**State agreement is anti-correlated with correctness on this family**, because
+a town named after a nation is almost always in that nation's own state. That
+is why `code/1101`'s `HELD_STATE_DISAGREES` (461 rows, correct for its own
+family) cannot reach `COQUILLE CHESS CLUB`, `CHEHALIS BALLET CENTER`,
+`SENECA ZOOLOGICAL SOCIETY` or `SHAKOPEE BAND BOOSTERS` — all
+`keyed_state_agreement = Y`, most `disposition = NATIVE_VERIFIED_STRICT`.
+
+**513 refused** by `1155` (P1 the token is the filer's own city; P2 the token is
+qualified by a geographic-form noun the entity's own name does not carry).
+Scored against the labels: **79 caught, 0 wrong, 82 missed** — refusal precision
+≥96.2% at 95% confidence by the rule of three, recall 49.1%.
+
+## NP-2 · ~608 wrong keys this predicate does not reach — OPEN
+
+78.8% of 1,423 is ~1,121 estimated wrong; 513 were refused. The residue is three
+families, each needing its own predicate rather than a loosening of this one:
+
+1. **Surnames.** `CROW LUNA FOUNDATION`, `POARCH FAMILY FOUNDATION`,
+   `EHS CROW FOUNDATION INC`.
+2. **The wrong Native entity.** 21 of the 161 hand-FALSE rows are genuine Native
+   organisations keyed to the wrong entity — `NATIVE HAWAIIAN EDUCATION
+   ASSOCIATION` → *Hawaiian Native Corporation*, `LAS VEGAS INDIAN CENTER` → the
+   Las Vegas Paiute Tribe, `ST AUGUSTINE INDIAN MISSION` (Winnebago NE) → the
+   **Augustine** Band of Cahuilla Indians, California. Each deserves a spine row
+   or a redirect, not a refusal.
+3. **A place name with no geographic-form word and no city match.**
+   `SEMINOLE COON HUNTERS CLUB`, Roseland VA.
+
+## NP-3 · The linkage ratchet cannot see a withdrawn claim — OPEN, integrator's call
+
+`docs/LINKAGE_COVERAGE.md` defines nonprofits LINKED as
+`tribe_id <> '' AND cedar_uid <> ''` on `data/clean`. This pass flags and never
+deletes, so **LINKED stays at 1,423 / 11.15% while published attributions fell
+851 → 559 (6.71% → 4.41%)**. Three readings of one dataset and the ratcheted one
+is the least true. Not a re-baselining request — no floor was breached. The fix
+is to add the publication mask to the LINKED predicate in
+`code/1139_linkage_coverage.py`:
+
+```
+AND key_review_disposition IN ('SUPPORTED','')
+AND disposition NOT IN ('NATIVE_PROPOSED_AWAITING_OWNER_RULING',
+                        'CONFLICT_EXCLUDED_AND_RULED_NATIVE')
+```
+
+## NP-4 · One line of `cedar_publication.py` is load-bearing for 293 filings
+
+`BLOCKED_STATES["key_review_disposition"]["REFUSED_PLACE_NAME_IS_THE_ADDRESS"]
+= MASK`. Deny-by-default means that without it those 293 real IRS records are
+**WITHHELD** rather than masked. `1155 verify` invariant **I6** reads that file
+and fails if the entry is gone; `1155 selftest` proves I6 fires by deleting it.
+
+## NP-5 · No 990 mission or program text is on disk for these filers
+
+A header sweep of every non-backup CSV in `data/clean` and `data/spine` for
+`mission` / `activity` / `purpose` / `description` / `narrative` returns nothing
+for `np_orgs` EINs. `np_financials.csv` is financial fields only. Any plan that
+assumes the organisation's own 990 language is available needs to acquire it
+first. Two of the four corroborators named in the codebook are also unusable
+here: `grantmaker_funding_flows` names **0** of the 1,423 keyed EINs, and
+`np_ein_entity_hub` names **1,416** — it is the same matcher seen twice, not an
+independent witness.
+<!-- END NP-PLACENAME-1155 -->
+
+<!-- BEGIN QA-STATUS-VOCAB-1153 -->
+
+## QA-STATUS-VOCAB · S1 · OPEN · `RULED_ATTRIBUTED` can mean "a quarantined resolver guessed", and that naming cost an escalation
+
+*Logged 2026-09-02 by `code/1153_qa_publication_eligibility.py`. The defect it
+describes is FIXED in the export; the NAME that caused it is not, and renaming a
+status vocabulary that eight scripts read is out of scope for that pass.*
+
+**What happened.** `1153` was building the CP-002 publication policy and had to
+decide what `contractors.identifier_ruling_quarantined = Y` means for
+publication — 227,540 rows carrying $30.26B of attribution. It logged the
+question as needing an owner ruling, on this reasoning: 3,469 of those rows read
+`ruling_status = RULED_ATTRIBUTED`, a positive human ruling should not be thrown
+away by a batch-level quarantine, and a builder should not make that call.
+
+**The reasoning was sound and the premise was false.** Measured:
+
+| the 3,469 quarantined `RULED_ATTRIBUTED` rows | |
+|---|---:|
+| `identifier_ruling_method = cluster_v3` | 3,330 |
+| `identifier_ruling_method = need_v6` | 139 |
+| `identifier_ruling_tier = A` | **0** |
+| `identifier_ruling_tier = B` | 3,469 |
+
+And across the whole quarantine: **227,540 of 227,540 rows are tier B**, on
+`identifier_ruling_tier` and on `confidence_tier` alike. There is no tier-A row
+anywhere inside it. `ENTITY_MATCH_RULES` rule 8 reserves tier A for an owner
+ruling, `cluster_v3`'s own `tier_rationale` reads *"Algorithmic name clustering,
+unreviewed"*, `ADR` calls it *"a `cluster_v3` guess"* and *"a resolver output —
+Cedar agreeing with itself"*, and `need_v6` is START_HERE trap 1 by name —
+**6.5% accurate, never publishes alone**.
+
+So `RULED_ATTRIBUTED` on these rows does not record an adjudication. It records
+that the quarantined resolver produced an answer. **This is START_HERE trap 1b
+in a sixth vocabulary** — *a ruled method is not a positive ruling* — and this
+time the trap was not in a consumer reading the column, it was in the column's
+own name.
+
+**The cost, stated plainly.** A reviewer with the whole file in front of them
+escalated a decision they could have answered, because the vocabulary told them
+a human had already spoken. Escalation is the *cheap* failure. The expensive one
+is the same name persuading the next reader to publish.
+
+**Fixed in the export, and NOT by keying on the name.** `BLOCKED_COMBINATIONS`
+in `cedar_publication` masks the attribution on any row where
+`identifier_ruling_quarantined = Y` and `identifier_ruling_tier != A`. Keying on
+the status label instead would have cleared 1,405 still-attributed rows and left
+**55,736 quarantined `cluster_v3` rows carrying $16.00B** untouched — the same
+method, the same tier, the same quarantine, and no misleading label on them at
+all. The defect is the METHOD; the name is only where it was noticed.
+
+**What is still OPEN, and who owns it.** The vocabulary. `ruling_status` mixes
+three unrelated facts under one `RULED_` prefix:
+
+| value | what it actually asserts |
+|---|---|
+| `RULED_ATTRIBUTED` | *either* an owner ruled this, *or* a quarantined resolver emitted it |
+| `RULED_NOT_NATIVE` | a NEGATIVE ruling — 559 of these shipped with `attributed_flag = 1` |
+| `RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED`, `RULED_TIER_C_NOT_ATTRIBUTED` | the row is NOT attributed, said in a name beginning `RULED_` |
+| `RULED_TIER_UNSTATED` | 39,646 inside the quarantine are `cluster_v3` tier B; 6 outside it are `hand` tier A. One name, two populations |
+
+A value whose name asserts adjudication must not be reachable by a resolver.
+The minimum honest fix is to split the prefix — `RULED_` only where a human
+ruled, something like `RESOLVED_` where a method emitted — and it touches every
+script that reads `ruling_status`. **Owner: whoever owns
+`code/1079_quarantine_method_exposure.py` and the ruling vocabulary.** Until
+then, `BLOCKED_COMBINATIONS` reads the METHOD and the TIER and never the name,
+and `docs/PUBLICATION_ELIGIBILITY.md` records every value with its live count so
+the next reader can see the split rather than infer it.
+
+**How to check it is still true:** `py -3 code/1153_qa_publication_eligibility.py`
+— the conjunction line reports the row count, and `verify` fails if a single
+quarantined non-tier-A row reaches the export with an attribution on it.
+
+<!-- END QA-STATUS-VOCAB-1153 -->
