@@ -73,7 +73,7 @@ indistinguishable from a correct one.
 
 # PART I — ENTITY CLASSES
 
-`data/spine/cedar_entity_spine.csv`, **1,534 rows, 17 classes, no blanks and no
+`data/spine/cedar_entity_spine.csv`, **1,555 rows, 17 classes, no blanks and no
 spelling variants inside the file.** Counts below are recomputed at build time.
 
 | n | `entity_class` | prefix(es) | in `cedar_domain`? | `verification_route` filled |

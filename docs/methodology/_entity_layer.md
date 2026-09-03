@@ -117,7 +117,8 @@ for the NHO, TCU, CDFI and BIE populations (`docs/NHO_SPINE_MERGE_LOG.md`,
 and `503_identity.py stamp` materialises `cedar_uid` onto every dataset.
 
 **The identifier ledger.** `data/clean/cedar_identifier_ledger_final.csv`,
-**20,577 rows** [measured], one row per `(identifier_type, identifier,
+**20,740 rows** [measured 2026-09-02 by `code/1156_doc_claim_gate.py`; it said
+20,577 and the file had moved], one row per `(identifier_type, identifier,
 tribe_id)` with a tier and a method. It is a long table, not a wide one, on
 purpose: adding a new identifier type — a Washington UBI, an NIGC id, a tribal
 charter number — requires a new `identifier_type` value and a tier rationale,

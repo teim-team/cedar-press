@@ -2210,56 +2210,57 @@ separates *a consultation is reported to have happened* (10,888 rows) from
 
 
 <!-- BEGIN NP-PLACENAME-1155 -->
-# Nonprofits — the place-name collision, measured 2026-09-02 by `code/1155`
+# Nonprofits - the place-name collision, measured 2026-09-02 by `code/1155`
 
-*Full account and every command: `docs/NP_PLACENAME_PRECISION_1155.md`.
-Sample `review/np_placename_precision_sample_2026-09-02.csv`, labels
-`review/np_placename_precision_labels_2026-09-02.csv`, seed `20260902`.*
+*Full account, every command and every rejected alternative:
+`docs/NP_PLACENAME_PRECISION_1155.md`. Population sample
+`review/np_placename_precision_sample_2026-09-02.csv` (seed 20260902); applied-set
+audit `review/np_placename_precision_applied_audit_2026-09-02.csv` (seed
+202609022); labels and per-row reasons beside each.*
 
-## NP-1 · 78.8% of the LINKED nonprofit keys are wrong, measured
+## NP-1 - 78.8% of the LINKED nonprofit keys are wrong, measured
 
 Seeded stratified sample of 210 of the 1,423 rows carrying both `tribe_id` and
 `cedar_uid`, hand-classified from the record. Of the 888 reading
-`key_review_disposition = SUPPORTED` — the ones that ship a key —
-**150 sampled, 105 FALSE: strict precision 25.3%, upper bound 30.0%.**
-Stratum-weighted over all 1,423: **17.7% TRUE, 78.8% FALSE, 3.5% UNKNOWN.**
+`key_review_disposition = SUPPORTED` - the ones that ship a key - **150 sampled,
+105 FALSE: strict precision 25.3%, upper bound 30.0%.** Weighted against the
+strata AS DRAWN over all 1,423: **17.7% TRUE, 78.8% FALSE, 3.5% UNKNOWN.**
 
 **State agreement is anti-correlated with correctness on this family**, because
-a town named after a nation is almost always in that nation's own state. That
-is why `code/1101`'s `HELD_STATE_DISAGREES` (461 rows, correct for its own
-family) cannot reach `COQUILLE CHESS CLUB`, `CHEHALIS BALLET CENTER`,
-`SENECA ZOOLOGICAL SOCIETY` or `SHAKOPEE BAND BOOSTERS` — all
+a town named after a nation is almost always in that nation's own state. That is
+why `code/1101`'s `HELD_STATE_DISAGREES` (461 rows, correct for its own family)
+cannot reach `COQUILLE CHESS CLUB`, `CHEHALIS BALLET CENTER`,
+`SENECA ZOOLOGICAL SOCIETY` or `SHAKOPEE BAND BOOSTERS` - all
 `keyed_state_agreement = Y`, most `disposition = NATIVE_VERIFIED_STRICT`.
 
-**513 refused** by `1155` (P1 the token is the filer's own city; P2 the token is
-qualified by a geographic-form noun the entity's own name does not carry).
-Scored against the labels: **79 caught, 0 wrong, 82 missed** — refusal precision
-≥96.2% at 95% confidence by the rule of three, recall 49.1%.
+**517 refused, 297 demoted.** Two precisions, both floors, both stated because
+they answer different questions: **scored set 0 errors in 80, >= 96.2%**;
+**applied set, its own random sample, 0 wrong in 60, >= 95.0%**. Recall over
+hand-FALSE 49.7%. Caveat that does not go away: the same judgement drew the rule
+and the labels.
 
-## NP-2 · ~608 wrong keys this predicate does not reach — OPEN
+## NP-2 - ~604 wrong keys this predicate does not reach - OPEN
 
-78.8% of 1,423 is ~1,121 estimated wrong; 513 were refused. The residue is three
-families, each needing its own predicate rather than a loosening of this one:
+78.8% of 1,423 is ~1,121 estimated wrong; 517 refused. Three families, each
+needing its own predicate rather than a loosening of this one:
 
-1. **Surnames.** `CROW LUNA FOUNDATION`, `POARCH FAMILY FOUNDATION`,
-   `EHS CROW FOUNDATION INC`.
-2. **The wrong Native entity.** 21 of the 161 hand-FALSE rows are genuine Native
-   organisations keyed to the wrong entity — `NATIVE HAWAIIAN EDUCATION
-   ASSOCIATION` → *Hawaiian Native Corporation*, `LAS VEGAS INDIAN CENTER` → the
-   Las Vegas Paiute Tribe, `ST AUGUSTINE INDIAN MISSION` (Winnebago NE) → the
-   **Augustine** Band of Cahuilla Indians, California. Each deserves a spine row
-   or a redirect, not a refusal.
+1. **Surnames.** `CROW LUNA FOUNDATION`, `POARCH FAMILY FOUNDATION`.
+2. **The wrong Native entity.** 21 of 161 hand-FALSE rows are genuine Native
+   organisations keyed wrongly - `NATIVE HAWAIIAN EDUCATION ASSOCIATION` to
+   *Hawaiian Native Corporation*, `LAS VEGAS INDIAN CENTER` to the Las Vegas
+   Paiute Tribe, `ST AUGUSTINE INDIAN MISSION` (Winnebago NE) to the
+   **Augustine** Band of California. Each deserves a spine row or a redirect,
+   not a refusal.
 3. **A place name with no geographic-form word and no city match.**
    `SEMINOLE COON HUNTERS CLUB`, Roseland VA.
 
-## NP-3 · The linkage ratchet cannot see a withdrawn claim — OPEN, integrator's call
+## NP-3 - The linkage ratchet cannot see a withdrawn claim - OPEN, integrator's call
 
-`docs/LINKAGE_COVERAGE.md` defines nonprofits LINKED as
-`tribe_id <> '' AND cedar_uid <> ''` on `data/clean`. This pass flags and never
-deletes, so **LINKED stays at 1,423 / 11.15% while published attributions fell
-851 → 559 (6.71% → 4.41%)**. Three readings of one dataset and the ratcheted one
-is the least true. Not a re-baselining request — no floor was breached. The fix
-is to add the publication mask to the LINKED predicate in
+This pass flags and never deletes, so **LINKED stays at 1,423 / 11.15%
+(`linkage_nonprofits_bp 1115`, unmoved) while published attributions fell 851 to
+555, 6.71% to 4.37%**. Three readings of one dataset and the ratcheted one is
+the least true. Not a re-baselining request - no floor was breached. The fix is
+to add the publication mask to the LINKED predicate in
 `code/1139_linkage_coverage.py`:
 
 ```
@@ -2268,22 +2269,52 @@ AND disposition NOT IN ('NATIVE_PROPOSED_AWAITING_OWNER_RULING',
                         'CONFLICT_EXCLUDED_AND_RULED_NATIVE')
 ```
 
-## NP-4 · One line of `cedar_publication.py` is load-bearing for 293 filings
+## NP-4 - One line of `cedar_publication.py` is load-bearing for 297 filings
 
 `BLOCKED_STATES["key_review_disposition"]["REFUSED_PLACE_NAME_IS_THE_ADDRESS"]
-= MASK`. Deny-by-default means that without it those 293 real IRS records are
+= MASK`. Deny-by-default means that without it those 297 real IRS records are
 **WITHHELD** rather than masked. `1155 verify` invariant **I6** reads that file
-and fails if the entry is gone; `1155 selftest` proves I6 fires by deleting it.
+and fails if the entry is gone; `selftest` proves I6 fires by deleting it.
 
-## NP-5 · No 990 mission or program text is on disk for these filers
+## NP-5 - A NATION'S SEAT IS EVIDENCE THAT FEDERAL FILINGS DO NOT CARRY FOR SMALL VILLAGES
+
+The reusable finding from the two false refusals an independent hand-check and a
+widened sweep turned up (`KASAAN HAIDA HERITAGE FOUNDATION`, Kasaan AK;
+`WHITE EARTH REDISCOVERY CENTER`, White Earth MN).
+
+A seat veto built on Single Audits and casinos **systematically misses small
+Alaska Native villages** - a village of sixty files no audit, runs no casino,
+and gives BIA a P.O. box in the next town (Kasaan's published address is
+Ketchikan). The BIA Tribal Leaders Directory closes part of it (540 of 583
+unique spine matches) and the rest needs a structural rule: **a
+`Federally recognized Alaska Native Village` sits at the village it names**,
+guarded by state agreement.
+
+**Do not generalise that rule to `Federally recognized tribe`**: measured, it
+would veto 114 of the 517 refusals, because Coquille OR, Chehalis WA, Shakopee
+MN, Flandreau SD, Quinault WA and Seneca Falls NY bear a nation's name and none
+is that nation's seat.
+
+## NP-6 - A NAME-LEVEL ETHNONYM VETO WAS BUILT, MEASURED AND REJECTED - do not rebuild it
+
+`NATIVE_PURPOSE_RE` looks for purpose words and misses people names, so `HAIDA`
+never vetoed. The obvious fix does not pay, and the measurement is here so the
+next pass does not repeat it. Register tokens minus every US place-name token
+gives 1,045 candidates; **applied to the refusals that vetoes 48 and 47 are
+wrong**, because Cedar's register contains organisations and so `EDUCATION`,
+`FRIENDS`, `UNITED` and `WELLNESS` all qualify. A frequency threshold does not
+separate them either - `HAIDA` and `TLINGIT` sit at 19 in a 26,974-name corpus
+of ordinary American nonprofits, above `SWIM` 5, `DUCK` 7 and `ORDER` 4.
+**Net: gains 1, loses 5.** The seat route saves the same row at zero cost.
+
+## NP-7 - No 990 mission or program text is on disk for these filers
 
 A header sweep of every non-backup CSV in `data/clean` and `data/spine` for
 `mission` / `activity` / `purpose` / `description` / `narrative` returns nothing
-for `np_orgs` EINs. `np_financials.csv` is financial fields only. Any plan that
-assumes the organisation's own 990 language is available needs to acquire it
-first. Two of the four corroborators named in the codebook are also unusable
-here: `grantmaker_funding_flows` names **0** of the 1,423 keyed EINs, and
-`np_ein_entity_hub` names **1,416** — it is the same matcher seen twice, not an
+for `np_orgs` EINs. `np_financials.csv` is financial fields only. Two of the
+four corroborators named in the codebook are also unusable here:
+`grantmaker_funding_flows` names **0** of the 1,423 keyed EINs, and
+`np_ein_entity_hub` names **1,416** - the same matcher seen twice, not an
 independent witness.
 <!-- END NP-PLACENAME-1155 -->
 

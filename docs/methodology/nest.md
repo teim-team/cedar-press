@@ -17,7 +17,7 @@
 <!-- BEGIN EDITORIAL:nest -->
 **`nest`. One delivered file, `nest.csv` — 4,798 rows × 91 columns, built from
 `nest_enterprises.csv` (4,798 × 68) with `nest_entity_dual_role.csv` folded in
-one-to-one and `nest_enterprise_relations.csv` (7,559 rows) counted rather than
+one-to-one and `nest_enterprise_relations.csv` (8,691 rows) counted rather than
 joined.** [measured 2026-09-02]
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from
@@ -340,7 +340,8 @@ is missing or empty, because an absence must never print as a clean result.
   `parent_uei` 41,055 / $489,839,872, measured disjointly across all three legs
   `40_build_prime_contracts.py` actually tries. [from the record —
   `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md`] The earlier figure of 2,142 rows
-  / $38.19B measured **one leg of a three-leg join**, and the CAGE leg is where
+  / $38.19B is **SUPERSEDED** — it measured **one leg of a three-leg join**,
+  and the CAGE leg is where
   the problem lives. **Scoping a measurement to one leg of a multi-leg join
   understates it silently, because the legs it skipped answer the same question.**
 - **The literal string `NAN` is suppressed as a CAGE code.** It sits in

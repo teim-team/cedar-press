@@ -262,8 +262,27 @@ DATASETS = [
     dict(
         collection="nonprofits", table="np_orgs.csv",
         denom="one nonprofit organisation (EIN filer)",
-        linked_sql=f"{nb('tribe_id')} AND {nb('cedar_uid')}",
+        # THE GATE COLUMN BELONGS IN THE CONJUNCTION, per this file's own rule
+        # ninety lines up: "A numerator that reads only the key column counts
+        # rows a ruling has already withdrawn."
+        #
+        # `1155` measured that 78.8% of the keyed rows name the WRONG entity -
+        # a town named after a nation sits in that nation's state, so a
+        # place-name collision passes every state test by construction - and
+        # demoted 293 of them to `REFUSED_PLACE_NAME_IS_THE_ADDRESS`. The key
+        # columns are deliberately left in place (flag, never delete), so a
+        # numerator reading only those columns cannot see the withdrawal.
+        #
+        # Before this line, one dataset had THREE readings and the ratcheted
+        # one was the least true: 11.15% ratcheted, 6.71% shipped, 4.41% after
+        # the refusals. A metric that cannot fall when a false claim is
+        # withdrawn is not measuring the product.
+        linked_sql=(f"{nb('tribe_id')} AND {nb('cedar_uid')} AND "
+                    f"coalesce(key_review_disposition,'') "
+                    f"NOT LIKE 'REFUSED_%'"),
         alts=[("key_only:tribe_id", nb("tribe_id")),
+              ("key_present_ignoring_refusal",
+               f"{nb('tribe_id')} AND {nb('cedar_uid')}"),
               ("spine_side:cedar_spine_entity_id", nb("cedar_spine_entity_id"))],
         not_attributable_sql="disposition LIKE 'EXCLUDED%'",
         not_attributable_why=(
@@ -776,6 +795,52 @@ def do_baseline():
     return 0
 
 
+#: Columns that record a link having been WITHDRAWN rather than lost. A refusal
+#: written here is a decision with a reason beside it; a link that simply
+#: disappears is not.
+WITHDRAWAL_COLS = ("key_review_disposition",)
+WITHDRAWAL_PREFIX = "REFUSED_"
+
+
+def _withdrawn_since_baseline(metric_key: str, base: dict) -> int:
+    """How many links this dataset withdrew on the record, since the baseline.
+
+    Counted from the flagship itself rather than trusted from a note, and
+    returns 0 - never a guess - when the dataset carries no withdrawal column.
+    A dataset with nowhere to record a refusal gets no allowance, which is the
+    right default: the allowance exists to reward writing the reason down.
+    """
+    name = metric_key
+    for suffix in ("_linked_rows", "_rows", "_bp"):
+        if name.endswith(suffix):
+            name = name[: -len(suffix)]
+    name = name.replace("linkage_", "").replace("_", "-")
+    spec = next((d for d in DATASETS if d["collection"] == name), None)
+    if spec is None:
+        return 0
+    path = CLEAN / spec["table"]
+    if not path.exists():
+        return 0
+    try:
+        con = duckdb.connect()
+        cols = {r[0] for r in con.execute(
+            f"DESCRIBE SELECT * FROM read_csv_auto('{path.as_posix()}', "
+            f"SAMPLE_SIZE=1)").fetchall()}
+        col = next((c for c in WITHDRAWAL_COLS if c in cols), None)
+        if col is None:
+            return 0
+        n = con.execute(
+            f"SELECT count(*) FROM read_csv_auto('{path.as_posix()}', "
+            f"all_varchar=true) WHERE coalesce({col},'') LIKE "
+            f"'{WITHDRAWAL_PREFIX}%'").fetchone()[0]
+        return int(n or 0)
+    except Exception:
+        # An allowance that cannot be measured is not granted. Failing closed
+        # here means an unreadable table produces a LOUD ratchet failure
+        # rather than a silent pardon.
+        return 0
+
+
 def below_floor():
     """[(metric, reason)] for everything under its floor.  62 calls this.
 
@@ -806,14 +871,48 @@ def below_floor():
         if not isinstance(floor, int) or k.endswith("_denom"):
             continue
         if k.endswith("_bp"):
-            if v < floor - tol:
-                out.append((k, f"{v:,} is below its floor of {floor:,} "
-                               f"(tolerance {tol} bp)"))
+            # A RATE, and the same three categories apply. A withdrawal lowers
+            # the rate legitimately, so the allowance is converted from rows
+            # into basis points against the CURRENT denominator - the
+            # population the rate is now measured over.
+            #
+            # Fixing only the row counter and not the rate would have been a
+            # half-fix that reads as a whole one: the row metric would go green
+            # while the rate stayed red on the same withdrawal, and the next
+            # reader would conclude the ratchet was flaky rather than
+            # incomplete.
+            wd = _withdrawn_since_baseline(k, base)
+            dk = k[:-3] + "_denom"
+            den = now.get(dk)
+            allow = int(round(10000.0 * wd / den)) if isinstance(den, int) and den else 0
+            if v < floor - tol - allow:
+                out.append((k, f"{v:,} bp is below its floor of {floor:,} "
+                               f"(tolerance {tol} bp, plus {allow} bp allowed "
+                               f"for {wd:,} link(s) withdrawn on the record). "
+                               f"The remainder is a fall with no refusal "
+                               f"written."))
             continue
-        # A ROW COUNTER. Zero tolerance for links lost, full allowance for
-        # rows that are simply no longer in the table: `shrank` is how many
-        # rows the flagship lost since the baseline, and a link cannot
-        # survive a row that does not exist.
+        # A ROW COUNTER. There are THREE ways a link count can fall and only
+        # one of them is a regression.
+        #
+        #   1. the row left the table       -> allowed, `shrank`
+        #   2. the link was WITHDRAWN by a recorded refusal
+        #                                   -> allowed, `withdrawn`
+        #   3. the link vanished from a row that still exists, with no
+        #      refusal recorded             -> THIS is the regression
+        #
+        # Category 2 was missing and it made the ratchet punish the fix. `1155`
+        # measured that 78.8% of nonprofits' keyed rows named the WRONG entity
+        # and demoted 293 of them; the keys stay on the row (flag, never
+        # delete) and the refusal is recorded beside them. Removing 293 false
+        # claims is the correct outcome and the old rule read it as 293 lost
+        # links.
+        #
+        # The alternative fixes are both worse. Widening the tolerance blinds
+        # the ratchet to real losses at the same magnitude. Re-recording the
+        # baseline bakes in whatever else is red that day, which standing rule
+        # 15 forbids. So the ratchet learns the third category instead, and a
+        # SILENT loss - a link gone with no refusal written - still fails.
         dk = k[:-5] + "_denom" if k.endswith("_rows") else None
         dk = "linkage_linked_rows_total_denom" if \
             k == "linkage_linked_rows_total" else dk
@@ -821,14 +920,15 @@ def below_floor():
         if dk and isinstance(base["metrics"].get(dk), int) \
                 and isinstance(now.get(dk), int):
             shrank = max(0, base["metrics"][dk] - now[dk])
-        if v < floor - shrank:
-            out.append((k, f"{v:,} is below its floor of {floor:,}"
-                           + (f", and the table only shrank by {shrank:,} "
-                              f"row(s) - so {floor - shrank - v:,} link(s) "
-                              f"were lost from rows that still exist"
-                              if shrank else
-                              " and the table did not shrink - links were "
-                              "lost from rows that still exist")))
+        withdrawn = _withdrawn_since_baseline(k, base)
+        if v < floor - shrank - withdrawn:
+            lost = floor - shrank - withdrawn - v
+            out.append((k, f"{v:,} is below its floor of {floor:,}. "
+                           f"Allowed: {shrank:,} row(s) left the table, "
+                           f"{withdrawn:,} link(s) withdrawn by a recorded "
+                           f"refusal. That leaves {lost:,} link(s) lost from "
+                           f"rows that still exist with no refusal written, "
+                           f"which is the regression."))
     return out
 
 

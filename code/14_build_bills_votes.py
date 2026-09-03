@@ -445,7 +445,18 @@ def rule_outcome(latest_action, congress, final_status):
     if fs == "died_in_committee":
         return ("died-in-committee", "tribal_bill_intros.final_status")
     if fs == "reached_floor_not_enacted":
-        return ("passed-one-chamber", "tribal_bill_intros.final_status")
+        # CORRECTED 2026-09-02 by code/1160. This map was unsound and it
+        # is the owner-reported defect: "reached the floor and was not
+        # enacted" INCLUDES every bill defeated on the floor, so it
+        # cannot yield "passed a chamber". 105-hr-948 failed 240-167 on
+        # a motion to suspend and shipped as passed-one-chamber through
+        # this line. The honest value is blank with a reason; the
+        # full-history derivation in code/1160 then supplies the real
+        # outcome from native_bill_actions.csv, which does not exist yet
+        # at the point this script runs.
+        return ("", "tribal_bill_intros.final_status=reached_floor_not_enacted "
+                    "does not distinguish passage from defeat; see "
+                    "code/1160 and native_bill_outcomes.disposition")
     return ("", "no_action_record_available")
 
 

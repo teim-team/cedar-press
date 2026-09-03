@@ -1138,7 +1138,7 @@ Disk is no longer the constraint.
 Corrected 2026-08-26:
 
 1. **It is not half-done.** Promotion completed 2026-08-06; `data/clean/subawards.csv` holds
-   **63,548** rows and zero staged rows are uncovered.
+   **89,809** rows and zero staged rows are uncovered.
 2. **345,090 is not a subaward count.** It is raw all-recipient rows across the first 11 of
    26 fiscal years, of which 1,798 were Native-linked. The same source log's PROMOTION
    section supersedes it: 22 FY on disk, **6,613,471 raw rows**, **53,429 Native-linked**.

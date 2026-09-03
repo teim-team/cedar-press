@@ -259,7 +259,7 @@ BLOCKED_STATES = {
     # same reason the other three do - the IRS record is real and ships, the
     # contested key does not. It is a ONE-LINE dependency of `1155`, whose
     # `verify` fails if this entry is missing, because deny-by-default would
-    # otherwise WITHHOLD 293 real filings instead of masking their keys.
+    # otherwise WITHHOLD 297 real filings instead of masking their keys.
     "key_review_disposition": {
         "SUPPORTED": PUBLISH,
         "HELD_STATE_DISAGREES": MASK,
