@@ -170,8 +170,16 @@ def resolve_tables():
 def guess_index(path):
     """Index the join keys people actually use, if the file has them."""
     hdr = [h.strip().lower() for h in CB.header_of(path)]
+    # Kept in step with `512_build_dataset_contracts.JOIN_KEYS`, which says so
+    # in its own comment. The two document keys were APPENDED there on
+    # 2026-09-02 - a bill and a Federal Register notice are things the world
+    # identifies stably, and a consumer joins on them - and they are appended
+    # here for the same reason and in the same place. The `[:3]` below is why
+    # the position matters: inserting a document key ahead of `tribe_id` would
+    # re-choose the SQL index on every table carrying both.
     want = ("tribe_id", "entity_id", "facility_id", "property_id",
-            "compact_id", "uei", "ein", "cage_code", "administrative_region_id")
+            "compact_id", "uei", "ein", "cage_code", "administrative_region_id",
+            "bill_id", "document_number")
     return [c for c in want if c in hdr][:3]
 
 

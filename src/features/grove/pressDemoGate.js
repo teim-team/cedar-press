@@ -124,12 +124,22 @@ export const PRESS_SIGN_IN_AVAILABLE = isConnected() || PRESS_DEMO_GATE_ACTIVE;
  * What the reader is told when the demo gate is what let them in. It says the
  * true thing: the check ran in their browser, on a build with no server.
  */
-export const PRESS_DEMO_NOTICE =
-  "Preview build. Nothing runs behind this site, so this sign-in is checked in your own browser: it is a demonstration gate, not access control. What it opens is the catalog, the methods and ten sampled rows per table — not the collections.";
+// PRESS_DEMO_NOTICE was removed 2026-09-02. It rendered "Preview build.
+// Nothing runs behind this site..." on the sign-in panel, and the owner's
+// judgement was that a reader he has already briefed does not need the
+// service explaining itself to them.
+//
+// The fact it stated has not changed and is not hidden: this gate is checked
+// in the reader's own browser, everything it reads is in a bundle they have
+// already downloaded, and it is therefore a demonstration gate rather than
+// access control. That is in this module's docstring above, and SECURITY.md
+// puts it out of scope as a vulnerability while keeping "a record reachable
+// through it that should not be public" in scope. The safety property was
+// never the paragraph - it is that nothing confidential sits behind the gate.
 
 /** What the gate says when nobody configured an account for this build. */
 export const PRESS_DEMO_UNCONFIGURED =
-  "Sign-in is not available on this build. It was deployed without a preview account, so there is nothing here to sign in to.";
+  "Sign-in is not available yet.";
 
 const HEX = "0123456789abcdef";
 

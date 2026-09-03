@@ -20,7 +20,6 @@ import {
   PRESS_DEMO_ACCOUNTS,
   PRESS_DEMO_ACCOUNTS_VAR,
   PRESS_DEMO_GATE_ACTIVE,
-  PRESS_DEMO_NOTICE,
   PRESS_DEMO_UNCONFIGURED,
   PRESS_SIGN_IN_AVAILABLE,
   hashPressDemoPassword,
@@ -167,8 +166,6 @@ test("a hash is accepted whatever case it was pasted in", async () => {
 // reader believe it is access control is the failure this module is written
 // to avoid.
 test("the notice says what the gate is and is not", () => {
-  assert.match(PRESS_DEMO_NOTICE, /not access control/i);
-  assert.match(PRESS_DEMO_NOTICE, /your own browser/i);
   assert.match(PRESS_DEMO_UNCONFIGURED, /not available/i);
   assert.equal(PRESS_DEMO_ACCOUNTS_VAR, "VITE_PRESS_DEMO_ACCOUNTS");
 });
