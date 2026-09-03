@@ -554,7 +554,7 @@ def scan_nest():
          "status_basis_named_by_owner": 0, "sector": Counter(),
          "sector_catchall": 0, "sector_blank": 0,
          "fpds_parent_declared_unresolved": 0, "fpds_parent_declared": 0,
-         "named_rows": {}, "self_owned": 0}
+         "named_rows": {}, "self_owned": 0, "name_begins_with_owner": 0}
     named = {"CEDAR-NEST-001630-JQ", "CEDAR-NEST-002101-BF", "CEDAR-NEST-004386-96"}
     cols = ["enterprise_id", "enterprise_name", "owner_hub_name", "cedar_uid",
             "owner_hub_cedar_uid", "relationship", "relation_class",
@@ -593,10 +593,23 @@ def scan_nest():
         if r.get("fpds_declared_parent_name"):
             f["fpds_parent_declared"] += 1
             if not r.get("fpds_parent_resolves_to"):
+                # lint-ok: class2c - nothing is dropped here. This counts a
+                # DEFECT for CP-129 and ships with its denominator
+                # (fpds_parent_declared) in the evidence string; the rows are
+                # not skipped, they are the finding.
                 f["fpds_parent_declared_unresolved"] += 1
+        # TWO measures, because one of them was wrong. `oh in en` counts
+        # "Ahtna Construction" owned by "Ahtna" as self-ownership, and a
+        # subsidiary named after its parent is ordinary, not a defect. Only
+        # exact equality after normalisation is the entity-class error CP-118
+        # describes; the containment count is kept separately and named for
+        # what it is.
         en, oh = norm(r.get("enterprise_name")), norm(r.get("owner_hub_name"))
-        if en and oh and (en == oh or oh in en):
-            f["self_owned"] += 1
+        if en and oh:
+            if en == oh:
+                f["self_owned"] += 1
+            elif oh in en:
+                f["name_begins_with_owner"] += 1
         if r.get("enterprise_id") in named:
             f["named_rows"][r["enterprise_id"]] = {
                 "enterprise_name": r.get("enterprise_name", ""),
@@ -880,6 +893,9 @@ def scan_legislation():
         elif "." in cc:
             f["cosponsor_decimal"] += 1
         if oc in ("passed-one-chamber", "enacted") and fail.search(la):
+            # lint-ok: class2c - nothing is dropped here. This counts a DEFECT
+            # for CP-062/RG-009 and ships with its denominator (rows) in the
+            # evidence string, plus the named bill 105-hr-948 verbatim.
             f["passed_but_action_failed"] += 1
         if oc == "died-in-committee" and advanced.search(la):
             f["died_but_action_advanced"] += 1
@@ -1551,7 +1567,10 @@ def chk_cp118(ev):
                        "The enterprise IS the owner hub.")
     return (base[0], base[1] + f" Population: {_pct(n['self_owned'], n['rows'])} "
                                f"rows have an enterprise_name that normalises to "
-                               f"its own owner_hub_name")
+                               f"EXACTLY its own owner_hub_name - the entity-class "
+                               f"error. A further {n['name_begins_with_owner']:,} "
+                               f"merely begin with the owner's name, which is an "
+                               f"ordinary subsidiary and is NOT counted here")
 
 
 def chk_cp119(ev):
@@ -1991,7 +2010,8 @@ def _nagpra_named(ev, doc, why):
     if not r:
         return (FIXED, f"document {doc} no longer ships")
     return (CONFIRMED,
-            f"{doc} ships unchanged: institution_count={r['institution_count']}, "
+            f"{doc} still ships, with the fields the finding named unchanged: "
+            f"institution_count={r['institution_count']}, "
             f"institution_city={r['institution_city']!r}, "
             f"institution_name={r['institution_name']!r}. {why}")
 
