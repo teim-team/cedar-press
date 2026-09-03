@@ -437,3 +437,146 @@ beings. **This build's own console log prints a sum** — *"total individuals,
 summed over notices that state one: 158,327"*. That is a diagnostic in a run
 log; it is not a column in any shipped table and nothing downstream may
 reproduce it.
+
+
+---
+
+## 2026-09-02 — THE INSTITUTION PARSER FABRICATED AN AGENCY, AND THE GATE THAT WATCHED IT READ ONE COLUMN OF SIX
+
+*Pass: `code/1154_nagpra_fr_grain_audit.py report` (measurement), the split rule
+in `code/cedar_nagpra_split.py`, applied through `code/1077_nagpra_institution_grain.py`.
+Every figure below is a full census of `data/clean/nagpra_notices.csv`
+(6,792 rows) or `nagpra_notice_institutions.csv`; nothing is sampled.*
+
+### What was shipping
+
+`02-7009`, title verbatim:
+
+> ... in the Possession of the **Louisiana Department of Culture, Recreation,
+> and Tourism, Division of Archaeology**, Baton Rouge, LA
+
+shipped as:
+
+| column | value |
+|---|---|
+| `institution_name` | `Louisiana Department of Culture, Recreation; Tourism, Division of Archaeology` |
+| `institution_primary` | `Louisiana Department of Culture, Recreation` |
+| `institution_count` | `2` |
+| `institution_city` | *(blank)* |
+| `institution_state` | *(blank)* |
+| `institution_names_all` | `Louisiana Department of Culture, Recreation and Tourism, Division of Archaeology` |
+
+`Louisiana Department of Culture, Recreation` is not an agency that exists, and
+**Baton Rouge went to the half that is not one either** — which is why the
+notice ships with no city at all.
+
+### The reason it survived a gate named after it
+
+`code/846_session_audit.py::_split` is called *"no institution name is split
+mid-name in NAGPRA notices"*. **It read `institution_names_all` and nothing
+else.** The 2026-09-02 repair had been applied to that one column, so the gate
+passed while `institution_name`, `institution_primary`, `institution_count`,
+`institution_city` and `institution_state` all carried the fabrication — and
+`institution_primary` is the column a buyer actually keys on. This is
+`docs/AGENT_FIELD_GUIDE.md` rule 6 (*write to the columns the CONSUMER reads*)
+and the signature defect (*a check that does not measure its own name*) in one
+row. `code/1084_nagpra_split_artefact_audit.py` had already printed the debt —
+`nagpra_notices_rows_carrying_the_same_fabrication: 51` — and said the fix
+belonged in the parser. It does, and it is there now.
+
+### The fix: ONE split rule, in one file, imported three times
+
+`code/cedar_nagpra_split.py` is the only copy. `77_build_nagpra_dataset.py`
+(`institution_parts`), `1077_nagpra_institution_grain.py`
+(`split_institutions`) and `1084_nagpra_split_artefact_audit.py` (detector A1,
+which imports `KW` and `POSTAL` from it) now share it. Two ladders for one
+number is what drifted here.
+
+The `, and ` split is **provisional**. It is undone, and the fragments rejoined
+into the one contiguous substring of the title that spans them, only when all
+four hold: the left fragment's last comma-segment is a bare enumerated noun
+(no institution keyword, not a postal state); the right fragment's first
+comma-segment is at most three words; the two share no token; and the pair is
+not one link of a longer `, and ` chain.
+
+### Measured, before and after
+
+| | before | after |
+|---|---|---|
+| titles carrying a semicolon | 64 | 64 |
+| titles on the legacy `, and ` path | 6,728 | 6,728 |
+| — of those, the legacy rule split | 328 | 328 |
+| adjacent pairs tripping the bare-noun test | 19 | 19 |
+| — rejoined | 0 | **15** |
+| — left split **and flagged with a reason** | — | **4** |
+| bridge rows (`nagpra_notice_institutions.csv`) | 7,234 | **7,219** |
+| notices naming more than one institution | 392 | **377** |
+| notices with a blank `institution_state` | 119 | **104** |
+| 1084 rows flagged as a splitting artefact | 77 | **47** |
+| 1084 detector A1 | 38 rows / 19 notices | **8 rows / 4 notices** |
+| `nagpra_notices` rows carrying the same fabrication (1084's own count) | 51 | **36** |
+| genuine `institution_name` defects (1154) | — | **10 of 6,792 (0.15%)** |
+| `institution_state` values that are not a USPS state | 0 | 0 |
+| `institution_count` disagreeing with `institution_names_all` | 14 | **0** |
+
+`02-7009` now reads one institution, `Louisiana Department of Culture,
+Recreation, and Tourism, Division of Archaeology`, in Baton Rouge, LA.
+So do `2021-17065` (New York State Office of Parks, Recreation, and Historic
+Preservation) and thirteen others.
+
+### FLAGGED, NEVER GUESSED — the four that were left alone
+
+Two new columns on `nagpra_notices.csv`, `institution_split_flag` and
+`institution_split_basis`, carry the reason with the row:
+
+* `E7-9453`, `E7-10715` — `ambiguous_oxford_chain`. *"Augusta State University,
+  Department of History, and Anthropology, and Philosophy, Archaeology
+  Laboratory"* joins three fragments with `, and `; which of them form one
+  institution is not decidable from the text.
+* `2014-21477`, `2014-21482` — `right_side_is_its_own_name`. *"California State
+  University, Long Beach, and California State University, Sacramento, CA"*
+  trips the bare-noun test on *Long Beach* and **is two real campuses**.
+  Merging it would fabricate a merger — the same error inverted.
+
+### Checks that are proven to fire
+
+* `1077` gained **I8**, a FLOOR on the intended delta (`merged_pairs >= 15`),
+  not a conservation check — field guide rule 5. Proven by a fixture that
+  neuters `apply_merges`: exit 1, and `I8` is the named invariant that fires.
+  `1077 verify` also exits 1 against the pre-fix table.
+* `846::_split` now reads **three** name columns and re-derives from the
+  notice's own title, and additionally requires that a **single-holder** notice
+  whose title ends in `, City, ST` carries that city on its primary
+  institution. Proven both ways: it returns FAIL on the pre-fix table
+  (3 notices) and PASS on the fixed one; the city half was proven by injecting
+  a stranded city into a real single-holder row (`94-17582`).
+  *A first draft of the city test did not condition on `institution_count` and
+  fired on 15 legitimately joint notices — the two CSU campuses, the three
+  Baylor museum names, USACE Omaha + the Hood Museum. That is this repo's
+  signature defect committed inside the check written to catch it, and it is
+  recorded here rather than quietly corrected.*
+
+### A wart removed on the way
+
+`1077.patch_builder` tested `if BAD_SPLIT in new:` **before**
+`elif "INST_SEMI_RE" in new:`, and `BAD_SPLIT` is the literal `INST_SPLIT_RE`
+definition, which survives the patch. So every 1077 run prepended its comment
+block to `77` again: **four identical copies of
+`INST_SEMI_RE = re.compile(r";")`** were in the file. Collapsed to one; the
+already-present test now comes first.
+
+### WHAT IS STILL OWED — measured, not implied
+
+* **36 `nagpra_notices` rows still carry a fabrication that 1084 repairs only
+  in the bridge** (down from 51). They are detectors A2 (a delimiter inside a
+  parenthetical, 14 rows), A3 (a Federal Register status word such as
+  `Republication` shipped as a holder, 10), A4 (a fragment beginning
+  mid-sentence, 18), A5 (the possession locution retained so the real holder is
+  downstream, 13) and A7 (1). Each is repaired verbatim in
+  `nagpra_notice_institutions.institution_name_repaired` and each is a
+  candidate for the same treatment the `, and ` rule just got: move the
+  decision to the moment of the split.
+* **`dist/customer/nagpra.csv` is stale by 17 rows against
+  `data/clean/nagpra_notices.csv`** and `846` reports
+  `1137 verify rc=1 - nagpra: STALE`. Re-publishing is not this lane's to do:
+  run `py -3 code/1137_*.py build nagpra`.

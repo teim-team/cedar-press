@@ -936,6 +936,30 @@ FORMAT_PATTERNS = [
     (re.compile(r"\bwritten comment", re.I), "written_comment"),
 ]
 
+# TWO DIFFERENT FACTS, AND THEY WERE IN ONE COLUMN.
+#
+# `fr_document_numbers()` already knows which of the two a document is - it
+# reads `fr_consultation_notices.csv` (485 documents: the agency PUBLISHED a
+# notice announcing or scheduling consultation) and
+# `fr_consultation_referenced.csv` (1,829 documents: the text REPORTS, in the
+# past tense, that consultation was carried out). That `kind` was then thrown
+# away into `consultation_type`, where it survived only as two fallback labels
+# and one special case, and every document whose text happened to match a
+# TYPE_PATTERN lost it entirely. A buyer reading `consultation_type =
+# listening_session` cannot tell whether a listening session was ANNOUNCED or
+# was REPORTED to have already happened, and a dataset that conflates those
+# cannot answer either question.
+#
+# `document_role` carries the fact verbatim from the source table the document
+# came from. It infers nothing: it is which file the document number was read
+# out of. `consultation_type` keeps its own meaning - WHAT KIND of consultation
+# - and its vocabulary is untouched (AGENT_FIELD_GUIDE §7: a controlled
+# vocabulary is an interface; the new fact gets its own column beside it).
+DOCUMENT_ROLE = {
+    "notice": "consultation_notice_published",
+    "referenced": "consultation_reported_in_document",
+}
+
 TYPE_PATTERNS = [
     (re.compile(r"native american graves protection|NAGPRA", re.I), "NAGPRA"),
     (re.compile(r"negotiated rulemaking", re.I), "negotiated_rulemaking"),
@@ -1442,6 +1466,7 @@ def stage_build():
         base = {
             "consultation_event_id": ev_id,
             "channel": CHANNEL,
+            "document_role": DOCUMENT_ROLE[kind],
             "agency": agency,
             "sub_agency": sub_agency,
             "program": program,
@@ -1575,8 +1600,39 @@ def stage_build():
             })
             rows.append(r)
 
+    # ---- the document fan-out, stated on the row ---------------------------
+    # ONE FEDERAL REGISTER DOCUMENT BECOMES UP TO 50 ROWS. `consultation_event_id`
+    # is 1:1 with `fr_document_number` - 2,313 of each over 11,402 rows - and
+    # the multiplication is one row per NAMED PARTICIPANT. That is a legitimate
+    # grain, and it is stated in `docs/schema/dataset_contracts.json`; what was
+    # missing is any way to see it from inside the file. A buyer who counts
+    # rows counts documents x tribes: the ten largest documents contribute 50,
+    # 50, 48, 48, 46, 45, 45, 44, 44 and 43 rows each, all of them NAGPRA
+    # inventory notices naming every tribe consulted.
+    #
+    # So the count travels on every row, and exactly one row per event carries
+    # `is_event_primary_row = 1`. `SUM(is_event_primary_row)` is the number of
+    # CONSULTATIONS; `COUNT(*)` is the number of (consultation, participant)
+    # pairs. Both are now derivable without a GROUP BY, and the difference is
+    # visible to anyone who opens the file.
+    #
+    # The primary row is chosen by the SORTED participant name, not by position
+    # in this file, so the same build on another machine marks the same row.
+    # lint-ok: class7 - keyed on the published participant name, not a row index
+    _per = Counter(r["consultation_event_id"] for r in rows)
+    _seen = set()
+    for r in sorted(rows, key=lambda x: (x["consultation_event_id"],
+                                         x["participant_name_as_published"],
+                                         x.get("tribe_id", ""))):
+        eid = r["consultation_event_id"]
+        r["n_participant_rows_for_event"] = _per[eid]
+        r["is_event_primary_row"] = 0 if eid in _seen else 1
+        _seen.add(eid)
+
     # ---- output -----------------------------------------------------------
-    FIELDS = ["consultation_event_id", "channel", "agency", "sub_agency",
+    FIELDS = ["consultation_event_id", "document_role",
+              "n_participant_rows_for_event", "is_event_primary_row",
+              "channel", "agency", "sub_agency",
               "program", "consultation_type", "topic", "notice_date",
               "event_start_date", "event_end_date", "location", "format",
               "tribe_id", "tribe_name", "participant_name_as_published",

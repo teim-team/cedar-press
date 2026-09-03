@@ -359,3 +359,100 @@ write, so scripts 97 and 99 cannot be clobbered.
 3. **EPA's TCOTS** (Tribal Consultation Opportunities Tracking System) is a live consultation tracker and redirected (302) rather than resolving; it is the single richest un-pulled consultation source found.
 4. **IHS Dear Tribal Leader Letters** are published as a series and are the cleanest non-NAGPRA participant source available.
 5. Extend to the remaining channels in §9.5: `OIRA_MEETING`, `HEARING_TESTIMONY`, `FACA`.
+
+
+---
+
+## 2026-09-02 — ONE FEDERAL REGISTER DOCUMENT WAS BECOMING FIFTY ROWS, AND TWO DIFFERENT FACTS SHARED ONE COLUMN
+
+*Pass: `code/1154_nagpra_fr_grain_audit.py report` (measurement),
+`code/1158_fr_consultation_grain_columns.py` (the three columns), fix at source
+in `code/96_build_consultation_events.py`. Full census of
+`data/clean/consultation_events.csv`, 11,402 rows; nothing sampled.*
+
+### Finding 1 — the fan-out is real, and it is LEGITIMATE
+
+| | |
+|---|---|
+| rows | 11,402 |
+| distinct `fr_document_number` | 2,313 |
+| distinct `consultation_event_id` | 2,313 — **1:1 with the document** |
+| rows per document: max | **50** |
+| p99 / p95 / median / mean | 38 / 21 / **1** / 4.93 |
+| documents with exactly one row | 1,304 |
+| documents with more than one row | 1,009 |
+| rows sitting on a multi-row document | **10,098 (88.6%)** |
+
+The ten largest are all NAGPRA inventory notices naming every tribe consulted —
+`2020-11569` (Ball State University, 85 FR 32417) and `2020-23825` (the same
+department, 85 FR 68360) contribute 50 rows each.
+
+**It is not duplication.** Tested two ways over all 1,009 multi-row documents:
+
+* the `(tribe_id, participant_name_as_published)` key is unique within the
+  document on **1,009 of 1,009**, zero repeats;
+* of the 28 non-participant columns, the only two that vary within a document
+  are `nagpra_bridge_overlap` (208 documents) and `source_quote` (133), **both
+  of which are per-participant facts**.
+
+So the grain is `(document, participant)`, exactly as
+`docs/schema/dataset_contracts.json` said — and **the fix is to SAY so, not to
+collapse rows.** What was missing is that nothing in the file or the contract
+named the FEDERAL REGISTER DOCUMENT at all, so a buyer counting rows counts
+documents x tribes.
+
+### Finding 2 — "a consultation happened" and "a notice was published" were one column
+
+`96_build_consultation_events.py` reads two source tables and already knows
+which is which:
+
+* `fr_consultation_notices.csv` — **485 documents**: the agency published a
+  notice announcing or scheduling consultation.
+* `fr_consultation_referenced.csv` — **1,829 documents**: the text reports, in
+  the past tense, that consultation was carried out.
+
+That `kind` was then **thrown away** into `consultation_type`, where it survived
+only as two fallback labels and one special case. Any document whose text
+matched a `TYPE_PATTERN` lost it entirely: `consultation_type =
+listening_session` does not say whether a listening session was **announced**
+or is **reported to have already happened**. Field guide rule 7 — a controlled
+vocabulary is an interface, and a second fact smuggled into it is a breaking
+change.
+
+### The three columns, written by 96 itself
+
+| column | what it is |
+|---|---|
+| `document_role` | `consultation_notice_published` (**514 rows, 484 documents**) or `consultation_reported_in_document` (**10,888 rows, 1,829 documents**). Verbatim from which source table the document number was read out of — it infers nothing. `consultation_type` keeps its own meaning and its vocabulary is untouched. |
+| `n_participant_rows_for_event` | the fan-out, on every row |
+| `is_event_primary_row` | 1 on exactly one row per event. **`SUM(is_event_primary_row)` = 2,313 is the number of CONSULTATIONS; `COUNT(*)` = 11,402 is the number of (consultation, participant) pairs.** The primary row is chosen by the sorted participant name, never by position in the file, so the same build on another machine marks the same row. |
+
+**The fix is at source.** `96.stage_build` writes all three from the
+`DOCUMENT_ROLE` map and the fan-out counter that `1158` imports from it, so a
+96 rebuild reproduces them rather than reverting them. `1158` exists only so
+the already-built table gets the columns without re-resolving 11,402
+participants. The ordering is declared in `ENRICHER_ORDERING` in
+`code/cedar_pipeline.py`.
+
+### How thin the event layer really is
+
+Only **190 of 11,402 rows carry an `event_start_date`** and **103 a
+`location`**, across 190 distinct documents. This table is overwhelmingly a
+record **that** consultation is asserted, not **when** or **where** it met, and
+the amended contract now says so in that sentence.
+
+### Checks
+
+`1158 verify` re-derives all three columns and exits 1 if they are absent or
+disagree. Proven: **exit 1 against the pre-apply backup** (columns absent),
+exit 0 after. `provegates` fires J3 and J4 on injected breaches. J2 fails the
+run if any pre-existing column value moves — this enricher may only ADD.
+
+### WHAT IS STILL OWED
+
+* **`2026-16826` is in `fr_consultation_notices.csv` and produced no rows** —
+  484 of the 485 notice documents are represented. One document short; worth a
+  look at whether its full text is on disk.
+* **`dist/customer/federal-register.csv` is stale** and `846` reports
+  `1137 verify rc=1 - federal-register: STALE`. Run
+  `py -3 code/1137_*.py build federal-register`.

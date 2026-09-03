@@ -1,0 +1,29 @@
+{
+ "measured_date": "2026-09-02",
+ "script": "code/1158_fr_consultation_grain_columns.py",
+ "fix_at_source": "code/96_build_consultation_events.py writes all three columns in stage_build from the same DOCUMENT_ROLE map and the same fan-out counter",
+ "rows": 11402,
+ "distinct_consultation_event_id": 2313,
+ "distinct_fr_document_number": 2313,
+ "sum_is_event_primary_row": 2313,
+ "document_role_rows": {
+  "consultation_reported_in_document": 10888,
+  "consultation_notice_published": 514
+ },
+ "document_role_documents": {
+  "consultation_notice_published": 484,
+  "consultation_reported_in_document": 1829
+ },
+ "source_table_documents": {
+  "fr_consultation_notices.csv": 485,
+  "fr_consultation_referenced.csv": 1829
+ },
+ "documents_in_neither_source_table": 0,
+ "rows_per_event": {
+  "max": 50,
+  "median": 1,
+  "mean": 4.93,
+  "events_with_one_row": 1304,
+  "events_with_more_than_one_row": 1009
+ }
+}

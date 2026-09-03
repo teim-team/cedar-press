@@ -361,11 +361,11 @@ No code can stop a buyer adding two files together. What **is** enforced, by `py
 
 ## Gaming self-published claims — a marketing number is not a measurement (workstream GAMING-NR, 2026-09-01)
 
-`gaming_property_self_published_assertions.csv` (622 rows) and `gaming_property_self_published_claims.csv` (270 rows) hold what a casino says about ITSELF on its own website — machine counts, hotel rooms, square footage, ownership and opening dates. Every row carries `assertion_class`, and every class is deliberately OUTSIDE `cedar_domain.MeasurementType`.
+`gaming_property_self_published_assertions.csv` (1,483 rows) and `gaming_property_self_published_claims.csv` (584 rows) hold what a casino says about ITSELF on its own website — machine counts, hotel rooms, square footage, ownership and opening dates. Every row carries `assertion_class`, and every class is deliberately OUTSIDE `cedar_domain.MeasurementType`.
 
 **A buyer may never sum either table against a regulator's figure.** Specifically, never against `gaming_capacity_official.csv` (regulator-reported capacity), `nigc_regional_ggr.csv` or `nigc_revenue_bands.csv` (NIGC), `state_gaming_observations.csv`, `wa_machine_allocations.csv`, or the Casino City vendor panel. A self-published count and a regulator count of the same floor are TWO CLAIMS ABOUT ONE THING, not two things; adding them doubles the floor, and preferring the larger is how a marketing number becomes a statistic.
 
-Three further measured cautions on the claims table: 162 of 270 values are BOUNDED ("more than 1,000 slots") and a bound is not a count; 9 rows restate an observation that is already in `gaming_property_site_observations.csv`, so stacking the two files double counts them; and 229 were RECOVERED from a refusal pile by `code/383` and are published because a refusal that hides the claim is worse than one that labels it, not because they got better.
+Three further measured cautions on the claims table: 318 of 584 values are BOUNDED ("more than 1,000 slots") and a bound is not a count; 9 rows restate an observation that is already in `gaming_property_site_observations.csv`, so stacking the two files double counts them; and 229 were RECOVERED from a refusal pile by `code/383` and are published because a refusal that hides the claim is worse than one that labels it, not because they got better.
 
 The grain is a claim occurrence, not a fact: two sentences on one page stating the same number about two different ballrooms are two rows, and collapsing them deletes a ballroom. See `512.GRAIN_GAMING_NR`.
 
@@ -2012,3 +2012,91 @@ generated, and the figures in §1–§5 above were measured on the delivered fil
 as it stands. Regenerate before shipping.
 
 <!-- END MONEY-RECON-1144 -->
+
+<!-- BEGIN COLUMN-SUMMABILITY-1161 -->
+## Per-column summability, measured on the delivered files (workstream COLUMN-SUMMABILITY, `code/1161_money_column_summability.py`, 2026-09-02)
+
+*Owner, 2026-09-02, on what only a full-data check can answer: "transaction totals versus cumulative snapshots are additive" - i.e. whether they can be summed at all. This block answers it per column. Every figure is re-measured from `dist/customer/` by `py -3 code/1161_money_column_summability.py apply`; the machine-readable form is `docs/MONEY_COLUMN_SUMMABILITY.json` and the sentence to print is `1161.summability_warning(dataset, column)`. Do not retype a number out of this table.*
+
+*This file is written WHOLESALE by `code/574_ws1_money_and_conservation.py`, which preserves only marked blocks; this section lives inside a marked block named COLUMN-SUMMABILITY-1161 and no other block was touched. The marker literals are deliberately NOT repeated in this sentence - an earlier draft quoted them, and the writer's own search for the END marker then found the quote instead and truncated the block on rewrite.*
+
+**The four shapes.** `TRANSACTION_ADDITIVE` - one row is one movement of money, SUM is the answer. `ADDITIVE_WITHIN_GROUP` - the rows partition their group, SUM is the answer. `SNAPSHOT_RESTATED_PER_ROW` - an award- or entity-level figure copied onto every row of its group; SUM multiplies it by the group size. `CUMULATIVE_RESTATED_PER_ROW` - an award-to-date running total, so it CHANGES per row and still may not be summed; the answer is the last value per group. The last two are the ones a column name never warns you about.
+
+| dataset | column | verdict | rows | SUM(all rows) | correct total | factor if summed |
+|---|---|---|---:|---:|---:|---:|
+| `contractors.csv` | `total_award_value` | **NEVER SUM** (CUMULATIVE_RESTATED_PER_ROW) * | 1,217,768 | $5,365,782,120,973.13 | $284,271,155,365.85 | 18.88x |
+| `contractors.csv` | `total_award_value_real2025` | **NEVER SUM** (CUMULATIVE_RESTATED_PER_ROW) * | 1,217,768 | $6,217,672,691,258.37 | $308,207,082,499.41 | 20.17x |
+| `contractors.csv` | `total_obligations` | ADDITIVE_WITHIN_GROUP * | 1,217,768 | $226,214,484,630.69 | $226,214,484,630.69 | 1.00x |
+| `contractors.csv` | `total_obligations_real2025` | ADDITIVE_WITHIN_GROUP * | 1,155,955 | $267,554,413,685.72 | $267,554,413,685.72 | 1.00x |
+| `deals.csv` | `Announced_Value_USD` | TRANSACTION_ADDITIVE | 861 | $47,880,355,533.49 | $47,880,355,533.49 | 1.00x |
+| `deals.csv` | `Project_Total_Value_USD` | TRANSACTION_ADDITIVE | 141 | $11,482,170,087.00 | $11,482,170,087.00 | 1.00x |
+| `funding.csv` | `bie_uio_dollars_by_entity__total_usd` | **UNMEASURED** | | | | no parseable numeric value in any row |
+| `funding.csv` | `bie_uio_dollars_by_entity__usd_prime_contracts` | **UNMEASURED** | | | | no parseable numeric value in any row |
+| `funding.csv` | `bie_uio_dollars_by_entity__usd_subawards` | **UNMEASURED** | | | | no parseable numeric value in any row |
+| `funding.csv` | `face_value_of_loan` | **NEVER SUM** (SNAPSHOT_RESTATED_PER_ROW) | 225,031 | $4,572,438,080.76 | $2,625,613,274.28 | 1.74x |
+| `funding.csv` | `obligated_usd` | ADDITIVE_WITHIN_GROUP | 701,955 | $219,689,020,478.59 | $219,689,020,478.59 | 1.00x |
+| `funding.csv` | `obligated_usd_real2025` | ADDITIVE_WITHIN_GROUP | 677,060 | $250,172,759,769.39 | $250,172,759,769.39 | 1.00x |
+| `funding.csv` | `original_loan_subsidy_cost` | **NEVER SUM** (SNAPSHOT_RESTATED_PER_ROW) | 225,031 | $211,035,206.44 | $220,416,447.07 | 0.96x |
+| `funding.csv` | `total_face_value_of_loan` | **NEVER SUM** (SNAPSHOT_RESTATED_PER_ROW) | 225,031 | $563,696,307,571.24 | $4,605,403,903.76 | 122.40x |
+| `funding.csv` | `total_loan_subsidy_cost` | **NEVER SUM** (SNAPSHOT_RESTATED_PER_ROW) | 225,031 | $410,063,655.37 | $211,247,714.14 | 1.94x |
+| `lobbying.csv` | `expenses_usd` | TRANSACTION_ADDITIVE | 237 | $31,121,655.81 | $31,121,655.81 | 1.00x |
+| `lobbying.csv` | `income_usd` | TRANSACTION_ADDITIVE | 17,621 | $694,622,318.71 | $694,622,318.71 | 1.00x |
+| `lobbying.csv` | `spend_usd` | TRANSACTION_ADDITIVE | 27,825 | $725,743,974.52 | $725,743,974.52 | 1.00x |
+| `natural-resources.csv` | `amount_usd` | TRANSACTION_ADDITIVE | 11,305 | $50,973,259,111.49 | $50,973,259,111.49 | 1.00x |
+| `natural-resources.csv` | `amount_usd_real2025` | TRANSACTION_ADDITIVE | 10,257 | $58,433,978,189.20 | $58,433,978,189.20 | 1.00x |
+| `nonprofits.csv` | `bmf_asset_amt` | TRANSACTION_ADDITIVE | 10,271 | $46,813,644,595.00 | $46,813,644,595.00 | 1.00x |
+| `nonprofits.csv` | `bmf_income_amt` | TRANSACTION_ADDITIVE | 10,271 | $24,705,924,367.00 | $24,705,924,367.00 | 1.00x |
+| `nonprofits.csv` | `bmf_revenue_amt` | TRANSACTION_ADDITIVE | 9,937 | $19,901,728,037.00 | $19,901,728,037.00 | 1.00x |
+| `subcontracting.csv` | `prime_award_amount` | **NEVER SUM** (CUMULATIVE_RESTATED_PER_ROW) | 67,876 | $15,287,833,378,607.94 | $1,113,757,198,353.94 | 13.73x |
+| `subcontracting.csv` | `subaward_amount` | TRANSACTION_ADDITIVE | 70,597 | $42,172,721,583.24 | $42,172,721,583.24 | 1.00x |
+| `subcontracting.csv` | `subaward_amount_real2025` | TRANSACTION_ADDITIVE | 67,263 | $48,971,563,476.23 | $48,971,563,476.23 | 1.00x |
+| `subcontracting.csv` | `subaward_entity_rollup__usd_as_prime_a` | **NEVER SUM** (SNAPSHOT_RESTATED_PER_ROW) | 29,182 | $22,309,732,318,204.07 | $7,943,989,328.24 | 2,808.38x |
+| `subcontracting.csv` | `subaward_entity_rollup__usd_as_subawardee_b` | **NEVER SUM** (SNAPSHOT_RESTATED_PER_ROW) | 29,182 | $17,106,633,746,257.15 | $7,000,813,664.93 | 2,443.52x |
+| `subcontracting.csv` | `subaward_entity_rollup__usd_both_sides` | **NEVER SUM** (SNAPSHOT_RESTATED_PER_ROW) | 29,182 | $1,591,306,785,512.40 | $1,231,925,611.55 | 1,291.72x |
+
+### Every never-sum column, in one sentence each
+
+* `total_award_value` in `contractors.csv` MUST NOT BE SUMMED: inside a `contract_award_unique_key` group, successive values ordered by `action_date` differ by only 30.4% on average (threshold 50%), and 82,566 of 132,976 groups (62.1%) never move at all: the column is ONE award-level figure restated on each transaction - a running total or a ceiling - not a per-row amount. 9,927 groups (7.5%) only ever rise; the rest fall on de-obligations, which is why a monotonicity test alone does not find this column. Summing gives $5,365,782,120,973.13, which is 18.88x the correct $284,271,155,365.85 taken as the LAST value per `contract_award_unique_key` over 307,671 groups, measured on the 841,002 of 1,217,768 rows (69.1%) on which contract_award_unique_key resolves; the remaining 376,766 rows carry no award key and are NOT covered by this verdict. Measured from the delivered file, not quoted.
+* `total_award_value_real2025` in `contractors.csv` MUST NOT BE SUMMED: inside a `contract_award_unique_key` group, successive values ordered by `action_date` differ by only 31.9% on average (threshold 50%), and 52,410 of 132,976 groups (39.4%) never move at all: the column is ONE award-level figure restated on each transaction - a running total or a ceiling - not a per-row amount. 6,175 groups (4.6%) only ever rise; the rest fall on de-obligations, which is why a monotonicity test alone does not find this column. Summing gives $6,217,672,691,258.37, which is 20.17x the correct $308,207,082,499.41 taken as the LAST value per `contract_award_unique_key` over 307,671 groups, measured on the 841,002 of 1,217,768 rows (69.1%) on which contract_award_unique_key resolves; the remaining 376,766 rows carry no award key and are NOT covered by this verdict. Measured from the delivered file, not quoted.
+* `face_value_of_loan` in `funding.csv` MUST NOT BE SUMMED: 34,096 of 34,225 multi-row `assistance_award_unique_key` groups (99.6%) hold ONE value repeated on every row, and 34,096 (99.6%) vary by no more than 2%: an award- or entity-level figure restated per row, which summing multiplies by the group size. Summing gives $4,572,438,080.76, which is 1.74x the correct $2,625,613,274.28 taken as one value per `assistance_award_unique_key` over 83,148 groups. Measured from the delivered file, not quoted.
+* `original_loan_subsidy_cost` in `funding.csv` MUST NOT BE SUMMED: 34,127 of 34,225 multi-row `assistance_award_unique_key` groups (99.7%) hold ONE value repeated on every row, and 34,127 (99.7%) vary by no more than 2%: an award- or entity-level figure restated per row, which summing multiplies by the group size. Summing gives $211,035,206.44, which is 0.96x the correct $220,416,447.07 taken as one value per `assistance_award_unique_key` over 83,148 groups. Measured from the delivered file, not quoted.
+* `total_face_value_of_loan` in `funding.csv` MUST NOT BE SUMMED: 34,225 of 34,225 multi-row `assistance_award_unique_key` groups (100.0%) hold ONE value repeated on every row, and 34,225 (100.0%) vary by no more than 2%: an award- or entity-level figure restated per row, which summing multiplies by the group size. Summing gives $563,696,307,571.24, which is 122.40x the correct $4,605,403,903.76 taken as one value per `assistance_award_unique_key` over 83,148 groups. Measured from the delivered file, not quoted.
+* `total_loan_subsidy_cost` in `funding.csv` MUST NOT BE SUMMED: 34,225 of 34,225 multi-row `assistance_award_unique_key` groups (100.0%) hold ONE value repeated on every row, and 34,225 (100.0%) vary by no more than 2%: an award- or entity-level figure restated per row, which summing multiplies by the group size. Summing gives $410,063,655.37, which is 1.94x the correct $211,247,714.14 taken as one value per `assistance_award_unique_key` over 83,148 groups. Measured from the delivered file, not quoted.
+* `prime_award_amount` in `subcontracting.csv` MUST NOT BE SUMMED: inside a `prime_award_unique_key` group, successive values ordered by `subaward_date` differ by only 1.0% on average (threshold 50%), and 7,474 of 8,142 groups (91.8%) never move at all: the column is ONE award-level figure restated on each transaction - a running total or a ceiling - not a per-row amount. 482 groups (5.9%) only ever rise; the rest fall on de-obligations, which is why a monotonicity test alone does not find this column. Summing gives $15,287,833,378,607.94, which is 13.73x the correct $1,113,757,198,353.94 taken as the LAST value per `prime_award_unique_key` over 17,546 groups. Measured from the delivered file, not quoted.
+* `subaward_entity_rollup__usd_as_prime_a` in `subcontracting.csv` MUST NOT BE SUMMED: 94 of 94 multi-row `subaward_entity_rollup__tribe_id` groups (100.0%) hold ONE value repeated on every row, and 94 (100.0%) vary by no more than 2%: an award- or entity-level figure restated per row, which summing multiplies by the group size. Summing gives $22,309,732,318,204.07, which is 2,808.38x the correct $7,943,989,328.24 taken as one value per `subaward_entity_rollup__tribe_id` over 123 groups. Measured from the delivered file, not quoted.
+* `subaward_entity_rollup__usd_as_subawardee_b` in `subcontracting.csv` MUST NOT BE SUMMED: 94 of 94 multi-row `subaward_entity_rollup__tribe_id` groups (100.0%) hold ONE value repeated on every row, and 94 (100.0%) vary by no more than 2%: an award- or entity-level figure restated per row, which summing multiplies by the group size. Summing gives $17,106,633,746,257.15, which is 2,443.52x the correct $7,000,813,664.93 taken as one value per `subaward_entity_rollup__tribe_id` over 123 groups. Measured from the delivered file, not quoted.
+* `subaward_entity_rollup__usd_both_sides` in `subcontracting.csv` MUST NOT BE SUMMED: 94 of 94 multi-row `subaward_entity_rollup__tribe_id` groups (100.0%) hold ONE value repeated on every row, and 94 (100.0%) vary by no more than 2%: an award- or entity-level figure restated per row, which summing multiplies by the group size. Summing gives $1,591,306,785,512.40, which is 1,291.72x the correct $1,231,925,611.55 taken as one value per `subaward_entity_rollup__tribe_id` over 123 groups. Measured from the delivered file, not quoted.
+
+### Where a row filter applies before summing
+
+* `deals.csv` `Announced_Value_USD` - and read Value_Type first: the column holds several different kinds of figure and summing across them adds unlike things.
+* `deals.csv` `Project_Total_Value_USD` - and never together with Announced_Value_USD on the same deal - the project total CONTAINS the announced value.
+* `lobbying.csv` `expenses_usd` - and NEVER together with income_usd - see income_usd.
+* `lobbying.csv` `income_usd` - and NEVER together with expenses_usd - an LDA filing reports income (a registrant billing a client) OR expenses (a client self-filing), and spend_usd is the coalesced one. Adding the two double-counts; adding either to spend_usd double-counts.
+* `lobbying.csv` `spend_usd` - and only over rows whose supersession_status is not a SUPERSEDED_* or AMBIGUOUS_* value and whose attribution_withdrawn != 1 - see cedar_publication.lobbying_warning().
+* `natural-resources.csv` `amount_usd` - and read amount_sign_meaning and aggregation_level first: a row whose aggregation_level is not the transaction level is itself a rollup.
+* `subcontracting.csv` `subaward_amount` - and only over rows with duplicate_status == 'primary' AND subaward_exceeds_prime_flag != 'yes' - see cedar_publication.subaward_warning().
+* `subcontracting.csv` `subaward_amount_real2025` - the same filter as subaward_amount.
+
+### Where the column NAME says the opposite of the measurement
+
+* `contractors.csv` `total_award_value` - sits one column away from total_obligations, is named the same way, and behaves in the opposite way: it is the award-to-date ceiling restated on every transaction.
+* `contractors.csv` `total_obligations` - the name says TOTAL and the column is a per-TRANSACTION delta - it carries negative values on de-obligations and sums correctly to the award total. It is the USAspending `federal_action_obligation`, renamed. Summing it is right; reading one row of it as an award total is wrong.
+
+### Declared money columns that are EMPTY in the delivered file
+
+Not a summability verdict - a delivery finding. These columns reach the customer file with a header and no value on any row.
+
+* `funding.csv` `bie_uio_dollars_by_entity__total_usd` - 701,955 rows, none parseable as a number.
+* `funding.csv` `bie_uio_dollars_by_entity__usd_prime_contracts` - 701,955 rows, none parseable as a number.
+* `funding.csv` `bie_uio_dollars_by_entity__usd_subawards` - 701,955 rows, none parseable as a number.
+
+### `*` - a verdict measured on a SUBSET, and which subset
+
+* `contractors.csv` `total_award_value` - measured on the 841,002 of 1,217,768 rows (69.1%) on which contract_award_unique_key resolves; the remaining 376,766 rows carry no award key and are NOT covered by this verdict.
+* `contractors.csv` `total_award_value_real2025` - measured on the 841,002 of 1,217,768 rows (69.1%) on which contract_award_unique_key resolves; the remaining 376,766 rows carry no award key and are NOT covered by this verdict.
+* `contractors.csv` `total_obligations` - measured on the 841,002 of 1,217,768 rows (69.1%) on which contract_award_unique_key resolves; the remaining 376,766 rows carry no award key and are NOT covered by this verdict.
+* `contractors.csv` `total_obligations_real2025` - measured on the 779,189 of 1,155,955 rows (67.4%) on which contract_award_unique_key resolves; the remaining 376,766 rows carry no award key and are NOT covered by this verdict.
+
+**What is DECLARED and what is MEASURED.** Which columns hold money, which column is the group the figure belongs to, and which column orders that group are declared in `1161.SPEC` - a machine cannot guess them. Constancy, monotonicity, the verdict, the two totals and the factor are all measured. A declared group key that is blank on more than 10% of the rows carrying a value is REFUSED and reported UNMEASURED rather than producing a clean verdict about nothing.
+<!-- END COLUMN-SUMMABILITY-1161 -->

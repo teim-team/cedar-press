@@ -1,0 +1,110 @@
+{
+  "_what": "Adjudicated exceptions for code/1156_doc_claim_gate.py. Each entry says: this document states a number that looks like a row count for this table, it does not equal the row count, AND THAT IS CORRECT. Read `py -3 code/1156_doc_claim_gate.py exclusions` for the live status of every entry.",
+  "_key": "(doc, table, stated). Deliberately NOT a line number - an edit above a claim must not silently orphan its adjudication. If the SENTENCE is rewritten the stated value moves, the exclusion stops matching, `exclusions` reports it DEAD, and the claim is checked again. That is the intended behaviour, not a bug.",
+  "_rule": "An exclusion is a statement that the MATCH is wrong, never that a stale number is acceptable. If a number is genuinely stale, fix the prose or mark it superseded - do not add it here.",
+  "_reviewed": "2026-09-02",
+  "exclusions": [
+    {
+      "doc": "AGENTS.md",
+      "table": "np_orgs.csv",
+      "stated": 27,
+      "reason": "SUBSET. '(27 rows, existing columns only)' counts the rows one repair wrote back, not the table. The table is 12,764."
+    },
+    {
+      "doc": "AGENTS.md",
+      "table": "cedar_correction_register.csv",
+      "stated": 19,
+      "reason": "DATED INCIDENT RECORD. Two passages narrate the table landing at 20:08 on 2026-08-26 with 19 rows, from code/354. Rewriting a timestamped narrative destroys the record it exists to keep."
+    },
+    {
+      "doc": "AGENTS.md",
+      "table": "cedar_correction_register.csv",
+      "stated": 24,
+      "reason": "TRANSCRIPT. A quoted 62_no_regression_check.py failure output ('NEW TABLES AT A 0% SHIP RATIO (1): cedar_correction_register.csv (24 rows)'). A quoted gate transcript must say what the gate said."
+    },
+    {
+      "doc": "AGENTS.md",
+      "table": "cedar_correction_register.csv",
+      "stated": 163,
+      "reason": "TRANSCRIPT. A quoted benchmark-diff block from the same incident."
+    },
+    {
+      "doc": "AGENTS.md",
+      "table": "federal_funding_transactions.csv",
+      "stated": 504,
+      "reason": "SUBSET. 504 rows / $494,305,407 is one attribution's reach, not the table. The table is 701,955."
+    },
+    {
+      "doc": "AGENTS.md",
+      "table": "cedar_dataset_punchlist.csv",
+      "stated": 418,
+      "reason": "DATED INCIDENT RECORD. '(418 rows, written 16:41)' - the cause-and-owner note for a specific unregistered-table failure."
+    },
+    {
+      "doc": "AGENTS.md",
+      "table": "native_owned_businesses.csv",
+      "stated": 2393,
+      "reason": "TRANSCRIPT. A quoted 62 benchmark-diff row explaining which new tables moved the codebook metrics that run."
+    },
+    {
+      "doc": "AGENTS.md",
+      "table": "nonprofit_schedule_c_lobbying.csv",
+      "stated": 6870,
+      "reason": "DATED INCIDENT RECORD. '(6,870 rows, 19:20, the lobbying workstream)' - a two-builds-in-one-hour collision narrative, keyed on the timestamps."
+    },
+    {
+      "doc": "START_HERE.md",
+      "table": "fpds_uei_cage_map.csv",
+      "stated": 504,
+      "reason": "SUBSET. '504 rows / $494,305,407.20 that claimed an attribution they did not have' - the reach of one 2026-09-02 reconciliation, in the index line for LINKAGE_CLOSE_LOG. The file is 34,601."
+    },
+    {
+      "doc": "docs/ARCHITECTURE_DECISIONS.md",
+      "table": "native_owned_businesses.csv",
+      "stated": 2916,
+      "reason": "IMMUTABLE BY THE DOCUMENT'S OWN RULE. Its header: 'One entry per new primitive. Append only; supersede by adding a new entry that names the one it replaces.' An ADR records the measurement the decision was made on. Editing it rewrites history; the remedy the document prescribes is a new ADR."
+    },
+    {
+      "doc": "docs/CROSS_DATASET_RECONCILIATION_LEDGER.md",
+      "table": "fpds_uei_cage_map.csv",
+      "stated": 2196,
+      "reason": "SUBSET. '(2,196 rows, 2,193 UEIs)' counts the rows carrying the literal string NAN in cage_code, quoted from ENTITY_MATCH_RULES rule 4. The file is 34,601."
+    },
+    {
+      "doc": "docs/EDITORIAL_PIPELINE.md",
+      "table": "subawards.csv",
+      "stated": 63548,
+      "reason": "SELF-DATED MEASUREMENT. The sentence is 'All measured 2026-08-26 from data/clean/subawards.csv (63,548 rows, 52 columns)'. It states its own vintage, which is the discipline this gate exists to enforce, not a violation of it."
+    },
+    {
+      "doc": "docs/codebooks/07_gaming.md",
+      "table": "gaming_nigc_roster_link.csv",
+      "stated": 442,
+      "reason": "GENERATED - FIX BELONGS UPSTREAM. docs/codebooks/*.md are written by the codebook registration scripts ('Generated 2026-08-07' in the header), and this is a '### New file: ... (442 rows)' registration fragment recording the table as registered. The file is now 453. OPEN: the registration fragment records a count and never re-states it. Editing the .md is the regenerate defect."
+    },
+    {
+      "doc": "docs/datasets/gaming_sources.md",
+      "table": "native_owned_businesses.csv",
+      "stated": 2393,
+      "reason": "TRANSCRIPT. A quoted 62 benchmark-diff row ('tables_missing_from_25_TABLES 179 -> 180 ... written 19:20')."
+    },
+    {
+      "doc": "docs/datasets/lobbying_sources.md",
+      "table": "native_owned_businesses.csv",
+      "stated": 2393,
+      "reason": "TRANSCRIPT. A quoted 62 benchmark-diff row naming the new tables at 0% ship for workstream P."
+    },
+    {
+      "doc": "docs/methodology/deals.md",
+      "table": "deals_classified.csv",
+      "stated": 935,
+      "reason": "GENERATED COPY, ROOT ALREADY FIXED. Inside <!-- BEGIN GENERATED:MEASURED -->, which quotes docs/WHAT_IS_MISSING.md L705 verbatim. That heading was corrected to 1,073 on 2026-09-02. Clears on the next `py -3 code/1143_methodology_papers.py build deals`, which was NOT run in that pass because 1143 verify reports dist/customer mid-rebuild by another agent. Then prune this entry."
+    },
+    {
+      "doc": "docs/methodology/native-owned-businesses.md",
+      "table": "native_owned_businesses.csv",
+      "stated": 2393,
+      "reason": "GENERATED COPY, ROOT ALREADY FIXED. Inside <!-- BEGIN GENERATED:MEASURED -->, quoting docs/WHAT_IS_MISSING.md L578 verbatim; that heading was corrected to 4,273 on 2026-09-02. Clears on the next `py -3 code/1143_methodology_papers.py build native-owned-businesses`. Then prune this entry."
+    }
+  ]
+}

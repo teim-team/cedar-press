@@ -121,6 +121,9 @@ from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, GROVE_SHELVES, BUILD_SHELVES,
     N_STOREFRONT_EXPECTED, N_BUILT_EXPECTED,
     row_ok, publishable_columns, shelves, subaward_warning,
+    BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
+    is_publication_eligible, mask_attribution, MASK,
+    LOBBYING_FILE, LOBBYING_FENCE, lobbying_overstatement, lobbying_warning,
 )
 
 csv.field_size_limit(10_000_000)
@@ -179,7 +182,15 @@ def find(name):
 # `cedar_publication`. It was reimplemented identically here and in 1135.
 
 
-def load(path, gate=True):
+def load(path, gate=True, masked=None):
+    """Read a table through THE publication gate.
+
+    `masked` is an optional counter the caller passes in to collect the
+    attribution masks - `is_publication_eligible` returns three things, not
+    two, and a caller that reads only the boolean silently reverts CP-017.
+    """
+    if masked is None:
+        masked = defaultdict(int)
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         rd = csv.DictReader(fh)
         hdr = publishable_columns(rd.fieldnames or [])
@@ -194,10 +205,18 @@ def load(path, gate=True):
             # to be published.
             r = {c: r.get(c, "") for c in hdr}
             if gate:
-                ok, why = row_ok(r)
+                # THE gate: licensing + personal data (`row_ok`, unchanged)
+                # plus the deny-by-default adjudication policy added
+                # 2026-09-02. Three outcomes, not two - a MASK keeps the row
+                # and withholds the Cedar attribution on it, because a prime
+                # contract whose ownership ruling was withdrawn is still a real
+                # federal award and dropping it would lose public record.
+                ok, why, disp = is_publication_eligible(r)
                 if not ok:
                     held[why] += 1
                     continue
+                if disp == MASK and mask_attribution(r, why):
+                    masked[why] += 1
             rows.append(r)
     return hdr, rows, held
 
@@ -369,6 +388,13 @@ def codebook(coll, c, fname, fmeta, cols, rows, prof, joined, refused, held):
     A("- A **sum** in the table above is the raw column total. It is NOT "
       "necessarily the dataset's money answer — filters and de-duplication "
       "rules live in the methodology paper. " + subaward_warning())
+    # The lobbying money fence, measured the same way and for the same
+    # reason. Superseded LDA filings are PUBLISHED - see
+    # `cedar_publication.BLOCKED_STATES` - so the fence, not a row gate,
+    # is what stops an original and its amendment being summed together.
+    if coll == "lobbying":
+        A("- " + lobbying_warning())
+        A(f"- Countable-spend fence: `{" AND ".join(LOBBYING_FENCE)}`")
     (OUT / f"{coll}__CODEBOOK.md").write_text("\n".join(L) + "\n",
                                               encoding="utf-8")
 
@@ -464,6 +490,11 @@ def notes(coll, c, fname, fmeta, cols, rows, prof, joined, refused, held):
                    "necessarily this dataset's money answer - filters and "
                    "de-duplication rules live in the methodology paper. "
                    + subaward_warning()))
+    if coll == "lobbying":
+        A("")
+        L.extend(_wrap(lobbying_warning()))
+        L.extend(_wrap("Countable-spend fence: "
+                       + " AND ".join(LOBBYING_FENCE)))
     A("")
     A("COLUMNS")
     A("-" * 7)
@@ -709,7 +740,8 @@ def build(dry: bool, only: tuple = ()) -> int:
             print(f"    {coll:<26} FLAGSHIP MISSING ({fname})")
             continue
 
-        fhdr, frows, fheld = load(fpath)
+        fmasked = defaultdict(int)
+        fhdr, frows, fheld = load(fpath, masked=fmasked)
         own_cols = set(fhdr)      # everything added after this is a join
         n0 = len(frows)
         meta = {t["table"]: t for t in c.get("tables", [])}
@@ -876,6 +908,12 @@ def build(dry: bool, only: tuple = ()) -> int:
             "flagship": fname, "grain": (fmeta.get("grain") or "")[:300],
             "rows": len(frows), "rows_withheld": sum(fheld.values()),
             "withheld_why": "; ".join(f"{k}={v}" for k, v in sorted(fheld.items())),
+            # CP-002 MASKS. A masked row SHIPS - what was withheld is the
+            # Cedar attribution on it. Counted separately from withheld
+            # rows because they are different products of one policy and
+            # summing them would misreport both.
+            "rows_attribution_masked": sum(fmasked.values()),
+            "attribution_masked_why": "; ".join(f"{k}={v}" for k, v in sorted(fmasked.items())),
             "columns": len(fhdr), "columns_added_by_join": added_cols,
             "tables_folded_in": "; ".join(joined),
             "tables_counted_not_joined": "; ".join(refused),
@@ -886,13 +924,19 @@ def build(dry: bool, only: tuple = ()) -> int:
             "notes_txt": f"{coll}__NOTES.txt" if not dry else "",
         })
         print(f"    {coll:<26} {len(frows):>9,} rows x {len(fhdr):>3} cols   "
-              f"+{added_cols} joined   {files} file(s)")
+              f"+{added_cols} joined   {files} file(s)"
+              + (f"   -{sum(fheld.values()):,} withheld"
+                 if sum(fheld.values()) else "")
+              + (f"   {sum(fmasked.values()):,} attribution(s) masked"
+                 if sum(fmasked.values()) else ""))
 
     if not dry:
         OUT.mkdir(parents=True, exist_ok=True)
     keys = ["dataset", "shelf", "storefront", "sold_through", "name",
             "flagship", "grain", "rows",
-            "rows_withheld", "withheld_why", "columns", "columns_added_by_join",
+            "rows_withheld", "withheld_why",
+            "rows_attribution_masked", "attribution_masked_why",
+            "columns", "columns_added_by_join",
             "tables_folded_in", "tables_counted_not_joined", "sparse_columns",
             "files", "largest_mb", "split", "codebook", "notes_txt",
             "notes_pdf", "notes_pdf_absent_reason", "note"]

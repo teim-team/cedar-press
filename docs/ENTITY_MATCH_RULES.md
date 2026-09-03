@@ -384,3 +384,133 @@ those families announce themselves.
 
 Treat a hard case in contracting as a **signal that the ladder was not run**,
 rather than as an intrinsically ambiguous record.
+
+
+<!-- BEGIN RULE-16-PLACENAME-1155 -->
+## Rule 16 - when a nation's name is also a town, STATE AGREEMENT ARGUES THE WRONG WAY
+
+*Added 2026-09-02 by `code/1155_np_placename_precision.py`, revised the same day
+after an independent hand-check. Full account, with the two alternatives that
+were measured and rejected: `docs/NP_PLACENAME_PRECISION_1155.md`.*
+
+This document already says geography is a strong corroborator and a poor gate.
+On one family it is worse than poor, and the reason is structural:
+
+> **A town named after a nation is almost always in that nation's own state.**
+> So on a place-name collision, state agreement is not weak evidence - it is
+> evidence pointing the wrong way, and it fires hardest exactly where the
+> matcher is most wrong.
+
+Measured on `np_orgs.csv`: of a seeded 150-row sample of the 888 keys reading
+`key_review_disposition = SUPPORTED`, **105 were wrong** - strict precision
+25.3%. Every one reads `keyed_state_agreement = Y`, and most read
+`disposition = NATIVE_VERIFIED_STRICT`:
+
+```
+COQUILLE CHESS CLUB           Coquille OR  -> Coquille Indian Tribe
+CHEHALIS BALLET CENTER        Chehalis WA  -> Chehalis Tribe
+COWLITZ OFF LEASH ASSOCIATION Kelso    WA  -> Cowlitz Tribe
+SENECA ZOOLOGICAL SOCIETY     Rochester NY -> Seneca Nation
+SHAKOPEE BAND BOOSTERS        Shakopee MN  -> Shakopee Mdewakanton
+```
+
+### The two predicates that separate them, and neither is a denylist
+
+**P1 - the matched token is the filer's own postal place.** The nation's
+distinctive token appears in the organisation's own city field. If the word that
+matched is the name of the town the filer sits in, the word is an address in
+that record. Entirely data-driven; no list of tribe names in it.
+
+**P2 - the token is qualified as geography in the name itself.** The token is
+immediately followed by a US geographic-form noun - `COUNTY`, `FALLS`, `LAKE`,
+`VALLEY`, `BEACH`, `RIVER` - **that the keyed entity's own official name does
+not itself carry**. `SENECA COUNTY` is a county; `TURTLE MOUNTAIN` is a nation.
+The closed class here is geography words, not entities, which is the difference
+between a structural predicate and a denylist.
+
+### The veto that makes P1 safe: A NATION'S OWN SEAT IS NOT A COLLISION
+
+Zuni NM, Siletz OR, Crow Agency MT and Kasaan AK are named after a nation
+*because the nation is there*.
+
+**The veto gates P1 and only P1.** P1 is a geographic inference and a seat is
+geographic evidence against it; P2 reads the organisation's OWN NAME, and rule 7
+cuts both ways - the record's own words outrank geography whether they are
+awarding a match or blocking one. Gating P2 as well preserved
+`COWLITZ VALLEY LODGE 530`, whose own name says Cowlitz *Valley*, and suppressed
+six other correct refusals.
+
+Read the seat off tables that carry both a Cedar key and an address:
+`fac_tribal_single_audits`, `fac_native_nontribal_single_audits` and
+`gaming_facilities`, each under a **DOMINANCE** test - a city is the seat only
+if it holds at least half that entity's anchored observations. Two stray 2021-22
+Chehalis Tribal Housing Authority filings printing `CHEHALIS` where fifteen
+other years print `OAKVILLE` would otherwise have vetoed 22 correct refusals.
+`cedar_entity_spine.city` cannot serve: blank on all 238 keyed entities.
+
+### Rule 16b - A FILING-BASED SEAT SYSTEMATICALLY MISSES SMALL VILLAGES
+
+The part worth keeping, and it was found by a hand-check rather than by the
+sample. Every evidential seat source above is a **federal filing**, and a
+village of sixty people files no Single Audit and runs no casino.
+`KASAAN HAIDA HERITAGE FOUNDATION`, in Kasaan AK, seat of the Organized Village
+of Kasaan, was refused for exactly that reason - and the BIA Tribal Leaders
+Directory does not rescue it either, because the address BIA publishes for that
+village is a P.O. box in **Ketchikan**, 30 miles away.
+
+Two additions, both measured across the whole population before adoption:
+
+1. **The BIA Tribal Leaders Directory as a seat source**, joined by exact
+   normalised name against the spine's own published names and used only on a
+   UNIQUE match (540 of 583 unique, 42 ambiguous, 1 unmatched, the rest
+   discarded). A name join is admissible here precisely because it can only
+   BLOCK a refusal, never award a match. It found a second false refusal nobody
+   had reported: `WHITE EARTH REDISCOVERY CENTER`, in the White Earth Nation's
+   own seat.
+2. **AN ENTITY CLASS THAT IS A PLACE.** A `Federally recognized Alaska Native
+   Village` sits at the village it is named for; that is what the class means,
+   and no filing is needed to establish it. **Guard it with state agreement** -
+   without that, `EAGLE BUTTE LAKOTA CHAPEL` in Eagle Butte, South Dakota reads
+   as sitting in the Native Village of Eagle, ALASKA.
+
+**Do not generalise the class rule to `Federally recognized tribe`.** Measured:
+that vetoes 114 of the 517 refusals, because Coquille OR, Chehalis WA, Shakopee
+MN, Flandreau SD, Lummi Island WA, Quinault WA, Seneca Falls NY and West Seneca
+NY all bear a nation's name and none of them is that nation's seat. **The class
+distinction is load-bearing.**
+
+### Rule 16c - AN ETHNONYM VETO IS THE OBVIOUS FIX AND IT DOES NOT PAY
+
+`HAIDA` in `KASAAN HAIDA HERITAGE FOUNDATION` should have blocked the refusal,
+and the reason it did not is that the purpose-word guard looks for `TRIBE`,
+`NATION`, `BAND`, `NATIVE`, `INDIAN` - and an ethnonym is a **people** name, not
+a purpose word. The obvious repair was built and measured, and it is recorded
+here as REJECTED so it is not rebuilt:
+
+- Every distinctive token any Cedar entity publishes (1,759) minus every token
+  in any US place name (42,650 places) leaves 1,045 candidates. Applied to the
+  refusals it vetoes **48, of which 47 are wrong** - Cedar's register contains
+  organisations, so `EDUCATION`, `FRIENDS`, `UNITED` and `WELLNESS` all qualify
+  as "a token a Native entity publishes that is not a US place name."
+- A frequency threshold against 26,974 distinct ordinary American nonprofit
+  names does not separate them: `HAIDA` and `TLINGIT` both sit at 19, above
+  `DUCK` 7, `SWIM` 5 and `ORDER` 4. Any threshold admitting the ethnonyms
+  admits the English words. **Net: gains 1, loses 5.**
+
+**A vocabulary that cannot be separated from ordinary English by any available
+structural test is a denylist wearing a measurement.** The seat route saves the
+same row at zero measured cost; take the route that does not need the list.
+
+### And two rules about the MEASUREMENT, which cost as much to learn
+
+**A precision measured on the refusals inside a population sample is not the
+precision of the refusals you applied.** 80 scored rows were quoted about 293
+applied ones, and the single false refusal an independent reviewer found sat
+outside the 80. Sample the APPLIED set separately.
+
+**Zero observed errors is not 100%.** With no errors in n rows the 95% upper
+bound on the error rate is about 3/n, so the claim is a floor: 0/80 is >= 96.2%,
+0/60 is >= 95.0%. State it that way, and state the caveat that matters more than
+either - where the same judgement wrote the rule and the labels, the score is
+the pass's own estimate of its own work.
+<!-- END RULE-16-PLACENAME-1155 -->

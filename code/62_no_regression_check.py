@@ -1895,51 +1895,30 @@ def numeric(x):
     return isinstance(x, (int, float)) and not isinstance(x, bool)
 
 
-def main():
-    now = measure()
 
-    ship, dist_by_file, clean_by_file = measure_shipping()
-    now.update(ship)
-    bak, col_losses, bak_odd = measure_backups()
-    now.update(bak)
-    trunc, short_units = measure_truncation()
-    now.update(trunc)
-    cov, absent_cols = measure_coverage_columns()
-    now.update(cov)
-    rul, _rul_detail = measure_rulings_unapplied()
-    now.update(rul)
-    corr, stale_consumers, declared_removals = measure_corrections()
-    now.update(corr)
-    now.update(measure_ledger_state_column())
-    now.update(measure_lint_bug_classes())
-    now.update(measure_regenerate_guard())
-    now.update(measure_linkage_coverage())
-    sem, sem_named, sem_snap = measure_semantic_diff()
-    now.update(sem)
+# --------------------------------------------------------------- compare
+def compare(now, base, base_ship, dist_by_file, clean_by_file,
+            declared_removals):
+    """The whole verdict, as a PURE FUNCTION of measured state.
 
-    if "--baseline" in sys.argv:
-        BASELINE.write_text(json.dumps(
-            {"recorded": TODAY, "metrics": now,
-             "shipping": dist_by_file or {}}, indent=2), encoding="utf-8")
-        SEM_BASELINE.write_text(json.dumps(sem_snap), encoding="utf-8")
-        print(f"baseline recorded -> {BASELINE.relative_to(CEDAR)}")
-        print(f"  and a SEMANTIC snapshot -> "
-              f"{SEM_BASELINE.relative_to(CEDAR)}: "
-              f"{len(sem_snap['facts']):,} resolved facts, "
-              f"{len(sem_snap['entities']):,} entities and "
-              f"{len(sem_snap['handles']):,} handle bindings, recorded by "
-              f"CONTENT. This is what lets the next run tell 'the totals held "
-              f"and everything got re-keyed' from 'nothing happened'.")
-        print(f"  including a per-table dist row count for "
-              f"{len(dist_by_file or {}):,} tables, which is what lets the "
-              f"next run tell 'this table stopped shipping' from 'the total "
-              f"moved'.\n")
-        for k, v in now.items():
-            print(show(k, v))
-        for n in NOTES:
-            print(f"  [note] {n}")
-        return
+    THIS WAS INLINE IN `main()` UNTIL 2026-09-02, AND THAT IS WHY THIS GATE
+    HAD NO FIRING FIXTURE. Everything below decides whether the run FAILS,
+    and none of it could be exercised without a five-and-a-half-minute
+    measurement pass over the whole warehouse - so nobody ever proved it
+    bites. `845` and `293` both ship a `selftest`; this one, the ratchet
+    the other two are measured against, did not.
 
+    A gate that has never been seen to fail is not known to work
+    (`docs/AGENT_FIELD_GUIDE.md` s3 habit 1). Two gates shipped on
+    2026-09-02 without a firing fixture and Codex caught both; this was the
+    third, and the oldest.
+
+    Nothing here reads a file or the clock. Give it dicts, get a verdict -
+    which is exactly what `py -3 code/62_no_regression_check.py --selftest`
+    does, in under a second, with no baseline and no warehouse.
+
+    Returns (fails, warns, loud, newly_zero).
+    """
     fails, warns, loud = [], [], []
 
     # A FAILURE MESSAGE THAT EXPLAINS THE WRONG DEFECT SENDS THE NEXT AGENT
@@ -1980,11 +1959,13 @@ def main():
         if numeric(v) and v:
             fails.append(f"{k} = {v:,}, must be 0")
 
-    base, base_ship = {}, None
-    if BASELINE.exists():
-        raw = json.loads(BASELINE.read_text(encoding="utf-8"))
-        base = raw.get("metrics", {})
-        base_ship = raw.get("shipping")
+    # THE BASELINE IS PASSED IN, not read here, so `--selftest` can
+    # inject a synthetic one. `base is None` means there is no baseline
+    # on file - distinct from an EMPTY baseline, which is a real one.
+    have_baseline = base is not None
+    if base is None:
+        base, base_ship = {}, None
+    if have_baseline:
         # THE DECLARED-WITHDRAWAL ALLOWANCE, and why it is not an
         # acknowledgement button.
         #
@@ -2195,6 +2176,185 @@ def main():
             fails.append(
                 f"ship_ratio_pct FELL {b_ratio:.3f}% -> {n_ratio:.3f}% AND "
                 f"shipped rows fell too. The shelf shrank.")
+    return fails, warns, loud, newly_zero
+
+
+# -------------------------------------------------------------- selftest
+def selftest():
+    """PROVE THE RATCHET BITES. Under a second; no baseline, no warehouse.
+
+    Standing rule 15 says a FAIL here is stop-work. That rule has been load-
+    bearing for this project since 2026-08-06 and until 2026-09-02 there was no
+    evidence the gate could produce a FAIL at all - the verdict logic lived
+    inline in `main()`, behind a five-and-a-half-minute measurement pass, so it
+    was never once exercised on purpose.
+
+    Every case below asserts on a NAMED metric drawn from the live ratchet sets
+    AT RUNTIME, never a hardcoded name. A fixture that hardcodes
+    `spine_entities` stops testing anything the day that metric is renamed, and
+    a test that silently stops testing is the defect class this whole file
+    exists to catch, wearing a lab coat.
+    """
+    ok = True
+
+    def pick(s, avoid=()):
+        for k in sorted(s):
+            if k not in avoid:
+                return k
+        return None
+
+    fall = pick(MUST_NOT_FALL, avoid={"ship_dist_rows", "ship_ratio_pct"})
+    rise = pick(MUST_NOT_RISE)
+    zero = pick(MUST_BE_ZERO)
+    ceil = pick(CEILINGS)
+    for label, v in (("MUST_NOT_FALL", fall), ("MUST_NOT_RISE", rise),
+                     ("MUST_BE_ZERO", zero), ("CEILINGS", ceil)):
+        if v is None:
+            print(f"FAIL: {label} is EMPTY - the ratchet has nothing in it, "
+                  f"which is UNMEASURED, not clean")
+            return 1
+
+    def run(now, base=None, base_ship=None, dist=None, clean=None, dec=None):
+        return compare(now, base, base_ship, dist, clean, dec)
+
+    def check(label, got, want):
+        nonlocal ok
+        if got != want:
+            print(f"FAIL: {label} (expected {want}, got {got})")
+            ok = False
+        else:
+            print(f"pass: {label}")
+
+    def named(items, needle):
+        return any(needle in x for x in items)
+
+    # 1. the four ratchet arms, each on a metric taken from its own live set
+    f, w, l, _ = run({fall: 90}, base={fall: 100})
+    check(f"a MUST_NOT_FALL metric falling FAILS ({fall} 100 -> 90)",
+          named(f, f"{fall} FELL"), True)
+
+    f, w, l, _ = run({fall: 110}, base={fall: 100})
+    check(f"the same metric RISING is a warning, not a failure ({fall})",
+          (bool(f), named(w, f"{fall} rose")), (False, True))
+
+    f, w, l, _ = run({rise: 10}, base={rise: 4})
+    check(f"a MUST_NOT_RISE metric rising FAILS ({rise} 4 -> 10)",
+          named(f, f"{rise} ROSE"), True)
+
+    f, w, l, _ = run({zero: 3}, base={zero: 0})
+    check(f"a MUST_BE_ZERO metric FAILS when non-zero ({zero} = 3)",
+          named(f, f"{zero} = 3, must be 0"), True)
+
+    f, w, l, _ = run({zero: 0}, base={zero: 0})
+    check(f"the same metric at zero does NOT fail ({zero})", bool(f), False)
+
+    f, w, l, _ = run({ceil: CEILINGS[ceil] + 1}, base={})
+    check(f"a CEILINGS metric above its ceiling FAILS ({ceil})",
+          named(f, f"{ceil} ="), True)
+
+    f, w, l, _ = run({ceil: CEILINGS[ceil]}, base={})
+    check(f"the same metric AT its ceiling does not fail ({ceil})",
+          bool(f), False)
+
+    # 2. a ratchet with NO baseline must not silently pass its own ratchets
+    f, w, l, _ = run({fall: 1}, base=None)
+    check("with no baseline on file the gate SAYS SO rather than passing "
+          "quietly", named(l, "NO PER-TABLE SHIPPING BASELINE"), True)
+
+    # 3. the shipping arm - standing rule 11, built is not done
+    f, w, l, _ = run({}, base={}, base_ship={"t.csv": 100},
+                     dist={}, clean={})
+    check("a table that vanished from the dist manifest FAILS",
+          named(f, "SHIPPING LOST: t.csv"), True)
+
+    f, w, l, _ = run({}, base={}, base_ship={"t.csv": 100},
+                     dist={"t.csv": 90}, clean={"t.csv": 90})
+    check("a table shipping FEWER rows FAILS",
+          named(f, "STOPPED SHIPPING - t.csv: 100 -> 90"), True)
+
+    f, w, l, _ = run({}, base={}, base_ship={"t.csv": 100},
+                     dist={"t.csv": 100}, clean={"t.csv": 100})
+    check("a table shipping the same rows does not fail", bool(f), False)
+
+    # 4. THE DECLARED-WITHDRAWAL ALLOWANCE. The subtle one, and the one that
+    #    has already been wrong twice: it must allow an EXACT match and refuse
+    #    anything else, or it becomes an acknowledgement button.
+    f, w, l, _ = run({"ship_dist_rows": 90}, base={"ship_dist_rows": 100},
+                     base_ship={"t.csv": 100}, dist={"t.csv": 90},
+                     clean={"t.csv": 90}, dec={"t.csv": 10})
+    check("a fall of EXACTLY the declared withdrawal is allowed, and named",
+          (bool(f), named(l, "EXACTLY the 10 row(s)")), (False, True))
+
+    f, w, l, _ = run({"ship_dist_rows": 89}, base={"ship_dist_rows": 100},
+                     base_ship={"t.csv": 100}, dist={"t.csv": 89},
+                     clean={"t.csv": 89}, dec={"t.csv": 10})
+    check("a fall of ONE MORE than the declared withdrawal still FAILS - the "
+          "allowance is exact, never `<=`",
+          named(f, "ship_dist_rows FELL"), True)
+
+    # 5. a clean run is clean
+    f, w, l, _ = run({fall: 100, rise: 4, zero: 0}, base={fall: 100, rise: 4,
+                                                          zero: 0},
+                     base_ship={"t.csv": 5}, dist={"t.csv": 5},
+                     clean={"t.csv": 5})
+    check("a run with nothing wrong produces no failures", bool(f), False)
+
+    print("SELFTEST", "PASS" if ok else "FAIL")
+    return 0 if ok else 1
+
+
+def main():
+    now = measure()
+
+    ship, dist_by_file, clean_by_file = measure_shipping()
+    now.update(ship)
+    bak, col_losses, bak_odd = measure_backups()
+    now.update(bak)
+    trunc, short_units = measure_truncation()
+    now.update(trunc)
+    cov, absent_cols = measure_coverage_columns()
+    now.update(cov)
+    rul, _rul_detail = measure_rulings_unapplied()
+    now.update(rul)
+    corr, stale_consumers, declared_removals = measure_corrections()
+    now.update(corr)
+    now.update(measure_ledger_state_column())
+    now.update(measure_lint_bug_classes())
+    now.update(measure_regenerate_guard())
+    now.update(measure_linkage_coverage())
+    sem, sem_named, sem_snap = measure_semantic_diff()
+    now.update(sem)
+
+    if "--baseline" in sys.argv:
+        BASELINE.write_text(json.dumps(
+            {"recorded": TODAY, "metrics": now,
+             "shipping": dist_by_file or {}}, indent=2), encoding="utf-8")
+        SEM_BASELINE.write_text(json.dumps(sem_snap), encoding="utf-8")
+        print(f"baseline recorded -> {BASELINE.relative_to(CEDAR)}")
+        print(f"  and a SEMANTIC snapshot -> "
+              f"{SEM_BASELINE.relative_to(CEDAR)}: "
+              f"{len(sem_snap['facts']):,} resolved facts, "
+              f"{len(sem_snap['entities']):,} entities and "
+              f"{len(sem_snap['handles']):,} handle bindings, recorded by "
+              f"CONTENT. This is what lets the next run tell 'the totals held "
+              f"and everything got re-keyed' from 'nothing happened'.")
+        print(f"  including a per-table dist row count for "
+              f"{len(dist_by_file or {}):,} tables, which is what lets the "
+              f"next run tell 'this table stopped shipping' from 'the total "
+              f"moved'.\n")
+        for k, v in now.items():
+            print(show(k, v))
+        for n in NOTES:
+            print(f"  [note] {n}")
+        return
+
+    base, base_ship = None, None
+    if BASELINE.exists():
+        raw = json.loads(BASELINE.read_text(encoding="utf-8"))
+        base = raw.get("metrics", {})
+        base_ship = raw.get("shipping")
+    fails, warns, loud, newly_zero = compare(
+        now, base, base_ship, dist_by_file, clean_by_file, declared_removals)
 
     # ---------------------------------------------------------------- print
     print("=== Cedar Press regression check ===\n")
@@ -2306,6 +2466,10 @@ def main():
 
 
 if __name__ == "__main__":
+    if "--selftest" in sys.argv:
+        # BEFORE main(), which measures the whole warehouse first. A
+        # fixture nobody can afford to run is a fixture nobody runs.
+        raise SystemExit(selftest())
     try:
         main()
     except AbsentColumn as e:

@@ -327,10 +327,10 @@ Per-facility gross gaming revenue is `SOURCE_DOES_NOT_PUBLISH`: NIGC publishes
 regional GGR and revenue bands, never per-operation, and five states seal
 per-tribe revenue by statute or compact. **Cedar answered that correctly and
 then hid the answer.** `gaming_revenue_bounds.csv` holds **13,803 bound rows
-covering 694 of the 787 rows (88% of rows; against 714 distinct properties the reach is not 694 and must be re-derived)**, with lower bound, upper bound,
+covering 694 of the 787 rows (88% of rows; against 717 distinct properties the reach is not 694 and must be re-derived)**, with lower bound, upper bound,
 basis and assumption note. `nigc_regional_ggr.csv` (198 rows),
 `nigc_revenue_bands.csv`, `ca_gaming_payments.csv`, `fl_gaming_payments.csv`
-and `digital_gaming_revenue.csv` (10,661 rows) are all on disk. The sample and
+and `digital_gaming_revenue.csv` (10,766 rows) are all on disk. The sample and
 its README mention none of them. **A buyer's single most likely question has a
 good answer and no path to it.**
 
@@ -575,7 +575,14 @@ The `basis` column that explains it is on the table and is not shown.
 
 ---
 
-## `native-owned-businesses` — `native_owned_businesses.csv`, 2,393 rows
+## `native-owned-businesses` — `native_owned_businesses.csv`, 4,273 rows
+
+> **RE-MEASURED 2026-09-02 by `code/1156_doc_claim_gate.py`.** The heading said
+> **2,393 rows**, which was true when this section was written on 2026-09-01;
+> the table is now **4,273**. The per-column fill counts below are stated
+> against the old 2,393 denominator and have NOT been re-derived — read every
+> `N of 2,393` in this section as a 2026-09-01 measurement, not a current one.
+> `py -3 code/841_missing_probe.py` re-derives them.
 
 **1. No indication of what any of these firms do.** — `ON_DISK_NOT_PROMOTED`
 `naics` is filled on **34 of 2,393 rows (1.4%)** — which is why it was requested
@@ -672,7 +679,15 @@ to close it.
 
 ---
 
-## `subcontracting` — `subawards.csv`, 76,859 rows
+## `subcontracting` — `subawards.csv`, 89,809 rows
+
+> **RE-MEASURED 2026-09-02 by `code/1156_doc_claim_gate.py`.** The heading said
+> **76,859 rows**, true on 2026-09-01; `code/121 append` added 10,318 rows at
+> 12:09Z and 2,632 at 16:49Z and the table is now **89,809**
+> (`docs/MONEY_TOTALLING_RULES.md` carries that reconciliation). Every
+> `N of 76,859` below is a 2026-09-01 measurement and has not been re-derived —
+> including the `duplicate_status` split, which is now `primary` **70,597** ·
+> `exact_repeat_within_source` **18,366** · `superseded_by_primary_source` 846.
 
 **1. `description` — what the subaward bought — is on 76,813 of 76,859 rows and is not in the sample.** — `ON_DISK_NOT_PROMOTED`
 99.94% fill on the single most informative column in the table. Also omitted:
@@ -702,7 +717,11 @@ key and hiding the permanent one teaches the buyer the wrong join.
 
 ---
 
-## `deals` — `deals_classified.csv`, 935 rows
+## `deals` — `deals_classified.csv`, 1,073 rows
+
+> **RE-MEASURED 2026-09-02 by `code/1156_doc_claim_gate.py`.** The heading said
+> **935 rows**, true on 2026-09-01; the table is now **1,073**. The `N of 935`
+> fill counts below are that day's measurement and have not been re-derived.
 
 **1. No dollar value, in the one dataset that exists nowhere else.** — `ON_DISK_NOT_PROMOTED`
 `Announced_Value_USD` on **835 of 935 rows (89%)**, `Value_Type` on 935,

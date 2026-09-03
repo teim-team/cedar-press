@@ -749,6 +749,27 @@ KNOWN_ORDERINGS = [
      "enricher_columns": ["split_artefact_suspected",
                           "split_artefact_detector", "split_artefact_basis",
                           "institution_name_repaired", "repair_action"]},
+    # Declared 2026-09-02 by the NAGPRA/FR grain pass. `96` rebuilds
+    # consultation_events.csv wholesale; `1158` adds `document_role`,
+    # `n_participant_rows_for_event` and `is_event_primary_row` IN PLACE.
+    # THE FIX IS AT SOURCE - 96's `stage_build` writes all three itself, from
+    # the same `DOCUMENT_ROLE` map and the same fan-out counter 1158 imports
+    # from it, so a 96 rebuild REPRODUCES them and does not revert them. 1158
+    # exists so the already-built 11,402-row table gets the columns without a
+    # full re-derivation and re-resolution of every participant. It is the
+    # THIRD enricher on this table: `1089` and `503_identity` run here too, and
+    # 1158 only ever ADDS columns (J2 fails the run if a pre-existing value
+    # moves), so its position among them does not matter.
+    {"rebuild": "96_build_consultation_events.py",
+     "enricher": "1158_fr_consultation_grain_columns.py",
+     "file": "consultation_events.csv",
+     "cost": "PAID AT SOURCE - 96 writes the three columns in stage_build, so "
+             "a rebuild reproduces them. Run "
+             "`py -3 code/1158_fr_consultation_grain_columns.py verify` after "
+             "any 96 build; it exits 1 if the columns are absent or disagree "
+             "with a fresh re-derivation",
+     "enricher_columns": ["document_role", "n_participant_rows_for_event",
+                          "is_event_primary_row"]},
     # Declared 2026-09-02 by workstream pr29, Codex PR #29 findings 2 and 4.
     # Both fixes are at source as well - 1075 corrects the identifier ledger
     # that 40 reads, and 1076 removes the self-parent fabrication from 114 and

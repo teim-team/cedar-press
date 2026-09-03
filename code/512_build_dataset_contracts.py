@@ -486,13 +486,43 @@ GRAIN_SWEEP = {
         ["disclosure_id"], {"tribe_id": "many", "cedar_uid": "many"}),
 
     # ---- federal register -------------------------------------------------
+    # AMENDED 2026-09-02 by the NAGPRA/FR grain pass (code/1154, code/1158).
+    # The old sentence was true and still could not stop the mistake a buyer
+    # actually makes. It named the participant fan-out but never named the
+    # FEDERAL REGISTER DOCUMENT, and one document becomes up to 50 rows, so
+    # COUNT(*) over this table is documents x tribes, not consultations. Every
+    # figure below is a full census by `py -3 code/1154_nagpra_fr_grain_audit.py
+    # report`; nothing here is sampled.
     "consultation_events.csv": _d(
-        "one row per (consultation event, participant as published). "
-        "`consultation_event_id` alone is NOT unique - an event with "
-        "several named participants has one row each, and 1,006 rows name "
-        "no participant at all",
+        "one row per (consultation event, participant as published), and a "
+        "consultation event is ONE FEDERAL REGISTER DOCUMENT - "
+        "`consultation_event_id` is 1:1 with `fr_document_number`, 2,313 of "
+        "each over 11,402 rows. ONE DOCUMENT BECOMES UP TO 50 ROWS: max 50, "
+        "p95 21, median 1, mean 4.93; 1,009 documents carry more than one row "
+        "and those hold 10,098 of the 11,402. The fan-out is one row per NAMED "
+        "PARTICIPANT and is NOT duplication - the (tribe_id, participant) key "
+        "is unique within the document on 1,009 of 1,009 multi-row documents, "
+        "and of the 28 non-participant columns only `nagpra_bridge_overlap` "
+        "(208 documents) and `source_quote` (133) vary within a document, both "
+        "per-participant facts. SO: `SUM(is_event_primary_row)` = 2,313 is the "
+        "number of CONSULTATIONS and `COUNT(*)` = 11,402 is the number of "
+        "(consultation, participant) pairs; `n_participant_rows_for_event` "
+        "carries the fan-out on every row. 1,006 rows name no participant at "
+        "all (`match_method = no_participants_named_in_record`). "
+        "TWO DIFFERENT FACTS LIVE HERE AND `document_role` SEPARATES THEM: "
+        "`consultation_reported_in_document` (10,888 rows, 1,829 documents) is "
+        "a document whose text reports in the past tense that consultation was "
+        "carried out; `consultation_notice_published` (514 rows, 484 documents) "
+        "is a notice announcing or scheduling one. Only 190 rows carry an "
+        "`event_start_date` and 103 a `location`, so this table is mostly a "
+        "record THAT consultation is asserted, not WHEN or WHERE it met",
         ["consultation_event_id", "participant_name_as_published"],
-        {"tribe_id": "many", "cedar_uid": "many"}),
+        {"tribe_id": "many", "cedar_uid": "many"},
+        declared_by="workstream-E grain sweep 2026-08-29, primary key "
+                    "confirmed unique on the FULL file; document fan-out and "
+                    "document_role added 2026-09-02 by code/1154 (measurement) "
+                    "and code/1158 (the three columns), fix at source in "
+                    "code/96_build_consultation_events.py"),
     "correspondence_foia_source_coverage.csv": _d(
         "one row per source URL checked for congressional-correspondence "
         "coverage. 17 rows repeat (agency, source, status, evidence) under a "
