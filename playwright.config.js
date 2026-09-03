@@ -9,7 +9,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 import { ACCOUNTS_JSON } from "./tests/demoAccount.js";
 
-const PORT = 4180;
+// Overridable, because the port is shared state between checkouts. See the
+// `reuseExistingServer` note below for what that cost once.
+const PORT = Number(process.env.CEDAR_PRESS_SMOKE_PORT ?? 4180);
 
 export default defineConfig({
   testDir: "./tests",
@@ -36,8 +38,23 @@ export default defineConfig({
   webServer: {
     command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}/`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // NEVER measure a build this run did not make.
+    //
+    // This was `!process.env.CI`, which reads as a local convenience and is
+    // not one: the port is hardcoded, so a run in one checkout attached to
+    // whatever preview server another checkout had left listening on 4180 and
+    // reported on THAT bundle. It does not announce itself — every assertion
+    // about the page passes, against the wrong page — and it surfaced only
+    // because the two tests at the bottom of the suite read `dist-site/` off
+    // this checkout's disk, where the build had never been written. The
+    // failure read as "the build is broken"; the truth was "54 of these
+    // results belong to someone else's tree".
+    //
+    // Two checkouts at once is what CEDAR_PRESS_SMOKE_PORT is for. Without
+    // it, a busy port is now a loud `--strictPort` refusal to start, which is
+    // the failure a reader can act on.
+    reuseExistingServer: false,
+    timeout: 180_000,
     // The suite builds the deployment it means to test, rather than
     // inheriting whatever the machine happens to have configured.
     //
