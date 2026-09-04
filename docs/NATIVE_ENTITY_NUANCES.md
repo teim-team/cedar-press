@@ -354,7 +354,7 @@ above as its verification protocol.
 **The API route (checked 2026-08-29, MEASURED 2026-08-30).** cage.dla.mil has
 no public API. The [SAM Entity Management API](https://open.gsa.gov/api/entity-api/)
 (`api.sam.gov/entity-information/v3/entities?ueiSAM=<UEI>`, key via
-`set_sam_key.ps1`) serves registration facts — name, CAGE, structure, state of
+`code/set_sam_key.ps1`) serves registration facts — name, CAGE, structure, state of
 incorporation, address, website — and is the right tool **at adjudication time,
 for a handful of lookups**. Measured limits, hit empirically:
 

@@ -71,6 +71,8 @@ It has its own entry points and its own conventions:
 |---|---|
 | Start here | [`START_HERE.md`](START_HERE.md) |
 | Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
+| Where the last session left off | [`docs/handoffs/`](docs/handoffs/) (`NEXT_SESSION.md`, the state-of-build records) |
+| The dataset plans and the v2 spec | [`docs/plans/`](docs/plans/) |
 | Measured map of the collections | [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) |
 | The thirteen built datasets | `dist/customer/` (CSV + codebook + notes) |
 | Rebuild the deliverables | `py -3 code/1137_customer_dataset_combine.py build` |

@@ -164,9 +164,9 @@ find its row here and stop — you do not need to grep `docs/`.*
 | **`docs/ASSERTION_LAYER.md`** | **new 2026-08-29. How a fact carries who said it, why two sources agreeing can be one source twice (evidence lineage), and the 8 ordered rules that pick the value Cedar stands behind. Read before adding a source or trusting a corroboration count.** |
 | **`code/build.py`** | **one entry point per collection.** `plan <id>` shows the ordered rebuilds-then-enrichers; `run <id> --execute` runs it. Holds no knowledge of its own — reads NEVER_RUN, the orderings, and the collection map. |
 | `docs/DATA_ARCHITECTURE.md` · `docs/ENTITY_INVENTORY.md` · `docs/ARCHIVE_CANDIDATES.md` | **GENERATED** by `code/500_*` / `501_*` / `502_*` — what exists, what we hold per entity, and what is safe to retire. Never hand-edit; re-run the script. |
-| `README.md` · `STATE_OF_BUILD.md` · `STATE_OF_THE_LAND_2026-08-07.md` | ⚠ the last two are **the densest concentrations of superseded numbers in the project** and carry banners saying so. Their *reasoning* is still good. Prefer this file on any conflict. |
-| `SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` | the v2 spec |
-| `*_DATASET_PLAN.md` (BILLS_VOTES, COMPACT, FEDERAL_ACTIONS, GAMING, INFLUENCE, NONPROFIT) | root-level forward plans, not build records |
+| `README.md` · `docs/handoffs/STATE_OF_BUILD.md` · `docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md` | ⚠ the last two are **the densest concentrations of superseded numbers in the project** and carry banners saying so. Their *reasoning* is still good. Prefer this file on any conflict. |
+| `docs/plans/SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` | the v2 spec |
+| `docs/plans/*_DATASET_PLAN.md` (BILLS_VOTES, COMPACT, FEDERAL_ACTIONS, GAMING, INFLUENCE, NONPROFIT) | forward plans, not build records; at the root until 2026-09-04 |
 
 ### Cross-cutting — read before trusting any single build log
 
