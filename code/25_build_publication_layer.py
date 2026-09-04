@@ -21,6 +21,37 @@ Three deliverables, one run:
      view, and dollar figures that carry no basis.
 
 No charts. Elijah: "we dont need fancy graphs or anything."
+
+THE DATABASE IS A DELIVERY ARTIFACT AND WAS NOT READING THE PUBLICATION RULES
+-----------------------------------------------------------------------------
+Added 2026-09-04. `1169_release_verify.py` reported the headline contradiction
+it was written to catch: `1165` found ZERO publication violations across the
+thirteen delivered CSVs on the same day `dist/cedar_press.db` carried a retired
+CICD/NEID identity column on **73 of its 231 tables, 84 columns, 4,325,664
+populated rows**. Both statements were true, and a customer joining one to the
+other gets two different answers about identity.
+
+**The cause was not that the database was stale. It was that this script had no
+knowledge of the rules at all.** `code/cedar_publication.py` is, by ADR-035, the
+single copy of the publication rules, and twenty scripts import it - `1137`
+(the delivered CSVs), `1135`, `1153`, `1165`, `760`, `770`. This one did not.
+Its only column filter was `cedar_codebook.is_licensed_col`, which knows about
+DUNS and `casino_city_id` and nothing else. So `NEID_COLS`, `PROPOSED_COLS`,
+`NEVER` and the build-lineage list were applied to every artifact a customer
+receives EXCEPT the database.
+
+Measured 2026-09-04 against the live `data/clean` headers, before any rebuild:
+of the 279 tables this script resolves, **80 carried 94 retired-scheme columns**;
+routing the header through `cedar_publication.publishable_columns()` takes that
+to **15 tables and 18 columns**, and the 18 are named by the run itself (see the
+residue report at the end of `main`). Those 18 are a SECOND finding, not a
+remainder of this one: `1169` tests a column NAME by substring (`tribe_id`
+anywhere in it) while `NEID_COLS` is an exact-name list, and the gap between
+those two definitions is where they sit.
+
+Fixing it here rather than by patching the database is the point. A hand-patched
+database is correct until the next build; a script that reads the single source
+is correct after it.
 """
 
 import csv
@@ -152,6 +183,11 @@ TABLES = [
 # ---------------------------------------------------------------------------
 sys.path.insert(0, str(Path(__file__).parent))
 import cedar_codebook as CB                                    # noqa: E402
+# THE PUBLICATION RULES ARE NOT RESTATED HERE. ADR-035: one importable module,
+# and a consumer IMPORTS it. Added 2026-09-04 - see the block above `main()`
+# headed "THE DATABASE IS A DELIVERY ARTIFACT" for what this fixed and what it
+# measured.
+import cedar_publication as CPUB                               # noqa: E402
 
 
 def resolve_tables():
@@ -289,6 +325,9 @@ def main():
     print("=== Cedar Press: publication layer ===\n")
     print("[1] Building SQLite database")
     ddl, manifest = [], []
+    # Named, per table, so the run says WHAT it removed and WHAT it rewrote
+    # rather than reporting a total.
+    dropped_cols, translated = {}, {}
 
     resolved, licensed, undocumented = resolve_tables()
     print(f"  {len(TABLES)} curated + {len(resolved) - len(TABLES)} from the "
@@ -337,6 +376,56 @@ def main():
             header = [c for i, c in enumerate(header) if i not in drop]
             rows = [[v for i, v in enumerate(r) if i not in drop] for r in rows]
 
+        # THE IDENTITY AND PUBLICATION RULES, FROM THE SINGLE SOURCE.
+        # `publishable_columns()` drops, by NAME: the retired CICD/NEID
+        # identity columns (`NEID_COLS`), the internal `*_proposed*` working
+        # columns (`PROPOSED_COLS`), the vendor-licensed identifiers
+        # (`DROP_COLS`), personal data held apart from a public role
+        # (`NEVER`), and build-lineage columns. Every one of those was
+        # already applied to the delivered CSVs by `1137`; NONE of them was
+        # applied here, and that is why `1169_release_verify.py` could report
+        # thirteen clean CSVs beside a database carrying the retired scheme.
+        keep = set(CPUB.publishable_columns(header))
+        idrop = [i for i, c in enumerate(header) if c not in keep]
+        if idrop:
+            # NAME WHAT IS DROPPED. A count with no column names is how the
+            # 404,236 populated DUNS survived twenty builds one row above.
+            print(f"    [publication] {table}: dropping "
+                  f"{', '.join(header[i] for i in idrop)}")
+            dropped_cols[table] = [header[i] for i in idrop]
+            dset = set(idrop)
+            header = [c for i, c in enumerate(header) if i not in dset]
+            rows = [[v for i, v in enumerate(r) if i not in dset] for r in rows]
+
+        # AND THE VALUES, WHICH THE NAME GATE ABOVE DOES NOT REACH.
+        # Measured 2026-09-03 on the delivered CSVs, immediately after the
+        # name gate shipped: 89,680 retired identifiers were still leaving on
+        # 45,213 rows in 22 columns, under names like `entity_id` and
+        # `affiliated_entity_ids` that say nothing about the scheme. The same
+        # is true here. Deletion is not available for those columns - several
+        # tables hold no `cedar_uid` at all and these are their only entity
+        # keys - so the retired identifier is TRANSLATED to Cedar's own, by
+        # `cedar_publication.translate_neid_values`, not re-implemented.
+        n_tr = n_amb = 0
+        for r in rows:
+            # Cheap exact pre-filter: `translate_neid_values` skips any cell
+            # with no hyphen, and no NEID has ever lacked one, so a row with
+            # no hyphen anywhere cannot translate. This changes no result; it
+            # only avoids building a dict for the rows that cannot match.
+            if not any(v and "-" in v for v in r):
+                continue
+            d = dict(enumerate(r))
+            a, b = CPUB.translate_neid_values(d)
+            n_tr += a
+            n_amb += b
+            if a:
+                r[:] = [d[i] for i in range(len(r))]
+        if n_tr or n_amb:
+            print(f"    [identity] {table}: translated {n_tr:,} retired "
+                  f"identifier(s) to a cedar_uid; {n_amb:,} left standing "
+                  f"because the NEID claims more than one uid")
+            translated[table] = (n_tr, n_amb)
+
         cols = [sqlname(c) for c in header]
         # De-duplicate column names (some sources ship repeats).
         seen, final = {}, []
@@ -369,6 +458,43 @@ def main():
 
     (DIST / "schema.sql").write_text("\n".join(ddl), encoding="utf-8")
     print(f"\n  wrote dist/cedar_press.db and dist/schema.sql")
+
+    # ---- what the release gate will see -----------------------------------
+    # `1169_release_verify.check_db_identity` tests a column NAME: it flags any
+    # column whose lower-cased name CONTAINS `tribe_id`, or ends `_neid`, or is
+    # `neid`. That test is deliberately WIDER than `cedar_publication.NEID_COLS`,
+    # which is an exact-name list. So this run states its own residue rather
+    # than leaving the gate to discover it: a name this build could not remove
+    # is named here, with its table and its populated count, in the log of the
+    # run that produced the database.
+    residue = []
+    for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'").fetchall():
+        t = row[0]
+        for info in conn.execute(f'PRAGMA table_info("{t}")'):
+            c = info[1]
+            low = c.lower()
+            if "tribe_id" in low or low.endswith("_neid") or low == "neid":
+                n = conn.execute(
+                    f'SELECT COUNT(*) FROM "{t}" WHERE "{c}" IS NOT NULL '
+                    f'AND TRIM("{c}") != \'\'').fetchone()[0]
+                residue.append((t, c, n))
+    print(f"\n  PUBLICATION RULES APPLIED (cedar_publication, ADR-035):")
+    print(f"    {len(dropped_cols)} table(s) lost a column by name; "
+          f"{sum(len(v) for v in dropped_cols.values())} column(s) in total")
+    print(f"    {len(translated)} table(s) had retired identifier VALUES "
+          f"rewritten to a cedar_uid; "
+          f"{sum(a for a, _ in translated.values()):,} value(s) translated, "
+          f"{sum(b for _, b in translated.values()):,} left standing "
+          f"(the NEID claims more than one uid)")
+    if residue:
+        print(f"    !! {len({t for t, _, _ in residue})} table(s) still carry a "
+              f"column whose NAME the release gate reads as retired-scheme "
+              f"({len(residue)} columns). NAMED, not counted:")
+        for t, c, n in sorted(residue, key=lambda r: (-r[2], r[0])):
+            print(f"         {t}.{c}  {n:,} populated")
+    else:
+        print(f"    no column name in any table reads as retired-scheme")
 
     # NAME WHAT DID NOT SHIP. A count with no filenames is how a 0.87% ship
     # rate survived twenty days and roughly twenty builds.

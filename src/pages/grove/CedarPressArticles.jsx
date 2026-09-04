@@ -90,7 +90,7 @@ function ArticleCard({ article, compact = false }) {
 }
 
 export default function CedarPressArticles() {
-  useDocumentTitle("Articles");
+  useDocumentTitle("Research Briefs");
   const { user, loading, logout } = useAuth();
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
@@ -112,7 +112,7 @@ export default function CedarPressArticles() {
             reader's hero for context the way it did as a section. */}
         <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Original research</p>
-          <h1 className="cp-mh__title">The Data Briefs.</h1>
+          <h1 className="cp-mh__title">Research Briefs.</h1>
           <p className="cp-mh__sub">
             Original research built from the collections and written for people who work in
             Indian Country&rsquo;s economy. Every brief names the collection behind it, and the

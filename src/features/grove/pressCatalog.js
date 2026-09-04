@@ -379,7 +379,7 @@ export const PRESS_CATALOG = Object.freeze([
         "What it contains",
         "Historical coverage",
         "Selected aggregate findings",
-        "Related Cedar Press articles",
+        "Related Cedar Press research briefs",
         "A methodology summary",
       ]),
       withholds: Object.freeze([

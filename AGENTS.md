@@ -8830,3 +8830,177 @@ minutes after `contractors.csv` was built, and the gate named it. Rebuilt;
 `1137 verify` ok, 0 problems, 13 datasets.
 
 <!-- END DELIVERY-READINESS-1165-2026-09-03 -->
+
+---
+
+## 2026-09-04 — `62` IS RED on 18 lines, none of them this pass's, and NONE of them today's codebook work. Named with owners, per standing rule 15.
+
+*Written by the DB-IDENTITY pass, whose whole job was two of `1169`'s blocking
+failures: the delivered CSVs are migrated off the retired CICD/NEID scheme and
+`dist/cedar_press.db` is not. Full run:
+`py -3 code/62_no_regression_check.py`, exit 1, 2026-09-04 14:09-14:16.*
+
+**What this pass did:** edited exactly one file in `code/`
+(`25_build_publication_layer.py`, backed up to
+`.bak_2026-09-04_pre_db_identity_rules`). It wrote no table in `data/clean`,
+registered no codebook block, applied no ruling, and ran no step of the ship
+chain. `py -3 code/293_lint_bug_classes.py` reports
+`CLEAN 25_build_publication_layer.py` and the lint totals are unchanged by the
+edit (169 instances before and after).
+
+### The question the mandate asked: is any red line today's codebook work?
+
+**No, and the opposite is true - `1172` improved four of these lines and cleared
+two others outright.** Measured against the two logged runs that bracket it:
+
+| metric | 2026-09-03 01:01, before `1172` | 2026-09-03 02:30, after `1172` | this run, 2026-09-04 |
+|---|---:|---:|---:|
+| `tables_undocumented_in_codebook` | 27 | **0** | **0** |
+| `tables_missing_codebook_block` | 27 | **0** | **0** |
+| `ship_tables_at_zero` | 57 | 43 | 43 |
+| `tables_missing_from_25_TABLES` | 247 | 233 | 233 |
+| `tables_missing_from_27_SPEC` | 254 | 240 | 240 |
+| `tables_missing_notes_contract` | 58 | 44 | 44 |
+
+`SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` is **not** `1172`'s either:
+that filename is present in `cedar_codebook.INTERNAL_TABLES` in
+`code/cedar_codebook.py.bak_2026-09-03_pre_1172_internal_classification`, i.e.
+before `1172` ran. It was classified internal on **2026-09-01 by GRAIN-WS3's C7
+pass** because the dated snapshot and the live `advocacy_passthrough.csv` each
+carry 1,620 rows and the same $193,592,975, so shipping both doubled the money.
+That is a deliberate de-duplication, and `62` reporting it as a shipping-set
+regression is the ratchet catching a decision, not a defect. The 14 tables
+`1172` DID add to `INTERNAL_TABLES` are the corroboration / harvest-coverage /
+constellation machinery, and not one of them appears in any `SHIPPING LOST` or
+`STOPPED SHIPPING` line.
+
+### The 18 lines and the owner the evidence points at
+
+| line | owner named by the evidence |
+|---|---|
+| `lint_new_defect_instances = 28`, `lint_bug_class_instances 146 -> 169`, `lint_class1 0 -> 1`, `class2c 60 -> 70`, `class3 0 -> 2`, `class4 9 -> 15`, `class7 42 -> 46` | the scripts `293` names, none of them this pass's and none of them `1172`: `1011_cross_dataset_reconciliation`, `1060_splink_pilot` (x3), `1085_prime_psc_desc_repull`, `1086_faads_award_key_promote`, `1173_funding_identity_diagnosis`, `846_session_audit`, `852_extend_constellation_edges`, `873_build_aiannh_crosswalk`, `992_newsletter_deal_candidates` (x2), `1030_sec_edgar_native_transactions` (x2), `1031_ancsa_45_55_139_annual_reports` (x2), `1111_probe_new_source_candidates`, `1171_prior_finding_regression_pack`, `980_gaming_web_harvest`, `1167_cedar_uid_identity_collisions` (x2), `1169_release_verify` (x3), `30_funding_pre2008`, `518_dataset_readiness`, `870_build_geo_crosswalks`, `99_build_earmarks_and_schedc`, `510_assertions` |
+| `contract_violations = 13`, `contract_orphan_shippable = 8` | the dataset-contracts workstream (`512` / `518`), unchanged since the 2026-09-03 entry above |
+| `rulings_unapplied 1,215 -> 14,544` | the rulings-consolidation workstream; `data/clean/cedar_ruling_ledger_consolidated.csv` written 2026-09-03 00:49:30 |
+| `tier_A_ruled FELL 1,676 -> 1,669` | already documented as deliberate - see the `tier_A_ruled FALLS 1,676 -> 1,669` section above |
+| `ship_tables_at_zero 13 -> 43`, `tables_missing_from_25_TABLES 179 -> 233`, `tables_missing_from_27_SPEC 194 -> 240`, `tables_missing_notes_contract 14 -> 44` | the workstreams that added ~50 tables to `data/clean` since the baseline was recorded 2026-09-01 17:32. These are **falling**, not rising - see the table above |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` | GRAIN-WS3's C7 pass, 2026-09-01, deliberate |
+| `STOPPED SHIPPING hearing_bill_links.csv 465 -> 464`, `native_bills_subject_sweep.csv 2,414 -> 2,409` | the bills/votes workstream. Both files ARE still resolved by `25`, so these two clear on the next chain run |
+
+**The only change to the regression set since the last recorded run (2026-09-03
+02:30) is one new `class2c` instance in `1173_funding_identity_diagnosis.py`,
+a file created today by the identity/delivery workstream.** Diffing the two
+regression blocks produces exactly three differing lines, all of them that
+instance's arithmetic (`lint_new_defect_instances 24 -> 28`,
+`lint_bug_class_instances 165 -> 169`, `lint_class2c 69 -> 70`).
+
+**Nothing was waived and no baseline was re-recorded.** The ship chain stays
+blocked at `289` step 4, and `dist/cedar_press.db` is therefore still the
+2026-09-02 03:03 build.
+
+## 2026-09-04 — the DATABASE never read the publication rules, and that, not staleness, is why it carries the retired identity scheme
+
+**`code/25_build_publication_layer.py` did not import
+`code/cedar_publication.py`.** Twenty scripts do - `1137` (which writes the
+thirteen delivered CSVs), `1135`, `1153`, `1165`, `760`, `770` - and the one
+that writes `dist/cedar_press.db`, `dist/cedar_press_master.xlsx` and
+`dist/schema.sql` did not. Its only column filter was
+`cedar_codebook.is_licensed_col`, which knows about DUNS and `casino_city_id`
+and nothing else.
+
+So `NEID_COLS`, `PROPOSED_COLS`, `NEVER` and the build-lineage list were applied
+to every artifact a customer receives **except the database**. That is the whole
+of `1169`'s headline contradiction - `1165` reporting zero violations across
+thirteen clean CSVs on the same day the database carried a retired-scheme column
+on 73 of 231 tables, 84 columns, 4,325,664 populated rows. **The database was
+not merely stale. A rebuild of the old code would have reproduced the defect
+exactly**, which is why the fix is an import and not a patch.
+
+**Measured 2026-09-04 against the live `data/clean` headers, before any
+rebuild.** Of the 279 tables `25.resolve_tables()` returns:
+
+| | tables | retired-scheme columns |
+|---|---:|---:|
+| `25` as it stood | **80** | **94** |
+| `25` routing the header through `cedar_publication.publishable_columns()` | **15** | **18** |
+
+Value translation was added in the same place and for the reason `1137` records:
+a name gate cannot see a NEID sitting in `entity_id` or `owner_hub_handle`, and
+deletion is unavailable for the tables whose NEID is their only entity key, so
+`cedar_publication.translate_neid_values()` rewrites it to Cedar's own key.
+
+**Proven to fire, on real tables plus a planted fixture, with `DIST` redirected
+to a temp directory so nothing in `dist/` moved** (`dist/cedar_press.db` still
+reads 2026-09-02 03:03:06 after the proof):
+
+- `gaming_ordinances` **lost** `tribe_id` and **kept** `cedar_uid` - identity survives the drop
+- a planted `entity_id` holding `AKNF-ACSRMT-00-CALSTA-ASVCPR` came out as `CE-00001-6S`, which is the extended Alaska form a shape regex misses
+- `gaming_ordinances` rows **1,155 -> 1,155**; the change drops no row anywhere
+
+### THE 18 THAT REMAIN ARE A SECOND FINDING, AND IT IS A DEFINITION GAP
+
+`1169.check_db_identity` flags a column whose lower-cased name **contains**
+`tribe_id`, or ends `_neid`, or is `neid`. `cedar_publication.NEID_COLS` is an
+**exact-name list of eight**. Those two definitions do not agree, and the 18 sit
+in the gap. Measured per column against `data/clean`:
+
+**(a) safe to add to `NEID_COLS` by the standard that block already states -
+Cedar's own key covers every populated row:** `gaming_employment_observations.tribe_id_as_staged`
+(133 populated, 133 with a `cedar_uid`), `gaming_ordinances.tribe_id_as_built` (3/3),
+`nho_ownership_changes.acquirer_tribe_id` (9/9),
+`ownership_events.native_entity_neid` (93/93),
+`individual_native_firm_register.owner_tribal_affiliation_resolved_to_tribe_id` (0 populated),
+`wa_machine_transfers.from_tribe_id` / `.to_tribe_id` (0 rows in the table).
+
+**(b) the NEID is the table's ONLY entity key - dropping it leaves the table
+unable to name a party, which is the reason `nagpra` was translated rather than
+stripped.** These need translate-AND-RENAME, which is a mechanism
+`cedar_publication` does not have and a schema decision this pass will not make
+alone: `native_passthrough.from_tribe_id`/`.to_tribe_id` (1,733 each, no
+`cedar_uid` on the table), `native_passthrough_pairs.from_tribe_id`/`.to_tribe_id`
+(323 each), `cedar_ruling_ledger_consolidated.resolved_tribe_id` (6,835),
+`np_schedule_i_filers.filer_tribe_id_np_orgs` (1,652),
+`np_schedule_i_grants.recipient_np_orgs_tribe_id` (552 populated but only 225 carry
+a `cedar_uid`, so 327 rows would lose their only key),
+`nepa_eplanning_projects.tribe_ids_named_in_record` (31),
+`lobbying_registrant_identifiers.prime_tribe_id` (5),
+`tribal_newsletter_corpus.served_tribe_id` (29).
+
+**(c) ONE IS A FALSE POSITIVE OF THE NAME TEST AND MUST NOT BE DROPPED.**
+`gaming_property_site_observations.tribe_id_basis` is populated on 95 rows and
+**holds zero retired identifiers** - it is a `_basis` column, prose naming where
+the key came from. `cedar_publication.LINEAGE_COLS` says this in as many words:
+*"`_basis` is NOT a lineage suffix... Dropping columns because a regex found a
+filename in them would delete the best provenance in the product."* A substring
+test on the NAME cannot tell that column from an identifier. Whoever owns `1169`
+should decide whether the gate excludes `_basis`, or whether the column is
+renamed.
+
+**None of the fourteen names in (a)-(c) appears in any `dist/customer/*.csv`
+header today** - checked across all 14 delivered files - so settling them costs
+the delivered CSVs nothing.
+
+`cedar_publication.py` was NOT edited by this pass. It was written today at
+13:26 and the identity/delivery workstream was live in `1169` at 13:52; adding to
+a shared policy module while its owner is mid-pass, for a change that cannot be
+verified until `62` is green, is the trade this repo has lost work to before.
+
+### STATE AT CLOSE
+
+`py -3 code/1169_release_verify.py` - **BLOCKED, 4 of 8**:
+`customer database identity migration` FAIL, `delivery artifacts share one
+identity state` FAIL, `no-regression chain (62)` NOT_ESTABLISHED,
+`dataset semantic correctness` NOT_ESTABLISHED. The first two are still red
+**because the database on disk was not rebuilt**, and it was not rebuilt because
+`62` is red and `289` step 4 is a hard gate. The builder is fixed; the artifact
+is not, and it cannot be until the gate clears. `delivered CSV identity
+migration`, `preview set is complete`, `cedar_uid names exactly one entity` and
+`verified negative rulings are applied` all PASS.
+
+**AND A SECOND, INDEPENDENT BLOCK, measured at close.** `289` step 0 refuses to
+start if any `data/clean/*.csv` moved in the last 30 minutes.
+`data/clean/cedar_identifier_ledger_final.csv` was written **2026-09-04
+14:23:03** and `data/clean/federal_funding_transactions.csv` **14:31:43** - 42
+seconds before this was written - by the ruling-application workstream. So even
+a green `62` would not have licensed a rebuild this session: rebuilding `dist/`
+from data another agent is concurrently writing is how this project lost work
+before.

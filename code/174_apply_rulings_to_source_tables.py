@@ -4,8 +4,8 @@ Cedar Press - 174: apply the consolidated ruling ledger back to the SOURCE
 tables, IN PLACE.
 
 Reads `data/clean/cedar_ruling_ledger_consolidated.csv` (script 173) and writes
-the settled verdicts onto `prime_contracts.csv` and
-`cedar_identifier_ledger_final.csv`.
+the settled verdicts onto `prime_contracts.csv`,
+`cedar_identifier_ledger_final.csv` and `federal_funding_transactions.csv`.
 
 **A ruling that is not applied back to its source table is not a ruling, it is
 a note.** That is the whole reason this script exists: 492 entity clusters
@@ -47,9 +47,62 @@ each attribution is recoverable from the table itself.
 A positive ruling whose tier is recorded NOWHERE is refused, not guessed. Those
 subjects go to `review/ruling_tier_unstated_<date>.csv`.
 
+federal_funding_transactions.csv — NEGATIVES ONLY, AND ONLY WHERE THE TIER WAS
+STATED BY THE RULER
+------------------------------------------------------------------------------
+Added 2026-09-04, after `code/1169_release_verify.py::check_rulings_applied`
+measured **5,998 rows** of this table still carrying a Cedar attribution that a
+verified denial forbids. See LIVE_ELSEWHERE below for how that gap survived.
+
+This applier writes NOTHING POSITIVE into the assistance table. It applies
+`RULED_NOT_NATIVE` and nothing else, and it applies it only where the ruling
+row **states its own tier** (`tier_source = stated_on_ruling_row` in 173's
+consolidated ledger). That gate is not a preference, it is
+`START_HERE.md` trap 1 read in the destructive direction: *a tier is INHERITED
+from the source row, never assigned by the consumer.* 173 manufactures tier X
+for any negative that carries none ("negative ruling asserts no link"), which
+is right for recording a verdict and is NOT evidence strong enough to strip a
+live attribution off a table.
+
+The difference is measured, not asserted. Of the 121 UEI subjects settled
+NEGATIVE on 2026-09-04, **2** state a tier on the ruling row and **119** do
+not, and the two are exactly the municipal PHAs the release gate names:
+
+    subjects admitted   2   5,998 funding rows   the two city PHAs
+    subjects refused  119   1,570 funding rows   $228M, and the top four are
+                                                 MICCOSUKEE CORPORATION,
+                                                 FOND DU LAC TRIBAL AND
+                                                 COMMUNITY COLLEGE, OGLALA
+                                                 SIOUX TRIBE DEPT OF PUBLIC
+                                                 SAFETY and HOOPA VALLEY
+                                                 PUBLIC UTILITIES DISTRICT
+
+Those 119 carry `BLOCKED: other_documented_exclusion` out of
+`cross_dataset_ruling_map.csv` or a 2026-08 conflict file, with no tier from
+any ruler. Applying them would un-attribute four plainly tribal recipients on
+machine output. `AGENT_FIELD_GUIDE.md` §5: **over-exclusion is a defect, not
+caution.** They are printed, counted and REFUSED, never silently dropped.
+
+THE EXCLUSION SHAPE IS NOT INVENTED HERE. It is the one
+`115_pull_assistance_archive.py` already writes when a ledger row is tier X,
+and the one `503_identity.py` honours — measured on 899 live rows of this
+table before anything was written:
+
+    attribution_status  excluded_not_native      canonical_name       (blank)
+    attribution_method  ledger_exclusion         tribe_id_neid        (blank)
+    confidence_tier     X                        cedar_uid            (blank)
+    attributed_flag     0                        proposal columns     (blank)
+    excluded_flag       1                        attribution_basis    stated
+
+`excluded_flag = 1` and the row itself stay. Rule: FLAG, NEVER DELETE. The
+prior key, name, tier and method are preserved verbatim inside
+`attribution_basis`, so the withdrawal is reversible from the row.
+
 SAFETY
 ------
-- Backs up each target to `.bak_<date>_pre174_rulings` before touching it.
+- Backs up each target to `.bak_<date>_pre174_rulings` before touching it
+  (`.bak_<date>_pre_174_apply_rulings_to_source_tables` for the assistance
+  table, which is new here and takes the STEM tag the field guide requires).
 - Writes `.part`, then renames. An interruption never looks like a completion.
 - Captures each target's mtime before reading and re-checks it before the
   rename. Another agent's concurrent write aborts this one instead of
@@ -58,6 +111,8 @@ SAFETY
 
     py -3 code/174_apply_rulings_to_source_tables.py --check
     py -3 code/174_apply_rulings_to_source_tables.py
+    py -3 code/174_apply_rulings_to_source_tables.py --tables=funding,ledger
+    py -3 code/174_apply_rulings_to_source_tables.py --selftest
 """
 
 import csv
@@ -79,8 +134,34 @@ csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 CONSOLIDATED = CLEAN / "cedar_ruling_ledger_consolidated.csv"
 PRIME = CLEAN / "prime_contracts.csv"
 LEDGER = CLEAN / "cedar_identifier_ledger_final.csv"
+FUND = CLEAN / "federal_funding_transactions.csv"
+
+# Set only by a test, so apply_funding can run against a planted ruling.
+_RULING_OVERRIDE = None
 
 NEW_COLS = ("ruling_status", "ruling_source_file", "ruling_applied_date")
+
+# The tier-X exclusion shape 115_pull_assistance_archive.py writes and
+# 503_identity.py honours. Read off 899 live rows of the table, not invented.
+# Every key here must already exist in the table's header; apply_funding
+# REFUSES rather than inventing a column (see FUND_REQUIRED_COLS).
+FUND_EXCLUDE_SET = {
+    "attribution_status": "excluded_not_native",
+    "attribution_method": "ledger_exclusion",
+    "confidence_tier": "X",
+    "attributed_flag": "0",
+    "excluded_flag": "1",
+}
+# Cleared, because a denied UEI may not keep a live key OR a live proposal
+# pointing at the entity the ruling just denied.
+FUND_CLEAR_COLS = ("canonical_name", "tribe_id_neid", "cedar_uid",
+                   "ledger_proposed_tribe_id", "tribe_id_neid_proposed",
+                   "tribe_id_neid_proposed_tier", "tribe_id_neid_proposed_basis")
+FUND_REQUIRED_COLS = (tuple(FUND_EXCLUDE_SET) +
+                      ("canonical_name", "tribe_id_neid", "cedar_uid",
+                       "recipient_uei", "attribution_basis"))
+# The gate that separates a ruler's tier from 173's manufactured one.
+TIER_STATED_BY_RULER = "stated_on_ruling_row"
 
 # Tables another agent may be actively pulling into. Applying a ruling into a
 # table a puller is rewriting loses one side or the other, so the skip is right
@@ -109,7 +190,33 @@ NEW_COLS = ("ruling_status", "ruling_source_file", "ruling_applied_date")
 # written within QUIET_SECONDS; otherwise the rulings apply. `--skip-locked`
 # restores the old behaviour by name for an operator who knows a pull is
 # starting.
-QUIET_SECONDS = 900
+#
+# AND THE STALENESS FIX WAS ONLY HALF THE REPAIR. Corrected 2026-09-04.
+# `live_elsewhere()` was made honest on 2026-09-03 and the two tables still did
+# not move, because THE WRITE PATH DID NOT EXIST: `main()` measured the lock,
+# found none, and then printed "This script still does not write it" - a
+# measurement wired to a paragraph instead of to an applier. `1169`'s ruling
+# gate went on measuring 5,998 attributed rows against the denial for another
+# day. A lock that is not held is not the same fact as a table that is not
+# written, and until today this script reported the first and meant the second.
+# `apply_funding()` below closes it for the assistance table.
+#
+# `subawards.csv` is STILL not written and that is now a NAMED gap rather than
+# a paragraph. Measured 2026-09-04: 14 rows / $3,221,778.36 under the denied
+# Omaha UEI, every one keyed `sub_native_tribe_id = TRBF-OMAHAT-00` /
+# `sub_cedar_uid = CE-0017W-FN` at tier B; the Yakima UEI has 0 rows there.
+# THE RULING SAYS "2 rows / $600,000" AND THAT IS AN UNDERCOUNT OF THE SAME
+# SHAPE: 2 rows spell the recipient `HOUSING AUTHORITY OF THE CITY OF OMAHA`
+# and 12 more / $2,621,778.36 spell it `OMAHA HOUSING AUTHORITY`. One UEI, two
+# names, and a count taken on the name misses two thirds of the money - field
+# guide rule 15. Key on the identifier, count on the identifier.
+# Nothing is written there because that table carries no `attributed_flag` /
+# `attribution_status` / `excluded_flag`, so the exclusion shape used here does
+# not exist in it and inventing one is how a convention gets forked. It needs
+# its own decision, not a copy of this one.
+# Seconds to watch a table before deciding it is quiet. Long enough that a
+# writer mid-flush is caught, short enough not to stall the run.
+LIVENESS_SAMPLE_S = 3
 
 PULLER_OF = {
     "federal_funding_transactions.csv": "115_pull_assistance_archive.py",
@@ -118,7 +225,31 @@ PULLER_OF = {
 
 
 def live_elsewhere():
-    """Tables too recently written to be safe to modify. Measured every run."""
+    """Tables actually being written right now. Measured every run.
+
+    THREE VERSIONS OF THIS, AND WHY THE THIRD IS THE RIGHT ONE
+    -----------------------------------------------------------
+    1. A FROZEN LITERAL. Two filenames hardcoded with the reason "115... WAS
+       live", recorded 2026-08-26 and checked against nothing. Every run since
+       printed "a lock on the table" whether or not anything held one, and the
+       assistance table went a week without receiving a ruling - including a
+       verified denial covering 5,998 rows and $1.13B.
+
+    2. AN AGE THRESHOLD. Better, and still a proxy. This tree is written
+       constantly by other workstreams, so "modified 360 seconds ago" is the
+       normal state of a busy repository, not evidence of a live puller. It
+       replaced a permanent false positive with a frequent one.
+
+    3. IS IT STILL MOVING? A puller writes repeatedly; a table someone touched
+       six minutes ago and left alone does not change again while we watch.
+       So sample the mtime and the size, wait, and sample again. A file that
+       changed between the two samples is genuinely being written and is
+       skipped. One that did not is quiet, whatever its age.
+
+    That is a measurement of the thing we care about rather than a correlate
+    of it, and it is the same distinction this repository keeps having to
+    relearn: a check adjacent to its own name is not the check.
+    """
     import time
     live = {}
     for fname, puller in PULLER_OF.items():
@@ -128,10 +259,14 @@ def live_elsewhere():
         if "--skip-locked" in sys.argv:
             live[fname] = f"{puller} skip forced by --skip-locked"
             continue
-        age = time.time() - path.stat().st_mtime
-        if age < QUIET_SECONDS:
-            live[fname] = (f"{puller} may be live - written {int(age)}s ago, "
-                           f"under the {QUIET_SECONDS}s quiet threshold")
+        before = path.stat()
+        time.sleep(LIVENESS_SAMPLE_S)
+        after = path.stat()
+        if (before.st_mtime, before.st_size) != (after.st_mtime, after.st_size):
+            live[fname] = (
+                f"{puller} IS live - the file changed during a "
+                f"{LIVENESS_SAMPLE_S}s observation "
+                f"({before.st_size:,} -> {after.st_size:,} bytes)")
     return live
 
 
@@ -218,6 +353,7 @@ def build_decisions():
             dec[key] = {
                 "action": "RULING_CONFLICT",
                 "tribe_id": "", "canonical_name": "", "tier": "",
+                "tier_stated_by_ruler": False,
                 "sources": sorted({r["source_file"] for r in rs}),
                 "ruling": " || ".join(sorted({r["ruling"][:60] for r in rs})),
                 "date": max((r["ruling_date"] or "") for r in rs),
@@ -257,6 +393,12 @@ def build_decisions():
                 "RULED_ATTRIBUTED", "RULED_TIER_C_NOT_ATTRIBUTED") else "",
             "tier": tier,
             "tier_source": best["tier_source"],
+            # ANY ruling row for this subject that carried its OWN tier. Taken
+            # across every row, not off `best`: `best` breaks a tie by file
+            # order, and every negative sorts to X, so reading `best` alone
+            # would lose a stated tier sitting on the second row of a subject.
+            "tier_stated_by_ruler": any(
+                r["tier_source"] == TIER_STATED_BY_RULER for r in rs),
             "sources": sorted({r["source_file"] for r in rs}),
             "ruling": best["ruling"][:120],
             "date": max((r["ruling_date"] or "") for r in rs),
@@ -529,7 +671,287 @@ def apply_ledger(dec, check):
     return changed
 
 
+def funding_denials(dec):
+    """(admitted, refused) UEI->decision maps for the assistance table.
+
+    ADMITTED is a negative whose tier was stated by the ruler. REFUSED is a
+    negative whose tier X was manufactured by 173 because a negative asserts no
+    link - a true statement that is not evidence for a destructive write.
+    """
+    admitted, refused = {}, {}
+    for key, d in dec.items():
+        if d["action"] != "RULED_NOT_NATIVE" or not key.startswith("UEI:"):
+            continue
+        (admitted if d.get("tier_stated_by_ruler") else refused)[key[4:].upper()] = d
+    return admitted, refused
+
+
+def apply_funding(dec, check, table=None):
+    """Apply RULED_NOT_NATIVE to the assistance table, STREAMED.
+
+    The table is 660 MB / 701,955 rows; `load()` it into dicts and this script
+    needs several GB, so it is streamed row by row into a `.part` and renamed.
+    The row count in and the row count out are compared before the rename and
+    a mismatch ABORTS: a ruling applier may never change the shape of a table.
+    """
+    table = table or FUND
+    print(f"\n[{table.name}]")
+    admitted, refused = funding_denials(dec)
+    print(f"  UEI subjects settled NOT_NATIVE : "
+          f"{len(admitted) + len(refused):,}")
+    print(f"    tier stated by the ruler      : {len(admitted):,}  APPLIED")
+    print(f"    tier manufactured by 173      : {len(refused):,}  REFUSED "
+          f"(a negative asserts no link; that is not a tier)")
+    if not table.exists():
+        print("  table absent - skipped")
+        return {"rows_in": 0, "rows_out": 0, "rows_excluded": 0}
+    if not admitted:
+        print("  no denial carries a ruler-stated tier - nothing to apply")
+        return {"rows_in": 0, "rows_out": 0, "rows_excluded": 0}
+
+    mtime0 = table.stat().st_mtime
+    with open(table, encoding="utf-8-sig", errors="replace", newline="") as fh:
+        header = next(csv.reader(fh), None) or []
+    missing = [c for c in FUND_REQUIRED_COLS if c not in header]
+    if missing:
+        # rule: verify your input contains what you think it does. A silent
+        # skip here would report a clean apply against columns that are gone.
+        print(f"  *** REFUSING: {table.name} has no {missing} column(s). "
+              f"The exclusion convention cannot be written. ***")
+        sys.exit(3)
+    clear = [c for c in FUND_CLEAR_COLS if c in header]
+    absent_clear = [c for c in FUND_CLEAR_COLS if c not in header]
+    if absent_clear:
+        print(f"  note: not present in this table, nothing to clear: "
+              f"{absent_clear}")
+
+    per = defaultdict(lambda: {"rows": 0, "usd": 0.0, "was_keyed": 0,
+                               "was_attributed": 0, "name": ""})
+    rows_in = rows_out = rows_excluded = 0
+    tmp = Path(str(table) + ".part")
+    fout = None if check else open(tmp, "w", encoding="utf-8", newline="")
+    try:
+        w = None
+        with open(table, encoding="utf-8-sig", errors="replace",
+                  newline="") as fin:
+            rdr = csv.DictReader(fin)
+            if fout is not None:
+                w = csv.DictWriter(fout, fieldnames=rdr.fieldnames,
+                                   extrasaction="ignore", lineterminator="\r\n")
+                w.writeheader()
+            for row in rdr:
+                rows_in += 1
+                u = (row.get("recipient_uei") or "").strip().upper()
+                d = admitted.get(u)
+                if d is not None:
+                    e = per[u]
+                    e["rows"] += 1
+                    e["usd"] += money(row, "obligated_usd")
+                    e["name"] = e["name"] or (row.get("recipient_name") or "")
+                    prior = {c: (row.get(c) or "") for c in
+                             ("tribe_id_neid", "cedar_uid", "canonical_name",
+                              "confidence_tier", "attribution_method",
+                              "attribution_status")}
+                    if prior["cedar_uid"].strip() or prior["tribe_id_neid"].strip():
+                        e["was_keyed"] += 1
+                    if (row.get("attributed_flag") or "").strip() == "1":
+                        e["was_attributed"] += 1
+                    for c, v in FUND_EXCLUDE_SET.items():
+                        row[c] = v
+                    for c in clear:
+                        row[c] = ""
+                    row["attribution_basis"] = (
+                        f"attribution WITHDRAWN by "
+                        f"code/174_apply_rulings_to_source_tables.py on {TODAY}: "
+                        f"UEI {u} ruled NOT a Native entity, tier X stated on the "
+                        f"ruling row in {' | '.join(d['sources'])}. "
+                        f"Ruling: {d['ruling'][:120]!r}. "
+                        f"PRIOR (recoverable, nothing deleted): "
+                        f"tribe_id_neid={prior['tribe_id_neid']!r} "
+                        f"cedar_uid={prior['cedar_uid']!r} "
+                        f"canonical_name={prior['canonical_name']!r} "
+                        f"confidence_tier={prior['confidence_tier']!r} "
+                        f"attribution_method={prior['attribution_method']!r} "
+                        f"attribution_status={prior['attribution_status']!r}. "
+                        f"Exclusion shape is the tier-X one written by "
+                        f"115_pull_assistance_archive.py and honoured by "
+                        f"503_identity.py.")
+                    rows_excluded += 1
+                if w is not None:
+                    w.writerow(row)
+                    rows_out += 1
+    except BaseException:
+        if fout is not None:
+            fout.close()
+            tmp.unlink(missing_ok=True)
+        raise
+    if fout is not None:
+        fout.close()
+
+    print(f"  rows read {rows_in:,}"
+          + (f"   rows written {rows_out:,}" if not check else ""))
+    print(f"  {'recipient_uei':14} {'rows':>7} {'was keyed':>10} "
+          f"{'was attr':>9} {'obligated_usd':>18}  recipient_name")
+    for u in sorted(per, key=lambda k: -per[k]["usd"]):
+        e = per[u]
+        print(f"  {u:14} {e['rows']:>7,} {e['was_keyed']:>10,} "
+              f"{e['was_attributed']:>9,} ${e['usd']:>17,.2f}  {e['name'][:44]}")
+    print(f"  {'TOTAL':14} {rows_excluded:>7,} "
+          f"{sum(e['was_keyed'] for e in per.values()):>10,} "
+          f"{sum(e['was_attributed'] for e in per.values()):>9,} "
+          f"${sum(e['usd'] for e in per.values()):>17,.2f}")
+    if refused:
+        print("  REFUSED, and named rather than dropped:")
+        for u, d in sorted(refused.items())[:12]:
+            print(f"    {u}  tier_source={d['tier_source']!r}  "
+                  f"{d['ruling'][:56]!r}")
+        if len(refused) > 12:
+            print(f"    ... and {len(refused) - 12} more")
+
+    if check:
+        print("  --check: nothing written")
+        return {"rows_in": rows_in, "rows_out": 0,
+                "rows_excluded": rows_excluded}
+
+    # A PROOF THAT NOTHING BROKE IS NOT A PROOF THAT SOMETHING HAPPENED.
+    # Conservation is asserted AND so is the intended delta, with a floor, so
+    # a no-op cannot pass as a clean apply.
+    if rows_out != rows_in:
+        tmp.unlink(missing_ok=True)
+        print(f"  *** ABORT: {rows_in:,} rows in, {rows_out:,} out ***")
+        sys.exit(2)
+    if rows_excluded == 0:
+        tmp.unlink(missing_ok=True)
+        print(f"  *** ABORT: {len(admitted)} denial(s) admitted and ZERO rows "
+              f"matched. Either the denial is already applied and this script "
+              f"should not have been asked to write, or recipient_uei stopped "
+              f"holding what this check reads. Refusing to rename a file that "
+              f"records no work. ***")
+        sys.exit(2)
+    if table.stat().st_mtime != mtime0:
+        tmp.unlink(missing_ok=True)
+        print(f"  *** {table.name} changed while we read it - ABORTING ***")
+        sys.exit(2)
+    bak = Path(str(table) + f".bak_{TODAY}_pre_174_apply_rulings_to_source_tables")
+    if not bak.exists():
+        shutil.copy2(table, bak)
+        print(f"  backed up -> {bak.name}")
+    os.replace(tmp, table)
+    print(f"  wrote {table.name} ({rows_out:,} rows, row count preserved)")
+    return {"rows_in": rows_in, "rows_out": rows_out,
+            "rows_excluded": rows_excluded}
+
+
+def selftest():
+    """Prove apply_funding FIRES on a planted violation, and REFUSES.
+
+    Field guide rule 1: a check that has never failed on purpose is not known
+    to work. Three fixtures - one denial that must be applied, one whose tier
+    173 manufactured and which must be refused, and a row-count guard.
+    """
+    import tempfile
+    fails = []
+    cols = ["recipient_uei", "recipient_name", "obligated_usd", "canonical_name",
+            "tribe_id_neid", "cedar_uid", "attribution_status",
+            "attribution_method", "confidence_tier", "attributed_flag",
+            "excluded_flag", "attribution_basis"]
+
+    def mk(root):
+        p = Path(root) / "fund.csv"
+        with open(p, "w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=cols, lineterminator="\r\n")
+            w.writeheader()
+            for uei, nm in (("AAAAAAAAAAAA", "HOUSING AUTHORITY OF THE CITY OF X"),
+                            ("BBBBBBBBBBBB", "A TRIBAL COLLEGE"),
+                            ("CCCCCCCCCCCC", "AN UNRULED RECIPIENT")):
+                w.writerow({"recipient_uei": uei, "recipient_name": nm,
+                            "obligated_usd": "100.00", "canonical_name": "Somebody",
+                            "tribe_id_neid": "TRBF-XXXXXX-00",
+                            "cedar_uid": "CE-00001-AA",
+                            "attribution_status": "cedar_neid",
+                            "attribution_method": "uei_exact_archive",
+                            "confidence_tier": "B", "attributed_flag": "1",
+                            "excluded_flag": "0", "attribution_basis": ""})
+        return p
+
+    dec = {
+        "UEI:AAAAAAAAAAAA": {"action": "RULED_NOT_NATIVE", "tier": "X",
+                             "tier_source": TIER_STATED_BY_RULER,
+                             "tier_stated_by_ruler": True,
+                             "ruling": "not_native", "sources": ["fixture.csv"],
+                             "tribe_id": "", "canonical_name": ""},
+        "UEI:BBBBBBBBBBBB": {"action": "RULED_NOT_NATIVE", "tier": "X",
+                             "tier_source": "negative ruling asserts no link",
+                             "tier_stated_by_ruler": False,
+                             "ruling": "BLOCKED: other_documented_exclusion",
+                             "sources": ["fixture.csv"],
+                             "tribe_id": "", "canonical_name": ""},
+    }
+    with tempfile.TemporaryDirectory() as d:
+        p = mk(d)
+        res = apply_funding(dec, False, table=p)
+        out = list(csv.DictReader(open(p, encoding="utf-8-sig", newline="")))
+        by = {r["recipient_uei"]: r for r in out}
+        cases = [
+            ("row count preserved", res["rows_in"] == res["rows_out"] == 3),
+            ("exactly one row excluded", res["rows_excluded"] == 1),
+            ("admitted denial: cedar_uid cleared", by["AAAAAAAAAAAA"]["cedar_uid"] == ""),
+            ("admitted denial: tribe_id_neid cleared",
+             by["AAAAAAAAAAAA"]["tribe_id_neid"] == ""),
+            ("admitted denial: status excluded_not_native",
+             by["AAAAAAAAAAAA"]["attribution_status"] == "excluded_not_native"),
+            ("admitted denial: tier X, attributed 0, excluded 1",
+             (by["AAAAAAAAAAAA"]["confidence_tier"],
+              by["AAAAAAAAAAAA"]["attributed_flag"],
+              by["AAAAAAAAAAAA"]["excluded_flag"]) == ("X", "0", "1")),
+            ("admitted denial: prior key preserved in the basis",
+             "CE-00001-AA" in by["AAAAAAAAAAAA"]["attribution_basis"]),
+            ("REFUSED denial untouched (manufactured tier)",
+             by["BBBBBBBBBBBB"]["cedar_uid"] == "CE-00001-AA"
+             and by["BBBBBBBBBBBB"]["attributed_flag"] == "1"),
+            ("unruled row untouched",
+             by["CCCCCCCCCCCC"]["cedar_uid"] == "CE-00001-AA"),
+        ]
+        for name, ok in cases:
+            print(f"  {'ok  ' if ok else 'FAIL'}  {name}")
+            if not ok:
+                fails.append(name)
+
+    # and the no-op guard: an admitted denial matching nothing must ABORT,
+    # never rename a file that records no work.
+    with tempfile.TemporaryDirectory() as d:
+        p = mk(d)
+        dec2 = {"UEI:ZZZZZZZZZZZZ": dict(dec["UEI:AAAAAAAAAAAA"])}
+        try:
+            apply_funding(dec2, False, table=p)
+            ok = False
+        except SystemExit as e:
+            ok = e.code == 2
+        print(f"  {'ok  ' if ok else 'FAIL'}  a denial matching ZERO rows aborts")
+        if not ok:
+            fails.append("no-op guard")
+
+    print(f"\n  174 selftest   {'ok' if not fails else 'FAIL'}   "
+          f"{len(fails)} failing assertion(s)")
+    return 1 if fails else 0
+
+
+def tables_requested():
+    """`--tables=a,b`. Default is every table, so behaviour is unchanged."""
+    want = {"prime", "ledger", "funding"}
+    for a in sys.argv:
+        if a.startswith("--tables="):
+            want = {t.strip().lower() for t in a.split("=", 1)[1].split(",")
+                    if t.strip()}
+    bad = want - {"prime", "ledger", "funding"}
+    if bad:
+        sys.exit(f"unknown --tables value(s): {sorted(bad)}")
+    return want
+
+
 def main():
+    if "--selftest" in sys.argv:
+        sys.exit(selftest())
     check = "--check" in sys.argv
     print("=== Cedar Press 174: apply rulings back to source tables ===\n")
     dec = build_decisions()
@@ -552,21 +974,37 @@ def main():
         if d["action"] == "RULED_TIER_UNSTATED"]
 
     reports_only = "--reports-only" in sys.argv
-    moved_rows, moved_usd, srows, susd = apply_prime(dec, check)
-    if not reports_only:
-        apply_ledger(dec, check)
+    want = tables_requested()
+    if "prime" in want:
+        moved_rows, moved_usd, srows, susd = apply_prime(dec, check)
     else:
+        print("\n  prime_contracts.csv: not in --tables, untouched")
+    if not reports_only and "ledger" in want:
+        apply_ledger(dec, check)
+    elif reports_only:
         print("\n  --reports-only: ledger untouched")
+    else:
+        print("\n  cedar_identifier_ledger_final.csv: not in --tables, untouched")
 
     live = live_elsewhere()
     for f, why in live.items():
         print(f"\n  SKIPPED {f}: {why}. "
               f"Not a gap in the rulings - a lock on the table.")
+    if reports_only:
+        print(f"\n  --reports-only: {FUND.name} untouched")
+    elif "funding" not in want:
+        print(f"\n  {FUND.name}: not in --tables, untouched")
+    elif FUND.name in live:
+        pass  # already printed above as a measured lock
+    else:
+        apply_funding(dec, check)
     for f in PULLER_OF:
-        if f not in live:
-            print(f"\n  {f}: QUIET, no lock held. This script still does not "
-                  f"write it - the skip was frozen, the gap is real. See the "
-                  f"LIVE_ELSEWHERE note for the $1.13B measured inside it.")
+        if f not in live and f != FUND.name:
+            print(f"\n  {f}: QUIET, no lock held, and this script still does "
+                  f"not write it. Named as a gap, with the measurement, in the "
+                  f"LIVE_ELSEWHERE note - it has no attributed_flag / "
+                  f"attribution_status / excluded_flag, so the exclusion shape "
+                  f"used for the assistance table does not exist in it.")
 
     if not check and unstated:
         dest = REVIEW / f"ruling_tier_unstated_{TODAY}.csv"

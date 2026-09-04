@@ -58,7 +58,7 @@ function sections(user) {
   return [
     {
       id: "articles",
-      label: "Articles",
+      label: "Research Briefs",
       to: PRESS_ARTICLES_PATH,
       icon: ArticlesIcon,
       meta: `${PRESS_ARTICLES.length} briefs`,

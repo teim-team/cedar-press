@@ -24,6 +24,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
+import { useAuth } from "../../context/useAuth";
+import { canReadCedarPress } from "../../features/grove/pressAccess";
+
 // The Press routes code-split separately, so a direct visit or refresh loads
 // this module first; without the stylesheet stack the page and its Cedar
 // launcher render unstyled.
@@ -63,6 +66,14 @@ function anchorOf(entry) {
 }
 
 export default function CedarPressWhatsNew() {
+  // The masthead carries the reader's profile and Sign out. These two pages
+  // rendered `<PressMast section="..." />` with NO `user` and no
+  // `onSignOut`, so a signed-in reader who navigated here lost the avatar
+  // and the way out - the session was intact, the chrome just stopped
+  // saying so. Articles and Data always passed both; these did not.
+  const { user, logout } = useAuth();
+  const entitled = canReadCedarPress(user);
+
   useDocumentTitle("What’s new");
   useScrollToTop();
   // Sitewide arrival language; the sticky filter stays out of it, since a
@@ -133,7 +144,7 @@ export default function CedarPressWhatsNew() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast section="whats-new" />
+        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="whats-new" />
 
         {/* Title across the page rather than down a 62ch column: this is the
             widest thing on the page and it was using half of it. The standing

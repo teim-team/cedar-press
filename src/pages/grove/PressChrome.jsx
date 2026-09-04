@@ -40,7 +40,7 @@ import {
 } from "../../features/grove/pressRoutes";
 
 const NAV = [
-  { id: "articles", label: "Articles", to: PRESS_ARTICLES_PATH },
+  { id: "articles", label: "Research Briefs", to: PRESS_ARTICLES_PATH },
   { id: "data", label: "Collections", to: PRESS_DATA_PATH },
   { id: "whats-new", label: "What’s new", to: PRESS_WHATS_NEW_PATH },
   { id: "methods", label: "Methods", to: PRESS_METHODS_PATH },
@@ -177,7 +177,7 @@ export function PressFoot({ flush = false, nav = true }) {
           <Link to={PRESS_PATH}>Cedar Press</Link>
           {nav ? (
             <>
-              <Link to={PRESS_ARTICLES_PATH}>Articles</Link>
+              <Link to={PRESS_ARTICLES_PATH}>Research Briefs</Link>
               <Link to={PRESS_DATA_PATH}>Collections</Link>
               <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
               <Link to={PRESS_METHODS_PATH}>Methods</Link>

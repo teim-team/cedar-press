@@ -16,6 +16,9 @@ import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
 import { Link } from "react-router";
 
+import { useAuth } from "../../context/useAuth";
+import { canReadCedarPress } from "../../features/grove/pressAccess";
+
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
@@ -44,6 +47,14 @@ const TRUST_ROW = [
 ];
 
 export default function CedarPressMethods() {
+  // The masthead carries the reader's profile and Sign out. These two pages
+  // rendered `<PressMast section="..." />` with NO `user` and no
+  // `onSignOut`, so a signed-in reader who navigated here lost the avatar
+  // and the way out - the session was intact, the chrome just stopped
+  // saying so. Articles and Data always passed both; these did not.
+  const { user, logout } = useAuth();
+  const entitled = canReadCedarPress(user);
+
   useDocumentTitle("Methods");
   useScrollToTop();
   // Sitewide arrival language: each argument fades in as the reader
@@ -52,7 +63,7 @@ export default function CedarPressMethods() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast section="methods" />
+        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="methods" />
 
         {/* The opening argument, given room. The claim under it is the one
             sentence this page exists to earn, so it stands alone rather than

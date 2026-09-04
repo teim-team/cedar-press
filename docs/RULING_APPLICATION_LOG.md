@@ -380,3 +380,145 @@ $760M.
 The second is a different kind of cheap: 420 rulings that name an owner and
 need only a tier written next to them. They fail today for want of a single
 letter, not for want of research.
+
+---
+
+## 2026-09-04 — the assistance table joins the appliers, and the half-repair that hid it
+
+*Measured 2026-09-04. Every figure below came from a command run that day against
+`data/clean/federal_funding_transactions.csv` at 701,955 rows, uncapped.*
+
+`code/1169_release_verify.py::check_rulings_applied` was one of five blocking
+failures on the release gate: **5,998 rows still carried a Cedar attribution that
+a verified denial forbids.** The denial is
+`review/cedar_research_rulings_municipal_pha_2026-09-03.csv` — two city public
+housing agencies under 42 U.S.C. 1437a(b)(6), keyed to two tribes on a shared
+place name. NAHASDA does not admit them either: 25 U.S.C. 4103 allows an Indian
+housing authority or a TDHE, and a city PHA is neither.
+
+**173 was never the problem.** It had already swept the ruling, keyed it
+`UEI:DFPYJKG9K2X4` / `UEI:MZMVA1YQ6MS6`, settled both `NEGATIVE` with no
+conflict, and inherited tier `X` from the ruling row itself
+(`tier_source = stated_on_ruling_row`). Both rows have sat in
+`data/clean/cedar_ruling_ledger_consolidated.csv` since 2026-09-03 00:49.
+
+**174 was, and the reason is a rule.** The 2026-09-03 pass replaced 174's frozen
+`live_elsewhere()` literal with a real staleness measurement — and stopped there.
+`main()` measured the lock, found the table QUIET, and then printed *"This script
+still does not write it"*. **The measurement was wired to a paragraph instead of
+to an applier.** A lock that is not held is not the same fact as a table that is
+not written; for a day this script reported the first and meant the second. This
+is the sibling of `AGENT_FIELD_GUIDE.md` rule 5 — *a proof that nothing broke is
+not a proof that something happened* — one level up: an honest instrument
+attached to nothing.
+
+### What was written
+
+`apply_funding()` in `code/174_apply_rulings_to_source_tables.py`, streamed (the
+table is 660 MB; `load()`-ing it costs several GB), `.part` then rename, mtime
+guard, backup at
+`federal_funding_transactions.csv.bak_2026-09-04_pre_174_apply_rulings_to_source_tables`.
+
+| | before | after | delta |
+|---|---:|---:|---:|
+| rows | 701,955 | 701,955 | **0** |
+| columns | 69 | 69 | **0** |
+| `sum(obligated_usd)` | $219,689,020,478.59 | $219,689,020,478.59 | **$0.00** |
+| `attributed_flag = 1` | 549,180 | 543,182 | −5,998 |
+| `excluded_flag = 1` | 54,090 | 60,088 | +5,998 |
+| `cedar_uid` non-blank | 552,756 | 546,758 | −5,998 |
+
+Rows differing outside the two denied UEIs, by full-row `EXCEPT ALL` against the
+backup: **0**.
+
+| recipient_uei | rows | obligated_usd | was keyed to |
+|---|---:|---:|---|
+| `DFPYJKG9K2X4` OMAHA HOUSING AUTHORITY | 5,024 | $980,994,769.34 | `TRBF-OMAHAT-00` / `CE-0017W-FN` |
+| `MZMVA1YQ6MS6` YAKIMA HOUSING AUTHORITY | 974 | $154,669,733.67 | `TRBF-YAKAMA-00` / `CE-001CC-8N` |
+| **total** | **5,998** | **$1,135,664,503.01** | |
+
+**Two dollar figures, both right, and they are not the same number.** The ruling
+states $1,133,101,073.01 over 5,980 rows — the `uei_exact_archive` rows it
+measured. The applier keys on the UEI, so it also reaches **18 rows /
+$2,563,430.00** written by the Stata do-file replay in `24_funding_merge.py`
+under the *other* spelling of the same recipient (`OMAHA HOUSING AUTHORITY`,
+`YAKIMA HOUSING AUTHORITY`, `attribution_method = dofile_corrtd:prefix`, tier
+**A**). Those 18 are the same legal person and the same denial; 5,980 + 18 =
+5,998, which is exactly what the release gate counted.
+
+### The exclusion shape was not invented
+
+It is the tier-X shape `115_pull_assistance_archive.py` already writes and
+`503_identity.py` honours — read off **899 live rows** of this table before
+anything was written:
+
+```
+attribution_status  excluded_not_native      canonical_name    (blank)
+attribution_method  ledger_exclusion         tribe_id_neid     (blank)
+confidence_tier     X                        cedar_uid         (blank)
+attributed_flag     0                        proposal columns  (blank)
+excluded_flag       1                        attribution_basis stated
+```
+
+Flag, never delete: the row stays, its dollars are untouched, and the prior
+`tribe_id_neid` / `cedar_uid` / `canonical_name` / tier / method are preserved
+verbatim inside `attribution_basis`, so the withdrawal is reversible from the row
+alone. The **proposal** columns are cleared too — 18 rows carried
+`tribe_id_neid_proposed = TRBF-*-00` at tier B, and a denied UEI may not keep a
+live proposal pointing at the entity the ruling just denied.
+
+`apply_ledger` (unchanged code) took the two ledger rows from tier B to tier **X**
+via `elijah_ruling`. That matters beyond tidiness: `115` reads ledger tier X and
+excludes at build time, so **a rebuild of this table now reproduces the exclusion
+instead of reverting it.**
+
+### 119 negatives were REFUSED, and that is the load-bearing half
+
+`apply_funding` applies `RULED_NOT_NATIVE` only where the ruling row **states its
+own tier**. That is `START_HERE.md` trap 1 read in the destructive direction: *a
+tier is inherited from the source row, never assigned by the consumer.* 173
+manufactures tier X for any negative that carries none (`tier_source = "negative
+ruling asserts no link"`), which is right for recording a verdict and is not
+evidence for stripping a live attribution.
+
+Of **121** UEI subjects settled NEGATIVE on 2026-09-04, **2** state a tier and
+**119** do not. Applying all 121 would have touched **7,568 rows / $1,366,703,527**
+— un-attributing `MICCOSUKEE CORPORATION` (847 rows), `FOND DU LAC TRIBAL AND
+COMMUNITY COLLEGE` (643), `OGLALA SIOUX TRIBE DEPARTMENT OF PUBLIC SAFETY` (38)
+and `HOOPA VALLEY PUBLIC UTILITIES DISTRICT` (8) on `BLOCKED:
+other_documented_exclusion` out of a machine map. `AGENT_FIELD_GUIDE.md` §5:
+**over-exclusion is a defect, not caution.** The 119 are printed and counted on
+every run, never silently dropped.
+
+`--selftest` proves the applier fires: a planted ruler-tiered denial is applied,
+a planted 173-tiered one is refused untouched, an unruled row is untouched, the
+row count is preserved, and a denial matching **zero** rows ABORTS rather than
+rename a file that records no work.
+
+### Result and what is still open
+
+`py -3 code/1169_release_verify.py` — *"verified negative rulings are applied, not
+merely written"* → **PASS** (`denied_ueis = 2`, `rows_still_attributed = 0`).
+`selftest` still returns FAIL on the planted violation, so the PASS is measured,
+not vacuous. Four blocking failures remain and none is this one: the customer
+database still carries a retired-scheme column, the artifacts therefore disagree,
+and `62` / dataset semantics are NOT_ESTABLISHED.
+
+**Still open, named rather than quietly skipped:** `data/clean/subawards.csv`
+carries **14 rows / $3,221,778.36** under `DFPYJKG9K2X4`, all keyed
+`sub_native_tribe_id = TRBF-OMAHAT-00`, `sub_cedar_uid = CE-0017W-FN`,
+`sub_native_tier = B`. `MZMVA1YQ6MS6` has **0** rows there.
+
+**The ruling itself says "2 rows / $600,000" and that is an undercount of the
+same shape the funding table just showed.** 2 rows / $600,000.00 carry
+`sub_name = HOUSING AUTHORITY OF THE CITY OF OMAHA`; **12 more rows /
+$2,621,778.36** carry `sub_name = OMAHA HOUSING AUTHORITY`. One UEI, two name
+spellings, and a count taken on the name misses two thirds of the money — the
+`AMERICANTRIBAL GOVERNMENT` / `no casino` shape in `AGENT_FIELD_GUIDE.md` rule
+15, arriving for the third time in one adjudication. **Key on the identifier,
+count on the identifier.**
+
+Nothing was written to `subawards.csv`: it has no `attributed_flag`,
+`attribution_status` or `excluded_flag`, so the exclusion shape used above does
+not exist in it, and copying one over would fork the convention. It needs its
+own decision.
