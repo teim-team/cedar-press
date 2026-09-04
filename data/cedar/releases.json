@@ -5,6 +5,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Federal Funding to Indian Country",
         "tables": 14,
         "rowsLabel": "3,646,750 rows",
         "preview": {
@@ -19,6 +20,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Federal Register — Indian Affairs",
         "tables": 23,
         "rowsLabel": "502,483 rows",
         "preview": {
@@ -33,6 +35,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Native Legislation and Votes",
         "tables": 11,
         "rowsLabel": "149,293 rows",
         "preview": {
@@ -47,6 +50,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Indian Country Deals",
         "tables": 15,
         "rowsLabel": "2,662 rows",
         "preview": {
@@ -61,6 +65,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "NAGPRA Notices",
         "tables": 5,
         "rowsLabel": "72,302 rows",
         "preview": {
@@ -75,6 +80,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Tribal Advocacy and Lobbying",
         "tables": 35,
         "rowsLabel": "264,478 rows",
         "preview": {
@@ -89,6 +95,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Native Federal Contractors",
         "tables": 10,
         "rowsLabel": "3,345,971 rows",
         "preview": {
@@ -103,6 +110,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Native Federal Subcontracting",
         "tables": 3,
         "rowsLabel": "90,479 rows",
         "preview": {
@@ -117,6 +125,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Native-Owned Businesses",
         "tables": 6,
         "rowsLabel": "row count unresolved",
         "preview": null,
@@ -131,6 +140,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "NEST: Native Enterprise Structures and Ties",
         "tables": 3,
         "rowsLabel": "5,757 rows",
         "preview": {
@@ -145,6 +155,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Tribal Natural Resource Revenue",
         "tables": 9,
         "rowsLabel": "283,716 rows",
         "preview": {
@@ -159,6 +170,7 @@
       {
         "version": "v0",
         "date": "2026-09-02",
+        "name": "Native Nonprofits",
         "tables": 10,
         "rowsLabel": "123,293 rows",
         "preview": {

@@ -275,9 +275,17 @@ export default function CedarPressWhatsNew() {
                       {entry.changed.map((line) => <li key={line}>{line}</li>)}
                     </ul>
                     <p className="cp-feed__acts">
-                      <Link className="cp-feed__act" to={PRESS_DATA_PATH}>
-                        View collection <span aria-hidden="true">&#8594;</span>
-                      </Link>
+                      {/* A retired collection's release is history a reader
+                          can still cite; there is no shelf to walk to. */}
+                      {entry.retired ? (
+                        <span className="cp-feed__act cp-feed__act--still">
+                          No longer on the shelf; kept for citation
+                        </span>
+                      ) : (
+                        <Link className="cp-feed__act" to={PRESS_DATA_PATH}>
+                          View collection <span aria-hidden="true">&#8594;</span>
+                        </Link>
+                      )}
                       {/* Cedar, scoped to the collection with the question
                           already phrased: the release log behind this feed is
                           exactly what the profile layer answers from. */}

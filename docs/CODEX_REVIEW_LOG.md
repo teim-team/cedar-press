@@ -1473,3 +1473,10 @@ reports it on a 3.11 interpreter; it predates this branch and was not edited.
 | P2 Preserve blocker identities, not only their count | `blockers` is the list of blocker texts, copied from the manifest; the same-facts check and the test compare the list. | `pressReleases.test.js` |
 | P2 Allow retired collections to remain in the ledger | A ledger id must be one the manifest ships or lists as excluded; a retired collection keeps its releases and has no storefront release record. | `pressReleases.test.js` |
 | P2 Stop advertising historical previews as downloadable | Only the current release's preview "downloads from the shelf"; an older release's preview "was published with this release". | `pressReleases.test.js` |
+
+### PR #53 — two findings, both right
+
+| finding | what changed | proof |
+|---|---|---|
+| P2 Reject ledgers with a missing releases map | The root and `releases` must be plain objects and every entry a list of releases; anything else that parses is refused before a write, alongside anything that does not parse. `--ledger=<path>` lets a test point the script at a planted file, and `pressReleases.test.js` runs it against six malformed ledgers and requires exit 1 with the refusal named, then against a copy of the real one and requires exit 0. | `npm test` |
+| P2 Keep retired releases in the public feed | `buildReleases` keeps a read-only record for any ledger id the storefront no longer sells: last version, `retired: true`, no cadence, name as it shipped (now recorded in the ledger). The feed carries it so `#<id>-v0` still resolves; What's New shows "no longer on the shelf" in place of the shelf link; the overview's rail excludes it. Proved on a synthetic ledger. | `pressReleases.test.js` |

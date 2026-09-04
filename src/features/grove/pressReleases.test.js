@@ -5,7 +5,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   EXCLUDED_COLLECTIONS,
@@ -22,6 +25,8 @@ import {
   RELEASE_KIND,
   RELEASE_NOTES,
   anchorOf,
+  buildFeed,
+  buildReleases,
   formatUpdated,
   freshnessLine,
   latestRelease,
@@ -75,6 +80,7 @@ test("the ledger's entry for the current version is what the manifest measures",
     assert.deepEqual(record, {
       version: dataset.version,
       date: dataset.updated,
+      name: dataset.name,
       tables: cedar.n_tables,
       rowsLabel: dataset.rowsLabel,
       preview: sample?.path ? { table: sample.table, rows: sample.rows, of: sample.of } : null,
@@ -108,9 +114,80 @@ test("every version in the ledger is unique, dated and no newer than the descrip
         assert.ok(record.date <= dataset.updated, `${id} ${record.version} is dated after the descriptor`);
       }
     }
-    // A retired collection has no release record on the storefront.
-    if (!dataset) assert.equal(releaseFor(id), null, `${id} is retired and still has a release`);
+    // A retired collection keeps a read-only record: citable, not sold.
+    if (!dataset) {
+      assert.equal(releaseFor(id)?.retired, true, `${id} is retired and reads as sold`);
+      assert.equal(releaseFor(id).cadence, null, id);
+    }
   }
+});
+
+// The retired case, on a synthetic ledger since the real one has none: the
+// permalink a citation names keeps resolving, the entry says it is history,
+// and the overview's "recently updated" rail never carries it.
+test("a retired collection stays in the feed as read-only history", () => {
+  const first = LAUNCH_COLLECTION[0];
+  const synthetic = {
+    releases: {
+      [first.id]: ledgerFor(first.id),
+      "retired-fixture": [
+        { version: "v0", date: "2026-01-15", name: "Retired Fixture", tables: 2,
+          rowsLabel: "10 rows", preview: { table: "x.csv", rows: 10, of: 10 }, blockers: [] },
+      ],
+    },
+  };
+  const releases = buildReleases(synthetic, [first]);
+  assert.equal(releases[first.id].retired, false);
+  const retired = releases["retired-fixture"];
+  assert.equal(retired.retired, true);
+  assert.equal(retired.name, "Retired Fixture");
+  assert.equal(retired.version, "v0");
+  assert.equal(retired.cadence, null);
+  assert.equal(retired.history.length, 1);
+  // Not the current release of anything: its preview is not on the shelf.
+  assert.ok(!retired.history[0].changed.some((line) => line.includes("downloads from the shelf")));
+  const feed = buildFeed(releases);
+  const entry = feed.find((item) => item.anchor === "retired-fixture-v0");
+  assert.ok(entry, "the retired permalink no longer resolves");
+  assert.equal(entry.retired, true);
+  assert.equal(entry.name, "Retired Fixture");
+  // Sold collections sort ahead of retired ones on a shared date.
+  const sameDay = buildFeed(buildReleases({ releases: { ...synthetic.releases, "retired-fixture": [{ ...synthetic.releases["retired-fixture"][0], date: first.updated }] } }, [first]));
+  assert.equal(sameDay[0].id, first.id);
+});
+
+// The ledger script refuses anything that is not a ledger, and proves it on
+// planted files: Codex, PR #53, `{}` was accepted and would have been
+// overwritten with the manifest's current releases alone.
+test("the ledger script refuses a file that is not a ledger", () => {
+  const script = new URL("../../../scripts/record-release.mjs", import.meta.url).pathname;
+  const dir = mkdtempSync(join(tmpdir(), "cedar-ledger-"));
+  const run = (contents) => {
+    const path = join(dir, `ledger-${Math.random().toString(36).slice(2)}.json`);
+    if (contents !== null) writeFileSync(path, contents);
+    const result = spawnSync(process.execPath, [script, "--check", `--ledger=${path}`], { encoding: "utf8" });
+    return { status: result.status, stderr: result.stderr, path };
+  };
+  for (const [label, contents] of [
+    ["truncated JSON", "{broken"],
+    ["an empty object", "{}"],
+    ["a null releases map", '{"releases": null}'],
+    ["an array", "[]"],
+    ["releases as a list", '{"releases": []}'],
+    ["an entry that is not a list", '{"releases": {"funding": {"version": "v0"}}}'],
+  ]) {
+    const { status, stderr } = run(contents);
+    assert.equal(status, 1, `${label} was accepted`);
+    assert.match(stderr, /Refusing to rebuild/, label);
+  }
+  // A missing file starts a new ledger, and `--check` then reports it behind.
+  const missing = run(null);
+  assert.equal(missing.status, 1);
+  assert.doesNotMatch(missing.stderr, /Refusing to rebuild/);
+  // The real ledger, copied, is current.
+  const real = readFileSync(new URL("../../../data/cedar/releases.json", import.meta.url), "utf8");
+  const current = run(real);
+  assert.equal(current.status, 0, current.stderr);
 });
 
 // Only the current release's preview is a file on the shelf.
