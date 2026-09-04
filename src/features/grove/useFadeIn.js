@@ -97,6 +97,58 @@ function splitByFold(nodes) {
   return below;
 }
 
+// ============================================================================
+// THE SAFETY NET
+// ============================================================================
+// Everything above depends on a ref being attached to an ancestor of the
+// content. That has now failed twice, in two different ways, and PressHub.jsx
+// renders `cp-fade` with no hook and no ref of its own, relying entirely on
+// its parent to have one.
+//
+// A reveal-on-scroll is a nicety. A blank page is a credibility event. So the
+// two are no longer allowed to share a failure mode: this watchdog runs once
+// per page load, document-wide, and reveals anything still hidden that a
+// reader can actually see. If the plumbing is correct it never does anything,
+// because every visible node already carries `is-in` long before it fires.
+//
+// It deliberately does NOT reveal below-fold content: that would kill the
+// scroll animation everywhere. It only rescues what is on screen and invisible,
+// which is the state that has no legitimate reading.
+const WATCHDOG_MS = 2500;
+let watchdogInstalled = false;
+
+//: Every class that is hidden in CSS and revealed by JavaScript adding
+//: `is-in`. `cp-band` is `PressShelf`'s, which runs its OWN observer rather
+//: than this hook - so a watchdog that knew only about `cp-fade` would have
+//: left the shelf with exactly the failure mode it was written to end. If a
+//: third such class is ever added, it belongs here on the same day.
+const REVEALED_BY_JS = [".cp-fade", ".cp-band"];
+
+function installWatchdog() {
+  if (watchdogInstalled || typeof document === "undefined") return;
+  watchdogInstalled = true;
+  const sweep = () => {
+    const h = window.innerHeight || 0;
+    for (const sel of REVEALED_BY_JS) {
+      for (const n of document.querySelectorAll(`${sel}:not(.is-in)`)) {
+        const { top, bottom } = n.getBoundingClientRect();
+        // On screen right now, and still invisible. Nothing else explains it.
+        if (bottom > 0 && top < h) n.classList.add("is-in", "cp-fade--now");
+      }
+    }
+  };
+  setTimeout(sweep, WATCHDOG_MS);
+  // Route changes render a new page without a reload, so one sweep is not
+  // enough; this app is a single-page router. `popstate` covers back/forward,
+  // and a sweep after every attach covers a push - attaches are cheap and the
+  // sweep is a no-op whenever the plumbing worked.
+  if (typeof window !== "undefined") {
+    window.addEventListener("popstate", () => setTimeout(sweep, WATCHDOG_MS));
+  }
+  return sweep;
+}
+
+
 /**
  * Everything the reveal does, as a plain function over an element.
  *
@@ -107,6 +159,7 @@ function splitByFold(nodes) {
  * Returns a cleanup, and takes ownership of the element until it is called.
  */
 export function attachFadeIn(el) {
+  installWatchdog();
   if (!el) return () => {};
 
   // No IntersectionObserver: reveal everything, now and whenever more arrives.
