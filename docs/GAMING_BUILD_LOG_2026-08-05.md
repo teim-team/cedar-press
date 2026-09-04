@@ -1,7 +1,7 @@
 # Gaming Development & Markets — Phase 1 build log
 
 *Run 2026-08-05. Scripts `code/23a`–`23e`. Console log: `logs/23_gaming_2026-08-05.log`.*
-*Plan: `GAMING_DATASET_PLAN.md`. Phase 1 = the decision index + the directory core.*
+*Plan: `docs/plans/GAMING_DATASET_PLAN.md`. Phase 1 = the decision index + the directory core.*
 
 ---
 
@@ -120,7 +120,7 @@ to dates.
 
 ### New source defect found: the BIA Tribe(s) column is misaligned here too
 
-`STATE_OF_BUILD.md` records that the BIA **compact** index misaligns its `Tribes`
+`docs/handoffs/STATE_OF_BUILD.md` records that the BIA **compact** index misaligns its `Tribes`
 column with its `Title` column on 61 of 1,189 rows. The same check was run on the
 **decisions** index and it fires on **3 of 138 rows (2.2%)**:
 
@@ -336,7 +336,7 @@ The address layer's provenance is overwhelmingly operator marketing websites.
 
 **6. Two BIA source defects are carried, flagged, into this build**: the
 Tribe(s)-column misalignment on the decisions index (3 of 138) and the same
-defect on the compact index (61 of 1,189, per `STATE_OF_BUILD.md`). Neither was
+defect on the compact index (61 of 1,189, per `docs/handoffs/STATE_OF_BUILD.md`). Neither was
 corrected in place; both are flagged with the evidence needed to adjudicate them.
 
 ---

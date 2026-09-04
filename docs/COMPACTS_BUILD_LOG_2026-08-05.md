@@ -1,7 +1,7 @@
 # Compacts dataset — build log, 2026-08-05
 
 Build of the Cedar Press **Tribal-State Gaming Compacts** dataset per
-`COMPACT_DATASET_PLAN.md`. Run log: `logs/15_compacts_2026-08-05.log`.
+`docs/plans/COMPACT_DATASET_PLAN.md`. Run log: `logs/15_compacts_2026-08-05.log`.
 Code: `code/15a_compacts_inventory.py`, `15b_build_compact_index.py`,
 `15c_terms_pilot.py`, `15d_terms_extract.py`, `15e_finalize_terms.py`.
 Sources: `data/raw/external/compacts/` (+ `SOURCE_MANIFEST.md`).

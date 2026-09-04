@@ -7,7 +7,7 @@
 >
 > This file is **twenty days old and has not been touched since 2026-08-06.** It predates
 > the archive backfill, the subaward promotion, the raw-match pass and the spine merges.
-> It is, together with `STATE_OF_THE_LAND_2026-08-07.md`, one of the **two densest
+> It is, together with `docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md`, one of the **two densest
 > concentrations of superseded numbers in the project**.
 >
 > **It is deliberately not rewritten.** Its reasoning is still good and its record of how

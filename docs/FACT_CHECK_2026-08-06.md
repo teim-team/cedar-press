@@ -1,6 +1,6 @@
 # Fact Check — 2026-08-06
 
-*Adversarial recomputation of every quantitative claim in `STATE_OF_BUILD.md`,
+*Adversarial recomputation of every quantitative claim in `docs/handoffs/STATE_OF_BUILD.md`,
 `docs/datasets/*.md`, `docs/COVERAGE_AUDIT.md`, `docs/CROSS_DATASET_LEARNING.md` and
 `docs/codebooks/README.md`, against `data/clean/` and `data/spine/`.*
 
@@ -101,7 +101,7 @@ Tier composition of `prime_contracts.csv` itself:
 *Deobligations are netted with no disclosure.* 59,794 of the 617,142 rows carry a
 **negative** `total_obligations`, totalling **−$4,813,482,633.74**. Gross positive
 obligations are **$211,575,268,969.10**. The published $206.8B is therefore a *net* figure.
-Nothing in `STATE_OF_BUILD.md`, `docs/datasets/02_contracting.md` or the codebook says so. A
+Nothing in `docs/handoffs/STATE_OF_BUILD.md`, `docs/datasets/02_contracting.md` or the codebook says so. A
 subscriber summing awards will not reproduce it.
 
 *`attributed_flag` and `tribe_id` disagree on 5,681 rows.* 285,113 rows carry
@@ -158,7 +158,7 @@ UEI/CAGE to the tier-A identifier set:
 
 Neither is $91,371M.
 
-**Tier split.** `STATE_OF_BUILD.md` line 142 says 1,581 / 4,803 / 12,715 / 133. No file has
+**Tier split.** `docs/handoffs/STATE_OF_BUILD.md` line 142 says 1,581 / 4,803 / 12,715 / 133. No file has
 ever held those numbers:
 
 | File | mtime | A | B | C | X |
@@ -270,7 +270,7 @@ Minutes later the same file held **952 rows** (55 `ITO` intertribal and 31 `NHO`
 by another agent mid-session). `ANVC` was still 179 — the ANCSA count is stable, the entity
 total is not.
 
-`STATE_OF_BUILD.md` says **687** in two places (line 78 of `02_contracting.md` and the Spine
+`docs/handoffs/STATE_OF_BUILD.md` says **687** in two places (line 78 of `02_contracting.md` and the Spine
 status table). That was the NEID backbone count and is now 179–265 entities stale.
 
 ### A-14/A-15 — Deals
@@ -294,7 +294,7 @@ and a root ledger.
 By tier: **A 853 · B 39 · X 8 · none 22.** `STATE_OF_BUILD` also says "604 at tier A" —
 recomputed **853**. Both figures predate `code/57_autoresolve_deal_parties.py`.
 
-**The charting-rule numbers are wrong.** `STATE_OF_BUILD.md` and
+**The charting-rule numbers are wrong.** `docs/handoffs/STATE_OF_BUILD.md` and
 `docs/datasets/01_deals.md` both say *"622 'Grant / public financing' rows against 116
 acquisitions"* and give a federal-award share by year.
 
@@ -324,36 +324,36 @@ the file it is written in.**
 | # | Figure | Stated | Where it is written | Recomputed |
 |---|---|---:|---|---:|
 | B-1 | Deals rows | 790 | `docs/COVERAGE_AUDIT.md` deals row | **922** — the audit globs `deals_*_additions.csv` and never sees the 132 rows in `deals_2026_ytd.csv` + `deals_historical_2020_2025.csv` |
-| B-2 | Lobbying rows | 11,717 | `STATE_OF_BUILD.md` §Where every dataset stands | **27,796** |
+| B-2 | Lobbying rows | 11,717 | `docs/handoffs/STATE_OF_BUILD.md` §Where every dataset stands | **27,796** |
 | B-3 | Lobbying disclosures file | 43,963 | `docs/datasets/04_lobbying.md` Files table | **27,796** |
-| B-4 | Subawards rows | 1,817 | `STATE_OF_BUILD.md` (twice) · `docs/datasets/02b_subcontracting.md` | **998** |
-| B-5 | Federal actions rows | 156,466 | `STATE_OF_BUILD.md` Datasets table · `docs/datasets/09_federal_actions.md` (both files) | **156,452** |
-| B-6 | Native bills rows | 3,047 | `STATE_OF_BUILD.md` · `docs/datasets/10_bills_votes.md` | **3,037** |
-| B-7 | Compact terms | 1,705 | `STATE_OF_BUILD.md` · `docs/datasets/compacts.md` | **1,311** |
-| B-8 | Gaming facilities | 775 | `STATE_OF_BUILD.md` · `docs/datasets/gaming.md` | **774** |
-| B-9 | Dataset 5 entity-year rows | 10,845 | `STATE_OF_BUILD.md` (4 places) | **11,865** |
-| B-10 | Ownership events | 99 | `STATE_OF_BUILD.md` (3 places) | **98** |
-| B-11 | Spine entities | 687 | `STATE_OF_BUILD.md` Spine status · `docs/datasets/02_contracting.md` | **866** at 14:20; **952** later |
-| B-12 | Publishable identifiers | 1,581 | `STATE_OF_BUILD.md` | **1,577** in the file; **1,705** tier A in the ledger |
-| B-13 | Awaiting a ruling | 4,751 | `STATE_OF_BUILD.md` | **4,637** tier B |
-| B-14 | Elijah rulings on file | 164, then 25, then 157 | `STATE_OF_BUILD.md` (two different numbers) · `docs/CROSS_DATASET_LEARNING.md` | `data/spine/cedar_rulings.csv` = **8**; `review/rulings_inbox_*.csv` = **13 files, 335 ruled rows**. No file holds 164, 25 or 157. |
-| B-15 | Elijah deals rulings | 34 parties | `STATE_OF_BUILD.md` Live warnings | **57** rows in `deals_party_attribution.csv` |
-| B-16 | Deals party coverage | 871 of 922 (94.5%), 604 at tier A | `STATE_OF_BUILD.md` | **900 of 922 (97.6%)**, **853 at tier A** |
-| B-17 | Deals: acquisitions | 116 | `STATE_OF_BUILD.md` · `docs/datasets/01_deals.md` | **152** |
+| B-4 | Subawards rows | 1,817 | `docs/handoffs/STATE_OF_BUILD.md` (twice) · `docs/datasets/02b_subcontracting.md` | **998** |
+| B-5 | Federal actions rows | 156,466 | `docs/handoffs/STATE_OF_BUILD.md` Datasets table · `docs/datasets/09_federal_actions.md` (both files) | **156,452** |
+| B-6 | Native bills rows | 3,047 | `docs/handoffs/STATE_OF_BUILD.md` · `docs/datasets/10_bills_votes.md` | **3,037** |
+| B-7 | Compact terms | 1,705 | `docs/handoffs/STATE_OF_BUILD.md` · `docs/datasets/compacts.md` | **1,311** |
+| B-8 | Gaming facilities | 775 | `docs/handoffs/STATE_OF_BUILD.md` · `docs/datasets/gaming.md` | **774** |
+| B-9 | Dataset 5 entity-year rows | 10,845 | `docs/handoffs/STATE_OF_BUILD.md` (4 places) | **11,865** |
+| B-10 | Ownership events | 99 | `docs/handoffs/STATE_OF_BUILD.md` (3 places) | **98** |
+| B-11 | Spine entities | 687 | `docs/handoffs/STATE_OF_BUILD.md` Spine status · `docs/datasets/02_contracting.md` | **866** at 14:20; **952** later |
+| B-12 | Publishable identifiers | 1,581 | `docs/handoffs/STATE_OF_BUILD.md` | **1,577** in the file; **1,705** tier A in the ledger |
+| B-13 | Awaiting a ruling | 4,751 | `docs/handoffs/STATE_OF_BUILD.md` | **4,637** tier B |
+| B-14 | Elijah rulings on file | 164, then 25, then 157 | `docs/handoffs/STATE_OF_BUILD.md` (two different numbers) · `docs/CROSS_DATASET_LEARNING.md` | `data/spine/cedar_rulings.csv` = **8**; `review/rulings_inbox_*.csv` = **13 files, 335 ruled rows**. No file holds 164, 25 or 157. |
+| B-15 | Elijah deals rulings | 34 parties | `docs/handoffs/STATE_OF_BUILD.md` Live warnings | **57** rows in `deals_party_attribution.csv` |
+| B-16 | Deals party coverage | 871 of 922 (94.5%), 604 at tier A | `docs/handoffs/STATE_OF_BUILD.md` | **900 of 922 (97.6%)**, **853 at tier A** |
+| B-17 | Deals: acquisitions | 116 | `docs/handoffs/STATE_OF_BUILD.md` · `docs/datasets/01_deals.md` | **152** |
 | B-18 | Deals: federal-award share 2019/2022/2024/2026 | 85 / 97 / 93 / 35 % | both files | **81.3 / 92.5 / 90.4 / 32.5 %** |
 | B-19 | Codebook: 02_prime_contracting rows | 622,750 | `docs/codebooks/README.md` | **623,174** |
 | B-20 | Codebook: 03_federal_funding rows | 2,748,625 | `docs/codebooks/README.md` | **3,252,168** |
 | B-21 | FPDS edges: distinct children | 1,805 | `docs/datasets/02_contracting.md` | **1,844** |
 | B-22 | FPDS edges: children with >1 parent | 190 | `docs/datasets/02_contracting.md` | **267** |
-| B-23 | FR rulemakings not to be quoted as tribal | 63,248 | `STATE_OF_BUILD.md` · `docs/datasets/09_federal_actions.md` | **63,400** (Rule 39,710 + Proposed Rule 23,690) |
-| B-24 | Nonprofit tier-A revenue aggregate | $2.51B | `STATE_OF_BUILD.md` · `docs/datasets/06_nonprofit.md` | **$218,256,135** latest-year over 419 orgs (**$7.13B** all years). Umatilla Electric and Yavapai Community Hospital are no longer tier A. *The warning is still right — do not quote it — but the number is stale.* |
+| B-23 | FR rulemakings not to be quoted as tribal | 63,248 | `docs/handoffs/STATE_OF_BUILD.md` · `docs/datasets/09_federal_actions.md` | **63,400** (Rule 39,710 + Proposed Rule 23,690) |
+| B-24 | Nonprofit tier-A revenue aggregate | $2.51B | `docs/handoffs/STATE_OF_BUILD.md` · `docs/datasets/06_nonprofit.md` | **$218,256,135** latest-year over 419 orgs (**$7.13B** all years). Umatilla Electric and Yavapai Community Hospital are no longer tier A. *The warning is still right — do not quote it — but the number is stale.* |
 | B-25 | Nonprofit tier-A rows awaiting a ruling | 412 | `docs/datasets/06_nonprofit.md` | **81** with `review_flag` set (739 tier A total) |
-| B-26 | Gaming `open_date_precision` | 152 day / 258 year / 148 month | `STATE_OF_BUILD.md` | **180 day / 279 year / 158 month** (+156 blank, 1 decade) |
+| B-26 | Gaming `open_date_precision` | 152 day / 258 year / 148 month | `docs/handoffs/STATE_OF_BUILD.md` | **180 day / 279 year / 158 month** (+156 blank, 1 decade) |
 | B-27 | Gaming `open_date_class` | exact 576 / absent 138 / bounded 60 | `docs/COVERAGE_AUDIT.md` | **exact 617 / absent 80 / bounded 77** |
-| B-28 | Gaming day-31 / day-15 placeholders | 150 / 148 | `STATE_OF_BUILD.md` | **151 / 155** |
-| B-29 | Gaming `open_date_event = gaming_commenced` | 112 | `STATE_OF_BUILD.md` | **162** |
-| B-30 | Pre-IGRA gaming facilities | 42 | `STATE_OF_BUILD.md` | **51** with `open_date` year < 1988 |
-| B-31 | Funding regression | "PASS **to the cent**" | `STATE_OF_BUILD.md` | passes to **$45.13**; `docs/datasets/03_funding.md` states this correctly |
+| B-28 | Gaming day-31 / day-15 placeholders | 150 / 148 | `docs/handoffs/STATE_OF_BUILD.md` | **151 / 155** |
+| B-29 | Gaming `open_date_event = gaming_commenced` | 112 | `docs/handoffs/STATE_OF_BUILD.md` | **162** |
+| B-30 | Pre-IGRA gaming facilities | 42 | `docs/handoffs/STATE_OF_BUILD.md` | **51** with `open_date` year < 1988 |
+| B-31 | Funding regression | "PASS **to the cent**" | `docs/handoffs/STATE_OF_BUILD.md` | passes to **$45.13**; `docs/datasets/03_funding.md` states this correctly |
 | B-32 | FAADS observed years | 2000–2007 | `docs/COVERAGE_AUDIT.md` | `fiscal_year` is **2001–2007**; FY2000 has zero rows. The 2000 comes from `action_date` 2000-10-01, which is FY2001. |
 | B-33 | Combined assistance series "2000–2023 continuous" | — | `docs/COVERAGE_AUDIT.md` | **2001–2023**, and see C-5: it unions two different populations |
 
@@ -649,7 +649,7 @@ Proposed, in priority order. Each names the defect it would have caught.
 | **11. New pulls must not share keys with the spine** | before promoting a staged pull, `INTERSECT` on the transaction key; non-zero requires an explicit supersede rule | **A-9** — 26 keys |
 | **12. Derived dollar columns must reconcile to source** | assert `prime_dollars_M` per identifier is within 0.5% of `SUM(total_obligations)` in `prime_contracts` for that identifier | **A-4** — fails on 7,790 of 11,809 rows |
 | **13. `attributed_flag` agrees with `tribe_id`** | `SELECT COUNT(*) FROM prime_contracts WHERE (attributed_flag='1') <> (TRIM(COALESCE(tribe_id,''))<>'')` | A-3 — 5,681 rows |
-| **14. Doc figures are regenerated, not typed** | fail the build if any number in `STATE_OF_BUILD.md` differs from the measured value | all 33 of §2.1 |
+| **14. Doc figures are regenerated, not typed** | fail the build if any number in `docs/handoffs/STATE_OF_BUILD.md` differs from the measured value | all 33 of §2.1 |
 
 ---
 
@@ -675,7 +675,7 @@ the last thing that runs, and it is not. `code/00_run_all.py` should regenerate 
 measured docs as a final stage, and the sale package should be cut from a frozen snapshot
 with a recorded hash per file.
 
-### D-2 · `STATE_OF_BUILD.md` contradicts itself
+### D-2 · `docs/handoffs/STATE_OF_BUILD.md` contradicts itself
 
 The same document gives two values for the same quantity in several places:
 

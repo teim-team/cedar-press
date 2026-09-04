@@ -11,7 +11,7 @@ Two entity classes the spine covered worst:
     while only 31 firms across 21 parents were rulings-verified.
   * Intertribal organizations - essentially absent, even though collective
     vehicles (NCAI, NIGA, USET, the IHS-area health boards) do much of Indian
-    Country's lobbying. INFLUENCE_DATASET_PLAN.md calls for an `I-` layer
+    Country's lobbying. docs/plans/INFLUENCE_DATASET_PLAN.md calls for an `I-` layer
     because without it the influence dataset undercounts and misattributes.
 
 THE CORRECTION THAT GOVERNS PART A
@@ -736,7 +736,7 @@ IT = [
      "count as NARF's own lobbying."),
     ("Native Americans in Philanthropy", "NAP", "national", "56-1849598", "", "", "no", "0", "",
      "https://nativephilanthropy.org", "", "https://projects.propublica.org/nonprofits/organizations/561849598",
-     "Named in NONPROFIT_DATASET_PLAN.md as a Net-3 roster-seeding source for dataset 6."),
+     "Named in docs/plans/NONPROFIT_DATASET_PLAN.md as a Net-3 roster-seeding source for dataset 6."),
     ("Intertribal Agriculture Council", "IAC", "national", "36-3886772", "", "", "yes", "8",
      "1999-2003", "https://www.indianag.org", "",
      "https://projects.propublica.org/nonprofits/organizations/363886772", ""),
@@ -791,7 +791,7 @@ IT = [
      "NO EIN AND THAT IS STRUCTURAL, NOT A GAP: CRITFC is an intertribal GOVERNMENTAL fishery agency "
      "created by its four member tribes, not a chartered charity, so absence from the 990 universe is "
      "expected. Same pattern as NWIFC. This is the tribal-instrumentality blind spot "
-     "NONPROFIT_DATASET_PLAN.md caveat 1 describes, showing up in the influence layer."),
+     "docs/plans/NONPROFIT_DATASET_PLAN.md caveat 1 describes, showing up in the influence layer."),
     ("Northwest Indian Fisheries Commission", "NWIFC|Northwest Treaty Tribes", "regional", "",
      "20", "20", "yes", "103", "1999-2006", "https://nwifc.org", "1974",
      "https://nwifc.org/about-us/",
@@ -1171,7 +1171,7 @@ REVIEW_ROWS = [
          issue_type="ein_absent",
          evidence_for=("CRITFC and NWIFC are intertribal GOVERNMENTAL fishery agencies, not chartered "
                        "charities - absence from the 990 universe is structural and expected, exactly "
-                       "the tribal-instrumentality blind spot in NONPROFIT_DATASET_PLAN.md caveat 1. "
+                       "the tribal-instrumentality blind spot in docs/plans/NONPROFIT_DATASET_PLAN.md caveat 1. "
                        "APCG's absence follows the documented 2013 dissolution of AIPC, Inc."),
          evidence_against=("RMTLC's absence is a FETCH FAILURE (ProPublica HTTP 429), not an "
                            "established absence. COLT, NTTA and NTEC returned nothing under multiple "

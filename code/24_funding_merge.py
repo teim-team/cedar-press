@@ -1327,7 +1327,7 @@ def write_md(res, n_spine, verdict, ok_rows, ok_usd, n_panel, n_cand,
       "thin before FY2008, so the gap may prove partly unclosable at source. "
       "Nothing here estimates or backfills it.")
     A("")
-    A("Note the corollary already recorded in `STATE_OF_BUILD.md`: federal "
+    A("Note the corollary already recorded in `docs/handoffs/STATE_OF_BUILD.md`: federal "
       "funding does **not** thin after 2022. That finding was an artifact of "
       "`first_seen_year`. This panel is indexed on "
       "`action_date_fiscal_year` — a true fiscal year — and `first_seen_year` "

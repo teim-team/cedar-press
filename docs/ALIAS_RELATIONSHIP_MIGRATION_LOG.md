@@ -1,7 +1,7 @@
 # Alias table and typed relationships — migration log
 
 Built 2026-08-07 by `code/97_build_aliases_and_relationships.py`.
-Spec: `SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` §5.3 (aliases) and §5.4
+Spec: `docs/plans/SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` §5.3 (aliases) and §5.4
 (relationships). Every number below is recomputed by the script and mirrored in
 `data/clean/_97_summary.json`; none of it is hand-typed (regression rule 10).
 

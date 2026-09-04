@@ -75,7 +75,7 @@ SAM is rate-limited to 10 requests/day without the pending role grant. A day of 
 could be spent retrieving a year the free archive already serves.
 **Correct: the archive reaches FY2007.**
 
-### A3. `STATE_OF_THE_LAND_2026-08-07.md` lists two *reversed* dead ends under "do not re-attempt"
+### A3. `docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md` lists two *reversed* dead ends under "do not re-attempt"
 
 The document has a section headed **"WHAT IS EMPTY ON PURPOSE — do not re-attempt"**,
 described as *"documented ceilings, not unfinished work."* Two of its entries have since
@@ -136,7 +136,7 @@ claim that does not survive a buyer's own check.
 |---:|---|
 | 687 | `docs/datasets/02_contracting.md:7` · `docs/ENTITY_HARVEST_LOG.md:19-21` · `docs/FEDERAL_ACTIONS_BUILD_LOG_2026-08-05.md:103` · `docs/DATASET5_LINKED_FILE_BUILD_LOG.md:194` · `docs/LOBBYING_BUILD_LOG_2026-08-05.md:405,494` |
 | 866 | `docs/COMPETITIVE_POSITION.md` — nine places |
-| 952 | `STATE_OF_BUILD.md:118,175` · `docs/ENTITY_KEY_PROPAGATION_LOG.md:7` · `docs/SUBSET_DATASETS.md:88` · `docs/TCU_CDFI_BUILD_LOG.md:7` |
+| 952 | `docs/handoffs/STATE_OF_BUILD.md:118,175` · `docs/ENTITY_KEY_PROPAGATION_LOG.md:7` · `docs/SUBSET_DATASETS.md:88` · `docs/TCU_CDFI_BUILD_LOG.md:7` |
 | **1,310** | `AGENTS.md:16` · `docs/DATASET_SCAFFOLD.md:14,41,98` · `docs/FAADS_NAME_ATTRIBUTION_LOG.md:98` · `docs/SOURCING_STRATEGY.md:92` · `docs/GAMING_ORDINANCE_BUILD_LOG.md:338` |
 
 **1,310 is correct.** The upgrade path is traceable: `TCU_CDFI_BUILD_LOG.md:36` records
@@ -146,10 +146,10 @@ claim that does not survive a buyer's own check.
 voice. A reader who finds that correction reasonably concludes the question was settled at
 866. Flagged in place 2026-08-26.
 
-### B2. Identifier ledger — `STATE_OF_BUILD.md` asserts both values, fifty lines apart
+### B2. Identifier ledger — `docs/handoffs/STATE_OF_BUILD.md` asserts both values, fifty lines apart
 
-- `STATE_OF_BUILD.md:126-127` — 20,559 links; tiers 1,708 / 5,963 / 12,711 / 177
-- `STATE_OF_BUILD.md:176-177` — 19,232 links; tiers 1,705 / 4,637 / 12,711 / 179
+- `docs/handoffs/STATE_OF_BUILD.md:126-127` — 20,559 links; tiers 1,708 / 5,963 / 12,711 / 177
+- `docs/handoffs/STATE_OF_BUILD.md:176-177` — 19,232 links; tiers 1,705 / 4,637 / 12,711 / 179
 
 Neither table names the file it measured (`_final` vs `_tiered`), which is the whole
 problem. **19,232 is the signature of the unsafe `09_import_rulings.py` rebuild**
@@ -164,7 +164,7 @@ The 19,232 figure also survives in `docs/COMPETITIVE_POSITION.md` (flagged in pl
 |---:|---|---|
 | 998 | `docs/SUBCONTRACTING_BUILD_LOG_2026-08-05.md:118` | the 2023 HigherGov export — now **one of three source datasets inside** the promoted file |
 | 55,035 | `docs/COVERAGE_AUDIT.md:12` | the promotion of 2026-08-06, **before** the 8,513-row raw-match pass |
-| 67,229 | `STATE_OF_BUILD.md:108` | **matches nothing.** Appears in no other document and no file |
+| 67,229 | `docs/handoffs/STATE_OF_BUILD.md:108` | **matches nothing.** Appears in no other document and no file |
 | **63,548** | `docs/SUBAWARD_RAW_MATCH_LOG.md:109,167` · `docs/SUBAWARD_API_PULL_LOG.md:18,207,214` | correct — 55,035 + 8,513 |
 
 Related, and separately corrected in `docs/COMPETITIVE_POSITION.md` today: **345,090 is not
@@ -175,9 +175,9 @@ row count produces a phantom ~317k figure.
 
 ### B4. Lobbying filings — 43,963 vs 27,796
 
-- `STATE_OF_BUILD.md:110` — 43,963
+- `docs/handoffs/STATE_OF_BUILD.md:110` — 43,963
 - `docs/FACT_CHECK_2026-08-06.md:296-297` (B-2, B-3) — recomputed **27,796**; 43,963 wrong
-- `SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md:27` — carries both, guessing *"43,963 may be raw filings"*
+- `docs/plans/SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md:27` — carries both, guessing *"43,963 may be raw filings"*
 
 **27,796 is correct.** The guess is wrong too: the raw pull is **39,448**
 (`LOBBYING_BUILD_LOG_2026-08-05.md:220`). **43,963 matches no lobbying file at any stage.**
@@ -307,7 +307,7 @@ line 218.
 
 ## D. Where the largest concentrations of stale numbers sit
 
-`STATE_OF_BUILD.md` (2026-08-06) and `STATE_OF_THE_LAND_2026-08-07.md` (2026-08-07) have not
+`docs/handoffs/STATE_OF_BUILD.md` (2026-08-06) and `docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md` (2026-08-07) have not
 been touched since they were written and are the two densest concentrations of superseded
 figures in the project. Between them they carry the 19,232 ledger, the 952 spine, the 67,229
 subaward count, the 43,963 lobbying count, and both reversed dead ends. **Banners added

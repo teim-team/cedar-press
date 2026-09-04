@@ -324,7 +324,7 @@ the floor as FY2001.**
    defensible published number. "Assistance to *the Navajo Nation*, FY2001–2007" is not,
    and will not be until Elijah rules on a name-based route.
 
-6. **Add the FY2010 Interior discontinuity to the live warnings** in `STATE_OF_BUILD.md`.
+6. **Add the FY2010 Interior discontinuity to the live warnings** in `docs/handoffs/STATE_OF_BUILD.md`.
    It affects the currently published dataset, independent of any backfill.
 
 ### What needs a ruling from Elijah

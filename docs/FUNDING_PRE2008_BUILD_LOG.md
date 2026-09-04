@@ -311,7 +311,7 @@ others:
    to be **agency-dependent**, sound for Interior/EPA/USDA/DOJ/Education, and requiring the HHS
    FY2007 and HUD FY2007 caveats above?
 4. The FY2010 Interior discontinuity flagged by the prior run still needs adding to the live
-   warnings in `STATE_OF_BUILD.md`. It affects the currently published dataset.
+   warnings in `docs/handoffs/STATE_OF_BUILD.md`. It affects the currently published dataset.
 
 ## 10. Next session
 

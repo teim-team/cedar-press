@@ -1,5 +1,5 @@
 # Cedar Press Dataset 6 — Native Nonprofit & Philanthropic Economy
-*Build plan, fleshed out 2026-07-31. Companion to AGENTS.md and INFLUENCE_DATASET_PLAN.md. Extends the draft proposal with identification methodology, coverage caveats, mechanics, and integration with the existing spine.*
+*Build plan, fleshed out 2026-07-31. Companion to AGENTS.md and docs/plans/INFLUENCE_DATASET_PLAN.md. Extends the draft proposal with identification methodology, coverage caveats, mechanics, and integration with the existing spine.*
 
 ## What this is
 A longitudinal dataset of Native-controlled, tribally affiliated, and Native-serving nonprofit organizations and the philanthropic capital flowing into Indian Country, built from IRS public tax records and linked into the Cedar Press entity graph. Standalone research product plus modeling substrate: it fills the nonprofit sector gap in Lumecon's I-O work and adds EIN — the one identifier the stack currently lacks — to the spine.

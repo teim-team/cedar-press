@@ -381,7 +381,7 @@ were written, looking exactly as authoritative as current ones.
 
 - **`docs/DOC_CONTRADICTIONS_2026-08-26.md` outranks every build log** on any
   number they both state. Check it before quoting a figure.
-- `STATE_OF_BUILD.md` and `STATE_OF_THE_LAND_2026-08-07.md` are the densest
+- `docs/handoffs/STATE_OF_BUILD.md` and `docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md` are the densest
   concentrations of superseded numbers in the project. Their *reasoning* is
   still good.
 - **`NEVER_RUN` is live in `code/cedar_pipeline.py` and is the only authority.**

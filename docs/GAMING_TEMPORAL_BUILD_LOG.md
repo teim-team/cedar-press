@@ -1076,7 +1076,7 @@ STRONG twin** and several newly-dated rows sit opposite an already-dated one.
    recipe. `as_of_date_basis`, `open_date_basis` and `close_date_basis` are not
    recipes — they are the interpretive guidance a subscriber needs in order to
    read the date at all, and the same argument applies to `value_basis`, which
-   `STATE_OF_BUILD.md` tells readers to consult before quoting any dollar figure
+   `docs/handoffs/STATE_OF_BUILD.md` tells readers to consult before quoting any dollar figure
    while the codebook marks it internal. Not changed here; it is a policy call.
    **`open_date_event_basis` makes this acute**: `open_date_event` publishes
    (good) but the string explaining *why the date marks that event* — including

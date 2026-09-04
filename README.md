@@ -71,7 +71,8 @@ It has its own entry points and its own conventions:
 |---|---|
 | Start here | [`START_HERE.md`](START_HERE.md) |
 | Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
-| Where the last session left off | [`docs/handoffs/`](docs/handoffs/) (`NEXT_SESSION.md`, the state-of-build records) |
+| Current state of the datasets | [`docs/DATASET_READINESS.md`](docs/DATASET_READINESS.md) (regenerate: `py -3 code/518_dataset_readiness.py`) and [`docs/TWELVE_DATASET_PLAN.md`](docs/TWELVE_DATASET_PLAN.md) |
+| Past handoffs, kept as records | [`docs/handoffs/`](docs/handoffs/); each carries a banner saying what superseded it |
 | The dataset plans and the v2 spec | [`docs/plans/`](docs/plans/) |
 | Measured map of the collections | [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) |
 | The thirteen built datasets | `dist/customer/` (CSV + codebook + notes) |

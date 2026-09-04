@@ -9004,3 +9004,15 @@ seconds before this was written - by the ruling-application workstream. So even
 a green `62` would not have licensed a rebuild this session: rebuilding `dist/`
 from data another agent is concurrently writing is how this project lost work
 before.
+
+## ROOT TIDY (2026-09-04): the plans, the spec and the handoffs moved under docs/
+
+Every mention above of a root-level `*_DATASET_PLAN.md`,
+`SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md`, `STATE_OF_BUILD.md`,
+`STATE_OF_THE_LAND_2026-08-07.md` or `NEXT_SESSION.md` now resolves under
+`docs/plans/` (the plans and the spec) or `docs/handoffs/` (the records).
+`NEXT_SESSION.md` carries a superseded banner: the current state is
+`docs/DATASET_READINESS.md` and `docs/TWELVE_DATASET_PLAN.md`. The root holds
+the four entry points and the web client's config. `set_sam_key.ps1` is
+`code/set_sam_key.ps1`; the wave-5 xlsx sits in `cedar_source_registry/`.
+Entries above are left as written; this note is the correction.

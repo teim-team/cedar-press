@@ -21,7 +21,7 @@ strictness levels and each level's yield is reported separately:
 
 Non-matches stay blank. The output is a diagnostic table, not an authority.
 
-CAVEAT INHERITED FROM THE COMPACT LAYER: STATE_OF_BUILD.md records that the BIA
+CAVEAT INHERITED FROM THE COMPACT LAYER: docs/handoffs/STATE_OF_BUILD.md records that the BIA
 compact index misaligns its Tribes column with its Title column on 61 of 1,189
 rows (5.1%). compacts.csv carries bia_tribes_column_conflict for those rows; any
 join through a conflicted row is flagged here rather than silently trusted.

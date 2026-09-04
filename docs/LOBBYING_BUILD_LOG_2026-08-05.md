@@ -574,7 +574,7 @@ quietly patched over.
    expenses fall below it, need not report a dollar figure. Small entities are
    systematically under-observed in spend and can be absent from the filing
    record entirely.
-3. **This run is a NAME net only.** `INFLUENCE_DATASET_PLAN.md` calls for three
+3. **This run is a NAME net only.** `docs/plans/INFLUENCE_DATASET_PLAN.md` calls for three
    nets: name, issue-code (Indian/Native American Affairs and gaming), and the
    LD-1 affiliated-organizations field. Only the name net has been pulled. The
    issue-code net is what produces the **counter-lobby layer** — non-Native

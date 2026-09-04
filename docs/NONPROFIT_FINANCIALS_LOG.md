@@ -3,7 +3,7 @@
 Build script: `code/33_nonprofit_financials.py` (one script, `--steps pull,build,report`)
 Run log: `logs/33_nonprofit_financials.log`
 Raw cache: `data/raw/external/propublica_990/` (1,157 JSON files + `_fetch_log.csv` + `_SOURCE_MANIFEST.csv`)
-Plan: `NONPROFIT_DATASET_PLAN.md` · Prior build: `docs/NONPROFIT_BUILD_LOG_2026-08-05.md`
+Plan: `docs/plans/NONPROFIT_DATASET_PLAN.md` · Prior build: `docs/NONPROFIT_BUILD_LOG_2026-08-05.md`
 
 **Source, on every row:** ProPublica Nonprofit Explorer API v2,
 `https://projects.propublica.org/nonprofits/api/v2/organizations/{ein}.json`,
@@ -170,7 +170,7 @@ field exists in the extract. Blank on all rows, `n_employees_basis = not_exposed
 
 ### What this means for the Dataset 4 cross-check
 
-The 990-vs-LDA independent measurement described in `NONPROFIT_DATASET_PLAN.md`
+The 990-vs-LDA independent measurement described in `docs/plans/NONPROFIT_DATASET_PLAN.md`
 **cannot be built from this API.** It is not blocked by coverage or by cost — the
 field simply is not in the SOI extract ProPublica republishes. Schedule C lives
 only in the IRS 990 e-file **XML**.
@@ -186,7 +186,7 @@ Routes tested and their status:
   the live path, and Schedule C (`IRS990ScheduleC`, `TotalLobbyingExpendituresAmt`,
   `LobbyingNontaxableAmt`) is in them. That is a multi-GB staged download, which
   is exactly the "990 XML financial panel" already scheduled as phase 2 in
-  `NONPROFIT_DATASET_PLAN.md` and listed as not-done in the prior build log.
+  `docs/plans/NONPROFIT_DATASET_PLAN.md` and listed as not-done in the prior build log.
 
 Recommendation: keep the lobbying cross-check on the phase-2 XML ticket and do
 not re-attempt it through the API. `np_financials.csv` already carries the

@@ -7,7 +7,7 @@ Source
 ------
 Federal Register API v1, https://www.federalregister.gov/api/v1/documents.json
 Free, no key, GET-based. Coverage begins 1994 (the API floor named in
-FEDERAL_ACTIONS_DATASET_PLAN.md caveat 1).
+docs/plans/FEDERAL_ACTIONS_DATASET_PLAN.md caveat 1).
 
 Two nets, both recorded per document
 ------------------------------------
