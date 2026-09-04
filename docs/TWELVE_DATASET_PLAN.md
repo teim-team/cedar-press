@@ -25,7 +25,8 @@
 
 *Written 2026-09-01. Every number here was measured from live data today, not
 recalled. Companion to `docs/DATASET_READINESS.md` (the scoreboard) and
-`docs/handoffs/NEXT_SESSION.md` (the immediate queue).*
+`docs/datasets/_PUNCHLIST.md` (the immediate queue; `docs/handoffs/NEXT_SESSION.md`
+held it until 2026-09-01 and is kept as a record).*
 
 This answers four questions the owner asked in one sitting, because they turn
 out to be the same question asked from four sides:
