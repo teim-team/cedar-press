@@ -42,6 +42,13 @@
  * overlays the ledger entry for its version and can only describe a version
  * the ledger holds; a test holds that too.
  *
+ * A RETIRED COLLECTION STAYS CITABLE
+ * A collection the storefront stops selling keeps its releases in the ledger,
+ * and they stay in the feed as read-only history: `#<id>-v0` still resolves,
+ * because a citation that named it does not expire with the shelf (Codex, PR
+ * #53). Such a record carries `retired: true`, no cadence and no shelf
+ * download, and the overview's "recently updated" rail leaves it out.
+ *
  * TWO KINDS OF RELEASE
  * A data update adds records, corrects them, or extends coverage. A
  * methodology update changes inclusion rules, classification or resolution
@@ -119,45 +126,57 @@ export const DECLARED_CADENCE = Object.freeze({
 export const RELEASE_NOTES = Object.freeze({});
 
 /** The ledger's entries for a collection, oldest first, as recorded. */
-export function ledgerFor(id) {
-  return ledger.releases[id] ?? [];
+export function ledgerFor(id, source = ledger) {
+  return source.releases[id] ?? [];
 }
 
-/** What a recorded release shipped, said for a reader, from its facts alone. */
-function describe(record, isFirst) {
+/**
+ * What a recorded release shipped, said for a reader, from its facts alone.
+ *
+ * Only the CURRENT release's preview "downloads from the shelf". The importer
+ * writes each sample to one unversioned path and the shelf serves whatever is
+ * there, so an older release's preview is a fact about what shipped then, not
+ * a file a reader can still take (Codex, PR #52).
+ */
+function describe(record, { isFirst, isCurrent }) {
   const lead = isFirst ? "First release on Cedar Press" : "Release";
   const tables = record.tables
     ? `${record.tables} ${record.tables === 1 ? "table" : "tables"}, ${record.rowsLabel}`
     : record.rowsLabel;
   const changed = [`${lead}: ${tables}.`];
   if (record.preview) {
+    const preview = `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table`;
     changed.push(
-      `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table, downloads from the shelf.`,
+      isCurrent
+        ? `${preview}, downloads from the shelf.`
+        : `${preview}, was published with this release; the shelf now serves the current release's preview.`,
     );
   } else {
     changed.push(
       "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
     );
   }
-  if (record.blockers) {
+  const blockers = Array.isArray(record.blockers) ? record.blockers.length : 0;
+  if (blockers) {
     changed.push(
-      `Readiness is blocked, with ${record.blockers} named ${record.blockers === 1 ? "blocker" : "blockers"} recorded in the manifest.`,
+      `Readiness is blocked, with ${blockers} named ${blockers === 1 ? "blocker" : "blockers"} recorded in the manifest.`,
     );
   }
   return changed;
 }
 
 /** One collection's history, newest first: the ledger, with notes overlaid. */
-function historyOf(id) {
+function historyOf(id, currentVersion, source) {
   const notes = RELEASE_NOTES[id] ?? {};
-  return ledgerFor(id).map((record, index) => {
+  return ledgerFor(id, source).map((record, index) => {
     const note = notes[record.version];
+    const standing = { isFirst: index === 0, isCurrent: record.version === currentVersion };
     return Object.freeze({
       version: record.version,
       date: record.date,
       kind: note?.kind ?? RELEASE_KIND.DATA,
       ...(note?.note ? { note: note.note } : {}),
-      changed: Object.freeze(note?.changed ?? describe(record, index === 0)),
+      changed: Object.freeze(note?.changed ?? describe(record, standing)),
     });
   }).reverse();
 }
@@ -165,22 +184,43 @@ function historyOf(id) {
 /**
  * Per collection: where it is now, and how it got here.
  *
- * `version` and `updated` are the descriptor's. `history` is the ledger's,
- * newest first, with editorial notes overlaid where they exist.
+ * For a collection the storefront sells, `version` and `updated` are the
+ * descriptor's and `history` is the ledger's, newest first, with editorial
+ * notes overlaid where they exist. For a collection the ledger holds and the
+ * storefront no longer sells, the record is read-only history: its last
+ * recorded release, `retired: true`, no cadence.
+ *
+ * A pure function of its inputs, so a test can hand it a synthetic ledger.
  */
-export const PRESS_RELEASES = Object.freeze(
-  Object.fromEntries(
-    LAUNCH_COLLECTION.map((dataset) => [
-      dataset.id,
-      Object.freeze({
-        version: dataset.version,
-        updated: dataset.updated,
-        cadence: DECLARED_CADENCE[dataset.id] ?? null,
-        history: Object.freeze(historyOf(dataset.id)),
-      }),
-    ]),
-  ),
-);
+export function buildReleases(source, launch) {
+  const sold = new Map(launch.map((dataset) => [dataset.id, dataset]));
+  const releases = {};
+  for (const dataset of launch) {
+    releases[dataset.id] = Object.freeze({
+      name: dataset.name,
+      version: dataset.version,
+      updated: dataset.updated,
+      cadence: DECLARED_CADENCE[dataset.id] ?? null,
+      retired: false,
+      history: Object.freeze(historyOf(dataset.id, dataset.version, source)),
+    });
+  }
+  for (const [id, records] of Object.entries(source.releases)) {
+    if (sold.has(id) || !records.length) continue;
+    const last = records[records.length - 1];
+    releases[id] = Object.freeze({
+      name: last.name ?? id,
+      version: last.version,
+      updated: last.date,
+      cadence: null,
+      retired: true,
+      history: Object.freeze(historyOf(id, null, source)),
+    });
+  }
+  return Object.freeze(releases);
+}
+
+export const PRESS_RELEASES = buildReleases(ledger, LAUNCH_COLLECTION);
 
 /** The release record for a collection, or null when it has none. */
 export function releaseFor(id) {
@@ -221,8 +261,10 @@ export function anchorOf(entry) {
   return `${entry.id}-${entry.version.replace(/\./g, "-")}`;
 }
 
-/** Catalog order, for tie-breaking releases that landed on one day. */
+/** Catalog order, for tie-breaking releases that landed on one day. A
+ *  retired collection sorts after every sold one. */
 const ORDER = new Map(LAUNCH_COLLECTION.map((dataset, index) => [dataset.id, index]));
+const orderOf = (id) => ORDER.get(id) ?? ORDER.size;
 
 /**
  * Every release from every collection, newest first, flattened for the feed.
@@ -234,21 +276,25 @@ const ORDER = new Map(LAUNCH_COLLECTION.map((dataset, index) => [dataset.id, ind
  * lowercased text the search matches against, so the page filters and never
  * derives.
  */
-export const RELEASE_FEED = Object.freeze(
-  Object.entries(PRESS_RELEASES)
-    .flatMap(([id, release]) =>
-      release.history.map((entry) => {
-        const name = PRESS_CATALOG_BY_ID[id]?.name ?? id;
-        const row = { id, name, ...entry };
-        return Object.freeze({
-          ...row,
-          anchor: anchorOf(row),
-          haystack: [name, entry.version, entry.note ?? "", ...entry.changed].join(" ").toLowerCase(),
-        });
-      }),
-    )
-    .sort((a, b) => (a.date === b.date ? ORDER.get(a.id) - ORDER.get(b.id) : a.date < b.date ? 1 : -1)),
-);
+export function buildFeed(releases) {
+  return Object.freeze(
+    Object.entries(releases)
+      .flatMap(([id, release]) =>
+        release.history.map((entry) => {
+          const name = PRESS_CATALOG_BY_ID[id]?.name ?? release.name ?? id;
+          const row = { id, name, retired: release.retired, ...entry };
+          return Object.freeze({
+            ...row,
+            anchor: anchorOf(row),
+            haystack: [name, entry.version, entry.note ?? "", ...entry.changed].join(" ").toLowerCase(),
+          });
+        }),
+      )
+      .sort((a, b) => (a.date === b.date ? orderOf(a.id) - orderOf(b.id) : a.date < b.date ? 1 : -1)),
+  );
+}
+
+export const RELEASE_FEED = buildFeed(PRESS_RELEASES);
 
 /**
  * The feed's activity over a trailing window: how many releases landed, how
@@ -278,7 +324,8 @@ export function recentActivity(days = 30, today = new Date()) {
  */
 export function recentlyUpdated(limit = 3) {
   return Object.entries(PRESS_RELEASES)
+    .filter(([, release]) => !release.retired)
     .map(([id, release]) => ({ id, ...release }))
-    .sort((a, b) => (a.updated === b.updated ? ORDER.get(a.id) - ORDER.get(b.id) : a.updated < b.updated ? 1 : -1))
+    .sort((a, b) => (a.updated === b.updated ? orderOf(a.id) - orderOf(b.id) : a.updated < b.updated ? 1 : -1))
     .slice(0, limit);
 }

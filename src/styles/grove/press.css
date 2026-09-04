@@ -1929,6 +1929,8 @@
  * question already phrased. Same underlined voice as the shelf's Ask Cedar. */
 .teim-rd .cp-feed__acts { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.7rem 0 0; }
 .teim-rd .cp-feed__act { display: inline-block; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+/* A retired collection's entry has nowhere to walk to; the line says so, unlinked. */
+.teim-rd .cp-feed__act--still { color: var(--muted); text-decoration: none; border-bottom: 0; cursor: default; }
 .teim-rd .cp-feed__act:hover { color: var(--ink); }
 @media (max-width: 720px) { .teim-rd .cp-feed__item { grid-template-columns: 1fr; gap: 0.3rem; } }
 /* A page at a time. The feed only grows on request, so the page has a bottom

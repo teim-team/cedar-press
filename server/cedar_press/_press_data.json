@@ -529,9 +529,11 @@
   ],
   "releases": {
     "funding": {
+      "name": "Federal Funding to Indian Country",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated monthly",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -545,9 +547,11 @@
       ]
     },
     "federal-register": {
+      "name": "Federal Register — Indian Affairs",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated as records arrive",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -561,9 +565,11 @@
       ]
     },
     "legislation": {
+      "name": "Native Legislation and Votes",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated monthly",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -577,9 +583,11 @@
       ]
     },
     "deals": {
+      "name": "Indian Country Deals",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated continuously",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -593,9 +601,11 @@
       ]
     },
     "nagpra": {
+      "name": "NAGPRA Notices",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated as records arrive",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -609,9 +619,11 @@
       ]
     },
     "lobbying": {
+      "name": "Tribal Advocacy and Lobbying",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated quarterly",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -625,9 +637,11 @@
       ]
     },
     "contractors": {
+      "name": "Native Federal Contractors",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated monthly",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -641,9 +655,11 @@
       ]
     },
     "subcontracting": {
+      "name": "Native Federal Subcontracting",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated monthly",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -657,9 +673,11 @@
       ]
     },
     "owned": {
+      "name": "Native-Owned Businesses",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated as records arrive",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -674,9 +692,11 @@
       ]
     },
     "nest": {
+      "name": "NEST: Native Enterprise Structures and Ties",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated as records arrive",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -690,9 +710,11 @@
       ]
     },
     "natural-resources": {
+      "name": "Tribal Natural Resource Revenue",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated quarterly",
+      "retired": false,
       "history": [
         {
           "version": "v0",
@@ -706,9 +728,11 @@
       ]
     },
     "nonprofits": {
+      "name": "Native Nonprofits",
       "version": "v0",
       "updated": "2026-09-02",
       "cadence": "Updated annually",
+      "retired": false,
       "history": [
         {
           "version": "v0",
