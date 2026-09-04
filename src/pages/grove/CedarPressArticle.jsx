@@ -11,7 +11,7 @@
 //
 // It carries a rail, so it carries sponsorship that sits beside the text
 // instead of interrupting it. It is also the only surface where an advertiser
-// can buy a subject: federal contracting and gaming are different buyers, and
+// can buy a subject: federal contracting and natural resources are different buyers, and
 // the article names its own collections.
 //
 // It ends on the data. Every piece declares the collections behind it, and

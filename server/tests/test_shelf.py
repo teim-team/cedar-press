@@ -127,9 +127,15 @@ class TestItRendersTheRealCollectionData(unittest.TestCase):
         # picking up a plausible-looking number from nowhere.
         stated = {str(dataset.updated)[:4] for dataset in launch.LAUNCH_COLLECTION}
         for entry in press_catalog.CATALOG:
+            # The retired pair must stay retired: a page reading them prints
+            # nothing, which is what this module did for two days.
             for field in ("standardFrom", "historyFrom"):
-                if entry.get(field) is not None:
-                    stated.add(str(entry[field]))
+                self.assertIsNone(entry.get(field), f"{entry['id']} carries {field}")
+            coverage = entry.get("coverage") or {}
+            if coverage.get("from") is not None:
+                stated.add(str(coverage["from"]))
+            if coverage.get("captured"):
+                stated.add(str(coverage["captured"])[:4])
         for release in press_catalog.RELEASES.values():
             if release.get("updated"):
                 stated.add(str(release["updated"])[:4])
@@ -389,8 +395,9 @@ class TestUnsupportedTiersReachNothing(unittest.TestCase):
         This half covers the SERVER-rendered shelf, and it covers only what
         that page can render: ``view_for`` fills its bands from
         ``LAUNCH_COLLECTION``, the twelve storefront collections. The browser
-        renders from ``PRESS_CATALOG``, which is thirteen, and it broke this
-        invariant on the entry the two do not share -- Codex, PR #41. The
+        renders from ``PRESS_CATALOG``, which was thirteen until 2026-09-04,
+        and it broke this invariant on the entry the two did not share --
+        Codex, PR #41. The
         client's half is
         ``test_access.py::TestNothingTheClientOpensIsRefused``, which runs
         ``canOpenDataset`` through ``scripts/dump-access.mjs`` and holds both
@@ -409,3 +416,44 @@ class TestUnsupportedTiersReachNothing(unittest.TestCase):
                             repository.may_open(tier, entry.id),
                             f"the shelf shows {entry.id} open to {tier!r} and "
                             f"the download route refuses it")
+
+
+class TestTheShelfStatesCoverage(unittest.TestCase):
+    """The badges and the bands read the catalog's live coverage field.
+
+    ``shelf.py`` read ``standardFrom`` and ``historyFrom`` until 2026-09-04,
+    a pair the catalog retired on 2026-09-02, so every badge said "Coverage
+    varies" and no band stated a year, and the only test on the subject
+    checked that the retired names were absent from the catalog. These check
+    what the page says.
+    """
+
+    def test_every_series_badge_states_its_first_year(self) -> None:
+        view = shelf.view_for("press_pro")
+        by_id = {entry["id"]: entry for entry in press_catalog.CATALOG}
+        for band in view.bands:
+            for entry in band.entries:
+                coverage = by_id[entry.id]["coverage"]
+                with self.subTest(dataset=entry.id):
+                    if coverage["kind"] == "series":
+                        self.assertEqual(entry.coverage, f"{coverage['from']} to present")
+                    else:
+                        self.assertEqual(
+                            entry.coverage, f"Current roster, captured {coverage['captured']}"
+                        )
+                    self.assertNotEqual(entry.coverage, "Coverage varies")
+
+    def test_each_storefront_band_reaches_back_to_its_deepest_series(self) -> None:
+        view = shelf.view_for("press_pro")
+        by_id = {entry["id"]: entry for entry in press_catalog.CATALOG}
+        for band in view.bands:
+            years = [
+                by_id[entry.id]["coverage"]["from"]
+                for entry in band.entries
+                if by_id[entry.id]["coverage"]["kind"] == "series"
+            ]
+            with self.subTest(shelf=band.shelf):
+                self.assertEqual(band.earliest, min(years) if years else None)
+        # A roster's capture year never becomes a band's earliest year.
+        pro = next(band for band in view.bands if band.shelf == "pro")
+        self.assertNotEqual(pro.earliest, 2026)

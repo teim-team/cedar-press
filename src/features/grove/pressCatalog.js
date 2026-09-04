@@ -14,12 +14,18 @@
  *
  * The Press/Grove content split is stated in one vocabulary, the Cedar data
  * workspace's: shelves `standard` and `pro` are what a Cedar Press customer
- * sees (`CUSTOMER_SHELVES` in `code/cedar_publication.py`), and shelf `grove`
- * is a Cedar collection Grove carries and Press does not. That is exactly one
- * collection today, Gaming Intelligence, so the catalog holds thirteen and the
- * storefront twelve. `server/tests/test_access.py` compares this file's shelf
- * assignment against the workspace's, so the site cannot move a collection
- * across the boundary on its own authority.
+ * sees (`STOREFRONT_SHELVES` in `code/cedar_publication.py`), and shelf
+ * `grove` is where a collection Grove carries and Press does not would sit.
+ * Nothing sits there today. Gaming Intelligence did, shown on the shelf as a
+ * Grove-exclusive preview, and the owner withdrew that promise on 2026-09-04
+ * because the collection is still being built: a preview of work in progress
+ * is a promise about a cadence and a scope nobody has measured. The
+ * workspace still lists it in the manifest's `excluded`, with its reason, and
+ * it comes back to this catalog when the workspace rules it ready. So the
+ * catalog is exactly the storefront, twelve collections, and
+ * `server/tests/test_access.py` compares this file's shelf assignment against
+ * the workspace's so the site cannot move a collection across the boundary
+ * on its own authority.
  *
  * The organizing idea is that value is not spread evenly. Each rung carries
  * one or two things that make a particular reader say "obviously I need that
@@ -28,7 +34,7 @@
  *
  *   Cedar Press   what happened          lobbying, and a lot of current intelligence
  *   Cedar Press+  what drives it         federal contracting, and the specialized record
- *   Cedar Grove   the whole environment  gaming intelligence, and the research tools
+ *   Cedar Grove   the whole environment  every collection, and the research tools
  *
  * THE BASE TIER IS THE PRODUCT
  * It is named "Cedar Press", not "Cedar Press Standard", because a tier called
@@ -58,17 +64,54 @@
  * would be a promise about a cadence it does not have. It lives in the entity
  * and history layer instead, where the rest of the catalog reads it.
  *
- * THE CATALOG IS NOT THE PILOT
- * This is the architecture: every collection the ladder is designed around,
- * including ones with no data yet. `collection.js` holds the three that ship
- * in the pilot with real figures. A test pins that every shipping dataset
- * appears here, so the two cannot drift.
+ * THE CATALOG IS THE STOREFRONT
+ * Every collection the ladder is designed around, and every one of them ships:
+ * `collection.js` reads the same twelve out of the manifest, with the measured
+ * descriptor behind each. A test pins the two sets equal in both directions,
+ * so a collection cannot be sold here without a descriptor, or measured there
+ * without a place on a shelf.
+ *
+ * THE NUMBERS IN THE TIER COPY ARE DERIVED
+ * "Six collections" and "twelve collections" used to be typed into the
+ * promise. A count typed beside the list it counts is a second place for the
+ * list to be wrong, so the tier copy that states a number reads it from the
+ * catalog through `shelfCount`, and the tests hold the words to the counts.
  */
 
-export const PRESS_TIERS = Object.freeze([
+/** The shelves a Cedar Press subscription can reach, in the workspace's own
+ *  vocabulary (`STOREFRONT_SHELVES` in `code/cedar_publication.py`). A
+ *  collection on any other shelf is not sold here, whatever the plan. */
+export const STOREFRONT_SHELVES = Object.freeze(["standard", "pro"]);
+
+/** Whether a catalog entry is one the storefront sells. */
+export function isOnStorefront(entry) {
+  return STOREFRONT_SHELVES.includes(entry?.shelf);
+}
+
+/** Small counts as words, the way the tier copy spells them. */
+const COUNT_WORDS = Object.freeze([
+  "no", "one", "two", "three", "four", "five", "six",
+  "seven", "eight", "nine", "ten", "eleven", "twelve",
+]);
+export function spellCount(n) {
+  return COUNT_WORDS[n] ?? String(n);
+}
+
+/** Capitalised, for the head of a sentence. */
+const capitalise = (word) => word[0].toUpperCase() + word.slice(1);
+
+/**
+ * The tiers are declared first and the catalog after them, so the counts the
+ * tier copy states are computed once the catalog exists (`PRESS_TIERS`, at
+ * the foot of this file). `storefront` says whether the tier is a rung of
+ * this product: Cedar Grove is not, it is a different product the shelf
+ * points at, which is why the shelf page never renders it as a band.
+ */
+const TIER_DECLARATIONS = Object.freeze([
   Object.freeze({
     id: "press",
     shelf: "standard",
+    storefront: true,
     name: "Cedar Press",
     price: 500,
     question: "See what's happening.",
@@ -77,26 +120,30 @@ export const PRESS_TIERS = Object.freeze([
     // No year in this note any more. Each collection reaches back a different
     // distance and every one of those distances is measured and stated on the
     // collection itself, so a single sentence here could only be wrong.
-    coverageNote: "Six collections, every year Cedar holds of each.",
+    coverageNote: (count) => `${capitalise(spellCount(count))} collections, every year Cedar holds of each.`,
   }),
   Object.freeze({
     id: "press_pro",
     shelf: "pro",
+    storefront: true,
     name: "Cedar Press+",
     price: 1000,
     question: "Understand the systems behind it.",
     // The whole tier, said here rather than left to the question. "Systems"
     // says nothing about which collections arrive, and which collections
     // arrive is now the entire difference between this tier and the one
-    // below. All six pro-shelf collections are named: a promise that omits
-    // one undersells the tier, and there is no second axis left to carry it.
-    promise:
-      "Six more collections on top of Cedar Press: federal contracting, subcontracting, resource revenue, individually owned Native businesses, enterprise structures and the nonprofit sector.",
-    coverageNote: "Twelve collections, at the same depth as Cedar Press.",
+    // below. Every pro-shelf collection is named: a promise that omits one
+    // undersells the tier, and there is no second axis left to carry it. The
+    // count is derived and a test holds the names to the shelf.
+    promise: (count) =>
+      `${capitalise(spellCount(count))} more collections on top of Cedar Press: federal contracting, subcontracting, resource revenue, individually owned Native businesses, enterprise structures and the nonprofit sector.`,
+    coverageNote: (count, total) =>
+      `${capitalise(spellCount(total))} collections, at the same depth as Cedar Press.`,
   }),
   Object.freeze({
     id: "grove",
     shelf: "grove",
+    storefront: false,
     name: "Cedar Grove",
     price: 2500,
     question: "Investigate it yourself.",
@@ -142,8 +189,6 @@ export const PRESS_TIERS = Object.freeze([
  *   subcontracting  min 2001, coverage 2010. The 51 pre-2010 rows are filer
  *                   typos flagged `action_date_precedes_ffata_flag`; FFATA's
  *                   reporting threshold makes 2010 a statutory floor.
- *   gaming          min 1905, coverage 1979. 1905 is a lodge, flagged
- *                   `open_date_event = not_gaming_commencement`.
  *
  * Where a dataset documents an exclusion flag, the floor is measured AFTER
  * applying it and the comment names the flag, so the next person can re-run
@@ -350,49 +395,6 @@ export const PRESS_CATALOG = Object.freeze([
     linkage:
       "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
   }),
-  Object.freeze({
-    id: "gaming",
-    short: "Gaming",
-    name: "Gaming Intelligence",
-    shelf: "grove",
-    // Series. Floor: min(open_date) in dist/customer/gaming.csv AFTER excluding
-    // open_date_predates_tribal_gaming_era = 1.
-    //
-    // The unfiltered minimum is 1905, and it is Crosby Lodge, whose
-    // open_date_event is not_gaming_commencement: the row dates a lodge, not
-    // gaming. Three more rows carry the era flag and each one's basis says the
-    // same thing — the date "precedes 1979, the first documented year of
-    // high-stakes" tribal gaming. The filter is deliberately this flag and not
-    // the year 1988: the 50 pre-IGRA facilities are mostly the high-stakes
-    // bingo halls whose litigation produced IGRA, and dropping them would
-    // understate the record as badly as 1905 overstates it
-    // (docs/datasets/gaming.md).
-    coverage: Object.freeze({ kind: "series", from: 1979 }),
-    blurb:
-      "Facilities, ownership and affiliation over time, declination letters, environmental reviews, expansions, employment estimates and transaction history, cross-validated against Deals.",
-    // A Grove-exclusive collection is shown on Cedar Press rather than hidden,
-    // because the point of it is to be a reason to cross a line. What a reader
-    // may see without Grove is listed rather than left to a component to
-    // decide, so the boundary is reviewable in one place.
-    preview: Object.freeze({
-      shows: Object.freeze([
-        "What it contains",
-        "Historical coverage",
-        "Selected aggregate findings",
-        "Related Cedar Press research briefs",
-        "A methodology summary",
-      ]),
-      withholds: Object.freeze([
-        "Record-level exploration",
-        "Downloads",
-        "Entity filters",
-        "Full historical records",
-        "Advanced queries",
-      ]),
-    }),
-    linkage:
-      "Facilities matched to their operators and their owners. This is the one collection where the counterparties are not all Native: management companies and outside operators are resolved and labeled as such.",
-  }),
 ]);
 
 /**
@@ -428,7 +430,13 @@ export const PRESS_TAXONOMY = Object.freeze([
     id: "industries",
     name: "Industries and Resources",
     lede: "The sectors that carry the most economic weight.",
-    collections: Object.freeze(["natural-resources", "gaming"]),
+    collections: Object.freeze(["natural-resources"]),
+  }),
+  Object.freeze({
+    id: "enterprises",
+    name: "Enterprises and Ownership",
+    lede: "Who owns what across Indian Country, and how that changes.",
+    collections: Object.freeze(["owned", "nest"]),
   }),
   Object.freeze({
     id: "institutions",
@@ -466,7 +474,7 @@ export const NATIVE_LINKAGE = Object.freeze({
   // duller one it can.
   claim: "Every record gets the right context.",
   // The door-sized version, for the gate's collection-name strip: the one
-  // sentence that keeps eleven federal-sounding names from reading as
+  // sentence that keeps twelve federal-sounding names from reading as
   // keyword filters over open data. Same discipline as `claim`: connected
   // to the Native entities each record touches, never "every record is
   // Native", which the counterparties would break.
@@ -570,11 +578,11 @@ function earliestOnShelf(shelf) {
  * The shelves below, as one badge each.
  *
  * Cedar Press+ does not redraw the Cedar Press collections to say it
- * includes them, and Grove should not redraw eleven. Listing every collection
+ * includes them, and Grove should not redraw twelve. Listing every collection
  * on the top tier made it the busiest band on the page, which reads as
  * clutter rather than as abundance.
  *
- * The years are derived, not typed. They used to be literals — 1978 on the
+ * The years and the counts are derived, not typed. They used to be literals — 1978 on the
  * standard rollup and 2000 on the pro one — and neither was the earliest year
  * of anything: no collection on either shelf began in 1978. A summary of
  * numbers stated elsewhere has to be computed from them or it is a fourth
@@ -599,7 +607,7 @@ export const GROVE_INCLUDES = Object.freeze([
     name: "Everything in Cedar Press+",
     kind: "rollup",
     shelf: "pro",
-    blurb: "The six specialized collections Cedar Press does not carry.",
+    blurb: `The ${spellCount(collectionsOnShelf("pro").length)} specialized collections Cedar Press does not carry.`,
     linkage:
       "Contracting, subcontracting, resources, individually owned Native businesses, enterprise structures and nonprofits: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
   }),
@@ -613,7 +621,7 @@ export const GROVE_INCLUDES = Object.freeze([
  * What Cedar Grove does, rather than what it contains.
  *
  * The contents argument is weak on its own, because a reader who has just
- * been shown eleven collections already believes there is a lot of data. What
+ * been shown twelve collections already believes there is a lot of data. What
  * they cannot see from the shelf is that Grove analyses across all of it,
  * finds things nobody went looking for, opens to a whole organization at
  * once, and keeps growing as Lumecon builds. Every line here is a capability
@@ -631,24 +639,40 @@ export const GROVE_CAPABILITIES = Object.freeze([
   "Extraction and reproducible outputs, so a number can be checked and cited",
 ]);
 
-/**
- * Which collections lead their shelf.
- *
- * A grid of equally weighted objects has no hierarchy, and hierarchy is what
- * separates an intelligence product from a directory. These are the entries
- * that get room and a real preview; the rest of the shelf runs compact
- * beneath them. Only collections with an actual figure appear here: a
- * featured slot filled with a decorative chart is exactly the fake dashboard
- * this page is trying not to be.
- */
-export const FEATURED = Object.freeze({
-  standard: Object.freeze(["funding", "deals"]),
-  pro: Object.freeze(["contractors"]),
-  grove: Object.freeze(["gaming"]),
-});
-
 /** The collections a tier's shelf carries, in catalog order. */
 export function collectionsOnShelf(shelf) {
   return PRESS_CATALOG.filter((entry) => entry.shelf === shelf);
 }
+
+/**
+ * How many collections a tier opens: its own shelf plus every shelf below it
+ * on the storefront. Cedar Grove reaches everything the storefront sells.
+ */
+export function shelfCount(shelf) {
+  const reach = STOREFRONT_SHELVES.indexOf(shelf);
+  const reached = reach < 0 ? STOREFRONT_SHELVES : STOREFRONT_SHELVES.slice(0, reach + 1);
+  return PRESS_CATALOG.filter((entry) => reached.includes(entry.shelf)).length;
+}
+
+/** The catalog's storefront entries, which today is all of it. */
+export const STOREFRONT_CATALOG = Object.freeze(PRESS_CATALOG.filter(isOnStorefront));
+
+/**
+ * The tiers with their counts filled in. Copy that states a number is a
+ * function of the count in `TIER_DECLARATIONS`; it is resolved here, once,
+ * so every page reads a finished string and no page can print a number the
+ * catalog does not add up to.
+ */
+export const PRESS_TIERS = Object.freeze(
+  TIER_DECLARATIONS.map((tier) => {
+    const own = collectionsOnShelf(tier.shelf).length;
+    const total = shelfCount(tier.shelf);
+    const resolve = (value) => (typeof value === "function" ? value(own, total) : value);
+    return Object.freeze({
+      ...tier,
+      promise: resolve(tier.promise),
+      coverageNote: resolve(tier.coverageNote),
+    });
+  }),
+);
 

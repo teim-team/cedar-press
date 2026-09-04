@@ -34,9 +34,10 @@ import "../../index.css";
 import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
 
-import { PRESS_CATALOG, PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
+import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import {
   PRESS_RELEASES,
+  RELEASE_FEED,
   RELEASE_KIND,
   formatUpdated,
   recentActivity,
@@ -53,17 +54,8 @@ import { PressCedarFab } from "./PressCedarFab";
 /** One screen's worth. More arrives a page at a time, on request. */
 const PAGE = 8;
 
-/** Every release from every collection, flattened and sorted by date. */
-function buildFeed() {
-  return Object.entries(PRESS_RELEASES)
-    .flatMap(([id, release]) => release.history.map((entry) => ({ id, ...entry })))
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
-}
-
-/** The release's stable anchor: cite `#funding-v4-2` and it stays citable. */
-function anchorOf(entry) {
-  return `${entry.id}-${entry.version.replace(/\./g, "-")}`;
-}
+/** Whether the address names a release in the feed. */
+const linkedAnchor = (hash) => Boolean(hash) && RELEASE_FEED.some((entry) => entry.anchor === hash);
 
 export default function CedarPressWhatsNew() {
   // The masthead carries the reader's profile and Sign out. These two pages
@@ -79,7 +71,9 @@ export default function CedarPressWhatsNew() {
   // Sitewide arrival language; the sticky filter stays out of it, since a
   // transform mid-arrival would fight its pinning.
   const fadeRoot = useFadeIn();
-  const all = useMemo(() => buildFeed(), []);
+  // The feed is static data, flattened, sorted and indexed once at module
+  // load (pressReleases.js); this page filters it and derives nothing.
+  const all = RELEASE_FEED;
   const [collection, setCollection] = useState("all");
   const [kind, setKind] = useState("all");
   const [query, setQuery] = useState("");
@@ -88,8 +82,7 @@ export default function CedarPressWhatsNew() {
   // starts fully open when the address names a release.
   const [shown, setShown] = useState(() => {
     const hash = typeof window === "undefined" ? "" : window.location.hash.slice(1);
-    const linked = hash && buildFeed().some((entry) => anchorOf(entry) === hash);
-    return linked ? Number.POSITIVE_INFINITY : PAGE;
+    return linkedAnchor(hash) ? Number.POSITIVE_INFINITY : PAGE;
   });
 
   const entries = useMemo(() => {
@@ -97,12 +90,7 @@ export default function CedarPressWhatsNew() {
     return all.filter((entry) => {
       if (collection !== "all" && entry.id !== collection) return false;
       if (kind !== "all" && entry.kind !== kind) return false;
-      if (!asked) return true;
-      const name = PRESS_CATALOG_BY_ID[entry.id]?.name ?? entry.id;
-      return [name, entry.version, entry.note ?? "", ...entry.changed]
-        .join(" ")
-        .toLowerCase()
-        .includes(asked);
+      return !asked || entry.haystack.includes(asked);
     });
   }, [all, collection, kind, query]);
 
@@ -121,7 +109,7 @@ export default function CedarPressWhatsNew() {
   useEffect(() => {
     const land = () => {
       const hash = window.location.hash.slice(1);
-      if (!hash || !all.some((entry) => anchorOf(entry) === hash)) return;
+      if (!linkedAnchor(hash)) return;
       setShown(Number.POSITIVE_INFINITY);
       requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
     };
@@ -245,8 +233,7 @@ export default function CedarPressWhatsNew() {
         {visible.length ? (
           <ol className="cp-feed cp-fade">
             {visible.map((entry) => {
-              const name = PRESS_CATALOG_BY_ID[entry.id]?.name ?? entry.id;
-              const anchor = anchorOf(entry);
+              const { name, anchor } = entry;
               const method = entry.kind === RELEASE_KIND.METHOD;
               return (
                 <li className="cp-feed__item" id={anchor} key={anchor}>

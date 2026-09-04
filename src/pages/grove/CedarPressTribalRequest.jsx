@@ -18,6 +18,7 @@ import "../../styles/grove/press.css";
 import { Link } from "react-router";
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { TRIBAL_REQUEST } from "../../features/grove/pressMethod";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
@@ -30,45 +31,11 @@ import { useScrollToTop } from "../../features/grove/useScrollToTop";
 const REQUEST_HREF =
   "mailto:contact@lumecon.ai?subject=Cedar%20Tribal%20Data%20Request";
 
-const COVERS = [
-  "Tribal government records",
-  "Affiliated tribal enterprises",
-  "Gaming operations",
-  "Wholly owned or controlled entities",
-  "Other records Cedar can reliably associate with the requesting tribal government",
-];
-
-const REQUESTERS = [
-  "An elected tribal official",
-  "An authorized tribal employee",
-  "Tribal legal counsel",
-  "A formally designated representative",
-];
-
-const VERIFICATION = [
-  "An official tribal-government email address",
-  "A signed authorization",
-  "Confirmation from leadership, the executive office or legal counsel",
-];
-
-const STEPS = [
-  { step: "Request", body: "Request your records" },
-  { step: "Verify", body: "Confirm governmental authority" },
-  { step: "Deliver", body: "Receive the tribe-specific package" },
-  { step: "Review", body: "Review Cedar's records" },
-  { step: "Correct", body: "Submit documentation or corrections" },
-];
-
-// Written in the case they are read in. Lowercasing these in the component
-// turned "Cedar" into "cedar" halfway down the sentence.
-const EXCLUDED = [
-  "other tribes' records",
-  "national comparative collections",
-  "proprietary crosswalks",
-  "Cedar's internal matching systems",
-  "the complete Cedar entity graph",
-  "restricted third-party information",
-];
+// The policy this page renders is declared once, in pressMethod.js, where
+// its tests live. This file carried its own copies of every list until
+// 2026-09-04, and the two had drifted: the page promised gaming operations
+// and named four kinds of requester while the declaration named five.
+const { included: COVERS, eligibility: REQUESTERS, verification: VERIFICATION, steps: STEPS, excluded: EXCLUDED } = TRIBAL_REQUEST;
 
 export default function CedarPressTribalRequest() {
   useDocumentTitle("Tribal data request");

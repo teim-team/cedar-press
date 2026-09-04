@@ -133,6 +133,29 @@ def up(row: dict, key: str) -> str:
     return (row.get(key) or "").upper()
 
 
+def _supersession_contradicts(r: dict) -> bool:
+    """The four supersession fields, read together, in both directions.
+
+    A row is contradictory when the flag says superseded and the status does
+    not, when the status says superseded and the flag does not, or when a
+    status of SUPERSEDED_BY_* names no superseding filing. The columns are
+    required: a file without them is read as contradictory rather than
+    silently passing, because a check reading a key that does not exist
+    passes for the same reason it is useless.
+    """
+    for col in ("is_superseded", "supersession_status"):
+        if col not in r:
+            return True
+    flagged = truthy(r.get("is_superseded"))
+    status = up(r, "supersession_status")
+    superseded_status = status.startswith("SUPERSEDED")
+    if flagged != superseded_status:
+        return True
+    if status.startswith("SUPERSEDED_BY") and not (r.get("superseded_by_filing_uuid") or "").strip():
+        return True
+    return False
+
+
 # --------------------------------------------------------------------------
 # the detectors
 #
@@ -335,18 +358,48 @@ DETECTORS: list[dict] = [
         # DELETE valid history. A regression test that can only be satisfied by
         # destroying correct data is worse than no test.
         #
-        # What is actually a defect is a superseded filing that arrives
-        # UNFLAGGED: no `supersession_status`, or one that does not name what
-        # superseded it. That is the row a customer would sum.
+        # What is actually a defect is a superseded filing whose four
+        # supersession fields do not agree. Codex, PR #48, and it is right:
+        # the first predicate read only rows where `is_superseded` was already
+        # truthy, so a row publication had flipped to `is_superseded = 0`
+        # while `supersession_status` still said SUPERSEDED_BY_AMENDMENT
+        # passed - and a customer following the documented rule
+        # `SUM(spend_usd) WHERE is_superseded = 0` counted its money. The
+        # predicate now fires in BOTH directions, and on a superseded row
+        # that names nothing as its superseder.
         "id": "SUPERSEDED_LOBBYING_FILING_UNFLAGGED",
         "prior_ids": ["CP-097", "CP-002"],
-        "what": "a superseded filing ships WITHOUT the flag that fences it out of countable spend",
+        "what": "a filing whose supersession fields contradict each other: flag without status, status without flag, or a superseded row naming no superseder",
         "file": ("customer", "lobbying.csv"),
-        "cols": ["client_name", "filing_uuid", "filing_year", "supersession_status", "superseded_by_filing_uuid"],
-        "pred": lambda r: (truthy(r.get("is_superseded"))
-                           and not up(r, "supersession_status").startswith("SUPERSEDED")),
+        "cols": ["client_name", "filing_uuid", "filing_year", "is_superseded", "supersession_status", "superseded_by_filing_uuid"],
+        "pred": lambda r: _supersession_contradicts(r),
         "clean": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "SUPERSEDED_BY_AMENDMENT", "superseded_by_filing_uuid": "f8fa8e38", "is_superseded": "1"},
         "dirty": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "", "superseded_by_filing_uuid": "", "is_superseded": "1"},
+    },
+    {
+        # The other direction of the same contradiction, as its own named
+        # case so the selftest proves it fires: the status says superseded
+        # and the flag a customer sums on says current.
+        "id": "SUPERSEDED_LOBBYING_STATUS_WITHOUT_FLAG",
+        "prior_ids": ["CP-097", "CP-002"],
+        "what": "a filing whose status says SUPERSEDED while is_superseded = 0, so the documented money rule counts it",
+        "file": ("customer", "lobbying.csv"),
+        "cols": ["client_name", "filing_uuid", "filing_year", "is_superseded", "supersession_status", "superseded_by_filing_uuid"],
+        "pred": lambda r: (up(r, "supersession_status").startswith("SUPERSEDED")
+                           and not truthy(r.get("is_superseded"))),
+        "clean": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "SUPERSEDED_BY_AMENDMENT", "superseded_by_filing_uuid": "f8fa8e38", "is_superseded": "1"},
+        "dirty": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "SUPERSEDED_BY_AMENDMENT", "superseded_by_filing_uuid": "f8fa8e38", "is_superseded": "0"},
+    },
+    {
+        "id": "SUPERSEDED_LOBBYING_FILING_NAMES_NO_SUPERSEDER",
+        "prior_ids": ["CP-097", "CP-002"],
+        "what": "a superseded filing that does not say which filing superseded it",
+        "file": ("customer", "lobbying.csv"),
+        "cols": ["client_name", "filing_uuid", "filing_year", "is_superseded", "supersession_status", "superseded_by_filing_uuid"],
+        "pred": lambda r: (up(r, "supersession_status").startswith("SUPERSEDED_BY")
+                           and not (r.get("superseded_by_filing_uuid") or "").strip()),
+        "clean": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "SUPERSEDED_BY_AMENDMENT", "superseded_by_filing_uuid": "f8fa8e38", "is_superseded": "1"},
+        "dirty": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "SUPERSEDED_BY_AMENDMENT", "superseded_by_filing_uuid": "", "is_superseded": "1"},
     },
     {
         "id": "WITHDRAWN_ATTRIBUTION_SHIPPED",

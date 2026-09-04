@@ -1422,3 +1422,36 @@ sides flagged independently.
 definition problem.** Stop re-deriving it and make the table state the answer
 in a column. Seven values were produced by seven correct-looking rules applied
 to an undefined question.
+
+---
+
+## PR #48 and PR #50 — nine open threads, answered on `claude/cedar-press-datasets-3n2wjf` (2026-09-04)
+
+Both PRs were merged with their Codex threads unresolved. Each finding was
+verified against current `main` before anything was changed; every one
+reproduced. Fixes land on the consolidation branch so Codex reviews them once.
+
+### PR #50 — `cedar_publication.enforce_denials` / `denied_ueis`
+
+| finding | verdict | what changed | proof |
+|---|---|---|---|
+| P1 Read only reconciled denial decisions | right | `denied_ueis()` reads `data/clean/cedar_ruling_ledger_consolidated.csv` (173's output), admitting only `status = SETTLED`, `outcome = NEGATIVE`, `ruling = not_native`, `tier_source = stated_on_ruling_row`, the gate 174 already applies. A `CONFLICT_NOT_APPLIED` row applies nothing; a later positive correction settles the subject as `ENTITY` and it is absent. | `py -3 code/cedar_publication.py selftest`, case 1 |
+| P1 Apply denials in every publication writer | right | `1135_full_dataset_review_bundle.py` and `25_build_publication_layer.py` call `enforce_denials` on every row, beside `translate_neid_values`. In 25 the row is widened to a dict only when a party column holds a denied value. | compiles; the constraint is the same function 1137 calls |
+| P1 Fail closed when ruling evidence cannot be read | right | An absent, unreadable or column-short ledger raises `DenialEvidenceUnavailable`; the writers let it propagate. No `except Exception: continue`, no `{}`. | selftest, cases 6 and 7 |
+| P2 Match denials only against the party's own UEI | right | `PARTY_UEI_COLS` names each side's own identifier column (`sub_uei`, `prime_uei`; `uei`, `recipient_uei`, `awardee_uei`, `auditee_uei`, `own_uei`, `operating_company_uei`, `fpds_uei`). No substring match; `verify` refuses any entry containing `parent` or `candidate`. | selftest, case 2 |
+| P1 Clear the attribution assertion when enforcing a denial | right | When a side is cleared, `MASK_FLAGS` (`attributed_flag`, side-prefixed where the side has one) goes to `"0"`, as `mask_attribution` does. | selftest, cases 3 and 5 |
+| P1 Preserve the funding status vocabulary during export | right | The status and basis are written only when a cell was cleared. `attribution_status` takes `excluded_not_native` (174's vocabulary); the WITHHELD note is appended to `attribution_basis` after whatever 174 wrote, never in place of it. A row 174 already corrected is untouched. Codex asked for a dedicated note field; that is a schema change to a delivered file and is left to the owner. | selftest, cases 3 and 4 |
+
+### PR #48 — `1169_release_verify.py` and `1171_prior_finding_regression_pack.py`
+
+| finding | verdict | what changed | proof |
+|---|---|---|---|
+| P2 Reject manifest rows that declare an absent preview | right | A manifest row carrying `note` is a declared failure; a file on disk for such a row is reported as stale; declared `rows`/`columns` are compared with the file. | `py -3 code/1169_release_verify.py selftest`, fixtures 5b |
+| P1 Add a firing fixture for the new preview check | right | Three fixtures (a stale file behind a failed row, a shape mismatch, absent/undeclared/empty) each run the real check and require FAIL; a fourth requires a complete set to PASS. `_fixture_fails` now saves and restores `PREVIEW`. 11 of 11 proven. | same |
+| P1 Detect contradictory supersession flags in both directions | right | `_supersession_contradicts` reads all four fields: flag without status, status without flag, and `SUPERSEDED_BY_*` with no superseder. The reverse direction and the missing superseder are their own named detectors so the selftest proves each fires. | `py -3 code/1171_prior_finding_regression_pack.py selftest`, 25 of 25 |
+
+### Noted, not changed
+
+`code/1137_customer_dataset_combine.py` line 418 nests double quotes inside an
+f-string, which Python 3.12 accepts and 3.11 rejects. `cedar_publication verify`
+reports it on a 3.11 interpreter; it predates this branch and was not edited.

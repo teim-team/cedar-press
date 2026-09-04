@@ -135,7 +135,7 @@
         },
         {
           "kind": "p",
-          "text": "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Contracting and Gaming. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible."
+          "text": "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Prime Contracting and in the enterprise structures NEST publishes. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible."
         },
         {
           "kind": "pull",
@@ -525,293 +525,198 @@
       },
       "blurb": "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
       "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
-    },
-    {
-      "id": "gaming",
-      "short": "Gaming",
-      "name": "Gaming Intelligence",
-      "shelf": "grove",
-      "coverage": {
-        "kind": "series",
-        "from": 1979
-      },
-      "blurb": "Facilities, ownership and affiliation over time, declination letters, environmental reviews, expansions, employment estimates and transaction history, cross-validated against Deals.",
-      "preview": {
-        "shows": [
-          "What it contains",
-          "Historical coverage",
-          "Selected aggregate findings",
-          "Related Cedar Press research briefs",
-          "A methodology summary"
-        ],
-        "withholds": [
-          "Record-level exploration",
-          "Downloads",
-          "Entity filters",
-          "Full historical records",
-          "Advanced queries"
-        ]
-      },
-      "linkage": "Facilities matched to their operators and their owners. This is the one collection where the counterparties are not all Native: management companies and outside operators are resolved and labeled as such."
     }
   ],
   "releases": {
     "funding": {
-      "version": "v4.2",
-      "updated": "2026-08-06",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated monthly",
-      "summary": "July awards added, with fourteen recipients resolved to existing tribal enterprises.",
       "history": [
         {
-          "version": "v4.2",
-          "date": "2026-08-06",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added 386 newly reported awards through July 2026.",
-            "Resolved 14 recipients to existing tribal enterprises.",
-            "Added two newly identified subsidiaries.",
-            "Corrected the historical affiliation of one recipient."
-          ]
-        },
-        {
-          "version": "v4.1",
-          "date": "2026-07-08",
-          "kind": "data",
-          "changed": [
-            "Added 412 awards through June 2026.",
-            "Entity updates from the maintained identity layer affected 28 historical records."
-          ]
-        },
-        {
-          "version": "v4.0",
-          "date": "2026-06-04",
-          "kind": "data",
-          "changed": [
-            "Extended the funding record back to FY2007 using additional federal and archival sources."
-          ]
-        },
-        {
-          "version": "v3.8",
-          "date": "2026-05-07",
-          "kind": "data",
-          "changed": [
-            "Routine monthly update."
+            "First release on Cedar Press: 14 tables, 3,646,750 rows.",
+            "A 10-row preview of federal_funding_transactions.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "federal-register": {
-      "version": "v6.1",
-      "updated": "2026-08-04",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated as records arrive",
-      "summary": "Notices through early August, with three entities matched under former names.",
       "history": [
         {
-          "version": "v6.1",
-          "date": "2026-08-04",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added notices published through 1 August 2026.",
-            "Matched three notices to entities appearing under former names."
-          ]
-        },
-        {
-          "version": "v6.0",
-          "date": "2026-07-02",
-          "kind": "methodology",
-          "note": "Notices naming a parent and a subsidiary are now attributed to both rather than to the parent alone.",
-          "changed": [
-            "Revised attribution for notices naming more than one related entity.",
-            "Reprocessed the full archive under the revised rule."
+            "First release on Cedar Press: 23 tables, 502,483 rows.",
+            "A 10-row preview of consultation_events.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "legislation": {
-      "version": "v3.4",
-      "updated": "2026-08-01",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated monthly",
-      "summary": "July roll-call votes and newly introduced bills.",
       "history": [
         {
-          "version": "v3.4",
-          "date": "2026-08-01",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added July roll-call votes and newly introduced bills.",
-            "Linked nine bills to the organizations they name."
-          ]
-        },
-        {
-          "version": "v3.3",
-          "date": "2026-07-01",
-          "kind": "data",
-          "changed": [
-            "Routine monthly update."
+            "First release on Cedar Press: 11 tables, 149,293 rows.",
+            "A 10-row preview of native_bills.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "deals": {
-      "version": "v9.0",
-      "updated": "2026-07-28",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated continuously",
-      "summary": "Twelve transactions added and three ownership relationships updated.",
       "history": [
         {
-          "version": "v9.0",
-          "date": "2026-07-28",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added 12 transactions confirmed against primary sources.",
-            "Updated three ownership relationships, which corrected records in Contracting and Gaming."
-          ]
-        },
-        {
-          "version": "v8.6",
-          "date": "2026-06-30",
-          "kind": "data",
-          "changed": [
-            "Added 9 transactions and one new subsidiary."
+            "First release on Cedar Press: 15 tables, 2,662 rows.",
+            "A 10-row preview of deals_classified.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "nagpra": {
-      "version": "v2.7",
-      "updated": "2026-07-22",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated as records arrive",
-      "summary": "New notices and inventories, matched across three decades of naming changes.",
       "history": [
         {
-          "version": "v2.7",
-          "date": "2026-07-22",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added notices and inventories published since the last release.",
-            "Reconciled six historical notices to their current tribal names."
+            "First release on Cedar Press: 5 tables, 72,302 rows.",
+            "A 10-row preview of nagpra_notices.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "lobbying": {
-      "version": "v5.2",
-      "updated": "2026-07-31",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated quarterly",
-      "summary": "Second-quarter filings added.",
       "history": [
         {
-          "version": "v5.2",
-          "date": "2026-07-31",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added Q2 2026 registrations and filings.",
-            "Resolved four registrants to the tribes that retained them."
-          ]
-        },
-        {
-          "version": "v5.1",
-          "date": "2026-04-30",
-          "kind": "data",
-          "changed": [
-            "Added Q1 2026 filings."
+            "First release on Cedar Press: 35 tables, 264,478 rows.",
+            "A 10-row preview of native_entity_lobbying_disclosures.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "contractors": {
-      "version": "v6.0",
-      "updated": "2026-08-05",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated monthly",
-      "summary": "July obligations added and 22 vendors rolled up to parent entities.",
       "history": [
         {
-          "version": "v6.0",
-          "date": "2026-08-05",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added obligations reported through July 2026.",
-            "Rolled 22 vendors up to their parent nation or corporation.",
-            "Entity updates from the maintained identity layer affected 41 historical records."
-          ]
-        },
-        {
-          "version": "v5.4",
-          "date": "2026-07-06",
-          "kind": "methodology",
-          "note": "8(a) participation is now recorded as a status with dates rather than a fixed flag.",
-          "changed": [
-            "Revised 8(a) participation to carry start and end dates.",
-            "Reprocessed the archive so historical awards reflect status at the time of award."
+            "First release on Cedar Press: 10 tables, 3,345,971 rows.",
+            "A 10-row preview of prime_contracts.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "subcontracting": {
-      "version": "v3.1",
-      "updated": "2026-08-05",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated monthly",
-      "summary": "Subaward activity matched to the same entities as the prime awards.",
       "history": [
         {
-          "version": "v3.1",
-          "date": "2026-08-05",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added July subaward activity and matched it to the prime awards above it."
+            "First release on Cedar Press: 3 tables, 90,479 rows.",
+            "A 10-row preview of subawards.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        }
+      ]
+    },
+    "owned": {
+      "version": "v0",
+      "updated": "2026-09-02",
+      "cadence": "Updated as records arrive",
+      "history": [
+        {
+          "version": "v0",
+          "date": "2026-09-02",
+          "kind": "data",
+          "changed": [
+            "First release on Cedar Press: 6 tables, row count unresolved.",
+            "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
+            "Readiness is blocked, with 3 named blockers recorded in the manifest."
+          ]
+        }
+      ]
+    },
+    "nest": {
+      "version": "v0",
+      "updated": "2026-09-02",
+      "cadence": "Updated as records arrive",
+      "history": [
+        {
+          "version": "v0",
+          "date": "2026-09-02",
+          "kind": "data",
+          "changed": [
+            "First release on Cedar Press: 3 tables, 5,757 rows.",
+            "A 10-row preview of nest_enterprises.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "natural-resources": {
-      "version": "v4.0",
-      "updated": "2026-07-15",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated quarterly",
-      "summary": "Second-quarter production and disbursements.",
       "history": [
         {
-          "version": "v4.0",
-          "date": "2026-07-15",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added Q2 production, royalties and disbursements."
+            "First release on Cedar Press: 9 tables, 283,716 rows.",
+            "A 10-row preview of resource_revenue.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
     },
     "nonprofits": {
-      "version": "v3.0",
-      "updated": "2026-06-25",
+      "version": "v0",
+      "updated": "2026-09-02",
       "cadence": "Updated annually",
-      "summary": "Native-serving classification rules revised. Read the note before reusing prior figures.",
       "history": [
         {
-          "version": "v3.0",
-          "date": "2026-06-25",
-          "kind": "methodology",
-          "note": "Native-serving nonprofit classification rules were revised, so counts in this release are not directly comparable with v2.x.",
-          "changed": [
-            "Separated Native-led from Native-serving where governance could be established from filings.",
-            "Reclassified 63 organizations under the revised rules.",
-            "Added the most recent filing year."
-          ]
-        }
-      ]
-    },
-    "gaming": {
-      "version": "v7.3",
-      "updated": "2026-08-02",
-      "cadence": "Updated continuously",
-      "summary": "Facility, operator and expansion activity reconciled against Deals.",
-      "history": [
-        {
-          "version": "v7.3",
-          "date": "2026-08-02",
+          "version": "v0",
+          "date": "2026-09-02",
           "kind": "data",
           "changed": [
-            "Added recent expansion filings and environmental review activity.",
-            "Reconciled two operator changes against Indian Country Deals.",
-            "Updated employment estimates for eleven facilities."
+            "First release on Cedar Press: 10 tables, 123,293 rows.",
+            "A 10-row preview of np_orgs.csv, the collection's flagship table, downloads from the shelf."
           ]
         }
       ]
