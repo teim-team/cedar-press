@@ -222,6 +222,12 @@ def collect(names):
             continue
         if (r.get("withdrawn") or "").strip().lower() in ("1", "true", "yes"):
             continue
+        # cedar_entity_id here holds a RETIRED CICD NEID, not a CE- uid.
+        # Testing for a "CE-" prefix before translating rejected all 892 rows
+        # and reported the source as entirely unkeyed - a silent zero, not an
+        # error. Every one of them is attribution_class TITLE_NAMES_THE_ENTITY,
+        # so they were resolved all along.
+        translate_neid_values(r)
         uid = (r.get("cedar_entity_id") or "").strip()
         com.append(_row(names, uid if uid.startswith("CE-") else "",
                         "regulatory_comment",
@@ -241,6 +247,17 @@ def collect(names):
         ty = (r.get("tax_year") or "").strip()
         if ty not in WINDOW:
             continue
+        # TERM MATCHES ARE NOT DOCUMENTED NATIVE ADVOCACY. 2,052 of the 2,312
+        # rows in window are inclusion_basis=term_match / record_scope=
+        # unresolved: organizations whose NAME contains a token like "Indian",
+        # matched and never resolved. They include INDIAN ROCKS ROTARY
+        # FOUNDATION INC, a Florida Rotary club, and CAN AM CROWN, a sled-dog
+        # race. Publishing them in a Native advocacy dataset would repeat the
+        # shared-word failure this project keeps having to undo, so only
+        # named_entity rows are carried.
+        if (r.get("inclusion_basis") or "").strip() != "named_entity":
+            continue
+        translate_neid_values(r)
         uid = (r.get("cedar_entity_id") or "").strip()
         amt = ""
         for c in ("total_lobbying_expenditures", "lobbying_expenditures",

@@ -516,6 +516,16 @@ NEID_COLS = (
 # inside a contract description and `SR-2012-11` as a subaward number, and it
 # MISSES the extended Alaska form `AKNF-ACSRMT-00-CALSTA-ASVCPR`. Membership in
 # the harvested vocabulary is exact; a shape test is a guess wearing a regex.
+#: (retired NEID, the uid it really means, why). Evidence, not preference.
+ADJUDICATED_COLLISIONS = (
+    ("TRBF-FSCWSA-00", "CE-0014G-RS",
+     "FSCWSA is Fort Sill Chiricahua Warm Springs Apache - the handle is that "
+     "tribe's initials. The rival claimant, the Confederated Tribes of the "
+     "Warm Springs Reservation of Oregon, shares only the words 'Warm "
+     "Springs'; a shared word is not a shared identity. Adjudicated "
+     "2026-09-04."),
+)
+
 _NEID_MAP: dict = {}
 _NEID_AMBIGUOUS: dict = {}
 _NEID_EMBEDDED_RE = None
@@ -569,6 +579,27 @@ def neid_map():
                     claims[neid].add(uid)
     _NEID_MAP = {k: next(iter(v)) for k, v in claims.items() if len(v) == 1}
     _NEID_AMBIGUOUS = {k: sorted(v) for k, v in claims.items() if len(v) > 1}
+
+    # ADJUDICATED COLLISIONS. A NEID claiming two uids is normally REFUSED,
+    # because picking one would write a guess into a customer file. But a
+    # refusal that can be settled on evidence is not caution, it is an
+    # unresolved defect left standing - and this one was blocking the release
+    # gate on 27 rows across lobbying, gaming and nest.
+    #
+    # TRBF-FSCWSA-00 decodes to Fort Sill Chiricahua Warm Springs Apache. The
+    # handle is that tribe's own initials. The second claimant, the
+    # Confederated Tribes of the Warm Springs Reservation of Oregon, shares
+    # only the words "Warm Springs" - it is the same shared-word failure that
+    # keyed Amee Bay to the Three Affiliated Tribes on "Three", and the owner's
+    # own deals review independently flagged "Confederated Tribes of Warm
+    # Springs, Oregon -> Fort Sill Apache Tribe" as a false attribution.
+    #
+    # Each entry needs a reason that survives being read years later. A bare
+    # mapping here would be indistinguishable from the guess it replaces.
+    for neid, uid, why in ADJUDICATED_COLLISIONS:
+        if neid in _NEID_AMBIGUOUS and uid in _NEID_AMBIGUOUS[neid]:
+            _NEID_MAP[neid] = uid
+            del _NEID_AMBIGUOUS[neid]
     return _NEID_MAP
 
 
@@ -1072,6 +1103,17 @@ DATASET_DEFINITION = {
         "bond issuances, joint ventures and major capital projects. Track who "
         "participated, the Native entity involved, announced value, status and "
         "timing, and compare activity across periods."
+    ),
+    # RENAMED 2026-09-04. "Lobbying" alone was legally misleading: a tribe
+    # attending a federal consultation is exercising a government-to-government
+    # relationship, not lobbying under the LDA, and the old name misdescribed
+    # its posture. `activity_type` now carries the distinction per row.
+    "lobbying": (
+        "Documented federal advocacy and engagement involving Native nations "
+        "and organizations, including registered lobbying, agency meetings, "
+        "tribal consultations, regulatory comments, congressional testimony "
+        "and nonprofit lobbying disclosures. Each row represents one "
+        "entity-linked activity or source record."
     ),
 }
 

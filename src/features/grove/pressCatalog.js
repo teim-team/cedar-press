@@ -209,8 +209,10 @@ export const PRESS_CATALOG = Object.freeze([
     shelf: "standard",
     // Series. Floor: min(Event_Year) in dist/customer/deals.csv.
     coverage: Object.freeze({ kind: "series", from: 2000 }),
+    // CANONICAL. Must match cedar_publication.DATASET_DEFINITION["deals"]
+    // verbatim; 1169's release gate fails the build if it drifts.
     blurb:
-      "Announced transactions across Indian Country: acquisitions, property purchases, project financings, bond issuances and capital projects. See who bought, who financed, what closed and how a quarter compares with the last.",
+      "Material transactions and capital commitments involving Native nations, organizations and enterprises, including acquisitions, divestitures, property purchases, investments, financing agreements, bond issuances, joint ventures and major capital projects. Track who participated, the Native entity involved, announced value, status and timing, and compare activity across periods.",
     linkage:
       "Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs.",
   }),
@@ -230,15 +232,17 @@ export const PRESS_CATALOG = Object.freeze([
   }),
   Object.freeze({
     id: "lobbying",
-    short: "Lobbying",
-    name: "Lobbying",
+    short: "Advocacy",
+    name: "Native Federal Advocacy & Engagement",
     shelf: "standard",
     // Series. Floor: min(filing_year) in dist/customer/lobbying.csv. The old
     // catalog claimed 1998, the first year the LDA required filings; Cedar's
     // earliest filing is 1999.
     coverage: Object.freeze({ kind: "series", from: 1999 }),
+    // CANONICAL. Must match cedar_publication.DATASET_DEFINITION["lobbying"]
+    // verbatim; 1169's release gate fails the build if it drifts.
     blurb:
-      "Federal lobbying registrations and the quarterly filings behind them. See who hired which firm, what they paid and which issues and bills the money is working.",
+      "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
     linkage:
       "Registrants and clients resolved to the tribes and Native organizations behind them, including firms retained on their behalf.",
   }),
