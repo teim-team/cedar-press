@@ -832,6 +832,105 @@ def adjudication(r) -> tuple[str, str]:
     return best, why
 
 
+_DENIED_UEIS: dict = {}
+
+
+def denied_ueis() -> dict:
+    """UEI -> reason, for every VERIFIED `not_native` denial on record.
+
+    A VALIDATED RULING MUST BE A CONSTRAINT, NOT A PER-TABLE PATCH.
+
+    External review, 2026-09-03:
+
+        "A validated ruling should automatically become a constraint, trigger
+         rebuilding of dependent views, and block release while any violating
+         row remains active. The fact that application still depends on
+         'whoever owns that table' means the agents and datasets are not yet
+         operating from one adjudication system."
+
+    Measured proof of the point, 2026-09-04. The municipal-PHA denial was
+    applied to `federal_funding_transactions.csv` and the release gate went
+    green on it - while **14 rows of the DELIVERED `subcontracting.csv` still
+    shipped `sub_cedar_uid = CE-0017W-FN`, the Omaha Tribe, for the Housing
+    Authority of the City of Omaha. $3,221,778.36, in a customer's hands.**
+
+    Applying the denial table by table was never going to close it: `subawards`
+    has no `attributed_flag` / `attribution_status` / `excluded_flag`, so the
+    exclusion shape used for the assistance table does not exist there, and
+    copying it over would fork the convention. The answer is not a third
+    shape - it is that no delivered dataset may carry an attribution a verified
+    denial forbids, whatever its columns look like.
+
+    Read from the ruling files rather than restated here, so the constraint
+    cannot drift from the adjudication. Only `not_native` at a tier the RULER
+    stated is admitted, which is the same gate `174.apply_funding` applies: a
+    negative that carries only a machine-manufactured tier asserts no link, and
+    that is not evidence enough to strip a live attribution.
+    """
+    global _DENIED_UEIS
+    if _DENIED_UEIS:
+        return _DENIED_UEIS
+    out = {}
+    for path in sorted((ROOT / "review").glob("cedar_research_rulings*.csv")):
+        try:
+            with path.open(encoding="utf-8-sig", errors="replace",
+                           newline="") as fh:
+                for row in csv.DictReader(fh):
+                    if (row.get("your_ruling") or "").strip() != "not_native":
+                        continue
+                    if (row.get("confidence_tier") or "").strip().upper() != "X":
+                        continue          # tier not stated by the ruler
+                    uei = (row.get("uei") or "").strip().upper()
+                    if uei:
+                        out[uei] = (row.get("name") or uei)
+        except Exception:
+            continue
+    _DENIED_UEIS = out
+    return out
+
+
+#: Every column that can carry a Cedar attribution, under every spelling the
+#: delivered files use. `subcontracting` carries one per side of the award, so
+#: a denial on the SUB side must not blank the PRIME side's key.
+_UID_COLS_BY_SIDE = {
+    "sub": ("sub_cedar_uid", "sub_canonical_name", "sub_native_tribe_id"),
+    "prime": ("prime_cedar_uid", "prime_canonical_name", "prime_native_tribe_id"),
+    "": ("cedar_uid", "canonical_name", "tribe_id", "entity_cedar_uids"),
+}
+
+
+def enforce_denials(row: dict) -> int:
+    """Blank any Cedar attribution a verified denial forbids. Returns cells cleared.
+
+    Side-aware: `subcontracting` names two parties per row, and a denial
+    against the SUBAWARDEE must not withdraw the PRIME's key. The UEI column
+    on each side selects which set of attribution columns is cleared.
+    """
+    denied = denied_ueis()
+    if not denied:
+        return 0
+    cleared = 0
+    for side, cols in _UID_COLS_BY_SIDE.items():
+        uei_cols = [c for c in row
+                    if "uei" in c.lower() and (c.startswith(side) if side else
+                                               not c.startswith(("sub_", "prime_")))]
+        hit = next((row[c] for c in uei_cols
+                    if (row.get(c) or "").strip().upper() in denied), None)
+        if hit is None:
+            continue
+        why = denied[(hit or "").strip().upper()]
+        for c in cols:
+            if row.get(c):
+                row[c] = ""
+                cleared += 1
+        for basis in (f"{side}_attribution_basis" if side else "attribution_basis",
+                      "attribution_status"):
+            if basis in row:
+                row[basis] = (f"WITHHELD: a verified not_native ruling denies "
+                              f"the Cedar attribution for {why}")
+    return cleared
+
+
 def mask_attribution(r, state_reason: str) -> int:
     """Blank the Cedar attribution on a row whose adjudication withdrew it.
 

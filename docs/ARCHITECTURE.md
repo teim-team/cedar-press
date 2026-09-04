@@ -64,7 +64,7 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 58 — `features/grove` 35, `pages/grove` 21, `components/grove` 1, `styles/grove` 1 |
-| Path references to rewrite | 208, across 55 files |
+| Path references to rewrite | 210, across 55 files |
 | Referencing files inside `src/` | 23 — `pages/` 17, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 32 — `server/cedar_press/` 7, `scripts/` 6, `docs/` 6, `code/` 4, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1 |
 
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 208 references get rewritten?" is a question the build, the
+First, "did all 210 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 208 references get rewritten?",
+is one of the three things that answer "did all 210 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
