@@ -76,6 +76,10 @@ PREVIEW = DIST / "preview"
 DB = DIST / "cedar_press.db"
 CLEAN = ROOT / "data" / "clean"
 SPINE = ROOT / "data" / "spine"
+# Set only by selftest, so a check can be run against a planted fixture.
+_RULING_OVERRIDE = None
+# Set only by selftest: a 1167 module whose paths point at a planted tree.
+_C1167 = None
 
 
 @dataclass
@@ -245,16 +249,24 @@ def check_uid_integrity() -> Check:
     c = Check("cedar_uid names exactly one entity",
               "data/clean/cedar_identifier_ledger_final.csv, positive rows",
               blocking=True)
-    try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(
-            "c1167", ROOT / "code" / "1167_cedar_uid_identity_collisions.py")
-        m = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(m)
-    except Exception as e:
-        c.status = "NOT_ESTABLISHED"
-        c.detail = f"1167 would not import: {e}"
-        return c
+    # `_C1167` lets selftest hand in a module whose paths point at a planted
+    # tree. Without it this function re-imported 1167 on every call, and 1167
+    # resolves its own LEDGER / ALIASES / register from ITS module globals - so
+    # a fixture could plant a uid collision and this check would sail past it
+    # reading the real repo, returning PASS. Codex, PR #46, was right that the
+    # uid check was not exercised; it turned out it could not be.
+    m = _C1167
+    if m is None:
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                "c1167", ROOT / "code" / "1167_cedar_uid_identity_collisions.py")
+            m = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(m)
+        except Exception as e:
+            c.status = "NOT_ESTABLISHED"
+            c.detail = f"1167 would not import: {e}"
+            return c
     # CALL 1167'S LOGIC, DO NOT RE-IMPLEMENT IT.
     #
     # The first version of this check rebuilt the uid->names map here and ran
@@ -304,7 +316,11 @@ def check_rulings_applied() -> Check:
     c = Check("verified negative rulings are applied, not merely written",
               "review/cedar_research_rulings_municipal_pha_2026-09-03.csv "
               "vs data/clean/federal_funding_transactions.csv", blocking=True)
-    ruling = ROOT / "review" / "cedar_research_rulings_municipal_pha_2026-09-03.csv"
+    # `_RULING_OVERRIDE` lets `selftest` point this at a planted ruling file.
+    # The check must be runnable against evidence it did not choose, or the
+    # positive control is testing a different function than production uses.
+    ruling = (_RULING_OVERRIDE if _RULING_OVERRIDE
+              else ROOT / "review" / "cedar_research_rulings_municipal_pha_2026-09-03.csv")
     target = CLEAN / "federal_funding_transactions.csv"
     if not ruling.exists() or not target.exists():
         c.status = "NOT_ESTABLISHED"
@@ -327,6 +343,62 @@ def check_rulings_applied() -> Check:
     c.detail = ("every denial applied" if live == 0
                 else f"{live:,} rows still carry a Cedar attribution that "
                      f"{len(denied)} verified denial(s) forbid")
+    return c
+
+
+def check_preview_complete() -> Check:
+    """Every dataset that ships must have a preview, and it must be real.
+
+    Codex, PR #46: `run_all()` never asked whether the preview SET was
+    complete, and `release_id()` simply hashes whichever preview files happen
+    to exist - so a missing preview would change the id and change nothing
+    else. Once the other blockers clear, an incomplete customer preview set
+    could take a GREEN verdict.
+
+    (Codex's example - a `gaming` preview declared in MANIFEST.json with no
+    `dist/preview/gaming.csv` - was true of the commit it reviewed and is not
+    true now; the file exists. The gap it points at is real regardless, which
+    is why this check exists rather than a reply saying the example is stale.)
+
+    The manifest is the declaration and the files are the fact, so this
+    compares them in BOTH directions: a declared preview with no file, and a
+    file nobody declared.
+    """
+    c = Check("preview set is complete and matches its manifest",
+              "dist/preview/MANIFEST.json vs dist/preview/*.csv", blocking=True)
+    man = PREVIEW / "MANIFEST.json"
+    if not man.exists():
+        c.status = "NOT_ESTABLISHED"
+        c.detail = "dist/preview/MANIFEST.json absent"
+        return c
+    try:
+        declared = json.loads(man.read_text(encoding="utf-8"))
+    except Exception as e:
+        c.status = "NOT_ESTABLISHED"
+        c.detail = f"manifest unreadable: {e}"
+        return c
+    rows = declared if isinstance(declared, list) else declared.get("datasets", [])
+    names = {r.get("dataset") for r in rows if isinstance(r, dict) and r.get("dataset")}
+    on_disk = {p.stem for p in PREVIEW.glob("*.csv")}
+    missing = sorted(names - on_disk)
+    undeclared = sorted(on_disk - names)
+    # A declared preview that is empty is as bad as one that is absent.
+    empty = sorted(p.stem for p in PREVIEW.glob("*.csv")
+                   if sum(1 for _ in p.open(encoding="utf-8-sig",
+                                            errors="replace")) <= 1)
+    c.measured = {"declared": len(names), "on_disk": len(on_disk),
+                  "missing": len(missing), "undeclared": len(undeclared),
+                  "empty": len(empty)}
+    problems = []
+    if missing:
+        problems.append(f"declared but absent: {missing}")
+    if undeclared:
+        problems.append(f"on disk but undeclared: {undeclared}")
+    if empty:
+        problems.append(f"header only, no rows: {empty}")
+    c.status = "PASS" if not problems else "FAIL"
+    c.detail = (f"{len(names)} declared, {len(on_disk)} on disk, all present"
+                if not problems else "; ".join(problems))
     return c
 
 
@@ -376,50 +448,152 @@ def run_all() -> list:
         sys.exit("FATAL: NEID vocabulary is empty - every membership test "
                  "would pass vacuously. Refusing to report a release verdict.")
     return [check_csv_identity(vocab), check_db_identity(vocab),
+            check_preview_complete(),
             check_artifacts_agree(vocab), check_uid_integrity(),
             check_rulings_applied(), check_no_regression(), check_semantics()]
+def _fixture_fails(name, build, run):
+    """Build a tree containing a KNOWN violation and assert the check fails.
+
+    Codex, PR #46: the previous selftest asserted only that the uid check
+    "reaches a verdict", which an implementation hardwired to PASS satisfies,
+    and it exercised none of the database, artifact-agreement, ruling, or
+    not-established checks at all. So it could report zero unproven checks
+    while proving almost nothing - a positive control that is itself a silent
+    pass, which is the exact failure this file was written about.
+
+    Each fixture points the module's own path constants at a temporary tree,
+    so the REAL check function runs against planted evidence rather than a
+    reimplementation of it.
+    """
+    import tempfile
+    global CUSTOMER, DB, CLEAN, SPINE
+    saved = (CUSTOMER, DB, CLEAN, SPINE)
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            build(Path(d))
+            got = run()
+            ok = got.status == "FAIL"
+            print(f"    {'ok  ' if ok else 'FAIL'}  {name}  (returned {got.status})")
+            return ok
+    finally:
+        CUSTOMER, DB, CLEAN, SPINE = saved
+        globals()["_RULING_OVERRIDE"] = None
 
 
 def selftest() -> int:
-    """Prove each membership check CAN fail. See the module docstring."""
-    print("  1169 selftest - proving the checks can return non-zero\n")
-    fails = []
-    vocab = neid_vocabulary()
+    """Prove EVERY check can return non-zero. See the module docstring."""
+    print("  1169 selftest - proving each check detects its named violation\n")
+    global CUSTOMER, DB, CLEAN, SPINE, _RULING_OVERRIDE
+    real_vocab = neid_vocabulary()
+    if not real_vocab:
+        sys.exit("FATAL: no vocabulary - this selftest would prove nothing")
+    probe = sorted(real_vocab)[0]
+    ok = []
 
-    got = check_csv_identity(set()).status
-    ok = got == "PASS"
-    print(f"    {'ok  ' if ok else 'FAIL'}  empty vocabulary makes the CSV check "
-          f"pass vacuously - which is why run_all() refuses an empty one  ({got})")
-    if not ok:
-        fails.append("vacuous-pass demonstration")
+    # 1. a delivered CSV carrying a retired identifier
+    def b1(root):
+        global CUSTOMER
+        (root / "customer").mkdir()
+        (root / "customer" / "x.csv").write_text(
+            "a,b\n1," + probe + "\n", encoding="utf-8")
+        CUSTOMER = root / "customer"
 
-    probe = next(iter(vocab))
-    import tempfile
-    with tempfile.TemporaryDirectory() as d:
-        p = Path(d) / "x.csv"
-        p.write_text(f"a,b\n1,{probe}\n", encoding="utf-8")
-        hits = 0
-        with p.open(encoding="utf-8-sig", newline="") as fh:
-            for row in csv.DictReader(fh):
-                for v in row.values():
-                    if v and v.strip() in vocab:
-                        hits += 1
-        ok = hits == 1
-        print(f"    {'ok  ' if ok else 'FAIL'}  an injected retired identifier "
-              f"IS detected  (found {hits}, expected 1)")
-        if not ok:
-            fails.append("retired-identifier detector")
+    ok.append(_fixture_fails("a delivered CSV carrying a retired identifier",
+                             b1, lambda: check_csv_identity(real_vocab)))
 
-    c = check_uid_integrity()
-    ok = c.status in ("PASS", "FAIL")
-    print(f"    {'ok  ' if ok else 'FAIL'}  uid-integrity check reaches a verdict "
-          f"({c.status})")
-    if not ok:
-        fails.append("uid integrity")
+    # 2. a database table still carrying a retired-scheme column
+    def b2(root):
+        global DB
+        DB = root / "db.sqlite"
+        con = sqlite3.connect(DB)
+        con.execute("CREATE TABLE t (cedar_uid TEXT, tribe_id TEXT)")
+        con.execute("INSERT INTO t VALUES ('CE-00001-AA', ?)", (probe,))
+        con.commit()
+        con.close()
 
-    print(f"\n  1169 selftest   {'ok' if not fails else 'FAIL'}   "
-          f"{len(fails)} check(s) unproven")
-    return 1 if fails else 0
+    ok.append(_fixture_fails("a database table with a retired-scheme column",
+                             b2, lambda: check_db_identity(real_vocab)))
+
+    # 3. artifacts disagreeing: clean CSVs, dirty database. The check that was
+    #    missing entirely before this script existed.
+    def b3(root):
+        global CUSTOMER, DB
+        (root / "customer").mkdir()
+        (root / "customer" / "x.csv").write_text(
+            "a,b\n1,CE-00001-AA\n", encoding="utf-8")
+        CUSTOMER = root / "customer"
+        DB = root / "db.sqlite"
+        con = sqlite3.connect(DB)
+        con.execute("CREATE TABLE t (tribe_id TEXT)")
+        con.execute("INSERT INTO t VALUES (?)", (probe,))
+        con.commit()
+        con.close()
+
+    ok.append(_fixture_fails("CSVs clean but the database not - artifacts disagree",
+                             b3, lambda: check_artifacts_agree(real_vocab)))    # 4. one cedar_uid naming two entities
+    def b4(root):
+        global CLEAN, SPINE, _C1167
+        (root / "data" / "clean").mkdir(parents=True)
+        (root / "data" / "spine").mkdir(parents=True)
+        (root / "data" / "clean" / "cedar_identifier_ledger_final.csv").write_text(
+            "cedar_uid,canonical_name,confidence_tier\n"
+            "CE-00001-AA,Bristol Bay Native Corporation,A\n"
+            "CE-00001-AA,Buena Vista Rancheria,A\n", encoding="utf-8")
+        (root / "data" / "clean" / "entity_aliases.csv").write_text(
+            "cedar_uid,alias_name\n", encoding="utf-8")
+        (root / "data" / "spine" / "cedar_identity_register.csv").write_text(
+            "cedar_uid,canonical_name,handle\n"
+            "CE-00001-AA,Bristol Bay Native Corporation,X\n", encoding="utf-8")
+        CLEAN, SPINE = root / "clean", root / "spine"
+        # Point 1167 itself at the fixture. Without this the check re-imports
+        # 1167, which resolves LEDGER / ALIASES / the register from ITS OWN
+        # module globals, reads the real repo, and returns PASS while a planted
+        # collision sits in the fixture - a positive control that proves
+        # nothing, which is what Codex flagged.
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "c1167_fix", ROOT / "code" / "1167_cedar_uid_identity_collisions.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.ROOT = root
+        mod.LEDGER = root / "data" / "clean" / "cedar_identifier_ledger_final.csv"
+        mod.ALIASES = root / "data" / "clean" / "entity_aliases.csv"
+        _C1167 = mod
+
+    ok.append(_fixture_fails("one cedar_uid naming two entities",
+                             b4, check_uid_integrity))
+
+    # 5. a verified denial still attributed in the data
+    def b5(root):
+        global CLEAN, _RULING_OVERRIDE
+        (root / "clean").mkdir()
+        (root / "review").mkdir()
+        (root / "clean" / "federal_funding_transactions.csv").write_text(
+            "recipient_uei,cedar_uid\nDFPYJKG9K2X4,CE-0017W-FN\n", encoding="utf-8")
+        CLEAN = root / "clean"
+        _RULING_OVERRIDE = root / "review" / "r.csv"
+        _RULING_OVERRIDE.write_text(
+            "your_ruling,uei,currently_keyed_to\n"
+            "not_native,DFPYJKG9K2X4,CE-0017W-FN\n", encoding="utf-8")
+
+    ok.append(_fixture_fails("a verified denial still attributed in the data",
+                             b5, check_rulings_applied))
+
+    # 6 and 7. The two checks with no implementation yet must say exactly that
+    #    and must block. An absent check has to read as absent, never as a pass;
+    #    asserting the contract is the only honest control available for them.
+    for fn, label in ((check_no_regression, "no-regression"),
+                      (check_semantics, "dataset semantics")):
+        c = fn()
+        good = c.status == "NOT_ESTABLISHED" and c.blocking
+        print(f"    {'ok  ' if good else 'FAIL'}  {label}: reports "
+              f"NOT_ESTABLISHED and blocks  ({c.status}, blocking={c.blocking})")
+        ok.append(good)
+
+    bad = [i for i, v in enumerate(ok) if not v]
+    print(f"\n  1169 selftest   {'ok' if not bad else 'FAIL'}   "
+          f"{len(bad)} of {len(ok)} check(s) unproven")
+    return 1 if bad else 0
 
 
 def main() -> int:

@@ -346,14 +346,26 @@ def main():
         src = src.replace("state[c.i]", "state[c.k]")
         print(f"  re-keyed {n_sites} state lookups from array index to stable card key")
 
+    # CHECK BEFORE WRITING. Codex, PR #46: this ran the uniqueness check AFTER
+    # `SHEET.write_text`, so a colliding payload was already on disk by the time
+    # the guard fired. The owner sheet would carry two cards sharing a state
+    # key, and one card's saved answer could overwrite or reattach to the other
+    # - the precise failure the re-keying was introduced to prevent.
+    #
+    # It is reachable: two no-UEI subjects differing only in punctuation, case
+    # or diacritics fold to the same `k`, because `_fold_for_identity` is built
+    # to erase exactly those differences. A guard that fires after the write is
+    # a report, not a guard.
+    keys = [c["k"] for c in kept]
+    if len(set(keys)) != len(keys):
+        dupes = sorted({k for k in keys if keys.count(k) > 1})
+        sys.exit(f"FATAL: card keys are not unique - answers would collide. "
+                 f"Nothing written. Colliding key(s): {dupes}")
+
     payload = "const CARDS = " + json.dumps(kept, separators=(",", ":")) + ";\n"
     src = re.sub(r"const CARDS = \[.*?\];\n", lambda _m: payload, src, count=1, flags=re.DOTALL)
     SHEET.write_text(src, encoding="utf-8")
     print(f"  rewrote {SHEET.relative_to(ROOT)} with {len(kept)} cards")
-
-    keys = [c["k"] for c in kept]
-    if len(set(keys)) != len(keys):
-        sys.exit("FATAL: card keys are not unique - answers would collide. Not shipping.")
 
 
 if __name__ == "__main__":

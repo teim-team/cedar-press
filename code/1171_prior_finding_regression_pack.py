@@ -323,14 +323,30 @@ DETECTORS: list[dict] = [
 
     # ---- named bad row 8: superseded lobbying filings shipping as current --
     {
-        "id": "SUPERSEDED_LOBBYING_FILING_SHIPPED",
+        # A SUPERSEDED FILING SHIPPING IS THE POLICY, NOT THE DEFECT.
+        #
+        # Codex, PR #46, and it is right. `cedar_publication.LOBBYING_FENCE`
+        # disposes superseded LDA filings as FLAG and KEEPS them, deliberately,
+        # so a customer retains the amendment history; the fence is a MONEY
+        # fence that removes them from countable spend, not a row gate. The
+        # first version of this predicate fired on every delivered superseded
+        # row, so the documented 1,064 legitimate ones made this pack
+        # permanently red - and the only way to green it would have been to
+        # DELETE valid history. A regression test that can only be satisfied by
+        # destroying correct data is worse than no test.
+        #
+        # What is actually a defect is a superseded filing that arrives
+        # UNFLAGGED: no `supersession_status`, or one that does not name what
+        # superseded it. That is the row a customer would sum.
+        "id": "SUPERSEDED_LOBBYING_FILING_UNFLAGGED",
         "prior_ids": ["CP-097", "CP-002"],
-        "what": "a filing the pipeline itself marked superseded is in the delivered file",
+        "what": "a superseded filing ships WITHOUT the flag that fences it out of countable spend",
         "file": ("customer", "lobbying.csv"),
         "cols": ["client_name", "filing_uuid", "filing_year", "supersession_status", "superseded_by_filing_uuid"],
-        "pred": lambda r: truthy(r.get("is_superseded")) or up(r, "supersession_status").startswith("SUPERSEDED"),
-        "clean": {"client_name": "HOPI TRIBE", "filing_uuid": "aaa", "filing_year": "1999", "supersession_status": "AMENDMENT_SURVIVOR", "superseded_by_filing_uuid": "", "is_superseded": "0"},
-        "dirty": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "SUPERSEDED_BY_AMENDMENT", "superseded_by_filing_uuid": "f8fa8e38", "is_superseded": "1"},
+        "pred": lambda r: (truthy(r.get("is_superseded"))
+                           and not up(r, "supersession_status").startswith("SUPERSEDED")),
+        "clean": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "SUPERSEDED_BY_AMENDMENT", "superseded_by_filing_uuid": "f8fa8e38", "is_superseded": "1"},
+        "dirty": {"client_name": "HOPI TRIBE", "filing_uuid": "3014138c", "filing_year": "1999", "supersession_status": "", "superseded_by_filing_uuid": "", "is_superseded": "1"},
     },
     {
         "id": "WITHDRAWN_ATTRIBUTION_SHIPPED",

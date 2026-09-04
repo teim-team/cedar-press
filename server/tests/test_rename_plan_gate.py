@@ -14,8 +14,11 @@ one, and both use ``treecopy.py``.
 
 FOUR INJECTIONS, ONE PER WAY THE TABLE CAN GO WRONG
 
-  a stale headline    `209` in the references row becomes `208`. The plainest
-                      form: the tree moved and the number did not.
+  a stale headline    the references row total is decremented by one, whatever
+                      it currently is. The plainest form: the tree moved and
+                      the number did not. Read from the doc, never hardcoded -
+                      pinning a fixture to the value the gate keeps current is
+                      how these injections silently stopped injecting.
 
   a stale breakdown   `scripts/` loses one and `docs/` gains one. The total is
                       still 32 and the breakdown still SUMS to 32, so every
@@ -52,6 +55,7 @@ measurement it is testing.
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import unittest
@@ -70,6 +74,34 @@ _TARGET = "tests.test_rename_plan.TestTheRenamePlanIsStillTrue"
 
 _DOC = "docs/ARCHITECTURE.md"
 _TABLE_ANCHOR = "**The rename is a named next step"
+_REFS_ROW = re.compile(
+    r"\| Path references to rewrite \| (\d+), across (\d+) files \|")
+
+
+def _refs_row(root: Path) -> tuple[str, int, int]:
+    """The references row AS IT STANDS, plus its two numbers.
+
+    THE FIXTURE MUST NOT HARDCODE THE MEASUREMENT.
+
+    These injections used to carry the literal
+    `| Path references to rewrite | 209, across 55 files |` as the text to
+    replace. That string is the very number the gate exists to keep current,
+    so the day it legitimately changed - 209 to 208, when a commit removed a
+    `grove` import - the fixtures could no longer find their anchor and
+    reported "this test injects a defect by rewriting it and has just injected
+    nothing". The gate was working; its positive controls were pinned to a
+    value that is supposed to move.
+
+    A control whose own setup breaks whenever the measured world changes is
+    not a control. Read the row, then perturb whatever it says.
+    """
+    text = (root / _DOC).read_text(encoding="utf-8")
+    m = _REFS_ROW.search(text)
+    if not m:
+        raise AssertionError(
+            f"{_DOC} has no 'Path references to rewrite' row matching "
+            f"{_REFS_ROW.pattern!r}; these injections have nothing to perturb")
+    return m.group(0), int(m.group(1)), int(m.group(2))
 
 #: What the four directories are renamed TO in the simulated-rename injection.
 #: Only the name matters; nothing reads the new paths.
@@ -183,10 +215,11 @@ class TestTheRenameGateFires(unittest.TestCase):
     # -- the injections -----------------------------------------------------
 
     def test_a_stale_headline_count_fails_the_gate_by_name(self) -> None:
+        row, total, files = _refs_row(self.root)
         with injected(
             self.root / _DOC,
-            "| Path references to rewrite | 209, across 55 files |",
-            "| Path references to rewrite | 208, across 55 files |",
+            row,
+            f"| Path references to rewrite | {total - 1}, across {files} files |",
             after=_TABLE_ANCHOR,
         ):
             self._assert_red("test_the_measurement_in_the_plan_is_the_current_one")
@@ -216,10 +249,12 @@ class TestTheRenameGateFires(unittest.TestCase):
         self._assert_green("restoring the breakdown did not restore the gate")
 
     def test_a_number_nothing_measures_fails_the_gate_by_name(self) -> None:
+        row, total, files = _refs_row(self.root)
         with injected(
             self.root / _DOC,
-            "| Path references to rewrite | 209, across 55 files |",
-            "| Path references to rewrite | 209, across 55 files, 3 generated |",
+            row,
+            f"| Path references to rewrite | {total}, across {files} files, "
+            f"3 generated |",
             after=_TABLE_ANCHOR,
         ):
             self._assert_red("test_the_table_states_no_number_this_file_does_not_check")

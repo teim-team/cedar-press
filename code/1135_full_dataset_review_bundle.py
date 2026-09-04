@@ -187,7 +187,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (          # noqa: E402
     NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
-    is_publication_eligible, mask_attribution, MASK,
+    is_publication_eligible, mask_attribution, MASK, translate_neid_values,
 )
 
 csv.field_size_limit(10_000_000)
@@ -339,6 +339,23 @@ def build(mode: str) -> int:
                         # carrying a phone number that was never going to be
                         # published anyway.
                         r = {c: r.get(c, "") for c in cols}
+                        # TRANSLATE THE RETIRED SCHEME HERE TOO.
+                        #
+                        # Codex, PR #46: `1137.load()` calls this and 1135 did
+                        # not, so a retired NEID arriving under a generic name
+                        # like `entity_id` or `affiliated_entity_ids` survived
+                        # the column gate and shipped in `dist/review` samples
+                        # and full exports - while the primary customer export
+                        # translated it. **The live site importer consumes the
+                        # 1135 samples**, so the two customer-facing surfaces
+                        # disagreed about identity.
+                        #
+                        # That is the same shape as the defect `1169` exists to
+                        # catch between the CSVs and the database, one layer
+                        # further down: a rule applied at one writer and not
+                        # its sibling. The rule belongs to
+                        # `cedar_publication`, so every writer calls it.
+                        translate_neid_values(r)
                         # CP-002: ONE gate, and all three of its outcomes.
                         # `is_publication_eligible` is `row_ok` plus the
                         # deny-by-default adjudication policy; a MASK keeps the

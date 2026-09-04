@@ -15,58 +15,224 @@
 // again in pieces. That is the "sections popping in at different moments"
 // this hook is now written to avoid.
 //
-// So the split is by position, decided once, before the browser paints:
-// anything intersecting the first screen is marked revealed in a layout
-// effect and told not to transition, so it is simply part of the page when
-// the page appears. Everything below the fold keeps the observer and the
-// 0.55s rise it was written for.
-import { useEffect, useLayoutEffect, useRef } from "react";
+// So the split is by position: anything intersecting the first screen is
+// revealed at attach time and told not to transition, so it is simply part of
+// the page when the page appears. Everything below the fold keeps the
+// observer and the 0.55s rise it was written for.
+//
+// ============================================================================
+// THE READER WENT BLANK AFTER SIGN-IN. TWO CAUSES, BOTH HERE.
+// ============================================================================
+// Reported 2026-09-03 on mobile and desktop, and again on 2026-09-04 after
+// the first fix: sign in, and the page shows the masthead and the ad and
+// nothing else. `.cp-fade` is `opacity: 0` in CSS and is revealed only by
+// JavaScript adding `is-in`, so a revealer that never runs is not a slow page.
+// It is a permanently invisible one.
+//
+// CAUSE 1 — the subtree was empty at mount.
+// `CedarPress.jsx` renders its whole body behind `{loading ? null : ...}`.
+// Connected, `loading` starts true, so at mount there were no `.cp-fade`
+// nodes: the effect matched nothing and returned early on `if (!nodes.length)`,
+// so no IntersectionObserver was ever constructed. `/me` answered, the
+// sections mounted at opacity 0, and nothing was left alive to reveal them.
+// Fixed by watching for nodes that arrive later — see `attachFadeIn`.
+//
+// CAUSE 2 — the ref detaches and reattaches, and a mount-time effect does not.
+// This is the one that survived the first fix, and it is why signing out and
+// back in still reproduced it. `CedarPress.jsx` has an EARLY RETURN:
+//
+//     if (!loading && !entitled) return (<div><PressGate /></div>);   // no ref
+//     ...
+//     return (<main ref={fadeRoot}> ... </main>);                     // ref
+//
+// So for a reader who arrives signed out:
+//   1. mount, `loading` true    -> main branch, ref attaches, observer starts
+//   2. session says not entitled -> gate branch, React sets the ref to NULL
+//                                   and the effect cleanup disconnects
+//   3. they sign in              -> main branch again, ref points at a NEW
+//                                   element - and `useEffect(..., [])` never
+//                                   runs again. No observer. Blank page.
+//
+// A `useRef` plus a mount-time effect cannot see step 3 at all: the ref object
+// is stable, so nothing tells React to re-run anything when the element behind
+// it changes. That is what a CALLBACK REF is for. React invokes it with the
+// node on attach and with null on detach, every time, so the observers follow
+// the element instead of following the component's first render.
+//
+// It also runs during the commit phase, before paint, which is the property
+// the old `useLayoutEffect` was chosen for — so the first-screen sections
+// still appear with the page rather than a frame later.
+//
+// Readers with `prefers-reduced-motion` were never affected: the CSS reveals
+// everything for them, which is part of why this survived review twice.
+import { useCallback, useRef } from "react";
 
 /** Nodes on the first screen are revealed with the page, not after it. */
 const FIRST_SCREEN_SLACK = 1.1;
 
-export function useFadeIn() {
-  const root = useRef(null);
+/** On the first screen: revealed immediately, and told not to transition. */
+function revealNow(node) {
+  node.classList.add("is-in", "cp-fade--now");
+}
 
-  // useLayoutEffect, not useEffect: this has to run BEFORE the browser
-  // paints. In an effect the sections would paint at opacity 0 and then be
-  // corrected, which is the flash this is here to remove. The measurement it
-  // makes is a getBoundingClientRect against the fold, which is cheap and
-  // needs no observer.
-  useLayoutEffect(() => {
-    const nodes = root.current?.querySelectorAll(".cp-fade");
-    if (!nodes) return;
-    // Slack, because this runs before webfonts have resolved and the fold is
-    // a few lines further down once they do. Over-revealing by one section is
-    // invisible; under-revealing brings the stagger back.
-    const fold = (window.innerHeight || 0) * FIRST_SCREEN_SLACK;
-    for (const node of nodes) {
-      if (node.getBoundingClientRect().top < fold) node.classList.add("is-in", "cp-fade--now");
-    }
-  }, []);
+/**
+ * Split freshly-seen nodes by position. Returns those left for the observer.
+ *
+ * Nodes arriving after first paint are already on a painted page, so one above
+ * the fold then is something the reader is looking at right now and must
+ * appear without a stagger — the same rule, for the same reason.
+ *
+ * Slack, because this can run before webfonts have resolved and the fold is a
+ * few lines further down once they do. Over-revealing by one section is
+ * invisible; under-revealing brings the stagger back.
+ */
+function splitByFold(nodes) {
+  const fold = (window.innerHeight || 0) * FIRST_SCREEN_SLACK;
+  const below = [];
+  for (const node of nodes) {
+    if (node.classList.contains("is-in")) continue;
+    if (node.getBoundingClientRect().top < fold) revealNow(node);
+    else below.push(node);
+  }
+  return below;
+}
 
-  useEffect(() => {
-    // Only what the layout effect left alone: the sections below the fold.
-    const nodes = [...(root.current?.querySelectorAll(".cp-fade:not(.is-in)") ?? [])];
-    if (!nodes.length) return undefined;
-    if (typeof IntersectionObserver === "undefined") {
-      nodes.forEach((node) => node.classList.add("is-in"));
-      return undefined;
+// ============================================================================
+// THE SAFETY NET
+// ============================================================================
+// Everything above depends on a ref being attached to an ancestor of the
+// content. That has now failed twice, in two different ways, and PressHub.jsx
+// renders `cp-fade` with no hook and no ref of its own, relying entirely on
+// its parent to have one.
+//
+// A reveal-on-scroll is a nicety. A blank page is a credibility event. So the
+// two are no longer allowed to share a failure mode: this watchdog runs once
+// per page load, document-wide, and reveals anything still hidden that a
+// reader can actually see. If the plumbing is correct it never does anything,
+// because every visible node already carries `is-in` long before it fires.
+//
+// It deliberately does NOT reveal below-fold content: that would kill the
+// scroll animation everywhere. It only rescues what is on screen and invisible,
+// which is the state that has no legitimate reading.
+const WATCHDOG_MS = 2500;
+let watchdogInstalled = false;
+
+//: Every class that is hidden in CSS and revealed by JavaScript adding
+//: `is-in`. `cp-band` is `PressShelf`'s, which runs its OWN observer rather
+//: than this hook - so a watchdog that knew only about `cp-fade` would have
+//: left the shelf with exactly the failure mode it was written to end. If a
+//: third such class is ever added, it belongs here on the same day.
+const REVEALED_BY_JS = [".cp-fade", ".cp-band"];
+
+function installWatchdog() {
+  if (watchdogInstalled || typeof document === "undefined") return;
+  watchdogInstalled = true;
+  const sweep = () => {
+    const h = window.innerHeight || 0;
+    for (const sel of REVEALED_BY_JS) {
+      for (const n of document.querySelectorAll(`${sel}:not(.is-in)`)) {
+        const { top, bottom } = n.getBoundingClientRect();
+        // On screen right now, and still invisible. Nothing else explains it.
+        if (bottom > 0 && top < h) n.classList.add("is-in", "cp-fade--now");
+      }
     }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-in");
-            observer.unobserve(entry.target);
+  };
+  setTimeout(sweep, WATCHDOG_MS);
+  // Route changes render a new page without a reload, so one sweep is not
+  // enough; this app is a single-page router. `popstate` covers back/forward,
+  // and a sweep after every attach covers a push - attaches are cheap and the
+  // sweep is a no-op whenever the plumbing worked.
+  if (typeof window !== "undefined") {
+    window.addEventListener("popstate", () => setTimeout(sweep, WATCHDOG_MS));
+  }
+  return sweep;
+}
+
+
+/**
+ * Everything the reveal does, as a plain function over an element.
+ *
+ * Extracted so it can be TESTED. This project's harness is `node --test` with
+ * no jsdom, so logic inside a hook was unreachable from a test — which is a
+ * large part of why a page that renders nothing shipped twice.
+ *
+ * Returns a cleanup, and takes ownership of the element until it is called.
+ */
+export function attachFadeIn(el) {
+  installWatchdog();
+  if (!el) return () => {};
+
+  // No IntersectionObserver: reveal everything, now and whenever more arrives.
+  // Never leave content at opacity 0 because a capability is absent.
+  const canObserve = typeof IntersectionObserver !== "undefined";
+
+  const observer = canObserve
+    ? new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-in");
+              observer.unobserve(entry.target);
+            }
           }
-        }
-      },
-      { rootMargin: "-6% 0px" },
-    );
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, []);
+        },
+        { rootMargin: "-6% 0px" },
+      )
+    : null;
 
-  return root;
+  const take = (nodes) => {
+    const list = [...nodes].filter((n) => !n.classList.contains("is-in"));
+    if (!list.length) return;
+    if (!observer) {
+      list.forEach((n) => n.classList.add("is-in"));
+      return;
+    }
+    splitByFold(list).forEach((n) => observer.observe(n));
+  };
+
+  take(el.querySelectorAll(".cp-fade"));
+
+  // Content that mounts after the session resolves — cause 1 above.
+  if (typeof MutationObserver === "undefined") {
+    el.querySelectorAll(".cp-fade").forEach((n) => n.classList.add("is-in"));
+    return () => observer?.disconnect();
+  }
+
+  const mutations = new MutationObserver((records) => {
+    const found = [];
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        if (node.classList?.contains("cp-fade")) found.push(node);
+        const inner = node.querySelectorAll?.(".cp-fade");
+        if (inner?.length) found.push(...inner);
+      }
+    }
+    if (found.length) take(found);
+  });
+  mutations.observe(el, { childList: true, subtree: true });
+
+  return () => {
+    mutations.disconnect();
+    observer?.disconnect();
+  };
+}
+
+/**
+ * A CALLBACK ref. Attach it with `ref={fadeRoot}` exactly as before.
+ *
+ * Callback and not `useRef`, for cause 2 above: React calls this with the node
+ * every time the element behind the ref changes, including null on detach, so
+ * a component that returns a different tree on a later render still gets its
+ * observers. A mount-time effect cannot see that happen.
+ */
+export function useFadeIn() {
+  const cleanup = useRef(null);
+  return useCallback((node) => {
+    if (cleanup.current) {
+      cleanup.current();
+      cleanup.current = null;
+    }
+    if (node) cleanup.current = attachFadeIn(node);
+  }, []);
 }

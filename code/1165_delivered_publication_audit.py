@@ -626,6 +626,14 @@ def selftest() -> int:
 
 
 def main() -> int:
+    # Codex, PR #46: flags were stripped BEFORE the refresh test, so
+    # `--refresh-vocab` could never enable it, and passing the bare token
+    # instead made it a DATASET SELECTOR that matched nothing and exited. The
+    # audit therefore stayed pinned to the cached vocabulary permanently, which
+    # means a retired identifier introduced after the cache was written would
+    # have been reported CLEAN - a silent zero, in the script whose whole
+    # purpose is to refuse those. Read flags first, then selectors.
+    flags = {a.lstrip("-") for a in sys.argv[1:] if a.startswith("-")}
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     if "selftest" in args:
         return selftest()
@@ -644,7 +652,7 @@ def main() -> int:
     # membership test pass for that reason alone; `neid_vocabulary` raises
     # rather than let that happen, and printing the count is how a reader
     # sees that it did not.
-    vocab = neid_vocabulary(refresh=("refresh-vocab" in args))
+    vocab = neid_vocabulary(refresh=("refresh-vocab" in flags or "refresh-vocab" in args))
     print(f"  1165 delivered publication audit   {len(files)} file(s), "
           f"full scan, no cap")
     print(f"    retired-NEID vocabulary: {len(vocab):,} value(s) "
