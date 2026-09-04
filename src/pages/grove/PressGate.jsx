@@ -58,18 +58,12 @@ import {
   rememberPressAccount,
 } from "../../features/grove/pressSignup";
 import {
-  AcademicIcon,
   CedarIcon,
   CredibleResearchIcon,
   InsightsIcon,
-  InstitutionIcon,
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
-import {
-  CREDIBILITY_DISCLAIMER,
-  CREDIBILITY_STRIP,
-} from "../../features/grove/pressMethod";
-import { NATIVE_LINKAGE, PRESS_CATALOG } from "../../features/grove/pressCatalog";
+import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import { PressCedarFab } from "./PressCedarFab";
 
 // The Cedar Press shelves by name, for the door. Names only, from the
@@ -80,7 +74,6 @@ const CATALOG_NAMES = PRESS_CATALOG.filter((entry) => entry.shelf !== "grove").m
   (entry) => entry.short,
 );
 
-const STRIP_ICONS = { institution: InstitutionIcon, academic: AcademicIcon };
 
 // The four pillars, in the order the supporting sentence names them: what the
 // data is, what is made from it, why it can be trusted, and Cedar.
@@ -268,10 +261,10 @@ export default function PressGate({ user }) {
                 </span>
               ))}
             </p>
-            {/* The sentence that separates these from open-data keyword
-                filters. One source of truth with the Data page's linkage
-                copy, so the door never promises what the shelf retracts. */}
-            <p className="cp-cats__how">{NATIVE_LINKAGE.door}</p>
+            {/* The linkage sentence was removed from the gate 2026-09-04 at
+                the owner's instruction. `NATIVE_LINKAGE.door` still lives in
+                pressCatalog and still carries the Data page's copy - the
+                claim is not withdrawn, it is no longer made on the door. */}
             <button
               type="button"
               className="cp-cats__cedar"
@@ -280,19 +273,12 @@ export default function PressGate({ user }) {
               Ask Cedar what Cedar Press can answer <span aria-hidden="true">&#8594;</span>
             </button>
           </div>
-          {/* The cards state the idea; the strip is what proves it. Text
-              only: a row of institutional logos reads as sponsorship, which
-              none of these have given, so the disclaimer travels with it. */}
-          <p className="cp-cred__head cp-fade">Team experience</p>
-          <div className="cp-cred cp-fade">
-            {CREDIBILITY_STRIP.map((group) => (
-              <div className="cp-cred__group" key={group.id}>
-                <span className="cp-cred__ic" aria-hidden="true">{STRIP_ICONS[group.kind]}</span>
-                <span className="cp-cred__names">{group.names.join(" · ")}</span>
-              </div>
-            ))}
-          </div>
-          <p className="cp-cred__note cp-fade">{CREDIBILITY_DISCLAIMER}</p>
+          {/* The "Team experience" strip - the Federal Reserve and university
+              names, and the endorsement disclaimer that had to travel with
+              them - was removed from the gate 2026-09-04 at the owner's
+              instruction. It remains on the Methods page, which is where a
+              reader who wants the team's background goes looking; the gate no
+              longer leads with affiliations that are not endorsements. */}
           <Link className="cp-split__method cp-fade" to={PRESS_METHODS_PATH}>
             How Cedar builds its collections <span aria-hidden="true">&#8594;</span>
           </Link>
