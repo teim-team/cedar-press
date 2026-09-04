@@ -434,6 +434,70 @@ def subcontracting():
           % (len(recs), total_in_window, CONTRACT_CAP))
 
 
+
+def federal_awards():
+    """Federal spending at the AWARD grain - the reviewer's main dataset.
+
+    Verdict, 2026-09-04: *"do not publish this version as the federal-spending
+    dataset."* The old sheet was one row per recipient UEI summarising 61,579
+    transactions, so it could not say what awards exist nor separate 2025 from
+    2026. Worse, 1,028 of its 1,060 attributions came from `uei_exact_archive`
+    and $980.6M of San Jose public housing was keyed to a New Mexico pueblo.
+
+    1186 rebuilds it: 29,622 awards, obligations split by year, and attribution
+    that is deny-by-default - tier A or B in the identifier ledger, tier X
+    honoured as a refusal, and 14 recipients proven false refused outright.
+    """
+    src = CUSTOMER / "federal_awards_2025_2026.csv"
+    if not src.exists():
+        print("    federal_awards_2025_2026.csv absent - run 1186 build")
+        return
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        recs = list(csv.DictReader(fh))
+    total = len(recs)
+    recs.sort(key=lambda r: -_num(r.get("obligated_window_usd")))
+    recs = recs[:CONTRACT_CAP]
+    for r in recs:
+        r["grain_note"] = ("ONE ROW PER AWARD, modifications summed. Sheet "
+                           "capped at the largest %d of %d awards by window "
+                           "obligations." % (CONTRACT_CAP, total))
+    order = ["cedar_uid", "name", "entity_type", "recipient_uei",
+             "recipient_name", "award_id", "award_type", "awarding_agency",
+             "program_code", "program_name", "obligated_2025_usd",
+             "obligated_2026_usd", "obligated_window_usd", "attribution_basis",
+             "grain_note"]
+    keepc = order + [k for k in (recs[0] if recs else {}) if k not in order]
+    write("8_federal_awards_2025_2026.csv", recs, keepc)
+    print("      (%d awards of %d; capped at %d by window obligations)"
+          % (len(recs), total, CONTRACT_CAP))
+
+
+
+def advocacy():
+    """Native Federal Advocacy & Engagement - replaces the 222-client summary.
+
+    Reviewer, 2026-09-04: "'Lobbying' alone would be misleading because formal
+    tribal consultations, public comments and official tribal-government
+    communications are not necessarily lobbying under the LDA." One flat table,
+    one row per documented activity per entity, activity_type carrying the
+    distinction. Client totals and meeting counts are DERIVABLE from it, which
+    is why the summary could be retired rather than maintained beside it.
+    """
+    src = CUSTOMER / "native_federal_advocacy_2025_2026.csv"
+    if not src.exists():
+        print("    native_federal_advocacy absent - run 1187 build")
+        return
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        recs = list(csv.DictReader(fh))
+    order = ["cedar_uid", "name", "entity_type", "activity_id", "activity_type",
+             "activity_date", "year", "quarter", "reported_party_name",
+             "representative_or_registrant", "federal_entity", "topic",
+             "reported_amount_usd", "amount_type", "source_type",
+             "source_record_id", "source_url", "notes"]
+    keepc = order + [k for k in (recs[0] if recs else {}) if k not in order]
+    write("9_native_federal_advocacy_2025_2026.csv", recs, keepc)
+
+
 def main():
     print("\n  Cedar Press - owner review bundle\n")
     native_entities()
@@ -442,6 +506,8 @@ def main():
     lobbying()
     federal_contracting()
     subcontracting()
+    federal_awards()
+    advocacy()
     print(f"\n  written to {OUT.relative_to(ROOT)}")
     print("  every sheet leads with YOUR_NOTES. Silence means approved.")
 

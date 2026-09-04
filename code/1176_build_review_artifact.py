@@ -60,15 +60,45 @@ FILES = [
      "The question is what the collection IS. A prior review found it is largely "
      "DOE grants, which overlaps Federal Funding — the same money under two "
      "grains."),
-    ("4_federal_spending_2025_2026_unique_entities.csv", "Federal spending",
-     "2,315 unique recipients, collapsed from 61,579 transactions.",
-     "Start here. Sort by <code>cedar_knows_this_uei_elsewhere</code> — 69 "
-     "entities carrying $1.64B have a key Cedar holds elsewhere and did not "
-     "apply here."),
-    ("5_lobbying_2025_2026_unique_clients.csv", "Lobbying",
-     "One row per client, not per filing. Clients file quarterly and amend.",
-     "<code>n_superseded_filings</code> is the amendment behaviour. Superseded "
-     "rows ship deliberately, flagged; an unflagged one is the defect."),
+    ("8_federal_awards_2025_2026.csv", "Federal spending — awards",
+     "REBUILT. One row per AWARD with modifications summed, obligations split "
+     "into <code>obligated_2025_usd</code> and <code>obligated_2026_usd</code>. "
+     "61,579 transactions resolve to 29,622 awards; the window total "
+     "reconciles to the old file to the dollar, so nothing was lost in the "
+     "regrain.",
+     "This replaces the recipient summary, which a review found unpublishable. "
+     "1,028 of that file's 1,060 attributions came from one rule — an exact "
+     "match on an ARCHIVED UEI — and it put $980.6M of San Jose public housing "
+     "under a New Mexico pueblo, ANTHC under Chugachmiut, and an Arizona "
+     "hospital under an Alaska corporation. Attribution here is "
+     "deny-by-default: tier A or B in the identifier ledger, tier X honoured "
+     "as a refusal, 14 recipients proven false refused outright, and blank "
+     "wherever Cedar cannot place the recipient. Read "
+     "<code>attribution_basis</code> — it says why every row is keyed or not."),
+    ("4_federal_spending_2025_2026_unique_entities.csv",
+     "Federal spending — recipient summary (superseded)",
+     "2,315 unique recipients, collapsed from 61,579 transactions. Kept for "
+     "comparison only.",
+     "DO NOT PUBLISH THIS ONE. Its grain cannot separate 2025 from 2026 and "
+     "its entity attributions are the ones under review — 63 rows carry a "
+     "state conflict worth $2.60B. It ships here so the rebuild can be checked "
+     "against it, not because it is fit to use."),
+    ("9_native_federal_advocacy_2025_2026.csv",
+     "Native Federal Advocacy &amp; Engagement",
+     "REBUILT and RENAMED. One flat table, one row per documented activity per "
+     "entity, with <code>activity_type</code> carrying the distinction: "
+     "registered lobbying, tribal consultations, agency meetings, regulatory "
+     "comments and IRS Schedule C disclosures.",
+     "&quot;Lobbying&quot; alone was misleading — a tribe attending a federal "
+     "consultation is exercising a government-to-government relationship, not "
+     "lobbying under the LDA, and the old name misdescribed its legal posture. "
+     "<code>amount_type</code> stops unlike figures being added: an LDA "
+     "quarterly income figure and an IRS tax-year expenditure are different "
+     "measures. Consultations, meetings and comments carry NO amount, because "
+     "no source reports one — blank, not zero, because zero is a claim. Two "
+     "declared activity types, congressional_testimony and formal_letter, "
+     "produce zero rows because Cedar holds no source; they are declared "
+     "rather than deleted, so the gap is visible."),
     ("6_federal_contracting_2025_2026.csv", "Federal contracting",
      "Prime contracts, ONE ROW PER CONTRACT rather than per modification. The "
      "window holds 110,692 source rows but only 68,616 distinct contracts - "

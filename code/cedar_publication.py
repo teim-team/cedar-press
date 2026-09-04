@@ -589,7 +589,20 @@ def _embedded_neid_re():
     if _NEID_EMBEDDED_RE is None:
         mapping = neid_map()
         known = sorted(set(mapping) | set(_NEID_AMBIGUOUS), key=len, reverse=True)
-        _NEID_EMBEDDED_RE = (re.compile(r"(?<![A-Za-z0-9-])(" +
+        # THE LOOKBEHIND MUST NOT EXCLUDE A HYPHEN. It did, and that made a
+        # NEID inside a hyphenated composite key unreachable:
+        #
+        #   NEPAP-DOI-BLM-UT-C040-2018-0027-CX-TRBF-KAIBAB-00
+        #
+        # `TRBF-KAIBAB-00` is preceded by "-", so `(?<![A-Za-z0-9-])` refused
+        # to match and the identifier shipped inside a party_id. Excluding a
+        # preceding hyphen was there to stop a NEID matching a PREFIX of the
+        # extended Alaska form, but the alternation is already built
+        # longest-first, so `AKNF-ACSRMT-00-CALSTA-ASVCPR` is consumed whole
+        # before `AKNF-ACSRMT-00` is ever tried. The hyphen exclusion was
+        # protecting against something the ordering already prevents, at the
+        # cost of a real miss.
+        _NEID_EMBEDDED_RE = (re.compile(r"(?<![A-Za-z0-9])(" +
                                         "|".join(re.escape(k) for k in known) +
                                         r")(?![A-Za-z0-9-])")
                              if known else re.compile(r"(?!x)x"))
@@ -705,7 +718,14 @@ NAME_COLS = ("canonical_name", "native_party_canonical_name",
              "gaming_properties__entity",
              "gaming_properties__ultimate_parent_entity",
              "canonical_name_token_match",
-             "name_match_support_measured_against")
+             "name_match_support_measured_against",
+             # Third group, found the same way as the second: by measuring the
+             # OUTPUT for a surviving handle rather than by reading headers.
+             # Neither of these has "canonical" in the name, so neither was
+             # reachable by inspection.
+             "requester_native_entity_name",
+             "tribes_named_in_record",
+             "resolved_native_entity_name")
 
 #: PROSE IS DELIBERATELY NOT REWRITTEN, and this is the opposite of the call
 #: made for NEIDs three hundred lines up. The difference is what the two

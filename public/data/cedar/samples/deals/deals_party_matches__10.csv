@@ -1,11 +1,11 @@
 native_party,proposed_tribe_id,proposed_name,n_deals,match_method,source_files
 Arctic Slope Regional Corporation,ANC-e960eb1ed79650d6,Arctic Slope Regional Corporation,26,exact_canonical+corp_form,deals_anc_reports_additions.csv | deals_ancsa_portal_additions.csv | deals_sec_2010_2017_additions.csv
-Cherokee Nation,TRBF-CHKNAT-00,Cherokee Nation,6,exact_canonical,deals_2026_ytd.csv | deals_federal_awards_additions.csv
+Cherokee Nation,CE-00134-BX,Cherokee Nation,6,exact_canonical,deals_2026_ytd.csv | deals_federal_awards_additions.csv
 Bering Straits Native Corporation,ANC-01159bd36085a96e,Bering Straits Native Corporation,5,exact_canonical+corp_form,deals_2000_2019_additions.csv | deals_2026_ytd.csv | deals_ancsa_portal_additions.csv | deals_historical_2020_2025.csv
-Leech Lake Band of Ojibwe,CNSF-MINNCH-LL,Leech Lake,4,parent_name_in_subsidiary,deals_2026_ytd.csv | deals_federal_awards_additions.csv
-Seneca Gaming Corporation (Seneca Nation of Indians),TRBF-SNCNAT-00,Seneca,4,exact_core-govt_for_corp_name,deals_2000_2019_additions.csv
-Oneida Nation,TRBF-ONDANY-00,Oneida,4,exact_core,deals_federal_awards_additions.csv
-Coushatta Tribe of Louisiana,TRBF-COUSLA-00,Coushatta,3,exact_alias,deals_2026_ytd.csv | deals_federal_awards_additions.csv
+Leech Lake Band of Ojibwe,CE-000QF-D7,Leech Lake,4,parent_name_in_subsidiary,deals_2026_ytd.csv | deals_federal_awards_additions.csv
+Seneca Gaming Corporation (Seneca Nation of Indians),CE-001AC-YN,Seneca,4,exact_core-govt_for_corp_name,deals_2000_2019_additions.csv
+Oneida Nation,CE-0017X-NE,Oneida,4,exact_core,deals_federal_awards_additions.csv
+Coushatta Tribe of Louisiana,CE-0013P-QZ,Coushatta,3,exact_alias,deals_2026_ytd.csv | deals_federal_awards_additions.csv
 "Koniag, Inc.",ANC-9fe723d7ba3a95ff,"Koniag, Incorporated",3,exact_canonical+corp_form,deals_ancsa_portal_additions.csv | deals_historical_2020_2025.csv
-Seminole Tribe of Florida,TRBF-SMNLFL-00,Seminole,3,exact_alias,deals_federal_awards_additions.csv
-Winnebago Tribe of Nebraska,TRBF-WNNBGO-00,Winnebago,3,exact_alias,deals_federal_awards_additions.csv
+Seminole Tribe of Florida,CE-001A9-CA,Seminole,3,exact_alias,deals_federal_awards_additions.csv
+Winnebago Tribe of Nebraska,CE-001C8-GH,Winnebago,3,exact_alias,deals_federal_awards_additions.csv

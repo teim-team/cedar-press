@@ -1,11 +1,11 @@
-recipient_name,recipient_state,recipient_type,tribe_id,canonical_name,entity_class,spine_state,match_method,match_pool,n_transactions,AUDIT_VERDICT,AUDIT_NOTE,cedar_uid
-"""COCHITI, PUEBLO DE WATER AND WASTEWATE""",NM,I,TRBF-COCHTI-00,Pueblo of Cochiti,Federally recognized tribe,NM,name+containment,primary_type_I,87,,,CE-0013H-S2
-ACOMA PUEBLO,NM,I,TRBF-ACOMAP-00,Pueblo of Acoma,Federally recognized tribe,NM,name+core/fr+containment,primary_type_I,159,,,CE-0011W-HN
-AK CHIN INDIAN COMMUNITY,AZ,I,TRBF-AKCHIN-00,Ak Chin,Federally recognized tribe,AZ,name+core,primary_type_I,76,,,CE-0011Y-X7
-AKIACHAK LIMITED,AK,I,AKNF-AKACHK-00-CALSTA-ASVCPR,Akiachak,Federally recognized Alaska Native Village,AK,name+core/fr+core,primary_type_I,31,,,CE-00004-R4
-AKIAK NATIVE COMMUNITY,AK,C,AKNF-AKIAKC-00-CALSTA-ASVCPR,Akiak,Federally recognized Alaska Native Village,AK,name+core/fr+exact,secondary_native_token,17,,,CE-00006-4P
-ALABAMA COUSHATTA INDIAN RESER,TX,I,TRBF-ALCOUS-00,Alabama-Coushatta,Federally recognized tribe,TX,name+containment,primary_type_I,84,,,CE-0011Z-30
-ALABAMA-QUASSARTE TRIBAL TOWN,OK,D,TRBF-ALQSRT-00,Alabama-Quassarte Tribal Town,Federally recognized tribe,OK,name+exact/fr+exact,secondary_native_token,37,,,CE-00120-E9
-ALATNA TRIBAL COUNCIL,AK,I,AKNF-ALATNA-00-DOYONL-TNNACH,Alatna,Federally recognized Alaska Native Village,AK,name+containment/fr+containment,primary_type_I,5,,,CE-0000A-WT
-"ALEUTIAN/PRIBILOF ISLANDS ASSOCIATION, INC",AK,I,SGVF-PRBLFA-00,Aleutian Pribilof Islands Association,Federal-level self-governance consortium,AK,name+core,primary_type_I,7,,,CE-0010K-P4
-ALLAKAKET TRIBAL COUNCIL,AK,I,AKNF-ALAKKT-00-DOYONL-TNNACH,Allakaket,Federally recognized Alaska Native Village,AK,name+containment/fr+containment,primary_type_I,11,,,CE-00008-G8
+recipient_name,recipient_state,recipient_type,canonical_name,entity_class,spine_state,match_method,match_pool,n_transactions,AUDIT_VERDICT,AUDIT_NOTE,cedar_uid
+"""COCHITI, PUEBLO DE WATER AND WASTEWATE""",NM,I,"Pueblo of Cochiti, New Mexico",Federally recognized tribe,NM,name+containment,primary_type_I,87,,,CE-0013H-S2
+ACOMA PUEBLO,NM,I,"Pueblo of Acoma, New Mexico",Federally recognized tribe,NM,name+core/fr+containment,primary_type_I,159,,,CE-0011W-HN
+AK CHIN INDIAN COMMUNITY,AZ,I,Ak-Chin Indian Community,Federally recognized tribe,AZ,name+core,primary_type_I,76,,,CE-0011Y-X7
+AKIACHAK LIMITED,AK,I,Akiachak Native Community,Federally recognized Alaska Native Village,AK,name+core/fr+core,primary_type_I,31,,,CE-00004-R4
+AKIAK NATIVE COMMUNITY,AK,C,Akiak Native Community,Federally recognized Alaska Native Village,AK,name+core/fr+exact,secondary_native_token,17,,,CE-00006-4P
+ALABAMA COUSHATTA INDIAN RESER,TX,I,Alabama-Coushatta Tribe of Texas,Federally recognized tribe,TX,name+containment,primary_type_I,84,,,CE-0011Z-30
+ALABAMA-QUASSARTE TRIBAL TOWN,OK,D,Alabama-Quassarte Tribal Town,Federally recognized tribe,OK,name+exact/fr+exact,secondary_native_token,37,,,CE-00120-E9
+ALATNA TRIBAL COUNCIL,AK,I,Alatna Village,Federally recognized Alaska Native Village,AK,name+containment/fr+containment,primary_type_I,5,,,CE-0000A-WT
+"ALEUTIAN/PRIBILOF ISLANDS ASSOCIATION, INC",AK,I,Aleutian Pribilof Islands Association,Federal-level self-governance consortium,AK,name+core,primary_type_I,7,,,CE-0010K-P4
+ALLAKAKET TRIBAL COUNCIL,AK,I,Allakaket Village,Federally recognized Alaska Native Village,AK,name+containment/fr+containment,primary_type_I,11,,,CE-00008-G8
