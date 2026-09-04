@@ -118,6 +118,15 @@ def norm_ein(v: str) -> str:
     return d.zfill(9) if d else ""
 
 
+def _namekey(x: str) -> str:
+    """Normalised form for EXACT name equality. Not a similarity measure."""
+    import re as _re
+    x = (x or "").lower()
+    x = _re.sub(r"(inc|incorporated|corp|corporation|llc|ltd|co|the)", " ", x)
+    x = _re.sub(r"[^a-z0-9]+", " ", x)
+    return " ".join(x.split())
+
+
 def _agree(a: str, b: str) -> bool:
     """Do two names refer to the same organization?
 
@@ -259,6 +268,23 @@ def plan():
     existing_name = existing_name_by_uid()
     already_nonprofit = {r["cedar_uid"] for r in reg
                          if r.get("entity_class") == ENTITY_CLASS}
+    merged = []
+    # name -> (uid, state, class) for every entity Cedar already holds
+    held_names = existing_name_by_uid()
+    reg_by_uid = {r["cedar_uid"]: r for r in reg if r.get("cedar_uid")}
+    by_name = {}
+    for uid_, nm in held_names.items():
+        # ONLY entities that are actually IN THE REGISTER. cedar_entity_names
+        # is a derived table and can outlive a register rollback - reading it
+        # unfiltered made every candidate "merge" into a uid that no longer
+        # existed, because a previous run's minted rows were still in it.
+        rr = reg_by_uid.get(uid_)
+        if rr is None:
+            continue
+        k = _namekey(nm)
+        if k:
+            by_name.setdefault(k, (uid_, (rr.get("state") or "").strip().upper(),
+                                   rr.get("entity_class", "")))
     # only the already-linked EINs need arbitration
     linked_eins = {norm_ein(o.get('ein')) for o in _read(GIVENATIVE)}
     linked_eins = {e for e in linked_eins if e and e in known}
@@ -322,12 +348,38 @@ def plan():
                 org["_collapsed_name"] = held
                 to_mint.append((ein, name, org))
         else:
+            # LAST GUARD BEFORE MINTING: does Cedar already hold this org under
+            # ANOTHER CLASS?
+            #
+            # The EIN check cannot see these. Measured 2026-09-04: of nine
+            # organizations this script duplicated, only ONE had its EIN in
+            # cedar_identifier_ledger_final. The other eight were already in
+            # the register as an Urban Indian Organization, an Intertribal
+            # Organization, a Tribal College, a Native CDFI, a Native Financial
+            # Institution or an NHO - Oweesta Corporation, the National
+            # Congress of American Indians, Lac Courte Oreilles Ojibwe
+            # University, the Indian Health Center of Santa Clara Valley - and
+            # were minted a second time as `Native nonprofit`. That is the
+            # duplicate identity this file's own docstring calls unforgivable,
+            # and it created it.
+            #
+            # This test is EXACT normalised equality, not similarity. The fuzzy
+            # approach was measured and rejected (see bmf_names); exact name
+            # equality plus agreeing state is a different and much higher bar.
+            hit = by_name.get(_namekey(name))
+            if hit:
+                huid, hstate, hclass = hit
+                st = (org.get("state") or "").strip().upper()
+                if not st or not hstate or st == hstate:
+                    to_link.append((ein, name, huid))
+                    merged.append((ein, name, huid, hclass))
+                    continue
             to_mint.append((ein, name, org))
-    return to_mint, to_link, skipped, nxt, ident
+    return to_mint, to_link, skipped, nxt, ident, merged
 
 
 def build(apply: bool = False) -> int:
-    to_mint, to_link, skipped, nxt, ident = plan()
+    to_mint, to_link, skipped, nxt, ident, merged = plan()
     print("  1183 native nonprofit entities   %s"
           % ("BUILD" if apply else "REPORT (writes nothing)"))
     print("    GiveNative orgs with an EIN : %d" % (len(to_mint) + len(to_link)))
@@ -335,6 +387,11 @@ def build(apply: bool = False) -> int:
           % len(to_link))
     print("    TO MINT as %-17s: %d" % (ENTITY_CLASS, len(to_mint)))
     print("    skipped, no EIN published   : %d" % len(skipped))
+    if merged:
+        print("    MERGED into an entity Cedar already held (NOT minted): %d"
+              % len(merged))
+        for ein_, nm, huid, hcls in merged[:12]:
+            print("        %-13s %-42s was already %s" % (huid, nm[:42], hcls[:30]))
     print("    next free uid ordinal       : %d -> %s" % (nxt, ident.mint(nxt)))
 
     if not apply:

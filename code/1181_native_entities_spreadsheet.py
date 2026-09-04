@@ -186,6 +186,35 @@ def verify() -> int:
     print("  blank name      : %d" % blank_name)
     print("  blank type      : %d" % blank_type)
     print("  definitions ship: %s" % OUT_DEFS.exists())
+
+    # TWO ENTITIES MUST NOT SHIP THE SAME NAME. Two ways this happened on
+    # 2026-09-04, both silent until someone looked:
+    #
+    #   1. Nine organizations Cedar already held - the National Congress of
+    #      American Indians, Oweesta Corporation, Lac Courte Oreilles Ojibwe
+    #      University - were MINTED AGAIN as `Native nonprofit`, because the
+    #      EIN check could not see them (only one of the nine had its EIN in
+    #      the identifier ledger). Two uids, one organization.
+    #   2. The BIA list publishes BOTH "Oneida Indian Nation" (New York) and
+    #      "Oneida Nation" (Wisconsin). The name reconciliation mapped BOTH
+    #      Cedar uids to the Wisconsin string, so two distinct federally
+    #      recognized tribes shipped under one identical name while the New
+    #      York name sat unmatched.
+    #
+    # A duplicate name is not always a duplicate ENTITY - but it is always
+    # either a duplicate identity or a naming error, and a customer cannot
+    # tell which. So it fails the build.
+    import collections as _c
+    dupes = {n: rs for n, rs in
+             _c.Counter(r["name"].strip() for r in data if r["name"].strip()).items()
+             if rs > 1}
+    print("  names used by >1 entity: %d" % len(dupes))
+    for n in sorted(dupes)[:8]:
+        who = [r["cedar_uid"] for r in data if r["name"].strip() == n]
+        print("      %-46s %s" % (n[:46], ", ".join(who[:4])))
+    if dupes:
+        ok = False
+
     if blank_uid or blank_name or blank_type or not OUT_DEFS.exists():
         ok = False
     print("  OK" if ok else "  FAIL")
