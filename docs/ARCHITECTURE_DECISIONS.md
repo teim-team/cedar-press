@@ -3668,3 +3668,121 @@ TERMS_STATED_RESTRICTIVE` and land `publishable = N`, because
 harvest gate and the publication gate are two gates and the owner has so far
 moved one.
 <!-- END ADR-041-NOB-DIRECTORIES -->
+
+<!-- BEGIN ADR-042-FULLDATA-THREE-GAPS -->
+## ADR-042 — three things only a full-data check can answer: a placeholder day, an outcome derived from one sentence, and whether a money column may be summed (workstream FULLDATA-THREE-GAPS, 2026-09-02)
+
+**Files owned by this pass**, declared here because they were edited:
+`code/1159_date_placeholder_precision.py`, `code/1160_legislation_outcome_vs_actions.py`,
+`code/1161_money_column_summability.py` (all claimed via `1050 claim`);
+`data/clean/gaming_facilities.csv`, `data/clean/deals_classified.csv`,
+`data/clean/native_bills.csv`; `code/14_build_bills_votes.py` (one function);
+`data/clean/codebook/07_gaming.csv`, `01_deals.csv`, `10_bills_votes.csv`
+(additive rows only); `docs/MONEY_TOTALLING_RULES.md` inside a marked block of
+this workstream's own name; new `docs/MONEY_COLUMN_SUMMABILITY.json` and
+`docs/DATE_PLACEHOLDER_SWEEP.json`.
+
+### 1. A placeholder day may not ship as a day — but find out WHOSE day it is first
+
+The owner's figures reproduce exactly: 148 of 339 `gaming.open_date_source_value_verbatim`
+values fall on day 15, 59 of 76 on `close_date`. **The day is not Cedar's.** The
+Casino City workbook `23d` reads holds 553 `Open Date` cells of which 188 fall on
+31 December and 165 on day 15, every one a real Excel datetime under number
+format `[$-409]d-mmm-yyyy`. Cedar transcribed a vendor placeholder; it did not
+complete a month-only value, and `code/158` had already re-typed the *shipping*
+`open_date` correctly. **Checking the raw source rather than reasoning from the
+output changed the finding from "we fabricate days" to "we inherit and disclose
+one, badly."**
+
+What was actually wrong is smaller and was fixed: nothing on the row said the
+retained verbatim value carried a placeholder, so a consumer parsing that column
+got a fabricated day with no warning. It is now a column, not a sentence at the
+end of a 300-character basis string.
+
+**The literal instance of the complaint was in a dataset nobody had looked at.**
+`deals.csv` had **no date-precision machinery at all** and 100 rows whose own
+`Date_Basis` says in English that the day is invented — *"A mid-month placeholder
+day (15) is used per ledger convention; the day is NOT stated by the source."*
+71 of them on day 15. It now has the same four columns gaming has, derived
+**only** from what each row's own basis already states, and 77 values re-typed.
+
+### 2. `outcome` was derived from one sentence out of an average of ten
+
+`legislation.outcome` had `outcome_basis = latest_action_text` on 2,606 of 3,069
+bills. Measured against `native_bill_actions.csv` (31,936 actions, 3,061 bills),
+**152 shipped values were refuted by the history**: 144 `died-in-committee` bills
+that reached the other chamber, 5 `passed-one-chamber` bills whose floor vote
+FAILED, 3 `died-in-committee` bills that became public law. A further 166 blanks
+were recoverable from the history.
+
+**Cedar already held the right answer and shipped the wrong column beside it.**
+`73_bills_votes_completion.stage_outcomes()` reads every bill's full history
+through a 13-rule ladder into `native_bill_outcomes.disposition`, with one
+auditable Congress.gov sentence per bill. `outcome` is now the COLLAPSE of that,
+not a new ladder — building a second full-history classifier is exactly the
+two-ladders-one-number drift in `AGENT_FIELD_GUIDE` §7. Before trusting it,
+`disposition` was itself checked against six primitive predicates over the raw
+actions: **0 refuted**.
+
+**Two faults, and both were fixed.** The unsound one is a single line:
+`14.rule_outcome` mapped `tribal_bill_intros.final_status = reached_floor_not_enacted`
+to `passed-one-chamber`. *Reached the floor and was not enacted* includes every
+bill defeated on it. That line produced the owner's example and is now patched at
+the generator, because repairing the table alone is reverted by the next rebuild.
+
+**The vocabulary was widened by exactly two values, and counted:**
+`floor-vote-failed` (11) and `superseded-by-another-measure` (15) — both already
+published values of `disposition`, so this widens `outcome` to a vocabulary the
+product already documents. Where the history cannot settle it the outcome is
+BLANK with a named reason (17 rows), never guessed.
+
+**Not done, recommended:** the four "never reached a floor" dispositions all
+still collapse to `died-in-committee`, which is imprecise for the **358** bills
+that were reported out of committee or placed on a calendar. Re-labelling 2,189
+rows of a customer-facing column is an owner's decision. The precise value is one
+column away and `outcome_basis` now names it on every affected row.
+
+### 3. Summability is a property of a column, and a constancy test does not find the worst case
+
+Four shapes, told apart by measurement on the delivered files:
+TRANSACTION_ADDITIVE, ADDITIVE_WITHIN_GROUP, SNAPSHOT_RESTATED_PER_ROW,
+CUMULATIVE_RESTATED_PER_ROW. **10 never-sum columns**, the worst by far being
+three joined rollups nobody had flagged: `subaward_entity_rollup__usd_as_prime_a`
+sums to **$22,309,732,318,204.07** against a correct **$7,943,989,328.24** —
+**2,808x** — because an entity-level rollup is restated on every subaward row of
+that entity.
+
+**The decisive statistic is AUTOCORRELATION, not constancy.** A constancy test
+finds the flat snapshots and walks straight past a ceiling that FALLS on a
+de-obligation, which is what `contractors.total_award_value` does; only 9,927 of
+its 132,976 multi-row award groups are monotone, so a monotonicity test misses it
+too. Inside one award, successive values of a restated figure differ by 30% on
+average and successive values of a genuine per-transaction amount by 97%. The two
+populations do not overlap on the delivered files (0.000–0.319 against
+0.761–0.970) and the threshold sits in the empty band.
+
+`total_award_value` is therefore **18.88x** its own award-level total — distinct
+from the 18.15x in circulation, which is `SUM(total_award_value) /
+SUM(total_obligations)`, a ratio between two columns rather than within one. Both
+reproduce; they are different quantities and must not be quoted interchangeably.
+
+**And the column names are actively misleading.** `total_obligations` is a
+per-TRANSACTION delta that sums correctly; `total_award_value`, one column away
+and named the same way, is a restated ceiling that must not be summed.
+
+Answers are machine-readable in `docs/MONEY_COLUMN_SUMMABILITY.json` and
+regenerated on every run; `1161.summability_warning(dataset, column)` is the
+sentence to print, following `cedar_publication.subaward_warning()` rather than
+typing a constant that goes stale.
+
+### The rule this pass paid for: an in-place enricher must survive its own second run
+
+`1159 apply` ran twice. The second run read its own `2001-03` output, failed
+`ISO.match`, fell through every branch, and re-classified **75 month-precision
+rows as `unparseable` while blanking 77 verbatim values.** A pass that destroys
+its own work on re-invocation is worse than one that never ran, and `build.py`
+re-runs every PHASE 2 enricher after any rebuild — so this would have fired
+unattended. Fixed by reading the shapes the pass itself writes; V6 asserts it and
+a fixture runs `apply` a second time and checks the survivors. **Every in-place
+enricher in this repo should be run twice before it is believed.**
+<!-- END ADR-042-FULLDATA-THREE-GAPS -->

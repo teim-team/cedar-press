@@ -1,0 +1,986 @@
+{
+ "snapshot": {
+  "file": "dist/customer/native-owned-businesses.csv",
+  "bytes": 5759289,
+  "mtime": "2026-09-03T00:37:36"
+ },
+ "rows": 3725,
+ "columns": 70,
+ "seconds": 8.6,
+ "profile": {
+  "business_source_id": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4439
+  },
+  "source_id": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 38,
+   "vocabulary": {
+    "TBD-045": 836,
+    "TBD-R01": 602,
+    "TBD-041": 346,
+    "TBD-079": 337,
+    "TBD-052": 140,
+    "TBD-L01": 136,
+    "TBD-046": 133,
+    "TBD-044": 116,
+    "TBD-L04": 101,
+    "TBD-058": 98,
+    "TBD-C03": 88,
+    "TBD-032": 81,
+    "TBD-M03": 73,
+    "TBD-043": 68,
+    "TBD-C02": 68,
+    "TBD-R06": 50,
+    "TBD-030": 49,
+    "TBD-M02": 45,
+    "TBD-R02": 41,
+    "TBD-L02": 39,
+    "TBD-L03": 35,
+    "TBD-047": 34,
+    "TBD-L08": 27,
+    "TBD-053": 25,
+    "TBD-M01": 23,
+    "TBD-056": 20,
+    "TBD-R05": 18,
+    "TBD-050": 17,
+    "TBD-R04": 16,
+    "TBD-R03": 14,
+    "TBD-048": 13,
+    "TBD-L07": 10,
+    "TBD-L09": 10,
+    "TBD-059": 5,
+    "TBD-054": 4,
+    "TBD-L05": 4,
+    "TBD-L06": 3
+   }
+  },
+  "certifying_authority_entity_id": {
+   "nonblank": 3576,
+   "blank": 149,
+   "pct_blank": 4.0,
+   "approx_distinct": 32,
+   "vocabulary": {
+    "TRBF-CHKNAT-00": 836,
+    "TRBF-CHKSWN-00": 602,
+    "TRBF-NAVAJO-00": 346,
+    "TRBF-MSENAT-00": 337,
+    "TRBF-LUMMIT-00": 140,
+    "TRBF-HOOPAV-00": 136,
+    "TRBF-MHATAT-00": 133,
+    "TRBF-CSKTFR-00": 116,
+    "TRBF-AQNNAH-00": 101,
+    "ANRC-CALSTA-00": 98,
+    "TRBF-PUYLLP-00": 88,
+    "TRBF-PYRMDL-00": 73,
+    "TRBF-ESTCHK-00": 68,
+    "ANRC-NANARC-00": 50,
+    "TRBF-TULALP-00": 49,
+    "TRBF-SWOYTE-00": 45,
+    "TRBF-COLVLL-00": 41,
+    "TRBF-BADRVR-00": 39,
+    "TRBF-LTRVRS-00": 35,
+    "TRBF-ONDAWI-00": 34,
+    "TRBF-CITIZN-00": 27,
+    "TRBF-BLCKFT-00": 25,
+    "TRBF-SPKANE-00": 23,
+    "ANRC-ARCSLO-00": 20,
+    "TRBF-STHUTE-00": 18,
+    "TRBF-THNODM-00": 17,
+    "TRBF-FSTCTY-00": 16,
+    "TRBF-UMATLL-00": 14,
+    "TRBF-POARCH-00": 13,
+    "TRBF-CHEHLS-00": 10,
+    "TRBF-FTHALL-00": 10,
+    "ANRC-DOYONL-00": 5,
+    "TRBF-DELAWT-00": 4,
+    "TRBF-MNMNEE-00": 4,
+    "TRBF-CAVLLY-00": 3
+   }
+  },
+  "nation_id": {
+   "nonblank": 3453,
+   "blank": 272,
+   "pct_blank": 7.302,
+   "approx_distinct": 41
+  },
+  "business_entity_id": {
+   "nonblank": 5,
+   "blank": 3720,
+   "pct_blank": 99.8658,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "CEDAR-ENT-000061": 1,
+    "ANVC-HUNATO-00": 1,
+    "ANVC-KLWCKH-00": 1,
+    "CEDAR-ENT-000092": 1,
+    "CDFI-CTZNPT-00": 1
+   }
+  },
+  "certifying_authority_name": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 37,
+   "vocabulary": {
+    "Cherokee Nation": 836,
+    "The Chickasaw Nation": 602,
+    "Navajo Nation": 346,
+    "Muscogee (Creek) Nation": 337,
+    "Lummi Nation": 140,
+    "Hoopa Valley Tribe": 136,
+    "Three Affiliated Tribes (MHA Nation)": 133,
+    "Confederated Salish & Kootenai Tribes": 116,
+    "Wampanoag Tribe of Gay Head (Aquinnah)": 101,
+    "Calista Corporation": 98,
+    "Puyallup Tribe of Indians": 88,
+    "Confederated Tribes of Grand Ronde": 81,
+    "Pyramid Lake Paiute Tribe": 73,
+    "Eastern Band of Cherokee Indians": 68,
+    "Pokagon Band of Potawatomi Indians": 68,
+    "NANA Regional Corporation, Inc.": 50,
+    "Tulalip Tribes": 49,
+    "Sisseton-Wahpeton Oyate": 45,
+    "Confederated Tribes of the Colville Reservation": 41,
+    "Bad River Band": 39,
+    "Little Traverse Bay Bands of Odawa Indians": 35,
+    "Oneida Nation (Wisconsin)": 34,
+    "Citizen Potawatomi Nation": 27,
+    "Blackfeet Nation": 25,
+    "Spokane Tribe of Indians": 23,
+    "Arctic Slope Regional Corporation": 20,
+    "Southern Ute Indian Tribe": 18,
+    "Tohono O'odham Nation": 17,
+    "Forest County Potawatomi Community": 16,
+    "Confederated Tribes of the Umatilla Indian Reservation": 14,
+    "Poarch Band of Creek Indians": 13,
+    "Shoshone-Bannock Tribes": 10,
+    "Confederated Tribes of the Chehalis Reservation": 10,
+    "Doyon, Limited": 5,
+    "Menominee Indian Tribe of Wisconsin": 4,
+    "Delaware Tribe of Indians": 4,
+    "California Valley Miwok Tribe": 3
+   }
+  },
+  "programme_name": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 32,
+   "vocabulary": {
+    "Cherokee Nation TERO Directory": 836,
+    "Chickasaw Business Directory": 602,
+    "Navajo Business Opportunity Act source listing": 346,
+    "MCN CESO Vendor List": 337,
+    "Lummi Owned Businesses (LIBC business-licence report)": 140,
+    "Hoopa Active Business Names (tribal business licence register)": 136,
+    "MHA TERO Certified Indian Contractors": 133,
+    "Indian Preference Office - Indian Preference Business List": 116,
+    "Business Directory (Planning Department listing)": 101,
+    "Calivika - Calista shareholder business directory": 98,
+    "TERO Indian Preference Directory": 88,
+    "TERO Indian Owned Business list": 81,
+    "2025 Approved Business Licenses": 73,
+    "EBCI TERO Certified Vendor List": 68,
+    "Tribal Owned Business & Vendor Directory (Mno-Bmadsen)": 68,
+    "Akima operating companies": 50,
+    "TERO Native American Owned Business (NAOB) Registry": 49,
+    "TERO Approved Indian Preference Businesses": 45,
+    "TERO Title 10 Certified Contractor List": 41,
+    "Business Directory - Tribal Member Owned Businesses": 39,
+    "LTBB Tribal Citizen-owned Business Directory": 35,
+    "Indian Preference Vendor List": 34,
+    "Tribal enterprise register (WordPress `enterprise` type)": 27,
+    "Blackfeet TERO Certified Indian Preference Firms": 25,
+    "TERO Updated Indian Preference Companies List": 23,
+    "ASRC Federal contract vehicles - subsidiary directory": 20,
+    "Indian Owned Business List": 18,
+    "TERO Certified Indian Preference Firms": 17,
+    "FCP Tribal Member Owned Businesses": 16,
+    "TERO Certified Indian Owned Business Directory": 14,
+    "TERO Certified Businesses": 13,
+    "Chehalis Tribal Enterprises (CTE) family of businesses": 10,
+    "TERO Certified Indian Preference Business Directory": 10,
+    "Doyon Operations - family of companies": 5,
+    "Tribal Business register (WordPress `tribalbusiness` type)": 4,
+    "Menominee Contractors listing": 4,
+    "Tribally owned SBA 8(a) operating companies": 3
+   }
+  },
+  "business_name_is_person_name": {
+   "nonblank": 2947,
+   "blank": 778,
+   "pct_blank": 20.8859,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 1786,
+    "-1": 601,
+    "1": 560
+   }
+  },
+  "business_entity_name": {
+   "nonblank": 5,
+   "blank": 3720,
+   "pct_blank": 99.8658,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "Cherokee Enterprises Inc": 1,
+    "Huna Totem Corporation": 1,
+    "Citizen Potawatomi Community Development Corporation": 1,
+    "Klawock Heenya Corporation": 1,
+    "Laguna Creek LLC": 1
+   }
+  },
+  "source_business_key": {
+   "nonblank": 3273,
+   "blank": 452,
+   "pct_blank": 12.1342,
+   "approx_distinct": 2301
+  },
+  "business_name_raw": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3181
+  },
+  "business_name_normalized": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3938
+  },
+  "business_entity_class": {
+   "nonblank": 5,
+   "blank": 3720,
+   "pct_blank": 99.8658,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "Alaska Native Village Corporation": 2,
+    "Individually Native-owned business": 2,
+    "Native Community Development Financial Institution": 1
+   }
+  },
+  "record_scope": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "unresolved": 3720,
+    "entity": 5
+   }
+  },
+  "assertion_class": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "OWNERSHIP": 3510,
+    "RELATIONSHIP": 213,
+    "JOINT_VENTURE_PARTICIPATION": 2
+   }
+  },
+  "directory_type": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "tero": 1846,
+    "member_directory": 618,
+    "business_licence": 349,
+    "certification_notice": 346,
+    "vendor_list": 243,
+    "subsidiary_directory": 119,
+    "indian_preference": 102,
+    "shareholder_vendor": 98,
+    "vendor": 4
+   }
+  },
+  "identity_scope": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 15,
+   "vocabulary": {
+    "any_native": 1782,
+    "citizen": 1082,
+    "shareholder_descendant_or_spouse": 199,
+    "mixed": 170,
+    "unknown": 138,
+    "enrolled_member_cskt": 91,
+    "vendor_relationship": 85,
+    "parent_asserted_subsidiary": 73,
+    "tribally_owned_entity": 48,
+    "enrolled_member_other_federally_recognized": 28,
+    "any_native_oodham_and_local": 15,
+    "enrolled_member_100pct": 6,
+    "enrolled_member_51pct": 4,
+    "joint_venture_partner": 2,
+    "other_indian_preference_certified": 2
+   }
+  },
+  "identity_claim_text": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 87
+  },
+  "ownership_percent": {
+   "nonblank": 389,
+   "blank": 3336,
+   "pct_blank": 89.557,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "100.0": 341,
+    "51.0": 32,
+    "0.0": 5,
+    "50.0": 3,
+    "60.0": 2,
+    "98.0": 1,
+    "55.0": 1,
+    "75.0": 1,
+    "65.0": 1,
+    "67.0": 1,
+    "52.0": 1
+   }
+  },
+  "ownership_threshold_min": {
+   "nonblank": 778,
+   "blank": 2947,
+   "pct_blank": 79.1141,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "51.0": 352,
+    "1.0": 278,
+    "0.51": 148
+   }
+  },
+  "certification_number": {
+   "nonblank": 106,
+   "blank": 3619,
+   "pct_blank": 97.1544,
+   "approx_distinct": 96
+  },
+  "certification_start": {
+   "nonblank": 117,
+   "blank": 3608,
+   "pct_blank": 96.8591,
+   "approx_distinct": 82
+  },
+  "certification_expiration": {
+   "nonblank": 750,
+   "blank": 2975,
+   "pct_blank": 79.8658,
+   "approx_distinct": 322
+  },
+  "business_license_number": {
+   "nonblank": 202,
+   "blank": 3523,
+   "pct_blank": 94.5772,
+   "approx_distinct": 220
+  },
+  "federal_contract_number": {
+   "nonblank": 20,
+   "blank": 3705,
+   "pct_blank": 99.4631,
+   "approx_distinct": 21,
+   "vocabulary": {
+    "47QRAA19D00AU": 1,
+    "47QTCA19D00FN; HHSN316201200127W": 1,
+    "47QTCA18D00A0": 1,
+    "47QTCB22D0256": 1,
+    "47QTCC26DH025": 1,
+    "47QRCA25DSB22, Domains: Management & Advisory, Technical & Engineering, Research & Development, Environmental, Facilities, Logistics": 1,
+    "GS00F020DA": 1,
+    "47QTCA25D007V; N0017825D7103": 1,
+    "GS35F343DA; HHSN316201200054W": 1,
+    "47QRCA25DU030, Domains: Environmental, Facilities, Logistics": 1,
+    "47QTCC25DS031": 1,
+    "47QRCA25DU031, Domains: Management & Advisory, Technical and Engineering, Research & Development": 1,
+    "HHSN316201200151W & HHSN316201200087W": 1,
+    "HC102818D0023": 1,
+    "HC104719D2034": 1,
+    "W15P7T-17-D-0104": 1,
+    "47QTCA22D00AH": 1,
+    "47QTCA18D00BH": 1,
+    "47QTCA18D001A": 1,
+    "47QRCA26DA020": 1
+   }
+  },
+  "service_category_raw": {
+   "nonblank": 3155,
+   "blank": 570,
+   "pct_blank": 15.302,
+   "approx_distinct": 1964
+  },
+  "naics": {
+   "nonblank": 34,
+   "blank": 3691,
+   "pct_blank": 99.0872,
+   "approx_distinct": 32,
+   "vocabulary": {
+    "484110": 2,
+    "484220": 2,
+    "238220": 2,
+    "236220": 2,
+    "562212": 1,
+    "238320": 1,
+    "236220, 221114, 335999": 1,
+    "236115": 1,
+    "236219": 1,
+    "561730": 1,
+    "238210": 1,
+    "1721": 1,
+    "236118": 1,
+    "21415": 1,
+    "2361": 1,
+    "561720": 1,
+    "236118, 238130, 238160, 238170, 238310, 238320, 238330, 238350": 1,
+    "238910, 484220, 561730, 237310": 1,
+    "541611, 644130": 1,
+    "2361, 2362, 2381, 2383": 1,
+    "562111": 1,
+    "512110": 1,
+    "541330, 541310": 1,
+    "00100, 00101": 1,
+    "541921, 541922, 512191": 1,
+    "721110": 1,
+    "33712, 337214, 2522, 2599, 2542, 5046, 5021, 3429, 3499": 1,
+    "238110": 1,
+    "238910, 237110, 561730, 237310, 238220, 238320, 484220": 1,
+    "236115, 236116, 236117, 236118, 236220, 541330, 541990": 1
+   }
+  },
+  "city": {
+   "nonblank": 1855,
+   "blank": 1870,
+   "pct_blank": 50.2013,
+   "approx_distinct": 660
+  },
+  "state_province": {
+   "nonblank": 1855,
+   "blank": 1870,
+   "pct_blank": 50.2013,
+   "approx_distinct": 53
+  },
+  "owner_name_present": {
+   "nonblank": 2675,
+   "blank": 1050,
+   "pct_blank": 28.1879,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 1419,
+    "0": 1256
+   }
+  },
+  "n_owners_named": {
+   "nonblank": 2675,
+   "blank": 1050,
+   "pct_blank": 28.1879,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "1": 1333,
+    "0": 1256,
+    "2": 82,
+    "3": 2,
+    "4": 1,
+    "7": 1
+   }
+  },
+  "withheld_fields": {
+   "nonblank": 3275,
+   "blank": 450,
+   "pct_blank": 12.0805,
+   "approx_distinct": 79
+  },
+  "source_edition": {
+   "nonblank": 1632,
+   "blank": 2093,
+   "pct_blank": 56.1879,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "NBOA-Source-List-2026.08.04.pdf (Revised: 08/04/2026)": 346,
+    "MCN-CESO-Vendor-List-260817": 337,
+    "Current as of Tuesday September 1st, 2026": 140,
+    "TERO-CIC-06.17.2026": 133,
+    "Indian-Preference-Business-List-06.10.2026": 116,
+    "TERO-IP-Directory-2025.pdf (Updated: February 2025)": 88,
+    "grandronde.org/government/tero/ as rendered 2026-08-28": 81,
+    "2025-Approved-Business-Licenses.pdf": 73,
+    "TERO-Vendor-List-July-August-2.pdf (July-August 2026 bimonthly edition)": 68,
+    "Tribal-Directory-2022-1.pdf": 68,
+    "PROD5-20260828-1112": 49,
+    "tero-indian-preference-list-1-2025-1.pdf (UPDATED: January 14, 2025)": 45,
+    "doc20250610134440 (2024 Certified Indian Preference Firms)": 25,
+    "UPDATED-INDIAN-PREFERENCE-COMPANIES-LIST-06-25-2026.docx": 23,
+    "July-2026-Updated-Certified-Firms-Listing-V2": 17,
+    "TERO-Certified-Business-List-07.21.2026-1": 13,
+    "September 2022": 10
+   }
+  },
+  "source_last_updated": {
+   "nonblank": 1366,
+   "blank": 2359,
+   "pct_blank": 63.3289,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "2026-08-04": 346,
+    "2026-08-17": 337,
+    "2026-09-01": 140,
+    "2026-06-17": 133,
+    "2026-06-10": 116,
+    "2025-02": 88,
+    "2025-06": 73,
+    "2025-01-14": 45,
+    "2026-07-21": 30,
+    "2025-06-10": 25,
+    "2026-06-25": 23,
+    "2022-09-13": 10
+   }
+  },
+  "harvest_date": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-09-01": 2372,
+    "2026-09-02": 741,
+    "2026-08-28": 612
+   }
+  },
+  "is_current": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "True": 3704,
+    "False": 21
+   }
+  },
+  "ocr_mean_confidence": {
+   "nonblank": 70,
+   "blank": 3655,
+   "pct_blank": 98.1208,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "0.8659": 45,
+    "0.8665": 6,
+    "0.8663": 5,
+    "0.8612": 4,
+    "0.8643": 4,
+    "0.8664": 3,
+    "0.8512": 3
+   }
+  },
+  "source_terms_status": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "SILENT": 2329,
+    "TERMS_STATED_RESTRICTIVE": 1087,
+    "NO_TERMS_PAGE_SERVED": 175,
+    "TERMS_STATED_NO_REUSE_RESTRICTION": 117,
+    "TERMS_STATED_COPYRIGHT_ONLY": 17
+   }
+  },
+  "consent_status": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "UNRESOLVED": 3725
+   }
+  },
+  "suppression_key": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 38,
+   "vocabulary": {
+    "SUPPRESS::TRBF-CHKNAT-00": 836,
+    "SUPPRESS::TRBF-CHKSWN-00": 602,
+    "SUPPRESS::TRBF-NAVAJO-00": 346,
+    "SUPPRESS::TRBF-MSENAT-00": 337,
+    "SUPPRESS::TRBF-LUMMIT-00": 140,
+    "SUPPRESS::TRBF-HOOPAV-00": 136,
+    "SUPPRESS::TRBF-MHATAT-00": 133,
+    "SUPPRESS::TRBF-CSKTFR-00": 116,
+    "SUPPRESS::TRBF-AQNNAH-00": 101,
+    "SUPPRESS::ANRC-CALSTA-00": 98,
+    "SUPPRESS::TRBF-PUYLLP-00": 88,
+    "SUPPRESS::TBD-032": 81,
+    "SUPPRESS::TRBF-PYRMDL-00": 73,
+    "SUPPRESS::TRBF-ESTCHK-00": 68,
+    "SUPPRESS::TBD-C02": 68,
+    "SUPPRESS::ANRC-NANARC-00": 50,
+    "SUPPRESS::TRBF-TULALP-00": 49,
+    "SUPPRESS::TRBF-SWOYTE-00": 45,
+    "SUPPRESS::TRBF-COLVLL-00": 41,
+    "SUPPRESS::TRBF-BADRVR-00": 39,
+    "SUPPRESS::TRBF-LTRVRS-00": 35,
+    "SUPPRESS::TRBF-ONDAWI-00": 34,
+    "SUPPRESS::TRBF-CITIZN-00": 27,
+    "SUPPRESS::TRBF-BLCKFT-00": 25,
+    "SUPPRESS::TRBF-SPKANE-00": 23,
+    "SUPPRESS::ANRC-ARCSLO-00": 20,
+    "SUPPRESS::TRBF-STHUTE-00": 18,
+    "SUPPRESS::TRBF-THNODM-00": 17,
+    "SUPPRESS::TRBF-FSTCTY-00": 16,
+    "SUPPRESS::TRBF-UMATLL-00": 14,
+    "SUPPRESS::TRBF-POARCH-00": 13,
+    "SUPPRESS::TRBF-CHEHLS-00": 10,
+    "SUPPRESS::TRBF-FTHALL-00": 10,
+    "SUPPRESS::ANRC-DOYONL-00": 5,
+    "SUPPRESS::TRBF-MNMNEE-00": 4,
+    "SUPPRESS::TRBF-DELAWT-00": 4,
+    "SUPPRESS::TRBF-CAVLLY-00": 3
+   }
+  },
+  "publishable": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Y": 3725
+   }
+  },
+  "validation_flags": {
+   "nonblank": 3097,
+   "blank": 628,
+   "pct_blank": 16.8591,
+   "approx_distinct": 153
+  },
+  "record_hash": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4055
+  },
+  "federal_uei_candidate": {
+   "nonblank": 220,
+   "blank": 3505,
+   "pct_blank": 94.094,
+   "approx_distinct": 153
+  },
+  "federal_cage_candidate": {
+   "nonblank": 169,
+   "blank": 3556,
+   "pct_blank": 95.4631,
+   "approx_distinct": 127
+  },
+  "federal_identifier_match_status": {
+   "nonblank": 2390,
+   "blank": 1335,
+   "pct_blank": 35.8389,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "no_match": 1704,
+    "refused_source_terms_restrictive": 346,
+    "unique_name_match": 220,
+    "refused_person_name_too_weak": 110,
+    "ambiguous_name_match_refused": 10
+   }
+  },
+  "federal_link_status": {
+   "nonblank": 2390,
+   "blank": 1335,
+   "pct_blank": 35.8389,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "NO_MATCH": 2112,
+    "LINKED": 203,
+    "PROPOSED": 59,
+    "HOLD_AMBIGUOUS": 8,
+    "REFUSED": 8
+   }
+  },
+  "federal_uei_linked": {
+   "nonblank": 203,
+   "blank": 3522,
+   "pct_blank": 94.5503,
+   "approx_distinct": 157
+  },
+  "federal_cage_linked": {
+   "nonblank": 156,
+   "blank": 3569,
+   "pct_blank": 95.8121,
+   "approx_distinct": 113
+  },
+  "federal_link_corroboration": {
+   "nonblank": 262,
+   "blank": 3463,
+   "pct_blank": 92.9664,
+   "approx_distinct": 84
+  },
+  "federal_link_publish_gate": {
+   "nonblank": 2390,
+   "blank": 1335,
+   "pct_blank": 35.8389,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "PUBLISH": 2390
+   }
+  },
+  "federal_link_no_match_reason": {
+   "nonblank": 2128,
+   "blank": 1597,
+   "pct_blank": 42.8725,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "no_federal_recipient_of_this_name": 2002,
+    "name_cannot_found_a_match:single_token_name": 103,
+    "name_cannot_found_a_match:all_tokens_generic": 7,
+    "2 federal entities share this name; identifier-first adjudication required": 5,
+    "4 federal entities share this name; identifier-first adjudication required": 1,
+    "5 federal entities share this name; identifier-first adjudication required": 1,
+    "state_conflict:directory=AK;federal=HI": 1,
+    "3 federal entities share this name; identifier-first adjudication required": 1,
+    "state_conflict:directory=AZ;federal=NM": 1,
+    "state_conflict:directory=OK;federal=MI": 1,
+    "state_conflict:directory=OK;federal=KS": 1,
+    "state_conflict:directory=AZ;federal=GA": 1,
+    "state_conflict:directory=NC;federal=LA": 1,
+    "state_conflict:directory=OK;federal=AL": 1,
+    "state_conflict:directory=OK;federal=UT": 1
+   }
+  },
+  "federal_link_relation": {
+   "nonblank": 2390,
+   "blank": 1335,
+   "pct_blank": 35.8389,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "identifies this FIRM in federal contracting data. It is NOT an ownership claim and does not change identity_scope: the directory's published relation remains affiliation.": 2390
+   }
+  },
+  "publishable_before_1100": {
+   "nonblank": 2390,
+   "blank": 1335,
+   "pct_blank": 35.8389,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Y": 2044,
+    "N": 346
+   }
+  },
+  "publish_hold": {
+   "nonblank": 0,
+   "blank": 3725,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "person_name_check_1100": {
+   "nonblank": 0,
+   "blank": 3725,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "resolution_method": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 58
+  },
+  "inclusion_basis": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "program_authority": 3725
+   }
+  },
+  "verification_basis": {
+   "nonblank": 3657,
+   "blank": 68,
+   "pct_blank": 1.8255,
+   "approx_distinct": 15,
+   "vocabulary": {
+    "TERO_review": 2005,
+    "tribal_directory_listing": 602,
+    "tribal_certification": 346,
+    "tribal_licence_issued": 136,
+    "self_submitted": 101,
+    "none_described_by_source": 98,
+    "tribal_business_licence_issued": 73,
+    "parent_published_subsidiary": 50,
+    "publisher_is_the_tribe": 44,
+    "TERO_certification": 42,
+    "TERO_Title_10_certification": 41,
+    "self_reported_to_tribal_programme": 39,
+    "self_reported_to_tribal_department": 35,
+    "parent_corporation_publication": 25,
+    "tribal_member_self_registration": 16,
+    "tribal_review_and_approval_before_listing": 4
+   }
+  },
+  "certification_tier": {
+   "nonblank": 693,
+   "blank": 3032,
+   "pct_blank": 81.396,
+   "approx_distinct": 17,
+   "vocabulary": {
+    "Priority 1": 201,
+    "Priority #1": 142,
+    "Preference Level 1": 113,
+    "PREFERENCE 1": 91,
+    "Priority #2": 40,
+    "Priority 2": 29,
+    "PREFERENCE 2": 25,
+    "Preference Level 2": 20,
+    "FIRST PREFERENCE; Probationary Certification": 12,
+    "BID LIMIT: NOT APPLICABLE": 5,
+    "BID LIMIT: UNLIMITED": 5,
+    "FIRST PREFERENCE; Full Certification": 3,
+    "SECOND PREFERENCE; Full Certification": 2,
+    "Priority I": 1,
+    "BID LIMIT: Not Applicable": 1,
+    "BID LIMIT: N/A": 1,
+    "BID LIMIT: Unlimited": 1,
+    "Priority #": 1
+   }
+  },
+  "source_url": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1131
+  },
+  "first_seen": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-09-01T00:00:00Z": 2440,
+    "2026-09-02T00:00:00Z": 741,
+    "2026-08-28T00:00:00Z": 544
+   }
+  },
+  "last_seen": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-09-01T00:00:00Z": 2440,
+    "2026-09-02T00:00:00Z": 741,
+    "2026-08-28T00:00:00Z": 544
+   }
+  },
+  "ingestion_method": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "html": 1761,
+    "pdf": 643,
+    "xlsx": 337,
+    "pdf_text_layer_positional": 273,
+    "html_table": 175,
+    "pdf_text_layer": 156,
+    "html_paragraph_blocks": 136,
+    "ocr": 45,
+    "pdf_table": 41,
+    "json_api": 34,
+    "wp_rest_custom_post_type": 31,
+    "ocr_rapidocr_220dpi": 25,
+    "docx": 23,
+    "pdf_layout_two_column_record": 18,
+    "docx_certificate_anchored": 14,
+    "html_prose_named_entities": 10,
+    "html_text": 3
+   }
+  },
+  "publishable_basis": {
+   "nonblank": 3725,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "harmonized_publication_per_PUBLICATION_POLICY": 3725
+   }
+  },
+  "federal_identifier_match_basis": {
+   "nonblank": 2390,
+   "blank": 1335,
+   "pct_blank": 35.8389,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "normalised business name is not in the local UEI-bearing name universe. Not evidence the firm holds no federal award - the universe is Cedar's Native-attributed slice, not all of FPDS.": 1704,
+    "source terms forbid reuse; a harmonized derivative is still a derivative. No identifier is attached to this row by any route.": 346,
+    "candidate only, NOT a resolved key. Exact match of the business name, normalised by uppercasing, splitting on non-alphanumerics and dropping legal-form suffixes, against the UEI-bearing name universe in prime_contracts.csv, fpds_uei_cage_map.csv, subawards.csv and usaspending_gapfill_2026-08-05/gapfill_recipient_universe.csv. Written ONLY where the normalised name resolves to exactly one UEI. A name match is tier B and MAY NOT key a dollar (docs/ENTITY_MATCH_RULES.md); adopt or refuse it explicitly. business_entity_id is not written by this script.": 220,
+    "the source name is flagged as a person's name and normalises to two tokens or fewer, which does not identify a firm. The name still ships; only the identifier match is refused.": 110,
+    "2 distinct UEIs share this normalised name; the name does not identify a firm, so nothing is written. candidate only, NOT a resolved key. Exact match of the business name, normalised by uppercasing, splitting on non-alphanumerics and dropping legal-form suffixes, against the UEI-bearing name universe in prime_contracts.csv, fpds_uei_cage_map.csv, subawards.csv and usaspending_gapfill_2026-08-05/gapfill_recipient_universe.csv. Written ONLY where the normalised name resolves to exactly one UEI. A name match is tier B and MAY NOT key a dollar (docs/ENTITY_MATCH_RULES.md); adopt or refuse it explicitly. business_entity_id is not written by this script.": 5,
+    "3 distinct UEIs share this normalised name; the name does not identify a firm, so nothing is written. candidate only, NOT a resolved key. Exact match of the business name, normalised by uppercasing, splitting on non-alphanumerics and dropping legal-form suffixes, against the UEI-bearing name universe in prime_contracts.csv, fpds_uei_cage_map.csv, subawards.csv and usaspending_gapfill_2026-08-05/gapfill_recipient_universe.csv. Written ONLY where the normalised name resolves to exactly one UEI. A name match is tier B and MAY NOT key a dollar (docs/ENTITY_MATCH_RULES.md); adopt or refuse it explicitly. business_entity_id is not written by this script.": 2,
+    "4 distinct UEIs share this normalised name; the name does not identify a firm, so nothing is written. candidate only, NOT a resolved key. Exact match of the business name, normalised by uppercasing, splitting on non-alphanumerics and dropping legal-form suffixes, against the UEI-bearing name universe in prime_contracts.csv, fpds_uei_cage_map.csv, subawards.csv and usaspending_gapfill_2026-08-05/gapfill_recipient_universe.csv. Written ONLY where the normalised name resolves to exactly one UEI. A name match is tier B and MAY NOT key a dollar (docs/ENTITY_MATCH_RULES.md); adopt or refuse it explicitly. business_entity_id is not written by this script.": 2,
+    "5 distinct UEIs share this normalised name; the name does not identify a firm, so nothing is written. candidate only, NOT a resolved key. Exact match of the business name, normalised by uppercasing, splitting on non-alphanumerics and dropping legal-form suffixes, against the UEI-bearing name universe in prime_contracts.csv, fpds_uei_cage_map.csv, subawards.csv and usaspending_gapfill_2026-08-05/gapfill_recipient_universe.csv. Written ONLY where the normalised name resolves to exactly one UEI. A name match is tier B and MAY NOT key a dollar (docs/ENTITY_MATCH_RULES.md); adopt or refuse it explicitly. business_entity_id is not written by this script.": 1
+   }
+  },
+  "federal_link_tier": {
+   "nonblank": 270,
+   "blank": 3455,
+   "pct_blank": 92.7517,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "A": 131,
+    "B": 72,
+    "C": 45,
+    "X": 22
+   }
+  },
+  "federal_link_method": {
+   "nonblank": 270,
+   "blank": 3455,
+   "pct_blank": 92.7517,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "name_exact+city+state": 88,
+    "name_exact+certifying_nation_state": 72,
+    "name_exact_unique_no_geography": 45,
+    "name_exact+state": 22,
+    "published_federal_contract_number": 15,
+    "name_exact_uncorroborated": 14,
+    "name_exact_multiple_federal_entities": 8,
+    "self_published_identifier_resolved_in_contracting": 3,
+    "name_exact+published_federal_contract_number": 2,
+    "name_exact+city+state+successor_entities_merged": 1
+   }
+  },
+  "federal_link_rung": {
+   "nonblank": 270,
+   "blank": 3455,
+   "pct_blank": 92.7517,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "1_city_and_state": 89,
+    "3_nation_home_state": 72,
+    "4_unique_distinctive_name": 45,
+    "2_state": 22,
+    "5_stop": 22,
+    "0a_published_federal_contract_number": 15,
+    "-1_self_published_identifier": 3,
+    "0b_contract_number_and_name": 2
+   }
+  },
+  "publish_hold_basis": {
+   "nonblank": 0,
+   "blank": 3725,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  }
+ }
+}

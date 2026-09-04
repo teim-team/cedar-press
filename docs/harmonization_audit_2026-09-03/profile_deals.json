@@ -1,0 +1,705 @@
+{
+ "snapshot": {
+  "file": "dist/customer/deals.csv",
+  "bytes": 1970816,
+  "mtime": "2026-09-03T00:35:55"
+ },
+ "rows": 1073,
+ "columns": 60,
+ "seconds": 2.1,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 959,
+   "blank": 114,
+   "pct_blank": 10.6244,
+   "approx_distinct": 328
+  },
+  "Deal_ID": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1284
+  },
+  "native_party_entity_id": {
+   "nonblank": 959,
+   "blank": 114,
+   "pct_blank": 10.6244,
+   "approx_distinct": 281
+  },
+  "native_party_canonical_name": {
+   "nonblank": 959,
+   "blank": 114,
+   "pct_blank": 10.6244,
+   "approx_distinct": 275
+  },
+  "Event_Date": {
+   "nonblank": 1066,
+   "blank": 7,
+   "pct_blank": 0.6524,
+   "approx_distinct": 538
+  },
+  "Event_Date_class": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "exact": 1049,
+    "fiscal_year_end_placeholder": 10,
+    "absent": 7,
+    "approximate": 7
+   }
+  },
+  "Event_Date_not_before": {
+   "nonblank": 1049,
+   "blank": 24,
+   "pct_blank": 2.2367,
+   "approx_distinct": 490
+  },
+  "Event_Date_not_after": {
+   "nonblank": 1049,
+   "blank": 24,
+   "pct_blank": 2.2367,
+   "approx_distinct": 532
+  },
+  "Event_Year": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "2022": 197,
+    "2024": 188,
+    "2023": 119,
+    "2025": 105,
+    "2026": 103,
+    "2019": 81,
+    "2021": 66,
+    "2020": 41,
+    "2018": 25,
+    "2016": 23,
+    "2015": 18,
+    "2017": 18,
+    "2013": 11,
+    "2014": 9,
+    "2003": 9,
+    "2010": 9,
+    "2004": 8,
+    "2005": 8,
+    "2012": 7,
+    "2011": 6,
+    "2000": 4,
+    "2006": 4,
+    "2001": 4,
+    "2002": 3,
+    "2009": 3,
+    "2008": 2,
+    "2007": 2
+   }
+  },
+  "Event_Quarter": {
+   "nonblank": 933,
+   "blank": 140,
+   "pct_blank": 13.0475,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "Q2": 291,
+    "Q4": 280,
+    "Q3": 249,
+    "Q1": 113
+   }
+  },
+  "Event_Month": {
+   "nonblank": 931,
+   "blank": 142,
+   "pct_blank": 13.2339,
+   "approx_distinct": 170
+  },
+  "Deal_Title": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1023
+  },
+  "Native_Party": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 646
+  },
+  "Native_Party_Type": {
+   "nonblank": 1071,
+   "blank": 2,
+   "pct_blank": 0.1864,
+   "approx_distinct": 50
+  },
+  "Counterparty_or_Funder": {
+   "nonblank": 1020,
+   "blank": 53,
+   "pct_blank": 4.9394,
+   "approx_distinct": 322
+  },
+  "Deal_Category": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 37,
+   "vocabulary": {
+    "Grant / public financing": 623,
+    "Acquisition": 173,
+    "Private transaction": 90,
+    "Financing": 38,
+    "Capital project": 25,
+    "Real estate / land acquisition": 22,
+    "Divestiture": 21,
+    "Contract award": 13,
+    "Equity investment": 11,
+    "Commercial partnership": 9,
+    "Joint venture": 6,
+    "Debt refinancing": 5,
+    "Debt financing": 4,
+    "Management agreement": 3,
+    "Capital contribution": 3,
+    "Ownership change observed in federal identifier data": 2,
+    "Contract termination / buyout": 2,
+    "Land transaction": 2,
+    "Settlement": 2,
+    "Sponsorship agreement": 1,
+    "Bond issuance": 1,
+    "Debt exchange": 1,
+    "Debt issuance": 1,
+    "Commercial partnership / capital project": 1,
+    "Operating-rights agreement": 1,
+    "Energy / natural resources": 1,
+    "Project financing": 1,
+    "Contract amendment": 1,
+    "Management agreement termination": 1,
+    "Real estate / land": 1,
+    "Capital project / investment": 1,
+    "Grant / capital project": 1,
+    "Philanthropic gift": 1,
+    "Government/commercial agreement": 1,
+    "Capital project / financing": 1,
+    "Royalty transaction": 1,
+    "Debt amendment": 1,
+    "Development agreement": 1
+   }
+  },
+  "Industry": {
+   "nonblank": 957,
+   "blank": 116,
+   "pct_blank": 10.8108,
+   "approx_distinct": 270
+  },
+  "Event_Type": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 258
+  },
+  "Status": {
+   "nonblank": 1025,
+   "blank": 48,
+   "pct_blank": 4.4734,
+   "approx_distinct": 43
+  },
+  "Record_Scope": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 34,
+   "vocabulary": {
+    "2022 commitment": 186,
+    "2024 commitment": 175,
+    "2023 commitment": 112,
+    "TRANSACTION_CANDIDATE_TRIBAL_PRESS": 90,
+    "2025 commitment": 77,
+    "2019 commitment": 75,
+    "2026 commitment": 69,
+    "2021 commitment": 54,
+    "STAGED_CANDIDATE_NOT_MERGED": 45,
+    "2020 commitment": 34,
+    "2026 project milestone": 21,
+    "2016 commitment": 16,
+    "2018 commitment": 12,
+    "2017 commitment": 11,
+    "2015 commitment": 11,
+    "2010 commitment": 9,
+    "2013 commitment": 9,
+    "2014 commitment": 8,
+    "2004 commitment": 7,
+    "2005 commitment": 7,
+    "2003 commitment": 7,
+    "2012 commitment": 6,
+    "2000 commitment": 4,
+    "2001 commitment": 4,
+    "2011 commitment": 4,
+    "2006 commitment": 3,
+    "2002 commitment": 3,
+    "2009 commitment": 3,
+    "2008 commitment": 2,
+    "CEDAR_OBSERVATION_NOT_A_PUBLISHED_ANNOUNCEMENT": 2,
+    "2007 commitment": 2,
+    "2024 project milestone": 2,
+    "2023 project milestone": 1,
+    "TRANSACTION": 1,
+    "Programme round covering several awards": 1
+   }
+  },
+  "Announced_Value_USD": {
+   "nonblank": 861,
+   "blank": 212,
+   "pct_blank": 19.7577,
+   "approx_distinct": 593
+  },
+  "Value_Type": {
+   "nonblank": 965,
+   "blank": 108,
+   "pct_blank": 10.0652,
+   "approx_distinct": 278
+  },
+  "Project_Total_Value_USD": {
+   "nonblank": 141,
+   "blank": 932,
+   "pct_blank": 86.8593,
+   "approx_distinct": 142
+  },
+  "State": {
+   "nonblank": 940,
+   "blank": 133,
+   "pct_blank": 12.3952,
+   "approx_distinct": 51
+  },
+  "Location": {
+   "nonblank": 628,
+   "blank": 445,
+   "pct_blank": 41.4725,
+   "approx_distinct": 475
+  },
+  "Description": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1038
+  },
+  "Native_Connection": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 222
+  },
+  "Source_1": {
+   "nonblank": 1069,
+   "blank": 4,
+   "pct_blank": 0.3728,
+   "approx_distinct": 617
+  },
+  "Source_1_Type": {
+   "nonblank": 1069,
+   "blank": 4,
+   "pct_blank": 0.3728,
+   "approx_distinct": 82
+  },
+  "Source_2": {
+   "nonblank": 655,
+   "blank": 418,
+   "pct_blank": 38.9562,
+   "approx_distinct": 293
+  },
+  "Source_2_Type": {
+   "nonblank": 655,
+   "blank": 418,
+   "pct_blank": 38.9562,
+   "approx_distinct": 68
+  },
+  "Verification_Status": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 27,
+   "vocabulary": {
+    "Primary verified": 553,
+    "Verified": 331,
+    "Single source (tribal press)": 90,
+    "Primary filing retrieved and read": 46,
+    "Primary + independent verified": 18,
+    "Primary verified (rating agency press release)": 5,
+    "Independent secondary corroborated": 5,
+    "Needs federal award-ID verification": 3,
+    "Primary retrospective + independent verified": 2,
+    "Verified announcement via secondary source": 2,
+    "UNVERIFIED AGAINST ANY PUBLISHED ANNOUNCEMENT - this is an observation Cedar made, not a claim a source published": 2,
+    "Needs primary-source confirmation": 2,
+    "Secondary verified": 2,
+    "Secondary corroborated": 2,
+    "Verified but disputed": 1,
+    "Secondary corroborated; likely common-source": 1,
+    "Verified announcement; obligation not verified": 1,
+    "Primary year-level verified": 1,
+    "Court-reported secondary verified": 1,
+    "Needs primary transaction release": 1,
+    "Verified via secondary references": 1,
+    "Primary-text reproduction + independent verified": 1,
+    "Primary verified (rating agency press releases, two independent actions)": 1,
+    "Primary company statement; Doyon source needed": 1
+   }
+  },
+  "Confidence": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "High": 703,
+    "Medium": 275,
+    "candidate - pattern match on publisher's own text, NOT hand-verified": 90,
+    "Low": 3,
+    "Observation": 2
+   }
+  },
+  "Threshold_Exception": {
+   "nonblank": 1027,
+   "blank": 46,
+   "pct_blank": 4.287,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "No": 775,
+    "Yes": 252
+   }
+  },
+  "Date_Added": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "2026-08-05": 790,
+    "2026-09-02": 138,
+    "2026-07-31": 131,
+    "2026-08-26": 14
+   }
+  },
+  "record_class": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "PUBLIC_AWARD": 654,
+    "TRANSACTION": 419
+   }
+  },
+  "sector": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "Broadband & Telecom": 289,
+    "Housing & Community Development": 240,
+    "Gaming": 97,
+    "Transportation & Infrastructure": 93,
+    "Energy": 91,
+    "UNCLASSIFIED": 70,
+    "Real Estate & Land": 45,
+    "Federal Contracting": 44,
+    "Health Care": 31,
+    "Natural Resources": 28,
+    "Financial Services": 20,
+    "Hospitality & Retail": 10,
+    "Media & Technology": 7,
+    "Education": 4,
+    "Agriculture & Food": 2,
+    "Economic Development (general)": 2
+   }
+  },
+  "transaction_type": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "Grant / Public Award": 654,
+    "Acquisition": 254,
+    "Joint Venture": 26,
+    "Commercial Partnership": 25,
+    "UNCLASSIFIED": 25,
+    "Divestiture": 22,
+    "Debt Issuance": 20,
+    "Financing (other)": 18,
+    "Debt Refinancing": 13,
+    "Equity Investment": 10,
+    "Land Transaction": 6
+   }
+  },
+  "capital_source": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "Federal": 822,
+    "Private": 185,
+    "UNCLASSIFIED": 64,
+    "Philanthropic": 2
+   }
+  },
+  "native_party_role": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "Grantee": 568,
+    "Acquirer": 269,
+    "Investor": 66,
+    "UNCLASSIFIED": 63,
+    "Partner": 41,
+    "Borrower": 27,
+    "Issuer": 20,
+    "Seller": 19
+   }
+  },
+  "deal_status_std": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "Awarded": 583,
+    "Closed": 155,
+    "Completed": 127,
+    "UNCLASSIFIED": 82,
+    "Announced": 66,
+    "Recommended": 49,
+    "Agreed": 7,
+    "Proposed": 2,
+    "Allocated": 2
+   }
+  },
+  "sector_raw": {
+   "nonblank": 957,
+   "blank": 116,
+   "pct_blank": 10.8108,
+   "approx_distinct": 270
+  },
+  "transaction_type_raw": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 258
+  },
+  "deal_category_raw": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 37,
+   "vocabulary": {
+    "Grant / public financing": 623,
+    "Acquisition": 173,
+    "Private transaction": 90,
+    "Financing": 38,
+    "Capital project": 25,
+    "Real estate / land acquisition": 22,
+    "Divestiture": 21,
+    "Contract award": 13,
+    "Equity investment": 11,
+    "Commercial partnership": 9,
+    "Joint venture": 6,
+    "Debt refinancing": 5,
+    "Debt financing": 4,
+    "Management agreement": 3,
+    "Capital contribution": 3,
+    "Contract termination / buyout": 2,
+    "Ownership change observed in federal identifier data": 2,
+    "Settlement": 2,
+    "Land transaction": 2,
+    "Government/commercial agreement": 1,
+    "Philanthropic gift": 1,
+    "Debt amendment": 1,
+    "Capital project / financing": 1,
+    "Royalty transaction": 1,
+    "Development agreement": 1,
+    "Project financing": 1,
+    "Energy / natural resources": 1,
+    "Contract amendment": 1,
+    "Grant / capital project": 1,
+    "Operating-rights agreement": 1,
+    "Commercial partnership / capital project": 1,
+    "Debt issuance": 1,
+    "Capital project / investment": 1,
+    "Debt exchange": 1,
+    "Real estate / land": 1,
+    "Sponsorship agreement": 1,
+    "Management agreement termination": 1,
+    "Bond issuance": 1
+   }
+  },
+  "value_type_raw": {
+   "nonblank": 965,
+   "blank": 108,
+   "pct_blank": 10.0652,
+   "approx_distinct": 278
+  },
+  "classified_date": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 1073
+   }
+  },
+  "native_party_parent_entity": {
+   "nonblank": 959,
+   "blank": 114,
+   "pct_blank": 10.6244,
+   "approx_distinct": 275
+  },
+  "native_party_attribution_source": {
+   "nonblank": 959,
+   "blank": 114,
+   "pct_blank": 10.6244,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "deals_party_attribution_agent.csv": 812,
+    "deals_party_attribution.csv": 89,
+    "deals_party_autoresolved.csv": 58
+   }
+  },
+  "native_party_value_caution": {
+   "nonblank": 901,
+   "blank": 172,
+   "pct_blank": 16.0298,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 841,
+    "1": 60
+   }
+  },
+  "Event_Date_source_value_verbatim": {
+   "nonblank": 77,
+   "blank": 996,
+   "pct_blank": 92.8239,
+   "approx_distinct": 61
+  },
+  "Event_Date_precision": {
+   "nonblank": 1066,
+   "blank": 7,
+   "pct_blank": 0.6524,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "day": 972,
+    "month": 75,
+    "unknown_within_fiscal_year": 10,
+    "unknown": 7,
+    "year": 2
+   }
+  },
+  "Event_Date_precision_basis": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "derived 2026-09-02 by code/1159 from this row's own Date_Basis: Date_Basis asserts no lower precision; the day is taken as stated.": 972,
+    "derived 2026-09-02 by code/1159 from this row's own Date_Basis: the row's own Date_Basis states the source gives a month and no day; the day carried here was a mid-month placeholder and has been withdrawn.": 75,
+    "derived 2026-09-02 by code/1159 from this row's own Date_Basis: Date_Basis states the value is a FISCAL-YEAR placeholder: it is the reporting period's end, not the event's date, and where the entity's fiscal year is not the calendar year the calendar year is not determined either. NOT re-typed - the value is left exactly as recorded and this column is the warning. Bounds are left empty rather than invented..": 10,
+    "derived 2026-09-02 by code/1159 from this row's own Date_Basis: Date_Basis says 'Approximate/first-pass date' without saying WHICH component is approximate, so no precision can be derived and none is asserted.": 7,
+    "derived 2026-09-02 by code/1159 from this row's own Date_Basis: Event_Date is blank; Date_Basis states why. No date is asserted..": 7,
+    "derived 2026-09-02 by code/1159 from this row's own Date_Basis: the row's own Date_Basis states the source gives a year and no month or day; both were placeholders and have been withdrawn.": 2
+   }
+  },
+  "Date_Basis": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 313
+  },
+  "Notes": {
+   "nonblank": 1039,
+   "blank": 34,
+   "pct_blank": 3.1687,
+   "approx_distinct": 358
+  },
+  "Data_As_Of": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "2026-08-05": 794,
+    "2026-09-02": 138,
+    "2026-07-31": 127,
+    "2026-08-26": 14
+   }
+  },
+  "native_party_attribution_tier": {
+   "nonblank": 959,
+   "blank": 114,
+   "pct_blank": 10.6244,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "A": 775,
+    "B": 184
+   }
+  },
+  "native_party_attribution_method": {
+   "nonblank": 959,
+   "blank": 114,
+   "pct_blank": 10.6244,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "agent_ruling+alias": 248,
+    "agent_ruling+exact": 247,
+    "agent_ruling+core": 221,
+    "agent_ruling+containment": 96,
+    "elijah_ruling+exact": 32,
+    "elijah_ruling+containment": 27,
+    "deterministic_containment": 26,
+    "elijah_ruling+core": 24,
+    "deterministic_core": 19,
+    "deterministic_exact": 11,
+    "elijah_ruling+alias": 6,
+    "deterministic_alias": 2
+   }
+  },
+  "n_ownership_events": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "0": 669,
+    "5": 114,
+    "1": 78,
+    "3": 67,
+    "2": 46,
+    "4": 36,
+    "6": 26,
+    "10": 22,
+    "12": 15
+   }
+  },
+  "n_seminole_bond_disclosures": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 1065,
+    "29": 8
+   }
+  },
+  "n_tribal_resolution_financings": {
+   "nonblank": 1073,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 1070,
+    "1": 3
+   }
+  }
+ }
+}

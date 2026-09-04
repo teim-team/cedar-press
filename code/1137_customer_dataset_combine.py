@@ -121,6 +121,7 @@ from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, GROVE_SHELVES, BUILD_SHELVES,
     N_STOREFRONT_EXPECTED, N_BUILT_EXPECTED,
     row_ok, publishable_columns, shelves, subaward_warning,
+    translate_neid_values,
     BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
     is_publication_eligible, mask_attribution, MASK,
     LOBBYING_FILE, LOBBYING_FENCE, lobbying_overstatement, lobbying_warning,
@@ -195,6 +196,7 @@ def load(path, gate=True, masked=None):
         rd = csv.DictReader(fh)
         hdr = publishable_columns(rd.fieldnames or [])
         rows, held = [], defaultdict(int)
+        neid_translated, neid_ambiguous = [0], [0]
         for r in rd:
             # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
             # so projecting first removes the personal-contact fields; running
@@ -204,6 +206,19 @@ def load(path, gate=True, masked=None):
             # withheld whole for carrying a phone number that was never going
             # to be published.
             r = {c: r.get(c, "") for c in hdr}
+            # TRANSLATE THE RETIRED SCHEME, DO NOT JUST DROP ITS COLUMN NAMES.
+            # `publishable_columns` removes columns whose NAME says NEID; it
+            # cannot see a NEID sitting in `entity_id`, `owner_hub_handle` or
+            # `affiliated_entity_ids`. Measured 2026-09-03, AFTER the name gate
+            # shipped: 89,680 retired values still leaving on 45,213 rows in 22
+            # columns across 8 datasets. Deleting them is not available -
+            # `nagpra` and `native-owned-businesses` hold no cedar_uid at all
+            # and these are their only entity keys - so they are rewritten to
+            # Cedar's own key. The 12 NEIDs that claim more than one uid are
+            # refused and left standing rather than guessed.
+            n_tr, n_amb = translate_neid_values(r)
+            neid_translated[0] += n_tr
+            neid_ambiguous[0] += n_amb
             if gate:
                 # THE gate: licensing + personal data (`row_ok`, unchanged)
                 # plus the deny-by-default adjudication policy added

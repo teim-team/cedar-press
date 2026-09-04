@@ -1,0 +1,453 @@
+{
+ "snapshot": {
+  "file": "dist/customer/federal-register.csv",
+  "bytes": 16855860,
+  "mtime": "2026-09-03T00:35:57"
+ },
+ "rows": 11402,
+ "columns": 45,
+ "seconds": 2.7,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 10396,
+   "blank": 1006,
+   "pct_blank": 8.823,
+   "approx_distinct": 417
+  },
+  "consultation_event_id": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2860
+  },
+  "tribe_name": {
+   "nonblank": 10396,
+   "blank": 1006,
+   "pct_blank": 8.823,
+   "approx_distinct": 308
+  },
+  "channel": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "CONSULTATION": 11402
+   }
+  },
+  "agency": {
+   "nonblank": 11396,
+   "blank": 6,
+   "pct_blank": 0.0526,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "Interior Department": 11068,
+    "Health and Human Services Department": 99,
+    "Environmental Protection Agency": 43,
+    "Commerce Department": 30,
+    "Energy Department": 23,
+    "Small Business Administration": 17,
+    "Housing and Urban Development Department": 14,
+    "Transportation Department": 13,
+    "Labor Department": 13,
+    "Veterans Affairs Department": 13,
+    "Agriculture Department": 10,
+    "Treasury Department": 7,
+    "Executive Office of the President": 7,
+    "Defense Department": 6,
+    "National Foundation on the Arts and the Humanities": 4,
+    "Homeland Security Department": 4,
+    "Federal Communications Commission": 4,
+    "State Department": 4,
+    "National Indian Gaming Commission": 3,
+    "Inter-American Foundation": 2,
+    "Advisory Council on Historic Preservation": 2,
+    "Federal Emergency Management Agency": 2,
+    "Education Department": 2,
+    "General Services Administration": 2,
+    "Corporation for National and Community Service": 1,
+    "Federal Permitting Improvement Steering Council": 1,
+    "Administrative Conference of the United States": 1,
+    "Nuclear Regulatory Commission": 1
+   }
+  },
+  "sub_agency": {
+   "nonblank": 11200,
+   "blank": 202,
+   "pct_blank": 1.7716,
+   "approx_distinct": 50
+  },
+  "program": {
+   "nonblank": 6569,
+   "blank": 4833,
+   "pct_blank": 42.3873,
+   "approx_distinct": 762
+  },
+  "consultation_type": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "NAGPRA_consultation_reported": 10888,
+    "consultation_session": 212,
+    "consultation_notice": 180,
+    "NAGPRA": 38,
+    "listening_session": 37,
+    "NHPA_section_106": 20,
+    "negotiated_rulemaking": 14,
+    "dear_tribal_leader_letter": 6,
+    "advisory_committee": 5,
+    "tribal_summit": 2
+   }
+  },
+  "topic": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1068
+  },
+  "notice_date": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 837
+  },
+  "event_start_date": {
+   "nonblank": 190,
+   "blank": 11212,
+   "pct_blank": 98.3336,
+   "approx_distinct": 177
+  },
+  "event_end_date": {
+   "nonblank": 190,
+   "blank": 11212,
+   "pct_blank": 98.3336,
+   "approx_distinct": 185
+  },
+  "location": {
+   "nonblank": 103,
+   "blank": 11299,
+   "pct_blank": 99.0966,
+   "approx_distinct": 83
+  },
+  "format": {
+   "nonblank": 180,
+   "blank": 11222,
+   "pct_blank": 98.4213,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "written_comment": 104,
+    "virtual": 34,
+    "virtual;written_comment": 15,
+    "teleconference": 7,
+    "teleconference;written_comment": 4,
+    "in_person": 3,
+    "in_person;written_comment": 3,
+    "virtual;in_person": 3,
+    "virtual;teleconference": 3,
+    "teleconference;in_person;written_comment": 2,
+    "virtual;teleconference;in_person;written_comment": 1,
+    "virtual;teleconference;written_comment": 1
+   }
+  },
+  "participant_role": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "consulted": 9110,
+    "invited_did_not_participate": 1211,
+    "not_enumerated": 1006,
+    "invited": 75
+   }
+  },
+  "comment_deadline": {
+   "nonblank": 9026,
+   "blank": 2376,
+   "pct_blank": 20.8384,
+   "approx_distinct": 519
+  },
+  "has_written_comments": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 11194,
+    "1": 208
+   }
+  },
+  "has_summary": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 11395,
+    "1": 7
+   }
+  },
+  "has_transcript": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 11387,
+    "1": 15
+   }
+  },
+  "federal_register_citation": {
+   "nonblank": 11395,
+   "blank": 7,
+   "pct_blank": 0.0614,
+   "approx_distinct": 1936
+  },
+  "tier": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "B": 11402
+   }
+  },
+  "confidence": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "high": 10867,
+    "medium": 535
+   }
+  },
+  "fr_document_number": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2366
+  },
+  "nagpra_notice_overlap": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "same_notice_in_nagpra_notices": 10920,
+    "not_in_nagpra_notices": 482
+   }
+  },
+  "nagpra_bridge_overlap": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "same_notice_and_party_in_nagpra_bridge": 8788,
+    "same_notice_different_party": 1606,
+    "no_tribe_resolved_on_this_row": 526,
+    "notice_not_in_nagpra_dataset": 482
+   }
+  },
+  "nagpra_coverage_window": {
+   "nonblank": 10920,
+   "blank": 482,
+   "pct_blank": 4.2273,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "inside_the_2011_2022_nagpra_window": 10882,
+    "after_the_2024_43_CFR_10_rewrite_broke_the_consultation_sentence_net": 38
+   }
+  },
+  "document_role": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "consultation_reported_in_document": 10888,
+    "consultation_notice_published": 514
+   }
+  },
+  "n_participant_rows_for_event": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 53
+  },
+  "is_event_primary_row": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 9089,
+    "1": 2313
+   }
+  },
+  "participant_name_as_published": {
+   "nonblank": 10396,
+   "blank": 1006,
+   "pct_blank": 8.823,
+   "approx_distinct": 1033
+  },
+  "source_url": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2369
+  },
+  "source_quote": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2271
+  },
+  "fetched_date": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-07": 11402
+   }
+  },
+  "built_date": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-07": 11402
+   }
+  },
+  "match_method": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "fr_official_name": 8251,
+    "no_participants_named_in_record": 1006,
+    "fr_official_prefix": 759,
+    "name_head": 650,
+    "government_class_core": 477,
+    "resolve_entity_alias": 136,
+    "government_class_core_via_former_name": 57,
+    "constituent_band_in_parenthetical": 55,
+    "exact_canonical": 10,
+    "name_head_via_former_name": 1
+   }
+  },
+  "event_date_basis": {
+   "nonblank": 97,
+   "blank": 11305,
+   "pct_blank": 99.1493,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "dates_field_of_a_notice_whose_own_ACTION_line_says_notice_of_meetings": 57,
+    "supplementary_information_sentence_with_an_event_verb": 26,
+    "dates_field_sentence_with_an_event_verb": 14
+   }
+  },
+  "event_date_source_quote": {
+   "nonblank": 97,
+   "blank": 11305,
+   "pct_blank": 99.1493,
+   "approx_distinct": 93
+  },
+  "location_basis": {
+   "nonblank": 43,
+   "blank": 11359,
+   "pct_blank": 99.6229,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "addresses_field_segment_anchored_to_a_meeting": 27,
+    "supplementary_information_segment_anchored_to_a_meeting": 11,
+    "dates_field_segment_anchored_to_a_meeting": 5
+   }
+  },
+  "location_source_quote": {
+   "nonblank": 43,
+   "blank": 11359,
+   "pct_blank": 99.6229,
+   "approx_distinct": 43
+  },
+  "n_federal_actions_entity_bridge": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 44
+  },
+  "n_fr_ex_parte_parties": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 10396,
+    "116": 1006
+   }
+  },
+  "n_fr_ex_parte_party_entity_links": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 11293,
+    "1": 91,
+    "2": 18
+   }
+  },
+  "n_nepa_administrative_record_parties": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "0": 10713,
+    "2": 256,
+    "1": 254,
+    "5": 94,
+    "4": 85
+   }
+  },
+  "n_section_106_consultation_events": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "0": 7932,
+    "1130": 1006,
+    "1": 838,
+    "3": 408,
+    "4": 238,
+    "2": 218,
+    "7": 137,
+    "8": 108,
+    "5": 104,
+    "10": 101,
+    "6": 100,
+    "15": 87,
+    "13": 51,
+    "9": 47,
+    "11": 27
+   }
+  },
+  "n_section_106_project_parties": {
+   "nonblank": 11402,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 10396,
+    "51": 1006
+   }
+  }
+ }
+}

@@ -1,0 +1,948 @@
+{
+ "snapshot": {
+  "file": "dist/customer/nest.csv",
+  "bytes": 9599684,
+  "mtime": "2026-09-03T00:37:41"
+ },
+ "rows": 5820,
+ "columns": 88,
+ "seconds": 10.5,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 745
+  },
+  "uei": {
+   "nonblank": 3496,
+   "blank": 2324,
+   "pct_blank": 39.9313,
+   "approx_distinct": 3939
+  },
+  "cage_code": {
+   "nonblank": 838,
+   "blank": 4982,
+   "pct_blank": 85.6014,
+   "approx_distinct": 837
+  },
+  "enterprise_id": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5952
+  },
+  "parent_enterprise_id": {
+   "nonblank": 145,
+   "blank": 5675,
+   "pct_blank": 97.5086,
+   "approx_distinct": 27,
+   "vocabulary": {
+    "CEDAR-NEST-000153-AH": 34,
+    "CEDAR-NEST-004285-Q9": 14,
+    "CEDAR-NEST-003075-Y6": 12,
+    "CEDAR-NEST-003619-KP": 12,
+    "CEDAR-NEST-000838-6P": 11,
+    "CEDAR-NEST-001891-X4": 8,
+    "CEDAR-NEST-003876-1F": 6,
+    "CEDAR-NEST-003554-3X": 5,
+    "CEDAR-NEST-004204-70": 5,
+    "CEDAR-NEST-004578-76": 5,
+    "CEDAR-NEST-004759-Y3": 4,
+    "CEDAR-NEST-000064-A0": 4,
+    "CEDAR-NEST-000763-NK": 4,
+    "CEDAR-NEST-003435-5Y": 3,
+    "CEDAR-NEST-002372-JP": 3,
+    "CEDAR-NEST-000582-YP": 2,
+    "CEDAR-NEST-000168-9R": 2,
+    "CEDAR-NEST-001294-07": 2,
+    "CEDAR-NEST-000584-A8": 2,
+    "CEDAR-NEST-001095-RR": 1,
+    "CEDAR-NEST-000583-4F": 1,
+    "CEDAR-NEST-000084-2M": 1,
+    "CEDAR-NEST-000576-T0": 1,
+    "CEDAR-NEST-000209-49": 1,
+    "CEDAR-NEST-000179-BB": 1,
+    "CEDAR-NEST-000579-CB": 1
+   }
+  },
+  "constellation_edge_id": {
+   "nonblank": 41,
+   "blank": 5779,
+   "pct_blank": 99.2955,
+   "approx_distinct": 40
+  },
+  "source_id": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "OWNERV6": 4227,
+    "AS45.55.139": 490,
+    "ANC_TRIBE_LOOKUP": 349,
+    "shard-E": 335,
+    "CE701": 187,
+    "SWEEP1070": 126,
+    "shard-H": 100,
+    "TBD-L10": 2,
+    "TBD-056": 2,
+    "TBD-059": 2
+   }
+  },
+  "enterprise_name": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5138
+  },
+  "owner_hub_name": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 619
+  },
+  "parent_name": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 686
+  },
+  "fpds_declared_parent_name": {
+   "nonblank": 1201,
+   "blank": 4619,
+   "pct_blank": 79.3643,
+   "approx_distinct": 390
+  },
+  "enterprise_name_normalized": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5435
+  },
+  "name_variants_observed": {
+   "nonblank": 471,
+   "blank": 5349,
+   "pct_blank": 91.9072,
+   "approx_distinct": 432
+  },
+  "owner_hub_cedar_uid": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 745
+  },
+  "owner_hub_handle": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 577
+  },
+  "owner_hub_entity_class": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "Federally recognized tribe": 2972,
+    "Federally recognized Alaska Native Village": 853,
+    "Alaska Native Regional Corporation": 819,
+    "Alaska Native Village Corporation": 800,
+    "State-recognized tribe": 189,
+    "Native Hawaiian Organization": 100,
+    "Federal-level constituency entity": 43,
+    "Federal-level self-governance consortium": 24,
+    "State-level constituency entity": 20
+   }
+  },
+  "owner_class": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "tribal_government": 4101,
+    "alaska_native_corporation": 1619,
+    "native_hawaiian_organization": 100
+   }
+  },
+  "owner_hub_state": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 42
+  },
+  "parent_is_hub": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Y": 5675,
+    "N": 145
+   }
+  },
+  "hierarchy_level": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "1": 5675,
+    "2": 143,
+    "3": 2
+   }
+  },
+  "relationship": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "unspecified": 4226,
+    "subsidiary": 765,
+    "wholly_owned": 592,
+    "joint_venture": 87,
+    "majority_owned": 85,
+    "operating_company": 35,
+    "holding_company": 15,
+    "shareholding_or_ancestry": 7,
+    "declared_suborganization": 5,
+    "division": 3
+   }
+  },
+  "relation_class": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "affiliation": 4325,
+    "ownership": 1495
+   }
+  },
+  "relationship_as_recorded": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 39,
+   "vocabulary": {
+    "unspecified": 4226,
+    "wholly_owned": 436,
+    "subsidiary": 379,
+    "subsidiary | unspecified": 376,
+    "subsidiary | wholly_owned": 72,
+    "joint_venture": 44,
+    "majority_owned": 38,
+    "subsidiary | unspecified | wholly_owned": 32,
+    "majority_owned | subsidiary": 31,
+    "joint venture": 24,
+    "unspecified | wholly_owned": 19,
+    "operating company | subsidiary | unspecified": 17,
+    "holding company": 13,
+    "majority_owned | subsidiary | unspecified": 12,
+    "operating company | subsidiary": 12,
+    "operating company | subsidiary | unspecified | wholly_owned": 12,
+    "passive_investment | subsidiary": 10,
+    "operating company | subsidiary | wholly_owned": 9,
+    "joint venture | unspecified": 9,
+    "shareholding_or_ancestry": 7,
+    "operating company": 6,
+    "joint_venture | wholly_owned": 6,
+    "declared_suborganization_schema_org": 5,
+    "joint venture | joint_venture": 5,
+    "joint venture | joint_venture | unspecified": 4,
+    "joint_venture | majority_owned": 4,
+    "majority_owned | wholly_owned": 3,
+    "division | subsidiary | unspecified": 2,
+    "holding company | wholly_owned": 2,
+    "division | subsidiary": 1,
+    "holding company | unspecified | wholly_owned": 1,
+    "joint_venture | unspecified": 1,
+    "holding company | operating company | unspecified": 1,
+    "holding company | operating company": 1
+   }
+  },
+  "ownership_percent_stated": {
+   "nonblank": 13,
+   "blank": 5807,
+   "pct_blank": 99.7766,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "100": 12,
+    "60": 1
+   }
+  },
+  "sector": {
+   "nonblank": 2199,
+   "blank": 3621,
+   "pct_blank": 62.2165,
+   "approx_distinct": 97
+  },
+  "status": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "operating": 5339,
+    "last_seen_earlier": 270,
+    "unknown": 211
+   }
+  },
+  "city": {
+   "nonblank": 3226,
+   "blank": 2594,
+   "pct_blank": 44.5704,
+   "approx_distinct": 840
+  },
+  "state_province": {
+   "nonblank": 3218,
+   "blank": 2602,
+   "pct_blank": 44.7079,
+   "approx_distinct": 110
+  },
+  "address_is_publishable": {
+   "nonblank": 3226,
+   "blank": 2594,
+   "pct_blank": 44.5704,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Y": 3226
+   }
+  },
+  "uei_candidate": {
+   "nonblank": 476,
+   "blank": 5344,
+   "pct_blank": 91.8213,
+   "approx_distinct": 389
+  },
+  "identifier_status": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "external_identifier": 3501,
+    "cedar_minted_only": 2319
+   }
+  },
+  "in_federal_contracting": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Y": 3229,
+    "N": 2591
+   }
+  },
+  "identity_scope": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "owner_research_dataset_named_enterprise": 4227,
+    "parent_asserted_subsidiary": 1428,
+    "tribally_owned_entity": 165
+   }
+  },
+  "assertion_class": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "AFFILIATION": 4325,
+    "OWNERSHIP": 1495
+   }
+  },
+  "evidence_class": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "owner_research_dataset_resolver_output": 2046,
+    "federal_certification_registry": 1595,
+    "audited_annual_report_as_45_55_139": 861,
+    "parent_self_published_company_list": 563,
+    "owner_research_dataset_hand_ruling": 420,
+    "nation_self_published_enterprise_register": 193,
+    "parent_declared_subsidiary_list": 100,
+    "compiled_third_party_directory": 42
+   }
+  },
+  "n_source_observations": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "1": 4761,
+    "2": 525,
+    "3": 185,
+    "4": 86,
+    "5": 68,
+    "7": 43,
+    "6": 42,
+    "9": 37,
+    "8": 23,
+    "11": 17,
+    "10": 16,
+    "12": 8,
+    "15": 4,
+    "13": 3,
+    "14": 2
+   }
+  },
+  "n_distinct_sources": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "1": 5021,
+    "2": 646,
+    "3": 117,
+    "4": 25,
+    "5": 11
+   }
+  },
+  "evidence_human_reviewed": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "N": 3910,
+    "Y": 1910
+   }
+  },
+  "n_auto_ruled_observations": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "1": 4214,
+    "0": 1233,
+    "2": 270,
+    "3": 62,
+    "5": 20,
+    "4": 15,
+    "7": 4,
+    "8": 1,
+    "6": 1
+   }
+  },
+  "first_observed_year": {
+   "nonblank": 5609,
+   "blank": 211,
+   "pct_blank": 3.6254,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "2026": 4683,
+    "2025": 299,
+    "2016": 223,
+    "2023": 82,
+    "2021": 64,
+    "2022": 50,
+    "2019": 45,
+    "2024": 45,
+    "2017": 45,
+    "2018": 38,
+    "2020": 35
+   }
+  },
+  "last_observed_year": {
+   "nonblank": 5609,
+   "blank": 211,
+   "pct_blank": 3.6254,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "2026": 4844,
+    "2025": 380,
+    "2024": 115,
+    "2021": 60,
+    "2023": 53,
+    "2020": 32,
+    "2016": 31,
+    "2017": 27,
+    "2018": 23,
+    "2019": 22,
+    "2022": 22
+   }
+  },
+  "enterprise_existing_cedar_uid": {
+   "nonblank": 103,
+   "blank": 5717,
+   "pct_blank": 98.2302,
+   "approx_distinct": 91
+  },
+  "source_document": {
+   "nonblank": 5052,
+   "blank": 768,
+   "pct_blank": 13.1959,
+   "approx_distinct": 133
+  },
+  "source_edition_date": {
+   "nonblank": 5248,
+   "blank": 572,
+   "pct_blank": 9.8282,
+   "approx_distinct": 58
+  },
+  "record_scope": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "BUSINESS": 5820
+   }
+  },
+  "publishable": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Y": 5820
+   }
+  },
+  "retrieved_date": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 5820
+   }
+  },
+  "fpds_parent_corroboration": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "NO_DECLARED_PARENT": 4566,
+    "PARENT_UNRESOLVED": 449,
+    "CORROBORATED": 394,
+    "PARENT_BELOW_JV_FLOOR": 381,
+    "CONTRADICTED": 30
+   }
+  },
+  "fpds_parent_corroboration_route": {
+   "nonblank": 873,
+   "blank": 4947,
+   "pct_blank": 85.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "rung1_published_uei": 601,
+    "rung2_exact_normalised_name": 272
+   }
+  },
+  "fpds_declared_parent_uei": {
+   "nonblank": 1254,
+   "blank": 4566,
+   "pct_blank": 78.4536,
+   "approx_distinct": 431
+  },
+  "fpds_declared_parent_observations": {
+   "nonblank": 1254,
+   "blank": 4566,
+   "pct_blank": 78.4536,
+   "approx_distinct": 440
+  },
+  "fpds_parent_resolves_to": {
+   "nonblank": 424,
+   "blank": 5396,
+   "pct_blank": 92.7148,
+   "approx_distinct": 117
+  },
+  "duplicate_name_variant_group": {
+   "nonblank": 144,
+   "blank": 5676,
+   "pct_blank": 97.5258,
+   "approx_distinct": 69
+  },
+  "status_basis": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 66
+  },
+  "address_basis": {
+   "nonblank": 3226,
+   "blank": 2594,
+   "pct_blank": 44.5704,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "parent's own subsidiary listing": 2734,
+    "SBA Dynamic Small Business Search extract, matched on a CANDIDATE UEI proposed by an exact normalized name match - weaker than an identifier": 476,
+    "SBA Dynamic Small Business Search extract, matched on published UEI": 16
+   }
+  },
+  "identifier_basis": {
+   "nonblank": 3501,
+   "blank": 2319,
+   "pct_blank": 39.8454,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "UEI from the SBA Dynamic Small Business Search extract": 2663,
+    "CAGE published by the parent (federal_certification_registry)": 638,
+    "CAGE published by the parent (parent_declared_subsidiary_list)": 75,
+    "CAGE published by the parent (owner_research_dataset_resolver_output)": 36,
+    "CAGE published by the parent (parent_self_published_company_list)": 31,
+    "CAGE published by the parent (audited_annual_report_as_45_55_139)": 31,
+    "CAGE published by the parent (parent_self_published_company_list); UEI resolved from that CAGE via fpds_uei_cage_map.csv": 14,
+    "CAGE published by the parent (nation_self_published_enterprise_register)": 9,
+    "CAGE published by the parent (nation_self_published_enterprise_register); UEI resolved from that CAGE via fpds_uei_cage_map.csv": 3,
+    "CAGE published by the parent (owner_research_dataset_hand_ruling)": 1
+   }
+  },
+  "uei_candidate_basis": {
+   "nonblank": 476,
+   "blank": 5344,
+   "pct_blank": 91.8213,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "exact normalized name match into the SBA DSBS extract - a CANDIDATE, not evidence of identity": 476
+   }
+  },
+  "in_federal_contracting_basis": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "published identifier found in the FPDS universe": 2785,
+    "no UEI, CAGE or exact awardee-name match in prime_contracts or fpds_uei_cage_map": 2591,
+    "exact normalized legal name found among FPDS awardees": 444
+   }
+  },
+  "constellation_note": {
+   "nonblank": 41,
+   "blank": 5779,
+   "pct_blank": 99.2955,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "the service constellation records a relationship between this firm and this hub; cedar_constellation_edges.csv is SERVICE (who serves whom), NEST is OWNERSHIP AND CORPORATE AFFILIATION - the two corroborate, they do not duplicate": 41
+   }
+  },
+  "source_url": {
+   "nonblank": 3301,
+   "blank": 2519,
+   "pct_blank": 43.2818,
+   "approx_distinct": 236
+  },
+  "hub_resolution_method": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "source_supplied_cedar_uid": 4776,
+    "exact_normalized_name": 498,
+    "source_supplied_handle": 243,
+    "ancsa_brand_repointed_to_named_corporation": 199,
+    "ancsa_village_government_repointed_to_corporation": 89,
+    "accent_and_form_folded_name": 15
+   }
+  },
+  "hub_resolution_note": {
+   "nonblank": 405,
+   "blank": 5415,
+   "pct_blank": 93.0412,
+   "approx_distinct": 193
+  },
+  "population_basis": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "cedar_spine_native_entities_publishing_ownership": 5820
+   }
+  },
+  "publishable_basis": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "harmonized_publication_per_PUBLICATION_POLICY": 5820
+   }
+  },
+  "built_date": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 5820
+   }
+  },
+  "fpds_parent_corroboration_basis": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 933
+  },
+  "duplicate_name_variant_basis": {
+   "nonblank": 144,
+   "blank": 5676,
+   "pct_blank": 97.5258,
+   "approx_distinct": 77
+  },
+  "n_nest_enterprise_relations": {
+   "nonblank": 5820,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 81
+  },
+  "nest_entity_dual_role__handle": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 228
+  },
+  "nest_entity_dual_role__canonical_name": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 232
+  },
+  "nest_entity_dual_role__entity_class": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "Federally recognized tribe": 881,
+    "Federally recognized Alaska Native Village": 584,
+    "Alaska Native Regional Corporation": 489,
+    "Alaska Native Village Corporation": 266,
+    "State-recognized tribe": 50,
+    "State-level constituency entity": 20,
+    "Native Hawaiian Organization": 14,
+    "Federal-level constituency entity": 9,
+    "Federal-level self-governance consortium": 6
+   }
+  },
+  "nest_entity_dual_role__dual_role": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Y": 2319
+   }
+  },
+  "nest_entity_dual_role__dual_role_class": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "REGISTER_ENTITY_AND_ENTERPRISE": 1550,
+    "ANC_CORPORATION_AND_ENTERPRISE": 755,
+    "NHO_ORGANISATION_AND_ENTERPRISE": 14
+   }
+  },
+  "nest_entity_dual_role__role_as_register_entity": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "hub in the Cedar identity register": 2319
+   }
+  },
+  "nest_entity_dual_role__role_as_enterprise": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "this entity itself trades - it holds the identifiers and the federal-contractor status on its OWN legal name": 2319
+   }
+  },
+  "nest_entity_dual_role__is_nest_owner_hub": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Y": 1726,
+    "N": 593
+   }
+  },
+  "nest_entity_dual_role__n_nest_enterprises_owned": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 39,
+   "vocabulary": {
+    "0": 593,
+    "110": 110,
+    "91": 91,
+    "43": 86,
+    "86": 86,
+    "10": 83,
+    "82": 82,
+    "36": 72,
+    "34": 69,
+    "17": 68,
+    "68": 68,
+    "7": 65,
+    "9": 65,
+    "21": 63,
+    "61": 61,
+    "51": 50,
+    "5": 45,
+    "37": 44,
+    "8": 40,
+    "39": 39,
+    "38": 38,
+    "6": 36,
+    "12": 36,
+    "3": 36,
+    "4": 34,
+    "2": 32,
+    "29": 29,
+    "14": 28,
+    "27": 27,
+    "1": 23,
+    "20": 20,
+    "19": 19,
+    "18": 18,
+    "11": 18,
+    "16": 17,
+    "15": 15,
+    "13": 13
+   }
+  },
+  "nest_entity_dual_role__evidence_rungs": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "R1_DECLARED_BY_OWNER_DATASET;R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER": 1586,
+    "R1_DECLARED_BY_OWNER_DATASET;R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER;R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS": 356,
+    "R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS": 292,
+    "R1_DECLARED_BY_OWNER_DATASET": 85
+   }
+  },
+  "nest_entity_dual_role__own_uei": {
+   "nonblank": 2234,
+   "blank": 3586,
+   "pct_blank": 61.6151,
+   "approx_distinct": 209
+  },
+  "nest_entity_dual_role__own_cage": {
+   "nonblank": 650,
+   "blank": 5170,
+   "pct_blank": 88.8316,
+   "approx_distinct": 46
+  },
+  "nest_entity_dual_role__own_is_8a_certified": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "N": 2102,
+    "Y": 217
+   }
+  },
+  "nest_entity_dual_role__own_is_federal_contractor": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Y": 2234,
+    "N": 85
+   }
+  },
+  "nest_entity_dual_role__owner_rows_naming_this_entity_as_an_enterprise": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "1": 1754,
+    "0": 292,
+    "2": 197,
+    "3": 59,
+    "4": 17
+   }
+  },
+  "nest_entity_dual_role__enterprise_name_as_recorded": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 186
+  },
+  "nest_entity_dual_role__verification_sources": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "sam_uei_to_tribe_assignment_v3.csv": 1260,
+    "https://search.certifications.sba.gov/": 507,
+    "user_final_tribes.dta": 207,
+    "https://search.certifications.sba.gov/;sam_uei_to_tribe_assignment_v3.csv": 126,
+    "https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf": 85,
+    "sam_uei_to_tribe_assignment_v3.csv;user_final_tribes.dta": 74,
+    "https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf;sam_uei_to_tribe_assignment_v3.csv": 40,
+    "https://search.certifications.sba.gov/;sam_uei_to_tribe_assignment_v3.csv;user_final_tribes.dta": 17,
+    "https://www.coushatta.org/government/;sam_uei_to_tribe_assignment_v3.csv": 3
+   }
+  },
+  "nest_entity_dual_role__evidence_families": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "cedar_inference": 1260,
+    "federal_registry": 592,
+    "human_ruling": 207,
+    "cedar_inference;federal_registry": 166,
+    "cedar_inference;human_ruling": 74,
+    "cedar_inference;federal_registry;human_ruling": 17,
+    "cedar_inference;entity_self_published": 3
+   }
+  },
+  "nest_entity_dual_role__representation_rule": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "RECORDED, NOT DUPLICATED. This entity keeps ONE row in the identity register and ZERO rows in nest_enterprises.csv for itself. NEST's key is (owner hub, normalised name); a self-row would make the hub its own subsidiary, which the 1072 build already refuses by testing the child against every deterministic rendering of the hub's name. The dual role therefore lives here, keyed to the cedar_uid, and a consumer joins it to nest_enterprises on owner_hub_cedar_uid.": 2319
+   }
+  },
+  "nest_entity_dual_role__dual_role_basis": {
+   "nonblank": 2319,
+   "blank": 3501,
+   "pct_blank": 60.1546,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "the owner's own enterprise dataset carries 1 row(s) whose enterprise_name normalises to this entity's own name. Evidence rungs: R1_DECLARED_BY_OWNER_DATASET;R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER.": 1373,
+    "the owner's own enterprise dataset carries 1 row(s) whose enterprise_name normalises to this entity's own name. The SBA certification register carries a firm under this entity's own legal name. Evidence rungs: R1_DECLARED_BY_OWNER_DATASET;R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER;R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS.": 339,
+    "The SBA certification register carries a firm under this entity's own legal name. Evidence rungs: R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS.": 292,
+    "the owner's own enterprise dataset carries 2 row(s) whose enterprise_name normalises to this entity's own name. Evidence rungs: R1_DECLARED_BY_OWNER_DATASET;R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER.": 154,
+    "the owner's own enterprise dataset carries 3 row(s) whose enterprise_name normalises to this entity's own name. Evidence rungs: R1_DECLARED_BY_OWNER_DATASET;R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER.": 59,
+    "the owner's own enterprise dataset carries 2 row(s) whose enterprise_name normalises to this entity's own name. Evidence rungs: R1_DECLARED_BY_OWNER_DATASET.": 43,
+    "the owner's own enterprise dataset carries 1 row(s) whose enterprise_name normalises to this entity's own name. Evidence rungs: R1_DECLARED_BY_OWNER_DATASET.": 42,
+    "the owner's own enterprise dataset carries 4 row(s) whose enterprise_name normalises to this entity's own name. The SBA certification register carries a firm under this entity's own legal name. Evidence rungs: R1_DECLARED_BY_OWNER_DATASET;R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER;R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS.": 17
+   }
+  }
+ }
+}

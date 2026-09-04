@@ -422,3 +422,35 @@ around.
 **A red gate is not automatically yours.** Name the owner with a measurement —
 which table moved, by how many rows, and which script wrote it — the way the
 gate-failure entries in `AGENTS.md` do. Then say so in writing.
+
+
+<!-- BEGIN IDENTITY-AND-DELIVERY-SCRIPTS-2026-09-03 -->
+## The five scripts added 2026-09-03, and which question each owns
+
+Owner, 2026-09-03: *"It sounds like you're also making a lot of stuff, so maybe you
+can consolidate code and reconcile it and fact check."*
+
+Checked for duplication rather than assumed: there is none, and the division below
+is the reason. **Before writing a sixth, find your question here.** Two of these
+already exist because someone did not.
+
+| script | the one question it answers | does NOT |
+|---|---|---|
+| `1164_native_legal_forms_classifier` | *what legal form is this entity, and what does the statute say it can be?* 16 forms, each with a fetched citation | **detect** uid collisions — it defers to 1167 in code and in its docstring |
+| `1165_delivered_publication_audit` | *did the publication RULES hold in the file the customer receives?* NEVER, DROP_COLS, lineage, mask, quarantine, the subaward fence, retired NEID values | judge whether the data is internally consistent |
+| `1166_owner_queue_card_builder` | *is this a question only the owner can answer?* Five gates that suppress everything already answered | apply any ruling |
+| `1167_cedar_uid_identity_collisions` | *does one `cedar_uid` name more than one entity?* ALIAS / TYPO / MERGE, plus `repoint` | decide which head survives on statute — that is 1164 |
+| `1168_harmonization_audit` | *do the 13 datasets agree with each other?* Column names, value vocabularies, codebook truth, duplicates | check publication rules |
+
+`1165` and `1168` both stream `dist/customer` and that is not duplication: one asks
+whether the rules were applied, the other whether the answers are mutually
+consistent. A file can pass either and fail the other.
+
+**The ordering that matters.** `1167 repoint` before `1137 build`, always. Identity
+collisions make the NEID→uid map ambiguous, and an ambiguous map is what leaves
+retired identifiers in a delivered file. Measured on 2026-09-03: 13 colliding uids
+left **1,954** untranslatable values; repointing 68 ledger rows took the collisions
+to 2 and the untranslatable values to **0**. One of those 68 rows — a single
+`Oneida Nation (Wisconsin)` row keyed to the New York uid — was on its own
+responsible for **290 retired identifiers across four delivered datasets**.
+<!-- END IDENTITY-AND-DELIVERY-SCRIPTS-2026-09-03 -->

@@ -1,0 +1,850 @@
+{
+ "snapshot": {
+  "file": "dist/customer/nagpra.csv",
+  "bytes": 11806550,
+  "mtime": "2026-09-03T00:37:35"
+ },
+ "rows": 6792,
+ "columns": 76,
+ "seconds": 6.3,
+ "profile": {
+  "document_number": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12659
+  },
+  "title": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3282
+  },
+  "institution_name": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1776
+  },
+  "publication_date": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1014
+  },
+  "publication_year": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 34,
+   "vocabulary": {
+    "2025": 900,
+    "2024": 707,
+    "2026": 633,
+    "2023": 496,
+    "2022": 244,
+    "2008": 214,
+    "2018": 211,
+    "2019": 202,
+    "2001": 193,
+    "2014": 193,
+    "2017": 177,
+    "2012": 175,
+    "2009": 170,
+    "2021": 169,
+    "2016": 166,
+    "2020": 163,
+    "2013": 160,
+    "2000": 151,
+    "2015": 142,
+    "2010": 138,
+    "2011": 131,
+    "2003": 115,
+    "2007": 112,
+    "1997": 107,
+    "1998": 104,
+    "2006": 102,
+    "2002": 101,
+    "1999": 96,
+    "2004": 95,
+    "2005": 90,
+    "1996": 89,
+    "1995": 31,
+    "1994": 15
+   }
+  },
+  "notice_type": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "inventory_completion": 4801,
+    "intent_to_repatriate": 1861,
+    "intended_disposition": 130
+   }
+  },
+  "notice_title_form": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "Notice of Inventory Completion": 4801,
+    "Notice of Intended Repatriation": 732,
+    "Notice of Intent To Repatriate": 626,
+    "Notice of Intent to Repatriate": 503,
+    "Notice of Intended Disposition": 130
+   }
+  },
+  "statute_stage": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "25 U.S.C. 3003 inventory / cultural affiliation": 4801,
+    "25 U.S.C. 3004 summary / cultural items": 1861,
+    "43 CFR 10.7 disposition of unclaimed remains": 130
+   }
+  },
+  "is_correction": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 6506,
+    "1": 286
+   }
+  },
+  "institution_primary": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1655
+  },
+  "institution_names_all": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1781
+  },
+  "institution_city": {
+   "nonblank": 6688,
+   "blank": 104,
+   "pct_blank": 1.5312,
+   "approx_distinct": 752
+  },
+  "institution_state": {
+   "nonblank": 6688,
+   "blank": 104,
+   "pct_blank": 1.5312,
+   "approx_distinct": 52
+  },
+  "institution_count": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "1": 6415,
+    "2": 350,
+    "3": 21,
+    "8": 3,
+    "6": 2,
+    "5": 1
+   }
+  },
+  "institution_type_derived": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "university": 2955,
+    "museum": 1524,
+    "federal_agency": 1258,
+    "other": 547,
+    "state_agency": 271,
+    "historical_society": 220,
+    "tribal": 17
+   }
+  },
+  "responsible_party_statement": {
+   "nonblank": 3064,
+   "blank": 3728,
+   "pct_blank": 54.8881,
+   "approx_distinct": 928
+  },
+  "object_categories": {
+   "nonblank": 4788,
+   "blank": 2004,
+   "pct_blank": 29.5053,
+   "approx_distinct": 17,
+   "vocabulary": {
+    "associated_funerary_objects|human_remains": 1793,
+    "human_remains": 1430,
+    "unassociated_funerary_objects": 529,
+    "objects_of_cultural_patrimony": 304,
+    "associated_funerary_objects": 214,
+    "sacred_objects": 211,
+    "sacred_objects|objects_of_cultural_patrimony": 149,
+    "unassociated_funerary_objects|sacred_objects|objects_of_cultural_patrimony": 86,
+    "unassociated_funerary_objects|objects_of_cultural_patrimony": 38,
+    "unassociated_funerary_objects|sacred_objects": 16,
+    "unassociated_funerary_objects|associated_funerary_objects|sacred_objects|objects_of_cultural_patrimony|human_remains": 14,
+    "objects_of_cultural_patrimony|human_remains": 1,
+    "unassociated_funerary_objects|human_remains": 1,
+    "unassociated_funerary_objects|associated_funerary_objects|human_remains": 1,
+    "unassociated_funerary_objects|associated_funerary_objects": 1
+   }
+  },
+  "mni_total_stated": {
+   "nonblank": 4273,
+   "blank": 2519,
+   "pct_blank": 37.0878,
+   "approx_distinct": 305
+  },
+  "mni_statement_count": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 62
+  },
+  "mni_statements": {
+   "nonblank": 4435,
+   "blank": 2357,
+   "pct_blank": 34.7026,
+   "approx_distinct": 1880
+  },
+  "n_associated_funerary_objects_stated": {
+   "nonblank": 1610,
+   "blank": 5182,
+   "pct_blank": 76.2956,
+   "approx_distinct": 575
+  },
+  "n_unassociated_funerary_objects_stated": {
+   "nonblank": 512,
+   "blank": 6280,
+   "pct_blank": 92.4617,
+   "approx_distinct": 164
+  },
+  "n_sacred_objects_stated": {
+   "nonblank": 318,
+   "blank": 6474,
+   "pct_blank": 95.318,
+   "approx_distinct": 73
+  },
+  "n_objects_of_cultural_patrimony_stated": {
+   "nonblank": 320,
+   "blank": 6472,
+   "pct_blank": 95.2886,
+   "approx_distinct": 92
+  },
+  "cultural_items_total_stated": {
+   "nonblank": 211,
+   "blank": 6581,
+   "pct_blank": 96.8934,
+   "approx_distinct": 116
+  },
+  "removal_counties": {
+   "nonblank": 3521,
+   "blank": 3271,
+   "pct_blank": 48.1596,
+   "approx_distinct": 1804
+  },
+  "removal_states": {
+   "nonblank": 4433,
+   "blank": 2359,
+   "pct_blank": 34.732,
+   "approx_distinct": 287
+  },
+  "removal_location_statements": {
+   "nonblank": 5412,
+   "blank": 1380,
+   "pct_blank": 20.318,
+   "approx_distinct": 5158
+  },
+  "repatriation_eligible_date": {
+   "nonblank": 2782,
+   "blank": 4010,
+   "pct_blank": 59.04,
+   "approx_distinct": 206
+  },
+  "response_deadline_date": {
+   "nonblank": 3904,
+   "blank": 2888,
+   "pct_blank": 42.5206,
+   "approx_distinct": 871
+  },
+  "window_days_derived": {
+   "nonblank": 6686,
+   "blank": 106,
+   "pct_blank": 1.5607,
+   "approx_distinct": 17,
+   "vocabulary": {
+    "30": 3814,
+    "32": 1457,
+    "31": 1141,
+    "33": 231,
+    "29": 21,
+    "28": 6,
+    "60": 3,
+    "365": 2,
+    "-336": 1,
+    "396": 1,
+    "-111": 1,
+    "-184": 1,
+    "35": 1,
+    "-31816": 1,
+    "14": 1,
+    "46": 1,
+    "-1": 1,
+    "-3206": 1,
+    "0": 1
+   }
+  },
+  "n_consulted_named": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 54
+  },
+  "n_consulted_resolved": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 53
+  },
+  "consulted_entity_ids": {
+   "nonblank": 2698,
+   "blank": 4094,
+   "pct_blank": 60.2768,
+   "approx_distinct": 1314
+  },
+  "n_affiliated_named": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 62
+  },
+  "n_affiliated_resolved": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 63
+  },
+  "affiliated_entity_ids": {
+   "nonblank": 5022,
+   "blank": 1770,
+   "pct_blank": 26.0601,
+   "approx_distinct": 1373
+  },
+  "n_disposition_priority_named": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 40,
+   "vocabulary": {
+    "0": 6090,
+    "1": 401,
+    "2": 80,
+    "3": 62,
+    "4": 50,
+    "5": 14,
+    "7": 13,
+    "8": 11,
+    "6": 8,
+    "21": 8,
+    "15": 8,
+    "9": 6,
+    "16": 4,
+    "11": 4,
+    "17": 3,
+    "49": 3,
+    "22": 2,
+    "12": 2,
+    "38": 2,
+    "10": 2,
+    "54": 2,
+    "64": 1,
+    "56": 1,
+    "26": 1,
+    "36": 1,
+    "18": 1,
+    "53": 1,
+    "52": 1,
+    "82": 1,
+    "41": 1,
+    "27": 1,
+    "31": 1,
+    "45": 1,
+    "57": 1,
+    "40": 1,
+    "23": 1,
+    "25": 1,
+    "28": 1
+   }
+  },
+  "n_disposition_priority_resolved": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 35,
+   "vocabulary": {
+    "0": 6347,
+    "1": 163,
+    "2": 77,
+    "4": 53,
+    "3": 52,
+    "7": 12,
+    "8": 11,
+    "5": 8,
+    "15": 8,
+    "6": 8,
+    "21": 7,
+    "9": 5,
+    "12": 4,
+    "10": 3,
+    "16": 3,
+    "49": 3,
+    "22": 3,
+    "53": 3,
+    "38": 2,
+    "24": 2,
+    "17": 2,
+    "11": 2,
+    "27": 1,
+    "31": 1,
+    "45": 1,
+    "57": 1,
+    "35": 1,
+    "28": 1,
+    "55": 1,
+    "41": 1,
+    "40": 1,
+    "52": 1,
+    "18": 1,
+    "81": 1,
+    "63": 1,
+    "20": 1
+   }
+  },
+  "disposition_priority_entity_ids": {
+   "nonblank": 445,
+   "blank": 6347,
+   "pct_blank": 93.4482,
+   "approx_distinct": 209
+  },
+  "n_repatriation_recipient_named": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 33,
+   "vocabulary": {
+    "0": 5054,
+    "1": 1033,
+    "2": 182,
+    "3": 156,
+    "6": 70,
+    "4": 65,
+    "5": 44,
+    "7": 23,
+    "8": 23,
+    "21": 23,
+    "9": 21,
+    "14": 16,
+    "13": 15,
+    "12": 12,
+    "10": 9,
+    "22": 7,
+    "15": 7,
+    "11": 7,
+    "20": 5,
+    "16": 4,
+    "23": 3,
+    "18": 3,
+    "27": 2,
+    "19": 2,
+    "31": 1,
+    "34": 1,
+    "40": 1,
+    "17": 1,
+    "26": 1,
+    "25": 1
+   }
+  },
+  "n_repatriation_recipient_resolved": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "0": 5167,
+    "1": 986,
+    "2": 157,
+    "3": 139,
+    "4": 65,
+    "6": 63,
+    "5": 45,
+    "8": 20,
+    "7": 18,
+    "21": 17,
+    "9": 17,
+    "11": 16,
+    "12": 15,
+    "10": 14,
+    "22": 7,
+    "16": 6,
+    "13": 6,
+    "14": 6,
+    "20": 6,
+    "15": 5,
+    "19": 4,
+    "18": 4,
+    "33": 2,
+    "27": 2,
+    "23": 1,
+    "24": 1,
+    "17": 1,
+    "26": 1,
+    "30": 1
+   }
+  },
+  "repatriation_recipient_entity_ids": {
+   "nonblank": 1625,
+   "blank": 5167,
+   "pct_blank": 76.0748,
+   "approx_distinct": 487
+  },
+  "n_letter_of_support_named": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 6788,
+    "2": 4
+   }
+  },
+  "n_letter_of_support_resolved": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 6788,
+    "2": 4
+   }
+  },
+  "letter_of_support_entity_ids": {
+   "nonblank": 4,
+   "blank": 6788,
+   "pct_blank": 99.9411,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "TRBF-ALCOUS-00|TRBF-JNACTW-00": 4
+   }
+  },
+  "n_aboriginal_land_named": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 48
+  },
+  "n_aboriginal_land_resolved": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 48
+  },
+  "aboriginal_land_entity_ids": {
+   "nonblank": 595,
+   "blank": 6197,
+   "pct_blank": 91.2397,
+   "approx_distinct": 265
+  },
+  "n_parties_named": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 92
+  },
+  "n_entities_resolved": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 68
+  },
+  "has_resolved_entity": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 6169,
+    "0": 623
+   }
+  },
+  "lineal_descendant_determination": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 6766,
+    "1": 26
+   }
+  },
+  "culturally_unidentifiable": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 6177,
+    "1": 615
+   }
+  },
+  "parse_template": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "B_nps_template": 3973,
+    "C_2024_rule": 2647,
+    "A_early_freeform": 139,
+    "correction_unheaded": 33
+   }
+  },
+  "spans_found": {
+   "nonblank": 6422,
+   "blank": 370,
+   "pct_blank": 5.4476,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "affiliation_finding": 2562,
+    "affiliation_finding|body_sentence|repatriation_sentence": 1162,
+    "affiliation_finding|consultation_section": 617,
+    "aboriginal_land_finding|consultation_section|disposition_finding": 450,
+    "affiliation_finding|body_sentence": 414,
+    "affiliation_finding|repatriation_sentence": 314,
+    "disposition_finding": 133,
+    "body_sentence": 111,
+    "affiliation_finding|consultation_section|repatriation_sentence": 97,
+    "aboriginal_land_finding": 93,
+    "consultation_section|disposition_finding": 63,
+    "consultation_section": 57,
+    "aboriginal_land_finding|affiliation_finding|body_sentence|repatriation_sentence": 51,
+    "body_sentence|disposition_finding": 50,
+    "repatriation_sentence": 38,
+    "body_sentence|repatriation_sentence": 37,
+    "aboriginal_land_finding|consultation_section": 33,
+    "aboriginal_land_finding|disposition_finding": 24,
+    "aboriginal_land_finding|affiliation_finding|consultation_section": 24,
+    "aboriginal_land_finding|affiliation_finding": 19,
+    "aboriginal_land_finding|affiliation_finding|consultation_section|repatriation_sentence": 15,
+    "aboriginal_land_finding|affiliation_finding|repatriation_sentence": 12,
+    "body_sentence|disposition_finding|repatriation_sentence": 9,
+    "aboriginal_land_finding|affiliation_finding|body_sentence": 9,
+    "aboriginal_land_finding|body_sentence": 9,
+    "aboriginal_land_finding|body_sentence|disposition_finding": 7,
+    "affiliation_finding|body_sentence|disposition_finding|repatriation_sentence": 3,
+    "aboriginal_land_finding|repatriation_sentence": 2,
+    "consultation_section|repatriation_sentence": 2,
+    "affiliation_finding|disposition_finding|repatriation_sentence": 1,
+    "affiliation_finding|disposition_finding": 1,
+    "disposition_finding|repatriation_sentence": 1,
+    "affiliation_finding|body_sentence|disposition_finding": 1,
+    "aboriginal_land_finding|body_sentence|repatriation_sentence": 1
+   }
+  },
+  "agency_names": {
+   "nonblank": 6791,
+   "blank": 1,
+   "pct_blank": 0.0147,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "Interior Department; National Park Service": 6653,
+    "Interior Department": 134,
+    "Interior Department;": 4
+   }
+  },
+  "html_url": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 8244
+  },
+  "pdf_url": {
+   "nonblank": 6777,
+   "blank": 15,
+   "pct_blank": 0.2208,
+   "approx_distinct": 7086
+  },
+  "full_text_url": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7631
+  },
+  "parent_dataset": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "federal_actions.csv (Cedar Press Dataset 9)": 6792
+   }
+  },
+  "artifact_mtime": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-08-06": 6729,
+    "2026-08-26": 43,
+    "2026-09-02": 20
+   }
+  },
+  "institution_split_flag": {
+   "nonblank": 4,
+   "blank": 6788,
+   "pct_blank": 99.9411,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "ambiguous_oxford_chain": 2,
+    "right_side_is_its_own_name": 2
+   }
+  },
+  "institution_name_basis": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "title_colon": 5854,
+    "title_possession": 926,
+    "title_remainder": 12
+   }
+  },
+  "mni_basis": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "determinations_finding": 4080,
+    "no_mni_stated": 2357,
+    "single_description_statement": 193,
+    "multiple_statements_not_summed": 162
+   }
+  },
+  "removal_location_basis": {
+   "nonblank": 5412,
+   "blank": 1380,
+   "pct_blank": 20.318,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "body_removal_statement": 5340,
+    "title_from_clause": 72
+   }
+  },
+  "source_url": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 8244
+  },
+  "fetched_date": {
+   "nonblank": 0,
+   "blank": 6792,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "institution_split_basis": {
+   "nonblank": 4,
+   "blank": 6788,
+   "pct_blank": 99.9411,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "`, and ` fell after the bare noun 'Long Beach', but the right side 'California State University' repeats the left fragment's own words or is too long to be an enumerated noun, so the `, and ` may be a real list of holders. Left split, not merged. The title reads verbatim: \"California State University, Long Beach, and California State University\"": 2,
+    "`, and ` fell after the bare noun 'Anthropology', but the title joins three or more fragments with `, and `, so which of them form one institution is not decidable from the text. Left split, not merged. The title reads verbatim: \"Anthropology, and Philosophy, Archaeology Laboratory\"": 2
+   }
+  },
+  "fr_nagpra_title_index__notice_kind": {
+   "nonblank": 6662,
+   "blank": 130,
+   "pct_blank": 1.914,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "inventory_completion": 4801,
+    "intent_to_repatriate": 1861
+   }
+  },
+  "fr_nagpra_title_index__has_abstract": {
+   "nonblank": 6662,
+   "blank": 130,
+   "pct_blank": 1.914,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 4686,
+    "0": 1976
+   }
+  },
+  "fr_nagpra_title_index__relevance_tier_from_tier_rule": {
+   "nonblank": 6662,
+   "blank": 130,
+   "pct_blank": 1.914,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "abstract_subject": 4487,
+    "body_only_unverifiable": 1245,
+    "title_subject": 926,
+    "weak_term_only": 4
+   }
+  },
+  "fr_nagpra_title_index__missed_by_tier_rule": {
+   "nonblank": 6662,
+   "blank": 130,
+   "pct_blank": 1.914,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 5413,
+    "1": 1249
+   }
+  },
+  "fr_nagpra_title_index__basis": {
+   "nonblank": 6662,
+   "blank": 130,
+   "pct_blank": 1.914,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "FR standardised notice title prescribed by 43 CFR 10; does not depend on abstract availability": 6662
+   }
+  },
+  "n_nagpra_notice_entity_bridge": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 92
+  },
+  "n_nagpra_notice_institutions": {
+   "nonblank": 6792,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "1": 6415,
+    "2": 350,
+    "3": 21,
+    "8": 3,
+    "6": 2,
+    "5": 1
+   }
+  }
+ }
+}

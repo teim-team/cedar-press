@@ -1,10 +1,10 @@
 {
-  "scanned_files": 653,
+  "scanned_files": 658,
   "counts": {
     "class1": 1,
     "class2a": 0,
     "class2b": 0,
-    "class2c": 71,
+    "class2c": 69,
     "class3": 2,
     "class4": 14,
     "class5": 6,
@@ -12,7 +12,7 @@
     "class7": 44,
     "class8": 0,
     "class9": 0,
-    "lint_bug_class_instances": 164
+    "lint_bug_class_instances": 162
   },
   "findings": [
     {
@@ -243,20 +243,20 @@
     {
       "class": "class2c",
       "file": "1152_qa_review_reconciliation.py",
-      "line": 883,
+      "line": 899,
       "evidence": "f[\"passed_but_action_failed\"] += 1",
       "why": "counter 'passed_but_action_failed' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "nothing is dropped here. This counts a DEFECT"
     },
     {
       "class": "class2c",
       "file": "1152_qa_review_reconciliation.py",
-      "line": 596,
+      "line": 600,
       "evidence": "f[\"fpds_parent_declared_unresolved\"] += 1",
       "why": "counter 'fpds_parent_declared_unresolved' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "nothing is dropped here. This counts a"
     },
     {
       "class": "class2c",
@@ -882,7 +882,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 784,
+      "line": 817,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -2715,6 +2715,9 @@
       "cedar_dataset_readiness.csv": [
         "621_dataset_coverage.py"
       ],
+      "cedar_decision_events.csv": [
+        "1163_negative_decision_registry.py"
+      ],
       "cedar_entity_freshness.csv": [
         "830_entity_freshness.py"
       ],
@@ -2787,6 +2790,9 @@
         "503_identity.py",
         "843_retire_cicd_scheme.py",
         "961_promote_register_legal_names_and_state.py"
+      ],
+      "cedar_negative_constraints.csv": [
+        "1163_negative_decision_registry.py"
       ],
       "cedar_nest_id_register.csv": [
         "1072_tribally_owned_enterprises.py"
@@ -3622,7 +3628,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 1021 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 1031 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {
@@ -3818,12 +3824,12 @@
     "ledger_rows": 20740,
     "ledger_exposure_note": "RULED methods read from cedar_domain.RULED_METHODS",
     "would_be_over_stated": {
-      "X|elijah_ruling": 344,
+      "X|elijah_ruling": 352,
       "C|web_verified": 2,
-      "B|elijah_ruling_redirect": 34
+      "B|elijah_ruling_redirect": 35
     },
     "tier_X_ruled_by_identifier_type": {
-      "UEI": 22,
+      "UEI": 30,
       "CAGE": 5,
       "EIN": 317
     }

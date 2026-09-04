@@ -1,0 +1,67 @@
+{
+ "contractors": {
+  "rows": 1217768,
+  "distinct_full_rows": 1217768,
+  "exact_duplicate_rows": 0
+ },
+ "deals": {
+  "rows": 1073,
+  "distinct_full_rows": 1073,
+  "exact_duplicate_rows": 0
+ },
+ "federal-register": {
+  "rows": 11402,
+  "distinct_full_rows": 11402,
+  "exact_duplicate_rows": 0
+ },
+ "funding": {
+  "rows": 701955,
+  "distinct_full_rows": 701955,
+  "exact_duplicate_rows": 0
+ },
+ "gaming": {
+  "rows": 787,
+  "distinct_full_rows": 787,
+  "exact_duplicate_rows": 0
+ },
+ "legislation": {
+  "rows": 3069,
+  "distinct_full_rows": 3069,
+  "exact_duplicate_rows": 0
+ },
+ "lobbying": {
+  "rows": 27825,
+  "distinct_full_rows": 27825,
+  "exact_duplicate_rows": 0
+ },
+ "nagpra": {
+  "rows": 6792,
+  "distinct_full_rows": 6792,
+  "exact_duplicate_rows": 0
+ },
+ "native-owned-businesses": {
+  "rows": 3725,
+  "distinct_full_rows": 3725,
+  "exact_duplicate_rows": 0
+ },
+ "natural-resources": {
+  "rows": 11305,
+  "distinct_full_rows": 11305,
+  "exact_duplicate_rows": 0
+ },
+ "nest": {
+  "rows": 5820,
+  "distinct_full_rows": 5820,
+  "exact_duplicate_rows": 0
+ },
+ "nonprofits": {
+  "rows": 12689,
+  "distinct_full_rows": 12689,
+  "exact_duplicate_rows": 0
+ },
+ "subcontracting": {
+  "rows": 70597,
+  "distinct_full_rows": 70597,
+  "exact_duplicate_rows": 0
+ }
+}

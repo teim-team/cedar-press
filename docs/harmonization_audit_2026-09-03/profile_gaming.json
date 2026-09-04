@@ -1,0 +1,4192 @@
+{
+ "snapshot": {
+  "file": "dist/customer/gaming.csv",
+  "bytes": 4185144,
+  "mtime": "2026-09-03T00:37:24"
+ },
+ "rows": 787,
+ "columns": 312,
+ "seconds": 13.6,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 785,
+   "blank": 2,
+   "pct_blank": 0.2541,
+   "approx_distinct": 337
+  },
+  "cedar_place_id": {
+   "nonblank": 771,
+   "blank": 16,
+   "pct_blank": 2.033,
+   "approx_distinct": 823
+  },
+  "entity_id": {
+   "nonblank": 228,
+   "blank": 559,
+   "pct_blank": 71.0292,
+   "approx_distinct": 95
+  },
+  "facility_id": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 796
+  },
+  "duplicate_of_facility_id": {
+   "nonblank": 10,
+   "blank": 777,
+   "pct_blank": 98.7294,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "VP-0011": 1,
+    "CCP-411600": 1,
+    "CCP-67000": 1,
+    "CCP-800600": 1,
+    "CCP-11800": 1,
+    "CCP-39900": 1,
+    "CCP-908000": 1,
+    "CCP-962300": 1,
+    "CCP-18500": 1,
+    "CCP-688700": 1
+   }
+  },
+  "tribe": {
+   "nonblank": 784,
+   "blank": 3,
+   "pct_blank": 0.3812,
+   "approx_distinct": 338
+  },
+  "facility_name": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 821
+  },
+  "company": {
+   "nonblank": 443,
+   "blank": 344,
+   "pct_blank": 43.7103,
+   "approx_distinct": 496
+  },
+  "tribe_canonical_name": {
+   "nonblank": 785,
+   "blank": 2,
+   "pct_blank": 0.2541,
+   "approx_distinct": 252
+  },
+  "address": {
+   "nonblank": 686,
+   "blank": 101,
+   "pct_blank": 12.8335,
+   "approx_distinct": 636
+  },
+  "city": {
+   "nonblank": 725,
+   "blank": 62,
+   "pct_blank": 7.878,
+   "approx_distinct": 428
+  },
+  "state": {
+   "nonblank": 786,
+   "blank": 1,
+   "pct_blank": 0.1271,
+   "approx_distinct": 35,
+   "vocabulary": {
+    "OK": 190,
+    "CA": 116,
+    "WA": 53,
+    "MN": 48,
+    "MT": 43,
+    "AZ": 43,
+    "MI": 41,
+    "WI": 40,
+    "NM": 38,
+    "ND": 22,
+    "SD": 21,
+    "NY": 17,
+    "OR": 16,
+    "ID": 13,
+    "FL": 12,
+    "NV": 10,
+    "NE": 9,
+    "KS": 8,
+    "TX": 7,
+    "NC": 5,
+    "MS": 5,
+    "CT": 5,
+    "WY": 4,
+    "IA": 4,
+    "LA": 4,
+    "CO": 3,
+    "AK": 3,
+    "AL": 3,
+    "PA": 1,
+    "IN": 1,
+    "MO": 1
+   }
+  },
+  "postal_code": {
+   "nonblank": 613,
+   "blank": 174,
+   "pct_blank": 22.1093,
+   "approx_distinct": 639
+  },
+  "latitude": {
+   "nonblank": 689,
+   "blank": 98,
+   "pct_blank": 12.4524,
+   "approx_distinct": 720
+  },
+  "longitude": {
+   "nonblank": 689,
+   "blank": 98,
+   "pct_blank": 12.4524,
+   "approx_distinct": 732
+  },
+  "property_status": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "current": 451,
+    "approved": 1,
+    "closed": 1
+   }
+  },
+  "open_date": {
+   "nonblank": 636,
+   "blank": 151,
+   "pct_blank": 19.1868,
+   "approx_distinct": 302
+  },
+  "open_date_source_value_placeholder": {
+   "nonblank": 339,
+   "blank": 448,
+   "pct_blank": 56.925,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "vendor_mid_month_placeholder_day_15": 148,
+    "vendor_year_end_placeholder_1231": 147,
+    "source_states_the_day": 44
+   }
+  },
+  "close_date": {
+   "nonblank": 148,
+   "blank": 639,
+   "pct_blank": 81.1944,
+   "approx_distinct": 98
+  },
+  "close_date_source_value_placeholder": {
+   "nonblank": 76,
+   "blank": 711,
+   "pct_blank": 90.3431,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "vendor_mid_month_placeholder_day_15": 59,
+    "vendor_year_end_placeholder_1231": 17
+   }
+  },
+  "gaming_machines": {
+   "nonblank": 409,
+   "blank": 378,
+   "pct_blank": 48.0305,
+   "approx_distinct": 291
+  },
+  "table_games": {
+   "nonblank": 201,
+   "blank": 586,
+   "pct_blank": 74.46,
+   "approx_distinct": 58
+  },
+  "poker_tables": {
+   "nonblank": 156,
+   "blank": 631,
+   "pct_blank": 80.1779,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "2": 27,
+    "4": 19,
+    "5": 17,
+    "1": 16,
+    "3": 16,
+    "6": 13,
+    "8": 9,
+    "10": 7,
+    "14": 5,
+    "7": 4,
+    "25": 3,
+    "12": 3,
+    "26": 2,
+    "20": 2,
+    "47": 1,
+    "38": 1,
+    "16": 1,
+    "13": 1,
+    "17": 1,
+    "55": 1,
+    "22": 1,
+    "35": 1,
+    "37": 1,
+    "27": 1,
+    "9": 1,
+    "18": 1,
+    "23": 1
+   }
+  },
+  "bingo_seats": {
+   "nonblank": 126,
+   "blank": 661,
+   "pct_blank": 83.9898,
+   "approx_distinct": 52
+  },
+  "gaming_square_feet": {
+   "nonblank": 301,
+   "blank": 486,
+   "pct_blank": 61.7535,
+   "approx_distinct": 195
+  },
+  "convention_square_feet": {
+   "nonblank": 96,
+   "blank": 691,
+   "pct_blank": 87.8018,
+   "approx_distinct": 68
+  },
+  "hotel_rooms": {
+   "nonblank": 125,
+   "blank": 662,
+   "pct_blank": 84.1169,
+   "approx_distinct": 95
+  },
+  "parking_spaces": {
+   "nonblank": 176,
+   "blank": 611,
+   "pct_blank": 77.6366,
+   "approx_distinct": 93
+  },
+  "employees": {
+   "nonblank": 323,
+   "blank": 464,
+   "pct_blank": 58.9581,
+   "approx_distinct": 176
+  },
+  "restaurants": {
+   "nonblank": 330,
+   "blank": 457,
+   "pct_blank": 58.0686,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "1": 160,
+    "2": 52,
+    "3": 34,
+    "4": 22,
+    "5": 14,
+    "6": 12,
+    "7": 9,
+    "9": 8,
+    "10": 5,
+    "8": 4,
+    "12": 3,
+    "16": 2,
+    "13": 1,
+    "17": 1,
+    "21": 1,
+    "15": 1,
+    "11": 1
+   }
+  },
+  "n_capacity_observations": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 46
+  },
+  "native_american_flag": {
+   "nonblank": 440,
+   "blank": 347,
+   "pct_blank": 44.0915,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Yes": 439,
+    "No": 1
+   }
+  },
+  "property_type": {
+   "nonblank": 440,
+   "blank": 347,
+   "pct_blank": 44.0915,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Casino": 440
+   }
+  },
+  "duplicate_risk": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 623,
+    "1": 164
+   }
+  },
+  "open_date_class": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "exact": 635,
+    "bounded": 90,
+    "absent": 62
+   }
+  },
+  "open_date_not_before": {
+   "nonblank": 644,
+   "blank": 143,
+   "pct_blank": 18.1703,
+   "approx_distinct": 317
+  },
+  "open_date_not_after": {
+   "nonblank": 722,
+   "blank": 65,
+   "pct_blank": 8.2592,
+   "approx_distinct": 341
+  },
+  "close_date_class": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "absent": 639,
+    "exact": 148
+   }
+  },
+  "close_date_not_before": {
+   "nonblank": 148,
+   "blank": 639,
+   "pct_blank": 81.1944,
+   "approx_distinct": 88
+  },
+  "close_date_not_after": {
+   "nonblank": 148,
+   "blank": 639,
+   "pct_blank": 81.1944,
+   "approx_distinct": 98
+  },
+  "observed_open_by": {
+   "nonblank": 432,
+   "blank": 355,
+   "pct_blank": 45.108,
+   "approx_distinct": 44
+  },
+  "open_date_postdates_observation": {
+   "nonblank": 27,
+   "blank": 760,
+   "pct_blank": 96.5693,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 27
+   }
+  },
+  "close_date_precedes_open_date": {
+   "nonblank": 4,
+   "blank": 783,
+   "pct_blank": 99.4917,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 4
+   }
+  },
+  "open_date_event": {
+   "nonblank": 636,
+   "blank": 151,
+   "pct_blank": 19.1868,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "unspecified": 445,
+    "gaming_commenced": 180,
+    "property_opened": 9,
+    "permanent_facility_opened": 1,
+    "not_gaming_commencement": 1
+   }
+  },
+  "open_date_predates_tribal_gaming_era": {
+   "nonblank": 4,
+   "blank": 783,
+   "pct_blank": 99.4917,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 4
+   }
+  },
+  "interim_open_date": {
+   "nonblank": 2,
+   "blank": 785,
+   "pct_blank": 99.7459,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1998-05-20": 2
+   }
+  },
+  "gaming_class_ii_authorized": {
+   "nonblank": 617,
+   "blank": 170,
+   "pct_blank": 21.601,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 617
+   }
+  },
+  "gaming_class_iii_authorized": {
+   "nonblank": 545,
+   "blank": 242,
+   "pct_blank": 30.7497,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 545
+   }
+  },
+  "has_revenue_bound": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Y": 694,
+    "N": 93
+   }
+  },
+  "n_revenue_bound_fiscal_years": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 37,
+   "vocabulary": {
+    "25": 286,
+    "0": 93,
+    "7": 45,
+    "24": 24,
+    "2": 23,
+    "50": 23,
+    "22": 23,
+    "19": 21,
+    "5": 21,
+    "3": 18,
+    "4": 18,
+    "18": 16,
+    "6": 15,
+    "23": 13,
+    "14": 12,
+    "15": 12,
+    "17": 12,
+    "10": 12,
+    "11": 11,
+    "16": 10,
+    "13": 10,
+    "12": 9,
+    "20": 9,
+    "21": 8,
+    "1": 8,
+    "8": 7,
+    "9": 7,
+    "41": 3,
+    "44": 3,
+    "48": 3,
+    "42": 3,
+    "26": 2,
+    "32": 2,
+    "82": 1,
+    "79": 1,
+    "38": 1,
+    "46": 1,
+    "43": 1
+   }
+  },
+  "revenue_bound_strongest_status": {
+   "nonblank": 694,
+   "blank": 93,
+   "pct_blank": 11.817,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "REGIONAL_GGR_CEILING": 683,
+    "SINGLE_PROPERTY_ATTRIBUTED": 9,
+    "REPORTED_PROPERTY_REVENUE": 2
+   }
+  },
+  "state_revenue_disclosure_status": {
+   "nonblank": 174,
+   "blank": 613,
+   "pct_blank": 77.8907,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "SEALED_BY_STATUTE_OR_COMPACT": 174
+   }
+  },
+  "operating_entity_cedar_uids": {
+   "nonblank": 785,
+   "blank": 2,
+   "pct_blank": 0.2541,
+   "approx_distinct": 337
+  },
+  "n_operating_entities": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "1": 784,
+    "0": 2,
+    "2": 1
+   }
+  },
+  "state_revenue_disclosure_disposition": {
+   "nonblank": 174,
+   "blank": 613,
+   "pct_blank": 77.8907,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "SEALED_HELD_BY_REGULATOR": 113,
+    "DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE": 58,
+    "NOT_COLLECTED_BY_THIS_BODY": 3
+   }
+  },
+  "state_revenue_disclosure_quote_supports_status": {
+   "nonblank": 174,
+   "blank": 613,
+   "pct_blank": 77.8907,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "Y": 116,
+    "N": 58
+   }
+  },
+  "n_revenue_bound_distinct_fiscal_years": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 26,
+   "vocabulary": {
+    "25": 316,
+    "0": 93,
+    "7": 45,
+    "2": 26,
+    "24": 24,
+    "19": 22,
+    "5": 21,
+    "22": 21,
+    "3": 17,
+    "18": 16,
+    "4": 16,
+    "11": 16,
+    "6": 15,
+    "23": 14,
+    "17": 13,
+    "15": 12,
+    "10": 12,
+    "14": 12,
+    "13": 12,
+    "16": 11,
+    "12": 11,
+    "21": 9,
+    "20": 9,
+    "1": 8,
+    "8": 7,
+    "9": 7,
+    "32": 1,
+    "29": 1
+   }
+  },
+  "cedar_place_id_absent_reason": {
+   "nonblank": 16,
+   "blank": 771,
+   "pct_blank": 97.967,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "NOT_A_PLACE: this facility_id names a row asserting the entity operates no gaming property": 16
+   }
+  },
+  "coords_basis": {
+   "nonblank": 689,
+   "blank": 98,
+   "pct_blank": 12.4524,
+   "approx_distinct": 213
+  },
+  "observation_status": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "current": 452,
+    "approved": 1
+   }
+  },
+  "property_status_literal": {
+   "nonblank": 440,
+   "blank": 347,
+   "pct_blank": 44.0915,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "Open": 431,
+    "Temporarily Closed": 7,
+    "Temporarily Closed | CORRECTED 2026-09-01 (code/587) from `current`. Two sources agree: the row's own close_date (2012) and a dated secondary account captured at oldcampcasino.com on 2026-08-12 - 'The tribal council immediately declared that the casino would be closed effective November 26' after the Oregon Health Authority condemned the building. That account is an affiliate site, not the operator, and is cited as secondary.": 1,
+    "Under Construction": 1
+   }
+  },
+  "property_status_observed_date": {
+   "nonblank": 440,
+   "blank": 347,
+   "pct_blank": 44.0915,
+   "approx_distinct": 31,
+   "vocabulary": {
+    "2023-01-01": 345,
+    "2006-11-07": 16,
+    "2017-01-01": 7,
+    "2007-11-06": 6,
+    "2012-01-01": 6,
+    "2010-05-17": 5,
+    "2005-09-02": 5,
+    "2019-01-01": 5,
+    "2013-01-01": 4,
+    "2016-01-01": 4,
+    "2005-01-25": 4,
+    "2014-01-01": 3,
+    "2015-07-01": 3,
+    "2021-07-01": 3,
+    "2017-07-01": 2,
+    "2018-01-01": 2,
+    "2022-07-01": 2,
+    "2008-04-22": 2,
+    "2016-07-01": 2,
+    "2013-07-01": 1,
+    "2022-01-01": 1,
+    "2010-11-03": 1,
+    "2026-08-12": 1,
+    "2009-04-22": 1,
+    "2009-11-09": 1,
+    "2018-07-01": 1,
+    "2007-05-02": 1,
+    "2020-01-01": 1,
+    "2014-07-01": 1,
+    "2004-01-27": 1,
+    "2020-07-01": 1,
+    "2012-09-17": 1,
+    "2011-04-28": 1
+   }
+  },
+  "open_date_source_value_verbatim": {
+   "nonblank": 339,
+   "blank": 448,
+   "pct_blank": 56.925,
+   "approx_distinct": 157
+  },
+  "open_date_source_value_placeholder_basis": {
+   "nonblank": 295,
+   "blank": 492,
+   "pct_blank": 62.5159,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "measured 2026-09-02 by code/1159 in the vendor workbook itself (data/raw/external/gaming/directory_core/Tribal Property List.xlsx): of 553 non-empty 'Open Date' cells, 188 fall on 31 December and 165 on day 15, and of 142 '1st Close Date' cells 63 fall on day 15. Every cell is a real Excel datetime under number format [$-409]d-mmm-yyyy, so the placeholder day is the VENDOR's and was transcribed, not completed, by Cedar. The shipping open_date / close_date columns were already re-typed to the supported precision by code/158; this column exists so a consumer reading the verbatim value does not have to parse a 300-character basis string to learn that its day is not source-stated.": 295
+   }
+  },
+  "open_date_basis": {
+   "nonblank": 636,
+   "blank": 151,
+   "pct_blank": 19.1868,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "Casino City Tribal Property List, 'Open Date'": 152,
+    "Casino City Tribal Property List, 'Open Date'; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (YYYY-12-31 = year, YYYY-MM-15 = mid-month) carrying a day no source states. Re-typed to the year-precision the source supports; verbatim source string retained in open_date_source_value_verbatim; parse open_date_not_before/open_date_not_after for the interval.": 147,
+    "Casino City Tribal Property List, 'Open Date'; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (YYYY-12-31 = year, YYYY-MM-15 = mid-month) carrying a day no source states. Re-typed to the month-precision the source supports; verbatim source string retained in open_date_source_value_verbatim; parse open_date_not_before/open_date_not_after for the interval.": 145,
+    "Indian Gaming Dataset, hand-coded opening event with a per-event source URL": 112,
+    "hand-researched 2026-08-06; day-precision date stated by the cited source": 33,
+    "hand-researched 2026-08-06; year-precision date stated by the cited source; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (YYYY-12-31 = year, YYYY-MM-15 = mid-month) carrying a day no source states. Re-typed to the year-precision the source supports; verbatim source string retained in open_date_source_value_verbatim; parse open_date_not_before/open_date_not_after for the interval.": 30,
+    "hand-researched 2026-08-06; month-precision date stated by the cited source; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (YYYY-12-31 = year, YYYY-MM-15 = mid-month) carrying a day no source states. Re-typed to the month-precision the source supports; verbatim source string retained in open_date_source_value_verbatim; parse open_date_not_before/open_date_not_after for the interval.": 14,
+    "RE-SOURCED 2026-08-26 from Cedar row VP-0042 (Foxwoods), which describes the same property and carries a day-precision date with a citable URL. Accepted only because 1992-02-15 falls inside the interval the original value supported (1992-02-01..1992-02-29); a sourced date outside that interval is a rebuild or a re-opening and is refused. Prior value: 1992-02-15 (Casino City Tribal Property List, 'Open Date'; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (Y)": 1,
+    "RE-SOURCED 2026-08-26 from Cedar row VP-0011 (Pala Casino Spa Resort), which describes the same property and carries a day-precision date with a citable URL. Accepted only because 2001-04-03 falls inside the interval the original value supported (2001-04-01..2001-04-30); a sourced date outside that interval is a rebuild or a re-opening and is refused. Prior value: 2001-04-15 (Casino City Tribal Property List, 'Open Date'; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (Y)": 1,
+    "RE-SOURCED 2026-08-26 from Cedar row VP-0030 (Seneca Allegany Resort & Casino), which describes the same property and carries a day-precision date with a citable URL. Accepted only because 2004-05-01 falls inside the interval the original value supported (2004-05-01..2004-05-31); a sourced date outside that interval is a rebuild or a re-opening and is refused. Prior value: 2004-05-15 (Casino City Tribal Property List, 'Open Date'; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (Y)": 1
+   }
+  },
+  "open_date_source_url": {
+   "nonblank": 192,
+   "blank": 595,
+   "pct_blank": 75.6036,
+   "approx_distinct": 161
+  },
+  "close_date_source_value_verbatim": {
+   "nonblank": 76,
+   "blank": 711,
+   "pct_blank": 90.3431,
+   "approx_distinct": 37
+  },
+  "close_date_source_value_placeholder_basis": {
+   "nonblank": 76,
+   "blank": 711,
+   "pct_blank": 90.3431,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "measured 2026-09-02 by code/1159 in the vendor workbook itself (data/raw/external/gaming/directory_core/Tribal Property List.xlsx): of 553 non-empty 'Open Date' cells, 188 fall on 31 December and 165 on day 15, and of 142 '1st Close Date' cells 63 fall on day 15. Every cell is a real Excel datetime under number format [$-409]d-mmm-yyyy, so the placeholder day is the VENDOR's and was transcribed, not completed, by Cedar. The shipping open_date / close_date columns were already re-typed to the supported precision by code/158; this column exists so a consumer reading the verbatim value does not have to parse a 300-character basis string to learn that its day is not source-stated.": 76
+   }
+  },
+  "close_date_basis": {
+   "nonblank": 148,
+   "blank": 639,
+   "pct_blank": 81.1944,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "Casino City Tribal Property List, '1st Close Date'; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (YYYY-12-31 = year, YYYY-MM-15 = mid-month) carrying a day no source states. Re-typed to the month-precision the source supports; verbatim source string retained in close_date_source_value_verbatim; parse close_date_not_before/close_date_not_after for the interval.": 59,
+    "Casino City Tribal Property List, '1st Close Date'": 57,
+    "Casino City Tribal Property List, '1st Close Date'; DAY PRECISION WITHDRAWN 2026-08-26: the value was a source placeholder (YYYY-12-31 = year, YYYY-MM-15 = mid-month) carrying a day no source states. Re-typed to the year-precision the source supports; verbatim source string retained in close_date_source_value_verbatim; parse close_date_not_before/close_date_not_after for the interval.": 17,
+    "Indian Gaming Dataset, hand-coded closing event": 15
+   }
+  },
+  "close_date_source_url": {
+   "nonblank": 15,
+   "blank": 772,
+   "pct_blank": 98.094,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "https://www.yogonet.com/international/news/2022/05/13/62633-oklahoma-ukb-tribe-closer-to-reopening-tahlequah-casino-after-favorable-court-ruling-in-cherokee-dispute": 1,
+    "https://static1.squarespace.com/static/5e83a16cec038607f18cf780/t/64130c9ff87c8521ce118300/1678970015689/MNE+March+2023+Press+Release.pdf": 1,
+    "OK Casino Closes Suddenly, Leaving Workers Without Paychecks (news9.com)": 1,
+    "https://www.casinocitytimes.com/news/article/sevenwinds-and-grindstone-creek-casinos-will-close-until-further-notice-234520": 1,
+    "https://www.kiowatribe.org/sites/default/files/inline-files/KCOA%20news%20update%204-2024.pdf": 1,
+    "River Spirit Casino to reopen earlier than anticipated | The Journal Record": 1,
+    "https://www.artesianhotel.com/footer/history-our-story/": 1,
+    "https://oldcampcasino.com/": 1,
+    "https://www.worldcasinodirectory.com/casino/lil-chiefs-casino-3200#": 1,
+    "https://www.500nations.com/casinos/ok-Cherokee-Tahlequah-Casino.asp": 1,
+    "Feds order Nooksack Tribe to shutter casino over violations | AP News": 1,
+    "https://www.seattletimes.com/seattle-news/northwest/nooksack-river-casino-shuts-down-after-financial-issues/": 1,
+    "https://www.500nations.com/casinos/waTwoRivers.asp": 1,
+    "https://en.wikipedia.org/wiki/Choctaw_Casino_Bingo": 1,
+    "https://www.oklahoman.com/story/news/2003/06/15/seminole-nation-to-close-4-casinos/62039182007/": 1
+   }
+  },
+  "gaming_machines_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "reported": 409,
+    "no_capacity_source_for_this_facility": 192,
+    "not_published": 186
+   }
+  },
+  "gaming_machines_observation_status": {
+   "nonblank": 409,
+   "blank": 378,
+   "pct_blank": 48.0305,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "current": 408,
+    "approved": 1
+   }
+  },
+  "gaming_machines_observed_date": {
+   "nonblank": 409,
+   "blank": 378,
+   "pct_blank": 48.0305,
+   "approx_distinct": 24,
+   "vocabulary": {
+    "2023-01-01": 338,
+    "2006-11-07": 17,
+    "2012-01-01": 6,
+    "2017-01-01": 6,
+    "2019-01-01": 6,
+    "2016-01-01": 4,
+    "2014-01-01": 3,
+    "2007-11-06": 3,
+    "2005-01-25": 3,
+    "2017-07-01": 2,
+    "2015-07-01": 2,
+    "2021-07-01": 2,
+    "2016-07-01": 2,
+    "2005-09-02": 2,
+    "2022-07-01": 2,
+    "2020-07-01": 1,
+    "2013-07-01": 1,
+    "2004-01-27": 1,
+    "2011-04-28": 1,
+    "2022-01-01": 1,
+    "2018-01-01": 1,
+    "2012-09-17": 1,
+    "2009-11-09": 1,
+    "2007-05-02": 1,
+    "2008-04-22": 1,
+    "2010-05-17": 1
+   }
+  },
+  "table_games_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "not_published": 394,
+    "reported": 201,
+    "no_capacity_source_for_this_facility": 192
+   }
+  },
+  "table_games_observation_status": {
+   "nonblank": 201,
+   "blank": 586,
+   "pct_blank": 74.46,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "current": 201
+   }
+  },
+  "table_games_observed_date": {
+   "nonblank": 201,
+   "blank": 586,
+   "pct_blank": 74.46,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "2023-01-01": 128,
+    "2020-01-01": 5,
+    "2022-07-01": 4,
+    "2007-11-06": 4,
+    "2006-11-07": 4,
+    "2017-01-01": 4,
+    "2014-07-01": 4,
+    "2019-01-01": 4,
+    "2005-09-02": 4,
+    "2010-11-03": 3,
+    "2009-04-22": 3,
+    "2013-01-01": 3,
+    "2012-01-01": 3,
+    "2010-05-17": 3,
+    "2015-01-01": 2,
+    "2022-01-01": 2,
+    "2014-01-01": 2,
+    "2017-07-01": 2,
+    "2020-07-01": 2,
+    "2016-07-01": 2,
+    "2016-01-01": 2,
+    "2008-11-03": 2,
+    "2009-11-09": 2,
+    "2005-01-25": 1,
+    "2007-05-02": 1,
+    "2004-01-27": 1,
+    "2021-07-01": 1,
+    "2015-07-01": 1,
+    "2002-09-13": 1,
+    "2011-04-28": 1
+   }
+  },
+  "poker_tables_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "not_published": 439,
+    "no_capacity_source_for_this_facility": 192,
+    "reported": 156
+   }
+  },
+  "poker_tables_observation_status": {
+   "nonblank": 156,
+   "blank": 631,
+   "pct_blank": 80.1779,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "current": 154,
+    "proposed": 1,
+    "approved": 1
+   }
+  },
+  "poker_tables_observed_date": {
+   "nonblank": 156,
+   "blank": 631,
+   "pct_blank": 80.1779,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "2023-01-01": 57,
+    "2008-11-03": 11,
+    "2016-01-01": 9,
+    "2017-01-01": 8,
+    "2012-01-01": 8,
+    "2007-11-06": 6,
+    "2010-11-03": 6,
+    "2020-01-01": 6,
+    "2009-11-09": 6,
+    "2022-07-01": 5,
+    "2019-01-01": 4,
+    "2014-07-01": 3,
+    "2010-05-17": 3,
+    "2005-01-25": 2,
+    "2016-07-01": 2,
+    "2013-01-01": 2,
+    "2007-05-02": 2,
+    "2008-04-22": 2,
+    "2005-09-02": 2,
+    "2015-07-01": 1,
+    "2012-09-17": 1,
+    "2018-01-01": 1,
+    "2012-07-01": 1,
+    "2017-07-01": 1,
+    "2002-09-13": 1,
+    "2020-07-01": 1,
+    "2015-01-01": 1,
+    "2022-01-01": 1,
+    "2009-04-22": 1,
+    "2014-01-01": 1,
+    "2006-11-07": 1
+   }
+  },
+  "bingo_seats_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "not_published": 469,
+    "no_capacity_source_for_this_facility": 192,
+    "reported": 126
+   }
+  },
+  "bingo_seats_observation_status": {
+   "nonblank": 126,
+   "blank": 661,
+   "pct_blank": 83.9898,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "current": 125,
+    "approved": 1
+   }
+  },
+  "bingo_seats_observed_date": {
+   "nonblank": 126,
+   "blank": 661,
+   "pct_blank": 83.9898,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "2023-01-01": 50,
+    "2017-07-01": 10,
+    "2006-11-07": 7,
+    "2005-01-25": 6,
+    "2007-11-06": 6,
+    "2005-09-02": 5,
+    "2004-01-27": 4,
+    "2013-01-01": 4,
+    "2003-06-06": 4,
+    "2002-09-13": 3,
+    "2006-03-28": 3,
+    "2015-07-01": 3,
+    "2008-04-22": 3,
+    "2016-01-01": 3,
+    "2010-05-17": 2,
+    "2018-07-01": 1,
+    "2022-07-01": 1,
+    "2011-04-28": 1,
+    "2019-01-01": 1,
+    "2015-01-01": 1,
+    "2014-01-01": 1,
+    "2001-09-01": 1,
+    "2022-01-01": 1,
+    "2018-01-01": 1,
+    "2017-01-01": 1,
+    "2014-07-01": 1,
+    "2021-07-01": 1,
+    "2010-11-03": 1
+   }
+  },
+  "gaming_square_feet_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "reported": 301,
+    "not_published": 294,
+    "no_capacity_source_for_this_facility": 192
+   }
+  },
+  "gaming_square_feet_observation_status": {
+   "nonblank": 301,
+   "blank": 486,
+   "pct_blank": 61.7535,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "current": 300,
+    "proposed": 1
+   }
+  },
+  "gaming_square_feet_observed_date": {
+   "nonblank": 301,
+   "blank": 486,
+   "pct_blank": 61.7535,
+   "approx_distinct": 24,
+   "vocabulary": {
+    "2023-01-01": 265,
+    "2012-01-01": 4,
+    "2006-11-07": 3,
+    "2019-01-01": 3,
+    "2017-01-01": 2,
+    "2014-01-01": 2,
+    "2008-04-22": 2,
+    "2015-07-01": 2,
+    "2016-01-01": 2,
+    "2010-05-17": 1,
+    "2014-07-01": 1,
+    "2013-01-01": 1,
+    "2011-04-28": 1,
+    "2022-07-01": 1,
+    "2007-05-02": 1,
+    "2012-09-17": 1,
+    "2017-07-01": 1,
+    "2018-01-01": 1,
+    "2007-11-06": 1,
+    "2022-01-01": 1,
+    "2004-01-27": 1,
+    "2005-01-25": 1,
+    "2013-07-01": 1,
+    "2021-07-01": 1,
+    "2016-07-01": 1
+   }
+  },
+  "convention_square_feet_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "not_published": 499,
+    "no_capacity_source_for_this_facility": 192,
+    "reported": 96
+   }
+  },
+  "convention_square_feet_observation_status": {
+   "nonblank": 96,
+   "blank": 691,
+   "pct_blank": 87.8018,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "current": 96
+   }
+  },
+  "convention_square_feet_observed_date": {
+   "nonblank": 96,
+   "blank": 691,
+   "pct_blank": 87.8018,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "2023-01-01": 81,
+    "2006-11-07": 3,
+    "2008-04-22": 3,
+    "2007-11-06": 2,
+    "2005-09-02": 2,
+    "2007-05-02": 2,
+    "2016-01-01": 1,
+    "2015-07-01": 1,
+    "2004-01-27": 1
+   }
+  },
+  "hotel_rooms_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "not_published": 470,
+    "no_capacity_source_for_this_facility": 192,
+    "reported": 125
+   }
+  },
+  "hotel_rooms_observation_status": {
+   "nonblank": 125,
+   "blank": 662,
+   "pct_blank": 84.1169,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "current": 124,
+    "approved": 1
+   }
+  },
+  "hotel_rooms_observed_date": {
+   "nonblank": 125,
+   "blank": 662,
+   "pct_blank": 84.1169,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "2023-01-01": 106,
+    "2019-01-01": 8,
+    "2006-11-07": 2,
+    "2007-05-02": 2,
+    "2018-01-01": 1,
+    "2007-11-06": 1,
+    "2015-07-01": 1,
+    "2017-01-01": 1,
+    "2010-11-03": 1,
+    "2008-04-22": 1,
+    "2005-09-02": 1
+   }
+  },
+  "parking_spaces_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "not_published": 419,
+    "no_capacity_source_for_this_facility": 192,
+    "reported": 176
+   }
+  },
+  "parking_spaces_observation_status": {
+   "nonblank": 176,
+   "blank": 611,
+   "pct_blank": 77.6366,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "current": 176
+   }
+  },
+  "parking_spaces_observed_date": {
+   "nonblank": 176,
+   "blank": 611,
+   "pct_blank": 77.6366,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "2023-01-01": 160,
+    "2007-11-06": 2,
+    "2006-11-07": 2,
+    "2022-07-01": 2,
+    "2017-01-01": 1,
+    "2022-01-01": 1,
+    "2015-07-01": 1,
+    "2004-01-27": 1,
+    "2016-01-01": 1,
+    "2016-07-01": 1,
+    "2007-05-02": 1,
+    "2019-01-01": 1,
+    "2011-04-28": 1,
+    "2012-01-01": 1
+   }
+  },
+  "employees_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "reported": 323,
+    "not_published": 272,
+    "no_capacity_source_for_this_facility": 192
+   }
+  },
+  "employees_observation_status": {
+   "nonblank": 323,
+   "blank": 464,
+   "pct_blank": 58.9581,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "current": 322,
+    "proposed": 1
+   }
+  },
+  "employees_observed_date": {
+   "nonblank": 323,
+   "blank": 464,
+   "pct_blank": 58.9581,
+   "approx_distinct": 24,
+   "vocabulary": {
+    "2023-01-01": 272,
+    "2006-11-07": 8,
+    "2007-11-06": 5,
+    "2017-01-01": 4,
+    "2019-01-01": 3,
+    "2010-05-17": 3,
+    "2016-01-01": 3,
+    "2015-07-01": 2,
+    "2012-01-01": 2,
+    "2022-07-01": 2,
+    "2014-01-01": 2,
+    "2008-04-22": 2,
+    "2014-07-01": 2,
+    "2021-07-01": 2,
+    "2012-09-17": 1,
+    "2022-01-01": 1,
+    "2018-01-01": 1,
+    "2004-01-27": 1,
+    "2013-01-01": 1,
+    "2011-04-28": 1,
+    "2009-11-09": 1,
+    "2007-05-02": 1,
+    "2005-09-02": 1,
+    "2005-01-25": 1,
+    "2013-07-01": 1
+   }
+  },
+  "restaurants_value_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "reported": 330,
+    "not_published": 265,
+    "no_capacity_source_for_this_facility": 192
+   }
+  },
+  "restaurants_observation_status": {
+   "nonblank": 330,
+   "blank": 457,
+   "pct_blank": 58.0686,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "current": 330
+   }
+  },
+  "restaurants_observed_date": {
+   "nonblank": 330,
+   "blank": 457,
+   "pct_blank": 58.0686,
+   "approx_distinct": 22,
+   "vocabulary": {
+    "2023-01-01": 267,
+    "2019-01-01": 20,
+    "2006-11-07": 6,
+    "2021-07-01": 4,
+    "2007-11-06": 3,
+    "2008-04-22": 3,
+    "2016-01-01": 3,
+    "2017-07-01": 3,
+    "2017-01-01": 2,
+    "2014-01-01": 2,
+    "2015-07-01": 2,
+    "2012-01-01": 2,
+    "2006-03-28": 2,
+    "2007-05-02": 1,
+    "2018-07-01": 1,
+    "2012-09-17": 1,
+    "2022-01-01": 1,
+    "2004-01-27": 1,
+    "2005-01-25": 1,
+    "2009-04-22": 1,
+    "2013-07-01": 1,
+    "2013-01-01": 1,
+    "2011-04-28": 1,
+    "2022-07-01": 1
+   }
+  },
+  "first_observed_date": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 44
+  },
+  "last_observed_date": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 33,
+   "vocabulary": {
+    "2023-01-01": 345,
+    "2006-11-07": 16,
+    "2026-08-26": 13,
+    "2017-01-01": 7,
+    "2012-01-01": 6,
+    "2007-11-06": 6,
+    "2019-01-01": 5,
+    "2005-09-02": 5,
+    "2010-05-17": 5,
+    "2016-01-01": 5,
+    "2013-01-01": 4,
+    "2005-01-25": 4,
+    "2014-01-01": 3,
+    "2015-07-01": 3,
+    "2021-07-01": 3,
+    "2017-07-01": 2,
+    "2018-01-01": 2,
+    "2016-07-01": 2,
+    "2008-04-22": 2,
+    "2022-07-01": 2,
+    "2018-07-01": 1,
+    "2007-05-02": 1,
+    "2020-01-01": 1,
+    "2014-07-01": 1,
+    "2012-09-17": 1,
+    "2022-01-01": 1,
+    "2020-07-01": 1,
+    "2004-01-27": 1,
+    "2009-04-22": 1,
+    "2013-07-01": 1,
+    "2010-11-03": 1,
+    "2009-11-09": 1,
+    "2011-04-28": 1
+   }
+  },
+  "source_datasets": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "casino_city_press|tribal_property_list": 250,
+    "votingpatterns_canonical": 164,
+    "casino_city_press|tribal_property_list|votingpatterns_canonical": 92,
+    "tribal_property_list|votingpatterns_canonical": 73,
+    "tribal_property_list": 68,
+    "casino_city_press|tribal_property_list|votingpatterns_canonical|indian_gaming_dataset": 55,
+    "casino_city_press|tribal_property_list|indian_gaming_dataset": 43,
+    "tribal_property_list|votingpatterns_canonical|indian_gaming_dataset": 21,
+    "NIGC_GAMING_LOCATION_MAP": 10,
+    "tribal_property_list|indian_gaming_dataset": 8,
+    "OSHA_ITA_300A": 3
+   }
+  },
+  "match_status": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "casino_city_only": 369,
+    "matched_casino_city_and_votingpatterns": 241,
+    "votingpatterns_only_no_exact_casino_city_match": 164,
+    "nigc_only_no_cedar_match": 10,
+    "osha_only_no_cedar_match": 3
+   }
+  },
+  "match_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "no exact normalised (name, state) match from another source": 369,
+    "exact match on normalised (facility_name, state)": 238,
+    "no exact normalised (name, state) match in Casino City": 164,
+    "no rung of the code/157 ladder matched, and no rare token of this name appears in any Cedar facility name nationwide": 10,
+    "exact match on normalised (street address, state)": 3,
+    "no rung of the code/157 ladder matched, and a NATIONWIDE duplicate screen over every Cedar facility name found no rare-token collision": 3
+   }
+  },
+  "fetched_date": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2026-08-05": 774,
+    "2026-08-26": 13
+   }
+  },
+  "open_date_precision": {
+   "nonblank": 636,
+   "blank": 151,
+   "pct_blank": 19.1868,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "year": 288,
+    "day": 188,
+    "month": 159,
+    "decade": 1
+   }
+  },
+  "open_date_evidence": {
+   "nonblank": 738,
+   "blank": 49,
+   "pct_blank": 6.2262,
+   "approx_distinct": 165
+  },
+  "open_date_evidence_url": {
+   "nonblank": 250,
+   "blank": 537,
+   "pct_blank": 68.2338,
+   "approx_distinct": 233
+  },
+  "open_date_evidence_quote": {
+   "nonblank": 125,
+   "blank": 662,
+   "pct_blank": 84.1169,
+   "approx_distinct": 125
+  },
+  "open_date_absent_reason": {
+   "nonblank": 62,
+   "blank": 725,
+   "pct_blank": 92.122,
+   "approx_distinct": 21,
+   "vocabulary": {
+    "not a gaming facility - this row comes from the votingpatterns tribe roster and its facility_name records that the tribe operates no casino; there is no opening to date": 20,
+    "no opening date sourced - this row is created from NIGC's gaming location map, which states that the location is a regulated gaming operation NOW and states nothing about when it opened. Absence of a date here is the source's silence, not a gap in searching.": 10,
+    "no source located - see docs/GAMING_TEMPORAL_BUILD_LOG.md for what was searched": 9,
+    "cross-reference stub - facility_name points at another row for the same property; not a distinct facility": 4,
+    "no opening date sourced - this row is created from OSHA ITA 300A establishment filings, which prove the establishment was OPERATING in the filed year and say nothing about when it opened": 3,
+    "gaming status not established - RULED 2026-08-06 (session 3), REPLACING a 2026-08-06 ruling of 'not a gaming facility' that over-claimed. FOR gaming: this row is a Casino City Tribal Property List record, and that roster is a gaming-property roster (its Montana entries include B & S Laundry, Dad's Bar and TJ's Quikstop, which are licensed video-gambling locations). It carries a close date of 2003-11-21, so the vendor tracked it as an operating gaming location until then. AGAINST gaming: saulttribe.com's CURRENT enterprise page describes MidJim as a convenience-store and fuel brand listed separately from Kewadin Casinos - 'Midjim has two locations in the Upper Peninsula, in Sault Ste. Marie and St. Ignace. Both locations offer items such as gasoline, cigarettes, beer, wine and other convenience items.' That page describes the brand in 2026 and cannot speak to a location that closed in 2003. Neither the opening date nor the gaming status is established. https://www.saulttribe.com/enterprises/midjim": 1,
+    "gaming status not established - RULED 2026-08-06 (session 3), REPLACING a 2026-08-06 ruling of 'not a gaming facility' that over-claimed (see TPL-0070 for the full reasoning; same MidJim brand, Casino City close date 2005-03-15). SEPARATE AND STILL OPEN: this row is labelled 'St. Ignace' but Casino City gives its address as 2205 Shunk Road, which is in Sault Ste. Marie - the two MidJim locations appear to have been crossed. Queued, not corrected. https://www.saulttribe.com/enterprises/midjim": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-908000, which carries the date. See `duplicate_of_facility_id`. SAME PROPERTY, AND THE TRIBE AND STATE ON THIS ROW ARE WRONG. Sage Hill Casino is on the FORT HALL Reservation in IDAHO and belongs to the SHOSHONE-BANNOCK Tribes - the operator's own page states 'Located on the Fort Hall Indian Reservation, 3 mi South of Blackfoot on Highway 91. I-15 Exit 89' (sho-ban.com, fetched 2026-08-06 (session 3)). This row says Shoshone-PAIUTE Tribes at Owyhee, NEVADA. The votingpatterns source file cites 'SageHillCasino.com' - the Idaho property's own site - and annotates the record 'NV side', so the roster knowingly filed an Idaho casino under a Nevada tribe. This file ALREADY HOLDS the property correctly as CCP-908000 Sage Hill Casino, Shoshone-Bannock Tribes, Idaho, open 2009-03-18. The 23g duplicate scorer could not find that twin because it searches within a state and this row's state field is the corrupted one. THIS IS WHY THE \u00a77.5c DATE WAS HELD: applying the sourced 'February 2009' opening here would have dated a Nevada row with an Idaho casino's opening while the correct row already carried it. NOTE A REMAINING CONFLICT, not resolved here: the held source says February 2009 and Casino City says 2009-03-18. Both are early 2009; neither is preferred without a further source.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-67000, which carries the date. See `duplicate_of_facility_id`. Address is byte-identical to the dated row - 6800 Y Frontage Rd NW against CCP-67000's 6800 Y Frontage Road Northwest, both Walker MN, both Leech Lake Band of Ojibwe - and the votingpatterns source file cites 'NorthernLightsCasino.com', the twin's own site. One property. READ THE TWIN'S EVENT RULING: researching this row is what established that CCP-67000's 2001-05-15 is a REPLACEMENT BUILDING, not the original opening (see RULED_EVENT). The original opening is still unsourced.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-39900, which carries the date. See `duplicate_of_facility_id`. Cross-reference stub. The facility_name says '- main IA' and the votingpatterns source file annotates the record 'Main casino in IA', both pointing at the Winnebago Tribe of Nebraska's Iowa property - CCP-39900 WinnaVegas Casino Resort, 1500 330th Street, Sloan IA, 1992. Not a distinct Nebraska facility. The CROSS_REF name rule did not catch it because that rule keys on '- actual XX' and 'see X', and this row says '- main IA'.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-411600, which carries the date. See `duplicate_of_facility_id`. The votingpatterns source file annotates this record 'Same property as primary' and gives its address as 777 Casino Ave, Thackerville - which the Indian Gaming Dataset also gives for WinStar World Casino and Resort (grand opening 2003, expansion 2024). WinStar is a single complex whose themed plazas (Beijing, Madrid, Paris, Rome, Vienna, London, New York, Cairo) were added across successive expansions; there is no 'additional plaza' with an opening of its own. CCP-411600 carries the 2003 date.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-11800, which carries the date. See `duplicate_of_facility_id`. Address is byte-identical to the dated row - 321 Sitting Bull St against CCP-11800's 321 Sitting Bull Street, both Lower Brule SD, both Lower Brule Sioux Tribe - the votingpatterns source file cites 'GoldenBuffaloCasino.com', and the Indian Gaming Dataset independently records 'The Golden Buffalo Casino Restaurant and Motel' at 321 Sitting Bull St with a 1992 grand opening, agreeing with CCP-11800's 1992-02-15. Three sources, one property.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as VP-0011, which carries the date. See `duplicate_of_facility_id`. The votingpatterns source file annotates this record 'Same property' and gives its address as 11154 Hwy 76 - byte-identical to VP-0011 Pala Casino Spa Resort and to CCP-521600 (11154 Highway 76). It is the hotel tower added to the existing Pala Casino, not a separate casino. Gaming at the property commenced 2001-04-03, which VP-0011 already carries; the hotel/spa expansion opened 2003-08-19, which is an expansion, not an opening. This is the \u00a77.5c row whose well-sourced date was deliberately NOT recorded, and this ruling is why: the date is real and it belongs to VP-0011.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-688700, which carries the date. See `duplicate_of_facility_id`. Same property, and the TRIBE on this row is wrong. The votingpatterns source file cites 'IronHorseBarAndCasino.com' for this record - the twin's own site - and the twin is CCP-688700 Iron Horse Bar & Casino, Emerson NE, open 2004-07-09, operated by the WINNEBAGO Tribe of Nebraska. This row attributes it to the OMAHA Tribe of Nebraska. Emerson is a village of about 800 people and does not host two casinos of the same name run by two tribes. The '- small' suffix is the roster's size-class descriptor, not a separate property. Addresses differ (1402 Hwy 75 against the vendor's 1106 South Main Street) and that discrepancy is disclosed rather than smoothed over.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-962300, which carries the date. See `duplicate_of_facility_id`. Same property - Indigo Sky Casino, Eastern Shawnee Tribe, Wyandotte OK - and THIS ROW IS THE ONE WITH THE CORRECT ADDRESS. It carries 70220 E Hwy 60, which the Indian Gaming Dataset also gives for Indigo Sky Casino (70220 US-60). The dated twin CCP-962300 carries 130 North Oneida Street, which is the PREDECESSOR Bordertown Casino's address (the Indian Gaming Dataset puts Bordertown Casino & Arena at 129 Oneida St). So the twin is dated, and this row is correctly located, and they are one casino. READ THE TWIN'S EVENT RULING: CCP-962300's 1981-12-31 cannot be Indigo Sky's opening.": 1,
+    "duplicate row - RULED 2026-08-06 (session 3) to be the same property as CCP-800600, which carries the date. See `duplicate_of_facility_id`. Same property. Name, city and tribe all agree with CCP-800600 Sac & Fox Nation Stroud Casino (Stroud OK, 2005-06-15), and the Indian Gaming Dataset records the Sac and Fox Nation Casino at 356120 926 Rd, Stroud - the same 356120 house number this row carries as '356120 EW 1240', which is the same rural address under Oklahoma's two road-naming conventions. Contrast VP-0165, the tribe's other roster row, which is NOT ruled a duplicate because its name, city and address disagree with each other.": 1,
+    "not a distinct gaming property - RULED 2026-08-06 (session 3). The row fuses three different nations' facts: '7 Clans' is the OTOE-MISSOURIA brand (this file holds six 7 Clans rows, all Otoe-Missouria, none in Ponca City); the tribe field says Ponca Tribe of Oklahoma, whose own Ponca City casino IS in this file as CCP-411000 Blue Star Gaming and Casino, 20 White Eagle Drive, opened 2010-10-15; and the location, Ponca City, is where the OSAGE NATION's casino sits (CCP-859600 / VP-0199, 2007). The Indian Gaming Dataset independently records the Ponca Tribe's Ponca City property as 'Two Rivers Casino', 101 White Eagle Dr, grand opening 2010, closed 2013 - the same White Eagle site as CCP-411000. Every real property this row could denote is already in the file and dated. Dating this row would create a fourth Ponca City record for three casinos.": 1,
+    "identity not established - RULED 2026-08-06 (session 3). No distinct Choctaw CASINO in Atoka is evidenced anywhere: 'Atoka' appears nowhere in a 31,054-row CDX enumeration of choctawcasinos.com, and the live locations page (fetched 2026-08-06) lists Durant, Pocola, Hochatown, Broken Bow, Idabel, McAlester, Grant and Stringtown as casinos, with Atoka appearing only as CHOCTAW TRAVEL PLAZA ATOKA. Stringtown is in Atoka County, which is a plausible source of the mislabel. This file already holds the tribe's Atoka gaming property as CCP-970700 Choctaw Travel Plaza - Atoka (1302 South Mississippi, 2010-06-15) - and travel plazas in this file DO host gaming, so that row is not a non-casino. NOT ruled a duplicate: this row's address is 1790 S Mississippi Ave against the vendor's 1302 South Mississippi, and a different street number is not a merge this project will make on inference. Searching harder cannot date a row whose subject is undefined. https://www.choctawcasinos.com/locations/": 1,
+    "not a distinct gaming property - RULED 2026-08-06 (session 3). The name does not resolve: potawatomi.org's gaming enterprise list has exactly TWO properties, Grand Casino Hotel & Resort and FireLake Casino, and 'FireLake Express' is the Citizen Potawatomi Nation's GROCERY chain. The votingpatterns source file that contributed this row cites 'GrandResortOK.com' and annotates it 'Adjacent to Grand' - i.e. the roster itself recorded it as an adjunct of the Grand Casino property, not as a casino of its own. Both candidate properties are already dated here (CCP-766700 Grand Casino Hotel Resort, 2006; CCP-409700 FireLake Casino, 1989), and the duplicate queue scores this row STRONG against BOTH - which is the tell that it is a merged label rather than a property. A date was available (October 2006 for the Grand) and was deliberately NOT recorded. https://www.potawatomi.org/": 1,
+    "not a gaming facility - RULED 2026-08-06 (session 3). Peoria Ridge is the Peoria Tribe's 18-hole GOLF COURSE. peoriatribe.com lists Buffalo Run Casino & Resort and Peoria Ridge Golf Course as SEPARATE enterprises, and the row's address (10238 S 580 Rd, Miami OK) is the golf course, not the casino (8520 S Highway 69A, carried on CCP-646400 Peoria Gaming Center). Same class of row as Lake of Isles, Foxwoods' golf course (VP-0002). There is no gaming opening to date. https://www.peoriatribe.com/": 1,
+    "identity not established - RULED 2026-08-06 (session 3). The Sac and Fox Nation of Oklahoma's Shawnee gaming property is The Black Hawk Casino, already in this file as CCP-692600 (42008 Westech Road, Shawnee, 2004-07-28), and the Indian Gaming Dataset independently lists Shawnee's casinos as Thunderbird, FireLake, Grand, Kickapoo Shawnee and The Black Hawk - with no 'Sac and Fox Casino Shawnee' among them. NOT ruled a duplicate of CCP-692600, because this row's address (920866 S Hwy 99) is a STROUD address - the Sac and Fox Nation's headquarters sits at 920883 S Hwy 99, Stroud - while its city field says Shawnee. Name, city and address disagree, and the votingpatterns roster cites 'SacAndFoxCasinos.com' for it, a domain the 2026-08-06 sweep found belongs to a DIFFERENT TRIBE (the Sac and Fox Nation of MISSOURI, Powhattan, Kansas). Resolve which property this row is before dating it.": 1
+   }
+  },
+  "close_date_precision": {
+   "nonblank": 148,
+   "blank": 639,
+   "pct_blank": 81.1944,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "month": 59,
+    "day": 57,
+    "year": 32
+   }
+  },
+  "open_date_event_basis": {
+   "nonblank": 636,
+   "blank": 151,
+   "pct_blank": 19.1868,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "The Casino City Tribal Property List publishes an 'Open Date' for each gaming property but does not state whether it marks the date gaming commenced or the date the property opened. Not inferred here.": 442,
+    "The Indian Gaming Dataset codes dated GAMING opening events for gaming properties and carries a per-event source URL, so the event is the source's own subject. Not independently re-verified here.": 112,
+    "Researched against a source describing the casino opening to the public.": 67,
+    "The stated date precedes 1979, the first documented year of high-stakes tribal gaming, so it cannot mark gaming commencement. The cited source describes the opening of the PROPERTY - a golf course, resort or lodge that later hosted gaming. Read `open_date_evidence_quote`.": 2,
+    "Researched, and the source dates a REPLACEMENT BUILDING or a rebranding, not the first operation on this site. Gaming here began earlier by an amount the source does not state. Read `open_date_evidence`.": 2,
+    "RULED 2026-08-06, RE-STATED IN CODE 2026-08-06 (session 3) so that re-running this script cannot silently drop it - the ruling had been applied directly to the CSV, and this loop clears `open_date_event` on every row before recomputing it, so the next rebuild would have reverted it to `unspecified`. TWO OPENINGS, BOTH REAL. The Kansas State Gaming Agency's history page states: 'The Iowa Tribe opened a temporary gaming facility on May 20, 1998. On December 15, 1998, their permanent casino, Casino White Cloud, was opened...'. `open_date` carries the PERMANENT building, 1998-12-15; the temporary facility is recorded separately in `interim_open_date` rather than resolved by a house rule, because 'when did gaming start here' and 'when did this building open' are different questions and this file answers both. http://www.kansas.gov/ksga/History.htm": 1,
+    "RULED 2026-08-06 (session 3), resolving \u00a77.6b of the build log. This row's 2001-05-15 is a REPLACEMENT BUILDING, not the original opening. Establishing why the undated twin VP-0261 could not be dated is what surfaced it: the May 2001 date that circulates on tribal and local sites describes 'the new facility, which opened in May of 2001'. The Leech Lake Band operated Northern Lights at Walker well before that and the original opening remains unsourced - the casino's earliest archived captures (2000-08, 2001-04, 2001-05) are register.com host placeholders and the band's 2001 page is a 295-byte stub. `open_date_postdates_observation` cannot catch this row because the file holds no earlier capacity observation of the property, which is exactly the blind spot a rebuild date sits in. Usable as the current building's opening; NOT usable in a 'gaming since' series.": 1,
+    "RULED 2026-08-06. The keyword rule flipped this to `property_opened` because the note mentions the later River Spirit rebuild, but the quote is unambiguous about the event: 'Opened in 1985, CNTB was the first high-stakes gaming operation in Oklahoma.' Gaming commenced at the 81st & Riverside site in 1985. SEPARATE AND UNRESOLVED: whether this ROW is that site. The Muscogee Nation's current property list has no standalone 'Muscogee Nation Casino Tulsa'; its Tulsa property is River Spirit Casino Resort, which dates to 2009 on the same 81st & Riverside lineage. Queued in review/gaming_facility_identity_queue_2026-08-06.csv.": 1,
+    "NOT INDEPENDENTLY VERIFIED. The stated date precedes 1979, the first documented year of high-stakes tribal gaming, so it is unlikely - but NOT proven - to mark gaming commencement; small tribal bingo predates that year. No source states which event this date marks. Treat the date as unusable for a 'gaming since' series and see `open_date_predates_tribal_gaming_era`. CORROBORATION (does not date the opening): Seneca Gaming Corporation's SEC Form S-4 filed 2004-07-23 (CIK 0001296785) states the Nation 'through its wholly owned business enterprise, Seneca Gaming & Entertainment, operates a Class II gaming facility located on the Nation's Territory in Irving, New York' and that 'For the fiscal year ended September 30, 2003, the Irving Class II facility generated $25.5 million in net revenue'. That proves the hall was operating by 2003-09-30 and says nothing about when it opened. https://www.sec.gov/Archives/edgar/data/1296785/000104746904024134/a2140167zs-4.htm": 1,
+    "RULED 2026-08-06 (session 3), resolving \u00a77.6 of the build log. The stated 1981-12-31 CANNOT mark Indigo Sky Casino's opening and the event it does mark is not established. Two independent facts settle the first half. (1) The Indian Gaming Dataset - the per-event-sourced opening history in data/raw/external/gaming/directory_core - records Indigo Sky Casino at 70220 US-60, Wyandotte OK with a GRAND OPENING IN 2012, citing a KOAM News report on Bordertown Casino's closure. (2) This row's Casino City address is 130 North Oneida Street, which is not Indigo Sky's address at all: the same dataset places Bordertown Casino & Arena, the Eastern Shawnee property Indigo Sky REPLACED, at 129 Oneida St, with a 2005 grand opening and a 2013 closing. So this row carries a successor property's name over a predecessor's address and a date earlier than either - a vendor carrying a LINEAGE date on a rebuilt property, which is a third route to the same property-versus-gaming conflation \u00a72 documents. The date is retained unmodified because it is the source value and no source read here states what 1981 marks. CONSEQUENCE FOR \u00a72: this row must NOT be counted among the verified pre-IGRA halls.": 1,
+    "RULED 2026-08-06 on the row's own evidence: the date is 'the gaming-floor opening of the NEW Soboba Casino Resort', which 'replaced the original 1995 Soboba Casino on a different site, which was already operating by 2000-10-17 per an archived soboba.com capture.' Gaming by this operator began in 1995. Usable as the new resort's opening; NOT usable in a 'gaming since' series.": 1,
+    "RULED 2026-08-06 on the researcher's own disclosure, which the keyword rule did not catch: 'CURRENT BUILDING ONLY ... the same article says [it] replaces the older, detached casino.' The Shoshone-Bannock Tribes were operating a casino before 2019-02-05, so that date marks the current building, not gaming commencement.": 1,
+    "Verified against the operator's own site (crosbylodge.com, Internet Archive snapshot 2001-04-28): Crosby Lodge is a lodge, grocery store, snack bar and bar at Sutcliffe on Pyramid Lake. The page describes lodging, tackle, fuel, an RV park and fishing derbies and contains no mention of gaming, slot machines, bingo or a casino. It states 'Our lodge has been in the family since 1896' and 'We have been your hosts since 1970' - NEITHER of which is 1905, so what the source's 1905-06-07 marks is not established either. It is certainly not the date gaming commenced.": 1,
+    "RULED 2026-08-06 on the row's own evidence: 'Dates the casino opening, not the 1986 bingo-hall predecessor.' Gaming at Mashantucket commenced at the bingo hall in 1986; 1992-02-15 is the casino building. Correct as a building date, wrong as a gaming-commencement date.": 1,
+    "RULED 2026-08-06. Lake of Isles is Foxwoods' GOLF COURSE, not a gaming floor, and the cited quote dates the golf facility: 'Since opening in 2005, Lake of Isles has consistently been ranked as one of the top golf facilities in the country.' Gaming at Mashantucket Pequot began at Foxwoods in 1986 (bingo) / 1992 (casino), not 2005. This row is the clearest surviving example of `open_date` carrying a property-establishment date on a post-1979 row, where the pre-tribal-gaming-era detector cannot reach it. Whether an amenity golf course belongs in a gaming-facility file at all is a separate question - noted for the reconcile queue.": 1,
+    "RULED 2026-08-06 on the researcher's own caveat. The Modoc Nation's history page says 'In 1998, The Modoc Tribe ESTABLISHED The Stables Casino' - established, not opened. Chartering an enterprise and commencing gaming are different events and no source states the second, so 1998 is retained as the stated date but the event it marks is not claimed. A one-word difference in a source is exactly the kind of thing this column exists to preserve.": 1
+   }
+  },
+  "temporal_build_date": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2026-08-06": 774,
+    "2026-08-26": 13
+   }
+  },
+  "entity_match_method": {
+   "nonblank": 785,
+   "blank": 2,
+   "pct_blank": 0.2541,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "containment": 291,
+    "core": 247,
+    "alias": 154,
+    "exact": 85,
+    "unanimous_city_operator": 7,
+    "corrected_by_regulator_roster": 1
+   }
+  },
+  "entity_tier": {
+   "nonblank": 785,
+   "blank": 2,
+   "pct_blank": 0.2541,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "B": 557,
+    "A": 228
+   }
+  },
+  "entity_match_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 68
+  },
+  "entity_keyed_date": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-08-06": 757,
+    "2026-08-26": 29,
+    "2026-09-01": 1
+   }
+  },
+  "interim_open_date_basis": {
+   "nonblank": 2,
+   "blank": 785,
+   "pct_blank": 99.7459,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "exact": 2
+   }
+  },
+  "interim_open_note": {
+   "nonblank": 2,
+   "blank": 785,
+   "pct_blank": 99.7459,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Two openings, both real. A TEMPORARY facility opened 1998-05-20 and the PERMANENT building opened 1998-12-15, which is what `open_date` carries. Recorded separately rather than resolved by a house rule: \"when did gaming start here\" and \"when did this building open\" are different questions and a single date cannot answer both.": 2
+   }
+  },
+  "gaming_class_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 206
+  },
+  "gaming_class_source_url": {
+   "nonblank": 684,
+   "blank": 103,
+   "pct_blank": 13.0877,
+   "approx_distinct": 209
+  },
+  "revenue_bound_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 109
+  },
+  "revenue_bound_absent_reason": {
+   "nonblank": 93,
+   "blank": 694,
+   "pct_blank": 88.183,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "NO_NIGC_REGION_ASSIGNED - no regional GGR total applies, so no ceiling can be stated": 34,
+    "NON_IGRA_TRIBALLY_OWNED - the operation is outside NIGC's regional total, so the regional total says nothing about it. An absence here is a property of NIGC's universe, not a gap in Cedar's": 21,
+    "IGRA_COVERAGE_UNKNOWN - Cedar has not established whether NIGC counts this operation in its regional total; NOT_CHECKED, not an absence": 20,
+    "NO_ROW_IN_nigc_region_assignments - this facility was never assigned to an NIGC administrative region, so the regional-ceiling method could not reach it": 15,
+    "REVIEW: IGRA-covered and region-assigned yet no bound row was produced - no region-year GGR row matched its effective span. FLAGGED, not explained away; see code/106_build_revenue_bounds.py": 2,
+    "PROPOSED_IGRA_OPERATION - not yet operating in any reported fiscal year": 1
+   }
+  },
+  "state_revenue_disclosure_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "NOT_ASSESSED - no documented_absence row for OK in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 190,
+    "NOT_ASSESSED - no documented_absence row for CA in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 116,
+    "NOT_ASSESSED - no documented_absence row for WA in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 53,
+    "Minnesota Legislature: \"a provision that in the event of a request for a renegotiation or a new compact the existing compact will remain in effect until renegotiated or replaced.\" [applies to: all tribal gaming revenue and payments] https://www.revisor.mn.gov/statutes/cite/3.9221": 48,
+    "Arizona Department of Gaming: \"In accordance with A.R.S. \u00a7 5-601.02(H)(1), which requires an annual report that includes \"a statement of aggregate gross gaming revenue for all Indian tribes, aggregate revenues deposited in the Arizona Benefits Fund, including interest thereon, expenditures made from the Arizona Benefits Fund, and\" [applies to: per-tribe gross gaming revenue and contributions] https://gaming.az.gov/sites/default/files/Annual%20Report%20on%20Tribal%20Contributions%20FY%202025.pdf": 43,
+    "NOT_ASSESSED - no documented_absence row for MT in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 43,
+    "NOT_ASSESSED - no documented_absence row for MI in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 41,
+    "Wisconsin Legislative Fiscal Bureau: \"Tribes are required to submit annual independent financial audits of casino operations to the Department of Administration (DOA) and to the Legislative Audit Bureau (LAB). These audits are confidential, and the revenue data for individual tribal operations may not be publicly disclosed.\" [applies to: per-tribe and per-property REVENUE] https://docs.legis.wisconsin.gov/misc/lfb/informational_papers/january_2025/0091_tribal_gaming_in_wisconsin_informational_paper_91.pdf": 40,
+    "NOT_ASSESSED - no documented_absence row for NM in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 38,
+    "North Dakota Legislative Assembly: \"54-58-02. Tribal gaming records not subject to disclosure - Exceptions. Except as provided in each tribal-state gaming compact, all tribal gaming records, including trade secret and proprietary information as defined in section 44-04-18.4, submitted to an agency of this state are confidential and ar\" [applies to: all tribal gaming records] https://ndlegis.gov/cencode/t54c58.pdf": 22,
+    "NOT_ASSESSED - no documented_absence row for SD in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 21,
+    "NOT_ASSESSED - no documented_absence row for NY in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 17,
+    "NOT_ASSESSED - no documented_absence row for OR in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 16,
+    "NOT_ASSESSED - no documented_absence row for ID in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 13,
+    "NOT_ASSESSED - no documented_absence row for FL in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 12,
+    "Washoe Tribe of Nevada and California / State of Nevada: \"For each Group I and Group II Tribal Gaming Operation, the Tribe shall submit to the Board a completed \"Monthly Gross Revenue Statistical Report\" (NGC-31) for each month of operation.\" [applies to: per-property tribal gross revenue] https://www.bia.gov/service/gaming-compacts": 10,
+    "NOT_ASSESSED - no documented_absence row for NE in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 9,
+    "Kansas Legislative Research Department: \"Revenue. Financial information concerning the operation of the four casinos is confidential. Under the existing compacts, the State does not receive revenue from the casinos, except for its oversight activities.\" [applies to: per-casino financial information] https://klrd.gov/publications/briefing-book-2021/lottery-state-owned-casinos-parimutuel-wagering-and-tribal-casinos/": 8,
+    "NOT_ASSESSED - no documented_absence row for TX in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 7,
+    "NOT_ASSESSED - no documented_absence row for NC in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 5,
+    "NOT_ASSESSED - no documented_absence row for MS in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 5,
+    "NOT_ASSESSED - no documented_absence row for CT in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 5,
+    "NOT_ASSESSED - no documented_absence row for LA in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 4,
+    "NOT_ASSESSED - no documented_absence row for IA in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 4,
+    "NOT_ASSESSED - no documented_absence row for WY in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 4,
+    "NOT_ASSESSED - no documented_absence row for AK in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 3,
+    "Colorado Department of Revenue, Division of Gaming: \"The two tribes, the Ute Mountain Ute Tribe and the Southern Ute Indian Tribe, are not subject to taxation and are not required to report their revenues to the State.\" [applies to: all tribal gaming revenue] https://sbg.colorado.gov/tribal-casinos-in-colorado": 3,
+    "NOT_ASSESSED - no documented_absence row for AL in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 3,
+    "NOT_ASSESSED - no documented_absence row for IN in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 1,
+    "NOT_ASSESSED - no documented_absence row for this state in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 1,
+    "NOT_ASSESSED - no documented_absence row for PA in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 1,
+    "NOT_ASSESSED - no documented_absence row for MO in state_gaming_observations.csv names tribe- or property-level revenue. Absence of a seal record is not evidence that revenue is published": 1
+   }
+  },
+  "operating_entity_basis": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "single_operator": 784,
+    "no_cedar_uid": 2,
+    "joint_operation_declared_in_source: the facility row's own `tribe` field names both nations, resolved through cedar_identity_register.csv": 1
+   }
+  },
+  "state_revenue_disclosure_quote_test": {
+   "nonblank": 174,
+   "blank": 613,
+   "pct_blank": 77.8907,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "NOT FOUND: the recorded quote contains no phrase from either family (seal: ['confidential', 'not subject to disclosure', 'may not be publicly disclosed', 'not be publicly disclosed']...; not-collected: ['are not required to report', 'not required to report', 'does not receive revenue']...). The status is asserted; the quote does not carry it. RE-SOURCE the statute or compact clause before publishing this as sealed.": 58,
+    "FOUND confidentiality/aggregation language: ['aggregate gross gaming revenue', 'statement of aggregate']": 43,
+    "FOUND confidentiality/aggregation language: ['confidential', 'may not be publicly disclosed', 'not be publicly disclosed']": 40,
+    "FOUND confidentiality/aggregation language: ['confidential', 'not subject to disclosure', 'trade secret', 'proprietary information']": 22,
+    "FOUND BOTH families - seal ['confidential'] and not-collected ['does not receive revenue']; typed SEALED because confidentiality is the operative bar on release": 8,
+    "FOUND not-collected language: ['are not required to report', 'not required to report', 'not subject to taxation']": 3
+   }
+  },
+  "n_ca_gaming_facilities_official": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "0": 713,
+    "3": 45,
+    "1": 19,
+    "2": 8,
+    "4": 2
+   }
+  },
+  "n_ca_gaming_payments": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 71
+  },
+  "n_compact_events": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 739,
+    "1": 28,
+    "2": 20
+   }
+  },
+  "n_compact_obligation_tribal_agency_bridge": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "0": 490,
+    "2": 43,
+    "1": 38,
+    "6": 35,
+    "5": 33,
+    "8": 29,
+    "3": 25,
+    "7": 17,
+    "11": 17,
+    "12": 15,
+    "4": 11,
+    "10": 11,
+    "9": 7,
+    "13": 6,
+    "15": 5,
+    "23": 3,
+    "14": 2
+   }
+  },
+  "n_compact_required_reports": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 51
+  },
+  "n_compact_structured_terms": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 38,
+   "vocabulary": {
+    "1": 168,
+    "0": 126,
+    "2": 79,
+    "3": 50,
+    "12": 32,
+    "10": 25,
+    "20": 23,
+    "6": 23,
+    "19": 21,
+    "15": 20,
+    "11": 19,
+    "7": 18,
+    "5": 16,
+    "26": 16,
+    "28": 14,
+    "13": 14,
+    "4": 13,
+    "9": 12,
+    "18": 11,
+    "25": 9,
+    "33": 9,
+    "27": 9,
+    "24": 8,
+    "29": 7,
+    "14": 7,
+    "21": 6,
+    "22": 6,
+    "8": 5,
+    "16": 4,
+    "44": 4,
+    "30": 3,
+    "37": 3,
+    "31": 2,
+    "34": 2,
+    "35": 1,
+    "23": 1,
+    "17": 1
+   }
+  },
+  "n_compact_terms": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 21,
+   "vocabulary": {
+    "0": 167,
+    "3": 151,
+    "2": 92,
+    "4": 89,
+    "5": 61,
+    "7": 42,
+    "1": 36,
+    "10": 22,
+    "9": 21,
+    "13": 21,
+    "8": 20,
+    "6": 19,
+    "12": 18,
+    "11": 14,
+    "15": 4,
+    "21": 4,
+    "17": 3,
+    "14": 2,
+    "16": 1
+   }
+  },
+  "n_compacts": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "1": 194,
+    "2": 159,
+    "4": 115,
+    "5": 102,
+    "3": 92,
+    "0": 89,
+    "9": 13,
+    "14": 6,
+    "7": 6,
+    "8": 4,
+    "6": 4,
+    "10": 3
+   }
+  },
+  "n_digital_gaming_relationships": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "0": 787
+   }
+  },
+  "n_digital_gaming_revenue": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "0": 787
+   }
+  },
+  "n_fac_audit_gaming_disclosures": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 27,
+   "vocabulary": {
+    "0": 579,
+    "2": 41,
+    "1": 21,
+    "4": 20,
+    "18": 17,
+    "96": 13,
+    "5": 12,
+    "11": 12,
+    "3": 9,
+    "6": 8,
+    "23": 7,
+    "10": 5,
+    "21": 5,
+    "7": 5,
+    "79": 4,
+    "95": 3,
+    "39": 3,
+    "22": 3,
+    "136": 3,
+    "77": 2,
+    "8": 2,
+    "110": 2,
+    "19": 2,
+    "9": 2,
+    "179": 2,
+    "64": 1,
+    "82": 1,
+    "72": 1,
+    "12": 1,
+    "14": 1
+   }
+  },
+  "n_fac_audit_sefa_gaming_programs": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 786,
+    "1": 1
+   }
+  },
+  "n_fl_gaming_payments": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 775,
+    "1": 12
+   }
+  },
+  "n_gaming_capacity_official": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 23,
+   "vocabulary": {
+    "0": 678,
+    "1": 27,
+    "2": 24,
+    "3": 14,
+    "4": 5,
+    "6": 5,
+    "11": 4,
+    "19": 3,
+    "10": 3,
+    "20": 3,
+    "7": 3,
+    "9": 3,
+    "5": 3,
+    "17": 2,
+    "13": 2,
+    "8": 2,
+    "21": 1,
+    "16": 1,
+    "1516": 1,
+    "18": 1,
+    "1584": 1,
+    "12": 1
+   }
+  },
+  "n_gaming_device_observations": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "0": 720,
+    "1": 24,
+    "7": 16,
+    "2": 9,
+    "6": 6,
+    "3": 5,
+    "5": 4,
+    "396": 1,
+    "355": 1,
+    "4": 1
+   }
+  },
+  "n_gaming_employment_observations": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "0": 357,
+    "1": 337,
+    "2": 22,
+    "5": 14,
+    "3": 11,
+    "4": 11,
+    "6": 10,
+    "7": 7,
+    "10": 7,
+    "9": 6,
+    "8": 4,
+    "11": 1
+   }
+  },
+  "n_gaming_financing_events": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 379,
+    "1": 194,
+    "2": 92,
+    "3": 84,
+    "5": 15,
+    "4": 12,
+    "6": 6,
+    "7": 3,
+    "19": 2
+   }
+  },
+  "n_gaming_game_finder_observations": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "0": 783,
+    "2973": 1,
+    "954": 1,
+    "1029": 1,
+    "1895": 1
+   }
+  },
+  "n_gaming_land_decisions": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "0": 505,
+    "1": 169,
+    "2": 40,
+    "4": 30,
+    "5": 25,
+    "3": 18
+   }
+  },
+  "gaming_nigc_roster_link__cedar_city": {
+   "nonblank": 431,
+   "blank": 356,
+   "pct_blank": 45.2351,
+   "approx_distinct": 360
+  },
+  "gaming_nigc_roster_link__cedar_state": {
+   "nonblank": 452,
+   "blank": 335,
+   "pct_blank": 42.5667,
+   "approx_distinct": 32,
+   "vocabulary": {
+    "OK": 113,
+    "CA": 72,
+    "MN": 34,
+    "WA": 33,
+    "NM": 24,
+    "WI": 24,
+    "MI": 23,
+    "AZ": 22,
+    "MT": 13,
+    "SD": 12,
+    "ID": 9,
+    "ND": 9,
+    "NY": 9,
+    "FL": 8,
+    "OR": 8,
+    "NE": 5,
+    "KS": 5,
+    "LA": 4,
+    "NV": 4,
+    "WY": 4,
+    "MS": 3,
+    "AL": 3,
+    "IA": 3,
+    "CO": 3,
+    "CT": 2,
+    "NC": 2,
+    "TX": 1
+   }
+  },
+  "gaming_nigc_roster_link__nigc_location_name": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 538
+  },
+  "gaming_nigc_roster_link__nigc_address": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 357
+  },
+  "gaming_nigc_roster_link__nigc_region_name": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "St. Paul": 88,
+    "Sacramento": 72,
+    "Tulsa": 63,
+    "Oklahoma": 57,
+    "Phoenix": 53,
+    "Portland": 50,
+    "Rapid City": 39,
+    "Washington, DC": 31
+   }
+  },
+  "gaming_nigc_roster_link__nigc_city": {
+   "nonblank": 452,
+   "blank": 335,
+   "pct_blank": 42.5667,
+   "approx_distinct": 339
+  },
+  "gaming_nigc_roster_link__nigc_state": {
+   "nonblank": 452,
+   "blank": 335,
+   "pct_blank": 42.5667,
+   "approx_distinct": 32,
+   "vocabulary": {
+    "OK": 113,
+    "CA": 72,
+    "MN": 34,
+    "WA": 33,
+    "NM": 24,
+    "WI": 24,
+    "MI": 23,
+    "AZ": 22,
+    "MT": 13,
+    "SD": 12,
+    "ND": 9,
+    "NY": 9,
+    "ID": 9,
+    "OR": 8,
+    "FL": 8,
+    "KS": 5,
+    "NE": 5,
+    "NV": 4,
+    "WY": 4,
+    "LA": 4,
+    "MS": 3,
+    "CO": 3,
+    "AL": 3,
+    "IA": 3,
+    "CT": 2,
+    "NC": 2,
+    "TX": 1
+   }
+  },
+  "gaming_nigc_roster_link__link_tier": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "A": 428,
+    "B": 25
+   }
+  },
+  "gaming_nigc_roster_link__cedar_row_has_close_evidence": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 414,
+    "1": 39
+   }
+  },
+  "gaming_nigc_roster_link__nigc_listed_as_of": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-26": 453
+   }
+  },
+  "gaming_nigc_roster_link__igra_coverage_status": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "VERIFIED_NIGC_OPERATION": 453
+   }
+  },
+  "gaming_nigc_roster_link__source_url": {
+   "nonblank": 453,
+   "blank": 334,
+   "pct_blank": 42.4396,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "https://www.nigc.gov/map/": 453
+   }
+  },
+  "n_gaming_ordinance_ocr": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "0": 391,
+    "1": 198,
+    "2": 89,
+    "5": 35,
+    "4": 28,
+    "3": 23,
+    "6": 7,
+    "10": 6,
+    "9": 6,
+    "7": 4
+   }
+  },
+  "n_gaming_ordinances": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "2": 140,
+    "3": 122,
+    "5": 90,
+    "4": 89,
+    "6": 85,
+    "0": 81,
+    "1": 74,
+    "7": 36,
+    "15": 21,
+    "8": 16,
+    "17": 7,
+    "13": 7,
+    "10": 5,
+    "9": 5,
+    "11": 4,
+    "23": 3,
+    "48": 2
+   }
+  },
+  "n_gaming_project_facilities": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 774,
+    "7": 10,
+    "12": 3
+   }
+  },
+  "gaming_properties__operating_company": {
+   "nonblank": 443,
+   "blank": 344,
+   "pct_blank": 43.7103,
+   "approx_distinct": 496
+  },
+  "gaming_properties__entity": {
+   "nonblank": 786,
+   "blank": 1,
+   "pct_blank": 0.1271,
+   "approx_distinct": 252
+  },
+  "gaming_properties__ultimate_parent_entity": {
+   "nonblank": 775,
+   "blank": 12,
+   "pct_blank": 1.5248,
+   "approx_distinct": 238
+  },
+  "gaming_properties__entity_class": {
+   "nonblank": 775,
+   "blank": 12,
+   "pct_blank": 1.5248,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "Federally recognized tribe": 729,
+    "Federal-level constituency entity": 43,
+    "Federally recognized Alaska Native Village": 3
+   }
+  },
+  "gaming_properties__earliest_land_decision_date": {
+   "nonblank": 274,
+   "blank": 513,
+   "pct_blank": 65.1842,
+   "approx_distinct": 67
+  },
+  "gaming_properties__opening_bounded_below_by_land_decision": {
+   "nonblank": 776,
+   "blank": 11,
+   "pct_blank": 1.3977,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 502,
+    "1": 274
+   }
+  },
+  "gaming_properties__latest_bingo_seats": {
+   "nonblank": 126,
+   "blank": 661,
+   "pct_blank": 83.9898,
+   "approx_distinct": 51
+  },
+  "gaming_properties__latest_convention_square_feet": {
+   "nonblank": 96,
+   "blank": 691,
+   "pct_blank": 87.8018,
+   "approx_distinct": 67
+  },
+  "gaming_properties__latest_employees": {
+   "nonblank": 323,
+   "blank": 464,
+   "pct_blank": 58.9581,
+   "approx_distinct": 184
+  },
+  "gaming_properties__latest_gaming_machines": {
+   "nonblank": 409,
+   "blank": 378,
+   "pct_blank": 48.0305,
+   "approx_distinct": 286
+  },
+  "gaming_properties__latest_gaming_square_feet": {
+   "nonblank": 301,
+   "blank": 486,
+   "pct_blank": 61.7535,
+   "approx_distinct": 220
+  },
+  "gaming_properties__latest_hotel_rooms": {
+   "nonblank": 125,
+   "blank": 662,
+   "pct_blank": 84.1169,
+   "approx_distinct": 96
+  },
+  "gaming_properties__latest_parking_spaces": {
+   "nonblank": 176,
+   "blank": 611,
+   "pct_blank": 77.6366,
+   "approx_distinct": 94
+  },
+  "gaming_properties__latest_poker_tables": {
+   "nonblank": 156,
+   "blank": 631,
+   "pct_blank": 80.1779,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "2.0": 27,
+    "4.0": 19,
+    "5.0": 17,
+    "3.0": 16,
+    "1.0": 16,
+    "6.0": 13,
+    "8.0": 9,
+    "10.0": 7,
+    "14.0": 5,
+    "7.0": 4,
+    "25.0": 3,
+    "12.0": 3,
+    "20.0": 2,
+    "26.0": 2,
+    "23.0": 1,
+    "9.0": 1,
+    "17.0": 1,
+    "35.0": 1,
+    "37.0": 1,
+    "38.0": 1,
+    "22.0": 1,
+    "27.0": 1,
+    "47.0": 1,
+    "18.0": 1,
+    "16.0": 1,
+    "13.0": 1,
+    "55.0": 1
+   }
+  },
+  "gaming_properties__latest_restaurants": {
+   "nonblank": 330,
+   "blank": 457,
+   "pct_blank": 58.0686,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "1.0": 160,
+    "2.0": 52,
+    "3.0": 34,
+    "4.0": 22,
+    "5.0": 14,
+    "6.0": 12,
+    "7.0": 9,
+    "9.0": 8,
+    "10.0": 5,
+    "8.0": 4,
+    "12.0": 3,
+    "16.0": 2,
+    "11.0": 1,
+    "17.0": 1,
+    "15.0": 1,
+    "21.0": 1,
+    "13.0": 1
+   }
+  },
+  "gaming_properties__latest_table_games": {
+   "nonblank": 201,
+   "blank": 586,
+   "pct_blank": 74.46,
+   "approx_distinct": 60
+  },
+  "gaming_properties__latest_bingo_seats_as_of": {
+   "nonblank": 126,
+   "blank": 661,
+   "pct_blank": 83.9898,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "2023-01-01": 50,
+    "2017-07-01": 10,
+    "2006-11-07": 7,
+    "2007-11-06": 6,
+    "2005-01-25": 6,
+    "2005-09-02": 5,
+    "2004-01-27": 4,
+    "2003-06-06": 4,
+    "2013-01-01": 4,
+    "2016-01-01": 3,
+    "2006-03-28": 3,
+    "2002-09-13": 3,
+    "2008-04-22": 3,
+    "2015-07-01": 3,
+    "2010-05-17": 2,
+    "2019-01-01": 1,
+    "2018-07-01": 1,
+    "2014-01-01": 1,
+    "2022-07-01": 1,
+    "2014-07-01": 1,
+    "2011-04-28": 1,
+    "2017-01-01": 1,
+    "2018-01-01": 1,
+    "2022-01-01": 1,
+    "2001-09-01": 1,
+    "2021-07-01": 1,
+    "2015-01-01": 1,
+    "2010-11-03": 1
+   }
+  },
+  "gaming_properties__latest_convention_square_feet_as_of": {
+   "nonblank": 96,
+   "blank": 691,
+   "pct_blank": 87.8018,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "2023-01-01": 81,
+    "2006-11-07": 3,
+    "2008-04-22": 3,
+    "2007-11-06": 2,
+    "2005-09-02": 2,
+    "2007-05-02": 2,
+    "2016-01-01": 1,
+    "2015-07-01": 1,
+    "2004-01-27": 1
+   }
+  },
+  "gaming_properties__latest_employees_as_of": {
+   "nonblank": 323,
+   "blank": 464,
+   "pct_blank": 58.9581,
+   "approx_distinct": 24,
+   "vocabulary": {
+    "2023-01-01": 272,
+    "2006-11-07": 8,
+    "2007-11-06": 5,
+    "2017-01-01": 4,
+    "2016-01-01": 3,
+    "2019-01-01": 3,
+    "2010-05-17": 3,
+    "2012-01-01": 2,
+    "2014-07-01": 2,
+    "2008-04-22": 2,
+    "2014-01-01": 2,
+    "2015-07-01": 2,
+    "2022-07-01": 2,
+    "2021-07-01": 2,
+    "2009-11-09": 1,
+    "2007-05-02": 1,
+    "2005-09-02": 1,
+    "2013-01-01": 1,
+    "2012-09-17": 1,
+    "2022-01-01": 1,
+    "2018-01-01": 1,
+    "2004-01-27": 1,
+    "2011-04-28": 1,
+    "2005-01-25": 1,
+    "2013-07-01": 1
+   }
+  },
+  "gaming_properties__latest_gaming_machines_as_of": {
+   "nonblank": 409,
+   "blank": 378,
+   "pct_blank": 48.0305,
+   "approx_distinct": 24,
+   "vocabulary": {
+    "2023-01-01": 338,
+    "2006-11-07": 17,
+    "2017-01-01": 6,
+    "2012-01-01": 6,
+    "2019-01-01": 6,
+    "2016-01-01": 4,
+    "2005-01-25": 3,
+    "2014-01-01": 3,
+    "2007-11-06": 3,
+    "2021-07-01": 2,
+    "2016-07-01": 2,
+    "2022-07-01": 2,
+    "2017-07-01": 2,
+    "2015-07-01": 2,
+    "2005-09-02": 2,
+    "2022-01-01": 1,
+    "2004-01-27": 1,
+    "2012-09-17": 1,
+    "2020-07-01": 1,
+    "2009-11-09": 1,
+    "2007-05-02": 1,
+    "2008-04-22": 1,
+    "2010-05-17": 1,
+    "2018-01-01": 1,
+    "2013-07-01": 1,
+    "2011-04-28": 1
+   }
+  },
+  "gaming_properties__latest_gaming_square_feet_as_of": {
+   "nonblank": 301,
+   "blank": 486,
+   "pct_blank": 61.7535,
+   "approx_distinct": 24,
+   "vocabulary": {
+    "2023-01-01": 265,
+    "2012-01-01": 4,
+    "2019-01-01": 3,
+    "2006-11-07": 3,
+    "2015-07-01": 2,
+    "2008-04-22": 2,
+    "2016-01-01": 2,
+    "2014-01-01": 2,
+    "2017-01-01": 2,
+    "2017-07-01": 1,
+    "2014-07-01": 1,
+    "2012-09-17": 1,
+    "2010-05-17": 1,
+    "2018-01-01": 1,
+    "2007-11-06": 1,
+    "2022-01-01": 1,
+    "2004-01-27": 1,
+    "2005-01-25": 1,
+    "2013-07-01": 1,
+    "2021-07-01": 1,
+    "2016-07-01": 1,
+    "2007-05-02": 1,
+    "2013-01-01": 1,
+    "2011-04-28": 1,
+    "2022-07-01": 1
+   }
+  },
+  "gaming_properties__latest_hotel_rooms_as_of": {
+   "nonblank": 125,
+   "blank": 662,
+   "pct_blank": 84.1169,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "2023-01-01": 106,
+    "2019-01-01": 8,
+    "2007-05-02": 2,
+    "2006-11-07": 2,
+    "2008-04-22": 1,
+    "2005-09-02": 1,
+    "2018-01-01": 1,
+    "2007-11-06": 1,
+    "2015-07-01": 1,
+    "2017-01-01": 1,
+    "2010-11-03": 1
+   }
+  },
+  "gaming_properties__latest_parking_spaces_as_of": {
+   "nonblank": 176,
+   "blank": 611,
+   "pct_blank": 77.6366,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "2023-01-01": 160,
+    "2007-11-06": 2,
+    "2006-11-07": 2,
+    "2022-07-01": 2,
+    "2017-01-01": 1,
+    "2022-01-01": 1,
+    "2015-07-01": 1,
+    "2004-01-27": 1,
+    "2007-05-02": 1,
+    "2019-01-01": 1,
+    "2016-01-01": 1,
+    "2016-07-01": 1,
+    "2011-04-28": 1,
+    "2012-01-01": 1
+   }
+  },
+  "gaming_properties__latest_poker_tables_as_of": {
+   "nonblank": 156,
+   "blank": 631,
+   "pct_blank": 80.1779,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "2023-01-01": 57,
+    "2008-11-03": 11,
+    "2016-01-01": 9,
+    "2017-01-01": 8,
+    "2012-01-01": 8,
+    "2020-01-01": 6,
+    "2009-11-09": 6,
+    "2007-11-06": 6,
+    "2010-11-03": 6,
+    "2022-07-01": 5,
+    "2019-01-01": 4,
+    "2014-07-01": 3,
+    "2010-05-17": 3,
+    "2007-05-02": 2,
+    "2008-04-22": 2,
+    "2005-09-02": 2,
+    "2016-07-01": 2,
+    "2005-01-25": 2,
+    "2013-01-01": 2,
+    "2015-07-01": 1,
+    "2020-07-01": 1,
+    "2017-07-01": 1,
+    "2018-01-01": 1,
+    "2009-04-22": 1,
+    "2006-11-07": 1,
+    "2012-09-17": 1,
+    "2015-01-01": 1,
+    "2022-01-01": 1,
+    "2014-01-01": 1,
+    "2012-07-01": 1,
+    "2002-09-13": 1
+   }
+  },
+  "gaming_properties__latest_restaurants_as_of": {
+   "nonblank": 330,
+   "blank": 457,
+   "pct_blank": 58.0686,
+   "approx_distinct": 22,
+   "vocabulary": {
+    "2023-01-01": 267,
+    "2019-01-01": 20,
+    "2006-11-07": 6,
+    "2021-07-01": 4,
+    "2017-07-01": 3,
+    "2008-04-22": 3,
+    "2007-11-06": 3,
+    "2016-01-01": 3,
+    "2012-01-01": 2,
+    "2006-03-28": 2,
+    "2014-01-01": 2,
+    "2015-07-01": 2,
+    "2017-01-01": 2,
+    "2013-01-01": 1,
+    "2011-04-28": 1,
+    "2022-07-01": 1,
+    "2018-07-01": 1,
+    "2007-05-02": 1,
+    "2012-09-17": 1,
+    "2022-01-01": 1,
+    "2004-01-27": 1,
+    "2005-01-25": 1,
+    "2009-04-22": 1,
+    "2013-07-01": 1
+   }
+  },
+  "gaming_properties__latest_table_games_as_of": {
+   "nonblank": 201,
+   "blank": 586,
+   "pct_blank": 74.46,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "2023-01-01": 128,
+    "2020-01-01": 5,
+    "2014-07-01": 4,
+    "2019-01-01": 4,
+    "2005-09-02": 4,
+    "2017-01-01": 4,
+    "2007-11-06": 4,
+    "2006-11-07": 4,
+    "2022-07-01": 4,
+    "2010-05-17": 3,
+    "2013-01-01": 3,
+    "2012-01-01": 3,
+    "2010-11-03": 3,
+    "2009-04-22": 3,
+    "2014-01-01": 2,
+    "2022-01-01": 2,
+    "2017-07-01": 2,
+    "2020-07-01": 2,
+    "2016-07-01": 2,
+    "2016-01-01": 2,
+    "2015-01-01": 2,
+    "2009-11-09": 2,
+    "2008-11-03": 2,
+    "2015-07-01": 1,
+    "2004-01-27": 1,
+    "2021-07-01": 1,
+    "2005-01-25": 1,
+    "2007-05-02": 1,
+    "2002-09-13": 1,
+    "2011-04-28": 1
+   }
+  },
+  "gaming_properties__n_land_decisions": {
+   "nonblank": 776,
+   "blank": 11,
+   "pct_blank": 1.3977,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "0": 502,
+    "1": 162,
+    "2": 39,
+    "4": 30,
+    "5": 25,
+    "3": 18
+   }
+  },
+  "gaming_properties__land_decision_urls": {
+   "nonblank": 274,
+   "blank": 513,
+   "pct_blank": 65.1842,
+   "approx_distinct": 54
+  },
+  "gaming_properties__land_decision_theory": {
+   "nonblank": 274,
+   "blank": 513,
+   "pct_blank": 65.1842,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "Two-Part Secretarial Determination": 88,
+    "Oklahoma - Within Former Reservation Boundaries": 60,
+    "Within or Contiguous to Reservation Boundaries": 35,
+    "Restored Lands": 27,
+    "Settlement of a Land Claim": 16,
+    "Oklahoma - Within Former Reservation Boundaries | Within Last Recognized Reservation | Within or Contiguous to Reservation Boundaries": 15,
+    "Oklahoma - Within Former Reservation Boundaries | Two-Part Secretarial Determination": 11,
+    "Initial Reservation": 10,
+    "Within Last Recognized Reservation": 7,
+    "Settlement of a Land Claim | Within or Contiguous to Reservation Boundaries": 3,
+    "Restored Lands | Two-Part Secretarial Determination": 2
+   }
+  },
+  "gaming_properties__n_deals_for_entity": {
+   "nonblank": 784,
+   "blank": 3,
+   "pct_blank": 0.3812,
+   "approx_distinct": 15,
+   "vocabulary": {
+    "1": 169,
+    "0": 138,
+    "2": 136,
+    "3": 130,
+    "4": 74,
+    "5": 30,
+    "6": 30,
+    "22": 28,
+    "10": 15,
+    "8": 10,
+    "11": 9,
+    "7": 8,
+    "9": 4,
+    "20": 2,
+    "15": 1
+   }
+  },
+  "gaming_properties__revenue_note": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "NOT REPORTED. Tribal gaming revenue is not published per facility. Cedar Press states measured capacity and does not estimate revenue.": 774
+   }
+  },
+  "gaming_properties__source_url": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "gaming_properties__built_date": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-08-06": 774,
+    "2026-08-26": 10,
+    "2026-09-02": 3
+   }
+  },
+  "gaming_property_federal_traces__trace_nigc_gaming_location_map": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 424,
+    "1": 350
+   }
+  },
+  "gaming_property_federal_traces__nigc_marker_id": {
+   "nonblank": 350,
+   "blank": 437,
+   "pct_blank": 55.5273,
+   "approx_distinct": 387
+  },
+  "gaming_property_federal_traces__nigc_location_name": {
+   "nonblank": 350,
+   "blank": 437,
+   "pct_blank": 55.5273,
+   "approx_distinct": 442
+  },
+  "gaming_property_federal_traces__nigc_marker_address": {
+   "nonblank": 350,
+   "blank": 437,
+   "pct_blank": 55.5273,
+   "approx_distinct": 278
+  },
+  "gaming_property_federal_traces__nigc_region_name": {
+   "nonblank": 349,
+   "blank": 438,
+   "pct_blank": 55.6544,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "St. Paul": 63,
+    "Tulsa": 59,
+    "Sacramento": 58,
+    "Oklahoma City": 44,
+    "Portland": 37,
+    "Phoenix": 32,
+    "Rapid City": 29,
+    "Washington DC": 27
+   }
+  },
+  "gaming_property_federal_traces__nigc_match_basis": {
+   "nonblank": 350,
+   "blank": 437,
+   "pct_blank": 55.5273,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "coords_1200m": 230,
+    "name_state": 97,
+    "name_state_far": 23
+   }
+  },
+  "gaming_property_federal_traces__nigc_match_distance_m": {
+   "nonblank": 338,
+   "blank": 449,
+   "pct_blank": 57.0521,
+   "approx_distinct": 215
+  },
+  "gaming_property_federal_traces__nigc_listed_as_of": {
+   "nonblank": 350,
+   "blank": 437,
+   "pct_blank": 55.5273,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-06": 350
+   }
+  },
+  "gaming_property_federal_traces__nigc_map_url": {
+   "nonblank": 350,
+   "blank": 437,
+   "pct_blank": 55.5273,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "https://www.nigc.gov/map/": 350
+   }
+  },
+  "gaming_property_federal_traces__trace_fr_class_iii_compact_approval": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 450,
+    "0": 324
+   }
+  },
+  "gaming_property_federal_traces__fr_document_number": {
+   "nonblank": 450,
+   "blank": 337,
+   "pct_blank": 42.8208,
+   "approx_distinct": 157
+  },
+  "gaming_property_federal_traces__fr_publication_date": {
+   "nonblank": 450,
+   "blank": 337,
+   "pct_blank": 42.8208,
+   "approx_distinct": 99
+  },
+  "gaming_property_federal_traces__fr_document_title": {
+   "nonblank": 450,
+   "blank": 337,
+   "pct_blank": 42.8208,
+   "approx_distinct": 35,
+   "vocabulary": {
+    "Indian Gaming": 315,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Between the White Earth Band of Chippewa Indians and the State of Minnesota for Blackjack": 28,
+    "Indian Gaming; Notice DEPARTMENT OF THE INTERIOR": 27,
+    "Indian Gaming; Notice of Approved Tribal-State Compact": 17,
+    "Indian Gaming; Approval of an Amendment to a Tribal-State Class III Gaming Compact in the State of Arizona": 8,
+    "Indian Gaming; Approval by Operation of Law of Tribal-State Class III Gaming Compact in the State of Indiana": 7,
+    "Indian Gaming; Notice": 5,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Amendment Between Minnesota Chippewa Tribe, Minnesota-Leech Lake Band and the State of Minnesota": 4,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Amendment in the State of Oklahoma": 4,
+    "Indian Gaming; Extension of Tribal-State Class III Gaming Compact Between the Yurok Tribe of the Yurok Reservation, California, and the State of California": 3,
+    "Indian Gaming; Tribal-State Class III Gaming Compact Taking Effect in the State of Iowa": 2,
+    "Indian Gaming; Extension of Tribal-State Class III Gaming Compact in California": 2,
+    "Indian Gaming; Approval by Operation of Law of Tribal-State Class III Gaming Compact in the State of California (Middletown Rancheria of Pomo Indians of California & State of California)": 2,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Between the Mille Lacs Band of Ojibwe and the State of Minnesota for Blackjack": 2,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact in the State of Arizona": 2,
+    "Indian Gaming; Notices DEPARTMENT OF THE INTERIOR": 2,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact in the State of Minnesota": 2,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Between the Upper Sioux Community and the State of Minnesota for Blackjack": 2,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Between the Fond du Lac Band of Lake Superior Chippewa and the State of Minnesota for Blackjack": 2,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact in the State of Washington": 1,
+    "Indian Gaming; Lummi Nation, WA": 1,
+    "Indian Gaming; Approval by Operation of Law of Amendment to Class III Tribal-State Gaming Compact (Ewiiaapaayp Band of Kumeyaay Indians & State of California)": 1,
+    "Bureau of Indian Affairs; Indian Gaming": 1,
+    "Indian Gaming; Hualapai Tribe; Notice DEPARTMENT OF THE INTERIOR": 1,
+    "Indian Gaming; Kaibab Band of Paiute Indians, AZ; Notice DEPARTMENT OF THE INTERIOR": 1,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Amendment Between Prairie Island Indian Community and the State of Minnesota": 1,
+    "Indian Gaming; Oklahoma.": 1,
+    "Indian Gaming; Notice of Approved Second Amendment to Tribal- State Compact": 1,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Between Redding Rancheria, California and the State of California": 1,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Amendment Between Lower Sioux Indian Community and the State of Minnesota": 1,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact Between the Bois Forte Band of Chippewa and the State of Minnesota for Blackjack": 1,
+    "Indian Gaming; Approval of Tribal-State Class III Gaming Compact in the State of California": 1,
+    "Indian Gaming; Tribal-State Class III Gaming Compact Taking Effect in the State of Oklahoma": 1
+   }
+  },
+  "gaming_property_federal_traces__fr_tribe_string_in_document": {
+   "nonblank": 450,
+   "blank": 337,
+   "pct_blank": 42.8208,
+   "approx_distinct": 122
+  },
+  "gaming_property_federal_traces__fr_resolve_how": {
+   "nonblank": 450,
+   "blank": 337,
+   "pct_blank": 42.8208,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "core": 223,
+    "containment": 178,
+    "alias": 32,
+    "exact": 17
+   }
+  },
+  "gaming_property_federal_traces__fr_document_url": {
+   "nonblank": 450,
+   "blank": 337,
+   "pct_blank": 42.8208,
+   "approx_distinct": 146
+  },
+  "gaming_property_federal_traces__fr_n_documents": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "0": 324,
+    "1": 208,
+    "2": 95,
+    "3": 52,
+    "4": 23,
+    "5": 21,
+    "7": 18,
+    "9": 13,
+    "8": 8,
+    "6": 4,
+    "25": 3,
+    "15": 2,
+    "13": 2,
+    "10": 1
+   }
+  },
+  "gaming_property_federal_traces__fr_all_document_numbers": {
+   "nonblank": 450,
+   "blank": 337,
+   "pct_blank": 42.8208,
+   "approx_distinct": 140
+  },
+  "gaming_property_federal_traces__trace_bia_gaming_land_decision": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 506,
+    "1": 268
+   }
+  },
+  "gaming_property_federal_traces__bia_decision_id": {
+   "nonblank": 268,
+   "blank": 519,
+   "pct_blank": 65.9466,
+   "approx_distinct": 87
+  },
+  "gaming_property_federal_traces__bia_decision_title": {
+   "nonblank": 268,
+   "blank": 519,
+   "pct_blank": 65.9466,
+   "approx_distinct": 90
+  },
+  "gaming_property_federal_traces__bia_decision_status": {
+   "nonblank": 268,
+   "blank": 519,
+   "pct_blank": 65.9466,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "Approved": 227,
+    "Disapproved": 36,
+    "Pending": 5
+   }
+  },
+  "gaming_property_federal_traces__land_decision_date": {
+   "nonblank": 268,
+   "blank": 519,
+   "pct_blank": 65.9466,
+   "approx_distinct": 66
+  },
+  "gaming_property_federal_traces__igra_section20_exception": {
+   "nonblank": 266,
+   "blank": 521,
+   "pct_blank": 66.2008,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "25 USC 2719(b)(1)(A)": 86,
+    "25 USC 2719(a)(2)(A)(i)": 71,
+    "25 USC 2719(a)(1)": 36,
+    "25 USC 2719(b)(1)(B)(iii)": 25,
+    "25 USC 2719(a)(2)(A)(ii)": 22,
+    "25 USC 2719(b)(1)(B)(i)": 16,
+    "25 USC 2719(b)(1)(B)(ii)": 10
+   }
+  },
+  "gaming_property_federal_traces__igra_section20_citation": {
+   "nonblank": 266,
+   "blank": 521,
+   "pct_blank": 66.2008,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "25 USC 2719(b)(1)(A)": 86,
+    "25 USC 2719(a)(2)(A)(i)": 71,
+    "25 USC 2719(a)(1)": 36,
+    "25 USC 2719(b)(1)(B)(iii)": 25,
+    "25 USC 2719(a)(2)(A)(ii)": 22,
+    "25 USC 2719(b)(1)(B)(i)": 16,
+    "25 USC 2719(b)(1)(B)(ii)": 10
+   }
+  },
+  "gaming_property_federal_traces__bia_decision_url": {
+   "nonblank": 268,
+   "blank": 519,
+   "pct_blank": 65.9466,
+   "approx_distinct": 43
+  },
+  "gaming_property_federal_traces__bia_n_decisions": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "0": 506,
+    "1": 160,
+    "2": 35,
+    "4": 30,
+    "5": 25,
+    "3": 18
+   }
+  },
+  "gaming_property_federal_traces__trace_tribal_state_compact": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 672,
+    "0": 102
+   }
+  },
+  "gaming_property_federal_traces__compact_id": {
+   "nonblank": 672,
+   "blank": 115,
+   "pct_blank": 14.6125,
+   "approx_distinct": 259
+  },
+  "gaming_property_federal_traces__compact_in_force_as_of": {
+   "nonblank": 672,
+   "blank": 115,
+   "pct_blank": 14.6125,
+   "approx_distinct": 145
+  },
+  "gaming_property_federal_traces__compact_status": {
+   "nonblank": 672,
+   "blank": 115,
+   "pct_blank": 14.6125,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "renegotiated": 474,
+    "unknown": 153,
+    "expired": 37,
+    "active": 8
+   }
+  },
+  "gaming_property_federal_traces__compact_url": {
+   "nonblank": 672,
+   "blank": 115,
+   "pct_blank": 14.6125,
+   "approx_distinct": 162
+  },
+  "gaming_property_federal_traces__compact_n": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "1": 190,
+    "2": 150,
+    "4": 113,
+    "0": 102,
+    "5": 98,
+    "3": 85,
+    "9": 13,
+    "7": 6,
+    "14": 6,
+    "8": 4,
+    "6": 4,
+    "10": 3
+   }
+  },
+  "gaming_property_federal_traces__compact_n_events": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 732,
+    "1": 25,
+    "2": 17
+   }
+  },
+  "gaming_property_federal_traces__trace_nigc_management_contract": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "0": 774
+   }
+  },
+  "gaming_property_federal_traces__nigc_management_contract_status": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "not_held_by_cedar_press_this_session": 774
+   }
+  },
+  "gaming_property_federal_traces__federal_trace_count": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 424,
+    "1": 350
+   }
+  },
+  "gaming_property_federal_traces__federal_trace_level": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "property": 774
+   }
+  },
+  "gaming_property_federal_traces__tribe_level_trace_count": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "2": 339,
+    "1": 208,
+    "3": 168,
+    "0": 59
+   }
+  },
+  "gaming_property_federal_traces__tribe_level_traces": {
+   "nonblank": 715,
+   "blank": 72,
+   "pct_blank": 9.1487,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "FR_CLASS_III_COMPACT_APPROVAL|TRIBAL_STATE_COMPACT_INDEX": 240,
+    "TRIBAL_STATE_COMPACT_INDEX": 168,
+    "FR_CLASS_III_COMPACT_APPROVAL|BIA_GAMING_LAND_DECISION_IGRA_S20|TRIBAL_STATE_COMPACT_INDEX": 168,
+    "BIA_GAMING_LAND_DECISION_IGRA_S20|TRIBAL_STATE_COMPACT_INDEX": 96,
+    "FR_CLASS_III_COMPACT_APPROVAL": 39,
+    "FR_CLASS_III_COMPACT_APPROVAL|BIA_GAMING_LAND_DECISION_IGRA_S20": 3,
+    "BIA_GAMING_LAND_DECISION_IGRA_S20": 1
+   }
+  },
+  "gaming_property_federal_traces__reports_gaming_capacity_non_federal": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 429,
+    "0": 345
+   }
+  },
+  "gaming_property_federal_traces__gaming_capacity_reported": {
+   "nonblank": 429,
+   "blank": 358,
+   "pct_blank": 45.4892,
+   "approx_distinct": 325
+  },
+  "gaming_property_federal_traces__gaming_equipment_metrics_observed": {
+   "nonblank": 429,
+   "blank": 358,
+   "pct_blank": 45.4892,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "gaming_machines": 177,
+    "gaming_machines|poker_tables|table_games": 80,
+    "bingo_seats|gaming_machines|poker_tables|table_games": 67,
+    "gaming_machines|table_games": 39,
+    "bingo_seats|gaming_machines": 29,
+    "bingo_seats": 14,
+    "bingo_seats|gaming_machines|table_games": 9,
+    "gaming_machines|poker_tables": 5,
+    "bingo_seats|table_games": 4,
+    "bingo_seats|gaming_machines|poker_tables": 3,
+    "table_games": 1,
+    "poker_tables|table_games": 1
+   }
+  },
+  "gaming_property_federal_traces__gaming_equipment_n_observations": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 129
+  },
+  "gaming_property_federal_traces__gaming_equipment_observed_first": {
+   "nonblank": 429,
+   "blank": 358,
+   "pct_blank": 45.4892,
+   "approx_distinct": 44
+  },
+  "gaming_property_federal_traces__gaming_equipment_observed_last": {
+   "nonblank": 429,
+   "blank": 358,
+   "pct_blank": 45.4892,
+   "approx_distinct": 25,
+   "vocabulary": {
+    "2023-01-01": 342,
+    "2006-11-07": 16,
+    "2017-01-01": 6,
+    "2012-01-01": 6,
+    "2019-01-01": 6,
+    "2007-11-06": 5,
+    "2016-01-01": 5,
+    "2010-05-17": 4,
+    "2013-01-01": 4,
+    "2017-07-01": 3,
+    "2014-01-01": 3,
+    "2015-07-01": 3,
+    "2021-07-01": 3,
+    "2005-01-25": 3,
+    "2005-09-02": 3,
+    "2018-01-01": 2,
+    "2016-07-01": 2,
+    "2022-07-01": 2,
+    "2008-04-22": 2,
+    "2004-01-27": 1,
+    "2022-01-01": 1,
+    "2010-11-03": 1,
+    "2009-11-09": 1,
+    "2007-05-02": 1,
+    "2013-07-01": 1,
+    "2020-07-01": 1,
+    "2012-09-17": 1,
+    "2011-04-28": 1
+   }
+  },
+  "gaming_property_federal_traces__gaming_equipment_source": {
+   "nonblank": 429,
+   "blank": 358,
+   "pct_blank": 45.4892,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Casino City capacity panel via gaming_facility_metrics.csv \u2014 VENDOR observation, not a federal record": 429
+   }
+  },
+  "gaming_property_federal_traces__nigc_unmatched_marker_in_same_city_state": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "0": 658,
+    "1": 86,
+    "2": 25,
+    "11": 3,
+    "5": 2
+   }
+  },
+  "gaming_property_federal_traces__nigc_unmatched_marker_names": {
+   "nonblank": 116,
+   "blank": 671,
+   "pct_blank": 85.2605,
+   "approx_distinct": 82
+  },
+  "gaming_property_federal_traces__nigc_match_ceiling_note": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "The NIGC roster match is deterministic and ONE-TO-ONE. A zero in trace_nigc_gaming_location_map means this row won no marker, not that the property is unlisted: a second Cedar row for the same property cannot claim a marker already taken, and a name variant beyond exact normalised equality plus a coordinate gap over 1.2 km misses outright (measured cases: Barona Resort & Casino, Apache Gold Casino Resort).": 774
+   }
+  },
+  "gaming_property_federal_traces__property_likelihood": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "CONFIRMED_GAMING": 522,
+    "INSUFFICIENT_TRACE_REVIEW": 214,
+    "PLACEHOLDER_ROW": 16,
+    "DUPLICATE": 15,
+    "NOT_A_GAMING_PROPERTY": 7
+   }
+  },
+  "gaming_property_federal_traces__property_likelihood_basis": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 253
+  },
+  "gaming_property_federal_traces__excluded_from_gaming_property_count": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 736,
+    "1": 38
+   }
+  },
+  "gaming_property_federal_traces__gaming_class_recorded": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "NOT_RECORDED_BY_DESIGN": 774
+   }
+  },
+  "gaming_property_federal_traces__gaming_class_note": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "Gaming class is a time-varying operational state, not a property attribute: a tribe changes class by swapping machines and no federal record is generated. Cedar Press records dated authorisations and dated listings, never a class.": 774
+   }
+  },
+  "gaming_property_federal_traces__igra_coverage_status": {
+   "nonblank": 772,
+   "blank": 15,
+   "pct_blank": 1.906,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "VERIFIED_NIGC_OPERATION": 349,
+    "LIKELY_IGRA_OPERATION": 272,
+    "CLOSED_IGRA_OPERATION": 105,
+    "NON_IGRA_TRIBALLY_OWNED": 24,
+    "UNKNOWN": 21,
+    "PROPOSED_IGRA_OPERATION": 1
+   }
+  },
+  "gaming_property_federal_traces__built_date": {
+   "nonblank": 774,
+   "blank": 13,
+   "pct_blank": 1.6518,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-06": 774
+   }
+  },
+  "n_gaming_property_labor_demand": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "0": 770,
+    "1": 12,
+    "2": 2,
+    "6": 2,
+    "3": 1
+   }
+  },
+  "n_gaming_property_self_published_assertions": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "0": 652,
+    "2": 37,
+    "1": 21,
+    "4": 13,
+    "17": 11,
+    "3": 10,
+    "8": 8,
+    "5": 6,
+    "6": 5,
+    "7": 4,
+    "9": 4,
+    "34": 4,
+    "10": 4,
+    "12": 2,
+    "28": 2,
+    "51": 1,
+    "20": 1,
+    "16": 1,
+    "13": 1
+   }
+  },
+  "n_gaming_property_self_published_claims": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "0": 699,
+    "1": 25,
+    "2": 18,
+    "3": 13,
+    "4": 11,
+    "5": 6,
+    "6": 5,
+    "8": 3,
+    "9": 2,
+    "7": 1,
+    "22": 1,
+    "10": 1,
+    "14": 1,
+    "11": 1
+   }
+  },
+  "n_gaming_property_site_observations": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 715,
+    "1": 28,
+    "2": 19,
+    "3": 13,
+    "4": 7,
+    "6": 2,
+    "7": 2,
+    "13": 1
+   }
+  },
+  "n_gaming_property_universe_events": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 781,
+    "1": 6
+   }
+  },
+  "n_gaming_revenue_bounds": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 37,
+   "vocabulary": {
+    "25": 286,
+    "0": 93,
+    "7": 45,
+    "24": 24,
+    "2": 23,
+    "50": 23,
+    "22": 23,
+    "5": 21,
+    "19": 21,
+    "3": 18,
+    "4": 18,
+    "18": 16,
+    "6": 15,
+    "23": 13,
+    "14": 12,
+    "10": 12,
+    "15": 12,
+    "17": 12,
+    "11": 11,
+    "16": 10,
+    "13": 10,
+    "12": 9,
+    "20": 9,
+    "21": 8,
+    "1": 8,
+    "8": 7,
+    "9": 7,
+    "41": 3,
+    "44": 3,
+    "48": 3,
+    "42": 3,
+    "32": 2,
+    "26": 2,
+    "46": 1,
+    "38": 1,
+    "43": 1,
+    "79": 1,
+    "82": 1
+   }
+  },
+  "n_gaming_vendor_tribal_licenses": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "0": 627,
+    "2": 31,
+    "1": 22,
+    "6": 20,
+    "4": 19,
+    "7": 17,
+    "17": 15,
+    "3": 15,
+    "24": 4,
+    "9": 3,
+    "8": 3,
+    "43": 3,
+    "145": 2,
+    "14": 2,
+    "287": 2,
+    "27": 1,
+    "19": 1
+   }
+  },
+  "loyalty_program_property__loyalty_program_id": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "LOY-0009": 11,
+    "LOY-0008": 8,
+    "LOY-0001": 7,
+    "LOY-0012": 3,
+    "LOY-0004": 3,
+    "LOY-0007": 2,
+    "LOY-0003": 2,
+    "LOY-0011": 2,
+    "LOY-0014": 2,
+    "LOY-0015": 2,
+    "LOY-0006": 2,
+    "LOY-0002": 1,
+    "LOY-0013": 1,
+    "LOY-0017": 1,
+    "LOY-0005": 1
+   }
+  },
+  "loyalty_program_property__program_name": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "Status+ Rewards": 11,
+    "Rewards Club My Rewards Club": 8,
+    "W Club": 7,
+    "Potawatomi Rewards": 3,
+    "Players Club Rewards": 3,
+    "ACCESS Club": 2,
+    "Winstar Rewards": 2,
+    "Foxwoods Rewards": 2,
+    "Momentum": 2,
+    "Salt River Rewards": 2,
+    "Muckleshoot Rewards": 2,
+    "Privileges Club": 1,
+    "Turning Stone Rewards": 1,
+    "Red Hot Rewards": 1,
+    "Odawa Pure Rewards": 1
+   }
+  },
+  "loyalty_program_property__evidence_basis": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "the programme page names this property in full": 25,
+    "the programme page names every distinctive token of this property (durant)": 4,
+    "the programme page names every distinctive token of this property (grant)": 3,
+    "the programme page names every distinctive token of this property (foxwoods)": 1,
+    "the programme page names every distinctive token of this property (potawatomi, carter)": 1,
+    "the programme page names every distinctive token of this property (potawatomi, milwaukee)": 1,
+    "the programme page names every distinctive token of this property (saganing, eagles, landing)": 1,
+    "the programme page names every distinctive token of this property (potawatomi)": 1,
+    "the programme page names every distinctive token of this property (four, winds, bend)": 1,
+    "the programme page names every distinctive token of this property (four, winds, new, buffalo)": 1,
+    "the programme page names every distinctive token of this property (odawa)": 1,
+    "the programme page names every distinctive token of this property (siloam, springs)": 1,
+    "the programme page names every distinctive token of this property (hard, rock, tulsa)": 1,
+    "the programme page names every distinctive token of this property (talking, stick)": 1,
+    "the programme page names every distinctive token of this property (four, winds, dowagiac)": 1,
+    "the programme page names every distinctive token of this property (four, winds, hartford)": 1,
+    "the programme page names every distinctive token of this property (leelanau, sands)": 1,
+    "the programme page names every distinctive token of this property (soaring, eagle)": 1,
+    "the programme page names every distinctive token of this property (pocola)": 1
+   }
+  },
+  "loyalty_program_property__source_url": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_program_property__source_quote": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 34,
+   "vocabulary": {
+    "DURANT \u2013 CASINO & RESORT": 4,
+    "GRANT \u2013 CASINO & RESORT": 3,
+    "Muckleshoot Rewards | Muckleshoot Casino Resort | Players Club": 2,
+    "Four Winds Hartford": 2,
+    "Cherokee Casino & Hotel West Siloam Springs": 2,
+    "Four Winds Dowagiac": 2,
+    "Players can take advantage of rewards not only at our Leelanau Sands Casino, but also at Crystal Shores Casino located in Benzonia, and Turtle Creek Casino & Hotel, located near Traverse City.": 2,
+    "Potawatomi Rewards | Potawatomi Casino Hotel in Milwaukee, Wisconsin": 2,
+    "A career at WinStar World Casino and Resort is virtually limitless.": 1,
+    "The Inn at WinStar": 1,
+    "Cherokee Casino South Coffeyville": 1,
+    "Team members of Pala Casino Spa and Resort are not eligible for participation.": 1,
+    "Momentum | Rewards & Loyalty Program | Mohegan Sun": 1,
+    "Four Winds South Bend": 1,
+    "Red Hot Rewards - FireKeepers Casino Hotel": 1,
+    "Cherokee Casino & Hotel Roland": 1,
+    "Cherokee Casino Tahlequah": 1,
+    "Hard Rock Hotel & Casino Tulsa": 1,
+    "Four Winds Casinos | New Buffalo Hotel | Michigan Casinos": 1,
+    "Cherokee Casino Fort Gibson": 1,
+    "Soaring Eagle & Saganing Landing | Casino Loyalty Program": 1,
+    "Indulgence in exclusive discounts from dining to retail therapy, rejuvenating spa services, and offers from our partners at Talking Stick Entertainment District.": 1,
+    "\u00a92025 Foxwoods Resort Casino.": 1,
+    "You can sign up at Turning Stone Resort Casino, Point Place Casino , YBR Casino & Sports Book , The Lake House at Sylvan Beach , SavOn Conveniences Stores and PlayOn Slot Parlor by Turning Stone .": 1,
+    "Cherokee Casino Grove": 1,
+    "You can spend Momentum Dollars at Mohegan Sun in Connecticut and Mohegan Pennsylvania in Wilkes-Barre, Pennsylvania.": 1,
+    "For the first time ever, your Potawatomi Rewards membership will grant you benefits and tier points at both our Milwaukee AND Carter location.": 1,
+    "Foxwoods Rewards | Foxwoods": 1,
+    "Salt River Rewards | Casino Arizona": 1,
+    "Four Winds New Buffalo": 1,
+    "Odawa Pure Rewards": 1,
+    "Earn points at Soaring Eagle Casino, Saganing Eagles Landing, and the Waterpark.": 1,
+    "Players Club Rewards | Turtle Creek Casino & Hotel \uf095": 1,
+    "Cherokee Casino Ramona": 1,
+    "With entertainment, dining, and hospitality all under one roof, Cherokee Casino Roland has been the River Valley\u2019s cornerstone.": 1,
+    "POCOLA \u2013 CASINO & RESORT": 1,
+    "Cherokee Casino Sallisaw": 1
+   }
+  },
+  "loyalty_program_property__observation_date": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-07": 48
+   }
+  },
+  "loyalty_program_property__confidence_tier": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "B": 48
+   }
+  },
+  "loyalty_program_property__built_date": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-07": 48
+   }
+  },
+  "loyalty_program_property__entity_level": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "facility": 48
+   }
+  },
+  "loyalty_program_property__entity_tier_basis": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 58
+  },
+  "loyalty_program_property__entity_link_rung": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "facility_id_exact": 48
+   }
+  },
+  "loyalty_program_property__entity_link_date": {
+   "nonblank": 48,
+   "blank": 739,
+   "pct_blank": 93.9009,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-26": 48
+   }
+  },
+  "loyalty_programs__loyalty_program_id": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "LOY-0011": 28,
+    "LOY-0008": 27,
+    "LOY-0009": 15,
+    "LOY-0010": 10,
+    "LOY-0001": 8,
+    "LOY-0014": 5,
+    "LOY-0016": 5,
+    "LOY-0017": 4,
+    "LOY-0006": 4,
+    "LOY-0013": 4,
+    "LOY-0015": 3,
+    "LOY-0012": 3,
+    "LOY-0018": 3,
+    "LOY-0004": 3,
+    "LOY-0005": 3,
+    "LOY-0003": 3,
+    "LOY-0007": 2,
+    "LOY-0002": 1
+   }
+  },
+  "loyalty_programs__program_name": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "Winstar Rewards": 28,
+    "Rewards Club My Rewards Club": 27,
+    "Status+ Rewards": 15,
+    "Club Osage": 10,
+    "W Club": 8,
+    "Salt River Rewards": 5,
+    "Pearl River Rewards": 5,
+    "Turning Stone Rewards": 4,
+    "Privileges Club": 4,
+    "Foxwoods Rewards": 4,
+    "Players Club Rewards": 3,
+    "Muckleshoot Rewards": 3,
+    "Wind Creek Rewards": 3,
+    "ACCESS Club": 3,
+    "Odawa Pure Rewards": 3,
+    "Potawatomi Rewards": 3,
+    "Momentum": 2,
+    "Red Hot Rewards": 1
+   }
+  },
+  "loyalty_programs__operator_entity_id": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "TRBF-CHKSWN-00": 28,
+    "TRBF-CTWNAT-00": 27,
+    "TRBF-CHKNAT-00": 15,
+    "TRBF-OSAGEN-00": 10,
+    "TRBF-POKAGN-00": 8,
+    "TRBF-MSBCTW-00": 5,
+    "TRBF-SRPMCP-00": 5,
+    "TRBF-PALABD-00": 4,
+    "TRBF-MSHNTK-00": 4,
+    "TRBF-ONDANY-00": 4,
+    "TRBF-LTRVRS-00": 3,
+    "TRBF-SGINAW-00": 3,
+    "TRBF-FSTCTY-00": 3,
+    "TRBF-POARCH-00": 3,
+    "TRBF-GRTRVS-00": 3,
+    "TRBF-MCKLSH-00": 3,
+    "TRBF-MHEGAN-00": 2,
+    "TRBF-NTWSPH-00": 1
+   }
+  },
+  "loyalty_programs__start_date": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__end_date": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__current_status": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "observed_active": 131
+   }
+  },
+  "loyalty_programs__program_name_basis": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "<title>": 101,
+    "<h1>": 30
+   }
+  },
+  "loyalty_programs__tier_names": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__tier_thresholds": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__earning_currency": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__slots_eligible": {
+   "nonblank": 58,
+   "blank": 729,
+   "pct_blank": 92.6302,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 58
+   }
+  },
+  "loyalty_programs__tables_eligible": {
+   "nonblank": 45,
+   "blank": 742,
+   "pct_blank": 94.2821,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 45
+   }
+  },
+  "loyalty_programs__sportsbook_eligible": {
+   "nonblank": 5,
+   "blank": 782,
+   "pct_blank": 99.3647,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 5
+   }
+  },
+  "loyalty_programs__online_gaming_eligible": {
+   "nonblank": 6,
+   "blank": 781,
+   "pct_blank": 99.2376,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 6
+   }
+  },
+  "loyalty_programs__hotel_eligible": {
+   "nonblank": 85,
+   "blank": 702,
+   "pct_blank": 89.1995,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 85
+   }
+  },
+  "loyalty_programs__dining_eligible": {
+   "nonblank": 75,
+   "blank": 712,
+   "pct_blank": 90.4701,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 75
+   }
+  },
+  "loyalty_programs__retail_eligible": {
+   "nonblank": 60,
+   "blank": 727,
+   "pct_blank": 92.3761,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 60
+   }
+  },
+  "loyalty_programs__cross_property_redemption": {
+   "nonblank": 58,
+   "blank": 729,
+   "pct_blank": 92.6302,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 58
+   }
+  },
+  "loyalty_programs__mobile_app": {
+   "nonblank": 33,
+   "blank": 754,
+   "pct_blank": 95.8069,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "yes": 33
+   }
+  },
+  "loyalty_programs__digital_wallet": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__cashless_gaming": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__n_properties_mapped": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "2": 45,
+    "8": 27,
+    "0": 18,
+    "11": 15,
+    "1": 12,
+    "7": 8,
+    "3": 6
+   }
+  },
+  "loyalty_programs__eligibility_quotes": {
+   "nonblank": 128,
+   "blank": 659,
+   "pct_blank": 83.7357,
+   "approx_distinct": 19,
+   "vocabulary": {
+    "hotel_eligible: And that\u2019s just the start, because you\u2019ll also be earning rewards that are only limited by how much you play \u2013 everything from invitations to exclusive events and special rewards t": 28,
+    "dining_eligible: Amber and above now earn points and tier credits when they play, book a stay or make purchases at participating restaurants, bars and retail outlets! || hotel_eligible: As you rack up the points, you can use them for more play, hotel stays, and entertainment. || retail_eligible: Amber and above now earn points and tier credits when they play, book a stay or make purchases at participating restaurants, bars and retail outlets! || slots_eligible: Whether you like slots, table games, or poker, the more you play with your Rewards Club card, the more Free Play you earn. || tables_eligible: Whether you like slots, table games, or poker, the more you play with your Rewards Club card, the more Free Play you earn. || cross_property: Just visit a Rewards Club desk at any Choctaw Casino location, or a cashier at any Choctaw Travel Plaza location, and present your photo ID.": 27,
+    "|| cross_property: Explore All Casinos": 15,
+    "|| cross_property: Reserved Preferred Parking Areas at all Casinos": 10,
+    "dining_eligible: Use your W\u2663 Club points toward a meal at any of our restaurants. || slots_eligible: 100 W\u2663 points = $1 in Instant Credit/Free Slot Play": 8,
+    "dining_eligible: Indulgence in exclusive discounts from dining to retail therapy, rejuvenating spa services, and offers from our partners at Talking Stick Entertainment District. || retail_eligible: Indulgence in exclusive discounts from dining to retail therapy, rejuvenating spa services, and offers from our partners at Talking Stick Entertainment District.": 5,
+    "dining_eligible: Redeem bonus points for FREE SLOT PLAY or COMPS to any of our great restaurants and retail outlets. || retail_eligible: Redeem bonus points for FREE SLOT PLAY or COMPS to any of our great restaurants and retail outlets. || slots_eligible: Redeem bonus points for FREE SLOT PLAY or COMPS to any of our great restaurants and retail outlets.": 5,
+    "dining_eligible: Best of all, you can cash in the TS Rewards Points you earn to pay for dining , recreation , retail purchases and much more. || hotel_eligible: To check out, you must be on property and connected to our Guest Wi-Fi at Turning Stone Resort Casino, Point Place Casino Hotel, YBR Casino & Sports Book or The Lake House at Sylva || retail_eligible: Discount on Qualified Retail Purchases || slots_eligible: You can sign up at Turning Stone Resort Casino, Point Place Casino , YBR Casino & Sports Book , The Lake House at Sylvan Beach , SavOn Conveniences Stores and PlayOn Slot Parlor by || tables_eligible: To ensure proper recording of points or comps for gaming activity, you are responsible for properly inserting your TS Rewards card into a slot machine prior to play or presenting y": 4,
+    "dining_eligible: Every time you play using your Privileges Card, you\u2019ll earn valuable \u201cPrivileges Points.\u201d Spend them just like cash in our restaurants, at the Impulse Gift Shoppe, for hotel rooms, || hotel_eligible: Every time you play using your Privileges Card, you\u2019ll earn valuable \u201cPrivileges Points.\u201d Spend them just like cash in our restaurants, at the Impulse Gift Shoppe, for hotel rooms, || retail_eligible: Every time you play using your Privileges Card, you\u2019ll earn valuable \u201cPrivileges Points.\u201d Spend them just like cash in our restaurants, at the Impulse Gift Shoppe, for hotel rooms, || slots_eligible: Slot Play Participants may earn entries during the earning period at a rate of 500 points = 1 entry || tables_eligible: Table Games Participants may earn entries during the earning period at a rate of 1000 points = 1 entry": 4,
+    "dining_eligible: Use Foxwoods Rewards Points for purchases at select restaurants, retail locations and gas purchases. || hotel_eligible: Complimentary Hotel Stays and Show Tickets based on play. || retail_eligible: Use Foxwoods Rewards Points for purchases at select restaurants, retail locations and gas purchases. || slots_eligible: Convert Foxwoods Rewards Points into Bonus Slot Play or Free Bet.": 4,
+    "dining_eligible: Every point you earn brings you closer to amazing dining experiences, incredible getaways and giveaways, luxurious hotel stays, and more. || hotel_eligible: Every point you earn brings you closer to amazing dining experiences, incredible getaways and giveaways, luxurious hotel stays, and more. || online_gaming_eligible: You can also play online games for FREE and earn real-world Rewards, redeemable at any of our resorts!": 3,
+    "dining_eligible: The points you earn unlock experiences that go beyond the casino floor\u2014from free play and exclusive gifts to delicious dining experiences, luxurious hotel stays, bonus rewards, and || hotel_eligible: The points you earn unlock experiences that go beyond the casino floor\u2014from free play and exclusive gifts to delicious dining experiences, luxurious hotel stays, bonus rewards, and || tables_eligible: Players can earn points by playing machines, Table Games, and other eligible games at the casino.": 3,
+    "dining_eligible: Use your card for discounts on accommodations and restaurants for all locations! || hotel_eligible: Discounts on gas, hotel rooms, restaurants, retail, golf, spa, concerts || retail_eligible: Discounts on gas, hotel rooms, restaurants, retail, golf, spa, concerts || cross_property: Three casinos, one card.": 3,
+    "dining_eligible: Once you sign up, you\u2019ll receive your Potawatomi Rewards player\u2019s card to immediately start racking up points towards great rewards like: dining discounts, hotel stays, free slot p || hotel_eligible: Once you sign up, you\u2019ll receive your Potawatomi Rewards player\u2019s card to immediately start racking up points towards great rewards like: dining discounts, hotel stays, free slot p || retail_eligible: Redeem Reward Points at Restaurants and Retail || slots_eligible: Once you sign up, you\u2019ll receive your Potawatomi Rewards player\u2019s card to immediately start racking up points towards great rewards like: dining discounts, hotel stays, free slot p || sportsbook_eligible: Can I earn tier points from Poker or Sportsbook? || tables_eligible: Tier credits are non-redeemable credits earned only while playing slots, table games and bingo.": 3,
+    "dining_eligible: Dining, Spa, Gift Shops & Entertainment 4 Points || hotel_eligible: Hotel Room & RV Space 10 Points || retail_eligible: Dining, Spa, Gift Shops & Entertainment 4 Points || slots_eligible: Slot Machine 2 Points || tables_eligible: Every time you play slots, table games or BINGO insert or present your card first, to earn the maximum amount of rewards. || cross_property: Unlike other programs, this card works seamlessly across all our properties, allowing you to earn and redeem points wherever you play, stay, or dine.": 3,
+    "dining_eligible: Momentum Dollars can be redeemed for purchases at any of our shops or restaurants, hotel, tickets to a show, golf and more! || hotel_eligible: Momentum Dollars can be redeemed for purchases at any of our shops or restaurants, hotel, tickets to a show, golf and more! || online_gaming_eligible: Link your Momentum account at Mohegan Sun Online Casino to earn while you play online. || retail_eligible: Enjoy discounts at many of our retail shops || sportsbook_eligible: Earn Momentum Dollars on Select Wagers in the Mohegan Sun FanDuel Sportsbook": 2,
+    "dining_eligible: 10% additional discount at all restaurants || hotel_eligible: $119 special discounted hotel rate for a Classic room Sunday \u2013 Thursday || online_gaming_eligible: Play Online \u2013 Earn On-Property Perks! || tables_eligible: Points Exchange for Table Games Match Bets & Table Games Free Bets": 1
+   }
+  },
+  "loyalty_programs__source_url": {
+   "nonblank": 0,
+   "blank": 787,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "loyalty_programs__source_quote": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "Winstar Rewards": 28,
+    "Rewards Club My Rewards Club Account": 27,
+    "Status+ Rewards": 15,
+    "Club Osage Casino Rewards Program": 10,
+    "W Club Benefits": 8,
+    "Salt River Rewards": 5,
+    "Pearl River Rewards": 5,
+    "Privileges Club": 4,
+    "Turning Stone Rewards: Casino Players Card & Loyalty Program": 4,
+    "Foxwoods Rewards": 4,
+    "Players Club Rewards": 3,
+    "Muckleshoot Rewards": 3,
+    "Wind Creek Rewards": 3,
+    "ACCESS Club: Your Casino Loyalty Program": 3,
+    "Odawa Pure Rewards": 3,
+    "Potawatomi Rewards": 3,
+    "Momentum": 2,
+    "Red Hot Rewards": 1
+   }
+  },
+  "loyalty_programs__observation_date": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-07": 131
+   }
+  },
+  "loyalty_programs__confidence_tier": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "B": 131
+   }
+  },
+  "loyalty_programs__built_date": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-07": 131
+   }
+  },
+  "loyalty_programs__entity_level": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "tribe": 131
+   }
+  },
+  "loyalty_programs__entity_tier_basis": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "mirrored from this row's own confidence_tier": 131
+   }
+  },
+  "loyalty_programs__entity_link_rung": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "row_tribe_id_mirror": 131
+   }
+  },
+  "loyalty_programs__entity_link_date": {
+   "nonblank": 131,
+   "blank": 656,
+   "pct_blank": 83.3545,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-26": 131
+   }
+  },
+  "n_nigc_action_parties": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "0": 334,
+    "2": 187,
+    "1": 77,
+    "5": 58,
+    "3": 51,
+    "4": 47,
+    "7": 12,
+    "6": 8,
+    "15": 6,
+    "8": 4,
+    "14": 3
+   }
+  },
+  "n_nigc_declination_letters": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "0": 318,
+    "1": 243,
+    "2": 101,
+    "3": 61,
+    "4": 27,
+    "5": 25,
+    "7": 6,
+    "6": 4,
+    "20": 2
+   }
+  },
+  "n_nigc_enforcement_actions": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "0": 402,
+    "2": 193,
+    "5": 47,
+    "4": 43,
+    "3": 42,
+    "1": 29,
+    "7": 12,
+    "6": 8,
+    "15": 6,
+    "14": 3,
+    "44": 2
+   }
+  },
+  "n_nigc_indian_lands_opinions": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "0": 621,
+    "1": 87,
+    "2": 27,
+    "5": 19,
+    "4": 17,
+    "3": 13,
+    "6": 3
+   }
+  },
+  "n_nigc_management_contract_approvals": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 657,
+    "1": 94,
+    "2": 36
+   }
+  },
+  "n_nigc_region_assignments": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "4": 419,
+    "2": 177,
+    "3": 116,
+    "1": 60,
+    "0": 15
+   }
+  },
+  "n_sec_gaming_financial_disclosures": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "0": 779,
+    "2": 3,
+    "1": 1,
+    "5": 1,
+    "14": 1,
+    "29": 1,
+    "12": 1
+   }
+  },
+  "n_sec_gaming_management_contract_terms": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 781,
+    "1": 5,
+    "2": 1
+   }
+  },
+  "n_state_gaming_observations": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "0": 763,
+    "14": 13,
+    "1": 4,
+    "2": 3,
+    "12": 2,
+    "10": 1,
+    "4": 1
+   }
+  },
+  "n_wa_machine_allocations": {
+   "nonblank": 787,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "0": 734,
+    "3": 41,
+    "2": 10,
+    "1": 2
+   }
+  }
+ }
+}

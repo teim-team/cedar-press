@@ -1,0 +1,93 @@
+{
+ "contractors": {
+  "codebook_exists": true,
+  "shipped_columns": 79,
+  "codebook_named_columns": 79,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "deals": {
+  "codebook_exists": true,
+  "shipped_columns": 60,
+  "codebook_named_columns": 60,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "federal-register": {
+  "codebook_exists": true,
+  "shipped_columns": 45,
+  "codebook_named_columns": 45,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "funding": {
+  "codebook_exists": true,
+  "shipped_columns": 79,
+  "codebook_named_columns": 79,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "gaming": {
+  "codebook_exists": true,
+  "shipped_columns": 312,
+  "codebook_named_columns": 312,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "legislation": {
+  "codebook_exists": true,
+  "shipped_columns": 65,
+  "codebook_named_columns": 65,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "lobbying": {
+  "codebook_exists": true,
+  "shipped_columns": 62,
+  "codebook_named_columns": 62,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "nagpra": {
+  "codebook_exists": true,
+  "shipped_columns": 76,
+  "codebook_named_columns": 76,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "native-owned-businesses": {
+  "codebook_exists": true,
+  "shipped_columns": 70,
+  "codebook_named_columns": 70,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "natural-resources": {
+  "codebook_exists": true,
+  "shipped_columns": 52,
+  "codebook_named_columns": 52,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "nest": {
+  "codebook_exists": true,
+  "shipped_columns": 88,
+  "codebook_named_columns": 88,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "nonprofits": {
+  "codebook_exists": true,
+  "shipped_columns": 73,
+  "codebook_named_columns": 73,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ },
+ "subcontracting": {
+  "codebook_exists": true,
+  "shipped_columns": 86,
+  "codebook_named_columns": 86,
+  "shipped_not_in_codebook": [],
+  "codebook_not_shipped": []
+ }
+}

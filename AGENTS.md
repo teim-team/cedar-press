@@ -151,6 +151,24 @@ points at, so nobody records this as "pre-existing, not mine":
 | `contract_violations 7 -> 12`, `contract_orphan_shippable 6 -> 7` | the new-table owners above; `docs/schema/dataset_contracts.json` names each |
 | `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` | pre-existing since 2026-09-01, unowned. The table is gone from `data/clean` and was shipping 1,620 rows |
 
+**UPDATE 2026-09-03 00:5x — the same failure, grown, and NOT from the rulings
+pass.** `62` still exits 1. `tables_undocumented_in_codebook` has gone **18 -> 27**
+and `tables_missing_from_27_SPEC` **194 -> 254** since the entry above; the driver
+is unchanged (new `data/clean` tables without a codebook block) and so is the
+owner. Measured: **249 CSVs have been written to `data/clean` since the baseline
+was recorded at 2026-09-01 17:32**, so the baseline is two days behind the tree.
+
+The rulings/identity pass of 2026-09-03 checked whether it was implicated and it
+is not. It wrote exactly **three** files under `data/clean` — `prime_contracts.csv`
+and `cedar_identifier_ledger_final.csv` (00:44, via `174`) and
+`cedar_ruling_ledger_consolidated.csv` (00:49, via `173`) — **all three
+pre-existing**, so none of them can raise an *undocumented-table* count. The two
+STOPPED SHIPPING lines point at files last written **2026-09-01 22:46** and
+**2026-09-01 22:42**, and `advocacy_passthrough_2026-08-07.csv` at **2026-09-02
+06:20** — every one of them before that pass began. Recorded here rather than
+waived, per standing rule 15: the gate is red, it is red for the reasons already
+named above, and no baseline was re-recorded to make it green.
+
 **Two lines that WERE on this list on 2026-09-01 and are NOT any more** —
 `files_with_columns_lost_vs_backup` fell 3 → 1 as the 843 backups aged out, and
 `lint_class6` fell 29 → 24.
@@ -8725,3 +8743,90 @@ doc-claim gate is another workstream's), `845 verify` ok, `cedar_publication`
 agents' concurrent writes to `data/clean` and were rebuilt to clear it.
 
 <!-- END QA-CP016-RESOLVED-2026-09-02 -->
+
+
+<!-- BEGIN DELIVERY-READINESS-1165-2026-09-03 -->
+
+## 2026-09-03 — `62` IS RED, AND NONE OF THE TWENTY IS THIS PASS'S. Named, with the owner the evidence points at.
+
+*Written by the delivery-readiness pass (`code/1165_delivered_publication_audit.py`,
+rewrite of `code/1162_twelve_dataset_report.py`). Standing rule 15: do not
+record a red gate as "pre-existing, not mine" and continue — name it and its
+owner here first. Measured 2026-09-03 00:5x; `logs/62_no_regression_2026-09-03.log`
+holds the full run.*
+
+`py -3 code/62_no_regression_check.py` exits 1 on twenty lines. This pass wrote
+two files in `code/` (`1162`, `1165`) and rebuilt `dist/customer/`; it created
+no table in `data/clean`, registered no codebook block, and applied no ruling.
+Neither of its files appears anywhere in `293`'s findings —
+`py -3 code/293_lint_bug_classes.py | grep -E '1162|1165'` returns nothing.
+
+| line | owner named by the evidence |
+|---|---|
+| `lint_bug_class_instances 146 -> 162`, `class1 0 -> 1`, `class2c 60 -> 69`, `class3 0 -> 2`, `class4 9 -> 14`, `class7 42 -> 44`, `lint_new_defect_instances = 21` | the twelve NEW instances `62` itself names: `1011_cross_dataset_reconciliation`, `1060_splink_pilot` (×3), `1085_prime_psc_desc_repull`, `1086_faads_award_key_promote`, `846_session_audit`, `852_extend_constellation_edges`, `873_build_aiannh_crosswalk`, `992_newsletter_deal_candidates`, `1030_sec_edgar_native_transactions`, `1031_ancsa_45_55_139_annual_reports` |
+| `tables_undocumented_in_codebook 3 -> 27`, `tables_missing_codebook_block 3 -> 27`, `tables_missing_notes_contract 14 -> 58`, `ship_tables_at_zero 13 -> 57`, `tables_missing_from_25_TABLES 179 -> 247`, `tables_missing_from_27_SPEC 194 -> 254` | the workstreams that added ~50 tables to `data/clean` without a codebook block. **A table without a codebook block cannot ship**: `cedar_codebook.write_fragment`, then 87 → 25 → 27 |
+| `rulings_unapplied 1,215 -> 14,544` | the rulings-consolidation workstream. `data/clean/cedar_ruling_ledger_consolidated.csv` was rewritten at **00:49:30 on 2026-09-03**, while this pass was running |
+| `contract_orphan_shippable = 8`, `contract_violations = 13` | the dataset-contracts workstream (`512` / `518`) |
+| `tier_A_ruled 1,676 -> 1,669` | already documented as deliberate — see the `tier_A_ruled FALLS 1,676 → 1,669` section above |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, `hearing_bill_links 465 -> 464`, `native_bills_subject_sweep 2,414 -> 2,409` | the advocacy and bills/votes workstreams; `62` names the cause as a missing codebook block for the first |
+
+### What this pass DID do, and why none of it moves those lines
+
+**`code/1165_delivered_publication_audit.py` (new).** Reads
+`dist/customer/*.csv` and nothing else, uncapped, and asks whether the
+publication rules hold in the file the customer receives. Every existing check
+reads either the policy module or `MANIFEST.csv`, which `1137` wrote —
+agreement there says the writer was self-consistent, not that the policy
+landed. `1165 selftest` injects every violation class into a fixture and
+asserts the NAMED detector fires, because this audit's first full run returned
+zero violations and zero is the strongest thing a check can say.
+
+**It calls `cedar_publication.adjudication()` rather than re-walking
+`BLOCKED_STATES`.** The first draft forked the rules and would have gone on
+agreeing with a stale copy of them; two detectors for one class drift.
+
+**`code/1162_twelve_dataset_report.py` (rewritten; the original is at
+`.bak_2026-09-03_pre_1165_delivered_publication_audit`).** It had never been
+run. Run, it did not crash — it described TWELVE datasets when thirteen are
+delivered (it iterated `dist/preview/`, which is storefront-only, so `gaming`
+was absent from a report about delivery); it summed per-COLUMN state tallies
+and printed them as ROW counts (a contractors row carries four state columns);
+it parsed `contractors.csv` five times to print two numbers; and it said
+nothing per dataset. It now measures once and reports per dataset: grain, rows
+× columns, join provenance, what was withheld — **flagship minus delivered, a
+measurement, not the builder's figure** — and known defects.
+
+### The finding that matters more than the gate
+
+The NEID retirement of 2026-09-03 dropped the retired identifiers **by column
+name** and the name gate holds: 0 retired column names survive in any of the
+thirteen delivered headers. **The identifiers themselves still ship.** Measured
+against the 1,562-value NEID vocabulary harvested from `data/clean` and
+`data/spine` — membership, not shape — **89,680 retired identifiers on 52,817
+rows, in 22 columns across 8 datasets**, under names like `entity_id`,
+`affiliated_entity_ids`, `owner_hub_handle`, `fpds_parent_resolves_to` and
+`cedar_spine_entity_id`. A shape regex was tried first and was wrong in both
+directions at once: 568 false positives (`DPW-00229-01` inside a contract
+description, `SR-2012-11` as a subaward number) and 2,173 misses, because 298
+of the real NEIDs are the extended Alaska form `AKNF-ACSRMT-00-CALSTA-ASVCPR`.
+
+**`nagpra` and `native-owned-businesses` now carry no `cedar_uid` under any
+spelling.** This is not a regression from the retirement — their flagship
+tables never held one and their delivered column counts did not move — but it
+is what makes the ruling bite: their only entity keys are `*_entity_id` /
+`*_entity_ids` columns holding the retired identifiers, so applying the ruling
+to those columns would leave the two datasets unable to name a party at all.
+Cedar's key has to be promoted onto them first. Full measurement, per column
+and per dataset, in `dist/customer/REPORT.md` and
+`review/1165_delivered_publication_audit_2026-09-03.json`.
+
+### The freshness gate fired in production, not only on a fixture
+
+`1137 verify` is the freshness check. It was proven to fire by fixture
+(a source table's mtime moved forward two hours; it exited 1 naming
+`deals_classified.csv`; restored, exit 0) — and then it fired for real:
+another workstream rewrote `data/clean/prime_contracts.csv` at 00:44:02, nine
+minutes after `contractors.csv` was built, and the gate named it. Rebuilt;
+`1137 verify` ok, 0 problems, 13 datasets.
+
+<!-- END DELIVERY-READINESS-1165-2026-09-03 -->

@@ -84,12 +84,12 @@
     {
       "file": "nonprofits.csv",
       "column": "placename_refusal_date",
-      "n_iso": 512,
+      "n_iso": 516,
       "day": 2,
-      "count": 512,
+      "count": 516,
       "pct": 100.0,
-      "expected": 16.8,
-      "z": 122.8,
+      "expected": 17.0,
+      "z": 123.2,
       "distinct_values": 1,
       "top_value": "2026-09-02",
       "top_value_share": 100.0
@@ -173,6 +173,19 @@
       "top_value_share": 5.3
     },
     {
+      "file": "deals.csv",
+      "column": "Event_Date_source_value_verbatim",
+      "n_iso": 77,
+      "day": 15,
+      "count": 73,
+      "pct": 94.8,
+      "expected": 2.5,
+      "z": 45.1,
+      "distinct_values": 56,
+      "top_value": "2017-09-15",
+      "top_value_share": 7.8
+    },
+    {
       "file": "natural-resources.csv",
       "column": "payment_date",
       "n_iso": 495,
@@ -238,6 +251,19 @@
       "top_value_share": 2.1
     },
     {
+      "file": "deals.csv",
+      "column": "Event_Date",
+      "n_iso": 989,
+      "day": 16,
+      "count": 110,
+      "pct": 11.1,
+      "expected": 32.5,
+      "z": 13.8,
+      "distinct_values": 424,
+      "top_value": "2019-12-16",
+      "top_value_share": 5.2
+    },
+    {
       "file": "subcontracting.csv",
       "column": "subaward_number",
       "n_iso": 205,
@@ -249,19 +275,6 @@
       "distinct_values": 201,
       "top_value": "0338-11-01",
       "top_value_share": 1.5
-    },
-    {
-      "file": "deals.csv",
-      "column": "Event_Date",
-      "n_iso": 1066,
-      "day": 16,
-      "count": 110,
-      "pct": 10.3,
-      "expected": 35.0,
-      "z": 12.9,
-      "distinct_values": 476,
-      "top_value": "2019-12-16",
-      "top_value_share": 4.8
     },
     {
       "file": "gaming.csv",
@@ -1336,6 +1349,20 @@
       "explained_by": "an interval bound emitted BY the precision machinery: a year-precision date bounds to YYYY-01-01 and YYYY-12-31 by construction"
     },
     {
+      "file": "deals.csv",
+      "column": "Event_Date_not_before",
+      "n_iso": 1049,
+      "day": 1,
+      "count": 151,
+      "pct": 14.4,
+      "expected": 34.5,
+      "z": 20.2,
+      "distinct_values": 452,
+      "top_value": "2019-12-16",
+      "top_value_share": 4.9,
+      "explained_by": "an interval bound emitted BY the precision machinery: a year-precision date bounds to YYYY-01-01 and YYYY-12-31 by construction"
+    },
+    {
       "file": "gaming.csv",
       "column": "gaming_property_federal_traces__compact_in_force_as_of",
       "n_iso": 672,
@@ -1348,6 +1375,20 @@
       "top_value": "2000-05-16",
       "top_value_share": 9.1,
       "explained_by": "an observation stamp inherited from a panel vintage, so a handful of vintage dates cover most rows"
+    },
+    {
+      "file": "deals.csv",
+      "column": "Event_Date_not_after",
+      "n_iso": 1049,
+      "day": 16,
+      "count": 110,
+      "pct": 10.5,
+      "expected": 34.5,
+      "z": 13.1,
+      "distinct_values": 459,
+      "top_value": "2019-12-16",
+      "top_value_share": 4.9,
+      "explained_by": "an interval bound emitted BY the precision machinery: a year-precision date bounds to YYYY-01-01 and YYYY-12-31 by construction"
     }
   ]
 }

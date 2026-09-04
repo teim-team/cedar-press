@@ -1,0 +1,742 @@
+{
+ "snapshot": {
+  "file": "dist/customer/natural-resources.csv",
+  "bytes": 24432382,
+  "mtime": "2026-09-03T00:37:39"
+ },
+ "rows": 11305,
+ "columns": 52,
+ "seconds": 6.3,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 705,
+   "blank": 10600,
+   "pct_blank": 93.7638,
+   "approx_distinct": 17,
+   "vocabulary": {
+    "CE-0016W-A5": 492,
+    "CE-00153-F4": 32,
+    "CE-0013W-VN": 32,
+    "CE-0017F-1G": 30,
+    "CE-0007C-BW": 13,
+    "CE-0007D-HN": 12,
+    "CE-0007F-X7": 12,
+    "CE-0007A-ZA": 12,
+    "CE-0007E-QE": 11,
+    "CE-00077-DZ": 11,
+    "CE-0007G-30": 10,
+    "CE-00078-KR": 9,
+    "CE-0007H-9S": 9,
+    "CE-0007B-53": 8,
+    "CE-00079-SH": 7,
+    "CE-00076-76": 4,
+    "CE-0000J-C2": 1
+   }
+  },
+  "resource_revenue_event_id": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10703
+  },
+  "recipient_entity_id": {
+   "nonblank": 705,
+   "blank": 10600,
+   "pct_blank": 93.7638,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "TRBF-MHATAT-00": 492,
+    "TRBF-CROWMT-00": 32,
+    "TRBF-HOPIAZ-00": 32,
+    "TRBF-NAVAJO-00": 30,
+    "ANRC-CHGCCO-00": 13,
+    "ANRC-BRBYCO-00": 12,
+    "ANRC-CKINLT-00": 12,
+    "ANRC-KONIAG-00": 12,
+    "ANRC-DOYONL-00": 11,
+    "ANRC-ALEUTC-00": 11,
+    "ANRC-NANARC-00": 10,
+    "ANRC-SEALSK-00": 9,
+    "ANRC-ARCSLO-00": 9,
+    "ANRC-CALSTA-00": 8,
+    "ANRC-BERSTR-00": 7,
+    "ANRC-AHTNAI-00": 4,
+    "AKNF-ARCTIC-00-DOYONL-CATHTG-TNNACH-VENTGV": 1
+   }
+  },
+  "beneficiary_entity_id": {
+   "nonblank": 586,
+   "blank": 10719,
+   "pct_blank": 94.8165,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "TRBF-MHATAT-00": 492,
+    "TRBF-HOPIAZ-00": 32,
+    "TRBF-CROWMT-00": 32,
+    "TRBF-NAVAJO-00": 30
+   }
+  },
+  "payer_entity_id": {
+   "nonblank": 1485,
+   "blank": 9820,
+   "pct_blank": 86.8642,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "PAYER-US-BIA": 508,
+    "PAYER-STATE-ND": 492,
+    "PAYER-US-ONRR": 157,
+    "PAYER-STATE-UT": 118,
+    "PAYER-US-OSMRE": 94,
+    "PAYER-STATE-MT": 49,
+    "ANRC-NANARC-00": 25,
+    "ANRC-CKINLT-00": 21,
+    "ANRC-ALEUTC-00": 8,
+    "ANRC-ARCSLO-00": 7,
+    "ANRC-CHGCCO-00": 6
+   }
+  },
+  "operator_entity_id": {
+   "nonblank": 0,
+   "blank": 11305,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "source_record_id": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12566
+  },
+  "recipient_entity_name": {
+   "nonblank": 1465,
+   "blank": 9840,
+   "pct_blank": 87.0411,
+   "approx_distinct": 22,
+   "vocabulary": {
+    "Holders of Osage headrights (individuals)": 508,
+    "Three Affiliated": 492,
+    "Osage Mineral Estate": 61,
+    "Uintah Basin Revitalization Fund": 60,
+    "Navajo Revitalization Fund": 58,
+    "Village corporations and at-large shareholders of the region, not individually named in the source": 35,
+    "Hopi": 32,
+    "Crow": 32,
+    "Navajo": 30,
+    "The other ANCSA regional corporations, not individually named in the source": 24,
+    "Chugach Alaska Corporation": 13,
+    "Bristol Bay Native Corporation": 12,
+    "Koniag, Incorporated": 12,
+    "Cook Inlet Region, Incorporated": 12,
+    "Aleut Corporation": 11,
+    "Doyon, Limited": 11,
+    "NANA Regional Corporation, Incorporated": 10,
+    "Arctic Slope Regional Corporation": 9,
+    "Sealaska Corporation": 9,
+    "Calista Corporation": 8,
+    "Bering Straits Native Corporation": 7,
+    "State of Oklahoma": 7,
+    "Other ANCSA regional corporations, village corporations and at-large shareholders, not individually named in the source": 7,
+    "Ahtna, Incorporated": 4,
+    "Northwest Arctic Borough": 1
+   }
+  },
+  "beneficiary_entity_name": {
+   "nonblank": 586,
+   "blank": 10719,
+   "pct_blank": 94.8165,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "Three Affiliated": 492,
+    "Hopi": 32,
+    "Crow": 32,
+    "Navajo": 30
+   }
+  },
+  "payer_entity_name": {
+   "nonblank": 1610,
+   "blank": 9695,
+   "pct_blank": 85.7585,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "United States, Bureau of Indian Affairs": 508,
+    "State of North Dakota": 492,
+    "United States, Office of Natural Resources Revenue": 157,
+    "State of Utah": 118,
+    "Other ANCSA regional corporations, not individually named in the source": 111,
+    "United States, Office of Surface Mining Reclamation and Enforcement": 94,
+    "State of Montana": 49,
+    "NANA Regional Corporation, Incorporated": 25,
+    "Cook Inlet Region, Incorporated": 21,
+    "Aleut Corporation": 8,
+    "Osage Mineral Estate": 7,
+    "Arctic Slope Regional Corporation": 7,
+    "Mine operator, not named in the quoted passage": 7,
+    "Chugach Alaska Corporation": 6
+   }
+  },
+  "operator_entity_name": {
+   "nonblank": 0,
+   "blank": 11305,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "related_asset_ids": {
+   "nonblank": 0,
+   "blank": 11305,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "source_system": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "ONRR_NRRD_monthly_revenue": 9277,
+    "OMC_headright_payment_history": 508,
+    "ND_State_Treasurer_tax_distribution_search": 492,
+    "MMS_MRM_american_indian_revenues_calendar": 315,
+    "ANCSA_7i_7j_annual_reports": 185,
+    "ONRR_NRRD_fiscal_year_disbursements": 157,
+    "UT_COBI_fund_financials": 118,
+    "OSMRE_AML_fee_based_grant_distribution": 76,
+    "OMC_quarterly_newsletter": 68,
+    "MT_DOR_county_oil_gas_distribution": 49,
+    "MMS_MRM_american_indian_revenues": 42,
+    "OSMRE_AML_IIJA_grant_distribution": 18
+   }
+  },
+  "revenue_type": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "royalty": 6100,
+    "other_reported_revenue": 2870,
+    "rent": 704,
+    "direct_pay": 478,
+    "production_tax_share": 325,
+    "severance_tax_share": 216,
+    "trust_disbursement": 187,
+    "reclamation_fee_distribution": 94,
+    "ancsa_7i_revenue_sharing_net_of_7j": 92,
+    "grant_from_resource_fund": 59,
+    "fund_deposit": 59,
+    "ancsa_7i_revenue_sharing": 43,
+    "ancsa_7j_redistribution": 35,
+    "bonus": 20,
+    "total_reported_revenue": 8,
+    "ancsa_7i_7j_obligation_combined": 7,
+    "production_tax_paid_to_state": 7,
+    "payment_in_lieu_of_taxes": 1
+   }
+  },
+  "resource_type": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "oil_and_gas": 6921,
+    "mixed": 963,
+    "sand_and_gravel": 922,
+    "coal": 910,
+    "other_mineral": 745,
+    "hardrock": 643,
+    "geothermal": 163,
+    "not_stated": 38
+   }
+  },
+  "commodity": {
+   "nonblank": 11118,
+   "blank": 187,
+   "pct_blank": 1.6541,
+   "approx_distinct": 43
+  },
+  "product": {
+   "nonblank": 7454,
+   "blank": 3851,
+   "pct_blank": 34.0646,
+   "approx_distinct": 51
+  },
+  "mineral_lease_type": {
+   "nonblank": 9269,
+   "blank": 2036,
+   "pct_blank": 18.0097,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "Oil & Gas": 6104,
+    "Sand & Gravel": 764,
+    "Coal": 736,
+    "Copper": 635,
+    "Gypsum": 419,
+    "Geothermal": 163,
+    "Cinders": 149,
+    "Mining-Unspecified": 147,
+    "Limestone": 93,
+    "Phosphate": 56,
+    "Silica Sand": 1,
+    "Hardrock": 1,
+    "Chat": 1
+   }
+  },
+  "period_type": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "month": 9277,
+    "quarter": 531,
+    "payment_date_only": 492,
+    "calendar_year": 341,
+    "federal_fiscal_year": 293,
+    "corporate_fiscal_year": 185,
+    "state_fiscal_year": 118,
+    "payment_quarter": 68
+   }
+  },
+  "period_start": {
+   "nonblank": 10813,
+   "blank": 492,
+   "pct_blank": 4.3521,
+   "approx_distinct": 771
+  },
+  "period_end": {
+   "nonblank": 10813,
+   "blank": 492,
+   "pct_blank": 4.3521,
+   "approx_distinct": 745
+  },
+  "payment_date": {
+   "nonblank": 495,
+   "blank": 10810,
+   "pct_blank": 95.6214,
+   "approx_distinct": 199
+  },
+  "amount_usd": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9027
+  },
+  "amount_usd_real2025": {
+   "nonblank": 10257,
+   "blank": 1048,
+   "pct_blank": 9.2702,
+   "approx_distinct": 9257
+  },
+  "deflator_factor_2025": {
+   "nonblank": 10257,
+   "blank": 1048,
+   "pct_blank": 9.2702,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "1.028311": 607,
+    "1.053836": 579,
+    "1.0": 565,
+    "1.170557": 562,
+    "1.28979": 557,
+    "1.312884": 550,
+    "1.092829": 540,
+    "1.240433": 539,
+    "1.260903": 537,
+    "1.223977": 529,
+    "1.325363": 513,
+    "1.337665": 446,
+    "1.360954": 370,
+    "1.438984": 368,
+    "1.384118": 359,
+    "1.456468": 358,
+    "1.409899": 351,
+    "1.493694": 330,
+    "1.465454": 322,
+    "1.581478": 312,
+    "1.631056": 308,
+    "1.534168": 303,
+    "1.674921": 290,
+    "1.81377": 20,
+    "1.77359": 20,
+    "1.734521": 14,
+    "1.707992": 8
+   }
+  },
+  "inflation_base_year": {
+   "nonblank": 10257,
+   "blank": 1048,
+   "pct_blank": 9.2702,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2025": 10257
+   }
+  },
+  "measurement_status": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "reported_revenue": 9939,
+    "actual_payment": 1328,
+    "statutory_allocation": 38
+   }
+  },
+  "aggregation_level": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "national_aggregate": 9791,
+    "entity_specific": 779,
+    "per_headright_rate": 508,
+    "state_aggregate": 167,
+    "entity_specific_component": 60
+   }
+  },
+  "land_status": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "not_stated": 10641,
+    "trust": 664
+   }
+  },
+  "allocation_formula": {
+   "nonblank": 1514,
+   "blank": 9791,
+   "pct_blank": 86.6077,
+   "approx_distinct": 15,
+   "vocabulary": {
+    "Distributed per full headright; the Osage Minerals Council prints a divisor of 2228.97393 headrights and rounds the rate back to the nearest $5. THE DIVISOR IS NOT APPLIED HERE - multiplying this rate by it would manufacture an aggregate.": 482,
+    "STATUTORY SPLIT FOR NEW WELLS ONLY: trust lands 80% tribe / 20% state; non-trust (fee) lands 20% tribe / 80% state. THIS RATIO MUST NOT BE APPLIED TO THE SERIES. It governs only wells on which drilling first commenced after 2019-06-30; wells spudded earlier stay on the prior split for the life of the well, so every monthly distribution after this date is a BLEND of two regimes weighted by the spud-date mix of producing wells. The published distribution does not decompose by well vintage, and Cedar Press does not model the mix.": 232,
+    "ANCSA Section 7(i): 70% of net revenues from timber resources and the subsurface estate is divided among all 12 Alaska-based regional corporations in proportion to original enrollment. ANCSA Section 7(j): not less than 50% of what a regional corporation receives under 7(i) must be redistributed to village corporations and at-large shareholders in its region. THIS FORMULA MUST NOT BE APPLIED TO ANY ROW - the shares are governed by the 1982 Section 7(i) Settlement Agreement and by allowable deductions and cost carryforwards that no report in this source system quantifies.": 185,
+    "Trust lands: 50% tribe / 50% state. Non-trust (fee) lands: 50% tribe / 50% state. MATCHED ON PAYMENT DATE, which lags the taxable event, so payments near a boundary may be governed by the adjacent period.": 144,
+    "Trust lands: 50% tribe / 50% state. Non-trust (fee) lands: 20% tribe / 80% state. MATCHED ON PAYMENT DATE, which lags the taxable event, so payments near a boundary may be governed by the adjacent period.": 116,
+    "SMCRA 30 U.S.C. 1232: 50% of reclamation fees collected in the state or tribal area. THE THREE TRIBAL PROGRAMMES ARE CERTIFIED, so the fee-based share is replaced by an equivalent Certified In Lieu payment. The formula is not applied here and must not be used to derive a collection figure.": 76,
+    "Utah Code 59-5-116 (deposits) and 63N-24-601..606 (fund)": 60,
+    "Utah Code 59-5-119 (deposits) and 63N-24-701..706 (fund)": 58,
+    "Fort Peck agreement sec. VIII: the Tribes receive 50% of the total tax on NEW oil and NEW natural gas production on the Reservation, paid quarterly (sec. VII.B). 'New' means wells on which drilling commenced on or after the effective date; existing production is unaffected.": 49,
+    "Total Revenue reproduces the published per-headright rate WITHOUT subtracting the Oklahoma gross production tax, so this vintage reports revenue NET of that tax.": 44,
+    "Distributed per full headright; the Osage Minerals Council prints a divisor of 2228.97393 headrights. THE DIVISOR IS NOT APPLIED HERE - multiplying this rate by it would manufacture an aggregate, and the modern divisor is in any case not the 1880 one.": 26,
+    "Total Revenue reproduces the published per-headright rate only AFTER subtracting the Oklahoma gross production tax, so this vintage reports revenue GROSS of that tax. NOT COMPARABLE with the pre-2018 vintage without adjustment.": 16,
+    "IIJA sec. 40701 apportions by historic coal production tonnage. The tonnage is printed but the apportionment is NOT recomputed here.": 15,
+    "Neither arithmetic reproduces the published per-headright rate; the relationship between total revenue and the distribution is not established for this letter.": 8,
+    "$8,000,000 divided equally among the eligible states and tribes; the source prints each recipient's amount and it is read, not derived.": 3
+   }
+  },
+  "allocation_formula_effective_start": {
+   "nonblank": 541,
+   "blank": 10764,
+   "pct_blank": 95.2145,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "2019-07-01": 232,
+    "2013-07-01": 144,
+    "2007-07-01": 116,
+    "2008-03-25": 49
+   }
+  },
+  "allocation_formula_effective_end": {
+   "nonblank": 260,
+   "blank": 11045,
+   "pct_blank": 97.7001,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2019-06-30": 144,
+    "2013-06-30": 116
+   }
+  },
+  "amount_sign_meaning": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "negative = refund, recoupment or prior-period correction; retained, never dropped": 9277,
+    "negative = correction or recoupment": 492,
+    "dollars per FULL headright for the quarter; not a total and not additive with any other row": 478,
+    "negative = refund or prior-period correction; retained": 357,
+    "negative = recoupment or correction; retained": 157,
+    "positive = amount the named corporation reports it RECEIVED": 118,
+    "positive = amount the named corporation reports it PAID OUT": 67,
+    "NEGATIVE AS PUBLISHED = money paid OUT of the fund; the sign is the source's and is retained so inflow and outflow do not have to be told apart by column name": 59,
+    "positive = deposited into the fund": 59,
+    "a 'Major Details' line item that does NOT sum with its siblings to the quarter's stated total revenue; in 2016Q3 the oil line alone exceeds the total. Never add these to the total.": 53,
+    "$0.00 is an assertion that nothing was distributed, NOT missing data": 49,
+    "the distribution calculated at 100% before the sequestration reduction; NOT money received - the POST row is": 38,
+    "the distribution actually made after the sequestration reduction required by 2 U.S.C. 901a": 38,
+    "dollars per full headright as PUBLISHED RETROSPECTIVELY by the Osage Minerals Council; headrights did not exist in this period. Not a total, not additive with any other row, and NOT characterised as resource revenue - see beneficiary_note.": 30,
+    "zero is an assertion of a 0.0000% share, not a missing value": 15,
+    "quarterly total revenue of the mineral estate as the Council states it": 8,
+    "AN OUTFLOW. Oklahoma gross production tax assessed on the Osage royalty interest and paid BY the estate TO the state. Positive here means money left the estate; never add it to revenue.": 7,
+    "one-time payment": 3
+   }
+  },
+  "confidence": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "A": 10815,
+    "B": 490
+   }
+  },
+  "record_scope": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "indian_country": 9791,
+    "entity": 1287,
+    "native_serving": 118,
+    "unresolved": 60,
+    "geographic": 49
+   }
+  },
+  "entity_attribution_status": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "aggregate_suppressed_by_publisher": 9840,
+    "keyed_to_cedar_entity": 705,
+    "class_recipient_never_an_individual": 508,
+    "keyed_via_resource_parties_only": 252
+   }
+  },
+  "beneficiary_note": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 180
+  },
+  "land_status_basis": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "ONRR publishes a Native American land CLASS; it does not state trust vs fee": 9277,
+    "the 1906 Osage Allotment Act reserved the entire mineral estate of Osage County to the Osage Nation, held in trust by the United States": 546,
+    "the distribution record does not state trust vs fee acreage": 492,
+    "MMS published an American Indian lands aggregate; it does not state trust vs fee": 357,
+    "not stated by source": 206,
+    "the annual report does not state land tenure; ANCSA Section 7(i) applies to revenue from the subsurface estate and timber resources conveyed to the corporation under the Act, which is corporate fee land, not federal trust land": 185,
+    "the enabling statute conditions the deposit on interests held in trust by the United States for the tribe and its members": 118,
+    "OSMRE distributes on programme approval, not on land status; the table states neither trust nor fee": 76,
+    "NOT STATED, and deliberately not 'trust'. The 1906 Osage Allotment Act reserved the mineral estate in trust and this payment predates the Act, so the trust characterisation that is correct for every later row is an anachronism here. The Osage purchased their Indian Territory reservation in 1872; what tenure applied to whatever generated this payment is not stated by any source retrieved, and is therefore not asserted.": 30,
+    "OSMRE distributes on programme approval, not on land status": 15,
+    "not stated by the source": 3
+   }
+  },
+  "allocation_formula_source_url": {
+   "nonblank": 1514,
+   "blank": 9791,
+   "pct_blank": 86.6077,
+   "approx_distinct": 95
+  },
+  "geography_note": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "State, county, FIPS and offshore region are BLANK on every Native American row by source design. Verified in this build, not assumed: 0 of 9,238 Native monthly revenue rows carry any geography, against 97.8% non-blank on Federal rows.": 9277,
+    "Osage County, Oklahoma - the mineral estate is coextensive with the county. No well or lease is named.": 550,
+    "Payee is named; no well or tract is named.": 492,
+    "National aggregate across all American Indian lands; no state, county or tribe. The document states that figures before 1982 come from U.S. Geological Survey records and 1982 onward from MMS records.": 315,
+    "Alaska. The report names no lease, tract, well or mine for the 7(i) flow itself; 7(i) is pooled across all shareable resources of the paying region.": 177,
+    "State and county blank on every Native American disbursement row; from FY2015 the rows are split on an undisclosed dimension - see the codebook": 157,
+    "Fund-level total for the whole fund; no well, tract or grantee is named.": 118,
+    "Named tribe; OSMRE prints no county or site.": 76,
+    "Statewide letter; no tribe and no county is named on the tribal line.": 49,
+    "National aggregate across all American Indian lands; no state, county or tribe.": 42,
+    "Osage County, Oklahoma. No well or lease is named.": 26,
+    "Named tribe; no county or site.": 15,
+    "Red Dog Mine, Northwest Arctic Borough, Alaska.": 8,
+    "Named tribe; no site.": 3
+   }
+  },
+  "source_url": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 113
+  },
+  "fetched_date": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-09-01": 10805,
+    "2026-08-06": 315,
+    "2026-08-05": 185
+   }
+  },
+  "built_date": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2026-09-01": 11120,
+    "2026-08-06": 185
+   }
+  },
+  "cedar_uid_basis": {
+   "nonblank": 586,
+   "blank": 10719,
+   "pct_blank": 94.8165,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "exact lookup in data/spine/cedar_identity_register.csv (register_status=active) by recipient_entity_id=TRBF-MHATAT-00": 492,
+    "exact lookup in data/spine/cedar_identity_register.csv (register_status=active) by recipient_entity_id=TRBF-CROWMT-00": 32,
+    "exact lookup in data/spine/cedar_identity_register.csv (register_status=active) by recipient_entity_id=TRBF-HOPIAZ-00": 32,
+    "exact lookup in data/spine/cedar_identity_register.csv (register_status=active) by recipient_entity_id=TRBF-NAVAJO-00": 30
+   }
+  },
+  "record_scope_basis": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "Interior releases Native American resource revenue ONLY in aggregate: \"For all Native American land, the federal government only releases natural resource extraction and revenue information in aggregate. Specific data on Native American revenues are confidential and proprietary.\" https://revenuedata.doi.gov/how-revenue-works/native-american-revenue/ - measured: State/County/FIPS/Offshore Region blank on 100% of Native American rows vs 99.8% populated on Federal rows in the same extract. No entity exists on the row to carry an id.": 9791,
+    "a Native entity is named on the row in a role-prefixed id column, or stands behind it in resource_parties.csv with relationship=parent_native_entity": 779,
+    "the subject is the Osage mineral estate - one Native entity, carried in resource_parties.csv as mineral_estate_owner (relationship=parent_native_entity, interest_share_pct=100). The recipient is a class of individual headright holders and is never published as individuals; the Council's 2,228.97393 headright divisor is a check, never a multiplier.": 508,
+    "Utah Code 63N-24-703(4): the fund \"consists of state severance tax money to be spent at the discretion of the state\" and \"does not constitute a trust fund\". No tribe is recipient or beneficiary; the tribe is carried in resource_parties.csv as serves_native_entities. Writing a parent here would invent an ownership fact (docs/RESOURCE_LEDGER_BUILD_LOG.md section 3).": 118,
+    "Osage Minerals Council quarterly newsletter line item. The estate is nameable and no resource_parties bridge row has been written for these events. THIS IS THE WORK QUEUE - the rows stay in the C4 denominator and count as misses.": 60,
+    "Montana DOR quarterly county oil and gas distribution letter. The letter carries a tribal distribution line and NAMES NO TRIBE and no county - recorded verbatim in beneficiary_note and geography_note on the row. The record is scoped to the State of Montana, not to an entity.": 49
+   }
+  },
+  "entity_attribution_basis": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 26,
+   "vocabulary": {
+    "Interior releases Native American extraction and revenue ONLY in aggregate, by statute - 'Treaties, laws, and regulations dictate what data the government can release' (revenuedata.doi.gov/how-revenue-works/native-american-revenue/). Verified in the data: 0 of 9,277 ONRR Native rows carry any geography, against 99.8% of Federal rows in the same file. NOT A CEDAR COVERAGE GAP - there is no entity in the source to resolve": 9840,
+    "the recipient is the CLASS 'Holders of Osage headrights (individuals)' at a per-headright RATE, and the Osage Nation's own auditor states the distributions 'are not received by the Nation'. Individual allottee data is never published and Cedar does not derive it: the 2,228.97393 headright divisor is a CHECK, never a multiplier. Not a keying gap - keying it to a person is the thing that must not happen": 508,
+    "recipient_entity_id = TRBF-MHATAT-00 is populated on this row by the builder that wrote it": 492,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: TRBF-OSAGEN-00": 68,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: TRBF-UNTHOR-00": 60,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: TRBF-NAVAJO-00": 58,
+    "recipient_entity_id = TRBF-CROWMT-00 is populated on this row by the builder that wrote it": 32,
+    "recipient_entity_id = TRBF-HOPIAZ-00 is populated on this row by the builder that wrote it": 32,
+    "recipient_entity_id = TRBF-NAVAJO-00 is populated on this row by the builder that wrote it": 30,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: ANRC-NANARC-00": 24,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: ANRC-CKINLT-00": 21,
+    "recipient_entity_id = ANRC-CHGCCO-00 is populated on this row by the builder that wrote it": 13,
+    "recipient_entity_id = ANRC-BRBYCO-00 is populated on this row by the builder that wrote it": 12,
+    "recipient_entity_id = ANRC-CKINLT-00 is populated on this row by the builder that wrote it": 12,
+    "recipient_entity_id = ANRC-KONIAG-00 is populated on this row by the builder that wrote it": 12,
+    "recipient_entity_id = ANRC-ALEUTC-00 is populated on this row by the builder that wrote it": 11,
+    "recipient_entity_id = ANRC-DOYONL-00 is populated on this row by the builder that wrote it": 11,
+    "recipient_entity_id = ANRC-NANARC-00 is populated on this row by the builder that wrote it": 10,
+    "recipient_entity_id = ANRC-ARCSLO-00 is populated on this row by the builder that wrote it": 9,
+    "recipient_entity_id = ANRC-SEALSK-00 is populated on this row by the builder that wrote it": 9,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: ANRC-ALEUTC-00": 8,
+    "recipient_entity_id = ANRC-CALSTA-00 is populated on this row by the builder that wrote it": 8,
+    "recipient_entity_id = ANRC-BERSTR-00 is populated on this row by the builder that wrote it": 7,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: ANRC-ARCSLO-00": 7,
+    "the revenue row asserts no single recipient - one payment routinely involves the tribal government, the allottees, the enterprise, the operator and the trust account at once, and a single column would assert a false exclusivity. The owner is named in resource_parties.csv: ANRC-CHGCCO-00": 6,
+    "recipient_entity_id = ANRC-AHTNAI-00 is populated on this row by the builder that wrote it": 4,
+    "recipient_entity_id = AKNF-ARCTIC-00-DOYONL-CATHTG-TNNACH-VENTGV is populated on this row by the builder that wrote it": 1
+   }
+  },
+  "n_anc_ceiling_roster": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "6": 10600,
+    "0": 587,
+    "1": 118
+   }
+  },
+  "n_ancsa_filings_index": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "0": 11187,
+    "438": 13,
+    "338": 12,
+    "1557": 12,
+    "115": 12,
+    "547": 11,
+    "1397": 11,
+    "756": 10,
+    "1119": 9,
+    "1965": 9,
+    "1283": 8,
+    "597": 7,
+    "380": 4
+   }
+  },
+  "n_nd_severance_allocation": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 10813,
+    "7": 492
+   }
+  },
+  "n_resource_assets": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "35": 10600,
+    "0": 705
+   }
+  },
+  "n_resource_parties": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "558": 10600,
+    "492": 492,
+    "33": 64,
+    "89": 30,
+    "22": 24,
+    "13": 23,
+    "35": 12,
+    "14": 12,
+    "43": 10,
+    "11": 9,
+    "18": 9,
+    "10": 8,
+    "9": 7,
+    "5": 4,
+    "0": 1
+   }
+  },
+  "n_tribal_tax_bases": {
+   "nonblank": 11305,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "26": 10600,
+    "660": 492,
+    "0": 213
+   }
+  }
+ }
+}

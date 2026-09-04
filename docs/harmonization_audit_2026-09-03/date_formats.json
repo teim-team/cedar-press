@@ -1,0 +1,889 @@
+{
+ "deals": {
+  "Event_Date": {
+   "nonblank": 1066,
+   "formats": [
+    "ISO_YM",
+    "ISO_YMD",
+    "OTHER",
+    "YYYY"
+   ]
+  },
+  "Event_Date_class": {
+   "nonblank": 1073,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "Event_Date_not_before": {
+   "nonblank": 1049,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "Event_Date_not_after": {
+   "nonblank": 1049,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "Date_Added": {
+   "nonblank": 1073,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "classified_date": {
+   "nonblank": 1073,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "Event_Date_source_value_verbatim": {
+   "nonblank": 77,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "Event_Date_precision": {
+   "nonblank": 1066,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "Event_Date_precision_basis": {
+   "nonblank": 1073,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "Date_Basis": {
+   "nonblank": 1073,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "Data_As_Of": {
+   "nonblank": 1073,
+   "formats": [
+    "ISO_YMD"
+   ]
+  }
+ },
+ "federal-register": {
+  "notice_date": {
+   "nonblank": 11402,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "event_start_date": {
+   "nonblank": 190,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "event_end_date": {
+   "nonblank": 190,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "comment_deadline": {
+   "nonblank": 9026,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "fetched_date": {
+   "nonblank": 11402,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "built_date": {
+   "nonblank": 11402,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "event_date_basis": {
+   "nonblank": 97,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "event_date_source_quote": {
+   "nonblank": 97,
+   "formats": [
+    "OTHER"
+   ]
+  }
+ },
+ "gaming": {
+  "open_date": {
+   "nonblank": 636,
+   "formats": [
+    "ISO_YM",
+    "ISO_YMD",
+    "OTHER",
+    "YYYY"
+   ]
+  },
+  "open_date_source_value_placeholder": {
+   "nonblank": 339,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "close_date": {
+   "nonblank": 148,
+   "formats": [
+    "ISO_YM",
+    "ISO_YMD",
+    "OTHER",
+    "YYYY"
+   ]
+  },
+  "close_date_source_value_placeholder": {
+   "nonblank": 76,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_class": {
+   "nonblank": 787,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_not_before": {
+   "nonblank": 644,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "open_date_not_after": {
+   "nonblank": 722,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "close_date_class": {
+   "nonblank": 787,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "close_date_not_before": {
+   "nonblank": 148,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "close_date_not_after": {
+   "nonblank": 148,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "open_date_postdates_observation": {
+   "nonblank": 27,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "close_date_precedes_open_date": {
+   "nonblank": 4,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_event": {
+   "nonblank": 636,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_predates_tribal_gaming_era": {
+   "nonblank": 4,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "interim_open_date": {
+   "nonblank": 2,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "property_status_observed_date": {
+   "nonblank": 440,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "open_date_source_value_verbatim": {
+   "nonblank": 339,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "open_date_source_value_placeholder_basis": {
+   "nonblank": 295,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_basis": {
+   "nonblank": 636,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_source_url": {
+   "nonblank": 192,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "close_date_source_value_verbatim": {
+   "nonblank": 76,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "close_date_source_value_placeholder_basis": {
+   "nonblank": 76,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "close_date_basis": {
+   "nonblank": 148,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "close_date_source_url": {
+   "nonblank": 15,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "gaming_machines_observed_date": {
+   "nonblank": 409,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "table_games_observed_date": {
+   "nonblank": 201,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "poker_tables_observed_date": {
+   "nonblank": 156,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "bingo_seats_observed_date": {
+   "nonblank": 126,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_square_feet_observed_date": {
+   "nonblank": 301,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "convention_square_feet_observed_date": {
+   "nonblank": 96,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "hotel_rooms_observed_date": {
+   "nonblank": 125,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "parking_spaces_observed_date": {
+   "nonblank": 176,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "employees_observed_date": {
+   "nonblank": 323,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "restaurants_observed_date": {
+   "nonblank": 330,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "first_observed_date": {
+   "nonblank": 453,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "last_observed_date": {
+   "nonblank": 453,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "fetched_date": {
+   "nonblank": 787,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "open_date_precision": {
+   "nonblank": 636,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_evidence": {
+   "nonblank": 738,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_evidence_url": {
+   "nonblank": 250,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_evidence_quote": {
+   "nonblank": 125,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_absent_reason": {
+   "nonblank": 62,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "close_date_precision": {
+   "nonblank": 148,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "open_date_event_basis": {
+   "nonblank": 636,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "temporal_build_date": {
+   "nonblank": 787,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "entity_keyed_date": {
+   "nonblank": 787,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "interim_open_date_basis": {
+   "nonblank": 2,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "gaming_nigc_roster_link__nigc_listed_as_of": {
+   "nonblank": 453,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__earliest_land_decision_date": {
+   "nonblank": 274,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_bingo_seats_as_of": {
+   "nonblank": 126,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_convention_square_feet_as_of": {
+   "nonblank": 96,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_employees_as_of": {
+   "nonblank": 323,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_gaming_machines_as_of": {
+   "nonblank": 409,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_gaming_square_feet_as_of": {
+   "nonblank": 301,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_hotel_rooms_as_of": {
+   "nonblank": 125,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_parking_spaces_as_of": {
+   "nonblank": 176,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_poker_tables_as_of": {
+   "nonblank": 156,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_restaurants_as_of": {
+   "nonblank": 330,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__latest_table_games_as_of": {
+   "nonblank": 201,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_properties__built_date": {
+   "nonblank": 787,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "gaming_property_federal_traces__nigc_listed_as_of": {
+   "nonblank": 350,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_property_federal_traces__fr_publication_date": {
+   "nonblank": 450,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_property_federal_traces__land_decision_date": {
+   "nonblank": 268,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_property_federal_traces__compact_in_force_as_of": {
+   "nonblank": 672,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "gaming_property_federal_traces__built_date": {
+   "nonblank": 774,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "loyalty_program_property__observation_date": {
+   "nonblank": 48,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "loyalty_program_property__built_date": {
+   "nonblank": 48,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "loyalty_program_property__entity_link_date": {
+   "nonblank": 48,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "loyalty_programs__start_date": {
+   "nonblank": 0,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "loyalty_programs__end_date": {
+   "nonblank": 0,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "loyalty_programs__observation_date": {
+   "nonblank": 131,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "loyalty_programs__built_date": {
+   "nonblank": 131,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "loyalty_programs__entity_link_date": {
+   "nonblank": 131,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  }
+ },
+ "legislation": {
+  "introduced_date": {
+   "nonblank": 3061,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "latest_action_date": {
+   "nonblank": 3061,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "build_date": {
+   "nonblank": 3069,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "native_bill_action_coverage__first_action_date": {
+   "nonblank": 3061,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "native_bill_action_coverage__last_action_date": {
+   "nonblank": 3061,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "native_bill_action_coverage__fetched_date": {
+   "nonblank": 3069,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "native_bill_cosponsor_coverage__fetched_date": {
+   "nonblank": 3069,
+   "formats": [
+    "ISO_YMD"
+   ]
+  }
+ },
+ "lobbying": {
+  "termination_date": {
+   "nonblank": 776,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "attribution_withdrawn_date": {
+   "nonblank": 471,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  }
+ },
+ "nagpra": {
+  "publication_date": {
+   "nonblank": 6792,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "repatriation_eligible_date": {
+   "nonblank": 2782,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "response_deadline_date": {
+   "nonblank": 3904,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "artifact_mtime": {
+   "nonblank": 6792,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "fetched_date": {
+   "nonblank": 0,
+   "formats": [
+    "OTHER"
+   ]
+  }
+ },
+ "native-owned-businesses": {
+  "certification_start": {
+   "nonblank": 117,
+   "formats": [
+    "ISO_YM",
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "certification_expiration": {
+   "nonblank": 750,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "harvest_date": {
+   "nonblank": 3725,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "first_seen": {
+   "nonblank": 3725,
+   "formats": [
+    "ISO_DATETIME"
+   ]
+  },
+  "last_seen": {
+   "nonblank": 3725,
+   "formats": [
+    "ISO_DATETIME"
+   ]
+  }
+ },
+ "natural-resources": {
+  "period_start": {
+   "nonblank": 10813,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "period_end": {
+   "nonblank": 10813,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "payment_date": {
+   "nonblank": 495,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "allocation_formula_effective_start": {
+   "nonblank": 541,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "allocation_formula_effective_end": {
+   "nonblank": 260,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "fetched_date": {
+   "nonblank": 11305,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "built_date": {
+   "nonblank": 11305,
+   "formats": [
+    "ISO_YMD"
+   ]
+  }
+ },
+ "nest": {
+  "source_edition_date": {
+   "nonblank": 5248,
+   "formats": [
+    "ISO_YMD",
+    "OTHER",
+    "YYYY"
+   ]
+  },
+  "retrieved_date": {
+   "nonblank": 5820,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "built_date": {
+   "nonblank": 5820,
+   "formats": [
+    "ISO_YMD"
+   ]
+  }
+ },
+ "nonprofits": {
+  "ruling_date": {
+   "nonblank": 327,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "placename_refusal_date": {
+   "nonblank": 516,
+   "formats": [
+    "ISO_YMD",
+    "OTHER"
+   ]
+  },
+  "built_date": {
+   "nonblank": 12689,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "entity_keyed_date": {
+   "nonblank": 12689,
+   "formats": [
+    "ISO_YMD"
+   ]
+  }
+ },
+ "subcontracting": {
+  "subaward_date": {
+   "nonblank": 70597,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "action_date_precedes_ffata_flag": {
+   "nonblank": 49,
+   "formats": [
+    "OTHER"
+   ]
+  },
+  "promoted_date": {
+   "nonblank": 70597,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "subaward_sam_report_last_modified_date": {
+   "nonblank": 70054,
+   "formats": [
+    "ISO_DATETIME",
+    "OTHER"
+   ]
+  },
+  "geo_built_date": {
+   "nonblank": 70597,
+   "formats": [
+    "ISO_YMD"
+   ]
+  },
+  "fetched_date": {
+   "nonblank": 70597,
+   "formats": [
+    "ISO_YMD"
+   ]
+  }
+ }
+}

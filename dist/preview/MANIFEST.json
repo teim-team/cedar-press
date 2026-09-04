@@ -1,5 +1,5 @@
 {
-  "built": "2026-09-02",
+  "built": "2026-09-03",
   "rows_per_dataset": 100,
   "datasets": [
     {
@@ -9,7 +9,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 80
+      "full_columns": 79
     },
     {
       "dataset": "deals",
@@ -17,8 +17,8 @@
       "columns": 9,
       "curated": 1,
       "curated_columns_absent": "",
-      "distinct_entities": 100,
-      "full_columns": 54
+      "distinct_entities": 88,
+      "full_columns": 60
     },
     {
       "dataset": "federal-register",
@@ -26,8 +26,8 @@
       "columns": 8,
       "curated": 1,
       "curated_columns_absent": "",
-      "distinct_entities": 100,
-      "full_columns": 46
+      "distinct_entities": 93,
+      "full_columns": 45
     },
     {
       "dataset": "funding",
@@ -36,7 +36,16 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 85
+      "full_columns": 79
+    },
+    {
+      "dataset": "gaming",
+      "rows": 100,
+      "columns": 8,
+      "curated": 1,
+      "curated_columns_absent": "",
+      "distinct_entities": 100,
+      "full_columns": 312
     },
     {
       "dataset": "legislation",
@@ -45,7 +54,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 66
+      "full_columns": 65
     },
     {
       "dataset": "lobbying",
@@ -80,7 +89,7 @@
       "columns": 8,
       "curated": 1,
       "curated_columns_absent": "",
-      "distinct_entities": 26,
+      "distinct_entities": 9,
       "full_columns": 52
     },
     {
@@ -99,7 +108,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 75
+      "full_columns": 73
     },
     {
       "dataset": "subcontracting",
@@ -108,7 +117,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 89
+      "full_columns": 86
     }
   ]
 }

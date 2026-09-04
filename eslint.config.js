@@ -11,7 +11,20 @@ import { defineConfig, globalIgnores } from "eslint/config";
 export default defineConfig([
   // `dist-site` is the web build's output (vite.config.js); `dist` is the
   // data workspace's tracked deliverables. Neither is source.
-  globalIgnores(["dist", "dist-site"]),
+  //
+  // `data` and `.claude` are ignored for the same reason and were added
+  // 2026-09-03, after `npm run lint` was measured locally at 2,737 errors and
+  // CI at zero. Every one of those errors came from a file git does not
+  // track: 13 under `data/` are third-party JavaScript HARVESTED from source
+  // websites (a tribal registry's jQuery probe, a state gaming commission's
+  // map bundle), and 523 are stale agent worktrees under `.claude/`. CI
+  // checks out tracked files only, so it never saw them.
+  //
+  // A gate that is green in CI and red on every developer's machine is a gate
+  // people stop running, and the divergence hid the real question: no tracked
+  // JavaScript outside `src/`, `tests/` and `scripts/` exists, so nothing that
+  // ships is being un-linted by this line.
+  globalIgnores(["dist", "dist-site", "data", ".claude"]),
   {
     files: ["**/*.{js,jsx}"],
     extends: [

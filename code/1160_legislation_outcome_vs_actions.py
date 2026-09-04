@@ -510,7 +510,75 @@ def cmd_apply():
     write_csv(BILLS, bills, fields)
     out(f"  native_bills.csv: {len(bills)} rows, {n} outcomes changed")
     patch_generator(True)
+    out("")
+    codebook(True)
     return 0
+
+
+# ===========================================================================
+# CODEBOOK. The vocabulary of a customer-facing column is an interface, and a
+# widened vocabulary that the codebook still describes with the old five values
+# is a breaking change delivered silently. Additive: the fragment is read, the
+# two rows this script owns are rewritten, nothing else is touched. Merge with
+# `py -3 code/cedar_codebook.py build`.
+# ===========================================================================
+CB_FRAG = CLEAN / "codebook" / "10_bills_votes.csv"
+
+CB_OUTCOME = (
+    "The bill's fate, derived on 2026-09-02 by `code/1160` from its FULL "
+    "Congress.gov action history in `native_bill_actions.csv` (31,936 actions "
+    "over 3,061 of 3,069 bills) rather than from its latest action alone. "
+    "Values: `died-in-committee` (2,189 - the bill never got a floor vote and "
+    "the Congress ended; see `disposition` in native_bill_outcomes.csv for "
+    "which of four ways, because 358 of these DID leave committee and the label "
+    "is imprecise for them); `passed-one-chamber` (421); `enacted` (283); "
+    "`pending` (125 - the 119th Congress is still sitting, so no death can be "
+    "inferred); `superseded-by-another-measure` (15); `floor-vote-failed` (11); "
+    "`vetoed` (8); BLANK (17, each with a named reason in `outcome_basis`). "
+    "`floor-vote-failed` and `superseded-by-another-measure` are NEW as of "
+    "2026-09-02 and are values `disposition` already publishes - the column was "
+    "widened deliberately because there was no honest existing slot for a bill "
+    "defeated on the floor. Before that date this column was derived from "
+    "`latest_action` text alone and 152 values were refuted by the action "
+    "history, including 5 bills recorded as `passed-one-chamber` whose floor "
+    "vote FAILED (105-hr-948 failed 240-167) and 3 recorded as "
+    "`died-in-committee` that became public law.  [1160, 2026-09-02]")
+
+CB_OUTCOME_BASIS = (
+    "Where `outcome` came from. Since 2026-09-02 this names the single "
+    "Congress.gov action sentence that establishes it, with its date, quoted "
+    "from `native_bill_actions.csv` - so every outcome can be audited back to "
+    "one line of the official record. A blank outcome carries `BLANK, "
+    "deliberately:` and the reason it could not be derived. The former values "
+    "`latest_action_text` and `tribal_bill_intros.final_status` are retired: "
+    "the first read one sentence out of an average of ten, and the second "
+    "mapped `reached_floor_not_enacted` to `passed-one-chamber`, which is a "
+    "strictly stronger claim than the evidence supports.  [1160, 2026-09-02]")
+
+
+def codebook(apply_it):
+    out("CODEBOOK fragment (additive; merge with "
+        "`py -3 code/cedar_codebook.py build`)")
+    if not CB_FRAG.exists():
+        out(f"  {CB_FRAG.name} is absent - not created here")
+        return
+    rows = read_csv(CB_FRAG)
+    fields = list(rows[0].keys())
+    n = 0
+    for r in rows:
+        if r["variable"] == "outcome" and r["description"] != CB_OUTCOME:
+            r["description"] = CB_OUTCOME
+            n += 1
+        elif r["variable"] == "outcome_basis" and r["description"] != CB_OUTCOME_BASIS:
+            r["description"] = CB_OUTCOME_BASIS
+            n += 1
+    out(f"  {CB_FRAG.name}: {n} variable description(s) rewritten ({len(rows)} rows)")
+    if apply_it and n:
+        b = CB_FRAG.with_name(CB_FRAG.name + TAG)
+        if not b.exists():
+            shutil.copy2(CB_FRAG, b)
+            out(f"  backed up -> {b.name}")
+        write_csv(CB_FRAG, rows, fields)
 
 
 # ===========================================================================
@@ -670,6 +738,8 @@ def main():
         cmd_report()
         out("")
         patch_generator(False)
+        out("")
+        codebook(False)
         out("\nDRY RUN. Nothing was written. Use `apply`.")
         return 0
     if cmd == "apply":

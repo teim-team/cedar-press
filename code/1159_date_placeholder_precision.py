@@ -134,6 +134,10 @@ TAG = f".bak_{TODAY}_pre_1159_date_placeholder_precision"
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
 ISO = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
+# The shapes this pass itself WRITES. Reading them back is what makes a second
+# run a no-op instead of a demolition.
+YM = re.compile(r"^(\d{4})-(\d{2})$")
+YONLY = re.compile(r"^(\d{4})$")
 
 # Occurrences per year of each day-of-month over the Gregorian cycle. Day-of-
 # month is NOT uniform at 1/30.44: days 1..28 occur twelve times a year, the
@@ -475,6 +479,17 @@ def classify_deal(basis):
 
 
 def edit_deals(apply_it):
+    """IDEMPOTENT. The second run of this pass must be a no-op, and the first
+    draft was not: after a row had been re-typed to `2001-03`, `ISO.match`
+    failed, every branch fell through, and 75 month-precision rows were
+    re-classified `unparseable` with their verbatim value blanked. Caught by
+    running `apply` twice - which is now a fixture, because a pass that
+    destroys its own output on re-run is worse than one that never ran, and
+    `build.py` re-runs every PHASE 2 enricher after any rebuild.
+
+    The fix has two halves: read the ALREADY-RETYPED value back through
+    `YM`/`YONLY` as well as `ISO`, and never overwrite a verbatim value that a
+    previous run already recorded."""
     rows = read_csv(DEALS)
     fields = list(rows[0].keys())
     stats = Counter()
@@ -483,6 +498,9 @@ def edit_deals(apply_it):
         ed = (r.get("Event_Date") or "").strip()
         kind = classify_deal(r.get("Date_Basis"))
         m = ISO.match(ed)
+        prior = (r.get("Event_Date_source_value_verbatim") or "").strip()
+        # already re-typed by an earlier run of this same pass
+        ym, yo = YM.match(ed), YONLY.match(ed)
         prec = cls = nb = na = ""
         note = ""
         verbatim = ""
@@ -490,33 +508,40 @@ def edit_deals(apply_it):
             cls, prec = "absent", ""
             note = ("Event_Date is blank; Date_Basis states why. No date is "
                     "asserted.")
-        elif kind == "month" and m:
-            y, mo = int(m.group(1)), int(m.group(2))
-            verbatim = ed
+        elif kind == "month" and (m or ym):
+            g = m or ym
+            y, mo = int(g.group(1)), int(g.group(2))
+            verbatim = prior or (ed if m else "")
             r["Event_Date"] = f"{y:04d}-{mo:02d}"
             cls, prec = "exact", "month"
             nb, na = f"{y:04d}-{mo:02d}-01", month_end(y, mo)
             note = ("the row's own Date_Basis states the source gives a month "
                     "and no day; the day carried here was a mid-month "
                     "placeholder and has been withdrawn")
-            stats["Event_Date re-typed to month precision"] += 1
-            if len(changed_examples) < 3:
-                changed_examples.append(f"{r.get('Deal_ID')}: {ed} -> {r['Event_Date']}")
-        elif kind == "year" and m:
-            y = int(m.group(1))
-            verbatim = ed
+            if m:
+                stats["Event_Date re-typed to month precision"] += 1
+                if len(changed_examples) < 3:
+                    changed_examples.append(
+                        f"{r.get('Deal_ID')}: {ed} -> {r['Event_Date']}")
+            else:
+                stats["already month precision from an earlier run - unchanged"] += 1
+        elif kind == "year" and (m or ym or yo):
+            g = m or ym or yo
+            y = int(g.group(1))
+            verbatim = prior or (ed if m else "")
             r["Event_Date"] = f"{y:04d}"
             cls, prec = "exact", "year"
             nb, na = f"{y:04d}-01-01", f"{y:04d}-12-31"
             note = ("the row's own Date_Basis states the source gives a year "
                     "and no month or day; both were placeholders and have been "
                     "withdrawn")
-            stats["Event_Date re-typed to year precision"] += 1
+            stats["Event_Date re-typed to year precision" if m else
+                  "already year precision from an earlier run - unchanged"] += 1
             for c in ("Event_Quarter", "Event_Month"):
                 if (r.get(c) or "").strip():
                     r[c] = ""
                     stats[f"{c} blanked - a year-precision source cannot determine it"] += 1
-        elif kind == "year" and not m:
+        elif kind == "year":
             y = (r.get("Event_Year") or "").strip()
             cls, prec = "exact", "year"
             if re.match(r"^\d{4}$", y):
@@ -547,12 +572,26 @@ def edit_deals(apply_it):
             nb = na = ed
             note = "Date_Basis asserts no lower precision; the day is taken as stated"
             stats["day precision retained"] += 1
+        elif ym or yo:
+            g = ym or yo
+            y = int(g.group(1))
+            if ym:
+                mo = int(g.group(2))
+                cls, prec = "exact", "month"
+                nb, na = f"{y:04d}-{mo:02d}-01", month_end(y, mo)
+            else:
+                cls, prec = "exact", "year"
+                nb, na = f"{y:04d}-01-01", f"{y:04d}-12-31"
+            note = ("Event_Date is recorded at less than day precision and "
+                    "Date_Basis does not say why; the value is taken at the "
+                    "precision it is written to and nothing is completed")
+            stats[f"partial ISO value taken at {prec} precision"] += 1
         else:
             cls, prec = "unparseable", ""
-            note = f"Event_Date {ed!r} does not parse as YYYY-MM-DD"
+            note = f"Event_Date {ed!r} does not parse as a date"
             stats["Event_Date unparseable"] += 1
 
-        r["Event_Date_source_value_verbatim"] = verbatim
+        r["Event_Date_source_value_verbatim"] = verbatim or prior
         r["Event_Date_class"] = cls
         r["Event_Date_precision"] = prec
         r["Event_Date_not_before"] = nb
@@ -579,6 +618,156 @@ def edit_deals(apply_it):
         write_csv(DEALS, rows, fields)
         out(f"  wrote {len(rows)} rows, {len(fields)} columns")
     return stats
+
+
+# ===========================================================================
+# CODEBOOK. A new customer-facing column with no codebook row is an undocumented
+# column, and `codebook_variables` in 62 is how that is caught. Fragments are
+# hand-maintained and merged by `py -3 code/cedar_codebook.py build`, so this is
+# ADDITIVE: a row that already exists is amended by APPENDING a sentence, never
+# rewritten, because another workstream's text lives in the same file.
+# ===========================================================================
+CB = CLEAN / "codebook"
+MARK = "  [1159, 2026-09-02]"
+
+NEW_GAMING_CB = [
+    ("open_date_source_value_placeholder", "text", "public",
+     "Whether the day carried in `open_date_source_value_verbatim` is a "
+     "placeholder the SOURCE wrote, and which one. `vendor_mid_month_"
+     "placeholder_day_15` (148 rows), `vendor_year_end_placeholder_1231` (147), "
+     "`source_states_the_day` (44), blank where there is no verbatim value. "
+     "Measured in the vendor workbook itself, not inferred from our own file: "
+     "of 553 non-empty 'Open Date' cells in the Casino City Tribal Property "
+     "List, 188 fall on 31 December and 165 on day 15, every one a real Excel "
+     "datetime under number format [$-409]d-mmm-yyyy. So the day is the "
+     "vendor's and was transcribed, not completed, by Cedar. This column "
+     "exists because the shipping `open_date` was already re-typed to the "
+     "supported precision while the verbatim value was not, and nothing on the "
+     "row said so outside a 300-character basis string."),
+    ("open_date_source_value_placeholder_basis", "text", "public",
+     "The measurement behind `open_date_source_value_placeholder`, stated in "
+     "full on every row that carries a vendor placeholder."),
+    ("close_date_source_value_placeholder", "text", "public",
+     "The same for `close_date_source_value_verbatim`: "
+     "`vendor_mid_month_placeholder_day_15` (59 rows), "
+     "`vendor_year_end_placeholder_1231` (17)."),
+    ("close_date_source_value_placeholder_basis", "text", "public",
+     "The measurement behind `close_date_source_value_placeholder`."),
+    ("open_date_source_value_verbatim", "text", "public",
+     "The source's own date value for the opening, kept exactly as recorded, "
+     "before `code/158` re-typed `open_date` to the precision the source "
+     "actually supports. It is NOT the column to parse: 148 of its 339 values "
+     "carry the vendor's mid-month placeholder day and 147 its year-end "
+     "placeholder. Read `open_date_source_value_placeholder` to know which, "
+     "and `open_date_not_before` / `open_date_not_after` for the interval."),
+    ("close_date_source_value_verbatim", "text", "public",
+     "The source's own date value for the closing, kept exactly as recorded. "
+     "Same caveat as `open_date_source_value_verbatim`: 59 of its 76 values "
+     "carry the vendor's mid-month placeholder day."),
+]
+
+NEW_DEALS_CB = [
+    ("Event_Date_class", "text", "public",
+     "What kind of thing `Event_Date` is. `exact` the row's basis supports the "
+     "value at the stated precision; `fiscal_year_end_placeholder` the value is "
+     "a reporting period's end standing in for an unknown event date and is NOT "
+     "an event date (10 rows); `approximate` the basis says the date is "
+     "approximate without saying which component; `absent` no date is asserted; "
+     "`unparseable`. Derived from the row's own `Date_Basis` by `code/1159`."),
+    ("Event_Date_precision", "text", "public",
+     "How precise `Event_Date` actually is: `day`, `month`, `year`, "
+     "`unknown_within_fiscal_year` or `unknown`. Derived ONLY from what the "
+     "row's own `Date_Basis` already states - nothing was re-sourced and no "
+     "precision was guessed."),
+    ("Event_Date_not_before", "date", "public",
+     "Earliest date the event can have occurred, given the precision. Parse "
+     "this and `Event_Date_not_after` rather than `Event_Date` when you need a "
+     "uniform ISO interval. Empty where the basis cannot bound it - an empty "
+     "bound is not a zero-width one."),
+    ("Event_Date_not_after", "date", "public",
+     "Latest date the event can have occurred, given the precision."),
+    ("Event_Date_source_value_verbatim", "text", "public",
+     "The full ISO value `Event_Date` carried before `code/1159` withdrew a "
+     "placeholder day or month that the row's own `Date_Basis` said the source "
+     "did not state. 77 rows. Blank where nothing was withdrawn."),
+    ("Event_Date_precision_basis", "text", "public",
+     "Why this row has the precision it has, quoting what its `Date_Basis` "
+     "established. Every precision can be audited back to one sentence."),
+]
+
+GAMING_AMEND = {
+    "open_date": (
+        "AMENDED 2026-09-02: the phrase 'as the source states it, unmodified' is "
+        "no longer true of this column and has not been since `code/158` - a "
+        "value whose own precision column says `year` or `month` was re-typed "
+        "(`1985-04-15` -> `1985-04`) and the source's string was moved to "
+        "`open_date_source_value_verbatim`. 6 of 636 values still end in `-15` "
+        "and all six are hand-researched day-precision dates from non-vendor "
+        "sources. OPEN QUESTION, not fixed: 28 of the 188 full-ISO values fall "
+        "on day 1, 26 of them from the Casino City roster at day precision. Day "
+        "1 is a third vendor placeholder shape, but the vendor workbook holds "
+        "only 31 day-1 values in 553 (z about 3, against z=41 for day 15 and "
+        "z=55 for 31 December), so the evidence does not establish a convention "
+        "and nothing was downgraded. See `code/1159`."),
+    "close_date": (
+        "AMENDED 2026-09-02: same re-typing caveat as `open_date`, and the same "
+        "unresolved day-1 question on 10 of its 57 full-ISO values. "
+        "See `code/1159`."),
+}
+
+DEALS_AMEND = {
+    "Event_Date": (
+        "AMENDED 2026-09-02: NOT uniformly day-precision, and it never was. 77 "
+        "values were full ISO dates whose own `Date_Basis` said the source gave "
+        "only a month or only a year; those now read `YYYY-MM` or `YYYY` and "
+        "the withdrawn string is in `Event_Date_source_value_verbatim`. Read "
+        "`Event_Date_precision` before parsing, and "
+        "`Event_Date_not_before`/`_not_after` for a uniform interval. 10 rows "
+        "carry a fiscal-year end rather than an event date and say so in "
+        "`Event_Date_class`. See `code/1159`."),
+}
+
+
+def _upsert(frag_name, dataset, new_rows, amend, n_rows, apply_it):
+    p = CB / frag_name
+    if not p.exists():
+        out(f"  CODEBOOK: {frag_name} is absent - not created here, because a "
+            f"fragment file this script did not expect is a coordination "
+            f"question, not a gap to fill silently")
+        return
+    rows = read_csv(p)
+    fields = list(rows[0].keys())
+    have = {r["variable"]: r for r in rows}
+    added = amended = 0
+    for var, typ, tier, desc in new_rows:
+        if var in have:
+            r = have[var]
+            if MARK not in (r.get("description") or ""):
+                r["description"] = desc + MARK
+                amended += 1
+            continue
+        rows.append({"dataset": dataset, "variable": var, "type": typ, "units": "",
+                     "pct_filled": "", "n_rows": str(n_rows), "published": "1",
+                     "access_tier": tier, "description": desc + MARK,
+                     "generated": TODAY})
+        added += 1
+    for var, sentence in amend.items():
+        r = have.get(var)
+        if r and MARK not in (r.get("description") or ""):
+            r["description"] = (r.get("description") or "").rstrip() + " " + sentence + MARK
+            amended += 1
+    out(f"  CODEBOOK {frag_name}: +{added} variables, {amended} amended "
+        f"(now {len(rows)})")
+    if apply_it and (added or amended):
+        backup(p)
+        write_csv(p, rows, fields)
+
+
+def codebook(apply_it):
+    out("CODEBOOK fragments (additive; merge with "
+        "`py -3 code/cedar_codebook.py build`)")
+    _upsert("07_gaming.csv", "07_gaming", NEW_GAMING_CB, GAMING_AMEND, 787, apply_it)
+    _upsert("01_deals.csv", "01_deals", NEW_DEALS_CB, DEALS_AMEND, 1073, apply_it)
 
 
 # ===========================================================================
@@ -650,12 +839,34 @@ def cmd_verify():
     if q:
         fails.append(f"V5: {len(q)} year-precision rows still carry Event_Quarter")
 
+    # V6 - IDEMPOTENCE, in the direction that actually broke. Re-deriving from
+    # the live file must reproduce the live file. `build.py` re-runs every
+    # PHASE 2 enricher after any rebuild, so a pass that is not a no-op on its
+    # own output destroys its work the second time it is invoked - which is what
+    # happened here on 2026-09-02: 75 month-precision rows became `unparseable`
+    # and 77 verbatim values were blanked.
+    redo = read_csv(DEALS)
+    changed = 0
+    for r in redo:
+        ed, kind = (r.get("Event_Date") or "").strip(), classify_deal(r.get("Date_Basis"))
+        if kind in ("month", "year") and ISO.match(ed):
+            changed += 1
+        if kind == "month" and not (YM.match(ed) or ISO.match(ed)):
+            changed += 1
+    n_unparse = sum(1 for r in d if r.get("Event_Date_class") == "unparseable")
+    out(f"V6 rows a re-run would change: {changed}; rows typed `unparseable`: "
+        f"{n_unparse}")
+    if n_unparse:
+        fails.append(f"V6: {n_unparse} rows are typed `unparseable`. In this table "
+                     f"that is the signature of a non-idempotent second run "
+                     f"reading its own YYYY-MM output as a broken date.")
+
     out("")
     if fails:
         for f in fails:
             out("FAIL  " + f)
         return 1
-    out("PASS  all five invariants")
+    out("PASS  all six invariants")
     return 0
 
 
@@ -710,6 +921,24 @@ def cmd_fixtures():
                         rc == 1 and "V5:" in txt, f"exit {rc}"))
         DEALS.write_bytes(orig_d)
 
+        # V6: the real 2026-09-02 defect - run `apply` a second time and check
+        # the file survives it. This is the fixture the bug is named after.
+        edit_deals(True)
+        edit_gaming(True)
+        rc, txt = run()
+        results.append(("a SECOND apply leaves the tables intact (idempotence)",
+                        rc == 0, f"exit {rc}"))
+        after = read_csv(DEALS)
+        n_month2 = sum(1 for r in after if r.get("Event_Date_precision") == "month")
+        n_verb2 = sum(1 for r in after
+                      if (r.get("Event_Date_source_value_verbatim") or "").strip())
+        results.append((f"a SECOND apply keeps 75 month rows and 77 verbatim "
+                        f"values (got {n_month2}/{n_verb2})",
+                        n_month2 >= 60 and n_verb2 >= 60,
+                        f"{n_month2} month, {n_verb2} verbatim"))
+        DEALS.write_bytes(orig_d)
+        GAMING.write_bytes(orig_g)
+
         # V1: blank the gaming flag.
         grows = read_csv(GAMING)
         gfields = list(grows[0].keys())
@@ -750,6 +979,8 @@ def main():
         edit_gaming(False)
         out("")
         edit_deals(False)
+        out("")
+        codebook(False)
         out("\nDRY RUN. Nothing was written. Use `apply`.")
         return 0
     if cmd == "apply":
@@ -759,6 +990,8 @@ def main():
         edit_gaming(True)
         out("")
         edit_deals(True)
+        out("")
+        codebook(True)
         return 0
     if cmd == "verify":
         return cmd_verify()

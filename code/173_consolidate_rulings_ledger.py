@@ -405,6 +405,19 @@ def load_module(name, filename):
     return mod
 
 
+# Words that describe the KIND of Native owner, never the name of one. A ruling
+# payload equal to one of these is a schema error in the source file, and must
+# never be resolved to a spine entity - see the block that consumes this set.
+NEVER_AN_ENTITY_NAME = {
+    "anc", "ancsa", "anc corporation", "alaska native corporation",
+    "tribe", "tribal", "tribes", "tribal organization", "tribal government",
+    "nho", "native hawaiian organization", "village corporation",
+    "regional corporation", "village", "corporation", "consortium",
+    "tribal college", "tcu", "cdfi", "nonprofit", "authority", "unknown",
+    "native", "native entity", "native owned", "native american",
+}
+
+
 def norm_name(s):
     s = (s or "").lower()
     s = re.sub(r"[^a-z0-9 ]+", " ", s)
@@ -547,6 +560,30 @@ def main():
                     rr["resolved_name"] = hit["canonical_name"]
                     rr["resolve_how"] = "tribe_id_literal"
                     continue
+            if norm_name(v) in NEVER_AN_ENTITY_NAME:
+                # A CLASS WORD IS NOT AN ENTITY NAME.
+                #
+                # Found 2026-09-03. `review/cedar_research_rulings_2026-09-03.csv`
+                # put the ruling KIND in its `ruling` column - `anc`, `tribe` -
+                # where the house convention (`your_ruling` in every working
+                # file) puts the entity NAME. This resolver then took the bare
+                # token `anc` and matched it, via acronym alias, to
+                #
+                #     TCU-NHNKDC-00   Aaniiih Nakoda College   (a college, in MT)
+                #
+                # on EIGHT rulings, including the whole Bowhead/UIC book. It
+                # resolved `how="alias"` and looked entirely successful. Had
+                # those been applied, $1.6B of Inupiat contracting would have
+                # been attributed to a Montana tribal college, with a clean
+                # audit trail saying so.
+                #
+                # The schema bug is fixed at its source, but a resolver that
+                # turns a three-letter class word into a confident entity match
+                # will do this again for the next file that gets it wrong. So
+                # the vocabulary is refused here explicitly rather than trusted
+                # not to collide.
+                rr["resolve_how"] = f"refused_class_word_as_entity_name:{v[:40]}"
+                continue
             tid, cname, how = resolve(v)
             if tid:
                 rr["resolved_tribe_id"] = tid

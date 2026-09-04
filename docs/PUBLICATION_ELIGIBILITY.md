@@ -61,9 +61,9 @@ An adjudication value this policy has never seen WITHHOLDS and names itself in t
 | nonprofits | `disposition` | `CANDIDATE_STATE_VALIDATED` | 105 | FLAG |
 | nonprofits | `disposition` | `NATIVE_RULED_VERIFIED` | 14 | PUBLISH |
 | nonprofits | `key_review_disposition` | `(blank)` | 11,307 | PUBLISH |
-| nonprofits | `key_review_disposition` | `SUPPORTED` | 559 | PUBLISH |
+| nonprofits | `key_review_disposition` | `SUPPORTED` | 555 | PUBLISH |
 | nonprofits | `key_review_disposition` | `HELD_STATE_DISAGREES` | 458 | MASK |
-| nonprofits | `key_review_disposition` | `REFUSED_PLACE_NAME_IS_THE_ADDRESS` | 292 | MASK |
+| nonprofits | `key_review_disposition` | `REFUSED_PLACE_NAME_IS_THE_ADDRESS` | 296 | MASK |
 | nonprofits | `key_review_disposition` | `REFUSED_GENERIC_TOKEN_ONLY` | 61 | MASK |
 | nonprofits | `key_review_disposition` | `REDIRECT_PROPOSED` | 12 | MASK |
 | subcontracting | `duplicate_status` | `primary` | 70,597 | PUBLISH |
@@ -90,12 +90,15 @@ Reported, never dropped. A column here is an upstream DATA problem: the value sh
 |---|---|---:|---:|---|
 | funding | `attribution_basis` | 184,077 / 701,955 | 26.2 | SOME_VALUES |
 | nest | `source_document` | 4,295 / 5,120 | 83.9 | SOME_VALUES |
+| legislation | `outcome_basis` | 3,069 / 3,069 | 100.0 | EVERY_VALUE |
 | legislation | `entity_link_basis` | 3,069 / 3,069 | 100.0 | EVERY_VALUE |
 | legislation | `native_bill_action_coverage__action_lookup_basis` | 3,061 / 3,069 | 99.7 | SOME_VALUES |
 | legislation | `entity_class_scope_basis` | 2,456 / 2,456 | 100.0 | EVERY_VALUE |
 | natural-resources | `cedar_uid_basis` | 586 / 586 | 100.0 | EVERY_VALUE |
+| gaming | `open_date_source_value_placeholder_basis` | 295 / 295 | 100.0 | EVERY_VALUE |
 | nest | `nest_entity_dual_role__verification_sources` | 281 / 2,406 | 11.7 | SOME_VALUES |
 | deals | `Notes` | 141 / 1,039 | 13.6 | SOME_VALUES |
+| gaming | `close_date_source_value_placeholder_basis` | 76 / 76 | 100.0 | EVERY_VALUE |
 | nonprofits | `exclusion_reason` | 27 / 4,960 | 0.5 | SOME_VALUES |
 | nonprofits | `entity_match_basis` | 27 / 12,689 | 0.2 | SOME_VALUES |
 | gaming | `entity_match_basis` | 21 / 787 | 2.7 | SOME_VALUES |
@@ -105,7 +108,7 @@ Reported, never dropped. A column here is an upstream DATA problem: the value sh
 
 ## Export width
 
-`dist/customer` is **46-309 columns**, widest `gaming`. The ten-row review saw 29-81. **The export is wider than the review found, not narrower** - only the 100-row previews in `dist/preview` are narrow (7-11).
+`dist/customer` is **46-313 columns**, widest `gaming`. The ten-row review saw 29-81. **The export is wider than the review found, not narrower** - only the 100-row previews in `dist/preview` are narrow (7-11).
 
 ## Still open, and why they are not decided here
 

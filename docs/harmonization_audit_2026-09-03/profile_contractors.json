@@ -1,0 +1,861 @@
+{
+ "snapshot": {
+  "file": "dist/customer/contractors.csv",
+  "bytes": 1485422707,
+  "mtime": "2026-09-03T00:54:43"
+ },
+ "rows": 1217768,
+ "columns": 79,
+ "seconds": 83.7,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 625787,
+   "blank": 591981,
+   "pct_blank": 48.612,
+   "approx_distinct": 332
+  },
+  "cage_code": {
+   "nonblank": 947321,
+   "blank": 270447,
+   "pct_blank": 22.2084,
+   "approx_distinct": 6824
+  },
+  "awardee_name": {
+   "nonblank": 1217723,
+   "blank": 45,
+   "pct_blank": 0.0037,
+   "approx_distinct": 15573
+  },
+  "parent_name": {
+   "nonblank": 1217514,
+   "blank": 254,
+   "pct_blank": 0.0209,
+   "approx_distinct": 10848
+  },
+  "recipient_city_name": {
+   "nonblank": 1217764,
+   "blank": 4,
+   "pct_blank": 0.0003,
+   "approx_distinct": 3012
+  },
+  "canonical_name": {
+   "nonblank": 625787,
+   "blank": 591981,
+   "pct_blank": 48.612,
+   "approx_distinct": 430
+  },
+  "geo_recipient_county_name": {
+   "nonblank": 1203201,
+   "blank": 14567,
+   "pct_blank": 1.1962,
+   "approx_distinct": 1086
+  },
+  "geo_pop_county_name": {
+   "nonblank": 1059404,
+   "blank": 158364,
+   "pct_blank": 13.0044,
+   "approx_distinct": 1509
+  },
+  "contract_number": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 472353
+  },
+  "parent_contract_number": {
+   "nonblank": 798403,
+   "blank": 419365,
+   "pct_blank": 34.4372,
+   "approx_distinct": 17476
+  },
+  "fiscal_year": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "2022": 69879,
+    "2011": 65427,
+    "2010": 64092,
+    "2020": 62115,
+    "2026": 61813,
+    "2017": 61668,
+    "2021": 61291,
+    "2008": 60446,
+    "2012": 60177,
+    "2009": 59831,
+    "2019": 59808,
+    "2018": 59355,
+    "2016": 57574,
+    "2015": 54619,
+    "2024": 53056,
+    "2014": 51780,
+    "2013": 50633,
+    "2025": 48879,
+    "2023": 45747,
+    "2007": 28844,
+    "2006": 25808,
+    "2005": 17446,
+    "2004": 15324,
+    "2003": 9882,
+    "2002": 5966,
+    "2001": 3803,
+    "2000": 2505
+   }
+  },
+  "pre_2000_flag": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "0": 1217768
+   }
+  },
+  "awardee_uei": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 14913
+  },
+  "parent_uei": {
+   "nonblank": 1217713,
+   "blank": 55,
+   "pct_blank": 0.0045,
+   "approx_distinct": 15368
+  },
+  "total_obligations": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 623812
+  },
+  "total_award_value": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 392595
+  },
+  "total_obligations_real2025": {
+   "nonblank": 1155955,
+   "blank": 61813,
+   "pct_blank": 5.0759,
+   "approx_distinct": 813700
+  },
+  "total_award_value_real2025": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 657697
+  },
+  "deflator_factor_2025": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 27,
+   "vocabulary": {
+    "1.0": 110692,
+    "1.092829": 69879,
+    "1.409899": 65427,
+    "1.438984": 64092,
+    "1.223977": 62115,
+    "1.28979": 61668,
+    "1.170557": 61291,
+    "1.465454": 60446,
+    "1.384118": 60177,
+    "1.456468": 59831,
+    "1.240433": 59808,
+    "1.260903": 59355,
+    "1.312884": 57574,
+    "1.325363": 54619,
+    "1.028311": 53056,
+    "1.337665": 51780,
+    "1.360954": 50633,
+    "1.053836": 45747,
+    "1.493694": 28844,
+    "1.534168": 25808,
+    "1.581478": 17446,
+    "1.631056": 15324,
+    "1.674921": 9882,
+    "1.707992": 5966,
+    "1.734521": 3803,
+    "1.77359": 2505
+   }
+  },
+  "inflation_base_year": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2025": 1217768
+   }
+  },
+  "setaside": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "None reported": 598321,
+    "8(a)": 364150,
+    "Small Business": 163064,
+    "Other": 55439,
+    "HUBZone": 17362,
+    "Indian Business": 9934,
+    "Buy Indian": 9498
+   }
+  },
+  "reported_8a": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 853618,
+    "1": 364150
+   }
+  },
+  "reported_buy_indian": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 1208270,
+    "1": 9498
+   }
+  },
+  "reported_indian_business": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 1207834,
+    "1": 9934
+   }
+  },
+  "reported_native_preference": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 834186,
+    "1": 383582
+   }
+  },
+  "setaside_reported": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 619447,
+    "0": 598321
+   }
+  },
+  "extent_competed": {
+   "nonblank": 1208348,
+   "blank": 9420,
+   "pct_blank": 0.7735,
+   "approx_distinct": 17,
+   "vocabulary": {
+    "FULL AND OPEN COMPETITION AFTER EXCLUSION OF SOURCES": 267508,
+    "NOT AVAILABLE FOR COMPETITION": 233124,
+    "FULL AND OPEN COMPETITION": 157348,
+    "B": 134203,
+    "D": 110603,
+    "COMPETED UNDER SAP": 89792,
+    "A": 65859,
+    "NOT COMPETED UNDER SAP": 46720,
+    "NOT COMPETED": 40266,
+    "C": 16784,
+    "F": 14956,
+    "G": 12838,
+    "NAN": 9411,
+    "CDO": 3594,
+    "COMPETITIVE DELIVERY ORDER": 2721,
+    "NON-COMPETITIVE DELIVERY ORDER": 1138,
+    "NDO": 671,
+    "FOLLOW ON TO COMPETED ACTION": 411,
+    "E": 401
+   }
+  },
+  "funding_agency": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 310
+  },
+  "sector": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 21,
+   "vocabulary": {
+    "54": 348605,
+    "56": 228472,
+    "23": 220401,
+    "33": 141191,
+    "32": 60877,
+    "51": 46678,
+    "42": 30047,
+    "62": 25710,
+    "Not given": 19259,
+    "81": 13063,
+    "53": 12406,
+    "48": 11848,
+    "61": 11622,
+    "49": 8832,
+    "31": 7236,
+    "22": 6457,
+    "11": 5815,
+    "44": 4822,
+    "72": 4202,
+    "92": 3298,
+    "45": 3153,
+    "71": 2170,
+    "21": 1075,
+    "52": 520,
+    "55": 9
+   }
+  },
+  "supersector": {
+   "nonblank": 1211953,
+   "blank": 5815,
+   "pct_blank": 0.4775,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "Professional & Business Services": 577086,
+    "Construction": 220401,
+    "Manufacturing": 209304,
+    "Trade, Transportation, & Utilities": 65159,
+    "Information": 46678,
+    "Education & Health Services": 37332,
+    "Other services or Not given": 35620,
+    "Financial Activities": 12926,
+    "Leisure & Hospitality": 6372,
+    "Natural Resources & Mining": 1075
+   }
+  },
+  "defense": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 687225,
+    "0": 530543
+   }
+  },
+  "recipient_state_code": {
+   "nonblank": 1216433,
+   "blank": 1335,
+   "pct_blank": 0.1096,
+   "approx_distinct": 64
+  },
+  "place_of_perform_city": {
+   "nonblank": 1155927,
+   "blank": 61841,
+   "pct_blank": 5.0782,
+   "approx_distinct": 4737
+  },
+  "place_of_perform_state": {
+   "nonblank": 1211294,
+   "blank": 6474,
+   "pct_blank": 0.5316,
+   "approx_distinct": 74
+  },
+  "attributed_flag": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 625787,
+    "0": 591981
+   }
+  },
+  "ruling_status": {
+   "nonblank": 745517,
+   "blank": 472251,
+   "pct_blank": 38.78,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "RULED_ATTRIBUTED": 456486,
+    "RULED_OWNER_NOT_IN_SPINE": 121186,
+    "RULED_TIER_UNSTATED": 42111,
+    "RULING_CONFLICT": 34899,
+    "RULED_CLASS_ONLY": 32918,
+    "RULED_NOT_NATIVE": 32393,
+    "RULED_HOLD": 17821,
+    "RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED": 7703
+   }
+  },
+  "ruling_applied_date": {
+   "nonblank": 745517,
+   "blank": 472251,
+   "pct_blank": 38.78,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-03": 745517
+   }
+  },
+  "extent_competed_normalized": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "FULL AND OPEN COMPETITION AFTER EXCLUSION OF SOURCES": 378111,
+    "NOT AVAILABLE FOR COMPETITION": 367327,
+    "FULL AND OPEN COMPETITION": 223207,
+    "COMPETED UNDER SAP": 104748,
+    "NOT COMPETED UNDER SAP": 59558,
+    "NOT COMPETED": 57050,
+    "NOT_REPORTED": 18831,
+    "COMPETITIVE DELIVERY ORDER": 6315,
+    "NON-COMPETITIVE DELIVERY ORDER": 1809,
+    "FOLLOW ON TO COMPETED ACTION": 812
+   }
+  },
+  "owner_attribution_status": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "NO_OWNER_ATTRIBUTED": 432127,
+    "RESOLVED_OWNER_NOT_IN_CEDAR": 285886,
+    "NOT_EVALUATED": 243121,
+    "CONFIRMED_AS_OF": 150842,
+    "UNKNOWN_OUTSIDE_EVIDENCE": 46224,
+    "AMBIGUOUS_OVERLAP": 40203,
+    "NO_FACT_ON_SUBJECT": 9459,
+    "CONTRADICTED_AS_OF": 9223,
+    "NO_COVERING_FACT": 608,
+    "AMBIGUOUS_GRANULARITY": 75
+   }
+  },
+  "owner_as_of_transaction_cedar_uid": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 126
+  },
+  "contract_transaction_unique_key": {
+   "nonblank": 841002,
+   "blank": 376766,
+   "pct_blank": 30.9391,
+   "approx_distinct": 1043416
+  },
+  "contract_award_unique_key": {
+   "nonblank": 841002,
+   "blank": 376766,
+   "pct_blank": 30.9391,
+   "approx_distinct": 252006
+  },
+  "naics_code": {
+   "nonblank": 838229,
+   "blank": 379539,
+   "pct_blank": 31.1668,
+   "approx_distinct": 1051
+  },
+  "naics_description": {
+   "nonblank": 827858,
+   "blank": 389910,
+   "pct_blank": 32.0184,
+   "approx_distinct": 1100
+  },
+  "action_date": {
+   "nonblank": 841002,
+   "blank": 376766,
+   "pct_blank": 30.9391,
+   "approx_distinct": 6399
+  },
+  "award_type": {
+   "nonblank": 769868,
+   "blank": 447900,
+   "pct_blank": 36.7804,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "DELIVERY ORDER": 406869,
+    "DO": 146269,
+    "DEFINITIVE CONTRACT": 90701,
+    "PURCHASE ORDER": 47141,
+    "DCA": 33642,
+    "PO": 21725,
+    "BPA CALL": 16820,
+    "BPA": 6701
+   }
+  },
+  "product_or_service_code": {
+   "nonblank": 840754,
+   "blank": 377014,
+   "pct_blank": 30.9594,
+   "approx_distinct": 1751
+  },
+  "product_or_service_code_description": {
+   "nonblank": 840738,
+   "blank": 377030,
+   "pct_blank": 30.9607,
+   "approx_distinct": 2484
+  },
+  "award_base_description": {
+   "nonblank": 840079,
+   "blank": 377689,
+   "pct_blank": 31.0149,
+   "approx_distinct": 491304
+  },
+  "identifier_ruling_quarantined": {
+   "nonblank": 888802,
+   "blank": 328966,
+   "pct_blank": 27.0138,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "N": 661262,
+    "Y": 227540
+   }
+  },
+  "identifier_ruling_review": {
+   "nonblank": 227540,
+   "blank": 990228,
+   "pct_blank": 81.315,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "WITHDRAWN_BY_1079": 103221,
+    "KEEP": 99241,
+    "HOLD": 18528,
+    "REPOINTED_BY_1079": 6550
+   }
+  },
+  "geo_recipient_county_fips": {
+   "nonblank": 1204023,
+   "blank": 13745,
+   "pct_blank": 1.1287,
+   "approx_distinct": 1334
+  },
+  "geo_recipient_state_fips": {
+   "nonblank": 1204023,
+   "blank": 13745,
+   "pct_blank": 1.1287,
+   "approx_distinct": 59
+  },
+  "geo_recipient_place_dominance_share": {
+   "nonblank": 956055,
+   "blank": 261713,
+   "pct_blank": 21.4912,
+   "approx_distinct": 1250
+  },
+  "geo_recipient_place_ambiguous": {
+   "nonblank": 956055,
+   "blank": 261713,
+   "pct_blank": 21.4912,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 827560,
+    "0": 128495
+   }
+  },
+  "geo_pop_county_fips": {
+   "nonblank": 1059979,
+   "blank": 157789,
+   "pct_blank": 12.9572,
+   "approx_distinct": 2215
+  },
+  "geo_pop_state_fips": {
+   "nonblank": 1059979,
+   "blank": 157789,
+   "pct_blank": 12.9572,
+   "approx_distinct": 59
+  },
+  "geo_pop_place_dominance_share": {
+   "nonblank": 828021,
+   "blank": 389747,
+   "pct_blank": 32.005,
+   "approx_distinct": 1409
+  },
+  "geo_pop_place_ambiguous": {
+   "nonblank": 828021,
+   "blank": 389747,
+   "pct_blank": 32.005,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 627864,
+    "0": 200157
+   }
+  },
+  "geo_award_unique_key": {
+   "nonblank": 841002,
+   "blank": 376766,
+   "pct_blank": 30.9391,
+   "approx_distinct": 252006
+  },
+  "geo_built_date": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 1217768
+   }
+  },
+  "attribution_method": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "uei_exact": 707762,
+    "unattributed": 425911,
+    "parent_uei": 42159,
+    "cage_exact": 30445,
+    "ruling_applied": 6383,
+    "ladder_1122": 3771,
+    "ladder_1117": 1210,
+    "propagated_from_agent_ruling": 127
+   }
+  },
+  "confidence_tier": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "A": 586225,
+    "C": 430177,
+    "B": 201366
+   }
+  },
+  "source_authority": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "USAspending award_data_archive (FPDS-NG static monthly file), stamp 20260806": 841002,
+    "Elijah hand-checked master prime file": 376766
+   }
+  },
+  "built_date": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2026-08-12": 841002,
+    "2026-08-06": 376766
+   }
+  },
+  "extent_competed_normalized_basis": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "DAIMS-DEC v2.2 ExtentCompeted | https://files.usaspending.gov/docs/Data_Dictionary_Crosswalk.xlsx | LABEL_AS_RECORDED": 839028,
+    "DAIMS-DEC v2.2 ExtentCompeted | https://files.usaspending.gov/docs/Data_Dictionary_Crosswalk.xlsx | FPDS_CODE_MAPPED": 359909,
+    "DAIMS-DEC v2.2 ExtentCompeted | https://files.usaspending.gov/docs/Data_Dictionary_Crosswalk.xlsx | NOT_REPORTED_BLANK": 9420,
+    "DAIMS-DEC v2.2 ExtentCompeted | https://files.usaspending.gov/docs/Data_Dictionary_Crosswalk.xlsx | NOT_REPORTED_NULL_TOKEN": 9411
+   }
+  },
+  "award_attributes_basis": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "naics/action_date/award_type: usaspending_award_archive_20260806 filtered extract, transaction grain | psc/description: award not present in the local gapfill corpus - genuine re-pull; archive_repull_1085_2026-09-02": 592925,
+    "no contract_transaction_unique_key on this row (BGOV / master-prime lineage) - no archive transaction to join to": 376766,
+    "naics/action_date/award_type: usaspending_award_archive_20260806 filtered extract, transaction grain | psc/description: usaspending_gapfill_2026-08-05 prime award summaries, AWARD grain, joined on contract_award_unique_key": 247987,
+    "naics/action_date/award_type: usaspending_award_archive_20260806 filtered extract, transaction grain | psc/description: award not present in the local gapfill corpus - genuine re-pull": 90
+   }
+  },
+  "identifier_ruling_method": {
+   "nonblank": 888802,
+   "blank": 328966,
+   "pct_blank": 27.0138,
+   "approx_distinct": 14,
+   "vocabulary": {
+    "agent_research_two_leg": 225614,
+    "cluster_v3": 213107,
+    "elijah_ruling": 153966,
+    "hand": 108364,
+    "agent_research_one_leg": 74565,
+    "subsidiary_lookup": 64155,
+    "web_verified": 17122,
+    "bgov_manual": 15448,
+    "need_v6": 14149,
+    "elijah_ruling_redirect": 1516,
+    "cross_dataset_propagation:funding": 349,
+    "sam_namematch_2026_05_06": 284,
+    "cross_dataset_propagation:contracting": 141,
+    "institution_exact_name": 22
+   }
+  },
+  "identifier_ruling_tier": {
+   "nonblank": 888802,
+   "blank": 328966,
+   "pct_blank": 27.0138,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "A": 586185,
+    "B": 302617
+   }
+  },
+  "identifier_ruling_basis": {
+   "nonblank": 888803,
+   "blank": 328965,
+   "pct_blank": 27.0138,
+   "approx_distinct": 2862
+  },
+  "geo_key_tier": {
+   "nonblank": 1211714,
+   "blank": 6054,
+   "pct_blank": 0.4971,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "derived_place_modal": 963727,
+    "exact_award_summary": 247987
+   }
+  },
+  "geo_key_basis": {
+   "nonblank": 1211714,
+   "blank": 6054,
+   "pct_blank": 0.4971,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "modal county of this row's own city+state in geo_place_county_crosswalk.csv": 963727,
+    "usaspending_prime_award_summary_via_usaspending_archive_transaction_bridge": 247987
+   }
+  },
+  "n_fpds_uei_cage_map": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "2196": 398840,
+    "23510": 270447,
+    "1": 247476,
+    "2": 214496,
+    "3": 63433,
+    "4": 22962,
+    "5": 92,
+    "6": 22
+   }
+  },
+  "n_prime_contracts_archive_backfill": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 446
+  },
+  "n_prime_contracts_awards": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 286
+  },
+  "n_prime_contracts_entity_year": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 29,
+   "vocabulary": {
+    "0": 592639,
+    "27": 378152,
+    "26": 108830,
+    "25": 31712,
+    "24": 28266,
+    "21": 19873,
+    "22": 17328,
+    "20": 12010,
+    "23": 10248,
+    "19": 3757,
+    "16": 3440,
+    "10": 2269,
+    "18": 2072,
+    "11": 1864,
+    "17": 1266,
+    "12": 941,
+    "15": 929,
+    "8": 769,
+    "13": 463,
+    "14": 258,
+    "7": 199,
+    "6": 138,
+    "5": 125,
+    "9": 96,
+    "2": 53,
+    "3": 30,
+    "1": 23,
+    "4": 18
+   }
+  },
+  "n_prime_contracts_published": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 286
+  },
+  "n_sam_prime_contracts_fy2000_2007": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 22,
+   "vocabulary": {
+    "0": 931052,
+    "268096": 270447,
+    "56": 7244,
+    "1": 5278,
+    "88": 1027,
+    "6": 505,
+    "2": 481,
+    "7": 393,
+    "9": 289,
+    "29": 216,
+    "304": 214,
+    "4": 175,
+    "13": 145,
+    "18": 104,
+    "22": 71,
+    "11": 49,
+    "21": 32,
+    "14": 22,
+    "3": 16,
+    "5": 8
+   }
+  },
+  "n_sam_prime_contracts_fy2000_2007_PUBLISHABLE": {
+   "nonblank": 1217768,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 22,
+   "vocabulary": {
+    "0": 931052,
+    "268096": 270447,
+    "56": 7244,
+    "1": 5278,
+    "88": 1027,
+    "6": 505,
+    "2": 481,
+    "7": 393,
+    "9": 289,
+    "29": 216,
+    "304": 214,
+    "4": 175,
+    "13": 145,
+    "18": 104,
+    "22": 71,
+    "11": 49,
+    "21": 32,
+    "14": 22,
+    "3": 16,
+    "5": 8
+   }
+  }
+ }
+}

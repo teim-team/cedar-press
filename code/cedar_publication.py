@@ -112,6 +112,7 @@ everything is not.
 """
 from __future__ import annotations
 
+import csv
 import importlib.util
 import re
 import sys
@@ -432,6 +433,158 @@ LOBBYING_FENCE = ("supersession_status NOT IN ('SUPERSEDED_BY_AMENDMENT', "
 # every entry here must be lower case or it can never match.
 DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
              "ultimate_duns", "parent_duns")
+
+# RETIRED IDENTITY SCHEME - the CICD NEID. Dropped as COLUMNS, like DROP_COLS.
+#
+# Owner, 2026-09-01: *"I think the CICD ID system sucks ass. Just remove it. We
+# don't need to use it. No one uses CICD data, so it's not like we have to link
+# ours to theirs. They should link ours to ours."*
+#
+# Owner again, 2026-09-03, on finding it still in the tree: *"I told you not to
+# use these CICD IDs anymore. I don't know why we still are. We are using our
+# own system."*
+#
+# `code/843_retire_cicd_scheme.py` did the retirement on 2026-09-01 and it was
+# real, but it named THREE FILES by hand - the register, the funding
+# transactions and the funding tribe-year panel. Measured 2026-09-03: **77
+# files in data/clean still carry a bare `tribe_id`**, and SEVEN of the twelve
+# customer datasets were still shipping a NEID as identity. A retirement that
+# enumerates its targets does not survive the next build that writes a new file.
+# So the rule moves here, to the file every extract already consults.
+#
+# MEASURED SAFE BEFORE BEING WRITTEN. Cedar's own key covers every row that
+# carries a NEID, with the counts matching exactly:
+#
+#   contractors      636,459 tribe_id / 636,459 cedar_uid / 0 orphaned
+#   federal-register  10,396 /  10,396 / 0
+#   gaming               785 /     785 / 0
+#   nonprofits           555 /     555 / 0
+#   subcontracting    32,203 prime_native_tribe_id / 32,203 prime_cedar_uid / 0
+#                     38,563 sub_native_tribe_id   / 38,563 sub_cedar_uid   / 0
+#   legislation          591 entity_tribe_ids      /    591 entity_cedar_uids
+#
+# Dropping these costs no identity anywhere. It removes a second, worse answer
+# sitting beside the right one - 843's own words for why this was safe.
+NEID_COLS = (
+    "tribe_id",
+    "tribe_id_neid",
+    "entity_tribe_ids",
+    "prime_native_tribe_id",
+    "sub_native_tribe_id",
+    "subaward_entity_rollup__tribe_id",
+    "tribe_id_token_match",
+    "bie_uio_dollars_by_entity__tribe_id",
+)
+
+# THE NEID VALUES, WHICH THE COLUMN GATE ABOVE DOES NOT REACH.
+#
+# The gate above removes columns whose NAME says NEID. Measured immediately
+# after it shipped, on 2026-09-03: **89,680 retired NEID values were still
+# leaving on 45,213 rows, in 22 columns across 8 datasets** - under names that
+# say nothing about the scheme.
+#
+#     26,513  lobbying.entity_id
+#     18,972  nagpra.affiliated_entity_ids
+#     17,104  nagpra.consulted_entity_ids
+#      5,820  nest.owner_hub_handle
+#      3,576  native-owned-businesses.certifying_authority_entity_id
+#
+# A name gate was never going to be enough, and the owner's complaint - "I told
+# you not to use these CICD IDs anymore" - was still true after it.
+#
+# DELETION IS THE WRONG FIX. `nagpra` and `native-owned-businesses` carry NO
+# cedar_uid at all; these ARE their only entity keys. Dropping them would leave
+# two datasets unable to name a party. So the retired identifier is TRANSLATED
+# to Cedar's own, which is what "we are using our own system" actually requires.
+#
+# WHY THIS IS DETECTED BY VOCABULARY AND NEVER BY SHAPE. A regex for the NEID
+# pattern is wrong in both directions, measured: it matches `DPW-00229-01`
+# inside a contract description and `SR-2012-11` as a subaward number, and it
+# MISSES the extended Alaska form `AKNF-ACSRMT-00-CALSTA-ASVCPR`. Membership in
+# the harvested vocabulary is exact; a shape test is a guess wearing a regex.
+_NEID_MAP: dict = {}
+_NEID_AMBIGUOUS: dict = {}
+
+
+def neid_map():
+    """NEID -> cedar_uid, but ONLY where exactly one uid claims that NEID.
+
+    Measured 2026-09-03: 1,555 NEIDs, of which 1,543 resolve to a single uid
+    and **12 do not**. Those twelve are the identity collisions that
+    `code/1167_cedar_uid_identity_collisions.py` reports as MERGE - one key
+    naming two entities (`ANRC-CKINLT-00` claims four uids; `ANVC-CAPEFO-00`
+    claims three). Translating one of those would be picking a winner in an
+    unresolved adjudication and writing the guess into a customer file, so they
+    are refused and left standing. 1,954 of the 89,680 shipping values are
+    theirs; the other 87,726 (97.82%) translate exactly.
+    """
+    global _NEID_MAP, _NEID_AMBIGUOUS
+    if _NEID_MAP or _NEID_AMBIGUOUS:
+        return _NEID_MAP
+    from collections import defaultdict as _dd
+    claims = _dd(set)
+    sources = ((ROOT / "data/spine/cedar_identity_register.csv", "handle"),
+               (ROOT / "data/clean/cedar_identifier_ledger_final.csv", "tribe_id"))
+    for path, key in sources:
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            for row in csv.DictReader(fh):
+                neid = (row.get(key) or "").strip()
+                uid = (row.get("cedar_uid") or "").strip()
+                if neid and uid:
+                    claims[neid].add(uid)
+    _NEID_MAP = {k: next(iter(v)) for k, v in claims.items() if len(v) == 1}
+    _NEID_AMBIGUOUS = {k: sorted(v) for k, v in claims.items() if len(v) > 1}
+    return _NEID_MAP
+
+
+def translate_neid_values(row: dict):
+    """Rewrite retired NEIDs to Cedar's own key, in place. Returns (n, n_left).
+
+    Pipe-delimited multi-value cells are handled member by member -
+    `nagpra.affiliated_entity_ids` holds up to dozens per cell, and replacing
+    the whole cell would destroy the list. A member that cannot be translated
+    is left EXACTLY as it was rather than blanked: a wrong-but-traceable key
+    beats a hole, and it keeps the residue countable.
+    """
+    mapping = neid_map()
+    done = left = 0
+    for col, val in row.items():
+        if not val or not isinstance(val, str):
+            continue
+        if "-" not in val:
+            continue                      # no NEID has ever lacked a hyphen
+        parts = val.split("|")
+        out, hit = [], False
+        for part in parts:
+            token = part.strip()
+            if token in mapping:
+                out.append(mapping[token])
+                done += 1
+                hit = True
+            else:
+                if token in _NEID_AMBIGUOUS:
+                    left += 1
+                out.append(part)
+        if hit:
+            row[col] = "|".join(out)
+    return done, left
+
+
+# INTERNAL WORKING COLUMNS. 843 states plainly that the `*_proposed*` columns
+# "are internal and never shipped" - and then `funding.csv` shipped four of
+# them, on 419,523 rows. They are a PROPOSAL that no one has adjudicated, which
+# is why 67,826 funding rows carried a proposed NEID and no cedar_uid: those
+# rows have no settled identity at all, and shipping the proposal made it look
+# as though they did. That is the worst of the three defects here, because a
+# customer cannot tell a proposal from a decision by looking at it.
+PROPOSED_COLS = (
+    "ledger_proposed_tribe_id",
+    "tribe_id_neid_proposed",
+    "tribe_id_neid_proposed_tier",
+    "tribe_id_neid_proposed_basis",
+)
 
 # BUILD LINEAGE - how Cedar made the row, not where the fact came from.
 # Added 2026-09-02 by `1153`, beside `DROP_COLS` because it is the same KIND of
@@ -919,6 +1072,11 @@ def publishable_columns(header) -> list:
     arriving under a name this list does not know.
     """
     lower_drop = {c.lower() for c in DROP_COLS}
+    # NEID_COLS and PROPOSED_COLS join the same gate, case-insensitively for the
+    # same reason DROP_COLS is: the seven datasets that shipped a NEID spelled
+    # the column six different ways between them.
+    lower_drop |= {c.lower() for c in NEID_COLS}
+    lower_drop |= {c.lower() for c in PROPOSED_COLS}
     never = set(NEVER)
     return [c for c in (header or [])
             if c.lower() not in lower_drop and c not in never

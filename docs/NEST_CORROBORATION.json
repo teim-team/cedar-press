@@ -14,24 +14,8 @@
     "duplicate_name_variant_basis"
   ],
   "jv_observation_floor": 20,
-  "base_fields_md5": "2562767f6bbb580dcf73370a6581b17d",
+  "base_fields_md5": "ddfb39f9461238baa621a8728d8702bb",
   "contradictions": [
-    {
-      "enterprise_id": "CEDAR-NEST-005110-FT",
-      "enterprise_name": "Eklutna Services, Llc,",
-      "nest_owner_hub_handle": "AKNF-EKLTNA-00-CKINLT",
-      "nest_owner_hub_name": "Eklutna",
-      "nest_relationship": "unspecified",
-      "nest_evidence_class": "owner_research_dataset_resolver_output",
-      "nest_n_distinct_sources": "1",
-      "fpds_declared_parent_name": "EKLUTNA, INC.",
-      "fpds_declared_parent_uei": "JWA7LVNPBSM5",
-      "fpds_declared_parent_observations": "144",
-      "ledger_resolves_parent_to": "ANVC-EKLUTN-00",
-      "route": "rung1_published_uei",
-      "disposition": "OPEN - neither side repointed by this pass",
-      "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
-    },
     {
       "enterprise_id": "CEDAR-NEST-005235-NR",
       "enterprise_name": "Bowhead Manufacturing Company",
@@ -97,38 +81,6 @@
       "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
     },
     {
-      "enterprise_id": "CEDAR-NEST-005496-VN",
-      "enterprise_name": "ALEUT CONSTRUCTION LLC",
-      "nest_owner_hub_handle": "AKNF-PRBLFC-00",
-      "nest_owner_hub_name": "Pribilof Islands",
-      "nest_relationship": "unspecified",
-      "nest_evidence_class": "federal_certification_registry",
-      "nest_n_distinct_sources": "1",
-      "fpds_declared_parent_name": "ALEUT CORPORATION  THE",
-      "fpds_declared_parent_uei": "M5H7HESFYJL5",
-      "fpds_declared_parent_observations": "82",
-      "ledger_resolves_parent_to": "ANRC-ALEUTC-00",
-      "route": "rung2_exact_normalised_name",
-      "disposition": "OPEN - neither side repointed by this pass",
-      "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
-    },
-    {
-      "enterprise_id": "CEDAR-NEST-005571-CR",
-      "enterprise_name": "Port Graham Development Corporation",
-      "nest_owner_hub_handle": "AKNF-PRTGRM-00-CHGCCO-CHGCMT",
-      "nest_owner_hub_name": "Port Graham",
-      "nest_relationship": "unspecified",
-      "nest_evidence_class": "owner_research_dataset_resolver_output",
-      "nest_n_distinct_sources": "1",
-      "fpds_declared_parent_name": "THE PORT GRAHAM CORPORATION",
-      "fpds_declared_parent_uei": "M3NNALGMSSX7",
-      "fpds_declared_parent_observations": "572",
-      "ledger_resolves_parent_to": "ANVC-PRTGRH-00",
-      "route": "rung1_published_uei",
-      "disposition": "OPEN - neither side repointed by this pass",
-      "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
-    },
-    {
       "enterprise_id": "CEDAR-NEST-005586-6F",
       "enterprise_name": "Sand Point Generating Llc",
       "nest_owner_hub_handle": "AKNF-QGNTGN-00-ALEUTC-PRBLFA",
@@ -141,6 +93,22 @@
       "fpds_declared_parent_observations": "93",
       "ledger_resolves_parent_to": "ANVC-TNDGSX-00",
       "route": "rung2_exact_normalised_name",
+      "disposition": "OPEN - neither side repointed by this pass",
+      "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
+    },
+    {
+      "enterprise_id": "CEDAR-NEST-000025-PH",
+      "enterprise_name": "Nisga'A Tek, Llc",
+      "nest_owner_hub_handle": "AKNF-TLNGHD-00-SEALSK",
+      "nest_owner_hub_name": "Tlingit & Haida",
+      "nest_relationship": "unspecified",
+      "nest_evidence_class": "parent_self_published_company_list",
+      "nest_n_distinct_sources": "1",
+      "fpds_declared_parent_name": "GOLDBELT  INCORPORATED",
+      "fpds_declared_parent_uei": "P9QQX7RT8E98",
+      "fpds_declared_parent_observations": "254",
+      "ledger_resolves_parent_to": "ANVC-GLDBLT-00",
+      "route": "rung1_published_uei",
       "disposition": "OPEN - neither side repointed by this pass",
       "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
     },
@@ -183,12 +151,28 @@
       "nest_owner_hub_name": "Goldbelt, Incorporated",
       "nest_relationship": "subsidiary",
       "nest_evidence_class": "audited_annual_report_as_45_55_139",
-      "nest_n_distinct_sources": "1",
+      "nest_n_distinct_sources": "2",
       "fpds_declared_parent_name": "GOLDBELT EAGLE, L.L.C.",
       "fpds_declared_parent_uei": "T2LSQ9Z645A5",
       "fpds_declared_parent_observations": "102",
       "ledger_resolves_parent_to": "AKNF-VEAGLE-00-DOYONL-TNNACH",
       "route": "rung2_exact_normalised_name",
+      "disposition": "OPEN - neither side repointed by this pass",
+      "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
+    },
+    {
+      "enterprise_id": "CEDAR-NEST-005993-HY",
+      "enterprise_name": "Goldbelt Eagle Limited Liability Company",
+      "nest_owner_hub_handle": "ANVC-GLDBLT-00",
+      "nest_owner_hub_name": "Goldbelt, Incorporated",
+      "nest_relationship": "unspecified",
+      "nest_evidence_class": "owner_research_dataset_resolver_output",
+      "nest_n_distinct_sources": "1",
+      "fpds_declared_parent_name": "GOLDBELT EAGLE, L.L.C.",
+      "fpds_declared_parent_uei": "T2LSQ9Z645A5",
+      "fpds_declared_parent_observations": "102",
+      "ledger_resolves_parent_to": "AKNF-VEAGLE-00-DOYONL-TNNACH",
+      "route": "rung1_published_uei",
       "disposition": "OPEN - neither side repointed by this pass",
       "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
     },
@@ -268,6 +252,22 @@
       "fpds_declared_parent_uei": "KZMRSJJJN1L6",
       "fpds_declared_parent_observations": "30",
       "ledger_resolves_parent_to": "AKNF-INPTAS-00-ARCSLO",
+      "route": "rung2_exact_normalised_name",
+      "disposition": "OPEN - neither side repointed by this pass",
+      "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
+    },
+    {
+      "enterprise_id": "CEDAR-NEST-006088-TN",
+      "enterprise_name": "WHITE MOUNTAIN APACHE TRIBE",
+      "nest_owner_hub_handle": "ANVC-WHTMNT-00",
+      "nest_owner_hub_name": "White Mountain Native Corporation",
+      "nest_relationship": "unspecified",
+      "nest_evidence_class": "owner_research_dataset_resolver_output",
+      "nest_n_distinct_sources": "1",
+      "fpds_declared_parent_name": "WHITE MOUNTAIN APACHE TRIBE",
+      "fpds_declared_parent_uei": "S8UKXJ8B7A83",
+      "fpds_declared_parent_observations": "148",
+      "ledger_resolves_parent_to": "TRBF-WMTNAZ-00",
       "route": "rung2_exact_normalised_name",
       "disposition": "OPEN - neither side repointed by this pass",
       "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
@@ -481,22 +481,6 @@
       "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
     },
     {
-      "enterprise_id": "CEDAR-NEST-003962-FN",
-      "enterprise_name": "Tikigaq Technology Services, L",
-      "nest_owner_hub_handle": "TRBF-PTTRUT-00",
-      "nest_owner_hub_name": "Paiute of Utah",
-      "nest_relationship": "unspecified",
-      "nest_evidence_class": "owner_research_dataset_resolver_output",
-      "nest_n_distinct_sources": "1",
-      "fpds_declared_parent_name": "TIKIGAQ CORPORATION",
-      "fpds_declared_parent_uei": "J9YKKR3JN9V3",
-      "fpds_declared_parent_observations": "258",
-      "ledger_resolves_parent_to": "ANVC-TIKIGA-00",
-      "route": "rung1_published_uei",
-      "disposition": "OPEN - neither side repointed by this pass",
-      "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
-    },
-    {
       "enterprise_id": "CEDAR-NEST-004100-88",
       "enterprise_name": "Flandreau Santee Sioux Tribe",
       "nest_owner_hub_handle": "TRBF-SANTSX-00",
@@ -513,19 +497,19 @@
       "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
     }
   ],
-  "rows": 5888,
+  "rows": 5820,
   "corroboration": {
-    "NO_DECLARED_PARENT": 4607,
-    "CORROBORATED": 401,
-    "PARENT_BELOW_JV_FLOOR": 384,
-    "PARENT_UNRESOLVED": 465,
-    "CONTRADICTED": 31
+    "NO_DECLARED_PARENT": 4566,
+    "CORROBORATED": 394,
+    "PARENT_BELOW_JV_FLOOR": 381,
+    "PARENT_UNRESOLVED": 449,
+    "CONTRADICTED": 30
   },
   "route": {
-    "rung1_published_uei": 602,
-    "rung2_exact_normalised_name": 295
+    "rung1_published_uei": 601,
+    "rung2_exact_normalised_name": 272
   },
-  "published_uei": 3497,
-  "dupe_groups": 72,
-  "dupe_rows": 148
+  "published_uei": 3496,
+  "dupe_groups": 70,
+  "dupe_rows": 144
 }
