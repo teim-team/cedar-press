@@ -127,9 +127,37 @@ def deals():
     """One row per DEAL - a deal is already an observation, not a transaction."""
     recs = [r for r in rows(CUSTOMER / "deals.csv")
             if in_window(r.get("Event_Year"))]
+
+    # record_class AND Record_Scope COME BACK, for the review sheet only.
+    # Reviewer, 2026-09-04: the schema cleanup "removed record_class and
+    # Record_Scope from the working dataset. Those should remain internally
+    # because the 208 rows still include 84 public-award records, 36
+    # unverified tribal-press candidates, 21 project milestones and 4 staged,
+    # unmerged candidates. Without those fields, later code cannot reliably
+    # distinguish release-ready deals from records that should be moved,
+    # reviewed, or excluded."
+    #
+    # He is right, and the two columns are in DEALS_INTERNAL for a good but
+    # DIFFERENT reason: they must not reach a CUSTOMER. This sheet is the
+    # owner's internal review bundle, which is exactly where they belong. So
+    # they are read back from the source table rather than un-withheld
+    # globally - the public download stays clean, 41 columns become 43 here.
+    src = {}
+    spath = ROOT / "data" / "clean" / "deals_classified.csv"
+    if spath.exists():
+        for r in rows(spath):
+            did = (r.get("Deal_ID") or "").strip()
+            if did:
+                src[did] = r
+    for r in recs:
+        s = src.get((r.get("Deal_ID") or "").strip(), {})
+        r["record_class"] = s.get("record_class", "")
+        r["Record_Scope"] = s.get("Record_Scope", "")
+
     order = ["Deal_ID", "native_party_canonical_name", "cedar_uid",
              "Deal_Title", "Counterparty_or_Funder", "Deal_Category",
-             "Event_Date", "Event_Year", "Announced_Value_USD", "State"]
+             "Event_Date", "Event_Year", "Announced_Value_USD", "State",
+             "record_class", "Record_Scope"]
     keep = order + [k for k in (recs[0] if recs else {}) if k not in order]
     return write("3_indian_country_deals_2025_2026.csv", recs, keep)
 
