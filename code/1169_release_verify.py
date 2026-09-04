@@ -378,26 +378,59 @@ def check_preview_complete() -> Check:
         c.detail = f"manifest unreadable: {e}"
         return c
     rows = declared if isinstance(declared, list) else declared.get("datasets", [])
-    names = {r.get("dataset") for r in rows if isinstance(r, dict) and r.get("dataset")}
+    rows = [r for r in rows if isinstance(r, dict) and r.get("dataset")]
+    # Codex, PR #48, and it is right: when 1151 cannot find a delivered
+    # source it still writes a manifest row - `{"dataset": "gaming", "note":
+    # "delivered file absent"}` - and leaves whatever preview an EARLIER
+    # build left on disk. Counting that row as a declaration let a stale,
+    # nonempty CSV from last week pass a check whose whole claim is that the
+    # preview set is current. A row carrying `note` is a declared failure,
+    # and a declaration of counts is compared with the file it describes.
+    failed = sorted(r["dataset"] for r in rows if r.get("note"))
+    declared_ok = {r["dataset"]: r for r in rows if not r.get("note")}
+    names = set(declared_ok)
     on_disk = {p.stem for p in PREVIEW.glob("*.csv")}
     missing = sorted(names - on_disk)
-    undeclared = sorted(on_disk - names)
-    # A declared preview that is empty is as bad as one that is absent.
-    empty = sorted(p.stem for p in PREVIEW.glob("*.csv")
-                   if sum(1 for _ in p.open(encoding="utf-8-sig",
-                                            errors="replace")) <= 1)
-    c.measured = {"declared": len(names), "on_disk": len(on_disk),
-                  "missing": len(missing), "undeclared": len(undeclared),
-                  "empty": len(empty)}
+    undeclared = sorted(on_disk - names - set(failed))
+    stale = sorted(set(failed) & on_disk)
+    # A declared preview that is empty is as bad as one that is absent, and
+    # one whose shape is not the shape the manifest declares was not written
+    # by the build that wrote the manifest.
+    empty, mismatched = [], []
+    for name in sorted(names & on_disk):
+        path = PREVIEW / f"{name}.csv"
+        with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            rd = csv.reader(fh)
+            header = next(rd, None) or []
+            n_rows = sum(1 for _ in rd)
+        if n_rows == 0:
+            empty.append(name)
+            continue
+        want = declared_ok[name]
+        if (want.get("rows") is not None and int(want["rows"]) != n_rows) or (
+                want.get("columns") is not None and int(want["columns"]) != len(header)):
+            mismatched.append(f"{name} (declared {want.get('rows')}x"
+                              f"{want.get('columns')}, file {n_rows}x{len(header)})")
+    c.measured = {"declared": len(names), "declared_failed": len(failed),
+                  "on_disk": len(on_disk), "missing": len(missing),
+                  "undeclared": len(undeclared), "stale": len(stale),
+                  "empty": len(empty), "mismatched": len(mismatched)}
     problems = []
+    if failed:
+        problems.append(f"manifest records a failed preview: {failed}")
+    if stale:
+        problems.append(f"a file on disk that the manifest says was NOT built: {stale}")
     if missing:
         problems.append(f"declared but absent: {missing}")
     if undeclared:
         problems.append(f"on disk but undeclared: {undeclared}")
     if empty:
         problems.append(f"header only, no rows: {empty}")
+    if mismatched:
+        problems.append(f"file does not match its declaration: {mismatched}")
     c.status = "PASS" if not problems else "FAIL"
-    c.detail = (f"{len(names)} declared, {len(on_disk)} on disk, all present"
+    c.detail = (f"{len(names)} declared, {len(on_disk)} on disk, all present "
+                f"and as declared"
                 if not problems else "; ".join(problems))
     return c
 
@@ -466,8 +499,8 @@ def _fixture_fails(name, build, run):
     reimplementation of it.
     """
     import tempfile
-    global CUSTOMER, DB, CLEAN, SPINE
-    saved = (CUSTOMER, DB, CLEAN, SPINE)
+    global CUSTOMER, DB, CLEAN, SPINE, PREVIEW
+    saved = (CUSTOMER, DB, CLEAN, SPINE, PREVIEW)
     try:
         with tempfile.TemporaryDirectory() as d:
             build(Path(d))
@@ -476,7 +509,7 @@ def _fixture_fails(name, build, run):
             print(f"    {'ok  ' if ok else 'FAIL'}  {name}  (returned {got.status})")
             return ok
     finally:
-        CUSTOMER, DB, CLEAN, SPINE = saved
+        CUSTOMER, DB, CLEAN, SPINE, PREVIEW = saved
         globals()["_RULING_OVERRIDE"] = None
 
 
@@ -578,6 +611,65 @@ def selftest() -> int:
 
     ok.append(_fixture_fails("a verified denial still attributed in the data",
                              b5, check_rulings_applied))
+
+    # 5b. The preview set, in the three ways it can lie. Codex, PR #48: the
+    #     check was added to `run_all()` and this selftest still exercised
+    #     seven, so it could regress to an unconditional PASS while the
+    #     positive control stayed green. Each fixture is the REAL check run
+    #     against a planted preview tree.
+    def _preview_tree(root, manifest_rows, files):
+        global PREVIEW
+        PREVIEW = root / "preview"
+        PREVIEW.mkdir()
+        (PREVIEW / "MANIFEST.json").write_text(
+            json.dumps({"built": "2026-09-04", "rows_per_dataset": 10,
+                        "datasets": manifest_rows}), encoding="utf-8")
+        for name, text in files.items():
+            (PREVIEW / f"{name}.csv").write_text(text, encoding="utf-8")
+
+    def b6(root):
+        # A failed row and a stale file from an earlier build, Codex's case.
+        _preview_tree(root,
+                      [{"dataset": "deals", "rows": 1, "columns": 2},
+                       {"dataset": "gaming", "note": "delivered file absent"}],
+                      {"deals": "a,b\n1,2\n", "gaming": "a,b\nstale,row\n"})
+
+    def b7(root):
+        # A declared preview whose file has a different shape than declared.
+        _preview_tree(root, [{"dataset": "deals", "rows": 10, "columns": 2}],
+                      {"deals": "a,b\n1,2\n"})
+
+    def b8(root):
+        # Declared but absent, undeclared on disk, and header-only.
+        _preview_tree(root,
+                      [{"dataset": "deals", "rows": 1, "columns": 2},
+                       {"dataset": "funding", "rows": 1, "columns": 1}],
+                      {"deals": "a,b\n", "nest": "a\n1\n"})
+
+    for label, build_fn in (("a preview the manifest says was NOT built, still on disk", b6),
+                            ("a preview whose shape is not the one declared", b7),
+                            ("a declared preview absent, an undeclared one present, an empty one", b8)):
+        ok.append(_fixture_fails(label, build_fn, check_preview_complete))
+
+    # 5c. And the control: a preview set that is complete and as declared
+    #     must PASS, or the check is a wall rather than a gate.
+    def _preview_passes():
+        global PREVIEW
+        import tempfile
+        saved = PREVIEW
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                _preview_tree(Path(d), [{"dataset": "deals", "rows": 1, "columns": 2}],
+                              {"deals": "a,b\n1,2\n"})
+                got = check_preview_complete()
+                good = got.status == "PASS"
+                print(f"    {'ok  ' if good else 'FAIL'}  a complete preview set passes  "
+                      f"(returned {got.status})")
+                return good
+        finally:
+            PREVIEW = saved
+
+    ok.append(_preview_passes())
 
     # 6 and 7. The two checks with no implementation yet must say exactly that
     #    and must block. An absent check has to read as absent, never as a pass;
