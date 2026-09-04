@@ -121,7 +121,7 @@ from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, GROVE_SHELVES, BUILD_SHELVES,
     N_STOREFRONT_EXPECTED, N_BUILT_EXPECTED,
     row_ok, publishable_columns, shelves, subaward_warning,
-    translate_neid_values,
+    translate_neid_values, enforce_denials,
     BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
     is_publication_eligible, mask_attribution, MASK,
     LOBBYING_FILE, LOBBYING_FENCE, lobbying_overstatement, lobbying_warning,
@@ -196,7 +196,7 @@ def load(path, gate=True, masked=None):
         rd = csv.DictReader(fh)
         hdr = publishable_columns(rd.fieldnames or [])
         rows, held = [], defaultdict(int)
-        neid_translated, neid_ambiguous = [0], [0]
+        neid_translated, neid_ambiguous, neid_denied = [0], [0], [0]
         for r in rd:
             # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
             # so projecting first removes the personal-contact fields; running
@@ -217,6 +217,12 @@ def load(path, gate=True, masked=None):
             # Cedar's own key. The 12 NEIDs that claim more than one uid are
             # refused and left standing rather than guessed.
             n_tr, n_amb = translate_neid_values(r)
+            # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY DATASET.
+            # Applying the municipal-PHA ruling to the assistance table left 14
+            # rows of the DELIVERED subcontracting.csv still carrying
+            # sub_cedar_uid = CE-0017W-FN for the Omaha city housing authority,
+            # $3,221,778.36. Per-table application cannot close that; this can.
+            neid_denied[0] += enforce_denials(r)
             neid_translated[0] += n_tr
             neid_ambiguous[0] += n_amb
             if gate:

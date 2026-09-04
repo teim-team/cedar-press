@@ -522,3 +522,20 @@ Nothing was written to `subawards.csv`: it has no `attributed_flag`,
 `attribution_status` or `excluded_flag`, so the exclusion shape used above does
 not exist in it, and copying one over would fork the convention. It needs its
 own decision.
+
+### A concurrent edit on `code/174`, recorded rather than quietly resolved
+
+Two workstreams reached this script within the same three minutes on 2026-09-04
+and both added a funding applier. For about two minutes the file held **two
+functions named `apply_funding`** and a call site using the older signature —
+`AGENT_FIELD_GUIDE.md` rule 16 exactly (*two blocks with one name are one block
+to the preserver*), this time in Python. It resolved on its own at 14:27:35 to
+the streamed, selftested version described above, and the other agent also
+landed a real improvement that is now live: `live_elsewhere()` no longer asks
+*how old is this file* but *is it still moving* — it samples mtime and size,
+waits `LIVENESS_SAMPLE_S`, and samples again, which is the measurement rather
+than a correlate of it.
+
+Two inert residues are left in place deliberately rather than raced over:
+`_RULING_OVERRIDE = None` at module level, now unused, and this paragraph. An
+integrator may drop the first.

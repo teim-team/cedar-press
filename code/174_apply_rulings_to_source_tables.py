@@ -136,9 +136,6 @@ PRIME = CLEAN / "prime_contracts.csv"
 LEDGER = CLEAN / "cedar_identifier_ledger_final.csv"
 FUND = CLEAN / "federal_funding_transactions.csv"
 
-# Set only by a test, so apply_funding can run against a planted ruling.
-_RULING_OVERRIDE = None
-
 NEW_COLS = ("ruling_status", "ruling_source_file", "ruling_applied_date")
 
 # The tier-X exclusion shape 115_pull_assistance_archive.py writes and
