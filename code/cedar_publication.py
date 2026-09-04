@@ -112,9 +112,11 @@ everything is not.
 """
 from __future__ import annotations
 
+import csv
 import importlib.util
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -177,6 +179,250 @@ GATES = {"publishable": {"Y", "y", "1", "true", "TRUE", ""},
                                  ""}}
 
 # ---------------------------------------------------------------------------
+# ADJUDICATION STATES - THE DENY-BY-DEFAULT PUBLICATION POLICY  (CP-002)
+# ---------------------------------------------------------------------------
+# Added 2026-09-02 by `1153`. The outside QA review's CP-002 asked for
+# ONE shared, deny-by-default `is_publication_eligible` policy applied before
+# export rather than each builder deciding for itself, and it was right: the
+# export was publishing rows the pipeline had already marked unsafe.
+#
+# THE POLICY IS NOT "DROP EVERY BLOCKED STATE". Three different things were
+# being called one thing, and they need three different answers:
+#
+#   WITHHOLD  the row is not a record. A subaward filed twice is one subaward;
+#             an unadjudicated Native/not-Native call is not a finding yet.
+#   MASK      the ROW is a real public record and must ship, but the CEDAR
+#             ATTRIBUTION on it is one the pipeline itself has withdrawn, held
+#             or contradicted. Keep the award, withhold the owner.
+#   FLAG      the state is a fact about the record that the buyer needs to SEE,
+#             not a reason to hide it. A superseded LDA filing was really filed.
+#
+# DENY-BY-DEFAULT means the VOCABULARY is the allow-list, exactly as `GATES`
+# works: a value that is not enumerated below WITHHOLDS the row and names
+# itself in the reason. Every vocabulary here was enumerated by counting the
+# live delivered file, not guessed - see `docs/PUBLICATION_ELIGIBILITY.md`.
+# A blank is PUBLISH, the same convention as `GATES`: a blank state column
+# means the gate was never evaluated for that row, not that it failed.
+#
+# ONLY COLUMNS CEDAR'S OWN PIPELINE WRITES ARE LISTED. A column absent from a
+# row is not tested, so a table that does not carry `ruling_status` is not
+# affected by the `ruling_status` policy.
+PUBLISH, FLAG, MASK, WITHHOLD = "PUBLISH", "FLAG", "MASK", "WITHHOLD"
+
+BLOCKED_STATES = {
+    # -- subcontracting -----------------------------------------------------
+    # `45_promote_subawards.py` measured both of these and neither is a second
+    # subaward. `exact_repeat_within_source` is a same-source re-filing on the
+    # six-field identity tuple (prime award key, subaward number, subawardee
+    # UEI, action date, amount, description) - `121` found ONE $57,500
+    # subaward re-filed to SAM 93 times across 2022-08..2025-01.
+    # `superseded_by_primary_source` is a HigherGov rendering of a filing
+    # USAspending already supplied. The declared grain of the delivered file is
+    # one row per SUBAWARD, so both violate it. Nothing is deleted: every row
+    # stays in `data/clean/subawards.csv` with its status.
+    "duplicate_status": {
+        "primary": PUBLISH,
+        "exact_repeat_within_source": WITHHOLD,
+        "superseded_by_primary_source": WITHHOLD,
+    },
+    # -- nonprofits ---------------------------------------------------------
+    # The one thing this project refuses to do is publish an unadjudicated
+    # Native / not-Native call, so `NATIVE_PROPOSED_AWAITING_OWNER_RULING` is
+    # withheld outright - it is a PROPOSAL waiting on the owner, and 41 of the
+    # 73 carry a cedar_uid that would read as settled.
+    # `CONFLICT_EXCLUDED_AND_RULED_NATIVE` is the record contradicting itself.
+    # Everything else here is a STATED position - excluded, verified, or an
+    # openly-labelled candidate - and a candidate that says it is a candidate
+    # is a finding, not a leak.
+    "disposition": {
+        "NATIVE_PROPOSED_AWAITING_OWNER_RULING": WITHHOLD,
+        "CONFLICT_EXCLUDED_AND_RULED_NATIVE": WITHHOLD,
+        "NATIVE_VERIFIED_STRICT": PUBLISH,
+        "NATIVE_RULED_VERIFIED": PUBLISH,
+        "EXCLUDED_PRIOR_RULING": FLAG,
+        "EXCLUDED_PLACE_NAME_COINCIDENCE": FLAG,
+        "CANDIDATE_NAME_ONLY": FLAG,
+        "CANDIDATE_NAME_MATCH_UNVERIFIED": FLAG,
+        "CANDIDATE_NAME_MATCH_GENERIC_TOKEN_ONLY": FLAG,
+        "CANDIDATE_STATE_VALIDATED": FLAG,
+    },
+    # The KEY review is a different question from the Native/not-Native
+    # question: it asks whether the cedar_uid on the row is the RIGHT Native
+    # entity. Three of its five values say it is not settled, and all three
+    # MASK - the organisation is real and ships, the contested key does not.
+    # `HELD_STATE_DISAGREES` is the place-name collision family measured in
+    # `docs/ENTITY_LAYER_DEEPENING_2026-09-02.md` (461 of 1,423 live keys).
+    # `REFUSED_PLACE_NAME_IS_THE_ADDRESS` added 2026-09-02 by `code/1155` - the
+    # collision `HELD_STATE_DISAGREES` cannot see, because a town named after a
+    # nation is almost always IN that nation's state, so state agreement is
+    # anti-correlated with correctness here. Measured: of a seeded 150-row
+    # sample of the 888 keys reading SUPPORTED, 105 were wrong. It MASKs for the
+    # same reason the other three do - the IRS record is real and ships, the
+    # contested key does not. It is a ONE-LINE dependency of `1155`, whose
+    # `verify` fails if this entry is missing, because deny-by-default would
+    # otherwise WITHHOLD 297 real filings instead of masking their keys.
+    "key_review_disposition": {
+        "SUPPORTED": PUBLISH,
+        "HELD_STATE_DISAGREES": MASK,
+        "REDIRECT_PROPOSED": MASK,
+        "REFUSED_GENERIC_TOKEN_ONLY": MASK,
+        "REFUSED_PLACE_NAME_IS_THE_ADDRESS": MASK,
+    },
+    # -- contractors --------------------------------------------------------
+    # CP-020. `CONTRADICTED_AS_OF` is the temporal-ownership model saying the
+    # owner on this row is contradicted AT THE TRANSACTION DATE. The award is a
+    # real FPDS record and ships; the owner does not.
+    # The other nine values are the model saying it could not COVER the row -
+    # not evaluated, no fact on the subject, ambiguous overlap. Absence of a
+    # covering fact is not a contradiction, and treating it as one would
+    # withhold 145,569 attributions the model never disputed.
+    "owner_attribution_status": {
+        "CONTRADICTED_AS_OF": MASK,
+        "CONFIRMED_AS_OF": PUBLISH,
+        "NO_OWNER_ATTRIBUTED": PUBLISH,
+        "NOT_EVALUATED": FLAG,
+        "RESOLVED_OWNER_NOT_IN_CEDAR": FLAG,
+        "UNKNOWN_OUTSIDE_EVIDENCE": FLAG,
+        "AMBIGUOUS_OVERLAP": FLAG,
+        "AMBIGUOUS_GRANULARITY": FLAG,
+        "NO_FACT_ON_SUBJECT": FLAG,
+        "NO_COVERING_FACT": FLAG,
+    },
+    # CP-017/CP-018, and START_HERE trap 1b in a fifth vocabulary: *a ruled
+    # method is not a positive ruling*. Six of these ten values are NEGATIVE or
+    # UNSETTLED rulings and the delivered file carried `attributed_flag = 1`
+    # on all of them - 559 rows RULED **NOT NATIVE** shipped as attributions.
+    # `RULED_TIER_UNSTATED` is deliberately FLAG, not MASK: it is a positive
+    # human ruling missing a confidence annotation, and masking 39,790 ruled
+    # attributions over a metadata gap would destroy real adjudication work.
+    "ruling_status": {
+        "RULED_ATTRIBUTED": PUBLISH,
+        "RULED_TIER_UNSTATED": FLAG,
+        "RULED_NOT_NATIVE": MASK,
+        "RULED_CLASS_ONLY": MASK,
+        "RULED_HOLD": MASK,
+        "RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED": MASK,
+        "RULING_CONFLICT": MASK,
+        "RULED_OWNER_NOT_IN_SPINE": FLAG,
+        "RULED_TIER_C_NOT_ATTRIBUTED": MASK,
+    },
+    # `1079`'s own disposition on the ruling behind the row. HOLD and
+    # WITHDRAWN are unambiguous - CP-018's example row is literally
+    # `RULED_HOLD` + `WITHDRAWN_BY_1079` + `NO_OWNER_ATTRIBUTED` shipping a
+    # Native owner. `REPOINTED_BY_1079` is a ruling 1079 CORRECTED, which is
+    # an adjudication, not a hold.
+    #
+    # `identifier_ruling_quarantined = Y` is NOT policed here and that is
+    # deliberate. CP-016's release test ("published count where quarantined = Y
+    # must equal zero") reaches 227,540 rows carrying $30.26B of attribution,
+    # including 39,459 `RULED_TIER_UNSTATED` and 3,469 `RULED_ATTRIBUTED`
+    # rows - positive rulings inside a quarantined BATCH. What quarantine means
+    # for publication is an owner ruling, not a builder's guess. Open as
+    # QA-CP016 in docs/PUBLICATION_ELIGIBILITY.md.
+    "identifier_ruling_review": {
+        "KEEP": PUBLISH,
+        "REPOINTED_BY_1079": PUBLISH,
+        "HOLD": MASK,
+        "WITHDRAWN_BY_1079": MASK,
+    },
+    # -- lobbying -----------------------------------------------------------
+    # KEPT AND FLAGGED, every value. A superseded LDA filing is a real filed
+    # public record and the supersession is part of what a buyer is buying -
+    # dropping it would delete the amendment history the LDA creates. What must
+    # not happen is a buyer summing spend across an original and its amendment,
+    # and that is a MONEY rule, not a row rule: see `LOBBYING_FENCE` below.
+    "supersession_status": {
+        "NOT_SUPERSEDED": PUBLISH,
+        "AMENDMENT_SURVIVOR": PUBLISH,
+        "REGISTRATION_NO_MONEY": PUBLISH,
+        "SUPERSEDED_BY_AMENDMENT": FLAG,
+        "SUPERSEDED_BY_LATER_AMENDMENT": FLAG,
+        "UNFLAGGED_DUPLICATE_CANDIDATE": FLAG,
+        "AMBIGUOUS_MULTIPLE_ORIGINALS": FLAG,
+        "AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT": FLAG,
+    },
+}
+
+# ---------------------------------------------------------------------------
+# ONE STATE COLUMN IS NOT ALWAYS ENOUGH  (CP-016, resolved 2026-09-02)
+# ---------------------------------------------------------------------------
+# `BLOCKED_STATES` asks one question of one column. This asks a CONJUNCTION,
+# and CP-016 is why it has to exist.
+#
+# THE ESCALATION THAT SHOULD NOT HAVE HAPPENED. `1153` first logged
+# `identifier_ruling_quarantined = Y` - 227,540 rows, $30.26B of attribution -
+# as needing an owner ruling, on the reasoning that 3,469 of them read
+# `ruling_status = RULED_ATTRIBUTED` and a positive human ruling should not be
+# discarded by a batch-level quarantine. **The premise was false and it is
+# measurable.** Those 3,469 rows are `cluster_v3` (3,330) and `need_v6` (139),
+# every one of them tier B:
+#
+#   * `cluster_v3`'s own `tier_rationale` reads "Algorithmic name clustering,
+#     unreviewed". ADR: "a `cluster_v3` guess"; "a resolver output - Cedar
+#     agreeing with itself".
+#   * `need_v6` is START_HERE trap 1 by name - **6.5% accurate, never
+#     publishes alone**.
+#   * `ENTITY_MATCH_RULES` rule 8 reserves tier A for an owner ruling, and
+#     **no row anywhere inside the quarantine is tier A** - 227,540 of 227,540
+#     are B, on `identifier_ruling_tier` AND on `confidence_tier`.
+#
+# So `RULED_ATTRIBUTED` here is not an adjudication. It is the output of a
+# quarantined method wearing a status name that reads like one - START_HERE
+# trap 1b in a sixth vocabulary, and the naming defect is logged separately in
+# `docs/KNOWN_ISSUES.md` (QA-STATUS-VOCAB).
+#
+# AND THE STATUS NAME IS THE WRONG THING TO KEY ON. Masking only the rows
+# labelled `RULED_ATTRIBUTED` would have cleared 1,405 still-attributed rows
+# and left the 55,736 quarantined `cluster_v3` rows carrying **$16.00B** that
+# have no `ruling_status` at all - the same method, the same tier, the same
+# quarantine, and no misleading label to catch the eye. The defect is the
+# METHOD, so the rule is keyed on the method's quarantine and on the tier.
+#
+# WHY `!= A` AND NOT "EVERYTHING IN THE QUARANTINE". Nothing in the quarantine
+# is tier A today, so the two are the same set right now. They stop being the
+# same set the moment an owner rules on one of these identifiers, and at that
+# moment this rule must let go of it by itself. Read the SIGN, not the batch.
+BLOCKED_COMBINATIONS = (
+    {"reason": "quarantined_method_not_ruled_tier_A",
+     "when": {"identifier_ruling_quarantined": {"Y"}},
+     "unless": {"identifier_ruling_tier": {"A"}},
+     "disposition": MASK},
+)
+
+# What a MASK blanks, per state column. Named per column rather than globally
+# because `cedar_uid` is the only name these tables share and the rest differ:
+# masking `entity_id` in nonprofits would blank the ORGANISATION's own id,
+# which is the row's subject and must survive.
+MASK_COLS = {
+    # keyed by the state column, or by a `BLOCKED_COMBINATIONS` reason
+    "quarantined_method_not_ruled_tier_A": ("cedar_uid", "tribe_id",
+                                            "canonical_name"),
+    "owner_attribution_status": ("cedar_uid", "tribe_id", "canonical_name"),
+    "ruling_status": ("cedar_uid", "tribe_id", "canonical_name"),
+    "identifier_ruling_review": ("cedar_uid", "tribe_id", "canonical_name"),
+    "key_review_disposition": ("cedar_uid", "tribe_id", "tribe_canonical_name",
+                               "cedar_spine_entity_id",
+                               "cedar_spine_canonical_name", "cedar_link_key"),
+}
+
+# A boolean that ASSERTS the attribution. When a mask fires it must be set to
+# the negative, not left at 1 - CP-017 is precisely that `attributed_flag = 1`
+# survived on rows whose adjudication columns said otherwise. Written as "0",
+# not blanked: blank means "never evaluated", and this WAS evaluated.
+MASK_FLAGS = ("attributed_flag",)
+
+#: The delivered lobbying spreadsheet, and the fence that makes its money
+#: columns summable. Superseded filings are PUBLISHED - see above - so the
+#: fence, not a row gate, is what stops the double count.
+LOBBYING_FILE = "lobbying.csv"
+LOBBYING_FENCE = ("supersession_status NOT IN ('SUPERSEDED_BY_AMENDMENT', "
+                  "'SUPERSEDED_BY_LATER_AMENDMENT', "
+                  "'UNFLAGGED_DUPLICATE_CANDIDATE', "
+                  "'AMBIGUOUS_MULTIPLE_ORIGINALS', "
+                  "'AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT')",
+                  "attribution_withdrawn != '1'")
+
+# ---------------------------------------------------------------------------
 # COLUMN-LEVEL PUBLICATION RULES
 # ---------------------------------------------------------------------------
 # Proprietary identifiers: licensed internal-only, never shipped. These drop as
@@ -187,6 +433,214 @@ GATES = {"publishable": {"Y", "y", "1", "true", "TRUE", ""},
 # every entry here must be lower case or it can never match.
 DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
              "ultimate_duns", "parent_duns")
+
+# RETIRED IDENTITY SCHEME - the CICD NEID. Dropped as COLUMNS, like DROP_COLS.
+#
+# Owner, 2026-09-01: *"I think the CICD ID system sucks ass. Just remove it. We
+# don't need to use it. No one uses CICD data, so it's not like we have to link
+# ours to theirs. They should link ours to ours."*
+#
+# Owner again, 2026-09-03, on finding it still in the tree: *"I told you not to
+# use these CICD IDs anymore. I don't know why we still are. We are using our
+# own system."*
+#
+# `code/843_retire_cicd_scheme.py` did the retirement on 2026-09-01 and it was
+# real, but it named THREE FILES by hand - the register, the funding
+# transactions and the funding tribe-year panel. Measured 2026-09-03: **77
+# files in data/clean still carry a bare `tribe_id`**, and SEVEN of the twelve
+# customer datasets were still shipping a NEID as identity. A retirement that
+# enumerates its targets does not survive the next build that writes a new file.
+# So the rule moves here, to the file every extract already consults.
+#
+# MEASURED SAFE BEFORE BEING WRITTEN. Cedar's own key covers every row that
+# carries a NEID, with the counts matching exactly:
+#
+#   contractors      636,459 tribe_id / 636,459 cedar_uid / 0 orphaned
+#   federal-register  10,396 /  10,396 / 0
+#   gaming               785 /     785 / 0
+#   nonprofits           555 /     555 / 0
+#   subcontracting    32,203 prime_native_tribe_id / 32,203 prime_cedar_uid / 0
+#                     38,563 sub_native_tribe_id   / 38,563 sub_cedar_uid   / 0
+#   legislation          591 entity_tribe_ids      /    591 entity_cedar_uids
+#
+# Dropping these costs no identity anywhere. It removes a second, worse answer
+# sitting beside the right one - 843's own words for why this was safe.
+NEID_COLS = (
+    "tribe_id",
+    "tribe_id_neid",
+    "entity_tribe_ids",
+    "prime_native_tribe_id",
+    "sub_native_tribe_id",
+    "subaward_entity_rollup__tribe_id",
+    "tribe_id_token_match",
+    "bie_uio_dollars_by_entity__tribe_id",
+)
+
+# THE NEID VALUES, WHICH THE COLUMN GATE ABOVE DOES NOT REACH.
+#
+# The gate above removes columns whose NAME says NEID. Measured immediately
+# after it shipped, on 2026-09-03: **89,680 retired NEID values were still
+# leaving on 45,213 rows, in 22 columns across 8 datasets** - under names that
+# say nothing about the scheme.
+#
+#     26,513  lobbying.entity_id
+#     18,972  nagpra.affiliated_entity_ids
+#     17,104  nagpra.consulted_entity_ids
+#      5,820  nest.owner_hub_handle
+#      3,576  native-owned-businesses.certifying_authority_entity_id
+#
+# A name gate was never going to be enough, and the owner's complaint - "I told
+# you not to use these CICD IDs anymore" - was still true after it.
+#
+# DELETION IS THE WRONG FIX. `nagpra` and `native-owned-businesses` carry NO
+# cedar_uid at all; these ARE their only entity keys. Dropping them would leave
+# two datasets unable to name a party. So the retired identifier is TRANSLATED
+# to Cedar's own, which is what "we are using our own system" actually requires.
+#
+# WHY THIS IS DETECTED BY VOCABULARY AND NEVER BY SHAPE. A regex for the NEID
+# pattern is wrong in both directions, measured: it matches `DPW-00229-01`
+# inside a contract description and `SR-2012-11` as a subaward number, and it
+# MISSES the extended Alaska form `AKNF-ACSRMT-00-CALSTA-ASVCPR`. Membership in
+# the harvested vocabulary is exact; a shape test is a guess wearing a regex.
+_NEID_MAP: dict = {}
+_NEID_AMBIGUOUS: dict = {}
+
+
+def neid_map():
+    """NEID -> cedar_uid, but ONLY where exactly one uid claims that NEID.
+
+    Measured 2026-09-03: 1,555 NEIDs, of which 1,543 resolve to a single uid
+    and **12 do not**. Those twelve are the identity collisions that
+    `code/1167_cedar_uid_identity_collisions.py` reports as MERGE - one key
+    naming two entities (`ANRC-CKINLT-00` claims four uids; `ANVC-CAPEFO-00`
+    claims three). Translating one of those would be picking a winner in an
+    unresolved adjudication and writing the guess into a customer file, so they
+    are refused and left standing. 1,954 of the 89,680 shipping values are
+    theirs; the other 87,726 (97.82%) translate exactly.
+    """
+    global _NEID_MAP, _NEID_AMBIGUOUS
+    if _NEID_MAP or _NEID_AMBIGUOUS:
+        return _NEID_MAP
+    from collections import defaultdict as _dd
+    claims = _dd(set)
+    sources = ((ROOT / "data/spine/cedar_identity_register.csv", "handle"),
+               (ROOT / "data/clean/cedar_identifier_ledger_final.csv", "tribe_id"))
+    for path, key in sources:
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            for row in csv.DictReader(fh):
+                neid = (row.get(key) or "").strip()
+                uid = (row.get("cedar_uid") or "").strip()
+                if neid and uid:
+                    claims[neid].add(uid)
+    _NEID_MAP = {k: next(iter(v)) for k, v in claims.items() if len(v) == 1}
+    _NEID_AMBIGUOUS = {k: sorted(v) for k, v in claims.items() if len(v) > 1}
+    return _NEID_MAP
+
+
+def translate_neid_values(row: dict):
+    """Rewrite retired NEIDs to Cedar's own key, in place. Returns (n, n_left).
+
+    Pipe-delimited multi-value cells are handled member by member -
+    `nagpra.affiliated_entity_ids` holds up to dozens per cell, and replacing
+    the whole cell would destroy the list. A member that cannot be translated
+    is left EXACTLY as it was rather than blanked: a wrong-but-traceable key
+    beats a hole, and it keeps the residue countable.
+    """
+    mapping = neid_map()
+    done = left = 0
+    for col, val in row.items():
+        if not val or not isinstance(val, str):
+            continue
+        if "-" not in val:
+            continue                      # no NEID has ever lacked a hyphen
+        parts = val.split("|")
+        out, hit = [], False
+        for part in parts:
+            token = part.strip()
+            if token in mapping:
+                out.append(mapping[token])
+                done += 1
+                hit = True
+            else:
+                if token in _NEID_AMBIGUOUS:
+                    left += 1
+                out.append(part)
+        if hit:
+            row[col] = "|".join(out)
+    return done, left
+
+
+# INTERNAL WORKING COLUMNS. 843 states plainly that the `*_proposed*` columns
+# "are internal and never shipped" - and then `funding.csv` shipped four of
+# them, on 419,523 rows. They are a PROPOSAL that no one has adjudicated, which
+# is why 67,826 funding rows carried a proposed NEID and no cedar_uid: those
+# rows have no settled identity at all, and shipping the proposal made it look
+# as though they did. That is the worst of the three defects here, because a
+# customer cannot tell a proposal from a decision by looking at it.
+PROPOSED_COLS = (
+    "ledger_proposed_tribe_id",
+    "tribe_id_neid_proposed",
+    "tribe_id_neid_proposed_tier",
+    "tribe_id_neid_proposed_basis",
+)
+
+# BUILD LINEAGE - how Cedar made the row, not where the fact came from.
+# Added 2026-09-02 by `1153`, beside `DROP_COLS` because it is the same KIND of
+# rule: the row is ours, this column is not the customer's business.
+#
+#   *"A Python file, a local review CSV, a ZIP archive, or a desktop path may
+#    explain how Cedar built a row, but none is the evidentiary source a
+#    customer needs."*   - QA review 2026-09-02
+#
+# THE LIST IS BY COLUMN NAME AND IT IS ENUMERATED, NOT PATTERN-MATCHED ON
+# VALUES, AND THAT IS THE WHOLE DESIGN. A value scan looks decisive and is
+# wrong: `natural-resources.record_scope_basis` quotes Interior's own aggregate
+# -release rule VERBATIM with the URL beside it, `contractors.geo_key_basis`
+# names the crosswalk the county came from, `gaming.gaming_class_basis` names
+# the ordinance table and says the grain is tribe not facility. Every one of
+# those contains a `.csv` or a `/` and every one is EVIDENCE. Dropping columns
+# because a regex found a filename in them would delete the best provenance in
+# the product. So: `_basis` is NOT a lineage suffix. Only a name that says
+# "which script or which local file produced this" is.
+#
+# Each entry was measured against the delivered file before it was added, and
+# for each one a real source column survives the drop - `source_url`,
+# `source_vintage`, `Source_1`, `federal_link_method`, `record_basis`,
+# `ruling_status`. See `docs/PUBLICATION_ELIGIBILITY.md` for the per-column
+# measurement and what replaces it.
+#
+# Lower case, compared case-insensitively, same as DROP_COLS.
+LINEAGE_COLS = (
+    # 100% a local file path or partition label, on every filled row
+    "source_file",            # contractors "master prime file.dta";
+                              # subcontracting "usaspending_2026-08-12/fy2021";
+                              # funding a bulk-download filename; legislation
+                              # "tribal_bill_intros.csv". NB `source_files`
+                              # (plural, nonprofits) is NOT this - it holds
+                              # funnel labels ("candidates|strict") and stays.
+    "_source_file",           # deals, leading-underscore internal
+    "ruling_source_file",     # contractors, review/ CSV paths, 100%
+    "federal_link_detail_file",   # native-owned-businesses, points at
+                                  # data/clean/native_business_contract_links.csv
+    "federal_link_basis",     # native-owned-businesses: "promoted verbatim
+                              # from <internal table> (built by code/1001...)".
+                              # A `_basis` column that carries no evidence -
+                              # the evidence is in `federal_link_method` and
+                              # `federal_identifier_match_basis`, both kept.
+    "raw_snapshot_uri",       # native-owned-businesses, data/staging paths
+    "built_by",               # `nest_entity_dual_role.built_by`. Reached the
+                              # export as `nest_entity_dual_role__built_by`
+                              # because 1137 prefixes a joined column with its
+                              # source table - which is why the check below
+                              # strips the join prefix before testing.
+)
+
+# Suffixes that can only mean lineage. `built_by` and `by_script` name a
+# BUILDER; no evidentiary field is called that.
+LINEAGE_SUFFIXES = ("built_by_script", "_built_by", "__built_by", "_by_script",
+                    "__source_file")
 
 # Fiscal-year column names, in preference order. Used to split an oversized
 # table by a column a buyer would have asked for rather than by byte offset.
@@ -334,6 +788,95 @@ def row_ok(r: dict) -> tuple[bool, str]:
     return True, ""
 
 
+def adjudication(r) -> tuple[str, str]:
+    """(disposition, reason) for one row against `BLOCKED_STATES`.
+
+    Deny-by-default: a value this policy has never seen WITHHOLDS and names
+    itself, so a new vocabulary entry upstream is loud instead of silent.
+
+    The strongest disposition on the row wins - WITHHOLD over MASK over FLAG -
+    because a row can trip two policies at once (a contractors row is commonly
+    `RULED_HOLD` and `WITHDRAWN_BY_1079` together).
+    """
+    rank = {PUBLISH: 0, FLAG: 1, MASK: 2, WITHHOLD: 3}
+    best, why = PUBLISH, ""
+    for col, vocab in BLOCKED_STATES.items():
+        if col not in r:
+            continue
+        v = (r.get(col) or "").strip()
+        if not v:
+            continue          # never evaluated, same convention as GATES
+        d = vocab.get(v)
+        if d is None:
+            # Deny-by-default. Case-insensitive second look first, because
+            # `duplicate_status` is lower case and `disposition` is upper and
+            # a vocabulary that changes case is not a new state.
+            d = next((x for k, x in vocab.items() if k.lower() == v.lower()),
+                     None)
+        if d is None:
+            return WITHHOLD, f"unknown_state:{col}={v}"
+        if rank[d] > rank[best]:
+            best, why = d, f"{col}={v}"
+    # Conjunctions last: they outrank a single-column PUBLISH or FLAG, because
+    # the whole reason one exists is that no single column carries the fact.
+    for rule in BLOCKED_COMBINATIONS:
+        if not all(c in r and (r.get(c) or "").strip() in vals
+                   for c, vals in rule["when"].items()):
+            continue
+        if any(c in r and (r.get(c) or "").strip() in vals
+               for c, vals in rule.get("unless", {}).items()):
+            continue
+        d = rule["disposition"]
+        if rank[d] > rank[best]:
+            best, why = d, rule["reason"]
+    return best, why
+
+
+def mask_attribution(r, state_reason: str) -> int:
+    """Blank the Cedar attribution on a row whose adjudication withdrew it.
+
+    Mutates `r` in place and returns how many cells it cleared. The ROW is
+    kept - it is a real public record - and the state column that caused the
+    mask is left in the row, so the export still SAYS why the owner is absent.
+    """
+    # A single-column reason is `<column>=<value>`; a conjunction reason is a
+    # bare name from `BLOCKED_COMBINATIONS`. Both index `MASK_COLS`.
+    col = state_reason.split("=", 1)[0]
+    cleared = 0
+    for c in MASK_COLS.get(col, ()):
+        if c in r and (r.get(c) or "").strip():
+            r[c] = ""
+            cleared += 1
+    for c in MASK_FLAGS:
+        if c in r and (r.get(c) or "").strip() not in ("", "0"):
+            r[c] = "0"
+            cleared += 1
+    return cleared
+
+
+def is_publication_eligible(r) -> tuple[bool, str, str]:
+    """THE gate. (eligible, reason, disposition).
+
+    One deny-by-default policy applied before export, which is what CP-002
+    asked for. It is `row_ok()` - the licensing and personal-data gates that
+    were always here - plus the adjudication-state policy added 2026-09-02.
+
+    `disposition` is returned separately from `eligible` because MASK is not a
+    third boolean: the caller keeps the row and must then call
+    `mask_attribution(row, reason)`. A caller that ignores the disposition gets
+    the old behaviour for masks and the new behaviour for withholds, which is
+    strictly safer than the old behaviour but is not the policy - so 1137 and
+    1135 both apply it, and `verify` checks they do.
+    """
+    ok, why = row_ok(r)
+    if not ok:
+        return False, why, WITHHOLD
+    d, sreason = adjudication(r)
+    if d == WITHHOLD:
+        return False, sreason, WITHHOLD
+    return True, sreason, d
+
+
 #: The delivered subcontracting spreadsheet, and the fence that makes its money
 #: column summable. Both are named here so a caller cannot quietly use a
 #: different rule and report a different percentage - which is exactly how this
@@ -417,15 +960,99 @@ def subaward_warning(dist_customer=None) -> str:
             f"from the delivered file, not quoted.")
 
 
+def lobbying_overstatement(dist_customer=None):
+    """The same measurement for the lobbying spend column.
+
+    Superseded LDA filings are PUBLISHED - see `BLOCKED_STATES` - so the buyer
+    needs the number that says how far a naive sum of `spend_usd` runs above
+    the countable one. Measured from the delivered file on every build, for
+    the reason `subaward_overstatement` is measured: the constant moves.
+    """
+    import csv as _csv
+    base = Path(dist_customer) if dist_customer else (ROOT / "dist" / "customer")
+    f = base / LOBBYING_FILE
+    if not f.exists():
+        return None
+    _csv.field_size_limit(10_000_000)
+    skip = {"SUPERSEDED_BY_AMENDMENT", "SUPERSEDED_BY_LATER_AMENDMENT",
+            "UNFLAGGED_DUPLICATE_CANDIDATE", "AMBIGUOUS_MULTIPLE_ORIGINALS",
+            "AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT"}
+    rows = unf = cnt = 0
+    unf_sum = cnt_sum = 0.0
+    with f.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in _csv.DictReader(fh):
+            rows += 1
+            raw = (r.get("spend_usd") or "").replace(",", "").replace("$", "").strip()
+            try:
+                v = float(raw)
+            except ValueError:
+                continue
+            unf += 1
+            unf_sum += v
+            if ((r.get("supersession_status") or "").strip() not in skip
+                    and (r.get("attribution_withdrawn") or "").strip() != "1"):
+                cnt += 1
+                cnt_sum += v
+    if cnt_sum <= 0:
+        return None
+    removed = unf_sum - cnt_sum
+    return {"rows": rows, "unfiltered_usd": unf_sum, "countable_usd": cnt_sum,
+            "removed_usd": removed,
+            "pct_of_countable": round(100.0 * removed / cnt_sum, 1),
+            "pct_of_unfiltered": round(100.0 * removed / unf_sum, 1)}
+
+
+def lobbying_warning(dist_customer=None) -> str:
+    """One sentence, with its denominator stated."""
+    m = lobbying_overstatement(dist_customer)
+    if not m:
+        return ("Superseded filings are published with their supersession "
+                "stated; the filters live in the methodology paper. (The "
+                "lobbying figure could not be measured - "
+                "dist/customer/lobbying.csv is absent.)")
+    return (f"A superseded LDA filing is a real filed record and IS published, "
+            f"with `supersession_status` and `is_superseded` on the row - but "
+            f"an amendment restates the original's money, so summing "
+            f"`spend_usd` over every row overstates the countable total by "
+            f"{m['pct_of_countable']}% (${m['unfiltered_usd']:,.2f} unfiltered "
+            f"against ${m['countable_usd']:,.2f} countable; the rule removes "
+            f"${m['removed_usd']:,.2f}, {m['pct_of_unfiltered']}% of the "
+            f"unfiltered total). Measured from the delivered file, not quoted.")
+
+
+def is_lineage_column(name: str) -> bool:
+    """Does this column NAME say `which script or local file built the row`?
+
+    Name-only, on purpose - see the comment on `LINEAGE_COLS`.
+    """
+    named = {c.lower() for c in LINEAGE_COLS}
+    n = (name or "").lower()
+    # A joined column arrives as `<source table>__<its own name>`, so the test
+    # runs on both. Without this, `nest_entity_dual_role.built_by` survived the
+    # drop and shipped `1130_nest_owner_v6_reconcile.py` on 1,701 rows - the
+    # rule was right and the name it was given had a prefix on it.
+    for cand in (n, n.rsplit("__", 1)[-1]):
+        if cand in named or any(cand.endswith(s) for s in LINEAGE_SUFFIXES):
+            return True
+    return False
+
+
 def publishable_columns(header) -> list:
     """Header minus what may never be published.
 
-    TWO classes, both dropped as COLUMNS:
+    THREE classes, all dropped as COLUMNS:
 
       `DROP_COLS`  proprietary identifiers - licensed to Cedar, not ours to
                    redistribute. Case-insensitive, as every consumer compared
                    them.
       `NEVER`      personal data held apart from a public role.
+      lineage      `LINEAGE_COLS` / `LINEAGE_SUFFIXES` - the script or local
+                   file that BUILT the row, which is not its provenance.
+                   Added 2026-09-02; measured cost of not having it:
+                   `nest.built_by_script` shipped a Python filename on all
+                   4,798 rows and `contractors.ruling_source_file` shipped
+                   `review/rulings_inbox_2026-08-08_elijah_batch2.csv` on
+                   81,797 of the first 300,000.
 
     WHY `NEVER` IS HERE AND NOT ONLY IN `row_ok()`
     ----------------------------------------------
@@ -445,9 +1072,15 @@ def publishable_columns(header) -> list:
     arriving under a name this list does not know.
     """
     lower_drop = {c.lower() for c in DROP_COLS}
+    # NEID_COLS and PROPOSED_COLS join the same gate, case-insensitively for the
+    # same reason DROP_COLS is: the seven datasets that shipped a NEID spelled
+    # the column six different ways between them.
+    lower_drop |= {c.lower() for c in NEID_COLS}
+    lower_drop |= {c.lower() for c in PROPOSED_COLS}
     never = set(NEVER)
     return [c for c in (header or [])
-            if c.lower() not in lower_drop and c not in never]
+            if c.lower() not in lower_drop and c not in never
+            and not is_lineage_column(c)]
 
 
 def _from_numbered(stem: str):
@@ -597,7 +1230,16 @@ CONSUMERS = ("770_sample_extracts.py",
 # DIFFERENT one is the failure this gate exists for.
 SHARED = ("NEVER", "GATES", "FLAGSHIP", "PRODUCT_ID", "DROP_COLS",
           "CUSTOMER_SHELVES", "STOREFRONT_SHELVES", "GROVE_SHELVES",
-          "BUILD_SHELVES", "SPINE_TABLES", "YEAR_COLS")
+          "BUILD_SHELVES", "SPINE_TABLES", "YEAR_COLS",
+          "BLOCKED_STATES", "BLOCKED_COMBINATIONS", "MASK_COLS", "MASK_FLAGS",
+          "LINEAGE_COLS", "LINEAGE_SUFFIXES")
+
+# Consumers that write a CUSTOMER file must apply the whole gate, not half of
+# it. Applying `is_publication_eligible` and ignoring the MASK disposition
+# silently reverts CP-017/CP-018 while looking fixed, so both names are
+# required together.
+GATE_CALLERS = ("1135_full_dataset_review_bundle.py",
+                "1137_customer_dataset_combine.py")
 
 
 def verify() -> int:
@@ -719,6 +1361,60 @@ def verify() -> int:
                        f"consumer compares `col.lower() in DROP_COLS`, so it "
                        f"can never match")
 
+    # 8. The lineage list is compared lower case too, and `_basis` may never
+    #    enter it - that suffix carries the best provenance in the product and
+    #    a wildcard on it would delete quoted statute, source lines and URLs.
+    for c in LINEAGE_COLS:
+        if c != c.lower():
+            bad.append(f"LINEAGE_COLS entry {c!r} is not lower case")
+    for s in LINEAGE_SUFFIXES:
+        if s.endswith("basis"):
+            bad.append(f"LINEAGE_SUFFIXES {s!r} would drop `_basis` columns; "
+                       f"those carry evidence, not lineage - see the comment "
+                       f"on LINEAGE_COLS")
+
+    # 9. Every disposition in the adjudication policy must be one of the four,
+    #    and a MASK must name the columns it blanks or it masks nothing and
+    #    reports success.
+    for col, vocab in BLOCKED_STATES.items():
+        for v, d in vocab.items():
+            if d not in (PUBLISH, FLAG, MASK, WITHHOLD):
+                bad.append(f"BLOCKED_STATES[{col!r}][{v!r}] = {d!r} is not one "
+                           f"of PUBLISH/FLAG/MASK/WITHHOLD")
+        if any(d == MASK for d in vocab.values()) and not MASK_COLS.get(col):
+            bad.append(f"BLOCKED_STATES[{col!r}] has a MASK disposition and "
+                       f"MASK_COLS names no column to blank - the mask would "
+                       f"clear nothing and count as applied")
+
+    #  9b. Same for a conjunction: it must name a disposition, at least one
+    #      `when` column, and - if it masks - the columns it blanks.
+    for rule in BLOCKED_COMBINATIONS:
+        if not rule.get("when"):
+            bad.append(f"BLOCKED_COMBINATIONS {rule.get('reason')!r} has no "
+                       f"`when` clause and would fire on every row")
+        if rule.get("disposition") not in (PUBLISH, FLAG, MASK, WITHHOLD):
+            bad.append(f"BLOCKED_COMBINATIONS {rule.get('reason')!r} has no "
+                       f"valid disposition")
+        if rule.get("disposition") == MASK and not MASK_COLS.get(rule["reason"]):
+            bad.append(f"BLOCKED_COMBINATIONS {rule['reason']!r} MASKs and "
+                       f"MASK_COLS names no column to blank")
+        if "=" in (rule.get("reason") or ""):
+            bad.append(f"BLOCKED_COMBINATIONS reason {rule['reason']!r} "
+                       f"contains '=' - mask_attribution() splits on it and "
+                       f"would look up the wrong MASK_COLS key")
+
+    # 10. Both halves of the gate, in every consumer that writes a customer
+    #     file. Half the gate is worse than none, because it looks fixed.
+    for stem in GATE_CALLERS:
+        p = CODE / stem
+        if not p.exists():
+            continue
+        txt = p.read_text(encoding="utf-8", errors="replace")
+        for name in ("is_publication_eligible", "mask_attribution"):
+            if name not in txt:
+                bad.append(f"{stem} writes a customer file but never calls "
+                           f"`{name}` - CP-002's gate is not applied")
+
     for b in bad:
         print("  FAIL " + b)
     print(f"  cedar_publication verify   {'FAIL' if bad else 'PASS'}   "
@@ -739,6 +1435,13 @@ def main() -> int:
     print(f"    NEVER            : {len(NEVER)} columns")
     print(f"    GATES            : {', '.join(sorted(GATES))}")
     print(f"    DROP_COLS        : {len(DROP_COLS)} proprietary identifiers")
+    print(f"    LINEAGE          : {len(LINEAGE_COLS)} named + "
+          f"{len(LINEAGE_SUFFIXES)} suffixes")
+    _d = Counter(d for v in BLOCKED_STATES.values() for d in v.values())
+    print(f"    BLOCKED_STATES   : {len(BLOCKED_STATES)} columns, "
+          + ", ".join(f"{k} {_d[k]}" for k in (PUBLISH, FLAG, MASK, WITHHOLD)))
+    print(f"    BLOCKED_COMBOS   : {len(BLOCKED_COMBINATIONS)} - "
+          + ", ".join(r["reason"] for r in BLOCKED_COMBINATIONS))
     print(f"    FLAGSHIP         : {len(FLAGSHIP)} collections")
     print(f"    PRODUCT_ID       : {PRODUCT_ID}")
     print(f"    CUSTOMER_SHELVES : {CUSTOMER_SHELVES}")

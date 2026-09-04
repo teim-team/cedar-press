@@ -148,23 +148,16 @@ NEW_COLS = ["split_artefact_suspected", "split_artefact_detector",
             "split_artefact_basis", "institution_name_repaired",
             "repair_action"]
 
-# Stems, deliberately WITHOUT a trailing \b - `\bsociet\b` never matches
-# "Society", which is the bug that made a first draft of this detector call
-# every historical society an artefact.
-KW = re.compile(
-    r"(?i)\b(?:museum|universit|college|department|dept|societ|park|service|"
-    r"cent(?:er|re)|institut|agenc|bureau|office|laborator|corps|commission|"
-    r"division|school|foundation|tribe|tribal|nation|compan|corporation|"
-    r"trust|librar|archive|academ|galler|association|council|authorit|"
-    r"district|program|survey|refuge|forest|monument|memorial|histor|"
-    r"hospital|seminar|arboretum|zoo|aquarium|garden|research|hall|house|"
-    r"fund|inc\b|llc\b|u\.s\.|united states|federal|national|state|county|"
-    r"city|town|village|administration|branch|repositor|facilit|collection|"
-    r"herbarium|observator|preserve|sanctuar|station|lab\b|army|navy|"
-    r"air force|interior|agriculture|reservation|pueblo|complex|annex|works|"
-    r"health|energy|defense|homeland|transportation|reclamation|engineer|"
-    r"exploration|heritage|cultural|anthropolog\w* museum)")
-POSTAL = re.compile(r"^[A-Z]{2}\.?$")
+# THE KEYWORD LIST MOVED, 2026-09-02. It used to live here, and 1077 split on
+# `, and ` without consulting it - so this audit flagged a fabrication that the
+# splitter had no way to avoid making, and the repair landed on ONE of the six
+# institution columns. The list is now `code/cedar_nagpra_split.py`, imported
+# by 77, 1077 and this file, so the merge decision and the audit of that
+# decision are the same words by construction rather than by coincidence.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import cedar_nagpra_split as _split_rule     # noqa: E402
+KW = _split_rule.KW
+POSTAL = _split_rule.POSTAL
 LEADIN_WORDS = {"and", "of", "the", "&", "in", "for", "from", "at", "with",
                 "formerly", "on", "to", "by"}
 EDITORIAL = re.compile(

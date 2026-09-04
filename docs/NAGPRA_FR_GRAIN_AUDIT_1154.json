@@ -1,0 +1,235 @@
+{
+ "measured_date": "2026-09-02",
+ "script": "code/1154_nagpra_fr_grain_audit.py",
+ "sampling": "none - every figure is a full census of the named file",
+ "nagpra_institution_parsing": {
+  "file": "data/clean/nagpra_notices.csv",
+  "rows_total_full_census": 6792,
+  "institution_name_classes": {
+   "ok": 6405,
+   "ok_multi_holder_normalised_to_semicolon": 290,
+   "ok_multi_holder_semicolon_in_the_title": 87,
+   "reads_as_a_sentence_not_a_name": 6,
+   "possession_locution_retained_real_holder_is_downstream": 4
+  },
+  "institution_name_defect_rows": 10,
+  "institution_name_defect_pct": 0.15,
+  "distinct_institution_name": 1798,
+  "institution_state_not_a_usps_state_rows": 0,
+  "institution_state_bad_values_top20": {},
+  "institution_state_blank_rows": 104,
+  "institution_city_suspicious_rows": 0,
+  "institution_count_disagrees_with_institution_names_all_rows": 0,
+  "institution_name_basis_distribution": {
+   "title_colon": 5854,
+   "title_possession": 926,
+   "title_remainder": 12
+  },
+  "institution_split_flag_distribution": {
+   "(none)": 6788,
+   "ambiguous_oxford_chain": 2,
+   "right_side_is_its_own_name": 2
+  },
+  "customer_export_rows_disagreeing_with_the_clean_table": 17,
+  "customer_export": "dist/customer/nagpra.csv",
+  "offender_csv": "review/nagpra_institution_defects_1154.csv",
+  "worked_examples": [
+   {
+    "document_number": "94-4238",
+    "defect": "possession_locution_retained_real_holder_is_downstream",
+    "institution_name": "of Native American Human Remains from the Hawaiian Islands in the Collections of the Peabody Museum of Natural History, Yale University",
+    "institution_names_all": "of Native American Human Remains from the Hawaiian Islands in the Collections of the Peabody Museum of Natural History, Yale University",
+    "institution_city": "",
+    "institution_state": "",
+    "institution_name_basis": "title_remainder",
+    "title": "Notice of Inventory Completion of Native American Human Remains from the Hawaiian Islands in the Collections of the Peabody Museum of Natural History, Yale University"
+   },
+   {
+    "document_number": "95-15963",
+    "defect": "possession_locution_retained_real_holder_is_downstream",
+    "institution_name": "of Native American Human Remains from the Island of Lanai in the Collections of the Bernice Pauahi Bishop Museum",
+    "institution_names_all": "of Native American Human Remains from the Island of Lanai in the Collections of the Bernice Pauahi Bishop Museum",
+    "institution_city": "Honolulu",
+    "institution_state": "HI",
+    "institution_name_basis": "title_remainder",
+    "title": "Notice of Inventory Completion of Native American Human Remains from the Island of Lanai in the Collections of the Bernice Pauahi Bishop Museum, Honolulu, HI"
+   },
+   {
+    "document_number": "95-23893",
+    "defect": "possession_locution_retained_real_holder_is_downstream",
+    "institution_name": "of Native American Human Remains and Associated Funerary Objects from the Island of Kaua'i in the Collections of the Bernice Pauahi Bishop Museum",
+    "institution_names_all": "of Native American Human Remains and Associated Funerary Objects from the Island of Kaua'i in the Collections of the Bernice Pauahi Bishop Museum",
+    "institution_city": "Honolulu",
+    "institution_state": "HI",
+    "institution_name_basis": "title_remainder",
+    "title": "Notice of Inventory Completion of Native American Human Remains and Associated Funerary Objects from the Island of Kaua'i in the Collections of the Bernice Pauahi Bishop Museum, Honolulu, HI"
+   },
+   {
+    "document_number": "95-26703",
+    "defect": "reads_as_a_sentence_not_a_name",
+    "institution_name": "Cultural Items within the Rainbow House Collection, Bandelier National Monument",
+    "institution_names_all": "Cultural Items within the Rainbow House Collection, Bandelier National Monument",
+    "institution_city": "Los Alamos County",
+    "institution_state": "NM",
+    "institution_name_basis": "title_remainder",
+    "title": "Notice of Intent to Repatriate Cultural Items within the Rainbow House Collection, Bandelier National Monument, Los Alamos County, NM"
+   },
+   {
+    "document_number": "96-4199",
+    "defect": "reads_as_a_sentence_not_a_name",
+    "institution_name": "for Native American Human Remains and Associated Funerary Objects from Indian Gardens Cemetery (Cross Village) in Emmet County, Michigan, in the Possession and Control of the Putnam Museum of History and Natural Science",
+    "institution_names_all": "for Native American Human Remains and Associated Funerary Objects from Indian Gardens Cemetery (Cross Village) in Emmet County, Michigan, in the Possession and Control of the Putnam Museum of History and Natural Science",
+    "institution_city": "Davenport",
+    "institution_state": "IA",
+    "institution_name_basis": "title_remainder",
+    "title": "Notice of Inventory Completion for Native American Human Remains and Associated Funerary Objects from Indian Gardens Cemetery (Cross Village) in Emmet County, Michigan, in the Possession and Control o"
+   }
+  ],
+  "state_worked_examples": [],
+  "count_mismatch_worked_examples": []
+ },
+ "federal_register_consultation_grain": {
+  "file": "data/clean/consultation_events.csv",
+  "rows_total_full_census": 11402,
+  "distinct_fr_documents": 2313,
+  "rows_per_document": {
+   "max": 50,
+   "p99": 38,
+   "p95": 21,
+   "median": 1,
+   "mean": 4.93,
+   "min": 1,
+   "documents_with_exactly_one_row": 1304,
+   "documents_with_more_than_one_row": 1009,
+   "rows_sitting_on_a_multi_row_document": 10098
+  },
+  "ten_biggest_documents": [
+   {
+    "fr_document_number": "2020-11569",
+    "rows": 50,
+    "distinct_tribe_id": 50,
+    "distinct_participant": 50,
+    "citation": "85 FR 32417",
+    "topic": "Notice of Inventory Completion: Ball State University, Department of Anthropology, Muncie, IN"
+   },
+   {
+    "fr_document_number": "2020-23825",
+    "rows": 50,
+    "distinct_tribe_id": 50,
+    "distinct_participant": 50,
+    "citation": "85 FR 68360",
+    "topic": "Notice of Inventory Completion: Ball State University, Department of Anthropology, Muncie, IN"
+   },
+   {
+    "fr_document_number": "2011-3764",
+    "rows": 48,
+    "distinct_tribe_id": 48,
+    "distinct_participant": 48,
+    "citation": "76 FR 9603",
+    "topic": "Notice of Inventory Completion: Denver Museum of Nature & Science, Denver, CO"
+   },
+   {
+    "fr_document_number": "2022-22514",
+    "rows": 48,
+    "distinct_tribe_id": 48,
+    "distinct_participant": 48,
+    "citation": "87 FR 62885",
+    "topic": "Notice of Inventory Completion: Michigan State Historic Preservation Office, Lansing, MI"
+   },
+   {
+    "fr_document_number": "2015-02187",
+    "rows": 46,
+    "distinct_tribe_id": 46,
+    "distinct_participant": 46,
+    "citation": "80 FR 6111",
+    "topic": "Notice of Inventory Completion: The American Museum of Natural History, New York, NY"
+   },
+   {
+    "fr_document_number": "2015-31303",
+    "rows": 45,
+    "distinct_tribe_id": 45,
+    "distinct_participant": 45,
+    "citation": "80 FR 77009",
+    "topic": "Notice of Inventory Completion: Field Museum of Natural History, Chicago, IL"
+   },
+   {
+    "fr_document_number": "2020-15581",
+    "rows": 45,
+    "distinct_tribe_id": 45,
+    "distinct_participant": 45,
+    "citation": "85 FR 43872",
+    "topic": "Notice of Inventory Completion: Indiana University, Bloomington, IN"
+   },
+   {
+    "fr_document_number": "2012-17631",
+    "rows": 44,
+    "distinct_tribe_id": 44,
+    "distinct_participant": 44,
+    "citation": "77 FR 42510",
+    "topic": "Notice of Inventory Completion: History Colorado, Denver, CO"
+   },
+   {
+    "fr_document_number": "2014-29888",
+    "rows": 44,
+    "distinct_tribe_id": 44,
+    "distinct_participant": 44,
+    "citation": "79 FR 76362",
+    "topic": "Notice of Inventory Completion: History Colorado, formerly Colorado Historical Society, Denver, CO"
+   },
+   {
+    "fr_document_number": "2013-20062",
+    "rows": 43,
+    "distinct_tribe_id": 43,
+    "distinct_participant": 43,
+    "citation": "78 FR 50095",
+    "topic": "Notice of Inventory Completion: History Colorado, Formerly Colorado Historical Society, Denver, CO"
+   }
+  ],
+  "grain_test_is_it_one_row_per_party": {
+   "multi_row_documents": 1009,
+   "party_key_unique_within_document": 1009,
+   "party_key_repeats_within_document": 0,
+   "repeat_examples": []
+  },
+  "grain_test_do_event_columns_vary_within_a_document": {
+   "multi_row_documents": 1009,
+   "event_columns_identical_across_all_rows": 0,
+   "event_columns_vary": 1009,
+   "which_columns_vary": {
+    "is_event_primary_row": 1009,
+    "nagpra_bridge_overlap": 208,
+    "source_quote": 133
+   },
+   "non_party_columns_tested": 31
+  },
+  "conceptual_test_event_vs_notice": {
+   "rows_with_event_start_date": 190,
+   "rows_without_event_start_date": 11212,
+   "rows_with_location": 103,
+   "distinct_documents_with_any_event_date": 190,
+   "event_date_basis": {
+    "(blank)": 11305,
+    "dates_field_of_a_notice_whose_own_ACTION_line_says_notice_of_meetings": 57,
+    "supplementary_information_sentence_with_an_event_verb": 26,
+    "dates_field_sentence_with_an_event_verb": 14
+   },
+   "consultation_type": {
+    "NAGPRA_consultation_reported": 10888,
+    "consultation_session": 212,
+    "consultation_notice": 180,
+    "NAGPRA": 38,
+    "listening_session": 37,
+    "NHPA_section_106": 20,
+    "negotiated_rulemaking": 14,
+    "dear_tribal_leader_letter": 6,
+    "advisory_committee": 5,
+    "tribal_summit": 2
+   },
+   "channel": {
+    "CONSULTATION": 11402
+   }
+  },
+  "customer_export_has_document_level_count_column": false,
+  "fanout_csv": "review/fr_document_fanout_1154.csv"
+ }
+}

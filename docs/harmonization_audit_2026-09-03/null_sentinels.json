@@ -1,0 +1,45 @@
+{
+ "contractors": {
+  "cage_code": 398840,
+  "recipient_city_name": 29,
+  "parent_uei": 22,
+  "extent_competed": 9411,
+  "recipient_state_code": 202,
+  "place_of_perform_city": 88269,
+  "place_of_perform_state": 87068,
+  "owner_as_of_transaction_cedar_uid": 1066926,
+  "award_base_description": 49
+ },
+ "deals": {
+  "Event_Date_precision": 7
+ },
+ "funding": {
+  "recipient_city_name": 1,
+  "cfda_title": 1070,
+  "state_agreement": 1
+ },
+ "gaming": {
+  "gaming_property_federal_traces__compact_status": 153,
+  "gaming_property_federal_traces__igra_coverage_status": 21
+ },
+ "lobbying": {
+  "specific_issues_text": 5
+ },
+ "native-owned-businesses": {
+  "identity_scope": 138
+ },
+ "nest": {
+  "sector": 1,
+  "status": 211,
+  "city": 2
+ },
+ "nonprofits": {
+  "tier": 129,
+  "keyed_state_agreement": 66
+ },
+ "subcontracting": {
+  "description": 1,
+  "direction": 42,
+  "subaward_number": 1
+ }
+}

@@ -531,10 +531,22 @@ DOC_MARKERS = ("GAMING-DENOMINATOR-2026-09-02",)
 # (regex, what is true instead, doc_level). Each literal was measured on
 # 2026-09-02 against the file named in its replacement - see `derive`.
 SUPERSEDED = [
+    # THE REPLACEMENT TEXT WENT STALE THE SAME WAY THE LITERAL DID. This said
+    # "714 distinct properties" until 2026-09-02: `d_gaming_denominator` above
+    # was corrected to 717 (`COUNT(DISTINCT cedar_place_id)`, the adjudicated
+    # collapse, not the 714 the mechanical same-name sweep produces) and this
+    # table was not corrected with it. So `verify` was telling every reader who
+    # tripped the gate to write down a superseded number. A blocklist's
+    # REMEDIATION is prose and rots exactly like the prose it polices; that is
+    # the argument for `code/1156_doc_claim_gate.py`, which restates nothing
+    # and derives everything. Measured: 787 rows - 16 placeholders = 771
+    # facility rows; COUNT(DISTINCT cedar_place_id) = 717.
     (r"787 facilit",
-     "787 is a ROW count. 16 rows' NAMES say no casino and 57 extra rows sit "
-     "across the same-tribe duplicate groups: 771 facility rows, 714 distinct "
-     "properties. Authority: `code/846_session_audit.py::_denom`", False),
+     "787 is a ROW count. 16 rows' NAMES say no casino: 771 facility rows, and "
+     "717 distinct properties by COUNT(DISTINCT cedar_place_id). Do NOT write "
+     "714 - that is the mechanical same-name sweep, which over-collapses three "
+     "genuinely different pairs of places. Authority: "
+     "`code/846_session_audit.py::_denom`", False),
     (r"of 787\b",
      "check the NOUN. `of 787 rows` is right, `of 787 facilities` is not, and the "
      "document needs the GAMING-DENOMINATOR-2026-09-02 note once", True),

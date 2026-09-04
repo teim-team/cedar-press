@@ -131,6 +131,63 @@ LICENSED_SOURCE_FILES = {
 # triage on every run and prints a loud mismatch if the two have drifted.
 # ---------------------------------------------------------------------------
 INTERNAL_TABLES = {
+    # ---------------------------------------------------------------------
+    # CEDAR'S OWN AUDIT MACHINERY, classified 2026-09-03 by 1172.
+    #
+    # These fourteen were the whole of `tables_undocumented_in_codebook` after
+    # 1172 generated blocks for the thirteen real customer tables. They are not
+    # a documentation backlog - they are Cedar measuring itself, and a public
+    # codebook block describing them to a buyer would be the wrong artifact.
+    #
+    # This gate's own comment already records the trap in the other direction:
+    # adding three internal tables once raised four "missing from X" ratchets by
+    # three apiece, "reporting a registration backlog for files that are
+    # registered - as internal". Classification IS the disposition.
+    #
+    # Nothing is removed from customers by this. They were undocumented, and an
+    # undocumented table cannot ship, so none of these was reaching anyone. What
+    # changes is that the gate now says "internal by decision" instead of
+    # "missing", and stops holding the ship chain shut. Promoting any one of
+    # these later needs only a real codebook block and a notes contract - the
+    # same door `cedar_export_safety.csv` is waiting at.
+    "cedar_constellation_edges.csv":
+        "852's constellation graph edges - how Cedar related two entities, "
+        "internal reasoning rather than an observed fact about the world",
+    "cedar_constellation_refusals.csv":
+        "852's refusals - edges Cedar declined to draw, and why. The negative "
+        "half of the same internal reasoning",
+    "cedar_corroboration_census.csv":
+        "how many independent sources Cedar holds per fact. A measure of OUR "
+        "evidence coverage, not a fact about Indian Country",
+    "cedar_corroboration_conservation.csv":
+        "whether corroboration counts survive a rebuild - a self-check",
+    "cedar_corroboration_disagreements.csv":
+        "where two sources Cedar holds disagree. Internal until each "
+        "disagreement is adjudicated; publishing raw conflicts would ship the "
+        "question rather than the answer",
+    "cedar_corroboration_observations.csv":
+        "the per-source observations behind the corroboration census",
+    "cedar_entity_freshness.csv":
+        "when Cedar last re-checked each entity. OUR maintenance state",
+    "cedar_fact_corroboration.csv":
+        "per-fact corroboration detail. Internal for the same reason as the "
+        "disagreements table, and a strong candidate for promotion once the "
+        "evidence model is settled",
+    "cedar_harvest_coverage_evidence.csv":
+        "evidence that a harvest reached what it claimed to reach",
+    "cedar_harvest_coverage_matrix.csv":
+        "source x dataset harvest coverage. OUR collection progress",
+    "consultation_agency_coverage.csv":
+        "which agencies Cedar has consultation coverage for - a completeness "
+        "measure of the collection, not a consultation record",
+    "gaming_web_harvest_coverage.csv":
+        "which gaming sites were reached. Harvest provenance",
+    "gaming_web_harvest_observations.csv":
+        "raw per-page harvest observations behind the gaming self-published "
+        "claims. The published claims table is the customer artifact",
+    "source_coverage_fac_nontribal.csv":
+        "FAC non-tribal source coverage - a denominator for OUR coverage "
+        "statistics",
     "cedar_dataset_punchlist.csv":
         "526's per-dataset punch list - the specific named actions between "
         "each dataset and clean. Internal because it describes OUR work "

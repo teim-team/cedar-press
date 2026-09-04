@@ -1,5 +1,5 @@
 {
-  "scanned_files": 640,
+  "scanned_files": 658,
   "counts": {
     "class1": 1,
     "class2a": 0,
@@ -8,11 +8,11 @@
     "class3": 2,
     "class4": 14,
     "class5": 6,
-    "class6": 27,
+    "class6": 26,
     "class7": 44,
     "class8": 0,
     "class9": 0,
-    "lint_bug_class_instances": 163
+    "lint_bug_class_instances": 162
   },
   "findings": [
     {
@@ -239,6 +239,24 @@
       "why": "counter 'dropped' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
       "waiver_reason": ""
+    },
+    {
+      "class": "class2c",
+      "file": "1152_qa_review_reconciliation.py",
+      "line": 899,
+      "evidence": "f[\"passed_but_action_failed\"] += 1",
+      "why": "counter 'passed_but_action_failed' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "waived": true,
+      "waiver_reason": "nothing is dropped here. This counts a DEFECT"
+    },
+    {
+      "class": "class2c",
+      "file": "1152_qa_review_reconciliation.py",
+      "line": 600,
+      "evidence": "f[\"fpds_parent_declared_unresolved\"] += 1",
+      "why": "counter 'fpds_parent_declared_unresolved' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "waived": true,
+      "waiver_reason": "nothing is dropped here. This counts a"
     },
     {
       "class": "class2c",
@@ -810,7 +828,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 667,
+      "line": 668,
       "evidence": "state[\"fail\"] += 1",
       "why": "counter 'fail' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -819,7 +837,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 2108,
+      "line": 2101,
       "evidence": "stats[\"containment_rejected\"] += 1",
       "why": "counter 'containment_rejected' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -828,7 +846,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 664,
+      "line": 665,
       "evidence": "state[\"fail\"] += 1",
       "why": "counter 'fail' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -837,7 +855,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 2150,
+      "line": 2143,
       "evidence": "stats[\"guard_refusals\"] += 1",
       "why": "counter 'guard_refusals' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -846,7 +864,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 656,
+      "line": 657,
       "evidence": "state[\"miss\"] += 1",
       "why": "counter 'miss' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -855,7 +873,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 635,
+      "line": 636,
       "evidence": "state[\"fail\"] += 1",
       "why": "counter 'fail' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -864,7 +882,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 701,
+      "line": 817,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -1344,8 +1362,8 @@
       "line": 1,
       "evidence": "nagpra_notice_institutions.csv",
       "why": "`nagpra_notice_institutions.csv` has FULL-REBUILD writer(s) ['1077_nagpra_institution_grain.py'] and IN-PLACE enricher(s) ['1084_nagpra_split_artefact_audit.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "ordering declared above and in cedar_pipeline; 1084 is the enricher and runs last."
     },
     {
       "class": "class6",
@@ -1361,7 +1379,7 @@
       "file": "14_build_bills_votes.py",
       "line": 1,
       "evidence": "native_bills.csv",
-      "why": "`native_bills.csv` has FULL-REBUILD writer(s) ['14_build_bills_votes.py'] and IN-PLACE enricher(s) ['35_entity_harvest.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`native_bills.csv` has FULL-REBUILD writer(s) ['14_build_bills_votes.py'] and IN-PLACE enricher(s) ['1160_legislation_outcome_vs_actions.py', '35_entity_harvest.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": true,
       "waiver_reason": "bill_votes.csv has this full-rebuild writer and two in-place"
     },
@@ -1593,7 +1611,7 @@
     {
       "class": "class7",
       "file": "1077_nagpra_institution_grain.py",
-      "line": 353,
+      "line": 413,
       "evidence": "\"nagpra_notice_institution_id\": f\"{r['document_number']}#{i:02d}\",",
       "why": "[WARN] POSITIONAL on target nagpra_notice_institution_id -> nagpra_notice_institutions.csv, nagpra_notices.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1611,7 +1629,7 @@
     {
       "class": "class7",
       "file": "1084_nagpra_split_artefact_audit.py",
-      "line": 703,
+      "line": 696,
       "evidence": "rows = [{\"nagpra_notice_institution_id\": f\"X#{i+1:02d}\",",
       "why": "[WARN] POSITIONAL on target nagpra_notice_institution_id -> nagpra_notice_institutions.csv, nagpra_notices.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1863,7 +1881,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4764,
+      "line": 4830,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1872,7 +1890,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4774,
+      "line": 4840,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1881,7 +1899,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4799,
+      "line": 4865,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1890,7 +1908,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4805,
+      "line": 4871,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -2697,6 +2715,9 @@
       "cedar_dataset_readiness.csv": [
         "621_dataset_coverage.py"
       ],
+      "cedar_decision_events.csv": [
+        "1163_negative_decision_registry.py"
+      ],
       "cedar_entity_freshness.csv": [
         "830_entity_freshness.py"
       ],
@@ -2770,6 +2791,9 @@
         "843_retire_cicd_scheme.py",
         "961_promote_register_legal_names_and_state.py"
       ],
+      "cedar_negative_constraints.csv": [
+        "1163_negative_decision_registry.py"
+      ],
       "cedar_nest_id_register.csv": [
         "1072_tribally_owned_enterprises.py"
       ],
@@ -2825,6 +2849,7 @@
         "96_build_consultation_events.py"
       ],
       "consultation_events.csv": [
+        "1158_fr_consultation_grain_columns.py",
         "96_build_consultation_events.py"
       ],
       "consultation_source_probe.csv": [
@@ -2844,6 +2869,7 @@
       ],
       "deals_classified.csv": [
         "1079_quarantine_method_exposure.py",
+        "1159_date_placeholder_precision.py",
         "126_apply_deal_party_attribution.py",
         "153_merge_base_ledgers_into_classified.py",
         "155_collect_deals_2026_08.py"
@@ -2950,6 +2976,7 @@
       ],
       "gaming_facilities.csv": [
         "1078_gaming_joint_operators.py",
+        "1159_date_placeholder_precision.py",
         "158_extend_gaming_facilities.py",
         "162_resource_dates_from_cedar_evidence.py",
         "172_key_unkeyed_gaming_facility_hubs.py",
@@ -3064,6 +3091,7 @@
         "1145_cosponsor_harvest.py"
       ],
       "native_bills.csv": [
+        "1160_legislation_outcome_vs_actions.py",
         "35_entity_harvest.py"
       ],
       "native_business_contract_links.csv": [
@@ -3138,6 +3166,7 @@
       ],
       "np_orgs.csv": [
         "1101_np_keyed_name_support.py",
+        "1155_np_placename_precision.py",
         "20_fix_nonprofit_authority.py",
         "251_apply_np_ein_exclusions_to_np_orgs.py",
         "34_apply_nonprofit_rulings.py",
@@ -3329,12 +3358,17 @@
         "96_build_consultation_events.py",
         "97_build_aliases_and_relationships.py"
       ],
+      "consultation_events.csv": [
+        "1158_fr_consultation_grain_columns.py",
+        "96_build_consultation_events.py"
+      ],
       "deals_ancsa_portal_additions.csv": [
         "build_deals.py",
         "build_deals2.py"
       ],
       "deals_classified.csv": [
         "1079_quarantine_method_exposure.py",
+        "1159_date_placeholder_precision.py",
         "126_apply_deal_party_attribution.py",
         "153_merge_base_ledgers_into_classified.py",
         "155_collect_deals_2026_08.py"
@@ -3417,6 +3451,7 @@
       ],
       "gaming_facilities.csv": [
         "1078_gaming_joint_operators.py",
+        "1159_date_placeholder_precision.py",
         "158_extend_gaming_facilities.py",
         "162_resource_dates_from_cedar_evidence.py",
         "172_key_unkeyed_gaming_facility_hubs.py",
@@ -3483,6 +3518,7 @@
         "77_build_nagpra_dataset.py"
       ],
       "native_bills.csv": [
+        "1160_legislation_outcome_vs_actions.py",
         "14_build_bills_votes.py",
         "35_entity_harvest.py"
       ],
@@ -3530,6 +3566,7 @@
       ],
       "np_orgs.csv": [
         "1101_np_keyed_name_support.py",
+        "1155_np_placename_precision.py",
         "20_fix_nonprofit_authority.py",
         "251_apply_np_ein_exclusions_to_np_orgs.py",
         "34_apply_nonprofit_rulings.py",
@@ -3591,7 +3628,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 998 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 1031 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {
@@ -3666,7 +3703,7 @@
       },
       {
         "file": "25_build_publication_layer.py",
-        "line": 253,
+        "line": 261,
         "source": "\"SELECT COUNT(*) FROM nho_entities WHERE confidence_tier='A' \""
       },
       {
@@ -3787,12 +3824,12 @@
     "ledger_rows": 20740,
     "ledger_exposure_note": "RULED methods read from cedar_domain.RULED_METHODS",
     "would_be_over_stated": {
-      "X|elijah_ruling": 344,
+      "X|elijah_ruling": 352,
       "C|web_verified": 2,
-      "B|elijah_ruling_redirect": 34
+      "B|elijah_ruling_redirect": 35
     },
     "tier_X_ruled_by_identifier_type": {
-      "UEI": 22,
+      "UEI": 30,
       "CAGE": 5,
       "EIN": 317
     }

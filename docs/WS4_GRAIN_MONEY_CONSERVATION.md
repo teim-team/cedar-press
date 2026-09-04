@@ -43,8 +43,8 @@ A file containing a LITERAL duplicate row — a whole row repeating byte for byt
 
 Zero rows, so every key is vacuously unique and the file cannot testify about itself. The question is therefore about the GENERATOR, and the generator is measurable. `136.build_correspondence_layer` mints `record_id = "FOIAREQ-{agency_code}-{foia_request_id}"` for every `foia_request_index.csv` row whose requester is a congressional office.
 
-- `foia_request_index.csv` holds **9,481** rows and **0** of them name a congressional office as requester. The table is empty because nothing qualified, not because a build failed.
-- `(agency_code, foia_request_id)` — the exact pair the id is built from — **collides 381 times** over 9,100 distinct values.
+- `foia_request_index.csv` holds **20,102** rows and **4** of them name a congressional office as requester. ~~9,481 rows and 0 congressional requesters~~ — **SUPERSEDED, re-measured 2026-09-02 by `code/1156_doc_claim_gate.py`.** The conclusion below has FLIPPED and that is the point of re-measuring: the table is no longer empty of congressional requesters, so "nothing qualified" is no longer true. Four rows now carry `requester_is_congressional_office = Y` against 20,098 `N`. Anything built on the old zero must be rechecked.
+- `(agency_code, foia_request_id)` — the exact pair the id is built from — **collides in 368 groups over 19,716 distinct values, 386 surplus rows** (~~381 collisions over 9,100 distinct values~~ — re-measured 2026-09-02 with the row count above).
 - The colliding rows say why themselves, in `parse_quality_reason`: `control_number_appears_more_than_once` ×744; `no_date_recovered_from_this_layout` ×223; `description_begins_mid_sentence` ×222.
 
 So `record_id` is **not unique on the population it is drawn from**. Declaring it as a primary key would validate today against zero rows and break the first time the table fills. It stays in `GRAIN_OPEN`. **The fix is upstream of this table:** the PDF layout solver in `136` recovers one control number for two different requests — different requester, different description, different official — and stamps both. Owner: whoever holds `136`.

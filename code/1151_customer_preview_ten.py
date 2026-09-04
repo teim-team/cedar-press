@@ -78,8 +78,22 @@ SRC = ROOT / "dist" / "customer"
 OUT = ROOT / "dist" / "preview"
 N = 100        # was 10; the owner asked for a hundred so it reads as real
 
+# A FRESH SAMPLE, ON REQUEST. Owner, 2026-09-03: "I want all the hundred
+# [previews] to be a new sample because you've already worked on fixing the
+# original issues. So a new sample would be more instructive per dataset."
+#
+# SEED is None  -> the original storefront behaviour: the most complete, richest
+#                  rows, deterministic, head of the file. Good for a shop
+#                  window, useless as a second look.
+# SEED is set   -> a uniform draw over the WHOLE file, reproducible from the
+#                  seed, which is printed and written into the manifest so the
+#                  exact sample can be regenerated or disputed.
+SEED = None
+POOL = 20_000  # reservoir size; 200x the sample, memory-safe on a 1.5 GB file
+sampled_from: dict = {}
+
 from cedar_publication import (          # noqa: E402
-    STOREFRONT_SHELVES, shelves, publishable_columns,
+    STOREFRONT_SHELVES, BUILD_SHELVES, shelves, publishable_columns,
 )
 
 #: Curated, per dataset, in reading order. The Cedar id goes LAST.
@@ -216,6 +230,46 @@ def money_of(r, cols):
     return 0.0
 
 
+def pick_random(rows, cols, coll=None, n=N, seed=0):
+    """A FRESH, REPRESENTATIVE draw - not the fattest rows in the file.
+
+    Owner, 2026-09-03: *"I want all the hundred [previews] to be a new sample
+    because you've already worked on fixing the original issues. So a new
+    sample would be more instructive per dataset."*
+
+    `pick()` below cannot do that. It is deterministic by construction - it
+    sorts by (columns filled, money) and takes the top n - so re-running it
+    after a fix returns THE SAME ROWS, and those rows are the most complete and
+    richest in the file. That is the right choice for a storefront preview and
+    the wrong one for a review sample: it systematically hides sparse rows,
+    which is where defects live.
+
+    This draws uniformly instead, with a recorded seed so the sample is
+    reproducible and can be quoted. Diversity is still enforced - one row per
+    entity - but applied AFTER the shuffle rather than as a ranking, so it no
+    longer doubles as a quality filter.
+    """
+    import random
+    rng = random.Random(seed)
+    pool = list(rows)
+    rng.shuffle(pool)
+    seen, out = set(), []
+    for r in pool:
+        e = entity_of(r, coll)
+        if e and e in seen:
+            continue
+        seen.add(e)
+        out.append(r)
+        if len(out) == n:
+            return out
+    for r in pool:                      # top up if entities run out
+        if r not in out:
+            out.append(r)
+        if len(out) == n:
+            break
+    return out
+
+
 def pick(rows, cols, coll=None, n=N):
     """Maximise distinct entities; prefer complete rows and real money."""
     scored = sorted(
@@ -240,8 +294,21 @@ def pick(rows, cols, coll=None, n=N):
 
 
 def datasets():
+    """All THIRTEEN, not the twelve on the storefront.
+
+    Owner's standing rule: *"you're always working on thirteen datasets, the
+    twelve in Cedar Press, and then the gaming dataset."* `gaming` reaches
+    customers through Cedar Grove rather than the Cedar Press storefront, and
+    this function used to filter it out on that basis - so the one dataset with
+    312 columns, the widest and hardest to read in the whole product, was the
+    only one with no preview at all. A reviewer asked to look at thirteen
+    datasets was handed twelve.
+
+    Distribution channel is not a reason to skip the preview. It is a reason
+    the preview matters more.
+    """
     sh = shelves()
-    return sorted(c for c, s in sh.items() if s in STOREFRONT_SHELVES)
+    return sorted(c for c, s in sh.items() if s in BUILD_SHELVES)
 
 
 def run(write: bool) -> int:
@@ -256,14 +323,42 @@ def run(write: bool) -> int:
         with f.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
             rd = csv.DictReader(fh)
             hdr = publishable_columns(rd.fieldnames or [])
-            rows = [r for i, r in zip(range(40000), rd)]
+            if SEED is None:
+                rows = [r for i, r in zip(range(40000), rd)]
+            else:
+                # RESERVOIR OVER THE WHOLE FILE, not the first 40,000.
+                #
+                # The head-only read was invisible while the picker was
+                # deterministic-by-quality, because it took the richest rows it
+                # could see and those look fine. It is not survivable for a
+                # representative sample: `contractors.csv` is 1,217,768 rows,
+                # so 40,000 is the first **3.3%** of the file, and delivered
+                # rows are not in random order - they arrive grouped by source
+                # pull and by fiscal year. A "random sample" drawn from the
+                # head is a sample of whichever years happened to load first.
+                #
+                # Algorithm R. One pass, memory bounded by POOL, and every row
+                # in the file has an equal chance of being held.
+                import random as _r
+                rng = _r.Random(SEED)
+                rows, n_seen = [], 0
+                for row in rd:
+                    n_seen += 1
+                    if len(rows) < POOL:
+                        rows.append(row)
+                    else:
+                        j = rng.randrange(n_seen)
+                        if j < POOL:
+                            rows[j] = row
+                sampled_from[coll] = n_seen
         curated = PREVIEW.get(coll)
         if curated:
             cols = [c for c in curated if c in hdr]
             missing = [c for c in curated if c not in hdr]
         else:
             cols, missing = score_fallback(hdr, rows), []
-        chosen = pick(rows, cols, coll)
+        chosen = (pick_random(rows, cols, coll, seed=SEED) if SEED is not None
+                  else pick(rows, cols, coll))
         if write:
             with (OUT / f"{coll}.csv").open("w", encoding="utf-8", newline="") as fh:
                 w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
@@ -341,6 +436,10 @@ def verify() -> int:
 
 
 def main() -> int:
+    global SEED
+    for a in sys.argv[1:]:
+        if a.startswith("--seed="):
+            SEED = int(a.split("=", 1)[1])
     mode = sys.argv[1] if len(sys.argv) > 1 else "report"
     if mode == "verify":
         return verify()

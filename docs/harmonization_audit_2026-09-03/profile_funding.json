@@ -1,0 +1,746 @@
+{
+ "snapshot": {
+  "file": "dist/customer/funding.csv",
+  "bytes": 605310996,
+  "mtime": "2026-09-03T00:36:59"
+ },
+ "rows": 701955,
+ "columns": 79,
+ "seconds": 16.0,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 552756,
+   "blank": 149199,
+   "pct_blank": 21.2548,
+   "approx_distinct": 577
+  },
+  "awarding_agency_name": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 35,
+   "vocabulary": {
+    "Department of Health and Human Services": 250115,
+    "Department of the Interior": 208727,
+    "Department of Agriculture": 63427,
+    "Department of Education": 48092,
+    "Department of Housing and Urban Development": 44334,
+    "Environmental Protection Agency": 25901,
+    "Department of Justice": 11620,
+    "Department of the Treasury": 9373,
+    "Department of Transportation": 8809,
+    "Department of Energy": 6072,
+    "Institute of Museum and Library Services": 5249,
+    "Department of Commerce": 4775,
+    "Federal Communications Commission": 4514,
+    "Department of Labor": 3691,
+    "Department of Homeland Security": 3448,
+    "National Science Foundation": 775,
+    "Department of Defense": 750,
+    "Corporation for National and Community Service": 640,
+    "Denali Commission": 620,
+    "National Aeronautics and Space Administration": 217,
+    "Department of Veterans Affairs": 214,
+    "National Endowment for the Humanities": 209,
+    "National Endowment for the Arts": 163,
+    "Small Business Administration": 124,
+    "National Archives and Records Administration": 36,
+    "Export-Import Bank of the United States": 19,
+    "Nuclear Regulatory Commission": 18,
+    "Agency for International Development": 13,
+    "Delta Regional Authority": 3,
+    "Appalachian Regional Commission": 2,
+    "National Credit Union Administration": 2,
+    "Social Security Administration": 2,
+    "Election Assistance Commission": 1
+   }
+  },
+  "awarding_sub_agency_name": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 121
+  },
+  "recipient_name": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 8810
+  },
+  "recipient_city_name": {
+   "nonblank": 700464,
+   "blank": 1491,
+   "pct_blank": 0.2124,
+   "approx_distinct": 5203
+  },
+  "canonical_name": {
+   "nonblank": 549157,
+   "blank": 152798,
+   "pct_blank": 21.7675,
+   "approx_distinct": 869
+  },
+  "geo_recipient_county_name": {
+   "nonblank": 662462,
+   "blank": 39493,
+   "pct_blank": 5.6261,
+   "approx_distinct": 1540
+  },
+  "geo_pop_county_name": {
+   "nonblank": 92054,
+   "blank": 609901,
+   "pct_blank": 86.8861,
+   "approx_distinct": 1194
+  },
+  "assistance_transaction_unique_key": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 736081
+  },
+  "assistance_award_unique_key": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 210245
+  },
+  "award_id_fain": {
+   "nonblank": 701767,
+   "blank": 188,
+   "pct_blank": 0.0268,
+   "approx_distinct": 200451
+  },
+  "action_date": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6520
+  },
+  "fiscal_year": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "2024": 50686,
+    "2022": 50597,
+    "2023": 49652,
+    "2020": 49195,
+    "2021": 48415,
+    "2025": 44471,
+    "2018": 43789,
+    "2019": 41434,
+    "2016": 37213,
+    "2017": 36122,
+    "2014": 33513,
+    "2015": 31191,
+    "2013": 30950,
+    "2010": 26919,
+    "2009": 26844,
+    "2011": 26103,
+    "2026": 24895,
+    "2012": 22854,
+    "2008": 15669,
+    "2007": 11443
+   }
+  },
+  "fy_partial_flag": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 661919,
+    "1": 40036
+   }
+  },
+  "obligated_usd": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 274779
+  },
+  "assistance_type": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 15,
+   "vocabulary": {
+    "06": 261543,
+    "04": 178317,
+    "03": 120872,
+    "02": 85521,
+    "05": 32376,
+    "10": 12519,
+    "11": 8130,
+    "07": 1641,
+    "F001": 642,
+    "F002": 139,
+    "08": 102,
+    "-1": 75,
+    "09": 74,
+    "F010": 4
+   }
+  },
+  "assistance_type_description": {
+   "nonblank": 402588,
+   "blank": 299367,
+   "pct_blank": 42.6476,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "DIRECT PAYMENT FOR SPECIFIED USE, AS A SUBSIDY OR OTHER NON-REIMBURSABLE DIRECT FINANCIAL AID (C)": 148445,
+    "PROJECT GRANT (B)": 103254,
+    "FORMULA GRANT (A)": 85822,
+    "BLOCK GRANT (A)": 30507,
+    "COOPERATIVE AGREEMENT (B)": 21224,
+    "DIRECT PAYMENT WITH UNRESTRICTED USE (RETIREMENT, PENSION, VETERANS BENEFITS, ETC.) (D)": 6555,
+    "OTHER REIMBURSABLE, CONTINGENT, INTANGIBLE, OR INDIRECT FINANCIAL ASSISTANCE": 4198,
+    "PROJECT GRANT": 726,
+    "GRANT": 642,
+    "DIRECT PAYMENT FOR SPECIFIED USE": 440,
+    "COOPERATIVE AGREEMENT": 281,
+    "FORMULA GRANT": 204,
+    "DIRECT LOAN (E)": 134,
+    "NOT SPECIFIED": 75,
+    "BLOCK GRANT": 52,
+    "OTHER FINANCIAL ASSISTANCE": 15,
+    "GUARANTEED/INSURED LOAN (F)": 8,
+    "INSURANCE (G)": 3,
+    "DIRECT PAYMENT WITH UNRESTRICTED USE": 3
+   }
+  },
+  "cfda": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1137
+  },
+  "cfda_title": {
+   "nonblank": 701947,
+   "blank": 8,
+   "pct_blank": 0.0011,
+   "approx_distinct": 2262
+  },
+  "recipient_uei": {
+   "nonblank": 668347,
+   "blank": 33608,
+   "pct_blank": 4.7878,
+   "approx_distinct": 6450
+  },
+  "recipient_duns": {
+   "nonblank": 461923,
+   "blank": 240032,
+   "pct_blank": 34.1948,
+   "approx_distinct": 7187
+  },
+  "recipient_state_code": {
+   "nonblank": 701943,
+   "blank": 12,
+   "pct_blank": 0.0017,
+   "approx_distinct": 71
+  },
+  "attribution_source_line": {
+   "nonblank": 365535,
+   "blank": 336420,
+   "pct_blank": 47.9261,
+   "approx_distinct": 883
+  },
+  "attribution_rule": {
+   "nonblank": 365535,
+   "blank": 336420,
+   "pct_blank": 47.9261,
+   "approx_distinct": 866
+  },
+  "exclusion_reason": {
+   "nonblank": 375,
+   "blank": 701580,
+   "pct_blank": 99.9466,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "I'm unsure about this hospital as it is not a tribal org but it serves ony Navajo": 159,
+    "navajo agricultural projects industry (napi) is owned by navajo nation;": 108,
+    "I'm unsure about zuni housing authority but I'll drop it": 18,
+    "rocky boy schools and chippewa cree tribe/health care are not flagged because they are affiliated with the tribe": 16,
+    "this is a tribal college that appears to serve Native Americans from multiple tribes": 11,
+    "santa clara day school is owned by the tribe": 9,
+    "not sure about this one, couldn't find much": 8,
+    "Alaska's tribal college": 8,
+    "I'm not 100% sure about this one": 7,
+    "burt lake band of ottawa & chippewa indians got federal recognition around 2022-2023, but they are not in our roaster of federally recognized tribes": 6,
+    "they are a state-recognized tribe": 5,
+    "tohono o'odham farming authority is tribally owned": 4,
+    "can't find this organization at all": 4,
+    "acoma cattle growers association appears separate from the tribe": 3,
+    "this district is entirely or almost entirely on the Rosebud reservation": 2,
+    "I'm unsure about turtle mountain public utilities comm but I'll keep it": 2,
+    "this enterprise appears to have no connection to the tribe": 2,
+    "Koi nation lives on lower lake rancheria": 1,
+    "primary place of performance is in FL but the city doesn't match at all": 1,
+    "laguna rainbow corp appears to be a tribe entity": 1
+   }
+  },
+  "exclusion_source_line": {
+   "nonblank": 53191,
+   "blank": 648764,
+   "pct_blank": 92.4224,
+   "approx_distinct": 1152
+  },
+  "exclusion_rule": {
+   "nonblank": 53191,
+   "blank": 648764,
+   "pct_blank": 92.4224,
+   "approx_distinct": 853
+  },
+  "ak_flag": {
+   "nonblank": 476924,
+   "blank": 225031,
+   "pct_blank": 32.0578,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 421481,
+    "1": 55443
+   }
+  },
+  "excluded_flag": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 647865,
+    "1": 54090
+   }
+  },
+  "attributed_flag": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 549180,
+    "0": 152775
+   }
+  },
+  "face_value_of_loan": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 593
+  },
+  "original_loan_subsidy_cost": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 302
+  },
+  "total_face_value_of_loan": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 374
+  },
+  "total_loan_subsidy_cost": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 232
+  },
+  "credit_instrument_flag": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 223214,
+    "1": 1817
+   }
+  },
+  "business_types_code": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 136
+  },
+  "business_types_description": {
+   "nonblank": 223337,
+   "blank": 478618,
+   "pct_blank": 68.1836,
+   "approx_distinct": 113
+  },
+  "obligated_usd_real2025": {
+   "nonblank": 677060,
+   "blank": 24895,
+   "pct_blank": 3.5465,
+   "approx_distinct": 422669
+  },
+  "deflator_factor_2025": {
+   "nonblank": 677060,
+   "blank": 24895,
+   "pct_blank": 3.5465,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "1.028311": 50686,
+    "1.092829": 50597,
+    "1.053836": 49652,
+    "1.223977": 49195,
+    "1.170557": 48415,
+    "1.0": 44471,
+    "1.260903": 43789,
+    "1.240433": 41434,
+    "1.312884": 37213,
+    "1.28979": 36122,
+    "1.337665": 33513,
+    "1.325363": 31191,
+    "1.360954": 30950,
+    "1.438984": 26919,
+    "1.456468": 26844,
+    "1.409899": 26103,
+    "1.384118": 22854,
+    "1.465454": 15669,
+    "1.493694": 11443
+   }
+  },
+  "inflation_base_year": {
+   "nonblank": 677060,
+   "blank": 24895,
+   "pct_blank": 3.5465,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2025": 677060
+   }
+  },
+  "state_agreement": {
+   "nonblank": 199873,
+   "blank": 502082,
+   "pct_blank": 71.5262,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "agree": 180830,
+    "disagree": 19042,
+    "unknown": 1
+   }
+  },
+  "source_archive_stamp": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "20260706": 131495,
+    "20260806": 93536
+   }
+  },
+  "attribution_status": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "cedar_neid": 552756,
+    "unattributed": 147067,
+    "excluded_not_native": 2119,
+    "unresolved_native": 13
+   }
+  },
+  "source_vintage": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "usaspending_bulk_download_2023-04-09": 476924,
+    "usaspending_award_archive_20260706": 131495,
+    "usaspending_award_archive_20260806": 93536
+   }
+  },
+  "business_types_description_normalized": {
+   "nonblank": 223337,
+   "blank": 478618,
+   "pct_blank": 68.1836,
+   "approx_distinct": 113
+  },
+  "geo_recipient_county_fips": {
+   "nonblank": 663101,
+   "blank": 38854,
+   "pct_blank": 5.5351,
+   "approx_distinct": 1792
+  },
+  "geo_recipient_state_fips": {
+   "nonblank": 663101,
+   "blank": 38854,
+   "pct_blank": 5.5351,
+   "approx_distinct": 59
+  },
+  "geo_recipient_place_dominance_share": {
+   "nonblank": 514061,
+   "blank": 187894,
+   "pct_blank": 26.7672,
+   "approx_distinct": 1153
+  },
+  "geo_recipient_place_ambiguous": {
+   "nonblank": 514061,
+   "blank": 187894,
+   "pct_blank": 26.7672,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 403667,
+    "0": 110394
+   }
+  },
+  "geo_pop_county_fips": {
+   "nonblank": 92064,
+   "blank": 609891,
+   "pct_blank": 86.8846,
+   "approx_distinct": 1107
+  },
+  "geo_pop_state_fips": {
+   "nonblank": 92064,
+   "blank": 609891,
+   "pct_blank": 86.8846,
+   "approx_distinct": 59
+  },
+  "geo_pop_place_dominance_share": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "geo_pop_place_ambiguous": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "geo_built_date": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 701955
+   }
+  },
+  "attribution_method": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "dofile_corrtd:prefix": 363078,
+    "uei_exact_archive": 183491,
+    "unattributed": 80682,
+    "not_evaluated:ak_scope_line9": 55316,
+    "ledger_uei_state_disagreement_withheld": 15878,
+    "dofile_corrtd:exact": 1450,
+    "dofile_corrtd:prefix+city": 1007,
+    "ledger_exclusion": 899,
+    "agent_research_one_leg": 154
+   }
+  },
+  "confidence_tier": {
+   "nonblank": 661845,
+   "blank": 40110,
+   "pct_blank": 5.714,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "A": 437138,
+    "B": 111106,
+    "C": 59511,
+    "X": 54090
+   }
+  },
+  "population_basis": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "recipient_type": 502082,
+    "both": 122933,
+    "ledger_uei": 61062,
+    "ledger_uei_withheld": 15878
+   }
+  },
+  "fetched_date": {
+   "nonblank": 225031,
+   "blank": 476924,
+   "pct_blank": 67.9422,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "2026-08-07": 131495,
+    "2026-08-12": 76504,
+    "2026-08-26": 17032
+   }
+  },
+  "attribution_basis": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 249
+  },
+  "source_vintage_basis": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "pull date parsed from source_file": 476924,
+    "source_archive_stamp": 225031
+   }
+  },
+  "business_types_description_normalized_basis": {
+   "nonblank": 223337,
+   "blank": 478618,
+   "pct_blank": 68.1836,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "as recorded": 216177,
+    "one token re-rendered to the majority form; variant differs by one missing space and one absent hyphen (7,160 rows vs 118,465). Source vocabulary, not ours.": 7160
+   }
+  },
+  "geo_key_tier": {
+   "nonblank": 663173,
+   "blank": 38782,
+   "pct_blank": 5.5249,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "derived_place_modal": 514061,
+    "exact_transaction": 139553,
+    "exact_award_summary": 9559
+   }
+  },
+  "geo_key_basis": {
+   "nonblank": 663173,
+   "blank": 38782,
+   "pct_blank": 5.5249,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "modal county of this row's own city+state in geo_place_county_crosswalk.csv": 514061,
+    "usaspending_prime_award_transaction_record_on_assistance_transaction_unique_key": 139553,
+    "usaspending_prime_award_summary_on_assistance_award_unique_key": 9559
+   }
+  },
+  "bie_uio_dollars_by_entity__entity_class": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__bie_operation_type": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__parent_native_entity": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__rolls_up_to_a_tribe": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__total_usd": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__usd_faads_all_agencies": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__usd_federal_funding": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__usd_nonprofit_990": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__usd_prime_contracts": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__usd_subawards": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__n_transactions": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "bie_uio_dollars_by_entity__built_date": {
+   "nonblank": 0,
+   "blank": 701955,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "n_faads_entity_attribution": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 162
+  },
+  "n_faads_transactions": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 552756,
+    "60661": 149199
+   }
+  },
+  "n_faads_transactions_all_agencies": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 552756,
+    "2769748": 149199
+   }
+  },
+  "n_federal_funding_tribe_year_panel": {
+   "nonblank": 701955,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 17,
+   "vocabulary": {
+    "16": 514527,
+    "7": 149226,
+    "0": 32647,
+    "15": 1704,
+    "14": 868,
+    "6": 464,
+    "12": 454,
+    "11": 339,
+    "19": 335,
+    "9": 312,
+    "8": 291,
+    "5": 282,
+    "13": 182,
+    "4": 147,
+    "10": 145,
+    "3": 29,
+    "2": 3
+   }
+  }
+ }
+}

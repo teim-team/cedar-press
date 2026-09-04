@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# ORDERING, WRITTEN DOWN. This script writes `nagpra_notice_institutions.csv`
+# WHOLESALE from the notice titles and enriches `nagpra_notices.csv` in place.
+# `code/1084_nagpra_split_artefact_audit.py` is the SECOND enricher on the
+# bridge and adds five columns to it IN PLACE, which a 1077 run drops, so 1084
+# must be re-run after any run of this script. Both legs are declared in
+# `KNOWN_ORDERINGS` / `ENRICHER_ORDERING` in code/cedar_pipeline.py.
+# lint-ok: class6 - ordering declared above and in cedar_pipeline; 1084 is the enricher and runs last.
 """
 Cedar Press - 1077: A NAGPRA NOTICE NAMES INSTITUTIONS, PLURAL, AND EACH HAS
 ITS OWN ADDRESS.
@@ -101,6 +108,8 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import cedar_nagpra_split as _split_rule   # noqa: E402  the ONE split rule
 csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 TAG = f".bak_{TODAY}_pre_1077_nagpra_institution_grain"
@@ -138,6 +147,11 @@ LEADIN_RE = re.compile(
     r"^(?:and\s+)?(?:in the (?:possession|control|physical custody) of\s+)?"
     r"(?:the\s+)?", re.I)
 LEFTOVER_PREFIX_RE = re.compile(r"^([A-Z][A-Za-z ]{2,40}):\s")
+# Measured 2026-09-02 over all 6,792 notice titles by
+# `py -3 code/1154_nagpra_fr_grain_audit.py report`: 19 adjacent `, and ` pairs
+# trip the bare-noun test, 15 of them satisfy the strict merge conditions.
+# This is a FLOOR on the intended delta, not a conservation check.
+MERGE_FLOOR = 15
 
 
 def notice_body(title: str):
@@ -160,8 +174,19 @@ def notice_body(title: str):
     return body, how
 
 
-def split_institutions(body: str):
-    """-> [(name, city, state)], in the order the notice lists them."""
+def split_institutions(body: str, with_notes: bool = False):
+    """-> [(name, city, state)], in the order the notice lists them.
+
+    THE `, and ` SPLIT IS PROVISIONAL. It is the Oxford comma inside an
+    ordinary organisation's own name as often as it is a separator between two
+    holders, and splitting on it unconditionally is what shipped `Louisiana
+    Department of Culture, Recreation` - an agency that does not exist - on 12
+    notices, with the notice's own city stranded on the phantom half.
+    `code/cedar_nagpra_split.py` holds the ONE rule that decides, and it is the
+    same rule `1084`'s detector A1 audits with, imported rather than
+    re-implemented so the two cannot drift. Pairs it will not decide are left
+    split and the reason is returned in `notes`, never guessed at.
+    """
     segs = body.split(";") if ";" in body else LEGACY_SPLIT_RE.split(body)
     out = []
     for s in segs:
@@ -174,7 +199,13 @@ def split_institutions(body: str):
                         cm.group(2)))
         else:
             out.append((s, "", ""))
-    return [p for p in out if p[0]]
+    out = [p for p in out if p[0]]
+    notes, n_merged = [], 0
+    if ";" not in body and len(out) > 1:
+        before = len(out)
+        out, notes = _split_rule.apply_merges(out, body)
+        n_merged = before - len(out)
+    return (out, notes, n_merged) if with_notes else out
 
 
 def inst_type(name, fallback=""):
@@ -244,7 +275,15 @@ OBJECT_HEAD_RE = re.compile(
     else:
         notes.append("parse_institution body MOVED - patch by hand")
 
-    if BAD_SPLIT in new:
+    # IDEMPOTENCY, THE RIGHT WAY ROUND. This used to test `BAD_SPLIT in new`
+    # FIRST and fall back to "already present" - but BAD_SPLIT is the literal
+    # INST_SPLIT_RE definition, which survives the patch, so every run
+    # prepended the comment block again. Four identical copies of
+    # `INST_SEMI_RE = re.compile(r";")` were in `77` by 2026-09-02. The
+    # already-present test has to come first.
+    if "INST_SEMI_RE" in new:
+        notes.append("semicolon rule already present")
+    elif BAD_SPLIT in new:
         new = new.replace(BAD_SPLIT, '''# SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
 # with "; " and closes the list with "; and ". Splitting on ", and " first
 # cuts INSIDE ordinary organisation names: "South Carolina Department of
@@ -302,12 +341,20 @@ def main() -> int:
         rows = list(rd)
     n_before, c_before = len(rows), len(cols)
 
+    for _c in ("institution_split_flag", "institution_split_basis"):
+        if _c not in cols:
+            cols.append(_c)
     bridge, changed_prefix, changed_count, changed_loc = [], 0, 0, 0
     i3_breach, i6_breach = 0, 0
+    flagged_rows = []
+    merged_pairs, merged_notices = 0, 0
     for r in rows:
         title = r.get("title") or ""
         body, how = notice_body(title)
-        parts = split_institutions(body)
+        parts, split_notes, _m = split_institutions(body, with_notes=True)
+        if _m:
+            merged_pairs += _m
+            merged_notices += 1
         if not parts:
             parts = [(body or (r.get("institution_name") or ""), "", "")]
         flat = re.sub(r"\s+", " ", title).lower()
@@ -334,6 +381,19 @@ def main() -> int:
         r["institution_city"] = parts[0][1]
         r["institution_state"] = parts[0][2]
         r["institution_name_basis"] = how
+        # FLAG, NEVER GUESS. A `, and ` pair that trips the bare-noun test but
+        # that the rule will not decide is left exactly as the title splits it
+        # and the reason travels with the row, so a buyer can see that these
+        # fragments MAY be one institution rather than being told they are two.
+        r["institution_split_flag"] = "|".join(
+            sorted({f for _, f, _ in split_notes}))
+        r["institution_split_basis"] = " || ".join(b for _, _, b in split_notes)
+        if r["institution_split_flag"]:
+            # NAME WHAT WAS FLAGGED, not just how many. A refusal counted and
+            # not named is a refusal nobody can act on.
+            flagged_rows.append((r["document_number"],
+                                 r["institution_split_flag"],
+                                 r["institution_name"][:120]))
         if LEFTOVER_PREFIX_RE.match(r["institution_name"]):
             i6_breach += 1
 
@@ -383,6 +443,13 @@ def main() -> int:
     if i6_breach:
         breaches.append(f"I6 {i6_breach} institution_name still carry a "
                         f"notice-type prefix")
+    # I8. A conservation check is not a proof that something happened
+    # (AGENT_FIELD_GUIDE rule 5). MERGE_FLOOR is derived from the notice TITLES
+    # on every run, not from the table, so it does not drift after the repair
+    # lands: if the split rule stops firing, this fires instead.
+    if merged_pairs < MERGE_FLOOR:
+        breaches.append(f"I8 the oxford `, and ` merge rule did not fire: "
+                        f"{merged_pairs} pairs rejoined, floor {MERGE_FLOOR}")
 
     multi = sum(1 for r in rows if int(r["institution_count"]) > 1)
     with_state = sum(1 for b in bridge if b["institution_state"])
@@ -395,6 +462,12 @@ def main() -> int:
     print(f"    institution_count corrected    {changed_count:,} rows")
     print(f"    city/state repointed to the primary institution "
           f"{changed_loc:,} rows")
+    print(f"    oxford `, and ` pairs rejoined {merged_pairs:,} on "
+          f"{merged_notices:,} notices")
+    print(f"    left split and FLAGGED, not guessed at "
+          f"{len(flagged_rows):,} notices")
+    for _dn, _fl, _nm in flagged_rows:
+        print(f"      {_dn}  {_fl}  {_nm}")
     for b in breaches:
         print(f"    BREACH {b}")
 
@@ -445,6 +518,15 @@ def main() -> int:
                     "prefix_stripped_rows": changed_prefix,
                     "institution_count_corrected": changed_count,
                     "city_state_repointed": changed_loc,
+                    "oxford_and_pairs_rejoined": merged_pairs,
+                    "notices_with_a_rejoined_name": merged_notices,
+                    "notices_left_split_and_flagged": len(flagged_rows),
+                    "notices_left_split_and_flagged_named": [
+                        {"document_number": d, "flag": f,
+                         "institution_name": n}
+                        for d, f, n in flagged_rows],
+                    "split_rule": "code/cedar_nagpra_split.py - the ONE rule, "
+                                  "imported by 77, 1077 and 1084",
                     "distinct_institution_names_before": 2184,
                     "distinct_institution_names_after":
                         len({b["institution_name"] for b in bridge}),

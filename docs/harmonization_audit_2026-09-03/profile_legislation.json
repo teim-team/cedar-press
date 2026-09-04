@@ -1,0 +1,718 @@
+{
+ "snapshot": {
+  "file": "dist/customer/legislation.csv",
+  "bytes": 5345999,
+  "mtime": "2026-09-03T00:37:27"
+ },
+ "rows": 3069,
+ "columns": 65,
+ "seconds": 2.7,
+ "profile": {
+  "bill_id": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3241
+  },
+  "companion_bill_id": {
+   "nonblank": 879,
+   "blank": 2190,
+   "pct_blank": 71.3587,
+   "approx_distinct": 1098
+  },
+  "sponsor_bioguide_id": {
+   "nonblank": 2936,
+   "blank": 133,
+   "pct_blank": 4.3337,
+   "approx_distinct": 456
+  },
+  "title": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2000
+  },
+  "congress": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 27,
+   "vocabulary": {
+    "116": 242,
+    "117": 231,
+    "118": 229,
+    "115": 196,
+    "110": 192,
+    "114": 184,
+    "108": 183,
+    "109": 175,
+    "107": 159,
+    "111": 157,
+    "106": 156,
+    "119": 154,
+    "113": 152,
+    "105": 148,
+    "103": 147,
+    "112": 137,
+    "104": 129,
+    "102": 17,
+    "100": 16,
+    "99": 11,
+    "95": 10,
+    "97": 9,
+    "96": 9,
+    "101": 8,
+    "94": 7,
+    "93": 7,
+    "98": 4
+   }
+  },
+  "chamber": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "House": 1704,
+    "Senate": 1333,
+    "senate": 21,
+    "house": 11
+   }
+  },
+  "number": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2438
+  },
+  "policy_area": {
+   "nonblank": 2945,
+   "blank": 124,
+   "pct_blank": 4.0404,
+   "approx_distinct": 34,
+   "vocabulary": {
+    "Native Americans": 2101,
+    "Public Lands and Natural Resources": 161,
+    "Taxation": 157,
+    "Health": 58,
+    "Armed Forces and National Security": 40,
+    "Education": 39,
+    "Congress": 36,
+    "Government Operations and Politics": 36,
+    "Environmental Protection": 34,
+    "Water Resources Development": 31,
+    "Crime and Law Enforcement": 26,
+    "Transportation and Public Works": 25,
+    "Social Welfare": 24,
+    "Agriculture and Food": 21,
+    "Housing and Community Development": 19,
+    "Energy": 17,
+    "Commerce": 17,
+    "Labor and Employment": 13,
+    "Economics and Public Finance": 12,
+    "Commemorations": 11,
+    "Science, Technology, Communications": 9,
+    "Animals": 8,
+    "International Affairs": 8,
+    "Private Legislation": 7,
+    "Immigration": 7,
+    "Finance and Financial Sector": 7,
+    "Emergency Management": 7,
+    "Law": 4,
+    "Arts, Culture, Religion": 3,
+    "Indian claims": 2,
+    "Civil Rights and Liberties, Minority Issues": 1,
+    "Families": 1,
+    "Foreign Trade and International Finance": 1,
+    "Sports and Recreation": 1,
+    "Lakes": 1
+   }
+  },
+  "bill_scope": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "general": 2569,
+    "tribe-specific": 500
+   }
+  },
+  "affected_entities": {
+   "nonblank": 0,
+   "blank": 3069,
+   "pct_blank": 100.0,
+   "approx_distinct": 0
+  },
+  "sponsor": {
+   "nonblank": 2952,
+   "blank": 117,
+   "pct_blank": 3.8123,
+   "approx_distinct": 540
+  },
+  "introduced_date": {
+   "nonblank": 3061,
+   "blank": 8,
+   "pct_blank": 0.2607,
+   "approx_distinct": 1958
+  },
+  "latest_action": {
+   "nonblank": 3061,
+   "blank": 8,
+   "pct_blank": 0.2607,
+   "approx_distinct": 1355
+  },
+  "outcome": {
+   "nonblank": 3052,
+   "blank": 17,
+   "pct_blank": 0.5539,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "died-in-committee": 2189,
+    "passed-one-chamber": 421,
+    "enacted": 283,
+    "pending": 125,
+    "superseded-by-another-measure": 15,
+    "floor-vote-failed": 11,
+    "vetoed": 8
+   }
+  },
+  "bill_type": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "hr": 1651,
+    "s": 1332,
+    "hres": 38,
+    "hjres": 23,
+    "sjres": 12,
+    "sconres": 5,
+    "treatydocno": 3,
+    "treatydoc": 2,
+    "hre": 2,
+    "hjr": 1
+   }
+  },
+  "latest_action_date": {
+   "nonblank": 3061,
+   "blank": 8,
+   "pct_blank": 0.2607,
+   "approx_distinct": 1763
+  },
+  "cosponsor_count": {
+   "nonblank": 2045,
+   "blank": 1024,
+   "pct_blank": 33.3659,
+   "approx_distinct": 66
+  },
+  "n_rollcalls": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "0": 2786,
+    "1": 226,
+    "2": 40,
+    "3": 7,
+    "4": 5,
+    "15": 1,
+    "5": 1,
+    "8": 1,
+    "13": 1,
+    "10": 1
+   }
+  },
+  "has_rollcall": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 2786,
+    "1": 283
+   }
+  },
+  "classification_source": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "congress_gov_policy_area_native_americans": 2019,
+    "single_coded_keyword_rule_on_title": 737,
+    "two_coder_adjudicated": 110,
+    "single_coded_keyword_rule": 63,
+    "two_coder_adjudicated_inherited_from_rollcall": 53,
+    "two_coder_zero_overlap_adjudicated": 51,
+    "subject_family_phrase_sweep:ANCSA / Alaska Native corporations": 14,
+    "subject_family_phrase_sweep:Native American / American Indian (general)": 10,
+    "subject_family_phrase_sweep:Native Hawaiian": 8,
+    "single_coded_8strategy_expansion": 4
+   }
+  },
+  "classification_kappa": {
+   "nonblank": 214,
+   "blank": 2855,
+   "pct_blank": 93.027,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0.952": 163,
+    "-1.000 (not meaningful: disjoint coder search strategies)": 51
+   }
+  },
+  "build_date": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2026-08-05": 3037,
+    "2026-08-06": 32
+   }
+  },
+  "pre_2000_flag": {
+   "nonblank": 585,
+   "blank": 2484,
+   "pct_blank": 80.9384,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 585
+   }
+  },
+  "floor_basis_field": {
+   "nonblank": 3037,
+   "blank": 32,
+   "pct_blank": 1.0427,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "introduced_date": 2901,
+    "congress": 136
+   }
+  },
+  "has_resolved_entity": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 2478,
+    "1": 591
+   }
+  },
+  "n_entities_resolved": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 2478,
+    "1": 527,
+    "2": 54,
+    "3": 5,
+    "4": 2,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   }
+  },
+  "entity_cedar_uids": {
+   "nonblank": 591,
+   "blank": 2478,
+   "pct_blank": 80.7429,
+   "approx_distinct": 159
+  },
+  "entity_names": {
+   "nonblank": 591,
+   "blank": 2478,
+   "pct_blank": 80.7429,
+   "approx_distinct": 161
+  },
+  "entity_link_tiers": {
+   "nonblank": 591,
+   "blank": 2478,
+   "pct_blank": 80.7429,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "A": 494,
+    "B": 33,
+    "A|A": 27,
+    "B|B": 26,
+    "B|A|B": 3,
+    "A|B|B": 2,
+    "A|B": 1,
+    "B|B|B|B|B|B": 1,
+    "B|A|B|B": 1,
+    "B|B|B|B|B": 1,
+    "A|A|A|A": 1,
+    "B|B|A|B|B|B|B": 1
+   }
+  },
+  "entity_class_scope": {
+   "nonblank": 2456,
+   "blank": 613,
+   "pct_blank": 19.9739,
+   "approx_distinct": 10,
+   "vocabulary": {
+    "Federally Recognized Tribe": 2230,
+    "Alaska Native Regional Corporation|Alaska Native Village Corporation": 84,
+    "Native Hawaiian Organization": 77,
+    "Alaska Native Village Corporation|Alaska Native Village Government|Federally Recognized Tribe|Native Hawaiian Organization": 32,
+    "Alaska Native Village Government": 11,
+    "Federally Recognized Tribe|Native Hawaiian Organization": 7,
+    "Intertribal Organization": 6,
+    "Federally Recognized Tribe|Intertribal Organization|Native Hawaiian Organization": 4,
+    "Alaska Native Regional Corporation|Alaska Native Village Corporation|Alaska Native Village Government": 4,
+    "Federally Recognized Tribe|Intertribal Organization": 1
+   }
+  },
+  "n_entity_classes": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "1": 2324,
+    "0": 613,
+    "2": 92,
+    "4": 32,
+    "3": 8
+   }
+  },
+  "bill_scope_basis": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 121
+  },
+  "outcome_basis": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2774
+  },
+  "companion_basis": {
+   "nonblank": 879,
+   "blank": 2190,
+   "pct_blank": 71.3587,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "identical_normalized_title_same_congress_opposite_chamber": 879
+   }
+  },
+  "record_basis": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "congress_api_bill_metadata": 2809,
+    "voteview_rollcall_only + congress_gov_bill_endpoint_title_backfill + scope_ruled_1092_2026-09-02": 128,
+    "voteview_rollcall + congress_api_bill_metadata": 92,
+    "congress_api_bill_metadata (all_bill_intros.csv) + scope_ruled_1092_2026-09-02": 32,
+    "voteview_rollcall_only + congress_gov_bill_endpoint_title_backfill (1092: bill_type slug normalised) + scope_ruled_1092_2026-09-02": 8
+   }
+  },
+  "entity_link_basis": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "no spine name matched this bill's title or text; code/1140 from data/clean/native_bills_entity_bridge.csv": 2478,
+    "collapsed one-row-per-bill from data/clean/native_bills_entity_bridge.csv by code/1140 on 2026-09-02; match method(s) spine_name_in_title. Tiers are INHERITED from the bridge row and are not upgraded here. Several entities per bill are pipe-delimited, the same shape nagpra_notices ships.": 591
+   }
+  },
+  "entity_class_scope_basis": {
+   "nonblank": 2456,
+   "blank": 613,
+   "pct_blank": 19.9739,
+   "approx_distinct": 38,
+   "vocabulary": {
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): policyArea=Native Americans": 1468,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Native American": 276,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian tribes": 99,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): American Indian": 93,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Native Hawaiian": 68,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian Tribe": 68,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian Health Service": 58,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian Tribes": 58,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Claims Settlement": 52,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Tribal Government": 49,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Native American; Native American Housing Assistance and Self-Determination": 30,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian tribe": 18,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian Country": 16,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): ANCSA": 15,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): tribal government": 15,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Tribal Health Consortium": 9,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian Self-Determination": 8,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Vietnam Era Veterans": 7,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Corporation": 6,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Hawaiian Homes Commission": 6,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): tribal organization": 5,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Claims Settlement; Alaska Native elders": 4,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Native American; Native Hawaiian": 4,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Native American; Native Hawaiian; tribal organization": 4,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Hawaiian Home Land": 3,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian tribe; Native Hawaiian": 3,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Allotment": 2,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Health": 2,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Alaska Native Village Corporation": 2,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian Health service": 2,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Native American; Native American Housing Assistance and Self-Determination; Native Hawaiian": 2,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian country": 1,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): inter-tribal": 1,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Indian tribes; tribal organization": 1,
+    "CLASS-LEVEL SCOPE, NOT AN ENTITY LINK. Promoted from data/clean/native_bills_entity_class.csv by code/1140 on 2026-09-02; that table asserts NO tribe_id and says so on every row. It records which CLASS of Native entity a statute or programme applies to as a whole. Do NOT read it as an attribution to any individual entity, and do NOT count it toward linkage coverage - the named-entity link is `entity_tribe_ids` / `has_resolved_entity`. Matched phrase(s): Tribal government": 1
+   }
+  },
+  "n_bill_votes": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "0": 2786,
+    "1": 226,
+    "2": 40,
+    "3": 7,
+    "4": 5,
+    "8": 1,
+    "13": 1,
+    "10": 1,
+    "15": 1,
+    "5": 1
+   }
+  },
+  "n_bill_votes_entity_bridge": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 3029,
+    "1": 23,
+    "2": 12,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "4": 1,
+    "3": 1
+   }
+  },
+  "n_member_positions": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 45
+  },
+  "native_bill_action_coverage__bill_number": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2438
+  },
+  "native_bill_action_coverage__action_lookup_status": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "ok": 3061,
+    "SOURCE_DOES_NOT_PUBLISH_ON_BILL_ENDPOINT": 8
+   }
+  },
+  "native_bill_action_coverage__n_actions_retrieved": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 114
+  },
+  "native_bill_action_coverage__n_actions_reported_by_fetch_log": {
+   "nonblank": 3061,
+   "blank": 8,
+   "pct_blank": 0.2607,
+   "approx_distinct": 114
+  },
+  "native_bill_action_coverage__first_action_date": {
+   "nonblank": 3061,
+   "blank": 8,
+   "pct_blank": 0.2607,
+   "approx_distinct": 1978
+  },
+  "native_bill_action_coverage__last_action_date": {
+   "nonblank": 3061,
+   "blank": 8,
+   "pct_blank": 0.2607,
+   "approx_distinct": 1763
+  },
+  "native_bill_action_coverage__became_law": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "N": 2786,
+    "Y": 283
+   }
+  },
+  "native_bill_action_coverage__action_lookup_basis": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "data/clean/_bill_actions.csv, congress.gov v3 /actions, fetched 2026-08-06, promoted by code/1150": 3061,
+    "bill_type 'treatydocno' is not a canonical congress.gov slug; /bill has no such path (established by code/1092)": 3,
+    "bill_type 'treatydoc' is not a canonical congress.gov slug; /bill has no such path (established by code/1092)": 2,
+    "bill_type 'hre' is not a canonical congress.gov slug; /bill has no such path (established by code/1092)": 2,
+    "bill_type 'hjr' is not a canonical congress.gov slug; /bill has no such path (established by code/1092)": 1
+   }
+  },
+  "native_bill_action_coverage__source_url": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2993
+  },
+  "native_bill_action_coverage__fetched_date": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 3069
+   }
+  },
+  "n_native_bill_actions": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 114
+  },
+  "native_bill_cosponsor_coverage__bill_number": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2438
+  },
+  "native_bill_cosponsor_coverage__cosponsor_lookup_status": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "ok": 2175,
+    "zero_cosponsors_reported": 886,
+    "SOURCE_DOES_NOT_PUBLISH_ON_BILL_ENDPOINT": 8
+   }
+  },
+  "native_bill_cosponsor_coverage__n_cosponsors_retrieved": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 96
+  },
+  "native_bill_cosponsor_coverage__n_cosponsors_reported_by_source": {
+   "nonblank": 3061,
+   "blank": 8,
+   "pct_blank": 0.2607,
+   "approx_distinct": 99
+  },
+  "native_bill_cosponsor_coverage__cosponsor_count_in_native_bills": {
+   "nonblank": 2045,
+   "blank": 1024,
+   "pct_blank": 33.3659,
+   "approx_distinct": 77
+  },
+  "native_bill_cosponsor_coverage__count_agrees_with_native_bills": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "Y": 2021,
+    "NOT_TESTABLE": 1024,
+    "N": 24
+   }
+  },
+  "native_bill_cosponsor_coverage__cosponsor_lookup_basis": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3086
+  },
+  "native_bill_cosponsor_coverage__source_url": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3116
+  },
+  "native_bill_cosponsor_coverage__fetched_date": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 3069
+   }
+  },
+  "n_native_bill_cosponsors": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 96
+  },
+  "n_native_bill_outcomes": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "0": 3069
+   }
+  },
+  "n_native_bills_entity_bridge": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 2478,
+    "1": 527,
+    "2": 54,
+    "3": 5,
+    "4": 2,
+    "5": 1,
+    "6": 1,
+    "7": 1
+   }
+  },
+  "n_native_bills_entity_class": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "1": 2324,
+    "0": 613,
+    "2": 92,
+    "5": 30,
+    "3": 8,
+    "6": 2
+   }
+  },
+  "n_native_bills_subject_sweep": {
+   "nonblank": 3069,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "1": 2409,
+    "0": 660
+   }
+  }
+ }
+}

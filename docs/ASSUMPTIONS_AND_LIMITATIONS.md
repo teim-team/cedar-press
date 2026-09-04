@@ -1378,7 +1378,7 @@ post-2011 BMF populations are not comparable.
 
 ---
 
-## H. GAMING — `gaming_facilities.csv` (784 rows), `gaming_facility_metrics.csv`
+## H. GAMING — `gaming_facilities.csv` (787 rows), `gaming_facility_metrics.csv`
 
 ### H1 · `GAMING_UNIVERSE_RECONCILIATION` · **OURS** — we undercount operating and overcount historical
 
@@ -1501,7 +1501,7 @@ of the SAM FY2000–2007 backfill.
 
 ## I. EMPLOYMENT AND LABOUR — forward-looking; the layer is Form 5500 + OSHA ITA today
 
-*Cedar currently holds `gaming_employment_observations.csv` (3,300 rows) built from **Form
+*Cedar currently holds `gaming_employment_observations.csv` (3,421 rows) built from **Form
 5500** and **OSHA ITA**, not from Census or BLS. The suppression entries below gate a planned
 layer and are recorded now so nobody builds on a zero. Full treatment:
 `docs/LABOR_SOURCES_FOR_GAMING_2026-08-26.md` §3 and §15.*

@@ -1,0 +1,907 @@
+{
+ "snapshot": {
+  "file": "dist/customer/nonprofits.csv",
+  "bytes": 14100205,
+  "mtime": "2026-09-03T00:37:44"
+ },
+ "rows": 12689,
+ "columns": 73,
+ "seconds": 4.3,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 555,
+   "blank": 12134,
+   "pct_blank": 95.6261,
+   "approx_distinct": 206
+  },
+  "entity_id": {
+   "nonblank": 84,
+   "blank": 12605,
+   "pct_blank": 99.338,
+   "approx_distinct": 75
+  },
+  "cedar_spine_entity_id": {
+   "nonblank": 591,
+   "blank": 12098,
+   "pct_blank": 95.3424,
+   "approx_distinct": 218
+  },
+  "key_redirect_proposed_entity_id": {
+   "nonblank": 12,
+   "blank": 12677,
+   "pct_blank": 99.9054,
+   "approx_distinct": 11,
+   "vocabulary": {
+    "UIO-HLTHSN-00": 1,
+    "NHO-MKHHWN-00": 1,
+    "NHO-HWNDCT-00": 1,
+    "NHO-HWNPHL-00": 1,
+    "NHO-HWNLGL-00": 1,
+    "CDFI-CHHLST-00": 1,
+    "NHO-HWNHSP-00": 1,
+    "CDFI-LCHLKF-00": 1,
+    "CDFI-WHTRT1-00": 1,
+    "CDFI-YRKLLN-00": 1,
+    "CDFI-SNCNTN-00": 1,
+    "UIO-MRCNCN-00": 1
+   }
+  },
+  "org_name": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 10977
+  },
+  "tribe_canonical_name": {
+   "nonblank": 555,
+   "blank": 12134,
+   "pct_blank": 95.6261,
+   "approx_distinct": 193
+  },
+  "cedar_spine_canonical_name": {
+   "nonblank": 591,
+   "blank": 12098,
+   "pct_blank": 95.3424,
+   "approx_distinct": 244
+  },
+  "key_redirect_proposed_name": {
+   "nonblank": 12,
+   "blank": 12677,
+   "pct_blank": 99.9054,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "Seneca Nation of Indians Economic Development Company": 1,
+    "Indian Health Center of Santa Clara Valley": 1,
+    "Native Hawaiian Education Council": 1,
+    "White Earth Investment Initiative": 1,
+    "Chehalis Tribal Loan Fund": 1,
+    "Native Hawaiian Hospitality Association": 1,
+    "Leech Lake Financial Services, Inc.": 1,
+    "Yurok Alliance for Northern California Housing": 1,
+    "American Indian Council on Alcoholism, Inc.": 1,
+    "Makaha Hawaiian Civic Club": 1,
+    "Native Hawaiian Legal Corporation": 1,
+    "Native Hawaiian Philanthropy": 1
+   }
+  },
+  "EIN": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 15211
+  },
+  "classification_ruling": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "UNRULED": 12366,
+    "place_name_coincidence": 309,
+    "tribally_controlled": 8,
+    "native_controlled": 6
+   }
+  },
+  "evidence": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3482
+  },
+  "tier": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "990_N": 6400,
+    "full_990": 2801,
+    "not_required_to_file": 2045,
+    "990_EZ": 1314,
+    "UNKNOWN": 129
+   }
+  },
+  "state": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 55
+  },
+  "city": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2695
+  },
+  "ntee_code": {
+   "nonblank": 9189,
+   "blank": 3500,
+   "pct_blank": 27.5829,
+   "approx_distinct": 1401
+  },
+  "funnel_stage": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "raw_name_candidate": 5082,
+    "excluded_by_prior_ruling": 4651,
+    "canonical_name_match": 1831,
+    "verified_strict": 697,
+    "ruled_not_native": 309,
+    "state_validated": 105,
+    "ruled_native_verified": 14
+   }
+  },
+  "review_flag": {
+   "nonblank": 1752,
+   "blank": 10937,
+   "pct_blank": 86.1928,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "civic_or_place_descriptor_in_name": 1752
+   }
+  },
+  "review_flag_token": {
+   "nonblank": 1752,
+   "blank": 10937,
+   "pct_blank": 86.1928,
+   "approx_distinct": 21,
+   "vocabulary": {
+    "COUNTY": 1018,
+    "BOOSTER": 125,
+    "LIBRARY": 94,
+    "CHAMBER OF COMMERCE": 86,
+    "PTO": 66,
+    "HISTORICAL SOCIETY": 62,
+    "VOLUNTEER FIRE": 52,
+    "ROTARY": 50,
+    "CEMETERY ASSOCIATION": 39,
+    "KIWANIS": 28,
+    "PTA": 26,
+    "STATE UNIVERSITY": 21,
+    "ELECTRIC COOPERATIVE": 16,
+    "LIONS CLUB": 15,
+    "ARTS COUNCIL": 10,
+    "UNIVERSITY OF": 10,
+    "FARM BUREAU": 8,
+    "SCHOOL DISTRICT": 7,
+    "CITY OF": 7,
+    "TOWN OF": 7,
+    "PUBLIC SCHOOL": 4,
+    "ELECTRIC MEMBERSHIP": 1
+   }
+  },
+  "excluded_by_prior_ruling": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 8008,
+    "1": 4681
+   }
+  },
+  "exclusion_reason": {
+   "nonblank": 4960,
+   "blank": 7729,
+   "pct_blank": 60.911,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "ambiguous_place_token_no_tribal_purpose": 2977,
+    "place_name_false_positive": 1674,
+    "Agent-researched 2026-08-05: place-name coincidence": 282,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Cowlitz). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 11,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Kiowa Tribe). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment;state_conflict:KS!=OK' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 4,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against The Chickasaw Nation). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment;state_conflict:IA!=OK' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 2,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Kiowa Tribe). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 2,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against The Chickasaw Nation). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment;state_conflict:MS!=OK' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Confederated Colville). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Alabama-Quassarte Tribal Town). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment;state_conflict:KS!=OK' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Kiowa Tribe). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment;state_conflict:CO!=OK' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Chehalis). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Pueblo of Jemez). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against The Chickasaw Nation). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1,
+    "Applied 2026-08-26 by code/251_apply_np_ein_exclusions_to_np_orgs from the ledger's tier-X EIN leg (elijah_ruling, against Coquille). Ruling, verbatim: \"Ruled by Elijah 2026-08-12: not a Native entity\". The match this replaces was 'resolver_containment' - containment with a recorded state conflict, the place-name defect. Evidence of the refused match is kept in tribe_id_token_match / canonical_name_token_match; a correction is made, never erased. review/np_ein_hub_exclusion_hits_2026-08-26.csv": 1
+   }
+  },
+  "canonical_name_token_match": {
+   "nonblank": 7409,
+   "blank": 5280,
+   "pct_blank": 41.6108,
+   "approx_distinct": 173
+  },
+  "n_coders_agree": {
+   "nonblank": 5671,
+   "blank": 7018,
+   "pct_blank": 55.3077,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "2": 3135,
+    "3": 1999,
+    "4": 502,
+    "5": 35
+   }
+  },
+  "bmf_in_snapshot": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 12689
+   }
+  },
+  "bmf_status": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "01": 12659,
+    "12": 17,
+    "02": 12,
+    "25": 1
+   }
+  },
+  "bmf_subsection": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "03": 10449,
+    "06": 662,
+    "04": 474,
+    "07": 367,
+    "05": 290,
+    "19": 94,
+    "12": 80,
+    "10": 72,
+    "13": 66,
+    "08": 51,
+    "02": 23,
+    "09": 22,
+    "92": 12,
+    "14": 10,
+    "01": 7,
+    "15": 4,
+    "91": 3,
+    "40": 2,
+    "25": 1
+   }
+  },
+  "bmf_filing_req_cd": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "02": 6400,
+    "01": 4240,
+    "06": 1485,
+    "00": 465,
+    "14": 46,
+    "13": 41,
+    "07": 8,
+    "03": 4
+   }
+  },
+  "bmf_foundation_cd": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 18,
+   "vocabulary": {
+    "15": 4658,
+    "16": 3428,
+    "00": 2238,
+    "10": 1512,
+    "04": 365,
+    "11": 165,
+    "17": 123,
+    "12": 59,
+    "21": 41,
+    "03": 34,
+    "13": 30,
+    "09": 13,
+    "23": 8,
+    "22": 7,
+    "14": 6,
+    "24": 1,
+    "02": 1
+   }
+  },
+  "bmf_irs_ruling_yyyymm": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1086
+  },
+  "bmf_tax_period": {
+   "nonblank": 10371,
+   "blank": 2318,
+   "pct_blank": 18.2678,
+   "approx_distinct": 84
+  },
+  "bmf_revenue_amt": {
+   "nonblank": 9937,
+   "blank": 2752,
+   "pct_blank": 21.6881,
+   "approx_distinct": 7150
+  },
+  "bmf_asset_amt": {
+   "nonblank": 10271,
+   "blank": 2418,
+   "pct_blank": 19.0559,
+   "approx_distinct": 5692
+  },
+  "bmf_income_amt": {
+   "nonblank": 10271,
+   "blank": 2418,
+   "pct_blank": 19.0559,
+   "approx_distinct": 6758
+  },
+  "source_files": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 15,
+   "vocabulary": {
+    "candidates": 5082,
+    "candidates|strict": 1633,
+    "candidates|icr_high_confidence|state_validated|strict|verified": 1338,
+    "candidates|icr_review_queue|strict|verified": 852,
+    "candidates|icr_review_queue|state_validated|strict|verified": 727,
+    "candidates|icr_review_queue|state_validated|strict": 685,
+    "candidates|icr_high_confidence|state_validated|strict": 601,
+    "candidates|icr_high_confidence|state_validated|strict|verified|verified_strict": 462,
+    "candidates|icr_review_queue|strict": 358,
+    "candidates|icr_review_queue|state_validated|strict|verified|verified_strict": 264,
+    "candidates|icr_review_queue|strict|verified|verified_strict": 249,
+    "candidates|strict|unmatched": 198,
+    "candidates|state_validated|strict": 105,
+    "candidates|icr_high_confidence|strict|verified": 63,
+    "candidates|icr_high_confidence|strict|verified|verified_strict": 42,
+    "candidates|icr_high_confidence|strict": 30
+   }
+  },
+  "source_dataset": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "IRS Exempt Organizations Business Master File (eo1-eo4)": 12689
+   }
+  },
+  "bmf_vintage_fetched": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-04-29": 12689
+   }
+  },
+  "placename_risk_flag": {
+   "nonblank": 3688,
+   "blank": 9001,
+   "pct_blank": 70.9355,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "REVIEW": 2330,
+    "HIGH": 1358
+   }
+  },
+  "ruling_authority": {
+   "nonblank": 327,
+   "blank": 12362,
+   "pct_blank": 97.423,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "agent_research": 300,
+    "elijah_ruling": 27
+   }
+  },
+  "ruling_confidence": {
+   "nonblank": 300,
+   "blank": 12389,
+   "pct_blank": 97.6357,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "medium": 182,
+    "high": 108,
+    "low": 6,
+    "unstated": 4
+   }
+  },
+  "ruling_date": {
+   "nonblank": 327,
+   "blank": 12362,
+   "pct_blank": 97.423,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2026-08-05": 300,
+    "2026-08-12": 27
+   }
+  },
+  "cedar_spine_entity_class": {
+   "nonblank": 1415,
+   "blank": 11274,
+   "pct_blank": 88.8486,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "Federally recognized tribe": 1007,
+    "Federal-level constituency entity": 126,
+    "Intertribal Organization": 67,
+    "Alaska Native Village Corporation": 49,
+    "State-recognized tribe": 47,
+    "Federally recognized Alaska Native Village": 45,
+    "Urban Indian Organization": 25,
+    "Native Hawaiian Organization": 21,
+    "Tribal College or University": 13,
+    "Alaska Native Regional Corporation": 5,
+    "BIE School": 5,
+    "Federal-level self-governance consortium": 3,
+    "State-level constituency entity": 1,
+    "Native Community Development Financial Institution": 1
+   }
+  },
+  "cedar_native_entity_class": {
+   "nonblank": 1415,
+   "blank": 11274,
+   "pct_blank": 88.8486,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "tribe": 1099,
+    "native org": 241,
+    "ANC": 54,
+    "NHO": 21
+   }
+  },
+  "cedar_link_key": {
+   "nonblank": 591,
+   "blank": 12098,
+   "pct_blank": 95.3424,
+   "approx_distinct": 622
+  },
+  "cedar_link_sources": {
+   "nonblank": 1415,
+   "blank": 11274,
+   "pct_blank": 88.8486,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "np_orgs": 1304,
+    "fac_single_audits; np_orgs": 22,
+    "bie_uio_identifier_links": 11,
+    "intertribal_register; np_orgs": 10,
+    "advocacy_passthrough; fac_single_audits": 9,
+    "bie_uio_identifier_links; fac_single_audits": 7,
+    "fac_single_audits": 7,
+    "ein_uei_bridge_to_ledger; np_orgs": 6,
+    "advocacy_passthrough": 4,
+    "nho_register": 4,
+    "advocacy_passthrough; fac_single_audits; np_orgs": 4,
+    "fac_single_audits; intertribal_register; np_orgs": 4,
+    "advocacy_passthrough; bie_uio_identifier_links; fac_single_audits": 3,
+    "advocacy_passthrough; np_orgs": 3,
+    "ein_uei_bridge_to_ledger": 3,
+    "advocacy_passthrough; ein_uei_bridge_to_ledger; fac_single_audits": 2,
+    "ein_uei_bridge_to_ledger; fac_single_audits; np_orgs": 2,
+    "advocacy_passthrough; bie_uio_identifier_links": 2,
+    "nho_register; np_orgs": 2,
+    "advocacy_passthrough; ein_uei_bridge_to_ledger; fac_single_audits; np_orgs": 1,
+    "intertribal_register": 1,
+    "advocacy_passthrough; fac_single_audits; intertribal_register; np_orgs": 1,
+    "intertribal_register; nho_register; np_orgs": 1,
+    "advocacy_passthrough; intertribal_register; np_orgs": 1,
+    "advocacy_passthrough; ein_uei_bridge_to_ledger; np_orgs": 1
+   }
+  },
+  "disposition": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "CANDIDATE_NAME_ONLY": 5082,
+    "EXCLUDED_PRIOR_RULING": 4681,
+    "CANDIDATE_NAME_MATCH_UNVERIFIED": 1573,
+    "NATIVE_VERIFIED_STRICT": 697,
+    "EXCLUDED_PLACE_NAME_COINCIDENCE": 279,
+    "CANDIDATE_NAME_MATCH_GENERIC_TOKEN_ONLY": 258,
+    "CANDIDATE_STATE_VALIDATED": 105,
+    "NATIVE_RULED_VERIFIED": 14
+   }
+  },
+  "name_match_support": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "not_a_name_match": 5280,
+    "distinctive_token": 4587,
+    "no_shared_token_with_canonical_name": 2252,
+    "generic_token_only": 570
+   }
+  },
+  "name_match_shared_tokens": {
+   "nonblank": 5157,
+   "blank": 7532,
+   "pct_blank": 59.3585,
+   "approx_distinct": 323
+  },
+  "name_match_support_measured_against": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 173
+  },
+  "keyed_name_match_support": {
+   "nonblank": 1382,
+   "blank": 11307,
+   "pct_blank": 89.1087,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "distinctive_token": 1319,
+    "generic_token_only": 62,
+    "no_shared_token_with_keyed_entity": 1
+   }
+  },
+  "keyed_name_match_shared_tokens": {
+   "nonblank": 1381,
+   "blank": 11308,
+   "pct_blank": 89.1166,
+   "approx_distinct": 321
+  },
+  "keyed_name_match_residue": {
+   "nonblank": 1237,
+   "blank": 11452,
+   "pct_blank": 90.2514,
+   "approx_distinct": 1338
+  },
+  "keyed_state_agreement": {
+   "nonblank": 1382,
+   "blank": 11307,
+   "pct_blank": 89.1087,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "N": 724,
+    "Y": 592,
+    "UNKNOWN": 66
+   }
+  },
+  "key_review_disposition": {
+   "nonblank": 1382,
+   "blank": 11307,
+   "pct_blank": 89.1087,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "SUPPORTED": 555,
+    "HELD_STATE_DISAGREES": 458,
+    "REFUSED_PLACE_NAME_IS_THE_ADDRESS": 296,
+    "REFUSED_GENERIC_TOKEN_ONLY": 61,
+    "REDIRECT_PROPOSED": 12
+   }
+  },
+  "placename_refusal_date": {
+   "nonblank": 516,
+   "blank": 12173,
+   "pct_blank": 95.9335,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-09-02": 516
+   }
+  },
+  "tier_basis": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3962
+  },
+  "confidence_tier": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "B": 7018,
+    "X": 4960,
+    "A": 711
+   }
+  },
+  "source_url": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf": 12689
+   }
+  },
+  "built_date": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-05": 12689
+   }
+  },
+  "entity_match_method": {
+   "nonblank": 1409,
+   "blank": 11280,
+   "pct_blank": 88.8959,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "containment": 1306,
+    "exact": 47,
+    "ruled_not_a_native_entity": 27,
+    "core": 21,
+    "alias": 8
+   }
+  },
+  "entity_tier": {
+   "nonblank": 6342,
+   "blank": 6347,
+   "pct_blank": 50.0197,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "X": 4960,
+    "B": 1328,
+    "A": 54
+   }
+  },
+  "entity_match_basis": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 227
+  },
+  "entity_keyed_date": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "2026-08-06": 12662,
+    "2026-08-26": 27
+   }
+  },
+  "cedar_link_tier": {
+   "nonblank": 6122,
+   "blank": 6567,
+   "pct_blank": 51.7535,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "X": 4707,
+    "B": 1331,
+    "A": 84
+   }
+  },
+  "cedar_link_basis": {
+   "nonblank": 6122,
+   "blank": 6567,
+   "pct_blank": 51.7535,
+   "approx_distinct": 5328
+  },
+  "disposition_basis": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "funnel_stage=raw_name_candidate": 5082,
+    "excluded_by_prior_ruling=1 | funnel_stage=excluded_by_prior_ruling; the ruling and its file are named in `evidence`. classification_ruling is UNRULED because no HAND ruling was recorded, which is a different fact.": 4651,
+    "funnel_stage=canonical_name_match": 1573,
+    "funnel_stage=verified_strict": 697,
+    "funnel_stage=ruled_not_native": 279,
+    "funnel_stage=canonical_name_match, and every token shared with the matched tribe's canonical name is a generic English or civic word (see name_match_shared_tokens). The cited name match does not support the link. This is a statement about the EVIDENCE, not a ruling on Native status.": 258,
+    "funnel_stage=state_validated": 105,
+    "excluded_by_prior_ruling=1 | funnel_stage=ruled_not_native; the ruling and its file are named in `evidence`. classification_ruling is UNRULED because no HAND ruling was recorded, which is a different fact.": 30,
+    "funnel_stage=ruled_native_verified": 14
+   }
+  },
+  "key_review_basis": {
+   "nonblank": 1382,
+   "blank": 11307,
+   "pct_blank": 89.1087,
+   "approx_distinct": 1042
+  },
+  "placename_refusal_rung": {
+   "nonblank": 516,
+   "blank": 12173,
+   "pct_blank": 95.9335,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "P1_TOKEN_IS_THE_FILERS_OWN_CITY": 349,
+    "P2_TOKEN_QUALIFIED_AS_GEOGRAPHY_IN_THE_NAME": 167
+   }
+  },
+  "placename_refusal_basis": {
+   "nonblank": 516,
+   "blank": 12173,
+   "pct_blank": 95.9335,
+   "approx_distinct": 116
+  },
+  "n_fac_native_nontribal_sefa_programs": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 12,
+   "vocabulary": {
+    "0": 12679,
+    "40": 1,
+    "16": 1,
+    "35": 1,
+    "24": 1,
+    "89": 1,
+    "11": 1,
+    "157": 1,
+    "85": 1,
+    "14": 1,
+    "3": 1
+   }
+  },
+  "n_fac_native_nontribal_single_audits": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 12679,
+    "6": 2,
+    "8": 2,
+    "4": 2,
+    "1": 1,
+    "5": 1,
+    "12": 1,
+    "10": 1
+   }
+  },
+  "n_fac_tribal_single_audits": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 29,
+   "vocabulary": {
+    "1250": 12134,
+    "0": 115,
+    "10": 80,
+    "19": 55,
+    "9": 51,
+    "17": 28,
+    "7": 25,
+    "18": 23,
+    "13": 20,
+    "20": 19,
+    "22": 17,
+    "16": 15,
+    "8": 14,
+    "5": 13,
+    "15": 12,
+    "14": 10,
+    "26": 10,
+    "12": 8,
+    "2": 7,
+    "27": 6,
+    "11": 5,
+    "6": 5,
+    "23": 5,
+    "1": 5,
+    "4": 3,
+    "30": 3,
+    "24": 1
+   }
+  },
+  "n_grantmaker_funding_flows": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "18656": 12134,
+    "0": 555
+   }
+  },
+  "n_np_ein_entity_hub": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 37,
+   "vocabulary": {
+    "0": 12134,
+    "2": 62,
+    "1": 58,
+    "123": 32,
+    "5": 31,
+    "4": 26,
+    "10": 25,
+    "3": 25,
+    "50": 25,
+    "98": 23,
+    "7": 22,
+    "14": 22,
+    "24": 21,
+    "13": 18,
+    "19": 18,
+    "11": 17,
+    "12": 15,
+    "20": 14,
+    "6": 13,
+    "9": 13,
+    "8": 11,
+    "88": 10,
+    "31": 10,
+    "22": 9,
+    "47": 7,
+    "42": 5,
+    "28": 4,
+    "17": 4,
+    "21": 3,
+    "29": 3,
+    "16": 3,
+    "76": 3,
+    "27": 2,
+    "26": 1
+   }
+  },
+  "n_np_schedule_i_grants": {
+   "nonblank": 12689,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "56243": 12134,
+    "0": 157,
+    "1": 64,
+    "3": 48,
+    "7": 47,
+    "9": 43,
+    "4": 32,
+    "15": 26,
+    "8": 25,
+    "12": 24,
+    "2": 23,
+    "23": 17,
+    "5": 15,
+    "6": 11,
+    "17": 4,
+    "10": 4,
+    "18": 3,
+    "22": 2,
+    "24": 2,
+    "13": 2,
+    "11": 1,
+    "45": 1,
+    "46": 1,
+    "21": 1,
+    "16": 1,
+    "14": 1
+   }
+  }
+ }
+}

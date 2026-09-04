@@ -1,0 +1,4550 @@
+{
+ "per_dataset": [
+  {
+   "dataset": "contractors",
+   "distinct_uid": 384,
+   "rows_keyed": 636459
+  },
+  {
+   "dataset": "deals",
+   "distinct_uid": 331,
+   "rows_keyed": 959
+  },
+  {
+   "dataset": "federal-register",
+   "distinct_uid": 396,
+   "rows_keyed": 10396
+  },
+  {
+   "dataset": "funding",
+   "distinct_uid": 669,
+   "rows_keyed": 552756
+  },
+  {
+   "dataset": "gaming",
+   "distinct_uid": 284,
+   "rows_keyed": 785
+  },
+  {
+   "dataset": "lobbying",
+   "distinct_uid": 302,
+   "rows_keyed": 26513
+  },
+  {
+   "dataset": "natural-resources",
+   "distinct_uid": 17,
+   "rows_keyed": 705
+  },
+  {
+   "dataset": "nest",
+   "distinct_uid": 707,
+   "rows_keyed": 5820
+  },
+  {
+   "dataset": "nonprofits",
+   "distinct_uid": 208,
+   "rows_keyed": 555
+  },
+  {
+   "dataset": "subcontracting",
+   "distinct_uid": 169,
+   "rows_keyed": 32369
+  }
+ ],
+ "uids_in_multiple_datasets": 710,
+ "name_disagreements": [
+  {
+   "cedar_uid": "CE-0004H-T9",
+   "names": [
+    "Native Village of Eyak",
+    "Eyak"
+   ],
+   "datasets": [
+    "contractors",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000B5-ND",
+   "names": [
+    "Barrow",
+    "Natives of Kodiak, Inc."
+   ],
+   "datasets": [
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000Q8-3R",
+   "names": [
+    "barona band of mission indians",
+    "Capitan Grande"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000Q9-9H",
+   "names": [
+    "Viejas",
+    "viejas band of kumeyaay indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000QC-VW",
+   "names": [
+    "Bois Forte",
+    "bois forte reservation tribal council"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000QD-1N",
+   "names": [
+    "Fond du Lac",
+    "fond du lac tribal and community college"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000QE-7E",
+   "names": [
+    "Grand Portage",
+    "grand portage reservation tribal council"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000QF-D7",
+   "names": [
+    "Leech Lake",
+    "leech lake band of ojibwe"
+   ],
+   "datasets": [
+    "contractors",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000QG-K0",
+   "names": [
+    "mille lacs band of ojibwe",
+    "Mille Lacs",
+    "Mille Lacs Band of Ojibwe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000QH-SS",
+   "names": [
+    "White Earth Reservation Business Committee",
+    "White Earth"
+   ],
+   "datasets": [
+    "contractors",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-000QM-B4",
+   "names": [
+    "Passamaquoddy Pleasant Point",
+    "pleasant point indian reservation"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0011S-ZA",
+   "names": [
+    "White Earth Tribal and Community College",
+    "white earth tribal & community college"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0011T-53",
+   "names": [
+    "Assiniboine and Sioux",
+    "Fort Peck Assiniboine and Sioux Tribes",
+    "fort peck assiniboine & sioux tribes"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0011V-BW",
+   "names": [
+    "agua caliente band of cahuilla indians",
+    "Agua Caliente"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0011W-HN",
+   "names": [
+    "haaku community academy",
+    "Pueblo of Acoma"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0011X-QE",
+   "names": [
+    "augustine band of cahuilla miss",
+    "Augustine"
+   ],
+   "datasets": [
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0011Y-X7",
+   "names": [
+    "Ak Chin",
+    "ak-chin indian community"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0011Z-30",
+   "names": [
+    "alabama coushatta tribe of texas",
+    "Alabama-Coushatta",
+    "Alabama Coushatta Tribe of Texas"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00120-E9",
+   "names": [
+    "Alabama-Quassarte Tribal Town",
+    "Alabama Quassarte Tribal Town",
+    "alabama quassarte service association"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00121-M2",
+   "names": [
+    "Alturas",
+    "alturas indian rancheria"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00122-TV",
+   "names": [
+    "Apache Tribe of Oklahoma",
+    "apache tribe of oklahoma"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00123-0M",
+   "names": [
+    "Wampanoag",
+    "wampanoag tribe of gay head (aquinnah)"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00124-6D",
+   "names": [
+    "Absentee-Shawnee",
+    "absentee shawnee tribe of oklahoma"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00125-C6",
+   "names": [
+    "United Auburn",
+    "united auburn indian community"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00126-JZ",
+   "names": [
+    "Bad River Band",
+    "bad river band of lake superior tribe of chippewa indians"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00127-RR",
+   "names": [
+    "bear river band of rohnerville rancheria",
+    "Bear River"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00128-YH",
+   "names": [
+    "Assiniboine and Gros Ventre Tribes",
+    "fort belknap indian community"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00129-4A",
+   "names": [
+    "Berry Creek",
+    "berry creek rancheria of maidu indians of california"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012A-A3",
+   "names": [
+    "big lagoon rancheria",
+    "Big Lagoon"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012B-GW",
+   "names": [
+    "Big Pine Reservation",
+    "big pine paiute tribe of the owens valley"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012C-PN",
+   "names": [
+    "Big Sandy",
+    "big sandy rancheria of western mono indians of california"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012D-WE",
+   "names": [
+    "Big Valley Rancheria",
+    "big valley of pomo indians of the big valley rancheria california"
+   ],
+   "datasets": [
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012E-27",
+   "names": [
+    "fort bidwell indian community council",
+    "Fort Bidwell"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012F-80",
+   "names": [
+    "Bishop Paiute",
+    "bishop indian tribal council"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012G-ES",
+   "names": [
+    "Blackfeet",
+    "blackfeet community college"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012H-MJ",
+   "names": [
+    "Blue Lake",
+    "blue lake rancheria"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012J-TB",
+   "names": [
+    "the buena vista rancheria of the me-wuk indians",
+    "Buena Vista Rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012K-04",
+   "names": [
+    "Bridgeport",
+    "bridgeport indian colony"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012M-6X",
+   "names": [
+    "Burns Paiute",
+    "burns paiute tribe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012N-CP",
+   "names": [
+    "bay mills indian community",
+    "Bay Mills"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012P-JF",
+   "names": [
+    "cabazon band of cahuilla indians",
+    "Cabazon"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012Q-R8",
+   "names": [
+    "colusa indian community council",
+    "Cachil DeHe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012R-Y1",
+   "names": [
+    "caddo tribe of oklahoma",
+    "Caddo"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012S-4T",
+   "names": [
+    "Cahto",
+    "cahto tribe of the laytonville rancheria"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012T-AK",
+   "names": [
+    "campo band of missions indians",
+    "Campo"
+   ],
+   "datasets": [
+    "contractors",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012V-GC",
+   "names": [
+    "Catawba Indian Nation of South Carolina",
+    "Catawba",
+    "catawba indian nation of south carolina the"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012X-WY",
+   "names": [
+    "cayuga indian nation of new york",
+    "Cayuga Nation of New York"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012Y-2Q",
+   "names": [
+    "cedarville rancheria",
+    "Cedarville"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0012Z-8G",
+   "names": [
+    "conf tribes of the goshute",
+    "Confederated Goshute",
+    "Confederated Tribes of the Goshute Reservation"
+   ],
+   "datasets": [
+    "funding",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00130-KS",
+   "names": [
+    "chickahominy indian tribe - eastern division",
+    "Chickahominy Indians-Eastern Division"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00131-SJ",
+   "names": [
+    "chickahominy indian tribe",
+    "Chickahominy Indian Tribe, Inc."
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00132-ZB",
+   "names": [
+    "chicken ranch rancheria of me-wuk indians",
+    "Chicken Ranch"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00133-54",
+   "names": [
+    "Chehalis",
+    "Confederated Tribes of the Chehalis Reservation",
+    "confederated tribes of the chehalis reservation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00134-BX",
+   "names": [
+    "Cherokee Nation",
+    "cherokee nation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00135-HP",
+   "names": [
+    "The Chickasaw Nation",
+    "chickasaw nation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00136-QF",
+   "names": [
+    "Cahuilla",
+    "cahuilla band of indians"
+   ],
+   "datasets": [
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00137-X8",
+   "names": [
+    "Chemehuevi",
+    "chemehuevi indian tribe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00138-31",
+   "names": [
+    "Cher-Ae Heights",
+    "cher-ae heights indian community"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00139-9T",
+   "names": [
+    "Chitimacha",
+    "Chitimacha Tribe of Louisiana",
+    "chitimacha tribe of louisiana"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013A-FK",
+   "names": [
+    "cheyenne arapaho tribe",
+    "Cheyenne and Arapaho Tribes"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013B-NC",
+   "names": [
+    "cheyenne river sioux tribe",
+    "Cheyenne River Sioux Tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013C-V5",
+   "names": [
+    "citizen potawatomi nation",
+    "Citizen Potawatomi Nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013D-1Y",
+   "names": [
+    "Cold Springs",
+    "cold springs rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013E-7Q",
+   "names": [
+    "Confederated Coos",
+    "confederated tribes of coos, lower umpqua and siuslaw indian"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013F-DG",
+   "names": [
+    "cloverdale rancheria of pomo indians of",
+    "Cloverdale"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013G-K9",
+   "names": [
+    "Comanche Nation",
+    "Comanche Nation-Oklahoma",
+    "comanche nation college"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013H-S2",
+   "names": [
+    "cochiti de pueblo",
+    "Pueblo of Cochiti"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013J-ZV",
+   "names": [
+    "Cocopah",
+    "cocopah indian tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013K-5M",
+   "names": [
+    "Confederated Tribes of the Colville Reservation",
+    "confederated tribes of the colville reservation, the",
+    "Confederated Colville"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013M-BD",
+   "names": [
+    "Coquille",
+    "Coquille Indian Tribe",
+    "coquille indian tribe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013N-H6",
+   "names": [
+    "Colorado River Indian Tribes",
+    "colorado river indian tribes",
+    "Colorado River"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013P-QZ",
+   "names": [
+    "coushatta tribe of louisiana",
+    "Coushatta"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013Q-XR",
+   "names": [
+    "Cow Creek",
+    "cow creek band of umpqua tribe of indians"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013R-3H",
+   "names": [
+    "cowlitz indian tribe",
+    "Cowlitz"
+   ],
+   "datasets": [
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013T-F3",
+   "names": [
+    "Coeur D'Alene",
+    "the coeur d'alene tribe",
+    "Coeur d'Alene Tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013V-NW",
+   "names": [
+    "Crow Creek",
+    "crow creek sioux tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013W-VN",
+   "names": [
+    "Crow",
+    "crow tribe of indians"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013X-1E",
+   "names": [
+    "Confederated Salish",
+    "confederated salish and kootenai tribes"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013Y-77",
+   "names": [
+    "The Choctaw Nation of Oklahoma",
+    "choctaw nation of oklahoma"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0013Z-D0",
+   "names": [
+    "Yavapai-Apache",
+    "yavapai apache nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00140-R9",
+   "names": [
+    "Coyote Valley",
+    "coyote valley tribal council"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00141-Y2",
+   "names": [
+    "Delaware Nation",
+    "delaware nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00142-4V",
+   "names": [
+    "Delaware Tribe of Indians",
+    "delaware tribe of indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00143-AM",
+   "names": [
+    "dry creek rancheria",
+    "Dry Creek"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00144-GD",
+   "names": [
+    "Shoshone-Paiute",
+    "shoshone-paiute tribes"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00145-P6",
+   "names": [
+    "duckwater shoshone tribe",
+    "Duckwater"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00146-WZ",
+   "names": [
+    "Elem",
+    "elem indian colony"
+   ],
+   "datasets": [
+    "gaming",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00147-2R",
+   "names": [
+    "elk valley rancheria",
+    "Elk Valley",
+    "Elk Valley Rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00149-EA",
+   "names": [
+    "enterprise rancheria",
+    "Enterprise"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014A-M3",
+   "names": [
+    "Eastern Shawnee Tribe of Oklahoma",
+    "eastern shawnee tribe of oklahoma"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014B-TW",
+   "names": [
+    "Eastern Cherokee",
+    "eastern band of cherokee indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014C-0N",
+   "names": [
+    "eastern shoshone tribe",
+    "Eastern Shoshone"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014D-6E",
+   "names": [
+    "Paiute-Shoshone",
+    "fallon paiute shoshone tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014E-C7",
+   "names": [
+    "Flandreau",
+    "flandreau santee sioux tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014F-J0",
+   "names": [
+    "Fort McDowell",
+    "ft mc dowell yavapai nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014G-RS",
+   "names": [
+    "Fort Sill Apache Tribe of Oklahoma",
+    "fort sill apache tribe",
+    "Fort Sill-Chiricahua-Warm Springs-Apache Tribe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014H-YJ",
+   "names": [
+    "Forest County",
+    "Forest County Potawatomi",
+    "forest county potawatomi community"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014J-4B",
+   "names": [
+    "Shoshone-Bannock",
+    "shoshone-bannock tribes of the fort hall reservation of idaho"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014K-A4",
+   "names": [
+    "fort independence indian reservation",
+    "Fort Independence"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014M-GX",
+   "names": [
+    "fort mcdermitt paiute shoshone",
+    "Fort McDermitt"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014N-PP",
+   "names": [
+    "Gila River",
+    "gila river indian community"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014P-WF",
+   "names": [
+    "Federated Indians of Graton",
+    "federated indians of graton rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014Q-28",
+   "names": [
+    "greenville rancheria",
+    "Greenville"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014R-81",
+   "names": [
+    "grindstone indian rancheria of wintun-wailaki indians of california",
+    "Grindstone"
+   ],
+   "datasets": [
+    "funding",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014S-ET",
+   "names": [
+    "Grand Ronde Tribes",
+    "confederated tribes of the grand ronde community of oregon"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014T-MK",
+   "names": [
+    "Grand Traverse",
+    "Grand Traverse Band of Ottawa and Chippewa Indians",
+    "grand traverse band llc"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014V-TC",
+   "names": [
+    "Guidiville Rancheria",
+    "guidiville band of pomo indians",
+    "Guidiville"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014W-05",
+   "names": [
+    "Hannahville",
+    "hannahville indian community"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014X-6Y",
+   "names": [
+    "Havasupai",
+    "havasupai tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014Y-CQ",
+   "names": [
+    "habematolel pomo of upper lake",
+    "Habematolel"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0014Z-JG",
+   "names": [
+    "houlton band of maliseet indians",
+    "Houlton"
+   ],
+   "datasets": [
+    "funding",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00150-XS",
+   "names": [
+    "Ho-Chunk",
+    "ho-chunk nation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00151-3J",
+   "names": [
+    "hoh indian tribe",
+    "Hoh"
+   ],
+   "datasets": [
+    "funding",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00152-9B",
+   "names": [
+    "hoopa valley tribe, the",
+    "Hoopa"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00153-F4",
+   "names": [
+    "Hopi",
+    "hotevilla-bacavi community school district"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00154-NX",
+   "names": [
+    "hopland band of pomo indians",
+    "Hopland"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00155-VP",
+   "names": [
+    "hualapai tribal council",
+    "Hualapai"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00156-1F",
+   "names": [
+    "iipay nation of santa ysabel",
+    "Iipay Nation of Santa Ysabel"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00157-78",
+   "names": [
+    "inaja cosmit band of mission indians",
+    "Inaja"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00158-D1",
+   "names": [
+    "ione band of miwok indians",
+    "Ione"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00159-KT",
+   "names": [
+    "Iowa of Kansas",
+    "iowa tribe of kansas and nebraska"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015A-SK",
+   "names": [
+    "Iowa of Oklahoma",
+    "iowa tribe of oklahoma, inc"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015B-ZC",
+   "names": [
+    "isleta, pueblo of",
+    "Pueblo of Isleta"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015C-55",
+   "names": [
+    "jamul indian village of california",
+    "Jamul"
+   ],
+   "datasets": [
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015D-BY",
+   "names": [
+    "jackson rancheria band of miwuk indians",
+    "Jackson"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015E-HQ",
+   "names": [
+    "Jicarilla Apache Nation",
+    "jicarilla apache nation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015F-QG",
+   "names": [
+    "Pueblo of Jemez",
+    "pueblo of jemez"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015G-X9",
+   "names": [
+    "Jamestown",
+    "jamestown sklallam tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015H-32",
+   "names": [
+    "jena band of choctaw indians",
+    "Jena"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015J-9V",
+   "names": [
+    "Kaibab",
+    "kaibab band of paiute indians"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015K-FM",
+   "names": [
+    "Kalispel",
+    "kalispel indian community of the kalispel reservation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015M-ND",
+   "names": [
+    "Karuk",
+    "karuk tribe of california"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015N-V6",
+   "names": [
+    "Kashia",
+    "kashia band of pomo indians of the stewarts point rancheria",
+    "stewarts point rancheria"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015P-1Z",
+   "names": [
+    "Kaw",
+    "kaw nation"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015Q-7R",
+   "names": [
+    "kickapoo tribe of kansas",
+    "Kickapoo Tribe in Kansas"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015R-DH",
+   "names": [
+    "kickapoo tribe of oklahoma",
+    "Kickapoo of Oklahoma"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015S-KA",
+   "names": [
+    "Kickapoo of Texas",
+    "kickapoo traditional tribe of texas"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015T-S3",
+   "names": [
+    "Kialegee Tribal Town",
+    "kialegee tribal town"
+   ],
+   "datasets": [
+    "contractors",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015V-ZW",
+   "names": [
+    "Kiowa Tribe",
+    "kiowa tribe of oklahoma"
+   ],
+   "datasets": [
+    "funding",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015W-5N",
+   "names": [
+    "Klamath",
+    "the klamath tribes"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015X-BE",
+   "names": [
+    "Kletsel Dehe Wintun",
+    "cortina band of wintun indians"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015Y-H7",
+   "names": [
+    "koi nation of northern california",
+    "Koi"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0015Z-Q0",
+   "names": [
+    "Kootenai",
+    "kootenai tribe of idaho"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00160-29",
+   "names": [
+    "Keweenaw",
+    "keweenaw bay indian community"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00161-82",
+   "names": [
+    "Pueblo of Laguna",
+    "pueblo of laguna"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00162-EV",
+   "names": [
+    "lower brule sioux tribe",
+    "Lower Brule"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00163-MM",
+   "names": [
+    "lac courte oreilles band of lake superior chippewa indians of wi",
+    "Lac Courte Oreilles"
+   ],
+   "datasets": [
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00164-TD",
+   "names": [
+    "los coyotes band of cahuilla & cupeno indians",
+    "Los Coyotes"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00165-06",
+   "names": [
+    "Lower Elwha",
+    "lower elwha tribal community council"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00166-6Z",
+   "names": [
+    "Lac du Flambeau",
+    "lac du flambeau band of lake superior chippewa indians",
+    "Lac du Flambeau Band of Lake Superior Chippewa Indians"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00167-CR",
+   "names": [
+    "la jolla band of luiseno indians",
+    "La Jolla"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00168-JH",
+   "names": [
+    "Lone Pine",
+    "lone pine paiute shoshone"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00169-RA",
+   "names": [
+    "la posta band of mission indians, the",
+    "La Posta"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016A-Y3",
+   "names": [
+    "little river band of ottawa indians",
+    "Little River",
+    "Little River Band of Ottawa Indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016B-4W",
+   "names": [
+    "Little Shell Tribe",
+    "little shell tribe of chippewa indians of montana"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016C-AN",
+   "names": [
+    "las vegas paiute tribe",
+    "Las Vegas"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016D-GE",
+   "names": [
+    "little traverse bay bands of odawa indians",
+    "Little Traverse"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016F-W0",
+   "names": [
+    "Lummi",
+    "northwest indian college foundation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016G-2S",
+   "names": [
+    "Lac Vieux",
+    "lac vieux desert band of lake superior chippewa indians"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016H-8J",
+   "names": [
+    "Lovelock",
+    "lovelock paiute tribe"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016J-EB",
+   "names": [
+    "lower sioux indian community",
+    "Lower Sioux"
+   ],
+   "datasets": [
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016K-M4",
+   "names": [
+    "Lytton",
+    "lytton rancheria of california"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016M-TX",
+   "names": [
+    "Makah",
+    "makah indian tribe of the makah indian reservation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016N-0P",
+   "names": [
+    "mechoopda indian tribe",
+    "Mechoopda"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016P-6F",
+   "names": [
+    "Manchester",
+    "manchester band of pomo indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016Q-C8",
+   "names": [
+    "Muckleshoot",
+    "muckleshoot indian tribe"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016R-J1",
+   "names": [
+    "Miccosukee",
+    "miccosukee corporation"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016S-RT",
+   "names": [
+    "middletown rancheria band of pomo indians of california",
+    "Middletown"
+   ],
+   "datasets": [
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016T-YK",
+   "names": [
+    "match-e-be-nash-she-wish band of pottawatomi indians",
+    "Match-e-be-nash-she-wish Band"
+   ],
+   "datasets": [
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016V-4C",
+   "names": [
+    "mesa grande band of mission indians",
+    "Mesa Grande"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016W-A5",
+   "names": [
+    "twin buttes elementary school",
+    "Three Affiliated",
+    "Three Affiliated Tribes (Mandan, Arikara & Hidatsa)"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016X-GY",
+   "names": [
+    "Mohegan",
+    "mohegan tribe of indians of connecticut"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016Y-PQ",
+   "names": [
+    "Miami Tribe of Oklahoma",
+    "miami tribe of oklahoma"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0016Z-WG",
+   "names": [
+    "aroostook micmac council",
+    "Mi'kmaq"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00170-7S",
+   "names": [
+    "minnesota chippewa tribe - white earth band",
+    "Minnesota Chippewa"
+   ],
+   "datasets": [
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00171-DJ",
+   "names": [
+    "Monacan Indian Nation",
+    "monacan indian nation"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00172-KB",
+   "names": [
+    "Menominee",
+    "menominee indian tribe of wisconsin"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00173-S4",
+   "names": [
+    "Manzanita",
+    "manzanita band of mission indians"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00174-ZX",
+   "names": [
+    "Moapa",
+    "moapa band paiute"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00175-5P",
+   "names": [
+    "Modoc Tribe of Oklahoma",
+    "Modoc Nation",
+    "modoc nation"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00176-BF",
+   "names": [
+    "Fort Mojave",
+    "fort mojave tribal council"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00177-H8",
+   "names": [
+    "Mooretown",
+    "mooretown rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00178-Q1",
+   "names": [
+    "morongo band of mission indians",
+    "Morongo"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00179-XT",
+   "names": [
+    "mississippi band of choctaw indians",
+    "Mississippi Choctaw",
+    "Mississippi Band of Choctaw Indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017A-3K",
+   "names": [
+    "Mescalero Apache",
+    "mescalero apache tribe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017B-9C",
+   "names": [
+    "muscogee creek nation",
+    "The Muscogee (Creek) Nation"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017C-F5",
+   "names": [
+    "mashantucket pequot tribal nation",
+    "Mashantucket Pequot"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017D-NY",
+   "names": [
+    "mashpee wampanoag tribe",
+    "Mashpee"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017E-VQ",
+   "names": [
+    "Pueblo of Nambe",
+    "nambe pueblo governor's office"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017F-1G",
+   "names": [
+    "Navajo Nation",
+    "Navajo",
+    "navajo nation tribal government, the"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017G-79",
+   "names": [
+    "Northern Arapaho Tribe of the Wind River Reservation",
+    "northern arapaho tribe",
+    "Northern Arapaho"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017H-D2",
+   "names": [
+    "nez perce tribe",
+    "Nez Perce"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017J-KV",
+   "names": [
+    "nisqually indian tribe",
+    "Nisqually"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017K-SM",
+   "names": [
+    "nansemond indian tribe",
+    "Nansemond Indian Tribe"
+   ],
+   "datasets": [
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017M-ZD",
+   "names": [
+    "Nooksack",
+    "nooksack indian tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017N-56",
+   "names": [
+    "Northern Cheyenne",
+    "northern cheyenne tribe",
+    "Northern Cheyenne Tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017P-BZ",
+   "names": [
+    "northfork rancheria of mono indians",
+    "North Fork"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017Q-HR",
+   "names": [
+    "Narragansett",
+    "narragansett indian tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017R-QH",
+   "names": [
+    "Nottawaseppi Potawatomi",
+    "Nottawaseppi Huron Band of the Potawatomi",
+    "nottawaseppi huron band of the potawatomi"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017S-XA",
+   "names": [
+    "Northwestern Shoshone",
+    "Northwestern Band of Shoshone Nation",
+    "northwestern band of the shoshon nation"
+   ],
+   "datasets": [
+    "funding",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017T-33",
+   "names": [
+    "Oglala Sioux",
+    "oglala sioux tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017V-9W",
+   "names": [
+    "ohkay owingeh tribal council",
+    "Ohkay Owingeh"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017W-FN",
+   "names": [
+    "omaha tribe of nebraska",
+    "Omaha"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017X-NE",
+   "names": [
+    "Oneida Nation",
+    "Oneida",
+    "oneida indian nation"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0017Y-V7",
+   "names": [
+    "oneida nation",
+    "Oneida Nation (Wisconsin)"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00180-C9",
+   "names": [
+    "The Osage Nation",
+    "osage nation",
+    "Osage Tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00181-J2",
+   "names": [
+    "Otoe-Missouria",
+    "otoe-missouria tribe"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00182-RV",
+   "names": [
+    "ottawa indian tribe of oklahoma",
+    "Ottawa Tribe of Oklahoma"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00183-YM",
+   "names": [
+    "Pala",
+    "pala band of mission indians"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00184-4D",
+   "names": [
+    "pamunkey indian tribe",
+    "Pamunkey"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00185-A6",
+   "names": [
+    "pauma band of mission indians",
+    "Pauma"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00186-GZ",
+   "names": [
+    "Pawnee Nation of Oklahoma",
+    "pawnee nation of oklahoma"
+   ],
+   "datasets": [
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00187-PR",
+   "names": [
+    "Pechanga",
+    "pechanga band of luiseno indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00188-WH",
+   "names": [
+    "picuris pueblo indian tribe",
+    "Pueblo of Picuris"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00189-2A",
+   "names": [
+    "Peoria Tribe of Indians of Oklahoma",
+    "peoria tribe of indians of oklahoma"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018A-83",
+   "names": [
+    "port gamble s'klallam tribe",
+    "Port Gamble"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018B-EW",
+   "names": [
+    "Pit River",
+    "pit river tribal council",
+    "Pit River Tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018C-MN",
+   "names": [
+    "Resighini",
+    "resighini rancheria"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018D-TE",
+   "names": [
+    "Penobscot",
+    "penobscot indian nation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018E-07",
+   "names": [
+    "Ponca Tribe of Nebraska",
+    "Ponca of Nebraska",
+    "ponca tribe of nebraska"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018F-60",
+   "names": [
+    "Ponca Tribe of Indians of Oklahoma",
+    "ponca tribe of oklahoma"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018G-CS",
+   "names": [
+    "Pinoleville",
+    "pinoleville pomo nation"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018H-JJ",
+   "names": [
+    "poarch creek indians",
+    "Poarch Band of Creek Indians",
+    "Poarch"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018J-RB",
+   "names": [
+    "pueblo of pojoaque",
+    "Pueblo of Pojoaque"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018K-Y4",
+   "names": [
+    "Pokagon Band of Potawatomi",
+    "Pokagon",
+    "pokagon band of potawatomi"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018M-4X",
+   "names": [
+    "prairie band potawatomi nation",
+    "Prairie Band"
+   ],
+   "datasets": [
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018N-AP",
+   "names": [
+    "Prairie Island",
+    "prairie island tribal council"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018P-GF",
+   "names": [
+    "yavapai prescott indian tribe",
+    "Yavapai-Prescott"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018Q-P8",
+   "names": [
+    "Paskenta",
+    "Paskenta Band of Nomlaki Indians",
+    "paskenta band of nomlaki indians"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018S-2T",
+   "names": [
+    "Pascua Yaqui",
+    "pascua yaqui tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018T-8K",
+   "names": [
+    "potter valley rancheria of pomo indians",
+    "Potter Valley"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018V-EC",
+   "names": [
+    "paiute indian tribe of utah",
+    "Paiute Indian Tribe of Utah",
+    "Paiute of Utah"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018W-M5",
+   "names": [
+    "puyallup tribe of indians",
+    "Puyallup"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018X-TY",
+   "names": [
+    "picayune rancheria of the chukchansi indians",
+    "Picayune"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018Y-0Q",
+   "names": [
+    "pyramid lake paiute tribe",
+    "Pyramid Lake"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0018Z-6G",
+   "names": [
+    "quapaw nation",
+    "Quapaw Nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00190-HS",
+   "names": [
+    "quartz valley indian reservation",
+    "Quartz Valley"
+   ],
+   "datasets": [
+    "contractors",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00191-QJ",
+   "names": [
+    "Quechan",
+    "quechan indian tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00192-XB",
+   "names": [
+    "Quileute",
+    "quileute tribe of the quileute reservation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00193-34",
+   "names": [
+    "quinault indian nation",
+    "Quinault"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00194-9X",
+   "names": [
+    "ramona band of cahuilla indians",
+    "Ramona"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00195-FP",
+   "names": [
+    "redding rancheria",
+    "Redding"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00196-NF",
+   "names": [
+    "red cliff band of lake superior chippewa indians",
+    "Red Cliff"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00197-V8",
+   "names": [
+    "red lake nation college",
+    "Red Lake",
+    "Red Lake Band of Chippewa Indians"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00198-11",
+   "names": [
+    "redwood valley little river band of pomo indians",
+    "Redwood Valley"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-00199-7T",
+   "names": [
+    "rincon band of luiseno mission indians of the rincon reservation, california",
+    "Rincon"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019A-DK",
+   "names": [
+    "Round Valley",
+    "round valley indian tribes"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019B-KC",
+   "names": [
+    "reno-sparks indian colony",
+    "Reno-Sparks"
+   ],
+   "datasets": [
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019C-S5",
+   "names": [
+    "Robinson",
+    "robinson rancheria citizens council"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019D-ZY",
+   "names": [
+    "Chippewa-Cree",
+    "stone child college corporation"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019E-5Q",
+   "names": [
+    "rosebud sioux tribe",
+    "Rosebud"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019F-BG",
+   "names": [
+    "rappahannock tribe",
+    "Rappahannock"
+   ],
+   "datasets": [
+    "funding",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019G-H9",
+   "names": [
+    "Samish",
+    "samish indian nation"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019H-Q2",
+   "names": [
+    "pueblo of sandia",
+    "Pueblo of Sandia"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019J-XV",
+   "names": [
+    "santee sioux tribe of nebraska",
+    "Santee Sioux"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019K-3M",
+   "names": [
+    "Stockbridge",
+    "stockbridge munsee community"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019M-9D",
+   "names": [
+    "Sac & Fox of Missouri",
+    "sac & fox nation of missouri in kansas"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019N-F6",
+   "names": [
+    "Sac & Fox of Mississippi",
+    "Sac & Fox Tribe of the Mississippi in Iowa\u2014Meskwaki",
+    "sac & fox tribe of the mississippi in iowa"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019P-NZ",
+   "names": [
+    "sac & fox nation",
+    "Sac and Fox Nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019Q-VR",
+   "names": [
+    "Pueblo of Santa Clara",
+    "santa clara pueblo"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019R-1H",
+   "names": [
+    "St. Croix",
+    "st croix chippewa indians of wisconsin"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019S-7A",
+   "names": [
+    "Scotts Valley",
+    "scotts valley band pomo indians"
+   ],
+   "datasets": [
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019T-D3",
+   "names": [
+    "Santo Domingo",
+    "santo domingo pueblo"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019V-KW",
+   "names": [
+    "Pueblo of San Felipe",
+    "pueblo of san felipe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019W-SN",
+   "names": [
+    "Saginaw Chippewa",
+    "saginaw chippewa tribal college"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019X-ZE",
+   "names": [
+    "shawnee tribe",
+    "Shawnee Tribe"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019Y-57",
+   "names": [
+    "Shoalwater",
+    "shoalwater bay indian tribe of the shoalwater bay indian reservation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-0019Z-B0",
+   "names": [
+    "shinnecock indian nation fund inc",
+    "Shinnecock"
+   ],
+   "datasets": [
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A0-P9",
+   "names": [
+    "sherwood valley rancheria",
+    "Sherwood Valley"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A1-W2",
+   "names": [
+    "Shingle Springs",
+    "shingle springs rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A2-2V",
+   "names": [
+    "Pueblo of San Ildefonso",
+    "pueblo de san ildefonso"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A3-8M",
+   "names": [
+    "Siletz Tribe",
+    "confederated tribes of siletz indians of oregon"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A4-ED",
+   "names": [
+    "skull valley band goshutes",
+    "Skull Valley"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A5-M6",
+   "names": [
+    "skokomish indian tribe",
+    "Skokomish"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A6-TZ",
+   "names": [
+    "Sauk-Suiattle",
+    "sauk-suiattle indian tribe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A7-0R",
+   "names": [
+    "Sault Ste. Marie",
+    "sault sainte marie tribe of chippewa indians"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A8-6H",
+   "names": [
+    "summit lake paiute tribe",
+    "Summit Lake"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001A9-CA",
+   "names": [
+    "Seminole",
+    "seminole tribe of florida"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AA-J3",
+   "names": [
+    "The Seminole Nation of Oklahoma",
+    "seminole nation of oklahoma, the"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AB-RW",
+   "names": [
+    "seneca cayuga tribe ofoklahoma",
+    "Seneca-Cayuga Nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AC-YN",
+   "names": [
+    "Seneca Nation of Indians",
+    "Seneca",
+    "seneca nation of indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AD-4E",
+   "names": [
+    "San Carlos Apache Tribe",
+    "san carlos apache tribal council",
+    "San Carlos"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AE-A7",
+   "names": [
+    "san juan southern paiute tribe",
+    "San Juan"
+   ],
+   "datasets": [
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AF-G0",
+   "names": [
+    "snoqualmie indian tribe",
+    "Snoqualmie"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AG-PS",
+   "names": [
+    "San Pasqual",
+    "san pasqual band of mission indians"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AH-WJ",
+   "names": [
+    "soboba band of luiseno indians",
+    "Soboba"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AJ-2B",
+   "names": [
+    "sokaogan chippewa community",
+    "Sokaogon"
+   ],
+   "datasets": [
+    "funding",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AK-84",
+   "names": [
+    "Spokane",
+    "spokane tribe of the spokane reservation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AM-EX",
+   "names": [
+    "shakopee mdewakanton sioux community",
+    "Shakopee"
+   ],
+   "datasets": [
+    "contractors",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AN-MP",
+   "names": [
+    "spirit lake tribe",
+    "Spirit Lake"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AP-TF",
+   "names": [
+    "Squaxin",
+    "squaxin island tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AQ-08",
+   "names": [
+    "Saint Regis",
+    "saint regis mohawk tribe"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AR-61",
+   "names": [
+    "Santa Rosa Band of Cahuilla Indians",
+    "santa rosa band of cahuilla indians",
+    "Santa Rosa of Cahuilla"
+   ],
+   "datasets": [
+    "contractors",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AS-CT",
+   "names": [
+    "Santa Rosa",
+    "santa rosa rancheria techi tribe"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AT-JK",
+   "names": [
+    "Salt River",
+    "salt river pima-maricopa indian community"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AV-RC",
+   "names": [
+    "Pueblo of Santa Ana",
+    "santa ana, pueblo of"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AW-Y5",
+   "names": [
+    "Santa Ynez",
+    "Santa Ynez Band of Mission Indians",
+    "santa ynez tribal health clinic"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AX-4Y",
+   "names": [
+    "Southern Ute",
+    "Southern Ute Indian Tribe",
+    "southern ute indian tribe"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AY-AQ",
+   "names": [
+    "stillaguamish tribe of indians of washington",
+    "Stillaguamish"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001AZ-GG",
+   "names": [
+    "Standing Rock Sioux Tribe",
+    "Standing Rock",
+    "standing rock sioux tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B0-VS",
+   "names": [
+    "suquamish indian tribe of the port madison reservation",
+    "Suquamish"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B1-1J",
+   "names": [
+    "Susanville Indian Rancheria",
+    "Susanville",
+    "susanville indian rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B2-7B",
+   "names": [
+    "swinomish indian tribal community",
+    "Swinomish"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B3-D4",
+   "names": [
+    "Sisseton-Wahpeton",
+    "Sisseton-Wahpeton Sioux Tribe",
+    "sisseton wahpeton oyate"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B4-KX",
+   "names": [
+    "Sycuan",
+    "Sycuan Band of the Kumeyaay Nation",
+    "sycuan band of kumeyaay nation"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B5-SP",
+   "names": [
+    "Table Mountain",
+    "table mountain rancheria"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B6-ZF",
+   "names": [
+    "taos, pueblo of",
+    "Pueblo of Taos"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B7-58",
+   "names": [
+    "Tejon",
+    "tejon indian tribe"
+   ],
+   "datasets": [
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001B9-HT",
+   "names": [
+    "tohono o'odham nation, the",
+    "Tohono O'odham Nation",
+    "Tohono O'odham"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BA-QK",
+   "names": [
+    "timbisha shoshone tribe",
+    "Timbi-sha Shoshone"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BB-XC",
+   "names": [
+    "Thlopthlocco Tribal Town",
+    "thlopthlocco tribal town"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BC-35",
+   "names": [
+    "tolowa dee-ni nation",
+    "Tolowa Dee-ni'"
+   ],
+   "datasets": [
+    "funding",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BD-9Y",
+   "names": [
+    "tonkawa tribe",
+    "Tonkawa"
+   ],
+   "datasets": [
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BF-NG",
+   "names": [
+    "Tonto Apache",
+    "tonto apache tribe"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BG-V9",
+   "names": [
+    "torres-martinez desert cahuilla indians",
+    "Torres Martinez"
+   ],
+   "datasets": [
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BJ-7V",
+   "names": [
+    "Pueblo of Tesuque",
+    "tesuque pueblo administration"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BK-DM",
+   "names": [
+    "Tulalip",
+    "the tulalip tribes of washington"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BM-KD",
+   "names": [
+    "Tule River",
+    "tule river indian housing auth"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BN-S6",
+   "names": [
+    "Tunica-Biloxi",
+    "tunica-biloxi tribe of lousiana"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BP-ZZ",
+   "names": [
+    "tuolumne me-wuk tribal council",
+    "Tuolumne"
+   ],
+   "datasets": [
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BQ-5R",
+   "names": [
+    "Turtle Mountain",
+    "Turtle Mountain Band of Chippewa Indians",
+    "turtle mountain band of chippewa indians"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BR-BH",
+   "names": [
+    "twenty-nine palms band of mission indians",
+    "Twenty-Nine Palms"
+   ],
+   "datasets": [
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BT-Q3",
+   "names": [
+    "Umatilla Tribe",
+    "Confederated Tribes of the Umatilla Indian Reservation",
+    "confederated tribes of the umatilla indian reservation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BV-XW",
+   "names": [
+    "upper mattaponi indian tribe",
+    "Upper Mattaponi"
+   ],
+   "datasets": [
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BW-3N",
+   "names": [
+    "Ute",
+    "ute indian tribe",
+    "Ute Indian Tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BX-9E",
+   "names": [
+    "upper sioux indian community",
+    "Upper Sioux"
+   ],
+   "datasets": [
+    "contractors",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BY-F7",
+   "names": [
+    "upper skagit indian tribe",
+    "Upper Skagit"
+   ],
+   "datasets": [
+    "contractors",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001BZ-N0",
+   "names": [
+    "Ute Mountain",
+    "ute mountain ute tribe",
+    "Ute Mountain Ute Tribe (Colorado & Utah)"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C0-09",
+   "names": [
+    "utu utu gwaitu paiute tribe of the benton paiute reservation california",
+    "Benton"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C1-62",
+   "names": [
+    "Washoe",
+    "washoe tribe of nevada & california"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C2-CV",
+   "names": [
+    "ewiiaapaayp band of kumeyaay indians",
+    "Ewiiaapaayp"
+   ],
+   "datasets": [
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C3-JM",
+   "names": [
+    "Wilton",
+    "wilton rancheria"
+   ],
+   "datasets": [
+    "gaming",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C4-RD",
+   "names": [
+    "Wiyot",
+    "wiyot tribe"
+   ],
+   "datasets": [
+    "contractors",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C5-Y6",
+   "names": [
+    "wcd enterprises, ok",
+    "Wichita"
+   ],
+   "datasets": [
+    "contractors",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C6-4Z",
+   "names": [
+    "walker river paiute tribe",
+    "Walker River"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C7-AR",
+   "names": [
+    "White Mountain",
+    "white mountain apache tribe"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C8-GH",
+   "names": [
+    "winnebago tribe of nebraska",
+    "Winnebago"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001C9-PA",
+   "names": [
+    "Winnemucca",
+    "winnemucca indian colony of nevada"
+   ],
+   "datasets": [
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CA-W3",
+   "names": [
+    "confederated tribes of warm springs reservation of oregon",
+    "Warm Springs Tribe",
+    "Warms Springs Tribe"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CB-2W",
+   "names": [
+    "Wyandotte Nation",
+    "wyandotte nation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CC-8N",
+   "names": [
+    "confederated tribes and bands of the yakama nation, the",
+    "Confederated Yakama"
+   ],
+   "datasets": [
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CD-EE",
+   "names": [
+    "yankton sioux tribe",
+    "Yankton"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying",
+    "gaming"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CE-M7",
+   "names": [
+    "Yuhaaviatam",
+    "san manuel band of mission indians"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CF-T0",
+   "names": [
+    "ysleta del sur pueblo",
+    "Ysleta Del Sur Pueblo",
+    "Ysleta del Sur"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CG-0S",
+   "names": [
+    "Yocha Dehe",
+    "yocha dehe wintun nation"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "gaming",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CH-6J",
+   "names": [
+    "Yomba Shoshone",
+    "yomba tribal council inc"
+   ],
+   "datasets": [
+    "funding",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CJ-CB",
+   "names": [
+    "Yerington",
+    "yerington paiute tribe"
+   ],
+   "datasets": [
+    "contractors",
+    "funding"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CK-J4",
+   "names": [
+    "yurok tribe",
+    "Yurok"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying",
+    "nonprofits"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CM-RX",
+   "names": [
+    "Pueblo of Zia",
+    "pueblo of zia"
+   ],
+   "datasets": [
+    "funding",
+    "gaming",
+    "contractors",
+    "lobbying"
+   ]
+  },
+  {
+   "cedar_uid": "CE-001CN-YP",
+   "names": [
+    "pueblo of zuni",
+    "Zuni"
+   ],
+   "datasets": [
+    "contractors",
+    "lobbying",
+    "nonprofits",
+    "gaming",
+    "funding"
+   ]
+  }
+ ],
+ "uid_shape_offenders": [
+  {
+   "dataset": "contractors",
+   "nonconforming_uids": 351,
+   "distinct_uids": 384
+  },
+  {
+   "dataset": "deals",
+   "nonconforming_uids": 296,
+   "distinct_uids": 331
+  },
+  {
+   "dataset": "federal-register",
+   "nonconforming_uids": 359,
+   "distinct_uids": 396
+  },
+  {
+   "dataset": "funding",
+   "nonconforming_uids": 606,
+   "distinct_uids": 669
+  },
+  {
+   "dataset": "gaming",
+   "nonconforming_uids": 259,
+   "distinct_uids": 284
+  },
+  {
+   "dataset": "lobbying",
+   "nonconforming_uids": 273,
+   "distinct_uids": 302
+  },
+  {
+   "dataset": "natural-resources",
+   "nonconforming_uids": 14,
+   "distinct_uids": 17
+  },
+  {
+   "dataset": "nest",
+   "nonconforming_uids": 636,
+   "distinct_uids": 707
+  },
+  {
+   "dataset": "nonprofits",
+   "nonconforming_uids": 190,
+   "distinct_uids": 208
+  },
+  {
+   "dataset": "subcontracting",
+   "nonconforming_uids": 150,
+   "distinct_uids": 169
+  }
+ ]
+}

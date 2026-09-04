@@ -850,7 +850,7 @@
       "tribe_id",
       "cedar_uid"
      ],
-     "grain": "one row per (consultation event, participant as published). `consultation_event_id` alone is NOT unique - an event with several named participants has one row each, and 1,006 rows name no participant at all",
+     "grain": "one row per (consultation event, participant as published), and a consultation event is ONE FEDERAL REGISTER DOCUMENT - `consultation_event_id` is 1:1 with `fr_document_number`, 2,313 of each over 11,402 rows. ONE DOCUMENT BECOMES UP TO 50 ROWS: max 50, p95 21, median 1, mean 4.93; 1,009 documents carry more than one row and those hold 10,098 of the 11,402. The fan-out is one row per NAMED PARTICIPANT and is NOT duplication - the (tribe_id, participant) key is unique within the document on 1,009 of 1,009 multi-row documents, and of the 28 non-participant columns only `nagpra_bridge_overlap` (208 documents) and `source_quote` (133) vary within a document, both per-participant facts. SO: `SUM(is_event_primary_row)` = 2,313 is the number of CONSULTATIONS and `COUNT(*)` = 11,402 is the number of (consultation, participant) pairs; `n_participant_rows_for_event` carries the fan-out on every row. 1,006 rows name no participant at all (`match_method = no_participants_named_in_record`). TWO DIFFERENT FACTS LIVE HERE AND `document_role` SEPARATES THEM: `consultation_reported_in_document` (10,888 rows, 1,829 documents) is a document whose text reports in the past tense that consultation was carried out; `consultation_notice_published` (514 rows, 484 documents) is a notice announcing or scheduling one. Only 190 rows carry an `event_start_date` and 103 a `location`, so this table is mostly a record THAT consultation is asserted, not WHEN or WHERE it met",
      "primary_key": [
       "consultation_event_id",
       "participant_name_as_published"
@@ -859,7 +859,7 @@
       "tribe_id": "many",
       "cedar_uid": "many"
      },
-     "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
+     "grain_declared_by": "workstream-E grain sweep 2026-08-29, primary key confirmed unique on the FULL file; document fan-out and document_role added 2026-09-02 by code/1154 (measurement) and code/1158 (the three columns), fix at source in code/96_build_consultation_events.py",
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "cedar_uid": 170,

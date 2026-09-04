@@ -167,6 +167,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import importlib
 
+import cedar_nagpra_split as _split_rule     # the ONE institution-split rule
 _pr = importlib.import_module("33_apply_party_rulings")
 resolve_entity = _pr.resolve_entity          # STANDING RULE 8: the one resolver
 norm = _pr.norm
@@ -1530,33 +1531,22 @@ def institution_type(name):
 # "Tourism, Columbia, SC", which does not exist (Codex PR #29 finding 8). The
 # legacy rule is kept for the pre-2000 titles that carry no semicolon.
 INST_SEMI_RE = re.compile(r";")
-# SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
-# with "; " and closes the list with "; and ". Splitting on ", and " first
-# cuts INSIDE ordinary organisation names: "South Carolina Department of
-# Parks, Recreation, and Tourism" became two institutions, one of them
-# "Tourism, Columbia, SC", which does not exist (Codex PR #29 finding 8). The
-# legacy rule is kept for the pre-2000 titles that carry no semicolon.
-INST_SEMI_RE = re.compile(r";")
-# SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
-# with "; " and closes the list with "; and ". Splitting on ", and " first
-# cuts INSIDE ordinary organisation names: "South Carolina Department of
-# Parks, Recreation, and Tourism" became two institutions, one of them
-# "Tourism, Columbia, SC", which does not exist (Codex PR #29 finding 8). The
-# legacy rule is kept for the pre-2000 titles that carry no semicolon.
-INST_SEMI_RE = re.compile(r";")
-# SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
-# with "; " and closes the list with "; and ". Splitting on ", and " first
-# cuts INSIDE ordinary organisation names: "South Carolina Department of
-# Parks, Recreation, and Tourism" became two institutions, one of them
-# "Tourism, Columbia, SC", which does not exist (Codex PR #29 finding 8). The
-# legacy rule is kept for the pre-2000 titles that carry no semicolon.
-INST_SEMI_RE = re.compile(r";")
 INST_SPLIT_RE = re.compile(
     r",\s+and\s+|;\s+and\s+|\s+and in the (?:possession|control|physical custody) of\s+",
     re.I)
 
 
 def institution_parts(body):
+    """The `, and ` split is PROVISIONAL - see code/cedar_nagpra_split.py.
+
+    `, and ` is the Oxford comma inside an ordinary organisation's own name as
+    often as it is a separator between two holders, and splitting on it
+    unconditionally shipped `Louisiana Department of Culture, Recreation` - an
+    agency that does not exist - on 12 notices. The ONE rule that decides lives
+    in `cedar_nagpra_split`, is imported here and by `1077` and `1084`, and is
+    never re-implemented: two ladders for one number drift, and this one
+    already did.
+    """
     _b = body or ""
     _segs = _b.split(";") if ";" in _b else INST_SPLIT_RE.split(_b)
     parts = [re.sub(r"^\s*and\s+", "", p.strip(" ,;."), flags=re.I)
@@ -1567,7 +1557,10 @@ def institution_parts(body):
     for p in parts:
         cm = CITY_STATE_RE.search(p)
         out.append(p[:cm.start()].strip(" ,") if cm else p)
-    return [p for p in out if p]
+    out = [p for p in out if p]
+    if ";" not in _b and len(out) > 1:
+        out, _notes = _split_rule.apply_merges(out, _b)
+    return out
 
 
 # ---------------------------------------------------------------- geography --

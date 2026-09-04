@@ -2163,3 +2163,411 @@ inconsistency inside that set is 524 rows / $208,029,567.40 where
 `attribution_status = 'cedar_neid'` and two populated keys.
 
 <!-- END MONEY-RECON-1144 -->
+
+<!-- BEGIN NAGPRA-FR-GRAIN-1154-1158 -->
+### NAGPRA institution split and Federal Register consultation grain (2026-09-02, `1154` / `1158`)
+
+**RESOLVED — the NAGPRA institution parser fabricated an agency, and the gate
+named after it read one column of six.** `institution_names_all` had been
+repaired on 2026-09-02; `institution_name`, `institution_primary`,
+`institution_count`, `institution_city` and `institution_state` had not, and
+`846::_split` read only the repaired one and passed. Fixed at the parser:
+`code/cedar_nagpra_split.py` is now the ONE split rule, imported by `77`,
+`1077` and `1084`. 15 of the 19 flagged `, and ` pairs are rejoined, 4 are left
+split and carry a stated reason in the new `institution_split_flag` /
+`institution_split_basis`. The gate now reads three name columns and also
+requires a single-holder notice whose title ends in `, City, ST` to carry that
+city; both halves are proven to fire. Detail and the before/after table:
+`docs/NAGPRA_BUILD_LOG.md`.
+
+**RESOLVED — `consultation_events.csv` said nothing about the document
+fan-out.** One Federal Register document becomes up to 50 rows (median 1, mean
+4.93; 10,098 of 11,402 rows sit on a multi-row document). The grain is
+legitimately `(document, participant)` — proven on 1,009 of 1,009 multi-row
+documents — so it was declared rather than collapsed, and
+`n_participant_rows_for_event` / `is_event_primary_row` now make
+`SUM(is_event_primary_row) = 2,313` the consultation count. `document_role`
+separates *a consultation is reported to have happened* (10,888 rows) from
+*a notice announcing one was published* (514). Fix at source in `96`.
+
+**STILL OPEN.**
+
+1. **36 `nagpra_notices` rows carry a fabrication that `1084` repairs only in
+   the bridge** (was 51). Detectors A2/A3/A4/A5/A7 — a delimiter inside a
+   parenthetical, `Republication` shipped as a holding institution, a fragment
+   beginning mid-sentence, the possession locution retained. Each has a
+   verbatim repair in `nagpra_notice_institutions.institution_name_repaired`
+   and each wants the same treatment the `, and ` rule just got: move the
+   decision to the moment of the split.
+2. **`dist/customer/nagpra.csv` is stale by 17 rows and
+   `dist/customer/federal-register.csv` is stale.** `846` reports
+   `1137 verify rc=1`. Run `py -3 code/1137_*.py build nagpra federal-register`
+   — republishing is outside this lane.
+3. **`2026-16826`** is in `fr_consultation_notices.csv` and produced no
+   consultation_events rows; 484 of 485 notice documents are represented.
+<!-- END NAGPRA-FR-GRAIN-1154-1158 -->
+
+
+
+<!-- BEGIN NP-PLACENAME-1155 -->
+# Nonprofits - the place-name collision, measured 2026-09-02 by `code/1155`
+
+*Full account, every command and every rejected alternative:
+`docs/NP_PLACENAME_PRECISION_1155.md`. Population sample
+`review/np_placename_precision_sample_2026-09-02.csv` (seed 20260902); applied-set
+audit `review/np_placename_precision_applied_audit_2026-09-02.csv` (seed
+202609022); labels and per-row reasons beside each.*
+
+## NP-1 - 78.8% of the LINKED nonprofit keys are wrong, measured
+
+Seeded stratified sample of 210 of the 1,423 rows carrying both `tribe_id` and
+`cedar_uid`, hand-classified from the record. Of the 888 reading
+`key_review_disposition = SUPPORTED` - the ones that ship a key - **150 sampled,
+105 FALSE: strict precision 25.3%, upper bound 30.0%.** Weighted against the
+strata AS DRAWN over all 1,423: **17.7% TRUE, 78.8% FALSE, 3.5% UNKNOWN.**
+
+**State agreement is anti-correlated with correctness on this family**, because
+a town named after a nation is almost always in that nation's own state. That is
+why `code/1101`'s `HELD_STATE_DISAGREES` (461 rows, correct for its own family)
+cannot reach `COQUILLE CHESS CLUB`, `CHEHALIS BALLET CENTER`,
+`SENECA ZOOLOGICAL SOCIETY` or `SHAKOPEE BAND BOOSTERS` - all
+`keyed_state_agreement = Y`, most `disposition = NATIVE_VERIFIED_STRICT`.
+
+**517 refused, 297 demoted.** Two precisions, both floors, both stated because
+they answer different questions: **scored set 0 errors in 80, >= 96.2%**;
+**applied set, its own random sample, 0 wrong in 60, >= 95.0%**. Recall over
+hand-FALSE 49.7%. Caveat that does not go away: the same judgement drew the rule
+and the labels.
+
+## NP-2 - ~604 wrong keys this predicate does not reach - OPEN
+
+78.8% of 1,423 is ~1,121 estimated wrong; 517 refused. Three families, each
+needing its own predicate rather than a loosening of this one:
+
+1. **Surnames.** `CROW LUNA FOUNDATION`, `POARCH FAMILY FOUNDATION`.
+2. **The wrong Native entity.** 21 of 161 hand-FALSE rows are genuine Native
+   organisations keyed wrongly - `NATIVE HAWAIIAN EDUCATION ASSOCIATION` to
+   *Hawaiian Native Corporation*, `LAS VEGAS INDIAN CENTER` to the Las Vegas
+   Paiute Tribe, `ST AUGUSTINE INDIAN MISSION` (Winnebago NE) to the
+   **Augustine** Band of California. Each deserves a spine row or a redirect,
+   not a refusal.
+3. **A place name with no geographic-form word and no city match.**
+   `SEMINOLE COON HUNTERS CLUB`, Roseland VA.
+
+## NP-3 - The linkage ratchet cannot see a withdrawn claim - OPEN, integrator's call
+
+This pass flags and never deletes, so **LINKED stays at 1,423 / 11.15%
+(`linkage_nonprofits_bp 1115`, unmoved) while published attributions fell 851 to
+555, 6.71% to 4.37%**. Three readings of one dataset and the ratcheted one is
+the least true. Not a re-baselining request - no floor was breached. The fix is
+to add the publication mask to the LINKED predicate in
+`code/1139_linkage_coverage.py`:
+
+```
+AND key_review_disposition IN ('SUPPORTED','')
+AND disposition NOT IN ('NATIVE_PROPOSED_AWAITING_OWNER_RULING',
+                        'CONFLICT_EXCLUDED_AND_RULED_NATIVE')
+```
+
+## NP-4 - One line of `cedar_publication.py` is load-bearing for 297 filings
+
+`BLOCKED_STATES["key_review_disposition"]["REFUSED_PLACE_NAME_IS_THE_ADDRESS"]
+= MASK`. Deny-by-default means that without it those 297 real IRS records are
+**WITHHELD** rather than masked. `1155 verify` invariant **I6** reads that file
+and fails if the entry is gone; `selftest` proves I6 fires by deleting it.
+
+## NP-5 - A NATION'S SEAT IS EVIDENCE THAT FEDERAL FILINGS DO NOT CARRY FOR SMALL VILLAGES
+
+The reusable finding from the two false refusals an independent hand-check and a
+widened sweep turned up (`KASAAN HAIDA HERITAGE FOUNDATION`, Kasaan AK;
+`WHITE EARTH REDISCOVERY CENTER`, White Earth MN).
+
+A seat veto built on Single Audits and casinos **systematically misses small
+Alaska Native villages** - a village of sixty files no audit, runs no casino,
+and gives BIA a P.O. box in the next town (Kasaan's published address is
+Ketchikan). The BIA Tribal Leaders Directory closes part of it (540 of 583
+unique spine matches) and the rest needs a structural rule: **a
+`Federally recognized Alaska Native Village` sits at the village it names**,
+guarded by state agreement.
+
+**Do not generalise that rule to `Federally recognized tribe`**: measured, it
+would veto 114 of the 517 refusals, because Coquille OR, Chehalis WA, Shakopee
+MN, Flandreau SD, Quinault WA and Seneca Falls NY bear a nation's name and none
+is that nation's seat.
+
+## NP-6 - A NAME-LEVEL ETHNONYM VETO WAS BUILT, MEASURED AND REJECTED - do not rebuild it
+
+`NATIVE_PURPOSE_RE` looks for purpose words and misses people names, so `HAIDA`
+never vetoed. The obvious fix does not pay, and the measurement is here so the
+next pass does not repeat it. Register tokens minus every US place-name token
+gives 1,045 candidates; **applied to the refusals that vetoes 48 and 47 are
+wrong**, because Cedar's register contains organisations and so `EDUCATION`,
+`FRIENDS`, `UNITED` and `WELLNESS` all qualify. A frequency threshold does not
+separate them either - `HAIDA` and `TLINGIT` sit at 19 in a 26,974-name corpus
+of ordinary American nonprofits, above `SWIM` 5, `DUCK` 7 and `ORDER` 4.
+**Net: gains 1, loses 5.** The seat route saves the same row at zero cost.
+
+## NP-7 - No 990 mission or program text is on disk for these filers
+
+A header sweep of every non-backup CSV in `data/clean` and `data/spine` for
+`mission` / `activity` / `purpose` / `description` / `narrative` returns nothing
+for `np_orgs` EINs. `np_financials.csv` is financial fields only. Two of the
+four corroborators named in the codebook are also unusable here:
+`grantmaker_funding_flows` names **0** of the 1,423 keyed EINs, and
+`np_ein_entity_hub` names **1,416** - the same matcher seen twice, not an
+independent witness.
+<!-- END NP-PLACENAME-1155 -->
+
+<!-- BEGIN QA-STATUS-VOCAB-1153 -->
+
+## QA-STATUS-VOCAB · S1 · OPEN · `RULED_ATTRIBUTED` can mean "a quarantined resolver guessed", and that naming cost an escalation
+
+*Logged 2026-09-02 by `code/1153_qa_publication_eligibility.py`. The defect it
+describes is FIXED in the export; the NAME that caused it is not, and renaming a
+status vocabulary that eight scripts read is out of scope for that pass.*
+
+**What happened.** `1153` was building the CP-002 publication policy and had to
+decide what `contractors.identifier_ruling_quarantined = Y` means for
+publication — 227,540 rows carrying $30.26B of attribution. It logged the
+question as needing an owner ruling, on this reasoning: 3,469 of those rows read
+`ruling_status = RULED_ATTRIBUTED`, a positive human ruling should not be thrown
+away by a batch-level quarantine, and a builder should not make that call.
+
+**The reasoning was sound and the premise was false.** Measured:
+
+| the 3,469 quarantined `RULED_ATTRIBUTED` rows | |
+|---|---:|
+| `identifier_ruling_method = cluster_v3` | 3,330 |
+| `identifier_ruling_method = need_v6` | 139 |
+| `identifier_ruling_tier = A` | **0** |
+| `identifier_ruling_tier = B` | 3,469 |
+
+And across the whole quarantine: **227,540 of 227,540 rows are tier B**, on
+`identifier_ruling_tier` and on `confidence_tier` alike. There is no tier-A row
+anywhere inside it. `ENTITY_MATCH_RULES` rule 8 reserves tier A for an owner
+ruling, `cluster_v3`'s own `tier_rationale` reads *"Algorithmic name clustering,
+unreviewed"*, `ADR` calls it *"a `cluster_v3` guess"* and *"a resolver output —
+Cedar agreeing with itself"*, and `need_v6` is START_HERE trap 1 by name —
+**6.5% accurate, never publishes alone**.
+
+So `RULED_ATTRIBUTED` on these rows does not record an adjudication. It records
+that the quarantined resolver produced an answer. **This is START_HERE trap 1b
+in a sixth vocabulary** — *a ruled method is not a positive ruling* — and this
+time the trap was not in a consumer reading the column, it was in the column's
+own name.
+
+**The cost, stated plainly.** A reviewer with the whole file in front of them
+escalated a decision they could have answered, because the vocabulary told them
+a human had already spoken. Escalation is the *cheap* failure. The expensive one
+is the same name persuading the next reader to publish.
+
+**Fixed in the export, and NOT by keying on the name.** `BLOCKED_COMBINATIONS`
+in `cedar_publication` masks the attribution on any row where
+`identifier_ruling_quarantined = Y` and `identifier_ruling_tier != A`. Keying on
+the status label instead would have cleared 1,405 still-attributed rows and left
+**55,736 quarantined `cluster_v3` rows carrying $16.00B** untouched — the same
+method, the same tier, the same quarantine, and no misleading label on them at
+all. The defect is the METHOD; the name is only where it was noticed.
+
+**What is still OPEN, and who owns it.** The vocabulary. `ruling_status` mixes
+three unrelated facts under one `RULED_` prefix:
+
+| value | what it actually asserts |
+|---|---|
+| `RULED_ATTRIBUTED` | *either* an owner ruled this, *or* a quarantined resolver emitted it |
+| `RULED_NOT_NATIVE` | a NEGATIVE ruling — 559 of these shipped with `attributed_flag = 1` |
+| `RULED_NAME_KEY_ONLY_NOT_ATTRIBUTED`, `RULED_TIER_C_NOT_ATTRIBUTED` | the row is NOT attributed, said in a name beginning `RULED_` |
+| `RULED_TIER_UNSTATED` | 39,646 inside the quarantine are `cluster_v3` tier B; 6 outside it are `hand` tier A. One name, two populations |
+
+A value whose name asserts adjudication must not be reachable by a resolver.
+The minimum honest fix is to split the prefix — `RULED_` only where a human
+ruled, something like `RESOLVED_` where a method emitted — and it touches every
+script that reads `ruling_status`. **Owner: whoever owns
+`code/1079_quarantine_method_exposure.py` and the ruling vocabulary.** Until
+then, `BLOCKED_COMBINATIONS` reads the METHOD and the TIER and never the name,
+and `docs/PUBLICATION_ELIGIBILITY.md` records every value with its live count so
+the next reader can see the split rather than infer it.
+
+**How to check it is still true:** `py -3 code/1153_qa_publication_eligibility.py`
+— the conjunction line reports the row count, and `verify` fails if a single
+quarantined non-tier-A row reaches the export with an attribution on it.
+
+<!-- END QA-STATUS-VOCAB-1153 -->
+
+<!-- BEGIN FULLDATA-THREE-GAPS-2026-09-02 -->
+## Open after the FULLDATA-THREE-GAPS pass (1159 / 1160 / 1161), 2026-09-02
+
+Named so nobody records them as fixed. Each carries the command that re-measures it.
+
+**A. `dist/customer/` is STALE for three datasets because this pass wrote to
+`data/clean/`.** `py -3 code/1137_*.py verify` reports legislation, deals and
+gaming STALE (nonprofits too, from another workstream). `code/1137_*` is owned by
+the export-hygiene workstream and was not run here. **Until `1137 build
+{legislation,deals,gaming}` runs, none of the three fixes is in a delivered
+file**, and `846_session_audit.py` sits at 30/31 on that one line.
+`code/1152_qa_review_reconciliation.py` reads the delivered file and will keep
+reporting `105-hr-948` as `passed-one-chamber` until then; it is read-only and
+does not conflict. **After `1137 build`, re-run
+`py -3 code/1159_date_placeholder_precision.py sweep` and
+`py -3 code/1161_money_column_summability.py apply`** — both measure
+`dist/customer/`, so both are stale by exactly the same amount, and
+`docs/DATE_PLACEHOLDER_SWEEP.json` / `docs/MONEY_COLUMN_SUMMABILITY.json` still
+describe the pre-rebuild files.
+
+**B. Day 1 in the Casino City gaming dates — UNRESOLVED, deliberately.** 28 of
+188 full-ISO `gaming.open_date` values and 10 of 57 `close_date` values fall on
+day 1, 26 of them from the vendor roster at `open_date_precision = day`. Day 1 is
+a plausible THIRD vendor placeholder shape that neither `23f.interpret()` nor
+`158.retype_dates` catches. But the vendor workbook holds only 31 day-1 values in
+553 — about z=3, against z=41 for day 15 and z=55 for 31 December — so the
+evidence does not establish a convention. **Downgrading 28 opening dates on a z=3
+signal would invent uncertainty, which is the same error as inventing a date.**
+Needs an owner ruling or a second source, not a threshold.
+Re-measure: `py -3 code/1159_date_placeholder_precision.py sweep`.
+
+**C. `died-in-committee` is imprecise for 358 bills.** Four dispositions collapse
+to it, and `placed-on-calendar-never-voted` (282) and
+`reported-from-committee-never-voted` (76) both describe bills that DID leave
+committee. Re-labelling 2,189 rows of a customer-facing column is an owner
+decision; `outcome_basis` now says so on every affected row and the precise value
+is in `native_bill_outcomes.disposition`.
+Re-measure: `py -3 code/1160_legislation_outcome_vs_actions.py report`.
+
+**D. Thirteen `bie_uio_dollars_by_entity__*` columns are 100% EMPTY in
+`dist/customer/funding.csv`** — a header and no value on any of 701,955 rows,
+including three money columns. Not a summability verdict, a delivery finding, and
+not this pass's lane. Listed in the marked block in
+`docs/MONEY_TOTALLING_RULES.md`.
+Re-measure: `py -3 code/1161_money_column_summability.py report`.
+
+**E. `lobbying.income_usd` and `expenses_usd` are individually additive and must
+never be added TOGETHER**, nor either to `spend_usd`: an LDA filing reports income
+(a registrant billing a client) OR expenses (a client self-filing), and
+`spend_usd` is the coalesced one. Recorded as a row filter in the JSON; there is
+no gate that stops a buyer doing it.
+
+**F. `contractors.total_obligations` is named TOTAL and is a per-TRANSACTION
+delta.** It sums correctly; reading one row of it as an award total is wrong. Its
+neighbour `total_award_value` is named the same way and behaves oppositely. The
+names are not changed here — a rename is a breaking change to a delivered column
+— but both are stated in the marked block and in the JSON's `name_warning`.
+
+**G. `62_no_regression_check.py` still exits 1.** Verified that none of the new
+findings belong to 1159/1160/1161: `py -3 code/293_lint_bug_classes.py | grep -E
+'1159|1160_legis|1161_money'` returns nothing. The named owners of the open lines
+are already listed in `AGENTS.md` under OPEN GATE FAILURE (the new-script
+workstreams for the lint classes, the geo/regulations_gov table workstreams for
+the codebook counters, the rulings-consolidation workstream for
+`rulings_unapplied`). This pass moved `codebook_variables` 6,222 -> 6,237, in the
+improving direction.
+<!-- END FULLDATA-THREE-GAPS-2026-09-02 -->
+
+<!-- BEGIN HARMONIZATION-AUDIT-1168 -->
+
+# Harmonization audit of the 13 delivered datasets — 2026-09-03, `code/1168`
+
+*Full account: `docs/DATASET_HARMONIZATION_AUDIT_2026-09-03.md`. Proposals that
+touch data or another agent's builder:
+`review/harmonization_proposals_2026-09-03.md`. Machine evidence:
+`docs/harmonization_audit_2026-09-03/*.json`. Re-derive everything with
+`py -3 code/1168_harmonization_audit.py all` — read-only, no network, no caps.*
+
+**This block RE-MEASURES claims made elsewhere in this file and in
+`WHAT_IS_MISSING.md`. It edits nothing in place and touches no other marker
+block.** Where a claim above is now stale, the stale line is left where it is,
+as this file's convention requires, and corrected here.
+
+## Re-measured against `dist/customer/`, 2026-09-03 01:0x
+
+| ref | verdict | measurement |
+|---|---|---|
+| **M1** — *"`dist/customer/contractors.csv` does not exist"* | **CLOSED** | the file exists: **1,480,867,420 bytes, 1,217,768 rows, 79 columns**, mtime 2026-09-03 00:54:43. `MANIFEST.csv` declares 13 datasets and **13** CSVs are on disk. **The stale line still ships to the customer**, inside `dist/customer/contractors__CODEBOOK.md`, via `1137`'s substring-matched quirk selector — see HA-6 below |
+| **M2** — *"'86.9%' ships in 26 customer files"* | **CLOSED in the boilerplate; the claim is now stale in the other direction** | `grep "86.9%" dist/customer/*` → **2 hits, and both are the quoted heading of M2 itself** (`funding__CODEBOOK.md` L37, `subcontracting__CODEBOOK.md` L25). The footer is now derived. The only route by which that number still reaches a buyer is the record of the defect |
+| **M2 residue** — one file, two answers | **STILL TRUE, with new numbers** | `subcontracting__NOTES.txt` says **63.4%** at line ~21 and **20.8%** in the footer. Both reproduce **exactly**: 63.4% on the 89,809-row source ($57,020,557,710.47 unfiltered / $34,906,694,737.65 countable), 20.8% on the 70,597-row delivered file ($42,172,721,583.24 / the same countable). Two right numbers, two undeclared denominators, one file |
+| **M3** — either-leg coverage 97.27% | **superseded by the delivery** | on the delivered file: **69,278 of 70,597 = 98.13%**; `cedar_uid` alone 32,369 = 45.85%; 1,319 rows with neither leg |
+| **M4** — 44 funding rows claiming an attribution they do not hold | **REPRODUCES — OPEN** | `attributed_flag='1' AND cedar_uid=''` → **44 rows**, exactly |
+| **M5** — contractors 96 rows / $269,771,379.45 | **DOES NOT REPRODUCE** | **0 rows** have `cedar_uid` populated and `attribution_method='unattributed'` |
+| **M5** — funding 3,620 rows / $1,534,889,361.52 | **REPRODUCES to the cent** | 3,620 rows, **$1,534,889,361.52** |
+| **C1 / C2** — faads and subawards duplicate rows | **not applicable to the delivery** | `funding.csv` and `subcontracting.csv` each have **0 exact duplicate rows**; the subaward repeats are the 19,212 rows the MANIFEST declares withheld, and `duplicate_status` is `primary` on 100% of what ships |
+| **L6** — `native_bills.affected_entities` blank on all 3,069 | **REPRODUCES — OPEN** | `legislation.affected_entities` non-blank = **0 of 3,069** |
+| **QA-STATUS-VOCAB** | **still shipping** | `contractors.ruling_status='RULED_ATTRIBUTED'` on 458,548 rows; `identifier_ruling_quarantined='Y'` on 227,540 |
+| **WHAT_IS_MISSING §2** — 341,486 of 548,980 funding rows name-disagree | **REPRODUCES** | **340,738 of 549,134 (62.1%)** disagree with the register's `canonical_name` for their own `cedar_uid`. Every other keyed dataset agrees ≥98.7% |
+| **WHAT_IS_MISSING §3** — `parent_contract_number` populated on all 1,217,768 and not shipped | **HALF CLOSED, and the figure was wrong** | it **now ships** — on **798,403 rows (65.6%)**, not all of them. Literal `nan` in it: **0**. `contract_number` ≤6 chars: **290,525 (23.9%)**, exact; `'0001'` on **11,700** |
+| **WHAT_IS_MISSING §4** — six date formats, fixed to ISO by `771` | **HALF CLOSED** | the slash formats are gone. **45 of 750 `certification_expiration` values remain non-ISO** (`8-13-2025`), and **77 of 117 `certification_start`** |
+| **START_HERE "five things" #5** — `extent_competed` two vocabularies | **CLOSED in the delivery** | `extent_competed_normalized` ships with **10 values in one vocabulary**, plus `extent_competed_normalized_basis`. Its companion warning — that `funding_agency` has no normalisation — is **still true and is not stated in the contractors codebook** |
+
+## New, and the two that move money
+
+**HA-1 · S1 · `contractors` counts the literal strings `NAN` and `UNKNOWN` as
+populated.** `owner_as_of_transaction_cedar_uid` is reported **100.0% filled**
+and **1,066,926 of 1,217,768 values (87.6%) are the string `UNKNOWN`**;
+`cage_code` is reported 77.8% and **398,840 are `NAN`**; `place_of_perform_city`
+88,269 `NAN`; `place_of_perform_state` 87,068 `NAN`. Four datasets
+(`federal-register`, `legislation`, `nagpra`, `natural-resources`) are clean of
+literal null sentinels; the other nine are not. Census:
+`docs/harmonization_audit_2026-09-03/null_sentinels.json`.
+
+**HA-2 · S1 · Six `n_<table>` join-count columns in `contractors` explode on a
+sentinel key.** All **270,447** blank-`cage_code` rows read
+`n_sam_prime_contracts_fy2000_2007 = 268,096` and `n_prime_contracts_awards =
+141,304`; all **398,840** `cage_code = 'NAN'` rows read
+`n_prime_contracts_archive_backfill = 398,840`. **0 rows with a real CAGE code
+carry any of those values.** 669,287 rows — **55.0% of the dataset** — carry a
+count that means nothing. This is the empty-join-key defect the field guide
+already names, shipped in a customer file.
+
+**HA-3 · S1 · Two identity namespaces ship side by side, and one dataset carries
+only the second.** `cedar_uid` in 10 datasets (0 shape violations, 0 values
+outside the 1,555-row register); the register's **`handle`** in the
+`*_entity_id` columns of 7 (every one tested resolves at **100%** to
+`register.handle` and **0%** to `register.cedar_uid`). **`nagpra` ships 6,792
+rows, 6,169 with a resolved entity, and zero `cedar_uid`** — 47,252 handle
+tokens across six columns, all six measured, 100% resolvable. A third namespace, `bia:cherokee-nation`, on
+`native-owned-businesses.nation_id` (3,453 rows). Nothing is broken; nothing in
+the package reconciles them either.
+
+**HA-4 · S1 · `tier` means two different things.** `federal-register.tier` is a
+Cedar confidence tier (`B`, 11,402 rows). `nonprofits.tier` is the **IRS filing
+form** (`990_N` 6,400, `full_990` 2,801, `not_required_to_file` 2,045, `990_EZ`
+1,314, `UNKNOWN` 129). Fourteen column names carry the word "tier" and they hold
+four unrelated concepts, one of which (`geo_key_tier`) is a match **method**.
+
+**HA-5 · S2 · The subaward money fence is printed into all 13 codebooks and 13
+`__NOTES.txt`; 12 of the 13 datasets have no `subaward_amount` column.**
+`1137` L~388 emits it unconditionally while the lobbying fence two lines below
+is correctly gated on `coll == "lobbying"`.
+
+**HA-6 · S2 · The codebooks' "Quirks to know" bullets are selected from THIS
+FILE by naked substring match, and it misfires in both directions.** 66 bullets
+across 13 codebooks; **only 3 name their dataset in the heading**. **Four of
+`nest`'s six matched on the word `honest`.** `native-owned-businesses` gets
+**zero**, because this file writes `native_owned_businesses` with underscores
+and the matcher tries hyphens and spaces. And `contractors` ships M1's heading —
+the "does not exist" line above — to a paying customer, beside the 1.48 GB file.
+
+## What is harmonized, measured, so it is not re-litigated
+
+- **13 of 13 delivered row counts reconcile to their flagship source table.** The
+  only three shortfalls — `native-owned-businesses` −548, `nonprofits` −75,
+  `subcontracting` −19,212 — equal the declared `rows_withheld` **exactly**.
+- **0 exact duplicate rows across all 2,074,807 delivered rows** (md5 over the
+  full row, uncapped, all 13 files), and **0 duplicate primary keys** on the 8
+  datasets with a single-column key.
+- **1,147 shipped columns; 1,147 named in a codebook; 0 missing and 0 phantom in
+  both directions**, and **1,147 of 1,147 codebook `filled` counts match the
+  file.** Every "N columns empty" / "N under 10%" bullet is exact on all 13.
+- **One deflator, one base year.** All four deflating datasets carry
+  `deflator_factor_2025` and `inflation_base_year = 2025`, single-valued.
+
+## The snapshot hazard this pass hit, recorded because it will recur
+
+`dist/customer/contractors.csv` was **rewritten at 00:54:43 while the first
+profile pass was reading the 00:35:55 version**. That produced four apparent
+codebook-count defects — `cedar_uid`/`canonical_name` understated by 10,672,
+`ruling_status`/`ruling_applied_date` overstated by 154,765 — **none of which
+exists**. Re-measured against the new file, all 1,147 counts match. Any audit of
+`dist/customer/` while `1137` is live must stamp the mtime of every file it
+reads and re-check anything surprising before writing it down. `1168` stamps
+`bytes` and `mtime` into every JSON it emits, for exactly this reason.
+
+<!-- END HARMONIZATION-AUDIT-1168 -->

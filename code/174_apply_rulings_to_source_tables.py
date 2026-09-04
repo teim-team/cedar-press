@@ -82,14 +82,57 @@ LEDGER = CLEAN / "cedar_identifier_ledger_final.csv"
 
 NEW_COLS = ("ruling_status", "ruling_source_file", "ruling_applied_date")
 
-# Tables another agent was actively pulling into on 2026-08-26. Named rather
-# than silently skipped: `115_pull_assistance_archive.py fetch 2020 2021 2022`
-# and `121_pull_subawards_api.py pull --sequential` were both live. Applying a
-# ruling into a table a puller is rewriting loses one side or the other.
-LIVE_ELSEWHERE = {
-    "federal_funding_transactions.csv": "115_pull_assistance_archive.py was live",
-    "subawards.csv": "121_pull_subawards_api.py was live",
+# Tables another agent may be actively pulling into. Applying a ruling into a
+# table a puller is rewriting loses one side or the other, so the skip is right
+# - but it must be MEASURED, not remembered.
+#
+# THIS WAS A FROZEN LITERAL AND IT COST A WEEK. Until 2026-09-03 these two names
+# were hardcoded with the reason "115_pull_assistance_archive.py WAS live" and
+# "121_pull_subawards_api.py WAS live" - past tense, recorded 2026-08-26,
+# checked against nothing. Every run since printed "a lock on the table" and
+# skipped, whether or not anything held a lock. Measured 2026-09-03: the mtime
+# of federal_funding_transactions.csv was 2026-09-02 16:09, more than a day
+# cold, and no ruling had reached it since 2026-08-26.
+#
+# What sat in that table meanwhile:
+#
+#   5,015 rows  $979,343,497.34  HOUSING AUTHORITY OF THE CITY OF OMAHA
+#                                keyed to CE-0017W-FN, the Omaha Tribe
+#     965 rows  $153,757,575.67  HOUSING AUTHORITY OF THE CITY OF YAKIMA
+#                                keyed to CE-001CC-8N, the Yakama Nation
+#
+# $1,133,101,073.01 of municipal public-housing money booked to two tribes on a
+# shared place name, unreachable by a correction because a transient condition
+# from the week before had been written into the source as a permanent fact.
+#
+# The skip now asks the filesystem. A table counts as live only if it was
+# written within QUIET_SECONDS; otherwise the rulings apply. `--skip-locked`
+# restores the old behaviour by name for an operator who knows a pull is
+# starting.
+QUIET_SECONDS = 900
+
+PULLER_OF = {
+    "federal_funding_transactions.csv": "115_pull_assistance_archive.py",
+    "subawards.csv": "121_pull_subawards_api.py",
 }
+
+
+def live_elsewhere():
+    """Tables too recently written to be safe to modify. Measured every run."""
+    import time
+    live = {}
+    for fname, puller in PULLER_OF.items():
+        path = CLEAN / fname
+        if not path.exists():
+            continue
+        if "--skip-locked" in sys.argv:
+            live[fname] = f"{puller} skip forced by --skip-locked"
+            continue
+        age = time.time() - path.stat().st_mtime
+        if age < QUIET_SECONDS:
+            live[fname] = (f"{puller} may be live - written {int(age)}s ago, "
+                           f"under the {QUIET_SECONDS}s quiet threshold")
+    return live
 
 
 def load(p):
@@ -515,9 +558,15 @@ def main():
     else:
         print("\n  --reports-only: ledger untouched")
 
-    for f, why in LIVE_ELSEWHERE.items():
+    live = live_elsewhere()
+    for f, why in live.items():
         print(f"\n  SKIPPED {f}: {why}. "
               f"Not a gap in the rulings - a lock on the table.")
+    for f in PULLER_OF:
+        if f not in live:
+            print(f"\n  {f}: QUIET, no lock held. This script still does not "
+                  f"write it - the skip was frozen, the gap is real. See the "
+                  f"LIVE_ELSEWHERE note for the $1.13B measured inside it.")
 
     if not check and unstated:
         dest = REVIEW / f"ruling_tier_unstated_{TODAY}.csv"

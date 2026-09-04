@@ -115,8 +115,12 @@ believed before.
 | **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
 | **X** | **refused.** A negative ruling. Never read as a confirmation |
 
-Ledger totals, `data/clean/cedar_identifier_ledger_final.csv`: **20,577 rows ·
-A 2,286 · B 5,443 · C 12,380 · X 468.** [measured]
+Ledger totals, `data/clean/cedar_identifier_ledger_final.csv`: **20,740 rows ·
+A 2,369 · B 4,865 · C 12,287 · X 1,219.** [measured 2026-09-02 by
+`code/1156_doc_claim_gate.py`. All five figures had moved — the line read
+20,577 · A 2,286 · B 5,443 · C 12,380 · X 468. **X, the refusals, went 468 →
+1,219**, which is the one to notice: a negative ruling is never a confirmation,
+and there are now two and a half times as many of them.]
 
 **A ruled *method* is not a positive ruling.** `attribution_method` says WHO
 decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN

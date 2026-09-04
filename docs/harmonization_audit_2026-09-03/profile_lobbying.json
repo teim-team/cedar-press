@@ -1,0 +1,807 @@
+{
+ "snapshot": {
+  "file": "dist/customer/lobbying.csv",
+  "bytes": 21158772,
+  "mtime": "2026-09-03T00:37:31"
+ },
+ "rows": 27825,
+ "columns": 62,
+ "seconds": 3.5,
+ "profile": {
+  "cedar_uid": {
+   "nonblank": 26513,
+   "blank": 1312,
+   "pct_blank": 4.7152,
+   "approx_distinct": 307
+  },
+  "entity_id": {
+   "nonblank": 26513,
+   "blank": 1312,
+   "pct_blank": 4.7152,
+   "approx_distinct": 223
+  },
+  "client_id": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 1497
+  },
+  "registrant_id": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 422
+  },
+  "attribution_withdrawn_entity_id": {
+   "nonblank": 471,
+   "blank": 27354,
+   "pct_blank": 98.3073,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "ANRC-BRBYCO-00": 234,
+    "TRBF-SROSAR-00": 220,
+    "SGVF-BRBYAS-00": 9,
+    "TRBF-CRDALN-00": 8
+   }
+  },
+  "supersession_group_id": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 27990
+  },
+  "canonical_name": {
+   "nonblank": 26513,
+   "blank": 1312,
+   "pct_blank": 4.7152,
+   "approx_distinct": 240
+  },
+  "client_name": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 690
+  },
+  "registrant_name": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 391
+  },
+  "filing_uuid": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 27950
+  },
+  "entity_type": {
+   "nonblank": 27354,
+   "blank": 471,
+   "pct_blank": 1.6927,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "Federally recognized tribe": 24555,
+    "Alaska Native Regional Corporation": 1797,
+    "Federally recognized Alaska Native Village": 587,
+    "Federal-level self-governance consortium": 229,
+    "State-recognized tribe": 100,
+    "Federal-level constituency entity": 72,
+    "State-level constituency entity": 14
+   }
+  },
+  "entity_state": {
+   "nonblank": 27354,
+   "blank": 471,
+   "pct_blank": 1.6927,
+   "approx_distinct": 39,
+   "vocabulary": {
+    "CA": 4106,
+    "WA": 3004,
+    "AK": 2613,
+    "OK": 2290,
+    "AZ": 2231,
+    "NM": 1447,
+    "MI": 1090,
+    "OR": 1003,
+    "WI": 938,
+    "NY": 859,
+    "SD": 783,
+    "FL": 745,
+    "MT": 668,
+    "ID": 490,
+    "ND": 469,
+    "TX": 465,
+    "NV": 454,
+    "MN": 423,
+    "CT": 393,
+    "NE": 348,
+    "CO": 329,
+    "LA": 326,
+    "MS": 301,
+    "AL": 268,
+    "WY": 247,
+    "MA": 247,
+    "NC": 167,
+    "KS": 158,
+    "SC": 143,
+    "IA": 129,
+    "ME": 99,
+    "RI": 63,
+    "VA": 36,
+    "NJ": 16,
+    "UT": 6
+   }
+  },
+  "client_state": {
+   "nonblank": 25748,
+   "blank": 2077,
+   "pct_blank": 7.4645,
+   "approx_distinct": 43
+  },
+  "registrant_state": {
+   "nonblank": 27807,
+   "blank": 18,
+   "pct_blank": 0.0647,
+   "approx_distinct": 41
+  },
+  "self_filed": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 27520,
+    "1": 305
+   }
+  },
+  "filing_year": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "2025": 1377,
+    "2008": 1344,
+    "2020": 1285,
+    "2015": 1277,
+    "2024": 1269,
+    "2014": 1262,
+    "2023": 1242,
+    "2017": 1232,
+    "2019": 1227,
+    "2022": 1223,
+    "2009": 1210,
+    "2016": 1205,
+    "2021": 1196,
+    "2010": 1187,
+    "2018": 1185,
+    "2013": 1176,
+    "2012": 1123,
+    "2011": 1075,
+    "2007": 712,
+    "2026": 672,
+    "2005": 650,
+    "2006": 635,
+    "2004": 611,
+    "2003": 578,
+    "2002": 524,
+    "2001": 500,
+    "2000": 451,
+    "1999": 397
+   }
+  },
+  "filing_period": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "first_quarter": 6024,
+    "second_quarter": 5878,
+    "third_quarter": 5436,
+    "fourth_quarter": 5429,
+    "mid_year": 2600,
+    "year_end": 2458
+   }
+  },
+  "filing_type": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 53
+  },
+  "filing_type_display": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 50
+  },
+  "income_usd": {
+   "nonblank": 17621,
+   "blank": 10204,
+   "pct_blank": 36.6721,
+   "approx_distinct": 285
+  },
+  "expenses_usd": {
+   "nonblank": 237,
+   "blank": 27588,
+   "pct_blank": 99.1482,
+   "approx_distinct": 80
+  },
+  "spend_usd": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 297
+  },
+  "lobbying_issues_codes": {
+   "nonblank": 22723,
+   "blank": 5102,
+   "pct_blank": 18.336,
+   "approx_distinct": 898
+  },
+  "specific_issues_text": {
+   "nonblank": 19499,
+   "blank": 8326,
+   "pct_blank": 29.9227,
+   "approx_distinct": 9873
+  },
+  "government_entities": {
+   "nonblank": 20891,
+   "blank": 6934,
+   "pct_blank": 24.92,
+   "approx_distinct": 1238
+  },
+  "affiliated_organizations": {
+   "nonblank": 69,
+   "blank": 27756,
+   "pct_blank": 99.752,
+   "approx_distinct": 46
+  },
+  "dt_posted": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 29776
+  },
+  "termination_date": {
+   "nonblank": 776,
+   "blank": 27049,
+   "pct_blank": 97.2111,
+   "approx_distinct": 395
+  },
+  "filing_url": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 22926
+  },
+  "match_confidence": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "high": 23765,
+    "medium": 2748,
+    "withdrawn_org_type": 841,
+    "withdrawn_false_attribution": 471
+   }
+  },
+  "matched_alias": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 424
+  },
+  "pull_keyword": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 373
+  },
+  "org_type_barred": {
+   "nonblank": 841,
+   "blank": 26984,
+   "pct_blank": 96.9775,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 841
+   }
+  },
+  "org_type_reason": {
+   "nonblank": 841,
+   "blank": 26984,
+   "pct_blank": 96.9775,
+   "approx_distinct": 6,
+   "vocabulary": {
+    "the Salt River Project, an Arizona public power and irrigation district - NOT the Salt River Pima-Maricopa Indian Community": 333,
+    "a special district": 211,
+    "a mining company": 123,
+    "a municipality": 99,
+    "a university (tribal colleges are ruled separately, by name)": 46,
+    "a member cooperative": 29
+   }
+  },
+  "filing_url_original": {
+   "nonblank": 1512,
+   "blank": 26313,
+   "pct_blank": 94.566,
+   "approx_distinct": 1656
+  },
+  "attribution_withdrawn": {
+   "nonblank": 471,
+   "blank": 27354,
+   "pct_blank": 98.3073,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "1": 471
+   }
+  },
+  "attribution_withdrawn_reason": {
+   "nonblank": 471,
+   "blank": 27354,
+   "pct_blank": 98.3073,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "Santa Rosa County, FLORIDA - a county government, not the Santa Rosa Rancheria Tachi Tribe of California. Matched on the token pair 'rosa santa'.": 148,
+    "Bristol Bay Economic Development Corporation (BBEDC) is a separate CDQ nonprofit representing 17 Bristol Bay communities. It is NOT Bristol Bay Native Corporation. Matched on 'bay bristol corp'. No spine entity exists for BBEDC, so this is unlinked, not repointed.": 129,
+    "Bristol Bay Area Health Corporation (BBAHC) is a separate tribal health organisation. It is NOT Bristol Bay Native Corporation. Matched on 'bay bristol corp'.": 97,
+    "Santa Rosa Junior College, a California community college - not a tribal college and not the Santa Rosa Rancheria Tachi Tribe.": 25,
+    "Team Santa Rosa, the economic development council of Santa Rosa County, FLORIDA - not the Santa Rosa Rancheria Tachi Tribe.": 22,
+    "Santa Rosa Memorial Hospital, a California hospital - not the Santa Rosa Rancheria Tachi Tribe.": 18,
+    "Coeur d'Alene Mining, the mining company - not the Coeur d'Alene Tribe. Script 65 bars the spelling 'MINES' and this is the same company spelled 'MINING': a correction that covers one spelling and not its variant.": 8,
+    "A regional seafood development association of fishermen - not the Bristol Bay Native Association. Matched on 'association bay bristol'.": 7,
+    "Bristol Bay Economic Development Corporation (BBEDC) is a separate CDQ nonprofit. It is NOT Bristol Bay Native Corporation.": 6,
+    "CHRISTUS Santa Rosa, a Texas hospital system - not the Santa Rosa Rancheria Tachi Tribe.": 4,
+    "CHRISTUS Santa Rosa Children's Hospital, a Texas hospital - not the Santa Rosa Rancheria Tachi Tribe.": 2,
+    "Bristol Bay Area Health Corporation (BBAHC) is a separate tribal health organisation. It is NOT Bristol Bay Native Corporation.": 2,
+    "A driftnet fishermen's association - not the Bristol Bay Native Association. Matched on 'association bay bristol'.": 2,
+    "The Santa Rosa County, FLORIDA board of supervisors - a county government body, not the Santa Rosa Rancheria Tachi Tribe.": 1
+   }
+  },
+  "attribution_withdrawn_date": {
+   "nonblank": 471,
+   "blank": 27354,
+   "pct_blank": 98.3073,
+   "approx_distinct": 1,
+   "vocabulary": {
+    "2026-08-26": 471
+   }
+  },
+  "supersession_status": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 7,
+   "vocabulary": {
+    "NOT_SUPERSEDED": 24106,
+    "REGISTRATION_NO_MONEY": 1183,
+    "AMENDMENT_SURVIVOR": 973,
+    "SUPERSEDED_BY_AMENDMENT": 958,
+    "UNFLAGGED_DUPLICATE_CANDIDATE": 370,
+    "SUPERSEDED_BY_LATER_AMENDMENT": 106,
+    "AMBIGUOUS_MULTIPLE_ORIGINALS": 93,
+    "AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT": 36
+   }
+  },
+  "is_superseded": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 26761,
+    "1": 1064
+   }
+  },
+  "superseded_by_filing_uuid": {
+   "nonblank": 1064,
+   "blank": 26761,
+   "pct_blank": 96.1761,
+   "approx_distinct": 1127
+  },
+  "spend_basis": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "income": 16283,
+    "none_reported": 11314,
+    "expenses": 228
+   }
+  },
+  "attribution_method": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "exact_normalized": 12475,
+    "core_token_set": 9427,
+    "core_containment": 2120,
+    "contains_canonical": 1917,
+    "exact_normalized_skeleton": 1465,
+    "exact_subsidiary": 238,
+    "core_token_set_plus_state_qualifier": 146,
+    "contains_subsidiary": 23,
+    "core_token_set_subsidiary": 14
+   }
+  },
+  "n_admin_appeal_parties": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 17,
+   "vocabulary": {
+    "0": 11170,
+    "1": 7352,
+    "3": 2217,
+    "2": 1642,
+    "5": 1312,
+    "19461": 1312,
+    "4": 1061,
+    "7": 390,
+    "8": 372,
+    "6": 333,
+    "21": 242,
+    "10": 154,
+    "15": 141,
+    "11": 86,
+    "9": 35,
+    "14": 6
+   }
+  },
+  "n_admin_appeal_positions": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 26887,
+    "1": 797,
+    "2": 141
+   }
+  },
+  "n_advocacy_passthrough": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 15591,
+    "1": 6320,
+    "2": 2307,
+    "3": 1634,
+    "1161": 1312,
+    "4": 192,
+    "5": 163,
+    "8": 141,
+    "10": 100,
+    "9": 65
+   }
+  },
+  "n_earmarks": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 21,
+   "vocabulary": {
+    "0": 12530,
+    "1": 3947,
+    "2": 3484,
+    "4": 1354,
+    "3": 1119,
+    "10": 840,
+    "6": 772,
+    "9": 740,
+    "12": 596,
+    "16": 524,
+    "5": 458,
+    "8": 386,
+    "14": 281,
+    "11": 220,
+    "7": 194,
+    "35": 111,
+    "15": 86,
+    "23": 73,
+    "19": 71,
+    "20": 39
+   }
+  },
+  "n_ferc_docket_filings": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 20,
+   "vocabulary": {
+    "0": 17473,
+    "1": 3420,
+    "2": 1759,
+    "101506": 1312,
+    "3": 567,
+    "5": 558,
+    "7": 530,
+    "4": 370,
+    "16": 242,
+    "120": 202,
+    "29": 180,
+    "22": 164,
+    "23": 158,
+    "6": 158,
+    "8": 154,
+    "11": 146,
+    "389": 134,
+    "132": 90,
+    "15": 74,
+    "9": 67,
+    "10": 60,
+    "39": 7
+   }
+  },
+  "n_ferc_docket_parties": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 13,
+   "vocabulary": {
+    "0": 18295,
+    "1": 4461,
+    "2": 1522,
+    "11346": 1312,
+    "4": 370,
+    "7": 354,
+    "3": 342,
+    "5": 340,
+    "6": 258,
+    "8": 235,
+    "10": 202,
+    "14": 134
+   }
+  },
+  "n_ferc_ex_parte_communications": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 26513,
+    "711": 1312
+   }
+  },
+  "n_ferc_ex_parte_parties": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "0": 26136,
+    "4237": 1312,
+    "1": 324,
+    "2": 53
+   }
+  },
+  "n_fr_ex_parte_parties": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 2,
+   "vocabulary": {
+    "0": 26513,
+    "116": 1312
+   }
+  },
+  "n_fr_ex_parte_party_entity_links": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 27448,
+    "1": 324,
+    "2": 53
+   }
+  },
+  "n_hearing_appearances": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 28,
+   "vocabulary": {
+    "0": 4916,
+    "1": 3640,
+    "2": 2337,
+    "5": 2270,
+    "3": 2151,
+    "8": 1871,
+    "4": 1477,
+    "892": 1312,
+    "6": 1099,
+    "7": 953,
+    "14": 865,
+    "9": 850,
+    "11": 591,
+    "15": 477,
+    "13": 463,
+    "21": 410,
+    "24": 408,
+    "12": 282,
+    "17": 251,
+    "74": 242,
+    "18": 221,
+    "16": 220,
+    "36": 188,
+    "37": 158,
+    "22": 104,
+    "10": 69
+   }
+  },
+  "n_lobbying_issue_families_filing": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 170
+  },
+  "n_lobbying_registrant_client_relationships": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 16,
+   "vocabulary": {
+    "7": 3579,
+    "6": 3519,
+    "4": 2993,
+    "3": 2337,
+    "5": 2187,
+    "2": 2135,
+    "8": 1972,
+    "1": 1643,
+    "9": 1486,
+    "13": 1402,
+    "22": 1312,
+    "12": 1163,
+    "16": 889,
+    "11": 754,
+    "10": 451,
+    "0": 3
+   }
+  },
+  "n_lobbying_registrant_native_ownership_evidence": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 5,
+   "vocabulary": {
+    "0": 26602,
+    "2": 421,
+    "4": 344,
+    "5": 288,
+    "1": 170
+   }
+  },
+  "n_nonprofit_schedule_c_lobbying": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 38,
+   "vocabulary": {
+    "0": 18050,
+    "25522": 1312,
+    "7": 1272,
+    "3": 839,
+    "15": 536,
+    "14": 457,
+    "18": 397,
+    "39": 348,
+    "9": 315,
+    "2": 286,
+    "112": 262,
+    "26": 261,
+    "8": 256,
+    "10": 255,
+    "24": 220,
+    "62": 207,
+    "339": 202,
+    "231": 193,
+    "6": 186,
+    "27": 176,
+    "38": 150,
+    "77": 146,
+    "17": 141,
+    "35": 134,
+    "13": 121,
+    "11": 111,
+    "167": 105,
+    "29": 102,
+    "16": 101,
+    "19": 100,
+    "46": 99,
+    "4": 94,
+    "56": 77,
+    "82": 76,
+    "5": 65,
+    "21": 64,
+    "61": 62,
+    "32": 29,
+    "25": 18
+   }
+  },
+  "n_nrc_meeting_participants": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 3,
+   "vocabulary": {
+    "0": 25578,
+    "397": 1312,
+    "1": 935
+   }
+  },
+  "n_oira_meeting_participants": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 9,
+   "vocabulary": {
+    "0": 24733,
+    "1038": 1312,
+    "2": 642,
+    "3": 565,
+    "18": 167,
+    "1": 158,
+    "4": 140,
+    "6": 108
+   }
+  },
+  "n_oira_meetings": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 4,
+   "vocabulary": {
+    "0": 25785,
+    "53": 1312,
+    "1": 476,
+    "2": 252
+   }
+  },
+  "n_tribe_year_lobbying_panel": {
+   "nonblank": 27825,
+   "blank": 0,
+   "pct_blank": 0.0,
+   "approx_distinct": 30,
+   "vocabulary": {
+    "28": 9877,
+    "25": 1922,
+    "26": 1610,
+    "20": 1546,
+    "0": 1312,
+    "27": 1294,
+    "23": 1287,
+    "22": 1262,
+    "21": 1027,
+    "17": 950,
+    "24": 787,
+    "18": 749,
+    "19": 631,
+    "16": 438,
+    "14": 384,
+    "15": 381,
+    "10": 360,
+    "7": 281,
+    "9": 278,
+    "6": 278,
+    "8": 214,
+    "12": 193,
+    "13": 148,
+    "11": 144,
+    "5": 127,
+    "4": 123,
+    "3": 106,
+    "2": 91,
+    "1": 25
+   }
+  }
+ }
+}

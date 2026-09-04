@@ -26,9 +26,19 @@ entity.** Nothing in a prime-award file can show it, by construction.
 
 | Where I looked | Result |
 |---|---|
-| `data/clean/prime_contracts.csv` (617,142 rows, 34 columns) | **No IIP field.** Native-preference columns are `reported_8a`, `reported_buy_indian`, `reported_indian_business`, `reported_native_preference`, `setaside`, `setaside_reported` |
-| `setaside` value set | Exactly 7 values, none an incentive flag: `None reported` (223,603), `8(a)` (176,859), `Small Business` (97,093), `Other` (95,188), `HUBZone` (10,227), `Indian Business` (7,245), `Buy Indian` (6,927) |
-| `data/clean/subawards.csv` (55,035 rows, 48 columns) | **No IIP field and no rebate field.** |
+| `data/clean/prime_contracts.csv` (1,217,768 rows, 75 columns) | **No IIP field.** Native-preference columns are `reported_8a`, `reported_buy_indian`, `reported_indian_business`, `reported_native_preference`, `setaside`, `setaside_reported` |
+| `setaside` value set | Exactly 7 values, none an incentive flag: `None reported` (598,321), `8(a)` (364,150), `Small Business` (163,064), `Other` (55,439), `HUBZone` (17,362), `Indian Business` (9,934), `Buy Indian` (9,498) |
+| `data/clean/subawards.csv` (89,809 rows, 81 columns) | **No IIP field and no rebate field.** |
+
+> **RE-MEASURED 2026-09-02 by `code/1156_doc_claim_gate.py`.** Every figure in
+> the three rows above had moved since this table was written: prime
+> 617,142 → 1,217,768 rows and 34 → 75 columns, subawards 55,035 → 89,809 rows
+> and 48 → 81 columns, and the whole `setaside` distribution with them (it
+> still sums to the row count, and it is still exactly 7 values). **The finding
+> is unchanged and is now measured against roughly twice the data: there is no
+> Indian Incentive Program field in either table.** A gap report that keeps
+> its conclusion while its denominator doubles is worth more than one that
+> quietly kept the old denominator.
 | Source `.dta` files | No IIP field |
 | Literal sweep for `indian incentive` / `252.226-7001` across `data/`, `code/`, `docs/` | Zero hits in any transaction file |
 

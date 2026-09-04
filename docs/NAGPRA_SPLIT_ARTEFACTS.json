@@ -1,11 +1,11 @@
 {
   "measured_date": "2026-09-02",
-  "bridge_rows": 7234,
+  "bridge_rows": 7219,
   "notices": 6792,
-  "rows_flagged": 77,
-  "rows_repaired": 55,
+  "rows_flagged": 47,
+  "rows_repaired": 25,
   "detector_rows": {
-    "A1": 38,
+    "A1": 8,
     "A2": 14,
     "A3": 10,
     "A4": 18,
@@ -14,7 +14,7 @@
     "A7": 1
   },
   "detector_notices": {
-    "A1": 19,
+    "A1": 4,
     "A2": 7,
     "A3": 10,
     "A4": 18,
@@ -25,23 +25,23 @@
   "a8_no_institution_keyword_advisory": 25,
   "repair_action_counts": {
     "flagged_not_an_institution": 10,
-    "merged_absorbed": 22,
-    "merged_primary": 22,
+    "merged_absorbed": 7,
+    "merged_primary": 7,
     "none": 12,
     "trimmed": 11
   },
   "row_conservation": {
-    "before": 7234,
-    "after": 7234,
+    "before": 7219,
+    "after": 7219,
     "deleted": 0,
     "added": 0
   },
   "census": {
-    "distinct_institution_name_as_shipped": 1709,
+    "distinct_institution_name_as_shipped": 1705,
     "distinct_after_applying_the_repairs_in_this_file": 1699,
     "distinct_under_case_and_punctuation_folding_only": 1636,
     "rows_carrying_a_city": 7087,
     "rows_carrying_a_state": 7087,
-    "nagpra_notices_rows_carrying_the_same_fabrication": 51
+    "nagpra_notices_rows_carrying_the_same_fabrication": 36
   }
 }
