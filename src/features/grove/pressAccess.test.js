@@ -12,6 +12,7 @@ import {
   PRESS_CATALOG,
   PRESS_CATALOG_BY_ID,
   PRESS_TIERS,
+  STOREFRONT_SHELVES,
   collectionsOnShelf,
 } from "./pressCatalog.js";
 import {
@@ -132,13 +133,13 @@ test("Cedar Grove opens everything this storefront sells", () => {
 
 // Codex, PR #41. This assertion used to read "every shelf, for grove and
 // tree", which is the same class of defect as the `tree` drift and not its
-// fix: `PRESS_CATALOG` carries `gaming` on the grove shelf, the launch
-// collection does not, so the browser opened a collection
-// `repository.may_open` refuses. `code/cedar_publication.py` settles which
-// side is wrong -- STOREFRONT_SHELVES is ("standard", "pro") and gaming
-// "ships through Cedar Grove, not the Press storefront" -- so nothing on the
-// grove shelf opens HERE, whatever the plan. The tier that owns Cedar Grove
-// opens it in Cedar Grove, which is a different product with its own surface.
+// fix: `PRESS_CATALOG` carried a grove-shelf collection the launch collection
+// did not, so the browser opened a collection `repository.may_open` refuses.
+// `code/cedar_publication.py` settles which side is wrong -- STOREFRONT_SHELVES
+// is ("standard", "pro") and a grove-shelf collection ships through Cedar
+// Grove, not the Press storefront -- so nothing on the grove shelf opens HERE,
+// whatever the plan. The catalog carries no such collection today, so the
+// rule is pinned by shelf rather than by name and holds the day one returns.
 test("the Grove shelf opens for nobody on this storefront", () => {
   for (const tier of ["press", "press_pro", "grove", "tree", "free"]) {
     assert.equal(canOpenDataset(as(tier), { shelf: SHELF.GROVE }), false, tier);
@@ -187,9 +188,25 @@ test("the upgrade prompt names the product that actually opens the shelf", () =>
 // The catalog is the only place a shelf is declared. A shipping dataset that
 // is not in it would resolve to Pro by the unclassified rule and quietly
 // disappear from Standard, which is a pricing bug nobody would see in review.
-test("every shipping dataset is placed in the catalog", () => {
+// The other direction matters as much: a catalog entry with no descriptor
+// behind it is a collection the shelf sells and the API cannot serve, which
+// is what the Gaming Intelligence preview was.
+test("the catalog and the shipping collection are the same set", () => {
+  const shipping = new Set(LAUNCH_COLLECTION.map((dataset) => dataset.id));
   for (const dataset of LAUNCH_COLLECTION) {
     assert.ok(PRESS_CATALOG_BY_ID[dataset.id], `${dataset.id} is not in the catalog`);
+  }
+  for (const entry of PRESS_CATALOG) {
+    assert.ok(shipping.has(entry.id), `${entry.id} is in the catalog and does not ship`);
+  }
+  assert.equal(PRESS_CATALOG.length, LAUNCH_COLLECTION.length);
+});
+
+// The shelf is the same one on both sides: a collection the workspace put on
+// `pro` must not be sold on `standard` here.
+test("every catalog entry sits on the shelf its descriptor declares", () => {
+  for (const dataset of LAUNCH_COLLECTION) {
+    assert.equal(PRESS_CATALOG_BY_ID[dataset.id].shelf, dataset.shelf, dataset.id);
   }
 });
 
@@ -203,11 +220,12 @@ test("every catalog entry sits on a shelf the model knows", () => {
 
 // If every collection were on one shelf the upgrade would have nothing to
 // point at, which is a launch mistake worth catching in CI rather than a demo.
-test("the catalog spans all three shelves", () => {
+// And nothing sits on the grove shelf: the storefront sells what it can
+// serve, and a grove-shelf entry is a tile no route hands a file over for.
+test("the catalog spans both storefront shelves and nothing else", () => {
   const shelves = new Set(PRESS_CATALOG.map((entry) => entry.shelf));
-  for (const shelf of Object.values(SHELF)) {
-    assert.ok(shelves.has(shelf), `nothing on the ${shelf} shelf`);
-  }
+  assert.deepEqual([...shelves].sort(), [...STOREFRONT_SHELVES].sort());
+  assert.equal(shelves.has(SHELF.GROVE), false, "a collection sits on the grove shelf");
 });
 
 // ONE AXIS. The year cap was retired on 2026-09-02, so coverage is a property
@@ -269,13 +287,11 @@ test("the rosters are rosters, and nothing reduces them to a year", () => {
   }
 });
 
-// The floors that are measured after an exclusion flag, pinned by value.
-// These are the two the unfiltered minimum gets wrong, and getting them wrong
-// is not a rounding error: it sells nine years of filer typos, and it dates
-// gaming intelligence from a lodge.
-test("the flag-corrected floors are the corrected ones", () => {
+// The floor that is measured after an exclusion flag, pinned by value. This
+// is the one the unfiltered minimum gets wrong, and getting it wrong is not a
+// rounding error: it sells nine years of filer typos.
+test("the flag-corrected floor is the corrected one", () => {
   assert.equal(PRESS_CATALOG_BY_ID.subcontracting.coverage.from, 2010);
-  assert.equal(PRESS_CATALOG_BY_ID.gaming.coverage.from, 1979);
 });
 
 // A collection the reader cannot open still states its coverage: the shelf's
@@ -316,28 +332,17 @@ test("a shelf rollup reaches back as far as its deepest series, and no roster", 
   }
 });
 
-// Gaming is the reason to cross the second line, so what it may show without
-// Cedar Grove is a declared list rather than a component's judgement.
-test("the Grove-exclusive collection declares what it shows and withholds", () => {
-  const gaming = PRESS_CATALOG_BY_ID.gaming;
-  assert.equal(gaming.shelf, SHELF.GROVE);
-  assert.ok(gaming.preview.shows.length > 0);
-  assert.ok(gaming.preview.withholds.length > 0);
-  const shows = gaming.preview.shows.join(" ").toLowerCase();
-  const withholds = gaming.preview.withholds.join(" ").toLowerCase();
-  assert.match(withholds, /download/);
-  assert.match(withholds, /record-level/);
-  assert.doesNotMatch(shows, /download/);
-});
-
 // `grove` and `tree` are the tiers this used to omit, and they are the two it
 // most needed: they are the only ones whose reach touches the grove shelf at
-// all, so they were the only ones that could ever have answered `true`.
-test("no plan opens the Grove-exclusive collection through Cedar Press", () => {
+// all, so they were the only ones that could ever have answered `true`. The
+// fixture is a shelf rather than a catalog entry, because the catalog carries
+// no grove-shelf collection today.
+test("no plan opens a Grove-exclusive collection through Cedar Press", () => {
+  const exclusive = { id: "not-sold-here", shelf: SHELF.GROVE };
   for (const tier of ["press", "press_pro", "grove", "tree"]) {
-    assert.equal(canOpenDataset({ workspace_tier: tier }, PRESS_CATALOG_BY_ID.gaming), false, tier);
+    assert.equal(canOpenDataset({ workspace_tier: tier }, exclusive), false, tier);
   }
-  assert.equal(upgradeFor(PRESS_CATALOG_BY_ID.gaming).sameProduct, false);
+  assert.equal(upgradeFor(exclusive).sameProduct, false);
 });
 
 // The catalog renders one band per tier and fills each band from its shelf,
@@ -353,11 +358,19 @@ test("every collection lands on a shelf some tier carries", () => {
   assert.equal(shown.length, PRESS_CATALOG.length);
 });
 
-// A tier with nothing on it renders a band with an empty list beside it.
-test("every tier carries at least one collection", () => {
+// A storefront tier with nothing on it renders a band with an empty list
+// beside it. Cedar Grove is not a band: it is a different product, teased at
+// the foot of the shelf, and it carries the storefront's collections rather
+// than a shelf of its own.
+test("every storefront tier carries at least one collection", () => {
   for (const tier of PRESS_TIERS) {
-    assert.ok(collectionsOnShelf(tier.shelf).length > 0, tier.id);
+    if (tier.storefront) assert.ok(collectionsOnShelf(tier.shelf).length > 0, tier.id);
+    else assert.equal(collectionsOnShelf(tier.shelf).length, 0, tier.id);
   }
+  assert.deepEqual(
+    PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => tier.shelf),
+    [...STOREFRONT_SHELVES],
+  );
 });
 
 // The join to Native entities is what Cedar sells; the underlying records are
@@ -380,10 +393,4 @@ test("the linkage tiers stay distinct rather than collapsing into one", () => {
   const joined = names.join(" ").toLowerCase();
   assert.match(joined, /native-led/);
   assert.match(joined, /native-serving/);
-});
-
-// Gaming counterparties are not all Native, and saying otherwise would be a
-// claim the data cannot carry.
-test("the one collection with non-Native counterparties says so", () => {
-  assert.match(PRESS_CATALOG_BY_ID.gaming.linkage, /not all Native/);
 });

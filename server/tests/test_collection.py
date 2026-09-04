@@ -478,25 +478,17 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                     captured = datetime.date.fromisoformat(coverage["captured"])
                     self.assertLessEqual(captured.year, this_year)
 
-    def test_the_flag_corrected_floors_are_the_corrected_ones(self) -> None:
-        # min(year) is not coverage, and these are the two collections where
-        # the difference is a claim rather than a rounding error.
+    def test_the_flag_corrected_floor_is_the_corrected_one(self) -> None:
+        # min(year) is not coverage, and this is the collection where the
+        # difference is a claim rather than a rounding error.
         #
         # subcontracting's unfiltered minimum is 2001, built entirely on 51
         # rows the repository itself flags `action_date_precedes_ffata_flag`
         # -- filer typos, every one filed in 2010 or later. FFATA dropped the
         # subaward reporting threshold in October 2010, so FSRS holds nothing
         # before FY2010 and 2001 would sell nine years that do not exist.
-        #
-        # gaming's unfiltered minimum is 1905, and it is Crosby Lodge, whose
-        # `open_date_event` is `not_gaming_commencement`. Four rows carry
-        # `open_date_predates_tribal_gaming_era` and each basis says the date
-        # precedes 1979, the first documented year of high-stakes tribal
-        # gaming. Excluding them lands on 1979 and keeps the pre-IGRA bingo
-        # halls, which are real gaming and must not be filtered at 1988.
         by_id = {entry["id"]: entry for entry in press_catalog.CATALOG}
         self.assertEqual(by_id["subcontracting"]["coverage"]["from"], 2010)
-        self.assertEqual(by_id["gaming"]["coverage"]["from"], 1979)
 
     def test_a_roster_never_produces_a_coverage_from_in_a_profile(self) -> None:
         # The Python surface, not the data: `profile_for` is what Cedar
@@ -533,6 +525,55 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                 "nonprofits",
             },
         )
+
+
+class TestGeneratorAndManifestAgree(unittest.TestCase):
+    """The importer's declarations and the manifest it writes, held equal.
+
+    ``scripts/import_cedar_manifest.py`` declares which collections ship
+    (``STOREFRONT``) and which are excluded with what reason (``EXCLUDED``),
+    and copies both into ``data/cedar/collections.manifest.json``. The
+    generator's other inputs -- Cedar's descriptors and review bundle -- are
+    not in this tree, so the manifest cannot be regenerated here, and an edit
+    to a reason in the script is an edit the manifest does not see until
+    somebody with the workspace re-runs it. That is how the gaming exclusion
+    read "the catalog already shows it as a Grove-exclusive preview" after
+    the preview was withdrawn. These compare the two on every run.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "import_cedar_manifest", _REPO / "scripts" / "import_cedar_manifest.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        cls.script = module
+        cls.manifest = json.loads(
+            (_REPO / "data" / "cedar" / "collections.manifest.json").read_text(encoding="utf-8")
+        )
+
+    def test_the_storefront_order_is_the_scripts(self) -> None:
+        self.assertEqual(
+            [entry["id"] for entry in self.manifest["collections"]],
+            list(self.script.STOREFRONT),
+        )
+
+    def test_every_exclusion_carries_the_scripts_reason(self) -> None:
+        manifest = {entry["id"]: entry["reason"] for entry in self.manifest["excluded"]}
+        self.assertEqual(set(manifest), set(self.script.EXCLUDED))
+        for collection_id, reason in self.script.EXCLUDED.items():
+            with self.subTest(excluded=collection_id):
+                self.assertEqual(manifest[collection_id], reason)
+
+    def test_the_unmeasured_fields_are_the_scripts(self) -> None:
+        self.assertEqual(self.manifest["unmeasured_fields"], self.script.UNMEASURED)
+
+    def test_nothing_is_both_shipped_and_excluded(self) -> None:
+        self.assertEqual(set(self.script.STOREFRONT) & set(self.script.EXCLUDED), set())
 
 
 def _plain(value: Any) -> Any:

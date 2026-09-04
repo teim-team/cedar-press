@@ -213,12 +213,12 @@ class TestNothingTheClientOpensIsRefused(unittest.TestCase):
     ``LAUNCH_COLLECTION``, so the page never rendered the one collection the
     two sides disagreed about.
 
-    The browser is built from ``PRESS_CATALOG``, which has thirteen entries to
-    the launch collection's twelve, and it did render that collection. Codex,
-    PR #41: giving ``PLAN_REACH`` the ``tree: SHELF.GROVE`` key it lacked
-    closed the tier drift and uncovered this one underneath -- a Grove or Tree
-    session was shown `gaming` as open and ``may_open("tree", "gaming")``
-    returned False.
+    The browser is built from ``PRESS_CATALOG``, which had thirteen entries to
+    the launch collection's twelve until 2026-09-04, and it did render that
+    collection. Codex, PR #41: giving ``PLAN_REACH`` the ``tree: SHELF.GROVE``
+    key it lacked closed the tier drift and uncovered this one underneath -- a
+    Grove or Tree session was shown `gaming` as open and
+    ``may_open("tree", "gaming")`` returned False.
 
     Which side was wrong is settled by ``code/cedar_publication.py``, not by
     symmetry. It holds three constants, verified in this tree rather than
@@ -234,6 +234,11 @@ class TestNothingTheClientOpensIsRefused(unittest.TestCase):
 
     Both directions are checked. One direction alone would let the fix be a
     client that opens nothing.
+
+    The catalog carries no grove-shelf collection since 2026-09-04, when the
+    owner withdrew the Gaming Intelligence preview: the collection is still
+    being built. The rule is kept by shelf, and the fixture for it is the
+    manifest's own ``excluded`` list rather than a catalog entry.
     """
 
     @classmethod
@@ -267,14 +272,22 @@ class TestNothingTheClientOpensIsRefused(unittest.TestCase):
                         f"will not show it",
                     )
 
-    def test_a_grove_shelf_collection_opens_for_no_tier_on_either_side(self) -> None:
-        # Stated by shelf rather than by name, so a second Grove-exclusive
-        # collection is covered the day it is added rather than the day
-        # somebody remembers to extend a list.
-        grove_shelf = set(self.js["catalogByShelf"].get("grove", []))
-        self.assertTrue(grove_shelf, "the fixture for this test has gone away")
+    def test_nothing_the_workspace_excludes_opens_for_any_tier_on_either_side(self) -> None:
+        # Stated from the manifest's `excluded` list rather than from a
+        # catalog fixture, so it holds while the catalog carries no grove-shelf
+        # collection and the day one returns. Every excluded id -- `gaming` on
+        # shelf grove among them -- is refused by the API for every tier and
+        # opened by the client for none.
+        excluded = {entry["id"] for entry in launch.EXCLUDED_COLLECTIONS}
+        self.assertTrue(excluded, "the fixture for this test has gone away")
         for tier in self.js["tiers"]:
-            for collection_id in sorted(grove_shelf):
+            for collection_id in sorted(excluded):
+                with self.subTest(tier=tier, collection=collection_id):
+                    self.assertNotIn(collection_id, self.js["canOpen"][tier])
+                    self.assertFalse(repository.may_open(tier, collection_id))
+        # And a grove-shelf catalog entry, should one return, opens nowhere.
+        for collection_id in self.js["catalogByShelf"].get("grove", []):
+            for tier in self.js["tiers"]:
                 with self.subTest(tier=tier, collection=collection_id):
                     self.assertNotIn(collection_id, self.js["canOpen"][tier])
                     self.assertFalse(repository.may_open(tier, collection_id))
@@ -318,29 +331,39 @@ class TestGroveDivergence(unittest.TestCase):
         self.assertEqual(len(by_shelf["standard"]), 6)
         self.assertEqual(len(by_shelf["pro"]), 6)
 
-    def test_the_catalog_is_the_storefront_plus_the_grove_shelf(self) -> None:
-        # Thirteen in the catalog, twelve on the storefront. The difference is
-        # the Grove shelf, and it is exactly one collection today.
+    def test_the_catalog_is_exactly_the_storefront(self) -> None:
+        # Twelve in the catalog, twelve on the storefront. The catalog used to
+        # carry a thirteenth on the grove shelf, previewed as a Grove
+        # exclusive; that promise was withdrawn on 2026-09-04 because the
+        # collection is still being built, so the catalog and the storefront
+        # are one set and nothing sits on the grove shelf.
         catalog = self.js["catalogByShelf"]
-        self.assertEqual(set(catalog), {"standard", "pro", "grove"})
+        self.assertEqual(set(catalog), {"standard", "pro"})
         storefront = sorted(catalog["standard"] + catalog["pro"])
         self.assertEqual(storefront, sorted(d.id for d in launch.LAUNCH_COLLECTION))
         self.assertEqual(len(storefront), 12)
-        self.assertEqual(sum(len(v) for v in catalog.values()), 13)
+        self.assertEqual(sum(len(v) for v in catalog.values()), 12)
 
-    def test_the_grove_shelf_matches_the_workspace_assignment(self) -> None:
-        # The catalog says which collections are Grove-exclusive; the manifest
-        # says which the Cedar data workspace put on shelf "grove". A
-        # disagreement here is the site selling, or withholding, a collection
-        # on its own authority.
-        catalog_grove = set(self.js["catalogByShelf"].get("grove", []))
+    def test_the_catalog_carries_nothing_the_workspace_excludes(self) -> None:
+        # The manifest's `excluded` is the workspace's ruling: `gaming` on
+        # shelf grove, `newsletters` withdrawn, `_entity_layer` infrastructure.
+        # None of them may appear in the catalog on any shelf. Previewing an
+        # excluded collection is how the site sold a download no route could
+        # hand over, and it must not come back by a different shelf name.
+        in_catalog = {
+            collection_id
+            for ids in self.js["catalogByShelf"].values()
+            for collection_id in ids
+        }
         workspace_grove = {
             entry["id"]
             for entry in launch.EXCLUDED_COLLECTIONS
             if entry["shelf"] == "grove"
         }
-        self.assertEqual(catalog_grove, workspace_grove)
-        self.assertEqual(catalog_grove, {"gaming"})
+        self.assertEqual(workspace_grove, {"gaming"})
+        for entry in launch.EXCLUDED_COLLECTIONS:
+            with self.subTest(excluded=entry["id"]):
+                self.assertNotIn(entry["id"], in_catalog)
 
     def test_a_grove_shelf_collection_is_never_on_the_storefront(self) -> None:
         # The one direction that must never happen: a Grove-exclusive

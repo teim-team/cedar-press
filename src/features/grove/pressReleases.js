@@ -12,6 +12,25 @@
  * in metadata rather than in page copy so a page cannot go stale independently
  * of the thing it describes.
  *
+ * THE RELEASE IS THE MANIFEST'S, NOT THIS FILE'S
+ * Version and date come from `data/cedar/collections.manifest.json`, the same
+ * descriptor the citation, the download filename and the Python service read.
+ * This file used to hold a hand-written history per collection, with versions
+ * (v4.2, v9.0) and change notes ("added 386 awards through July") that no
+ * release had shipped, and it covered ten collections while the storefront
+ * sold twelve: a reader citing "Deals v9.0" from the feed downloaded
+ * `deals-v0-sample.csv`. Deriving the record from the descriptor makes that
+ * disagreement impossible and gives every collection a release the day its
+ * descriptor lands, with nothing typed twice.
+ *
+ * What the manifest does not carry is the reason a release happened. The
+ * first release's notes are derived from what the manifest does measure (the
+ * table count, the row count, the preview file). Later releases get editorial
+ * notes in `RELEASE_NOTES`, written for a reader of the research product:
+ * "resolved 14 recipients to existing tribal enterprises" is something a
+ * subscriber can act on, "bump parser to 2.3" is not. A note can only describe
+ * a version the manifest has shipped; a test holds that.
+ *
  * TWO KINDS OF RELEASE
  * A data update adds records, corrects them, or extends coverage. A
  * methodology update changes inclusion rules, classification or resolution
@@ -19,11 +38,17 @@
  * second kind is called out loudly, because silently changing consequential
  * methodology is how a research product loses researchers.
  *
- * CADENCE IS NOT UNIFORM
- * Federal Register moves when the agencies move; lobbying moves on filing
- * quarters. Forcing one cadence onto all of them would be a promise the
- * pipeline does not keep.
+ * CADENCE IS A PROMISE, NOT A MEASUREMENT
+ * Cedar's cadence measurement has produced no vintage for any collection
+ * (`UNMEASURED_FIELDS` in collection.js), so the cadence here is what Cedar
+ * commits to maintain, declared per collection because the sources move at
+ * different speeds: the Federal Register moves when the agencies move,
+ * lobbying moves on filing quarters. A collection with no declared cadence
+ * states none rather than borrowing one.
  */
+
+import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
+import { LAUNCH_COLLECTION, collectionCedarFacts, collectionSample } from "./collection.js";
 
 /** How often a collection changes. The label is what a reader sees. */
 export const CADENCE = Object.freeze({
@@ -41,262 +66,95 @@ export const RELEASE_KIND = Object.freeze({
 });
 
 /**
+ * The maintenance Cedar commits to, per collection. A product declaration,
+ * kept apart from the measured fields on purpose: nothing in the manifest
+ * says how often a collection moves, and a test requires every storefront
+ * collection to declare one here so a new collection cannot arrive silent.
+ */
+export const DECLARED_CADENCE = Object.freeze({
+  funding: CADENCE.MONTHLY,
+  "federal-register": CADENCE.ON_CHANGE,
+  legislation: CADENCE.MONTHLY,
+  deals: CADENCE.CONTINUOUS,
+  nagpra: CADENCE.ON_CHANGE,
+  lobbying: CADENCE.QUARTERLY,
+  contractors: CADENCE.MONTHLY,
+  subcontracting: CADENCE.MONTHLY,
+  "natural-resources": CADENCE.QUARTERLY,
+  // Office by office: a nation's TERO or commerce office shares its list when
+  // it confirms terms, and there is no filing calendar behind that.
+  owned: CADENCE.ON_CHANGE,
+  nonprofits: CADENCE.ANNUAL,
+  // Structures change when a parent publishes a new edition of its filings or
+  // its enterprise register, which is not a calendar either.
+  nest: CADENCE.ON_CHANGE,
+});
+
+/**
+ * Editorial change notes, keyed by collection id, newest first.
+ *
+ * Each entry is `{ version, date, kind, note?, changed }` and describes a
+ * release the manifest has shipped: `version` must be the descriptor's
+ * current version or one before it, and `date` may not run ahead of the
+ * descriptor's `updated`. When the workspace re-imports a collection at a new
+ * version, its notes are written here and the derived first-release entry
+ * stays below them as the floor of the history.
+ *
+ * Empty today. Every collection is on its first release, and the first
+ * release's notes are derived below rather than typed.
+ */
+export const RELEASE_NOTES = Object.freeze({});
+
+/** What the manifest measures about a first release, said for a reader. */
+function firstRelease(dataset) {
+  const cedar = collectionCedarFacts(dataset.id);
+  const sample = collectionSample(dataset.id);
+  const tables = cedar?.n_tables;
+  const changed = [
+    tables
+      ? `First release on Cedar Press: ${tables} ${tables === 1 ? "table" : "tables"}, ${dataset.rowsLabel}.`
+      : `First release on Cedar Press: ${dataset.rowsLabel}.`,
+  ];
+  if (sample?.path) {
+    changed.push(
+      `A ${sample.rows}-row preview of ${sample.table}, the collection's flagship table, downloads from the shelf.`,
+    );
+  } else {
+    changed.push(
+      "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
+    );
+  }
+  if (cedar?.blockers?.length) {
+    const n = cedar.blockers.length;
+    changed.push(`Readiness is blocked, with ${n} named ${n === 1 ? "blocker" : "blockers"} recorded in the manifest.`);
+  }
+  return Object.freeze({
+    version: dataset.version,
+    date: dataset.updated,
+    kind: RELEASE_KIND.DATA,
+    changed: Object.freeze(changed),
+  });
+}
+
+/**
  * Per collection: where it is now, and how it got here.
  *
- * `changed` is written for a reader of the research product, not pulled from
- * a commit log. "Resolved 14 recipients to existing tribal enterprises" is
- * something a subscriber can act on; "bump parser to 2.3" is not.
+ * `version` and `updated` are the descriptor's. `history` is the editorial
+ * notes, newest first, over the derived first release.
  */
-export const PRESS_RELEASES = Object.freeze({
-  funding: Object.freeze({
-    version: "v4.2",
-    updated: "2026-08-06",
-    cadence: CADENCE.MONTHLY,
-    summary: "July awards added, with fourteen recipients resolved to existing tribal enterprises.",
-    history: Object.freeze([
+export const PRESS_RELEASES = Object.freeze(
+  Object.fromEntries(
+    LAUNCH_COLLECTION.map((dataset) => [
+      dataset.id,
       Object.freeze({
-        version: "v4.2",
-        date: "2026-08-06",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added 386 newly reported awards through July 2026.",
-          "Resolved 14 recipients to existing tribal enterprises.",
-          "Added two newly identified subsidiaries.",
-          "Corrected the historical affiliation of one recipient.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v4.1",
-        date: "2026-07-08",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added 412 awards through June 2026.",
-          "Entity updates from the maintained identity layer affected 28 historical records.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v4.0",
-        date: "2026-06-04",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Extended the funding record back to FY2007 using additional federal and archival sources.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v3.8",
-        date: "2026-05-07",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze(["Routine monthly update."]),
+        version: dataset.version,
+        updated: dataset.updated,
+        cadence: DECLARED_CADENCE[dataset.id] ?? null,
+        history: Object.freeze([...(RELEASE_NOTES[dataset.id] ?? []), firstRelease(dataset)]),
       }),
     ]),
-  }),
-  "federal-register": Object.freeze({
-    version: "v6.1",
-    updated: "2026-08-04",
-    cadence: CADENCE.ON_CHANGE,
-    summary: "Notices through early August, with three entities matched under former names.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v6.1",
-        date: "2026-08-04",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added notices published through 1 August 2026.",
-          "Matched three notices to entities appearing under former names.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v6.0",
-        date: "2026-07-02",
-        kind: RELEASE_KIND.METHOD,
-        note: "Notices naming a parent and a subsidiary are now attributed to both rather than to the parent alone.",
-        changed: Object.freeze([
-          "Revised attribution for notices naming more than one related entity.",
-          "Reprocessed the full archive under the revised rule.",
-        ]),
-      }),
-    ]),
-  }),
-  legislation: Object.freeze({
-    version: "v3.4",
-    updated: "2026-08-01",
-    cadence: CADENCE.MONTHLY,
-    summary: "July roll-call votes and newly introduced bills.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v3.4",
-        date: "2026-08-01",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added July roll-call votes and newly introduced bills.",
-          "Linked nine bills to the organizations they name.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v3.3",
-        date: "2026-07-01",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze(["Routine monthly update."]),
-      }),
-    ]),
-  }),
-  deals: Object.freeze({
-    version: "v9.0",
-    updated: "2026-07-28",
-    cadence: CADENCE.CONTINUOUS,
-    summary: "Twelve transactions added and three ownership relationships updated.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v9.0",
-        date: "2026-07-28",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added 12 transactions confirmed against primary sources.",
-          "Updated three ownership relationships, which corrected records in Contracting and Gaming.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v8.6",
-        date: "2026-06-30",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze(["Added 9 transactions and one new subsidiary."]),
-      }),
-    ]),
-  }),
-  nagpra: Object.freeze({
-    version: "v2.7",
-    updated: "2026-07-22",
-    cadence: CADENCE.ON_CHANGE,
-    summary: "New notices and inventories, matched across three decades of naming changes.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v2.7",
-        date: "2026-07-22",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added notices and inventories published since the last release.",
-          "Reconciled six historical notices to their current tribal names.",
-        ]),
-      }),
-    ]),
-  }),
-  lobbying: Object.freeze({
-    version: "v5.2",
-    updated: "2026-07-31",
-    cadence: CADENCE.QUARTERLY,
-    summary: "Second-quarter filings added.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v5.2",
-        date: "2026-07-31",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added Q2 2026 registrations and filings.",
-          "Resolved four registrants to the tribes that retained them.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v5.1",
-        date: "2026-04-30",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze(["Added Q1 2026 filings."]),
-      }),
-    ]),
-  }),
-  contractors: Object.freeze({
-    version: "v6.0",
-    updated: "2026-08-05",
-    cadence: CADENCE.MONTHLY,
-    summary: "July obligations added and 22 vendors rolled up to parent entities.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v6.0",
-        date: "2026-08-05",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added obligations reported through July 2026.",
-          "Rolled 22 vendors up to their parent nation or corporation.",
-          "Entity updates from the maintained identity layer affected 41 historical records.",
-        ]),
-      }),
-      Object.freeze({
-        version: "v5.4",
-        date: "2026-07-06",
-        kind: RELEASE_KIND.METHOD,
-        note: "8(a) participation is now recorded as a status with dates rather than a fixed flag.",
-        changed: Object.freeze([
-          "Revised 8(a) participation to carry start and end dates.",
-          "Reprocessed the archive so historical awards reflect status at the time of award.",
-        ]),
-      }),
-    ]),
-  }),
-  subcontracting: Object.freeze({
-    version: "v3.1",
-    updated: "2026-08-05",
-    cadence: CADENCE.MONTHLY,
-    summary: "Subaward activity matched to the same entities as the prime awards.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v3.1",
-        date: "2026-08-05",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze(["Added July subaward activity and matched it to the prime awards above it."]),
-      }),
-    ]),
-  }),
-  "natural-resources": Object.freeze({
-    version: "v4.0",
-    updated: "2026-07-15",
-    cadence: CADENCE.QUARTERLY,
-    summary: "Second-quarter production and disbursements.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v4.0",
-        date: "2026-07-15",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze(["Added Q2 production, royalties and disbursements."]),
-      }),
-    ]),
-  }),
-  nonprofits: Object.freeze({
-    version: "v3.0",
-    updated: "2026-06-25",
-    cadence: CADENCE.ANNUAL,
-    summary: "Native-serving classification rules revised. Read the note before reusing prior figures.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v3.0",
-        date: "2026-06-25",
-        kind: RELEASE_KIND.METHOD,
-        note: "Native-serving nonprofit classification rules were revised, so counts in this release are not directly comparable with v2.x.",
-        changed: Object.freeze([
-          "Separated Native-led from Native-serving where governance could be established from filings.",
-          "Reclassified 63 organizations under the revised rules.",
-          "Added the most recent filing year.",
-        ]),
-      }),
-    ]),
-  }),
-  gaming: Object.freeze({
-    version: "v7.3",
-    updated: "2026-08-02",
-    cadence: CADENCE.CONTINUOUS,
-    summary: "Facility, operator and expansion activity reconciled against Deals.",
-    history: Object.freeze([
-      Object.freeze({
-        version: "v7.3",
-        date: "2026-08-02",
-        kind: RELEASE_KIND.DATA,
-        changed: Object.freeze([
-          "Added recent expansion filings and environmental review activity.",
-          "Reconciled two operator changes against Indian Country Deals.",
-          "Updated employment estimates for eleven facilities.",
-        ]),
-      }),
-    ]),
-  }),
-});
+  ),
+);
 
 /** The release record for a collection, or null when it has none. */
 export function releaseFor(id) {
@@ -308,27 +166,63 @@ export function latestRelease(id) {
   return releaseFor(id)?.history?.[0] ?? null;
 }
 
+const MONTHS = Object.freeze([
+  "Jan.", "Feb.", "Mar.", "Apr.", "May", "June",
+  "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec.",
+]);
+
 /** Month and day, spelled the way the rest of the page spells dates. */
 export function formatUpdated(iso) {
   if (!iso) return "";
   const [year, month, day] = iso.split("-").map(Number);
-  const months = [
-    "Jan.", "Feb.", "Mar.", "Apr.", "May", "June",
-    "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec.",
-  ];
-  return `${months[month - 1]} ${day}, ${year}`;
+  return `${MONTHS[month - 1]} ${day}, ${year}`;
 }
 
-/** The short form for a metadata rail: `Updated Aug. 6 · Monthly · v4.2`. */
+/** The short form for a metadata rail: `Updated Aug. 6 · Monthly`. */
 export function freshnessLine(id) {
   const release = releaseFor(id);
-  if (!release) return "";
+  if (!release?.updated) return "";
   const [, month, day] = release.updated.split("-").map(Number);
-  const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
   // No version number: collections update continuously, and a vX.X on a
   // continuously maintained series read as clutter. The date is the fact.
-  return `Updated ${months[month - 1]} ${day} · ${release.cadence.replace("Updated ", "")}`;
+  // No cadence where none is declared, rather than a plausible one.
+  const cadence = release.cadence ? ` · ${release.cadence.replace("Updated ", "")}` : "";
+  return `Updated ${MONTHS[month - 1]} ${day}${cadence}`;
 }
+
+/** The release's stable anchor: cite `#funding-v0` and it stays citable. */
+export function anchorOf(entry) {
+  return `${entry.id}-${entry.version.replace(/\./g, "-")}`;
+}
+
+/** Catalog order, for tie-breaking releases that landed on one day. */
+const ORDER = new Map(LAUNCH_COLLECTION.map((dataset, index) => [dataset.id, index]));
+
+/**
+ * Every release from every collection, newest first, flattened for the feed.
+ *
+ * Built once at module load rather than on every render: the feed is static
+ * data, and the What's New page used to rebuild and re-sort it in two places
+ * and re-lowercase every entry's text on every keystroke of the search box.
+ * Each entry carries its collection's name, its permalink anchor and the
+ * lowercased text the search matches against, so the page filters and never
+ * derives.
+ */
+export const RELEASE_FEED = Object.freeze(
+  Object.entries(PRESS_RELEASES)
+    .flatMap(([id, release]) =>
+      release.history.map((entry) => {
+        const name = PRESS_CATALOG_BY_ID[id]?.name ?? id;
+        const row = { id, name, ...entry };
+        return Object.freeze({
+          ...row,
+          anchor: anchorOf(row),
+          haystack: [name, entry.version, entry.note ?? "", ...entry.changed].join(" ").toLowerCase(),
+        });
+      }),
+    )
+    .sort((a, b) => (a.date === b.date ? ORDER.get(a.id) - ORDER.get(b.id) : a.date < b.date ? 1 : -1)),
+);
 
 /**
  * The feed's activity over a trailing window: how many releases landed, how
@@ -342,17 +236,13 @@ export function freshnessLine(id) {
  */
 export function recentActivity(days = 30, today = new Date()) {
   const cutoff = today.getTime() - days * 86400000;
-  const releases = Object.entries(PRESS_RELEASES).flatMap(([id, release]) =>
-    release.history.map((entry) => ({ id, ...entry })),
-  );
-  const inWindow = releases.filter((entry) => new Date(entry.date).getTime() >= cutoff);
-  const dates = releases.map((entry) => entry.date).sort();
+  const inWindow = RELEASE_FEED.filter((entry) => new Date(entry.date).getTime() >= cutoff);
   return {
     days,
     releases: inWindow.length,
     collections: new Set(inWindow.map((entry) => entry.id)).size,
     methodology: inWindow.filter((entry) => entry.kind === RELEASE_KIND.METHOD).length,
-    latest: dates[dates.length - 1] ?? null,
+    latest: RELEASE_FEED[0]?.date ?? null,
   };
 }
 
@@ -363,6 +253,6 @@ export function recentActivity(days = 30, today = new Date()) {
 export function recentlyUpdated(limit = 3) {
   return Object.entries(PRESS_RELEASES)
     .map(([id, release]) => ({ id, ...release }))
-    .sort((a, b) => (a.updated < b.updated ? 1 : -1))
+    .sort((a, b) => (a.updated === b.updated ? ORDER.get(a.id) - ORDER.get(b.id) : a.updated < b.updated ? 1 : -1))
     .slice(0, limit);
 }

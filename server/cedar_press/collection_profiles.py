@@ -330,9 +330,9 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
 
     If the question names a version that the log carries, that release
     answers; otherwise the latest one does. Every answer says which release
-    it describes, and — like the launch figures — says the notes are
-    demonstration content until the first real releases, because a change
-    note is a claim about records nobody has shipped yet.
+    it describes. The log is derived from the manifest (``pressReleases.js``,
+    dumped into ``_press_data.json``), so a note here is a measured fact about
+    the shipped release rather than the demonstration copy it used to be.
     """
     name = profile["collection_name"]
     release = press_catalog.RELEASES.get(profile["collection_id"])
@@ -349,11 +349,7 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
     kind = "methodology release" if entry.get("kind") == "methodology" else "data release"
     note = f" Note: {entry['note']}" if entry.get("note") else ""
     changes = " ".join(entry["changed"])
-    return (
-        f"{name} {entry['version']} ({entry['date']}, {kind}): {changes}{note} "
-        "These release notes are demonstration content, standing in until the "
-        "first real releases."
-    )
+    return f"{name} {entry['version']} ({entry['date']}, {kind}): {changes}{note}"
 
 
 def _coverage_sentence(profile: dict[str, Any]) -> str | None:

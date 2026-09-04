@@ -6,87 +6,122 @@
 // account: every source gets its own ray, no ray crosses any collection's
 // label, no source name lands on another label, and the whole figure fits its
 // canvas. The canvas itself is derived from the measured extents, so the ring
-// takes the space it needs and no more. Edit RING or SOURCES freely; the
-// solver re-lays the fans and pressEcosystem.test.js re-checks the claims.
+// takes the space it needs and no more. Edit ECOSYSTEM freely; the solver
+// re-lays the fans and pressEcosystem.test.js re-checks the claims.
+//
+// KEYED BY CATALOG ID
+// The ring used to be a list of ten display names typed here, and it drifted
+// from the catalog twice: it carried Gaming after the storefront stopped
+// selling it, and never gained Subcontracting, Native-Owned Businesses or
+// NEST after they arrived. It is keyed by collection id now, the labels come
+// from the catalog's own short names, and a test requires every storefront
+// collection to be on the ring. The name-keyed RING, SOURCES and FEEDS the
+// diagram and the solver read are derived from that one map.
 
-export const RING = [
-  "Funding",
-  "Federal Register",
-  "Legislation",
-  "Lobbying",
-  "Deals",
-  "Contracting",
-  "NAGPRA",
-  "Natural Resources",
-  "Native Nonprofits",
-  "Gaming",
-];
+import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 
 /**
- * The upstream records each collection is actually built from, for the
- * hover fan. These are the external sources; the reinforcement between
- * collections is FEEDS below, and the middle is where both get resolved.
+ * Per collection: the upstream records it is built from (`sources`, the
+ * hover fan), the other collections whose records improve it (`feeds`, by
+ * catalog id) and the sentence the diagram says while those are lit.
+ *
+ * Sources are short labels for the diagram, written from the manifest
+ * descriptor's own `sources` field; the descriptor is the full statement.
  */
-export const SOURCES = {
-  Funding: ["USASpending", "Grants.gov", "Agency award files"],
-  "Federal Register": ["Office of the Federal Register", "Agency dockets"],
-  Legislation: ["Congress.gov", "House and Senate roll calls"],
-  Lobbying: ["Senate LDA filings", "House disclosures"],
-  Deals: ["Press and trade reporting", "SEC filings", "Municipal bond filings"],
-  Contracting: ["SAM.gov", "FPDS", "SBA 8(a) records"],
-  NAGPRA: ["National Park Service notices", "Federal Register"],
-  "Natural Resources": ["ONRR", "BLM", "EIA"],
-  "Native Nonprofits": ["IRS Form 990", "State registries"],
-  Gaming: ["NIGC", "State compacts", "Environmental reviews", "Tribal gaming commissions"],
-};
-
-/**
- * What reinforces each collection inside Cedar. `feeds` names the other
- * collections whose records improve this one; `line` is the sentence the
- * diagram says while the connections are lit.
- */
-export const FEEDS = {
-  Funding: {
-    feeds: ["Native Nonprofits", "Contracting"],
+export const ECOSYSTEM = Object.freeze({
+  funding: Object.freeze({
+    sources: Object.freeze(["USAspending", "FAADS archives", "Agency award files"]),
+    feeds: Object.freeze(["nonprofits", "contractors"]),
     line: "An award's recipient resolves in the entity layer, so funding, filings and contracts describe the same organization.",
-  },
-  "Federal Register": {
-    feeds: ["Legislation", "Natural Resources", "NAGPRA"],
+  }),
+  "federal-register": Object.freeze({
+    sources: Object.freeze(["Office of the Federal Register", "Agency dockets"]),
+    feeds: Object.freeze(["legislation", "natural-resources", "nagpra"]),
     line: "A notice validates a recognition or regulatory event, and the collections built on those events inherit it.",
-  },
-  Legislation: {
-    feeds: ["Lobbying", "Federal Register"],
+  }),
+  legislation: Object.freeze({
+    sources: Object.freeze(["Congress.gov", "House and Senate roll calls"]),
+    feeds: Object.freeze(["lobbying", "federal-register"]),
     line: "A bill's subjects and sponsors meet the lobbying filings working the same issue.",
-  },
-  Lobbying: {
-    feeds: ["Legislation", "Funding"],
+  }),
+  lobbying: Object.freeze({
+    sources: Object.freeze(["Senate LDA filings", "House disclosures", "Agency dockets"]),
+    feeds: Object.freeze(["legislation", "funding"]),
     line: "Registrations link organizations to the policy they engage and the money that follows it.",
-  },
-  Deals: {
-    feeds: ["Gaming", "Contracting", "Native Nonprofits"],
+  }),
+  deals: Object.freeze({
+    sources: Object.freeze(["Press and trade reporting", "SEC filings", "Municipal bond filings"]),
+    feeds: Object.freeze(["nest", "contractors", "nonprofits"]),
     line: "A deal reveals an ownership transfer, and that change improves every collection holding the entity.",
-  },
-  Contracting: {
-    feeds: ["Deals", "Funding"],
+  }),
+  contractors: Object.freeze({
+    sources: Object.freeze(["SAM.gov", "FPDS", "SBA 8(a) records"]),
+    feeds: Object.freeze(["deals", "funding", "nest"]),
     line: "Vendors roll up to parent entities, so a transfer found in Deals recredits the award history.",
-  },
-  NAGPRA: {
-    feeds: ["Federal Register"],
+  }),
+  subcontracting: Object.freeze({
+    sources: Object.freeze(["FSRS subaward reporting", "USAspending"]),
+    feeds: Object.freeze(["contractors"]),
+    line: "Every subaward keys to the prime award above it, so both parties resolve to the entities Prime Contracting already names.",
+  }),
+  nagpra: Object.freeze({
+    sources: Object.freeze(["National Park Service notices", "Federal Register"]),
+    feeds: Object.freeze(["federal-register"]),
     line: "Institutions and nations resolve in the entity layer, and notices arrive through the Register.",
-  },
-  "Natural Resources": {
-    feeds: ["Federal Register", "Funding"],
+  }),
+  "natural-resources": Object.freeze({
+    sources: Object.freeze(["ONRR", "OSMRE", "Osage Minerals Council"]),
+    feeds: Object.freeze(["federal-register", "funding"]),
     line: "Production and royalties attach to lands whose status the Register documents.",
-  },
-  "Native Nonprofits": {
-    feeds: ["Funding", "Deals"],
+  }),
+  owned: Object.freeze({
+    sources: Object.freeze(["Tribal TERO offices", "Business licensing departments", "Enterprise registers"]),
+    feeds: Object.freeze(["contractors", "nest"]),
+    line: "A certified business carries the nation whose office lists it, and the contracting record shows what it has been awarded.",
+  }),
+  nonprofits: Object.freeze({
+    sources: Object.freeze(["IRS Form 990", "State registries"]),
+    feeds: Object.freeze(["funding", "deals"]),
     line: "Filings, grants and affiliations describe one institution once the entity layer joins them.",
-  },
-  Gaming: {
-    feeds: ["Deals", "Contracting"],
-    line: "Facilities and ownership over time, cross-validated against the transactions that changed them.",
-  },
-};
+  }),
+  nest: Object.freeze({
+    sources: Object.freeze(["ANCSA audited filings", "Enterprise registers", "ANC and NHO subsidiary directories"]),
+    feeds: Object.freeze(["contractors", "deals", "owned"]),
+    line: "Every subsidiary and holding company names its parent, so an award or a transaction anywhere in the family rolls up to the nation or corporation behind it.",
+  }),
+});
+
+/** The label a collection carries on the ring: the catalog's short name. */
+const labelOf = Object.fromEntries(STOREFRONT_CATALOG.map((entry) => [entry.id, entry.short]));
+
+/** The ring, in catalog order, by label. */
+export const RING = STOREFRONT_CATALOG.map((entry) => entry.short);
+
+/** Sources by label, for the hover fan. */
+export const SOURCES = Object.fromEntries(
+  STOREFRONT_CATALOG.map((entry) => [entry.short, ECOSYSTEM[entry.id]?.sources ?? []]),
+);
+
+/** Reinforcement by label: `feeds` as labels, and the sentence. */
+export const FEEDS = Object.fromEntries(
+  STOREFRONT_CATALOG.map((entry) => {
+    const record = ECOSYSTEM[entry.id];
+    return [
+      entry.short,
+      record
+        ? { feeds: record.feeds.map((id) => labelOf[id] ?? id), line: record.line }
+        : { feeds: [], line: "" },
+    ];
+  }),
+);
+
+/**
+ * Source labels that begin with a proper noun and keep their capital inside
+ * a sentence; everything else is lowercased when the diagram reads the fan
+ * out as prose. Kept beside the sources it classifies.
+ */
+export const PROPER_NOUN =
+  /^(Grants|Congress|USAspending|FAADS|FSRS|Federal|National|Office|Senate|House|IRS|SEC|SAM|FPDS|SBA|ONRR|OSMRE|Osage|ANCSA|ANC)\b/;
 
 /** a, b and c: the list style the rest of the product uses. */
 export const say = (items) =>
@@ -96,7 +131,7 @@ export const say = (items) =>
 
 // ── Geometry ────────────────────────────────────────────────────────────
 
-const R = 260; // collection labels sit on this ring
+const R = 300; // collection labels sit on this ring: twelve of them need the room
 const DOT_INSET = 26; // the dataset IS the dot, just inside its label
 const FAN = 100; // source points sit this far beyond the ring
 const CORE = 110; // Cedar + human review
@@ -222,5 +257,5 @@ const solve = () => {
   };
 };
 
-/** Solved once at module load; RING and SOURCES are static. */
+/** Solved once at module load; ECOSYSTEM and the catalog are static. */
 export const LAYOUT = solve();

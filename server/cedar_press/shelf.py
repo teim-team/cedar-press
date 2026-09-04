@@ -143,25 +143,37 @@ class ShelfView:
     catalog_gap: tuple[str, ...]
 
 
-def _coverage(entry: dict[str, Any]) -> str:
-    """How far back a reader goes in this collection, said the way they get it.
+def _coverage_from(entry: dict[str, Any]) -> int | None:
+    """The first year of a series, or ``None`` for a roster or an absence.
 
-    Mirrors the intent of ``coverageLine`` in ``PressShelf.jsx``: the shelf's
-    own window first, and the reconstructed archive named separately where it
-    starts earlier. Never the archive alone -- leading with a year the plan
-    does not include describes a series nobody sold the reader, which is the
-    defect that line was written to fix.
-
-    ``standardFrom`` and ``historyFrom`` are catalog fields, and a collection
-    the catalog snapshot has not caught up with states neither.
+    Reads the catalog's one coverage field in its two shapes. This module read
+    ``standardFrom`` and ``historyFrom`` until 2026-09-04, a pair the catalog
+    retired on 2026-09-02, so every badge said "Coverage varies" and no band
+    stated a year while the tests that would have noticed only checked that
+    the retired names were absent. Mirrors ``coverageFrom`` in
+    ``pressAccess.js``: a roster yields no year, never its capture date.
     """
-    standard = entry.get("standardFrom")
-    full = entry.get("historyFrom")
-    if standard is None:
+    coverage = entry.get("coverage") or {}
+    if coverage.get("kind") != "series":
+        return None
+    year = coverage.get("from")
+    return year if isinstance(year, int) else None
+
+
+def _coverage(entry: dict[str, Any]) -> str:
+    """Coverage as one line, in the shape the collection actually has.
+
+    Mirrors ``coverageLabel`` in ``pressAccess.js``: a series says the span,
+    a roster says it is a roster and when it was taken. A collection the
+    catalog snapshot has not caught up with states neither.
+    """
+    coverage = entry.get("coverage") or {}
+    if coverage.get("kind") == "roster" and coverage.get("captured"):
+        return f"Current roster, captured {coverage['captured']}"
+    year = _coverage_from(entry)
+    if year is None:
         return "Coverage varies"
-    if full is not None and full < standard:
-        return f"{standard} to present · full archive from {full}"
-    return f"{standard} to present"
+    return f"{year} to present"
 
 
 def _freshness(collection_id: str) -> str | None:
@@ -256,11 +268,13 @@ def view_for(tier: str) -> ShelfView:
             for dataset in launch.LAUNCH_COLLECTION
             if dataset.shelf == shelf
         )
+        on_band = {item.id for item in entries}
         years = [
-            int(entry["historyFrom"])
+            year
             for entry in press_catalog.CATALOG
-            if entry.get("historyFrom") is not None
-            and entry["id"] in {item.id for item in entries}
+            if entry["id"] in on_band
+            for year in [_coverage_from(entry)]
+            if year is not None
         ]
         bands.append(
             Band(

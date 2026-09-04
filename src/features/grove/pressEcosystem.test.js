@@ -7,6 +7,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  ECOSYSTEM,
+  PROPER_NOUN,
   RING,
   SOURCES,
   FEEDS,
@@ -16,6 +18,7 @@ import {
   clears,
   overlaps,
 } from "./pressEcosystem.js";
+import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 
 const centered = (p) => ({
   ...p,
@@ -25,6 +28,43 @@ const centered = (p) => ({
 });
 const nodes = LAYOUT.nodes.map(centered);
 const labelBoxes = nodes.map(labelBoxFor);
+
+// The ring is the storefront: every collection sold has a place on it and a
+// declaration behind it, and nothing is declared that the storefront does
+// not sell. This is the drift the diagram had twice, in both directions.
+test("the ring is exactly the storefront catalog", () => {
+  assert.deepEqual(RING, STOREFRONT_CATALOG.map((entry) => entry.short));
+  const ids = new Set(STOREFRONT_CATALOG.map((entry) => entry.id));
+  for (const id of ids) {
+    assert.ok(ECOSYSTEM[id]?.sources?.length, `${id} declares no sources`);
+    assert.ok(ECOSYSTEM[id]?.feeds?.length, `${id} declares no feeds`);
+    assert.ok(ECOSYSTEM[id]?.line, `${id} has no sentence`);
+    for (const feed of ECOSYSTEM[id].feeds) {
+      assert.ok(ids.has(feed), `${id} is fed by ${feed}, which the storefront does not sell`);
+      assert.notEqual(feed, id, `${id} feeds itself`);
+    }
+  }
+  for (const id of Object.keys(ECOSYSTEM)) {
+    assert.ok(ids.has(id), `${id} is declared and not sold`);
+  }
+});
+
+// A source name is read into a sentence, and the first word decides whether
+// it keeps its capital. Every source must be one or the other on purpose:
+// an agency name lowercased reads as a typo, and a common noun capitalised
+// reads as a proper noun nobody can look up.
+test("every source is either a proper noun or reads lowercased", () => {
+  for (const [id, record] of Object.entries(ECOSYSTEM)) {
+    for (const source of record.sources) {
+      const proper = PROPER_NOUN.test(source);
+      const acronymLed = /^[A-Z]{2,}/.test(source);
+      assert.ok(
+        proper || !acronymLed,
+        `${id}: "${source}" starts with an acronym PROPER_NOUN does not know`,
+      );
+    }
+  }
+});
 
 test("every collection is on the ring with a fan", () => {
   assert.equal(LAYOUT.nodes.length, RING.length);

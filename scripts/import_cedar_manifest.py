@@ -53,8 +53,12 @@ TWELVE, NOT FIFTEEN
 -------------------
 Cedar measures fifteen collections. Three do not go on the storefront, and
 each is listed in ``excluded`` with its reason rather than silently dropped:
-``newsletters`` (owner ruling, 2026-09-02), ``gaming`` (shelf ``grove``, it
-belongs to Cedar Grove) and ``_entity_layer`` (shelf ``infrastructure``).
+``newsletters`` (owner ruling, 2026-09-02), ``gaming`` (shelf ``grove``: built
+for Cedar Grove and still in progress, so the storefront neither sells nor
+previews it, owner ruling 2026-09-04) and ``_entity_layer`` (shelf
+``infrastructure``). ``server/tests/test_collection.py`` compares
+``STOREFRONT`` and ``EXCLUDED`` here against the manifest on disk, so a reason
+edited in one place and not regenerated in the other fails a test.
 Excluding a collection from the storefront is not deleting its data: the
 workspace keeps every one of them, and this script only chooses what the
 product shows.
@@ -144,8 +148,9 @@ EXCLUDED: dict[str, str] = {
         "is withdrawn."
     ),
     "gaming": (
-        "Shelf 'grove': Gaming Intelligence belongs to Cedar Grove, and the "
-        "catalog already shows it as a Grove-exclusive preview."
+        "Shelf 'grove': Gaming Intelligence is built for Cedar Grove and is "
+        "still in progress. Cedar Press neither sells nor previews it; it "
+        "returns to the storefront's catalog when the workspace rules it ready."
     ),
     "_entity_layer": (
         "Shelf 'infrastructure': the identity spine every other collection "

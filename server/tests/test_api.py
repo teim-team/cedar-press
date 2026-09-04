@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import sys
 import unittest
 from pathlib import Path
+from types import MappingProxyType
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -39,10 +42,33 @@ from cedar_press import (
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
 )
+from cedar_press import collections as launch  # noqa: E402
 from cedar_press import session as session_module  # noqa: E402
 from cedar_press.app import app  # noqa: E402
 
 client = TestClient(app)
+
+
+@contextlib.contextmanager
+def _catalog_only_collection():
+    """A catalog entry with no descriptor behind it, for the tests that need one.
+
+    Copied from a real entry so its coverage shape is one the profile layer
+    accepts, and placed on the grove shelf so it is sold to nobody. Restored
+    on exit: ``press_catalog.CATALOG`` is module state every route reads.
+    """
+    base = {key: value for key, value in next(iter(press_catalog.CATALOG)).items()}
+    entry = {
+        **base,
+        "id": "catalog-only-fixture",
+        "short": "Fixture",
+        "name": "Catalog-Only Fixture",
+        "shelf": "grove",
+        "blurb": "A collection catalogued ahead of its descriptor, for this test.",
+    }
+    patched = tuple(press_catalog.CATALOG) + (MappingProxyType(entry),)
+    with mock.patch.object(press_catalog, "CATALOG", patched):
+        yield entry
 
 
 def sign_in(email: str = "reader@example.org", password: str = "correct-horse"):
@@ -187,23 +213,23 @@ class TestCatalog(unittest.TestCase):
         self.assertFalse(profile["demonstration"])
         self.assertEqual(client.get("/press/collections/nope/profile").status_code, 404)
 
-    def test_a_catalog_collection_answers_from_its_catalog_entry(self) -> None:
-        # Gaming is the catalog-only collection: it sits on the Grove shelf and
-        # the storefront's twelve do not include it, so it has no descriptor
-        # and its profile comes from the catalog. This test asked about
-        # lobbying until lobbying became one of the twelve with a real
-        # descriptor behind it; the subject moved, the invariant did not.
-        response = client.post(
-            "/cedar/ask",
-            json={"question": "What does this collection cover?", "collectionId": "gaming"},
-        )
-        self.assertEqual(response.status_code, 200)
-        payload = response.json()
+    def test_a_catalog_only_collection_answers_from_its_catalog_entry(self) -> None:
+        # A collection the catalog carries and the storefront does not sell
+        # has no descriptor, so its profile comes from the catalog. Gaming was
+        # that collection until 2026-09-04; the catalog is exactly the
+        # storefront now, so the case is exercised with an injected entry
+        # rather than dropped. The path stays live for the day a collection is
+        # catalogued ahead of its descriptor again.
+        with _catalog_only_collection() as entry:
+            response = client.post(
+                "/cedar/ask",
+                json={"question": "What does this collection cover?", "collectionId": entry["id"]},
+            )
+            self.assertEqual(response.status_code, 200)
+            payload = response.json()
         # Compared against the catalog's own blurb rather than a word the
-        # answer is expected to contain: the previous subject happened to
-        # repeat its own name in its blurb and gaming's does not, which would
-        # make this a test of the copy rather than of where the copy came from.
-        entry = next(c for c in press_catalog.CATALOG if c["id"] == "gaming")
+        # answer is expected to contain, so this tests where the copy came
+        # from rather than the copy.
         self.assertIn(entry["blurb"], payload["answer"])
         self.assertIn("catalog entry", payload["basis"])
 
@@ -254,16 +280,17 @@ class TestCatalog(unittest.TestCase):
         self.assertNotIn("full reconstructed archive", answer)
         ratelimit.reset_for_tests()
 
-    def test_a_catalog_collection_says_it_has_no_figures(self) -> None:
+    def test_a_catalog_only_collection_says_it_has_no_figures(self) -> None:
         # A quantity question about an unreleased collection is answered with
         # the honest state of the numbers, never a routing miss or a made-up
         # figure.
-        response = client.post(
-            "/cedar/ask",
-            json={"question": "How many records are in it?", "collectionId": "gaming"},
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("no published figures", response.json()["answer"])
+        with _catalog_only_collection() as entry:
+            response = client.post(
+                "/cedar/ask",
+                json={"question": "How many records are in it?", "collectionId": entry["id"]},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("no published figures", response.json()["answer"])
 
     def test_a_shipping_collection_without_a_figure_says_so_too(self) -> None:
         # Eight of the twelve have real row counts and no figure series, which
@@ -278,28 +305,48 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("no published figures", response.json()["answer"])
 
     def test_cedar_answers_what_a_release_changed(self) -> None:
+        # The release log is derived from the manifest now, so the answer
+        # names the descriptor's version and carries the measured facts the
+        # first release states: the table count and the row label. It used to
+        # answer "v4.1 ... 412 awards" from demonstration notes no release had
+        # shipped, and flagged them as demonstration; nothing here is.
+        dataset = next(d for d in launch.LAUNCH_COLLECTION if d.id == "funding")
         response = client.post(
             "/cedar/ask",
             json={
-                "question": "What changed in Federal Funding v4.1?",
+                "question": f"What changed in Federal Funding {dataset.version}?",
                 "collectionId": "funding",
             },
         )
         self.assertEqual(response.status_code, 200)
         answer = response.json()["answer"]
-        # The named release, not the latest one, and flagged as the
-        # demonstration content it is.
-        self.assertIn("v4.1", answer)
-        self.assertIn("412", answer)
-        self.assertIn("demonstration", answer)
+        self.assertIn(dataset.version, answer)
+        self.assertIn(dataset.rows_label, answer)
+        self.assertIn(f"{launch.collection_cedar_facts('funding')['n_tables']} tables", answer)
+        self.assertNotIn("demonstration", answer)
 
     def test_a_change_question_without_a_version_gets_the_latest(self) -> None:
+        dataset = next(d for d in launch.LAUNCH_COLLECTION if d.id == "deals")
         response = client.post(
             "/cedar/ask",
             json={"question": "What changed in the latest release?", "collectionId": "deals"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("v9.0", response.json()["answer"])
+        answer = response.json()["answer"]
+        self.assertIn(f"Indian Country Deals {dataset.version} ({dataset.updated}", answer)
+
+    def test_every_storefront_collection_has_a_release_the_feed_serves(self) -> None:
+        # The feed covered ten collections while the storefront sold twelve;
+        # derived from the manifest, it covers exactly the storefront.
+        response = client.get("/press/releases")
+        self.assertEqual(response.status_code, 200)
+        served = {row["id"]: row for row in response.json()["releases"]}
+        self.assertEqual(set(served), {d.id for d in launch.LAUNCH_COLLECTION})
+        for dataset in launch.LAUNCH_COLLECTION:
+            with self.subTest(collection=dataset.id):
+                self.assertEqual(served[dataset.id]["version"], dataset.version)
+                self.assertEqual(served[dataset.id]["updated"], dataset.updated)
+                self.assertTrue(served[dataset.id]["history"])
 
     def test_releases_are_served_from_the_dumped_history(self) -> None:
         response = client.get("/press/releases")
@@ -311,16 +358,25 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(dates, sorted(dates, reverse=True))
         self.assertIn("funding", {row["id"] for row in rows})
 
-    def test_a_catalog_collection_profile_is_served(self) -> None:
-        # Gaming, for the same reason as above: it is the collection the
-        # catalog carries and the storefront does not sell, so every
-        # release-shaped field is None.
-        response = client.get("/press/collections/gaming/profile")
-        self.assertEqual(response.status_code, 200)
-        profile = response.json()
-        self.assertEqual(profile["collection_id"], "gaming")
+    def test_a_catalog_only_collection_profile_is_served(self) -> None:
+        # A collection the catalog carries and the storefront does not sell
+        # has every release-shaped field None. Injected, for the reason given
+        # on the first of these tests.
+        with _catalog_only_collection() as entry:
+            response = client.get(f"/press/collections/{entry['id']}/profile")
+            self.assertEqual(response.status_code, 200)
+            profile = response.json()
+        self.assertEqual(profile["collection_id"], entry["id"])
         self.assertIsNone(profile["version"])
         self.assertIsNone(profile["headline_statistics"])
+
+    def test_every_catalog_collection_ships_with_a_version(self) -> None:
+        # The catalog is exactly the storefront: no entry answers from its
+        # catalog copy alone, because every entry has a descriptor behind it.
+        for entry in press_catalog.CATALOG:
+            with self.subTest(collection=entry["id"]):
+                profile = client.get(f"/press/collections/{entry['id']}/profile").json()
+                self.assertIsNotNone(profile["version"])
 
 
 class TestEntitlement(unittest.TestCase):

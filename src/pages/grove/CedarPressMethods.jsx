@@ -28,6 +28,7 @@ import {
   CREDIBILITY_DISCLAIMER,
   CREDIBILITY_STRIP,
   METHOD_COMMITMENTS,
+  expertiseSentence,
 } from "../../features/grove/pressMethod";
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import { coverageLabel } from "../../features/grove/pressAccess";
@@ -200,11 +201,13 @@ export default function CedarPressMethods() {
                 academic backgrounds spanning MIT, Oxford, Cornell, Brown, Dartmouth and Yale, and
                 decades of combined work in Indian Country.
               </p>
+              {/* The domains are read from the strip rather than typed: this
+                  sentence named gaming for a week after the shelf stopped
+                  selling it, because nothing held the two together. */}
               <p className="cp-exp__body">
-                Federal funding, contracting, gaming, natural resources, policy and Native
-                institutions each have different definitions, reporting systems and historical
-                quirks. Reliable data requires knowing how to process the records and what those
-                records mean.
+                {expertiseSentence()} each have different definitions, reporting systems and
+                historical quirks. Reliable data requires knowing how to process the records
+                and what those records mean.
               </p>
             </div>
             <div className="cp-exp__strip">

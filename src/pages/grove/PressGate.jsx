@@ -63,16 +63,14 @@ import {
   InsightsIcon,
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
-import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
+import { STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
 import { PressCedarFab } from "./PressCedarFab";
 
 // The Cedar Press shelves by name, for the door. Names only, from the
-// catalog itself so a new collection appears here the day it ships; the
-// Grove-exclusive shelf stays inside, since it is a different product's
-// pitch. What the names mean is Cedar's job, one click away.
-const CATALOG_NAMES = PRESS_CATALOG.filter((entry) => entry.shelf !== "grove").map(
-  (entry) => entry.short,
-);
+// catalog itself so a new collection appears here the day it ships, and only
+// what the storefront sells: a different product's pitch does not belong on
+// this door. What the names mean is Cedar's job, one click away.
+const CATALOG_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short);
 
 
 // The four pillars, in the order the supporting sentence names them: what the
@@ -249,7 +247,7 @@ export default function PressGate({ user }) {
           </ul>
           {/* The shelves, by name: a prospect who heard "Cedar Press" at a
               conference should learn what is actually inside from the door,
-              and eleven specific collection names say more than any
+              and twelve specific collection names say more than any
               adjective. Cedar is the way to ask what any of them means. */}
           <div className="cp-cats cp-fade">
             <p className="cp-cats__head">The intelligence inside</p>
