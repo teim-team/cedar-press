@@ -969,6 +969,11 @@ _UID_COLS_BY_SIDE = {
 #: the status (1139_linkage_coverage does) sees one vocabulary.
 DENIED_STATUS = "excluded_not_native"
 
+#: The reason a denial is recorded under in a writer's `masked` counter, and
+#: so in the manifest's `attribution_masked_why`. One string, shared, so 1135
+#: and 1137 report the same disposition and an audit can find it by name.
+DENIAL_MASK_REASON = "verified_not_native_denial"
+
 
 def _prefixed(side: str, column: str) -> str:
     return f"{side}_{column}" if side else column

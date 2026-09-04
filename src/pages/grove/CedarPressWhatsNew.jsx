@@ -57,6 +57,23 @@ const PAGE = 8;
 /** Whether the address names a release in the feed. */
 const linkedAnchor = (hash) => Boolean(hash) && RELEASE_FEED.some((entry) => entry.anchor === hash);
 
+/**
+ * Scroll a release into view, clear of the sticky filter bar.
+ *
+ * `scrollIntoView` lands the entry at the top of the window, where the
+ * sticky filter then covers its heading; the overview's "recently updated"
+ * links arrive here by permalink, so the landing has to show the release
+ * they named. The bar's height is measured rather than assumed, because the
+ * collection chips wrap to a second row on narrower screens.
+ */
+function landOn(hash) {
+  const target = document.getElementById(hash);
+  if (!target) return;
+  target.scrollIntoView();
+  const bar = document.querySelector(".cp-filter--stick");
+  if (bar) window.scrollBy(0, -(bar.getBoundingClientRect().height + 16));
+}
+
 export default function CedarPressWhatsNew() {
   // The masthead carries the reader's profile and Sign out. These two pages
   // rendered `<PressMast section="..." />` with NO `user` and no
@@ -111,10 +128,10 @@ export default function CedarPressWhatsNew() {
       const hash = window.location.hash.slice(1);
       if (!linkedAnchor(hash)) return;
       setShown(Number.POSITIVE_INFINITY);
-      requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
+      requestAnimationFrame(() => landOn(hash));
     };
     const hash = window.location.hash.slice(1);
-    if (hash) requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
+    if (hash) requestAnimationFrame(() => landOn(hash));
     window.addEventListener("hashchange", land);
     return () => window.removeEventListener("hashchange", land);
   }, [all]);

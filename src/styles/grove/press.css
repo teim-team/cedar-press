@@ -1837,6 +1837,12 @@
 .teim-rd .cp-new__item { font-size: 0.92rem; color: var(--ink-2); }
 .teim-rd .cp-new__item b { font-weight: 700; color: var(--ink); }
 .teim-rd .cp-new__date { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-left: 0.4rem; }
+/* Each item is a door into What's New at that release's permalink: the rule
+ * under it appears on hover, the way the close's other actions behave. */
+.teim-rd .cp-new__link { display: inline-flex; align-items: baseline; gap: 0.2rem; min-height: 44px; color: inherit; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease; }
+.teim-rd .cp-new__link:hover, .teim-rd .cp-new__link:focus-visible { border-bottom-color: currentColor; }
+.teim-rd .cp-new__more .cp-new__link { font-family: var(--sans); font-size: 0.92rem; font-weight: 700; gap: 0.5rem; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-new__link { transition: none; } }
 /* The page opening runs across the full measure rather than down a 62ch
  * column like the other secondary pages. This is the widest, plainest page
  * in the set and a half-width title on it just looks like a column that ran

@@ -5,7 +5,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { LAUNCH_COLLECTION } from "./collection.js";
+import { readFileSync } from "node:fs";
+
+import { LAUNCH_COLLECTION, collectionCedarFacts, collectionSample } from "./collection.js";
 import { PRESS_CATALOG } from "./pressCatalog.js";
 import {
   CADENCE,
@@ -18,6 +20,7 @@ import {
   formatUpdated,
   freshnessLine,
   latestRelease,
+  ledgerFor,
   recentActivity,
   recentlyUpdated,
   releaseFor,
@@ -37,14 +40,57 @@ test("every storefront collection has a release and nothing else does", () => {
 
 // A reader citing a version from the feed must download that version: the
 // feed's version is the descriptor's, which is the one the citation and the
-// download filename carry.
-test("the release is the descriptor's version and date", () => {
+// download filename carry, and the ledger holds that version at the head of
+// the history with the descriptor's own date.
+test("the release is the descriptor's version and date, and the ledger holds it", () => {
   for (const dataset of LAUNCH_COLLECTION) {
     const release = releaseFor(dataset.id);
     assert.equal(release.version, dataset.version, dataset.id);
     assert.equal(release.updated, dataset.updated, dataset.id);
-    assert.equal(release.history.at(-1).version, dataset.version, dataset.id);
-    assert.equal(release.history.at(-1).date, dataset.updated, dataset.id);
+    assert.equal(
+      release.history[0].version,
+      dataset.version,
+      `${dataset.id}: the manifest is at ${dataset.version} and the ledger is not; run node scripts/record-release.mjs`,
+    );
+    assert.equal(release.history[0].date, dataset.updated, dataset.id);
+  }
+});
+
+// The ledger is append-only and a recorded version keeps the facts it was
+// recorded with. The entry for the CURRENT version must equal what the
+// manifest measures now: a descriptor re-imported with different facts under
+// the same version is a version that should have been bumped, and the ledger
+// must not be quietly rewritten to agree with it.
+test("the ledger's entry for the current version is what the manifest measures", () => {
+  for (const dataset of LAUNCH_COLLECTION) {
+    const record = ledgerFor(dataset.id).find((item) => item.version === dataset.version);
+    assert.ok(record, `${dataset.id} ${dataset.version} is not in the ledger`);
+    const cedar = collectionCedarFacts(dataset.id);
+    const sample = collectionSample(dataset.id);
+    assert.deepEqual(record, {
+      version: dataset.version,
+      date: dataset.updated,
+      tables: cedar.n_tables,
+      rowsLabel: dataset.rowsLabel,
+      preview: sample?.path ? { table: sample.table, rows: sample.rows, of: sample.of } : null,
+      blockers: cedar.blockers.length,
+    }, `${dataset.id} ${dataset.version}: the ledger and the manifest disagree`);
+  }
+});
+
+test("every version in the ledger is unique, dated and no newer than the descriptor", () => {
+  const shipped = new Set(LAUNCH_COLLECTION.map((dataset) => dataset.id));
+  for (const [id, records] of Object.entries(JSON.parse(readFileSync(new URL("../../../data/cedar/releases.json", import.meta.url), "utf8")).releases)) {
+    assert.ok(shipped.has(id), `${id} is in the ledger and not sold`);
+    const versions = records.map((record) => record.version);
+    assert.equal(new Set(versions).size, versions.length, `${id} records a version twice`);
+    const dates = records.map((record) => record.date);
+    assert.deepEqual(dates, [...dates].sort(), `${id}: the ledger is not in date order`);
+    const dataset = LAUNCH_COLLECTION.find((item) => item.id === id);
+    for (const record of records) {
+      assert.match(record.date, /^\d{4}-\d{2}-\d{2}$/, `${id} ${record.version}`);
+      assert.ok(record.date <= dataset.updated, `${id} ${record.version} is dated after the descriptor`);
+    }
   }
 });
 
@@ -78,16 +124,18 @@ test("the first release says what the manifest measures", () => {
   assert.ok(funding.changed.some((line) => /-row preview of /.test(line)));
 });
 
-// Editorial notes describe shipped releases. A note dated after the
-// descriptor's own date describes a release the manifest has not seen.
-test("no editorial note runs ahead of the manifest", () => {
+// Editorial notes describe shipped releases: a note names a version the
+// ledger holds, and nothing else.
+test("every editorial note overlays a version the ledger holds", () => {
   for (const [id, notes] of Object.entries(RELEASE_NOTES)) {
-    const dataset = LAUNCH_COLLECTION.find((item) => item.id === id);
-    assert.ok(dataset, `${id} has notes and is not sold`);
-    for (const note of notes) {
-      assert.ok(note.date <= dataset.updated, `${id} ${note.version} is dated after the descriptor`);
-      assert.ok(Object.values(RELEASE_KIND).includes(note.kind), `${id} ${note.version}`);
-      assert.ok(note.changed?.length, `${id} ${note.version} changes nothing`);
+    const versions = new Set(ledgerFor(id).map((record) => record.version));
+    assert.ok(versions.size, `${id} has notes and no ledger`);
+    for (const [version, note] of Object.entries(notes)) {
+      assert.ok(versions.has(version), `${id} ${version} is noted and never shipped`);
+      assert.ok(Object.values(RELEASE_KIND).includes(note.kind), `${id} ${version}`);
+      assert.ok(note.changed?.length, `${id} ${version} changes nothing`);
+      const rendered = releaseFor(id).history.find((entry) => entry.version === version);
+      assert.deepEqual([...rendered.changed], [...note.changed], `${id} ${version}: the note is not what renders`);
     }
   }
 });

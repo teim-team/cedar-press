@@ -1455,3 +1455,11 @@ reproduced. Fixes land on the consolidation branch so Codex reviews them once.
 `code/1137_customer_dataset_combine.py` line 418 nests double quotes inside an
 f-string, which Python 3.12 accepts and 3.11 rejects. `cedar_publication verify`
 reports it on a 3.11 interpreter; it predates this branch and was not edited.
+
+### PR #51 round 1 — three findings on the branch itself, all right
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 Preserve the immutable first-release record | The history is read from an append-only ledger, `data/cedar/releases.json`, written by `scripts/record-release.mjs` after each import with the facts the release shipped with. A recorded version keeps its facts: the script refuses to overwrite a version whose facts changed, and a test fails, naming the command, when the manifest carries a version the ledger does not. Editorial notes overlay a ledger version and can name no other. Anchors are unique by construction, one per recorded version. | `node scripts/record-release.mjs --check`; `pressReleases.test.js` |
+| P2 Stop describing released collections as still in preparation | The no-figure answer distinguishes "no figure series" from "no release": a shipped collection says its current version, date and row label; only a collection with no release says its first release is in preparation. | `server/tests/test_api.py` |
+| P2 Record denial masks in the review manifest | A denial is counted as the mask it is, under `DENIAL_MASK_REASON` (`verified_not_native_denial`), in the `masked` counter both 1135 and 1137 already write to `rows_attribution_masked` / `attribution_masked_why`. The dead cell counters are gone. | `py -3 code/cedar_publication.py verify` |
