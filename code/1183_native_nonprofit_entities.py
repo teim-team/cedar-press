@@ -118,9 +118,123 @@ def norm_ein(v: str) -> str:
     return d.zfill(9) if d else ""
 
 
-def existing_ein_to_uid() -> dict:
-    """Every EIN Cedar already resolves, so nothing is minted twice."""
+def _agree(a: str, b: str) -> bool:
+    """Do two names refer to the same organization?
+
+    Deliberately strict. A false AGREE keeps a wrong collapse; a false
+    DISAGREE mints an entity that already exists, and a duplicate identity is
+    the more expensive error - so this only accepts near-identity after
+    normalising case, punctuation and the legal suffix.
+    """
+    # NOTE: the  word boundaries below were once written through a
+    # shell heredoc that turned each one into a literal backspace
+    # (0x08). The pattern then matched NOTHING, so legal-suffix
+    # stripping silently did not run - and had the boundaries merely
+    # been dropped instead, it would have stripped "co" out of
+    # "Community" and manufactured agreement between unrelated orgs.
+    import re as _re
+    def norm(x):
+        x = (x or "").lower()
+        x = _re.sub(r"\b(inc|incorporated|corp|corporation|llc|ltd|co)\b", " ", x)
+        x = _re.sub(r"[^a-z0-9]+", " ", x)
+        return " ".join(x.split())
+    na, nb = norm(a), norm(b)
+    if not na or not nb:
+        return False
+    if na == nb:
+        return True
+    ta, tb = set(na.split()), set(nb.split())
+    if ta == tb:
+        return True
+
+    # A LEGAL-FORM WORD IS NEVER A ROUNDING ERROR. The "one word apart" rule
+    # below let `Catawba Indian Nation` agree with `Catawba Indian Nation
+    # Foundation` - they differ by exactly one token - which is the containment
+    # case this function exists to reject. A nation and that nation's
+    # foundation are two legal persons filing two 990s under two EINs, and the
+    # single word "foundation" is the entire difference between them.
+    FORM = {"foundation", "trust", "fund", "institute", "club", "association",
+            "society", "council", "board", "authority", "enterprise",
+            "enterprises", "holdings", "development", "project", "coalition",
+            "alliance", "network", "center", "centre"}
+    if (ta ^ tb) & FORM:
+        return False
+
+    # otherwise allow a single incidental word to differ
+    return len(ta ^ tb) == 1 and len(ta & tb) >= 2
+
+
+def bmf_names(eins: set) -> dict:
+    """EIN -> the name the IRS puts against it, for the EINs asked for.
+
+    WHY THE IRS ARBITRATES AND NAME SIMILARITY DOES NOT.
+    Deciding whether an existing link is trustworthy by comparing names cannot
+    work, and this was measured rather than assumed:
+
+        Museum of the Cherokee Indian  vs  Museum of the Cherokee People
+            the SAME organization, renamed in 2023        Jaccard 0.50
+        Catawba Indian Nation          vs  Catawba Nation Foundation
+            two DIFFERENT legal persons                   Jaccard 0.50
+
+    Identical similarity, opposite truth, so no threshold is right for both -
+    and the two failure directions are not symmetric. Too permissive keeps a
+    wrong collapse; too strict mints a second identity for an entity Cedar
+    already holds, which is the more expensive error.
+
+    The IRS Business Master File settles it with evidence instead: it publishes
+    the legal name registered against each EIN. If the BMF says TULALIP
+    FOUNDATION and Cedar keyed that EIN to the Tulalip Tribes, the link is
+    wrong however similar the strings look; if the BMF says MUSEUM OF THE
+    CHEROKEE INDIAN and Cedar holds the same, the link is right even though the
+    directory shows a newer trading name.
+    """
+    import glob
+    found = {}
+    pattern = str(ROOT / "data" / "raw" / "external" / "irs990"
+                  / "bmf_full_*" / "eo*.csv")
+    for path in sorted(glob.glob(pattern)):
+        with open(path, encoding="utf-8", errors="replace", newline="") as fh:
+            for row in csv.DictReader(fh):
+                e = norm_ein(row.get("EIN"))
+                if e in eins and e not in found:
+                    found[e] = (row.get("NAME") or "").strip()
+        if len(found) == len(eins):
+            break
+    return found
+
+
+def existing_name_by_uid() -> dict:
+    """cedar_uid -> the name Cedar currently holds, for the agreement test."""
     out = {}
+    for r in _read(SPINE / "cedar_entity_names.csv"):
+        if r.get("cedar_uid"):
+            out[r["cedar_uid"]] = r.get("name", "")
+    if not out:
+        for r in _read(REGISTER):
+            if r.get("cedar_uid"):
+                out[r["cedar_uid"]] = r.get("canonical_name", "")
+    return out
+
+
+def existing_ein_to_uid() -> dict:
+    """Every EIN Cedar already resolves, so nothing is minted twice.
+
+    ORDER IS THE WHOLE POINT, and getting it wrong cost a re-run. `setdefault`
+    means the FIRST source to claim an EIN wins, so this file's own arbitrated
+    output must be read BEFORE nonprofits.csv. Read the other way round, the
+    stale link nonprofits.csv holds - the one the IRS says is wrong, keying
+    TULALIP FOUNDATION's EIN to the Tulalip Tribes - beat the corrected link
+    written minutes earlier, and the 11 repaired entities were proposed for
+    minting all over again.
+    """
+    out = {}
+    # 1. this script's arbitrated output: the corrected answer
+    for r in _read(SPINE / "cedar_nonprofit_ein_links.csv"):
+        ein = norm_ein(r.get("EIN"))
+        uid = (r.get("cedar_uid") or "").strip()
+        if ein and uid:
+            out.setdefault(ein, uid)
+    # 2. then what Cedar held before, which may be the wrong collapse
     for r in _read(NONPROFITS):
         ein = norm_ein(r.get("EIN"))
         uid = (r.get("cedar_uid") or "").strip()
@@ -142,6 +256,13 @@ def plan():
     nxt = max(_ordinal(u) for u in used) + 1
 
     known = existing_ein_to_uid()
+    existing_name = existing_name_by_uid()
+    already_nonprofit = {r["cedar_uid"] for r in reg
+                         if r.get("entity_class") == ENTITY_CLASS}
+    # only the already-linked EINs need arbitration
+    linked_eins = {norm_ein(o.get('ein')) for o in _read(GIVENATIVE)}
+    linked_eins = {e for e in linked_eins if e and e in known}
+    irs = bmf_names(linked_eins) if linked_eins else {}
     seen_ein = set()
     to_mint, to_link, skipped = [], [], []
     for org in _read(GIVENATIVE):
@@ -156,7 +277,50 @@ def plan():
             continue
         seen_ein.add(ein)
         if ein in known:
-            to_link.append((ein, name, known[ein]))
+            # AN EXISTING LINK IS A CLAIM, NOT A FACT - check it agrees.
+            #
+            # Measured 2026-09-04: 12 of the 21 EINs Cedar already resolved
+            # pointed at a DIFFERENT organization than the one that owns the
+            # EIN. Three separate Blackfeet nonprofits - FAST Blackfeet,
+            # Blackfeet Eco Knowledge, Blackfeet Mmip - were all keyed to
+            # CE-0012G-ES, the Blackfeet Tribe. Tulalip Foundation resolved to
+            # the Tulalip Tribes; Boys and Girls Club of Rosebud to the Rosebud
+            # Sioux Tribe. One was not even a parent relationship: the National
+            # Center for American Indian Enterprise Development was keyed to the
+            # Native American Development Center, a different organization.
+            #
+            # A tribe's foundation is a distinct legal person that files its own
+            # 990 under its own EIN. Collapsing it into the tribe is the error
+            # docs/IDENTIFIER_STANDARD names in its own words - "the exact error
+            # that keyed Amee Bay to the Three Affiliated Tribes" - and taking
+            # the existing link on trust would have propagated it into a new
+            # entity class rather than fixing it.
+            #
+            # So the link is accepted only when the names AGREE. Where they do
+            # not, the nonprofit is minted as itself and `related_entity` records
+            # the uid it was wrongly collapsed into, so the old attribution can
+            # be reviewed rather than silently dropped.
+            # THIS SCRIPT'S OWN OUTPUT IS NOT ARBITRATED. The BMF check exists
+            # to judge links Cedar inherited from elsewhere. Re-judging an
+            # entity 1183 minted itself compares the directory name against the
+            # IRS name for the same EIN - which often differ in form ("THE",
+            # abbreviations, all-caps) - so a second run failed the test and
+            # minted 329 duplicates of entities it had created minutes before.
+            # An identity a script just established is not evidence to weigh.
+            if known[ein] in already_nonprofit:
+                to_link.append((ein, name, known[ein]))
+                continue
+            held = existing_name.get(known[ein], "")
+            irs_name = irs.get(ein, "")
+            # the IRS decides; _agree only stands in when the BMF is silent
+            trust = _agree(held, irs_name) if irs_name else _agree(held, name)
+            if trust:
+                to_link.append((ein, name, known[ein]))
+            else:
+                org = dict(org)
+                org["_collapsed_into"] = known[ein]
+                org["_collapsed_name"] = held
+                to_mint.append((ein, name, org))
         else:
             to_mint.append((ein, name, org))
     return to_mint, to_link, skipped, nxt, ident
@@ -316,6 +480,30 @@ def selftest() -> int:
         print("  FAIL next ordinal collides with an existing uid")
         ok = False
     print("  ordinal round-trip exact; next uid %s is free" % ident.mint(nxt))
+
+    # THE COLLAPSES. Each of these was a live wrong link found on 2026-09-04,
+    # and each broke a different version of the agreement test:
+    #   - Catawba: differs by ONE token, which the "one word apart" rule
+    #     accepted until legal-form words were made identity-changing.
+    #   - Tulalip: the containment case.
+    #   - National Indian Health Board: the non-regression - a form word IN
+    #     BOTH names must not cause a false rejection.
+    for a, b, want, why in (
+            ("Catawba Indian Nation", "CATAWBA INDIAN NATION FOUNDATION INC",
+             False, "a nation and its foundation are two legal persons"),
+            ("Tulalip Tribes of Washington", "TULALIP FOUNDATION",
+             False, "containment is not agreement"),
+            ("Blackfeet Tribe of the Blackfeet Indian Reservation of Montana",
+             "FAST BLACKFEET", False, "a shared word is not a shared identity"),
+            ("National Indian Health Board", "NATIONAL INDIAN HEALTH BOARD",
+             True, "a form word in BOTH names must still agree"),
+            ("Akiptan, Inc.", "AKIPTAN INC", True, "legal suffix only")):
+        got = _agree(a, b)
+        if got != want:
+            print("  FAIL _agree(%r, %r) = %s, expected %s - %s"
+                  % (a[:34], b[:34], got, want, why))
+            ok = False
+    print("  agreement test holds on all 5 named collapse cases")
     print("  selftest %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 
