@@ -32,20 +32,23 @@ CODE = ROOT / "code"
 
 LIVE_WINDOW_MIN = 30
 
-# Root-level markdown that is part of the reading core, not a docs/ entry.
+# The reading core: the entry points at the root, plus the plans and the
+# handoffs, which lived at the root until 2026-09-04 and now sit under
+# docs/plans/ and docs/handoffs/. Paths relative to ROOT.
 ROOT_DOCS = [
     "README.md",
     "START_HERE.md",
     "AGENTS.md",
-    "STATE_OF_BUILD.md",
-    "STATE_OF_THE_LAND_2026-08-07.md",
-    "SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md",
-    "BILLS_VOTES_DATASET_PLAN.md",
-    "COMPACT_DATASET_PLAN.md",
-    "FEDERAL_ACTIONS_DATASET_PLAN.md",
-    "GAMING_DATASET_PLAN.md",
-    "INFLUENCE_DATASET_PLAN.md",
-    "NONPROFIT_DATASET_PLAN.md",
+    "docs/handoffs/STATE_OF_BUILD.md",
+    "docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md",
+    "docs/handoffs/NEXT_SESSION.md",
+    "docs/plans/SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md",
+    "docs/plans/BILLS_VOTES_DATASET_PLAN.md",
+    "docs/plans/COMPACT_DATASET_PLAN.md",
+    "docs/plans/FEDERAL_ACTIONS_DATASET_PLAN.md",
+    "docs/plans/GAMING_DATASET_PLAN.md",
+    "docs/plans/INFLUENCE_DATASET_PLAN.md",
+    "docs/plans/NONPROFIT_DATASET_PLAN.md",
 ]
 
 DATED_RE = re.compile(r"20\d\d-\d\d-\d\d")
