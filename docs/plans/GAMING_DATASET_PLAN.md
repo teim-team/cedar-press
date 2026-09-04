@@ -1,5 +1,5 @@
 # Cedar Press Dataset — Tribal Gaming Development & Markets
-*Build plan, 2026-07-31. Companion to AGENTS.md, INFLUENCE_DATASET_PLAN.md, NONPROFIT_DATASET_PLAN.md. Incorporates the NEPA-documents memo and CLAW's independent source verification of the same date.*
+*Build plan, 2026-07-31. Companion to AGENTS.md, docs/plans/INFLUENCE_DATASET_PLAN.md, docs/plans/NONPROFIT_DATASET_PLAN.md. Incorporates the NEPA-documents memo and CLAW's independent source verification of the same date.*
 
 ## What this is
 Two layers, one product. A **directory core**: the current universe of Indian gaming facilities (operator, class, machines/tables, hotel keys, sq ft) from NIGC, compacts, operator sites, and trade directories. And the differentiating **development layer**: the proposal-to-operation history of gaming projects reconstructed from federal environmental review documents (EAs, EISs, FONSIs, RODs) and BIA gaming-land decisions — what was proposed, at what scale, with what projected economics, what was approved, what got built, what failed, and what got reversed. Directories exist; the development layer exists nowhere. It converts "casinos and slot counts" into the capacity, investment, market, and infrastructure history of Indian gaming.

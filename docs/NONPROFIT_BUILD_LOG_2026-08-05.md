@@ -2,7 +2,7 @@
 
 Build script: `code/17_build_nonprofit_990.py` (one script, `--steps` switches)
 Run log: `logs/17_nonprofit_990_2026-08-05.log`
-Plan: `NONPROFIT_DATASET_PLAN.md`
+Plan: `docs/plans/NONPROFIT_DATASET_PLAN.md`
 
 Vintage of every number below: IRS Exempt Organizations Business Master File as
 downloaded 2026-04-29 (source page

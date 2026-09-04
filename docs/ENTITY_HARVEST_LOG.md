@@ -6,9 +6,9 @@ One-time universe-completion job: every distinct Native-entity-shaped name appea
 
 ## The rule this job obeyed
 
-**No parallel ID system was minted.** The spine is NEID (CICD connector, 687 entities) plus the `Entity_Master` series — `T-` 588 federally recognized tribes, `A-` 191 ANCs and village corporations, `E-` 29 enterprises and subsidiaries, `N-` 7 Native Hawaiian Organizations. Every proposal in this build **extends** one of those series or the `I-` series that INFLUENCE_DATASET_PLAN.md reserves for intertribal and inter-Native organizations. Nothing here is assigned; `entity_candidates_new.csv` and `entity_candidates_ambiguous.csv` both carry a blank `YOUR_RULING` column and a later script does the minting.
+**No parallel ID system was minted.** The spine is NEID (CICD connector, 687 entities) plus the `Entity_Master` series — `T-` 588 federally recognized tribes, `A-` 191 ANCs and village corporations, `E-` 29 enterprises and subsidiaries, `N-` 7 Native Hawaiian Organizations. Every proposal in this build **extends** one of those series or the `I-` series that docs/plans/INFLUENCE_DATASET_PLAN.md reserves for intertribal and inter-Native organizations. Nothing here is assigned; `entity_candidates_new.csv` and `entity_candidates_ambiguous.csv` both carry a blank `YOUR_RULING` column and a later script does the minting.
 
-**On `NP-`.** It is proposed, sparingly, for Native nonprofits that are *not* Hawaiian. `N-` is already in use for Native Hawaiian Organizations — all 7 current `N-` rows are NHOs, and the DOI NHO roster is the population behind them. Putting a Minnesota Native CDFI or a national Native philanthropy under `N-` would make the prefix mean two different things and would silently corrupt every NHO count taken off a prefix filter, including the 190-row DOI roster ceiling in STATE_OF_BUILD.md. That is a genuine collision, so `NP-` is proposed rather than forced into `N-`. If Elijah prefers, the alternative is to keep one `N-` series with a mandatory subclass column; the register is written so either ruling is a one-line change.
+**On `NP-`.** It is proposed, sparingly, for Native nonprofits that are *not* Hawaiian. `N-` is already in use for Native Hawaiian Organizations — all 7 current `N-` rows are NHOs, and the DOI NHO roster is the population behind them. Putting a Minnesota Native CDFI or a national Native philanthropy under `N-` would make the prefix mean two different things and would silently corrupt every NHO count taken off a prefix filter, including the 190-row DOI roster ceiling in docs/handoffs/STATE_OF_BUILD.md. That is a genuine collision, so `NP-` is proposed rather than forced into `N-`. If Elijah prefers, the alternative is to keep one `N-` series with a mandatory subclass column; the register is written so either ruling is a one-line change.
 
 ## Alias corpus
 
@@ -162,7 +162,7 @@ Highest-occurrence HIGH-priority candidates (full list in `data/clean/entity_can
 | Chickasaw Management Services | `E-` | 11 | corporate form 'services' with a Native signal |
 | NAVAJO TRIBAL UTILITY AUTHORITY | `E-` | 11 | tribal form 'tribal' plus business vocabulary (authority, utility) — reads as an arm of a government, not the  |
 | TIMBISHA SHOSHONE TRIBE OF DEATH VALLEY | `T-` | 9 | tribal-government form 'tribe' |
-| UNITED SOUTH & EASTERN TRIBES INC | `I-` | 7 | named in INFLUENCE_DATASET_PLAN.md's I- layer ('united south and eastern tribes') |
+| UNITED SOUTH & EASTERN TRIBES INC | `I-` | 7 | named in docs/plans/INFLUENCE_DATASET_PLAN.md's I- layer ('united south and eastern tribes') |
 | IOWA TRIBE OF KANSAS AND NEBRASKA - NUWEH | `T-` | 6 | tribal-government form 'tribe' |
 | MHA Nation | `T-` | 6 | tribal-government form 'nation' |
 | SHIVWITZ BAND OF THE PAIUTE INDIAN TRIBE OF UTAH | `T-` | 6 | tribal-government form 'band' |

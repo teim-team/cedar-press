@@ -1,5 +1,12 @@
 # Next session — start here
 
+> **SUPERSEDED. This is the 2026-08-30 handoff, kept as a record.** The
+> current state is `docs/DATASET_READINESS.md` (the scoreboard, regenerated
+> by `code/518_dataset_readiness.py`) and `docs/TWELVE_DATASET_PLAN.md` (the
+> operating plan); the punch list is `docs/datasets/_PUNCHLIST.md`. The
+> figures below (2 of 13 READY, the red gate) were true when written and are
+> not true now. Moved from the repository root on 2026-09-04.
+
 *Left 2026-08-30 by the integrator session. Read this, then
 `docs/DATASET_READINESS.md`. Everything below is verified against live data
 unless it says otherwise.*

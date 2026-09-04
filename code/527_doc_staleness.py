@@ -55,7 +55,7 @@ OUT = ROOT / "docs" / "DOC_STALENESS.md"
 
 # Documents a reader consults for CURRENT state. Everything else is RECORD.
 LIVE_DOCS = {
-    "README.md", "AGENTS.md", "START_HERE.md", "docs/handoffs/NEXT_SESSION.md",
+    "README.md", "AGENTS.md", "START_HERE.md",
     "docs/DATASET_READINESS.md", "docs/TWELVE_DATASET_PLAN.md",
     "docs/EXPORT_SAFETY.md", "docs/INVENTORY.md", "docs/KNOWN_ISSUES.md",
     "docs/ASSERTION_LAYER.md", "docs/IDENTIFIER_STANDARD.md",

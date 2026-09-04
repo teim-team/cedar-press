@@ -137,7 +137,7 @@ SOURCE_CEILINGS = {
     #
     # The fact that post-2018 coverage rests on hand research rather than on a
     # vendor column is a genuine caveat and is recorded in
-    # docs/GAMING_TEMPORAL_BUILD_LOG.md and STATE_OF_BUILD.md, where it belongs.
+    # docs/GAMING_TEMPORAL_BUILD_LOG.md and docs/handoffs/STATE_OF_BUILD.md, where it belongs.
     "gaming_facility_metrics": (2026, "Capacity observations end with the "
                                       "Casino City panel (2023-01); revenue and "
                                       "payment observations run to 2026."),

@@ -4,7 +4,7 @@
 what would break. Maintained so subscriber demand can be answered with a real estimate
 instead of a guess.*
 
-*Created 2026-08-05. Standing policy: temporal floor is 2000; see STATE_OF_BUILD.md.*
+*Created 2026-08-05. Standing policy: temporal floor is 2000; see docs/handoffs/STATE_OF_BUILD.md.*
 
 ---
 

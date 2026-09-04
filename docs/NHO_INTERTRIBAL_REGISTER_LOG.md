@@ -205,7 +205,7 @@ ANCs and are correctly excluded from this register.)
 ## PART B — intertribal / inter-Native organizations (`I-`)
 
 **57 organizations registered**: 18 national, 19 regional, 20 sector. Every organization
-named in `INFLUENCE_DATASET_PLAN.md` is present.
+named in `docs/plans/INFLUENCE_DATASET_PLAN.md` is present.
 
 | Plan's named list | Registered |
 |---|---|
@@ -295,7 +295,7 @@ organizations will double-count.
 - **CRITFC and NWIFC have no EIN, and that is structural, not a gap.** They are
   intertribal **governmental** fishery agencies created by their member tribes, not
   chartered charities — the tribal-instrumentality blind spot of
-  `NONPROFIT_DATASET_PLAN.md` caveat 1, showing up in the influence layer. NWIFC files
+  `docs/plans/NONPROFIT_DATASET_PLAN.md` caveat 1, showing up in the influence layer. NWIFC files
   **103 LDA reports** while having no 990 presence at all, which is precisely why this
   layer cannot be built off IRS data.
 - **GPTCA ≠ GPTLHB.** A near-name collision with GPTLHB's own former name ("Great Plains

@@ -1,5 +1,5 @@
 # Cedar Press Dataset — Tribal-State Gaming Compacts
-*Standalone build plan, 2026-07-31. Merges into the Tribal Gaming Development & Markets dataset (GAMING_DATASET_PLAN.md) as its authorization/fiscal layer, but is built and versioned as its own product.*
+*Standalone build plan, 2026-07-31. Merges into the Tribal Gaming Development & Markets dataset (docs/plans/GAMING_DATASET_PLAN.md) as its authorization/fiscal layer, but is built and versioned as its own product.*
 
 ## What this is
 The complete record of Class III tribal-state gaming compacts and amendments: who may operate what, where, until when, and on what fiscal terms. Standalone value: the authorization and revenue-sharing history of Indian gaming. Merged value: the legal-economic layer that completes the gaming triangle (proposed / built / authorized).

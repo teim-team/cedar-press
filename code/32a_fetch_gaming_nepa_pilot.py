@@ -2,7 +2,7 @@
 """
 32a_fetch_gaming_nepa_pilot.py -- Cedar Press Gaming dataset, Phase 2 Step A.
 
-Retrieves the two PILOT NEPA document sets named in GAMING_DATASET_PLAN.md
+Retrieves the two PILOT NEPA document sets named in docs/plans/GAMING_DATASET_PLAN.md
 phasing step 2 into data/raw/external/gaming_nepa/:
 
   1. Osage Nation Lake Ozark Casino Resort Project   (clean single-document test)

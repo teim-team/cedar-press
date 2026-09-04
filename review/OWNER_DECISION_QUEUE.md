@@ -132,7 +132,7 @@ Ranked by dollar consequence:
    identical cent; the real harm was **join fan-out** — a buyer merging *their
    own* table on the promised key got up to 3 copies of *their* rows. Fan-out
    is now 1.000×. Acting on the wrong model would have produced a destructive
-   de-dupe. See `NEXT_SESSION.md` §3.
+   de-dupe. See `docs/handoffs/NEXT_SESSION.md` §3.
 2. `fpds_uei_cage_map.csv` — `uei` repeats 11,455×; even
    (uei, cage, source_file) collides 4,680×. One row per UEI, or per
    observation-in-a-source?

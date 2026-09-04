@@ -380,7 +380,7 @@ clobbering did.** Everyone did the right thing; nobody owned the second half.
 
 ### MECHANISM 2 — the shipping step is written down and never done
 
-`STATE_OF_THE_LAND_2026-08-07.md`, section 7, "recommended next session, in
+`docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md`, section 7, "recommended next session, in
 order", item **6 of 6**:
 
     6. Re-run 62 (gate), 87 (notes contracts), 102 (coverage), 110 (views)
@@ -826,7 +826,7 @@ And then nothing. No line saying "this reached `dist/`", or "this did not, and
 here is why." The word "ship" does not appear as a step in any of them.
 `AGENTS.md` names script 87 once, in a sentence about where presentation lives.
 The shipping step was written down exactly once, in
-`STATE_OF_THE_LAND_2026-08-07.md` §7 as **item 6 of 6**, and carried forward
+`docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md` §7 as **item 6 of 6**, and carried forward
 unread through twenty days and roughly twenty builds.
 
 The result is a project that audits its **sources** constantly and its
@@ -897,7 +897,7 @@ counted, defects confessed with the failing quote, regression gate run before an
 after. Not one of them ends by asking whether the table can leave the building.
 `AGENTS.md` names script 87 once and states no rule about it. The one place the
 shipping step was written down —
-`STATE_OF_THE_LAND_2026-08-07.md`, item 6 of 6 — has been carried forward unread
+`docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md`, item 6 of 6 — has been carried forward unread
 through twenty days and roughly twenty builds.
 
 On top of that, publication is gated on `codebook_master.csv`, a file the project

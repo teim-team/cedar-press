@@ -104,7 +104,7 @@ Action dates in the spine run **2007-10-01 → 2023-04-05**.
 
 Against the Cedar temporal floor of 2000, this dataset starts eight years late: the earliest action date in the source pull is 2007-10-01, so **FY2000–FY2007 are absent entirely**, not empty. No `pre_2000_flag` is emitted because there are no pre-2000 rows to flag. Closing that end also requires a fresh USAspending assistance pull; note that USAspending's assistance coverage is itself thin before FY2008, so the gap may prove partly unclosable at source. Nothing here estimates or backfills it.
 
-Note the corollary already recorded in `STATE_OF_BUILD.md`: federal funding does **not** thin after 2022. That finding was an artifact of `first_seen_year`. This panel is indexed on `action_date_fiscal_year` — a true fiscal year — and `first_seen_year` appears nowhere in the build.
+Note the corollary already recorded in `docs/handoffs/STATE_OF_BUILD.md`: federal funding does **not** thin after 2022. That finding was an artifact of `first_seen_year`. This panel is indexed on `action_date_fiscal_year` — a true fiscal year — and `first_seen_year` appears nowhere in the build.
 
 ---
 

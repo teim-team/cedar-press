@@ -1,5 +1,5 @@
 # Cedar Press Dataset — Native Bills & Congressional Votes
-*Build plan, 2026-07-31. Dataset 10. Status: MOSTLY BUILT — Elijah already holds the core dataset from prior research; this plan documents completion, not construction. Companion to AGENTS.md and INFLUENCE_DATASET_PLAN.md.*
+*Build plan, 2026-07-31. Dataset 10. Status: MOSTLY BUILT — Elijah already holds the core dataset from prior research; this plan documents completion, not construction. Companion to AGENTS.md and docs/plans/INFLUENCE_DATASET_PLAN.md.*
 
 ## What this is
 The legislative record of Indian Country: bills affecting tribes and Native entities — proposed and enacted — with roll-call votes, member positions, cosponsorships, and outcomes. It is the **outcomes leg of the influence chain**: dataset 4 records who lobbied and on what; this dataset records what the lobbying was aimed at and how the votes went.

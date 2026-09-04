@@ -189,7 +189,7 @@ XREF = re.compile(r"\bsee\b|\b(?:" + "|".join(MONTHS) + r")\s+\d{1,2},\s*\d{4}\s
 
 # ------------------------------------------------------------------------
 # SOURCE DEFECT CHECK -- BIA's Tribe(s) column vs its own Title / document set.
-# STATE_OF_BUILD.md records that the BIA *compact* index misaligns its Tribes
+# docs/handoffs/STATE_OF_BUILD.md records that the BIA *compact* index misaligns its Tribes
 # column with its Title column on 5.1% of rows. The same check is therefore run
 # here on the *decisions* index, and it fires: the row whose Tribe(s) column
 # reads "Tonawanda Band of Seneca" / "Louisiana" is titled "Tunica-Biloxi Indian
@@ -519,7 +519,7 @@ log(f"rows with a BIA note            : {n_note}")
 log(f"rows carrying U+FFFD in BIA text: {n_ffd}  (source-side encoding damage, preserved verbatim)")
 log(f"decision_id collisions resolved : {sum(1 for k, v in id_used.items() if v > 1)}")
 log(f"BIA Tribe(s)-column conflicts   : {n_conflict} of {len(decisions)} "
-    f"({100*n_conflict/len(decisions):.1f}%) -- same defect class STATE_OF_BUILD.md "
+    f"({100*n_conflict/len(decisions):.1f}%) -- same defect class docs/handoffs/STATE_OF_BUILD.md "
     f"records for the BIA compact index; BIA value preserved, flagged, and the "
     f"title-derived candidate published in tribe_from_title")
 for d in decisions:

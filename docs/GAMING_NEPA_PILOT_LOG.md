@@ -1,7 +1,7 @@
 # Gaming Development & Markets — Phase 2: NEPA document extraction pilot
 
 *Run 2026-08-05. Scripts `code/32a`–`32b`. Console log: `logs/32_gaming_nepa_pilot.log`.*
-*Plan: `GAMING_DATASET_PLAN.md` phasing step 2. Phase 1: `docs/GAMING_BUILD_LOG_2026-08-05.md`.*
+*Plan: `docs/plans/GAMING_DATASET_PLAN.md` phasing step 2. Phase 1: `docs/GAMING_BUILD_LOG_2026-08-05.md`.*
 
 Two document sets only, exactly as the plan scopes the pilot. **No bulk extraction was run.**
 
