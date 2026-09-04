@@ -146,6 +146,30 @@ data/restricted/
 # history that dies with the working directory, and an old handle that stops
 # resolving is exactly the failure review finding F6 is about.
 !/data/spine/cedar_handle_history.csv
+# RETIRED 2026-09-04 by 1177 - the file moved to graveyard/cicd/ and the rule
+# above now un-ignores a path that does not exist. Kept, because the retirement
+# is the point: graveyard/cicd/cedar_handle_history.csv is the binding that
+# lets any older artifact naming a handle still be read, and 1180 reads it.
+
+# Added 2026-09-04. All four are SOURCE OF TRUTH, small (~690 KB together),
+# and none is regenerable from what remains in the repo:
+#
+#   cedar_retired_neid_crosswalk.csv  the retired NEID -> cedar_uid binding.
+#     1177 deleted the `handle` column from the register BEFORE the values
+#     were scrubbed from the datasets, which cut the translation vocabulary
+#     from 1,555 to 877 while 13,400 customer rows still carried handles. This
+#     file is the repair. Untracked, the next clone cannot scrub a NEID at all.
+#   cedar_entity_names.csv            the OFFICIAL name per entity with its
+#     register, URL and capture date. Rebuildable only by re-fetching three
+#     external sources, one of which is a PDF.
+#   cedar_entity_types.csv            the 18 entity-class definitions. 1181
+#     FAILS the build if a class in the data has no definition here.
+#   cedar_nonprofit_ein_links.csv     EIN -> cedar_uid for 380 Native
+#     nonprofits. This is identity, not a derived join.
+!/data/spine/cedar_retired_neid_crosswalk.csv
+!/data/spine/cedar_entity_names.csv
+!/data/spine/cedar_entity_types.csv
+!/data/spine/cedar_nonprofit_ein_links.csv
 
 # Reports and audit evidence that live in docs/ - small, prose-adjacent,
 # and meaningless without the commit they describe.

@@ -262,8 +262,14 @@ def repoint(apply_it: bool):
     merges = {u for u, ns in by_uid.items()
               if len(ns) > 1 and classify(sorted(ns)) == "MERGE"}
 
-    plan, mint = [], []
-    for r in rows:
+    # Rows already scheduled, BY POSITION. `293` class7: an id minted from
+    # outside the row - a process hash, a rank, or a memory address - is not
+    # row identity. This used `id(r)`, which CPython reuses the moment an
+    # object is freed and which is stable here only because `rows` holds every
+    # dict alive; a caller that streamed instead of loading would get silent
+    # collisions with nothing to see them by. The index is what was meant.
+    plan, mint, planned = [], [], set()
+    for i, r in enumerate(rows):
         uid = (r.get("cedar_uid") or "").strip()
         name = (r.get("canonical_name") or "").strip()
         if uid not in merges or not name or name == reg.get(uid):
@@ -294,6 +300,7 @@ def repoint(apply_it: bool):
             target = sorted(ali.get(_norm_alias(name), set()))
         if len(target) == 1 and target[0] != uid:
             plan.append((r, uid, target[0], name))
+            planned.add(i)
         elif not target:
             mint.append((r, uid, name))
 
@@ -324,7 +331,7 @@ def repoint(apply_it: bool):
     # misattribution stood - a report and a remedy that disagreed with each
     # other. Same rule as everywhere else: the name must resolve to exactly one
     # OTHER uid, via the register or the alias table.
-    for r in rows:
+    for i, r in enumerate(rows):
         uid = (r.get("cedar_uid") or "").strip()
         name = (r.get("canonical_name") or "").strip()
         if not uid or not name:
@@ -335,10 +342,17 @@ def repoint(apply_it: bool):
                   | ali.get(_norm_alias(name), set())) - {uid}
         if len(owners) == 1:
             plan.append((r, uid, next(iter(owners)), name))
+            planned.add(i)
 
-    already = {id(r) for r, *_ in plan}
-    for r in rows:
-        if id(r) in already:
+    # POSITION, NOT `id()`. `293` class7: an id minted from OUTSIDE the row -
+    # a process hash, a rank, or here a memory address - is not row identity.
+    # CPython reuses an address the moment an object is freed, so `id()` is
+    # only accidentally stable, and it is stable here only because `rows` holds
+    # every dict alive. A future caller that streams instead of loading would
+    # get silent collisions with no way to see them. The row's INDEX in `rows`
+    # is the thing actually meant, and it is stable by construction.
+    for i, r in enumerate(rows):
+        if i in planned:
             continue
         uid = (r.get("cedar_uid") or "").strip()
         name = (r.get("canonical_name") or "").strip()

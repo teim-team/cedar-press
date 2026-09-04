@@ -175,7 +175,8 @@ def sqlid(s: str) -> str:
 # scan
 # --------------------------------------------------------------------------
 def scan(argv):
-    import duckdb
+    import duckdb  # noqa: F401  (kept: types/exceptions)
+    import cedar_duck
 
     only = None
     if "--only" in argv:
@@ -188,7 +189,7 @@ def scan(argv):
         raise SystemExit("UNMEASURED: no input files matched. Refusing to "
                          "report a clean census over an empty corpus.")
 
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.execute("PRAGMA threads=8")
     inlist = ",".join(sqlq(s) for s in SENTINELS)
 
@@ -395,7 +396,7 @@ def explode(argv):
     """
     import duckdb
 
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.execute("PRAGMA threads=8")
     census = _load_census()
 
@@ -658,7 +659,7 @@ def verify(argv):
         raise SystemExit("UNMEASURED: no files to verify. A guard with no "
                          "input is not a passing guard.")
 
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.execute("PRAGMA threads=8")
     all_v, evaluated, unmeasured = [], [], []
     for p in files:
@@ -728,7 +729,7 @@ def selftest(argv):
     """
     import duckdb
 
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     tmp = Path(tempfile.mkdtemp(prefix="1170_selftest_"))
     failures = []
 

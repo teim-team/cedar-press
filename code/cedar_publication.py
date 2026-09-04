@@ -466,6 +466,20 @@ DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
 # Dropping these costs no identity anywhere. It removes a second, worse answer
 # sitting beside the right one - 843's own words for why this was safe.
 NEID_COLS = (
+    # THE HANDLE IS THE CICD SCHEME. Owner, 2026-09-04: "the readable code we
+    # dont need and it is CICD's - remove from all datasets, remove every trace
+    # from every dataset".
+    #
+    # He is right and this document had it backwards. AGENTS.md:703 records the
+    # NEID as the "CICD Native Entity Connector Crosswalk", and the prefixed
+    # handle - TRBF-, AKNF-, ANVC- - IS that scheme. It had been described as
+    # Cedar's own readable code, which is how it survived the 2026-09-01
+    # retirement and two passes on 2026-09-03. `cedar_uid` is Cedar's key; the
+    # handle is the thing being retired.
+    "handle",
+    "handle_prefix",
+    "owner_hub_handle",
+    "nest_entity_dual_role__handle",
     "tribe_id",
     "tribe_id_neid",
     "entity_tribe_ids",
@@ -504,6 +518,7 @@ NEID_COLS = (
 # the harvested vocabulary is exact; a shape test is a guess wearing a regex.
 _NEID_MAP: dict = {}
 _NEID_AMBIGUOUS: dict = {}
+_NEID_EMBEDDED_RE = None
 
 
 def neid_map():
@@ -523,8 +538,26 @@ def neid_map():
         return _NEID_MAP
     from collections import defaultdict as _dd
     claims = _dd(set)
+    # FOUR sources, and the last two are why this still works after 1177.
+    #
+    # `1177_retire_handle_column.py apply` (2026-09-04) deleted `handle` from
+    # the register, which is correct - it is the CICD scheme and the owner
+    # asked seven times. But the map that TRANSLATES a retired handle was
+    # reading that same column, so retiring it cut the vocabulary from 1,555
+    # to 877 while 13,400 customer rows still carried handles in prose. You
+    # cannot scrub an identifier after you have destroyed its crosswalk.
+    #
+    # 1177 saw this and kept the binding in graveyard/cicd/ - its own note
+    # says "the binding is how any older artifact still naming a handle can be
+    # read". That file is the durable record; the crosswalk beside it is the
+    # same content in one flat shape, one row per (neid, uid) PAIR so an
+    # ambiguous binding stays countable as two rather than collapsing into a
+    # confident wrong answer.
     sources = ((ROOT / "data/spine/cedar_identity_register.csv", "handle"),
-               (ROOT / "data/clean/cedar_identifier_ledger_final.csv", "tribe_id"))
+               (ROOT / "data/clean/cedar_identifier_ledger_final.csv", "tribe_id"),
+               (ROOT / "graveyard/cicd/cedar_handle_history.csv", "handle"),
+               (ROOT / "data/spine/cedar_retired_neid_crosswalk.csv",
+                "retired_neid"))
     for path, key in sources:
         if not path.exists():
             continue
@@ -537,6 +570,30 @@ def neid_map():
     _NEID_MAP = {k: next(iter(v)) for k, v in claims.items() if len(v) == 1}
     _NEID_AMBIGUOUS = {k: sorted(v) for k, v in claims.items() if len(v) > 1}
     return _NEID_MAP
+
+
+def _embedded_neid_re():
+    """An alternation built FROM the harvested vocabulary, not from a shape.
+
+    The module argues a paragraph above that a shape regex is wrong in both
+    directions - it matches `DPW-00229-01` in a contract description and misses
+    the extended Alaska form `AKNF-ACSRMT-00-CALSTA-ASVCPR`. That argument is
+    about inventing a PATTERN. It does not forbid a regex whose every branch is
+    a literal the vocabulary already vouches for, which is what this is: exact
+    membership, applied at a position other than the start of the cell.
+
+    Longest-first, so `AKNF-ACSRMT-00-CALSTA-ASVCPR` is consumed whole and
+    never left as a translated stem with an orphaned tail.
+    """
+    global _NEID_EMBEDDED_RE
+    if _NEID_EMBEDDED_RE is None:
+        mapping = neid_map()
+        known = sorted(set(mapping) | set(_NEID_AMBIGUOUS), key=len, reverse=True)
+        _NEID_EMBEDDED_RE = (re.compile(r"(?<![A-Za-z0-9-])(" +
+                                        "|".join(re.escape(k) for k in known) +
+                                        r")(?![A-Za-z0-9-])")
+                             if known else re.compile(r"(?!x)x"))
+    return _NEID_EMBEDDED_RE
 
 
 def translate_neid_values(row: dict):
@@ -569,7 +626,142 @@ def translate_neid_values(row: dict):
                 out.append(part)
         if hit:
             row[col] = "|".join(out)
+            continue
+
+        # NOT a bare token, and this is the gap that kept the owner asking.
+        # Measured 2026-09-04, AFTER the whole-token pass had already taken
+        # lobbying and nagpra to zero: 13,400 rows in SIX customer datasets
+        # still shipped a retired NEID, every one of them inside a longer
+        # string the whole-token test cannot see -
+        #
+        #     7,158  nonprofits.evidence               "...matched canonical
+        #                                               tribe ANRC-AHTNAI-00
+        #                                               (Ahtna, Inc) via..."
+        #     3,576  native-owned-businesses.suppression_key
+        #                                              "SUPPRESS::TRBF-TULALP-00"
+        #     1,193  nest.hub_resolution_note
+        #       957  natural-resources.entity_attribution_basis
+        #       504  funding.attribution_basis
+        #        12  gaming.entity_match_basis
+        #
+        # `suppression_key` is the one that proves the point: it is a
+        # STRUCTURED key, not prose, and it escaped only because a
+        # `SUPPRESS::` prefix made the cell stop being a bare token.
+        rx = _embedded_neid_re()
+        if not rx.search(val):
+            continue
+
+        def _sub(m):
+            nonlocal done, left
+            tok = m.group(1)
+            if tok in _NEID_AMBIGUOUS:
+                left += 1        # an unresolved collision; leave it standing
+                return tok
+            done += 1
+            return mapping[tok]
+
+        new = rx.sub(_sub, val)
+        if new != val:
+            row[col] = new
     return done, left
+
+
+_OFFICIAL_NAMES: dict = {}
+
+
+def official_names() -> dict:
+    """short handle -> official name, from `data/spine/cedar_entity_names.csv`.
+
+    Measured 2026-09-04: 1,555 handles, every one mapping to exactly ONE
+    official name, so this substitution has no ambiguous case to refuse. If a
+    future build introduces one, the loader drops it rather than picking - the
+    same rule `neid_map()` applies to a NEID claiming two uids.
+    """
+    global _OFFICIAL_NAMES
+    if _OFFICIAL_NAMES:
+        return _OFFICIAL_NAMES
+    path = ROOT / "data" / "spine" / "cedar_entity_names.csv"
+    if not path.exists():
+        return _OFFICIAL_NAMES
+    claims: dict = {}
+    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for row in csv.DictReader(fh):
+            handle = (row.get("prior_canonical_name") or "").strip()
+            name = (row.get("name") or "").strip()
+            if handle and name and handle != name:
+                claims.setdefault(handle, set()).add(name)
+    _OFFICIAL_NAMES = {k: next(iter(v)) for k, v in claims.items() if len(v) == 1}
+    return _OFFICIAL_NAMES
+
+
+#: Columns that carry a Cedar entity NAME. Enumerated, not pattern-matched, so
+#: adding one is a decision somebody makes on purpose. The second group was
+#: found by measuring the rebuilt files for a surviving handle rather than by
+#: reading headers - `gaming_properties__entity` does not have "name" in it.
+NAME_COLS = ("canonical_name", "native_party_canonical_name",
+             "tribe_canonical_name", "cedar_spine_canonical_name",
+             "nest_entity_dual_role__canonical_name",
+             "register_canonical_name", "withdrawn_canonical_name",
+             "gaming_properties__entity",
+             "gaming_properties__ultimate_parent_entity",
+             "canonical_name_token_match",
+             "name_match_support_measured_against")
+
+#: PROSE IS DELIBERATELY NOT REWRITTEN, and this is the opposite of the call
+#: made for NEIDs three hundred lines up. The difference is what the two
+#: things are.
+#:
+#: A retired NEID inside an evidence sentence is an IDENTIFIER, and rewriting
+#: it to Cedar's own key leaves the sentence saying the same true thing about
+#: the same entity. A short handle inside an evidence sentence is part of a
+#: RECORD OF WHAT A MATCHER SAW: `nonprofits.evidence` reads "BMF name matched
+#: canonical tribe X via irs_bmf_canonical_match", and the matcher really did
+#: compare against the handle. Substituting the official name there would
+#: describe a comparison that never happened.
+#:
+#: It is also unsafe in a way the NEID substitution is not. NEIDs are
+#: distinctive tokens; handles are ordinary words. `Oneida` inside "Oneida
+#: County" or `Blackfeet` mid-sentence would be rewritten by any prose pass,
+#: and the result is a corrupted sentence rather than a corrected one.
+#:
+#: So the handle survives in evidence text, in 4 nonprofits rows, on purpose.
+#: A customer-facing NAME column carries the official name; an audit trail
+#: keeps saying what actually happened.
+
+
+def apply_official_names(row: dict) -> int:
+    """Replace the short handle with the official name, in place.
+
+    Owner, 2026-09-04: *"there should be no short handle we cant use it
+    reliable"*, and he is right in a way that is measurable. Matching the BIA
+    list on `canonical_name` resolved 29 of 577 rows - 5.0%. Matching on the
+    official name resolved 576 of 577 - 99.8%. `Benton` carries nothing that
+    connects it to the Utu Utu Gwaitu Paiute Tribe of the Benton Paiute
+    Reservation, so no matcher could reach it, and that is exactly why 21
+    corrupted handles sat in the register undetected: nothing ever got close
+    enough to notice they were wrong.
+
+    Dropping these columns is not available - seven customer datasets read a
+    name out of them and a buyer needs to see WHO a row is about. So the
+    column stays and its VALUE becomes the name the publishing register uses.
+
+    Substitution is by exact handle, never by prefix or fuzzy match. A value
+    that is not a known handle - a raw recipient name from FPDS, a filing's
+    own spelling - is left exactly as it was.
+    """
+    mapping = official_names()
+    if not mapping:
+        return 0
+    n = 0
+    for col in NAME_COLS:
+        val = row.get(col)
+        if not val or not isinstance(val, str):
+            continue
+        official = mapping.get(val.strip())
+        if official:
+            row[col] = official
+            n += 1
+    return n
 
 
 # INTERNAL WORKING COLUMNS. 843 states plainly that the `*_proposed*` columns
@@ -833,6 +1025,201 @@ def adjudication(r) -> tuple[str, str]:
 
 
 _DENIED_UEIS: dict = {}
+
+
+# ---------------------------------------------------------------------------
+# WHAT EACH DATASET IS — the canonical, customer-facing definition
+# ---------------------------------------------------------------------------
+# Owner, 2026-09-04: "the definition of the dataset needs to be updated across
+# the infrastructure, git/website and artifact too".
+#
+# It was typed into four places independently — the manifest builder's
+# `measure`, the dataset-doc generator's `what`, `docs/datasets/_descriptors
+# .json`'s `tracks`, and the website catalog's `blurb` — and all four had
+# drifted apart. The site said "Announced transactions"; the manifest said
+# "Documented public transactions"; the descriptor omitted divestitures and
+# investments entirely. A customer reading the site and a customer reading the
+# codebook were being told the dataset covered different things.
+#
+# This is now the one place it is written. Everything else reads from here, and
+# 1169's release gate fails if any consumer has drifted from it.
+
+DATASET_DEFINITION = {
+    "deals": (
+        "Material transactions and capital commitments involving Native "
+        "nations, organizations and enterprises, including acquisitions, "
+        "divestitures, property purchases, investments, financing agreements, "
+        "bond issuances, joint ventures and major capital projects. Track who "
+        "participated, the Native entity involved, announced value, status and "
+        "timing, and compare activity across periods."
+    ),
+}
+
+
+def dataset_definition(collection: str) -> str:
+    """The customer-facing definition of a collection, or "" if none is set.
+
+    Returns "" rather than raising: a collection with no ruled definition yet
+    is a normal state, and the gate reports it as NOT_ESTABLISHED rather than
+    letting a caller invent one.
+    """
+    return DATASET_DEFINITION.get(str(collection).strip().lower(), "")
+
+
+# ---------------------------------------------------------------------------
+# THE DEALS SCHEMA RULING — owner, 2026-09-04
+# ---------------------------------------------------------------------------
+# "The file has 61 columns, which is too many. Several are exact duplicates or
+#  internal pipeline debris."
+#
+# Every claim below was VERIFIED against all 1,073 rows before anything was
+# removed, and three of the owner's premises turned out to be wrong. The
+# conclusions still hold; the reasons changed, and the reasons are what a
+# future reader needs.
+
+#: EXACT DUPLICATES. Measured identical on 1,073 of 1,073 rows, every pair.
+#: A second column carrying the same bytes is not redundancy, it is a second
+#: thing to keep in sync and a second thing to get wrong.
+DEALS_DUPLICATE = {
+    "native_party_entity_id": "cedar_uid",
+    "native_party_parent_entity": "native_party_canonical_name",
+    "sector_raw": "Industry",
+    "transaction_type_raw": "Event_Type",
+    "deal_category_raw": "Deal_Category",
+    "value_type_raw": "Value_Type",
+}
+
+#: PIPELINE DEBRIS. Removed for what they ARE, not for being empty — and that
+#: distinction is the correction.
+#:
+#: The owner wrote "n_seminole_bond_disclosures because every value is zero".
+#: Measured: 1,065 rows are zero and **8 rows hold 29**. Likewise
+#: n_tribal_resolution_financings has 3 non-zero rows, and n_ownership_events
+#: has NINE distinct values across 404 non-zero rows. None of the three is
+#: empty.
+#:
+#: They go anyway, on the owner's other and better reason: they are join
+#: counts — how many rows some other table contributed — which is a fact about
+#: Cedar's pipeline, not an attribute of a deal. Recording the real reason
+#: matters, because "it was all zeros" would license deleting them without
+#: looking, and the next such column may not be.
+#:
+#: classified_date IS uniform: 1 distinct value, 2026-09-02, on every row. It
+#: is the date a script ran.
+DEALS_DEBRIS = (
+    "classified_date",
+    "n_seminole_bond_disclosures",
+    "n_tribal_resolution_financings",
+    "n_ownership_events",
+)
+
+#: SUPERSEDED BY A FINER COLUMN. `Event_Date_class` has four values;
+#: `Event_Date_precision` has six and is strictly finer — measured, `exact`
+#: splits into day (972), month (75) and year (2), and every other class value
+#: maps 1:1 onto exactly one precision value:
+#:
+#:     exact                        -> day | month | year
+#:     approximate                  -> unknown
+#:     fiscal_year_end_placeholder  -> unknown_within_fiscal_year
+#:     absent                       -> (blank)
+#:
+#: So the class is recoverable from the precision and the reverse is not.
+#: Dropping it loses nothing, which is why it is here and not in the internal
+#: list.
+DEALS_SUPERSEDED = ("Event_Date_class",)
+
+#: INTERNAL: kept in the working table, never published. These are how Cedar
+#: reached a conclusion — the evidence trail, the caution flags, the verbatim
+#: source string a date was read from. A customer is owed the conclusion and
+#: the source, not the deliberation.
+#:
+#: `YOUR_NOTES` is the owner's review column and is internal by the same rule.
+DEALS_INTERNAL = (
+    "YOUR_NOTES",
+    "Threshold_Exception",
+    "record_class",
+    "Record_Scope",
+    "native_party_attribution_source",
+    "native_party_attribution_method",
+    "native_party_value_caution",
+    "Event_Date_precision_basis",
+    "Event_Date_source_value_verbatim",
+    "Date_Basis",
+)
+
+#: DERIVED AT PUBLISH, not stored. Owner: "Keep Event_Year, but calculate
+#: Event_Quarter and Event_Month when producing the public file rather than
+#: storing them as canonical source fields." A stored derivative is a second
+#: copy of the date that can disagree with it; computing it at export cannot.
+DEALS_DERIVED = ("Event_Quarter", "Event_Month")
+
+#: KEPT, BOTH OF THEM, against the instinct to fold. Recorded because the next
+#: reader will see near-identical columns and reach for the delete key:
+#:
+#:   Date_Added / Data_As_Of  — identical on 1,069 of 1,073 rows today, and
+#:     they mean different things: when Cedar first recorded the deal, and how
+#:     current the record is. They will diverge the first time a row is
+#:     refreshed, and folding them now would make that divergence unrecordable.
+#:
+#:   Native_Party / native_party_canonical_name — the party NAMED in the deal,
+#:     and the Cedar entity the deal is ATTRIBUTED to. A subsidiary signs the
+#:     contract; the nation is who it belongs to. Collapsing these is the exact
+#:     error that keyed Amee Bay to the Three Affiliated Tribes.
+DEALS_KEEP_BOTH = (("Date_Added", "Data_As_Of"),
+                   ("Native_Party", "native_party_canonical_name"))
+
+
+def recompute_derived(collection: str, header, rows) -> dict:
+    """Recompute publish-time derivatives from their source column.
+
+    Owner's ruling, 2026-09-04: "Keep Event_Year, but calculate Event_Quarter
+    and Event_Month when producing the public file rather than storing them as
+    canonical source fields."
+
+    A stored derivative is a second copy of the date that is free to disagree
+    with it, and on the build this ruling was written against, 133 of 1,073
+    rows already did: 120 rows carried a day-precision Event_Date and a BLANK
+    quarter and month. Nothing had gone wrong loudly; the derivative had simply
+    never been filled for those rows and no check could see it, because there
+    was nothing to compare a stored value against. Deriving removes the
+    possibility rather than the symptom.
+
+    PRECISION GOVERNS. A quarter is only derived where the month is genuinely
+    known — precision `day` or `month`. Ten rows carry
+    `unknown_within_fiscal_year`, whose Event_Date is a fiscal-year-end
+    PLACEHOLDER; reading a quarter off it would report the placeholder as a
+    fact about the deal. Those stay blank, and so do rows whose only real
+    precision is the year. That is why this is not a one-line strftime.
+
+    Mutates `rows` in place. Returns a count per column of what changed, so a
+    caller can report it rather than assert silently.
+    """
+    changed = {}
+    if str(collection).strip().lower() != "deals":
+        return changed
+    have_month = {"day", "month"}
+    for col in DEALS_DERIVED:
+        changed[col] = 0
+    for r in rows:
+        date = str(r.get("Event_Date") or "").strip()
+        prec = str(r.get("Event_Date_precision") or "").strip().lower()
+        # No precision recorded at all: fall back to the shape of the date
+        # itself rather than refusing every row in a table that predates the
+        # precision column.
+        known = (prec in have_month) if prec else len(date) >= 7
+        if known and len(date) >= 7 and date[4] == "-" and date[5:7].isdigit():
+            month = date[:7]
+            try:
+                quarter = "Q%d" % ((int(date[5:7]) - 1) // 3 + 1)
+            except ValueError:
+                month = quarter = ""
+        else:
+            month = quarter = ""
+        for col, val in (("Event_Month", month), ("Event_Quarter", quarter)):
+            if col in changed and str(r.get(col) or "") != val:
+                r[col] = val
+                changed[col] += 1
+    return {k: v for k, v in changed.items() if v}
 
 
 def denied_ueis() -> dict:
@@ -1176,6 +1563,12 @@ def publishable_columns(header) -> list:
     # the column six different ways between them.
     lower_drop |= {c.lower() for c in NEID_COLS}
     lower_drop |= {c.lower() for c in PROPOSED_COLS}
+    # The deals schema ruling of 2026-09-04. Duplicates and debris go entirely;
+    # the internal set stays in the working table and never reaches a customer.
+    lower_drop |= {c.lower() for c in DEALS_DUPLICATE}
+    lower_drop |= {c.lower() for c in DEALS_DEBRIS}
+    lower_drop |= {c.lower() for c in DEALS_SUPERSEDED}
+    lower_drop |= {c.lower() for c in DEALS_INTERNAL}
     never = set(NEVER)
     return [c for c in (header or [])
             if c.lower() not in lower_drop and c not in never

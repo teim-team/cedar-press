@@ -337,7 +337,8 @@ def _rel(path: Path) -> str:
 
 def measure(did: str) -> dict:
     """Every number in Appendix M is produced here, from dist/customer/<id>.csv."""
-    import duckdb
+    import duckdb  # noqa: F401  (kept: types/exceptions)
+    import cedar_duck
 
     path = DIST / f"{did}.csv"
     out: dict = {"dataset": did, "path": path, "exists": path.exists()}
@@ -349,7 +350,7 @@ def measure(did: str) -> dict:
     out["bytes"] = path.stat().st_size
     out["header_sha256"] = hashlib.sha256(header_line).hexdigest()
 
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     rel = _rel(path)
     cols = [r[0] for r in con.sql(f"DESCRIBE SELECT * FROM {rel}").fetchall()]
     out["columns"] = len(cols)

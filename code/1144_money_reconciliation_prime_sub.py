@@ -30,7 +30,8 @@ import sys
 import time
 from pathlib import Path
 
-import duckdb
+import duckdb  # noqa: F401  (kept: types/exceptions)
+import cedar_duck
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_JSON = ROOT / "docs" / "MONEY_RECONCILIATION_1144.json"
@@ -64,7 +65,7 @@ def one(con, sql):
 
 
 def measure():
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.sql("PRAGMA threads=4")
     out = {
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

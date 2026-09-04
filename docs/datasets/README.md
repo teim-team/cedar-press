@@ -1,6 +1,6 @@
 # Dataset Maintenance Docs
 
-*Generated 2026-09-01 by `code/24_generate_dataset_docs.py`. Edit the SPEC in that script, not these files.*
+*Generated 2026-09-04 by `code/24_generate_dataset_docs.py`. Edit the SPEC in that script, not these files.*
 
 One file per dataset. Each answers: what it is, where its inputs are, how to refresh it, what is known to be wrong, and what must never be done to it.
 
@@ -30,4 +30,4 @@ These cover the collections with no SPEC entry above. Edit them directly; their 
 
 Five more hand-written docs sit alongside a generated one and carry the operational runbook or the long-form source surface for their collection: [`federal-register.md`](federal-register.md), [`nagpra.md`](nagpra.md), [`subcontracting.md`](subcontracting.md), [`gaming_sources.md`](gaming_sources.md) and [`lobbying_sources.md`](lobbying_sources.md).
 
-*Catalog coverage check: 10 sellable collections have a SPEC entry here; documented BY HAND instead: `native-owned-businesses`, `natural-resources` — listed above, not missing.*
+*Catalog coverage check: 10 sellable collections have a SPEC entry here; documented BY HAND instead: `native-owned-businesses`, `natural-resources`, `nest`, `newsletters` — listed above, not missing.*

@@ -6,13 +6,13 @@
     "class2b": 0,
     "class2c": 70,
     "class3": 2,
-    "class4": 15,
+    "class4": 14,
     "class5": 6,
     "class6": 29,
-    "class7": 46,
+    "class7": 44,
     "class8": 0,
     "class9": 0,
-    "lint_bug_class_instances": 169
+    "lint_bug_class_instances": 166
   },
   "findings": [
     {
@@ -270,11 +270,11 @@
     {
       "class": "class4",
       "file": "1171_prior_finding_regression_pack.py",
-      "line": 549,
+      "line": 556,
       "evidence": "if quick and n > QUICK_CAP:",
       "why": "a budget (QUICK_CAP) exits a loop, the file writes a completion marker (['OK']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "the truncation is RECORDED, not hidden."
     },
     {
       "class": "class2c",
@@ -1742,24 +1742,6 @@
       "why": "[WARN] POSITIONAL on target business_source_id -> codebook_master.csv, native_owned_businesses.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
       "waiver_reason": "`disc` is a function of the ROW, never of its"
-    },
-    {
-      "class": "class7",
-      "file": "1167_cedar_uid_identity_collisions.py",
-      "line": 339,
-      "evidence": "already = {id(r) for r, *_ in plan}",
-      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> cedar_identifier_ledger_final.csv. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
-      "file": "1167_cedar_uid_identity_collisions.py",
-      "line": 341,
-      "evidence": "if id(r) in already:",
-      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> cedar_identifier_ledger_final.csv. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
     },
     {
       "class": "class7",

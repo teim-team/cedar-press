@@ -105,7 +105,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
-import duckdb
+import duckdb  # noqa: F401  (kept: types/exceptions)
+import cedar_duck
 
 ROOT = Path(__file__).resolve().parent.parent
 CLEAN = ROOT / "data" / "clean"
@@ -490,7 +491,7 @@ def measure_one(con, spec):
 
 def coverage():
     """The measurement, as a plain dict.  Imported by 62's ratchet."""
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.sql("SET preserve_insertion_order=false")
     try:
         return {"measured": TODAY,
@@ -822,7 +823,7 @@ def _withdrawn_since_baseline(metric_key: str, base: dict) -> int:
     if not path.exists():
         return 0
     try:
-        con = duckdb.connect()
+        con = cedar_duck.connect()
         cols = {r[0] for r in con.execute(
             f"DESCRIBE SELECT * FROM read_csv_auto('{path.as_posix()}', "
             f"SAMPLE_SIZE=1)").fetchall()}
