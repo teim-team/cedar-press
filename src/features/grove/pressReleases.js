@@ -23,13 +23,24 @@
  * disagreement impossible and gives every collection a release the day its
  * descriptor lands, with nothing typed twice.
  *
- * What the manifest does not carry is the reason a release happened. The
- * first release's notes are derived from what the manifest does measure (the
- * table count, the row count, the preview file). Later releases get editorial
- * notes in `RELEASE_NOTES`, written for a reader of the research product:
- * "resolved 14 recipients to existing tribal enterprises" is something a
- * subscriber can act on, "bump parser to 2.3" is not. A note can only describe
- * a version the manifest has shipped; a test holds that.
+ * THE HISTORY IS THE LEDGER'S
+ * `data/cedar/releases.json` is the append-only record of every release the
+ * manifest has shipped, written by `scripts/record-release.mjs` after each
+ * import with the facts the release shipped with (tables, rows, preview,
+ * blockers). Codex, PR #51, and it is right: the first version of this file
+ * derived the "first release" from the CURRENT descriptor, so a re-import at
+ * v1 would have recomputed v0 as v1 and the v0 entry, its date and the
+ * permalink anchor a citation may already name would have vanished. A release
+ * on the record stays on the record; the ledger refuses to overwrite a
+ * version whose facts changed, and a test fails, naming the command, when the
+ * manifest carries a version the ledger does not.
+ *
+ * What neither file carries is the reason a release happened. A ledger entry
+ * says what shipped; `RELEASE_NOTES` says why, written for a reader of the
+ * research product: "resolved 14 recipients to existing tribal enterprises"
+ * is something a subscriber can act on, "bump parser to 2.3" is not. A note
+ * overlays the ledger entry for its version and can only describe a version
+ * the ledger holds; a test holds that too.
  *
  * TWO KINDS OF RELEASE
  * A data update adds records, corrects them, or extends coverage. A
@@ -47,8 +58,10 @@
  * states none rather than borrowing one.
  */
 
+import ledger from "../../../data/cedar/releases.json" with { type: "json" };
+
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
-import { LAUNCH_COLLECTION, collectionCedarFacts, collectionSample } from "./collection.js";
+import { LAUNCH_COLLECTION } from "./collection.js";
 
 /** How often a collection changes. The label is what a reader sees. */
 export const CADENCE = Object.freeze({
@@ -91,56 +104,69 @@ export const DECLARED_CADENCE = Object.freeze({
 });
 
 /**
- * Editorial change notes, keyed by collection id, newest first.
+ * Editorial change notes, keyed by collection id, then by the version they
+ * describe.
  *
- * Each entry is `{ version, date, kind, note?, changed }` and describes a
- * release the manifest has shipped: `version` must be the descriptor's
- * current version or one before it, and `date` may not run ahead of the
- * descriptor's `updated`. When the workspace re-imports a collection at a new
- * version, its notes are written here and the derived first-release entry
- * stays below them as the floor of the history.
+ * Each note is `{ kind, note?, changed }` and overlays the ledger's entry for
+ * that version: the ledger supplies the date and the measured facts, the
+ * note supplies the reason and, for a methodology release, the warning. A
+ * note for a version the ledger does not hold fails a test, because a note
+ * can only describe a release that shipped.
  *
- * Empty today. Every collection is on its first release, and the first
- * release's notes are derived below rather than typed.
+ * Empty today. Every collection is on its first release, and what a first
+ * release changed is said from the ledger's facts rather than typed.
  */
 export const RELEASE_NOTES = Object.freeze({});
 
-/** What the manifest measures about a first release, said for a reader. */
-function firstRelease(dataset) {
-  const cedar = collectionCedarFacts(dataset.id);
-  const sample = collectionSample(dataset.id);
-  const tables = cedar?.n_tables;
-  const changed = [
-    tables
-      ? `First release on Cedar Press: ${tables} ${tables === 1 ? "table" : "tables"}, ${dataset.rowsLabel}.`
-      : `First release on Cedar Press: ${dataset.rowsLabel}.`,
-  ];
-  if (sample?.path) {
+/** The ledger's entries for a collection, oldest first, as recorded. */
+export function ledgerFor(id) {
+  return ledger.releases[id] ?? [];
+}
+
+/** What a recorded release shipped, said for a reader, from its facts alone. */
+function describe(record, isFirst) {
+  const lead = isFirst ? "First release on Cedar Press" : "Release";
+  const tables = record.tables
+    ? `${record.tables} ${record.tables === 1 ? "table" : "tables"}, ${record.rowsLabel}`
+    : record.rowsLabel;
+  const changed = [`${lead}: ${tables}.`];
+  if (record.preview) {
     changed.push(
-      `A ${sample.rows}-row preview of ${sample.table}, the collection's flagship table, downloads from the shelf.`,
+      `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table, downloads from the shelf.`,
     );
   } else {
     changed.push(
       "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
     );
   }
-  if (cedar?.blockers?.length) {
-    const n = cedar.blockers.length;
-    changed.push(`Readiness is blocked, with ${n} named ${n === 1 ? "blocker" : "blockers"} recorded in the manifest.`);
+  if (record.blockers) {
+    changed.push(
+      `Readiness is blocked, with ${record.blockers} named ${record.blockers === 1 ? "blocker" : "blockers"} recorded in the manifest.`,
+    );
   }
-  return Object.freeze({
-    version: dataset.version,
-    date: dataset.updated,
-    kind: RELEASE_KIND.DATA,
-    changed: Object.freeze(changed),
-  });
+  return changed;
+}
+
+/** One collection's history, newest first: the ledger, with notes overlaid. */
+function historyOf(id) {
+  const notes = RELEASE_NOTES[id] ?? {};
+  return ledgerFor(id).map((record, index) => {
+    const note = notes[record.version];
+    return Object.freeze({
+      version: record.version,
+      date: record.date,
+      kind: note?.kind ?? RELEASE_KIND.DATA,
+      ...(note?.note ? { note: note.note } : {}),
+      changed: Object.freeze(note?.changed ?? describe(record, index === 0)),
+    });
+  }).reverse();
 }
 
 /**
  * Per collection: where it is now, and how it got here.
  *
- * `version` and `updated` are the descriptor's. `history` is the editorial
- * notes, newest first, over the derived first release.
+ * `version` and `updated` are the descriptor's. `history` is the ledger's,
+ * newest first, with editorial notes overlaid where they exist.
  */
 export const PRESS_RELEASES = Object.freeze(
   Object.fromEntries(
@@ -150,7 +176,7 @@ export const PRESS_RELEASES = Object.freeze(
         version: dataset.version,
         updated: dataset.updated,
         cadence: DECLARED_CADENCE[dataset.id] ?? null,
-        history: Object.freeze([...(RELEASE_NOTES[dataset.id] ?? []), firstRelease(dataset)]),
+        history: Object.freeze(historyOf(dataset.id)),
       }),
     ]),
   ),

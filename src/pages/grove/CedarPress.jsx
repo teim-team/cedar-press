@@ -34,7 +34,7 @@ import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
-import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
+import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -153,13 +153,31 @@ export default function CedarPress() {
                 still reproduces.
               </p>
             </div>
+            {/* The three most recently changed collections, read from the
+                release record, each a door into What's New at that release's
+                permalink, and a fourth line into the whole feed. The claim
+                beside them is that the collections keep moving; a reader who
+                wants to check it should be one click from the evidence. */}
             <ul className="cp-new">
-              {recentlyUpdated(3).map((release) => (
-                <li className="cp-new__item" key={release.id}>
-                  <b>{PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}</b>
-                  <span className="cp-new__date">{formatUpdated(release.updated)}</span>
-                </li>
-              ))}
+              {recentlyUpdated(3).map((release) => {
+                const latest = latestRelease(release.id);
+                const to = latest
+                  ? `${PRESS_WHATS_NEW_PATH}#${anchorOf({ id: release.id, version: latest.version })}`
+                  : PRESS_WHATS_NEW_PATH;
+                return (
+                  <li className="cp-new__item" key={release.id}>
+                    <Link className="cp-new__link" to={to}>
+                      <b>{PRESS_CATALOG_BY_ID[release.id]?.name ?? release.id}</b>
+                      <span className="cp-new__date">{formatUpdated(release.updated)}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+              <li className="cp-new__item cp-new__more">
+                <Link className="cp-new__link" to={PRESS_WHATS_NEW_PATH}>
+                  See every release <span aria-hidden="true">&#8594;</span>
+                </Link>
+              </li>
             </ul>
             {/* Under the statement, in its column, rather than on a rule of
                 their own across the page. Two links are not a section. */}

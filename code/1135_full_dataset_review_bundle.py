@@ -188,7 +188,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (          # noqa: E402
     NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
     is_publication_eligible, mask_attribution, MASK, translate_neid_values,
-    enforce_denials,
+    enforce_denials, DENIAL_MASK_REASON,
 )
 
 csv.field_size_limit(10_000_000)
@@ -330,7 +330,6 @@ def build(mode: str) -> int:
                     dropped = [c for c in hdr if c not in cols]
                     kept, held = [], defaultdict(int)
                     masked = defaultdict(int)
-                    denied = [0]
                     for r in rd:
                         # PROJECT BEFORE GATING. `row_ok`'s NEVER check is a
                         # backstop for a personal field under a name the drop
@@ -365,8 +364,14 @@ def build(mode: str) -> int:
                         # dist/review samples the live site importer consumes
                         # still carried the denied attribution. Same rule,
                         # same module, every writer. Raises rather than
-                        # continues when the ledger cannot be read.
-                        denied[0] += enforce_denials(r)
+                        # continues when the ledger cannot be read. Counted
+                        # as the MASK it is, under its own reason, so the
+                        # manifest's `rows_attribution_masked` and
+                        # `attribution_masked_why` carry it: Codex, PR #51,
+                        # a counter that is written and never read leaves the
+                        # samples changed and the audit trail silent.
+                        if enforce_denials(r):
+                            masked[DENIAL_MASK_REASON] += 1
                         # CP-002: ONE gate, and all three of its outcomes.
                         # `is_publication_eligible` is `row_ok` plus the
                         # deny-by-default adjudication policy; a MASK keeps the
