@@ -123,41 +123,53 @@ export function ledgerFor(id) {
   return ledger.releases[id] ?? [];
 }
 
-/** What a recorded release shipped, said for a reader, from its facts alone. */
-function describe(record, isFirst) {
+/**
+ * What a recorded release shipped, said for a reader, from its facts alone.
+ *
+ * Only the CURRENT release's preview "downloads from the shelf". The importer
+ * writes each sample to one unversioned path and the shelf serves whatever is
+ * there, so an older release's preview is a fact about what shipped then, not
+ * a file a reader can still take (Codex, PR #52).
+ */
+function describe(record, { isFirst, isCurrent }) {
   const lead = isFirst ? "First release on Cedar Press" : "Release";
   const tables = record.tables
     ? `${record.tables} ${record.tables === 1 ? "table" : "tables"}, ${record.rowsLabel}`
     : record.rowsLabel;
   const changed = [`${lead}: ${tables}.`];
   if (record.preview) {
+    const preview = `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table`;
     changed.push(
-      `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table, downloads from the shelf.`,
+      isCurrent
+        ? `${preview}, downloads from the shelf.`
+        : `${preview}, was published with this release; the shelf now serves the current release's preview.`,
     );
   } else {
     changed.push(
       "No preview file yet: the collection's flagship table is unsettled, and no sample is published until it is.",
     );
   }
-  if (record.blockers) {
+  const blockers = Array.isArray(record.blockers) ? record.blockers.length : 0;
+  if (blockers) {
     changed.push(
-      `Readiness is blocked, with ${record.blockers} named ${record.blockers === 1 ? "blocker" : "blockers"} recorded in the manifest.`,
+      `Readiness is blocked, with ${blockers} named ${blockers === 1 ? "blocker" : "blockers"} recorded in the manifest.`,
     );
   }
   return changed;
 }
 
 /** One collection's history, newest first: the ledger, with notes overlaid. */
-function historyOf(id) {
+function historyOf(id, currentVersion) {
   const notes = RELEASE_NOTES[id] ?? {};
   return ledgerFor(id).map((record, index) => {
     const note = notes[record.version];
+    const standing = { isFirst: index === 0, isCurrent: record.version === currentVersion };
     return Object.freeze({
       version: record.version,
       date: record.date,
       kind: note?.kind ?? RELEASE_KIND.DATA,
       ...(note?.note ? { note: note.note } : {}),
-      changed: Object.freeze(note?.changed ?? describe(record, index === 0)),
+      changed: Object.freeze(note?.changed ?? describe(record, standing)),
     });
   }).reverse();
 }
@@ -176,7 +188,7 @@ export const PRESS_RELEASES = Object.freeze(
         version: dataset.version,
         updated: dataset.updated,
         cadence: DECLARED_CADENCE[dataset.id] ?? null,
-        history: Object.freeze(historyOf(dataset.id)),
+        history: Object.freeze(historyOf(dataset.id, dataset.version)),
       }),
     ]),
   ),

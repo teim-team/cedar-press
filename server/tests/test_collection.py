@@ -575,6 +575,24 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
     def test_nothing_is_both_shipped_and_excluded(self) -> None:
         self.assertEqual(set(self.script.STOREFRONT) & set(self.script.EXCLUDED), set())
 
+    def test_the_release_ledger_is_tracked(self) -> None:
+        # Codex, PR #52. `.gitignore` excludes `/data/*` as a directory, so a
+        # file the site imports from data/cedar/ reaches the repository only
+        # by `git add -f`. The first ledger was written, read by the build and
+        # never committed, and `main` could not build. Every file the client
+        # imports from data/cedar/ must be in the index.
+        for name in ("collections.manifest.json", "releases.json"):
+            with self.subTest(file=name):
+                result = subprocess.run(  # noqa: S603
+                    ["git", "-C", str(_REPO), "ls-files", "--error-unmatch",
+                     f"data/cedar/{name}"],
+                    capture_output=True, text=True, check=False,
+                )
+                self.assertEqual(
+                    result.returncode, 0,
+                    f"data/cedar/{name} is not tracked; `git add -f data/cedar/{name}`",
+                )
+
 
 def _plain(value: Any) -> Any:
     """A frozen snapshot value in the shape ``json`` produced it."""

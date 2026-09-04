@@ -7,7 +7,12 @@ import test from "node:test";
 
 import { readFileSync } from "node:fs";
 
-import { LAUNCH_COLLECTION, collectionCedarFacts, collectionSample } from "./collection.js";
+import {
+  EXCLUDED_COLLECTIONS,
+  LAUNCH_COLLECTION,
+  collectionCedarFacts,
+  collectionSample,
+} from "./collection.js";
 import { PRESS_CATALOG } from "./pressCatalog.js";
 import {
   CADENCE,
@@ -73,15 +78,24 @@ test("the ledger's entry for the current version is what the manifest measures",
       tables: cedar.n_tables,
       rowsLabel: dataset.rowsLabel,
       preview: sample?.path ? { table: sample.table, rows: sample.rows, of: sample.of } : null,
-      blockers: cedar.blockers.length,
+      // By name, not by count: a blocker that changed is a fact that changed.
+      blockers: [...cedar.blockers],
     }, `${dataset.id} ${dataset.version}: the ledger and the manifest disagree`);
   }
 });
 
+// The ledger is append-only, so a collection the storefront retires keeps its
+// releases here: a citation of its v0 still resolves. What the ledger may not
+// hold is a collection the workspace has never measured at all. Every id must
+// be one the manifest ships or one it lists as excluded (Codex, PR #52).
 test("every version in the ledger is unique, dated and no newer than the descriptor", () => {
-  const shipped = new Set(LAUNCH_COLLECTION.map((dataset) => dataset.id));
-  for (const [id, records] of Object.entries(JSON.parse(readFileSync(new URL("../../../data/cedar/releases.json", import.meta.url), "utf8")).releases)) {
-    assert.ok(shipped.has(id), `${id} is in the ledger and not sold`);
+  const known = new Set([
+    ...LAUNCH_COLLECTION.map((dataset) => dataset.id),
+    ...EXCLUDED_COLLECTIONS.map((entry) => entry.id),
+  ]);
+  const ledger = JSON.parse(readFileSync(new URL("../../../data/cedar/releases.json", import.meta.url), "utf8"));
+  for (const [id, records] of Object.entries(ledger.releases)) {
+    assert.ok(known.has(id), `${id} is in the ledger and the workspace has never measured it`);
     const versions = records.map((record) => record.version);
     assert.equal(new Set(versions).size, versions.length, `${id} records a version twice`);
     const dates = records.map((record) => record.date);
@@ -89,7 +103,25 @@ test("every version in the ledger is unique, dated and no newer than the descrip
     const dataset = LAUNCH_COLLECTION.find((item) => item.id === id);
     for (const record of records) {
       assert.match(record.date, /^\d{4}-\d{2}-\d{2}$/, `${id} ${record.version}`);
-      assert.ok(record.date <= dataset.updated, `${id} ${record.version} is dated after the descriptor`);
+      assert.ok(Array.isArray(record.blockers), `${id} ${record.version} records blockers by count, not by name`);
+      if (dataset) {
+        assert.ok(record.date <= dataset.updated, `${id} ${record.version} is dated after the descriptor`);
+      }
+    }
+    // A retired collection has no release record on the storefront.
+    if (!dataset) assert.equal(releaseFor(id), null, `${id} is retired and still has a release`);
+  }
+});
+
+// Only the current release's preview is a file on the shelf.
+test("only the current release says its preview downloads", () => {
+  for (const dataset of LAUNCH_COLLECTION) {
+    const [current, ...older] = releaseFor(dataset.id).history;
+    if (collectionSample(dataset.id)?.path) {
+      assert.ok(current.changed.some((line) => line.endsWith("downloads from the shelf.")), dataset.id);
+    }
+    for (const entry of older) {
+      assert.ok(!entry.changed.some((line) => line.includes("downloads from the shelf")), `${dataset.id} ${entry.version}`);
     }
   }
 });
