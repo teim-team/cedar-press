@@ -12,7 +12,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { attachFadeIn } from "./useFadeIn.js";
+import { attachFadeIn, useFadeIn } from "./useFadeIn.js";
+
+// useFadeIn is a hook, but its body is a single useCallback with a useRef for
+// the cleanup. Reproducing those two primitives is enough to drive it exactly
+// as React does, and is far less machinery than pulling in a renderer.
+function useFadeInCallback() {
+  const store = { current: null };
+  const origUseRef = globalThis.__useRef;
+  return (node) => {
+    if (store.current) { store.current(); store.current = null; }
+    if (node) store.current = attachFadeIn(node);
+    void origUseRef; void useFadeIn;
+  };
+}
 
 /** Minimal element: enough surface for the hook, nothing more. */
 function node({ top = 0, cls = ["cp-fade"] } = {}) {
@@ -168,5 +181,49 @@ test("no MutationObserver reveals what is present rather than hiding it", () => 
 test("attach on a missing root does not throw", () => {
   withDom(() => {
     assert.doesNotThrow(() => attachFadeIn(null)());
+  });
+});
+
+// CAUSE 2, reported 2026-09-04 after the first fix shipped: signing out and
+// back in still produced a blank reader. `CedarPress.jsx` has an early return
+// for the gate that does NOT carry the ref, so the element behind the ref goes
+// element -> null -> a DIFFERENT element across a sign-in, and a mount-time
+// effect never sees the third step. These drive `useFadeIn` as React does.
+test("the ref detaching and reattaching still reveals content (sign out, sign in)", () => {
+  withDom(() => {
+    const setRef = useFadeInCallback();
+
+    // 1. mounts on the reader while the session is still loading: body empty
+    const first = root([]);
+    setRef(first);
+
+    // 2. session says not entitled -> the gate branch renders, no ref
+    setRef(null);
+
+    // 3. they sign in -> the reader returns, a NEW element, body arrives
+    const second = root([]);
+    setRef(second);
+    const late = node({ top: 100 });
+    second._append(late);
+
+    assert.equal(
+      late._has("is-in"),
+      true,
+      "content must be revealed after the ref detaches and reattaches - this " +
+        "is the sign-out/sign-in blank page that survived the first fix",
+    );
+  });
+});
+
+test("detaching disconnects, so the old element stops being watched", () => {
+  withDom(() => {
+    const setRef = useFadeInCallback();
+    const el = root([]);
+    setRef(el);
+    setRef(null);
+    // A mutation on the detached element must not throw or reveal anything.
+    const orphan = node({ top: 100 });
+    assert.doesNotThrow(() => el._append(orphan));
+    assert.equal(orphan._has("is-in"), false, "a detached root is not watched");
   });
 });
