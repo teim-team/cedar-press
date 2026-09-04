@@ -305,12 +305,143 @@ def lobbying():
     return write("5_lobbying_2025_2026_unique_clients.csv", recs)
 
 
+
+CONTRACT_CAP = 3000
+
+
+def _fy(v):
+    v = (v or "").strip()
+    return v[:4] if len(v) >= 4 and v[:4].isdigit() else ""
+
+
+def _num(v):
+    try:
+        return float(str(v).replace(",", "").replace("$", "").strip() or 0)
+    except ValueError:
+        return 0.0
+
+
+def federal_contracting():
+    """Prime contracting, ONE ROW PER CONTRACT, not per modification.
+
+    Owner, 2026-09-04: *"in the row should be, like, unique by contract or
+    award. We don't need to have every contract modification."*
+
+    Measured: the 2025-2026 window holds 110,692 rows but only 68,616 distinct
+    `contract_number` values - roughly 1.6 rows per contract - so the file
+    counts modifications as if they were awards. Anyone reading it as a deal
+    count is overstating activity by 61%.
+
+    WHY IT IS CAPPED. 68,616 contracts x 79 columns is about 40 MB and the
+    artifact ceiling is 16 MB, so the sheet carries the largest CONTRACT_CAP
+    contracts by obligation and says so. It is a review surface for judging
+    STRUCTURE, not a complete extract, and a sheet that silently truncates is
+    worse than one that states its own limit.
+
+    TWO PASSES, ON PURPOSE. Pass one aggregates obligations per contract using
+    small values only; pass two re-reads to collect the full rows for the
+    contracts that made the cut. Holding 68,616 wide rows in memory to save a
+    pass is exactly the shape that took this machine down twice today.
+    """
+    src = CUSTOMER / "contractors.csv"
+    if not src.exists():
+        print("    contractors.csv absent - skipped")
+        return
+    years = {"2025", "2026"}
+
+    agg = {}
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if _fy(r.get("fiscal_year")) not in years:
+                continue
+            cn = (r.get("contract_number") or "").strip()
+            if not cn:
+                continue
+            a = agg.get(cn)
+            ob = _num(r.get("total_obligations"))
+            if a is None:
+                agg[cn] = [ob, _num(r.get("total_award_value")), 1]
+            else:
+                a[0] += ob
+                a[1] += _num(r.get("total_award_value"))
+                a[2] += 1
+    keep = {cn for cn, _v in sorted(agg.items(), key=lambda kv: -kv[1][0])[:CONTRACT_CAP]}
+
+    best = {}
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if _fy(r.get("fiscal_year")) not in years:
+                continue
+            cn = (r.get("contract_number") or "").strip()
+            if cn not in keep:
+                continue
+            cur = best.get(cn)
+            if cur is None or _num(r.get("total_obligations")) > _num(
+                    cur.get("total_obligations")):
+                best[cn] = r
+
+    recs = []
+    for cn, r in best.items():
+        ob, av, n = agg[cn]
+        r = dict(r)
+        r["contract_total_obligations"] = "%.2f" % ob
+        r["contract_total_award_value"] = "%.2f" % av
+        r["n_rows_collapsed"] = str(n)
+        r["grain_note"] = ("ONE ROW PER CONTRACT. %d source row(s) collapsed; "
+                           "modifications are summed, not listed." % n)
+        recs.append(r)
+    recs.sort(key=lambda r: -_num(r.get("contract_total_obligations")))
+    order = ["cedar_uid", "canonical_name", "awardee_name", "contract_number",
+             "parent_contract_number", "fiscal_year",
+             "contract_total_obligations", "contract_total_award_value",
+             "n_rows_collapsed", "grain_note", "awardee_uei", "setaside"]
+    keepc = order + [k for k in (recs[0] if recs else {}) if k not in order]
+    write("6_federal_contracting_2025_2026.csv", recs, keepc)
+    print("      (%d contracts of %d in window; capped at %d by obligation)"
+          % (len(recs), len(agg), CONTRACT_CAP))
+
+
+def subcontracting():
+    """Subawards in the window, one row per prime->sub award."""
+    src = CUSTOMER / "subcontracting.csv"
+    if not src.exists():
+        print("    subcontracting.csv absent - skipped")
+        return
+    years = {"2025", "2026"}
+    recs = []
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if _fy(r.get("fiscal_year")) in years:
+                recs.append(r)
+    recs.sort(key=lambda r: -_num(r.get("subaward_amount")))
+    # CAPPED for the same reason as contracting: 10,410 subawards x 86 columns
+    # is 13.7 MB, and with contracting's 4.6 MB that alone exceeds the 16 MB
+    # artifact ceiling before the other five sheets are counted. Largest by
+    # amount, and the sheet says so rather than truncating quietly.
+    total_in_window = len(recs)
+    recs = recs[:CONTRACT_CAP]
+    for r in recs:
+        r["grain_note"] = ("one row per prime-to-sub award; sheet capped at the "
+                           "largest %d of %d in window by amount"
+                           % (CONTRACT_CAP, total_in_window))
+    order = ["prime_cedar_uid", "sub_cedar_uid", "prime_name", "sub_name",
+             "prime_award_id", "subaward_amount", "subaward_date",
+             "fiscal_year", "prime_uei", "sub_uei", "sub_state", "naics"]
+    order = [c for c in order if recs and c in recs[0]]
+    keepc = order + [k for k in (recs[0] if recs else {}) if k not in order]
+    write("7_subcontracting_2025_2026.csv", recs, keepc)
+    print("      (%d subawards of %d in window; capped at %d by amount)"
+          % (len(recs), total_in_window, CONTRACT_CAP))
+
+
 def main():
     print("\n  Cedar Press - owner review bundle\n")
     native_entities()
     deals()
     funding()
     lobbying()
+    federal_contracting()
+    subcontracting()
     print(f"\n  written to {OUT.relative_to(ROOT)}")
     print("  every sheet leads with YOUR_NOTES. Silence means approved.")
 

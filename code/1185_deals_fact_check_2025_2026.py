@@ -348,20 +348,63 @@ def apply_all(rows: list):
 
 
 def deliverables(rows: list, log: list, skipped: list, before: dict):
+    """TWO files, not eight.
+
+    Owner, 2026-09-04: *"instead of generating, like, fifty files, I just want
+    an updated dataset and code, and we can just look at the time stamp to know
+    when it was last updated."*
+
+    He is right, and review/ proves it - 37 deals_*.csv files had accumulated
+    there. The handoff asked for eight deliverables, but six of them are
+    ROW-LEVEL ATTRIBUTES: which rows are intentionally blank, which are queued
+    for review, which carry a candidate uid, which group a row belongs to.
+    Those are columns, not files. Splitting them out creates six things that
+    can go stale independently of the dataset they describe.
+
+    So they become columns, and what survives as a separate file is the one
+    thing that genuinely is not row-shaped: the change log, which is one row
+    per FIELD CHANGE rather than one row per deal.
+    """
     REVIEW.mkdir(parents=True, exist_ok=True)
     written = []
 
-    def w(name, fields, data):
-        p = REVIEW / name
-        with p.open("w", encoding="utf-8", newline="") as fh:
-            wr = csv.DictWriter(fh, fieldnames=fields)
-            wr.writeheader()
-            wr.writerows(data)
-        written.append((name, len(data)))
+    cand = {d: (u, n, st) for d, u, n, st in CANDIDATES}
+    q = {}
+    for r in rows:
+        d = (r.get("Deal_ID") or "").strip()
+        if r.get("Record_Scope") == "TRANSACTION_CANDIDATE_TRIBAL_PRESS":
+            q[d] = ("P1", "machine-extracted tribal-press candidate; the row's "
+                          "own Confidence says NOT hand-verified")
+        else:
+            vs = (r.get("Verification_Status") or "").strip()
+            if not (r.get("Source_2") or "").strip() and not vs.startswith("Primary"):
+                q[d] = ("P2", "single source and no primary document read - "
+                              "one publisher's word, uncorroborated")
+    refused = {d: why for _f, d, why in skipped}
 
-    # 1. corrected dataset
+    for r in rows:
+        d = (r.get("Deal_ID") or "").strip()
+        pr, why = q.get(d, ("", ""))
+        r["review_priority"] = pr
+        r["review_reason"] = why
+        c = cand.get(d)
+        r["candidate_cedar_uid"] = c[0] if c else ""
+        r["candidate_note"] = c[2] if c else ""
+        if not (r.get("cedar_uid") or "").strip():
+            r["blank_uid_reason"] = (
+                "attribution withdrawn 2026-09-04 (F01): attributed on a shared "
+                "word, not on evidence"
+                if d == "FA-HUD-0211" else
+                "no documented ownership, control or legal identity link; left "
+                "blank rather than inferred")
+        else:
+            r["blank_uid_reason"] = ""
+        r["correction_refused"] = refused.get(d, "")
+
     fields = list(rows[0].keys())
-    for extra in ("transaction_group", "capital_source_review"):
+    for extra in ("transaction_group", "capital_source_review", "review_priority",
+                  "review_reason", "candidate_cedar_uid", "candidate_note",
+                  "blank_uid_reason", "correction_refused"):
         if extra not in fields:
             fields.append(extra)
     with OUT.open("w", encoding="utf-8", newline="") as fh:
@@ -369,88 +412,16 @@ def deliverables(rows: list, log: list, skipped: list, before: dict):
         wr.writeheader()
         for r in rows:
             wr.writerow({c: r.get(c, "") for c in fields})
-    written.append((OUT.name, len(rows)))
+    written.append((OUT.name, len(rows), "%d columns" % len(fields)))
 
-    # 2. row-level change log
-    w("deals_change_log_%s.csv" % TODAY,
-      ["finding", "Deal_ID", "field", "old_value", "new_value", "reason",
-       "source", "applied"], log)
-
-    # 3. duplicate / transaction-group crosswalk
-    groups = collections.defaultdict(list)
-    for r in rows:
-        g = (r.get("transaction_group") or "").strip()
-        if g:
-            groups[g].append(r)
-    w("deals_transaction_groups.csv",
-      ["transaction_group", "Deal_ID", "Event_Date", "Announced_Value_USD",
-       "note"],
-      [{"transaction_group": g, "Deal_ID": r.get("Deal_ID", ""),
-        "Event_Date": r.get("Event_Date", ""),
-        "Announced_Value_USD": r.get("Announced_Value_USD", ""),
-        "note": "members of one transaction; never sum as separate events"}
-       for g, rs in sorted(groups.items()) for r in rs])
-
-    # 4. unresolved entity candidates
-    w("deals_unresolved_entity_candidates.csv",
-      ["Deal_ID", "candidate_cedar_uid", "candidate_entity", "status"],
-      [{"Deal_ID": d, "candidate_cedar_uid": u, "candidate_entity": n,
-        "status": s} for d, u, n, s in CANDIDATES])
-
-    # 5. rows intentionally left blank
-    w("deals_intentional_blank_uid.csv",
-      ["Deal_ID", "Native_Party", "reason"],
-      [{"Deal_ID": r.get("Deal_ID", ""),
-        "Native_Party": r.get("Native_Party", ""),
-        "reason": ("attribution withdrawn 2026-09-04 (F01)"
-                   if r.get("Deal_ID") == "FA-HUD-0211"
-                   else "no documented ownership, control or legal identity "
-                        "link; left blank rather than inferred")}
-       for r in rows if not (r.get("cedar_uid") or "").strip()])
-
-    # 6. exclusions
-    w("deals_exclusions.csv", ["finding", "Deal_ID", "reason"],
-      [{"finding": f, "Deal_ID": d, "reason": why} for f, d, why in skipped])
-
-    # 7. remaining verification queue, TIERED.
-    #
-    # The handoff states 79 rows need a new row-specific substantive source
-    # review. That figure could not be reproduced from any field in the file -
-    # every criterion tried landed on 36, 103, 108 or 131, never 79 - so it is
-    # the owner's own judgement rather than a derivable property. Guessing a
-    # rule that happens to total 79 would be fitting a number, not finding one.
-    #
-    # So the queue uses two criteria that ARE defensible from the data, keeps
-    # them separate, and over-includes rather than under-includes: a review
-    # queue that misses a row is worse than one carrying an extra.
-    #
-    #   P1  machine-extracted, never hand-verified. The row's own Confidence
-    #       says so. 36 rows.
-    #   P2  no SECOND independent source and no primary document read. One
-    #       source's word, unverified against anything.
-    def _tier(r):
-        if r.get("Record_Scope") == "TRANSACTION_CANDIDATE_TRIBAL_PRESS":
-            return ("P1", "machine-extracted tribal-press candidate; the row's "
-                          "own Confidence says NOT hand-verified")
-        vs = (r.get("Verification_Status") or "").strip()
-        if not (r.get("Source_2") or "").strip() and not vs.startswith("Primary"):
-            return ("P2", "single source and no primary document read - one "
-                          "publisher's word, uncorroborated")
-        return (None, "")
-    q = []
-    for r in rows:
-        t, why = _tier(r)
-        if t:
-            q.append({"review_priority": t, "Deal_ID": r.get("Deal_ID", ""),
-                      "Verification_Status": r.get("Verification_Status", ""),
-                      "Confidence": r.get("Confidence", ""),
-                      "Source_1": r.get("Source_1", ""),
-                      "Source_2": r.get("Source_2", ""),
-                      "why_queued": why})
-    q.sort(key=lambda x: (x["review_priority"], x["Deal_ID"]))
-    w("deals_verification_queue.csv",
-      ["review_priority", "Deal_ID", "Verification_Status", "Confidence",
-       "Source_1", "Source_2", "why_queued"], q)
+    log_path = REVIEW / "deals_change_log.csv"
+    with log_path.open("w", encoding="utf-8", newline="") as fh:
+        wr = csv.DictWriter(fh, fieldnames=["finding", "Deal_ID", "field",
+                                            "old_value", "new_value", "reason",
+                                            "source", "applied"])
+        wr.writeheader()
+        wr.writerows(log)
+    written.append((log_path.name, len(log), "one row per FIELD CHANGE"))
     return written
 
 
@@ -513,8 +484,8 @@ def build(apply: bool = False) -> int:
     if apply:
         written = deliverables(rows, log, skipped, before)
         print()
-        for name, n in written:
-            print("    wrote %-44s %5d rows" % (name, n))
+        for name, n, note in written:
+            print("    wrote %-40s %5d rows  (%s)" % (name, n, note))
     return 0
 
 
@@ -533,11 +504,12 @@ def verify() -> int:
            and (r.get("Event_Date_precision") or "") == "day"]
     f01 = [r for r in rows if r.get("Deal_ID") == "FA-HUD-0211"
            and (r.get("cedar_uid") or "").strip()]
-    qpath = REVIEW / "deals_verification_queue.csv"
-    queue = 0
-    if qpath.exists():
-        with qpath.open(encoding="utf-8-sig", newline="") as fh:
-            queue = sum(1 for _ in csv.DictReader(fh))
+    # THE QUEUE IS A COLUMN NOW, NOT A FILE. When the deliverables were
+    # consolidated this check kept reading the deleted file, found nothing, and
+    # reported "0 outstanding - OK" while 108 rows were still queued. A guard
+    # that reads a file which no longer exists does not fail; it passes, which
+    # is worse. It reads the data it is guarding.
+    queue = sum(1 for r in rows if (r.get("review_priority") or "").strip())
     print("  rows                          : %d" % len(rows))
     print("  capital_source off-vocabulary : %s" % (bad_cap or "none"))
     print("  native_party_role off-vocab   : %s" % (bad_role or "none"))

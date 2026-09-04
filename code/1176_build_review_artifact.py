@@ -43,8 +43,9 @@ FILES = [
      "<code>name</code> is the OFFICIAL name, taken from the register that "
      "publishes it, and <code>name_source</code> says which: the BIA Federal "
      "Register for tribes and Alaska Native villages, the DOI list for Native "
-     "Hawaiian Organizations, the ANCSA corporation list for ANCs. 952 of "
-     "1,555 are sourced that way; the rest read <code>cedar_internal</code>, "
+     "Hawaiian Organizations, the ANCSA corporation list for ANCs. __SOURCED__ "
+     "of __ENTITIES__ are sourced that way; the rest read "
+     "<code>cedar_internal</code>, "
      "which means no external register publishes a name for that class — so "
      "you can always tell a sourced name from an unsourced one. There is no "
      "short handle and no retired CICD code in this file: matching on the old "
@@ -68,6 +69,28 @@ FILES = [
      "One row per client, not per filing. Clients file quarterly and amend.",
      "<code>n_superseded_filings</code> is the amendment behaviour. Superseded "
      "rows ship deliberately, flagged; an unflagged one is the defect."),
+    ("6_federal_contracting_2025_2026.csv", "Federal contracting",
+     "Prime contracts, ONE ROW PER CONTRACT rather than per modification. The "
+     "window holds 110,692 source rows but only 68,616 distinct contracts - "
+     "about 1.6 rows per contract - so anything counting rows as awards "
+     "overstates activity by 61%. <code>n_rows_collapsed</code> shows how many "
+     "modifications each row absorbed.",
+     "Capped at the largest 3,000 contracts by obligation, because 68,616 "
+     "contracts x 79 columns is roughly 40 MB against a 16 MB ceiling. This is "
+     "a surface for judging STRUCTURE, not a complete extract. The thing to "
+     "look at is the shape: 79 columns carrying identity, geography, money in "
+     "nominal and 2025-real dollars, set-aside path and parent vehicle all in "
+     "one table - if that should be several tables, this is where to say so."),
+    ("7_subcontracting_2025_2026.csv", "Subcontracting",
+     "Subawards in the same window, one row per prime-to-sub award. Two "
+     "entities appear on every row - the prime and the sub - so it carries two "
+     "cedar_uids and two UEIs, which is why it is the most structurally awkward "
+     "file Cedar ships.",
+     "Capped at the largest 3,000 of 10,410 in window by amount — the full set "
+     "is 13.7 MB against a 16 MB ceiling for the whole page. The question is "
+     "whether a subaward is one row with two parties, or two rows with a role "
+     "column. Every other Cedar dataset uses the second shape; this one does "
+     "not."),
 ]
 
 
@@ -133,6 +156,22 @@ def main():
             "rows": rows_of(p), "kb": round(len(raw) / 1024),
             "kind": p.suffix.lstrip("."),
         })
+
+    # MEASURED, NOT TYPED. This card read "952 of 1,555" long after the
+    # register had grown to 1,916 - a stale hand-typed figure in the one
+    # bundle whose whole claim is that every number in it was read from the
+    # data at build time. Now it is.
+    n_ent = n_src = 0
+    with (SRC / "1_native_entities_ALL.csv").open(
+            encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in csv.DictReader(fh):
+            n_ent += 1
+            if (r.get("name_source") or "").strip() not in ("", "cedar_internal"):
+                n_src += 1
+    for c in cards:
+        for k in ("what", "look"):
+            c[k] = (c[k].replace("__SOURCED__", format(n_src, ","))
+                        .replace("__ENTITIES__", format(n_ent, ",")))
 
     html = TEMPLATE.replace("__CARDS__", json.dumps(cards)) \
                    .replace("__PAYLOAD__", json.dumps(payload)) \
