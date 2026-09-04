@@ -8,7 +8,6 @@ import test from "node:test";
 import {
   CONSTRUCTION_STEPS,
   DISCOVERY_MOVES,
-  ECOSYSTEM_COLLECTIONS,
   ECOSYSTEM_EXAMPLES,
   EXPERTISE_DOMAINS,
   EXPERTISE_STRIP,
@@ -17,6 +16,7 @@ import {
   REPLICATION_CALLOUTS,
   SOURCE_KINDS,
   TRIBAL_REQUEST,
+  expertiseSentence,
 } from "./pressMethod.js";
 
 const ALL_STRINGS = [
@@ -27,7 +27,6 @@ const ALL_STRINGS = [
   ...DISCOVERY_MOVES,
   ...MAINTENANCE_TRACKED,
   ...MAINTENANCE_TIMELINE.map((e) => e.event),
-  ...ECOSYSTEM_COLLECTIONS.map((c) => c.label),
   ...ECOSYSTEM_EXAMPLES,
   ...REPLICATION_CALLOUTS,
   TRIBAL_REQUEST.policy,
@@ -36,6 +35,7 @@ const ALL_STRINGS = [
   ...TRIBAL_REQUEST.included,
   ...TRIBAL_REQUEST.excluded,
   ...TRIBAL_REQUEST.purposes,
+  ...TRIBAL_REQUEST.steps.flatMap((s) => [s.step, s.body]),
 ];
 
 // The brand lock in CLAUDE.md, applied to displayed copy.
@@ -55,10 +55,11 @@ test("no antithesis constructions in the method copy", () => {
   }
 });
 
-test("the pipeline starts at the public records and ends at maintenance", () => {
-  assert.equal(CONSTRUCTION_STEPS[0].id, "fragmented");
-  assert.equal(CONSTRUCTION_STEPS.at(-1).id, "maintained");
+test("the pipeline starts at discovery and ends at maintenance", () => {
+  assert.equal(CONSTRUCTION_STEPS[0].id, "discover");
+  assert.equal(CONSTRUCTION_STEPS.at(-1).id, "maintain");
   assert.equal(new Set(CONSTRUCTION_STEPS.map((s) => s.id)).size, CONSTRUCTION_STEPS.length);
+  for (const step of CONSTRUCTION_STEPS) assert.ok(step.label && step.note, step.id);
 });
 
 test("the timeline runs forward in time", () => {
@@ -78,11 +79,24 @@ test("every strip icon covers domains the long list actually names", () => {
   }
 });
 
-test("every domain is covered by one of the six strip icons", () => {
+test("every domain is covered by one of the strip icons", () => {
   const covered = new Set(EXPERTISE_STRIP.flatMap((domain) => domain.covers));
   for (const domain of EXPERTISE_DOMAINS) {
     assert.ok(covered.has(domain), domain);
   }
+});
+
+// The Methods page names the domains in one sentence, read from the strip.
+// The sentence used to be typed into the page and named gaming for a week
+// after the shelf stopped selling it.
+test("the expertise sentence names every strip label and nothing else", () => {
+  const sentence = expertiseSentence();
+  for (const [index, domain] of EXPERTISE_STRIP.entries()) {
+    const expected = index === 0 ? domain.label : domain.label[0].toLowerCase() + domain.label.slice(1);
+    assert.ok(sentence.includes(expected), `${domain.label} is not in "${sentence}"`);
+  }
+  assert.match(sentence, / and [^,]+$/);
+  assert.doesNotMatch(sentence, /gaming/i);
 });
 
 // The scope split is the part of the policy that stops one tribe's package
@@ -116,10 +130,13 @@ test("verification can reach the tribal government directly", () => {
   assert.match(verification, /signed authorization letter/);
 });
 
-test("every ecosystem collection has a label and a unique id", () => {
-  assert.equal(
-    new Set(ECOSYSTEM_COLLECTIONS.map((c) => c.id)).size,
-    ECOSYSTEM_COLLECTIONS.length,
-  );
-  assert.ok(ECOSYSTEM_COLLECTIONS.every((c) => c.label.trim().length > 0));
+// The request policy names what a package covers, and it may only name what
+// the storefront publishes: a promise about records the product does not yet
+// carry is one the desk cannot keep on the day a request arrives.
+test("the request policy covers nothing the storefront does not sell", () => {
+  const included = TRIBAL_REQUEST.included.join(" ").toLowerCase();
+  assert.doesNotMatch(included, /gaming/);
+  assert.equal(TRIBAL_REQUEST.steps.length, 5);
+  assert.equal(TRIBAL_REQUEST.steps[0].step, "Request");
+  assert.equal(TRIBAL_REQUEST.steps.at(-1).step, "Correct");
 });

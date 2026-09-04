@@ -73,7 +73,7 @@ export const AD_SLOT = Object.freeze({
  * Four of the six slots sit on a hosted article, and that is the point of
  * hosting a piece here rather than on Tribal Business News. An article has
  * a rail, which the reader does not; it has an audience you can count and report; and it has a
- * subject, so a buyer can choose federal contracting or gaming rather than
+ * subject, so a buyer can choose federal contracting or natural resources rather than
  * buying the whole product. The rail units sit beside the text and never
  * inside it.
  *

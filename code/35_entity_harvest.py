@@ -13,7 +13,7 @@ WHAT THIS DOES
 WHAT THIS DOES NOT DO
     It does NOT mint IDs. The spine is NEID + the Entity_Master series
     (T- tribes, A- ANCs, E- enterprises, N- NHOs). New entities EXTEND those
-    series; INFLUENCE_DATASET_PLAN.md reserves I- for intertribal / inter-Native
+    series; docs/plans/INFLUENCE_DATASET_PLAN.md reserves I- for intertribal / inter-Native
     organizations. NP- is proposed only for Native nonprofits that are not
     Hawaiian, where N- would genuinely collide (see the log).
     Every proposal carries a blank YOUR_RULING column. Elijah rules; a later
@@ -418,7 +418,7 @@ INTERTRIBAL_SIGNAL_RE = re.compile(
     r")\b"
 )
 
-# Named collective vehicles from INFLUENCE_DATASET_PLAN.md's I- layer. These
+# Named collective vehicles from docs/plans/INFLUENCE_DATASET_PLAN.md's I- layer. These
 # are recognized outright, because they are the population the I- series was
 # reserved for.
 KNOWN_I_ORG_RE = re.compile(
@@ -1281,7 +1281,7 @@ def propose_class(norm: str, raw: str, sources: str, native_by_construction: boo
     known_i = KNOWN_I_ORG_RE.search(norm)
     if known_i:
         return "I-", "Intertribal / inter-Native organization", \
-            [f"named in INFLUENCE_DATASET_PLAN.md's I- layer "
+            [f"named in docs/plans/INFLUENCE_DATASET_PLAN.md's I- layer "
              f"('{known_i.group(0)}')"]
 
     haw = HAWAIIAN_SIGNAL_RE.search(norm)
@@ -1674,7 +1674,7 @@ def write_md(s: dict):
       "recognized tribes, `A-` 191 ANCs and village corporations, `E-` 29 "
       "enterprises and subsidiaries, `N-` 7 Native Hawaiian Organizations. "
       "Every proposal in this build **extends** one of those series or the "
-      "`I-` series that INFLUENCE_DATASET_PLAN.md reserves for intertribal and "
+      "`I-` series that docs/plans/INFLUENCE_DATASET_PLAN.md reserves for intertribal and "
       "inter-Native organizations. Nothing here is assigned; "
       "`entity_candidates_new.csv` and `entity_candidates_ambiguous.csv` both "
       "carry a blank `YOUR_RULING` column and a later script does the minting.")
@@ -1686,7 +1686,7 @@ def write_md(s: dict):
       "or a national Native philanthropy under `N-` would make the prefix mean "
       "two different things and would silently corrupt every NHO count taken "
       "off a prefix filter, including the 190-row DOI roster ceiling in "
-      "STATE_OF_BUILD.md. That is a genuine collision, so `NP-` is proposed "
+      "docs/handoffs/STATE_OF_BUILD.md. That is a genuine collision, so `NP-` is proposed "
       "rather than forced into `N-`. If Elijah prefers, the alternative is to "
       "keep one `N-` series with a mandatory subclass column; the register is "
       "written so either ruling is a one-line change.")

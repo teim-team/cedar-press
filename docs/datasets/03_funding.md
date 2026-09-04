@@ -123,7 +123,7 @@ Per source. This dataset has the single largest documented gap in Cedar Press an
 - Cedar Press is self-contained — stage inputs into `data/raw/external/` and build from local copies.
 - Temporal floor is 2000; pre-2000 rows carry `pre_2000_flag = 1`.
 
-See `STATE_OF_BUILD.md`, `docs/CROSS_DATASET_LEARNING.md`, and `docs/COVERAGE_EXPANSION_OPTIONS.md`.
+See `docs/handoffs/STATE_OF_BUILD.md`, `docs/CROSS_DATASET_LEARNING.md`, and `docs/COVERAGE_EXPANSION_OPTIONS.md`.
 
 ## Reference
 

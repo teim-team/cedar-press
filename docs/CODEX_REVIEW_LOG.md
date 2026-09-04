@@ -1422,3 +1422,61 @@ sides flagged independently.
 definition problem.** Stop re-deriving it and make the table state the answer
 in a column. Seven values were produced by seven correct-looking rules applied
 to an undefined question.
+
+---
+
+## PR #48 and PR #50 — nine open threads, answered on `claude/cedar-press-datasets-3n2wjf` (2026-09-04)
+
+Both PRs were merged with their Codex threads unresolved. Each finding was
+verified against current `main` before anything was changed; every one
+reproduced. Fixes land on the consolidation branch so Codex reviews them once.
+
+### PR #50 — `cedar_publication.enforce_denials` / `denied_ueis`
+
+| finding | verdict | what changed | proof |
+|---|---|---|---|
+| P1 Read only reconciled denial decisions | right | `denied_ueis()` reads `data/clean/cedar_ruling_ledger_consolidated.csv` (173's output), admitting only `status = SETTLED`, `outcome = NEGATIVE`, `ruling = not_native`, `tier_source = stated_on_ruling_row`, the gate 174 already applies. A `CONFLICT_NOT_APPLIED` row applies nothing; a later positive correction settles the subject as `ENTITY` and it is absent. | `py -3 code/cedar_publication.py selftest`, case 1 |
+| P1 Apply denials in every publication writer | right | `1135_full_dataset_review_bundle.py` and `25_build_publication_layer.py` call `enforce_denials` on every row, beside `translate_neid_values`. In 25 the row is widened to a dict only when a party column holds a denied value. | compiles; the constraint is the same function 1137 calls |
+| P1 Fail closed when ruling evidence cannot be read | right | An absent, unreadable or column-short ledger raises `DenialEvidenceUnavailable`; the writers let it propagate. No `except Exception: continue`, no `{}`. | selftest, cases 6 and 7 |
+| P2 Match denials only against the party's own UEI | right | `PARTY_UEI_COLS` names each side's own identifier column (`sub_uei`, `prime_uei`; `uei`, `recipient_uei`, `awardee_uei`, `auditee_uei`, `own_uei`, `operating_company_uei`, `fpds_uei`). No substring match; `verify` refuses any entry containing `parent` or `candidate`. | selftest, case 2 |
+| P1 Clear the attribution assertion when enforcing a denial | right | When a side is cleared, `MASK_FLAGS` (`attributed_flag`, side-prefixed where the side has one) goes to `"0"`, as `mask_attribution` does. | selftest, cases 3 and 5 |
+| P1 Preserve the funding status vocabulary during export | right | The status and basis are written only when a cell was cleared. `attribution_status` takes `excluded_not_native` (174's vocabulary); the WITHHELD note is appended to `attribution_basis` after whatever 174 wrote, never in place of it. A row 174 already corrected is untouched. Codex asked for a dedicated note field; that is a schema change to a delivered file and is left to the owner. | selftest, cases 3 and 4 |
+
+### PR #48 — `1169_release_verify.py` and `1171_prior_finding_regression_pack.py`
+
+| finding | verdict | what changed | proof |
+|---|---|---|---|
+| P2 Reject manifest rows that declare an absent preview | right | A manifest row carrying `note` is a declared failure; a file on disk for such a row is reported as stale; declared `rows`/`columns` are compared with the file. | `py -3 code/1169_release_verify.py selftest`, fixtures 5b |
+| P1 Add a firing fixture for the new preview check | right | Three fixtures (a stale file behind a failed row, a shape mismatch, absent/undeclared/empty) each run the real check and require FAIL; a fourth requires a complete set to PASS. `_fixture_fails` now saves and restores `PREVIEW`. 11 of 11 proven. | same |
+| P1 Detect contradictory supersession flags in both directions | right | `_supersession_contradicts` reads all four fields: flag without status, status without flag, and `SUPERSEDED_BY_*` with no superseder. The reverse direction and the missing superseder are their own named detectors so the selftest proves each fires. | `py -3 code/1171_prior_finding_regression_pack.py selftest`, 25 of 25 |
+
+### Noted, not changed
+
+`code/1137_customer_dataset_combine.py` line 418 nests double quotes inside an
+f-string, which Python 3.12 accepts and 3.11 rejects. `cedar_publication verify`
+reports it on a 3.11 interpreter; it predates this branch and was not edited.
+
+### PR #51 round 1 — three findings on the branch itself, all right
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 Preserve the immutable first-release record | The history is read from an append-only ledger, `data/cedar/releases.json`, written by `scripts/record-release.mjs` after each import with the facts the release shipped with. A recorded version keeps its facts: the script refuses to overwrite a version whose facts changed, and a test fails, naming the command, when the manifest carries a version the ledger does not. Editorial notes overlay a ledger version and can name no other. Anchors are unique by construction, one per recorded version. | `node scripts/record-release.mjs --check`; `pressReleases.test.js` |
+| P2 Stop describing released collections as still in preparation | The no-figure answer distinguishes "no figure series" from "no release": a shipped collection says its current version, date and row label; only a collection with no release says its first release is in preparation. | `server/tests/test_api.py` |
+| P2 Record denial masks in the review manifest | A denial is counted as the mask it is, under `DENIAL_MASK_REASON` (`verified_not_native_denial`), in the `masked` counter both 1135 and 1137 already write to `rows_attribution_masked` / `attribution_masked_why`. The dead cell counters are gone. | `py -3 code/cedar_publication.py verify` |
+
+### PR #52 — five findings, all right, one of them a broken `main`
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 Check in the ledger before importing it | Right, and it had already happened: `.gitignore` excludes `/data/*` as a directory, the ledger was never staged, and the deploy of the #52 merge (run 65) failed on the missing import. The ledger is force-added, the script says so in its header, and `test_collection.py` fails if any file the client imports from `data/cedar/` leaves the index. | `git ls-files data/cedar/releases.json`; `test_the_release_ledger_is_tracked` |
+| P2 Reject corrupted ledgers instead of resetting them | Only `ENOENT` starts a new ledger; any other read error, or a file that is not a ledger, exits 1 without writing. The write is a temp file renamed into place. | `node scripts/record-release.mjs` |
+| P2 Preserve blocker identities, not only their count | `blockers` is the list of blocker texts, copied from the manifest; the same-facts check and the test compare the list. | `pressReleases.test.js` |
+| P2 Allow retired collections to remain in the ledger | A ledger id must be one the manifest ships or lists as excluded; a retired collection keeps its releases and has no storefront release record. | `pressReleases.test.js` |
+| P2 Stop advertising historical previews as downloadable | Only the current release's preview "downloads from the shelf"; an older release's preview "was published with this release". | `pressReleases.test.js` |
+
+### PR #53 — two findings, both right
+
+| finding | what changed | proof |
+|---|---|---|
+| P2 Reject ledgers with a missing releases map | The root and `releases` must be plain objects and every entry a list of releases; anything else that parses is refused before a write, alongside anything that does not parse. `--ledger=<path>` lets a test point the script at a planted file, and `pressReleases.test.js` runs it against six malformed ledgers and requires exit 1 with the refusal named, then against a copy of the real one and requires exit 0. | `npm test` |
+| P2 Keep retired releases in the public feed | `buildReleases` keeps a read-only record for any ledger id the storefront no longer sells: last version, `retired: true`, no cadence, name as it shipped (now recorded in the ledger). The feed carries it so `#<id>-v0` still resolves; What's New shows "no longer on the shelf" in place of the shelf link; the overview's rail excludes it. Proved on a synthetic ledger. | `pressReleases.test.js` |

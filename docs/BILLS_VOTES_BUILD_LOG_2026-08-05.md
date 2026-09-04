@@ -1,7 +1,7 @@
 # Cedar Press Dataset 10 — Native Bills & Congressional Votes
 ## Build log, 2026-08-05
 
-Companion to `BILLS_VOTES_DATASET_PLAN.md` and `AGENTS.md`. This was a completion-and-
+Companion to `docs/plans/BILLS_VOTES_DATASET_PLAN.md` and `AGENTS.md`. This was a completion-and-
 productization pass, not a construction pass: the classification work already existed in
 `C:\Users\esm247\Desktop\votingpatterns`. Nothing in that project was modified. Every source
 file was copied out and every table below was built from the local copies only.
@@ -26,7 +26,7 @@ file was copied out and every table below was built from the local copies only.
 
 ### The Senate gap is NOT real. Both chambers are present.
 
-The plan (`BILLS_VOTES_DATASET_PLAN.md`, "confirm: House in hand; Senate to verify") flagged a
+The plan (`docs/plans/BILLS_VOTES_DATASET_PLAN.md`, "confirm: House in hand; Senate to verify") flagged a
 possible missing chamber. It does not exist. `rollcalls_senate_tribal.csv` (141 Senate roll
 calls, Congresses 93–118) and `senate_member_tribal_scores.csv` (2,652 senator-Congress rows,
 Congresses 93–119) were both built on 2026-04-20 by

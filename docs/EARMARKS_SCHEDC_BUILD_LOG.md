@@ -3,7 +3,7 @@
 Build script: `code/99_build_earmarks_and_schedc.py`
 (one script, `--steps probe,irs-index,irs-xml,irs-deflate64,schedc,earmarks-pull,earmarks-stage,earmarks,crosscheck,codebook,report`)
 
-Spec: `SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` §9.5, §9.3 ·
+Spec: `docs/plans/SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` §9.5, §9.3 ·
 Reconciliation: `docs/LOBBYING_EXPANSION_RECONCILIATION.md` (item 4 and the
 Schedule C row of the "already built" table)
 

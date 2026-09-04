@@ -266,7 +266,7 @@ def build_items():
             # A binary is too coarse. El Pueblo de Abiquiu Library is neither a
             # place-name coincidence nor a tribally controlled entity: real
             # genizaro programming, no Indigenous governance. The taxonomy in
-            # NONPROFIT_DATASET_PLAN.md already has the middle categories, so
+            # docs/plans/NONPROFIT_DATASET_PLAN.md already has the middle categories, so
             # the queue should offer them.
             "question": "Which classification fits?",
             "options": ["Tribally controlled / Native-controlled - reinstate",

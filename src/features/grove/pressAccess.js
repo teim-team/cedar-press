@@ -126,10 +126,12 @@ export function shelfReach(user) {
  * NOTHING ON THE GROVE SHELF OPENS HERE, FOR ANY PLAN
  * Codex, PR #41. Giving PLAN_REACH the `tree: SHELF.GROVE` key it lacked fixed
  * the drift this file's header describes and exposed the disagreement beneath
- * it: `PRESS_CATALOG` carries `gaming` and the launch collection does not, so
- * a Grove or Tree session was told it could open a collection
- * `repository.may_open` refuses — the same defect as the `tree` drift, in the
- * other direction and one layer down.
+ * it: `PRESS_CATALOG` carried Gaming Intelligence on the grove shelf and the
+ * launch collection did not, so a Grove or Tree session was told it could
+ * open a collection `repository.may_open` refuses — the same defect as the
+ * `tree` drift, in the other direction and one layer down. The catalog
+ * carries no grove-shelf collection since 2026-09-04; the rule stays, by
+ * shelf, for the day one returns.
  *
  * The client is the wrong side, and the reason is a product ruling rather than
  * a symmetry. `code/cedar_publication.py` splits the shelves in two:
@@ -141,6 +143,7 @@ export function shelfReach(user) {
  * the launch collection. The Cedar Press API therefore cannot serve one
  * without the Cedar data workspace changing its ruling first, and a page that
  * renders a download for it is offering a file no route will hand over.
+ * `STOREFRONT_SHELVES` in pressCatalog.js is the same split, on this side.
  *
  * So the grove shelf stays in SHELF_ORDER and in PLAN_REACH — that is what
  * makes Grove and Tree reach everything Cedar Press has, and it is the map

@@ -27,7 +27,6 @@
 export const EXPERTISE_DOMAINS = Object.freeze([
   "Federal contracting and subcontracting",
   "Federal funding, grants, loans and direct spending",
-  "Tribal gaming",
   "Natural resources",
   "Congressional legislation and voting",
   "Lobbying",
@@ -36,13 +35,19 @@ export const EXPERTISE_DOMAINS = Object.freeze([
   "NAGPRA",
   "Native nonprofits",
   "Tribal enterprises and economic development",
+  "Native business certification and ownership",
 ]);
 
 /**
- * The six the icon strip carries. Each names the domains above that it stands
- * for, so the strip is provably a summary of the list rather than a separate
- * claim: `covers` entries must appear verbatim in EXPERTISE_DOMAINS, and every
- * domain must be covered by one of these six.
+ * The strip the Methods page names its domains from. Each names the domains
+ * above that it stands for, so the strip is provably a summary of the list
+ * rather than a separate claim: `covers` entries must appear verbatim in
+ * EXPERTISE_DOMAINS, and every domain must be covered by one of these.
+ *
+ * Gaming was one of these until 2026-09-04. It left with the Gaming
+ * Intelligence preview: a page that names gaming as a domain of expertise
+ * beside a shelf that sells no gaming collection reads as a promise, and the
+ * collection is still being built.
  */
 export const EXPERTISE_STRIP = Object.freeze([
   Object.freeze({
@@ -54,11 +59,6 @@ export const EXPERTISE_STRIP = Object.freeze([
     id: "contracting",
     label: "Contracting",
     covers: Object.freeze(["Federal contracting and subcontracting"]),
-  }),
-  Object.freeze({
-    id: "gaming",
-    label: "Gaming",
-    covers: Object.freeze(["Tribal gaming"]),
   }),
   Object.freeze({
     id: "resources",
@@ -78,13 +78,21 @@ export const EXPERTISE_STRIP = Object.freeze([
   }),
   Object.freeze({
     id: "institutions",
-    label: "Native institutions",
+    label: "Native institutions and enterprises",
     covers: Object.freeze([
       "Native nonprofits",
       "Tribal enterprises and economic development",
+      "Native business certification and ownership",
     ]),
   }),
 ]);
+
+/** The domains as one sentence, for the Methods page's expertise paragraph. */
+export function expertiseSentence() {
+  const labels = EXPERTISE_STRIP.map((domain) => domain.label);
+  const lowered = labels.map((label, index) => (index === 0 ? label : label[0].toLowerCase() + label.slice(1)));
+  return `${lowered.slice(0, -1).join(", ")} and ${lowered.at(-1)}`;
+}
 
 /**
  * Where the records come from. Named because the page should not imply that
@@ -106,42 +114,47 @@ export const SOURCE_KINDS = Object.freeze([
   "Manually reviewed documentation",
 ]);
 
-/** How a collection gets made, in order. Rendered as the pipeline. */
+/**
+ * How a collection gets made, in order. Rendered as the pipeline on the
+ * Methods page (`ProcessRail`), which used to carry its own copy of these
+ * seven stages while this list rendered nowhere; the two had different
+ * names for the same steps. One list, the rendered one.
+ */
 export const CONSTRUCTION_STEPS = Object.freeze([
   Object.freeze({
-    id: "fragmented",
-    label: "Fragmented public records",
-    note: "Scattered across agencies, formats and decades, with no common key.",
+    id: "discover",
+    label: "Discover",
+    note: "Find APIs, archives, notices, regulatory records, filings, state reports and other relevant sources.",
   }),
   Object.freeze({
-    id: "discovery",
-    label: "Source discovery",
-    note: "Finding the records that carry the answer, including the ones nobody files under it.",
+    id: "extract",
+    label: "Extract",
+    note: "Retrieve structured records, historical files and relevant document-level information.",
   }),
   Object.freeze({
-    id: "cleaning",
-    label: "Domain-specific cleaning",
-    note: "Each domain has its own definitions, exceptions and reporting conventions.",
+    id: "normalize",
+    label: "Normalize",
+    note: "Reconcile names, dates, identifiers, classifications, formats and geographies.",
   }),
   Object.freeze({
-    id: "linking",
-    label: "Entity and affiliation linking",
-    note: "Which organizations these records belong to, and who owns or controls them.",
+    id: "resolve",
+    label: "Resolve",
+    note: "Connect tribal governments, enterprises, ANCs, NHOs, businesses, nonprofits, facilities and relevant counterparties.",
   }),
   Object.freeze({
-    id: "reconciliation",
-    label: "Historical reconciliation",
-    note: "Names, owners and legal status change. The past has to still line up.",
+    id: "validate",
+    label: "Validate",
+    note: "Use source documentation and other Cedar collections to confirm relationships and identify conflicts.",
   }),
   Object.freeze({
     id: "review",
-    label: "Human review",
-    note: "The hard records are read by people who know the institutions behind them.",
+    label: "Review",
+    note: "Researchers examine ambiguous matches, unusual relationships and historical changes that automation cannot safely resolve alone.",
   }),
   Object.freeze({
-    id: "maintained",
-    label: "Continuously maintained intelligence",
-    note: "Corrections and new relationships flow back through everything above.",
+    id: "maintain",
+    label: "Maintain",
+    note: "Track new entities, renames, acquisitions, ownership changes, closures, reorganizations and corrections over time.",
   }),
 ]);
 
@@ -173,34 +186,31 @@ export const MAINTENANCE_TRACKED = Object.freeze([
 /**
  * One organization's lineage, as an illustration of what "maintained" means.
  * Generic on purpose: it demonstrates the shape of a tracked history without
- * asserting anything about a real enterprise.
+ * asserting anything about a real enterprise. Rendered by `EntityTimeline`
+ * on the Methods page, which carried its own copy until 2026-09-04.
  */
 export const MAINTENANCE_TIMELINE = Object.freeze([
-  Object.freeze({ year: "2018", event: "Enterprise created" }),
-  Object.freeze({ year: "2020", event: "New subsidiary identified" }),
-  Object.freeze({ year: "2022", event: "Property acquired" }),
-  Object.freeze({ year: "2024", event: "Organization renamed" }),
-  Object.freeze({ year: "2026", event: "Ownership relationship updated" }),
+  Object.freeze({ year: "2017", event: "Enterprise created" }),
+  Object.freeze({ year: "2019", event: "Subsidiary added" }),
+  Object.freeze({ year: "2021", event: "Property acquired" }),
+  Object.freeze({ year: "2023", event: "Entity renamed" }),
+  Object.freeze({ year: "2025", event: "Ownership changed" }),
+  Object.freeze({ year: "2026", event: "Historical records reconciled" }),
 ]);
 
-/** The collections that feed the shared entity layer, and are fed by it. */
-export const ECOSYSTEM_COLLECTIONS = Object.freeze([
-  Object.freeze({ id: "deals", label: "Deals" }),
-  Object.freeze({ id: "funding", label: "Funding" }),
-  Object.freeze({ id: "contracting", label: "Contracting" }),
-  Object.freeze({ id: "gaming", label: "Gaming" }),
-  Object.freeze({ id: "register", label: "Federal Register" }),
-  Object.freeze({ id: "lobbying", label: "Lobbying" }),
-  Object.freeze({ id: "legislation", label: "Legislation" }),
-  Object.freeze({ id: "resources", label: "Natural Resources" }),
-]);
+/**
+ * The collections that feed the shared entity layer, and are fed by it, live
+ * in `pressEcosystem.js` (`ECOSYSTEM`), keyed by catalog id, because that is
+ * the module the diagram draws from. A second list here carried different
+ * ids and a collection the storefront does not sell.
+ */
 
 /** Worked examples of one collection improving another. */
 export const ECOSYSTEM_EXAMPLES = Object.freeze([
-  "A transaction in Indian Country Deals can reveal a new owner, subsidiary or renamed enterprise, which corrects the gaming, contracting and nonprofit records.",
+  "A transaction in Indian Country Deals can reveal a new owner, subsidiary or renamed enterprise, which corrects the enterprise structure, contracting and nonprofit records.",
   "A Federal Register notice can validate a recognition event, a regulatory action or a land-related development.",
   "Lobbying records connect organizations to legislation, and bill histories and votes show what followed.",
-  "Environmental reviews help confirm facilities, expansions, ownership and employment.",
+  "A nation's own enterprise register or audited filing names the subsidiaries the federal record files under unrelated names.",
   "Federal funding and contracting records add economic activity to an entity profile.",
   "Better entity resolution then improves matching across every collection above.",
 ]);
@@ -231,30 +241,40 @@ export const TRIBAL_REQUEST = Object.freeze({
     "An authorized tribal employee",
     "Tribal legal counsel",
     "A formally designated representative",
-    "Another person whose authority can be verified directly with the tribal government",
   ]),
   verification: Object.freeze([
-    "Submission from an official tribal government email address",
+    "An official tribal government email address",
     "A signed authorization letter",
-    "Confirmation from the tribal chair, council office, executive office or legal department",
-    "Government identification or other reasonable verification",
-    "Documentation identifying the affiliated enterprises included in the request",
+    "Confirmation from leadership, the executive office or legal counsel",
   ]),
+  // What a package covers is what the collections hold about the nation.
+  // "Its gaming operations" was on this list while Gaming Intelligence was
+  // previewed on the shelf; it left with the preview on 2026-09-04, because a
+  // request policy that names records the product does not yet publish is a
+  // promise the desk cannot keep on the day the request arrives.
   included: Object.freeze([
-    "Its tribal government",
-    "Its affiliated tribal enterprises",
-    "Its gaming operations",
-    "Its wholly owned or controlled entities",
-    "Other tribe-specific records Cedar can reliably associate with the requesting government",
+    "Tribal government records",
+    "Affiliated tribal enterprises",
+    "Wholly owned or controlled entities",
+    "Other records Cedar can reliably associate with the requesting tribal government",
   ]),
+  // Written in the case they are read in: the page runs these into one
+  // sentence, and lowercasing them there turned "Cedar" into "cedar".
   excluded: Object.freeze([
-    "Other tribes",
-    "Unrelated Native organizations",
-    "National comparative collections",
-    "Proprietary crosswalks",
-    "Cedar's complete entity graph",
-    "Internal confidence scores and matching systems",
-    "Restricted third-party information",
+    "other tribes' records",
+    "national comparative collections",
+    "proprietary crosswalks",
+    "Cedar's internal matching systems",
+    "the complete Cedar entity graph",
+    "restricted third-party information",
+  ]),
+  /** The five moments of a request, in order. */
+  steps: Object.freeze([
+    Object.freeze({ step: "Request", body: "Request your records" }),
+    Object.freeze({ step: "Verify", body: "Confirm governmental authority" }),
+    Object.freeze({ step: "Deliver", body: "Receive the tribe-specific package" }),
+    Object.freeze({ step: "Review", body: "Review Cedar's records" }),
+    Object.freeze({ step: "Correct", body: "Submit documentation or corrections" }),
   ]),
   purposes: Object.freeze([
     "Governmental planning",

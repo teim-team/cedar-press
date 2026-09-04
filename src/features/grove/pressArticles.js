@@ -21,7 +21,7 @@
  *
  * Hosting is what makes the page sellable. A hosted article has a rail for
  * sponsorship, an audience you can count and a subject a buyer can choose:
- * federal contracting is a different advertiser from gaming. It also lets the
+ * federal contracting is a different advertiser from natural resources. It also lets the
  * piece do two jobs the TBN version cannot. `draws` names the collections
  * behind it, so a reader can take the data if their tier opens it and is
  * shown what opens it if not, which is the most honest upgrade prompt in the
@@ -221,7 +221,7 @@ export const PRESS_ARTICLES = Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Contracting and Gaming. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible.",
+          "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Prime Contracting and in the enterprise structures NEST publishes. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible.",
       }),
       Object.freeze({
         kind: BLOCK.PULL,

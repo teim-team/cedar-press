@@ -190,7 +190,7 @@ Additional village corporations appear *inside* the Arctic Inupiat Offshore join
 and are not separately ruled: Atqasuk Corporation, Kaktovik Inupiat Corporation, Nunamiut Corporation,
 Olgoonik Corporation, Tikigaq Corporation, Ukpeagvik Inupiat Corporation.
 
-**Recommendation:** the ANCSA universe ceiling in `STATE_OF_BUILD.md` already names 196 ANCs including
+**Recommendation:** the ANCSA universe ceiling in `docs/handoffs/STATE_OF_BUILD.md` already names 196 ANCs including
 173 village/urban corps in `Entity_Master`. Bringing those 173 into `data/spine/cedar_entity_spine.csv`
 with an `A-` village-corp class would convert all 14 of these from organization-level records into
 attributable entities — and would do the same for the ANCSA-portal deal rows.

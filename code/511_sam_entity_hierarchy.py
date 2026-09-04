@@ -137,7 +137,7 @@ def sam_key() -> str:
             pass
     if not key:
         sys.exit("no SAM_API_KEY in environment or user registry - "
-                 "run set_sam_key.ps1 first")
+                 "run code/set_sam_key.ps1 first")
     return key
 
 

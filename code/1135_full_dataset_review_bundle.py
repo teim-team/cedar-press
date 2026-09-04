@@ -189,6 +189,7 @@ from cedar_publication import (          # noqa: E402
     NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
     is_publication_eligible, mask_attribution, MASK, translate_neid_values,
     apply_official_names,
+    enforce_denials, DENIAL_MASK_REASON,
 )
 
 csv.field_size_limit(10_000_000)
@@ -369,6 +370,21 @@ def build(mode: str) -> int:
                         # are applied here too. Same rule, same module,
                         # every writer.
                         apply_official_names(r)
+                        # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY WRITER.
+                        # Codex, PR #50: 1137 enforced the denials and this
+                        # writer did not, so rebuilding after the Omaha ruling
+                        # fixed dist/customer/subcontracting.csv while the
+                        # dist/review samples the live site importer consumes
+                        # still carried the denied attribution. Same rule,
+                        # same module, every writer. Raises rather than
+                        # continues when the ledger cannot be read. Counted
+                        # as the MASK it is, under its own reason, so the
+                        # manifest's `rows_attribution_masked` and
+                        # `attribution_masked_why` carry it: Codex, PR #51,
+                        # a counter that is written and never read leaves the
+                        # samples changed and the audit trail silent.
+                        if enforce_denials(r):
+                            masked[DENIAL_MASK_REASON] += 1
                         # CP-002: ONE gate, and all three of its outcomes.
                         # `is_publication_eligible` is `row_ok` plus the
                         # deny-by-default adjudication policy; a MASK keeps the

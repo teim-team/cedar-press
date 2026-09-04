@@ -311,7 +311,7 @@ datasets."* **That figure does not reproduce.** Measured 2026-08-26 against
 | = 12 (the maximum observed) | **13** |
 
 All 516 are in the spine. `458` appears elsewhere in the repo attached to two different
-objects — "458 lobbying clients settled" (`STATE_OF_BUILD.md` line 133) and "600 party
+objects — "458 lobbying clients settled" (`docs/handoffs/STATE_OF_BUILD.md` line 133) and "600 party
 rows / 458 distinct pairs" (`docs/LOBBYING_EXPANSION_RECONCILIATION.md` line 282) — and
 neither is the corroboration count. **Use 516, and re-measure before publishing.**
 

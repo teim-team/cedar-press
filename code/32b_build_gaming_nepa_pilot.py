@@ -61,7 +61,7 @@ def url(k): return DOCS[k][1]
 
 # =============================================================== TABLE 1 =====
 T1_COLS = [
-    # --- schema as specified in GAMING_DATASET_PLAN.md ---
+    # --- schema as specified in docs/plans/GAMING_DATASET_PLAN.md ---
     "project_id", "tribe", "entity_id", "facility_name", "status",
     "source_document", "document_date", "alternative", "acres", "gaming_sqft",
     "total_sqft", "machines", "tables", "hotel_rooms", "meeting_sqft",
@@ -275,7 +275,7 @@ T1.append(t1(**DGP, source_document=doc("MEN_EA"), document_date="2026-03",
 
 # =============================================================== TABLE 2 =====
 T2_COLS = [
-    # --- schema as specified in GAMING_DATASET_PLAN.md ---
+    # --- schema as specified in docs/plans/GAMING_DATASET_PLAN.md ---
     "project_id", "metric", "value", "unit", "impact_type", "geography",
     "time_period", "reported_or_calculated", "source_document", "page",
     "table_ref", "confidence",
@@ -775,7 +775,7 @@ T2.append(t2(**M, _doc="MEN_IGA", metric="food_and_beverage_seats_total", value=
 
 # =============================================================== TABLE 3 =====
 T3_COLS = [
-    # --- schema as specified in GAMING_DATASET_PLAN.md ---
+    # --- schema as specified in docs/plans/GAMING_DATASET_PLAN.md ---
     "project_id", "counterparty_government", "service", "amount", "term",
     "effective_date", "source_document", "page",
     # --- columns the pilot proved are needed ---

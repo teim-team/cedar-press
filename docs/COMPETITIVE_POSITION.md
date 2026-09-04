@@ -4,7 +4,7 @@
 of the Native economy.*
 
 *Every Cedar Press number in this document was measured from the files in this folder on
-2026-08-06, not copied from `STATE_OF_BUILD.md`. Where a measurement disagrees with the
+2026-08-06, not copied from `docs/handoffs/STATE_OF_BUILD.md`. Where a measurement disagrees with the
 state document it is flagged. Incumbent facts are marked by source strength: **[verified]**
 on the vendor's own page, **[reported]** third-party, **[unknown]** where nobody publishes it.*
 
@@ -254,7 +254,7 @@ the smallest.** Four routes to nominally the same quantity:
 | the same, restricted to the 699 publishable UEIs | $34.6B |
 
 Two of these are now explained and one is not. The **$42.6B "publishable prime dollars"**
-in `STATE_OF_BUILD.md` is route 2 — the sum of `prime_dollars_M` over the 1,577-row
+in `docs/handoffs/STATE_OF_BUILD.md` is route 2 — the sum of `prime_dollars_M` over the 1,577-row
 publishable set, and it is *not* double counting: the 878 CAGE rows carry $0 and all
 $42.2B sits on the 699 UEI rows (687 of them non-zero). Good.
 
@@ -1048,7 +1048,7 @@ Candid then does the thing Cedar Press should copy exactly: **its Demographics a
 Taxonomy APIs are free, and it charges $2,750–$9,900/year for the APIs that carry the
 funding linkage.** Give away the identity layer, charge for the join. Translated: publish
 the 866-entity spine — names, classes, states, IDs — free and open, and licence the
-identifier crosswalk. That is already the instinct in `STATE_OF_BUILD.md`'s
+identifier crosswalk. That is already the instinct in `docs/handoffs/STATE_OF_BUILD.md`'s
 public/subscriber/internal column tiering; Candid's price list is the proof it works.
 
 **10. Price against the repair work, not against the raw data.** USAspending and SAM give
@@ -1096,7 +1096,7 @@ difference between a product and a folder of CSVs.
 | Nonprofits (12,764) | 739 tier A, 4,933 already ruled X; `ruling_authority` blank on 12,389 rows | the EIN bridge exists (`np_ein_uei_bridge.csv`) |
 
 So four of the six unlinked datasets are a few days of propagation and one alias pass.
-Ruling the ownership-event parties is named in `STATE_OF_BUILD.md` as the highest-value
+Ruling the ownership-event parties is named in `docs/handoffs/STATE_OF_BUILD.md` as the highest-value
 single fix in the project; the measurement here says it is also nearly free.
 
 Until this lands, the entity profile page renders four sections out of nine, the
@@ -1221,7 +1221,7 @@ the price point of a different product from the same company.
 
 ---
 
-## Appendix B — corrections to `STATE_OF_BUILD.md` found while measuring
+## Appendix B — corrections to `docs/handoffs/STATE_OF_BUILD.md` found while measuring
 
 1. **Tier A is 1,705, not 1,581**, and the spine is 866, not 687. The 687 figure is the
    NEID backbone; the spine has grown past it. The state document's "Spine status" table

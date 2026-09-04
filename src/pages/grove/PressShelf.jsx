@@ -50,6 +50,7 @@ import { canOpenDataset, coverageFrom, coverageLabel } from "../../features/grov
 import { downloadAll, downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import {
   GROVE_CAPABILITIES,
+  GROVE_PUBLIC_DATA,
   PRESS_CATALOG_BY_ID,
   PRESS_TIERS,
   collectionsOnShelf,
@@ -402,13 +403,15 @@ function Band({ tier, user, index }) {
 /**
  * Cedar Grove, teased rather than shelved.
  *
- * Gaming Intelligence carries it, because Census and BLS are infrastructure
- * and infrastructure is not why anyone crosses this line. What Grove opens is
- * set against what a Cedar Press reader still sees, so the boundary itself is
- * the argument rather than a feature list.
+ * This used to lead with Gaming Intelligence as the Grove exclusive, with a
+ * split of what Cedar Press showed and what Grove opened. That promise was
+ * withdrawn on 2026-09-04: the collection is still being built, and a
+ * storefront that previews it is selling a cadence and a scope nobody has
+ * measured. What is left is the true case for Grove, which is not one
+ * collection but what it does with all of them: the capabilities, and the
+ * harmonized public data it carries beside them.
  */
 function GroveTeaser({ tier }) {
-  const gaming = PRESS_CATALOG_BY_ID.gaming;
   const [ref, seen, instant] = useReveal();
   return (
     // id="grove": the address of the Cedar Grove case. Article figures say
@@ -436,38 +439,27 @@ function GroveTeaser({ tier }) {
         </div>
       </div>
 
-      <article className="cp-gt__star">
-        <div className="cp-gt__starmain">
-          <span className="cp-gt__excl">Cedar Grove exclusive</span>
-          <h4 className="cp-gt__name">
-            {gaming.name}<span className="cp-gt__and">, and more</span>
-          </h4>
-          <p className="cp-gt__blurb">{gaming.blurb}</p>
-          <p className="cp-gt__fresh">
-            {freshnessLine(gaming.id)} · {coverageLabel(gaming)}
-          </p>
-          <a className="cp-gt__cta" href={appUrl("/app/grove")} target="_blank" rel="noreferrer">
-            Explore Gaming Intelligence and more in Cedar Grove <span aria-hidden="true">&#8594;</span>
-          </a>
-        </div>
-        <div className="cp-gt__split">
-          <div>
-            <span className="cp-gt__cap">On Cedar Press you see</span>
-            <ul>{gaming.preview.shows.map((item) => <li key={item}>{item}</li>)}</ul>
-          </div>
-          <div>
-            <span className="cp-gt__cap">Cedar Grove opens</span>
-            <ul className="cp-gt__opens">
-              {gaming.preview.withholds.map((item) => <li key={item}>{item}</li>)}
-            </ul>
-          </div>
-        </div>
-      </article>
-
       <ul className="cp-gt__caps">
         {GROVE_CAPABILITIES.map((item) => <li key={item}>{item}</li>)}
       </ul>
 
+      {/* The public data Grove harmonizes beside the collections, as one
+          line each. Listed rather than badged: infrastructure is part of
+          the case for Grove, not the headline of it. */}
+      <ul className="cp-gt__public" aria-label="Harmonized public data in Cedar Grove">
+        {GROVE_PUBLIC_DATA.map((entry) => (
+          <li key={entry.id}>
+            <span className="cp-gt__publicname">{entry.name}</span>
+            <span className="cp-gt__publicblurb">{entry.blurb}</span>
+          </li>
+        ))}
+      </ul>
+
+      <p className="cp-gt__act">
+        <a className="cp-band__cta" href={appUrl("/app/grove")} target="_blank" rel="noreferrer">
+          Explore Cedar Grove <span aria-hidden="true">&#8594;</span>
+        </a>
+      </p>
     </section>
   );
 }
@@ -479,8 +471,8 @@ function GroveTeaser({ tier }) {
  * different question.
  */
 export default function PressShelf({ user }) {
-  const shelves = PRESS_TIERS.filter((tier) => tier.shelf !== "grove");
-  const grove = PRESS_TIERS.find((tier) => tier.shelf === "grove");
+  const shelves = PRESS_TIERS.filter((tier) => tier.storefront);
+  const grove = PRESS_TIERS.find((tier) => !tier.storefront);
   return (
     <div id="catalog" className="cp-bands">
       {shelves.map((tier, index) => (

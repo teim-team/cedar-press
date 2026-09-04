@@ -407,24 +407,47 @@ def main():
         # keys - so the retired identifier is TRANSLATED to Cedar's own, by
         # `cedar_publication.translate_neid_values`, not re-implemented.
         n_tr = n_amb = 0
+        # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY WRITER. Codex, PR #50:
+        # 1137 enforced the denials and this writer did not, so the customer
+        # database kept a denied attribution the delivered CSV had withdrawn.
+        # The same `cedar_publication.enforce_denials`, on the same rows. The
+        # only rows that can match carry a party's own UEI in one of the named
+        # columns, so those columns are located once per table and the row is
+        # widened into a dict only when one of them holds a denied value;
+        # `denied_ueis()` raises when the ledger cannot be read, and that is
+        # the build stopping rather than shipping with the constraint unread.
+        denied_set = CPUB.denied_ueis()
+        party_idx = [i for i, c in enumerate(header)
+                     if any(c in cols for cols in CPUB.PARTY_UEI_COLS.values())]
+        n_denied = 0
         for r in rows:
+            hyphenated = any(v and "-" in v for v in r)
+            denied_hit = bool(denied_set) and any(
+                (r[i] or "").strip().upper() in denied_set for i in party_idx)
             # Cheap exact pre-filter: `translate_neid_values` skips any cell
             # with no hyphen, and no NEID has ever lacked one, so a row with
             # no hyphen anywhere cannot translate. This changes no result; it
             # only avoids building a dict for the rows that cannot match.
-            if not any(v and "-" in v for v in r):
+            if not hyphenated and not denied_hit:
                 continue
-            d = dict(enumerate(r))
-            a, b = CPUB.translate_neid_values(d)
+            d = dict(zip(header, r))
+            a = b = 0
+            if hyphenated:
+                a, b = CPUB.translate_neid_values(d)
             n_tr += a
             n_amb += b
-            if a:
-                r[:] = [d[i] for i in range(len(r))]
+            cleared = CPUB.enforce_denials(d) if denied_hit else 0
+            n_denied += cleared
+            if a or cleared:
+                r[:] = [d[c] for c in header]
         if n_tr or n_amb:
             print(f"    [identity] {table}: translated {n_tr:,} retired "
                   f"identifier(s) to a cedar_uid; {n_amb:,} left standing "
                   f"because the NEID claims more than one uid")
             translated[table] = (n_tr, n_amb)
+        if n_denied:
+            print(f"    [denials]  {table}: withdrew {n_denied:,} attribution "
+                  f"cell(s) a verified not_native ruling forbids")
 
         cols = [sqlname(c) for c in header]
         # De-duplicate column names (some sources ship repeats).

@@ -15,7 +15,7 @@ import { Link } from "react-router";
 import { PRESS_ARTICLES, TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { canOpenDataset, coverageFrom } from "../../features/grove/pressAccess";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
+import { STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import {
   PRESS_ARTICLES_PATH,
@@ -35,12 +35,10 @@ import {
 const CONTACT_HREF = "mailto:contact@lumecon.ai?subject=Cedar%20Press";
 
 /** The collections THIS reader's plan opens: a Cedar Press subscriber has
- *  six, not the catalog's eleven, and a tile that counts the higher shelf
- *  describes a product they did not buy. */
+ *  the standard shelf, not the whole catalog, and a tile that counts the
+ *  higher shelf describes a product they did not buy. */
 function pressCollections(user) {
-  return PRESS_CATALOG.filter(
-    (entry) => entry.shelf !== "grove" && canOpenDataset(user, entry),
-  );
+  return STOREFRONT_CATALOG.filter((entry) => canOpenDataset(user, entry));
 }
 
 function sections(user) {
@@ -71,10 +69,9 @@ function sections(user) {
       icon: DataIcon,
       meta: `${collections.length} collections`,
       // "reaching back as far as", never "<year> to present". The minimum is
-      // one collection's floor — Legislation's 1973 — and eleven of the twelve
-      // start later, two of them being rosters with no start at all. A
-      // shelf-wide sentence cannot carry a per-collection fact, and the tiles
-      // below give each collection its own.
+      // one collection's floor and the rest start later, two of them being
+      // rosters with no start at all. A shelf-wide sentence cannot carry a
+      // per-collection fact, and the tiles below give each collection its own.
       what: `Coverage, method and the release for every collection${
         earliest.length ? `, reaching back as far as ${Math.min(...earliest)},` : ","
       } downloadable with your subscription.`,

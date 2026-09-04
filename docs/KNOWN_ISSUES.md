@@ -136,7 +136,7 @@ that had gone stale in five other runbooks — `fpds_uei_cage_map` 24,977 →
 
 **What it was.** `AGENTS.md` CURRENT STATE (2026-08-30) opened with
 `#### OPEN GATE FAILURE, named per standing rule 15 — ship_dist_rows`, stating
-`62` exits 1. `NEXT_SESSION.md` §1 said the opposite. Standing rule 15 exists
+`62` exits 1. `docs/handoffs/NEXT_SESSION.md` §1 said the opposite. Standing rule 15 exists
 because *"a red gate that is always red reports nothing"* — a **stale** red
 gate notice is the same disease with an extra step, because the next session
 reads it, assumes the gate is untrustworthy, and stops running it.
@@ -293,7 +293,7 @@ Live: **READY 2 / 13** (`nagpra`, `federal-register`). The line sat inside the
 box that tells every new session where to start. **Fixed**, with a pointer to
 the regenerated scoreboard and a note not to quote the box.
 
-## A12 · S3 · `NEXT_SESSION.md`'s number-one priority was already done
+## A12 · S3 · `docs/handoffs/NEXT_SESSION.md`'s number-one priority was already done
 
 §4 item 1, *"Register row for the 1,749. Clears the gate"*, was completed and
 recorded in §1 of the same document. A completed item at the top of a priority

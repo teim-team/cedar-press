@@ -330,9 +330,9 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
 
     If the question names a version that the log carries, that release
     answers; otherwise the latest one does. Every answer says which release
-    it describes, and — like the launch figures — says the notes are
-    demonstration content until the first real releases, because a change
-    note is a claim about records nobody has shipped yet.
+    it describes. The log is derived from the manifest (``pressReleases.js``,
+    dumped into ``_press_data.json``), so a note here is a measured fact about
+    the shipped release rather than the demonstration copy it used to be.
     """
     name = profile["collection_name"]
     release = press_catalog.RELEASES.get(profile["collection_id"])
@@ -349,11 +349,7 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
     kind = "methodology release" if entry.get("kind") == "methodology" else "data release"
     note = f" Note: {entry['note']}" if entry.get("note") else ""
     changes = " ".join(entry["changed"])
-    return (
-        f"{name} {entry['version']} ({entry['date']}, {kind}): {changes}{note} "
-        "These release notes are demonstration content, standing in until the "
-        "first real releases."
-    )
+    return f"{name} {entry['version']} ({entry['date']}, {kind}): {changes}{note}"
 
 
 def _coverage_sentence(profile: dict[str, Any]) -> str | None:
@@ -425,8 +421,28 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         if sentence:
             return {"answer": sentence, "basis": basis}
         # No figures is an answer, not a routing miss: a reader who asked a
-        # quantity question about an unreleased collection should hear that
-        # the numbers do not exist yet, not a generic refusal.
+        # quantity question should hear that the figure series does not exist,
+        # not a generic refusal. Codex, PR #51: "no published figures" and "no
+        # release" are two facts, and this sentence ran them together, so a
+        # shipped collection with a version, a date and a row count was
+        # described as still in preparation while /press/releases served its
+        # release. A shipped collection says what it holds; only a collection
+        # with no release says it is in preparation.
+        if profile.get("version"):
+            held = (
+                f" Its current release is {profile['version']}"
+                f" ({profile['last_updated']}), holding {profile['record_count_label']}."
+                if profile.get("record_count_label")
+                else f" Its current release is {profile['version']} ({profile['last_updated']})."
+            )
+            return {
+                "answer": (
+                    f"{profile['collection_name']} has no published figures yet: Cedar "
+                    f"publishes no figure series for it.{held} Ask what it covers, "
+                    "what changed in the release or how it is constructed."
+                ),
+                "basis": basis,
+            }
         return {
             "answer": (
                 f"{profile['collection_name']} has no published figures yet: its "

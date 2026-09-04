@@ -20,7 +20,9 @@ search-only from wave 5.1. The distinguishers are (a) the dated
 ### Setup
 - Unpacked `cedar_source_registry_wave5.zip` into `cedar_source_registry/` as
   the working tree; the xlsx remains the wave-5 human-facing artifact, but
-  edits from this branch forward live in these files.
+  edits from this branch forward live in these files. (The zip was removed
+  from the tree on 2026-09-04: its contents are these files, and git history
+  keeps the archive itself.)
 - Added `tools/build_summary.py` (summary.json counts computed, never
   transcribed), `tools/check_integrity.py` (JSONL parse, join-key resolution,
   computed-summary equality, schema validation of templates, nation-crosswalk

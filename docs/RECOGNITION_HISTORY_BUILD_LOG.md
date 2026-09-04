@@ -19,7 +19,7 @@ the wrong tribe"* — which is worked first, in §3.
 
 ## Scope: this is infrastructure, not a product
 
-`SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` §2 lists recognition events under
+`docs/plans/SPEC_v2_ENTITY_EVENT_INTELLIGENCE.md` §2 lists recognition events under
 derived subsets with an explicit ruling:
 
 > Recognition events (internal infrastructure feeding the entity/history layer;

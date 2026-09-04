@@ -149,7 +149,7 @@ codebook block written, and are ranked in
 
 There was no rule. `AGENTS.md` mentioned script 87 once, in passing, in a
 sentence about where presentation lives. The shipping step was written down
-exactly once — `STATE_OF_THE_LAND_2026-08-07.md` §7, item **6 of 6** — and
+exactly once — `docs/handoffs/STATE_OF_THE_LAND_2026-08-07.md` §7, item **6 of 6** — and
 carried forward unread through twenty days and roughly twenty builds.
 
 **A build is not finished when the table is written. It is finished when the

@@ -1075,7 +1075,31 @@ def adjudication(r) -> tuple[str, str]:
     return best, why
 
 
-_DENIED_UEIS: dict = {}
+_DENIED_UEIS: dict | None = None
+
+#: Where the verified denials come from: 173's consolidated ledger, the one
+#: file where every ruling has been reconciled against every other ruling on
+#: the same subject. 174 reads the same file for the same reason.
+RULING_LEDGER = ROOT / "data" / "clean" / "cedar_ruling_ledger_consolidated.csv"
+
+#: The columns a denial is read from. Named so a ledger missing one of them
+#: is refused rather than read as "no denials".
+RULING_LEDGER_COLS = ("subject_key", "subject_name", "outcome", "ruling",
+                      "tier_source", "status")
+
+#: A negative's tier is evidence only when the RULER stated it. 173 writes
+#: this value into `tier_source` for exactly that case and manufactures tier X
+#: for the rest; 174's `TIER_STATED_BY_RULER` is the same string.
+TIER_STATED_BY_RULER = "stated_on_ruling_row"
+
+
+class DenialEvidenceUnavailable(RuntimeError):
+    """The verified denials could not be read, so no build may proceed.
+
+    Codex, PR #50, and it is right: a safety accessor whose absence re-enables
+    customer-facing identity claims must block the build rather than return
+    an empty set and let the export ship the attributions the denials forbid.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -1285,58 +1309,100 @@ def recompute_derived(collection: str, header, rows) -> dict:
 
 
 def denied_ueis() -> dict:
-    """UEI -> reason, for every VERIFIED `not_native` denial on record.
+    """UEI -> subject name, for every verified denial the export must enforce.
 
-    A VALIDATED RULING MUST BE A CONSTRAINT, NOT A PER-TABLE PATCH.
+    Read from `RULING_LEDGER`, the reconciled output of
+    `173_consolidate_rulings_ledger.py`, never from the raw ruling files.
+    Codex, PR #50, and it is right: this used to sweep
+    `review/cedar_research_rulings*.csv` and take every `not_native` row at
+    tier X as permanently settled, so a UEI that later received a positive
+    correction, or that carries a positive and a negative ruling at once,
+    stayed denied here while 173 had already recorded the pair as a
+    `POSITIVE_VS_NOT_NATIVE` conflict and applied NEITHER. Two readers of one
+    set of rulings reaching two verdicts is the defect 173 exists to end.
 
-    External review, 2026-09-03:
+    A UEI is denied when, in the ledger:
+      - `status` is SETTLED (a CONFLICT_NOT_APPLIED row applies nothing);
+      - `outcome` is NEGATIVE (a later positive correction settles the subject
+        as ENTITY, and it is then absent from this set);
+      - `ruling` is `not_native`; and
+      - `tier_source` is `stated_on_ruling_row`, the same gate
+        `174.funding_denials` applies, because a negative asserts no link and
+        173's manufactured tier X is not evidence for a destructive write.
 
-        "A validated ruling should automatically become a constraint, trigger
-         rebuilding of dependent views, and block release while any violating
-         row remains active. The fact that application still depends on
-         'whoever owns that table' means the agents and datasets are not yet
-         operating from one adjudication system."
+    FAILS CLOSED. A ledger that is absent, unreadable, or missing a column
+    this reads raises `DenialEvidenceUnavailable`, and the callers let it
+    propagate: 1137, 1135 and 25 stop rather than publish with the constraint
+    unmeasured. This used to `except Exception: continue` per file and return
+    `{}` when everything failed, which reads as "no denials" to every caller.
 
-    Measured proof of the point, 2026-09-04. The municipal-PHA denial was
-    applied to `federal_funding_transactions.csv` and the release gate went
-    green on it - while **14 rows of the DELIVERED `subcontracting.csv` still
-    shipped `sub_cedar_uid = CE-0017W-FN`, the Omaha Tribe, for the Housing
-    Authority of the City of Omaha. $3,221,778.36, in a customer's hands.**
-
-    Applying the denial table by table was never going to close it: `subawards`
-    has no `attributed_flag` / `attribution_status` / `excluded_flag`, so the
-    exclusion shape used for the assistance table does not exist there, and
-    copying it over would fork the convention. The answer is not a third
-    shape - it is that no delivered dataset may carry an attribution a verified
-    denial forbids, whatever its columns look like.
-
-    Read from the ruling files rather than restated here, so the constraint
-    cannot drift from the adjudication. Only `not_native` at a tier the RULER
-    stated is admitted, which is the same gate `174.apply_funding` applies: a
-    negative that carries only a machine-manufactured tier asserts no link, and
-    that is not evidence enough to strip a live attribution.
+    Cached after the first read: the ledger is one file and every exported
+    row consults it. `reset_denials()` clears the cache for a fixture.
     """
     global _DENIED_UEIS
-    if _DENIED_UEIS:
+    if _DENIED_UEIS is not None:
         return _DENIED_UEIS
-    out = {}
-    for path in sorted((ROOT / "review").glob("cedar_research_rulings*.csv")):
-        try:
-            with path.open(encoding="utf-8-sig", errors="replace",
-                           newline="") as fh:
-                for row in csv.DictReader(fh):
-                    if (row.get("your_ruling") or "").strip() != "not_native":
-                        continue
-                    if (row.get("confidence_tier") or "").strip().upper() != "X":
-                        continue          # tier not stated by the ruler
-                    uei = (row.get("uei") or "").strip().upper()
-                    if uei:
-                        out[uei] = (row.get("name") or uei)
-        except Exception:
-            continue
+    if not RULING_LEDGER.exists():
+        raise DenialEvidenceUnavailable(
+            f"verified denials cannot be read: {RULING_LEDGER} is absent. Run "
+            f"`py -3 code/173_consolidate_rulings_ledger.py` first; a build "
+            f"without it would ship attributions a ruling forbids.")
+    out: dict[str, str] = {}
+    try:
+        with RULING_LEDGER.open(encoding="utf-8-sig", errors="replace",
+                                newline="") as fh:
+            rd = csv.DictReader(fh)
+            missing = [c for c in RULING_LEDGER_COLS
+                       if c not in (rd.fieldnames or [])]
+            if missing:
+                raise DenialEvidenceUnavailable(
+                    f"{RULING_LEDGER.name} lacks {missing}; the denial "
+                    f"constraint cannot be read from it and the build must "
+                    f"not guess.")
+            for row in rd:
+                if (row.get("status") or "").strip() != "SETTLED":
+                    continue
+                if (row.get("outcome") or "").strip() != "NEGATIVE":
+                    continue
+                if (row.get("ruling") or "").strip().lower() != "not_native":
+                    continue
+                if (row.get("tier_source") or "").strip() != TIER_STATED_BY_RULER:
+                    continue
+                key = (row.get("subject_key") or "").strip()
+                if not key.upper().startswith("UEI:"):
+                    continue
+                uei = key[4:].strip().upper()
+                if uei:
+                    out[uei] = (row.get("subject_name") or uei)
+    except DenialEvidenceUnavailable:
+        raise
+    except (OSError, csv.Error, UnicodeError) as e:
+        raise DenialEvidenceUnavailable(
+            f"verified denials cannot be read: {RULING_LEDGER} - {e}") from e
     _DENIED_UEIS = out
     return out
 
+
+def reset_denials() -> None:
+    """Forget the cached ledger. For fixtures that point `RULING_LEDGER` elsewhere."""
+    global _DENIED_UEIS
+    _DENIED_UEIS = None
+
+
+#: The column that names EACH PARTY'S OWN identifier, per side of a row, and
+#: nothing else. Codex, PR #50: matching any column with "uei" in its name
+#: treated `parent_uei`, `ultimate_parent_uei` and `fpds_declared_parent_uei`
+#: as the subject, so a denial against a PARENT blanked the awardee's own key.
+#: A federal parent UEI is grouping evidence, not the identity of the row's
+#: party, and the repository records it as inconsistent. Listed by name so a
+#: new identifier column is a decision here rather than a substring match;
+#: `verify` refuses any entry with "parent" in it.
+PARTY_UEI_COLS = {
+    "sub": ("sub_uei",),
+    "prime": ("prime_uei",),
+    "": ("uei", "recipient_uei", "awardee_uei", "auditee_uei", "own_uei",
+         "operating_company_uei", "fpds_uei"),
+}
 
 #: Every column that can carry a Cedar attribution, under every spelling the
 #: delivered files use. `subcontracting` carries one per side of the award, so
@@ -1347,36 +1413,74 @@ _UID_COLS_BY_SIDE = {
     "": ("cedar_uid", "canonical_name", "tribe_id", "entity_cedar_uids"),
 }
 
+#: The controlled value `attribution_status` takes when a denial withdraws an
+#: attribution: the same one `174.apply_funding` writes, so a consumer testing
+#: the status (1139_linkage_coverage does) sees one vocabulary.
+DENIED_STATUS = "excluded_not_native"
+
+#: The reason a denial is recorded under in a writer's `masked` counter, and
+#: so in the manifest's `attribution_masked_why`. One string, shared, so 1135
+#: and 1137 report the same disposition and an audit can find it by name.
+DENIAL_MASK_REASON = "verified_not_native_denial"
+
+
+def _prefixed(side: str, column: str) -> str:
+    return f"{side}_{column}" if side else column
+
 
 def enforce_denials(row: dict) -> int:
     """Blank any Cedar attribution a verified denial forbids. Returns cells cleared.
 
     Side-aware: `subcontracting` names two parties per row, and a denial
-    against the SUBAWARDEE must not withdraw the PRIME's key. The UEI column
-    on each side selects which set of attribution columns is cleared.
+    against the SUBAWARDEE must not withdraw the PRIME's key. Each side is
+    matched on ITS OWN identifier column (`PARTY_UEI_COLS`), never on a parent
+    column.
+
+    When a denial fires on a side it does what `mask_attribution` does: the
+    identity cells go blank, and the flag that ASSERTS the attribution goes
+    to "0" rather than surviving at 1 beside a blank key (Codex, PR #50; the
+    same shape as CP-017). The status column takes the controlled value
+    `DENIED_STATUS`, and the explanation is appended to the basis column
+    rather than replacing it, so a basis 174 already wrote - which carries the
+    prior key, recoverable - is kept.
+
+    A row that already carries no attribution on that side is left alone,
+    counted as zero: rewriting `attribution_status` on the 5,998 funding rows
+    `174.apply_funding` had already corrected replaced their controlled status
+    with a sentence while reporting nothing cleared (Codex, PR #50).
     """
     denied = denied_ueis()
     if not denied:
         return 0
     cleared = 0
     for side, cols in _UID_COLS_BY_SIDE.items():
-        uei_cols = [c for c in row
-                    if "uei" in c.lower() and (c.startswith(side) if side else
-                                               not c.startswith(("sub_", "prime_")))]
-        hit = next((row[c] for c in uei_cols
+        hit = next((row[c] for c in PARTY_UEI_COLS[side]
                     if (row.get(c) or "").strip().upper() in denied), None)
         if hit is None:
             continue
-        why = denied[(hit or "").strip().upper()]
+        side_cleared = 0
         for c in cols:
             if row.get(c):
                 row[c] = ""
-                cleared += 1
-        for basis in (f"{side}_attribution_basis" if side else "attribution_basis",
-                      "attribution_status"):
-            if basis in row:
-                row[basis] = (f"WITHHELD: a verified not_native ruling denies "
-                              f"the Cedar attribution for {why}")
+                side_cleared += 1
+        for flag in MASK_FLAGS:
+            c = _prefixed(side, flag)
+            if c in row and (row.get(c) or "").strip() not in ("", "0"):
+                row[c] = "0"
+                side_cleared += 1
+        if not side_cleared:
+            continue
+        cleared += side_cleared
+        why = denied[hit.strip().upper()]
+        note = (f"WITHHELD: a verified not_native ruling denies the Cedar "
+                f"attribution for {why}")
+        status = _prefixed(side, "attribution_status")
+        if status in row:
+            row[status] = DENIED_STATUS
+        basis = _prefixed(side, "attribution_basis")
+        if basis in row:
+            prior = (row.get(basis) or "").strip()
+            row[basis] = f"{prior} | {note}" if prior else note
     return cleared
 
 
@@ -1871,6 +1975,21 @@ def verify() -> int:
                 bad.append(f"770: 760's scrape yields {len(c760)} entries, "
                            f"FLAGSHIP has {len(FLAGSHIP)}")
 
+    # 4b. A denial matches a party on ITS OWN identifier. A parent column in
+    #     PARTY_UEI_COLS would let a parent's denial blank a subsidiary's own
+    #     key (Codex, PR #50), so the list is refused here rather than trusted.
+    for side, cols in PARTY_UEI_COLS.items():
+        for c in cols:
+            if "parent" in c.lower() or "candidate" in c.lower():
+                bad.append(f"PARTY_UEI_COLS[{side!r}] names {c!r}: a parent or "
+                           f"candidate identifier is not the party's own")
+            if side and not c.startswith(f"{side}_"):
+                bad.append(f"PARTY_UEI_COLS[{side!r}] names {c!r}, which is "
+                           f"not on that side")
+            if not side and c.startswith(("sub_", "prime_")):
+                bad.append(f"PARTY_UEI_COLS[''] names {c!r}, which belongs "
+                           f"to a side")
+
     # 5. The shelf map must resolve, to the TWELVE the owner ruled onto the
     #    storefront and the THIRTEEN that get built. Both counts are checked,
     #    separately, because they are different facts: a dataset appearing on
@@ -1979,12 +2098,134 @@ def verify() -> int:
     return 1 if bad else 0
 
 
+def selftest_denials() -> int:
+    """Prove the denial constraint reads the reconciled verdict, fails closed,
+    matches each party on its own identifier, and leaves a corrected row alone.
+
+        py -3 code/cedar_publication.py selftest
+
+    One synthetic ledger and a handful of rows, each planted to reproduce a
+    finding from Codex, PR #50, and each asserted to be caught. A gate that
+    has never been seen to refuse anything is not known to work.
+    """
+    import tempfile
+    global RULING_LEDGER
+    saved = RULING_LEDGER
+    results = []
+
+    def case(name, ok):
+        results.append(ok)
+        print(f"    {'ok  ' if ok else 'FAIL'}  {name}")
+
+    def ledger(path, rows, header=RULING_LEDGER_COLS):
+        with path.open("w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(header))
+            w.writeheader()
+            for r in rows:
+                w.writerow({c: r.get(c, "") for c in header})
+
+    neg = {"subject_key": "UEI:DENIEDUEI001", "subject_name": "City Housing Authority",
+           "outcome": "NEGATIVE", "ruling": "not_native",
+           "tier_source": TIER_STATED_BY_RULER, "status": "SETTLED"}
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            # 1. Reconciled, not raw: a conflict applies neither side, a
+            #    manufactured tier is not evidence, a positive correction wins.
+            RULING_LEDGER = root / "ledger.csv"
+            ledger(RULING_LEDGER, [
+                neg,
+                {**neg, "subject_key": "UEI:CONFLICTED01",
+                 "outcome": "POSITIVE_VS_NOT_NATIVE", "status": "CONFLICT_NOT_APPLIED"},
+                {**neg, "subject_key": "UEI:MANUFACTURED", "tier_source": "manufactured_x"},
+                {**neg, "subject_key": "UEI:CORRECTED001", "outcome": "ENTITY",
+                 "ruling": "keep as CE-00001-AA"},
+                {**neg, "subject_key": "CAGE:1A2B3"},
+            ])
+            reset_denials()
+            got = denied_ueis()
+            case("only a SETTLED NEGATIVE with a ruler-stated tier is a denial",
+                 set(got) == {"DENIEDUEI001"})
+
+            # 2. Party-own columns: a parent's denial leaves the awardee alone.
+            row = {"awardee_uei": "OTHERUEI0001", "parent_uei": "DENIEDUEI001",
+                   "cedar_uid": "CE-00002-BB", "canonical_name": "Awardee LLC",
+                   "attributed_flag": "1", "attribution_status": "cedar_neid",
+                   "attribution_basis": ""}
+            n = enforce_denials(row)
+            case("a denied PARENT uei clears nothing on the awardee's row",
+                 n == 0 and row["cedar_uid"] == "CE-00002-BB"
+                 and row["attributed_flag"] == "1"
+                 and row["attribution_status"] == "cedar_neid")
+
+            # 3. The flag falls to 0 and the status keeps its vocabulary.
+            row = {"recipient_uei": "DENIEDUEI001", "cedar_uid": "CE-0017W-FN",
+                   "canonical_name": "Omaha Tribe", "tribe_id": "T1",
+                   "attributed_flag": "1", "attribution_status": "cedar_neid",
+                   "attribution_basis": "prior cedar_uid='CE-0017W-FN'"}
+            n = enforce_denials(row)
+            case("a denial blanks the identity, sets attributed_flag to 0 and "
+                 "keeps the controlled status",
+                 n == 4 and row["cedar_uid"] == "" and row["canonical_name"] == ""
+                 and row["tribe_id"] == "" and row["attributed_flag"] == "0"
+                 and row["attribution_status"] == DENIED_STATUS
+                 and row["attribution_basis"].startswith("prior cedar_uid='CE-0017W-FN' | WITHHELD"))
+
+            # 4. A row 174 already corrected is left exactly as it was.
+            row = {"recipient_uei": "DENIEDUEI001", "cedar_uid": "",
+                   "canonical_name": "", "attributed_flag": "0",
+                   "attribution_status": DENIED_STATUS,
+                   "attribution_basis": "attribution WITHDRAWN by 174"}
+            before = dict(row)
+            case("an already-corrected row is untouched, status and basis kept",
+                 enforce_denials(row) == 0 and row == before)
+
+            # 5. Sides: a denied SUB does not withdraw the PRIME's key.
+            row = {"sub_uei": "DENIEDUEI001", "prime_uei": "OTHERUEI0001",
+                   "sub_cedar_uid": "CE-0017W-FN", "prime_cedar_uid": "CE-00002-BB",
+                   "sub_attributed_flag": "1", "prime_attributed_flag": "1"}
+            n = enforce_denials(row)
+            case("a denied sub clears the sub side only",
+                 n == 2 and row["sub_cedar_uid"] == "" and row["sub_attributed_flag"] == "0"
+                 and row["prime_cedar_uid"] == "CE-00002-BB"
+                 and row["prime_attributed_flag"] == "1")
+
+            # 6. Fail closed: absent, then missing a column.
+            RULING_LEDGER = root / "absent.csv"
+            reset_denials()
+            try:
+                denied_ueis()
+                case("an absent ledger blocks the build", False)
+            except DenialEvidenceUnavailable:
+                case("an absent ledger blocks the build", True)
+            RULING_LEDGER = root / "short.csv"
+            ledger(RULING_LEDGER, [neg], header=("subject_key", "ruling"))
+            reset_denials()
+            try:
+                denied_ueis()
+                case("a ledger missing a column blocks the build", False)
+            except DenialEvidenceUnavailable:
+                case("a ledger missing a column blocks the build", True)
+            # 7. No party column may be a parent column.
+            case("PARTY_UEI_COLS names no parent column",
+                 not any("parent" in c for cols in PARTY_UEI_COLS.values() for c in cols))
+    finally:
+        RULING_LEDGER = saved
+        reset_denials()
+    bad = [i for i, v in enumerate(results) if not v]
+    print(f"\n  cedar_publication selftest   {'ok' if not bad else 'FAIL'}   "
+          f"{len(bad)} of {len(results)} case(s) unproven")
+    return 1 if bad else 0
+
+
 def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "show"
     if mode == "verify":
         return verify()
     if mode == "sync":
         return sync()
+    if mode == "selftest":
+        return selftest_denials()
     print("  cedar_publication - the publication rules, in one place")
     print(f"    NEVER            : {len(NEVER)} columns")
     print(f"    GATES            : {', '.join(sorted(GATES))}")

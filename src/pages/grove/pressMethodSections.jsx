@@ -15,46 +15,14 @@ import {
   SOURCES,
   FEEDS,
   LAYOUT,
+  PROPER_NOUN,
   say,
 } from "../../features/grove/pressEcosystem.js";
+import { CONSTRUCTION_STEPS, MAINTENANCE_TIMELINE } from "../../features/grove/pressMethod.js";
 
-const STAGES = [
-  {
-    n: "01",
-    name: "Discover",
-    body: "Find APIs, archives, notices, regulatory records, filings, state reports and other relevant sources.",
-  },
-  {
-    n: "02",
-    name: "Extract",
-    body: "Retrieve structured records, historical files and relevant document-level information.",
-  },
-  {
-    n: "03",
-    name: "Normalize",
-    body: "Reconcile names, dates, identifiers, classifications, formats and geographies.",
-  },
-  {
-    n: "04",
-    name: "Resolve",
-    body: "Connect tribal governments, enterprises, ANCs, NHOs, businesses, nonprofits, facilities and relevant counterparties.",
-  },
-  {
-    n: "05",
-    name: "Validate",
-    body: "Use source documentation and other Cedar collections to confirm relationships and identify conflicts.",
-  },
-  {
-    n: "06",
-    name: "Review",
-    body: "Researchers examine ambiguous matches, unusual relationships and historical changes that automation cannot safely resolve alone.",
-  },
-  {
-    n: "07",
-    name: "Maintain",
-    body: "Track new entities, renames, acquisitions, ownership changes, closures, reorganizations and corrections over time.",
-  },
-];
+// The stages and the timeline are declared in pressMethod.js, where the
+// tests can hold them; this file used to carry its own copies of both, with
+// different names for the same steps, and rendered the copies.
 
 /**
  * The pipeline as one continuous run rather than seven boxes.
@@ -66,11 +34,11 @@ const STAGES = [
 export function ProcessRail() {
   return (
     <ol className="cp-rail">
-      {STAGES.map((stage) => (
-        <li className="cp-rail__stage" key={stage.n}>
-          <span className="cp-rail__n">{stage.n}</span>
-          <h3 className="cp-rail__name">{stage.name}</h3>
-          <p className="cp-rail__body">{stage.body}</p>
+      {CONSTRUCTION_STEPS.map((stage, index) => (
+        <li className="cp-rail__stage" key={stage.id}>
+          <span className="cp-rail__n">{String(index + 1).padStart(2, "0")}</span>
+          <h3 className="cp-rail__name">{stage.label}</h3>
+          <p className="cp-rail__body">{stage.note}</p>
         </li>
       ))}
     </ol>
@@ -88,9 +56,9 @@ export function ProcessRail() {
  */
 export function EcosystemDiagram() {
   // Select a collection and the whole answer appears at once: the
-  // records it is built from fan outward (Gaming starts at NIGC and state
-  // compacts, Contracting at SAM.gov and FPDS), and the collections that
-  // reinforce it light up on the ring. A click pins the same view for
+  // records it is built from fan outward (Prime Contracting starts at
+  // SAM.gov and FPDS, NEST at the ANCSA audited filings), and the
+  // collections that reinforce it light up on the ring. A click pins the same view for
   // touch and for reading at leisure. The middle is Cedar working with
   // human reviewers on the entity resolution layer, floated above the
   // page, and the picture says so. "Entity resolution", deliberately:
@@ -104,8 +72,7 @@ export function EcosystemDiagram() {
   const feeds = focus ? FEEDS[focus] : null;
   const litSet = new Set(focus ? [focus, ...(feeds?.feeds ?? [])] : []);
 
-  const PROPER = /^(Grants|Congress|USASpending|Federal|National|Office|Senate|House|IRS|SEC|SAM|FPDS|SBA|ONRR|BLM|EIA|NIGC)/;
-  const inSentence = (t) => (PROPER.test(t) ? t : t[0].toLowerCase() + t.slice(1));
+  const inSentence = (t) => (PROPER_NOUN.test(t) ? t : t[0].toLowerCase() + t.slice(1));
   const sentence = focus
     ? `${focus} is built from ${say((SOURCES[focus] ?? []).map(inSentence))}, resolved in the entity resolution layer in the middle and reinforced by ${say(feeds?.feeds ?? [])}.`
     : "Select a collection to see the records it is built from and what reinforces it.";
@@ -117,7 +84,7 @@ export function EcosystemDiagram() {
               keyboard can reach, and role="img" told a screen reader the
               whole diagram was one flat picture. */}
         <svg viewBox={`0 0 ${w} ${h}`} className="cp-eco__svg" role="group"
-          aria-label="Ten Cedar collections around the Cedar entity resolution layer, with the sources each is built from">
+          aria-label={`${RING.length} Cedar collections around the Cedar entity resolution layer, with the sources each is built from`}>
           {/* Anywhere that is not a label unpins. */}
           <rect x="0" y="0" width={w} height={h} fill="transparent" onClick={() => setPinned(null)} />
           {nodes.map((node) => {
@@ -263,15 +230,6 @@ export function EcosystemDiagram() {
   );
 }
 
-const HISTORY = [
-  { year: "2017", event: "Enterprise created" },
-  { year: "2019", event: "Subsidiary added" },
-  { year: "2021", event: "Property acquired" },
-  { year: "2023", event: "Entity renamed" },
-  { year: "2025", event: "Ownership changed" },
-  { year: "2026", event: "Historical records reconciled" },
-];
-
 /** One entity's life, which is the thing that has to be maintained. The
  *  label says the sequence is an example: these are the kinds of events the
  *  identity layer tracks, not the record of a particular enterprise, and a
@@ -281,7 +239,7 @@ export function EntityTimeline() {
     <>
       <p className="cp-tl__cap">Illustrative entity history</p>
       <ol className="cp-tl">
-        {HISTORY.map((point) => (
+        {MAINTENANCE_TIMELINE.map((point) => (
           <li className="cp-tl__point" key={point.year}>
             <span className="cp-tl__year">{point.year}</span>
             <span className="cp-tl__event">{point.event}</span>
