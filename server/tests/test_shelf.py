@@ -146,10 +146,25 @@ class TestItRendersTheRealCollectionData(unittest.TestCase):
             f"the page prints years nothing states: {sorted(printed - stated)}",
         )
 
-    def test_the_collection_with_no_sample_says_cedars_reason_for_it(self) -> None:
-        reason = launch.sample_unavailable_reason("owned")
-        self.assertTrue(reason, "the fixture for this test has gone away")
-        self.assertIn(_as_rendered(reason), _page("press_pro"))
+    def test_a_collection_with_no_sample_says_cedars_reason_for_it(self) -> None:
+        """The fixture DID go away, exactly as this test warned it might.
+
+        `owned` was the collection with no sample; the 2026-09-04 rebuild gave
+        it one, and measured against the manifest every collection now has a
+        sample. So the test no longer hardcodes which collection is missing
+        one - it asks the data, and asserts the page explains whichever ones
+        are. When none is missing there is nothing to render and nothing to
+        assert, which is the honest outcome rather than a failure.
+        """
+        missing = [
+            d.id
+            for d in launch.LAUNCH_COLLECTION
+            if not (launch.collection_sample(d.id) or {}).get("path")
+        ]
+        for cid in missing:
+            reason = launch.sample_unavailable_reason(cid)
+            self.assertTrue(reason, f"{cid} has no sample and no stated reason")
+            self.assertIn(_as_rendered(reason), _page("press_pro"))
 
     def test_excluded_collections_are_named_rather_than_absent(self) -> None:
         for entry in launch.EXCLUDED_COLLECTIONS:

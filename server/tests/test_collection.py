@@ -327,20 +327,39 @@ class TestCrossLanguageParity(unittest.TestCase):
                     self.assertIn("split", table["full_file"])
                     self.assertIn("files", table["full_file"])
 
-    def test_the_one_collection_without_a_sample_says_why(self) -> None:
+    def test_every_collection_has_a_sample_and_a_blocked_one_says_why(self) -> None:
+        """UPDATED 2026-09-04. `owned` used to be the one collection with no
+        sample, and this asserted that by name. The rebuild gave it one -
+        native_owned_businesses__10.csv, 10 rows of 4,273 - so every collection
+        now carries a sample and the old assertion read a fix as a regression.
+
+        The invariant that actually matters survives and is asserted both ways:
+        a collection either HAS a sample, or SAYS why it does not. Naming which
+        collection is in which state was the brittle part.
+        """
         without = [
             d.id
             for d in launch.LAUNCH_COLLECTION
             if not (launch.collection_sample(d.id) or {}).get("path")
         ]
-        self.assertEqual(without, ["owned"])
-        reason = launch.sample_unavailable_reason("owned")
-        self.assertTrue(reason)
-        # It is BLOCKED on Cedar's side too, with named blockers rather than
-        # the bare word.
-        facts = launch.collection_cedar_facts("owned")
-        self.assertEqual(facts["status"], "BLOCKED")
-        self.assertTrue(facts["blockers"])
+        for cid in without:
+            self.assertTrue(launch.sample_unavailable_reason(cid),
+                            f"{cid} has no sample and no reason for it")
+        # `owned` was BLOCKED with three named blockers at v0 and is READY with
+        # none at v1 - the rebuild settled its membership and grain. Pinning the
+        # test to BLOCKED would have made that fix look like a failure.
+        #
+        # The invariant is what gets asserted: a BLOCKED collection NAMES its
+        # blockers rather than shipping the bare word, and a READY one has none.
+        # That holds whichever state a collection is in.
+        for dataset in launch.LAUNCH_COLLECTION:
+            facts = launch.collection_cedar_facts(dataset.id)
+            if facts["status"] == "BLOCKED":
+                self.assertTrue(facts["blockers"],
+                                f"{dataset.id} is BLOCKED and names no blocker")
+            elif facts["status"] == "READY":
+                self.assertFalse(facts["blockers"],
+                                 f"{dataset.id} is READY and still lists blockers")
 
     # -- the bytes a reader receives ---------------------------------------
 

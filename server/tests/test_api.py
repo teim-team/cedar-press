@@ -245,7 +245,11 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertNotIn("catalog entry", payload["basis"])
-        self.assertIn("v0", payload["basis"])
+        # A VERSION, not the literal "v0". Every collection went to v1 on
+        # 2026-09-04 and this pinned assertion failed - which is the wrong
+        # signal entirely, because what it is really testing is that the basis
+        # cites the measured descriptor rather than the catalog.
+        self.assertRegex(payload["basis"], r"v\d+")
         self.assertNotIn("vintage", payload["basis"])
 
     def test_coverage_is_the_same_sentence_for_every_tier(self) -> None:

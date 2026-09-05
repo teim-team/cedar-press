@@ -9,6 +9,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   EXCLUDED_COLLECTIONS,
@@ -160,7 +161,13 @@ test("a retired collection stays in the feed as read-only history", () => {
 // planted files: Codex, PR #53, `{}` was accepted and would have been
 // overwritten with the manifest's current releases alone.
 test("the ledger script refuses a file that is not a ledger", () => {
-  const script = new URL("../../../scripts/record-release.mjs", import.meta.url).pathname;
+  // fileURLToPath, not .pathname. On Windows .pathname yields
+  // "/C:/Users/.../Cedar%20Press/..." - a leading slash Node cannot resolve
+  // and a percent-encoded space - so this test failed on every Windows
+  // checkout whose path contains a space, which is every checkout of this
+  // repo. It passed in CI, so the breakage was invisible where it was run.
+  const script = fileURLToPath(
+    new URL("../../../scripts/record-release.mjs", import.meta.url));
   const dir = mkdtempSync(join(tmpdir(), "cedar-ledger-"));
   const run = (contents) => {
     const path = join(dir, `ledger-${Math.random().toString(36).slice(2)}.json`);
@@ -218,15 +225,32 @@ test("every collection declares a cadence, and it is one of the known ones", () 
 // The first release's notes are what the manifest measures, said plainly.
 // No note may carry a number the manifest does not: the table count and the
 // row label are copied, never typed.
-test("the first release says what the manifest measures", () => {
+// The FIRST release describes what the manifest measured WHEN IT WAS RECORDED;
+// the LATEST describes what it measures now. Those were the same sentence while
+// every collection had exactly one release, and this test asserted it as one.
+//
+// On 2026-09-04 all twelve went to v1 and they stopped being the same: the
+// ledger is append-only, so v0 keeps its own facts forever - that is the point
+// of it - while the manifest moved on. legislation went 149,293 -> 206,354 rows,
+// and the old assertion read that as a defect rather than as history.
+test("the first release keeps its own facts, the latest matches the manifest", () => {
   for (const dataset of LAUNCH_COLLECTION) {
     const first = releaseFor(dataset.id).history.at(-1);
     assert.equal(first.kind, RELEASE_KIND.DATA);
     assert.ok(first.changed.length >= 2, dataset.id);
     assert.match(first.changed[0], /^First release on Cedar Press: /);
-    assert.ok(first.changed[0].includes(dataset.rowsLabel), `${dataset.id}: ${first.changed[0]}`);
+    // it states SOME measured row count - its own, not necessarily today's
+    assert.match(first.changed[0], /[\d,]+ rows|row count unresolved/,
+                 `${dataset.id}: ${first.changed[0]}`);
+    // and the ledger's NEWEST release is the version the manifest is on.
+    // (latestRelease returns a release - kind, changed, version - not the raw
+    // ledger entry, so there is no rowsLabel on it to compare.)
+    const latest = latestRelease(dataset.id);
+    assert.ok(latest, dataset.id);
+    assert.equal(latest.version, dataset.version,
+                 `${dataset.id}: ledger's newest release is not the manifest's version`);
   }
-  // The one collection with no preview file says so rather than promising one.
+  // The collection that had no preview file said so rather than promising one.
   const owned = releaseFor("owned").history.at(-1);
   assert.ok(owned.changed.some((line) => line.startsWith("No preview file yet")));
   const funding = releaseFor("funding").history.at(-1);
@@ -291,7 +315,11 @@ test("recently updated is deterministic when releases share a day", () => {
 test("dates are spelled one way everywhere", () => {
   assert.equal(formatUpdated("2026-09-02"), "Sept. 2, 2026");
   assert.equal(formatUpdated(""), "");
-  assert.match(freshnessLine("funding"), /^Updated Sept\. 2 · monthly$/);
+  // The SHAPE, not the day. Pinning this to "Sept. 2" made a routine data
+  // refresh fail a formatting test, which teaches the next person to edit the
+  // date rather than read the failure.
+  assert.match(freshnessLine("funding"),
+               /^Updated [A-Z][a-z]+\.? \d{1,2} · monthly$/);
   assert.equal(freshnessLine("not-a-collection"), "");
   assert.equal(latestRelease("nest").version, releaseFor("nest").version);
   assert.equal(latestRelease("not-a-collection"), null);

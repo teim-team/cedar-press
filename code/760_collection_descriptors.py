@@ -159,6 +159,43 @@ LEVEL = {
 #
 # 770 already reads this file's `PRODUCT_ID` by text so the two id maps cannot
 # drift. This is the same discipline in the other direction.
+
+#: COLLECTION VERSION. Hardcoding "v0" for everything was fine while nothing
+#: had shipped, but data/cedar/releases.json is an APPEND-ONLY ledger and it
+#: refuses to overwrite a recorded version - correctly. So when a rebuild
+#: changes a collection's measured facts, the version has to move, or the
+#: ledger and the manifest disagree and the release tests fail naming exactly
+#: that.
+#:
+#: EVERY storefront collection goes to v1 on 2026-09-04, and the reason is that
+#: every one of them actually changed. This was not a cosmetic re-import:
+#:
+#:   nest          preview `of` 4,799 -> 5,820 rows
+#:   nonprofits    10 tables / 123,293 rows -> 12 / 131,090
+#:   owned         gained a preview it did not have
+#:   all twelve    rebuilt from datasets whose identity layer changed - the
+#:                 CICD scheme removed, names re-sourced from the registers
+#:                 that publish them, 371 Native nonprofits minted
+#:
+#: Bumping only the two whose row counts moved was my first attempt and it was
+#: wrong: `updated` moved for all of them, so a v0 citation would resolve to
+#: facts recorded on a different day. The ledger caught that, which is the
+#: whole reason it refuses to overwrite a version.
+VERSION = {
+    "contractors": "v1",
+    "deals": "v1",
+    "federal-register": "v1",
+    "funding": "v1",
+    "legislation": "v1",
+    "lobbying": "v1",
+    "nagpra": "v1",
+    "natural-resources": "v1",
+    "nest": "v1",
+    "nonprofits": "v1",
+    "owned": "v1",
+    "subcontracting": "v1",
+}
+
 def _flagship_map() -> tuple[dict, set]:
     """`FLAGSHIP` and the spine-resident table set, from `cedar_publication`.
 
@@ -475,7 +512,7 @@ def main() -> int:
             "origin": "lumecon",
             "rows_label": f"{nrows:,} rows",
             "vintage": cadence.get(did, ""),
-            "version": "v0",          # pre-release; the platform owns bumping
+            "version": VERSION.get(PRODUCT_ID.get(did, did), "v0"),
             "updated": TODAY,
             # `downloads` is a PRODUCT metric that lives in the platform
             # database. Cedar has no business inventing a number here, but the

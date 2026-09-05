@@ -82,13 +82,29 @@ test("every collection with a sample downloads real rows for it", async () => {
 // The one collection with no preview is `owned`, and the reason is a real
 // unresolved disagreement about which table the collection is. It must fall
 // back to the description file rather than hand over another table's rows.
+// UPDATED 2026-09-04. This test used `owned` as its live example of a
+// collection Cedar could not settle a sample for. It is not one any more -
+// the rebuild gave it native_owned_businesses__10.csv, 10 rows of 4,273 - and
+// measured against the manifest, ALL TWELVE collections now carry a sample.
+//
+// So the fallback is exercised against a collection that does not exist rather
+// than against whichever real one happens to be broken today. A test that
+// depends on a real dataset staying broken passes for the wrong reason and
+// fails the day somebody fixes it, which is what just happened.
 test("a collection whose sample Cedar could not settle falls back, and says why", async () => {
-  const owned = LAUNCH_COLLECTION.find((d) => d.id === "owned");
-  assert.ok(owned, "owned is on the shelf");
-  assert.equal(hasReleaseFile(owned), false);
-  assert.equal(samplePath("owned"), null);
-  const { name } = await csvFor(owned, readSample);
-  assert.equal(name, "owned-collection-description.csv");
+  const absent = { id: "not-a-collection", name: "Not A Collection" };
+  assert.equal(samplePath("not-a-collection"), null);
+  const { name } = await csvFor(absent, readSample);
+  assert.equal(name, "not-a-collection-collection-description.csv");
+});
+
+// And the thing that changed: every collection on the shelf now HAS a sample.
+// Asserted so the coverage cannot quietly regress to the state above.
+test("every storefront collection carries a sample file", () => {
+  for (const dataset of LAUNCH_COLLECTION) {
+    assert.ok(samplePath(dataset.id), `${dataset.id} has no sample path`);
+    assert.equal(hasReleaseFile(dataset), true, `${dataset.id} has no release file`);
+  }
 });
 
 // A fetch that fails must not leave the button dead: the reader gets the
