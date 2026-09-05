@@ -5,7 +5,7 @@
       "collection": "funding",
       "dataset": "Federal Funding to Indian Country",
       "row": "One federal assistance transaction (a grant, loan, direct payment or insurance action) reported on USAspending, linked to the Native entity that received it.",
-      "where": "workspace dist/review/spreadsheets/funding/federal_funding_transactions.csv; built by code/1135_full_dataset_review_bundle.py from the USAspending assistance archive.",
+      "where": "workspace dist/customer/funding.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/funding/federal_funding_transactions.csv; built by code/1135_full_dataset_review_bundle.py from the USAspending assistance archive.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -37,6 +37,11 @@
           "column": "fiscal_year",
           "label": "Fiscal year",
           "meaning": "The federal fiscal year of the action (October to September), which is what USAspending reports and what the year filter uses."
+        },
+        {
+          "column": "fy_partial_flag",
+          "label": "Partial fiscal year",
+          "meaning": "Whether this row falls in a fiscal year the source had not finished reporting when Cedar pulled it (yes or no). Do not compare a partial year to a complete one."
         },
         {
           "column": "obligated_usd",
@@ -129,6 +134,16 @@
           "meaning": "Cedar's confidence in the link: A is strongest."
         },
         {
+          "column": "attributed_flag",
+          "label": "Attributed to the entity",
+          "meaning": "Whether Cedar attributes this transaction to the Native entity (yes) or keeps it in the file unattributed (no). Cedar's totals count attributed rows only."
+        },
+        {
+          "column": "attribution_status",
+          "label": "Attribution status",
+          "meaning": "How the attribution stands: attributed through the register, unattributed, or under review."
+        },
+        {
           "column": "source_url",
           "label": "Source",
           "meaning": "The award's page on USAspending.",
@@ -140,7 +155,7 @@
       "collection": "federal-register",
       "dataset": "Federal Register",
       "row": "One tribal consultation event announced or reported in the Federal Register, one row per event and named participant (most events name no single tribe).",
-      "where": "workspace dist/review/spreadsheets/federal-register/consultation_events.csv; built from Federal Register documents.",
+      "where": "workspace dist/customer/federal-register.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/federal-register/consultation_events.csv; built from Federal Register documents.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -183,6 +198,21 @@
           "column": "consultation_type",
           "label": "Kind of consultation",
           "meaning": "Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document."
+        },
+        {
+          "column": "document_role",
+          "label": "Document role",
+          "meaning": "Whether the document announces a consultation or reports one that already happened."
+        },
+        {
+          "column": "is_event_primary_row",
+          "label": "Counts as one consultation",
+          "meaning": "One row per event carries yes; the rest are additional participants of the same event. Count consultations by this column, not by rows."
+        },
+        {
+          "column": "n_participant_rows_for_event",
+          "label": "Participant rows for this event",
+          "meaning": "How many rows this event has in the file."
         },
         {
           "column": "topic",
@@ -265,7 +295,7 @@
       "collection": "legislation",
       "dataset": "Legislation",
       "row": "One bill in Congress that concerns Native nations or organizations, with the entities it names.",
-      "where": "workspace dist/review/spreadsheets/legislation/native_bills.csv; built from the Congress.gov API.",
+      "where": "workspace dist/customer/legislation.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/legislation/native_bills.csv; built from the Congress.gov API.",
       "fields": [
         {
           "column": "entity_cedar_uids",
@@ -375,7 +405,7 @@
       "collection": "deals",
       "dataset": "Indian Country Deals",
       "row": "One announced transaction or award involving a Native party: an acquisition, a financing, a grant, a partnership.",
-      "where": "workspace dist/review/spreadsheets/deals/deals_classified.csv; assembled from announcements, filings and agency award lists.",
+      "where": "workspace dist/customer/deals.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/deals/deals_classified.csv; assembled from announcements, filings and agency award lists.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -520,7 +550,7 @@
       "collection": "nagpra",
       "dataset": "NAGPRA",
       "row": "One NAGPRA notice in the Federal Register (a notice of inventory completion or intent to repatriate), with the institution holding the remains or objects and the Native entities the notice names.",
-      "where": "workspace dist/review/spreadsheets/nagpra/nagpra_notices.csv; built from Federal Register NAGPRA notices.",
+      "where": "workspace dist/customer/nagpra.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nagpra/nagpra_notices.csv; built from Federal Register NAGPRA notices.",
       "fields": [
         {
           "column": "affiliated_entity_ids",
@@ -538,6 +568,16 @@
           "label": "Entity types",
           "meaning": "Their entity types, in the same order.",
           "add": true
+        },
+        {
+          "column": "n_affiliated_named",
+          "label": "Affiliated parties named",
+          "meaning": "How many parties the notice names as culturally affiliated."
+        },
+        {
+          "column": "n_affiliated_resolved",
+          "label": "Affiliated parties resolved",
+          "meaning": "How many of those Cedar could resolve to a register entity."
         },
         {
           "column": "document_number",
@@ -630,9 +670,29 @@
           "meaning": "Entities the notice says were consulted."
         },
         {
+          "column": "n_consulted_named",
+          "label": "Consulted parties named",
+          "meaning": "How many parties the notice names as consulted."
+        },
+        {
+          "column": "n_consulted_resolved",
+          "label": "Consulted parties resolved",
+          "meaning": "How many of those Cedar could resolve to a register entity. The gap is real uncertainty, not an omission."
+        },
+        {
           "column": "repatriation_recipient_entity_ids",
           "label": "Cedar IDs (repatriation recipient)",
           "meaning": "Entities the notice names to receive the repatriation."
+        },
+        {
+          "column": "n_repatriation_recipient_named",
+          "label": "Recipients named",
+          "meaning": "How many recipients the notice names."
+        },
+        {
+          "column": "n_repatriation_recipient_resolved",
+          "label": "Recipients resolved",
+          "meaning": "How many of those Cedar could resolve."
         },
         {
           "column": "disposition_priority_entity_ids",
@@ -640,9 +700,39 @@
           "meaning": "Entities with priority for disposition, where stated."
         },
         {
+          "column": "n_disposition_priority_named",
+          "label": "Priority parties named",
+          "meaning": "How many parties the notice names with disposition priority."
+        },
+        {
+          "column": "n_disposition_priority_resolved",
+          "label": "Priority parties resolved",
+          "meaning": "How many of those Cedar could resolve."
+        },
+        {
           "column": "aboriginal_land_entity_ids",
           "label": "Cedar IDs (aboriginal land)",
           "meaning": "Entities on whose aboriginal land the removal site lies, where stated."
+        },
+        {
+          "column": "n_aboriginal_land_named",
+          "label": "Aboriginal-land parties named",
+          "meaning": "How many parties the notice names for aboriginal land."
+        },
+        {
+          "column": "n_aboriginal_land_resolved",
+          "label": "Aboriginal-land parties resolved",
+          "meaning": "How many of those Cedar could resolve."
+        },
+        {
+          "column": "n_parties_named",
+          "label": "Parties named in all",
+          "meaning": "All parties the notice names, across roles."
+        },
+        {
+          "column": "n_entities_resolved",
+          "label": "Entities resolved in all",
+          "meaning": "How many distinct register entities those resolve to."
         },
         {
           "column": "response_deadline_date",
@@ -680,7 +770,7 @@
       "collection": "lobbying",
       "dataset": "Native Federal Advocacy & Engagement",
       "row": "One federal lobbying filing under the Lobbying Disclosure Act in which the client is a Native entity, one row per filing (amended filings appear once, as the current version).",
-      "where": "workspace dist/review/spreadsheets/lobbying/native_entity_lobbying_disclosures.csv; built from the Senate LDA filings database.",
+      "where": "workspace dist/customer/lobbying.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/lobbying/native_entity_lobbying_disclosures.csv; built from the Senate LDA filings database.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -794,6 +884,16 @@
           "meaning": "The filing that replaces this one, where one does."
         },
         {
+          "column": "attribution_withdrawn",
+          "label": "Attribution withdrawn",
+          "meaning": "Whether Cedar withdrew its link between this filing and the entity after review (yes or no). A withdrawn filing stays in the file; its spend is not counted as the entity's."
+        },
+        {
+          "column": "attribution_withdrawn_reason",
+          "label": "Why withdrawn",
+          "meaning": "The reason recorded for the withdrawal."
+        },
+        {
           "column": "filing_url",
           "label": "Source",
           "meaning": "The filing on lda.senate.gov."
@@ -809,7 +909,7 @@
       "collection": "contractors",
       "dataset": "Native Federal Contractors",
       "row": "One federal contract transaction (an award or a modification) to a firm owned by a Native entity, as reported to FPDS and published on USAspending.",
-      "where": "workspace dist/review/spreadsheets/contractors/prime_contracts.csv; built from the USAspending contract archive.",
+      "where": "workspace dist/customer/contractors.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/contractors/prime_contracts.csv; built from the USAspending contract archive.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -866,6 +966,11 @@
           "column": "awardee_uei",
           "label": "Awardee UEI",
           "meaning": "The contractor's federal Unique Entity ID."
+        },
+        {
+          "column": "cage_code",
+          "label": "Awardee CAGE",
+          "meaning": "The contractor's CAGE code, the identifier that persists across the DUNS-to-UEI change; masked on rows the publication rule withholds."
         },
         {
           "column": "parent_name",
@@ -984,7 +1089,7 @@
       "collection": "subcontracting",
       "dataset": "Native Subcontracting",
       "row": "One federal subcontract reported through FSRS where the prime, the subcontractor or both are owned by a Native entity.",
-      "where": "workspace dist/review/spreadsheets/subcontracting/subawards.csv; built from the USAspending FSRS subaward pull.",
+      "where": "workspace dist/customer/subcontracting.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/subcontracting/subawards.csv; built from the USAspending FSRS subaward pull.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -1044,6 +1149,21 @@
           "meaning": "The same amount adjusted to 2025 dollars."
         },
         {
+          "column": "duplicate_status",
+          "label": "Duplicate status",
+          "meaning": "Whether this row is the primary filing or a duplicate of one. Sum primaries only."
+        },
+        {
+          "column": "subaward_exceeds_prime_flag",
+          "label": "Exceeds the prime award",
+          "meaning": "Whether the subaward amount exceeds its prime award (yes or no). A real filing, kept in the file, but never added into totals."
+        },
+        {
+          "column": "action_date_precedes_ffata_flag",
+          "label": "Date before FFATA",
+          "meaning": "Whether the reported date precedes the reporting law itself (yes or no), a known filer anomaly; do not treat such a date as when the work happened."
+        },
+        {
           "column": "description",
           "label": "Description",
           "meaning": "What the subcontract is for, as reported."
@@ -1057,6 +1177,11 @@
           "column": "sub_uei",
           "label": "Subcontractor UEI",
           "meaning": "Its Unique Entity ID."
+        },
+        {
+          "column": "sub_cage",
+          "label": "Subcontractor CAGE",
+          "meaning": "Its CAGE code, where reported."
         },
         {
           "column": "sub_state",
@@ -1082,6 +1207,11 @@
           "column": "prime_uei",
           "label": "Prime UEI",
           "meaning": "Its Unique Entity ID."
+        },
+        {
+          "column": "prime_cage",
+          "label": "Prime CAGE",
+          "meaning": "Its CAGE code, where reported."
         },
         {
           "column": "prime_parent_name",
@@ -1129,7 +1259,7 @@
       "collection": "owned",
       "dataset": "Native-Owned Businesses",
       "row": "One business owned by a Native entity, in the register of such businesses.",
-      "where": "workspace dist/review/spreadsheets/native-owned-businesses/native_owned_businesses.csv. NOT AUDITED: the sample is not in the repository yet; run scripts/import_cedar_manifest.py --audit after adding it.",
+      "where": "workspace dist/customer/owned.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/native-owned-businesses/native_owned_businesses.csv. NOT AUDITED: the sample is not in the repository yet; run scripts/import_cedar_manifest.py --audit after adding it.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -1152,7 +1282,7 @@
       "collection": "nest",
       "dataset": "Native Enterprises",
       "row": "One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it and how.",
-      "where": "workspace dist/review/spreadsheets/nest/nest_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.",
+      "where": "workspace dist/customer/nest.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nest/nest_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -1287,7 +1417,7 @@
       "collection": "natural-resources",
       "dataset": "Natural Resource Revenue",
       "row": "One payment or distribution of natural-resource revenue (royalties, severance tax shares, reclamation distributions) to a Native entity.",
-      "where": "workspace dist/review/spreadsheets/natural-resources/resource_revenue.csv; built from federal and state revenue records.",
+      "where": "workspace dist/customer/natural-resources.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/natural-resources/resource_revenue.csv; built from federal and state revenue records.",
       "fields": [
         {
           "column": "cedar_uid",
@@ -1345,6 +1475,11 @@
           "column": "commodity",
           "label": "Commodity",
           "meaning": "The commodity, as the source names it."
+        },
+        {
+          "column": "related_asset_ids",
+          "label": "Related assets",
+          "meaning": "The wells, tracts or leases the payment relates to, where a source names them; empty today and kept for when one does."
         },
         {
           "column": "amount_usd",
@@ -1417,7 +1552,7 @@
       "collection": "nonprofits",
       "dataset": "Native Nonprofits",
       "row": "One nonprofit organization in the IRS Business Master File that is Native-led or tribally controlled, with the Native entity it is linked to.",
-      "where": "workspace dist/review/spreadsheets/nonprofits/np_orgs.csv; built from the IRS Exempt Organizations Business Master File and Native-led directories.",
+      "where": "workspace dist/customer/nonprofits.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nonprofits/np_orgs.csv; built from the IRS Exempt Organizations Business Master File and Native-led directories.",
       "fields": [
         {
           "column": "cedar_uid",

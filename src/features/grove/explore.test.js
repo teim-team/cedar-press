@@ -522,6 +522,10 @@ test("the codebook names real columns in every flagship, with a label and a mean
     for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
     assert.ok(codebookColumns(key, columns).length >= 10, `${key}: fewer than ten codebook columns present`);
   }
+  // The identity block's class is the register's, never a scope or a source's own type (Codex, PR #64).
+  assert.equal(contractFor("legislation/native_bills").entity_type, null);
+  assert.equal(contractFor("deals/deals_classified").entity_type, null);
+  assert.equal(contractFor("nonprofits/np_orgs").entity_type, "cedar_spine_entity_class");
   assert.equal(labelFor("lobbying/native_entity_lobbying_disclosures", "registrant_name"), "Registrant");
   assert.match(meaningFor("lobbying/native_entity_lobbying_disclosures", "spend_basis"), /Income, expenses/);
   assert.equal(labelFor("lobbying/native_entity_lobbying_disclosures", "not_a_column"), "Not a column");

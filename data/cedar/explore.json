@@ -496,7 +496,7 @@
     "deals/deals_classified": {
       "entity_uid": "cedar_uid",
       "entity_name": "native_party_canonical_name",
-      "entity_type": "Native_Party_Type",
+      "entity_type": null,
       "year": "Event_Year",
       "date": "Event_Date",
       "amount": "Announced_Value_USD",
@@ -534,7 +534,7 @@
         "Status",
         "Source_1"
       ],
-      "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration.",
+      "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration. Native_Party_Type is the party's type as the source published it, not the register's class.",
       "columns": 40
     },
     "deals/deals_federal_awards_additions": {
@@ -2377,7 +2377,7 @@
     "legislation/native_bills": {
       "entity_uid": "entity_cedar_uids",
       "entity_name": null,
-      "entity_type": "entity_class_scope",
+      "entity_type": null,
       "year": null,
       "date": "introduced_date",
       "amount": null,
@@ -2399,7 +2399,7 @@
         "chamber"
       ],
       "entity_uid_list": true,
-      "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number.",
+      "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number. entity_class_scope is a class-level scope, not the entities' class; the register answers the class from each uid.",
       "reviewed": true,
       "entity_role": "named in the bill",
       "source_builder": {
@@ -4323,7 +4323,7 @@
     "nonprofits/np_orgs": {
       "entity_uid": "cedar_uid",
       "entity_name": "cedar_spine_canonical_name",
-      "entity_type": "cedar_native_entity_class",
+      "entity_type": "cedar_spine_entity_class",
       "year": null,
       "date": null,
       "amount": "bmf_revenue_amt",
@@ -4343,7 +4343,7 @@
         "city",
         "state"
       ],
-      "_why": "A register of organizations, not events: no row date. reviewed 2026-09-05 from the sample header and its ten rows: source_url is the IRS BMF, the dataset's source, not a per-organization page.",
+      "_why": "A register of organizations, not events: no row date. reviewed 2026-09-05 from the sample header and its ten rows: source_url is the IRS BMF, the dataset's source, not a per-organization page. cedar_spine_entity_class is the register's class of the linked entity; cedar_native_entity_class is the organization's own kind.",
       "reviewed": true,
       "entity_role": "the tribe or Native entity the organization is linked to",
       "amount_label": "revenue in the IRS Business Master File",
