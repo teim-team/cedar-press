@@ -9048,3 +9048,12 @@ checkout (ignored by `*.csv`, never force-added), so `main`'s deploy has been
 red since the merge. `.gitignore` now re-includes
 `public/data/cedar/samples/**/*.csv`, and `test_collection` fails naming any
 manifest sample that is not in the index. The owner has to `git add` them.
+
+### Addendum, same day: Codex's six findings on the fixes
+
+All six were right and are answered on the same branch, restarted from
+`main` after #58 merged. Two are worth the line: the 1185 F11/F13 blocks had
+no precondition, which was harmless when they ran once and destructive once
+they ran on every build (a placeholder guard now); and a provenance gate that
+fails only when a whole activity type is unsourced is not a gate, because the
+sourced rows of the type hide the rest (any blank fails now).

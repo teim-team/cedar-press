@@ -262,7 +262,11 @@ def collect(names):
                        r.get("party_as_printed"), "", r.get("agency_names"),
                        r.get("docket_ids_as_printed"), "", "",
                        "Federal Register ex parte notice",
-                       r.get("document_number"), "",
+                       r.get("document_number"),
+                       r.get("source_url") or (
+                           "https://www.federalregister.gov/d/%s"
+                           % r["document_number"].strip()
+                           if (r.get("document_number") or "").strip() else ""),
                        r.get("position_relative_to_native_interest") or ""))
     rows += ex
     counts["agency_meeting"] = len(ex)
@@ -526,17 +530,16 @@ def verify() -> int:
     pat = _re.compile(r"(TRBF|AKNF|ANVC|ANRC|CNSF|SGVF|NHO|UIO|BIE|CDFI|TRBS|ITO"
                       r"|TCU|CNSS)-[A-Z0-9]{6}-[A-Z0-9]{2}")
     neid = sum(1 for r in rows for v in r.values() if v and pat.search(v))
-    # PROVENANCE. Every activity type's source carries a URL; a type that
-    # ships with none has lost its evidence link somewhere in this file
-    # (Codex, PR #56: consultation and Schedule C rows hardcoded a blank).
+    # PROVENANCE, PER ROW. Every source carries a URL, so a row without one
+    # has lost its evidence link somewhere in this file (Codex, PR #56:
+    # consultation and Schedule C rows hardcoded a blank; PR #58: a gate
+    # that failed only when a whole TYPE was unsourced let the FR ex parte
+    # blanks hide behind the FERC rows of the same type). Any blank fails.
     no_url = {}
     for r in rows:
         if not (r.get("source_url") or "").strip():
             no_url[r["activity_type"]] = no_url.get(r["activity_type"], 0) + 1
-    by_type = {}
-    for r in rows:
-        by_type[r["activity_type"]] = by_type.get(r["activity_type"], 0) + 1
-    unsourced_types = sorted(t for t, n in by_type.items() if no_url.get(t, 0) == n)
+    unsourced_rows = sum(no_url.values())
     no_act = sum(1 for r in rows if "no activity" in (r.get("notes") or "").lower()
                  and r["activity_type"] == "registered_lobbying")
     print("  rows                          : %d" % len(rows))
@@ -544,14 +547,13 @@ def verify() -> int:
           % (sum(no_url.values()),
              ("(" + ", ".join("%s=%d" % kv for kv in sorted(no_url.items())) + ")")
              if no_url else ""))
-    print("  types with NO source_url at all: %s" % (unsourced_types or "none"))
     print("  no-activity filings shipped   : %d" % no_act)
     print("  activity_type off-vocabulary  : %s" % (bad_t or "none"))
     print("  amount_type off-vocabulary    : %s" % (bad_a or "none"))
     print("  amount with no amount_type    : %d" % len(amt_no_type))
     print("  amount invented on an event   : %d" % len(invented))
     print("  retired CICD identifiers      : %d" % neid)
-    if bad_t or bad_a or amt_no_type or invented or neid or unsourced_types or no_act:
+    if bad_t or bad_a or amt_no_type or invented or neid or unsourced_rows or no_act:
         ok = False
     print("  OK" if ok else "  FAIL")
     return 0 if ok else 1

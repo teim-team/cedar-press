@@ -289,7 +289,7 @@ export const PRESS_CATALOG = Object.freeze([
     blurb:
       "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
     linkage:
-      "Every activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it, including firms retained on its behalf and organizations acting for many nations.",
+      "Each activity, from a lobbying registration to a consultation, a docket filing or testimony, keyed to the tribe or Native organization behind it where the record names one exactly; a row the record cannot place keeps its printed party name and a blank key rather than a guess.",
   }),
   Object.freeze({
     id: "contractors",

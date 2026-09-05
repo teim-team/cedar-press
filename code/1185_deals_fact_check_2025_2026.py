@@ -212,6 +212,13 @@ F04_GROUP = ("ND-2025-009", "ND-2026-074")
 
 #: F11 - three ANCSA rows whose 2025-06-30 is a PLACEHOLDER, not a close date.
 F11_ROWS = ("ANCSA3-2025-001", "ANCSA3-2025-002", "ANCSA3-2025-003")
+#: THE VALUES F11 AND F13 WERE WRITTEN AGAINST. These blocks run on every
+#: publication build now (cedar_publication.deals_public_view), so like every
+#: row in CORRECTIONS they need a precondition: a later source refresh that
+#: replaces the placeholder with a verified date must keep it, not have it
+#: blanked again with the old uncertainty text (Codex, PR #58).
+F11_PLACEHOLDER = "2025-06-30"
+F13_PLACEHOLDER = "2025-04-09"
 
 #: F12 - one IHBG formula round reported twice: an exact roster aggregate and
 #: a rounded public announcement. One program-round identity, never summed.
@@ -277,6 +284,11 @@ def apply_all(rows: list):
             skipped.append(("F11", d, "row not found"))
             continue
         old = r.get("Event_Date", "")
+        if old and old != F11_PLACEHOLDER:
+            skipped.append(("F11", d, "precondition: expected Event_Date %s, "
+                            "found %s - a later verified date is kept"
+                            % (F11_PLACEHOLDER, old)))
+            continue
         if old:
             r["Event_Date"] = ""
             r["Event_Date_precision"] = "unknown_within_fiscal_year"
@@ -326,6 +338,11 @@ def apply_all(rows: list):
         if not F13_RE.match(d):
             continue
         old = r.get("Event_Date", "")
+        if r.get("Event_Date_precision") == "day" and old != F13_PLACEHOLDER:
+            skipped.append(("F13", d, "precondition: expected Event_Date %s, "
+                            "found %s - a real award-action day is kept"
+                            % (F13_PLACEHOLDER, old)))
+            continue
         if r.get("Event_Date_precision") == "day":
             r["Event_Date"] = ""
             r["Event_Date_precision"] = "unknown"
@@ -572,6 +589,23 @@ def selftest() -> int:
                   % (c["f"], u)); ok = False
     print("  %d corrections, all Deal_IDs present, no uid invented"
           % len(CORRECTIONS))
+    # F11/F13 keep a date that is not the placeholder they were written against
+    planted = [{"Deal_ID": F11_ROWS[0], "Event_Date": "2025-09-12",
+                "Event_Date_precision": "day"},
+               {"Deal_ID": "FA-HUD-0190", "Event_Date": "2025-07-01",
+                "Event_Date_precision": "day"},
+               {"Deal_ID": "FA-HUD-0191", "Event_Date": F13_PLACEHOLDER,
+                "Event_Date_precision": "day"}]
+    _log, sk, n13, _n14 = apply_all(planted)
+    kept = (planted[0]["Event_Date"] == "2025-09-12"
+            and planted[1]["Event_Date"] == "2025-07-01"
+            and planted[2]["Event_Date"] == "" and n13 == 1
+            and sum(1 for f, _d, why in sk if why.startswith("precondition")) == 2)
+    if not kept:
+        print("  FAIL F11/F13 blanked a verified date, or missed the placeholder")
+        ok = False
+    else:
+        print("  F11/F13 blank only the placeholder they were written against")
     print("  selftest %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 

@@ -279,8 +279,10 @@ def build(apply: bool = False) -> int:
 def verify() -> int:
     try:
         rows = _read(OUT)
-        for f, _c, _s in RECON_FILES:
-            _read(RECON / f)
+        # THE SAME LOADING PATH AS BUILD, so verify cannot pass a stale table
+        # while an input build would refuse on is absent - checking only
+        # RECON_FILES let a missing EXTRA_SOURCES file through (Codex, PR #58).
+        sourced_names()
     except Unmeasured as exc:
         print("  %s" % exc)
         return 2
