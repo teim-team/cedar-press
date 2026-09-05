@@ -29,11 +29,11 @@ export function render() {
   p();
   p("## What this is");
   p();
-  p("Cedar Press sells twelve collections. Each collection has one customer-facing dataset (its flagship table) and, in the workspace, a number of supporting tables. Today the flagship files carry between 37 and 78 columns, of which a third to two-thirds are pipeline bookkeeping: how a row was matched, when it was built, the basis of a derived value. This document proposes the structure each dataset should have when a customer downloads it: what one row is, and the columns to keep, each with a plain-English label and what it means. Columns not listed stay in the workspace. The per-table drop lists and the reasoning are in `" + NOTE + "`.");
+  p("Cedar Press sells twelve collections. Each collection has one customer-facing dataset (its flagship table) and, in the workspace, a number of supporting tables. Today the flagship files carry between 37 and 78 columns, of which a third to two-thirds are pipeline bookkeeping: how a row was matched, when it was built, the basis of a derived value. This document is the data dictionary of the structure each dataset has when a customer downloads it under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`: what one row is, and the columns that ship, each with a plain-English label and what it means. Every column here is one `docs/FIELD_MAP_2026-09-05.md` ships, under the name the map gives it; columns not listed stay in the workspace, and the per-column decisions with their reasons are in the map (the earlier reasoning is in `" + NOTE + "`).");
   p();
   p("Three rules apply to every dataset:");
   p();
-  p("1. **The Cedar identity block comes first**: `cedar_uid` (the entity's permanent ID), `canonical_name` (its name as Cedar's register spells it), `entity_class` (which of Cedar's eighteen classes it is). These three are the join key across collections. Where a table lacks one today it is marked *to add*; where it carries the same thing under another name, the rename is shown.");
+  p("1. **The Cedar opening block comes first**: `cedar_uid` (the entity's permanent ID), `cedar_entity_name` (its name as Cedar's register spells it), `cedar_entity_type` (which of Cedar's eighteen classes it is) and `cedar_entity_role` (why the entity is on the row). The first three are the join key across collections; the fourth says what the join means. Where a table lacks one today it is marked *to add* and the writer fills it from the register; where it carries the same thing under another name, the rename is shown.");
   p("2. **One row is one thing**, stated at the top of each dataset; a table whose rows name several entities carries them separated by `|`.");
   p("3. **Every amount says what it is** (an obligation, an announced value, a reported spend) and is never summed across datasets; every row cites a source.");
   p();
@@ -54,12 +54,12 @@ export function render() {
     p();
     p(`**Where:** ${table.where}`);
     p();
-    p(`**Columns to keep (${table.fields.length}):**`);
+    p(`**Columns a subscriber sees (${table.fields.length}):**`);
     p();
     p("| # | Column | Label | Meaning |");
     p("|---|---|---|---|");
     table.fields.forEach((field, i) => {
-      const flags = [field.add ? "*to add*" : "", field.rename_to ? `*rename to \`${field.rename_to}\`*` : ""].filter(Boolean).join(", ");
+      const flags = [field.add ? "*to add*" : "", field.rename_to ? `*rename to \`${field.rename_to}\`*` : "", field.combine_into ? `*combines into \`${field.combine_into}\`*` : ""].filter(Boolean).join(", ");
       p(`| ${i + 1} | \`${field.column}\`${flags ? ` (${flags})` : ""} | ${field.label} | ${field.meaning.replace(/\|/g, "\\|")} |`);
     });
     p();
@@ -68,7 +68,7 @@ export function render() {
   p();
   p("- Is any kept column unnecessary for a subscriber, and is any dropped column (see the note) something a subscriber would miss?");
   p("- Are the labels the words a subscriber would use? Is any meaning wrong or unclear?");
-  p("- Is the identity block the right first three columns for every dataset, and should the record's own identifier be the fourth everywhere?");
+  p("- Is the opening block the right first four columns for every dataset, and should the record's own identifier be the fifth everywhere?");
   p("- For datasets whose rows name several entities (Legislation, NAGPRA), is one row per record with `|`-separated entities better than one row per record and entity?");
   p("- Which datasets should carry inflation-adjusted amounts, and should the base year be a column or a note?");
   p();

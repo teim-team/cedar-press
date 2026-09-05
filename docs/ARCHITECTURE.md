@@ -355,6 +355,67 @@ following the viewer's own entitlement (`may_open`) and every open logged.
 `CUT_VERSION` names the cut's shape so the service can accept older links and
 say what changed.
 
+## The public dataset specification
+
+`docs/PUBLIC_DATASET_SPEC_2026-09-05.md` is the owner's specification for
+the customer files, the samples, the viewer and the researcher
+documentation, recorded verbatim. It governs; the earlier column note says
+where it changed things. What this repository carries of it:
+
+THE FIELD MAP. `data/cedar/field_map.json` is the old-to-new field map the
+specification asks for first (§17): for each flagship, one decision per
+column of its current header (keep, rename, combine, derive, document,
+internal, withhold), the target columns that do not exist yet with their
+status, and `order`, the approved public header, which opens with
+`cedar_uid`, `cedar_entity_name`, `cedar_entity_type`, `cedar_entity_role`
+in every dataset. `scripts/field-map-markdown.mjs` renders it as
+`docs/FIELD_MAP_2026-09-05.md` (`--check` fails a stale document). The
+unsampled flagship (`owned`) is declared with its opening block and the
+specification's field list, and its map is written when its sample lands.
+
+THE WRITER READS IT. `code/cedar_publication.apply_field_map` generates the
+customer header from the map: it renames, drops what is internal or
+documented, fills the opening block from the register by uid
+(`data/spine/cedar_entity_names.csv`), writes the role as a constant or
+from the declared role column, orders the header as `order` says and
+appends what the build synthesised behind it. It REFUSES a flagship column
+that has no decision (`UndecidedColumns`, a `SystemExit` naming the
+columns), so a new upstream field needs a publication decision before it
+can reach a customer. `1137_customer_dataset_combine.py` calls it after the
+deny lists and before writing; a collection the map does not know keeps the
+banded order. `server/tests/test_field_map.py` runs the applier over the
+sample files, which carry the header the writer sees. What the applier
+does NOT do is the terminal's, on the full table: combine the deals
+categories, build the annual grain for funding and contractors, write
+names as published beside NAGPRA's roles, add the other advocacy
+families. The map lists each as owed and the guide says so.
+
+THE CODEBOOK IS THE DICTIONARY OF WHAT SHIPS. `data/cedar/codebook.json`
+lists, per flagship, exactly the columns the map ships under the names it
+gives them (`rename_to`; `combine_into` for a combine's sources, shown
+until the combined column exists) and the columns the writer adds at build
+time (`add`), the opening block first. `explore.test.js` holds the map, the
+codebook and the samples together from the site's side and
+`test_field_map.py` from the pipeline's, so none can drift alone.
+
+THE VIEWER FINDS AN ENTITY THROUGH EVERY ROLE (§1). A contract may declare
+`entity_roles`, the table's further entity columns with the role each
+carries (a subaward's prime and sub owners, a NAGPRA notice's consulted and
+recipient parties, a payment's beneficiary, a contract's owner as of the
+action). `rowEntities` unions them into the row's entities with the role
+on each, so an entity filter, the search, the facets and the record find a
+row through any supported role and never only the first displayed uid.
+
+THE GUIDES (§16). `scripts/guides-markdown.mjs` writes one researcher guide
+per collection into `docs/guides/` from `data/cedar/guides.json` (the
+prose), the collection descriptor (purpose, sources, method), the field
+map (row unit, grain, roles, approved header, what is owed) and the
+codebook (the field dictionary, with data types read off the sample and
+what a blank means). Every figure in the prose is quoted from a repository
+document named beside it; the finished public table is re-measured at
+release, which nothing here can do. Dataset-level version, release date and
+citation are in the guide and the manifest, never rows in the CSV.
+
 ## Shape the Research
 
 A Cedar Press subscription earns Cedar Points for using the product and

@@ -1,226 +1,275 @@
 {
-  "_note": "Hand-written declarations over scripts/derive-explore.mjs, one table at a time, each with its reason. The derived file is regenerated from the samples; this file wins where it speaks. `reviewed: true` means a person read the sample header and rows and declared the row grain, the record id, the entity relationship (`entity_role`), the time basis, the money basis and the source; `default_columns` are the columns the viewer shows first. Reviewed 2026-09-05 against the ten-row samples; a full-table review is still owed before the full releases are served.",
-  "contractors/prime_contracts": {
-    "amount": "total_obligations",
-    "_why": "One row per contract transaction. reviewed 2026-09-05 from the sample header and its ten rows: total_award_value is cumulative and restated on every modification row (docs/MONEY_TOTALLING_RULES.md: NEVER SUM); obligations are the row's own money.",
-    "reviewed": true,
-    "record_id": "contract_transaction_unique_key",
-    "entity_role": "the awardee's Native owner, resolved",
-    "amount_label": "obligation on this transaction",
-    "year_basis": "federal fiscal year",
-    "source_builder": {
-      "kind": "usaspending_award",
-      "column": "contract_award_unique_key"
-    },
-    "default_columns": [
-      "canonical_name",
-      "fiscal_year",
-      "action_date",
-      "awardee_name",
-      "funding_agency",
-      "total_obligations",
-      "naics_description",
-      "setaside",
-      "extent_competed_normalized"
-    ]
+ "_note": "Hand-written declarations over scripts/derive-explore.mjs, one table at a time, each with its reason. The derived file is regenerated from the samples; this file wins where it speaks. `reviewed: true` means a person read the sample header and rows and declared the row grain, the record id, the entity relationship (`entity_role`), the time basis, the money basis and the source; `default_columns` are the columns the viewer shows first. Reviewed 2026-09-05 against the ten-row samples; a full-table review is still owed before the full releases are served. `entity_roles` lists the table's other entity columns with the role each carries (a subaward's prime and sub, a NAGPRA notice's consulted and recipient parties, a payment's beneficiary), so the viewer finds an entity through every supported role and not only the first displayed uid (docs/PUBLIC_DATASET_SPEC_2026-09-05.md §1).",
+ "contractors/prime_contracts": {
+  "amount": "total_obligations",
+  "_why": "One row per contract transaction. reviewed 2026-09-05 from the sample header and its ten rows: total_award_value is cumulative and restated on every modification row (docs/MONEY_TOTALLING_RULES.md: NEVER SUM); obligations are the row's own money.",
+  "reviewed": true,
+  "record_id": "contract_transaction_unique_key",
+  "entity_role": "the awardee's Native owner, resolved",
+  "amount_label": "obligation on this transaction",
+  "year_basis": "federal fiscal year",
+  "source_builder": {
+   "kind": "usaspending_award",
+   "column": "contract_award_unique_key"
   },
-  "legislation/native_bills": {
-    "entity_uid": "entity_cedar_uids",
-    "entity_uid_list": true,
-    "year": null,
-    "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number. entity_class_scope is a class-level scope, not the entities' class; the register answers the class from each uid.",
-    "reviewed": true,
-    "record_id": "bill_id",
-    "entity_role": "named in the bill",
-    "year_basis": "calendar year introduced",
-    "source_builder": {
-      "kind": "congress_bill"
-    },
-    "default_columns": [
-      "entity_names",
-      "congress",
-      "bill_id",
-      "title",
-      "introduced_date",
-      "sponsor",
-      "policy_area",
-      "outcome",
-      "latest_action_date"
-    ],
-    "entity_type": null
+  "default_columns": [
+   "canonical_name",
+   "fiscal_year",
+   "action_date",
+   "awardee_name",
+   "funding_agency",
+   "total_obligations",
+   "naics_description",
+   "setaside",
+   "extent_competed_normalized"
+  ],
+  "entity_roles": [
+   {
+    "column": "owner_as_of_transaction_cedar_uid",
+    "role": "owner as of the action date"
+   }
+  ]
+ },
+ "legislation/native_bills": {
+  "entity_uid": "entity_cedar_uids",
+  "entity_uid_list": true,
+  "year": null,
+  "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number. entity_class_scope is a class-level scope, not the entities' class; the register answers the class from each uid.",
+  "reviewed": true,
+  "record_id": "bill_id",
+  "entity_role": "named in the bill",
+  "year_basis": "calendar year introduced",
+  "source_builder": {
+   "kind": "congress_bill"
   },
-  "nonprofits/np_orgs": {
-    "date": null,
-    "year": null,
-    "_why": "A register of organizations, not events: no row date. reviewed 2026-09-05 from the sample header and its ten rows: source_url is the IRS BMF, the dataset's source, not a per-organization page. cedar_spine_entity_class is the register's class of the linked entity; cedar_native_entity_class is the organization's own kind.",
-    "reviewed": true,
-    "record_id": "EIN",
-    "entity_role": "the tribe or Native entity the organization is linked to",
-    "amount": "bmf_revenue_amt",
-    "amount_label": "revenue in the IRS Business Master File",
-    "default_columns": [
-      "org_name",
-      "cedar_spine_canonical_name",
-      "state",
-      "city",
-      "ntee_code",
-      "bmf_revenue_amt",
-      "source_url"
-    ],
-    "entity_type": "cedar_spine_entity_class"
+  "default_columns": [
+   "entity_names",
+   "congress",
+   "bill_id",
+   "title",
+   "introduced_date",
+   "sponsor",
+   "policy_area",
+   "outcome",
+   "latest_action_date"
+  ],
+  "entity_type": null
+ },
+ "nonprofits/np_orgs": {
+  "date": null,
+  "year": null,
+  "_why": "A register of organizations, not events: no row date. reviewed 2026-09-05 from the sample header and its ten rows: source_url is the IRS BMF, the dataset's source, not a per-organization page. cedar_spine_entity_class is the register's class of the linked entity; cedar_native_entity_class is the organization's own kind.",
+  "reviewed": true,
+  "record_id": "EIN",
+  "entity_role": "the tribe or Native entity the organization is linked to",
+  "amount": "bmf_revenue_amt",
+  "amount_label": "revenue in the IRS Business Master File",
+  "default_columns": [
+   "org_name",
+   "cedar_spine_canonical_name",
+   "state",
+   "city",
+   "ntee_code",
+   "bmf_revenue_amt",
+   "source_url"
+  ],
+  "entity_type": "cedar_spine_entity_class"
+ },
+ "lobbying/native_entity_lobbying_disclosures": {
+  "reviewed": true,
+  "record_id": "filing_uuid",
+  "entity_role": "the registrant's client, resolved to the register",
+  "amount_label": "spend, as reported by the registrant",
+  "year_basis": "filing year",
+  "default_columns": [
+   "canonical_name",
+   "filing_year",
+   "filing_period",
+   "client_name",
+   "registrant_name",
+   "spend_usd",
+   "spend_basis",
+   "filing_type_display",
+   "supersession_status",
+   "filing_url"
+  ],
+  "_why": "One row per LDA filing. reviewed 2026-09-05 from the sample header and its ten rows: money is the registrant's reported income or expense (spend_basis says which); superseded filings stay as history and are hidden by default."
+ },
+ "funding/federal_funding_transactions": {
+  "reviewed": true,
+  "record_id": "assistance_transaction_unique_key",
+  "entity_role": "recipient, resolved to the Native entity behind it",
+  "amount_label": "federal obligation on this transaction",
+  "year_basis": "federal fiscal year",
+  "source_builder": {
+   "kind": "usaspending_award",
+   "column": "assistance_award_unique_key"
   },
-  "lobbying/native_entity_lobbying_disclosures": {
-    "reviewed": true,
-    "record_id": "filing_uuid",
-    "entity_role": "the registrant's client, resolved to the register",
-    "amount_label": "spend, as reported by the registrant",
-    "year_basis": "filing year",
-    "default_columns": [
-      "canonical_name",
-      "filing_year",
-      "filing_period",
-      "client_name",
-      "registrant_name",
-      "spend_usd",
-      "spend_basis",
-      "filing_type_display",
-      "supersession_status",
-      "filing_url"
-    ],
-    "_why": "One row per LDA filing. reviewed 2026-09-05 from the sample header and its ten rows: money is the registrant's reported income or expense (spend_basis says which); superseded filings stay as history and are hidden by default."
-  },
-  "funding/federal_funding_transactions": {
-    "reviewed": true,
-    "record_id": "assistance_transaction_unique_key",
-    "entity_role": "recipient, resolved to the Native entity behind it",
-    "amount_label": "federal obligation on this transaction",
-    "year_basis": "federal fiscal year",
-    "source_builder": {
-      "kind": "usaspending_award",
-      "column": "assistance_award_unique_key"
-    },
-    "default_columns": [
-      "canonical_name",
-      "fiscal_year",
-      "action_date",
-      "recipient_name",
-      "awarding_agency_name",
-      "cfda_title",
-      "obligated_usd",
-      "assistance_type_description"
-    ],
-    "_why": "One row per USAspending assistance transaction. reviewed 2026-09-05 from the sample header and its ten rows: the fiscal year is the federal one, so an October action sits in the next year; negative obligations are de-obligations, kept as recorded. The source link is built from the award key on USAspending, the same pattern the subawards table records in its own source_url."
-  },
-  "federal-register/consultation_events": {
-    "reviewed": true,
-    "record_id": "consultation_event_id",
-    "entity_role": "participant named in the notice",
-    "year_basis": "calendar year of the notice date",
-    "default_columns": [
-      "topic",
-      "agency",
-      "notice_date",
-      "consultation_type",
-      "event_start_date",
-      "comment_deadline",
-      "participant_name_as_published",
-      "federal_register_citation",
-      "source_url"
-    ],
-    "_why": "One row per consultation event and participant. reviewed 2026-09-05 from the sample header and its ten rows: most rows name no single entity, and the card says so rather than hiding them."
-  },
-  "deals/deals_classified": {
-    "reviewed": true,
-    "record_id": "Deal_ID",
-    "entity_role": "the Native party to the deal",
-    "amount_label": "announced value",
-    "year_basis": "event year",
-    "default_columns": [
-      "native_party_canonical_name",
-      "Event_Date",
-      "Deal_Title",
-      "Deal_Category",
-      "Counterparty_or_Funder",
-      "Announced_Value_USD",
-      "Value_Type",
-      "Status",
-      "Source_1"
-    ],
-    "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration. Native_Party_Type is the party's type as the source published it, not the register's class.",
-    "entity_type": null
-  },
-  "nagpra/nagpra_notices": {
-    "entity_uid": "affiliated_entity_ids",
-    "entity_uid_list": true,
-    "reviewed": true,
-    "record_id": "document_number",
-    "entity_role": "culturally affiliated, as the notice determines",
-    "subject": "institution_name",
-    "year_basis": "publication year",
-    "default_columns": [
-      "institution_name",
-      "publication_date",
-      "notice_type",
-      "title",
-      "mni_total_stated",
-      "n_associated_funerary_objects_stated",
-      "repatriation_recipient_entity_ids",
-      "source_url"
-    ],
-    "_why": "One row per Federal Register NAGPRA notice. reviewed 2026-09-05 from the sample header and its ten rows: the record's subject is the holding institution; the Native entities are those the notice finds culturally affiliated (other roles, consulted and recipient, are in the record)."
-  },
-  "subcontracting/subawards": {
-    "reviewed": true,
-    "record_id": "subaward_source_record_id",
-    "entity_role": "the subawardee or prime's Native owner, resolved",
-    "amount_label": "subaward amount",
-    "year_basis": "federal fiscal year",
-    "default_columns": [
-      "sub_name",
-      "prime_name",
-      "subaward_date",
-      "fiscal_year",
-      "subaward_amount",
-      "description",
-      "prime_top_awarding_agency",
-      "source_url"
-    ],
-    "_why": "One row per reported subaward. reviewed 2026-09-05 from the sample header and its ten rows."
-  },
-  "nest/nest_enterprises": {
-    "reviewed": true,
-    "record_id": "enterprise_id",
-    "entity_role": "owner hub of the enterprise",
-    "date": null,
-    "year": null,
-    "default_columns": [
-      "enterprise_name",
-      "owner_hub_name",
-      "relationship",
-      "sector",
-      "status",
-      "city",
-      "state_province",
-      "source_url"
-    ],
-    "_why": "A register of enterprises, one row each, not events: no row date, so the year filter does not apply. reviewed 2026-09-05 from the sample header and its ten rows."
-  },
-  "natural-resources/resource_revenue": {
-    "reviewed": true,
-    "record_id": "resource_revenue_event_id",
-    "entity_role": "recipient of the payment",
-    "amount_label": "amount, as the source states it",
-    "year_basis": "calendar year of the payment date",
-    "default_columns": [
-      "recipient_entity_name",
-      "payment_date",
-      "revenue_type",
-      "commodity",
-      "payer_entity_name",
-      "amount_usd",
-      "measurement_status",
-      "source_url"
-    ],
-    "_why": "One row per revenue event. reviewed 2026-09-05 from the sample header and its ten rows: measurement_status says whether the amount is an actual payment or something else."
-  }
+  "default_columns": [
+   "canonical_name",
+   "fiscal_year",
+   "action_date",
+   "recipient_name",
+   "awarding_agency_name",
+   "cfda_title",
+   "obligated_usd",
+   "assistance_type_description"
+  ],
+  "_why": "One row per USAspending assistance transaction. reviewed 2026-09-05 from the sample header and its ten rows: the fiscal year is the federal one, so an October action sits in the next year; negative obligations are de-obligations, kept as recorded. The source link is built from the award key on USAspending, the same pattern the subawards table records in its own source_url."
+ },
+ "federal-register/consultation_events": {
+  "reviewed": true,
+  "record_id": "consultation_event_id",
+  "entity_role": "participant named in the notice",
+  "year_basis": "calendar year of the notice date",
+  "default_columns": [
+   "topic",
+   "agency",
+   "notice_date",
+   "consultation_type",
+   "event_start_date",
+   "comment_deadline",
+   "participant_name_as_published",
+   "federal_register_citation",
+   "source_url"
+  ],
+  "_why": "One row per consultation event and participant. reviewed 2026-09-05 from the sample header and its ten rows: most rows name no single entity, and the card says so rather than hiding them."
+ },
+ "deals/deals_classified": {
+  "reviewed": true,
+  "record_id": "Deal_ID",
+  "entity_role": "the Native party to the deal",
+  "amount_label": "announced value",
+  "year_basis": "event year",
+  "default_columns": [
+   "native_party_canonical_name",
+   "Event_Date",
+   "Deal_Title",
+   "Deal_Category",
+   "Counterparty_or_Funder",
+   "Announced_Value_USD",
+   "Value_Type",
+   "Status",
+   "Source_1"
+  ],
+  "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration. Native_Party_Type is the party's type as the source published it, not the register's class.",
+  "entity_type": null
+ },
+ "nagpra/nagpra_notices": {
+  "entity_uid": "affiliated_entity_ids",
+  "entity_uid_list": true,
+  "reviewed": true,
+  "record_id": "document_number",
+  "entity_role": "culturally affiliated, as the notice determines",
+  "subject": "institution_name",
+  "year_basis": "publication year",
+  "default_columns": [
+   "institution_name",
+   "publication_date",
+   "notice_type",
+   "title",
+   "mni_total_stated",
+   "n_associated_funerary_objects_stated",
+   "repatriation_recipient_entity_ids",
+   "source_url"
+  ],
+  "_why": "One row per Federal Register NAGPRA notice. reviewed 2026-09-05 from the sample header and its ten rows: the record's subject is the holding institution; the Native entities are those the notice finds culturally affiliated (other roles, consulted and recipient, are in the record).",
+  "entity_roles": [
+   {
+    "column": "consulted_entity_ids",
+    "role": "consulted",
+    "list": true
+   },
+   {
+    "column": "disposition_priority_entity_ids",
+    "role": "disposition priority",
+    "list": true
+   },
+   {
+    "column": "repatriation_recipient_entity_ids",
+    "role": "repatriation recipient",
+    "list": true
+   },
+   {
+    "column": "letter_of_support_entity_ids",
+    "role": "letter of support",
+    "list": true
+   },
+   {
+    "column": "aboriginal_land_entity_ids",
+    "role": "aboriginal land",
+    "list": true
+   }
+  ]
+ },
+ "subcontracting/subawards": {
+  "reviewed": true,
+  "record_id": "subaward_source_record_id",
+  "entity_role": "the subawardee or prime's Native owner, resolved",
+  "amount_label": "subaward amount",
+  "year_basis": "federal fiscal year",
+  "default_columns": [
+   "sub_name",
+   "prime_name",
+   "subaward_date",
+   "fiscal_year",
+   "subaward_amount",
+   "description",
+   "prime_top_awarding_agency",
+   "source_url"
+  ],
+  "_why": "One row per reported subaward. reviewed 2026-09-05 from the sample header and its ten rows.",
+  "entity_roles": [
+   {
+    "column": "sub_cedar_uid",
+    "role": "owner of the subrecipient"
+   },
+   {
+    "column": "prime_cedar_uid",
+    "role": "owner of the prime"
+   }
+  ]
+ },
+ "nest/nest_enterprises": {
+  "reviewed": true,
+  "record_id": "enterprise_id",
+  "entity_role": "owner hub of the enterprise",
+  "date": null,
+  "year": null,
+  "default_columns": [
+   "enterprise_name",
+   "owner_hub_name",
+   "relationship",
+   "sector",
+   "status",
+   "city",
+   "state_province",
+   "source_url"
+  ],
+  "_why": "A register of enterprises, one row each, not events: no row date, so the year filter does not apply. reviewed 2026-09-05 from the sample header and its ten rows."
+ },
+ "natural-resources/resource_revenue": {
+  "reviewed": true,
+  "record_id": "resource_revenue_event_id",
+  "entity_role": "recipient of the payment",
+  "amount_label": "amount, as the source states it",
+  "year_basis": "calendar year of the payment date",
+  "default_columns": [
+   "recipient_entity_name",
+   "payment_date",
+   "revenue_type",
+   "commodity",
+   "payer_entity_name",
+   "amount_usd",
+   "measurement_status",
+   "source_url"
+  ],
+  "_why": "One row per revenue event. reviewed 2026-09-05 from the sample header and its ten rows: measurement_status says whether the amount is an actual payment or something else.",
+  "entity_roles": [
+   {
+    "column": "beneficiary_entity_id",
+    "role": "beneficiary"
+   }
+  ]
+ }
 }

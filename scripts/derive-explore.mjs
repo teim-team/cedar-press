@@ -265,6 +265,13 @@ export function derive() {
       for (const column of contract.default_columns ?? []) {
         if (!columns.includes(column)) throw new Error(`${key}: default column ${column} is not in the sample`);
       }
+      // Every declared role column exists, names a role, and is not the
+      // entity column itself (which carries the table's own role).
+      for (const role of contract.entity_roles ?? []) {
+        if (!columns.includes(role.column)) throw new Error(`${key}: role column ${role.column} is not in the sample`);
+        if (!role.role) throw new Error(`${key}: role column ${role.column} names no role`);
+        if (role.column === contract.entity_uid) throw new Error(`${key}: ${role.column} is the entity column, not a further role`);
+      }
       contract.columns = columns.length;
       tables[key] = contract;
     }

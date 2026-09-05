@@ -148,6 +148,12 @@
         "setaside",
         "extent_competed_normalized"
       ],
+      "entity_roles": [
+        {
+          "column": "owner_as_of_transaction_cedar_uid",
+          "role": "owner as of the action date"
+        }
+      ],
       "columns": 72
     },
     "contractors/prime_contracts_archive_backfill": {
@@ -3690,6 +3696,33 @@
         "source_url"
       ],
       "_why": "One row per Federal Register NAGPRA notice. reviewed 2026-09-05 from the sample header and its ten rows: the record's subject is the holding institution; the Native entities are those the notice finds culturally affiliated (other roles, consulted and recipient, are in the record).",
+      "entity_roles": [
+        {
+          "column": "consulted_entity_ids",
+          "role": "consulted",
+          "list": true
+        },
+        {
+          "column": "disposition_priority_entity_ids",
+          "role": "disposition priority",
+          "list": true
+        },
+        {
+          "column": "repatriation_recipient_entity_ids",
+          "role": "repatriation recipient",
+          "list": true
+        },
+        {
+          "column": "letter_of_support_entity_ids",
+          "role": "letter of support",
+          "list": true
+        },
+        {
+          "column": "aboriginal_land_entity_ids",
+          "role": "aboriginal land",
+          "list": true
+        }
+      ],
       "columns": 69
     },
     "natural-resources/anc_ceiling_roster": {
@@ -3918,6 +3951,12 @@
         "source_url"
       ],
       "_why": "One row per revenue event. reviewed 2026-09-05 from the sample header and its ten rows: measurement_status says whether the amount is an actual payment or something else.",
+      "entity_roles": [
+        {
+          "column": "beneficiary_entity_id",
+          "role": "beneficiary"
+        }
+      ],
       "columns": 45
     },
     "natural-resources/tribal_bond_issuances": {
@@ -4585,6 +4624,16 @@
         "source_url"
       ],
       "_why": "One row per reported subaward. reviewed 2026-09-05 from the sample header and its ten rows.",
+      "entity_roles": [
+        {
+          "column": "sub_cedar_uid",
+          "role": "owner of the subrecipient"
+        },
+        {
+          "column": "prime_cedar_uid",
+          "role": "owner of the prime"
+        }
+      ],
       "columns": 78
     }
   }

@@ -753,7 +753,7 @@ Elijah's own Dippel correspondence proves that **no reliable corporate-hierarchy
 Name similarity ≠ relatedness ("Cherokee Inc." trap). DBA ≠ legal name. Subsidiaries don't share parent names. Firm ≠ establishment. Identifiers change on ownership events. Therefore: match conservatively, leave ambiguous blank and flagged (the 34 unmatched BGOV tribes and 3 corrected village-corp region mappings are the model — my own auto-matcher produced Sea Lion→Koniag via a token trap; audit every automated match against ground truth).
 
 ## Queue (highest value first)
-0. **Column order and count in the customer files** — `docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md`: the Cedar identity block (`cedar_uid`, `canonical_name`, `entity_class`) first in every table, tier-C bookkeeping out of `dist/customer/` and the samples, `source_url` written where the site builds it today. Per-table lists with the reasoning; the owner decides.
+0. **The public dataset specification** — `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (the owner's, verbatim; it governs) with `docs/FIELD_MAP_2026-09-05.md` (every current column decided, the approved header per dataset, what is owed) and `docs/guides/` (one researcher guide per collection). The site side is done: `1137` now generates the customer header from `data/cedar/field_map.json` through `cedar_publication.apply_field_map` and refuses an undecided column. The terminal's part, per dataset, on the full tables: validate each decision; test every `combine` for agreement before one column replaces its sources (deals categories and status); measure whether funding and contractors support the award-recipient-fiscal-year grain (§4, §10); decide vote and action record types for legislation (§6); bring the other advocacy families under `activity_type` (§9); write names as published beside NAGPRA's roles and `related_notice_id` (§8); recode `attribution_status` values that name the retired scheme; run `--audit` and write the `owned` map when its sample lands (§15); then report per dataset the counts §17 asks for and re-measure each guide's figures from the finished file. `docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md` stands where the specification did not change it.
 1. Get the **do-file**; review the 117 QC-flagged panel rows against it.
 2. Comprehensive FPDS pull (both methodologies) via HigherGov/USAspending → upload → match through Entity_Master aliases + NEID; build the ownership-change ledger from the deal rows.
 3. TBCP + HUD ONAP award lists via manual download → row-per-award (path to 500+; channel inventory with counts lives in Backfill_Plan).
@@ -9136,3 +9136,22 @@ service never writes it. A request in a subscriber's words is read against
 the list (the same function in both languages) and kept beside the priority
 as evidence. Points inform and the copy says so; never let a total set the
 agenda mechanically, and never count a point on the client.
+
+## 2026-09-05 — The public dataset specification: an allow list, a map and twelve guides
+
+The owner's specification (`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`) is in
+the repository verbatim and governs the customer files, the samples, the
+viewer and the documentation. The rules to keep: the opening block is
+`cedar_uid`, `cedar_entity_name`, `cedar_entity_type`, `cedar_entity_role`,
+and the uid is never a record's own id; the export is GENERATED from the
+approved field list (`data/cedar/field_map.json`), never filtered down to it,
+and a column with no decision fails the build by name rather than shipping;
+a `combine` is owed until its sources are tested for agreement, and a target
+column that does not exist is absent, never blank; the codebook lists exactly
+what ships, under the shipped name; a row's entities include every declared
+role column, so the viewer finds a row through any role; the guides quote
+figures only from a named repository document and say the finished table is
+re-measured at release. Retired identity schemes appear in no public column,
+text or value. When a sample's header changes, the map, the codebook, the
+field-map document and the guides all have to change with it, and the suites
+say which.

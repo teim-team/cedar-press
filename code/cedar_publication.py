@@ -114,6 +114,7 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import json
 import re
 import sys
 from collections import Counter
@@ -827,6 +828,203 @@ def apply_official_names(row: dict) -> int:
             row[col] = official
             n += 1
     return n
+
+
+
+# ---------------------------------------------------------------------------
+# THE APPROVED FIELD LIST - the export is generated FROM it, not filtered down
+# to it.
+#
+# Owner's specification, 2026-09-05 (docs/PUBLIC_DATASET_SPEC_2026-09-05.md
+# §17): "Generate public exports from approved field lists. ... New upstream
+# fields must require a publication decision rather than appearing
+# automatically in customer data." Everything above this line is a DENY list -
+# DROP_COLS, NEVER, NEID_COLS, PROPOSED_COLS, the lineage suffixes - and a deny
+# list fails open: a column nobody has looked at ships. `data/cedar/
+# field_map.json` is the allow list: one decision per column of each
+# flagship's header, and the approved public header in order. This applier
+# reads it, and REFUSES a flagship column that has no decision.
+#
+# It is deliberately narrow. It renames, drops what is internal or
+# documented, fills the opening block from the register, orders the header as
+# the map says and appends anything the build synthesised after the flagship
+# (the `n_<table>` counts, the `<table>__col` joins) behind it. It does not
+# combine, derive an annual grain, or write a research note: those are the
+# terminal's, on the full table, and the map lists them as owed until they
+# exist. The deny lists above still run first; this does not replace them.
+# ---------------------------------------------------------------------------
+
+FIELD_MAP_PATH = ROOT / "data" / "cedar" / "field_map.json"
+OPENING_BLOCK = ("cedar_uid", "cedar_entity_name", "cedar_entity_type",
+                 "cedar_entity_role")
+_FIELD_MAP: dict = {}
+_REGISTER: dict = {}
+
+
+class UndecidedColumns(SystemExit):
+    """A flagship carries a column the field map has no decision for."""
+
+    def __init__(self, collection: str, columns: list):
+        self.collection, self.columns = collection, list(columns)
+        super().__init__(
+            f"{collection}: {len(self.columns)} column(s) have no decision in "
+            f"{FIELD_MAP_PATH.relative_to(ROOT)} and cannot ship until they "
+            f"do: {', '.join(self.columns)}")
+
+
+def field_map() -> dict:
+    """collection id -> the map's table entry, keyed by collection."""
+    global _FIELD_MAP
+    if _FIELD_MAP:
+        return _FIELD_MAP
+    if not FIELD_MAP_PATH.exists():
+        raise SystemExit(f"cedar_publication: {FIELD_MAP_PATH} is absent - the "
+                         f"customer files are generated from it and there is "
+                         f"nothing to generate them from")
+    data = json.loads(FIELD_MAP_PATH.read_text(encoding="utf-8"))
+    _FIELD_MAP = {t["collection"]: dict(t, key=key)
+                  for key, t in data["tables"].items()}
+    return _FIELD_MAP
+
+
+def register() -> dict:
+    """cedar_uid -> (name, class) from the two spine files the site reads.
+
+    Names come from `cedar_entity_names.csv` (the register the publication
+    uses) and classes from the same file's `entity_class`. A uid the register
+    does not know maps to nothing, and the opening block stays blank for it:
+    a blank says unknown; a guess would say something false.
+    """
+    global _REGISTER
+    if _REGISTER:
+        return _REGISTER
+    path = ROOT / "data" / "spine" / "cedar_entity_names.csv"
+    if not path.exists():
+        return _REGISTER
+    out: dict = {}
+    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for row in csv.DictReader(fh):
+            uid = (row.get("cedar_uid") or "").strip()
+            if uid:
+                out[uid] = ((row.get("name") or "").strip(),
+                            (row.get("entity_class") or "").strip())
+    _REGISTER = out
+    return _REGISTER
+
+
+def _role_of(entry: dict, row: dict) -> str:
+    """The row's cedar_entity_role: a constant, or read from a role column."""
+    for n in entry.get("new", []):
+        if n["column"] != "cedar_entity_role":
+            continue
+        src = n.get("from", "")
+        if src.startswith("constant:"):
+            return src[len("constant:"):]
+        if src.startswith("map:"):
+            col = src[len("map:"):]
+            return (row.get(col) or "").strip()
+    return ""
+
+
+def apply_field_map(collection: str, header: list, rows: list,
+                    own_cols=None) -> dict:
+    """Rewrite `header` and every row in `rows` IN PLACE to the approved list.
+
+    Returns what it did, for the build log and the manifest: the columns
+    renamed, dropped (with their decision), added, and the target columns the
+    map still lists as owed. Raises `UndecidedColumns` - which is a
+    `SystemExit` - when the flagship carries a column with no decision.
+
+    `own_cols` is the flagship's own header. Columns outside it were
+    synthesised by the build (joins and counts); they are not the map's to
+    decide and are appended after the approved header, in the order given.
+    """
+    entry = field_map().get(collection)
+    if not entry or not entry.get("fields"):
+        # No map for this collection (gaming; the unsampled flagship): the
+        # deny lists have run and the header is left as it was.
+        return {"mapped": False}
+    own = set(own_cols if own_cols is not None else header)
+    decision = {f["column"]: f for f in entry["fields"]}
+    undecided = [c for c in header if c in own and c not in decision]
+    if undecided:
+        raise UndecidedColumns(collection, undecided)
+    drop, rename = [], {}
+    for c in header:
+        if c not in decision:
+            continue
+        d = decision[c]
+        if d["decision"] in ("keep", "withhold"):
+            continue
+        if d["decision"] == "rename":
+            rename[c] = d["to"]
+        else:
+            # combine, derive, document, internal: the column itself does not
+            # ship; a combined or derived target is written by the terminal
+            # and listed as owed until it is.
+            drop.append((c, d["decision"]))
+    dropped = {c for c, _ in drop}
+    # Drop before renaming, so a raw column marked internal cannot be
+    # clobbered by - or clobber - the normalized one renamed onto its name
+    # (contractors: extent_competed <- extent_competed_normalized).
+    for r in rows:
+        for c in dropped:
+            r.pop(c, None)
+        for old, new in rename.items():
+            if old in r:
+                r[new] = r.pop(old)
+    # The opening block: uid from the map's uid column (renamed above where it
+    # had another name), name and class from the register, role as declared.
+    reg = register()
+    lists = bool(entry.get("entity_uid_list"))
+    added = []
+    for r in rows:
+        uid = (r.get("cedar_uid") or "").strip()
+        uids = [u.strip() for u in uid.split("|")] if lists else [uid]
+        known = [reg.get(u) for u in uids]
+        if "cedar_entity_name" not in r or not (r.get("cedar_entity_name") or "").strip():
+            r["cedar_entity_name"] = "|".join(k[0] if k else "" for k in known)
+        else:
+            # The register rewrites a renamed name column in place where it
+            # knows the uid; a uid it does not know keeps the table's value.
+            names = [k[0] if k else None for k in known]
+            if all(names):
+                r["cedar_entity_name"] = "|".join(names)
+        r["cedar_entity_type"] = "|".join(k[1] if k else "" for k in known)
+        # A table whose role column was renamed onto cedar_entity_role keeps
+        # its own values; the constant or the mapped column fills the rest.
+        role = _role_of(entry, r)
+        if role or "cedar_entity_role" not in r:
+            r["cedar_entity_role"] = role
+    # Anything the map builds at write time from a constant.
+    for n in entry.get("new", []):
+        src = n.get("from", "")
+        if n["column"] in OPENING_BLOCK or n.get("status"):
+            continue
+        if src.startswith("constant:"):
+            value = src[len("constant:"):]
+            for r in rows:
+                r[n["column"]] = value
+            added.append(n["column"])
+    present = set()
+    for r in rows[:1]:
+        present = set(r)
+    if not rows:
+        present = {rename.get(c, c) for c in header if c not in dropped} | set(OPENING_BLOCK)
+    owed = [c for c in entry["order"] if c not in present]
+    ordered = [c for c in entry["order"] if c in present]
+    extra = [c for c in header if c not in own and c not in dropped]
+    # A synthesised column may collide with an approved name; the approved
+    # one wins and the synthesised one is dropped with the collision named.
+    extra = [c for c in extra if c not in ordered]
+    header[:] = ordered + extra
+    # A row that lacks an approved column reads as blank, never as absent.
+    for r in rows:
+        for c in header:
+            r.setdefault(c, "")
+    return {"mapped": True, "renamed": rename, "dropped": drop,
+            "added": list(OPENING_BLOCK) + added, "owed": owed,
+            "synthesised": extra}
 
 
 # INTERNAL WORKING COLUMNS. 843 states plainly that the `*_proposed*` columns

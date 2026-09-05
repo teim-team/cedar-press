@@ -1,0 +1,4913 @@
+{
+ "_note": "The old-to-new field map the specification (docs/PUBLIC_DATASET_SPEC_2026-09-05.md §17) asks for first: every column of each flagship's current header carries one decision, and `order` is the approved public header. Written 2026-09-05 against the ten-row samples in public/data/cedar/samples/; the terminal validates each decision against the full table before applying it (a blank in ten rows proves nothing, and a `combine` is owed until its sources are tested for agreement). code/cedar_publication.apply_field_map reads this file: it renames, drops what is internal or documented, fills the opening block from the register, orders the header as `order` says, and refuses a flagship column that has no decision. scripts/field-map-markdown.mjs renders it as docs/FIELD_MAP_2026-09-05.md; src/features/grove/explore.test.js keeps it in step with the samples and the codebook.",
+ "decisions": {
+  "keep": "Ships under its current name.",
+  "rename": "Ships under the name in `to`.",
+  "combine": "Folds into the target field named in `to` once the terminal has tested that the sources agree; until then it stays in the workspace and the target is owed.",
+  "derive": "Its content reaches the customer file as a derived field named in `to`; the column itself stays in the workspace.",
+  "document": "Leaves the file; what it says is stated once in the researcher guide.",
+  "internal": "Stays in the workspace for reproducibility and review; never ships.",
+  "withhold": "Ships as a column; cells are masked where the publication policy applies, never the column."
+ },
+ "opening": {
+  "cedar_uid": "The permanent identifier of the Native entity the row is attributed to; a pipe-separated list where a row names several. Never the record's own id.",
+  "cedar_entity_name": "That entity's name as the register spells it (data/spine/cedar_entity_names.csv, by uid), written at build time; withheld where the publication rule says so.",
+  "cedar_entity_type": "That entity's class as the register holds it (one of eighteen), written at build time from the uid; never a scope, a source's own type or the record subject's kind.",
+  "cedar_entity_role": "Why the entity is on the row: recipient, owner of the awardee, client, participant, culturally affiliated, certifying authority. Constant per table or read from a role column, as each table declares."
+ },
+ "tables": {
+  "funding/federal_funding_transactions": {
+   "collection": "funding",
+   "public_file": "funding.csv",
+   "row_today": "One federal assistance transaction (an award action or modification) on USAspending or in the FAADS archive, linked to the Native entity that received it.",
+   "row_target": "One transaction, as today, until the terminal measures whether stable award identity and compatible transaction measures support the award-recipient-fiscal-year product the specification asks for; where they do, that becomes the public grain and the transactions stay internal.",
+   "grain_change": "Owed (§4): an award-recipient-fiscal-year product built by summing verified transaction-level obligations within award and year, negatives kept, loan face values and subsidy costs never added to obligations; historical FAADS rows that cannot support award identity ship under an explicit record_type with their own counting rule. Not attempted here: it needs the full table and the FAADS/USAspending seam measured (docs/schema/faads_fy2007_seam.json).",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "recipient",
+   "columns_today": 63,
+   "columns_target": 41,
+   "fields": [
+    {
+     "column": "assistance_transaction_unique_key",
+     "decision": "keep",
+     "why": "The transaction's own USAspending key; cite it to find the exact record.",
+     "spec": "§4"
+    },
+    {
+     "column": "assistance_award_unique_key",
+     "decision": "keep",
+     "why": "The award's USAspending key; the source page is built from it.",
+     "spec": "§4"
+    },
+    {
+     "column": "award_id_fain",
+     "decision": "keep",
+     "why": "The Federal Award Identification Number, an official identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "action_date",
+     "decision": "keep",
+     "why": "When the agency took the action.",
+     "spec": "§4"
+    },
+    {
+     "column": "fiscal_year",
+     "decision": "keep",
+     "why": "The federal fiscal year of the action.",
+     "spec": "§4"
+    },
+    {
+     "column": "fy_partial_flag",
+     "decision": "keep",
+     "why": "Control: a partial fiscal year is not a year.",
+     "spec": "§4"
+    },
+    {
+     "column": "obligated_usd",
+     "decision": "keep",
+     "why": "The obligation measure; negatives are deobligations and stay.",
+     "spec": "§4"
+    },
+    {
+     "column": "assistance_type",
+     "decision": "internal",
+     "why": "The source's code for the assistance type; the description ships and the code is defined in the dictionary.",
+     "spec": "§2"
+    },
+    {
+     "column": "assistance_type_description",
+     "decision": "keep",
+     "why": "Grant, loan, direct payment, insurance.",
+     "spec": "§4"
+    },
+    {
+     "column": "cfda",
+     "decision": "keep",
+     "why": "The Assistance Listing number (program code).",
+     "spec": "§4"
+    },
+    {
+     "column": "cfda_title",
+     "decision": "keep",
+     "why": "The program's title.",
+     "spec": "§4"
+    },
+    {
+     "column": "awarding_agency_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§4"
+    },
+    {
+     "column": "awarding_sub_agency_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§4"
+    },
+    {
+     "column": "recipient_uei",
+     "decision": "keep",
+     "why": "The recipient's UEI, an official identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "recipient_duns",
+     "decision": "internal",
+     "why": "A retired identifier, licensed and not Cedar's to redistribute (cedar_publication.DROP_COLS).",
+     "spec": "§1"
+    },
+    {
+     "column": "recipient_name",
+     "decision": "keep",
+     "why": "The actual recipient's name, never overwritten by the register's.",
+     "spec": "§1"
+    },
+    {
+     "column": "recipient_city_name",
+     "decision": "keep",
+     "why": "Recipient geography.",
+     "spec": "§3"
+    },
+    {
+     "column": "recipient_state_code",
+     "decision": "keep",
+     "why": "Recipient geography.",
+     "spec": "§3"
+    },
+    {
+     "column": "canonical_name",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "The register's name for the attributed entity, rewritten from the register by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "attribution_method",
+     "decision": "keep",
+     "why": "How the recipient was linked to the entity (uei_exact_archive, name with corroboration): a qualification a reader needs.",
+     "spec": "§2"
+    },
+    {
+     "column": "attribution_source_line",
+     "decision": "internal",
+     "why": "Attribution-rule transcript.",
+     "spec": "§4"
+    },
+    {
+     "column": "attribution_rule",
+     "decision": "internal",
+     "why": "Attribution-rule transcript.",
+     "spec": "§4"
+    },
+    {
+     "column": "exclusion_reason",
+     "decision": "internal",
+     "why": "Exclusion log.",
+     "spec": "§4"
+    },
+    {
+     "column": "exclusion_source_line",
+     "decision": "internal",
+     "why": "Exclusion log.",
+     "spec": "§4"
+    },
+    {
+     "column": "exclusion_rule",
+     "decision": "internal",
+     "why": "Exclusion log.",
+     "spec": "§4"
+    },
+    {
+     "column": "ak_flag",
+     "decision": "internal",
+     "why": "Build flag.",
+     "spec": "§2"
+    },
+    {
+     "column": "excluded_flag",
+     "decision": "internal",
+     "why": "An excluded row does not reach the file; the flag is the pipeline's.",
+     "spec": "§2"
+    },
+    {
+     "column": "attributed_flag",
+     "decision": "keep",
+     "why": "Control: the file ships unattributed rows on purpose and Cedar's totals count attributed rows only.",
+     "spec": "§4"
+    },
+    {
+     "column": "confidence_tier",
+     "decision": "keep",
+     "why": "Attribution confidence, a qualification that changes interpretation.",
+     "spec": "§2"
+    },
+    {
+     "column": "face_value_of_loan",
+     "decision": "keep",
+     "why": "Loan measure; never added to obligations.",
+     "spec": "§4"
+    },
+    {
+     "column": "original_loan_subsidy_cost",
+     "decision": "keep",
+     "why": "Loan measure; never added to obligations.",
+     "spec": "§4"
+    },
+    {
+     "column": "total_face_value_of_loan",
+     "decision": "keep",
+     "why": "Loan measure; never added to obligations.",
+     "spec": "§4"
+    },
+    {
+     "column": "total_loan_subsidy_cost",
+     "decision": "keep",
+     "why": "Loan measure; never added to obligations.",
+     "spec": "§4"
+    },
+    {
+     "column": "credit_instrument_flag",
+     "decision": "keep",
+     "why": "Fences loan rows from grant rows so the loan measures are read for the right rows.",
+     "spec": "§4"
+    },
+    {
+     "column": "business_types_code",
+     "decision": "internal",
+     "why": "The source's code; the description ships.",
+     "spec": "§2"
+    },
+    {
+     "column": "business_types_description",
+     "decision": "keep",
+     "why": "The recipient's business type as the source reports it, spelled as the normalized column spells it (see business_types_description_normalized).",
+     "spec": "§2"
+    },
+    {
+     "column": "obligated_usd_real2025",
+     "decision": "keep",
+     "why": "The constant-dollar measure, kept beside the nominal one; base year and deflator in the guide.",
+     "spec": "§4"
+    },
+    {
+     "column": "deflator_factor_2025",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§4"
+    },
+    {
+     "column": "inflation_base_year",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§4"
+    },
+    {
+     "column": "population_basis",
+     "decision": "internal",
+     "why": "Pipeline population marker.",
+     "spec": "§2"
+    },
+    {
+     "column": "state_agreement",
+     "decision": "internal",
+     "why": "Matching diagnostic.",
+     "spec": "§4"
+    },
+    {
+     "column": "source_archive_stamp",
+     "decision": "document",
+     "why": "The archive's date stamp is the release vintage, stated once in the manifest.",
+     "spec": "§16"
+    },
+    {
+     "column": "fetched_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§2"
+    },
+    {
+     "column": "attribution_status",
+     "decision": "keep",
+     "why": "Control: whether and how the row is attributed. Its value vocabulary must lose the retired scheme's name (the sample carries `cedar_neid`); the terminal recodes the values before this ships.",
+     "spec": "§1"
+    },
+    {
+     "column": "attribution_basis",
+     "decision": "internal",
+     "why": "Matcher transcript naming spine files.",
+     "spec": "§4"
+    },
+    {
+     "column": "source_vintage",
+     "decision": "derive",
+     "to": "source_system",
+     "why": "The source family (USAspending archive or FAADS) is read off the vintage stamp into source_system; the stamp itself is release metadata.",
+     "spec": "§3"
+    },
+    {
+     "column": "source_vintage_basis",
+     "decision": "internal",
+     "why": "Explains the stamp.",
+     "spec": "§2"
+    },
+    {
+     "column": "business_types_description_normalized",
+     "decision": "derive",
+     "to": "business_types_description",
+     "why": "The normalized spelling is what business_types_description should carry; written into it at build, not shipped twice.",
+     "spec": "§3"
+    },
+    {
+     "column": "business_types_description_normalized_basis",
+     "decision": "internal",
+     "why": "Explains the normalization.",
+     "spec": "§2"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "",
+     "spec": "§1"
+    },
+    {
+     "column": "geo_recipient_county_fips",
+     "decision": "rename",
+     "to": "recipient_county_fips",
+     "why": "Recipient geography, named for its role.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_recipient_county_name",
+     "decision": "rename",
+     "to": "recipient_county_name",
+     "why": "Recipient geography, named for its role.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_recipient_state_fips",
+     "decision": "internal",
+     "why": "recipient_state_code carries the state.",
+     "spec": "§2"
+    },
+    {
+     "column": "geo_recipient_place_dominance_share",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§4"
+    },
+    {
+     "column": "geo_recipient_place_ambiguous",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§4"
+    },
+    {
+     "column": "geo_pop_county_fips",
+     "decision": "rename",
+     "to": "place_of_performance_county_fips",
+     "why": "Place-of-performance geography, named for its role: a recipient's county is not where the work happens.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_pop_county_name",
+     "decision": "rename",
+     "to": "place_of_performance_county_name",
+     "why": "Place-of-performance geography, named for its role.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_pop_state_fips",
+     "decision": "internal",
+     "why": "Derivable from the county FIPS.",
+     "spec": "§2"
+    },
+    {
+     "column": "geo_pop_place_dominance_share",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§4"
+    },
+    {
+     "column": "geo_pop_place_ambiguous",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§4"
+    },
+    {
+     "column": "geo_key_tier",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§4"
+    },
+    {
+     "column": "geo_key_basis",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§4"
+    },
+    {
+     "column": "geo_built_date",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§4"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:recipient",
+     "why": "Why the entity is on the row: recipient."
+    },
+    {
+     "column": "source_url",
+     "from": "built:assistance_award_unique_key",
+     "why": "The USAspending award page, written into the file so it cites itself (today the site builds it)."
+    },
+    {
+     "column": "source_system",
+     "from": "derived:source_vintage",
+     "why": "usaspending or faads: the source family, so the two coverages are never summed as one."
+    },
+    {
+     "column": "annual_obligations",
+     "from": "pending:grain change",
+     "why": "Sum of obligated_usd within award, recipient and fiscal year, once the annual grain is supported.",
+     "status": "pending"
+    },
+    {
+     "column": "first_action_date",
+     "from": "pending:grain change",
+     "why": "Earliest action date within the award-recipient-fiscal-year.",
+     "status": "pending"
+    },
+    {
+     "column": "last_action_date",
+     "from": "pending:grain change",
+     "why": "Latest action date within the award-recipient-fiscal-year.",
+     "status": "pending"
+    },
+    {
+     "column": "record_type",
+     "from": "pending:grain change",
+     "why": "award_year or source_record, for historical rows that cannot support award identity.",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "assistance_award_unique_key",
+    "award_id_fain",
+    "assistance_transaction_unique_key",
+    "record_type",
+    "recipient_name",
+    "recipient_uei",
+    "assistance_type_description",
+    "credit_instrument_flag",
+    "awarding_agency_name",
+    "awarding_sub_agency_name",
+    "cfda",
+    "cfda_title",
+    "fiscal_year",
+    "fy_partial_flag",
+    "action_date",
+    "first_action_date",
+    "last_action_date",
+    "obligated_usd",
+    "annual_obligations",
+    "obligated_usd_real2025",
+    "face_value_of_loan",
+    "original_loan_subsidy_cost",
+    "total_face_value_of_loan",
+    "total_loan_subsidy_cost",
+    "business_types_description",
+    "recipient_city_name",
+    "recipient_state_code",
+    "recipient_county_name",
+    "recipient_county_fips",
+    "place_of_performance_county_name",
+    "place_of_performance_county_fips",
+    "attributed_flag",
+    "attribution_status",
+    "attribution_method",
+    "confidence_tier",
+    "source_system",
+    "source_url"
+   ]
+  },
+  "contractors/prime_contracts": {
+   "collection": "contractors",
+   "public_file": "contractors.csv",
+   "row_today": "One federal contract transaction (an award or a modification) to a firm owned by a Native entity, as FPDS reports it through USAspending.",
+   "row_target": "One transaction, as today, until the terminal measures whether the transaction history supports the award-recipient-fiscal-year public record the specification asks for; where it does, annual obligations are built from incremental transaction measures and the transactions stay internal.",
+   "grain_change": "Owed (§10): annual obligations from verified incremental measures, deobligations kept, cumulative award values never summed; ownership matched to the period (an as-of owner per transaction is already carried and must not be replaced by the current owner); a within-year ownership change gets an attribution-period grain or a stated qualification. Needs the full table and docs/schema/ownership_change_invariants.json.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "owner of the awardee, as resolved for the transaction's date",
+   "columns_today": 72,
+   "columns_target": 48,
+   "fields": [
+    {
+     "column": "contract_number",
+     "decision": "keep",
+     "why": "The contract's own identifier.",
+     "spec": "§10"
+    },
+    {
+     "column": "parent_contract_number",
+     "decision": "keep",
+     "why": "The parent award, where the contract is an order under one.",
+     "spec": "§10"
+    },
+    {
+     "column": "fiscal_year",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "pre_2000_flag",
+     "decision": "internal",
+     "why": "Build flag.",
+     "spec": "§2"
+    },
+    {
+     "column": "awardee_name",
+     "decision": "withhold",
+     "why": "The contractor's own name, never replaced by the tribal government's; masked on a row of an individually owned firm without recorded consent.",
+     "spec": "§10"
+    },
+    {
+     "column": "awardee_uei",
+     "decision": "withhold",
+     "why": "Official identifier; masked only where the publication carve-out applies.",
+     "spec": "§1"
+    },
+    {
+     "column": "cage_code",
+     "decision": "withhold",
+     "why": "The settled first identifier across the DUNS-to-UEI change; masked only where the carve-out applies, never dropped.",
+     "spec": "§10"
+    },
+    {
+     "column": "parent_name",
+     "decision": "keep",
+     "why": "The declared parent, as FPDS carries it.",
+     "spec": "§10"
+    },
+    {
+     "column": "parent_uei",
+     "decision": "keep",
+     "why": "Official identifier of the declared parent.",
+     "spec": "§1"
+    },
+    {
+     "column": "total_obligations",
+     "decision": "keep",
+     "why": "The incremental obligation on this transaction; the additive measure.",
+     "spec": "§10"
+    },
+    {
+     "column": "total_award_value",
+     "decision": "keep",
+     "why": "The award's potential total value: a ceiling, non-additive across transactions and years, labelled so in the dictionary.",
+     "spec": "§10"
+    },
+    {
+     "column": "total_obligations_real2025",
+     "decision": "keep",
+     "why": "Constant-dollar obligations beside the nominal.",
+     "spec": "§10"
+    },
+    {
+     "column": "total_award_value_real2025",
+     "decision": "internal",
+     "why": "A cumulative ceiling deflated row by row is not a number a reader should have.",
+     "spec": "§10"
+    },
+    {
+     "column": "deflator_factor_2025",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§10"
+    },
+    {
+     "column": "inflation_base_year",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§10"
+    },
+    {
+     "column": "setaside",
+     "decision": "keep",
+     "why": "The set-aside or preference category actually used on the award.",
+     "spec": "§10"
+    },
+    {
+     "column": "reported_8a",
+     "decision": "keep",
+     "why": "Reported preference use; ownership, eligibility and use are different concepts and each ships.",
+     "spec": "§10"
+    },
+    {
+     "column": "reported_buy_indian",
+     "decision": "keep",
+     "why": "Reported preference use.",
+     "spec": "§10"
+    },
+    {
+     "column": "reported_indian_business",
+     "decision": "keep",
+     "why": "Reported preference use.",
+     "spec": "§10"
+    },
+    {
+     "column": "reported_native_preference",
+     "decision": "keep",
+     "why": "Reported preference use.",
+     "spec": "§10"
+    },
+    {
+     "column": "setaside_reported",
+     "decision": "internal",
+     "why": "Whether any set-aside was reported; `setaside` says which, or none.",
+     "spec": "§2"
+    },
+    {
+     "column": "extent_competed",
+     "decision": "internal",
+     "why": "The raw label; the normalized one ships under this name.",
+     "spec": "§10"
+    },
+    {
+     "column": "funding_agency",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "sector",
+     "decision": "internal",
+     "why": "The two-digit NAICS sector code; naics_code and industry_group carry the classification.",
+     "spec": "§2"
+    },
+    {
+     "column": "supersector",
+     "decision": "rename",
+     "to": "industry_group",
+     "why": "The readable industry group.",
+     "spec": "§10"
+    },
+    {
+     "column": "defense",
+     "decision": "internal",
+     "why": "Derivable from the agency.",
+     "spec": "§2"
+    },
+    {
+     "column": "recipient_city_name",
+     "decision": "keep",
+     "why": "Recipient geography.",
+     "spec": "§10"
+    },
+    {
+     "column": "recipient_state_code",
+     "decision": "keep",
+     "why": "Recipient geography.",
+     "spec": "§10"
+    },
+    {
+     "column": "place_of_perform_city",
+     "decision": "keep",
+     "why": "Place-of-performance geography.",
+     "spec": "§10"
+    },
+    {
+     "column": "place_of_perform_state",
+     "decision": "keep",
+     "why": "Place-of-performance geography.",
+     "spec": "§10"
+    },
+    {
+     "column": "canonical_name",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "The register's name for the owner, rewritten from the register by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "attribution_method",
+     "decision": "keep",
+     "why": "How the awardee was linked to its owner.",
+     "spec": "§2"
+    },
+    {
+     "column": "confidence_tier",
+     "decision": "keep",
+     "why": "Attribution confidence.",
+     "spec": "§2"
+    },
+    {
+     "column": "attributed_flag",
+     "decision": "internal",
+     "why": "Every row in this file is attributed by construction; the flag is the pipeline's.",
+     "spec": "§2"
+    },
+    {
+     "column": "source_authority",
+     "decision": "document",
+     "why": "The archive the rows came from, stated once in the guide.",
+     "spec": "§16"
+    },
+    {
+     "column": "built_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§2"
+    },
+    {
+     "column": "ruling_status",
+     "decision": "internal",
+     "why": "Identity decision bookkeeping.",
+     "spec": "§10"
+    },
+    {
+     "column": "ruling_applied_date",
+     "decision": "internal",
+     "why": "Identity decision bookkeeping.",
+     "spec": "§10"
+    },
+    {
+     "column": "extent_competed_normalized",
+     "decision": "rename",
+     "to": "extent_competed",
+     "why": "The normalized competition category, under the plain name.",
+     "spec": "§10"
+    },
+    {
+     "column": "extent_competed_normalized_basis",
+     "decision": "internal",
+     "why": "Explains the normalization.",
+     "spec": "§2"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "",
+     "spec": "§1"
+    },
+    {
+     "column": "owner_attribution_status",
+     "decision": "keep",
+     "why": "Whether the owner is known for the transaction's date: historical ownership uncertainty ships as a qualification, never as a definite owner.",
+     "spec": "§10"
+    },
+    {
+     "column": "owner_as_of_transaction_cedar_uid",
+     "decision": "keep",
+     "why": "The owner as of the transaction where the ownership history resolves it; UNKNOWN ships as unknown.",
+     "spec": "§10"
+    },
+    {
+     "column": "contract_transaction_unique_key",
+     "decision": "keep",
+     "why": "The transaction's own key.",
+     "spec": "§10"
+    },
+    {
+     "column": "contract_award_unique_key",
+     "decision": "keep",
+     "why": "The award's key; the source page is built from it.",
+     "spec": "§10"
+    },
+    {
+     "column": "naics_code",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "naics_description",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "action_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "award_type",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "product_or_service_code",
+     "decision": "keep",
+     "why": "Code, defined in the dictionary.",
+     "spec": "§10"
+    },
+    {
+     "column": "product_or_service_code_description",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "award_base_description",
+     "decision": "rename",
+     "to": "contract_description",
+     "why": "What the contract is for.",
+     "spec": "§10"
+    },
+    {
+     "column": "award_attributes_basis",
+     "decision": "internal",
+     "why": "Explains where attributes came from.",
+     "spec": "§2"
+    },
+    {
+     "column": "identifier_ruling_method",
+     "decision": "internal",
+     "why": "Proposed identity decision machinery.",
+     "spec": "§10"
+    },
+    {
+     "column": "identifier_ruling_tier",
+     "decision": "internal",
+     "why": "Identity ruling machinery; confidence_tier is the reader's qualification.",
+     "spec": "§10"
+    },
+    {
+     "column": "identifier_ruling_quarantined",
+     "decision": "internal",
+     "why": "Identity ruling machinery; a quarantined row is masked at the gate, not labelled.",
+     "spec": "§10"
+    },
+    {
+     "column": "identifier_ruling_basis",
+     "decision": "internal",
+     "why": "Identity ruling machinery.",
+     "spec": "§10"
+    },
+    {
+     "column": "identifier_ruling_review",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§2"
+    },
+    {
+     "column": "geo_recipient_county_fips",
+     "decision": "rename",
+     "to": "recipient_county_fips",
+     "why": "Recipient geography, named for its role.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_recipient_county_name",
+     "decision": "rename",
+     "to": "recipient_county_name",
+     "why": "Recipient geography, named for its role.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_recipient_state_fips",
+     "decision": "internal",
+     "why": "recipient_state_code carries the state.",
+     "spec": "§2"
+    },
+    {
+     "column": "geo_recipient_place_dominance_share",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§10"
+    },
+    {
+     "column": "geo_recipient_place_ambiguous",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§10"
+    },
+    {
+     "column": "geo_pop_county_fips",
+     "decision": "rename",
+     "to": "place_of_performance_county_fips",
+     "why": "Place-of-performance geography.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_pop_county_name",
+     "decision": "rename",
+     "to": "place_of_performance_county_name",
+     "why": "Place-of-performance geography.",
+     "spec": "§3"
+    },
+    {
+     "column": "geo_pop_state_fips",
+     "decision": "internal",
+     "why": "place_of_perform_state carries the state.",
+     "spec": "§2"
+    },
+    {
+     "column": "geo_pop_place_dominance_share",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§10"
+    },
+    {
+     "column": "geo_pop_place_ambiguous",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§10"
+    },
+    {
+     "column": "geo_key_tier",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§10"
+    },
+    {
+     "column": "geo_key_basis",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§10"
+    },
+    {
+     "column": "geo_award_unique_key",
+     "decision": "internal",
+     "why": "Duplicates contract_award_unique_key.",
+     "spec": "§1"
+    },
+    {
+     "column": "geo_built_date",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§10"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:owner of the awardee, as resolved for the transaction's date",
+     "why": "Why the entity is on the row: owner of the awardee, as resolved for the transaction's date."
+    },
+    {
+     "column": "source_url",
+     "from": "built:contract_award_unique_key",
+     "why": "The USAspending award page, written into the file so it cites itself."
+    },
+    {
+     "column": "annual_obligations",
+     "from": "pending:grain change",
+     "why": "Sum of total_obligations within award, awardee and fiscal year, once the annual grain is supported.",
+     "status": "pending"
+    },
+    {
+     "column": "first_action_date",
+     "from": "pending:grain change",
+     "why": "Earliest action date within the award-awardee-fiscal-year.",
+     "status": "pending"
+    },
+    {
+     "column": "last_action_date",
+     "from": "pending:grain change",
+     "why": "Latest action date within the award-awardee-fiscal-year.",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "contract_award_unique_key",
+    "contract_number",
+    "parent_contract_number",
+    "contract_transaction_unique_key",
+    "awardee_name",
+    "awardee_uei",
+    "cage_code",
+    "parent_name",
+    "parent_uei",
+    "owner_attribution_status",
+    "owner_as_of_transaction_cedar_uid",
+    "fiscal_year",
+    "action_date",
+    "first_action_date",
+    "last_action_date",
+    "total_obligations",
+    "annual_obligations",
+    "total_obligations_real2025",
+    "total_award_value",
+    "funding_agency",
+    "award_type",
+    "contract_description",
+    "naics_code",
+    "naics_description",
+    "industry_group",
+    "product_or_service_code",
+    "product_or_service_code_description",
+    "setaside",
+    "extent_competed",
+    "reported_8a",
+    "reported_buy_indian",
+    "reported_indian_business",
+    "reported_native_preference",
+    "recipient_city_name",
+    "recipient_state_code",
+    "recipient_county_name",
+    "recipient_county_fips",
+    "place_of_perform_city",
+    "place_of_perform_state",
+    "place_of_performance_county_name",
+    "place_of_performance_county_fips",
+    "attribution_method",
+    "confidence_tier",
+    "source_url"
+   ]
+  },
+  "subcontracting/subawards": {
+   "collection": "subcontracting",
+   "public_file": "subcontracting.csv",
+   "row_today": "One reported subaward (a subcontract or an assistance subaward) where the prime, the subrecipient or both are owned by a Native entity.",
+   "row_target": "One identifiable reported subaward, with its report version treated so a refreshed copy of the same report is not another subaward (duplicate_status and the report's last-modified date carry that).",
+   "grain_change": "Owed (§11): reconcile the source systems and distinguish report snapshots from incremental transactions before any amount is combined; confirm on the full table that duplicate_status already separates refreshed copies. Not a header change.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "read from native_side: the Native owner of the subrecipient, of the prime, or of both",
+   "entity_roles": [
+    {
+     "column": "sub_cedar_uid",
+     "role": "owner of the subrecipient"
+    },
+    {
+     "column": "prime_cedar_uid",
+     "role": "owner of the prime"
+    }
+   ],
+   "columns_today": 78,
+   "columns_target": 54,
+   "fields": [
+    {
+     "column": "sub_uei",
+     "decision": "withhold",
+     "why": "Official identifier; masked only where the carve-out applies.",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_cage",
+     "decision": "withhold",
+     "why": "Identifier; masked only where the carve-out applies.",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_name",
+     "decision": "withhold",
+     "why": "The subrecipient's own name; masked where the carve-out applies.",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_state",
+     "decision": "keep",
+     "why": "Subrecipient geography.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_uei",
+     "decision": "withhold",
+     "why": "Official identifier; masked only where the carve-out applies.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_cage",
+     "decision": "withhold",
+     "why": "Identifier; masked only where the carve-out applies.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_name",
+     "decision": "withhold",
+     "why": "The prime's own name; masked where the carve-out applies.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_award_id",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_amount",
+     "decision": "keep",
+     "why": "Additive only where duplicate_status is primary and subaward_exceeds_prime_flag is not yes.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "fiscal_year",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "naics",
+     "decision": "rename",
+     "to": "naics_code",
+     "why": "Named as the other files name it.",
+     "spec": "§11"
+    },
+    {
+     "column": "psc",
+     "decision": "rename",
+     "to": "product_or_service_code",
+     "why": "Named as the other files name it.",
+     "spec": "§11"
+    },
+    {
+     "column": "description",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "direction",
+     "decision": "rename",
+     "to": "native_side",
+     "why": "Which side creates the Native connection: sub, prime or both; the role column is read from it.",
+     "spec": "§11"
+    },
+    {
+     "column": "fetched_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§2"
+    },
+    {
+     "column": "subaward_number",
+     "decision": "keep",
+     "why": "The subaward's own number as reported.",
+     "spec": "§11"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_parent_uei",
+     "decision": "keep",
+     "why": "Official identifier of the subrecipient's declared parent.",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_parent_cage",
+     "decision": "withhold",
+     "why": "Identifier; carve-out masking only.",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_parent_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_parent_uei",
+     "decision": "keep",
+     "why": "Official identifier of the prime's declared parent.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_parent_cage",
+     "decision": "withhold",
+     "why": "Identifier; carve-out masking only.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_parent_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "naics_title",
+     "decision": "rename",
+     "to": "naics_description",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "psc_title",
+     "decision": "rename",
+     "to": "product_or_service_code_description",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_top_awarding_agency",
+     "decision": "rename",
+     "to": "awarding_agency",
+     "why": "Agency context.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_set_aside",
+     "decision": "keep",
+     "why": "The prime award's set-aside.",
+     "spec": "§11"
+    },
+    {
+     "column": "pre_2000_flag",
+     "decision": "internal",
+     "why": "Build flag.",
+     "spec": "§2"
+    },
+    {
+     "column": "floor_basis_field",
+     "decision": "internal",
+     "why": "Build bookkeeping.",
+     "spec": "§2"
+    },
+    {
+     "column": "source_dataset",
+     "decision": "rename",
+     "to": "source_system",
+     "why": "The source system, named as the specification names it.",
+     "spec": "§3"
+    },
+    {
+     "column": "source_population",
+     "decision": "internal",
+     "why": "Pipeline population marker.",
+     "spec": "§2"
+    },
+    {
+     "column": "award_kind",
+     "decision": "rename",
+     "to": "award_type",
+     "why": "contract or assistance: the explicit award type that keeps the two populations apart.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_type",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_award_unique_key",
+     "decision": "keep",
+     "why": "The prime award's USAspending key.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_award_amount",
+     "decision": "keep",
+     "why": "Context for the money fence; never added to the subaward.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_to_prime_ratio",
+     "decision": "internal",
+     "why": "Out of the default export until numerator and denominator are shown to cover compatible definitions, periods and versions.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_exceeds_prime_flag",
+     "decision": "keep",
+     "why": "Control: a real filing whose amount is never summed.",
+     "spec": "§11"
+    },
+    {
+     "column": "action_date_precedes_ffata_flag",
+     "decision": "keep",
+     "why": "Control: a known filer-date anomaly; do not read the date as when the work happened.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_sam_report_year",
+     "decision": "rename",
+     "to": "report_year",
+     "why": "The reporting period.",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_native_tier",
+     "decision": "keep",
+     "why": "Attribution confidence on the prime side.",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_native_tier",
+     "decision": "keep",
+     "why": "Attribution confidence on the sub side.",
+     "spec": "§11"
+    },
+    {
+     "column": "sub_business_types",
+     "decision": "keep",
+     "why": "",
+     "spec": "§11"
+    },
+    {
+     "column": "prime_awarding_sub_agency",
+     "decision": "rename",
+     "to": "awarding_sub_agency",
+     "why": "Agency context.",
+     "spec": "§11"
+    },
+    {
+     "column": "duplicate_status",
+     "decision": "keep",
+     "why": "Control: primary, or a repeat within the source; the revision status the specification asks for.",
+     "spec": "§11"
+    },
+    {
+     "column": "promoted_date",
+     "decision": "internal",
+     "why": "Promotion timestamp.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_amount_real2025",
+     "decision": "keep",
+     "why": "Constant-dollar amount beside the nominal.",
+     "spec": "§11"
+    },
+    {
+     "column": "deflator_factor_2025",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§11"
+    },
+    {
+     "column": "inflation_base_year",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§11"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "The Native entity the row is attributed to; sub_cedar_uid and prime_cedar_uid say which side.",
+     "spec": "§1"
+    },
+    {
+     "column": "subaward_sam_report_id",
+     "decision": "internal",
+     "why": "Duplicates subaward_source_record_id on every sample row; one identifier ships.",
+     "spec": "§1"
+    },
+    {
+     "column": "subaward_sam_report_month",
+     "decision": "internal",
+     "why": "The report's month; the year and last-modified date ship.",
+     "spec": "§2"
+    },
+    {
+     "column": "subaward_sam_report_last_modified_date",
+     "decision": "rename",
+     "to": "report_last_modified_date",
+     "why": "The report version's date: the revision marker.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_sam_report_id_basis",
+     "decision": "internal",
+     "why": "Explains the identifier.",
+     "spec": "§2"
+    },
+    {
+     "column": "subaward_source_record_id",
+     "decision": "keep",
+     "why": "The source record id that makes the row unique.",
+     "spec": "§11"
+    },
+    {
+     "column": "subaward_source_record_id_basis",
+     "decision": "internal",
+     "why": "Explains the identifier.",
+     "spec": "§2"
+    },
+    {
+     "column": "prime_cedar_uid",
+     "decision": "keep",
+     "why": "Role-specific link: the prime's Native owner.",
+     "spec": "§1"
+    },
+    {
+     "column": "sub_cedar_uid",
+     "decision": "keep",
+     "why": "Role-specific link: the subrecipient's Native owner.",
+     "spec": "§1"
+    },
+    {
+     "column": "geo_prime_award_recipient_county_fips",
+     "decision": "internal",
+     "why": "The prime's geography must not stand in for the subrecipient's.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_prime_award_recipient_county_name",
+     "decision": "internal",
+     "why": "The prime's geography must not stand in for the subrecipient's.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_prime_award_recipient_state_fips",
+     "decision": "internal",
+     "why": "The prime's geography.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_prime_award_pop_county_fips",
+     "decision": "internal",
+     "why": "The prime award's place of performance is not the subaward's.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_prime_award_pop_county_name",
+     "decision": "internal",
+     "why": "The prime award's place of performance is not the subaward's.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_prime_award_pop_state_fips",
+     "decision": "internal",
+     "why": "The prime award's place of performance.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_key_tier",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_key_basis",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_county_gap_reason",
+     "decision": "internal",
+     "why": "Names a script and a date.",
+     "spec": "§2"
+    },
+    {
+     "column": "geo_built_date",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_city",
+     "decision": "rename",
+     "to": "sub_city",
+     "why": "Subrecipient geography.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_state_code",
+     "decision": "internal",
+     "why": "sub_state carries it.",
+     "spec": "§1"
+    },
+    {
+     "column": "geo_subawardee_zip5",
+     "decision": "rename",
+     "to": "sub_zip5",
+     "why": "Subrecipient geography.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_country_code",
+     "decision": "rename",
+     "to": "sub_country_code",
+     "why": "Subrecipient geography.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_county_fips",
+     "decision": "rename",
+     "to": "sub_county_fips",
+     "why": "Subrecipient geography.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_county_name",
+     "decision": "rename",
+     "to": "sub_county_name",
+     "why": "Subrecipient geography.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_state_fips",
+     "decision": "internal",
+     "why": "sub_state carries the state.",
+     "spec": "§2"
+    },
+    {
+     "column": "geo_subawardee_place_dominance_share",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_place_ambiguous",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§11"
+    },
+    {
+     "column": "geo_subawardee_basis",
+     "decision": "internal",
+     "why": "Geographic matching machinery (dominance share, ambiguity, key tier and basis, build date); the county name and FIPS ship, the diagnostics do not.",
+     "spec": "§11"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_name",
+     "from": "register",
+     "why": "The entity's name as data/spine/cedar_entity_names.csv spells it, by cedar_uid; withheld where the publication rule says so."
+    },
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "cedar_entity_role",
+     "from": "map:native_side",
+     "why": "Read from native_side: owner of the subrecipient, owner of the prime, or owner of both."
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "native_side",
+    "sub_cedar_uid",
+    "prime_cedar_uid",
+    "subaward_source_record_id",
+    "subaward_number",
+    "prime_award_id",
+    "prime_award_unique_key",
+    "sub_name",
+    "sub_uei",
+    "sub_cage",
+    "sub_parent_name",
+    "sub_parent_uei",
+    "sub_parent_cage",
+    "sub_business_types",
+    "sub_native_tier",
+    "prime_name",
+    "prime_uei",
+    "prime_cage",
+    "prime_parent_name",
+    "prime_parent_uei",
+    "prime_parent_cage",
+    "prime_native_tier",
+    "award_type",
+    "subaward_type",
+    "subaward_date",
+    "fiscal_year",
+    "report_year",
+    "report_last_modified_date",
+    "subaward_amount",
+    "subaward_amount_real2025",
+    "prime_award_amount",
+    "description",
+    "naics_code",
+    "naics_description",
+    "product_or_service_code",
+    "product_or_service_code_description",
+    "awarding_agency",
+    "awarding_sub_agency",
+    "prime_set_aside",
+    "sub_city",
+    "sub_state",
+    "sub_zip5",
+    "sub_country_code",
+    "sub_county_name",
+    "sub_county_fips",
+    "duplicate_status",
+    "subaward_exceeds_prime_flag",
+    "action_date_precedes_ffata_flag",
+    "source_system",
+    "source_url"
+   ]
+  },
+  "deals/deals_classified": {
+   "collection": "deals",
+   "public_file": "deals.csv",
+   "row_today": "One announced transaction or award involving a Native party, classified.",
+   "row_target": "One distinct transaction or project-financing event, enriched as new sources confirm it and updated as its status changes; several articles about one event are one row.",
+   "grain_change": "Owed (§7): the event-boundary pass on the full table (a source index already exists in deals_source_index.csv); the three overlapping category fields are combined into one taxonomy only after the terminal tests where they disagree.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller)",
+   "columns_today": 40,
+   "columns_target": 31,
+   "fields": [
+    {
+     "column": "Deal_ID",
+     "decision": "rename",
+     "to": "deal_id",
+     "why": "The record's own id; headers go lowercase throughout this file.",
+     "spec": "§7"
+    },
+    {
+     "column": "Event_Date",
+     "decision": "rename",
+     "to": "event_date",
+     "why": "The announcement date at the precision stated; no invented day.",
+     "spec": "§7"
+    },
+    {
+     "column": "Event_Date_precision",
+     "decision": "rename",
+     "to": "event_date_precision",
+     "why": "day, month or year.",
+     "spec": "§7"
+    },
+    {
+     "column": "Event_Date_not_before",
+     "decision": "internal",
+     "why": "The precision column says what the date resolves to.",
+     "spec": "§7"
+    },
+    {
+     "column": "Event_Date_not_after",
+     "decision": "internal",
+     "why": "The precision column says what the date resolves to.",
+     "spec": "§7"
+    },
+    {
+     "column": "Event_Year",
+     "decision": "internal",
+     "why": "Derivable from event_date; the viewer derives it.",
+     "spec": "§3"
+    },
+    {
+     "column": "Event_Quarter",
+     "decision": "internal",
+     "why": "Derivable.",
+     "spec": "§3"
+    },
+    {
+     "column": "Event_Month",
+     "decision": "internal",
+     "why": "Derivable.",
+     "spec": "§3"
+    },
+    {
+     "column": "Deal_Title",
+     "decision": "rename",
+     "to": "deal_title",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Native_Party",
+     "decision": "rename",
+     "to": "native_party",
+     "why": "The participant as the source names it, kept beside the register's name.",
+     "spec": "§1"
+    },
+    {
+     "column": "Native_Party_Type",
+     "decision": "rename",
+     "to": "native_party_type",
+     "why": "The participant's kind as the source states it; the register's class is cedar_entity_type.",
+     "spec": "§1"
+    },
+    {
+     "column": "Counterparty_or_Funder",
+     "decision": "rename",
+     "to": "counterparty",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Deal_Category",
+     "decision": "combine",
+     "to": "deal_category",
+     "why": "One of three overlapping classifications; combined into one deliberate taxonomy after the terminal measures their agreement.",
+     "spec": "§7"
+    },
+    {
+     "column": "Industry",
+     "decision": "rename",
+     "to": "industry",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Event_Type",
+     "decision": "combine",
+     "to": "deal_category",
+     "why": "Free text that repeats the category with detail; folds into the taxonomy, and its detail into the description where it adds anything.",
+     "spec": "§7"
+    },
+    {
+     "column": "Status",
+     "decision": "combine",
+     "to": "status",
+     "why": "Two status columns disagree in spelling; one ships after the agreement test.",
+     "spec": "§7"
+    },
+    {
+     "column": "Announced_Value_USD",
+     "decision": "rename",
+     "to": "announced_value_usd",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Value_Type",
+     "decision": "rename",
+     "to": "value_basis",
+     "why": "What the announced value measures.",
+     "spec": "§7"
+    },
+    {
+     "column": "Project_Total_Value_USD",
+     "decision": "rename",
+     "to": "project_total_value_usd",
+     "why": "Whole-project value, kept apart from the Native participant's share.",
+     "spec": "§7"
+    },
+    {
+     "column": "State",
+     "decision": "rename",
+     "to": "state",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Location",
+     "decision": "rename",
+     "to": "location",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Description",
+     "decision": "rename",
+     "to": "description",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Native_Connection",
+     "decision": "rename",
+     "to": "native_connection",
+     "why": "Why the deal is a Native deal, in words.",
+     "spec": "§7"
+    },
+    {
+     "column": "Source_1",
+     "decision": "rename",
+     "to": "source_url",
+     "why": "Primary source.",
+     "spec": "§7"
+    },
+    {
+     "column": "Source_1_Type",
+     "decision": "rename",
+     "to": "source_type",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Source_2",
+     "decision": "rename",
+     "to": "source_url_2",
+     "why": "Second source.",
+     "spec": "§7"
+    },
+    {
+     "column": "Source_2_Type",
+     "decision": "rename",
+     "to": "source_type_2",
+     "why": "",
+     "spec": "§7"
+    },
+    {
+     "column": "Verification_Status",
+     "decision": "rename",
+     "to": "verification_status",
+     "why": "Primary verified, secondary, unverified: a qualification that changes interpretation.",
+     "spec": "§7"
+    },
+    {
+     "column": "Confidence",
+     "decision": "internal",
+     "why": "A generic confidence letter; verification_status carries the meaning.",
+     "spec": "§7"
+    },
+    {
+     "column": "Notes",
+     "decision": "derive",
+     "to": "research_note",
+     "why": "A mixed-purpose notes column (harvest dates, value caveats); only a substantive caveat survives, as a short research_note, after review.",
+     "spec": "§2"
+    },
+    {
+     "column": "Date_Added",
+     "decision": "internal",
+     "why": "Classification timestamp.",
+     "spec": "§7"
+    },
+    {
+     "column": "Data_As_Of",
+     "decision": "document",
+     "why": "Release metadata, stated once.",
+     "spec": "§16"
+    },
+    {
+     "column": "sector",
+     "decision": "keep",
+     "why": "The broad sector beside the finer industry.",
+     "spec": "§7"
+    },
+    {
+     "column": "transaction_type",
+     "decision": "combine",
+     "to": "deal_category",
+     "why": "The third of the overlapping classifications.",
+     "spec": "§7"
+    },
+    {
+     "column": "capital_source",
+     "decision": "keep",
+     "why": "Public, private, tribal: the capital's origin.",
+     "spec": "§7"
+    },
+    {
+     "column": "native_party_role",
+     "decision": "rename",
+     "to": "cedar_entity_role",
+     "why": "Why the Native entity is on the row: acquirer, borrower, issuer, partner.",
+     "spec": "§1"
+    },
+    {
+     "column": "deal_status_std",
+     "decision": "combine",
+     "to": "status",
+     "why": "The standardized status; the survivor after the agreement test.",
+     "spec": "§7"
+    },
+    {
+     "column": "native_party_canonical_name",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "The register's name, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "native_party_attribution_tier",
+     "decision": "rename",
+     "to": "attribution_tier",
+     "why": "How firmly the party resolves to the register.",
+     "spec": "§2"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "",
+     "spec": "§1"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "deal_category",
+     "from": "combine:Deal_Category|transaction_type|Event_Type",
+     "why": "One deliberate taxonomy (financing, acquisition, partnership, asset sale, project announcement, grant) built after the three are tested for agreement.",
+     "status": "pending"
+    },
+    {
+     "column": "status",
+     "from": "combine:Status|deal_status_std",
+     "why": "Announced, completed, cancelled, unconfirmed.",
+     "status": "pending"
+    },
+    {
+     "column": "closing_date",
+     "from": "pending:source review",
+     "why": "The closing date where a source confirms it; blank otherwise.",
+     "status": "pending"
+    },
+    {
+     "column": "research_note",
+     "from": "derived:Notes",
+     "why": "A short factual caveat where one is needed (\"Amount covers the entire joint venture; the Native participant's share is not stated\").",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "deal_id",
+    "deal_title",
+    "native_party",
+    "native_party_type",
+    "counterparty",
+    "deal_category",
+    "industry",
+    "sector",
+    "capital_source",
+    "event_date",
+    "event_date_precision",
+    "closing_date",
+    "status",
+    "announced_value_usd",
+    "value_basis",
+    "project_total_value_usd",
+    "state",
+    "location",
+    "description",
+    "native_connection",
+    "research_note",
+    "verification_status",
+    "attribution_tier",
+    "source_url",
+    "source_type",
+    "source_url_2",
+    "source_type_2"
+   ]
+  },
+  "lobbying/native_entity_lobbying_disclosures": {
+   "collection": "lobbying",
+   "public_file": "lobbying.csv",
+   "row_today": "One Lobbying Disclosure Act filing whose client resolves to a Native entity.",
+   "row_target": "One advocacy activity, with activity_type saying which source family it is; LDA filings are the first family, one row per filing, and other documented families (consultations, testimony, ex parte, comments) join under the same schema only as they are obtained and supported.",
+   "grain_change": "Owed (§9): the activity schema over the other source families the collection already holds in the workspace (hearing_appearances, ferc_ex_parte_*, oira_meetings, nrc_public_meetings, advocacy_passthrough). Each family is evaluated against the common schema before it ships; a lead is not coverage.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "client",
+   "columns_today": 43,
+   "columns_target": 35,
+   "fields": [
+    {
+     "column": "filing_uuid",
+     "decision": "rename",
+     "to": "filing_id",
+     "why": "The source-specific filing identifier.",
+     "spec": "§9"
+    },
+    {
+     "column": "entity_id",
+     "decision": "internal",
+     "why": "A second spelling of cedar_uid on the same row; the specification removes duplicate aliases of the same identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "canonical_name",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "The register's name, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "entity_type",
+     "decision": "rename",
+     "to": "cedar_entity_type",
+     "why": "The register's class, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "entity_state",
+     "decision": "internal",
+     "why": "The register carries it.",
+     "spec": "§1"
+    },
+    {
+     "column": "client_name",
+     "decision": "keep",
+     "why": "The actual client as filed, never overwritten by the register's name.",
+     "spec": "§9"
+    },
+    {
+     "column": "client_id",
+     "decision": "keep",
+     "why": "The LDA client identifier, an official identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "client_state",
+     "decision": "keep",
+     "why": "",
+     "spec": "§9"
+    },
+    {
+     "column": "registrant_name",
+     "decision": "keep",
+     "why": "The representative or registrant.",
+     "spec": "§9"
+    },
+    {
+     "column": "registrant_id",
+     "decision": "keep",
+     "why": "The LDA registrant identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "registrant_state",
+     "decision": "keep",
+     "why": "",
+     "spec": "§9"
+    },
+    {
+     "column": "self_filed",
+     "decision": "keep",
+     "why": "Whether the client is its own registrant.",
+     "spec": "§9"
+    },
+    {
+     "column": "filing_year",
+     "decision": "keep",
+     "why": "The reporting year.",
+     "spec": "§9"
+    },
+    {
+     "column": "filing_period",
+     "decision": "keep",
+     "why": "The reporting period within the year.",
+     "spec": "§9"
+    },
+    {
+     "column": "filing_type",
+     "decision": "internal",
+     "why": "The code; the readable type ships.",
+     "spec": "§2"
+    },
+    {
+     "column": "filing_type_display",
+     "decision": "rename",
+     "to": "filing_type",
+     "why": "Registration, quarterly report, amendment, termination.",
+     "spec": "§9"
+    },
+    {
+     "column": "income_usd",
+     "decision": "keep",
+     "why": "The registrant's reported income for the client.",
+     "spec": "§9"
+    },
+    {
+     "column": "expenses_usd",
+     "decision": "keep",
+     "why": "The self-filer's reported expenses; never added to income.",
+     "spec": "§9"
+    },
+    {
+     "column": "spend_usd",
+     "decision": "rename",
+     "to": "amount_usd",
+     "why": "The one amount the row reports, with amount_basis saying which.",
+     "spec": "§9"
+    },
+    {
+     "column": "spend_basis",
+     "decision": "rename",
+     "to": "amount_basis",
+     "why": "income or expenses.",
+     "spec": "§9"
+    },
+    {
+     "column": "lobbying_issues_codes",
+     "decision": "keep",
+     "why": "",
+     "spec": "§9"
+    },
+    {
+     "column": "specific_issues_text",
+     "decision": "keep",
+     "why": "The topic as filed.",
+     "spec": "§9"
+    },
+    {
+     "column": "government_entities",
+     "decision": "keep",
+     "why": "The agencies and chambers contacted.",
+     "spec": "§9"
+    },
+    {
+     "column": "affiliated_organizations",
+     "decision": "keep",
+     "why": "",
+     "spec": "§9"
+    },
+    {
+     "column": "dt_posted",
+     "decision": "rename",
+     "to": "posted_date",
+     "why": "When the filing was posted.",
+     "spec": "§9"
+    },
+    {
+     "column": "termination_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§9"
+    },
+    {
+     "column": "filing_url",
+     "decision": "rename",
+     "to": "source_url",
+     "why": "",
+     "spec": "§9"
+    },
+    {
+     "column": "attribution_method",
+     "decision": "keep",
+     "why": "How the client resolved to the entity.",
+     "spec": "§2"
+    },
+    {
+     "column": "match_confidence",
+     "decision": "keep",
+     "why": "Entity-link uncertainty, preserved.",
+     "spec": "§9"
+    },
+    {
+     "column": "matched_alias",
+     "decision": "internal",
+     "why": "Matched alias.",
+     "spec": "§9"
+    },
+    {
+     "column": "pull_keyword",
+     "decision": "internal",
+     "why": "Search keyword.",
+     "spec": "§9"
+    },
+    {
+     "column": "org_type_barred",
+     "decision": "internal",
+     "why": "Internal exclusion explanation.",
+     "spec": "§9"
+    },
+    {
+     "column": "org_type_reason",
+     "decision": "internal",
+     "why": "Internal exclusion explanation.",
+     "spec": "§9"
+    },
+    {
+     "column": "filing_url_original",
+     "decision": "internal",
+     "why": "One URL ships.",
+     "spec": "§2"
+    },
+    {
+     "column": "attribution_withdrawn",
+     "decision": "keep",
+     "why": "Control: a withdrawn attribution stays as a correction and its spend is not Native lobbying.",
+     "spec": "§9"
+    },
+    {
+     "column": "attribution_withdrawn_entity_id",
+     "decision": "internal",
+     "why": "The correction's evidence beyond the reason stays in the workspace.",
+     "spec": "§9"
+    },
+    {
+     "column": "attribution_withdrawn_reason",
+     "decision": "keep",
+     "why": "Why the attribution was withdrawn.",
+     "spec": "§9"
+    },
+    {
+     "column": "attribution_withdrawn_date",
+     "decision": "internal",
+     "why": "Correction bookkeeping.",
+     "spec": "§9"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "",
+     "spec": "§1"
+    },
+    {
+     "column": "supersession_group_id",
+     "decision": "internal",
+     "why": "Group bookkeeping; the status and the successor ship.",
+     "spec": "§9"
+    },
+    {
+     "column": "supersession_status",
+     "decision": "rename",
+     "to": "filing_status",
+     "why": "Current, or superseded by an amendment: the default view counts current filings only.",
+     "spec": "§9"
+    },
+    {
+     "column": "is_superseded",
+     "decision": "internal",
+     "why": "Duplicates filing_status.",
+     "spec": "§1"
+    },
+    {
+     "column": "superseded_by_filing_uuid",
+     "decision": "rename",
+     "to": "superseded_by_filing_id",
+     "why": "The amendment that replaces this filing.",
+     "spec": "§9"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:client",
+     "why": "Why the entity is on the row: client."
+    },
+    {
+     "column": "activity_id",
+     "from": "derived:filing_id",
+     "why": "A collection-wide activity identifier (lda:<filing_id> for this family) so families share one key space.",
+     "status": "pending"
+    },
+    {
+     "column": "activity_type",
+     "from": "constant:lda_filing",
+     "why": "Which source family the row is: lda_filing for every row today."
+    },
+    {
+     "column": "source_system",
+     "from": "constant:lda",
+     "why": "The source system: the Senate and House LDA database."
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "activity_id",
+    "activity_type",
+    "filing_id",
+    "client_name",
+    "client_id",
+    "client_state",
+    "registrant_name",
+    "registrant_id",
+    "registrant_state",
+    "self_filed",
+    "filing_type",
+    "filing_year",
+    "filing_period",
+    "posted_date",
+    "termination_date",
+    "amount_usd",
+    "amount_basis",
+    "income_usd",
+    "expenses_usd",
+    "lobbying_issues_codes",
+    "specific_issues_text",
+    "government_entities",
+    "affiliated_organizations",
+    "filing_status",
+    "superseded_by_filing_id",
+    "attribution_withdrawn",
+    "attribution_withdrawn_reason",
+    "attribution_method",
+    "match_confidence",
+    "source_system",
+    "source_url"
+   ]
+  },
+  "legislation/native_bills": {
+   "collection": "legislation",
+   "public_file": "legislation.csv",
+   "row_today": "One bill in Congress that concerns Native nations or organizations, with the entities it names.",
+   "row_target": "One bill keyed by Congress, bill type and number, its status derived from its action history; member votes and actions, where they ship, are explicit record types with their own ids in the same table.",
+   "grain_change": "Owed (§6): whether bill_votes and member_positions ship as vote and action record types inside this file (record_type) or remain supporting tables; either way bill totals count distinct bill_id and the promised vote coverage is not replaced by counts.",
+   "entity_uid": "entity_cedar_uids",
+   "entity_uid_list": true,
+   "entity_role": "named in the bill",
+   "columns_today": 37,
+   "columns_target": 26,
+   "fields": [
+    {
+     "column": "bill_id",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "congress",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "chamber",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "number",
+     "decision": "rename",
+     "to": "bill_number",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "title",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "policy_area",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "bill_scope",
+     "decision": "rename",
+     "to": "relevance_scope",
+     "why": "tribe-specific, class-wide or topic-wide: how the bill is relevant.",
+     "spec": "§6"
+    },
+    {
+     "column": "affected_entities",
+     "decision": "internal",
+     "why": "Empty; the entity list column is the supported one.",
+     "spec": "§6"
+    },
+    {
+     "column": "sponsor",
+     "decision": "rename",
+     "to": "sponsor_name",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "introduced_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "latest_action",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "outcome",
+     "decision": "rename",
+     "to": "status",
+     "why": "Current status derived from the action history, with latest_action_date as its as-of date.",
+     "spec": "§6"
+    },
+    {
+     "column": "companion_bill_id",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "bill_type",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "sponsor_bioguide_id",
+     "decision": "keep",
+     "why": "The sponsor's identifier.",
+     "spec": "§6"
+    },
+    {
+     "column": "latest_action_date",
+     "decision": "keep",
+     "why": "The status's as-of date.",
+     "spec": "§6"
+    },
+    {
+     "column": "cosponsor_count",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "n_rollcalls",
+     "decision": "rename",
+     "to": "rollcall_count",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "has_rollcall",
+     "decision": "keep",
+     "why": "",
+     "spec": "§6"
+    },
+    {
+     "column": "bill_scope_basis",
+     "decision": "internal",
+     "why": "Matching note.",
+     "spec": "§6"
+    },
+    {
+     "column": "outcome_basis",
+     "decision": "internal",
+     "why": "Internal evidence path.",
+     "spec": "§6"
+    },
+    {
+     "column": "companion_basis",
+     "decision": "internal",
+     "why": "Matching note.",
+     "spec": "§6"
+    },
+    {
+     "column": "classification_source",
+     "decision": "internal",
+     "why": "Classification bookkeeping.",
+     "spec": "§6"
+    },
+    {
+     "column": "classification_kappa",
+     "decision": "internal",
+     "why": "Classification agreement statistic.",
+     "spec": "§6"
+    },
+    {
+     "column": "record_basis",
+     "decision": "internal",
+     "why": "Build bookkeeping.",
+     "spec": "§6"
+    },
+    {
+     "column": "build_date",
+     "decision": "internal",
+     "why": "Build flag.",
+     "spec": "§6"
+    },
+    {
+     "column": "pre_2000_flag",
+     "decision": "internal",
+     "why": "Build flag.",
+     "spec": "§6"
+    },
+    {
+     "column": "floor_basis_field",
+     "decision": "internal",
+     "why": "Build bookkeeping.",
+     "spec": "§6"
+    },
+    {
+     "column": "has_resolved_entity",
+     "decision": "internal",
+     "why": "Derivable from the entity list.",
+     "spec": "§3"
+    },
+    {
+     "column": "n_entities_resolved",
+     "decision": "internal",
+     "why": "Derivable from the entity list.",
+     "spec": "§3"
+    },
+    {
+     "column": "entity_cedar_uids",
+     "decision": "rename",
+     "to": "cedar_uid",
+     "why": "The entities the bill names, pipe-separated: the documented multi-entity representation.",
+     "spec": "§1"
+    },
+    {
+     "column": "entity_names",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "Their register names, pipe-separated, rewritten from the register at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "entity_link_tiers",
+     "decision": "keep",
+     "why": "Link confidence per entity, pipe-separated.",
+     "spec": "§6"
+    },
+    {
+     "column": "entity_link_basis",
+     "decision": "internal",
+     "why": "Matching note.",
+     "spec": "§6"
+    },
+    {
+     "column": "entity_class_scope",
+     "decision": "rename",
+     "to": "relevance_class_scope",
+     "why": "The class of entity the bill is about when it names none: class-wide relevance, distinct from any entity's class.",
+     "spec": "§6"
+    },
+    {
+     "column": "n_entity_classes",
+     "decision": "internal",
+     "why": "Derivable.",
+     "spec": "§3"
+    },
+    {
+     "column": "entity_class_scope_basis",
+     "decision": "internal",
+     "why": "Explains the scope.",
+     "spec": "§6"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:named in the bill",
+     "why": "Why the entity is on the row: named in the bill."
+    },
+    {
+     "column": "source_url",
+     "from": "built:congress|bill_type|bill_number",
+     "why": "The congress.gov page, written into the file."
+    },
+    {
+     "column": "record_type",
+     "from": "pending:grain change",
+     "why": "bill, action or vote, if vote and action records ship in this table.",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "bill_id",
+    "record_type",
+    "congress",
+    "chamber",
+    "bill_type",
+    "bill_number",
+    "title",
+    "policy_area",
+    "relevance_scope",
+    "relevance_class_scope",
+    "sponsor_name",
+    "sponsor_bioguide_id",
+    "cosponsor_count",
+    "introduced_date",
+    "latest_action",
+    "latest_action_date",
+    "status",
+    "companion_bill_id",
+    "has_rollcall",
+    "rollcall_count",
+    "entity_link_tiers",
+    "source_url"
+   ]
+  },
+  "federal-register/consultation_events": {
+   "collection": "federal-register",
+   "public_file": "federal-register.csv",
+   "row_today": "One tribal consultation event announced or reported in the Federal Register, one row per event and named participant; is_event_primary_row marks one row per event.",
+   "row_target": "The same event-participant grain, declared: count events by consultation_event_id (or SUM of is_event_primary_row), never rows; a notice, the meeting it announces and an attendee are not three equivalent observations.",
+   "grain_change": "Owed (§5): merge duplicate representations of one document across federal_actions and this table, and cross-reference NAGPRA and Advocacy appearances of the same document rather than counting them as separate actions.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "read from participant_role",
+   "columns_today": 39,
+   "columns_target": 28,
+   "fields": [
+    {
+     "column": "consultation_event_id",
+     "decision": "keep",
+     "why": "The event's own id.",
+     "spec": "§5"
+    },
+    {
+     "column": "channel",
+     "decision": "internal",
+     "why": "Constant by construction and vague; the action type and source say what the row is.",
+     "spec": "§5"
+    },
+    {
+     "column": "agency",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "sub_agency",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "program",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "consultation_type",
+     "decision": "rename",
+     "to": "action_type",
+     "why": "Session, written comment period, listening session.",
+     "spec": "§5"
+    },
+    {
+     "column": "topic",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "notice_date",
+     "decision": "rename",
+     "to": "publication_date",
+     "why": "The Federal Register publication date, distinct from the event dates.",
+     "spec": "§5"
+    },
+    {
+     "column": "event_start_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "event_end_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "location",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "format",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "tribe_name",
+     "decision": "internal",
+     "why": "The participant as published is the kept column.",
+     "spec": "§1"
+    },
+    {
+     "column": "participant_name_as_published",
+     "decision": "keep",
+     "why": "The participant as the notice names it, beside the register's name.",
+     "spec": "§1"
+    },
+    {
+     "column": "participant_role",
+     "decision": "rename",
+     "to": "cedar_entity_role",
+     "why": "Why the entity is on the row: invited, named, not enumerated.",
+     "spec": "§1"
+    },
+    {
+     "column": "comment_deadline",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "has_written_comments",
+     "decision": "keep",
+     "why": "Availability indicator.",
+     "spec": "§5"
+    },
+    {
+     "column": "has_summary",
+     "decision": "keep",
+     "why": "Availability indicator.",
+     "spec": "§5"
+    },
+    {
+     "column": "has_transcript",
+     "decision": "keep",
+     "why": "Availability indicator.",
+     "spec": "§5"
+    },
+    {
+     "column": "federal_register_citation",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "",
+     "spec": "§5"
+    },
+    {
+     "column": "source_quote",
+     "decision": "keep",
+     "why": "The sentence that classifies the action; kept because it materially clarifies.",
+     "spec": "§5"
+    },
+    {
+     "column": "fetched_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§5"
+    },
+    {
+     "column": "tier",
+     "decision": "internal",
+     "why": "Confidence shorthand.",
+     "spec": "§5"
+    },
+    {
+     "column": "confidence",
+     "decision": "internal",
+     "why": "Confidence shorthand.",
+     "spec": "§5"
+    },
+    {
+     "column": "built_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§5"
+    },
+    {
+     "column": "match_method",
+     "decision": "internal",
+     "why": "Matching method.",
+     "spec": "§5"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "Blank where no participant is enumerated: unknown or not applicable, not non-Native.",
+     "spec": "§1"
+    },
+    {
+     "column": "fr_document_number",
+     "decision": "keep",
+     "why": "The document number, the stable document id.",
+     "spec": "§5"
+    },
+    {
+     "column": "nagpra_notice_overlap",
+     "decision": "derive",
+     "to": "related_nagpra_document_number",
+     "why": "The overlap becomes a cross-reference to the NAGPRA record, not a diagnostic label.",
+     "spec": "§5"
+    },
+    {
+     "column": "nagpra_bridge_overlap",
+     "decision": "internal",
+     "why": "Diagnostic.",
+     "spec": "§5"
+    },
+    {
+     "column": "nagpra_coverage_window",
+     "decision": "internal",
+     "why": "Diagnostic.",
+     "spec": "§5"
+    },
+    {
+     "column": "event_date_basis",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§5"
+    },
+    {
+     "column": "event_date_source_quote",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§5"
+    },
+    {
+     "column": "location_basis",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§5"
+    },
+    {
+     "column": "location_source_quote",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§5"
+    },
+    {
+     "column": "document_role",
+     "decision": "keep",
+     "why": "Control: a notice announcing a consultation is not a report of one that happened.",
+     "spec": "§5"
+    },
+    {
+     "column": "n_participant_rows_for_event",
+     "decision": "keep",
+     "why": "Control: how many rows this event fans out to.",
+     "spec": "§5"
+    },
+    {
+     "column": "is_event_primary_row",
+     "decision": "keep",
+     "why": "Control: one row per event carries yes; count consultations by this column.",
+     "spec": "§5"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_name",
+     "from": "register",
+     "why": "The entity's name as data/spine/cedar_entity_names.csv spells it, by cedar_uid; withheld where the publication rule says so."
+    },
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "related_nagpra_document_number",
+     "from": "derived:nagpra_notice_overlap",
+     "why": "The NAGPRA notice this document also is, where it is one.",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "consultation_event_id",
+    "fr_document_number",
+    "action_type",
+    "document_role",
+    "topic",
+    "agency",
+    "sub_agency",
+    "program",
+    "publication_date",
+    "event_start_date",
+    "event_end_date",
+    "comment_deadline",
+    "location",
+    "format",
+    "participant_name_as_published",
+    "has_written_comments",
+    "has_summary",
+    "has_transcript",
+    "is_event_primary_row",
+    "n_participant_rows_for_event",
+    "related_nagpra_document_number",
+    "federal_register_citation",
+    "source_quote",
+    "source_url"
+   ]
+  },
+  "nagpra/nagpra_notices": {
+   "collection": "nagpra",
+   "public_file": "nagpra.csv",
+   "row_today": "One NAGPRA notice in the Federal Register, with the institution and the Native entities named in each role.",
+   "row_target": "The same: one notice or document, with its correction relationship retained and each role's entities kept distinct.",
+   "grain_change": "Owed (§8): related_notice_id for corrections so a corrected notice does not repeat holdings in totals; names as published beside each role's ids so the resolved subset is not shown as the whole.",
+   "entity_uid": "affiliated_entity_ids",
+   "entity_uid_list": true,
+   "entity_role": "culturally affiliated, as the notice determines",
+   "entity_roles": [
+    {
+     "column": "consulted_entity_ids",
+     "role": "consulted",
+     "list": true
+    },
+    {
+     "column": "disposition_priority_entity_ids",
+     "role": "disposition priority",
+     "list": true
+    },
+    {
+     "column": "repatriation_recipient_entity_ids",
+     "role": "repatriation recipient",
+     "list": true
+    },
+    {
+     "column": "letter_of_support_entity_ids",
+     "role": "letter of support",
+     "list": true
+    },
+    {
+     "column": "aboriginal_land_entity_ids",
+     "role": "aboriginal land",
+     "list": true
+    }
+   ],
+   "columns_today": 69,
+   "columns_target": 59,
+   "fields": [
+    {
+     "column": "document_number",
+     "decision": "keep",
+     "why": "The document id.",
+     "spec": "§8"
+    },
+    {
+     "column": "publication_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "publication_year",
+     "decision": "internal",
+     "why": "Derivable; the viewer derives it.",
+     "spec": "§3"
+    },
+    {
+     "column": "notice_type",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "notice_title_form",
+     "decision": "internal",
+     "why": "The same fact as notice_type.",
+     "spec": "§1"
+    },
+    {
+     "column": "statute_stage",
+     "decision": "rename",
+     "to": "process_stage",
+     "why": "The documented process stage under the statute.",
+     "spec": "§8"
+    },
+    {
+     "column": "is_correction",
+     "decision": "keep",
+     "why": "Correction status.",
+     "spec": "§8"
+    },
+    {
+     "column": "title",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_primary",
+     "decision": "internal",
+     "why": "Duplicates institution_name.",
+     "spec": "§1"
+    },
+    {
+     "column": "institution_names_all",
+     "decision": "keep",
+     "why": "Every institution a multi-institution notice names.",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_city",
+     "decision": "keep",
+     "why": "Institution geography, distinct from removal geography.",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_state",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_count",
+     "decision": "internal",
+     "why": "Derivable.",
+     "spec": "§3"
+    },
+    {
+     "column": "institution_name_basis",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_type_derived",
+     "decision": "rename",
+     "to": "institution_type",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "responsible_party_statement",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "object_categories",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "mni_total_stated",
+     "decision": "keep",
+     "why": "Minimum number of individuals as stated; never added to object counts.",
+     "spec": "§8"
+    },
+    {
+     "column": "mni_basis",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§8"
+    },
+    {
+     "column": "mni_statement_count",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§8"
+    },
+    {
+     "column": "mni_statements",
+     "decision": "keep",
+     "why": "The measurement qualification where the stated count is ambiguous.",
+     "spec": "§8"
+    },
+    {
+     "column": "n_associated_funerary_objects_stated",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_unassociated_funerary_objects_stated",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_sacred_objects_stated",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_objects_of_cultural_patrimony_stated",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "cultural_items_total_stated",
+     "decision": "keep",
+     "why": "The total only where the notice itself states one.",
+     "spec": "§8"
+    },
+    {
+     "column": "removal_counties",
+     "decision": "keep",
+     "why": "Removal geography at county level.",
+     "spec": "§8"
+    },
+    {
+     "column": "removal_states",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "removal_location_statements",
+     "decision": "internal",
+     "why": "Free text that can name a precise site; the public export does not expand to sensitive locations.",
+     "spec": "§8"
+    },
+    {
+     "column": "removal_location_basis",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§8"
+    },
+    {
+     "column": "repatriation_eligible_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "response_deadline_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "window_days_derived",
+     "decision": "internal",
+     "why": "Derivable.",
+     "spec": "§3"
+    },
+    {
+     "column": "n_consulted_named",
+     "decision": "keep",
+     "why": "Control: named against resolved is real uncertainty.",
+     "spec": "§8"
+    },
+    {
+     "column": "n_consulted_resolved",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "consulted_entity_ids",
+     "decision": "keep",
+     "why": "Role-specific entity list.",
+     "spec": "§8"
+    },
+    {
+     "column": "n_affiliated_named",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_affiliated_resolved",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "affiliated_entity_ids",
+     "decision": "rename",
+     "to": "cedar_uid",
+     "why": "The culturally affiliated entities are the opening block's entities, pipe-separated; the other roles keep their own lists.",
+     "spec": "§1"
+    },
+    {
+     "column": "n_disposition_priority_named",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_disposition_priority_resolved",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "disposition_priority_entity_ids",
+     "decision": "keep",
+     "why": "Role-specific entity list.",
+     "spec": "§8"
+    },
+    {
+     "column": "n_repatriation_recipient_named",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_repatriation_recipient_resolved",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "repatriation_recipient_entity_ids",
+     "decision": "keep",
+     "why": "Role-specific entity list.",
+     "spec": "§8"
+    },
+    {
+     "column": "n_letter_of_support_named",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_letter_of_support_resolved",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "letter_of_support_entity_ids",
+     "decision": "keep",
+     "why": "Role-specific entity list.",
+     "spec": "§8"
+    },
+    {
+     "column": "n_aboriginal_land_named",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_aboriginal_land_resolved",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "aboriginal_land_entity_ids",
+     "decision": "keep",
+     "why": "Role-specific entity list.",
+     "spec": "§8"
+    },
+    {
+     "column": "n_parties_named",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "n_entities_resolved",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "has_resolved_entity",
+     "decision": "internal",
+     "why": "Derivable.",
+     "spec": "§3"
+    },
+    {
+     "column": "lineal_descendant_determination",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "culturally_unidentifiable",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "parse_template",
+     "decision": "internal",
+     "why": "Parser template.",
+     "spec": "§8"
+    },
+    {
+     "column": "spans_found",
+     "decision": "internal",
+     "why": "Span counts.",
+     "spec": "§8"
+    },
+    {
+     "column": "agency_names",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "html_url",
+     "decision": "internal",
+     "why": "The same page as source_url.",
+     "spec": "§1"
+    },
+    {
+     "column": "pdf_url",
+     "decision": "keep",
+     "why": "The official PDF.",
+     "spec": "§8"
+    },
+    {
+     "column": "full_text_url",
+     "decision": "internal",
+     "why": "The same document as source_url.",
+     "spec": "§1"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "",
+     "spec": "§8"
+    },
+    {
+     "column": "parent_dataset",
+     "decision": "internal",
+     "why": "Names an internal table.",
+     "spec": "§2"
+    },
+    {
+     "column": "fetched_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§8"
+    },
+    {
+     "column": "artifact_mtime",
+     "decision": "internal",
+     "why": "Artifact timestamp.",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_split_flag",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§8"
+    },
+    {
+     "column": "institution_split_basis",
+     "decision": "internal",
+     "why": "Extraction diagnostic.",
+     "spec": "§8"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_name",
+     "from": "register",
+     "why": "The entity's name as data/spine/cedar_entity_names.csv spells it, by cedar_uid; withheld where the publication rule says so."
+    },
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:culturally affiliated, as the notice determines",
+     "why": "Why the entity is on the row: culturally affiliated, as the notice determines."
+    },
+    {
+     "column": "related_notice_id",
+     "from": "pending:corrections",
+     "why": "The notice this one corrects, or is corrected by.",
+     "status": "pending"
+    },
+    {
+     "column": "consulted_entity_names",
+     "from": "pending:names as published",
+     "why": "The consulted parties as the notice names them, so the unresolved are visible.",
+     "status": "pending"
+    },
+    {
+     "column": "affiliated_entity_names",
+     "from": "pending:names as published",
+     "why": "The affiliated parties as the notice names them.",
+     "status": "pending"
+    },
+    {
+     "column": "disposition_priority_entity_names",
+     "from": "pending:names as published",
+     "why": "",
+     "status": "pending"
+    },
+    {
+     "column": "repatriation_recipient_entity_names",
+     "from": "pending:names as published",
+     "why": "",
+     "status": "pending"
+    },
+    {
+     "column": "letter_of_support_entity_names",
+     "from": "pending:names as published",
+     "why": "",
+     "status": "pending"
+    },
+    {
+     "column": "aboriginal_land_entity_names",
+     "from": "pending:names as published",
+     "why": "",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "document_number",
+    "related_notice_id",
+    "notice_type",
+    "process_stage",
+    "is_correction",
+    "publication_date",
+    "title",
+    "institution_name",
+    "institution_names_all",
+    "institution_type",
+    "institution_city",
+    "institution_state",
+    "responsible_party_statement",
+    "agency_names",
+    "object_categories",
+    "mni_total_stated",
+    "mni_statements",
+    "n_associated_funerary_objects_stated",
+    "n_unassociated_funerary_objects_stated",
+    "n_sacred_objects_stated",
+    "n_objects_of_cultural_patrimony_stated",
+    "cultural_items_total_stated",
+    "removal_counties",
+    "removal_states",
+    "repatriation_eligible_date",
+    "response_deadline_date",
+    "lineal_descendant_determination",
+    "culturally_unidentifiable",
+    "n_affiliated_named",
+    "n_affiliated_resolved",
+    "affiliated_entity_names",
+    "n_consulted_named",
+    "n_consulted_resolved",
+    "consulted_entity_ids",
+    "consulted_entity_names",
+    "n_disposition_priority_named",
+    "n_disposition_priority_resolved",
+    "disposition_priority_entity_ids",
+    "disposition_priority_entity_names",
+    "n_repatriation_recipient_named",
+    "n_repatriation_recipient_resolved",
+    "repatriation_recipient_entity_ids",
+    "repatriation_recipient_entity_names",
+    "n_letter_of_support_named",
+    "n_letter_of_support_resolved",
+    "letter_of_support_entity_ids",
+    "letter_of_support_entity_names",
+    "n_aboriginal_land_named",
+    "n_aboriginal_land_resolved",
+    "aboriginal_land_entity_ids",
+    "aboriginal_land_entity_names",
+    "n_parties_named",
+    "n_entities_resolved",
+    "source_url",
+    "pdf_url"
+   ]
+  },
+  "nest/nest_enterprises": {
+   "collection": "nest",
+   "public_file": "nest.csv",
+   "row_today": "One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it.",
+   "row_target": "One enterprise-owner relationship, with an effective period where known; businesses are counted by distinct enterprise_id, and an enterprise with several owners shows each.",
+   "grain_change": "Owed (§13): ownership effective dates separated from observation dates; multiple owners visible (nest_enterprise_relations.csv holds the assertions); duplicate observations merged only on confirmed identity.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "read from relationship_type: owner, or affiliated entity, of the enterprise",
+   "columns_today": 65,
+   "columns_target": 33,
+   "fields": [
+    {
+     "column": "enterprise_id",
+     "decision": "keep",
+     "why": "The enterprise's own id.",
+     "spec": "§13"
+    },
+    {
+     "column": "enterprise_name",
+     "decision": "keep",
+     "why": "The published enterprise name.",
+     "spec": "§13"
+    },
+    {
+     "column": "enterprise_name_normalized",
+     "decision": "internal",
+     "why": "Raw normalization string.",
+     "spec": "§13"
+    },
+    {
+     "column": "name_variants_observed",
+     "decision": "rename",
+     "to": "name_variants",
+     "why": "Other names the sources use, pipe-separated.",
+     "spec": "§13"
+    },
+    {
+     "column": "owner_hub_cedar_uid",
+     "decision": "internal",
+     "why": "A second spelling of cedar_uid on the same row; the specification removes duplicate aliases of the same identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "The owner or affiliated Native entity.",
+     "spec": "§1"
+    },
+    {
+     "column": "owner_hub_name",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "The register's name, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "owner_hub_entity_class",
+     "decision": "rename",
+     "to": "cedar_entity_type",
+     "why": "The register's class, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "owner_class",
+     "decision": "keep",
+     "why": "tribal_government, ANC, NHO: the owner's kind in the collection's own terms.",
+     "spec": "§13"
+    },
+    {
+     "column": "owner_hub_state",
+     "decision": "internal",
+     "why": "The register carries it.",
+     "spec": "§1"
+    },
+    {
+     "column": "parent_enterprise_id",
+     "decision": "keep",
+     "why": "The immediate parent enterprise.",
+     "spec": "§13"
+    },
+    {
+     "column": "parent_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "parent_is_hub",
+     "decision": "keep",
+     "why": "Whether the immediate parent is the Native entity itself.",
+     "spec": "§13"
+    },
+    {
+     "column": "hierarchy_level",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "relationship",
+     "decision": "keep",
+     "why": "The finer relationship as recorded (subsidiary, joint venture, management).",
+     "spec": "§13"
+    },
+    {
+     "column": "relation_class",
+     "decision": "rename",
+     "to": "cedar_entity_role",
+     "why": "ownership or affiliation: why the Native entity is on the row.",
+     "spec": "§1"
+    },
+    {
+     "column": "relationship_as_recorded",
+     "decision": "internal",
+     "why": "The source's wording; relationship carries it normalized.",
+     "spec": "§13"
+    },
+    {
+     "column": "ownership_percent_stated",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "sector",
+     "decision": "rename",
+     "to": "industry",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "status",
+     "decision": "rename",
+     "to": "operating_status",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "status_basis",
+     "decision": "internal",
+     "why": "Explains the status.",
+     "spec": "§13"
+    },
+    {
+     "column": "city",
+     "decision": "keep",
+     "why": "Business location.",
+     "spec": "§13"
+    },
+    {
+     "column": "state_province",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "address_basis",
+     "decision": "internal",
+     "why": "Explains the address.",
+     "spec": "§13"
+    },
+    {
+     "column": "address_is_publishable",
+     "decision": "internal",
+     "why": "Applied at the gate, not published.",
+     "spec": "§13"
+    },
+    {
+     "column": "uei",
+     "decision": "keep",
+     "why": "Official identifier.",
+     "spec": "§13"
+    },
+    {
+     "column": "cage_code",
+     "decision": "keep",
+     "why": "Official identifier.",
+     "spec": "§13"
+    },
+    {
+     "column": "identifier_basis",
+     "decision": "internal",
+     "why": "Explains the identifier.",
+     "spec": "§13"
+    },
+    {
+     "column": "uei_candidate",
+     "decision": "internal",
+     "why": "Proposed identifier.",
+     "spec": "§13"
+    },
+    {
+     "column": "uei_candidate_basis",
+     "decision": "internal",
+     "why": "Proposed identifier.",
+     "spec": "§13"
+    },
+    {
+     "column": "identifier_status",
+     "decision": "internal",
+     "why": "Identifier bookkeeping.",
+     "spec": "§13"
+    },
+    {
+     "column": "in_federal_contracting",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "in_federal_contracting_basis",
+     "decision": "internal",
+     "why": "Explains the flag.",
+     "spec": "§13"
+    },
+    {
+     "column": "identity_scope",
+     "decision": "internal",
+     "why": "Population marker.",
+     "spec": "§13"
+    },
+    {
+     "column": "assertion_class",
+     "decision": "internal",
+     "why": "Duplicates relationship_type.",
+     "spec": "§1"
+    },
+    {
+     "column": "evidence_class",
+     "decision": "keep",
+     "why": "What kind of evidence supports the relationship: a qualification the reader needs.",
+     "spec": "§13"
+    },
+    {
+     "column": "n_source_observations",
+     "decision": "internal",
+     "why": "Observation bookkeeping.",
+     "spec": "§13"
+    },
+    {
+     "column": "n_distinct_sources",
+     "decision": "rename",
+     "to": "source_count",
+     "why": "How many distinct sources support the relationship.",
+     "spec": "§13"
+    },
+    {
+     "column": "evidence_human_reviewed",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "n_auto_ruled_observations",
+     "decision": "internal",
+     "why": "Observation bookkeeping.",
+     "spec": "§13"
+    },
+    {
+     "column": "first_observed_year",
+     "decision": "keep",
+     "why": "When Cedar first observed the relationship, not when it began.",
+     "spec": "§13"
+    },
+    {
+     "column": "last_observed_year",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "enterprise_existing_cedar_uid",
+     "decision": "internal",
+     "why": "Proposed identifier.",
+     "spec": "§13"
+    },
+    {
+     "column": "constellation_edge_id",
+     "decision": "internal",
+     "why": "Constellation debugging.",
+     "spec": "§13"
+    },
+    {
+     "column": "constellation_note",
+     "decision": "internal",
+     "why": "Constellation debugging.",
+     "spec": "§13"
+    },
+    {
+     "column": "source_id",
+     "decision": "internal",
+     "why": "Internal source code; the document and URL ship.",
+     "spec": "§13"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "source_document",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "source_edition_date",
+     "decision": "keep",
+     "why": "",
+     "spec": "§13"
+    },
+    {
+     "column": "hub_resolution_method",
+     "decision": "internal",
+     "why": "Matching method.",
+     "spec": "§13"
+    },
+    {
+     "column": "hub_resolution_note",
+     "decision": "internal",
+     "why": "Matching note.",
+     "spec": "§13"
+    },
+    {
+     "column": "population_basis",
+     "decision": "internal",
+     "why": "Population marker.",
+     "spec": "§13"
+    },
+    {
+     "column": "publishable",
+     "decision": "internal",
+     "why": "Applied at the gate.",
+     "spec": "§13"
+    },
+    {
+     "column": "publishable_basis",
+     "decision": "internal",
+     "why": "Applied at the gate.",
+     "spec": "§13"
+    },
+    {
+     "column": "retrieved_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§13"
+    },
+    {
+     "column": "built_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§13"
+    },
+    {
+     "column": "fpds_parent_corroboration",
+     "decision": "rename",
+     "to": "parent_corroboration",
+     "why": "Whether FPDS's declared parent agrees: a contested affiliation ships as contested, never as verified ownership.",
+     "spec": "§13"
+    },
+    {
+     "column": "fpds_parent_corroboration_route",
+     "decision": "internal",
+     "why": "How corroboration was attempted.",
+     "spec": "§13"
+    },
+    {
+     "column": "fpds_declared_parent_uei",
+     "decision": "internal",
+     "why": "The declared parent's name ships; its UEI is corroboration machinery.",
+     "spec": "§13"
+    },
+    {
+     "column": "fpds_declared_parent_name",
+     "decision": "keep",
+     "why": "The parent FPDS declares, as public relationship evidence.",
+     "spec": "§13"
+    },
+    {
+     "column": "fpds_declared_parent_observations",
+     "decision": "internal",
+     "why": "Corroboration machinery.",
+     "spec": "§13"
+    },
+    {
+     "column": "fpds_parent_resolves_to",
+     "decision": "internal",
+     "why": "Corroboration machinery.",
+     "spec": "§13"
+    },
+    {
+     "column": "fpds_parent_corroboration_basis",
+     "decision": "internal",
+     "why": "Corroboration machinery.",
+     "spec": "§13"
+    },
+    {
+     "column": "duplicate_name_variant_group",
+     "decision": "internal",
+     "why": "Duplicate-group diagnostic.",
+     "spec": "§13"
+    },
+    {
+     "column": "duplicate_name_variant_basis",
+     "decision": "internal",
+     "why": "Duplicate-group diagnostic.",
+     "spec": "§13"
+    }
+   ],
+   "new": [
+    {
+     "column": "ownership_effective_start",
+     "from": "pending:relations",
+     "why": "When the ownership began, where a source states it.",
+     "status": "pending"
+    },
+    {
+     "column": "ownership_effective_end",
+     "from": "pending:relations",
+     "why": "When it ended, where a source states it.",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "enterprise_id",
+    "enterprise_name",
+    "name_variants",
+    "owner_class",
+    "parent_enterprise_id",
+    "parent_name",
+    "parent_is_hub",
+    "hierarchy_level",
+    "relationship",
+    "ownership_percent_stated",
+    "ownership_effective_start",
+    "ownership_effective_end",
+    "industry",
+    "operating_status",
+    "city",
+    "state_province",
+    "uei",
+    "cage_code",
+    "in_federal_contracting",
+    "first_observed_year",
+    "last_observed_year",
+    "evidence_class",
+    "evidence_human_reviewed",
+    "source_count",
+    "parent_corroboration",
+    "fpds_declared_parent_name",
+    "source_document",
+    "source_edition_date",
+    "source_url"
+   ]
+  },
+  "natural-resources/resource_revenue": {
+   "collection": "natural-resources",
+   "public_file": "natural-resources.csv",
+   "row_today": "One payment or distribution of natural-resource revenue, with its measurement status and aggregation level.",
+   "row_target": "The same: one resource-related financial event with an explicit revenue type, measurement status and aggregation level; aggregates never assigned to a tribe.",
+   "grain_change": "Owed (§12): a cross-reference to Federal Funding where a reliable common identifier exists, so the same event is not counted twice.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "recipient",
+   "entity_roles": [
+    {
+     "column": "beneficiary_entity_id",
+     "role": "beneficiary"
+    }
+   ],
+   "columns_today": 45,
+   "columns_target": 38,
+   "fields": [
+    {
+     "column": "resource_revenue_event_id",
+     "decision": "keep",
+     "why": "The event's own id.",
+     "spec": "§12"
+    },
+    {
+     "column": "recipient_entity_id",
+     "decision": "internal",
+     "why": "A second spelling of cedar_uid on the same row; the specification removes duplicate aliases of the same identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "recipient_entity_name",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "The register's name, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "beneficiary_entity_id",
+     "decision": "keep",
+     "why": "Role-specific link: the beneficiary where it differs from the recipient.",
+     "spec": "§12"
+    },
+    {
+     "column": "beneficiary_entity_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "beneficiary_note",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "payer_entity_id",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "payer_entity_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "operator_entity_id",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "operator_entity_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "related_asset_ids",
+     "decision": "keep",
+     "why": "Empty today and kept for when a source names them.",
+     "spec": "§2"
+    },
+    {
+     "column": "source_system",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "source_record_id",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "revenue_type",
+     "decision": "keep",
+     "why": "Royalty, distribution, reclamation grant, budget, announced allocation, actual payment.",
+     "spec": "§12"
+    },
+    {
+     "column": "resource_type",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "commodity",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "product",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "mineral_lease_type",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "period_type",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "period_start",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "period_end",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "payment_date",
+     "decision": "keep",
+     "why": "Its meaning is in measurement_status (actual payment, announced allocation).",
+     "spec": "§12"
+    },
+    {
+     "column": "amount_usd",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "amount_usd_real2025",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "deflator_factor_2025",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§12"
+    },
+    {
+     "column": "inflation_base_year",
+     "decision": "document",
+     "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
+     "spec": "§12"
+    },
+    {
+     "column": "measurement_status",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "aggregation_level",
+     "decision": "keep",
+     "why": "entity_specific, regional or countrywide: never assign an aggregate to a tribe.",
+     "spec": "§12"
+    },
+    {
+     "column": "land_status",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "land_status_basis",
+     "decision": "internal",
+     "why": "Explains the land status.",
+     "spec": "§12"
+    },
+    {
+     "column": "allocation_formula",
+     "decision": "keep",
+     "why": "The validated allocation rule.",
+     "spec": "§12"
+    },
+    {
+     "column": "allocation_formula_effective_start",
+     "decision": "keep",
+     "why": "The rule's effective period.",
+     "spec": "§12"
+    },
+    {
+     "column": "allocation_formula_effective_end",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "allocation_formula_source_url",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "amount_sign_meaning",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "geography_note",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "confidence",
+     "decision": "internal",
+     "why": "A generic confidence letter.",
+     "spec": "§2"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "",
+     "spec": "§12"
+    },
+    {
+     "column": "fetched_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§12"
+    },
+    {
+     "column": "built_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§12"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "The recipient.",
+     "spec": "§1"
+    },
+    {
+     "column": "cedar_uid_basis",
+     "decision": "internal",
+     "why": "Matching transcript.",
+     "spec": "§12"
+    },
+    {
+     "column": "record_scope_basis",
+     "decision": "internal",
+     "why": "Explains the scope.",
+     "spec": "§12"
+    },
+    {
+     "column": "entity_attribution_status",
+     "decision": "rename",
+     "to": "attribution_status",
+     "why": "Keyed to an entity, an aggregate, or unresolved: a blank attribution has a documented status.",
+     "spec": "§1"
+    },
+    {
+     "column": "entity_attribution_basis",
+     "decision": "internal",
+     "why": "Matching transcript.",
+     "spec": "§12"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The entity's class as the register holds it, by cedar_uid."
+    },
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:recipient",
+     "why": "Why the entity is on the row: recipient."
+    },
+    {
+     "column": "related_funding_award_id",
+     "from": "pending:cross-reference",
+     "why": "The Federal Funding award this event also appears as, where a reliable identifier exists.",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "resource_revenue_event_id",
+    "attribution_status",
+    "beneficiary_entity_id",
+    "beneficiary_entity_name",
+    "beneficiary_note",
+    "payer_entity_id",
+    "payer_entity_name",
+    "operator_entity_id",
+    "operator_entity_name",
+    "related_asset_ids",
+    "revenue_type",
+    "resource_type",
+    "commodity",
+    "product",
+    "mineral_lease_type",
+    "period_type",
+    "period_start",
+    "period_end",
+    "payment_date",
+    "measurement_status",
+    "amount_usd",
+    "amount_usd_real2025",
+    "amount_sign_meaning",
+    "aggregation_level",
+    "land_status",
+    "geography_note",
+    "allocation_formula",
+    "allocation_formula_effective_start",
+    "allocation_formula_effective_end",
+    "allocation_formula_source_url",
+    "related_funding_award_id",
+    "source_system",
+    "source_record_id",
+    "source_url"
+   ]
+  },
+  "nonprofits/np_orgs": {
+   "collection": "nonprofits",
+   "public_file": "nonprofits.csv",
+   "row_today": "One nonprofit organization in the IRS Business Master File that is Native-led or tribally controlled, with the Native entity it is linked to.",
+   "row_target": "One organization (EIN) with its BMF snapshot; financial analysis rows are organization-EIN-reporting-period (np_financials.csv), and a directory-only row is distinguishable and gets no invented year.",
+   "grain_change": "Owed (§14): the organization-EIN-reporting-period financial table is np_financials.csv in the workspace; whether it ships inside this file under a record_type or as the collection's financial companion is the terminal's call after measuring compatible periods.",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "associated Native entity",
+   "columns_today": 67,
+   "columns_target": 28,
+   "fields": [
+    {
+     "column": "EIN",
+     "decision": "rename",
+     "to": "ein",
+     "why": "Kept as text with leading zeros.",
+     "spec": "§14"
+    },
+    {
+     "column": "entity_id",
+     "decision": "internal",
+     "why": "A second spelling of cedar_uid on the same row; the specification removes duplicate aliases of the same identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "org_name",
+     "decision": "keep",
+     "why": "",
+     "spec": "§14"
+    },
+    {
+     "column": "classification_ruling",
+     "decision": "keep",
+     "why": "Native-controlled, Native-serving or unruled, where supported.",
+     "spec": "§14"
+    },
+    {
+     "column": "evidence",
+     "decision": "internal",
+     "why": "Agent research narrative.",
+     "spec": "§14"
+    },
+    {
+     "column": "tier",
+     "decision": "rename",
+     "to": "filing_tier",
+     "why": "full_990, 990-EZ, 990-N: which return the organization files.",
+     "spec": "§14"
+    },
+    {
+     "column": "tier_basis",
+     "decision": "internal",
+     "why": "Explains the tier.",
+     "spec": "§14"
+    },
+    {
+     "column": "state",
+     "decision": "keep",
+     "why": "",
+     "spec": "§14"
+    },
+    {
+     "column": "city",
+     "decision": "keep",
+     "why": "",
+     "spec": "§14"
+    },
+    {
+     "column": "ntee_code",
+     "decision": "keep",
+     "why": "Activity classification.",
+     "spec": "§14"
+    },
+    {
+     "column": "confidence_tier",
+     "decision": "internal",
+     "why": "Funnel confidence; attribution_tier ships.",
+     "spec": "§14"
+    },
+    {
+     "column": "funnel_stage",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§14"
+    },
+    {
+     "column": "review_flag",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§14"
+    },
+    {
+     "column": "review_flag_token",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "excluded_by_prior_ruling",
+     "decision": "internal",
+     "why": "Exclusion bookkeeping.",
+     "spec": "§14"
+    },
+    {
+     "column": "exclusion_reason",
+     "decision": "internal",
+     "why": "Exclusion bookkeeping.",
+     "spec": "§14"
+    },
+    {
+     "column": "canonical_name_token_match",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "n_coders_agree",
+     "decision": "internal",
+     "why": "Coding agreement count.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_in_snapshot",
+     "decision": "internal",
+     "why": "Build bookkeeping.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_status",
+     "decision": "keep",
+     "why": "IRS status code, defined in the dictionary.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_subsection",
+     "decision": "keep",
+     "why": "501(c) subsection.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_filing_req_cd",
+     "decision": "keep",
+     "why": "Filing requirement code, defined in the dictionary.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_foundation_cd",
+     "decision": "keep",
+     "why": "Foundation code, defined in the dictionary.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_irs_ruling_yyyymm",
+     "decision": "rename",
+     "to": "irs_ruling_month",
+     "why": "",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_tax_period",
+     "decision": "rename",
+     "to": "tax_period",
+     "why": "The reporting period the BMF amounts belong to.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_revenue_amt",
+     "decision": "keep",
+     "why": "Kept under the BMF's own name until the source definition is confirmed; never relabelled.",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_asset_amt",
+     "decision": "keep",
+     "why": "",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_income_amt",
+     "decision": "keep",
+     "why": "The BMF's income amount; not net income.",
+     "spec": "§14"
+    },
+    {
+     "column": "source_files",
+     "decision": "internal",
+     "why": "Funnel labels.",
+     "spec": "§14"
+    },
+    {
+     "column": "source_dataset",
+     "decision": "rename",
+     "to": "source_system",
+     "why": "",
+     "spec": "§3"
+    },
+    {
+     "column": "source_url",
+     "decision": "keep",
+     "why": "",
+     "spec": "§14"
+    },
+    {
+     "column": "bmf_vintage_fetched",
+     "decision": "rename",
+     "to": "bmf_snapshot_date",
+     "why": "When the BMF snapshot was taken: a retrieval date, not a tax year.",
+     "spec": "§14"
+    },
+    {
+     "column": "built_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§14"
+    },
+    {
+     "column": "placename_risk_flag",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§14"
+    },
+    {
+     "column": "ruling_authority",
+     "decision": "internal",
+     "why": "Ruling bookkeeping.",
+     "spec": "§14"
+    },
+    {
+     "column": "ruling_confidence",
+     "decision": "internal",
+     "why": "Ruling bookkeeping.",
+     "spec": "§14"
+    },
+    {
+     "column": "ruling_date",
+     "decision": "internal",
+     "why": "Ruling bookkeeping.",
+     "spec": "§14"
+    },
+    {
+     "column": "tribe_canonical_name",
+     "decision": "internal",
+     "why": "Duplicates the register name.",
+     "spec": "§1"
+    },
+    {
+     "column": "entity_match_method",
+     "decision": "rename",
+     "to": "attribution_method",
+     "why": "",
+     "spec": "§2"
+    },
+    {
+     "column": "entity_tier",
+     "decision": "rename",
+     "to": "attribution_tier",
+     "why": "",
+     "spec": "§2"
+    },
+    {
+     "column": "entity_match_basis",
+     "decision": "internal",
+     "why": "Matching transcript.",
+     "spec": "§14"
+    },
+    {
+     "column": "entity_keyed_date",
+     "decision": "internal",
+     "why": "Build date.",
+     "spec": "§14"
+    },
+    {
+     "column": "cedar_spine_entity_id",
+     "decision": "internal",
+     "why": "A second spelling of cedar_uid on the same row; the specification removes duplicate aliases of the same identifier.",
+     "spec": "§1"
+    },
+    {
+     "column": "cedar_spine_canonical_name",
+     "decision": "rename",
+     "to": "cedar_entity_name",
+     "why": "The register's name, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "cedar_spine_entity_class",
+     "decision": "rename",
+     "to": "cedar_entity_type",
+     "why": "The register's class, rewritten by uid at build time.",
+     "spec": "§1"
+    },
+    {
+     "column": "cedar_native_entity_class",
+     "decision": "rename",
+     "to": "org_entity_class",
+     "why": "The organization's own kind (ANC, TCU, CDFI), distinct from the linked entity's class.",
+     "spec": "§1"
+    },
+    {
+     "column": "cedar_link_tier",
+     "decision": "internal",
+     "why": "Duplicates attribution_tier.",
+     "spec": "§1"
+    },
+    {
+     "column": "cedar_link_basis",
+     "decision": "internal",
+     "why": "Matching transcript.",
+     "spec": "§14"
+    },
+    {
+     "column": "cedar_link_key",
+     "decision": "internal",
+     "why": "Matching key.",
+     "spec": "§14"
+    },
+    {
+     "column": "cedar_link_sources",
+     "decision": "internal",
+     "why": "Matching bookkeeping.",
+     "spec": "§14"
+    },
+    {
+     "column": "cedar_uid",
+     "decision": "keep",
+     "why": "",
+     "spec": "§1"
+    },
+    {
+     "column": "disposition",
+     "decision": "rename",
+     "to": "inclusion_basis",
+     "why": "Why the organization is in Cedar (verified strict, verified, candidate).",
+     "spec": "§14"
+    },
+    {
+     "column": "disposition_basis",
+     "decision": "internal",
+     "why": "Explains the disposition.",
+     "spec": "§14"
+    },
+    {
+     "column": "name_match_support",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "name_match_shared_tokens",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "name_match_support_measured_against",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "keyed_name_match_support",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "keyed_name_match_shared_tokens",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "keyed_name_match_residue",
+     "decision": "internal",
+     "why": "Matching token.",
+     "spec": "§14"
+    },
+    {
+     "column": "keyed_state_agreement",
+     "decision": "internal",
+     "why": "Matching diagnostic.",
+     "spec": "§14"
+    },
+    {
+     "column": "key_review_disposition",
+     "decision": "internal",
+     "why": "Review queue; a contested link is resolved before it ships.",
+     "spec": "§14"
+    },
+    {
+     "column": "key_review_basis",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§14"
+    },
+    {
+     "column": "key_redirect_proposed_entity_id",
+     "decision": "internal",
+     "why": "Proposed redirect.",
+     "spec": "§14"
+    },
+    {
+     "column": "key_redirect_proposed_name",
+     "decision": "internal",
+     "why": "Proposed redirect.",
+     "spec": "§14"
+    },
+    {
+     "column": "placename_refusal_rung",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§14"
+    },
+    {
+     "column": "placename_refusal_basis",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§14"
+    },
+    {
+     "column": "placename_refusal_date",
+     "decision": "internal",
+     "why": "Review queue.",
+     "spec": "§14"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:associated Native entity",
+     "why": "Why the entity is on the row: associated Native entity."
+    },
+    {
+     "column": "native_relationship",
+     "from": "pending:classification",
+     "why": "controlled_by, serves, or is (a tribal government's own organization): the relationship to the linked entity, distinct from a name match.",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "ein",
+    "org_name",
+    "org_entity_class",
+    "native_relationship",
+    "classification_ruling",
+    "inclusion_basis",
+    "city",
+    "state",
+    "ntee_code",
+    "bmf_status",
+    "bmf_subsection",
+    "bmf_filing_req_cd",
+    "bmf_foundation_cd",
+    "irs_ruling_month",
+    "filing_tier",
+    "tax_period",
+    "bmf_revenue_amt",
+    "bmf_income_amt",
+    "bmf_asset_amt",
+    "bmf_snapshot_date",
+    "attribution_method",
+    "attribution_tier",
+    "source_system",
+    "source_url"
+   ]
+  },
+  "owned/native_owned_businesses": {
+   "collection": "owned",
+   "public_file": "owned.csv",
+   "row_today": "One business certified or listed as Native-owned by a certifying authority (no sample is published in this repository yet; the flagship is one of the nineteen samples still to be added).",
+   "row_target": "One supported business, enriched by every directory listing whose identity is verified; certification by two authorities is one business, and same-name businesses are never merged without evidence.",
+   "grain_change": "Owed (§15): the map for this table is written when its sample lands, after `python scripts/import_cedar_manifest.py --audit` has run (the collection's supporting tables carried withheld names and were struck on 2026-09-05).",
+   "entity_uid": "cedar_uid",
+   "entity_uid_list": false,
+   "entity_role": "certifying_authority: the nation or office that lists or certifies the business, never its owner",
+   "columns_today": null,
+   "columns_target": null,
+   "fields": [],
+   "new": [
+    {
+     "column": "cedar_entity_name",
+     "from": "register",
+     "why": "The certifying authority's register name."
+    },
+    {
+     "column": "cedar_entity_type",
+     "from": "register",
+     "why": "The certifying authority's register class."
+    },
+    {
+     "column": "cedar_entity_role",
+     "from": "constant:certifying_authority",
+     "why": "A certifying nation's uid is an associated link labelled certifying_authority, not owner."
+    },
+    {
+     "column": "business_id",
+     "from": "pending:sample",
+     "why": "The business's own id; an existing business Cedar uid only where the identity system already assigns one.",
+     "status": "pending"
+    },
+    {
+     "column": "business_name",
+     "from": "pending:sample",
+     "why": "Withheld where the publication policy withholds it; never reintroduced through aliases, source text or fallback fields.",
+     "status": "pending"
+    },
+    {
+     "column": "trade_name",
+     "from": "pending:sample",
+     "why": "Where publishable.",
+     "status": "pending"
+    },
+    {
+     "column": "business_category",
+     "from": "pending:sample",
+     "why": "Normalized across directories, with the issuing authority's own terminology kept beside it.",
+     "status": "pending"
+    },
+    {
+     "column": "services",
+     "from": "pending:sample",
+     "why": "",
+     "status": "pending"
+    },
+    {
+     "column": "city",
+     "from": "pending:sample",
+     "why": "Publishable business location.",
+     "status": "pending"
+    },
+    {
+     "column": "state",
+     "from": "pending:sample",
+     "why": "",
+     "status": "pending"
+    },
+    {
+     "column": "contact_channels",
+     "from": "pending:sample",
+     "why": "Publishable channels only.",
+     "status": "pending"
+    },
+    {
+     "column": "listing_authority",
+     "from": "pending:sample",
+     "why": "The directory or certifying authority.",
+     "status": "pending"
+    },
+    {
+     "column": "program",
+     "from": "pending:sample",
+     "why": "The certification or preference program, in the authority's terms.",
+     "status": "pending"
+    },
+    {
+     "column": "certification_status",
+     "from": "pending:sample",
+     "why": "",
+     "status": "pending"
+    },
+    {
+     "column": "certification_date",
+     "from": "pending:sample",
+     "why": "Where stated.",
+     "status": "pending"
+    },
+    {
+     "column": "certification_expiry_date",
+     "from": "pending:sample",
+     "why": "Where stated.",
+     "status": "pending"
+    },
+    {
+     "column": "observation_date",
+     "from": "pending:sample",
+     "why": "When Cedar observed the listing; not historical coverage.",
+     "status": "pending"
+    },
+    {
+     "column": "source_url",
+     "from": "pending:sample",
+     "why": "",
+     "status": "pending"
+    }
+   ],
+   "order": [
+    "cedar_uid",
+    "cedar_entity_name",
+    "cedar_entity_type",
+    "cedar_entity_role",
+    "business_id",
+    "business_name",
+    "trade_name",
+    "business_category",
+    "services",
+    "city",
+    "state",
+    "contact_channels",
+    "listing_authority",
+    "program",
+    "certification_status",
+    "certification_date",
+    "certification_expiry_date",
+    "observation_date",
+    "source_url"
+   ]
+  }
+ }
+}

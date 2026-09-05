@@ -492,6 +492,12 @@ function Fields({ columns, item, contract, plain }) {
   );
 }
 
+/** The further roles an entity carries on a record, in words, or nothing for the table's own role. */
+function roleOf(entity) {
+  const roles = [...(entity.role ? [entity.role] : []), ...(entity.roles ?? [])];
+  return roles.length ? roles.join(", ") : "";
+}
+
 function Record({ item, columns }) {
   const contract = contractFor(item.key);
   const codebook = codebookFor(item.key);
@@ -506,7 +512,7 @@ function Record({ item, columns }) {
         </p>
       ) : null}
       {item.entity.entities.length > 1 ? (
-        <p className="cp-ex__fine">Entities named: {item.entity.entities.map((e) => e.name ?? (e.withheld ? WITHHELD_TEXT : e.uid)).join("; ")}{contract?.entity_role ? ` · ${contract.entity_role}` : ""}</p>
+        <p className="cp-ex__fine">Entities named: {item.entity.entities.map((e) => `${e.name ?? (e.withheld ? WITHHELD_TEXT : e.uid)}${roleOf(e) ? ` (${roleOf(e)})` : ""}`).join("; ")}{contract?.entity_role ? ` · ${contract.entity_role}` : ""}</p>
       ) : contract?.entity_role && item.entity.uid ? (
         <p className="cp-ex__fine">Entity: {item.entity.name ?? WITHHELD_TEXT} ({item.entity.uid}) · {contract.entity_role}</p>
       ) : null}

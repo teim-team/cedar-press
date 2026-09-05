@@ -127,6 +127,7 @@ from cedar_publication import (          # noqa: E402
     BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
     is_publication_eligible, mask_attribution, MASK,
     LOBBYING_FILE, LOBBYING_FENCE, lobbying_overstatement, lobbying_warning,
+    apply_field_map,
 )
 
 csv.field_size_limit(10_000_000)
@@ -959,7 +960,26 @@ def build(dry: bool, only: tuple = ()) -> int:
                   + ", ".join(f"{k} ({v:,} row(s) corrected)"
                               for k, v in sorted(_moved.items())))
 
-        fhdr = order_columns(fhdr, fmeta.get("key_columns"), own_cols)
+        # THE APPROVED FIELD LIST, LAST. Owner's specification of 2026-09-05
+        # (docs/PUBLIC_DATASET_SPEC_2026-09-05.md §17): the export is
+        # generated from `data/cedar/field_map.json`, and a flagship column
+        # with no decision there stops the build rather than shipping. The
+        # map renames, drops what is internal, writes the opening block
+        # (cedar_uid, cedar_entity_name, cedar_entity_type, cedar_entity_role)
+        # from the register and orders the header; the deny lists above still
+        # ran first. A collection the map does not know keeps the banded
+        # order below.
+        _fm = apply_field_map(coll, fhdr, frows, own_cols)
+        if _fm.get("mapped"):
+            print(f"      field map: {len(_fm['renamed'])} renamed, "
+                  f"{len(_fm['dropped'])} dropped, "
+                  f"{len(_fm['owed'])} owed"
+                  + (f" ({', '.join(_fm['owed'])})" if _fm['owed'] else "")
+                  + (f"; {len(_fm['synthesised'])} synthesised column(s) "
+                     f"appended" if _fm['synthesised'] else ""))
+            own_cols = set(fhdr)
+        else:
+            fhdr = order_columns(fhdr, fmeta.get("key_columns"), own_cols)
 
         files = size = 0
         kind = ""
