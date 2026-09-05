@@ -9194,3 +9194,19 @@ and the guides all have to change with it, and the suites say which.
   classes; `redesign.css` carrying the platform's rules the press pages never
   use (a designer's pass, since `press.css` depends on its cascade).
 
+## 2026-09-05 (night): collective scope, without touching entity identity
+
+The owner's decision (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md, verbatim)
+rejected minting populations as entities and approved scope-aware records
+and filtering. Built: `data/cedar/scopes.json` (the vocabulary, versioned);
+`collective_scopes` in the map for Legislation (built from `bill_scope` and
+`entity_class_scope`, relationship `general_subject`) and the Federal
+Register (owed, with `entity_link_status`); `ScopeRefused` in the applier
+(unknown scope, element without basis, a scope code where an identity
+belongs); `scopes` and `broad` in the viewer's cut, the scope picker, the
+per-row explanation, the export column; tests for the named failures. Owed
+on the terminal: the Federal Register's two columns from the source text;
+the uid-level reconciliation of the recognized-tribe classes against the
+BIA list of 2026-01-30 (the register's class totals give 577; the list
+states 575); per-state and regional scopes only when a source requires them.
+

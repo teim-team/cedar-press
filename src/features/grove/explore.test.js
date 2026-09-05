@@ -27,6 +27,10 @@ import {
   contractFor,
   csvCell,
   cutCsv,
+  broadHits,
+  rowScopes,
+  scopeCovers,
+
   entityVectors,
   cutReadme,
   decodeCut,
@@ -305,6 +309,8 @@ test("a cut round-trips through the URL, and a permalink of nothing is empty", (
   assert.equal(encodeCut(EMPTY_CUT), "");
   const cut = {
     entities: ["CE-00134-BX"],
+    scopes: ["federally-recognized-tribes", "federally-recognized-tribes-in-state:OK"],
+    broad: true,
     types: ["Federally recognized tribe", "Native nonprofit"],
     years: [2015, 2024],
     collections: ["funding", "deals"],
@@ -564,7 +570,7 @@ test("the field map decides every column of every sampled flagship in the owner'
   assert.deepEqual(OPENING_SINGULAR, ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"]);
   assert.deepEqual(OPENING_PLURAL, ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"]);
   // The owner's column counts, exactly; Funding is 39 because DUNS is retired.
-  const EXPECTED = { funding: 39, "federal-register": 31, legislation: 29, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, nest: 30, nonprofits: 24 };
+  const EXPECTED = { funding: 39, "federal-register": 33, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, nest: 30, nonprofits: 24 };
   let sampled = 0;
   for (const dataset of LAUNCH_COLLECTION) {
     const map = Object.values(FIELD_MAP).find((t) => t.collection === dataset.id);
@@ -721,6 +727,88 @@ test("a row's entities include every declared role column, so an entity filter f
   const back = parseCsv(csv);
   assert.equal(back.rows[0].entity_uids.split("|").length, back.rows[0].entity_names.split("|").length);
   assert.equal(back.rows[0].entity_uids, vectors.uids);
+});
+
+// ── Collective scope ───────────────────────────────────────────────────────
+//
+// The owner's decision of 2026-09-05: a scope is a population a record
+// relates to, never an entity. The tests below are the failures the decision
+// names, each injected and watched.
+
+const SCOPED_KEY = "legislation/native_bills";
+const SCOPED_CONTRACT = { ...contractFor(SCOPED_KEY), scopes: "collective_scopes", link_status: "entity_link_statuses" };
+const FRT = { scope: "federally-recognized-tribes", relationship: "general_subject", as_of: null, as_of_rule: "unknown", basis: "bill_scope=general" };
+const OK_STATE = { scope: "federally-recognized-tribes-in-state:OK", relationship: "applies_to", as_of: "2021-01-01", as_of_rule: "source_defined", basis: "section 2" };
+function scopedRows(register = REGISTER) {
+  const contract = SCOPED_CONTRACT;
+  const base = { congress: "117", bill_type: "hr", bill_number: "1", introduced_date: "2021-03-01", title: "t" };
+  const raws = [
+    // 1. addressed to the class, names nobody
+    { ...base, bill_id: "b-class", entity_cedar_uids: "", collective_scopes: JSON.stringify([FRT]) },
+    // 2. names a tribe AND carries the class
+    { ...base, bill_id: "b-both", entity_cedar_uids: "CE-00134-BX", collective_scopes: JSON.stringify([FRT]) },
+    // 3. names a tribe only
+    { ...base, bill_id: "b-named", entity_cedar_uids: "CE-00134-BX", collective_scopes: "[]" },
+    // 4. an unresolved named party: no uid, no scope (never a fallback)
+    { ...base, bill_id: "b-unresolved", entity_cedar_uids: "", collective_scopes: "[]" },
+    // 5. a state scope whose membership cannot be evaluated
+    { ...base, bill_id: "b-state", entity_cedar_uids: "", collective_scopes: JSON.stringify([OK_STATE]) },
+    // 6. not evaluated
+    { ...base, bill_id: "b-unread", entity_cedar_uids: "", collective_scopes: "" },
+  ];
+  return raws.map((raw, i) => {
+    const entity = rowEntities(raw, contract, register);
+    const first = entity[0] ?? { uid: null, name: null, type: null, withheld: false };
+    return {
+      id: `${SCOPED_KEY}:${raw.bill_id}`, recordId: raw.bill_id, key: SCOPED_KEY, collection: "legislation",
+      entity: { ...first, uids: entity.map((e) => e.uid).filter(Boolean), entities: entity },
+      scopes: rowScopes(raw, contract), subject: null, year: 2021, date: "2021-03-01", amount: null, amountBasis: null,
+      source: null, superseded: false, replacement: null, observation: raw.title, row: raw, i,
+    };
+  });
+}
+
+test("a scope is never an entity: it has no uid, fills no entity block, and an unresolved party never becomes all tribes", () => {
+  const rows = scopedRows();
+  const byId = Object.fromEntries(rows.map((r) => [r.recordId, r]));
+  assert.equal(byId["b-class"].entity.uids.length, 0);
+  assert.equal(byId["b-class"].scopes.length, 1);
+  assert.equal(byId["b-unresolved"].scopes.length, 0, "evaluated, none: [] never turns into a scope");
+  assert.equal(byId["b-unread"].scopes, null, "not evaluated is null, distinct from []");
+  // The picker's facets count scopes apart from entities.
+  const f = facets(rows, REGISTER);
+  assert.ok(!f.entities.some((e) => e.uid === "federally-recognized-tribes"));
+  assert.deepEqual(f.scopes.map((s) => [s.code, s.count, s.evaluable]), [["federally-recognized-tribes", 2, true], ["federally-recognized-tribes-in-state:OK", 1, false]]);
+});
+
+test("named and collective coexist; an entity filter finds named records only, unless the reader asks for the broader group", () => {
+  const rows = scopedRows();
+  const ids = (cut) => filterRows(rows, cut, REGISTER).map((r) => r.recordId);
+  assert.deepEqual(ids({ ...EMPTY_CUT, entities: ["CE-00134-BX"] }), ["b-both", "b-named"]);
+  // Broad: the class record joins, once, with its reason; the unresolved and the unread do not.
+  const broad = filterRows(rows, { ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true }, REGISTER);
+  assert.deepEqual(broad.map((r) => r.recordId), ["b-class", "b-both", "b-named"]);
+  const why = broadHits(broad[0], { ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true }, REGISTER);
+  assert.equal(why.length, 1);
+  assert.equal(why[0].scope, "federally-recognized-tribes");
+  // A record that names the entity is not explained as a broad match.
+  assert.equal(broadHits(broad[1], { ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true }, REGISTER).length, 0);
+  // Ambiguous membership stays unknown: the state scope never expands.
+  assert.equal(scopeCovers("federally-recognized-tribes-in-state:OK", REGISTER.byUid.get("CE-00134-BX"), REGISTER), null);
+  assert.ok(!broad.some((r) => r.recordId === "b-state"));
+  // Selecting the scope itself finds the records covering it, named or not.
+  assert.deepEqual(ids({ ...EMPTY_CUT, scopes: ["federally-recognized-tribes"] }), ["b-class", "b-both"]);
+  assert.deepEqual(ids({ ...EMPTY_CUT, scopes: ["federally-recognized-tribes-in-state"] }), ["b-state"], "a parameterised scope is found by its family");
+  // Overlapping matches do not multiply rows: a record matching through a name and two scopes appears once.
+  assert.deepEqual(ids({ ...EMPTY_CUT, entities: ["CE-00134-BX"], scopes: ["federally-recognized-tribes"], broad: true }), ["b-class", "b-both", "b-named"]);
+  // The cut says what it did.
+  assert.match(describeCut({ ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true }, { register: REGISTER }), /broader group/);
+  assert.match(describeCut({ ...EMPTY_CUT, scopes: ["federally-recognized-tribes"] }), /Federally recognized tribes collectively/);
+  // The export keeps the population out of the entity columns.
+  const csv = cutCsv([rows[0]], { view: "cut" });
+  const back = parseCsv(csv);
+  assert.equal(back.rows[0].entity_uids, "");
+  assert.ok(back.rows[0].collective_scopes.includes("federally-recognized-tribes"));
 });
 
 test("the contract guard fires on each violation it names, and passes a clean override", () => {

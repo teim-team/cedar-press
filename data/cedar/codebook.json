@@ -497,6 +497,12 @@
      "rename_to": "affected_entity_classes"
     },
     {
+     "column": "collective_scopes",
+     "label": "Collective scopes",
+     "meaning": "The population this record relates to, kept apart from the entities it names: a JSON array of {scope, relationship, as_of, as_of_rule, basis} elements from the vocabulary in data/cedar/scopes.json, [] when the record names no population, null when not evaluated. A scope is not an entity: it has no Cedar ID, is never counted as one and never receives dollars.",
+     "add": true
+    },
+    {
      "column": "affected_entities",
      "label": "Affected entities as published",
      "meaning": "The entities the source itself names as affected, as it names them; empty where the source names none.",

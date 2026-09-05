@@ -45,6 +45,7 @@ import {
   PAGE_SIZE,
   UNLINKED,
   WITHHELD_TEXT,
+  broadHits,
   buildRegister,
   codebookColumns,
   codebookFor,
@@ -64,6 +65,7 @@ import {
   pageOf,
   parseCsv,
   questionFor,
+  scopeName,
   sortRows,
   universalRows,
 } from "../../features/grove/explore.js";
@@ -289,6 +291,58 @@ function EntityPicker({ cut, facets, register, onChange }) {
         ))}
         {!inRows.length && !elsewhere.length ? <li className="cp-ex__fine">No entity matches.</li> : null}
       </ul>
+    </Picker>
+  );
+}
+
+/**
+ * Records covering a population collectively, apart from records naming an
+ * entity: a notice to every federally recognized tribe is not a record of
+ * any one of them (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). Two
+ * different operations, named as such: selecting a scope finds the records
+ * covering it; the toggle lets an entity filter also include the records
+ * covering a broader group the entity belongs to, off by default, and only
+ * for scopes whose membership the register can evaluate per entity.
+ */
+function ScopePicker({ cut, facets, onChange }) {
+  const chosen = new Set(cut.scopes ?? []);
+  const toggle = (code) => {
+    const next = new Set(chosen);
+    if (next.has(code)) next.delete(code); else next.add(code);
+    onChange({ scopes: [...next] });
+  };
+  const value = chosen.size === 0 ? "Any" : chosen.size === 1 ? scopeName([...chosen][0]) : `${chosen.size} chosen`;
+  const evaluable = facets.scopes.some((s) => s.evaluable);
+  return (
+    <Picker label="Covering" value={value} testId="explore-scope">
+      <div className="cp-ex__panelrow">
+        <span className="cp-ex__fine">{facets.scoped} of {facets.total} preview records cover a population collectively, not a named entity</span>
+        {chosen.size ? <button type="button" className="cp-ex__clear" onClick={() => onChange({ scopes: [] })}>Any</button> : null}
+      </div>
+      <ul className="cp-ex__list">
+        {facets.scopes.map((s) => (
+          <li key={s.code}>
+            <label>
+              <input type="checkbox" checked={chosen.has(s.code)} onChange={() => toggle(s.code)} />
+              <span className="cp-ex__lname">{s.name} <small>collectively</small></span>
+              <span className="cp-ex__ltype">{s.evaluable ? "membership by register class" : "membership not evaluable"}</span>
+              <span className="cp-ex__lcount">{s.count}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+      <div className="cp-ex__panelrow">
+        <label className="cp-ex__fine">
+          <input
+            type="checkbox"
+            checked={Boolean(cut.broad)}
+            disabled={!evaluable || !cut.entities?.length}
+            onChange={(e) => onChange({ broad: e.target.checked })}
+          />{" "}
+          With an entity chosen, also include records covering a broader group it belongs to
+          {!cut.entities?.length ? " (choose an entity first)" : !evaluable ? " (no scope here has evaluable membership)" : ""}
+        </label>
+      </div>
     </Picker>
   );
 }
@@ -549,12 +603,28 @@ function Record({ item, columns }) {
   );
 }
 
+/** A scope element in words: the population and the relationship. */
+function scopeLine(el) {
+  const rel = { addressed: "addressed to", applies_to: "applies to", eligible_class: "eligible class:", aggregate_population: "describes collectively", general_subject: "concerns" }[el.relationship] ?? el.relationship;
+  return `${rel} ${scopeName(el.scope)}`;
+}
+
 function EntityCell({ item }) {
   const { entities } = item.entity;
   const first = entities[0];
-  if (!first) return <em className="cp-ex__unkeyed">not linked to an entity</em>;
+  const why = item.why ?? [];
+  if (!first) {
+    return (
+      <>
+        <em className="cp-ex__unkeyed">{item.scopes?.length ? "no individual entity named" : "not linked to an entity"}</em>
+        {item.scopes?.length ? <small className="cp-ex__uid">{item.scopes.map(scopeLine).join("; ")}</small> : null}
+        {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
+      </>
+    );
+  }
   return (
     <>
+      {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
       {first.name ?? <em>{first.withheld ? WITHHELD_TEXT : first.uid}</em>}
       {entities.length > 1 ? <small className="cp-ex__uid"> +{entities.length - 1} more</small> : null}
       {first.uid ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
@@ -747,9 +817,11 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
   const { rows, missing, columns, loading } = useSampleRows(tables, register);
   const facets = useMemo(() => facetsOf(rows, register), [rows, register]);
-  const filtered = useMemo(() => sortRows(filterRows(rows, cut), cut.sort), [rows, cut]);
-  const excluded = useMemo(() => excludedBy(rows, cut), [rows, cut]);
+  const filtered = useMemo(() => sortRows(filterRows(rows, cut, register), cut.sort), [rows, cut, register]);
+  const excluded = useMemo(() => excludedBy(rows, cut, register), [rows, cut, register]);
   const paged = pageOf(filtered, cut.page);
+  // Every row included through a broader group says so, on the row.
+  paged.rows = paged.rows.map((item) => (cut.broad ? { ...item, why: broadHits(item, cut, register) } : item));
 
   // Written to the URL at once. The visible controls and the applied query
   // are one thing; nothing waits in a timer to overwrite a newer change.
@@ -904,6 +976,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   const filters = (
     <>
       <EntityPicker cut={cut} facets={facets} register={register} onChange={(entities) => narrowTo({ entities })} />
+      {facets.scopes.length ? <ScopePicker cut={cut} facets={facets} onChange={(next) => narrowTo(next)} /> : null}
       <TypePicker cut={cut} facets={facets} register={register} onChange={(types) => narrowTo({ types })} />
       <YearRange cut={cut} bounds={facets.years} basis={yearBasis} onChange={(years) => narrowTo({ years })} />
     </>

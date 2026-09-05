@@ -43,6 +43,7 @@
 
 import explore from "../../../data/cedar/explore.json" with { type: "json" };
 import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
+import scopesJson from "../../../data/cedar/scopes.json" with { type: "json" };
 
 import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
@@ -308,6 +309,65 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
   return primary;
 }
 
+// ── Collective scope ───────────────────────────────────────────────────────
+//
+// The population a record relates to, kept apart from the entities it names
+// (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). A scope is never an entity:
+// it has no uid, it never fills the entity block, and a filter on an entity
+// never finds a scope row unless the reader asks for the broader group.
+
+export const SCOPES = scopesJson;
+
+/** A scope code's definition, parameter stripped, or null when unknown. */
+export function scopeDefinition(code) {
+  const [base] = String(code ?? "").split(":");
+  return SCOPES.scopes[base] ?? null;
+}
+
+/** A scope code in words: the definition's name, with its parameter. */
+export function scopeName(code) {
+  const [base, param] = String(code ?? "").split(":");
+  const defn = SCOPES.scopes[base];
+  if (!defn) return code;
+  return param ? `${defn.name}: ${param}` : defn.name;
+}
+
+/**
+ * The record's collective scopes as the file carries them: an array of
+ * elements ({scope, relationship, as_of, as_of_rule, basis}), `[]` when the
+ * record was evaluated and names none, `null` when it was not evaluated
+ * (the column absent, or the cell null). Elements the vocabulary does not
+ * know are kept as read; the writer refuses them upstream, and the viewer
+ * only shows them.
+ */
+export function rowScopes(row, contract) {
+  if (!contract?.scopes) return null;
+  const raw = cell(row, contract.scopes);
+  if (!raw || raw === "null") return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((el) => el && typeof el === "object" && el.scope) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a scope's population includes an entity: true, false, or null
+ * when membership cannot be evaluated (the definition says so, or the
+ * entity is unknown to the register). Only a register-class definition is
+ * evaluable here, per entity, from the entity's class; no count is made.
+ */
+export function scopeCovers(code, entity, register = EMPTY_REGISTER) {
+  const defn = scopeDefinition(code);
+  const membership = defn?.membership;
+  if (!membership || membership.kind !== "register_class") return null;
+  const known = entity?.uid ? register.byUid.get(entity.uid) : null;
+  const type = known?.type ?? entity?.type ?? null;
+  if (!type) return null;
+  return membership.classes.includes(type);
+}
+
 /** The first entity, for one-line displays; the full list is `entities`. */
 export function rowEntity(row, contract, register = EMPTY_REGISTER) {
   const entities = rowEntities(row, contract, register);
@@ -470,6 +530,7 @@ export function universalRows(key, rows, register = EMPTY_REGISTER) {
       key,
       collection,
       entity,
+      scopes: rowScopes(row, contract),
       subject: subject && subject.toLowerCase() !== (entity.name ?? "").toLowerCase() ? subject : null,
       year: rowYear(row, contract),
       date: rowDate(row, contract),
@@ -488,6 +549,12 @@ export function universalRows(key, rows, register = EMPTY_REGISTER) {
 
 export const EMPTY_CUT = Object.freeze({
   entities: Object.freeze([]),
+  // Collective scopes to select records covering (codes from scopes.json),
+  // and whether an entity filter also includes records covering a broader
+  // group the entity belongs to. Off by default: a nation's own records
+  // stay distinct from the records addressed to everyone.
+  scopes: Object.freeze([]),
+  broad: false,
   types: null,
   years: null,
   collections: null,
@@ -512,6 +579,8 @@ function list(value) {
 export function encodeCut(cut) {
   const params = new URLSearchParams();
   if (cut.entities?.length) params.set("e", cut.entities.join(SEP));
+  if (cut.scopes?.length) params.set("sc", cut.scopes.join(SEP));
+  if (cut.broad) params.set("b", "1");
   if (cut.types !== null && cut.types !== undefined) params.set("t", cut.types.join(SEP));
   if (cut.years) params.set("y", `${cut.years[0]}-${cut.years[1]}`);
   if (cut.collections !== null && cut.collections !== undefined) params.set("c", cut.collections.join(SEP));
@@ -537,6 +606,10 @@ export function decodeCut(search) {
   const entities = list(params.get("e"));
   cut.entities = entities.filter((uid) => UID.test(uid));
   for (const uid of entities) if (!UID.test(uid)) dropped.push(`entity ${uid}`);
+  const scopeCodes = list(params.get("sc"));
+  cut.scopes = scopeCodes.filter((code) => scopeDefinition(code));
+  for (const code of scopeCodes) if (!scopeDefinition(code)) dropped.push(`scope ${code}`);
+  cut.broad = params.get("b") === "1";
   cut.types = params.has("t") ? list(params.get("t")) : null;
   const years = /^(\d{4})-(\d{4})$/.exec(params.get("y") ?? "");
   cut.years = years ? [Number(years[1]), Number(years[2])].sort((a, b) => a - b) : null;
@@ -562,7 +635,7 @@ export function decodeCut(search) {
 
 /** Whether the cut narrows anything beyond which tables it reads. */
 export function isNarrowed(cut) {
-  return Boolean(cut.entities?.length || cut.types !== null || cut.years || cut.q);
+  return Boolean(cut.entities?.length || cut.scopes?.length || cut.types !== null || cut.years || cut.q);
 }
 
 /**
@@ -596,14 +669,54 @@ function entityPasses(item, entities, types) {
   });
 }
 
-/** The rows a cut selects. Pure, so the download and the table agree. */
-export function filterRows(rows, cut) {
+/** The scope elements of a record whose code the cut selected. */
+function scopeHits(item, wanted) {
+  if (!wanted.size || !item.scopes?.length) return [];
+  return item.scopes.filter((el) => wanted.has(el.scope) || wanted.has(String(el.scope).split(":")[0]));
+}
+
+/**
+ * Why a record is in a cut that names an entity when the record does not
+ * name that entity: the scope elements whose population includes one of
+ * the chosen entities, evaluated per entity from the register. Empty when
+ * the record names the entity itself, when the cut asks for no broader
+ * group, or when membership cannot be evaluated (unknown is never a match).
+ */
+export function broadHits(item, cut, register = EMPTY_REGISTER) {
+  if (!cut.broad || !cut.entities?.length || !item.scopes?.length) return [];
+  const named = new Set(item.entity.entities.filter((e) => e.uid).map((e) => e.uid));
+  if (cut.entities.some((uid) => named.has(uid))) return [];
+  return item.scopes.filter((el) =>
+    cut.entities.some((uid) => scopeCovers(el.scope, register.byUid.get(uid) ?? { uid }, register) === true));
+}
+
+/**
+ * The rows a cut selects. Pure, so the download and the table agree.
+ *
+ * The identity dimension has three doors and a record passes through any
+ * one of them, once: it names a chosen entity (with its type, where types
+ * are chosen); it carries a chosen scope; or, only when the reader asked
+ * for the broader group, a scope whose population includes a chosen
+ * entity. Each row is tested once, so a record matching through a name
+ * and a scope appears once, at its own grain.
+ */
+export function filterRows(rows, cut, register = EMPTY_REGISTER) {
   const entities = new Set(cut.entities ?? []);
+  const wantedScopes = new Set(cut.scopes ?? []);
   const types = cut.types ?? null;
   const needle = (cut.q ?? "").trim().toLowerCase();
   return rows.filter((item) => {
     if (!cut.history && item.superseded) return false;
-    if (!entityPasses(item, entities, types)) return false;
+    const byName = entityPasses(item, entities, types);
+    const byScope = wantedScopes.size ? scopeHits(item, wantedScopes).length > 0 : false;
+    const byBroad = broadHits(item, cut, register).length > 0;
+    if (wantedScopes.size && !entities.size) {
+      // Scopes alone select the records covering them; the type filter
+      // still applies to whatever entities those records name.
+      if (!byScope || !entityPasses(item, new Set(), types)) return false;
+    } else if (!(byName || byScope || byBroad)) {
+      return false;
+    }
     if (cut.years) {
       // A row with no year cannot be inside a year range, and saying it is
       // would let a register row pass a filter it never answered.
@@ -618,9 +731,9 @@ export function filterRows(rows, cut) {
  * rows that satisfy the REST of the cut, so an undated record of another
  * entity is not reported as excluded by the year range (Codex, PR #63).
  */
-export function excludedBy(rows, cut) {
-  const undated = cut.years ? filterRows(rows, { ...cut, years: null }).filter((r) => r.year == null).length : 0;
-  const superseded = cut.history ? 0 : filterRows(rows, { ...cut, history: true }).filter((r) => r.superseded).length;
+export function excludedBy(rows, cut, register = EMPTY_REGISTER) {
+  const undated = cut.years ? filterRows(rows, { ...cut, years: null }, register).filter((r) => r.year == null).length : 0;
+  const superseded = cut.history ? 0 : filterRows(rows, { ...cut, history: true }, register).filter((r) => r.superseded).length;
   return { undated, superseded };
 }
 
@@ -693,9 +806,19 @@ export function facets(rows, register = EMPTY_REGISTER) {
   let dated = 0;
   let keyed = 0;
   let unlinked = 0;
+  const scopes = new Map();
+  let scoped = 0;
   for (const item of rows) {
     const linked = item.entity.entities.filter((e) => e.uid);
     if (linked.length) keyed += 1; else unlinked += 1;
+    if (item.scopes?.length) {
+      scoped += 1;
+      for (const code of new Set(item.scopes.map((el) => el.scope))) {
+        const seen = scopes.get(code) ?? { code, name: scopeName(code), evaluable: scopeDefinition(code)?.membership?.kind === "register_class", count: 0 };
+        seen.count += 1;
+        scopes.set(code, seen);
+      }
+    }
     const seenTypes = new Set();
     for (const e of linked) {
       const known = register.byUid.get(e.uid);
@@ -722,6 +845,8 @@ export function facets(rows, register = EMPTY_REGISTER) {
     entities: [...entities.values()].sort(byName),
     types: [...types.entries()].map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count || compare(a.type, b.type)),
     years: min == null ? null : { min, max },
+    scopes: [...scopes.values()].sort((a, b) => b.count - a.count || compare(a.name, b.name)),
+    scoped,
     dated,
     keyed,
     unlinked,
@@ -758,6 +883,8 @@ export function describeCut(cut, { register = EMPTY_REGISTER, shown = null, tota
   const parts = [];
   const who = names(cut, register);
   if (who.length) parts.push(who.length <= 3 ? who.join(", ") : `${who.length} entities`);
+  if (cut.broad && who.length) parts.push("including records covering a broader group they belong to");
+  if (cut.scopes?.length) parts.push(`covering ${cut.scopes.map(scopeName).join(", ")} collectively`);
   if (cut.types !== null && cut.types !== undefined) {
     const shown = cut.types.map((t) => (t === UNLINKED ? "not linked to an entity" : t));
     parts.push(shown.length === 0 ? "no entity type" : shown.length <= 2 ? shown.join(", ") : `${shown.length} entity types`);
@@ -786,9 +913,13 @@ export function questionFor(cut, register = EMPTY_REGISTER) {
 // `entity_roles` are pipe-separated and aligned position for position, so a
 // NAGPRA notice naming nine parties exports nine uids beside nine names and
 // nine roles, never one name standing beside nine ids (Codex, PR #66).
+// `collective_scopes` is the population the record relates to, as the file
+// carries it (a JSON array of scope elements, empty when none, blank when
+// not evaluated): never folded into the entity columns, so a population
+// label is not mistaken for a named entity.
 const UNIVERSAL_HEADER = [
   "collection", "table", "record_id", "entity_uids", "entity_name", "entity_type",
-  "entity_names", "entity_types", "entity_roles", "record_subject",
+  "entity_names", "entity_types", "entity_roles", "collective_scopes", "record_subject",
   "date", "year", "observation", "amount", "amount_basis", "superseded", "source",
 ];
 
@@ -832,7 +963,8 @@ export function cutCsv(rows, { view, columns = [] }) {
         return [
           item.collection, item.key.split("/")[1], item.recordId, vectors.uids,
           item.entity.withheld ? WITHHELD_TEXT : item.entity.name, item.entity.type,
-          vectors.names, vectors.types, vectors.roles, item.subject,
+          vectors.names, vectors.types, vectors.roles,
+          item.scopes == null ? "" : JSON.stringify(item.scopes), item.subject,
           item.date, item.year, item.observation, item.amount, item.amountBasis,
           item.superseded ? "1" : "0", item.source,
         ];

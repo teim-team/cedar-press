@@ -606,7 +606,7 @@
    "plural": false,
    "entity_role": "constant:participant",
    "columns_today": 39,
-   "columns_target": 31,
+   "columns_target": 33,
    "default_viewer": [
     "canonical_name",
     "notice_date",
@@ -873,6 +873,18 @@
      "why": "The register's class, by uid."
     },
     {
+     "column": "entity_link_status",
+     "from": "pending:terminal reads the source: no_individual_named, resolved, unresolved or withheld",
+     "why": "Why the Cedar block is filled or blank on this row: a notice addressed to a population names no individual entity, which is not a failed match (owner's decision of 2026-09-05, docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md).",
+     "status": "pending"
+    },
+    {
+     "column": "collective_scopes",
+     "from": "pending:terminal reads the source's addressee, applicability or eligibility clause into elements of data/cedar/scopes.json",
+     "why": "JSON array of collective scopes: the population the notice addresses or applies to, with the relationship, the as-of date and rule, and the source words; null until evaluated, [] when the notice names none.",
+     "status": "pending"
+    },
+    {
      "column": "cedar_entity_role",
      "from": "constant:participant",
      "why": "participant."
@@ -899,6 +911,8 @@
     "canonical_name",
     "entity_class",
     "cedar_entity_role",
+    "entity_link_status",
+    "collective_scopes",
     "consultation_event_id",
     "fr_document_number",
     "agency",
@@ -945,7 +959,7 @@
    "entity_role": "constant:named in the bill",
    "primary_role": "named in the bill",
    "columns_today": 37,
-   "columns_target": 29,
+   "columns_target": 30,
    "default_viewer": [
     "canonical_names",
     "bill_id",
@@ -1223,6 +1237,11 @@
      "why": "Aligned link tiers."
     },
     {
+     "column": "collective_scopes",
+     "from": "rule:collective_scopes:bill_scope|entity_class_scope",
+     "why": "JSON array of collective scopes (data/cedar/scopes.json): a bill classified `general` for a class carries that class's population with the relationship general_subject, since the classification is topical and does not establish applicability; a tribe-specific bill carries []. Owner's decision of 2026-09-05."
+    },
+    {
      "column": "source_system",
      "from": "constant:congress.gov",
      "why": "Congress.gov."
@@ -1253,6 +1272,7 @@
     "policy_area",
     "bill_scope",
     "affected_entity_classes",
+    "collective_scopes",
     "affected_entities_as_published",
     "introduced_date",
     "sponsor_name",

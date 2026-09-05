@@ -53,6 +53,8 @@
         "owner_class",
         "owner_entity_class_as_recorded"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 44
     },
@@ -76,6 +78,8 @@
       "search": [
         "legal_business_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 6
     },
@@ -103,6 +107,8 @@
         "parent_name",
         "edge_type"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -129,6 +135,8 @@
         "sector",
         "naics_description"
       ],
+      "scopes": null,
+      "link_status": null,
       "_why": "One row per contract transaction. reviewed 2026-09-05 from the sample header and its ten rows: total_award_value is cumulative and restated on every modification row (docs/MONEY_TOTALLING_RULES.md: NEVER SUM); obligations are the row's own money.",
       "reviewed": true,
       "entity_role": "the awardee's Native owner, resolved",
@@ -180,6 +188,8 @@
         "contract_number",
         "parent_contract_number"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 38
     },
@@ -208,6 +218,8 @@
         "first_award_fy",
         "last_action_fy"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 30
     },
@@ -236,6 +248,8 @@
         "attribution_names",
         "owner_attribution_statuses"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 16
     },
@@ -264,6 +278,8 @@
         "first_award_fy",
         "last_action_fy"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 24
     },
@@ -291,6 +307,8 @@
         "modification_number",
         "transaction_number"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 89
     },
@@ -318,6 +336,8 @@
         "modification_number",
         "transaction_number"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 79
     },
@@ -345,6 +365,8 @@
         "variant_class",
         "grain_note"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -375,6 +397,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -405,6 +429,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 28
     },
@@ -435,6 +461,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -465,6 +493,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -495,6 +525,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -525,6 +557,8 @@
         "Deal_Category",
         "sector"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": true,
       "entity_role": "the Native party to the deal",
       "amount_label": "announced value",
@@ -567,6 +601,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -597,6 +633,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -625,6 +663,8 @@
         "parent_native_entity",
         "match_method"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -653,6 +693,8 @@
         "parent_native_entity",
         "ruling_authority"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 18
     },
@@ -681,6 +723,8 @@
         "instrumentality_kind",
         "parent_native_entity"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -709,6 +753,8 @@
         "match_method",
         "source_files"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 6
     },
@@ -739,6 +785,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -769,6 +817,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -797,6 +847,8 @@
         "source_1_kind",
         "source_2_label"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 10
     },
@@ -822,6 +874,8 @@
         "axis",
         "value"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 4
     },
@@ -852,6 +906,8 @@
         "Deal_Category",
         "Status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 29
     },
@@ -880,6 +936,8 @@
         "acquirer_entity",
         "target_entity"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 30
     },
@@ -908,6 +966,8 @@
         "conduit_issuer_as_published",
         "disclosure_class"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 35
     },
@@ -936,6 +996,8 @@
         "entity_match_method",
         "instrument_title"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 33
     },
@@ -963,6 +1025,8 @@
         "parent_department",
         "publishes_named_participants"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 25
     },
@@ -993,6 +1057,8 @@
         "agency",
         "consultation_type"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": true,
       "entity_role": "participant named in the notice",
       "default_columns": [
@@ -1032,6 +1098,8 @@
         "source_name",
         "question"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 12
     },
@@ -1057,6 +1125,8 @@
         "agency",
         "status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 8
     },
@@ -1082,6 +1152,8 @@
         "subject_as_published",
         "agency"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 26
     },
@@ -1109,6 +1181,8 @@
         "source_host",
         "series"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -1134,6 +1208,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 32
     },
@@ -1162,6 +1238,8 @@
         "matched_in",
         "entity_match_method"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -1187,6 +1265,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 25
     },
@@ -1210,6 +1290,8 @@
       "search": [
         "share_with_abstract"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 4
     },
@@ -1235,6 +1317,8 @@
         "normalized_department",
         "share_of_notices"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 3
     },
@@ -1260,6 +1344,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -1285,6 +1371,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 5
     },
@@ -1304,6 +1392,8 @@
       "year_basis": "publication year",
       "observation": [],
       "search": [],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 3
     },
@@ -1329,6 +1419,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -1354,6 +1446,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 26
     },
@@ -1379,6 +1473,8 @@
         "agency_names",
         "relationship"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 28
     },
@@ -1406,6 +1502,8 @@
         "party_as_printed",
         "resolved_native_entity_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 12
     },
@@ -1433,6 +1531,8 @@
         "kind",
         "previously_listed_as"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 7
     },
@@ -1460,6 +1560,8 @@
         "sampled",
         "hand_coded_tribal_subject"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 5
     },
@@ -1479,6 +1581,8 @@
       "year_basis": "publication year",
       "observation": [],
       "search": [],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 3
     },
@@ -1504,6 +1608,8 @@
         "theme",
         "share_of_classifiable"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 5
     },
@@ -1531,6 +1637,8 @@
         "event_class",
         "channel"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 22
     },
@@ -1558,6 +1666,8 @@
         "agency",
         "city"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 26
     },
@@ -1585,6 +1695,8 @@
         "document_record_type",
         "event_class"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 20
     },
@@ -1612,6 +1724,8 @@
         "source",
         "what_was_swept"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 7
     },
@@ -1638,6 +1752,8 @@
         "agency",
         "consultation_type"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 41
     },
@@ -1665,6 +1781,8 @@
         "event_class",
         "channel"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 24
     },
@@ -1692,6 +1810,8 @@
         "host",
         "coverage_state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 9
     },
@@ -1720,6 +1840,8 @@
         "recipient_type",
         "spine_state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 12
     },
@@ -1746,6 +1868,8 @@
         "cfda_title",
         "agency"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 30
     },
@@ -1773,6 +1897,8 @@
         "pct_with_duns",
         "pct_with_duns_tribal_rows_only"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -1799,6 +1925,8 @@
         "cfda_title",
         "agency"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 25
     },
@@ -1825,6 +1953,8 @@
         "cfda_title",
         "agency"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 40
     },
@@ -1853,6 +1983,8 @@
         "identifier",
         "ruling"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 7
     },
@@ -1879,6 +2011,8 @@
         "cfda_title",
         "awarding_agency_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": true,
       "entity_role": "recipient, resolved to the Native entity behind it",
       "amount_label": "federal obligation on this transaction",
@@ -1924,6 +2058,8 @@
         "obl_type_03_formula_grant",
         "obl_type_04_project_grant"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 14
     },
@@ -1951,6 +2087,8 @@
         "A_raw_rows",
         "A_clean_lower48_attributed"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 10
     },
@@ -1979,6 +2117,8 @@
         "recipient_ein",
         "recipient_state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 15
     },
@@ -1998,6 +2138,8 @@
       "year_basis": null,
       "observation": [],
       "search": [],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 1
     },
@@ -2025,6 +2167,8 @@
         "factor_to_base",
         "source"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 6
     },
@@ -2052,6 +2196,8 @@
         "source_dataset",
         "duplicate_status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 22
     },
@@ -2079,6 +2225,8 @@
         "to_entity",
         "award_kinds"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 10
     },
@@ -2106,6 +2254,8 @@
         "chosen_category_of_service",
         "download_speed"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 75
     },
@@ -2133,6 +2283,8 @@
         "ros_entity_name",
         "tribal_type"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 26
     },
@@ -2160,6 +2312,8 @@
         "filing_hcp_city",
         "filing_hcp_county"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 20
     },
@@ -2185,6 +2339,8 @@
         "program",
         "status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 63
     },
@@ -2212,6 +2368,8 @@
         "congress",
         "rollnumber"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 71
     },
@@ -2238,6 +2396,8 @@
         "entity_match_method",
         "chamber"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 10
     },
@@ -2265,6 +2425,8 @@
         "congress",
         "session"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 26
     },
@@ -2292,6 +2454,8 @@
         "bureau_recipient",
         "congressional_office"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 24
     },
@@ -2319,6 +2483,8 @@
         "bureau_or_office",
         "system_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 18
     },
@@ -2346,6 +2512,8 @@
         "party",
         "state_abbrev"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 17
     },
@@ -2373,6 +2541,8 @@
         "congress",
         "chamber"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 25
     },
@@ -2401,6 +2571,8 @@
         "congress",
         "chamber"
       ],
+      "scopes": null,
+      "link_status": null,
       "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number. entity_class_scope is a class-level scope, not the entities' class; the register answers the class from each uid.",
       "reviewed": true,
       "entity_role": "named in the bill",
@@ -2443,6 +2615,8 @@
         "matched_in",
         "entity_match_method"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 12
     },
@@ -2470,6 +2644,8 @@
         "congress",
         "bill_type"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -2497,6 +2673,8 @@
         "congress",
         "chamber"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 21
     },
@@ -2524,6 +2702,8 @@
         "source_or_forum",
         "coverage_state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 8
     },
@@ -2551,6 +2731,8 @@
         "case_name",
         "court"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 38
     },
@@ -2578,6 +2760,8 @@
         "board_name",
         "citation"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 50
     },
@@ -2605,6 +2789,8 @@
         "citation",
         "party_role"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 32
     },
@@ -2632,6 +2818,8 @@
         "matter_type",
         "native_entity_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 24
     },
@@ -2659,6 +2847,8 @@
         "funder_type",
         "recipient_ein"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 28
     },
@@ -2686,6 +2876,8 @@
         "funder_type",
         "recipient_ein"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 28
     },
@@ -2713,6 +2905,8 @@
         "fr_documents",
         "fr_share_of_agency_mentions"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -2740,6 +2934,8 @@
         "fr_documents",
         "lobbying_filings_targeting"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 4
     },
@@ -2768,6 +2964,8 @@
         "chamber",
         "requesting_member"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 23
     },
@@ -2795,6 +2993,8 @@
         "docket_number",
         "subdocket"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 38
     },
@@ -2822,6 +3022,8 @@
         "subdocket",
         "docket_program"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 17
     },
@@ -2849,6 +3051,8 @@
         "subdocket",
         "accession_number"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 33
     },
@@ -2876,6 +3080,8 @@
         "fr_document_number",
         "fr_citation"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 43
     },
@@ -2903,6 +3109,8 @@
         "source",
         "what_was_swept"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 7
     },
@@ -2930,6 +3138,8 @@
         "docket_prefix",
         "docket_program"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 28
     },
@@ -2960,6 +3170,8 @@
         "witness_title",
         "committee"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 25
     },
@@ -2987,6 +3199,8 @@
         "committee",
         "relationship"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 16
     },
@@ -3015,6 +3229,8 @@
         "ruling",
         "evidence"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -3040,6 +3256,8 @@
         "mean_issue_families_per_filing",
         "mean_segments_per_filing"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 4
     },
@@ -3068,6 +3286,8 @@
         "issue_families",
         "text_status"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 18
     },
@@ -3095,6 +3315,8 @@
         "share_of_classified_filings",
         "share_of_family_mentions"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 9
     },
@@ -3123,6 +3345,8 @@
         "registrant_state",
         "client_state_on_filing"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 38
     },
@@ -3150,6 +3374,8 @@
         "total_filings",
         "hhi_filings"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 28
     },
@@ -3177,6 +3403,8 @@
         "registrant_state",
         "identifier_type"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 46
     },
@@ -3205,6 +3433,8 @@
         "evidence_route",
         "claim"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 24
     },
@@ -3232,6 +3462,8 @@
         "registrant_name_variants",
         "registrant_city"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 51
     },
@@ -3257,6 +3489,8 @@
         "government_entity_as_filed",
         "normalized_department"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 3
     },
@@ -3285,6 +3519,8 @@
         "top_issue_codes",
         "native_token_hit"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -3315,6 +3551,8 @@
         "government_entities",
         "specific_issues_text"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": true,
       "entity_role": "the registrant's client, resolved to the register",
       "amount_label": "spend, as reported by the registrant",
@@ -3355,6 +3593,8 @@
         "downloaded",
         "parsed_here"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 13
     },
@@ -3383,6 +3623,8 @@
         "return_type",
         "tax_period"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 54
     },
@@ -3410,6 +3652,8 @@
         "participant_type",
         "participant_name_withheld_reason"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 32
     },
@@ -3437,6 +3681,8 @@
         "time_start",
         "time_end"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 34
     },
@@ -3464,6 +3710,8 @@
         "rin",
         "federal_action_document_number"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 10
     },
@@ -3491,6 +3739,8 @@
         "rin",
         "participant_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 20
     },
@@ -3518,6 +3768,8 @@
         "channel",
         "rin"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 22
     },
@@ -3546,6 +3798,8 @@
         "top_lobbying_issue_codes",
         "top_government_entities"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 14
     },
@@ -3571,6 +3825,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 10
     },
@@ -3594,6 +3850,8 @@
       "search": [
         "share_with_abstract"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 4
     },
@@ -3622,6 +3880,8 @@
         "notice_type",
         "party_name_as_published"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 14
     },
@@ -3649,6 +3909,8 @@
         "institution_city",
         "institution_state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 16
     },
@@ -3674,6 +3936,8 @@
         "title",
         "agency_names"
       ],
+      "scopes": null,
+      "link_status": null,
       "entity_uid_list": true,
       "reviewed": true,
       "entity_role": "culturally affiliated, as the notice determines",
@@ -3740,6 +4004,8 @@
         "corporation_name",
         "anc_class"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 19
     },
@@ -3767,6 +4033,8 @@
         "document_type",
         "period_covered"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 19
     },
@@ -3794,6 +4062,8 @@
         "effective_start",
         "effective_end"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 17
     },
@@ -3821,6 +4091,8 @@
         "publisher",
         "attribute"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 8
     },
@@ -3846,6 +4118,8 @@
         "status",
         "state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 46
     },
@@ -3873,6 +4147,8 @@
         "objectid",
         "regional_office"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 19
     },
@@ -3901,6 +4177,8 @@
         "object_type",
         "entity_is_native"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 16
     },
@@ -3928,6 +4206,8 @@
         "beneficiary_note",
         "payer_entity_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": true,
       "entity_role": "recipient of the payment",
       "amount_label": "amount, as the source states it",
@@ -3974,6 +4254,8 @@
         "cusip",
         "instrument_type"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 19
     },
@@ -4002,6 +4284,8 @@
         "tax_type",
         "period_start"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 22
     },
@@ -4030,6 +4314,8 @@
         "child_name_as_recorded",
         "parent_name_as_recorded"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 23
     },
@@ -4060,6 +4346,8 @@
         "status",
         "city"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": true,
       "entity_role": "owner hub of the enterprise",
       "default_columns": [
@@ -4101,6 +4389,8 @@
         "dual_role_class",
         "role_as_register_entity"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 23
     },
@@ -4129,6 +4419,8 @@
         "auditee_ein",
         "auditee_city"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 36
     },
@@ -4156,6 +4448,8 @@
         "funder_ein",
         "expected_form"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 14
     },
@@ -4184,6 +4478,8 @@
         "funder_ein",
         "funder_name_as_filed"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 59
     },
@@ -4211,6 +4507,8 @@
         "funder_name_canonical",
         "funder_is_donor_advised_fund"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 19
     },
@@ -4239,6 +4537,8 @@
         "entity_state",
         "link_method"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 17
     },
@@ -4266,6 +4566,8 @@
         "match_evidence",
         "total_fed_assist_M"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 15
     },
@@ -4294,6 +4596,8 @@
         "form_type",
         "total_revenue"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 77
     },
@@ -4321,6 +4625,8 @@
         "schedc_filed",
         "schedc_501h_election"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 19
     },
@@ -4348,6 +4654,8 @@
         "in_recheck_candidate",
         "in_placename_risk"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 30
     },
@@ -4374,6 +4682,8 @@
         "city",
         "state"
       ],
+      "scopes": null,
+      "link_status": null,
       "_why": "A register of organizations, not events: no row date. reviewed 2026-09-05 from the sample header and its ten rows: source_url is the IRS BMF, the dataset's source, not a per-organization page. cedar_spine_entity_class is the register's class of the linked entity; cedar_native_entity_class is the organization's own kind.",
       "reviewed": true,
       "entity_role": "the tribe or Native entity the organization is linked to",
@@ -4415,6 +4725,8 @@
         "filer_name_as_filed",
         "filer_state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 39
     },
@@ -4443,6 +4755,8 @@
         "filer_name_as_filed",
         "filer_state"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 65
     },
@@ -4470,6 +4784,8 @@
         "dimension_1",
         "dimension_2"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -4495,6 +4811,8 @@
         "naics_modal",
         "prime_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 11
     },
@@ -4522,6 +4840,8 @@
         "usd_as_subawardee_b",
         "usd_both_sides"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 9
     },
@@ -4549,6 +4869,8 @@
         "legal_business_name",
         "role"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 14
     },
@@ -4576,6 +4898,8 @@
         "legal_business_name",
         "role"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": false,
       "columns": 19
     },
@@ -4603,6 +4927,8 @@
         "sub_state",
         "prime_name"
       ],
+      "scopes": null,
+      "link_status": null,
       "reviewed": true,
       "entity_role": "the subawardee or prime's Native owner, resolved",
       "amount_label": "subaward amount",
