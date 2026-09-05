@@ -2827,7 +2827,7 @@
       "tables": [
         {
           "table": "individual_native_exclusion_pairs.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/individual_native_exclusion_pairs__10.csv",
+          "sample_path": null,
           "rows_in": 5,
           "rows_published": 5,
           "rows_withheld": 0,
@@ -2839,11 +2839,16 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
+          "sample_withheld_columns": [
+            "identifier",
+            "firm_name_norm"
+          ]
         },
         {
           "table": "individual_native_firm_contracts.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/individual_native_firm_contracts__10.csv",
+          "sample_path": null,
           "rows_in": 324,
           "rows_published": 324,
           "rows_withheld": 0,
@@ -2855,7 +2860,11 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
+          "sample_withheld_columns": [
+            "canonical_name"
+          ]
         },
         {
           "table": "individual_native_firm_contracts_published.csv",
@@ -2875,7 +2884,7 @@
         },
         {
           "table": "individual_native_firm_register.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/individual_native_firm_register__10.csv",
+          "sample_path": null,
           "rows_in": 45,
           "rows_published": 45,
           "rows_withheld": 0,
@@ -2887,11 +2896,15 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
+          "sample_withheld_columns": [
+            "canonical_name"
+          ]
         },
         {
           "table": "individual_native_ownership_verification.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/individual_native_ownership_verification__10.csv",
+          "sample_path": null,
           "rows_in": 335,
           "rows_published": 335,
           "rows_withheld": 0,
@@ -2903,11 +2916,15 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
+          "sample_withheld_columns": [
+            "awardee_name_modal"
+          ]
         },
         {
           "table": "individual_native_prior_rulings.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/individual_native_prior_rulings__10.csv",
+          "sample_path": null,
           "rows_in": 45,
           "rows_published": 45,
           "rows_withheld": 0,
@@ -2919,11 +2936,15 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
+          "sample_withheld_columns": [
+            "entity_name"
+          ]
         },
         {
           "table": "individual_native_verification_candidates.csv",
-          "sample_path": "/data/cedar/samples/native-owned-businesses/individual_native_verification_candidates__10.csv",
+          "sample_path": null,
           "rows_in": 335,
           "rows_published": 335,
           "rows_withheld": 0,
@@ -2935,7 +2956,12 @@
             "split": "",
             "files": 0,
             "largest_file_mb": 0.0
-          }
+          },
+          "sample_withheld_why": "The sample carries the name of an individually Native-owned firm without recorded consent; may_publish_individual_native_field withholds it, so the file is not published. The table is still in the release.",
+          "sample_withheld_columns": [
+            "awardee_name_modal",
+            "awardee_name_variants"
+          ]
         },
         {
           "table": "native_owned_businesses.csv",

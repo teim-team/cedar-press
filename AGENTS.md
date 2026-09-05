@@ -9084,30 +9084,39 @@ importer, then `node scripts/measure-samples.mjs` and a commit. Until then the
 owned collection's flagship sample and eighteen table samples are absent from
 the site, and the site says so.
 
-## 2026-09-05 — Explore the data: one cut, four uses, no page knows a column
+## 2026-09-05 — Explore the collections: one cut, four uses, no page knows a column
 
 The Collections page now carries a table under the shelves, and the rule that
 made it possible is the one to keep: the card never names a column of any
 collection. `scripts/derive-explore.mjs` reads each sample's header and writes
 a CONTRACT per table (`data/cedar/explore.json`, force-added like the
-manifest): which column is the entity uid, the name, the type, the year, the
-date, the amount, the source, and which make the observation line. Where the
-rule picks wrong, `data/cedar/explore.overrides.json` says so for that one
-table with its reason (prime contracts: obligations, never the cumulative
-award value - MONEY_TOTALLING_RULES; bills: several uids in one cell; the
-nonprofit register: no row date). The tests fail on a shipped table with no
-contract and on a stale file, naming the command; the importer re-runs it.
+manifest); `data/cedar/explore.overrides.json` DECLARES the twelve flagships
+reviewed, with the record id, the entity relationship, the time basis, the
+money basis, the source and the default columns, each with its reason. A
+derived mapping is a proposal; only a declaration is a review. The tests fail
+on a shipped table with no contract and on a stale file, naming the command;
+the importer re-runs it.
 
-The filters, the URL, the saved cut, the download and the question to Cedar
+THE PUBLICATION RULE FOUND SIX SERVED FILES. Six ten-row samples under
+`native-owned-businesses/` carried `canonical_name` for firms whose own rows
+said `publish_name = 0`, `consent_status = NOT_ASKED`. The importer now
+strikes such a sample before it is copied (`withhold_samples`), `--audit`
+applies the rule to the committed manifest, and both suites scan every served
+sample for a withheld name. Run `--audit` again after adding the nineteen
+absent samples: `native_owned_businesses.csv` is the flagship of that
+collection and has not been checked, because it is not here.
+
+The filters, the URL, the saved view, the download and the question to Cedar
 are one object, the cut (`features/grove/explore.js`). Change what a cut is
 there and every use follows; add a control to the card that is not in the cut
-and the permalink lies. An amount is shown only where the table records one
-and is NEVER summed across collections. The entity register the pickers read
-(`public/data/cedar/register.json`) withholds the 45 individually
-Native-owned business names per `may_publish_individual_native_field`; keep it
-that way.
+and the permalink lies. "All" is `null` and "none" is `[]`, and they are
+different answers. An amount is shown with its basis and is NEVER summed
+across collections. A withheld register name is withheld everywhere, never a
+prompt to read the table's own name column. The export is rectangular; the
+citation and the cut are in the README beside it, never rows in the file.
 
 Phase one is the ten-row samples and says "sample" in every count. The full
 tables, Cedar answering from the cut, and extracts pinned to a release and
-shared by link all need the API deployed, and the cut is the interface they
-consume; do not build a second query shape for them.
+shared by link all need the API deployed with authorization on every request,
+and the cut is the interface they consume; do not build a second query shape
+for them.

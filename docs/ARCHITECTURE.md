@@ -282,40 +282,78 @@ change notes. `pressDownload.js` builds the file, and every download carries
 its own citation, because provenance that lives only in the interface is
 provenance a reader loses on save.
 
-## Explore the data
+## Explore the collections
 
 The card under the shelves (`pages/grove/PressExplore.jsx`) shows every
-collection's rows through the same three filters: which entity, which kind of
-entity, which years. It can do that because no page knows a collection's
+collection's records through the same three filters: which entity, which kind
+of entity, which years. It can do that because no page knows a collection's
 column names. `data/cedar/explore.json` is a CONTRACT per table, derived from
-the sample header by `scripts/derive-explore.mjs` and corrected in
-`data/cedar/explore.overrides.json`, that says which of the table's columns
-are the entity uid, the name, the type, the year, the date, the amount and the
-source, and which columns make the one-line observation. The importer re-runs
-the derivation after copying samples; `--check` fails a stale file and the
-suites run it. The entity register the pickers read is exported to
+the sample header by `scripts/derive-explore.mjs`, that says which of the
+table's columns are the record id, the entity uid, the name, the type, the
+record's own subject, the year and what year means there (`year_basis`), the
+date, the amount and its basis, the source, supersession, and which columns
+make the one-line observation. Derivation by header is a PROPOSAL: a table is
+`reviewed` only where `data/cedar/explore.overrides.json` declares it so, with
+its reason, its `entity_role`, its `default_columns` and, where the table
+carries no source column but its identifiers determine one, a
+`source_builder`. The twelve flagships are declared. The importer re-runs the
+derivation after copying samples; `--check` fails a stale file and the suites
+run it. The entity register the pickers read is exported to
 `public/data/cedar/register.json` by the same script, with the names the
 publication rule withholds written null.
 
+THE PUBLICATION RULE RUNS BEFORE A FILE IS PUBLIC. The importer
+(`withhold_samples`) strikes any sample that carries the name of an
+individually Native-owned firm without recorded consent
+(`may_publish_individual_native_field`): the table keeps its release facts and
+loses its `sample_path`, gaining `sample_withheld_why`. `--audit` applies the
+same rule to the committed manifest and deletes the files; on 2026-09-05 it
+struck six that were being served. Both suites scan every served sample for
+such a name. In the model a withheld register name is `withheld`, never a
+prompt to read the table's own name column, and the masked row is what the
+table, the record, the search and the export read.
+
 `features/grove/explore.js` is the model. Everything the card shows is a
 function of one object, the CUT: entities, entity types, a year range, the
-collections, one table or none, a search, a sort and a page. The cut is the
-URL (`?e=…&t=…&y=2015-2024&c=…&tb=…&q=…`), so a permalink reproduces it; a
-saved cut is a permalink with a name; the download is the cut's rows with a
-`cite_as` row per collection and the cut written last; the question to Cedar
-is the cut said in words. Two views of the same rows: several collections show
-seven universal columns (an amount only where a selected table records one,
-never totalled across collections); one table shows all of its own columns,
-entity pinned, the rest scrolling.
+collections, one table or none, a search, a sort, a page, and whether
+superseded versions are shown. `types` and `collections` are `null` for no
+restriction and `[]` for an explicit nothing, in the URL too (`t=`, `c=`).
+The cut is the URL (`?e=…&t=…&y=2015-2024&c=…&tb=…&q=…&h=1`), written at once
+so the controls and the applied query are one thing; a saved view is a
+permalink with a name and the collections spelled out; the download is a ZIP
+of `records.csv`, rectangular, one line per record, and a `README.txt` with
+the citation per collection and the cut; the question to Cedar names the
+collection. A link naming a collection this catalog lacks is not widened. A
+record naming several entities carries each as an entity, and an entity
+filter and a type filter are satisfied by the same one. A table with a year
+column answers the year filter from that column only; `year_basis` is shown
+over the control.
 
-Phase one, shipped: the card over the ten-row samples, static on Pages, the
-caption counting sample rows and saying so; saved cuts in the browser's own
-storage, marked "on this device". Not shipped, and needing the API deployed:
-the full tables behind the same cut (a rows-and-facets endpoint), Cedar
-answering from the cut rather than from the collection profile, and saved
-extracts pinned to a release, shareable by opaque link, private by default,
-with the rows following the viewer's own entitlement (`may_open`) and every
-open logged. The cut object is the interface those phases consume unchanged.
+THE TILES DRIVE THE VIEWER. A tile on the shelf selects its collection in
+the viewer and stays lit while the viewer shows it; the reader beside the
+grid describes the collection and carries its sample download on every
+pointer; hovering changes what is described, never what is selected. A
+collection is ONE DATASET to a reader: its flagship table with the declared
+default columns first and the rest one click away; supporting tables are not
+browsing options (a `tb=` link is still honoured). A record opens in three
+groups: what it says, its source and attribution, and its technical fields
+folded away, with links, dates, money and flags rendered for a person and
+the raw values kept for the download. On a phone the records are a list
+(who, where, when, what; tap for the record), the three pickers sit behind
+"Filters", and the year control is two boxes. Cedar's floating launcher
+steps aside while the viewer is on screen; the viewer's foot carries the
+Cedar action.
+
+Phase one, shipped: the viewer over the ten-row samples, static on Pages, the
+caption counting sample records and saying so, and what it is not showing
+(locked, no preview, unreachable, undated, superseded). Not shipped, and
+needing the API deployed: the full tables behind the same cut (a rows-and-
+facets endpoint with authorization on every request), Cedar answering from
+the cut rather than from the collection profile, and saved extracts pinned to
+a release, shareable by opaque link, private by default, with the rows
+following the viewer's own entitlement (`may_open`) and every open logged.
+`CUT_VERSION` names the cut's shape so the service can accept older links and
+say what changed.
 
 ## Interface conventions
 
