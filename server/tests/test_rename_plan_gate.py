@@ -232,7 +232,7 @@ class TestTheRenameGateFires(unittest.TestCase):
         # per-label comparison can see this, which is the point of adding it.
         with (
             injected(
-                self.root / _DOC, "`scripts/` 6", "`scripts/` 5", after=_TABLE_ANCHOR
+                self.root / _DOC, "`scripts/` 7", "`scripts/` 6", after=_TABLE_ANCHOR
             ),
             injected(self.root / _DOC, "`docs/` 6", "`docs/` 7", after=_TABLE_ANCHOR),
         ):

@@ -22,9 +22,6 @@
 // Without the service the page lists the priorities with no counts and says
 // the counting begins with the service; nothing here invents a number.
 
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 

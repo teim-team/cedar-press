@@ -1347,8 +1347,8 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
    inside the redesign shell. Safe to edit by hand.
    ────────────────────────────────────────────────────────────────────────── */
 
-/* Legacy-token bridge — the utility pages (Dashboard work area, Analyses,
-   Sources, Review, Workspace, Settings) are styled by workspace.css and the
+/* Legacy-token bridge — the design system's utility pages were styled by
+   the platform's workspace stylesheet (not shipped here) and the
    form rules in index.css, which reference the old Lume palette (--lume-*,
    --md-*, --accent-clay) and a serif display face. Remapping those custom
    properties on .teim-rd repaints every one of those rules into the redesign's
@@ -1912,7 +1912,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .rd-authstatus__resend-note { color: var(--teal-dark); font-size: 0.9rem; margin: 0; }
 .teim-rd .rd-authstatus__resend-note--error { color: var(--lume-error); }
 
-/* Analyses page: it reuses the legacy workspace.css markup, which carries the
+/* Analyses page (platform only): it reuses the legacy workspace markup, which carries the
    old cream/navy editorial palette (serif headings, navy + sand divider rules).
    These scoped overrides bring it into the teal redesign system and drop the
    stacked divider lines so it reads like the rest of the app. */
@@ -1941,7 +1941,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 /* Remove the extra rule under "Projects/Drafts/Archived" — the tabs already
    separate this section. */
 .teim-rd .analyses-page .dashboard-work__head { border-bottom: none; padding-bottom: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; row-gap: 0.75rem; }
-/* Phones: workspace.css flips this head to a column; with wrap still on, a
+/* Phones: the legacy workspace rules flip this head to a column; with wrap still on, a
    tall child (the sector chips) wraps into a second column rendered off the
    right edge of the screen. Stack, never wrap. */
 @media (max-width: 720px) {
@@ -3859,7 +3859,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .rd-lane__retry { margin-top: 0.7rem; }
 
 /* ==========================================================================
-   DARK THEME  (opt-in via data-theme="dark" on <html>; see themePreference.js)
+   DARK THEME  (opt-in via data-theme="dark" on <html>; nothing on this site sets it)
    The app is fully tokenized, so dark is a remap of the core tokens plus a
    short list of fixes: elements that used --ink as a solid dark FILL (their
    white text must stay legible) and a few translucent-white overlays. Values
@@ -4291,7 +4291,6 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
    The organization's economic evidence library. Built on the existing tokens
    rather than a second visual system: the evidence card is structurally the
    Commons project card, with the figure standing in for the sector photograph.
-   See docs/cedar-grove-design-note.md.
    ========================================================================= */
 /* The bottom padding clears the Ask Cedar launcher, which is fixed to the
    bottom-right and would otherwise sit on top of the last row of figures. A

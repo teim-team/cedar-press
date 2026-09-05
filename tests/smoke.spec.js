@@ -537,6 +537,33 @@ test.describe("crawlers", () => {
     }
   });
 
+  // The public pages are prerendered (scripts/prerender.mjs): their text is
+  // in the document a crawler fetches, before any script runs. Asserted on
+  // the raw response, not the rendered page, because the rendered page looks
+  // identical whether or not the prerender happened.
+  for (const [path, heading] of [
+    ["/", "The data behind Indian Country"],
+    ["/tribal-data-request", "See what Cedar knows about your nation"],
+    ["/research-access", "Need one or two Cedar collections for a defined project"],
+  ]) {
+    test(`${path} is served with its text in the HTML, before any script runs`, async ({ request }) => {
+      const response = await request.get(path);
+      expect(response.status()).toBe(200);
+      const body = await response.text();
+      expect(body).toContain(heading);
+      expect(body).toMatch(/<meta name="robots" content="index, follow">/);
+      expect(body).toContain('<script type="application/ld+json">');
+    });
+  }
+
+  test("a page behind the gate is not offered to crawlers", async ({ request }) => {
+    // Unknown and gated paths get the shell (404.html is the shell), whose
+    // static head says nothing a crawler should rank; the app adds noindex
+    // once it mounts.
+    const body = await (await request.get("/data")).text();
+    expect(body).not.toContain("Every collection, and what it holds");
+  });
+
   test("the page carries a policy and describes itself", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Cedar Press/);

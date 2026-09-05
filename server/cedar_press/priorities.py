@@ -232,6 +232,16 @@ CREATE TABLE IF NOT EXISTS research_requests (
   status TEXT NOT NULL DEFAULT 'received',
   created_at TEXT NOT NULL
 );
+-- What a reader says they work on (the client's readerWork.js): one
+-- optional answer per seat, never per subscription, because two seats of one
+-- organization can do different work. Kept beside the ledger because it is
+-- the other thing the service remembers about a reader, and a deployment
+-- that names CEDAR_PRESS_DB keeps both across restarts.
+CREATE TABLE IF NOT EXISTS reader_profiles (
+  email TEXT PRIMARY KEY,
+  work TEXT,
+  updated_at TEXT NOT NULL
+);
 """
 
 _EDITORIAL = ("type", "title", "description", "status", "published_output", "evolved_from")
@@ -603,6 +613,33 @@ class Priorities:
             "requesting_accounts": len({r["account_id"] for r in reqs}),
             "common_needs": sorted(uses, key=lambda u: (-uses[u], u)),
         }
+
+    # ── the reader's declared work ──
+
+    def profile(self, email: str) -> dict[str, Any]:
+        """What this seat declared, or ``{"work": None}`` when it never answered."""
+        with self._lock:
+            row = self._db.execute(
+                "SELECT work, updated_at FROM reader_profiles WHERE email = ?", (email,)
+            ).fetchone()
+        if row is None:
+            return {"work": None, "updated_at": None}
+        return {"work": row["work"], "updated_at": row["updated_at"]}
+
+    def set_profile(self, email: str, work: str | None) -> dict[str, Any]:
+        """Record the answer; ``None`` withdraws it. The caller validates the vocabulary."""
+        with self._lock:
+            if work is None:
+                self._db.execute("DELETE FROM reader_profiles WHERE email = ?", (email,))
+            else:
+                self._db.execute(
+                    "INSERT INTO reader_profiles (email, work, updated_at) VALUES (?, ?, ?) "
+                    "ON CONFLICT(email) DO UPDATE SET work=excluded.work, "
+                    "updated_at=excluded.updated_at",
+                    (email, work, _now()),
+                )
+            self._db.commit()
+        return self.profile(email)
 
     def close(self) -> None:
         with self._lock:

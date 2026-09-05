@@ -24,14 +24,12 @@
  * own FastAPI service in `server/`, which implements the contract in
  * `api.js`. Keep the two apart when reading this file.
  *
- * ONE ROUTE THAT IS NOT YET BOTH
- * `server/` serves every endpoint `api.js` calls except `/press/profile`
- * (GET and PATCH, the reader's declared work — see `readerWork.js`). That
- * route exists only on the Lumecon platform backend, so a CONNECTED
- * deployment pointed at Cedar Press's own API 404s on it: the read is
- * swallowed by `CedarPressSettings.jsx` and reads as "not answered", and the
- * write rejects with nothing shown. It is the one place the client still
- * assumes the platform, and it is named here rather than left to be found.
+ * EVERY ROUTE IS BOTH
+ * `server/` serves every endpoint `api.js` calls, `/press/profile` included
+ * (the reader's declared work, kept per seat in the service's SQLite store
+ * beside the Cedar Points ledger). Pointing `VITE_API_URL` at that service
+ * is the whole switch from STANDALONE to CONNECTED; the runbook is
+ * docs/ARCHITECTURE.md, "Running the API".
  */
 
 const raw = import.meta.env?.VITE_API_URL ?? "";
@@ -43,11 +41,6 @@ export const API_URL = String(raw).trim().replace(/\/+$/, "");
 export function isConnected() {
   return API_URL !== "";
 }
-
-/** The Lumecon platform's origin, for links out of the service. */
-export const APP_URL = String(
-  import.meta.env?.VITE_APP_URL ?? "https://lumecon.ai",
-).replace(/\/+$/, "");
 
 /**
  * Datadog RUM, configured per environment. Telemetry stays off entirely

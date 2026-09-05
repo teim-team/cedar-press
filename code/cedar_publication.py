@@ -916,10 +916,10 @@ class UnadjudicatedIdentifier(FieldMapRefusal):
 class OwedDerivation(FieldMapRefusal):
     def __init__(self, collection: str, column: str, target: str, n: int):
         super().__init__(collection, [column],
-                         f"{column} carries substantive qualifications on {n} "
-                         f"row(s) that must reach {target} before the column "
-                         f"leaves the file, and no {target} has been supplied; "
-                         f"the dataset does not ship until the derivation exists")
+                         f"{column} carries information on {n} row(s) that must "
+                         f"reach {target} before the column leaves the file, and "
+                         f"no {target} has been built or supplied; the dataset "
+                         f"does not ship until the terminal delivers {target}")
 
 
 class RetiredIdentifierPresent(FieldMapRefusal):
@@ -1169,20 +1169,6 @@ def apply_field_map(collection: str, header: list, rows: list,
                 raise UnadjudicatedIdentifier(collection, col, populated)
         retirement.append(line)
 
-    # 1b. A BLOCKING DERIVATION: a source column that carries substantive
-    # qualifications (Deals' Notes, a beneficiary note) may leave only once
-    # its target exists on the row; otherwise the dataset does not ship
-    # (Codex, PR #67: a caveat dropped before research_note exists is a
-    # customer total that goes wrong).
-    for f in entry["fields"]:
-        if f["decision"] == "derive" and f.get("blocking"):
-            target = f["to"]
-            stuck = sum(1 for row in rows
-                        if (row.get(f["column"]) or "").strip()
-                        and not (row.get(target) or "").strip())
-            if stuck:
-                raise OwedDerivation(collection, f["column"], target, stuck)
-
     # 2. THE RULES, computed before anything is dropped (they read the
     # diagnostics that are about to leave).
     rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
@@ -1217,8 +1203,40 @@ def apply_field_map(collection: str, header: list, rows: list,
         for b, row in zip(per_row, rows, strict=True):
             b.update(_plural_block(entry, row, reg))
         built_cols.extend([c for c in OPENING_PLURAL if c not in built_cols])
-        if any("entity_link_statuses" in b for b in per_row):
+        # Declared by the map, not discovered from the rows: a table whose
+        # link tiers are mapped carries `entity_link_statuses` whether the
+        # build has one row or none (Codex, PR #66: a schema that depends on
+        # the row count is two schemas).
+        if any(f["decision"] == "derive" and f.get("to") == "entity_link_statuses"
+               for f in entry["fields"]):
             built_cols.append("entity_link_statuses")
+
+    # 2b. NOTHING LEAVES BEFORE ITS REPLACEMENT EXISTS. A column marked
+    # `combine` or `derive` is dropped below; its content is supposed to reach
+    # the customer as the target field. Where the target is neither built by
+    # a rule here, nor kept or renamed from the row, nor supplied on the row
+    # by the terminal, dropping the source would lose the information the
+    # decision promised to carry - Deals' categories and status before
+    # `deal_type` and `deal_status` exist, a caveat before `research_note`
+    # does (Codex, PR #66 and #67). The dataset does not ship until the
+    # terminal delivers the target; the refusal names both columns and the
+    # rows that would have lost something. A source that is blank on every
+    # row loses nothing and may go.
+    kept = {f["column"] for f in entry["fields"] if f["decision"] in ("keep", "withhold")}
+    delivered = kept | set(rename.values()) | set(built_cols)
+    for f in entry["fields"]:
+        if f["decision"] not in ("combine", "derive"):
+            continue
+        target = f["to"]
+        # A `blocking` derive (Deals' Notes into research_note) is held to
+        # the row: the target built blank here is not the caveat arriving.
+        if target in delivered and not f.get("blocking"):
+            continue
+        stuck = sum(1 for row in rows
+                    if (row.get(f["column"]) or "").strip()
+                    and not (row.get(target) or "").strip())
+        if stuck:
+            raise OwedDerivation(collection, f["column"], target, stuck)
 
     # 3. DROP, then RENAME (so a raw column marked internal cannot clobber, or
     # be clobbered by, the normalized one renamed onto its name).
@@ -1242,6 +1260,16 @@ def apply_field_map(collection: str, header: list, rows: list,
     if role_src and role_src.get("status"):
         role_src = None            # owed: absent until supplied, never a placeholder
     withdrawn = entry.get("withdrawn_flag")
+    # The per-field publication rule for an individually Native-owned firm
+    # (cedar_domain.may_publish_individual_native_field): the columns the map
+    # marks `withhold` are masked upstream, where the consent evidence lives
+    # (241, 242), and the register blanks the canonical name. This is the
+    # last check before emission, and it fails closed: a row whose entity the
+    # register classes as individually Native-owned carries no consent here,
+    # so its withheld fields leave blank (Codex, PR #66).
+    withhold_cols = [f["column"] for f in entry["fields"] if f["decision"] == "withhold"]
+    import cedar_domain  # noqa: PLC0415
+    withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS if withhold_cols else None
     for row, b in zip(rows, per_row, strict=True):
         if "cedar_uid" in b:
             row["cedar_uid"] = b.pop("cedar_uid")
@@ -1255,6 +1283,10 @@ def apply_field_map(collection: str, header: list, rows: list,
             if known:
                 row["canonical_name"] = known[0]
                 row["entity_class"] = known[1]
+                if withheld_class and known[1] == withheld_class:
+                    for c in withhold_cols:
+                        if c in row:
+                            row[c] = ""
             elif not uid:
                 # No entity: no name, no class, no role. A table's own name
                 # column never stands in for an attribution the row lacks.

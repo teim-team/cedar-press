@@ -12,6 +12,7 @@
 // request is sent and the service agrees when it arrives.
 
 import seed from "../../../data/cedar/priorities.json" with { type: "json" };
+import { MONTHS } from "./pressReleases.js";
 
 export const POINTS_PER_ACTIVE_MONTH = Object.freeze({ ...seed.rules.points_per_active_month });
 export const EXPIRY_MONTHS = seed.rules.expiry_months;
@@ -92,7 +93,6 @@ export function related(query, priorities = SEED_PRIORITIES, limit = 3) {
 
 // ── Words ──
 
-const MONTHS = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
 
 /** "2026-09" -> "Sept. 2026", the way the What's New feed spells a month. */
 export function formatMonth(month) {

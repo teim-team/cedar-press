@@ -61,7 +61,10 @@ export default defineConfig({
     { name: "phone", use: { ...devices["iPhone 13"], browserName: "chromium" } },
   ],
   webServer: {
-    command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
+    // `build:site`, not `build`: the deployment prerenders the three public
+    // pages after the build (scripts/prerender.mjs), and the suite tests the
+    // deployment, static HTML included.
+    command: `npm run build:site && npm run preview -- --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}/`,
     // NEVER measure a build this run did not make.
     //

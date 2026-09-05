@@ -5,9 +5,6 @@
 // repackaging of open data, which is what a reader will assume since the
 // source records genuinely are public — then the shelf itself, with the
 // Cedar Grove boundary at its foot.
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router";
 

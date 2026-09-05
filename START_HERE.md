@@ -21,13 +21,13 @@
 > Do not commit. An integrator verifies claims against live data and commits.
 
 **Read order:** `README.md` → **this file** → **`docs/AGENT_FIELD_GUIDE.md`** →
-`AGENTS.md` (~6,000 lines, mostly an append-only journal — read the top section and
+`AGENTS.md` (~9,000 lines, mostly an append-only journal — read the top section and
 then grep it for your dataset; do not read it linearly) → `docs/PULL_DISCIPLINE.md`
 → the build log for whatever you are touching.
 
-`README.md` (new, 2026-08-26) covers what Cedar Press is, the folder layout, how to run
-things, the hard safety rules, and **where the data actually goes** — the Collections
-pipeline into `github.com/teim-team/cedar-press`. This file covers *current state*.
+`README.md` covers the site and the API (how to run, test and deploy them);
+`docs/ARCHITECTURE.md` covers how the site is built and how the data reaches it.
+This file covers the data workspace's *current state*.
 
 **Before quoting a number out of any build log, check
 `docs/DOC_CONTRADICTIONS_2026-08-26.md`.** Superseded figures never get overwritten — they

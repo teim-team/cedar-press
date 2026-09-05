@@ -69,7 +69,12 @@ jobs:
       #                          because it is protected: it ships in a public
       #                          static bundle and anyone can read it there.
       #                          See src/features/grove/pressDemoGate.js.
-      - run: npm run build
+      #
+      # `build:site` builds and then prerenders the three public pages to
+      # static HTML (scripts/prerender.mjs) with the Chromium the smoke step
+      # installed, so a crawler reads the door, the tribal data request
+      # policy and research access as text rather than an empty root.
+      - run: npm run build:site
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_PRESS_DEMO_ACCOUNTS: ${{ secrets.VITE_PRESS_DEMO_ACCOUNTS }}

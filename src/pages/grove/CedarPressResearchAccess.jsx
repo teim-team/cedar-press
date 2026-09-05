@@ -7,10 +7,8 @@
 // two-page proposal and a research programme that does not belong here
 // recognises itself and goes to Cedar Press+ or Cedar Grove instead.
 
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 import { Link } from "react-router";
+import { contactHref } from "../../features/grove/appLink.js";
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
@@ -23,7 +21,7 @@ import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 
 const REQUEST_HREF =
-  "mailto:contact@lumecon.ai?subject=Cedar%20Limited%20Research%20Data%20Request";
+  contactHref("Cedar Limited Research Data Request");
 
 const PROPOSAL = [
   "Project title",
@@ -36,7 +34,11 @@ const PROPOSAL = [
 ];
 
 export default function CedarPressResearchAccess() {
-  useDocumentTitle("Research access");
+  useDocumentTitle("Research access", {
+    index: true,
+    description:
+      "Limited research access to one or two Cedar Press collections for a defined project: for researchers, journalists, students, nonprofits and public-interest work on tribal governments, Native enterprises and Indian Country's economy.",
+  });
   // Links here sit at the bottom of long pages; without the reset the
   // destination opens mid-scroll, past its headline.
   useScrollToTop();

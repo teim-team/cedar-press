@@ -63,10 +63,10 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 69 — `features/grove` 42, `pages/grove` 25, `components/grove` 1, `styles/grove` 1 |
-| Path references to rewrite | 247, across 62 files |
+| Files to move | 71 — `features/grove` 43, `pages/grove` 26, `components/grove` 1, `styles/grove` 1 |
+| Path references to rewrite | 240, across 63 files |
 | Referencing files inside `src/` | 27 — `pages/` 21, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 35 — `server/cedar_press/` 8, `scripts/` 6, `docs/` 6, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1, `AGENTS.md` 1 |
+| Referencing files outside `src/` | 36 — `server/cedar_press/` 8, `scripts/` 7, `docs/` 6, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1, `AGENTS.md` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 247 references get rewritten?" is a question the build, the
+First, "did all 240 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 247 references get rewritten?",
+is one of the three things that answer "did all 240 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
@@ -170,16 +170,23 @@ carrying `code` — the shape `pressSignup.pressSignupError` already reads.
 | `GET /press/collections/:id/download` | A release file, served as a blob |
 | `GET /press/collections/:id/profile` | The collection's data dictionary |
 | `POST /cedar/ask` | Cedar, scoped to this surface |
-| `GET`, `PATCH /press/profile` | The reader's declared work — **not served by `server/`** |
+| `GET`, `PATCH /press/profile` | The reader's declared work, per seat |
+| `GET /press/priorities`, `/press/priorities/related`, `/press/influence`; `POST /press/priorities/:id/points`, `/press/requests` | Shape the Research |
 
-Every row but the last is implemented by the FastAPI service in `server/`.
-`/press/profile` (`src/features/grove/readerWork.js`) exists only on the
-Lumecon platform backend, so a deployment pointed at Cedar Press's own API
-404s on it: the read is swallowed and reads as "not answered", the write
-rejects with nothing shown to the reader. It is the one endpoint the client
-still assumes the platform for, and closing it is either implementing the
-route in `server/` or dropping the connected path in favour of the
-`localStorage` one `readerWork.js` already has.
+Every row is implemented by the FastAPI service in `server/`; nothing in
+teim-app or the Cedar engine serves a `/press/*` route, so that service is
+the server this client is built for. `/press/profile` was the last gap
+(2026-09-05): it now reads and writes `reader_profiles` in the same SQLite
+store as the Cedar Points ledger, validated against the vocabulary
+`readerWork.js` offers (dumped into `_press_data.json` so the two cannot
+drift).
+
+Two client behaviours change with the switch and nothing else does:
+`downloadCsv` asks `GET /press/collections/:id/download` (the service
+enforces entitlement and serves the release file) instead of fetching the
+static sample, and `readerWork.js` reads and writes the profile route instead
+of `localStorage`. The demo gate turns itself off because every module
+discriminates on `isConnected()`.
 
 ## Running the API
 
@@ -225,6 +232,44 @@ Because the Pages deployment is standalone by default, the gate there offers
 sign-in only. Activation needs an API to validate a code against, and
 `PRESS_ACTIVATION_AVAILABLE` follows `isConnected()` rather than a constant,
 so a build with nothing behind it cannot ask for a code it cannot check.
+
+## What a crawler reads, and what a slow connection gets first
+
+Three pages are public: the door (`/`), the tribal data request policy and
+research access. They are what someone searching for data on a tribe, a
+Native enterprise or Indian Country's economy should find, and everything
+else answers with a sign-in, which a search engine should not rank.
+
+- **Static HTML for the public pages.** `scripts/prerender.mjs` runs after the
+  build (`npm run build:site`, which the deployment and the smoke suite both
+  use) and renders the three pages with Chromium into `dist-site/index.html`,
+  `dist-site/tribal-data-request/index.html` and
+  `dist-site/research-access/index.html`. A crawler, and a reader whose
+  bundle has not arrived, meets the page's text in the document; React then
+  mounts over the same markup. `404.html` stays the empty shell, which is
+  what every other path serves.
+- **Per-page head.** `useDocumentTitle(title, { description, index })` sets
+  the title, description, canonical address, Open Graph pair and a robots
+  meta on navigation. The three public pages pass `index: true` with a
+  description of their own; every page behind the gate says `noindex`, in
+  agreement with `public/robots.txt`.
+- **Structured data.** `scripts/seo-head.mjs` writes the JSON-LD in
+  `index.html` from the catalog: the site, Lumecon, the product, a
+  `DataCatalog` and one `Dataset` per storefront collection with its name,
+  description, coverage, keywords and `isAccessibleForFree: false`. It also
+  writes `public/sitemap.xml` with `lastmod` from the release ledger.
+  `npm run seo:check` (a unit test runs it) fails when either is stale.
+- **The first bundle is the reader.** `pages.jsx`, beside the pages, lazy-loads
+  the nine satellite pages and `PressShelf.jsx` lazy-loads the Explore viewer,
+  so the door paints before the Methods reference or the viewer's contracts
+  are fetched. Measured at 400 kbps with a 4x CPU throttle: everything in one
+  bundle was 184 kB gzipped and nine seconds to the first headline; split and
+  prerendered, the headline is in the HTML at 0.7 seconds and the first
+  bundle is 123 kB.
+
+What this does not do: it does not publish records, entity pages or per-tribe
+pages to the open web. The collections stay behind the subscription, and a
+public page per Native entity is a product decision, not a build step.
 
 ## The standalone sign-in
 

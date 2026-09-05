@@ -53,16 +53,33 @@ pub = _load_publication()
 #: column that stops them. These are findings, not fixture defects: the
 #: writer will refuse the full table for the same reason until the terminal
 #: resolves it, and that is the point of the retirement rule.
+# What stops each sampled dataset as it is today, and why. The applier's
+# checks run in a fixed order (alias and adjudication, then the loss guard on
+# combines and derives, then the retired-scheme gate on shipped values), so
+# the FIRST refusal a sample meets is listed with the columns it names; the
+# later ones surface once the earlier are neutralised.
 REFUSED_AS_SAMPLED = {
-    "funding": (("attribution_status",), pub.RetiredIdentifierPresent),   # value `cedar_neid`
+    # attribution_status carries the value `cedar_neid`; recipient_type is a
+    # combine the terminal owes.
+    "funding": (("business_types_code", "attribution_status"), pub.OwedDerivation),
+    "federal-register": (("event_date_basis",), pub.OwedDerivation),
+    "deals": (("Deal_Category", "Notes"), pub.OwedDerivation),
+    "contractors": (("extent_competed",), pub.OwedDerivation),
     "nest": (("enterprise_existing_cedar_uid",), pub.UnadjudicatedIdentifier),
     # entity_id and cedar_spine_entity_id both disagree with cedar_uid on the
     # Menominee row: neither is an alias, and neither is deleted unadjudicated.
     "nonprofits": (("entity_id", "cedar_spine_entity_id"), pub.UnadjudicatedIdentifier),
-    # Notes and the beneficiary note carry caveats that must reach
-    # research_note before they leave (Codex, PR #67).
-    "deals": (("Notes",), pub.OwedDerivation),
+    # The beneficiary note carries caveats that must reach research_note
+    # before it leaves (Codex, PR #67).
     "natural-resources": (("beneficiary_note",), pub.OwedDerivation),
+}
+
+# The identifier findings alone, resolved the way the terminal would resolve
+# them: the retired vocabulary recoded, the unadjudicated ids adjudicated away.
+IDENTIFIERS_TO_SETTLE = {
+    "funding": {"attribution_status": "attributed"},
+    "nest": {"enterprise_existing_cedar_uid": ""},
+    "nonprofits": {"entity_id": "", "cedar_spine_entity_id": ""},
 }
 
 
@@ -77,16 +94,36 @@ def sample(collection: str, table: str):
         return list(rd.fieldnames), list(rd)
 
 
+def supply_owed_targets(collection: str, rows) -> set:
+    """Stand in for the terminal: every combine or derive target the map does
+    not build here is written on the row wherever its source is populated,
+    so the loss guard is satisfied and the rest of the contract can be
+    asserted. Returns the targets supplied."""
+    entry = pub.field_map()[collection]
+    kept = {f["column"] for f in entry["fields"] if f["decision"] in ("keep", "withhold")}
+    renamed = {f["to"] for f in entry["fields"] if f["decision"] == "rename"}
+    built = {n["column"] for n in entry["new"] if not n.get("status")}
+    delivered = kept | renamed | built
+    supplied = set()
+    for f in entry["fields"]:
+        if f["decision"] not in ("combine", "derive"):
+            continue
+        if f["to"] in delivered and not f.get("blocking"):
+            continue
+        for r in rows:
+            if (r.get(f["column"]) or "").strip() and not (r.get(f["to"]) or "").strip():
+                r[f["to"]] = f"supplied from {f['column']}"
+        supplied.add(f["to"])
+    return supplied
+
+
 def neutralised(collection: str, header, rows):
-    """The sample with the one finding that stops it resolved, so the rest of
+    """The sample with every finding that stops it resolved, so the rest of
     the contract can be asserted on that dataset too."""
-    cols, _ = REFUSED_AS_SAMPLED[collection]
-    for r in rows:
-        for col in cols:
-            if collection == "funding":
-                r[col] = "attributed"        # the recoded vocabulary the terminal owes
-            else:
-                r[col] = ""                  # adjudicated away, for the test only
+    for col, value in IDENTIFIERS_TO_SETTLE.get(collection, {}).items():
+        for r in rows:
+            r[col] = value
+    supply_owed_targets(collection, rows)
     return header, rows
 
 
@@ -101,8 +138,7 @@ class TestApplyFieldMap(unittest.TestCase):
                 continue
             with self.subTest(collection=coll):
                 header, rows = sample(coll, table)
-                if coll in REFUSED_AS_SAMPLED:
-                    header, rows = neutralised(coll, header, rows)
+                header, rows = neutralised(coll, header, rows)
                 own = set(header)
                 result = pub.apply_field_map(coll, header, rows, own)
                 self.assertTrue(result["mapped"])
@@ -140,8 +176,7 @@ class TestApplyFieldMap(unittest.TestCase):
                     ("lobbying", "native_entity_lobbying_disclosures"))
         for coll, table in singular:
             header, rows = sample(coll, table)
-            if coll in REFUSED_AS_SAMPLED:
-                neutralised(coll, header, rows)
+            neutralised(coll, header, rows)
             pub.apply_field_map(coll, header, rows, set(header))
             for r in rows:
                 known = reg.get(r["cedar_uid"])
@@ -156,6 +191,7 @@ class TestApplyFieldMap(unittest.TestCase):
         pub.apply_field_map("funding", header, rows, set(header))
         self.assertTrue(all(r["cedar_entity_role"] == "recipient" for r in rows))
         header, rows = sample("subcontracting", "subawards")
+        neutralised("subcontracting", header, rows)
         pub.apply_field_map("subcontracting", header, rows, set(header))
         for r in rows:
             self.assertEqual(r["cedar_entity_role"], r["native_direction"])
@@ -280,6 +316,7 @@ class TestApplyFieldMap(unittest.TestCase):
 
     def test_a_retired_scheme_in_a_shipped_value_or_name_stops_the_dataset(self):
         header, rows = sample("contractors", "prime_contracts")
+        neutralised("contractors", header, rows)
         rows[0]["award_base_description"] = "keyed via NEID TRBF-0001"   # ships as `description`
         # (the sample carries 'Oneida' in several cells, which must not match)
         rows[1]["awardee_name"] = "ONEIDA NATION ENTERPRISES"
@@ -340,11 +377,22 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertTrue(withheld, "the register carries the withheld class")
         self.assertTrue(all(reg[uid][0] == "" for uid in withheld))
         header, rows = sample("contractors", "prime_contracts")
+        neutralised("contractors", header, rows)
         rows[0]["cedar_uid"] = withheld[0]
         rows[0]["canonical_name"] = "A Raw Name That Must Not Ship"
+        rows[0]["awardee_name"] = "A Person's Firm"
+        rows[0]["awardee_uei"] = "UEI000000001"
+        rows[0]["cage_code"] = "1ABC2"
         pub.apply_field_map("contractors", header, rows, set(header))
         self.assertEqual(rows[0]["canonical_name"], "")
         self.assertEqual(rows[0]["entity_class"], cedar_domain.INDIVIDUAL_NATIVE_CLASS)
+        # The fields the map marks `withhold` leave blank for that class with
+        # no consent on the row: the per-field rule, applied last and failing
+        # closed (Codex, PR #66). A tribal owner's row keeps them.
+        for col in ("awardee_name", "awardee_uei", "cage_code"):
+            self.assertIn(col, header)
+            self.assertEqual(rows[0][col], "", col)
+        self.assertTrue(rows[1]["awardee_name"])
 
     def test_an_undecided_flagship_column_stops_the_build_by_name(self):
         header, rows = sample("contractors", "prime_contracts")
@@ -369,20 +417,49 @@ class TestApplyFieldMap(unittest.TestCase):
             pub.apply_field_map("contractors", header, rows, own)
         self.assertEqual(caught.exception.columns, ["n_prime_contracts_awards"])
 
-    def test_a_blocking_derivation_holds_the_dataset_until_its_target_is_supplied(self):
+    def test_nothing_leaves_before_its_replacement_exists(self):
+        # A combine whose target the terminal has not delivered holds the
+        # dataset: Deals' categories may not vanish before deal_type exists
+        # (Codex, PR #66).
         header, rows = sample("deals", "deals_classified")
+        with self.assertRaises(pub.OwedDerivation) as caught:
+            pub.apply_field_map("deals", header, rows, set(header))
+        self.assertEqual(caught.exception.columns, ["Deal_Category"])
+        self.assertIn("deal_type", str(caught.exception))
+        # Contractors likewise, on competition_type.
+        header, rows = sample("contractors", "prime_contracts")
+        with self.assertRaises(pub.OwedDerivation) as caught:
+            pub.apply_field_map("contractors", header, rows, set(header))
+        self.assertIn("competition_type", str(caught.exception))
+        # A source blank on every row loses nothing and may go.
+        header, rows = sample("contractors", "prime_contracts")
+        for r in rows:
+            r["extent_competed"] = r["extent_competed_normalized"] = ""
+            r["sector"] = r["supersector"] = ""
+        pub.apply_field_map("contractors", header, rows, set(header))
+        self.assertNotIn("extent_competed", header)
+        # With the combines supplied, the blocking derive still holds Deals
+        # to the row: research_note is built blank here, and blank is not the
+        # caveat arriving.
+        header, rows = sample("deals", "deals_classified")
+        supplied = supply_owed_targets("deals", rows)
+        self.assertIn("deal_type", supplied)
+        for r in rows:
+            r.pop("research_note", None)
         with self.assertRaises(pub.OwedDerivation) as caught:
             pub.apply_field_map("deals", header, rows, set(header))
         self.assertEqual(caught.exception.columns, ["Notes"])
         # Once the editorial research_note is on the row, Notes may leave and
         # the supplied note ships as it was written.
         header, rows = sample("deals", "deals_classified")
+        supply_owed_targets("deals", rows)
         header.append("research_note")
         for r in rows:
             r["research_note"] = ("Announced value is the Native party's consideration; "
                                   "the project total is the whole project.")
         pub.apply_field_map("deals", header, rows, set(header) - {"research_note"})
         self.assertNotIn("Notes", header)
+        self.assertIn("deal_type", header)
         self.assertTrue(all(r["research_note"].startswith("Announced value") for r in rows))
 
     def test_supplied_names_as_published_are_kept_and_must_align(self):

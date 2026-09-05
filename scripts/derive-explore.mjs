@@ -240,6 +240,25 @@ export function deriveRegister() {
   };
 }
 
+/**
+ * The invariants an override must satisfy against the sample it describes.
+ * Exported so a test can inject each violation and watch it fire
+ * (Codex, PR #66): a guard that has only ever seen valid input is a guard
+ * nobody has proven.
+ */
+export function validateContract(key, contract, columns) {
+  for (const column of contract.default_columns ?? []) {
+    if (!columns.includes(column)) throw new Error(`${key}: default column ${column} is not in the sample`);
+  }
+  // Every declared role column exists, names a role, and is not the
+  // entity column itself (which carries the table's own role).
+  for (const role of contract.entity_roles ?? []) {
+    if (!columns.includes(role.column)) throw new Error(`${key}: role column ${role.column} is not in the sample`);
+    if (!role.role) throw new Error(`${key}: role column ${role.column} names no role`);
+    if (role.column === contract.entity_uid) throw new Error(`${key}: ${role.column} is the entity column, not a further role`);
+  }
+}
+
 export function derive() {
   const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
   const overrides = existsSync(OVERRIDES) ? JSON.parse(readFileSync(OVERRIDES, "utf8")) : {};
@@ -265,16 +284,7 @@ export function derive() {
       // Derived by name, so PROPOSED, not certified: only a declaration in the
       // overrides file, with its reason, marks a table's mapping reviewed.
       contract.reviewed = override.reviewed === true;
-      for (const column of contract.default_columns ?? []) {
-        if (!columns.includes(column)) throw new Error(`${key}: default column ${column} is not in the sample`);
-      }
-      // Every declared role column exists, names a role, and is not the
-      // entity column itself (which carries the table's own role).
-      for (const role of contract.entity_roles ?? []) {
-        if (!columns.includes(role.column)) throw new Error(`${key}: role column ${role.column} is not in the sample`);
-        if (!role.role) throw new Error(`${key}: role column ${role.column} names no role`);
-        if (role.column === contract.entity_uid) throw new Error(`${key}: ${role.column} is the entity column, not a further role`);
-      }
+      validateContract(key, contract, columns);
       contract.columns = columns.length;
       tables[key] = contract;
     }

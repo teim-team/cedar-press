@@ -16,20 +16,13 @@
 // shelves live behind their doors, on pages of their own, identical on
 // desktop and phone.
 //
-// Built from the app's own tokens, so this page cannot drift from what
-// subscribers see inside Grove.
-
-// The app's stylesheet order, so the Cedar widget markup below is styled by
-// exactly the rules that style it inside the product: index.css base,
-// redesign.css retheme, then this page's own layout.
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
+// Built from the design system's own tokens (index.css base, redesign.css
+// retheme, then press.css, imported once in main.jsx in that order).
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
-import { appUrl } from "../../features/grove/appLink.js";
+import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
@@ -51,7 +44,8 @@ import PressHub from "./PressHub";
 import PressPrioritiesBlock from "./PressPrioritiesBlock";
 
 export default function CedarPress() {
-  useDocumentTitle();
+  // The door is the one page every visitor and every crawler reaches.
+  useDocumentTitle(undefined, { index: true });
   const { user, loading, logout } = useAuth();
   const entitled = canReadCedarPress(user);
   // Sections arrive as they enter the viewport, sitewide language.
@@ -186,7 +180,7 @@ export default function CedarPress() {
             <div className="cp-close__acts">
               <a
                 className="cp-close__act"
-                href="mailto:contact@lumecon.ai?subject=Cedar%20Press%20feedback"
+                href={contactHref("Cedar Press feedback")}
               >
                 Send feedback <span aria-hidden="true">&#8594;</span>
               </a>

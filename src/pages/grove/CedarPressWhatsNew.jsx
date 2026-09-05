@@ -30,9 +30,6 @@ import { canReadCedarPress } from "../../features/grove/pressAccess";
 // The Press routes code-split separately, so a direct visit or refresh loads
 // this module first; without the stylesheet stack the page and its Cedar
 // launcher render unstyled.
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import {

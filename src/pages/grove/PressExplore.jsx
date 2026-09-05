@@ -505,9 +505,17 @@ function Fields({ columns, item, contract, plain }) {
   );
 }
 
-/** The further roles an entity carries on a record, in words, or nothing for the table's own role. */
-function roleOf(entity) {
-  const roles = [...(entity.role ? [entity.role] : []), ...(entity.roles ?? [])];
+/**
+ * An entity's roles on a record, in words. An entity from the table's own
+ * entity column carries the contract's role (NAGPRA's "culturally affiliated,
+ * as the notice determines"); one that arrived through a further role column
+ * carries only the role that column declares. A notice that names consulted
+ * parties and no affiliated one therefore never labels them affiliated
+ * (Codex, PR #66).
+ */
+function roleOf(entity, contract) {
+  const own = entity.role ? [entity.role] : contract?.entity_role ? [contract.entity_role] : [];
+  const roles = [...own, ...(entity.roles ?? [])];
   return roles.length ? roles.join(", ") : "";
 }
 
@@ -525,7 +533,7 @@ function Record({ item, columns }) {
         </p>
       ) : null}
       {item.entity.entities.length > 1 ? (
-        <p className="cp-ex__fine">Entities named: {item.entity.entities.map((e) => `${e.name ?? (e.withheld ? WITHHELD_TEXT : e.uid)}${roleOf(e) ? ` (${roleOf(e)})` : ""}`).join("; ")}{contract?.entity_role ? ` · ${contract.entity_role}` : ""}</p>
+        <p className="cp-ex__fine">Entities named: {item.entity.entities.map((e) => `${e.name ?? (e.withheld ? WITHHELD_TEXT : e.uid)}${roleOf(e, contract) ? ` (${roleOf(e, contract)})` : ""}`).join("; ")}</p>
       ) : contract?.entity_role && item.entity.uid ? (
         <p className="cp-ex__fine">Entity: {item.entity.name ?? WITHHELD_TEXT} ({item.entity.uid}) · {contract.entity_role}</p>
       ) : null}
@@ -885,7 +893,9 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
     cut.unknown?.length ? `Not a collection here: ${cut.unknown.join(", ")}.` : "",
     cut.dropped?.length ? `Not understood in the link: ${cut.dropped.join(", ")}.` : "",
     lockedOut.length ? `Not shown: ${lockedOut.map(short).join(", ")} (locked on your shelf).` : "",
-    noPreview.length ? `No preview yet: ${noPreview.map((c) => `${c.entry.short} (${c.previewUnavailable})`).join("; ")}.` : "",
+    // The reason is the measured record's sentence, written for the build;
+    // the reader is told which collection has no preview yet and no more.
+    noPreview.length ? `No preview yet for ${noPreview.map((c) => c.entry.short).join(", ")}.` : "",
     missing.length ? `Not reachable right now: ${missing.map((k) => short(k.split("/")[0])).join(", ")}.` : "",
     excluded.undated ? `${excluded.undated} undated record(s) excluded by the year range.` : "",
     registerStatus === "failed" ? "The entity register did not load: names and types may be missing." : "",

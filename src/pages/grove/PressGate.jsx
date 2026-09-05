@@ -31,6 +31,7 @@
 // explaining why there is none.
 
 import { useState } from "react";
+import { contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
@@ -400,7 +401,7 @@ export default function PressGate({ user }) {
                 </button>
               </form>
               <p className="cp-gate__aside">
-                <a href="mailto:contact@lumecon.ai?subject=Cedar%20Press%20password%20help">Forgot password?</a>
+                <a href={contactHref("Cedar Press password help")}>Forgot password?</a>
               </p>
               {/* The access-code flow only appears once its server routes
                   exist; a form that ends at a 404 is worse than no form.

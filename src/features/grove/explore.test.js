@@ -14,7 +14,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { contractFor as deriveContract } from "../../../scripts/derive-explore.mjs";
+import { contractFor as deriveContract, validateContract } from "../../../scripts/derive-explore.mjs";
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import {
   CODEBOOK,
@@ -27,6 +27,7 @@ import {
   contractFor,
   csvCell,
   cutCsv,
+  entityVectors,
   cutReadme,
   decodeCut,
   describeCut,
@@ -703,6 +704,35 @@ test("a row's entities include every declared role column, so an entity filter f
   for (const k of Object.keys(CONTRACTS)) {
     for (const r of CONTRACTS[k].entity_roles ?? []) assert.notEqual(r.column, CONTRACTS[k].entity_uid, k);
   }
+  // The reduced export keeps the vectors aligned: as many names and roles as
+  // uids, and a consulted party is exported as consulted, never as the
+  // contract's primary role (Codex, PR #66).
+  const vectors = entityVectors(withConsulted.entity, ncontract);
+  const n = vectors.uids.split("|").length;
+  assert.equal(vectors.names.split("|").length, n);
+  assert.equal(vectors.types.split("|").length, n);
+  assert.equal(vectors.roles.split("|").length, n);
+  const consultedOnly = nitems.find((it) => it.row.consulted_entity_ids && !it.row.affiliated_entity_ids);
+  if (consultedOnly) {
+    const roles = entityVectors(consultedOnly.entity, ncontract).roles.split("|");
+    assert.ok(roles.every((r) => r && !r.includes(ncontract.entity_role)), roles.join(" / "));
+  }
+  const csv = cutCsv([withConsulted], { view: "cut" });
+  const back = parseCsv(csv);
+  assert.equal(back.rows[0].entity_uids.split("|").length, back.rows[0].entity_names.split("|").length);
+  assert.equal(back.rows[0].entity_uids, vectors.uids);
+});
+
+test("the contract guard fires on each violation it names, and passes a clean override", () => {
+  const columns = ["record_id", "cedar_uid", "consulted_entity_ids", "title"];
+  const clean = { entity_uid: "cedar_uid", default_columns: ["title"], entity_roles: [{ column: "consulted_entity_ids", role: "consulted", list: true }] };
+  assert.doesNotThrow(() => validateContract("t/x", clean, columns));
+  assert.throws(() => validateContract("t/x", { ...clean, default_columns: ["absent"] }, columns), /default column absent is not in the sample/);
+  assert.throws(() => validateContract("t/x", { ...clean, entity_roles: [{ column: "missing_ids", role: "consulted" }] }, columns), /role column missing_ids is not in the sample/);
+  assert.throws(() => validateContract("t/x", { ...clean, entity_roles: [{ column: "consulted_entity_ids", role: "" }] }, columns), /names no role/);
+  assert.throws(() => validateContract("t/x", { ...clean, entity_roles: [{ column: "cedar_uid", role: "owner" }] }, columns), /is the entity column, not a further role/);
+  // And restored, the real overrides still pass every table they describe.
+  for (const k of Object.keys(CONTRACTS)) assert.doesNotThrow(() => validateContract(k, CONTRACTS[k], load(k).columns));
 });
 
 // ── The researcher guides ──────────────────────────────────────────────────

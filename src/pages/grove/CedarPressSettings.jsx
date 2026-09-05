@@ -8,10 +8,8 @@
 // Nothing here is required to read anything. The one question this page
 // asks is asked plainly: more detail means better-curated collections, and
 // a reader who does not want to answer never sees it again.
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 import { useCallback, useEffect, useState } from "react";
+import { contactHref } from "../../features/grove/appLink.js";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
@@ -200,7 +198,7 @@ export default function CedarPressSettings() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:contact@lumecon.ai?subject=Cedar%20Press">
+                <a href={contactHref("Cedar Press")}>
                   <b>Contact the research desk</b>
                   <span>
                     Corrections, questions about a method, and what the collections should cover

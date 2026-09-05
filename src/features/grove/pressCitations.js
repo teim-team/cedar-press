@@ -21,9 +21,11 @@
  * `CITATIONS` (newest first), `citationCountFor()`, `REPORT_CITATION_HREF`.
  */
 
+import { contactHref } from "./appLink.js";
+
 /** Where a reader reports a citation the register missed. */
 export const REPORT_CITATION_HREF =
-  "mailto:contact@lumecon.ai?subject=Cedar%20Press%20citation";
+  contactHref("Cedar Press citation");
 
 /**
  * Entries, newest first. Shape:

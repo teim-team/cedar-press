@@ -129,7 +129,33 @@
             "name": "Cedar Press",
             "description": "Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method.",
             "inLanguage": "en",
-            "publisher": { "@id": "https://lumecon.ai/#organization" }
+            "keywords": [
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations",
+              "Native Hawaiian Organizations",
+              "tribal enterprises",
+              "Native-owned businesses",
+              "federal funding to tribes",
+              "federal contracting tribal",
+              "NAGPRA notices",
+              "tribal consultation",
+              "Federal Register tribes",
+              "tribal legislation",
+              "tribal lobbying",
+              "Indian Country deals",
+              "tribal natural resources revenue",
+              "Native nonprofits",
+              "Cedar Press",
+              "Lumecon",
+              "Tribal Business News"
+            ],
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            }
           },
           {
             "@type": "Organization",
@@ -142,9 +168,437 @@
             "@type": "Product",
             "name": "Cedar Press",
             "url": "https://cedarpress.ai/",
-            "brand": { "@id": "https://lumecon.ai/#organization" },
+            "brand": {
+              "@id": "https://lumecon.ai/#organization"
+            },
             "description": "A subscriber intelligence service covering the money, policy, transactions, institutions and public actions that shape Indian Country's economy. Every collection begins with public records and carries its own citation.",
             "category": "Economic data and research"
+          },
+          {
+            "@type": "DataCatalog",
+            "@id": "https://cedarpress.ai/#catalog",
+            "name": "The Cedar Press collections",
+            "url": "https://cedarpress.ai/",
+            "description": "Twelve collections on Indian Country's economy: federal funding, the Federal Register, legislation, deals, NAGPRA, advocacy, prime contracting, subcontracting, natural resources, Native-owned businesses, Native nonprofits and the enterprise register, each resolved to the tribal governments and Native entities behind the records.",
+            "provider": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "dataset": [
+              {
+                "@id": "https://cedarpress.ai/#dataset-funding"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-federal-register"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-legislation"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-deals"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-nagpra"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-lobbying"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-contractors"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-subcontracting"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-natural-resources"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-owned"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-nonprofits"
+              },
+              {
+                "@id": "https://cedarpress.ai/#dataset-nest"
+              }
+            ]
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-funding",
+            "name": "Federal Funding to Indian Country",
+            "alternateName": "Federal Funding",
+            "description": "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award. Recipients resolved to the Native entity behind them, so an award to a subsidiary, a housing authority or a consortium is attributed to the nation or organization it belongs to.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "2007 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Federal Funding to Indian Country",
+              "Federal Funding",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-federal-register",
+            "name": "Federal Register",
+            "description": "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond. Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "1994 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Federal Register",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-legislation",
+            "name": "Congressional Votes and Proposed Legislation",
+            "alternateName": "Legislation",
+            "description": "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how. Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "1973 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Congressional Votes and Proposed Legislation",
+              "Legislation",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-deals",
+            "name": "Indian Country Deals",
+            "alternateName": "Deals",
+            "description": "Material transactions and capital commitments involving Native nations, organizations and enterprises, including acquisitions, divestitures, property purchases, investments, financing agreements, bond issuances, joint ventures and major capital projects. Track who participated, the Native entity involved, announced value, status and timing, and compare activity across periods. Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "2000 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Indian Country Deals",
+              "Deals",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-nagpra",
+            "name": "NAGPRA",
+            "description": "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item. Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "1994 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "NAGPRA",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-lobbying",
+            "name": "Native Federal Advocacy & Engagement",
+            "alternateName": "Advocacy",
+            "description": "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record. Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "1999 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Native Federal Advocacy & Engagement",
+              "Advocacy",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-contractors",
+            "name": "Federal Prime Contracting",
+            "alternateName": "Prime Contracting",
+            "description": "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through. Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "2000 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Federal Prime Contracting",
+              "Prime Contracting",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-subcontracting",
+            "name": "Federal Subcontracting",
+            "alternateName": "Subcontracting",
+            "description": "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors. Subawards matched to the same resolved entities as the prime contracts above them.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "2010 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Federal Subcontracting",
+              "Subcontracting",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-natural-resources",
+            "name": "Natural Resource Revenues",
+            "alternateName": "Natural Resources",
+            "description": "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went. Production and disbursements matched to the nations and allottees they belong to.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "1880 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Natural Resource Revenues",
+              "Natural Resources",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-owned",
+            "name": "Individually Owned Native Businesses",
+            "alternateName": "Native-Owned Businesses",
+            "description": "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies. Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "Current roster, captured Sept. 1, 2026",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Individually Owned Native Businesses",
+              "Native-Owned Businesses",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-nonprofits",
+            "name": "Native Nonprofits",
+            "description": "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year. Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "Current roster, captured Apr. 29, 2026",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Native Nonprofits",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://cedarpress.ai/#dataset-nest",
+            "name": "Native Enterprise Structures and Ties",
+            "alternateName": "NEST",
+            "description": "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down. This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
+            "url": "https://cedarpress.ai/",
+            "creator": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "publisher": {
+              "@id": "https://lumecon.ai/#organization"
+            },
+            "includedInDataCatalog": {
+              "@id": "https://cedarpress.ai/#catalog"
+            },
+            "temporalCoverage": "2016 to present",
+            "spatialCoverage": "United States",
+            "keywords": [
+              "Native Enterprise Structures and Ties",
+              "NEST",
+              "Indian Country data",
+              "tribal data",
+              "tribal government",
+              "tribal economy",
+              "Native American economic data",
+              "Alaska Native Corporations"
+            ],
+            "isAccessibleForFree": false,
+            "license": "https://cedarpress.ai/methods",
+            "inLanguage": "en"
           }
         ]
       }

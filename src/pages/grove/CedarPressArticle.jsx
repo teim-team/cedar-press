@@ -29,9 +29,6 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
@@ -173,7 +170,7 @@ function DrawnFrom({ id, user }) {
         // The file, right here. The per-collection pages are gone: a tile
         // is a download everywhere in the product, and this block keeps
         // that contract at the end of a piece.
-        <button type="button" className="cp-ar__take" onClick={() => downloadCsv(entry)}>
+        <button type="button" className="cp-ar__take" onClick={() => downloadCsv(entry).catch(() => {})}>
           {/* Same honesty as the shelf tiles: what downloads is ten real rows
               of the collection's flagship table, not the collection, and a
               collection without even a sample delivers its description. The

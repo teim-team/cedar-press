@@ -9,9 +9,20 @@
  * links land on lumecon.ai, which can hand the visitor onward.
  */
 
-const APP_ORIGIN = (import.meta.env.VITE_APP_URL || "https://lumecon.ai").replace(/\/+$/, "");
+const APP_ORIGIN = (import.meta.env?.VITE_APP_URL || "https://lumecon.ai").replace(/\/+$/, "");
 
 /** An absolute URL into the app, from the app-relative path the page names. */
 export function appUrl(path = "") {
   return `${APP_ORIGIN}${path}`;
+}
+
+/**
+ * The research desk's address, with the subject line that says which page the
+ * message came from. One spelling of the address for the ten places that
+ * write to it; a typo in one of them was a message nobody received.
+ */
+export const CONTACT_EMAIL = "contact@lumecon.ai";
+
+export function contactHref(subject) {
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 }

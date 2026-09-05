@@ -243,7 +243,8 @@ export function latestRelease(id) {
   return releaseFor(id)?.history?.[0] ?? null;
 }
 
-const MONTHS = Object.freeze([
+/** The abbreviated months the feed spells dates with; the priorities page reads them too. */
+export const MONTHS = Object.freeze([
   "Jan.", "Feb.", "Mar.", "Apr.", "May", "June",
   "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec.",
 ]);
