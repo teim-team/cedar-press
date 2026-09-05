@@ -85,7 +85,11 @@ ACTIVITY_TYPES = ("registered_lobbying", "tribal_consultation",
 #: `congressional_testimony` was here until 2026-09-04, when a source was
 #: found. Declaring an empty category rather than deleting it is what made
 #: the gap visible enough to close.
-NO_SOURCE_YET = ("formal_letter",)
+#: EMPTY as of 2026-09-04. Both former members found a source: testimony
+#: was harvested, and formal_letter turned out to have been in Cedar all
+#: along as dear_tribal_leader_letters.csv. The tuple stays because the
+#: next added activity type will need somewhere honest to sit.
+NO_SOURCE_YET = ()
 
 AMOUNT_TYPES = ("lobbying_income", "lobbying_expense",
                 "irs_lobbying_expenditure", "")
@@ -306,6 +310,87 @@ def collect(names):
                        "amounts"))
     rows += sc
     counts["nonprofit_lobbying_disclosure"] = len(sc)
+
+    # 5b. FERC ex parte. CEDAR ALREADY HAD THIS and it was never wired in:
+    #     4,246 party rows, 96 in window, with footnote verbatims and an
+    #     explicit editorial ruling already attached. `agency_meeting` read as
+    #     8 rows not because the sourcing was thin but because this table and
+    #     267 unread FR notice bodies were sitting outside the activity layer.
+    #     Harvesting more would have been the wrong instinct.
+    ferc = []
+    for r in _read(CLEAN / "ferc_ex_parte_parties.csv"):
+        d = (r.get("communication_file_date") or r.get("notice_date") or "").strip()
+        if _year(d) not in WINDOW:
+            continue
+        uid = (r.get("resolved_native_entity_id") or "").strip()
+        if not uid.startswith("CE-"):
+            translate_neid_values(r)
+            uid = (r.get("resolved_native_entity_id") or "").strip()
+        ferc.append(_row(names, uid if uid.startswith("CE-") else "",
+                         "agency_meeting",
+                         (r.get("ferc_ex_parte_party_id") or "").strip(), d,
+                         r.get("presenter_or_requester_as_printed"), "",
+                         "FERC", r.get("docket_numbers_as_printed"), "", "",
+                         "FERC ex parte filing",
+                         r.get("fr_document_number"), "",
+                         # The footnote names a party FERC did not print in the
+                         # table. Cedar's own ruling forbids promoting it into
+                         # the party field - "with X", "from X" and "forwarding
+                         # comments of X" are three different relationships -
+                         # so it travels verbatim in notes for a human.
+                         (r.get("footnote_text_verbatim") or "").strip()))
+    rows += ferc
+    counts["agency_meeting"] = counts.get("agency_meeting", 0) + len(ferc)
+
+    # 5c. Dear Tribal Leader letters. `formal_letter` was declared SOURCELESS
+    #     in this file and that was simply wrong - Cedar has held 807 of them
+    #     since 2026-09-02. Declaring the gap is what got it looked at; the
+    #     declaration was just aimed at the wrong shelf.
+    dtll = []
+    for r in _read(CLEAN / "dear_tribal_leader_letters.csv"):
+        d = (r.get("letter_date") or "").strip()
+        if _year(d) not in WINDOW:
+            continue
+        dtll.append(_row(names, "", "formal_letter",
+                         (r.get("letter_id") or "").strip(), d,
+                         r.get("addressed_to"), r.get("agency"),
+                         r.get("agency"), r.get("subject_as_published"),
+                         "", "", "Dear Tribal Leader letter",
+                         r.get("letter_id"), r.get("document_url"),
+                         (r.get("letter_date_basis") or "").strip()))
+    rows += dtll
+    counts["formal_letter"] = len(dtll)
+
+    # 5d. BIA's own consultation calendar, and FR ex parte parties Cedar had
+    #     not extracted. ONLY the non-overlapping rows: 104 of the 151
+    #     harvested were already in Cedar's FERC/FR tables with fuller docket
+    #     strings and footnote reading, so importing them would have created
+    #     duplicates that are WORSE than the originals.
+    #
+    #     The 35 BIA rows matter most. Cedar's consultation_events.csv is 100%
+    #     Federal-Register-derived and collapses to 7 events with a 2025 start
+    #     and 2 in 2026; bia.gov publishes the sessions themselves. A source
+    #     that only sees consultations the FR announced cannot see the ones an
+    #     agency simply held.
+    extra = []
+    for r in _read(ROOT / "data" / "source" / "advocacy"
+                   / "bia_and_new_fr_meetings_2025_2026.csv"):
+        d = (r.get("activity_date") or "").strip()
+        if _year(d) not in WINDOW:
+            continue
+        is_bia = "bia.gov" in (r.get("source_url") or "")
+        extra.append(_row(names, "",
+                          "tribal_consultation" if is_bia else "agency_meeting",
+                          (r.get("meeting_id") or "").strip(), d,
+                          r.get("party_as_printed"), "", r.get("agency"),
+                          r.get("topic"), "", "",
+                          "BIA consultation calendar" if is_bia
+                          else "Federal Register ex parte notice",
+                          r.get("source_record_id"), r.get("source_url"),
+                          r.get("notes")))
+    rows += extra
+    for e in extra:
+        counts[e["activity_type"]] = counts.get(e["activity_type"], 0) + 1
 
     # 6. congressional testimony. ACQUIRED 2026-09-04 - this category was
     #    declared-and-empty until then, which is why it was declared rather
