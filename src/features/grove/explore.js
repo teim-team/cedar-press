@@ -42,12 +42,43 @@
 // count the card states is a count of sample rows, and the caption says so.
 
 import explore from "../../../data/cedar/explore.json" with { type: "json" };
+import codebookJson from "../../../data/cedar/codebook.json" with { type: "json" };
 
 import { collectionCitation, collectionSample, collectionTables, sampleUnavailableReason } from "./collection.js";
 import { canOpenDataset } from "./pressAccess.js";
 import { PRESS_CATALOG_BY_ID, STOREFRONT_CATALOG } from "./pressCatalog.js";
 
 export const CONTRACTS = Object.freeze(explore.tables);
+
+/**
+ * The codebook: per table, what one row is and the columns a subscriber
+ * sees, each with a plain-English label and its meaning. The viewer reads
+ * labels for headings and meanings for the record; a column the codebook
+ * does not list is a technical field, shown only on request. The review
+ * document docs/DATASET_CODEBOOK.md is generated from the same file.
+ */
+export const CODEBOOK = Object.freeze(codebookJson.tables);
+
+export function codebookFor(key) {
+  return CODEBOOK[key] ?? null;
+}
+
+/** The plain-English label for a column, or a heading made from its name. */
+export function labelFor(key, column) {
+  const field = CODEBOOK[key]?.fields.find((f) => f.column === column);
+  if (field) return field.label;
+  const words = String(column).replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+export function meaningFor(key, column) {
+  return CODEBOOK[key]?.fields.find((f) => f.column === column)?.meaning ?? null;
+}
+
+/** The codebook's columns for a table, in its order, that the sample actually has. */
+export function codebookColumns(key, columns) {
+  return (CODEBOOK[key]?.fields ?? []).map((f) => f.column).filter((c) => columns.includes(c));
+}
 export const CUT_VERSION = 1;
 
 /** The type-picker token for rows no register entity is linked to. */

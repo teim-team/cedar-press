@@ -2309,6 +2309,9 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-ex__record dt { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-ex__record dt small { display: inline; color: var(--dteal); letter-spacing: 0.06em; margin-left: 0.35rem; }
 .teim-rd .cp-ex__record dd { margin: 0.1rem 0 0; font-size: 0.84rem; overflow-wrap: anywhere; }
+.teim-rd .cp-ex__record dt { font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.02em; text-transform: none; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-ex__group .cp-ex__record dt { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-ex__record dd.cp-ex__meaning { font-size: 0.74rem; line-height: 1.4; color: var(--muted); margin-top: 0.15rem; }
 .teim-rd .cp-ex__empty { margin: 0; padding: 1.4rem 1rem; font-size: 0.92rem; color: var(--muted); border-top: 1px solid var(--line); }
 .teim-rd .cp-ex__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 0.7rem 1rem; border-top: 1px solid var(--line); }
 .teim-rd .cp-ex__foot .cp-read__cedar { margin-top: 0; }

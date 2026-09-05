@@ -16,11 +16,13 @@ import { fileURLToPath } from "node:url";
 
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import {
+  CODEBOOK,
   CONTRACTS,
   EMPTY_CUT,
   UNLINKED,
   WITHHELD_TEXT,
   buildRegister,
+  codebookColumns,
   contractFor,
   csvCell,
   cutCsv,
@@ -35,6 +37,8 @@ import {
   filterRows,
   flagshipKey,
   isNarrowed,
+  labelFor,
+  meaningFor,
   observationOf,
   pageOf,
   parseCsv,
@@ -490,6 +494,37 @@ test("a table with no identifier column has no record id, and its rows keep dist
   for (const [k, c] of Object.entries(CONTRACTS)) {
     if (c.record_id) assert.ok(/(_id|_uuid|_key|_number|^ein$|^deal_id$)/i.test(c.record_id), `${k}: ${c.record_id} is not an identifier`);
   }
+});
+
+test("the codebook names real columns in every flagship, with a label and a meaning each, and its document is current", () => {
+  const script = fileURLToPath(new URL("../../../scripts/codebook-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr || run.stdout);
+  for (const dataset of LAUNCH_COLLECTION) {
+    const key = flagshipKey(dataset.id);
+    if (!key) continue;
+    const book = CODEBOOK[key];
+    assert.ok(book, `${key} has no codebook entry`);
+    assert.ok(book.row && book.where, `${key}: no row or where`);
+    const { columns } = load(key);
+    for (const field of book.fields) {
+      assert.ok(field.label && field.meaning, `${key}.${field.column} lacks a label or meaning`);
+      if (!field.add) assert.ok(columns.includes(field.column), `${key}: codebook column ${field.column} is not in the sample`);
+    }
+    // The identity block leads, in the register's order.
+    // (plural, and with the role in brackets, where a row names several)
+    const lead = book.fields.slice(0, 3).map((f) => f.label);
+    assert.match(lead[0], /^Cedar IDs?/, key);
+    assert.match(lead[1], /^Native entit/, key);
+    assert.match(lead[2], /^Entity types?/, key);
+    // Every column the contract declares as a default is a column the codebook explains.
+    const listed = new Set(book.fields.map((f) => f.column));
+    for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
+    assert.ok(codebookColumns(key, columns).length >= 10, `${key}: fewer than ten codebook columns present`);
+  }
+  assert.equal(labelFor("lobbying/native_entity_lobbying_disclosures", "registrant_name"), "Registrant");
+  assert.match(meaningFor("lobbying/native_entity_lobbying_disclosures", "spend_basis"), /Income, expenses/);
+  assert.equal(labelFor("lobbying/native_entity_lobbying_disclosures", "not_a_column"), "Not a column");
 });
 
 test("CONTRACTS is the derived file, frozen, and the withheld tables are gone from it", () => {

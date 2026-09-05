@@ -46,6 +46,8 @@ import {
   UNLINKED,
   WITHHELD_TEXT,
   buildRegister,
+  codebookColumns,
+  codebookFor,
   contractFor,
   cutCsv,
   cutReadme,
@@ -57,6 +59,8 @@ import {
   facets as facetsOf,
   filterRows,
   isNarrowed,
+  labelFor,
+  meaningFor,
   pageOf,
   parseCsv,
   questionFor,
@@ -81,11 +85,6 @@ function short(id) {
   return PRESS_CATALOG_BY_ID[id]?.short ?? id;
 }
 
-/** "filing_type_display" -> "Filing type display", for a column heading. */
-function heading(column) {
-  const words = String(column).replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").trim();
-  return words.charAt(0).toUpperCase() + words.slice(1);
-}
 
 // ── Static data ────────────────────────────────────────────────────────────
 
@@ -444,65 +443,62 @@ function CollectionSelect({ value, subset, collections, scope, onChange, onActiv
 
 // ── The record ─────────────────────────────────────────────────────────────
 
-const ROLES = ["record_id", "entity_uid", "entity_name", "entity_type", "subject", "year", "date", "amount", "amount_basis", "source", "superseded", "superseded_by"];
-const ATTRIBUTION = /source|attribution|match|confidence|basis|evidence|tier|ruling|verif|quote|fetched|built|retrieved|promoted|review|method|scope|population|vintage|withdrawn|supersession|superseded|duplicate/i;
-const TECHNICAL = /(^|_)(id|ids|uid|uids|uuid|key|code|fips|flag|hash|token|index)$|^(is_|has_|n_|geo_|dt_)|_normalized$|_norm$|_real2025$|deflator|inflation|_share$|_ambiguous$|_count$|_pct$|_percent$|_rank$/i;
-
 /**
- * A record's columns in three groups: what the record says (the declared
- * default columns and the roles), where it came from (source and
- * attribution), and the technical fields (identifiers, flags, geography,
- * derived numbers). Complete, but with a hierarchy.
+ * A record in two parts: the columns the codebook lists, in its order and
+ * with its plain-English labels and meanings, and everything else folded
+ * under Technical fields. Complete, but a subscriber meets the record in
+ * their own words first. A table the codebook does not know yet shows its
+ * columns as they are.
  */
-function groupColumns(columns, contract) {
-  const roles = new Set(ROLES.map((k) => contract?.[k]).filter(Boolean));
-  const main = new Set([...(contract?.default_columns ?? []), ...roles, ...(contract?.observation ?? [])]);
-  const groups = { main: [], attribution: [], technical: [] };
-  for (const column of columns) {
-    if (main.has(column) && !(TECHNICAL.test(column) && !roles.has(column))) groups.main.push(column);
-    else if (ATTRIBUTION.test(column) && !TECHNICAL.test(column)) groups.attribution.push(column);
-    else groups.technical.push(column);
-  }
-  // Main columns in the declared order, so the record reads the way the table does.
-  const order = [...(contract?.default_columns ?? []), ...columns];
-  groups.main.sort((a, b) => order.indexOf(a) - order.indexOf(b));
-  return groups;
+function groupColumns(columns, key) {
+  const listed = codebookColumns(key, columns);
+  const main = listed.length ? listed : columns;
+  const known = new Set(main);
+  return { main, technical: columns.filter((c) => !known.has(c)) };
 }
 
-/** A cell for a person: links, dates, money, yes/no, lists; a dash for nothing. */
-function Human({ column, value, contract }) {
+function Human({ column, value, contract, item = null }) {
   if (value === "" || value == null) return "—";
   const text = String(value);
   if (/^https?:\/\/\S+$/i.test(text)) return <a href={text} target="_blank" rel="noreferrer">{text.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{text.length > 88 ? "…" : ""}</a>;
-  if (contract?.amount === column) {
+  // Money wherever the column is money: the table's amount, or any column
+  // named in dollars (`_usd`, `_amt`, `obligations`, `amount`, `value_usd`).
+  if (contract?.amount === column || /(_usd|_amt|obligations|_amount|amount_usd)$/i.test(column) || /^(income|expenses|spend)_/i.test(column)) {
     const n = Number(text.replace(/[$,\s]/g, ""));
-    return Number.isFinite(n) ? money.format(n) : text;
+    if (Number.isFinite(n)) return money.format(n);
   }
   if (/^\d{4}-\d{2}-\d{2}T/.test(text)) return text.slice(0, 10);
-  if (/^(is_|has_)|_flag$/.test(column) && /^(0|1)$/.test(text)) return text === "1" ? "yes" : "no";
+  // Yes or no wherever the codebook says the column is one, or the name does.
+  const yesNo = /\(yes or no\)/.test(meaningFor(item?.key, column) ?? "") || /^(is_|has_|self_|reported_)|_flag$/.test(column);
+  if (yesNo && /^(0|1|Y|N)$/i.test(text)) return /^(1|Y)$/i.test(text) ? "yes" : "no";
   if (text.includes("|") && !/^https?:/.test(text)) return text.split("|").map((p) => p.trim()).filter(Boolean).join(", ");
   return text;
 }
 
-function Fields({ columns, item, contract, roleOf }) {
+function Fields({ columns, item, contract, plain }) {
   return (
     <dl className="cp-ex__record">
-      {columns.map((column) => (
-        <div key={column} className={item.row[column] === "" ? "is-blank" : ""}>
-          <dt>{heading(column)}{roleOf(column) ? <small> {roleOf(column).replace(/_/g, " ")}</small> : null}</dt>
-          <dd><Human column={column} value={item.row[column]} contract={contract} /></dd>
-        </div>
-      ))}
+      {columns.map((column) => {
+        const meaning = plain ? meaningFor(item.key, column) : null;
+        return (
+          <div key={column} className={item.row[column] === "" ? "is-blank" : ""}>
+            <dt title={meaning ?? undefined}>{plain ? labelFor(item.key, column) : column}</dt>
+            <dd><Human column={column} value={item.row[column]} contract={contract} item={item} /></dd>
+            {meaning ? <dd className="cp-ex__meaning">{meaning}</dd> : null}
+          </div>
+        );
+      })}
     </dl>
   );
 }
 
 function Record({ item, columns }) {
   const contract = contractFor(item.key);
-  const roleOf = (column) => ROLES.find((k) => contract?.[k] === column) ?? (contract?.observation?.includes(column) ? "observation" : null);
-  const groups = groupColumns(columns, contract);
+  const codebook = codebookFor(item.key);
+  const groups = groupColumns(columns, item.key);
   return (
     <div className="cp-ex__inner">
+      {codebook ? <p className="cp-ex__fine"><b>One row is</b> {codebook.row}</p> : null}
       {item.superseded ? (
         <p className="cp-ex__superseded">
           <b>Superseded.</b> A later version replaces this record
@@ -514,17 +510,11 @@ function Record({ item, columns }) {
       ) : contract?.entity_role && item.entity.uid ? (
         <p className="cp-ex__fine">Entity: {item.entity.name ?? WITHHELD_TEXT} ({item.entity.uid}) · {contract.entity_role}</p>
       ) : null}
-      <Fields columns={groups.main} item={item} contract={contract} roleOf={roleOf} />
-      {groups.attribution.length ? (
-        <details className="cp-ex__group" open>
-          <summary>Source and attribution ({groups.attribution.length})</summary>
-          <Fields columns={groups.attribution} item={item} contract={contract} roleOf={roleOf} />
-        </details>
-      ) : null}
+      <Fields columns={groups.main} item={item} contract={contract} plain />
       {groups.technical.length ? (
         <details className="cp-ex__group">
-          <summary>Technical fields ({groups.technical.length})</summary>
-          <Fields columns={groups.technical} item={item} contract={contract} roleOf={roleOf} />
+          <summary>Technical fields ({groups.technical.length}), as the file carries them</summary>
+          <Fields columns={groups.technical} item={item} contract={contract} plain={false} />
         </details>
       ) : null}
       <p className="cp-ex__fine">{short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"} · preview row</p>
@@ -598,7 +588,7 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
     ["source", "Source"],
   ];
   const pinned = (c) => c === entityColumn || c === contract?.entity_uid;
-  const heads = view === "table" ? columns.map((c) => [c, heading(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
+  const heads = view === "table" ? columns.map((c) => [c, labelFor(items[0]?.key, c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   const span = heads.length + 1;
   return (
     <div className="cp-ex__scroll" ref={scrollRef}>
@@ -626,7 +616,7 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
                   ? columns.map((column) => (
                     <td key={column} className={`${pinned(column) ? "cp-ex__pin" : ""}${column === contract?.entity_uid ? " cp-ex__pin--uid" : column === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
                       {column === entityColumn && item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
-                      {column === entityColumn && item.entity.withheld ? <em>{WITHHELD_TEXT}</em> : <Human column={column} value={item.row[column]} contract={contract} />}
+                      {column === entityColumn && item.entity.withheld ? <em>{WITHHELD_TEXT}</em> : <Human column={column} value={item.row[column]} contract={contract} item={item} />}
                       {column === entityColumn && item.entity.uid && !columns.includes(contract?.entity_uid) ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
                     </td>
                   ))
@@ -785,7 +775,10 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // columns, then, on request, everything else. The download keeps the
   // table's own order and every column.
   const lead = contract ? [contract.entity_uid, contract.entity_name, contract.entity_type].filter((c) => c && tableColumns.includes(c)) : [];
-  const defaults = (contract?.default_columns ?? []).filter((c) => tableColumns.includes(c));
+  // The columns a subscriber sees first: the codebook's, in its order;
+  // the contract's declared defaults where the codebook has none yet.
+  const listed = table ? codebookColumns(table.key, tableColumns) : [];
+  const defaults = (listed.length ? listed : (contract?.default_columns ?? [])).filter((c) => tableColumns.includes(c));
   const allColumns = table ? [...new Set([...lead, ...tableColumns])] : [];
   const shownColumns = table ? (showAll || !defaults.length ? allColumns : [...new Set([...lead, ...defaults])]) : [];
   const yearBasis = table
@@ -939,7 +932,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               <b>{single.entry.name}.</b> {single.entry.blurb}
               {contract?.entity_role ? <> The entity on each record is <em>{contract.entity_role}</em>.</> : null}
               {contract?.year_basis ? <> Years are the <em>{contract.year_basis}</em>.</> : <> This is a register, not a series of events: the year filter does not apply.</>}
-              {contract?.amount ? <> Amounts are <em>{contract.amount_label ?? heading(contract.amount)}</em>.</> : null}
+              {contract?.amount ? <> Amounts are <em>{contract.amount_label ?? labelFor(table.key, contract.amount)}</em>.</> : null}
               {/* A filing appears once, as its current version. The earlier
                   versions are history, reachable by link (h=1) and not a
                   thing a subscriber browses; the count of them was chrome. */}

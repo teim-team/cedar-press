@@ -146,7 +146,7 @@
         "total_obligations",
         "naics_description",
         "setaside",
-        "extent_competed"
+        "extent_competed_normalized"
       ],
       "columns": 72
     },
@@ -3685,7 +3685,7 @@
         "notice_type",
         "title",
         "mni_total_stated",
-        "cultural_items_total_stated",
+        "n_associated_funerary_objects_stated",
         "repatriation_recipient_entity_ids",
         "source_url"
       ],
@@ -4354,7 +4354,6 @@
         "city",
         "ntee_code",
         "bmf_revenue_amt",
-        "bmf_status",
         "source_url"
       ],
       "columns": 67
