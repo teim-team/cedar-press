@@ -76,7 +76,7 @@ export default function CedarPressResearchAccess() {
         <section className="cp-fit cp-fade" aria-label="Whether this fits">
           <div className="cp-fit__side cp-fit__side--yes">
             <span className="cp-fit__cap">Good fit</span>
-            <p>A researcher needs the Lobbying collection for one defined journal article.</p>
+            <p>A researcher needs the Advocacy collection for one defined journal article.</p>
           </div>
           <div className="cp-fit__side cp-fit__side--no">
             <span className="cp-fit__cap">Not a fit</span>

@@ -107,8 +107,19 @@ def _q(d: str) -> str:
     return ""
 
 
-def _read(p: Path):
+class Unmeasured(RuntimeError):
+    """A required source is absent. Never an empty list: an absent
+    consultation, ex-parte, regulations.gov, Schedule C or LDA input used to
+    read as a zero-row category and `build` wrote a partial dataset with an
+    activity type silently missing (Codex, PR #56). Only the categories
+    declared in NO_SOURCE_YET may be empty for want of a source."""
+
+
+def _read(p: Path, required: bool = True):
     if not p.exists():
+        if required:
+            shown = p.relative_to(ROOT) if p.is_relative_to(ROOT) else p
+            raise Unmeasured("UNMEASURED: required source absent: %s" % shown)
         return []
     with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         return list(csv.DictReader(fh))
@@ -143,7 +154,7 @@ def _orgkey(x: str) -> str:
     """Normalised form for EXACT organization-name equality, not similarity."""
     import re as _re
     x = (x or "").lower()
-    x = _re.sub(r"(inc|incorporated|corp|corporation|llc|ltd|co|the)", " ", x)
+    x = _re.sub(r"\b(inc|incorporated|corp|corporation|llc|ltd|co|the)\b", " ", x)
     x = _re.sub(r"[^a-z0-9]+", " ", x)
     return " ".join(x.split())
 
@@ -182,14 +193,22 @@ def collect(names):
         prev = seen_group.get(key)
         if prev is None or (r.get("dt_posted") or "") > (prev.get("dt_posted") or ""):
             seen_group[key] = r
+    no_activity = 0
     for r in seen_group.values():
+        ft = (r.get("filing_type_display") or r.get("filing_type") or "").strip()
+        if "no activity" in ft.lower():
+            # A NO-ACTIVITY FILING DOCUMENTS THE ABSENCE OF LOBBYING. The
+            # grain is one row per documented activity, so it is counted
+            # here and not emitted; a reader counting rows must not count
+            # it as advocacy (Codex, PR #56). It used to ship with a note.
+            no_activity += 1
+            continue
         inc, exp = (r.get("income_usd") or "").strip(), (r.get("expenses_usd") or "").strip()
         amt, atype = ("", "")
         if inc and inc not in ("0", "0.0", "0.00"):
             amt, atype = inc, "lobbying_income"
         elif exp and exp not in ("0", "0.0", "0.00"):
             amt, atype = exp, "lobbying_expense"
-        ft = (r.get("filing_type_display") or r.get("filing_type") or "").strip()
         lob.append(_row(names, r.get("cedar_uid"), "registered_lobbying",
                         (r.get("filing_uuid") or "").strip(),
                         (r.get("dt_posted") or "")[:10],
@@ -197,11 +216,10 @@ def collect(names):
                         r.get("government_entities"),
                         r.get("specific_issues_text"),
                         amt, atype, "LDA quarterly filing",
-                        r.get("filing_uuid"), r.get("filing_url"),
-                        ("no-activity filing - does NOT document lobbying activity"
-                         if "no activity" in ft.lower() else ft)))
+                        r.get("filing_uuid"), r.get("filing_url"), ft))
     rows += lob
     counts["registered_lobbying"] = len(lob)
+    counts["_no_activity_filings_excluded"] = no_activity
 
     # 2. tribal consultations. tribe_id here is a RETIRED CICD identifier, so
     #    the row goes through the same translator every other writer uses.
@@ -225,7 +243,8 @@ def collect(names):
                             "", r.get("agency"), r.get("topic")
                             or r.get("consultation_type"),
                             "", "", label,
-                            r.get("consultation_event_id"), "",
+                            r.get("consultation_event_id"),
+                            r.get("source_url") or r.get("notice_url") or "",
                             r.get("participant_role") or ""))
     rows += con
     counts["tribal_consultation"] = len(con)
@@ -305,7 +324,8 @@ def collect(names):
                        "%s-12-31" % ty,
                        r.get("taxpayer_name_as_filed"), "", "IRS", "",
                        amt, "irs_lobbying_expenditure" if amt else "",
-                       "IRS 990 Schedule C", r.get("object_id"), "",
+                       "IRS 990 Schedule C", r.get("object_id"),
+                       r.get("source_url") or r.get("filing_url") or "",
                        "tax-year figure; NOT comparable with LDA quarterly "
                        "amounts"))
     rows += sc
@@ -332,7 +352,11 @@ def collect(names):
                          r.get("presenter_or_requester_as_printed"), "",
                          "FERC", r.get("docket_numbers_as_printed"), "", "",
                          "FERC ex parte filing",
-                         r.get("fr_document_number"), "",
+                         r.get("fr_document_number"),
+                         r.get("source_url") or (
+                             "https://www.federalregister.gov/d/%s"
+                             % r["fr_document_number"].strip()
+                             if (r.get("fr_document_number") or "").strip() else ""),
                          # The footnote names a party FERC did not print in the
                          # table. Cedar's own ruling forbids promoting it into
                          # the party field - "with X", "from X" and "forwarding
@@ -396,7 +420,7 @@ def collect(names):
     #     5 not already present - the other 9 are in consultation_events.csv.
     #
     #     They were missed for a reason worth recording: the harvest pattern
-    #     was `tribal consultation`, and a word boundary cannot fall
+    #     was `\btribal consultation\b`, and a word boundary cannot fall
     #     between "consultation" and "s". Every PLURAL - "Tribal
     #     consultations", "listening sessions" - was invisible to it, which
     #     hid a real EPA/Army tribal listening session. A coverage gap created
@@ -450,8 +474,13 @@ def collect(names):
 
 
 def build(apply: bool = False) -> int:
-    names = entity_names()
-    rows, counts = collect(names)
+    try:
+        names = entity_names()
+        rows, counts = collect(names)
+    except Unmeasured as exc:
+        print("  %s" % exc)
+        print("  refusing to build: an absent source is not a zero-row category")
+        return 2
     keyed = sum(1 for r in rows if r["cedar_uid"])
     print("  1187 Native Federal Advocacy & Engagement   %s"
           % ("BUILD" if apply else "REPORT (writes nothing)"))
@@ -461,6 +490,8 @@ def build(apply: bool = False) -> int:
         note = "   <- NO SOURCE IN CEDAR YET" if t in NO_SOURCE_YET else ""
         print("      %-32s %7d%s" % (t, n, note))
     print()
+    print("      no-activity LDA filings excluded : %d  (not activities)"
+          % counts.get("_no_activity_filings_excluded", 0))
     print("    with a cedar_uid : %d (%.1f%%)"
           % (keyed, 100.0 * keyed / len(rows) if rows else 0))
     print("    left blank       : %d" % (len(rows) - keyed))
@@ -495,13 +526,32 @@ def verify() -> int:
     pat = _re.compile(r"(TRBF|AKNF|ANVC|ANRC|CNSF|SGVF|NHO|UIO|BIE|CDFI|TRBS|ITO"
                       r"|TCU|CNSS)-[A-Z0-9]{6}-[A-Z0-9]{2}")
     neid = sum(1 for r in rows for v in r.values() if v and pat.search(v))
+    # PROVENANCE. Every activity type's source carries a URL; a type that
+    # ships with none has lost its evidence link somewhere in this file
+    # (Codex, PR #56: consultation and Schedule C rows hardcoded a blank).
+    no_url = {}
+    for r in rows:
+        if not (r.get("source_url") or "").strip():
+            no_url[r["activity_type"]] = no_url.get(r["activity_type"], 0) + 1
+    by_type = {}
+    for r in rows:
+        by_type[r["activity_type"]] = by_type.get(r["activity_type"], 0) + 1
+    unsourced_types = sorted(t for t, n in by_type.items() if no_url.get(t, 0) == n)
+    no_act = sum(1 for r in rows if "no activity" in (r.get("notes") or "").lower()
+                 and r["activity_type"] == "registered_lobbying")
     print("  rows                          : %d" % len(rows))
+    print("  rows without a source_url     : %d  %s"
+          % (sum(no_url.values()),
+             ("(" + ", ".join("%s=%d" % kv for kv in sorted(no_url.items())) + ")")
+             if no_url else ""))
+    print("  types with NO source_url at all: %s" % (unsourced_types or "none"))
+    print("  no-activity filings shipped   : %d" % no_act)
     print("  activity_type off-vocabulary  : %s" % (bad_t or "none"))
     print("  amount_type off-vocabulary    : %s" % (bad_a or "none"))
     print("  amount with no amount_type    : %d" % len(amt_no_type))
     print("  amount invented on an event   : %d" % len(invented))
     print("  retired CICD identifiers      : %d" % neid)
-    if bad_t or bad_a or amt_no_type or invented or neid:
+    if bad_t or bad_a or amt_no_type or invented or neid or unsourced_types or no_act:
         ok = False
     print("  OK" if ok else "  FAIL")
     return 0 if ok else 1
@@ -518,6 +568,11 @@ def selftest() -> int:
         print("  FAIL quarter derivation"); ok = False
     else:
         print("  quarter derives from the date, never stored independently")
+    try:
+        _read(CLEAN / "this_source_does_not_exist.csv")
+        print("  FAIL a missing required source read as an empty list"); ok = False
+    except Unmeasured:
+        print("  a missing required source raises UNMEASURED, never reads empty")
     print("  selftest %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 

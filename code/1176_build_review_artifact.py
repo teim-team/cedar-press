@@ -168,6 +168,16 @@ def coverage():
     }
 
 
+
+def _script_json(obj) -> str:
+    """JSON that is safe inside an inline <script>. json.dumps leaves `<`
+    alone, so a regulations.gov comment containing `</script>` would end the
+    element and hand the rest of the payload to the HTML parser. `\u003c` is
+    the same character to JSON.parse and inert to the HTML tokenizer."""
+    return json.dumps(obj).replace("<", "\\u003c").replace(">", "\\u003e") \
+                          .replace("&", "\\u0026")
+
+
 def main():
     cov = coverage()
     payload, cards = {}, []
@@ -203,9 +213,9 @@ def main():
             c[k] = (c[k].replace("__SOURCED__", format(n_src, ","))
                         .replace("__ENTITIES__", format(n_ent, ",")))
 
-    html = TEMPLATE.replace("__CARDS__", json.dumps(cards)) \
-                   .replace("__PAYLOAD__", json.dumps(payload)) \
-                   .replace("__COV__", json.dumps(cov)) \
+    html = TEMPLATE.replace("__CARDS__", _script_json(cards)) \
+                   .replace("__PAYLOAD__", _script_json(payload)) \
+                   .replace("__COV__", _script_json(cov)) \
                    .replace("__DATE__", f"{date.today():%d %B %Y}")
     OUT.write_text(html, encoding="utf-8")
     mb = OUT.stat().st_size / 1e6

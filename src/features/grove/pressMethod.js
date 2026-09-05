@@ -29,7 +29,7 @@ export const EXPERTISE_DOMAINS = Object.freeze([
   "Federal funding, grants, loans and direct spending",
   "Natural resources",
   "Congressional legislation and voting",
-  "Lobbying",
+  "Federal advocacy, from lobbying disclosure to consultation and testimony",
   "Federal Register actions",
   "Tribal recognition",
   "NAGPRA",
@@ -70,7 +70,7 @@ export const EXPERTISE_STRIP = Object.freeze([
     label: "Policy and regulation",
     covers: Object.freeze([
       "Congressional legislation and voting",
-      "Lobbying",
+      "Federal advocacy, from lobbying disclosure to consultation and testimony",
       "Federal Register actions",
       "Tribal recognition",
       "NAGPRA",
@@ -209,7 +209,7 @@ export const MAINTENANCE_TIMELINE = Object.freeze([
 export const ECOSYSTEM_EXAMPLES = Object.freeze([
   "A transaction in Indian Country Deals can reveal a new owner, subsidiary or renamed enterprise, which corrects the enterprise structure, contracting and nonprofit records.",
   "A Federal Register notice can validate a recognition event, a regulatory action or a land-related development.",
-  "Lobbying records connect organizations to legislation, and bill histories and votes show what followed.",
+  "Advocacy records, from lobbying filings to consultations, docket comments and testimony, connect organizations to legislation, and bill histories and votes show what followed.",
   "A nation's own enterprise register or audited filing names the subsidiaries the federal record files under unrelated names.",
   "Federal funding and contracting records add economic activity to an entity profile.",
   "Better entity resolution then improves matching across every collection above.",

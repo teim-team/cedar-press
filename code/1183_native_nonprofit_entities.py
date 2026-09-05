@@ -122,7 +122,7 @@ def _namekey(x: str) -> str:
     """Normalised form for EXACT name equality. Not a similarity measure."""
     import re as _re
     x = (x or "").lower()
-    x = _re.sub(r"(inc|incorporated|corp|corporation|llc|ltd|co|the)", " ", x)
+    x = _re.sub(r"\b(inc|incorporated|corp|corporation|llc|ltd|co|the)\b", " ", x)
     x = _re.sub(r"[^a-z0-9]+", " ", x)
     return " ".join(x.split())
 
@@ -135,7 +135,7 @@ def _agree(a: str, b: str) -> bool:
     the more expensive error - so this only accepts near-identity after
     normalising case, punctuation and the legal suffix.
     """
-    # NOTE: the  word boundaries below were once written through a
+    # NOTE: the \b word boundaries below were once written through a
     # shell heredoc that turned each one into a literal backspace
     # (0x08). The pattern then matched NOTHING, so legal-suffix
     # stripping silently did not run - and had the boundaries merely
@@ -241,6 +241,8 @@ def existing_ein_to_uid() -> dict:
     for r in _read(SPINE / "cedar_nonprofit_ein_links.csv"):
         ein = norm_ein(r.get("EIN"))
         uid = (r.get("cedar_uid") or "").strip()
+        if (r.get("link_status") or "").startswith("SUPERSEDED"):
+            continue                 # a retired binding is history, not a claim
         if ein and uid:
             out.setdefault(ein, uid)
     # 2. then what Cedar held before, which may be the wrong collapse
@@ -258,7 +260,8 @@ def existing_ein_to_uid() -> dict:
 
 
 def plan():
-    """Returns (to_mint, to_link, skipped_no_ein, next_ordinal)."""
+    """Returns (to_mint, to_link, skipped_no_ein, next_ordinal, ident, merged,
+    unregistered) - the last being EINs the IRS BMF does not hold."""
     ident = _identity()
     reg = _read(REGISTER)
     used = {r["cedar_uid"] for r in reg if r.get("cedar_uid")}
@@ -285,12 +288,21 @@ def plan():
         if k:
             by_name.setdefault(k, (uid_, (rr.get("state") or "").strip().upper(),
                                    rr.get("entity_class", "")))
-    # only the already-linked EINs need arbitration
-    linked_eins = {norm_ein(o.get('ein')) for o in _read(GIVENATIVE)}
-    linked_eins = {e for e in linked_eins if e and e in known}
-    irs = bmf_names(linked_eins) if linked_eins else {}
+    # THE IRS LEG, FOR EVERY CANDIDATE. Membership is two legs - listed as
+    # Native-led by GiveNative AND registered with the IRS - and the second
+    # leg was only ever checked for EINs Cedar already held, so a directory
+    # row with a well-formed but unregistered number minted an entity on one
+    # leg (Codex, PR #56). Every EIN is looked up; one the BMF does not hold
+    # is neither minted nor linked, and is reported under `unregistered`.
+    all_eins = {norm_ein(o.get("ein")) for o in _read(GIVENATIVE)}
+    all_eins.discard("")
+    irs = bmf_names(all_eins) if all_eins else {}
+    if all_eins and not irs:
+        raise RuntimeError("UNMEASURED: no IRS Business Master File under "
+                           "data/raw/external/irs990/bmf_full_*/ - the IRS leg "
+                           "cannot be checked, so nothing is minted")
     seen_ein = set()
-    to_mint, to_link, skipped = [], [], []
+    to_mint, to_link, skipped, unregistered = [], [], [], []
     for org in _read(GIVENATIVE):
         ein = norm_ein(org.get("ein"))
         name = (org.get("name") or "").strip()
@@ -302,6 +314,9 @@ def plan():
         if ein in seen_ein:
             continue
         seen_ein.add(ein)
+        if ein not in irs:
+            unregistered.append((ein, name))
+            continue
         if ein in known:
             # AN EXISTING LINK IS A CLAIM, NOT A FACT - check it agrees.
             #
@@ -375,14 +390,23 @@ def plan():
                     merged.append((ein, name, huid, hclass))
                     continue
             to_mint.append((ein, name, org))
-    return to_mint, to_link, skipped, nxt, ident, merged
+    return to_mint, to_link, skipped, nxt, ident, merged, unregistered
 
 
 def build(apply: bool = False) -> int:
-    to_mint, to_link, skipped, nxt, ident, merged = plan()
+    try:
+        to_mint, to_link, skipped, nxt, ident, merged, unregistered = plan()
+    except RuntimeError as exc:
+        print("  %s" % exc)
+        return 2
     print("  1183 native nonprofit entities   %s"
           % ("BUILD" if apply else "REPORT (writes nothing)"))
-    print("    GiveNative orgs with an EIN : %d" % (len(to_mint) + len(to_link)))
+    print("    GiveNative orgs with an EIN : %d" % (len(to_mint) + len(to_link)
+                                                    + len(unregistered)))
+    print("    EIN NOT in the IRS BMF      : %d  (one leg only: neither minted "
+          "nor linked)" % len(unregistered))
+    for ein_, nm in unregistered[:8]:
+        print("        %-11s %s" % (ein_, nm[:60]))
     print("    already a Cedar entity      : %d  (linked, never re-minted)"
           % len(to_link))
     print("    TO MINT as %-17s: %d" % (ENTITY_CLASS, len(to_mint)))
@@ -439,19 +463,51 @@ def build(apply: bool = False) -> int:
     print()
     print("    minted %d entities into %s" % (len(minted), REGISTER.name))
 
-    # the EIN -> uid link, which is the half that makes them findable
+    # the EIN -> uid link, which is the half that makes them findable.
+    # APPEND-ONLY. The file used to be truncated and rewritten from the
+    # current directory capture, so an organization that dropped out of a
+    # later GiveNative listing kept its permanent register row and LOST its
+    # EIN binding, and every join on it regressed (Codex, PR #56). Existing
+    # links are kept; one this run no longer sees is marked, not deleted.
     link_path = SPINE / "cedar_nonprofit_ein_links.csv"
+    fields = ["EIN", "cedar_uid", "name", "link_basis", "link_tier",
+              "link_status", "last_seen"]
+    prior = {}
+    for r in _read(link_path):
+        e = norm_ein(r.get("EIN"))
+        if e:
+            prior[e] = {c: r.get(c, "") for c in fields}
+    current = {}
+    for uid, ein, name in minted:
+        current[ein] = [ein, uid, name,
+                        "minted 1183: GiveNative listing + IRS registration", "A"]
+    for ein, name, uid in to_link:
+        current[ein] = [ein, uid, name,
+                        "existing Cedar entity matched on exact EIN", "A"]
+    out_rows, kept, retired = [], 0, 0
+    for ein, row in current.items():
+        old = prior.pop(ein, None)
+        if old and old["cedar_uid"] and old["cedar_uid"] != row[1]:
+            # a binding never changes silently: keep the old one, retired,
+            # so the change is visible in the file itself
+            old["link_status"] = "SUPERSEDED %s by %s" % (TODAY, row[1])
+            out_rows.append(old)
+        out_rows.append(dict(zip(fields, row + ["active", TODAY])))
+    for ein, old in prior.items():
+        if not old.get("link_status", "").startswith("SUPERSEDED"):
+            if old.get("link_status", "active") in ("", "active"):
+                old["link_status"] = "NOT_IN_CURRENT_DIRECTORY since %s" % TODAY
+                retired += 1
+            else:
+                kept += 1
+        out_rows.append(old)
     with link_path.open("w", encoding="utf-8", newline="") as fh:
-        w = csv.writer(fh)
-        w.writerow(["EIN", "cedar_uid", "name", "link_basis", "link_tier"])
-        for uid, ein, name in minted:
-            w.writerow([ein, uid, name,
-                        "minted 1183: GiveNative listing + IRS registration", "A"])
-        for ein, name, uid in to_link:
-            w.writerow([ein, uid, name,
-                        "existing Cedar entity matched on exact EIN", "A"])
-    print("    wrote %s (%d links)"
-          % (link_path.relative_to(ROOT), len(minted) + len(to_link)))
+        w = csv.DictWriter(fh, fieldnames=fields)
+        w.writeheader()
+        w.writerows(out_rows)
+    print("    wrote %s (%d active links, %d prior link(s) marked "
+          "NOT_IN_CURRENT_DIRECTORY, %d already-marked kept)"
+          % (link_path.relative_to(ROOT), len(current), retired, kept))
 
     # and the class needs a definition, or 1181's selftest fails the build
     types = _read(TYPES)
@@ -514,7 +570,8 @@ def verify() -> int:
         ok = False
     links = _read(SPINE / "cedar_nonprofit_ein_links.csv")
     print("  EIN links            : %d" % len(links))
-    eins = [r["EIN"] for r in links]
+    eins = [r["EIN"] for r in links
+            if not (r.get("link_status") or "").startswith("SUPERSEDED")]
     print("  duplicate EIN links  : %d" % (len(eins) - len(set(eins))))
     if len(eins) != len(set(eins)):
         ok = False
@@ -561,6 +618,14 @@ def selftest() -> int:
                   % (a[:34], b[:34], got, want, why))
             ok = False
     print("  agreement test holds on all 5 named collapse cases")
+    # THE ESCAPE. `\b` in _namekey once shipped as a literal backspace byte,
+    # so the suffix strip never matched and "X Inc." and "X" were two names
+    # (Codex, PR #56). Asserted on the exact pair.
+    if _namekey("Akiptan, Inc.") != _namekey("Akiptan") != "":
+        print("  FAIL _namekey does not strip a legal suffix at a word boundary")
+        ok = False
+    else:
+        print("  _namekey strips legal suffixes at word boundaries")
     print("  selftest %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 

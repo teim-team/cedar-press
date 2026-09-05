@@ -67,6 +67,12 @@ import re
 import sys
 from pathlib import Path
 
+#: HOW THIS SHIPS. `transform` is applied by `cedar_publication.deals_public_view`
+#: on the raw source rows at every 1137 build, so `Caveat`, the normalised
+#: source types and the one-word Confidence reach the customer file without
+#: the canonical source being rewritten. OUT_INTERNAL is the inspectable copy
+#: of the same transform, for review; it is not what 1137 reads (Codex,
+#: PR #56: it used to be the only output, and nothing read it).
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "data" / "clean" / "deals_classified.csv"
 OUT_INTERNAL = ROOT / "data" / "clean" / "deals_presentation.csv"

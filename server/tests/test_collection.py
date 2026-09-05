@@ -307,8 +307,24 @@ class TestCrossLanguageParity(unittest.TestCase):
         for dataset in launch.LAUNCH_COLLECTION:
             for table in launch.collection_tables(dataset.id):
                 path = _REPO / "public" / table["sample_path"].lstrip("/")
+                # In the INDEX, not merely on this disk. `.gitignore` drops
+                # every `*.csv` by extension, so a sample the importer wrote
+                # and nobody force-added passes on the importer's machine
+                # and fails everywhere else: 2026-09-05, twenty samples,
+                # three red deploys. The rule now re-includes the samples
+                # directory; this holds the line either way.
                 with self.subTest(dataset=dataset.id, table=table["table"]):
                     self.assertTrue(path.exists(), f"{path} is declared and missing")
+                    tracked = subprocess.run(  # noqa: S603
+                        ["git", "-C", str(_REPO), "ls-files", "--error-unmatch",
+                         str(path.relative_to(_REPO))],
+                        capture_output=True, text=True, check=False,
+                    )
+                    self.assertEqual(
+                        tracked.returncode, 0,
+                        f"{dataset.id}: {path.relative_to(_REPO)} is not tracked; "
+                        "`git add` it from the checkout that ran the importer",
+                    )
 
     def test_no_full_dataset_file_is_committed_to_this_repository(self) -> None:
         # 1135 also writes the full spreadsheets: 6.2 GB, with single tables

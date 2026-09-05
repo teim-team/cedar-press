@@ -93,10 +93,19 @@ class Check:
 
 
 def neid_vocabulary() -> set:
-    """Every retired NEID Cedar holds. Membership, never shape - see 1165."""
+    """Every retired NEID Cedar holds. Membership, never shape - see 1165.
+
+    THE CROSSWALK IS THE VOCABULARY. `data/spine/cedar_retired_neid_crosswalk.csv`
+    is the tracked, complete list of retired identifiers (1,555), kept for
+    exactly this purpose when the register dropped its `handle` column. This
+    used to read that removed column plus the ignored ledger's partial
+    `tribe_id` set, which in a fresh checkout is an EMPTY vocabulary and on
+    the owner's machine 877 of 1,555 (Codex, PR #56). The ledger is still
+    read as a supplement, never as the source.
+    """
     vals = set()
-    for path, col in ((CLEAN / "cedar_identifier_ledger_final.csv", "tribe_id"),
-                      (SPINE / "cedar_identity_register.csv", "handle")):
+    for path, col in ((SPINE / "cedar_retired_neid_crosswalk.csv", "retired_neid"),
+                      (CLEAN / "cedar_identifier_ledger_final.csv", "tribe_id")):
         if not path.exists():
             continue
         with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
@@ -757,6 +766,21 @@ def selftest() -> int:
 
     ok.append(_fixture_fails("a database table with a retired-scheme column",
                              b2, lambda: check_db_identity(real_vocab)))
+
+    # 2b. a delivered CSV whose HEADER carries the retired scheme. The value
+    #     fixture (1) and the database fixture (2) never exercised this gate,
+    #     so it could have been hardwired to PASS unnoticed (Codex, PR #56).
+    def b2b(root):
+        global CUSTOMER, PREVIEW
+        (root / "customer").mkdir()
+        (root / "preview").mkdir()
+        (root / "customer" / "x.csv").write_text(
+            "cedar_uid,handle\nCE-00001-AA,\n", encoding="utf-8")
+        CUSTOMER = root / "customer"
+        PREVIEW = root / "preview"
+
+    ok.append(_fixture_fails("a delivered CSV with a retired-scheme column",
+                             b2b, check_no_retired_scheme_columns))
 
     # 3. artifacts disagreeing: clean CSVs, dirty database. The check that was
     #    missing entirely before this script existed.

@@ -176,6 +176,14 @@ data/restricted/
 !docs/**/*.csv
 !docs/**/*.txt
 
+# The site's sample files, tracked by rule rather than by `git add -f`. Every
+# one is read by the client, the API and the tests, and a sample the importer
+# wrote that nobody force-added is a build that passes on the importer's
+# machine and fails everywhere else: 2026-09-05, twenty of them, three red
+# deploys. `server/tests/test_collection.py` fails if a manifest sample is not
+# in the index.
+!/public/data/cedar/samples/**/*.csv
+
 # Requirements / lockfiles, wherever they turn up.
 !requirements*.txt
 !constraints*.txt
