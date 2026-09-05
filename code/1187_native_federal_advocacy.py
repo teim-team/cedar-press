@@ -392,6 +392,30 @@ def collect(names):
     for e in extra:
         counts[e["activity_type"]] = counts.get(e["activity_type"], 0) + 1
 
+    # 5e. Federal Register consultations Cedar's own harvest missed. Only the
+    #     5 not already present - the other 9 are in consultation_events.csv.
+    #
+    #     They were missed for a reason worth recording: the harvest pattern
+    #     was `tribal consultation`, and a word boundary cannot fall
+    #     between "consultation" and "s". Every PLURAL - "Tribal
+    #     consultations", "listening sessions" - was invisible to it, which
+    #     hid a real EPA/Army tribal listening session. A coverage gap created
+    #     by a regex looks exactly like an absence of events.
+    for r in _read(ROOT / "data" / "source" / "advocacy"
+                   / "fr_consultations_new_2025_2026.csv"):
+        d = (r.get("event_start_date") or r.get("activity_date")
+             or r.get("notice_date") or "").strip()
+        if _year(d) not in WINDOW:
+            continue
+        rows.append(_row(names, "", "tribal_consultation",
+                         (r.get("consultation_event_id") or "").strip(), d,
+                         r.get("tribes_named"), "", r.get("agency"),
+                         r.get("topic"), "", "",
+                         "Federal Register consultation notice",
+                         r.get("source_record_id"), r.get("source_url"),
+                         r.get("notes")))
+        counts["tribal_consultation"] = counts.get("tribal_consultation", 0) + 1
+
     # 6. congressional testimony. ACQUIRED 2026-09-04 - this category was
     #    declared-and-empty until then, which is why it was declared rather
     #    than deleted: a visible gap is one somebody can fill.
