@@ -485,6 +485,84 @@ class TestApplyFieldMap(unittest.TestCase):
             with self.assertRaises(pub.FieldMapRefusal):
                 pub.apply_field_map("legislation", header, rows, own)
 
+    def test_a_collective_scope_is_a_population_and_never_an_entity(self):
+        # Legislation: the class-level scope becomes the structured column,
+        # with the conservative relationship; a tribe-specific bill carries
+        # []; an unclassified bill null (owner's decision of 2026-09-05).
+        header, rows = sample("legislation", "native_bills")
+        rows[0]["bill_scope"] = ""
+        nobody = next(r for r in rows[1:] if r["bill_scope"] == "general")
+        nobody["entity_cedar_uids"] = ""            # a general bill naming nobody
+        pub.apply_field_map("legislation", header, rows, set(header))
+        self.assertIn("collective_scopes", header)
+        for r in rows[1:]:
+            parsed = json.loads(r["collective_scopes"])
+            if r["bill_scope"] == "general":
+                self.assertEqual([e["scope"] for e in parsed], ["federally-recognized-tribes"])
+                self.assertEqual(parsed[0]["relationship"], "general_subject")
+                self.assertEqual(parsed[0]["as_of_rule"], "unknown")
+                self.assertTrue(parsed[0]["basis"])
+            else:
+                self.assertEqual(parsed, [])
+        self.assertEqual(rows[0]["collective_scopes"], "null")
+        # The scope never fills the entity block: the general bill naming
+        # nobody has an empty array of uids, not a scope code in it.
+        self.assertEqual(json.loads(nobody["cedar_uids"]), [])
+        self.assertEqual(json.loads(nobody["collective_scopes"])[0]["scope"],
+                         "federally-recognized-tribes")
+        # A class the vocabulary does not know stops the dataset.
+        header, rows = sample("legislation", "native_bills")
+        rows[0]["bill_scope"] = "general"
+        rows[0]["entity_class_scope"] = "Every Native person"
+        with self.assertRaises(pub.ScopeRefused):
+            pub.apply_field_map("legislation", header, rows, set(header))
+        # The Federal Register's column is owed and supplied by the terminal:
+        # a supplied element outside the vocabulary is refused, by column.
+        element = {"scope": "all-tribes-everywhere", "relationship": "addressed",
+                   "as_of": None, "as_of_rule": "unknown", "basis": "x"}
+
+        def supplied(el):
+            header, rows = sample("federal-register", "consultation_events")
+            neutralised("federal-register", header, rows)
+            header.append("collective_scopes")
+            for r in rows:
+                r["collective_scopes"] = json.dumps([el])
+            return header, rows, set(header) - {"collective_scopes"}
+
+        header, rows, own = supplied(element)
+        with self.assertRaises(pub.ScopeRefused) as caught:
+            pub.apply_field_map("federal-register", header, rows, own)
+        self.assertEqual(caught.exception.columns, ["collective_scopes"])
+        # Without a basis, with an unknown relationship, or a parameterised
+        # scope without its parameter, likewise; a good element ships.
+        for bad in (dict(element, scope="indian-country", basis=""),
+                    dict(element, scope="indian-country", relationship="covers"),
+                    dict(element, scope="federally-recognized-tribes-in-state")):
+            header, rows, own = supplied(bad)
+            with self.assertRaises(pub.ScopeRefused):
+                pub.apply_field_map("federal-register", header, rows, own)
+        header, rows, own = supplied(dict(element, scope="federally-recognized-tribes-in-state:OK"))
+        pub.apply_field_map("federal-register", header, rows, own)
+        self.assertIn("collective_scopes", header)
+        # Right after the opening block, where the order puts it; the owed
+        # entity_link_status before it is absent until supplied.
+        self.assertEqual(header.index("collective_scopes"), 4)
+        # A scope code where an identity belongs stops a singular table too.
+        header, rows = sample("contractors", "prime_contracts")
+        neutralised("contractors", header, rows)
+        rows[2]["cedar_uid"] = "federally-recognized-tribes"
+        with self.assertRaises(pub.ScopeRefused) as caught:
+            pub.apply_field_map("contractors", header, rows, set(header))
+        self.assertEqual(caught.exception.columns, ["cedar_uid"])
+        # The Federal Register owes both columns; the writer ships without them
+        # rather than inventing either.
+        header, rows = sample("federal-register", "consultation_events")
+        neutralised("federal-register", header, rows)
+        result = pub.apply_field_map("federal-register", header, rows, set(header))
+        self.assertIn("collective_scopes", result["owed"])
+        self.assertIn("entity_link_status", result["owed"])
+        self.assertNotIn("collective_scopes", header)
+
     def test_an_unmapped_collection_is_left_alone(self):
         header = ["facility_id", "name", "built_date"]
         rows = [{"facility_id": "1", "name": "x", "built_date": "2026-01-01"}]

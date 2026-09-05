@@ -1,0 +1,75 @@
+{
+  "_note": "Collective scope: the population a record relates to, kept apart from Native entity identity. A scope is never a Cedar entity, never carries a CE-XXXXX-CC uid, never stands in for a failed entity match and never receives dollars. Owner's decision of 2026-09-05 (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). This file is the whole vocabulary: a scope code the writer meets that is not here stops the dataset. Versioned: a membership result is reproducible only against the version and the register release it was computed with.",
+  "version": 1,
+  "field": "collective_scopes",
+  "element": {
+    "scope": "A code from `scopes` below; a parameterised scope carries its parameter after a colon (federally-recognized-tribes-in-state:OK).",
+    "relationship": "How the record relates to the population: one of `relationships`.",
+    "as_of": "The date the population is defined at, YYYY-MM-DD, or null when the source does not fix one.",
+    "as_of_rule": "How `as_of` was chosen: one of `as_of_rules`.",
+    "basis": "The source words, or the source field, the scope was read from. Never blank."
+  },
+  "null_vs_empty": "null: the record was not evaluated for collective scope (the terminal has not read its source for a population). []: evaluated, and the record names no collective population.",
+  "relationships": {
+    "addressed": "The source directs a communication or an opportunity to this population: an invitation to consult, a call for comment. An invitation is not participation.",
+    "applies_to": "The source establishes applicability to this population: a statute's or a rule's applicability clause.",
+    "eligible_class": "Members of the population may qualify, subject to the criteria the source states. Eligibility is not receipt.",
+    "aggregate_population": "A statistic or an amount describes this population collectively. It is never a share per member.",
+    "general_subject": "The source discusses this population without establishing applicability to any member."
+  },
+  "as_of_rules": {
+    "source_defined": "The source names the date its population is defined at (a statute freezing membership to entities recognized on a stated date; a program's application deadline).",
+    "record_date": "The record's own date, where the source type addresses the population as it stood then (an invitation).",
+    "publication_date": "The publication date, a documented fallback for source types the guide names; never a substitute for a source-defined date.",
+    "unknown": "No date can be established from the source; membership at any date is unknown."
+  },
+  "membership_kinds": {
+    "register_class": "Membership is the register's class of an entity: evaluable per entity for the classes listed. A national count is not displayed until the class populations are reconciled against the official list, and no count is stored here.",
+    "undetermined": "Membership cannot be evaluated from the register: the source's own definition decides, and the record keeps the stated scope with individual membership unknown.",
+    "none": "The scope is a subject, not a population with members: nothing expands to it."
+  },
+  "scopes": {
+    "federally-recognized-tribes": {
+      "name": "Federally recognized tribes",
+      "definition": "The tribal governments on the Secretary of the Interior's list published under 25 U.S.C. 5131, including the Alaska Native village governments, as the list stood at `as_of`.",
+      "membership": {
+        "kind": "register_class",
+        "classes": ["Federally recognized tribe", "Federally recognized Alaska Native Village"],
+        "reconciled_against_official_list": false,
+        "reconciliation": "Owed on the terminal: a uid-level reconciliation of the register's two classes against the BIA list in the Federal Register notice of 2026-01-30 (aliases, constituent bodies, unresolved differences), before any national count is shown. The proposal's 577 was the register's class totals, not the list."
+      }
+    },
+    "federally-recognized-tribes-in-state": {
+      "name": "Federally recognized tribes in a state",
+      "parameter": "state",
+      "definition": "The federally recognized tribes a source relates to a state: headquartered there, holding land there, served by an office there, or as the source defines. The source's predicate is recorded in `basis`.",
+      "membership": {
+        "kind": "undetermined",
+        "why": "Headquarters, trust land and service area are different predicates; the register's state field is the headquarters state, which is not automatically what a source means. Individual membership stays unknown until the predicate is explicit and the evidence exists."
+      }
+    },
+    "alaska-native-villages": {
+      "name": "Alaska Native village governments",
+      "definition": "The federally recognized Alaska Native village governments, as the list stood at `as_of`.",
+      "membership": { "kind": "register_class", "classes": ["Federally recognized Alaska Native Village"], "reconciled_against_official_list": false }
+    },
+    "alaska-native-corporations": {
+      "name": "Alaska Native Corporations",
+      "definition": "The regional, village and group corporations organised under ANCSA. Not federally recognized tribes; a source that uses the ISDA definition of Indian tribe (Yellen v. Confederated Tribes of the Chehalis Reservation, 2021) reaches them where the recognized-tribe list does not, and the two scopes are recorded separately.",
+      "membership": { "kind": "register_class", "classes": ["Alaska Native Regional Corporation", "Alaska Native Village Corporation", "ANCSA Group Corporation"], "reconciled_against_official_list": false }
+    },
+    "native-hawaiian-organizations": {
+      "name": "Native Hawaiian Organizations",
+      "definition": "Organizations a source treats as Native Hawaiian Organizations under the definition it names (SBA's, a statute's, a program's own). The definition is recorded in `basis`.",
+      "membership": {
+        "kind": "undetermined",
+        "why": "Definitions differ in organisation, control and beneficiary requirements; the register's class is not a program's definition."
+      }
+    },
+    "indian-country": {
+      "name": "Indian Country, general",
+      "definition": "The record concerns Indian Country without a defined population. General relevance only.",
+      "membership": { "kind": "none" }
+    }
+  }
+}

@@ -123,7 +123,7 @@ Collection `legislation` · table `native_bills` · 3,069 rows in the full table
 
 **Where:** workspace dist/customer/legislation.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/legislation/native_bills.csv; built from the Congress.gov API.
 
-**Columns a subscriber sees (29):**
+**Columns a subscriber sees (30):**
 
 | # | Column | Label | Meaning |
 |---|---|---|---|
@@ -141,21 +141,22 @@ Collection `legislation` · table `native_bills` · 3,069 rows in the full table
 | 12 | `policy_area` | Policy area | Congress.gov's policy area for the bill. |
 | 13 | `bill_scope` | Scope | Whether the bill is specific to one tribe or general to Indian Country. |
 | 14 | `entity_class_scope` (*rename to `affected_entity_classes`*) | Relevance class scope | When the bill names no entity, the class of entity it is about (federally recognized tribes, Alaska Native corporations). Class-wide relevance, not any entity's class. |
-| 15 | `affected_entities` (*rename to `affected_entities_as_published`*) | Affected entities as published | The entities the source itself names as affected, as it names them; empty where the source names none. |
-| 16 | `introduced_date` | Introduced | The date the bill was introduced; the year filter uses this. |
-| 17 | `sponsor` (*rename to `sponsor_name`*) | Sponsor | The sponsoring member, with party and state. |
-| 18 | `sponsor_bioguide_id` | Sponsor ID | The sponsor's Biographical Directory identifier. |
-| 19 | `cosponsor_count` | Cosponsors | How many members cosponsored it. |
-| 20 | `latest_action` | Latest action | The most recent action recorded on the bill. |
-| 21 | `latest_action_date` | Latest action date | When that action happened. |
-| 22 | `outcome` | Outcome | Where the bill ended: enacted, passed one chamber, died in committee. |
-| 23 | `companion_bill_id` | Companion bill | The matching bill in the other chamber, where one exists. |
-| 24 | `n_rollcalls` (*rename to `rollcall_count`*) | Roll-call votes | How many recorded roll-call votes the bill had. |
-| 25 | `n_entities_resolved` (*rename to `resolved_entity_count`*) | Resolved entities | How many of the named entities Cedar resolved to its register. |
-| 26 | `entity_link_statuses` (*to add*) | Entity link statuses | How firmly each named entity resolves to the register, aligned with the Cedar IDs (A strongest). |
-| 27 | `source_system` (*to add*) | Source system | Which source the record came from. |
-| 28 | `source_url` (*to add*) | Source | The official page for this record, written into the file so it cites itself. |
-| 29 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
+| 15 | `collective_scopes` (*to add*) | Collective scopes | The population this record relates to, kept apart from the entities it names: a JSON array of {scope, relationship, as_of, as_of_rule, basis} elements from the vocabulary in data/cedar/scopes.json, [] when the record names no population, null when not evaluated. A scope is not an entity: it has no Cedar ID, is never counted as one and never receives dollars. |
+| 16 | `affected_entities` (*rename to `affected_entities_as_published`*) | Affected entities as published | The entities the source itself names as affected, as it names them; empty where the source names none. |
+| 17 | `introduced_date` | Introduced | The date the bill was introduced; the year filter uses this. |
+| 18 | `sponsor` (*rename to `sponsor_name`*) | Sponsor | The sponsoring member, with party and state. |
+| 19 | `sponsor_bioguide_id` | Sponsor ID | The sponsor's Biographical Directory identifier. |
+| 20 | `cosponsor_count` | Cosponsors | How many members cosponsored it. |
+| 21 | `latest_action` | Latest action | The most recent action recorded on the bill. |
+| 22 | `latest_action_date` | Latest action date | When that action happened. |
+| 23 | `outcome` | Outcome | Where the bill ended: enacted, passed one chamber, died in committee. |
+| 24 | `companion_bill_id` | Companion bill | The matching bill in the other chamber, where one exists. |
+| 25 | `n_rollcalls` (*rename to `rollcall_count`*) | Roll-call votes | How many recorded roll-call votes the bill had. |
+| 26 | `n_entities_resolved` (*rename to `resolved_entity_count`*) | Resolved entities | How many of the named entities Cedar resolved to its register. |
+| 27 | `entity_link_statuses` (*to add*) | Entity link statuses | How firmly each named entity resolves to the register, aligned with the Cedar IDs (A strongest). |
+| 28 | `source_system` (*to add*) | Source system | Which source the record came from. |
+| 29 | `source_url` (*to add*) | Source | The official page for this record, written into the file so it cites itself. |
+| 30 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
 ### Indian Country Deals
 

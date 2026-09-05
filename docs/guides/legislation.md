@@ -32,7 +32,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published`, aligned JSON arrays. `cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published` are aligned JSON arrays: each position is one entity-role association, the role here being named in the bill. A named but unresolved party has null in `cedar_uids` and its name in `entity_names_as_published` once Cedar supplies it from the relationship evidence (null until then); `entity_link_statuses` is aligned the same way. `bill_scope` says whether the bill is tribe-specific, class-wide or topic-wide, and `affected_entity_classes` names the class a class-wide bill is about, kept apart from the named entities' registry classes. A broad Indigenous-policy bill does not name every tribe and is not attributed to any. Unpacking the arrays for analysis must keep the distinct `bill_id`, so the expansion does not inflate bill counts.
+The opening block of every row is `cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published`, aligned JSON arrays. `cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published` are aligned JSON arrays: each position is one entity-role association, the role here being named in the bill. A named but unresolved party has null in `cedar_uids` and its name in `entity_names_as_published` once Cedar supplies it from the relationship evidence (null until then); `entity_link_statuses` is aligned the same way. `bill_scope` says whether the bill is tribe-specific, class-wide or topic-wide, and `affected_entity_classes` names the class a class-wide bill is about, kept apart from the named entities' registry classes. `collective_scopes` is the structured form of that: a JSON array of elements from data/cedar/scopes.json, built at write time from `bill_scope` and the class, with the relationship `general_subject` because the classification is topical and does not establish applicability; `[]` for a tribe-specific bill; null where the bill was not classified. A scope is not an entity and is never counted as one. A broad Indigenous-policy bill does not name every tribe and is not attributed to any. Unpacking the arrays for analysis must keep the distinct `bill_id`, so the expansion does not inflate bill counts.
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -42,7 +42,7 @@ Status is derived from the action history on each rebuild; a bill's row changes 
 
 ## Field dictionary
 
-The approved header, in the owner's exact order (29 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
+The approved header, in the owner's exact order (30 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
@@ -60,21 +60,22 @@ The approved header, in the owner's exact order (29 columns, of which 0 are owed
 | 12 | `policy_area` | Policy area | Congress.gov's policy area for the bill. | text | the source states none, or not applicable to this row |
 | 13 | `bill_scope` | Scope | Whether the bill is specific to one tribe or general to Indian Country. | text | the source states none, or not applicable to this row |
 | 14 | `affected_entity_classes` (was `entity_class_scope`) | Relevance class scope | When the bill names no entity, the class of entity it is about (federally recognized tribes, Alaska Native corporations). Class-wide relevance, not any entity's class. | text | the source states none, or not applicable to this row |
-| 15 | `affected_entities_as_published` (was `affected_entities`) | Affected entities as published | The entities the source itself names as affected, as it names them; empty where the source names none. | text | the source states none, or not applicable to this row |
-| 16 | `introduced_date` | Introduced | The date the bill was introduced; the year filter uses this. | date (YYYY-MM-DD) | the source states no date |
-| 17 | `sponsor_name` (was `sponsor`) | Sponsor | The sponsoring member, with party and state. | text | the source states none, or not applicable to this row |
-| 18 | `sponsor_bioguide_id` | Sponsor ID | The sponsor's Biographical Directory identifier. | identifier, as text | the source states none, or not applicable to this row |
-| 19 | `cosponsor_count` | Cosponsors | How many members cosponsored it. | number | the source states none, or not applicable to this row |
-| 20 | `latest_action` | Latest action | The most recent action recorded on the bill. | text | the source states none, or not applicable to this row |
-| 21 | `latest_action_date` | Latest action date | When that action happened. | date (YYYY-MM-DD) | the source states no date |
-| 22 | `outcome` | Outcome | Where the bill ended: enacted, passed one chamber, died in committee. | text | the source states none, or not applicable to this row |
-| 23 | `companion_bill_id` | Companion bill | The matching bill in the other chamber, where one exists. | identifier, as text | the source states none, or not applicable to this row |
-| 24 | `rollcall_count` (was `n_rollcalls`) | Roll-call votes | How many recorded roll-call votes the bill had. | number | the source states none, or not applicable to this row |
-| 25 | `resolved_entity_count` (was `n_entities_resolved`) | Resolved entities | How many of the named entities Cedar resolved to its register. | number | the source states none, or not applicable to this row |
-| 26 | `entity_link_statuses` | Entity link statuses | How firmly each named entity resolves to the register, aligned with the Cedar IDs (A strongest). | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
-| 27 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
-| 28 | `source_url` | Source | The official page for this record, written into the file so it cites itself. | web address | the source states none, or not applicable to this row |
-| 29 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
+| 15 | `collective_scopes` | Collective scopes | The population this record relates to, kept apart from the entities it names: a JSON array of {scope, relationship, as_of, as_of_rule, basis} elements from the vocabulary in data/cedar/scopes.json, [] when the record names no population, null when not evaluated. A scope is not an entity: it has no Cedar ID, is never counted as one and never receives dollars. | text | the source states none, or not applicable to this row |
+| 16 | `affected_entities_as_published` (was `affected_entities`) | Affected entities as published | The entities the source itself names as affected, as it names them; empty where the source names none. | text | the source states none, or not applicable to this row |
+| 17 | `introduced_date` | Introduced | The date the bill was introduced; the year filter uses this. | date (YYYY-MM-DD) | the source states no date |
+| 18 | `sponsor_name` (was `sponsor`) | Sponsor | The sponsoring member, with party and state. | text | the source states none, or not applicable to this row |
+| 19 | `sponsor_bioguide_id` | Sponsor ID | The sponsor's Biographical Directory identifier. | identifier, as text | the source states none, or not applicable to this row |
+| 20 | `cosponsor_count` | Cosponsors | How many members cosponsored it. | number | the source states none, or not applicable to this row |
+| 21 | `latest_action` | Latest action | The most recent action recorded on the bill. | text | the source states none, or not applicable to this row |
+| 22 | `latest_action_date` | Latest action date | When that action happened. | date (YYYY-MM-DD) | the source states no date |
+| 23 | `outcome` | Outcome | Where the bill ended: enacted, passed one chamber, died in committee. | text | the source states none, or not applicable to this row |
+| 24 | `companion_bill_id` | Companion bill | The matching bill in the other chamber, where one exists. | identifier, as text | the source states none, or not applicable to this row |
+| 25 | `rollcall_count` (was `n_rollcalls`) | Roll-call votes | How many recorded roll-call votes the bill had. | number | the source states none, or not applicable to this row |
+| 26 | `resolved_entity_count` (was `n_entities_resolved`) | Resolved entities | How many of the named entities Cedar resolved to its register. | number | the source states none, or not applicable to this row |
+| 27 | `entity_link_statuses` | Entity link statuses | How firmly each named entity resolves to the register, aligned with the Cedar IDs (A strongest). | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
+| 28 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
+| 29 | `source_url` | Source | The official page for this record, written into the file so it cites itself. | web address | the source states none, or not applicable to this row |
+| 30 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 

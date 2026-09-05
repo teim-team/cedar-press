@@ -922,6 +922,73 @@ class OwedDerivation(FieldMapRefusal):
                          f"does not ship until the terminal delivers {target}")
 
 
+class ScopeRefused(FieldMapRefusal):
+    """A collective scope the vocabulary does not know, an element without
+    its relationship or basis, or a scope code where an identity belongs."""
+    def __init__(self, collection: str, column: str, n: int, example: str):
+        super().__init__(collection, [column],
+                         f"{column} carries a collective scope the vocabulary "
+                         f"(data/cedar/scopes.json) cannot accept on {n} row(s), "
+                         f"e.g. {example}; the dataset does not ship until the "
+                         f"scope is defined or the cell corrected")
+
+
+_SCOPES_CACHE: dict = {}
+
+
+def scopes() -> dict:
+    """data/cedar/scopes.json: the collective-scope vocabulary (owner's
+    decision of 2026-09-05). A scope is a population a record relates to,
+    never a Cedar entity."""
+    if not _SCOPES_CACHE:
+        _SCOPES_CACHE.update(json.loads(
+            (ROOT / "data" / "cedar" / "scopes.json").read_text(encoding="utf-8")))
+    return _SCOPES_CACHE
+
+
+#: The register class a terminal's class-level scope column names, to the
+#: scope code that population has in the vocabulary. Lower-cased keys.
+_CLASS_TO_SCOPE = {
+    "federally recognized tribe": "federally-recognized-tribes",
+    "federally recognized tribes": "federally-recognized-tribes",
+    "federally recognized alaska native village": "alaska-native-villages",
+    "alaska native corporation": "alaska-native-corporations",
+    "alaska native corporations": "alaska-native-corporations",
+    "native hawaiian organization": "native-hawaiian-organizations",
+    "indian country": "indian-country",
+}
+
+
+def scope_elements(value: str, collection: str, column: str):
+    """Parse and validate one `collective_scopes` cell. Returns the list
+    (possibly empty) or None for null; raises ScopeRefused otherwise."""
+    text = (value or "").strip()
+    if text in ("", "null"):
+        return None
+    try:
+        parsed = json.loads(text)
+    except ValueError:
+        raise ScopeRefused(collection, column, 1, text[:60]) from None
+    if not isinstance(parsed, list):
+        raise ScopeRefused(collection, column, 1, text[:60])
+    vocab = scopes()
+    for el in parsed:
+        if not isinstance(el, dict):
+            raise ScopeRefused(collection, column, 1, str(el)[:60])
+        code = str(el.get("scope") or "")
+        base, _, param = code.partition(":")
+        defn = vocab["scopes"].get(base)
+        if not defn or (defn.get("parameter") and not param) or (param and not defn.get("parameter")):
+            raise ScopeRefused(collection, column, 1, f"scope {code!r}")
+        if el.get("relationship") not in vocab["relationships"]:
+            raise ScopeRefused(collection, column, 1, f"relationship {el.get('relationship')!r}")
+        if el.get("as_of_rule") not in vocab["as_of_rules"]:
+            raise ScopeRefused(collection, column, 1, f"as_of_rule {el.get('as_of_rule')!r}")
+        if not str(el.get("basis") or "").strip():
+            raise ScopeRefused(collection, column, 1, f"scope {code!r} without a basis")
+    return parsed
+
+
 class RetiredIdentifierPresent(FieldMapRefusal):
     def __init__(self, collection: str, where: str, n: int, example: str):
         super().__init__(collection, [where],
@@ -1095,6 +1162,25 @@ def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
                 return ""
             return f"https://www.congress.gov/bill/{_ordinal(int(congress))}-congress/{kind2}/{number}"
         return ""
+    if name == "collective_scopes":
+        # Legislation: the terminal's class-level scope, translated into the
+        # vocabulary. `general` for a class is the population with the
+        # relationship general_subject (the classification is topical and
+        # does not establish applicability); tribe-specific is []; unread
+        # is null. A class the vocabulary does not know stops the dataset.
+        scope_col, class_col = arg.split("|")
+        kind = (row.get(scope_col) or "").strip().lower()
+        cls = (row.get(class_col) or "").strip()
+        if not kind:
+            return "null"
+        if kind != "general":
+            return "[]"
+        code = _CLASS_TO_SCOPE.get(cls.lower())
+        if not code:
+            raise ScopeRefused(entry["collection"], "collective_scopes", 1, f"class {cls!r}")
+        return _js([{"scope": code, "relationship": "general_subject", "as_of": None,
+                     "as_of_rule": "unknown",
+                     "basis": f"{scope_col}={kind}; {class_col}={cls}"}])
     if name == "additional_sources":
         url_col, type_col = arg.split("|")
         url = (row.get(url_col) or "").strip()
@@ -1322,7 +1408,19 @@ def apply_field_map(collection: str, header: list, rows: list,
             row.pop(c)
 
     # 6. THE REGRESSION GATE: no prohibited name in the header, no retired
-    # scheme's name in a shipped value.
+    # scheme's name in a shipped value, every collective scope in the
+    # vocabulary, and never a scope code where an identity belongs
+    # (owner's decision of 2026-09-05: a scope is not an entity).
+    if "collective_scopes" in header:
+        for row in rows:
+            scope_elements(row.get("collective_scopes"), collection, "collective_scopes")
+    scope_codes = set(scopes()["scopes"])
+    for c in [c for c in header if c in ("cedar_uid",) or c in OPENING_PLURAL[:1]
+              or c.endswith("_cedar_uid") or c.endswith("_entity_id")]:
+        hits = [row[c] for row in rows
+                if (row.get(c) or "").split(":")[0].strip() in scope_codes]
+        if hits:
+            raise ScopeRefused(collection, c, len(hits), hits[0][:60])
     bad_names = [c for c in header if PROHIBITED_PUBLIC_COLUMN.search(c)]
     if bad_names:
         raise RetiredIdentifierPresent(collection, "the header", len(bad_names),

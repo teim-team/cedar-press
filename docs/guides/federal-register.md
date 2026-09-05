@@ -32,7 +32,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`. `cedar_entity_role` is the participant's role as the notice states it (`participant_role` today: named, invited, not enumerated). A blank `cedar_uid` means the notice enumerates no participant, or names one Cedar could not resolve; it never means no tribe was consulted.
+The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`. `cedar_entity_role` is the participant's role as the notice states it (`participant_role` today: named, invited, not enumerated). A blank `cedar_uid` is explained by `entity_link_status`, never left to be guessed: `no_individual_named` (the notice addresses a population, not an entity), `unresolved` (a named party the register could not place), `withheld` (the publication rule applies) or `resolved`. `collective_scopes` carries the population the notice addresses or applies to, as a JSON array of elements from the vocabulary in data/cedar/scopes.json: the scope, the relationship (addressed, applies_to, eligible_class, aggregate_population, general_subject), the as-of date and its rule, and the source words. A scope is not an entity: it has no Cedar ID, is never counted as one, and a notice addressed to every federally recognized tribe is not a record of any one of them. Both columns are owed by the terminal from the source text; until then they are absent, and a blank `cedar_uid` still never means no tribe was consulted.
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -42,7 +42,7 @@ Corrections and withdrawals are separate Federal Register documents; each is its
 
 ## Field dictionary
 
-The approved header, in the owner's exact order (31 columns, of which 1 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
+The approved header, in the owner's exact order (33 columns, of which 3 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
@@ -50,33 +50,35 @@ The approved header, in the owner's exact order (31 columns, of which 1 are owed
 | 2 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
 | 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
 | 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: participant. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 5 | `consultation_event_id` | Event ID | Cedar's identifier for the consultation event. | identifier, as text | the source states none, or not applicable to this row |
-| 6 | `fr_document_number` | Document number | The Federal Register document number. | identifier, as text | the source states none, or not applicable to this row |
-| 7 | `agency` | Agency | The department holding the consultation. | text | the source states none, or not applicable to this row |
-| 8 | `subagency` (was `sub_agency`) | Office | The office within the department. | text | the source states none, or not applicable to this row |
-| 9 | `program` | Program | The program or matter the consultation concerns, where the document names one. | text | the source states none, or not applicable to this row |
-| 10 | `activity_type` (was `consultation_type`) | Kind of consultation | Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document. | text | the source states none, or not applicable to this row |
-| 11 | `topic` | Topic | What the consultation was about, from the document's title. | text | the source states none, or not applicable to this row |
-| 12 | `document_role` | Document role | Whether the document announces a consultation or reports one that already happened. | text | the source states none, or not applicable to this row |
-| 13 | `notice_date` | Notice date | The date the Federal Register document was published. | date (YYYY-MM-DD) | the source states no date |
-| 14 | `event_start_date` | Event start | When the consultation began, as the notice states it. | date (YYYY-MM-DD) | the source states no date |
-| 15 | `event_end_date` | Event end | When it ended, where stated. | date (YYYY-MM-DD) | the source states no date |
-| 16 | `event_date_precision` | event date precision | day, month, year or unstated, translated from the date qualification. | — | owed: not in the file until the terminal builds it |
-| 17 | `participant_name` (was `participant_name_as_published`) | Participant as published | The tribe or organization named in the document, as it spells it. | text | the source states none, or not applicable to this row |
-| 18 | `participant_role` | Entity role | Why the entity is on this row: read from participant_role. | text | the source states none, or not applicable to this row |
-| 19 | `location` | Location | Where the consultation was held. | text | the source states none, or not applicable to this row |
-| 20 | `event_format` (was `format`) | Format | In person, virtual, teleconference, written comment, or a combination. | text | the source states none, or not applicable to this row |
-| 21 | `comment_deadline` | Comment deadline | The date written comments were due, where stated. | date (YYYY-MM-DD) | the source states no date |
-| 22 | `has_written_comments` | Written comments invited | Whether the document invites written comments (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 23 | `has_summary` | Summary available (yes or no) | Whether a summary of the consultation is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
-| 24 | `has_transcript` | Transcript available (yes or no) | Whether a transcript is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
-| 25 | `is_event_primary_row` | Counts as one consultation | One row per event carries yes; the rest are additional participants of the same event. Count consultations by this column, not by rows. | yes or no (1 or 0) | not stated; 0 is no |
-| 26 | `participant_rows_per_event` (was `n_participant_rows_for_event`) | Participant rows for this event | How many rows this event has in the file. | number | the source states none, or not applicable to this row |
-| 27 | `federal_register_citation` | Citation | The Federal Register citation (volume FR page). | text | the source states none, or not applicable to this row |
-| 28 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
-| 29 | `source_url` | Source | The document on federalregister.gov. | web address | the source states none, or not applicable to this row |
-| 30 | `source_quote` | Source passage | The sentence in the document this row was read from. | text | the source states none, or not applicable to this row |
-| 31 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
+| 5 | `entity_link_status` | entity link status | Why the Cedar block is filled or blank on this row: a notice addressed to a population names no individual entity, which is not a failed match (owner's decision of 2026-09-05, docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). | — | owed: not in the file until the terminal builds it |
+| 6 | `collective_scopes` | collective scopes | JSON array of collective scopes: the population the notice addresses or applies to, with the relationship, the as-of date and rule, and the source words; null until evaluated, [] when the notice names none. | — | owed: not in the file until the terminal builds it |
+| 7 | `consultation_event_id` | Event ID | Cedar's identifier for the consultation event. | identifier, as text | the source states none, or not applicable to this row |
+| 8 | `fr_document_number` | Document number | The Federal Register document number. | identifier, as text | the source states none, or not applicable to this row |
+| 9 | `agency` | Agency | The department holding the consultation. | text | the source states none, or not applicable to this row |
+| 10 | `subagency` (was `sub_agency`) | Office | The office within the department. | text | the source states none, or not applicable to this row |
+| 11 | `program` | Program | The program or matter the consultation concerns, where the document names one. | text | the source states none, or not applicable to this row |
+| 12 | `activity_type` (was `consultation_type`) | Kind of consultation | Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document. | text | the source states none, or not applicable to this row |
+| 13 | `topic` | Topic | What the consultation was about, from the document's title. | text | the source states none, or not applicable to this row |
+| 14 | `document_role` | Document role | Whether the document announces a consultation or reports one that already happened. | text | the source states none, or not applicable to this row |
+| 15 | `notice_date` | Notice date | The date the Federal Register document was published. | date (YYYY-MM-DD) | the source states no date |
+| 16 | `event_start_date` | Event start | When the consultation began, as the notice states it. | date (YYYY-MM-DD) | the source states no date |
+| 17 | `event_end_date` | Event end | When it ended, where stated. | date (YYYY-MM-DD) | the source states no date |
+| 18 | `event_date_precision` | event date precision | day, month, year or unstated, translated from the date qualification. | — | owed: not in the file until the terminal builds it |
+| 19 | `participant_name` (was `participant_name_as_published`) | Participant as published | The tribe or organization named in the document, as it spells it. | text | the source states none, or not applicable to this row |
+| 20 | `participant_role` | Entity role | Why the entity is on this row: read from participant_role. | text | the source states none, or not applicable to this row |
+| 21 | `location` | Location | Where the consultation was held. | text | the source states none, or not applicable to this row |
+| 22 | `event_format` (was `format`) | Format | In person, virtual, teleconference, written comment, or a combination. | text | the source states none, or not applicable to this row |
+| 23 | `comment_deadline` | Comment deadline | The date written comments were due, where stated. | date (YYYY-MM-DD) | the source states no date |
+| 24 | `has_written_comments` | Written comments invited | Whether the document invites written comments (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
+| 25 | `has_summary` | Summary available (yes or no) | Whether a summary of the consultation is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
+| 26 | `has_transcript` | Transcript available (yes or no) | Whether a transcript is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
+| 27 | `is_event_primary_row` | Counts as one consultation | One row per event carries yes; the rest are additional participants of the same event. Count consultations by this column, not by rows. | yes or no (1 or 0) | not stated; 0 is no |
+| 28 | `participant_rows_per_event` (was `n_participant_rows_for_event`) | Participant rows for this event | How many rows this event has in the file. | number | the source states none, or not applicable to this row |
+| 29 | `federal_register_citation` | Citation | The Federal Register citation (volume FR page). | text | the source states none, or not applicable to this row |
+| 30 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
+| 31 | `source_url` | Source | The document on federalregister.gov. | web address | the source states none, or not applicable to this row |
+| 32 | `source_quote` | Source passage | The sentence in the document this row was read from. | text | the source states none, or not applicable to this row |
+| 33 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 
@@ -108,6 +110,8 @@ A blank is never zero and never an invented date. A blank JSON-list cell means u
 
 Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
 
+- `entity_link_status` (pending:terminal reads the source: no_individual_named, resolved, unresolved or withheld): Why the Cedar block is filled or blank on this row: a notice addressed to a population names no individual entity, which is not a failed match (owner's decision of 2026-09-05, docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md).
+- `collective_scopes` (pending:terminal reads the source's addressee, applicability or eligibility clause into elements of data/cedar/scopes.json): JSON array of collective scopes: the population the notice addresses or applies to, with the relationship, the as-of date and rule, and the source words; null until evaluated, [] when the notice names none.
 - `event_date_precision` (derive:event_date_basis): day, month, year or unstated, translated from the date qualification.
 
 ## Release, citation and method

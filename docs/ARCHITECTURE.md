@@ -400,6 +400,44 @@ following the viewer's own entitlement (`may_open`) and every open logged.
 `CUT_VERSION` names the cut's shape so the service can accept older links and
 say what changed.
 
+## Collective scope: the population a record relates to
+
+A Federal Register notice addressed to every federally recognized tribe, a
+bill about a class of entities, a program open to all Alaska Native
+Corporations: these records name no individual entity, and before 2026-09-05
+they were indistinguishable from records whose named party the resolver
+could not place. The owner's decision
+(`docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md`) settles how they are
+represented, and its centre is a boundary: **a scope is a population, never
+an entity**. No `CE-XXXXX-CC` uid is minted for "all tribes", no entity class
+is added, and `cedar_uid` keeps meaning the canonical Native entity.
+
+- `data/cedar/scopes.json` is the vocabulary: the scope codes and their
+  definitions, the five relationships (addressed, applies_to,
+  eligible_class, aggregate_population, general_subject), the as-of rules,
+  the membership kinds, and the element schema of the `collective_scopes`
+  column (a JSON array; `[]` evaluated and none; null not evaluated).
+- The field map declares `collective_scopes` on Legislation (built at write
+  time from `bill_scope` and the class-level scope, relationship
+  `general_subject`) and on the Federal Register (owed by the terminal from
+  the source text, together with an `entity_link_status` of
+  `no_individual_named`, `resolved`, `unresolved` or `withheld`).
+- `cedar_publication.apply_field_map` validates every element against the
+  vocabulary, refuses a scope code in an identity field (`ScopeRefused`),
+  and never fills the entity block from a scope.
+- The shared query model (`explore.js`) carries `scopes` and `broad` in the
+  cut, so the permalink, the saved view, the caption, the download and the
+  Cedar question agree. Selecting a scope finds the records covering it;
+  `broad` lets an entity filter include records covering a broader group the
+  entity belongs to, off by default, evaluated per entity from the
+  register's class only for scopes whose membership kind is
+  `register_class`, and never for a state or NHO scope (unknown is never a
+  match). A row passes once, at its own grain. Every row included that way
+  says why in the viewer, and the reduced export carries `collective_scopes`
+  beside the entity columns rather than inside them.
+- Nothing here displays a national membership count: the register's class
+  totals are reconciled against the official list on the terminal first.
+
 ## The public dataset specification
 
 `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` is the owner's specification for
