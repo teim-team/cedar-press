@@ -56,10 +56,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from cedar_press import codes, ratelimit, repository, shelf
+from cedar_press import codes, priorities, ratelimit, repository, shelf
 from cedar_press.session import (
     Session,
     account_exists,
+    account_id_for,
     create_account,
     current_session,
     issue,
@@ -118,6 +119,37 @@ class Credentials(BaseModel):
     password: str
 
 
+class PointsMove(BaseModel):
+    points: int
+
+
+class ResearchRequest(BaseModel):
+    text: str
+    use_case: str | None = None
+    priority_id: str | None = None
+    support_points: int = 0
+
+
+#: Shape the Research: one store for the process, seeded from the owner's
+#: file on start. ``CEDAR_PRESS_DB`` names the SQLite file; unset, the store
+#: lives in memory and a restart forgets it, which is right for a test and
+#: wrong for a deployment, so the deployment sets it.
+_priorities = priorities.Priorities(os.environ.get("CEDAR_PRESS_DB", ":memory:"))
+_priorities.seed()
+
+
+def _account(session: Session) -> priorities.Account:
+    return priorities.Account(
+        account_id=account_id_for(session.email),
+        user_id=session.email,
+        tier=session.tier,
+    )
+
+
+def _points_error(exc: priorities.PointsError) -> HTTPException:
+    return HTTPException(status_code=400, detail={"code": "POINTS_REFUSED", "message": str(exc)})
+
+
 class Question(BaseModel):
     question: str
     surface: str = "cedar-press"
@@ -164,7 +196,73 @@ async def _flatten_error(request: Request, exc: HTTPException):
 
 @app.get("/me")
 def me(session: Session = Depends(require_session)) -> dict[str, object]:
+    # The first authenticated call of a visit: the month's points, once.
+    _priorities.accrue(_account(session))
     return session.as_payload()
+
+
+# ── Shape the Research ────────────────────────────────────────────────────
+
+
+@app.get("/press/priorities")
+def list_priorities(session: Session = Depends(require_session)) -> dict[str, object]:
+    """Every priority with its points and subscriber count, most supported first."""
+    return {
+        "month": priorities.month_of(),
+        "rules": {
+            "points_per_active_month": priorities.POINTS_PER_ACTIVE_MONTH,
+            "expiry_months": priorities.EXPIRY_MONTHS,
+        },
+        "priorities": _priorities.priorities(),
+    }
+
+
+@app.get("/press/priorities/related")
+def related_priorities(
+    q: str = "", session: Session = Depends(require_session)
+) -> dict[str, object]:
+    """The priorities a request reads as being about, before it is sent."""
+    return {"matches": priorities.related(q, _priorities.priorities())}
+
+
+@app.get("/press/influence")
+def influence(session: Session = Depends(require_session)) -> dict[str, object]:
+    """What this subscription has and has done: the profile's card.
+
+    Credits the month first, once.
+    """
+    account = _account(session)
+    _priorities.accrue(account)
+    return _priorities.influence(account)
+
+
+@app.post("/press/priorities/{priority_id}/points")
+def move_points(
+    priority_id: str, move: PointsMove, session: Session = Depends(require_session),
+) -> dict[str, object]:
+    """Put points on a priority (positive) or take them back (negative)."""
+    account = _account(session)
+    _priorities.accrue(account)
+    try:
+        return _priorities.allocate(account, priority_id, move.points)
+    except priorities.PointsError as exc:
+        raise _points_error(exc) from exc
+
+
+@app.post("/press/requests", status_code=201)
+def submit_request(
+    body: ResearchRequest, session: Session = Depends(require_session)
+) -> dict[str, object]:
+    """A subscriber's own words, beside the priority they are about, with a point if asked."""
+    account = _account(session)
+    _priorities.accrue(account)
+    try:
+        result = _priorities.submit_request(account, body.text, body.use_case, body.priority_id)
+        if body.priority_id and body.support_points > 0:
+            result["support"] = _priorities.allocate(account, body.priority_id, body.support_points)
+        return result
+    except priorities.PointsError as exc:
+        raise _points_error(exc) from exc
 
 
 @app.post("/auth/login")

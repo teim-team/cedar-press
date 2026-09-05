@@ -15,6 +15,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
+import { usePriorities } from "../../features/grove/usePriorities.js";
+import { PressInfluence } from "./PressInfluence";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { WORK_KINDS, loadWork, saveWork } from "../../features/grove/readerWork.js";
@@ -103,6 +105,7 @@ export default function CedarPressSettings() {
   useScrollToTop("settings");
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
+  const { influence, status: influenceStatus } = usePriorities({ signedIn: entitled });
 
   if (!loading && !entitled) {
     return (
@@ -163,6 +166,11 @@ export default function CedarPressSettings() {
               </button>
             </div>
           </section>
+
+          {/* Where the account's influence lives: what this subscription has
+              earned by using the product, where it put it, and what it asked
+              for. The page is worth visiting for this, not only for billing. */}
+          <PressInfluence influence={influence} tier={tierId} status={influenceStatus} />
 
           <WorkCard />
 

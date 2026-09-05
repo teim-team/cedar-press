@@ -9121,3 +9121,18 @@ tables, Cedar answering from the cut, and extracts pinned to a release and
 shared by link all need the API deployed with authorization on every request,
 and the cut is the interface they consume; do not build a second query shape
 for them.
+
+## 2026-09-05 — Shape the Research: points that inform, on an append-only ledger
+
+Cedar Press subscribers now earn Cedar Points and put them on research
+questions and data priorities (`server/cedar_press/priorities.py`,
+`docs/ARCHITECTURE.md` "Shape the Research"). The rules to keep: the
+SUBSCRIPTION earns, once a month, on the first sign-in of the month (the
+unique index is the rule; do not "award a point per login"); Press 1, Press+
+2; twelve-month expiry, oldest spent first; points and subscriber counts are
+both shown, always; the ledger is append-only and a balance is a sum, never a
+stored number; the priorities file is the owner's editorial data and the
+service never writes it. A request in a subscriber's words is read against
+the list (the same function in both languages) and kept beside the priority
+as evidence. Points inform and the copy says so; never let a total set the
+agenda mechanically, and never count a point on the client.

@@ -44,6 +44,8 @@ export const PRESS_RESEARCH_PATH = "/research-access";
  *  file inline, because a subject is worth more than a download. */
 /** One chronological feed for every collection, not a changelog per dataset. */
 export const PRESS_WHATS_NEW_PATH = "/whats-new";
+// Shape the Research: the priorities subscribers put Cedar Points toward.
+export const PRESS_PRIORITIES_PATH = "/priorities";
 
 /** A hosted article. Pieces that publish on Tribal Business News keep their
  *  own URL and never reach this route. */

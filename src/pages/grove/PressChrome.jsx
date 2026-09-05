@@ -33,6 +33,7 @@ import {
   PRESS_ARTICLES_PATH,
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
+  PRESS_PRIORITIES_PATH,
   PRESS_PATH,
   PRESS_REQUEST_PATH,
   PRESS_SETTINGS_PATH,
@@ -44,6 +45,7 @@ const NAV = [
   { id: "data", label: "Collections", to: PRESS_DATA_PATH },
   { id: "whats-new", label: "What’s new", to: PRESS_WHATS_NEW_PATH },
   { id: "methods", label: "Methods", to: PRESS_METHODS_PATH },
+  { id: "priorities", label: "Priorities", to: PRESS_PRIORITIES_PATH },
 ];
 
 /**

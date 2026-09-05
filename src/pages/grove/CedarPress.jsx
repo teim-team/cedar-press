@@ -48,6 +48,7 @@ import {
 } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
 import PressHub from "./PressHub";
+import PressPrioritiesBlock from "./PressPrioritiesBlock";
 
 export default function CedarPress() {
   useDocumentTitle();
@@ -128,6 +129,7 @@ export default function CedarPress() {
             </Link>
           </nav>
           <PressHub user={entitled ? user : null} />
+          <PressPrioritiesBlock signedIn={entitled} />
         </div>
 
         {/* Screen two: the close and the footer, as one ending. The ending is

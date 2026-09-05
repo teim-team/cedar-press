@@ -87,6 +87,30 @@ def _accounts() -> dict[str, tuple[str, str]]:
 _activated: dict[str, tuple[str, str]] = {}
 
 
+def account_id_for(email: str) -> str:
+    """The SUBSCRIPTION an address belongs to, for Shape the Research.
+
+    From the same ``CEDAR_PRESS_ACCOUNTS`` record, an optional ``account``::
+
+        {"one@bank.example": {"password": "...", "tier": "press_pro", "account": "acct-bank"},
+         "two@bank.example": {"password": "...", "tier": "press_pro", "account": "acct-bank"}}
+
+    Two seats naming one account share one ledger: the organization earns
+    its points once a month, not once per seat. An address without one is
+    its own subscription, which is every activated account today.
+    """
+    key = email.strip().lower()
+    raw = os.environ.get("CEDAR_PRESS_ACCOUNTS", "").strip()
+    if raw:
+        try:
+            record = json.loads(raw).get(key)
+        except json.JSONDecodeError:
+            record = None
+        if isinstance(record, dict) and record.get("account"):
+            return str(record["account"]).strip()
+    return key
+
+
 def account_exists(email: str) -> bool:
     """Whether an address already has an account, provisioned or activated."""
     key = email.strip().lower()

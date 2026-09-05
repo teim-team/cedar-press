@@ -392,6 +392,34 @@ test.describe("Explore the collections", () => {
   });
 });
 
+test.describe("Shape the research", () => {
+  test("the priorities page lists both kinds, says the counting needs the service, and the profile carries the card", async ({ page }) => {
+    // This build has no service, so no point is counted and no point can be
+    // placed; the page and the profile say exactly that rather than showing
+    // a zero that means "unknown".
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/priorities");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("What should Cedar research and build next?");
+    await expect(page.getByTestId("priorities-research_question").getByTestId("priority").first()).toBeVisible();
+    await expect(page.getByTestId("priorities-dataset").getByTestId("priority").first()).toBeVisible();
+    await expect(page.getByTestId("priorities-static")).toContainText("not connected");
+    await expect(page.getByTestId("priority-total").first()).toContainText("0 points · 0 subscribers");
+    // The request form reads the words against the list before sending.
+    await page.getByLabel("Tell Cedar what you need").fill("I wish you had a dataset showing which tribal enterprises own which subsidiaries");
+    await expect(page.getByTestId("request-match")).toContainText("Tribal enterprise ownership and subsidiary relationships");
+    await expect(page.getByRole("button", { name: "Submit my specific use case" })).toBeDisabled();
+    // The profile's card and the homepage block.
+    await page.goto("/settings");
+    await expect(page.getByTestId("influence")).toContainText("Your research influence");
+    await expect(page.getByTestId("influence")).toContainText("not connected");
+    await page.goto("/");
+    await expect(page.getByTestId("priorities-block")).toContainText("Subscriber research priorities");
+    await expect(page.getByTestId("priorities-block")).toContainText("not yet counted");
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("Ask Cedar", () => {
   test("the launcher opens a panel and closes it again", async ({ page }, testInfo) => {
     const errors = watchConsole(page);

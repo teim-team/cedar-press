@@ -2334,3 +2334,73 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
    * fold: visible to the DOM and unreachable by a finger. */
   .teim-rd .cp-ex__panel { position: fixed; left: 1rem; right: 1rem; top: auto; bottom: 1rem; width: auto; max-height: 60vh; }
 }
+
+/* ── Shape the Research ──────────────────────────────────────────────────
+ * The priorities page, the profile's influence card and the homepage's
+ * compact block, in the settings cards' language. */
+.teim-rd .cp-pri__layout { display: grid; grid-template-columns: 20rem minmax(0, 1fr); gap: 1.4rem; margin-top: 2rem; align-items: start; }
+.teim-rd .cp-pri__side { position: sticky; top: 3.6rem; display: flex; flex-direction: column; gap: 0.8rem; }
+.teim-rd .cp-pri__main { display: flex; flex-direction: column; gap: 2rem; min-width: 0; }
+.teim-rd .cp-pri__group .cp-head { margin-bottom: 0.4rem; }
+.teim-rd .cp-pri__lede { font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); margin: 0 0 0.9rem; max-width: 64ch; }
+.teim-rd .cp-pri__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 0.9rem; }
+.teim-rd .cp-pri { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.1rem 1.2rem; background: var(--bg); display: flex; flex-direction: column; gap: 0.45rem; }
+.teim-rd .cp-pri.is-published { border-color: var(--teal); }
+.teim-rd .cp-pri__head { display: flex; justify-content: space-between; gap: 0.6rem; align-items: baseline; }
+.teim-rd .cp-pri__type { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-pri__status { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); padding: 0.1rem 0.45rem; border: 1px solid var(--teal-line); }
+.teim-rd .cp-pri__status--published { background: var(--dteal); color: #fff; border-color: var(--dteal); }
+.teim-rd .cp-pri__status--interest { color: var(--muted); border-color: var(--line); }
+.teim-rd .cp-pri__title { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; color: var(--ink); margin: 0; }
+.teim-rd .cp-pri__desc { font-size: 0.9rem; line-height: 1.5; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-pri__points { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-pri__total { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--ink-2); }
+.teim-rd .cp-pri__total b { color: var(--dteal); }
+.teim-rd .cp-pri__mine { display: inline-flex; align-items: center; gap: 0.4rem; }
+.teim-rd .cp-pri__yours { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); }
+.teim-rd .cp-pri__btn { width: 2rem; height: 2rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-weight: 700; cursor: pointer; }
+.teim-rd .cp-pri__btn:hover:not(:disabled) { background: var(--dteal); color: #fff; }
+.teim-rd .cp-pri__btn:disabled { opacity: 0.45; cursor: default; }
+.teim-rd .cp-pri__shipped { border: 1px solid var(--teal); border-radius: var(--radius-card, 14px); padding: 1rem 1.2rem; background: var(--teal-tint); }
+.teim-rd .cp-pri__shipped ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-pri__form { display: flex; flex-direction: column; gap: 0.5rem; max-width: 40rem; }
+.teim-rd .cp-pri__label { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-top: 0.4rem; }
+.teim-rd .cp-pri__text, .teim-rd .cp-pri__select { font: inherit; font-size: 0.95rem; padding: 0.65rem 0.85rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-pri__text:focus, .teim-rd .cp-pri__select:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.teim-rd .cp-pri__match { border: 1px solid var(--teal); border-radius: 10px; padding: 0.8rem 1rem; background: var(--teal-tint); display: flex; flex-direction: column; gap: 0.3rem; }
+.teim-rd .cp-pri__matchtitle { font-weight: 700; color: var(--ink); margin: 0; }
+.teim-rd .cp-pri__check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--ink); }
+.teim-rd .cp-pri__check input { accent-color: var(--dteal); }
+.teim-rd .cp-pri__sent { font-size: 0.9rem; color: var(--dteal); margin: 0; }
+.teim-rd .cp-pri__error { font-size: 0.9rem; color: var(--amber); margin: 0; }
+.teim-rd .cp-pri__note { margin: 0; }
+/* The influence card. */
+.teim-rd .cp-inf__tier { font-size: 0.95rem; font-weight: 700; color: var(--ink); margin: 0.2rem 0 0; }
+.teim-rd .cp-inf__points { font-size: 1.15rem; color: var(--ink); margin: 0.4rem 0 0; }
+.teim-rd .cp-inf__points b { color: var(--dteal); }
+.teim-rd .cp-inf__next { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); margin: 0.2rem 0 0; }
+.teim-rd .cp-inf__h { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin: 1rem 0 0.3rem; }
+.teim-rd .cp-inf__table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.teim-rd .cp-inf__table td { padding: 0.35rem 0; border-top: 1px solid var(--line-soft); vertical-align: top; }
+.teim-rd .cp-inf__table td small { display: block; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-inf__n { text-align: right; font-family: var(--mono); color: var(--dteal); font-weight: 700; }
+.teim-rd .cp-inf__activity, .teim-rd .cp-inf__requests { list-style: none; margin: 0; padding: 0; font-size: 0.88rem; }
+.teim-rd .cp-inf__activity li, .teim-rd .cp-inf__requests li { padding: 0.3rem 0; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-inf__month { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+.teim-rd .cp-inf__reqtext { display: block; color: var(--ink); }
+.teim-rd .cp-inf__requests small { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-inf__foot { margin-top: 0.9rem; }
+/* The homepage block. */
+.teim-rd .cp-prib { max-width: 1560px; margin: 2rem auto 0; padding: 0 2.4rem; }
+.teim-rd .cp-prib__in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.4rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card, 14px); background: var(--bg); }
+.teim-rd .cp-prib__list { margin: 0.6rem 0 0.8rem; padding-left: 1.2rem; }
+.teim-rd .cp-prib__list li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.25rem 0; font-size: 0.95rem; }
+.teim-rd .cp-prib__title { font-weight: 700; color: var(--ink); }
+.teim-rd .cp-prib__points { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--dteal); white-space: nowrap; }
+.teim-rd .cp-prib__shipped p { font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); margin: 0.5rem 0 0; }
+@media (max-width: 900px) {
+  .teim-rd .cp-pri__layout { grid-template-columns: 1fr; }
+  .teim-rd .cp-pri__side { position: static; }
+  .teim-rd .cp-prib__in { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) { .teim-rd .cp-prib { padding-inline: 1.15rem; } }

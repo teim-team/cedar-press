@@ -65,3 +65,12 @@ replaces, and the cookie, its flags and the payload the client reads all stay.
 ruff check . && ruff format --check .
 python -m unittest discover -s tests -t .
 ```
+
+## Shape the Research
+
+`CEDAR_PRESS_DB` names the SQLite file that holds the Cedar Points ledger, the
+priorities' counts and subscribers' requests (for example `server/var/cedar_press.sqlite`,
+which is ignored). Unset, the store lives in memory and a restart forgets it:
+right for the tests, wrong for a deployment. An account record in
+`CEDAR_PRESS_ACCOUNTS` may carry `"account": "acct-name"` so several seats share
+one subscription's ledger.
