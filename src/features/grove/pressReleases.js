@@ -68,7 +68,7 @@
 import ledger from "../../../data/cedar/releases.json" with { type: "json" };
 
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
-import { LAUNCH_COLLECTION } from "./collection.js";
+import { LAUNCH_COLLECTION, hasSample } from "./collection.js";
 
 /** How often a collection changes. The label is what a reader sees. */
 export const CADENCE = Object.freeze({
@@ -141,7 +141,7 @@ export function ledgerFor(id, source = ledger) {
  * there, so an older release's preview is a fact about what shipped then, not
  * a file a reader can still take (Codex, PR #52).
  */
-function describe(record, { isFirst, isCurrent }) {
+function describe(record, { isFirst, isCurrent, served }) {
   const lead = isFirst ? "First release on Cedar Press" : "Release";
   const tables = record.tables
     ? `${record.tables} ${record.tables === 1 ? "table" : "tables"}, ${record.rowsLabel}`
@@ -149,10 +149,14 @@ function describe(record, { isFirst, isCurrent }) {
   const changed = [`${lead}: ${tables}.`];
   if (record.preview) {
     const preview = `A ${record.preview.rows}-row preview of ${record.preview.table}, the collection's flagship table`;
+    // A current preview the repository does not hold yet (samples.published
+    // .json) is not on the shelf, and saying it is would be the 404 in prose.
     changed.push(
-      isCurrent
+      isCurrent && served
         ? `${preview}, downloads from the shelf.`
-        : `${preview}, was published with this release; the shelf now serves the current release's preview.`,
+        : isCurrent
+          ? `${preview}, was produced with this release and is not published on the shelf yet.`
+          : `${preview}, was published with this release; the shelf now serves the current release's preview.`,
     );
   } else {
     changed.push(
@@ -173,7 +177,11 @@ function historyOf(id, currentVersion, source) {
   const notes = RELEASE_NOTES[id] ?? {};
   return ledgerFor(id, source).map((record, index) => {
     const note = notes[record.version];
-    const standing = { isFirst: index === 0, isCurrent: record.version === currentVersion };
+    const standing = {
+      isFirst: index === 0,
+      isCurrent: record.version === currentVersion,
+      served: hasSample(id),
+    };
     return Object.freeze({
       version: record.version,
       date: record.date,

@@ -306,6 +306,15 @@ class TestCrossLanguageParity(unittest.TestCase):
     def test_every_table_the_manifest_names_has_its_sample_on_disk(self) -> None:
         for dataset in launch.LAUNCH_COLLECTION:
             for table in launch.collection_tables(dataset.id):
+                if not table.get("sample_path"):
+                    # Declared by the manifest, absent from the repository, and
+                    # RECORDED as such by scripts/measure-samples.mjs: the site
+                    # says so instead of linking to a 404. An absence with no
+                    # record is the failure below.
+                    with self.subTest(dataset=dataset.id, table=table["table"]):
+                        self.assertTrue(table.get("sample_unpublished"),
+                                        f"{table['table']} has no sample and no record")
+                    continue
                 path = _REPO / "public" / table["sample_path"].lstrip("/")
                 # In the INDEX, not merely on this disk. `.gitignore` drops
                 # every `*.csv` by extension, so a sample the importer wrote
@@ -610,13 +619,24 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
     def test_nothing_is_both_shipped_and_excluded(self) -> None:
         self.assertEqual(set(self.script.STOREFRONT) & set(self.script.EXCLUDED), set())
 
+    def test_the_unpublished_sample_record_matches_the_disk(self) -> None:
+        # The record is measured, so it must agree with the checkout: a sample
+        # added (or removed) without re-running the measurement fails here,
+        # naming the command, on the machine where it happened.
+        result = subprocess.run(  # noqa: S603
+            ["node", str(_REPO / "scripts" / "measure-samples.mjs"), "--check"],
+            capture_output=True, text=True, check=False, cwd=_REPO,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
     def test_the_release_ledger_is_tracked(self) -> None:
         # Codex, PR #52. `.gitignore` excludes `/data/*` as a directory, so a
         # file the site imports from data/cedar/ reaches the repository only
         # by `git add -f`. The first ledger was written, read by the build and
         # never committed, and `main` could not build. Every file the client
         # imports from data/cedar/ must be in the index.
-        for name in ("collections.manifest.json", "releases.json"):
+        for name in ("collections.manifest.json", "releases.json",
+                     "samples.published.json"):
             with self.subTest(file=name):
                 result = subprocess.run(  # noqa: S603
                     ["git", "-C", str(_REPO), "ls-files", "--error-unmatch",

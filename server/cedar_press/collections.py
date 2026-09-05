@@ -160,11 +160,40 @@ LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = tuple(
 _CEDAR: dict[str, dict[str, Any]] = {
     entry["id"]: entry["cedar"] for entry in _MANIFEST["collections"]
 }
+# Sample files the manifest declares and the repository does not hold, as
+# measured by scripts/measure-samples.mjs. The client applies the same record
+# (collection.js), so a declared-but-uncommitted sample reads as unpublished,
+# with the reason, on both sides instead of as a file that will 404.
+_PUBLISHED: dict[str, Any] = json.loads(
+    (_MANIFEST_PATH.parent / "samples.published.json").read_text(encoding="utf-8")
+)
+_UNPUBLISHED: frozenset[str] = frozenset(
+    entry["path"] for entry in _PUBLISHED["unpublished"]
+)
+
+
+def _with_publication(sample: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not sample or not sample.get("path") or sample["path"] not in _UNPUBLISHED:
+        return sample
+    marked = {k: v for k, v in sample.items() if k != "path"}
+    marked["path"] = None
+    marked["unpublished_path"] = sample["path"]
+    marked["unavailable_because"] = _PUBLISHED["reason"].replace("{table}", sample["table"])
+    return marked
+
+
+def _table_with_publication(table: dict[str, Any]) -> dict[str, Any]:
+    if not table.get("sample_path") or table["sample_path"] not in _UNPUBLISHED:
+        return table
+    return {**table, "sample_path": None, "sample_unpublished": table["sample_path"]}
+
+
 _SAMPLE: dict[str, dict[str, Any]] = {
-    entry["id"]: entry["sample"] for entry in _MANIFEST["collections"]
+    entry["id"]: _with_publication(entry["sample"]) for entry in _MANIFEST["collections"]
 }
 _TABLES: dict[str, tuple[dict[str, Any], ...]] = {
-    entry["id"]: tuple(entry["tables"]) for entry in _MANIFEST["collections"]
+    entry["id"]: tuple(_table_with_publication(t) for t in entry["tables"])
+    for entry in _MANIFEST["collections"]
 }
 
 

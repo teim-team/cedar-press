@@ -8,6 +8,8 @@
 // and not a fixture that can drift from them.
 
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -98,13 +100,31 @@ test("a collection whose sample Cedar could not settle falls back, and says why"
   assert.equal(name, "not-a-collection-collection-description.csv");
 });
 
-// And the thing that changed: every collection on the shelf now HAS a sample.
-// Asserted so the coverage cannot quietly regress to the state above.
-test("every storefront collection carries a sample file", () => {
+// And the contract that replaced "every collection has a sample": a collection
+// either serves a sample file, or says why it does not. The "why" is data --
+// the manifest's own reason for a flagship Cedar could not settle, or the
+// measured record of a sample the importer produced that nobody committed
+// (samples.published.json). A path with neither is the 404 this guards.
+test("every storefront collection serves a sample or says why it cannot", () => {
   for (const dataset of LAUNCH_COLLECTION) {
-    assert.ok(samplePath(dataset.id), `${dataset.id} has no sample path`);
-    assert.equal(hasReleaseFile(dataset), true, `${dataset.id} has no release file`);
+    const path = samplePath(dataset.id);
+    const sample = collectionSample(dataset.id);
+    assert.ok(
+      path || sample?.unavailable_because,
+      `${dataset.id} has no sample path and no reason for it`,
+    );
+    if (path) assert.ok(existsSync(`${PUBLIC}${path}`), `${dataset.id}: ${path} would 404`);
+    assert.equal(hasReleaseFile(dataset), Boolean(path), `${dataset.id}: the tile disagrees with the path`);
   }
+});
+
+// The record of unpublished samples is measured from the disk, so it must
+// agree with the disk: a sample added or removed without re-running the
+// measurement fails here, naming the command.
+test("samples.published.json matches what public/ holds", () => {
+  const script = fileURLToPath(new URL("../../../scripts/measure-samples.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr || run.stdout);
 });
 
 // A fetch that fails must not leave the button dead: the reader gets the

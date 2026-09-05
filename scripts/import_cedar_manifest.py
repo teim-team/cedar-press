@@ -80,6 +80,7 @@ import csv
 import json
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -442,6 +443,16 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     written = copy_samples(workspace, manifest)
+    # The record of which declared samples the repository holds follows every
+    # import; the tests refuse a stale one. On the importer's machine every
+    # sample was just copied, so the record says none is missing -- until the
+    # files are committed elsewhere, which is exactly what it exists to show.
+    measured = subprocess.run(  # noqa: S603
+        ["node", str(REPO / "scripts" / "measure-samples.mjs")],
+        capture_output=True, text=True, check=False,
+    )
+    if measured.returncode != 0:
+        raise SystemExit(f"measure-samples failed:\n{measured.stderr}")
 
     print(f"  manifest  {out.relative_to(REPO)}")
     print(f"  storefront {len(manifest['collections'])} collections")
