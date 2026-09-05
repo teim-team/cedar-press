@@ -854,7 +854,6 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
     noPreview.length ? `No preview yet: ${noPreview.map((c) => `${c.entry.short} (${c.previewUnavailable})`).join("; ")}.` : "",
     missing.length ? `Not reachable right now: ${missing.map((k) => short(k.split("/")[0])).join(", ")}.` : "",
     excluded.undated ? `${excluded.undated} undated record(s) excluded by the year range.` : "",
-    excluded.superseded ? `${excluded.superseded} superseded version(s) hidden.` : "",
     registerStatus === "failed" ? "The entity register did not load: names and types may be missing." : "",
   ].filter(Boolean);
 
@@ -919,6 +918,10 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               {contract?.entity_role ? <> The entity on each record is <em>{contract.entity_role}</em>.</> : null}
               {contract?.year_basis ? <> Years are the <em>{contract.year_basis}</em>.</> : <> This is a register, not a series of events: the year filter does not apply.</>}
               {contract?.amount ? <> Amounts are <em>{contract.amount_label ?? heading(contract.amount)}</em>.</> : null}
+              {/* A filing appears once, as its current version. The earlier
+                  versions are history, reachable by link (h=1) and not a
+                  thing a subscriber browses; the count of them was chrome. */}
+              {contract?.superseded ? <> Superseded versions of a record are not shown.</> : null}
             </p>
           ) : null}
 
@@ -957,10 +960,8 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             {isNarrowed(cut) || cut.history ? (
               <button type="button" className="cp-ex__clear" onClick={() => write({ entities: [], types: null, years: null, q: "", sort: null, history: false })}>Clear filters</button>
             ) : null}
-            {excluded.superseded || cut.history ? (
-              <button type="button" className="cp-ex__clear" onClick={() => write({ history: !cut.history })}>
-                {cut.history ? "Hide superseded versions" : `Show ${excluded.superseded} superseded version(s)`}
-              </button>
+            {cut.history ? (
+              <button type="button" className="cp-ex__clear" onClick={() => write({ history: false })}>Hide superseded versions</button>
             ) : null}
             {registerStatus === "failed" ? <button type="button" className="cp-ex__clear" onClick={retryRegister}>Retry the register</button> : null}
           </p>
