@@ -1,6 +1,6 @@
 {
   "generated_by": "scripts/measure-samples.mjs",
-  "note": "Every path here is declared by collections.manifest.json and absent from public/ in this checkout. Measured, never typed; re-run the script after adding or removing a sample file.",
+  "note": "Every path here is declared by collections.manifest.json and not published: absent from public/, or on disk but not in the git index. Measured, never typed; re-run the script after `git add`ing or removing a sample file.",
   "reason": "The ten-row sample of {table} was produced with this release but is not in the repository yet, so the site cannot serve it.",
   "unpublished": [
     {

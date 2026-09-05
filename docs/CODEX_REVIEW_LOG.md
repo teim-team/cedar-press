@@ -1571,3 +1571,9 @@ on the importer's checkout (see the PR).
 | P1 `1187` exercise the per-row URL gate in selftest | `verify_rows` on planted rows: one blank URL among sourced rows of the same type fails, restored it passes, and a shipped no-activity filing fails. | `1187 selftest` |
 | P2 catalog: do not claim all advocacy links are exact | "resolved to the tribe or Native organization behind it where the record supports the link". Press dump regenerated. | `npm test` |
 | P1 `1180` prove the extra-source verifier path with a fixture | The selftest builds a fixture tree (three reconciliation files, the EIN-links extra source, an output table), runs `verify()` complete (0), with the extra source removed (2), restored (0); the fixture proofs run before the real-data part, so a checkout without the reconciliation directory still proves the gates before reporting UNMEASURED. | `1180 selftest` |
+
+### PR #60 — one late finding, right (2026-09-05, on PR #61)
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 measure tracked samples instead of local files | Published means on disk AND in the git index (`git ls-files` over the samples directory); a sample the importer copied and nobody staged stays on the record, so the clean checkout CI builds from cannot disagree with it. No git is a refusal, not a disk-only guess. Proven here by copying an untracked file into place: the record did not move. | `node scripts/measure-samples.mjs --check` |
