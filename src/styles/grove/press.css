@@ -2408,7 +2408,8 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 @media (max-width: 900px) {
   .teim-rd .cp-pri__layout { grid-template-columns: 1fr; }
   .teim-rd .cp-pri__side { position: static; }
-  .teim-rd .cp-prib__in { grid-template-columns: 1fr; }
+  /* The published state's modifier is more specific than this rule, so it is named here too (Codex, PR #65). */
+  .teim-rd .cp-prib__in, .teim-rd .cp-prib__in.is-two { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
   .teim-rd .cp-prib__in { padding: 1rem 1.1rem; }
