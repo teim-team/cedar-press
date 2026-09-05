@@ -59,6 +59,10 @@ REFUSED_AS_SAMPLED = {
     # entity_id and cedar_spine_entity_id both disagree with cedar_uid on the
     # Menominee row: neither is an alias, and neither is deleted unadjudicated.
     "nonprofits": (("entity_id", "cedar_spine_entity_id"), pub.UnadjudicatedIdentifier),
+    # Notes and the beneficiary note carry caveats that must reach
+    # research_note before they leave (Codex, PR #67).
+    "deals": (("Notes",), pub.OwedDerivation),
+    "natural-resources": (("beneficiary_note",), pub.OwedDerivation),
 }
 
 
@@ -102,9 +106,9 @@ class TestApplyFieldMap(unittest.TestCase):
                 own = set(header)
                 result = pub.apply_field_map(coll, header, rows, own)
                 self.assertTrue(result["mapped"])
-                opening = entry["opening"]
-                self.assertEqual(header[:len(opening)], opening)
                 expected = [c for c in entry["order"] if c not in result["owed"]]
+                opening = [c for c in entry["opening"] if c not in result["owed"]]
+                self.assertEqual(header[:len(opening)], opening)
                 self.assertEqual(header, expected)
                 self.assertEqual(header[-1], "research_note")
                 # Nothing internal, documented, combined or derived survives.
@@ -136,6 +140,8 @@ class TestApplyFieldMap(unittest.TestCase):
                     ("lobbying", "native_entity_lobbying_disclosures"))
         for coll, table in singular:
             header, rows = sample(coll, table)
+            if coll in REFUSED_AS_SAMPLED:
+                neutralised(coll, header, rows)
             pub.apply_field_map(coll, header, rows, set(header))
             for r in rows:
                 known = reg.get(r["cedar_uid"])
@@ -155,8 +161,12 @@ class TestApplyFieldMap(unittest.TestCase):
             self.assertEqual(r["cedar_entity_role"], r["native_direction"])
             self.assertTrue(r["sub_cedar_uid"] and r["prime_cedar_uid"])
         header, rows = sample("deals", "deals_classified")
-        pub.apply_field_map("deals", header, rows, set(header))
-        # The party's own role stays beside the block; the block's role is the entity's.
+        neutralised("deals", header, rows)
+        result = pub.apply_field_map("deals", header, rows, set(header))
+        # The party's own role stays; the block's role is owed and absent,
+        # never an ambiguous constant (Codex, PR #67).
+        self.assertIn("cedar_entity_role", result["owed"])
+        self.assertNotIn("cedar_entity_role", header)
         self.assertIn("native_party_role", header)
         self.assertTrue(all(r["native_party_role"] for r in rows))
         self.assertNotIn("Notes", header)
@@ -227,6 +237,7 @@ class TestApplyFieldMap(unittest.TestCase):
             self.assertEqual(r["source_system"], "lda")
             self.assertEqual(r["participant_name"], "")
         header, rows = sample("deals", "deals_classified")
+        neutralised("deals", header, rows)
         pub.apply_field_map("deals", header, rows, set(header))
         for r in rows:
             extra = json.loads(r["additional_sources"])
@@ -237,12 +248,21 @@ class TestApplyFieldMap(unittest.TestCase):
 
     def test_an_alias_of_cedar_uid_is_verified_row_by_row(self):
         header, rows = sample("natural-resources", "resource_revenue")
+        neutralised("natural-resources", header, rows)
         rows[3]["recipient_entity_id"] = "CE-00000-00"      # disagrees with cedar_uid
         with self.assertRaises(pub.AliasDisagreement) as caught:
             pub.apply_field_map("natural-resources", header, rows, set(header))
         self.assertIn("recipient_entity_id", caught.exception.columns)
+        # A populated alias beside a BLANK cedar_uid is unresolved too:
+        # retiring it would turn an identity into none (Codex, PR #67).
+        header, rows = sample("natural-resources", "resource_revenue")
+        neutralised("natural-resources", header, rows)
+        rows[4]["cedar_uid"] = ""
+        with self.assertRaises(pub.AliasDisagreement):
+            pub.apply_field_map("natural-resources", header, rows, set(header))
         # And where every row agrees, the alias is retired and reported.
         header, rows = sample("natural-resources", "resource_revenue")
+        neutralised("natural-resources", header, rows)
         result = pub.apply_field_map("natural-resources", header, rows, set(header))
         self.assertNotIn("recipient_entity_id", header)
         line = next(r for r in result["retirement"] if r["column"] == "recipient_entity_id")
@@ -336,16 +356,57 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertIn("new_upstream_field", caught.exception.columns)
         self.assertIsInstance(caught.exception, SystemExit)
 
-    def test_synthesised_columns_are_appended_not_decided(self):
-        header, rows = sample("natural-resources", "resource_revenue")
+    def test_a_joined_column_needs_a_decision_too(self):
+        # A count or a join the build synthesised is outside the flagship's
+        # header and outside the map: refused by name, never appended
+        # (Codex, PR #67).
+        header, rows = sample("contractors", "prime_contracts")
         own = set(header)
-        header.append("n_resource_assets")
+        header.append("n_prime_contracts_awards")
         for r in rows:
-            r["n_resource_assets"] = "2"
-        result = pub.apply_field_map("natural-resources", header, rows, own)
-        self.assertEqual(header[-1], "n_resource_assets")
-        self.assertEqual(header[-2], "research_note")
-        self.assertEqual(result["synthesised"], ["n_resource_assets"])
+            r["n_prime_contracts_awards"] = "2"
+        with self.assertRaises(pub.UndecidedColumns) as caught:
+            pub.apply_field_map("contractors", header, rows, own)
+        self.assertEqual(caught.exception.columns, ["n_prime_contracts_awards"])
+
+    def test_a_blocking_derivation_holds_the_dataset_until_its_target_is_supplied(self):
+        header, rows = sample("deals", "deals_classified")
+        with self.assertRaises(pub.OwedDerivation) as caught:
+            pub.apply_field_map("deals", header, rows, set(header))
+        self.assertEqual(caught.exception.columns, ["Notes"])
+        # Once the editorial research_note is on the row, Notes may leave and
+        # the supplied note ships as it was written.
+        header, rows = sample("deals", "deals_classified")
+        header.append("research_note")
+        for r in rows:
+            r["research_note"] = ("Announced value is the Native party's consideration; "
+                                  "the project total is the whole project.")
+        pub.apply_field_map("deals", header, rows, set(header) - {"research_note"})
+        self.assertNotIn("Notes", header)
+        self.assertTrue(all(r["research_note"].startswith("Announced value") for r in rows))
+
+    def test_supplied_names_as_published_are_kept_and_must_align(self):
+        header, rows = sample("legislation", "native_bills")
+        header.append("entity_names_as_published")
+        for r in rows:
+            n = len([u for u in r["entity_cedar_uids"].split("|") if u.strip()])
+            r["entity_names_as_published"] = json.dumps(["As the bill says"] * n)
+        own = set(header) - {"entity_names_as_published"}
+        pub.apply_field_map("legislation", header, rows, own)
+        for r in rows:
+            names = json.loads(r["entity_names_as_published"])
+            self.assertEqual(len(names), len(json.loads(r["cedar_uids"])))
+            self.assertTrue(all(x == "As the bill says" for x in names))
+        header, rows = sample("legislation", "native_bills")
+        header.append("entity_names_as_published")
+        for r in rows:
+            r["entity_names_as_published"] = json.dumps(["one name only"])
+        misaligned = [r for r in rows
+                      if len([u for u in r["entity_cedar_uids"].split("|") if u.strip()]) != 1]
+        if misaligned:
+            own = set(header) - {"entity_names_as_published"}
+            with self.assertRaises(pub.FieldMapRefusal):
+                pub.apply_field_map("legislation", header, rows, own)
 
     def test_an_unmapped_collection_is_left_alone(self):
         header = ["facility_id", "name", "built_date"]

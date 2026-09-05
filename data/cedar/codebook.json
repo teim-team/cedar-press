@@ -605,12 +605,6 @@
      "add": true
     },
     {
-     "column": "cedar_entity_role",
-     "label": "Entity role",
-     "meaning": "Why the entity is on this row: Native party or its owner (per-row derivation owed from the party attribution).",
-     "add": true
-    },
-    {
      "column": "Deal_ID",
      "label": "Deal ID",
      "meaning": "Cedar's identifier for the deal.",

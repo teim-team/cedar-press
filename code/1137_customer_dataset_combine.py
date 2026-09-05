@@ -968,16 +968,15 @@ def build(dry: bool, only: tuple = ()) -> int:
         # (cedar_uid, canonical_name, entity_class, cedar_entity_role, or the
         # plural aligned arrays for Legislation and NAGPRA)
         # from the register and orders the header; the deny lists above still
-        # ran first. A collection the map does not know keeps the banded
-        # order below.
+        # ran first. A column the joins above synthesised is refused too: it
+        # needs a decision in the map before it can reach a customer. A
+        # collection the map does not know keeps the banded order below.
         _fm = apply_field_map(coll, fhdr, frows, own_cols)
         if _fm.get("mapped"):
             print(f"      field map: {len(_fm['renamed'])} renamed, "
                   f"{len(_fm['dropped'])} dropped, "
                   f"{len(_fm['owed'])} owed"
-                  + (f" ({', '.join(_fm['owed'])})" if _fm['owed'] else "")
-                  + (f"; {len(_fm['synthesised'])} synthesised column(s) "
-                     f"appended" if _fm['synthesised'] else ""))
+                  + (f" ({', '.join(_fm['owed'])})" if _fm['owed'] else ""))
             for _r in _fm["retirement"]:
                 # The identifier retirement report's row for this build:
                 # dataset | old_identifier | what_it_identified |

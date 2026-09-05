@@ -14,6 +14,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { contractFor as deriveContract } from "../../../scripts/derive-explore.mjs";
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import {
   CODEBOOK,
@@ -526,7 +527,7 @@ test("the codebook names real columns in every flagship, with a label and a mean
     assert.match(lead[0], /^Cedar IDs?/, key);
     assert.match(lead[1], /^Native entit/, key);
     assert.match(lead[2], /^Entity types?/, key);
-    assert.match(lead[3], /^Entity roles?/, key);
+    if (/^(cedar_)?entity_roles?$/.test(book.fields[3].column)) assert.match(lead[3], /^Entity roles?/, key);
     // Every column the contract declares as a default is a column the codebook explains.
     const listed = new Set(book.fields.map((f) => f.column));
     for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
@@ -553,7 +554,7 @@ const OPENING_SINGULAR = FIELD_MAP_JSON.opening.singular;
 const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
 // Mirrors cedar_publication.PROHIBITED_PUBLIC_COLUMN: a competing entity
 // identifier or build bookkeeping never reaches an approved header.
-const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino_?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
+const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
 
 test("the field map decides every column of every sampled flagship in the owner's exact order, retires every competing identifier, and the codebook lists exactly what ships", () => {
   const script = fileURLToPath(new URL("../../../scripts/field-map-markdown.mjs", import.meta.url));
@@ -620,9 +621,10 @@ test("the field map decides every column of every sampled flagship in the owner'
     for (const [, source] of ships) assert.ok(listed.has(source), `${key}: ${source} ships but the codebook does not explain it`);
     for (const [name, n] of added) if (!n.status) assert.ok(listed.has(name), `${key}: ${name} is built at write time but the codebook does not explain it`);
     // The codebook's opening labels.
-    const lead = book.fields.slice(0, opening.length).map((f) => f.label);
-    if (map.plural) assert.deepEqual(lead, ["Cedar IDs", "Native entities", "Entity types", "Entity roles", "Names as published"], key);
-    else assert.deepEqual(lead, ["Cedar ID", "Native entity", "Entity type", "Entity role"], key);
+    const expectedLead = (map.plural ? ["Cedar IDs", "Native entities", "Entity types", "Entity roles", "Names as published"] : ["Cedar ID", "Native entity", "Entity type", "Entity role"])
+      .filter((_, i) => !added.get(opening[i])?.status);   // an owed opening column (Deals' role) has no entry yet
+    const lead = book.fields.slice(0, expectedLead.length).map((f) => f.label);
+    assert.deepEqual(lead, expectedLead, key);
   }
   assert.equal(sampled, 11);
   // The unsampled flagship is decided from the builder's 53-field declaration.
@@ -646,6 +648,19 @@ test("a JSON-array cell reads as a list in the viewer, before and after the expo
   const [item] = universalRows("legislation/native_bills", [{ ...json, bill_id: "1-hr-1" }], register);
   assert.equal(item.entity.entities.length, 2);
   assert.ok(item.entity.entities.some((e) => e.uid === WITHHELD_UID && e.withheld));
+  // The approved header itself: a contract derived from the exported
+  // columns names `cedar_uids` as a list, and an exported row reads through it.
+  const approvedColumns = ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published", "bill_id", "title", "introduced_date", "source_url", "research_note"];
+  const derived = deriveContract(approvedColumns);
+  assert.equal(derived.entity_uid, "cedar_uids");
+  assert.equal(derived.entity_uid_list, true);
+  assert.equal(derived.entity_name, "canonical_names");
+  assert.equal(derived.entity_type, "entity_classes");
+  const exported = { cedar_uids: JSON.stringify([NAMED[0], null]), canonical_names: JSON.stringify([NAMED[1].name, "Unresolved Band"]), entity_classes: JSON.stringify(["Federally recognized tribe", null]), entity_roles: JSON.stringify(["named in the bill", "named in the bill"]), entity_names_as_published: JSON.stringify([null, "Unresolved Band"]), bill_id: "1-hr-1" };
+  assert.deepEqual(rowUids(exported, derived), [NAMED[0]]);
+  const entities = rowEntities(exported, derived, register);
+  assert.equal(entities[0].uid, NAMED[0]);
+  assert.equal(entities[0].name, NAMED[1].name);
 });
 
 // ── Entity roles ───────────────────────────────────────────────────────────

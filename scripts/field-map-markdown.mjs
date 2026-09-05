@@ -28,9 +28,9 @@ const OUT_RETIRE = `${REPO}docs/IDENTIFIER_RETIREMENT_2026-09-05.md`;
 const esc = (s) => String(s ?? "").replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
 
 /** Column names that name a competing entity identifier, in any table. */
-export const COMPETING_ID = /duns|neid|cicd|casino_?city|tribe_id|_candidate|proposed|resolver|(^|_)(native_)?entity_id$|resolved_(native_)?entity_id|existing_cedar_uid|_uid_candidate/i;
+export const COMPETING_ID = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|(^|_)(native_)?entity_id$|resolved_(native_)?entity_id|existing_cedar_uid|_uid_candidate/i;
 /** A retired scheme's name inside a value; `_` and a word boundary both separate. */
-export const RETIRED_TOKEN = /(?<![a-z])(neid|cicd|casino_?city)(?![a-z])/i;
+export const RETIRED_TOKEN = /(?<![a-z])(neid|cicd|casino[ _-]?city)(?![a-z])/i;
 
 function header(path) {
   const first = readFileSync(path, "utf8").replace(/^﻿/, "").split(/\r?\n/)[0] ?? "";

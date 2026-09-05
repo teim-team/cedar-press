@@ -165,45 +165,44 @@ Collection `deals` · table `deals_classified` · 1,073 rows in the full table �
 
 **Where:** workspace dist/customer/deals.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/deals/deals_classified.csv; assembled from announcements, filings and agency award lists.
 
-**Columns a subscriber sees (35):**
+**Columns a subscriber sees (34):**
 
 | # | Column | Label | Meaning |
 |---|---|---|---|
 | 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. |
 | 2 | `native_party_canonical_name` (*rename to `canonical_name`*) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. |
 | 3 | `entity_class` (*to add*) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. |
-| 4 | `cedar_entity_role` (*to add*) | Entity role | Why the entity is on this row: Native party or its owner (per-row derivation owed from the party attribution). |
-| 5 | `Deal_ID` (*rename to `deal_id`*) | Deal ID | Cedar's identifier for the deal. |
-| 6 | `Event_Date` (*rename to `event_date`*) | Date | When the deal happened or was announced. |
-| 7 | `Event_Date_precision` (*rename to `event_date_precision`*) | Date precision | Whether the date is known to the day, the month or the year. |
-| 8 | `Event_Date_not_before` (*rename to `event_date_not_before`*) | Date not before | The earliest date the event could have happened, where the source gives an interval rather than a day. |
-| 9 | `Event_Date_not_after` (*rename to `event_date_not_after`*) | Date not after | The latest date the event could have happened. |
-| 10 | `Event_Year` (*rename to `event_year`*) | Year | The year of the event date. |
-| 11 | `Deal_Title` (*rename to `title`*) | Title | A one-line description of the deal. |
-| 12 | `Native_Party` (*rename to `native_party_name`*) | Native party as published | The Native party's name as the source gives it. |
-| 13 | `Native_Party_Type` (*rename to `native_party_type`*) | Native party type as published | How the source describes the Native party. |
-| 14 | `native_party_role` | Entity role | Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller). |
-| 15 | `Counterparty_or_Funder` (*rename to `counterparty_or_funder`*) | Counterparty or funder | The other side of the deal. |
-| 16 | `Deal_Category` (*combines into `deal_type`*) | Category | Acquisition, grant or public financing, joint venture, and so on. |
-| 17 | `transaction_type` (*combines into `deal_type`*) | Transaction type | The third of three overlapping classifications; shown until the one taxonomy replaces all three. |
-| 18 | `Event_Type` (*combines into `transaction_structure`*) | Event | What kind of event this row records (an acquisition of a 90% interest, an award). |
-| 19 | `Industry` (*rename to `industry`*) | Industry | The industry the deal is in. |
-| 20 | `sector` | Sector | The broad sector the deal belongs to, beside the finer industry. |
-| 21 | `capital_source` | Capital source | Where the capital comes from: public, private or tribal. |
-| 22 | `Status` (*combines into `deal_status`*) | Status | Completed, announced, awarded, pending. |
-| 23 | `deal_status_std` (*combines into `deal_status`*) | Status (standardized) | The standardized status; shown until one status column replaces the two. |
-| 24 | `Announced_Value_USD` (*rename to `announced_value_usd`*) | Announced value | The dollar value announced, where one was. |
-| 25 | `Value_Type` (*rename to `value_basis`*) | What the value is | What the announced figure represents (consideration paid, grant amount, project cost). |
-| 26 | `Project_Total_Value_USD` (*rename to `project_total_value_usd`*) | Project total | The total project value, where larger than the announced value. |
-| 27 | `State` (*rename to `state`*) | State | The state the deal is located in. |
-| 28 | `Location` (*rename to `location`*) | Location | The place, as the source gives it. |
-| 29 | `Description` (*rename to `description`*) | Description | A longer description of the deal. |
-| 30 | `Native_Connection` (*rename to `native_connection`*) | Native connection | Why this deal is in the collection: how the Native party is connected. |
-| 31 | `Verification_Status` (*rename to `verification_status`*) | Verification | Whether the deal was verified against a primary source. |
-| 32 | `Source_1` (*rename to `source_url`*) | Source | The primary source document or page. |
-| 33 | `Source_1_Type` (*rename to `source_type`*) | Source type | What kind of document the primary source is. |
-| 34 | `additional_sources` (*to add*) | Additional sources | Further public sources beyond the primary one, as a JSON list of {url, source_type}. |
-| 35 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
+| 4 | `Deal_ID` (*rename to `deal_id`*) | Deal ID | Cedar's identifier for the deal. |
+| 5 | `Event_Date` (*rename to `event_date`*) | Date | When the deal happened or was announced. |
+| 6 | `Event_Date_precision` (*rename to `event_date_precision`*) | Date precision | Whether the date is known to the day, the month or the year. |
+| 7 | `Event_Date_not_before` (*rename to `event_date_not_before`*) | Date not before | The earliest date the event could have happened, where the source gives an interval rather than a day. |
+| 8 | `Event_Date_not_after` (*rename to `event_date_not_after`*) | Date not after | The latest date the event could have happened. |
+| 9 | `Event_Year` (*rename to `event_year`*) | Year | The year of the event date. |
+| 10 | `Deal_Title` (*rename to `title`*) | Title | A one-line description of the deal. |
+| 11 | `Native_Party` (*rename to `native_party_name`*) | Native party as published | The Native party's name as the source gives it. |
+| 12 | `Native_Party_Type` (*rename to `native_party_type`*) | Native party type as published | How the source describes the Native party. |
+| 13 | `native_party_role` | Entity role | Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller). |
+| 14 | `Counterparty_or_Funder` (*rename to `counterparty_or_funder`*) | Counterparty or funder | The other side of the deal. |
+| 15 | `Deal_Category` (*combines into `deal_type`*) | Category | Acquisition, grant or public financing, joint venture, and so on. |
+| 16 | `transaction_type` (*combines into `deal_type`*) | Transaction type | The third of three overlapping classifications; shown until the one taxonomy replaces all three. |
+| 17 | `Event_Type` (*combines into `transaction_structure`*) | Event | What kind of event this row records (an acquisition of a 90% interest, an award). |
+| 18 | `Industry` (*rename to `industry`*) | Industry | The industry the deal is in. |
+| 19 | `sector` | Sector | The broad sector the deal belongs to, beside the finer industry. |
+| 20 | `capital_source` | Capital source | Where the capital comes from: public, private or tribal. |
+| 21 | `Status` (*combines into `deal_status`*) | Status | Completed, announced, awarded, pending. |
+| 22 | `deal_status_std` (*combines into `deal_status`*) | Status (standardized) | The standardized status; shown until one status column replaces the two. |
+| 23 | `Announced_Value_USD` (*rename to `announced_value_usd`*) | Announced value | The dollar value announced, where one was. |
+| 24 | `Value_Type` (*rename to `value_basis`*) | What the value is | What the announced figure represents (consideration paid, grant amount, project cost). |
+| 25 | `Project_Total_Value_USD` (*rename to `project_total_value_usd`*) | Project total | The total project value, where larger than the announced value. |
+| 26 | `State` (*rename to `state`*) | State | The state the deal is located in. |
+| 27 | `Location` (*rename to `location`*) | Location | The place, as the source gives it. |
+| 28 | `Description` (*rename to `description`*) | Description | A longer description of the deal. |
+| 29 | `Native_Connection` (*rename to `native_connection`*) | Native connection | Why this deal is in the collection: how the Native party is connected. |
+| 30 | `Verification_Status` (*rename to `verification_status`*) | Verification | Whether the deal was verified against a primary source. |
+| 31 | `Source_1` (*rename to `source_url`*) | Source | The primary source document or page. |
+| 32 | `Source_1_Type` (*rename to `source_type`*) | Source type | What kind of document the primary source is. |
+| 33 | `additional_sources` (*to add*) | Additional sources | Further public sources beyond the primary one, as a JSON list of {url, source_type}. |
+| 34 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
 ### NAGPRA
 

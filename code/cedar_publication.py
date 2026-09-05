@@ -868,10 +868,10 @@ OPENING_PLURAL = ("cedar_uids", "canonical_names", "entity_classes",
 #: A retired scheme's name inside a value or a column name. `_` and a word
 #: boundary both separate, so `cedar_neid` and `neid_join_status` match and
 #: `Oneida` does not.
-RETIRED_TOKEN = re.compile(r"(?<![a-z])(neid|cicd|casino_?city)(?![a-z])", re.I)
+RETIRED_TOKEN = re.compile(r"(?<![a-z])(neid|cicd|casino[ _-]?city)(?![a-z])", re.I)
 #: Column names that may never reach a public header, whatever the map says.
 PROHIBITED_PUBLIC_COLUMN = re.compile(
-    r"duns|neid|cicd|casino_?city|tribe_id|_candidate|proposed|resolver|"
+    r"duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|"
     r"built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime", re.I)
 _FIELD_MAP: dict = {}
 _REGISTER: dict = {}
@@ -911,6 +911,15 @@ class UnadjudicatedIdentifier(FieldMapRefusal):
                          f"disposition `adjudicate`); the dataset stops until "
                          f"it is adjudicated, and the column is neither "
                          f"retained nor deleted")
+
+
+class OwedDerivation(FieldMapRefusal):
+    def __init__(self, collection: str, column: str, target: str, n: int):
+        super().__init__(collection, [column],
+                         f"{column} carries substantive qualifications on {n} "
+                         f"row(s) that must reach {target} before the column "
+                         f"leaves the file, and no {target} has been supplied; "
+                         f"the dataset does not ship until the derivation exists")
 
 
 class RetiredIdentifierPresent(FieldMapRefusal):
@@ -1019,9 +1028,26 @@ def _plural_block(entry: dict, row: dict, reg: dict) -> dict:
     names = [reg[u][0] if u and u in reg else None for u in uids]
     classes = [reg[u][1] if u and u in reg else None for u in uids]
     roles = [r for _, r in pairs]
+    # Names as published come from the relationship evidence, never from the
+    # register. A supplied, aligned column is kept; otherwise every position
+    # is null and the unresolved counts say what is missing (Codex, PR #67).
+    published = [None] * len(pairs)
+    supplied = (row.get("entity_names_as_published") or "").strip()
+    if supplied:
+        try:
+            parsed = json.loads(supplied)
+        except ValueError:
+            parsed = None
+        if isinstance(parsed, list) and len(parsed) == len(pairs):
+            published = parsed
+        else:
+            raise FieldMapRefusal(
+                entry["collection"], ["entity_names_as_published"],
+                f"entity_names_as_published is supplied but not aligned with "
+                f"the {len(pairs)} entity-role association(s) on the row")
     out = {"cedar_uids": _js(uids), "canonical_names": _js(names),
            "entity_classes": _js(classes), "entity_roles": _js(roles),
-           "entity_names_as_published": _js([None] * len(pairs))}
+           "entity_names_as_published": _js(published)}
     # Legislation carries link tiers aligned to its primary list.
     tiers_col = next((f["column"] for f in entry["fields"]
                       if f["decision"] == "derive" and f.get("to") == "entity_link_statuses"), None)
@@ -1040,7 +1066,7 @@ def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
     arg = ":".join(parts[2:]) if len(parts) > 2 else ""
     col = lambda target: row.get(source_of.get(target, target), "")  # noqa: E731
     if name == "blank":
-        return ""
+        return None      # built after the rules: a supplied value stays, else blank
     if name == "copy":
         return (col(arg) or "").strip()
     if name == "geography_status":
@@ -1104,6 +1130,17 @@ def apply_field_map(collection: str, header: list, rows: list,
     undecided = [c for c in header if c in own and c not in decision]
     if undecided:
         raise UndecidedColumns(collection, undecided)
+    # A column the build synthesised (a join, a count) is outside the
+    # flagship's header and outside the map, and the specification is exact:
+    # "a meaningful unmatched field in the full combined export blocks
+    # migration until its destination is accounted for." It is refused by
+    # name, never appended (Codex, PR #67).
+    # A column outside the flagship that IS an approved target (a supplied
+    # research_note, names as published from the bridge) is the terminal
+    # delivering an owed derivation, and is welcome.
+    joined = [c for c in header if c not in own and c not in entry["order"]]
+    if joined:
+        raise UndecidedColumns(collection, joined)
     uid_col = entry["entity_uid"]
     plural = bool(entry.get("plural"))
     reg = register()
@@ -1118,9 +1155,12 @@ def apply_field_map(collection: str, header: list, rows: list,
                 "disposition": r["disposition"], "rows_affected": populated,
                 "unresolved": 0}
         if r["disposition"] == "alias_verified":
-            bad = [(row.get(col), row.get(uid_col)) for row in rows
-                   if (row.get(col) or "").strip() and (row.get(uid_col) or "").strip()
-                   and row.get(col).strip() != row.get(uid_col).strip()]
+            # A populated alias beside a blank cedar_uid is not verified
+            # either: retiring it would turn an identity into no identity
+            # (Codex, PR #67).
+            bad = [(row.get(col), row.get(uid_col) or "") for row in rows
+                   if (row.get(col) or "").strip()
+                   and row.get(col).strip() != (row.get(uid_col) or "").strip()]
             if bad:
                 raise AliasDisagreement(collection, col, len(bad), bad[0])
         elif r["disposition"] == "adjudicate":
@@ -1128,6 +1168,20 @@ def apply_field_map(collection: str, header: list, rows: list,
             if populated:
                 raise UnadjudicatedIdentifier(collection, col, populated)
         retirement.append(line)
+
+    # 1b. A BLOCKING DERIVATION: a source column that carries substantive
+    # qualifications (Deals' Notes, a beneficiary note) may leave only once
+    # its target exists on the row; otherwise the dataset does not ship
+    # (Codex, PR #67: a caveat dropped before research_note exists is a
+    # customer total that goes wrong).
+    for f in entry["fields"]:
+        if f["decision"] == "derive" and f.get("blocking"):
+            target = f["to"]
+            stuck = sum(1 for row in rows
+                        if (row.get(f["column"]) or "").strip()
+                        and not (row.get(target) or "").strip())
+            if stuck:
+                raise OwedDerivation(collection, f["column"], target, stuck)
 
     # 2. THE RULES, computed before anything is dropped (they read the
     # diagnostics that are about to leave).
@@ -1157,8 +1211,7 @@ def apply_field_map(collection: str, header: list, rows: list,
                 continue
             for b, row in zip(per_row, rows, strict=True):
                 v = _rule(entry, src, row, source_of)
-                if v is not None:
-                    b[target] = v
+                b[target] = (row.get(target) or "") if v is None else v
             built_cols.append(target)
     if plural:
         for b, row in zip(per_row, rows, strict=True):
@@ -1186,6 +1239,8 @@ def apply_field_map(collection: str, header: list, rows: list,
 
     # 4. THE OPENING BLOCK.
     role_src = next((n for n in entry.get("new", []) if n["column"] == "cedar_entity_role"), None)
+    if role_src and role_src.get("status"):
+        role_src = None            # owed: absent until supplied, never a placeholder
     withdrawn = entry.get("withdrawn_flag")
     for row, b in zip(rows, per_row, strict=True):
         if "cedar_uid" in b:
@@ -1216,7 +1271,7 @@ def apply_field_map(collection: str, header: list, rows: list,
                     row["cedar_entity_role"] = (row.get(src[4:]) or "").strip()
                 else:
                     row.setdefault("cedar_entity_role", "")
-            elif not uid:
+            elif not uid and role_src:
                 row["cedar_entity_role"] = ""
         row.update(b)
 
@@ -1227,8 +1282,7 @@ def apply_field_map(collection: str, header: list, rows: list,
         | set(entry["opening"]) | set(built_cols))
     owed = [c for c in entry["order"] if c not in present]
     ordered = [c for c in entry["order"] if c in present]
-    extra = [c for c in header if c not in own and c not in dropped and c not in ordered]
-    header[:] = ordered + extra
+    header[:] = ordered
     for row in rows:
         for c in header:
             row.setdefault(c, "")
@@ -1247,7 +1301,7 @@ def apply_field_map(collection: str, header: list, rows: list,
             raise RetiredIdentifierPresent(collection, c, len(hits), hits[0][:60])
     return {"mapped": True, "renamed": rename, "dropped": drop,
             "built": list(entry["opening"]) + built_cols, "owed": owed,
-            "synthesised": extra, "retirement": retirement}
+            "retirement": retirement}
 
 
 # INTERNAL WORKING COLUMNS. 843 states plainly that the `*_proposed*` columns

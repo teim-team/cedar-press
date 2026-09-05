@@ -1283,7 +1283,7 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "constant:Native party or its owner (per-row derivation owed from the party attribution)",
+   "entity_role": "pending: party, or owner of the party, per row from the party attribution table; absent until supplied",
    "columns_today": 40,
    "columns_target": 33,
    "default_viewer": [
@@ -1502,8 +1502,9 @@
      "column": "Notes",
      "decision": "derive",
      "to": "research_note",
-     "why": "Substantive notes (closing-date disclaimers, uncertain status, ownership-share limits) become concise research_note text by an editorial pass (owed); harvest bookkeeping is dropped.",
-     "spec": "§4"
+     "why": "Substantive notes (closing-date disclaimers, uncertain status, ownership-share limits) become concise research_note text by an editorial pass (owed); harvest bookkeeping is dropped. BLOCKING: the writer refuses the dataset while Notes is populated and no research_note has been supplied, so a caveat such as 'do not sum the announced value and the project total' cannot be dropped before it reaches the customer.",
+     "spec": "§4",
+     "blocking": true
     },
     {
      "column": "Date_Added",
@@ -1577,8 +1578,9 @@
     },
     {
      "column": "cedar_entity_role",
-     "from": "constant:Native party or its owner",
-     "why": "Owed: a per-row value (party, owner of the party) once the party attribution table supplies it."
+     "from": "pending:party attribution",
+     "why": "party, or owner of the party, per row, once the party attribution table supplies it; absent until then rather than an ambiguous constant.",
+     "status": "pending"
     },
     {
      "column": "deal_type",
@@ -3950,8 +3952,9 @@
      "column": "beneficiary_note",
      "decision": "derive",
      "to": "research_note",
-     "why": "A factual beneficiary qualification goes to research_note (owed editorial pass).",
-     "spec": "§9"
+     "why": "A factual beneficiary qualification goes to research_note (owed editorial pass). BLOCKING: the writer refuses the dataset while the note is populated and no research_note has been supplied.",
+     "spec": "§9",
+     "blocking": true
     },
     {
      "column": "payer_entity_id",

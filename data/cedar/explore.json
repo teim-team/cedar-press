@@ -2378,6 +2378,7 @@
     },
     "legislation/native_bills": {
       "entity_uid": "entity_cedar_uids",
+      "entity_uid_list": true,
       "entity_name": null,
       "entity_type": null,
       "year": null,
@@ -2400,7 +2401,6 @@
         "congress",
         "chamber"
       ],
-      "entity_uid_list": true,
       "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number. entity_class_scope is a class-level scope, not the entities' class; the register answers the class from each uid.",
       "reviewed": true,
       "entity_role": "named in the bill",
