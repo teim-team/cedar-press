@@ -15,6 +15,7 @@ import {
   EXCLUDED_COLLECTIONS,
   LAUNCH_COLLECTION,
   collectionCedarFacts,
+  collectionDeclaredSample,
   collectionSample,
 } from "./collection.js";
 import { PRESS_CATALOG } from "./pressCatalog.js";
@@ -77,7 +78,9 @@ test("the ledger's entry for the current version is what the manifest measures",
     const record = ledgerFor(dataset.id).find((item) => item.version === dataset.version);
     assert.ok(record, `${dataset.id} ${dataset.version} is not in the ledger`);
     const cedar = collectionCedarFacts(dataset.id);
-    const sample = collectionSample(dataset.id);
+    // The DECLARED sample: the ledger records what the release produced,
+    // whether or not the repository holds the file today.
+    const sample = collectionDeclaredSample(dataset.id);
     assert.deepEqual(record, {
       version: dataset.version,
       date: dataset.updated,

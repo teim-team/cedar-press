@@ -757,7 +757,7 @@
           "kind": "data",
           "changed": [
             "Release: 7 tables, 5,930 rows.",
-            "A 10-row preview of native_owned_businesses.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of native_owned_businesses.csv, the collection's flagship table, was produced with this release and is not published on the shelf yet."
           ]
         },
         {

@@ -54,6 +54,7 @@
  */
 
 import manifest from "../../../data/cedar/collections.manifest.json" with { type: "json" };
+import published from "../../../data/cedar/samples.published.json" with { type: "json" };
 
 import { CLAIM_CLASS } from "./claims.js";
 
@@ -120,11 +121,45 @@ export const LAUNCH_COLLECTION = deepFreeze(
 const CEDAR = deepFreeze(
   Object.fromEntries(manifest.collections.map((entry) => [entry.id, entry.cedar])),
 );
+/**
+ * Sample files the manifest declares and this repository does not hold.
+ *
+ * Measured by scripts/measure-samples.mjs, never typed. The manifest states
+ * what the importer produced; this states what was committed. On 2026-09-04
+ * the two disagreed by nineteen files and every deploy failed on it for a
+ * day, so the difference is now data: such a sample reads as unpublished, with
+ * the reason, instead of as a file that will 404. `server/cedar_press/
+ * collections.py` applies the same record, so the two stay value-equal.
+ */
+const UNPUBLISHED = new Set(published.unpublished.map((entry) => entry.path));
+
+function unpublishedReason(table) {
+  return published.reason.replace("{table}", table);
+}
+
+/** A collection's sample, or the same entry marked unpublished with a reason. */
+function withPublication(sample) {
+  if (!sample?.path || !UNPUBLISHED.has(sample.path)) return sample;
+  const { path, ...rest } = sample;
+  return { ...rest, path: null, unpublished_path: path,
+           unavailable_because: unpublishedReason(sample.table) };
+}
+
+/** A table entry, or the same entry with its sample marked unpublished. */
+function tableWithPublication(table) {
+  if (!table.sample_path || !UNPUBLISHED.has(table.sample_path)) return table;
+  return { ...table, sample_path: null, sample_unpublished: table.sample_path };
+}
+
 const SAMPLES = deepFreeze(
-  Object.fromEntries(manifest.collections.map((entry) => [entry.id, entry.sample])),
+  Object.fromEntries(
+    manifest.collections.map((entry) => [entry.id, withPublication(entry.sample)]),
+  ),
 );
 const TABLES = deepFreeze(
-  Object.fromEntries(manifest.collections.map((entry) => [entry.id, entry.tables])),
+  Object.fromEntries(
+    manifest.collections.map((entry) => [entry.id, entry.tables.map(tableWithPublication)]),
+  ),
 );
 
 /** Readiness, blockers and measured counts for a dataset, or `null`. */
@@ -147,6 +182,20 @@ export function collectionTables(datasetId) {
 /** The flagship table's ten-row sample: which table, where, how many of. */
 export function collectionSample(datasetId) {
   return SAMPLES[datasetId] ?? null;
+}
+
+const DECLARED_SAMPLES = deepFreeze(
+  Object.fromEntries(manifest.collections.map((entry) => [entry.id, entry.sample])),
+);
+
+/**
+ * The sample the release PRODUCED, as the manifest declares it, before the
+ * publication record is applied. The release ledger records this one: what
+ * shipped with a version is a fact about the release, and whether the
+ * repository holds the file today is a fact about the repository.
+ */
+export function collectionDeclaredSample(datasetId) {
+  return DECLARED_SAMPLES[datasetId] ?? null;
 }
 
 /**

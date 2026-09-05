@@ -9057,3 +9057,29 @@ no precondition, which was harmless when they ran once and destructive once
 they ran on every build (a placeholder guard now); and a provenance gate that
 fails only when a whole activity type is unsourced is not a gate, because the
 sourced rows of the type hide the rest (any blank fails now).
+
+## 2026-09-05 — a declared sample the repository does not hold is data, not a red deploy
+
+cedarpress.ai served the 4 September 22:04 build for a day. Every deploy after
+it (runs 69 to 73) failed the same test: the importer wrote nineteen ten-row
+samples into `public/data/cedar/samples/` on the machine that ran it, git
+ignores `*.csv`, nobody added them, and CI refused a manifest whose files were
+not there. The refusal was right - the alternative is nineteen 404s - and the
+consequence was wrong: the twelve-collection release, the advocacy rename and
+two rounds of review fixes sat behind one missing `git add`.
+
+So the difference between what the importer produced and what the repository
+holds is now measured and recorded: `scripts/measure-samples.mjs` writes
+`data/cedar/samples.published.json` (force-added, like the manifest and the
+ledger), `collection.js` and `collections.py` both apply it, and a sample on
+that list reads on the site as "produced with this release, not published
+yet" instead of as a download that fails. The tests refuse a stale record,
+naming the command; the importer re-runs it after every copy. The ledger is
+untouched: what a release produced is a fact about the release, and
+`collectionDeclaredSample` is that fact; `collectionSample` is what the shelf
+can serve today.
+
+The nineteen files still have to be added from the checkout that ran the
+importer, then `node scripts/measure-samples.mjs` and a commit. Until then the
+owned collection's flagship sample and eighteen table samples are absent from
+the site, and the site says so.
