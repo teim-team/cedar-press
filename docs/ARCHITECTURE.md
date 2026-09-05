@@ -64,7 +64,7 @@ git ls-files src/<dir>/grove                                   # files to move
 | | |
 |---|---|
 | Files to move | 71 — `features/grove` 43, `pages/grove` 26, `components/grove` 1, `styles/grove` 1 |
-| Path references to rewrite | 240, across 63 files |
+| Path references to rewrite | 241, across 63 files |
 | Referencing files inside `src/` | 27 — `pages/` 21, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 36 — `server/cedar_press/` 8, `scripts/` 7, `docs/` 6, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1, `AGENTS.md` 1 |
 
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 240 references get rewritten?" is a question the build, the
+First, "did all 241 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 240 references get rewritten?",
+is one of the three things that answer "did all 241 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
@@ -431,8 +431,12 @@ is added, and `cedar_uid` keeps meaning the canonical Native entity.
   `broad` lets an entity filter include records covering a broader group the
   entity belongs to, off by default, evaluated per entity from the
   register's class only for scopes whose membership kind is
-  `register_class`, and never for a state or NHO scope (unknown is never a
-  match). A row passes once, at its own grain. Every row included that way
+  `register_class` and only for an element dated on or after the register's
+  own date (`register.json` carries `as_of`, the latest mint date: the
+  register vouches for a class from then on, not before), and never for a
+  state or NHO scope (unknown is never a match). A chosen entity that fails
+  the type filter brings nothing in. A row passes once, at its own grain,
+  and the export says how each row got in (`matched_by`). Every row included that way
   says why in the viewer, and the reduced export carries `collective_scopes`
   beside the entity columns rather than inside them.
 - Nothing here displays a national membership count: the register's class

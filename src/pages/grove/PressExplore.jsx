@@ -614,9 +614,15 @@ function EntityCell({ item }) {
   const first = entities[0];
   const why = item.why ?? [];
   if (!first) {
+    // What the blank says is the table's own link status where it carries
+    // one; a scope alone does not make a blank "no individual named", since
+    // a notice can address a population AND name a party the register could
+    // not place (Codex, PR #69).
+    const blank = { no_individual_named: "no individual entity named", unresolved: "named party not resolved to the register", withheld: "identity withheld" }[item.linkStatus]
+      ?? "not linked to an entity";
     return (
       <>
-        <em className="cp-ex__unkeyed">{item.scopes?.length ? "no individual entity named" : "not linked to an entity"}</em>
+        <em className="cp-ex__unkeyed">{blank}</em>
         {item.scopes?.length ? <small className="cp-ex__uid">{item.scopes.map(scopeLine).join("; ")}</small> : null}
         {why.length ? <small className="cp-ex__uid">Broad scope: {why.map(scopeLine).join("; ")}. The chosen entity is not individually named.</small> : null}
       </>
@@ -894,7 +900,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   const download = () => {
     const stamp = new Date().toISOString().slice(0, 10);
     const files = [
-      { name: "records.csv", text: cutCsv(filtered, { view, columns: tableColumns }) },
+      { name: "records.csv", text: cutCsv(filtered, { view, columns: tableColumns, cut: said, register }) },
       { name: "README.txt", text: cutReadme(filtered, { view, cut: said, register, columns: tableColumns, accessedOn: stamp, missing: missing.map((k) => k.split("/")[0]) }) },
     ];
     saveZip(`cedar-press-${view === "table" ? "sample" : "summary"}-results-${stamp}.zip`, files);

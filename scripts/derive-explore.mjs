@@ -35,6 +35,7 @@ const OUT = `${REPO}data/cedar/explore.json`;
 const PUBLIC = `${REPO}public`;
 const NAMES = `${REPO}data/spine/cedar_entity_names.csv`;
 const TYPES = `${REPO}data/spine/cedar_entity_types.csv`;
+const IDENTITY = TYPES.replace(/cedar_entity_types\.csv$/, "cedar_identity_register.csv");
 const REGISTER = `${PUBLIC}/data/cedar/register.json`;
 
 // The one class whose names the publication rule withholds unless the owner
@@ -224,6 +225,11 @@ function rows(path) {
  */
 export function deriveRegister() {
   const classes = rows(TYPES).map((t) => ({ code: t.type_code, label: t.label }));
+  // The register's own date: the latest mint date the identity register
+  // records. The register can vouch for an entity's class on and after that
+  // day and not before, which is what a scope's membership evaluation reads
+  // (Codex, PR #69: a current class is not historical membership).
+  const asOf = rows(IDENTITY).map((r) => r.minted).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().at(-1) ?? null;
   const index = new Map(classes.map((c, i) => [c.code, i]));
   const entities = [];
   let withheld = 0;
@@ -241,6 +247,7 @@ export function deriveRegister() {
       "Each entity is [cedar_uid, name, class index into `classes`]. A null name is " +
       `withheld by the publication rule for ${WITHHELD_CLASS} (code/cedar_domain.py).`,
     withheld_names: withheld,
+    as_of: asOf,
     classes,
     entities,
   };

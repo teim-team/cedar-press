@@ -95,25 +95,26 @@ def sample(collection: str, table: str):
 
 
 def supply_owed_targets(collection: str, rows) -> set:
-    """Stand in for the terminal: every combine or derive target the map does
-    not build here is written on the row wherever its source is populated,
-    so the loss guard is satisfied and the rest of the contract can be
-    asserted. Returns the targets supplied."""
+    """Stand in for the terminal: every combine or derive target the writer's
+    own loss guard (`cedar_publication.owed_derivations`) would hold the
+    dataset for is written on the row wherever its source is populated, so
+    the rest of the contract can be asserted. Returns the targets supplied."""
     entry = pub.field_map()[collection]
-    kept = {f["column"] for f in entry["fields"] if f["decision"] in ("keep", "withhold")}
-    renamed = {f["to"] for f in entry["fields"] if f["decision"] == "rename"}
-    built = {n["column"] for n in entry["new"] if not n.get("status")}
-    delivered = kept | renamed | built
+    rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
+    built = [n["column"] for n in entry["new"] if not n.get("status")]
     supplied = set()
-    for f in entry["fields"]:
-        if f["decision"] not in ("combine", "derive"):
-            continue
-        if f["to"] in delivered and not f.get("blocking"):
+    carriers = {f["column"] for f in entry["fields"]
+                if f["decision"] == "combine" and f["to"] == f["column"]}
+    for f, target, _stuck in pub.owed_derivations(entry, rename, built, rows):
+        if target in [n["column"] for n in entry["new"] if not n.get("status")
+                      and n.get("from") != "rule:blank"]:
             continue
         for r in rows:
-            if (r.get(f["column"]) or "").strip() and not (r.get(f["to"]) or "").strip():
-                r[f["to"]] = f"supplied from {f['column']}"
-        supplied.add(f["to"])
+            if target in carriers:
+                r[f["column"]] = ""          # folded into the carrier, for the test only
+            elif (r.get(f["column"]) or "").strip() and not (r.get(target) or "").strip():
+                r[target] = f"supplied from {f['column']}"
+        supplied.add(target)
     return supplied
 
 
@@ -147,10 +148,15 @@ class TestApplyFieldMap(unittest.TestCase):
                 self.assertEqual(header[:len(opening)], opening)
                 self.assertEqual(header, expected)
                 self.assertEqual(header[-1], "research_note")
-                # Nothing internal, documented, combined or derived survives.
+                # Nothing internal, documented, combined or derived survives,
+                # except a combine's carrier: the source that already bears
+                # the target's name (contractors' sector), kept as the target.
                 targets = {f["to"] for f in entry["fields"] if f["decision"] == "rename"}
+                carriers = {f["column"] for f in entry["fields"]
+                            if f["decision"] == "combine" and f["to"] == f["column"]}
                 gone = {f["column"] for f in entry["fields"]
-                        if f["decision"] in ("internal", "document", "combine", "derive")} - targets
+                        if f["decision"] in ("internal", "document", "combine", "derive")}
+                gone -= targets | carriers
                 self.assertFalse(gone & set(header))
                 for r in rows:
                     self.assertFalse(gone & set(r), sorted(gone & set(r)))
@@ -431,13 +437,34 @@ class TestApplyFieldMap(unittest.TestCase):
         with self.assertRaises(pub.OwedDerivation) as caught:
             pub.apply_field_map("contractors", header, rows, set(header))
         self.assertIn("competition_type", str(caught.exception))
-        # A source blank on every row loses nothing and may go.
+        # A source blank on every row loses nothing and may go; the carrier
+        # of a combine named like its source (sector) stays as the target,
+        # and supersector, with content and nowhere to go, holds the dataset
+        # (Codex, PR #68: a source is not its own replacement).
         header, rows = sample("contractors", "prime_contracts")
         for r in rows:
             r["extent_competed"] = r["extent_competed_normalized"] = ""
-            r["sector"] = r["supersector"] = ""
+        with self.assertRaises(pub.OwedDerivation) as caught:
+            pub.apply_field_map("contractors", header, rows, set(header))
+        self.assertEqual(caught.exception.columns, ["supersector"])
+        header, rows = sample("contractors", "prime_contracts")
+        for r in rows:
+            r["extent_competed"] = r["extent_competed_normalized"] = ""
+            r["supersector"] = ""
         pub.apply_field_map("contractors", header, rows, set(header))
         self.assertNotIn("extent_competed", header)
+        self.assertIn("sector", header)
+        self.assertTrue(any(r["sector"] for r in rows), "the carrier keeps its values")
+        # A blank builder delivers nothing: the Federal Register's
+        # location_basis into research_note (rule:blank) holds the dataset
+        # until a research_note is supplied (Codex, PR #68).
+        header, rows = sample("federal-register", "consultation_events")
+        for r in rows:
+            r["event_date_precision"] = "day"
+            r.pop("research_note", None)
+        with self.assertRaises(pub.OwedDerivation) as caught:
+            pub.apply_field_map("federal-register", header, rows, set(header))
+        self.assertEqual(caught.exception.columns, ["location_basis"])
         # With the combines supplied, the blocking derive still holds Deals
         # to the row: research_note is built blank here, and blank is not the
         # caveat arriving.
@@ -516,6 +543,38 @@ class TestApplyFieldMap(unittest.TestCase):
         rows[0]["entity_class_scope"] = "Every Native person"
         with self.assertRaises(pub.ScopeRefused):
             pub.apply_field_map("legislation", header, rows, set(header))
+        # So does a bill_scope value the rule does not know: it is not
+        # "evaluated and names none" (Codex, PR #69).
+        header, rows = sample("legislation", "native_bills")
+        rows[0]["bill_scope"] = "regional"
+        with self.assertRaises(pub.ScopeRefused):
+            pub.apply_field_map("legislation", header, rows, set(header))
+        # A scope code in the raw plural identity list is refused BEFORE the
+        # plural block would recast it as an unresolved entity (Codex, PR #69).
+        header, rows = sample("legislation", "native_bills")
+        rows[1]["entity_cedar_uids"] = "federally-recognized-tribes"
+        with self.assertRaises(pub.ScopeRefused) as caught:
+            pub.apply_field_map("legislation", header, rows, set(header))
+        self.assertEqual(caught.exception.columns, ["entity_cedar_uids"])
+        # The Federal Register's supplied link status is held to its vocabulary.
+        header, rows = sample("federal-register", "consultation_events")
+        neutralised("federal-register", header, rows)
+        header.append("entity_link_status")
+        for r in rows:
+            r["entity_link_status"] = "no_individual_named"
+        rows[0]["entity_link_status"] = "banana"
+        own = set(header) - {"entity_link_status"}
+        with self.assertRaises(pub.ScopeRefused) as caught:
+            pub.apply_field_map("federal-register", header, rows, own)
+        self.assertEqual(caught.exception.columns, ["entity_link_status"])
+        rows[0]["entity_link_status"] = "unresolved"
+        header, rows2 = sample("federal-register", "consultation_events")
+        neutralised("federal-register", header, rows2)
+        header.append("entity_link_status")
+        for r in rows2:
+            r["entity_link_status"] = "no_individual_named"
+        pub.apply_field_map("federal-register", header, rows2, set(header) - {"entity_link_status"})
+        self.assertIn("entity_link_status", header)
         # The Federal Register's column is owed and supplied by the terminal:
         # a supplied element outside the vocabulary is refused, by column.
         element = {"scope": "all-tribes-everywhere", "relationship": "addressed",

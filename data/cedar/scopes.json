@@ -1,5 +1,5 @@
 {
-  "_note": "Collective scope: the population a record relates to, kept apart from Native entity identity. A scope is never a Cedar entity, never carries a CE-XXXXX-CC uid, never stands in for a failed entity match and never receives dollars. Owner's decision of 2026-09-05 (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). This file is the whole vocabulary: a scope code the writer meets that is not here stops the dataset. Versioned: a membership result is reproducible only against the version and the register release it was computed with.",
+  "_note": "Collective scope: the population a record relates to, kept apart from Native entity identity. A scope is never a Cedar entity, never carries a CE-XXXXX-CC uid, never stands in for a failed entity match and never receives dollars. Owner's decision of 2026-09-05 (docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md). This file is the whole vocabulary: a scope code the writer meets that is not here stops the dataset. Versioned: a membership result is reproducible only against the version and the register release it was computed with. `link_statuses` is the vocabulary of `entity_link_status`, the column that says why a Cedar block is filled or blank; it is validated by the writer the same way.",
   "version": 1,
   "field": "collective_scopes",
   "element": {
@@ -34,7 +34,10 @@
       "definition": "The tribal governments on the Secretary of the Interior's list published under 25 U.S.C. 5131, including the Alaska Native village governments, as the list stood at `as_of`.",
       "membership": {
         "kind": "register_class",
-        "classes": ["Federally recognized tribe", "Federally recognized Alaska Native Village"],
+        "classes": [
+          "Federally recognized tribe",
+          "Federally recognized Alaska Native Village"
+        ],
         "reconciled_against_official_list": false,
         "reconciliation": "Owed on the terminal: a uid-level reconciliation of the register's two classes against the BIA list in the Federal Register notice of 2026-01-30 (aliases, constituent bodies, unresolved differences), before any national count is shown. The proposal's 577 was the register's class totals, not the list."
       }
@@ -51,12 +54,26 @@
     "alaska-native-villages": {
       "name": "Alaska Native village governments",
       "definition": "The federally recognized Alaska Native village governments, as the list stood at `as_of`.",
-      "membership": { "kind": "register_class", "classes": ["Federally recognized Alaska Native Village"], "reconciled_against_official_list": false }
+      "membership": {
+        "kind": "register_class",
+        "classes": [
+          "Federally recognized Alaska Native Village"
+        ],
+        "reconciled_against_official_list": false
+      }
     },
     "alaska-native-corporations": {
       "name": "Alaska Native Corporations",
       "definition": "The regional, village and group corporations organised under ANCSA. Not federally recognized tribes; a source that uses the ISDA definition of Indian tribe (Yellen v. Confederated Tribes of the Chehalis Reservation, 2021) reaches them where the recognized-tribe list does not, and the two scopes are recorded separately.",
-      "membership": { "kind": "register_class", "classes": ["Alaska Native Regional Corporation", "Alaska Native Village Corporation", "ANCSA Group Corporation"], "reconciled_against_official_list": false }
+      "membership": {
+        "kind": "register_class",
+        "classes": [
+          "Alaska Native Regional Corporation",
+          "Alaska Native Village Corporation",
+          "ANCSA Group Corporation"
+        ],
+        "reconciled_against_official_list": false
+      }
     },
     "native-hawaiian-organizations": {
       "name": "Native Hawaiian Organizations",
@@ -69,7 +86,15 @@
     "indian-country": {
       "name": "Indian Country, general",
       "definition": "The record concerns Indian Country without a defined population. General relevance only.",
-      "membership": { "kind": "none" }
+      "membership": {
+        "kind": "none"
+      }
     }
+  },
+  "link_statuses": {
+    "no_individual_named": "The record addresses or concerns a population and names no individual entity; the Cedar block is blank by design. Never a failed match.",
+    "resolved": "The named party resolved to the register; the Cedar block carries it.",
+    "unresolved": "The record names a party the register could not place; the Cedar block is blank and the name as published stands. Never recast as a population.",
+    "withheld": "The publication rule withholds the identity; the Cedar block is blank by policy, not by failure."
   }
 }

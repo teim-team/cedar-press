@@ -57,22 +57,42 @@ async function main() {
     for (const path of PAGES) {
       await page.goto(`http://localhost:${PORT}${path}`, { waitUntil: "networkidle" });
       await page.locator("#root h1").first().waitFor({ timeout: 15_000 });
-      const { rendered, title, description, canonical } = await page.evaluate(() => ({
-        rendered: document.getElementById("root").innerHTML,
-        title: document.title,
-        description: document.querySelector('meta[name="description"]')?.getAttribute("content") ?? "",
-        canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "",
-      }));
-      if (!rendered || !title) throw new Error(`prerender: ${path} rendered nothing`);
       // The head is the shell's (its asset links, policy and structured data
-      // are what the build wrote); the root's markup and the page's title,
-      // description, canonical address and index permission come from the
-      // render. A prerendered page is by definition one a crawler may index.
-      const attr = (text) => text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+      // are what the build wrote); the root's markup and the page's own head
+      // values come from the render: title, description, canonical, the
+      // Open Graph and Twitter pair, and the robots meta, because a social
+      // crawler reads this file without running the bundle (Codex, PR #68).
+      // Every reveal-on-scroll section is marked revealed before the markup
+      // is read: the capture ran with reduced motion, where CSS shows them
+      // regardless, and a reader with motion on would otherwise get
+      // `.cp-fade` at opacity 0 until the bundle arrived (Codex, PR #68).
+      const got = await page.evaluate(() => {
+        for (const node of document.querySelectorAll(".cp-fade")) node.classList.add("is-in");
+        const meta = {};
+        for (const tag of document.head.querySelectorAll("meta[name], meta[property]")) {
+          const key = tag.getAttribute("name") ?? tag.getAttribute("property");
+          meta[key] = tag.getAttribute("content") ?? "";
+        }
+        return {
+          rendered: document.getElementById("root").innerHTML,
+          title: document.title,
+          canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? null,
+          meta,
+        };
+      });
+      const { rendered, title, canonical, meta } = got;
+      if (!rendered || !title) throw new Error(`prerender: ${path} rendered nothing`);
+      const attr = (text) => String(text).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
       let out = shell.replace('<div id="root"></div>', `<div id="root">${rendered}</div>`);
-      out = out.replace(/<title>[^<]*<\/title>/, `<title>${attr(title)}</title>`);
-      if (description) out = out.replace(/(<meta\s+name="description"\s+content=")[^"]*(")/, `$1${attr(description)}$2`);
+      out = out.replace(/<title>[^<]*<\/title>/, `<title>${attr(title).replace(/&quot;/g, '"')}</title>`);
       if (canonical) out = out.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${attr(canonical)}$2`);
+      for (const key of ["description", "og:title", "og:description", "og:url", "twitter:title", "twitter:description"]) {
+        if (meta[key] == null) continue;
+        const which = key.startsWith("og:") ? "property" : "name";
+        const pattern = new RegExp(`(<meta\\s+${which}="${key}"\\s+content=")[^"]*(")`);
+        if (pattern.test(out)) out = out.replace(pattern, `$1${attr(meta[key])}$2`);
+      }
+      if (meta.robots) out = out.replace("</head>", `    <meta name="robots" content="${attr(meta.robots)}" />\n  </head>`);
       out = out.replace("</head>", '  <meta name="robots" content="index, follow">\n  </head>');
       // Written twice for a satellite page: `path.html`, which GitHub Pages
       // and the preview server both serve at the extensionless address the

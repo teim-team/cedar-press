@@ -81,7 +81,9 @@ export function meaningFor(key, column) {
 export function codebookColumns(key, columns) {
   return (CODEBOOK[key]?.fields ?? []).map((f) => f.column).filter((c) => columns.includes(c));
 }
-export const CUT_VERSION = 1;
+// 2 since the cut carries collective scopes (`sc`) and the broad toggle
+// (`b`), 2026-09-05; a version-1 cut reads as version 2 with neither.
+export const CUT_VERSION = 2;
 
 /** The type-picker token for rows no register entity is linked to. */
 export const UNLINKED = "unlinked";
@@ -213,7 +215,7 @@ export function buildRegister(json) {
     const cls = classes[classIndex];
     byUid.set(uid, { uid, name: name ?? null, type: cls?.code ?? null, withheld: name == null });
   }
-  return { classes, byUid, entities: [...byUid.values()] };
+  return { classes, byUid, entities: [...byUid.values()], asOf: json?.as_of ?? null };
 }
 
 export const EMPTY_REGISTER = buildRegister({ classes: [], entities: [] });
@@ -324,6 +326,19 @@ export function scopeDefinition(code) {
   return SCOPES.scopes[base] ?? null;
 }
 
+/**
+ * Whether a code is well formed against its definition: a parameterised
+ * scope carries its parameter, an unparameterised one carries none. A
+ * malformed code in a permalink is dropped and said so, never kept as a
+ * filter that can match nothing (Codex, PR #69).
+ */
+export function validScopeCode(code) {
+  const [base, param] = String(code ?? "").split(":");
+  const defn = SCOPES.scopes[base];
+  if (!defn) return false;
+  return defn.parameter ? Boolean(param) : !param;
+}
+
 /** A scope code in words: the definition's name, with its parameter. */
 export function scopeName(code) {
   const [base, param] = String(code ?? "").split(":");
@@ -353,15 +368,34 @@ export function rowScopes(row, contract) {
 }
 
 /**
+ * Why the Cedar block is filled or blank, where the table says: one of the
+ * vocabulary in scopes.json (`link_statuses`) on a singular table, or null
+ * where the table carries no such column or the cell is blank. The plural
+ * tables' aligned tiers are a different thing and are not read here.
+ */
+export function rowLinkStatus(row, contract) {
+  if (contract?.link_status !== "entity_link_status") return null;
+  const value = cell(row, contract.link_status);
+  return value && SCOPES.link_statuses?.[value] ? value : null;
+}
+
+/**
  * Whether a scope's population includes an entity: true, false, or null
  * when membership cannot be evaluated (the definition says so, or the
  * entity is unknown to the register). Only a register-class definition is
  * evaluable here, per entity, from the entity's class; no count is made.
  */
-export function scopeCovers(code, entity, register = EMPTY_REGISTER) {
-  const defn = scopeDefinition(code);
+export function scopeCovers(element, entity, register = EMPTY_REGISTER) {
+  const el = typeof element === "string" ? { scope: element } : element ?? {};
+  const defn = scopeDefinition(el.scope);
   const membership = defn?.membership;
   if (!membership || membership.kind !== "register_class") return null;
+  // The register vouches for an entity's class on and after its own date and
+  // not before: an element whose population is defined at an unknown date,
+  // or at a date before the register, has unknown membership here (Codex,
+  // PR #69). A dated membership source for earlier dates is the terminal's.
+  if (!register.asOf || el.as_of_rule === "unknown" || !/^\d{4}-\d{2}-\d{2}$/.test(el.as_of ?? "")) return null;
+  if (el.as_of < register.asOf) return null;
   const known = entity?.uid ? register.byUid.get(entity.uid) : null;
   const type = known?.type ?? entity?.type ?? null;
   if (!type) return null;
@@ -531,6 +565,7 @@ export function universalRows(key, rows, register = EMPTY_REGISTER) {
       collection,
       entity,
       scopes: rowScopes(row, contract),
+      linkStatus: rowLinkStatus(row, contract),
       subject: subject && subject.toLowerCase() !== (entity.name ?? "").toLowerCase() ? subject : null,
       year: rowYear(row, contract),
       date: rowDate(row, contract),
@@ -607,8 +642,8 @@ export function decodeCut(search) {
   cut.entities = entities.filter((uid) => UID.test(uid));
   for (const uid of entities) if (!UID.test(uid)) dropped.push(`entity ${uid}`);
   const scopeCodes = list(params.get("sc"));
-  cut.scopes = scopeCodes.filter((code) => scopeDefinition(code));
-  for (const code of scopeCodes) if (!scopeDefinition(code)) dropped.push(`scope ${code}`);
+  cut.scopes = scopeCodes.filter(validScopeCode);
+  for (const code of scopeCodes) if (!validScopeCode(code)) dropped.push(`scope ${code}`);
   cut.broad = params.get("b") === "1";
   cut.types = params.has("t") ? list(params.get("t")) : null;
   const years = /^(\d{4})-(\d{4})$/.exec(params.get("y") ?? "");
@@ -686,8 +721,13 @@ export function broadHits(item, cut, register = EMPTY_REGISTER) {
   if (!cut.broad || !cut.entities?.length || !item.scopes?.length) return [];
   const named = new Set(item.entity.entities.filter((e) => e.uid).map((e) => e.uid));
   if (cut.entities.some((uid) => named.has(uid))) return [];
-  return item.scopes.filter((el) =>
-    cut.entities.some((uid) => scopeCovers(el.scope, register.byUid.get(uid) ?? { uid }, register) === true));
+  // A chosen entity that fails the type filter cannot bring records in
+  // through its group either (Codex, PR #69).
+  const candidates = cut.entities
+    .map((uid) => register.byUid.get(uid) ?? { uid, type: null })
+    .filter((e) => cut.types === null || cut.types === undefined || (e.type && cut.types.includes(e.type)));
+  if (!candidates.length) return [];
+  return item.scopes.filter((el) => candidates.some((entity) => scopeCovers(el, entity, register) === true));
 }
 
 /**
@@ -919,9 +959,30 @@ export function questionFor(cut, register = EMPTY_REGISTER) {
 // label is not mistaken for a named entity.
 const UNIVERSAL_HEADER = [
   "collection", "table", "record_id", "entity_uids", "entity_name", "entity_type",
-  "entity_names", "entity_types", "entity_roles", "collective_scopes", "record_subject",
+  "entity_names", "entity_types", "entity_roles", "entity_link_status", "collective_scopes", "record_subject",
   "date", "year", "observation", "amount", "amount_basis", "superseded", "source",
 ];
+
+/**
+ * How a record got into a cut that names entities or scopes: `named` (it
+ * names a chosen entity), `scope:<code>` (it carries a chosen scope) or
+ * `broad:<code>` (the reader asked for the broader group). Blank where the
+ * cut selects by nothing of the kind. Exported beside the rows whenever the
+ * cut asks for scopes or the broader group, so a record brought in through
+ * collective membership says so in the file too (Codex, PR #69).
+ */
+export function matchedBy(item, cut, register = EMPTY_REGISTER) {
+  const reasons = [];
+  const entities = new Set(cut.entities ?? []);
+  if (entities.size && item.entity.entities.some((e) => e.uid && entities.has(e.uid))) reasons.push("named");
+  for (const el of scopeHits(item, new Set(cut.scopes ?? []))) reasons.push(`scope:${el.scope}`);
+  for (const el of broadHits(item, cut, register)) reasons.push(`broad:${el.scope}`);
+  return [...new Set(reasons)].join("|");
+}
+
+function explainsMatches(cut) {
+  return Boolean(cut && (cut.broad || cut.scopes?.length));
+}
 
 /** One entity's exportable name: the register's, the withheld marker, or its uid. */
 const exportName = (entity) => (entity.withheld ? WITHHELD_TEXT : entity.name ?? entity.uid ?? "");
@@ -952,8 +1013,9 @@ export function entityVectors(entity, contract = null) {
  * the README says so. Citation and the cut travel beside it in the README,
  * never as rows, so the file re-imports as exactly the records it lists.
  */
-export function cutCsv(rows, { view, columns = [] }) {
-  const header = view === "table" ? columns : UNIVERSAL_HEADER;
+export function cutCsv(rows, { view, columns = [], cut = null, register = EMPTY_REGISTER }) {
+  const explain = explainsMatches(cut);
+  const header = [...(view === "table" ? columns : UNIVERSAL_HEADER), ...(explain ? ["matched_by"] : [])];
   const lines = [header.map(csvCell).join(",")];
   for (const item of rows) {
     const values = view === "table"
@@ -963,12 +1025,13 @@ export function cutCsv(rows, { view, columns = [] }) {
         return [
           item.collection, item.key.split("/")[1], item.recordId, vectors.uids,
           item.entity.withheld ? WITHHELD_TEXT : item.entity.name, item.entity.type,
-          vectors.names, vectors.types, vectors.roles,
+          vectors.names, vectors.types, vectors.roles, item.linkStatus ?? "",
           item.scopes == null ? "" : JSON.stringify(item.scopes), item.subject,
           item.date, item.year, item.observation, item.amount, item.amountBasis,
           item.superseded ? "1" : "0", item.source,
         ];
       })();
+    if (explain) values.push(matchedBy(item, cut, register));
     lines.push(values.map(csvCell).join(","));
   }
   return lines.join("\n");
