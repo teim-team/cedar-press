@@ -1,5 +1,5 @@
 {
- "_note": "The customer-facing structure of each collection's dataset: what one row is, and the columns a subscriber sees with a plain-English label and meaning. Written 2026-09-05 from the twelve flagship samples and kept in step with data/cedar/field_map.json (the old-to-new field map the specification asks for): every column here is one the map ships, under the name the map gives it (`rename_to`), or one the writer adds at build time (`add`), and the first four are the specification's opening block. Meanings are read from the column names and ten rows of values and are to be confirmed by the terminal against the build scripts. Columns not listed here stay in the workspace. The viewer reads this file: labels become headings, meanings become the record's definitions, and unlisted columns fold under Technical fields.",
+ "_note": "The customer-facing structure of each collection's dataset: what one row is, and the columns a subscriber sees with a plain-English label and meaning. Written 2026-09-05 and kept in step with data/cedar/field_map.json, the field-by-field map behind the owner's exact column specification: every column here is one the map ships, under the name the map gives it (`rename_to`), one the writer builds at write time (`add`), or a combine's source shown until the combined column exists (`combine_into`); the first four (or, for Legislation and NAGPRA, five) are the specification's opening block. Meanings are read from the column names and ten rows of values and are to be confirmed by the terminal against the build scripts. Columns not listed stay in the workspace. The viewer reads this file: labels become headings, meanings become the record's definitions, and unlisted columns fold under Technical fields.",
  "tables": {
   "funding/federal_funding_transactions": {
    "collection": "funding",
@@ -10,16 +10,15 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
      "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns."
     },
     {
-     "column": "cedar_entity_type",
+     "column": "entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
      "add": true
@@ -31,59 +30,27 @@
      "add": true
     },
     {
+     "column": "assistance_transaction_unique_key",
+     "label": "Transaction ID",
+     "meaning": "USAspending's unique key for this transaction. Cite it to find the exact record.",
+     "rename_to": "transaction_id"
+    },
+    {
      "column": "assistance_award_unique_key",
      "label": "Award ID",
-     "meaning": "USAspending's key for the whole award; the source link is built from it."
+     "meaning": "USAspending's key for the whole award; the source link is built from it.",
+     "rename_to": "award_id"
     },
     {
      "column": "award_id_fain",
      "label": "Award number",
-     "meaning": "The award's Federal Award Identification Number; several transactions can share one."
+     "meaning": "The award's Federal Award Identification Number; several transactions can share one.",
+     "rename_to": "fain"
     },
     {
-     "column": "assistance_transaction_unique_key",
-     "label": "Transaction ID",
-     "meaning": "USAspending's unique key for this transaction. Cite it to find the exact record."
-    },
-    {
-     "column": "recipient_name",
-     "label": "Recipient as recorded",
-     "meaning": "The recipient's name as the award records it, before Cedar resolved it to the entity."
-    },
-    {
-     "column": "recipient_uei",
-     "label": "Recipient UEI",
-     "meaning": "The recipient's federal Unique Entity ID."
-    },
-    {
-     "column": "assistance_type_description",
-     "label": "Assistance type",
-     "meaning": "What kind of assistance it is: formula grant, project grant, direct payment, loan, insurance."
-    },
-    {
-     "column": "credit_instrument_flag",
-     "label": "Loan or guarantee (yes or no)",
-     "meaning": "Whether this row is a loan or loan guarantee, so the loan columns are read for the rows they belong to."
-    },
-    {
-     "column": "awarding_agency_name",
-     "label": "Agency",
-     "meaning": "The department that made the award."
-    },
-    {
-     "column": "awarding_sub_agency_name",
-     "label": "Office",
-     "meaning": "The office within the department."
-    },
-    {
-     "column": "cfda",
-     "label": "Program number",
-     "meaning": "The Assistance Listing (CFDA) number of the federal program."
-    },
-    {
-     "column": "cfda_title",
-     "label": "Program",
-     "meaning": "The federal program's name."
+     "column": "action_date",
+     "label": "Action date",
+     "meaning": "The date the agency took this action."
     },
     {
      "column": "fiscal_year",
@@ -96,60 +63,122 @@
      "meaning": "Whether this row falls in a fiscal year the source had not finished reporting when Cedar pulled it (yes or no). Do not compare a partial year to a complete one."
     },
     {
-     "column": "action_date",
-     "label": "Action date",
-     "meaning": "The date the agency took this action."
+     "column": "recipient_name",
+     "label": "Recipient as recorded",
+     "meaning": "The recipient's name as the award records it, before Cedar resolved it to the entity."
     },
     {
-     "column": "obligated_usd",
-     "label": "Amount obligated",
-     "meaning": "Dollars obligated by this transaction. Negative values are de-obligations, kept as recorded."
+     "column": "recipient_uei",
+     "label": "Recipient UEI",
+     "meaning": "The recipient's federal Unique Entity ID."
     },
     {
-     "column": "obligated_usd_real2025",
-     "label": "Amount in 2025 dollars",
-     "meaning": "The same amount adjusted for inflation to 2025 dollars."
-    },
-    {
-     "column": "face_value_of_loan",
-     "label": "Loan face value",
-     "meaning": "For loans, the face value of this loan; zero for grants."
-    },
-    {
-     "column": "original_loan_subsidy_cost",
-     "label": "Original loan subsidy cost",
-     "meaning": "For a loan, the government's estimated cost of the subsidy when it was made. A loan measure; never added to obligations."
-    },
-    {
-     "column": "total_face_value_of_loan",
-     "label": "Award loan face value",
-     "meaning": "For loans, the face value of the whole award to date."
-    },
-    {
-     "column": "total_loan_subsidy_cost",
-     "label": "Total loan subsidy cost",
-     "meaning": "The subsidy cost across the award's loan actions. Never added to obligations."
+     "column": "business_types_code",
+     "label": "Business types code",
+     "meaning": "One of three overlapping recipient-type fields, consolidated through the source-code dictionary with conflict checks.",
+     "combine_into": "recipient_type"
     },
     {
      "column": "business_types_description",
      "label": "Recipient type as recorded",
-     "meaning": "How USAspending classifies the recipient (for example, federally recognized tribal government)."
+     "meaning": "How USAspending classifies the recipient (for example, federally recognized tribal government).",
+     "combine_into": "recipient_type"
+    },
+    {
+     "column": "business_types_description_normalized",
+     "label": "Business types description normalized",
+     "meaning": "The normalized spelling, the third of the three.",
+     "combine_into": "recipient_type"
+    },
+    {
+     "column": "assistance_type",
+     "label": "Assistance type code",
+     "meaning": "The source's code for the assistance type (grant, loan, direct payment, insurance), defined in the dictionary; the readable type is beside it.",
+     "rename_to": "assistance_type_code"
+    },
+    {
+     "column": "assistance_type_description",
+     "label": "Assistance type",
+     "meaning": "What kind of assistance it is: formula grant, project grant, direct payment, loan, insurance.",
+     "rename_to": "assistance_type"
+    },
+    {
+     "column": "cfda",
+     "label": "Program number",
+     "meaning": "The Assistance Listing (CFDA) number of the federal program.",
+     "rename_to": "program_code"
+    },
+    {
+     "column": "cfda_title",
+     "label": "Program",
+     "meaning": "The federal program's name.",
+     "rename_to": "program_name"
+    },
+    {
+     "column": "awarding_agency_name",
+     "label": "Agency",
+     "meaning": "The department that made the award.",
+     "rename_to": "awarding_agency"
+    },
+    {
+     "column": "awarding_sub_agency_name",
+     "label": "Office",
+     "meaning": "The office within the department.",
+     "rename_to": "awarding_subagency"
+    },
+    {
+     "column": "obligated_usd",
+     "label": "Amount obligated",
+     "meaning": "Dollars obligated by this transaction. Negative values are de-obligations, kept as recorded.",
+     "rename_to": "obligations_usd"
+    },
+    {
+     "column": "obligated_usd_real2025",
+     "label": "Amount in 2025 dollars",
+     "meaning": "The same amount adjusted for inflation to 2025 dollars.",
+     "rename_to": "obligations_usd_real2025"
+    },
+    {
+     "column": "face_value_of_loan",
+     "label": "Loan face value",
+     "meaning": "For loans, the face value of this loan; zero for grants.",
+     "rename_to": "loan_face_value_usd"
+    },
+    {
+     "column": "original_loan_subsidy_cost",
+     "label": "Original loan subsidy cost",
+     "meaning": "For a loan, the government's estimated cost of the subsidy when it was made. A loan measure; never added to obligations.",
+     "rename_to": "loan_subsidy_cost_usd"
+    },
+    {
+     "column": "total_face_value_of_loan",
+     "label": "Award loan face value",
+     "meaning": "For loans, the face value of the whole award to date.",
+     "rename_to": "total_loan_face_value_usd"
+    },
+    {
+     "column": "total_loan_subsidy_cost",
+     "label": "Total loan subsidy cost",
+     "meaning": "The subsidy cost across the award's loan actions. Never added to obligations.",
+     "rename_to": "total_loan_subsidy_cost_usd"
     },
     {
      "column": "recipient_city_name",
      "label": "Recipient city",
-     "meaning": "City of the recipient's address on the award."
+     "meaning": "City of the recipient's address on the award.",
+     "rename_to": "recipient_city"
     },
     {
      "column": "recipient_state_code",
      "label": "Recipient state",
-     "meaning": "State of the recipient's address on the award."
+     "meaning": "State of the recipient's address on the award.",
+     "rename_to": "recipient_state"
     },
     {
      "column": "geo_recipient_county_name",
      "label": "Recipient county",
      "meaning": "The county of the recipient's address, which is not necessarily where the funded work happens.",
-     "rename_to": "recipient_county_name"
+     "rename_to": "recipient_county"
     },
     {
      "column": "geo_recipient_county_fips",
@@ -161,13 +190,25 @@
      "column": "geo_pop_county_name",
      "label": "Place of performance county",
      "meaning": "The county where the funded work is performed, as the award reports it.",
-     "rename_to": "place_of_performance_county_name"
+     "rename_to": "performance_county"
     },
     {
      "column": "geo_pop_county_fips",
      "label": "Place of performance county FIPS",
      "meaning": "The county code where the funded work is performed, as the award reports it.",
-     "rename_to": "place_of_performance_county_fips"
+     "rename_to": "performance_county_fips"
+    },
+    {
+     "column": "recipient_geography_status",
+     "label": "Recipient geography status",
+     "meaning": "Whether the recipient's address was placed in a county: placed, placed with an ambiguous place name, or unplaced.",
+     "add": true
+    },
+    {
+     "column": "performance_geography_status",
+     "label": "Performance geography status",
+     "meaning": "The same for the place of performance.",
+     "add": true
     },
     {
      "column": "attributed_flag",
@@ -180,25 +221,26 @@
      "meaning": "How the attribution stands: attributed through the register, unattributed, or under review."
     },
     {
-     "column": "attribution_method",
-     "label": "How the entity was matched",
-     "meaning": "How Cedar linked this recipient to the entity (for example, an exact UEI match)."
-    },
-    {
-     "column": "confidence_tier",
-     "label": "Match confidence",
-     "meaning": "Cedar's confidence in the link: A is strongest."
-    },
-    {
      "column": "source_system",
      "label": "Source system",
-     "meaning": "Which source family the row came from: the USAspending archive or the historical FAADS files. The two overlap in coverage and are never summed as one.",
+     "meaning": "Which source the record came from.",
      "add": true
+    },
+    {
+     "column": "source_vintage",
+     "label": "Source vintage",
+     "meaning": "The date stamp of the archive the row was taken from."
     },
     {
      "column": "source_url",
      "label": "Source",
-     "meaning": "The award's page on USAspending.",
+     "meaning": "The official page for this record, written into the file so it cites itself.",
+     "add": true
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
      "add": true
     }
    ]
@@ -212,25 +254,25 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
-     "column": "cedar_entity_name",
+     "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
      "add": true
     },
     {
-     "column": "cedar_entity_type",
+     "column": "entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
      "add": true
     },
     {
-     "column": "participant_role",
+     "column": "cedar_entity_role",
      "label": "Entity role",
-     "meaning": "Why the entity is on this row: read from participant_role.",
-     "rename_to": "cedar_entity_role"
+     "meaning": "Why the entity is on this row: participant.",
+     "add": true
     },
     {
      "column": "consultation_event_id",
@@ -243,22 +285,6 @@
      "meaning": "The Federal Register document number."
     },
     {
-     "column": "consultation_type",
-     "label": "Kind of consultation",
-     "meaning": "Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document.",
-     "rename_to": "action_type"
-    },
-    {
-     "column": "document_role",
-     "label": "Document role",
-     "meaning": "Whether the document announces a consultation or reports one that already happened."
-    },
-    {
-     "column": "topic",
-     "label": "Topic",
-     "meaning": "What the consultation was about, from the document's title."
-    },
-    {
      "column": "agency",
      "label": "Agency",
      "meaning": "The department holding the consultation."
@@ -266,7 +292,8 @@
     {
      "column": "sub_agency",
      "label": "Office",
-     "meaning": "The office within the department."
+     "meaning": "The office within the department.",
+     "rename_to": "subagency"
     },
     {
      "column": "program",
@@ -274,10 +301,25 @@
      "meaning": "The program or matter the consultation concerns, where the document names one."
     },
     {
+     "column": "consultation_type",
+     "label": "Kind of consultation",
+     "meaning": "Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document.",
+     "rename_to": "activity_type"
+    },
+    {
+     "column": "topic",
+     "label": "Topic",
+     "meaning": "What the consultation was about, from the document's title."
+    },
+    {
+     "column": "document_role",
+     "label": "Document role",
+     "meaning": "Whether the document announces a consultation or reports one that already happened."
+    },
+    {
      "column": "notice_date",
      "label": "Notice date",
-     "meaning": "The date the Federal Register document was published.",
-     "rename_to": "publication_date"
+     "meaning": "The date the Federal Register document was published."
     },
     {
      "column": "event_start_date",
@@ -290,9 +332,15 @@
      "meaning": "When it ended, where stated."
     },
     {
-     "column": "comment_deadline",
-     "label": "Comment deadline",
-     "meaning": "The date written comments were due, where stated."
+     "column": "participant_name_as_published",
+     "label": "Participant as published",
+     "meaning": "The tribe or organization named in the document, as it spells it.",
+     "rename_to": "participant_name"
+    },
+    {
+     "column": "participant_role",
+     "label": "Entity role",
+     "meaning": "Why the entity is on this row: read from participant_role."
     },
     {
      "column": "location",
@@ -302,12 +350,13 @@
     {
      "column": "format",
      "label": "Format",
-     "meaning": "In person, virtual, teleconference, written comment, or a combination."
+     "meaning": "In person, virtual, teleconference, written comment, or a combination.",
+     "rename_to": "event_format"
     },
     {
-     "column": "participant_name_as_published",
-     "label": "Participant as published",
-     "meaning": "The tribe or organization named in the document, as it spells it."
+     "column": "comment_deadline",
+     "label": "Comment deadline",
+     "meaning": "The date written comments were due, where stated."
     },
     {
      "column": "has_written_comments",
@@ -332,7 +381,8 @@
     {
      "column": "n_participant_rows_for_event",
      "label": "Participant rows for this event",
-     "meaning": "How many rows this event has in the file."
+     "meaning": "How many rows this event has in the file.",
+     "rename_to": "participant_rows_per_event"
     },
     {
      "column": "federal_register_citation",
@@ -340,14 +390,26 @@
      "meaning": "The Federal Register citation (volume FR page)."
     },
     {
-     "column": "source_quote",
-     "label": "Source passage",
-     "meaning": "The sentence in the document this row was read from."
+     "column": "source_system",
+     "label": "Source system",
+     "meaning": "Which source the record came from.",
+     "add": true
     },
     {
      "column": "source_url",
      "label": "Source",
      "meaning": "The document on federalregister.gov."
+    },
+    {
+     "column": "source_quote",
+     "label": "Source passage",
+     "meaning": "The sentence in the document this row was read from."
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -358,27 +420,33 @@
    "where": "workspace dist/customer/legislation.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/legislation/native_bills.csv; built from the Congress.gov API.",
    "fields": [
     {
-     "column": "entity_cedar_uids",
+     "column": "cedar_uids",
      "label": "Cedar IDs",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID. Several, separated by |, where a row names several entities.",
-     "rename_to": "cedar_uid"
-    },
-    {
-     "column": "entity_names",
-     "label": "Native entities",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
-    },
-    {
-     "column": "cedar_entity_type",
-     "label": "Entity types",
-     "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
+     "meaning": "The Native entities associated with this record, as a JSON array; one position per entity-role association. A named but unresolved party has null here and its name in the names-as-published column.",
      "add": true
     },
     {
-     "column": "cedar_entity_role",
-     "label": "Entity role",
-     "meaning": "Why the entity is on this row: named in the bill.",
+     "column": "canonical_names",
+     "label": "Native entities",
+     "meaning": "Their register names, aligned position by position with the Cedar IDs.",
+     "add": true
+    },
+    {
+     "column": "entity_classes",
+     "label": "Entity types",
+     "meaning": "Their register classes, aligned.",
+     "add": true
+    },
+    {
+     "column": "entity_roles",
+     "label": "Entity roles",
+     "meaning": "The role of each association (affiliated, consulted, repatriation recipient; named in the bill), aligned. An entity in two roles occupies two positions.",
+     "add": true
+    },
+    {
+     "column": "entity_names_as_published",
+     "label": "Names as published",
+     "meaning": "What the source called each entity, aligned; null until Cedar supplies it from the relationship evidence. A register name is not proof of what the source said.",
      "add": true
     },
     {
@@ -420,14 +488,24 @@
     {
      "column": "bill_scope",
      "label": "Scope",
-     "meaning": "Whether the bill is specific to one tribe or general to Indian Country.",
-     "rename_to": "relevance_scope"
+     "meaning": "Whether the bill is specific to one tribe or general to Indian Country."
     },
     {
      "column": "entity_class_scope",
      "label": "Relevance class scope",
      "meaning": "When the bill names no entity, the class of entity it is about (federally recognized tribes, Alaska Native corporations). Class-wide relevance, not any entity's class.",
-     "rename_to": "relevance_class_scope"
+     "rename_to": "affected_entity_classes"
+    },
+    {
+     "column": "affected_entities",
+     "label": "Affected entities as published",
+     "meaning": "The entities the source itself names as affected, as it names them; empty where the source names none.",
+     "rename_to": "affected_entities_as_published"
+    },
+    {
+     "column": "introduced_date",
+     "label": "Introduced",
+     "meaning": "The date the bill was introduced; the year filter uses this."
     },
     {
      "column": "sponsor",
@@ -446,11 +524,6 @@
      "meaning": "How many members cosponsored it."
     },
     {
-     "column": "introduced_date",
-     "label": "Introduced",
-     "meaning": "The date the bill was introduced; the year filter uses this."
-    },
-    {
      "column": "latest_action",
      "label": "Latest action",
      "meaning": "The most recent action recorded on the bill."
@@ -463,18 +536,12 @@
     {
      "column": "outcome",
      "label": "Outcome",
-     "meaning": "Where the bill ended: enacted, passed one chamber, died in committee.",
-     "rename_to": "status"
+     "meaning": "Where the bill ended: enacted, passed one chamber, died in committee."
     },
     {
      "column": "companion_bill_id",
      "label": "Companion bill",
      "meaning": "The matching bill in the other chamber, where one exists."
-    },
-    {
-     "column": "has_rollcall",
-     "label": "Had a roll-call vote",
-     "meaning": "Whether any roll-call vote was taken (yes or no)."
     },
     {
      "column": "n_rollcalls",
@@ -483,14 +550,33 @@
      "rename_to": "rollcall_count"
     },
     {
-     "column": "entity_link_tiers",
-     "label": "Entity link tiers",
-     "meaning": "How firmly each named entity resolves to the register, in the same order as the IDs (A strongest)."
+     "column": "n_entities_resolved",
+     "label": "Resolved entities",
+     "meaning": "How many of the named entities Cedar resolved to its register.",
+     "rename_to": "resolved_entity_count"
+    },
+    {
+     "column": "entity_link_statuses",
+     "label": "Entity link statuses",
+     "meaning": "How firmly each named entity resolves to the register, aligned with the Cedar IDs (A strongest).",
+     "add": true
+    },
+    {
+     "column": "source_system",
+     "label": "Source system",
+     "meaning": "Which source the record came from.",
+     "add": true
     },
     {
      "column": "source_url",
      "label": "Source",
-     "meaning": "The bill's page on congress.gov.",
+     "meaning": "The official page for this record, written into the file so it cites itself.",
+     "add": true
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
      "add": true
     }
    ]
@@ -504,25 +590,19 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
      "column": "native_party_canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
+     "rename_to": "canonical_name"
     },
     {
-     "column": "cedar_entity_type",
+     "column": "entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
      "add": true
-    },
-    {
-     "column": "native_party_role",
-     "label": "Entity role",
-     "meaning": "Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller).",
-     "rename_to": "cedar_entity_role"
     },
     {
      "column": "Deal_ID",
@@ -531,16 +611,46 @@
      "rename_to": "deal_id"
     },
     {
+     "column": "Event_Date",
+     "label": "Date",
+     "meaning": "When the deal happened or was announced.",
+     "rename_to": "event_date"
+    },
+    {
+     "column": "Event_Date_precision",
+     "label": "Date precision",
+     "meaning": "Whether the date is known to the day, the month or the year.",
+     "rename_to": "event_date_precision"
+    },
+    {
+     "column": "Event_Date_not_before",
+     "label": "Date not before",
+     "meaning": "The earliest date the event could have happened, where the source gives an interval rather than a day.",
+     "rename_to": "event_date_not_before"
+    },
+    {
+     "column": "Event_Date_not_after",
+     "label": "Date not after",
+     "meaning": "The latest date the event could have happened.",
+     "rename_to": "event_date_not_after"
+    },
+    {
+     "column": "Event_Year",
+     "label": "Year",
+     "meaning": "The year of the event date.",
+     "rename_to": "event_year"
+    },
+    {
      "column": "Deal_Title",
      "label": "Title",
      "meaning": "A one-line description of the deal.",
-     "rename_to": "deal_title"
+     "rename_to": "title"
     },
     {
      "column": "Native_Party",
      "label": "Native party as published",
      "meaning": "The Native party's name as the source gives it.",
-     "rename_to": "native_party"
+     "rename_to": "native_party_name"
     },
     {
      "column": "Native_Party_Type",
@@ -549,28 +659,33 @@
      "rename_to": "native_party_type"
     },
     {
+     "column": "native_party_role",
+     "label": "Entity role",
+     "meaning": "Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller)."
+    },
+    {
      "column": "Counterparty_or_Funder",
      "label": "Counterparty or funder",
      "meaning": "The other side of the deal.",
-     "rename_to": "counterparty"
+     "rename_to": "counterparty_or_funder"
     },
     {
      "column": "Deal_Category",
      "label": "Category",
      "meaning": "Acquisition, grant or public financing, joint venture, and so on.",
-     "combine_into": "deal_category"
-    },
-    {
-     "column": "Event_Type",
-     "label": "Event",
-     "meaning": "What kind of event this row records (an acquisition of a 90% interest, an award).",
-     "combine_into": "deal_category"
+     "combine_into": "deal_type"
     },
     {
      "column": "transaction_type",
      "label": "Transaction type",
      "meaning": "The third of three overlapping classifications; shown until the one taxonomy replaces all three.",
-     "combine_into": "deal_category"
+     "combine_into": "deal_type"
+    },
+    {
+     "column": "Event_Type",
+     "label": "Event",
+     "meaning": "What kind of event this row records (an acquisition of a 90% interest, an award).",
+     "combine_into": "transaction_structure"
     },
     {
      "column": "Industry",
@@ -589,28 +704,16 @@
      "meaning": "Where the capital comes from: public, private or tribal."
     },
     {
-     "column": "Event_Date",
-     "label": "Date",
-     "meaning": "When the deal happened or was announced.",
-     "rename_to": "event_date"
-    },
-    {
-     "column": "Event_Date_precision",
-     "label": "Date precision",
-     "meaning": "Whether the date is known to the day, the month or the year.",
-     "rename_to": "event_date_precision"
-    },
-    {
      "column": "Status",
      "label": "Status",
      "meaning": "Completed, announced, awarded, pending.",
-     "combine_into": "status"
+     "combine_into": "deal_status"
     },
     {
      "column": "deal_status_std",
      "label": "Status (standardized)",
      "meaning": "The standardized status; shown until one status column replaces the two.",
-     "combine_into": "status"
+     "combine_into": "deal_status"
     },
     {
      "column": "Announced_Value_USD",
@@ -661,12 +764,6 @@
      "rename_to": "verification_status"
     },
     {
-     "column": "native_party_attribution_tier",
-     "label": "Attribution tier",
-     "meaning": "How firmly the Native party resolves to Cedar's register (A strongest).",
-     "rename_to": "attribution_tier"
-    },
-    {
      "column": "Source_1",
      "label": "Source",
      "meaning": "The primary source document or page.",
@@ -679,16 +776,16 @@
      "rename_to": "source_type"
     },
     {
-     "column": "Source_2",
-     "label": "Second source",
-     "meaning": "A second source, where one was found.",
-     "rename_to": "source_url_2"
+     "column": "additional_sources",
+     "label": "Additional sources",
+     "meaning": "Further public sources beyond the primary one, as a JSON list of {url, source_type}.",
+     "add": true
     },
     {
-     "column": "Source_2_Type",
-     "label": "Second source type",
-     "meaning": "What kind of document the second source is.",
-     "rename_to": "source_type_2"
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -699,33 +796,49 @@
    "where": "workspace dist/customer/nagpra.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nagpra/nagpra_notices.csv; built from Federal Register NAGPRA notices.",
    "fields": [
     {
-     "column": "affiliated_entity_ids",
+     "column": "cedar_uids",
      "label": "Cedar IDs",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID. Several, separated by |, where a row names several entities.",
-     "rename_to": "cedar_uid"
+     "meaning": "The Native entities associated with this record, as a JSON array; one position per entity-role association. A named but unresolved party has null here and its name in the names-as-published column.",
+     "add": true
     },
     {
-     "column": "cedar_entity_name",
+     "column": "canonical_names",
      "label": "Native entities",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
+     "meaning": "Their register names, aligned position by position with the Cedar IDs.",
      "add": true
     },
     {
-     "column": "cedar_entity_type",
+     "column": "entity_classes",
      "label": "Entity types",
-     "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
+     "meaning": "Their register classes, aligned.",
      "add": true
     },
     {
-     "column": "cedar_entity_role",
-     "label": "Entity role",
-     "meaning": "Why the entity is on this row: culturally affiliated, as the notice determines.",
+     "column": "entity_roles",
+     "label": "Entity roles",
+     "meaning": "The role of each association (affiliated, consulted, repatriation recipient; named in the bill), aligned. An entity in two roles occupies two positions.",
+     "add": true
+    },
+    {
+     "column": "entity_names_as_published",
+     "label": "Names as published",
+     "meaning": "What the source called each entity, aligned; null until Cedar supplies it from the relationship evidence. A register name is not proof of what the source said.",
      "add": true
     },
     {
      "column": "document_number",
      "label": "Document number",
      "meaning": "The Federal Register document number."
+    },
+    {
+     "column": "publication_date",
+     "label": "Published",
+     "meaning": "The date the notice was published."
+    },
+    {
+     "column": "publication_year",
+     "label": "Publication year",
+     "meaning": "The year the notice was published."
     },
     {
      "column": "notice_type",
@@ -744,11 +857,6 @@
      "meaning": "Whether this notice corrects an earlier one (yes or no)."
     },
     {
-     "column": "publication_date",
-     "label": "Published",
-     "meaning": "The date the notice was published."
-    },
-    {
      "column": "title",
      "label": "Title",
      "meaning": "The notice's title."
@@ -759,15 +867,10 @@
      "meaning": "The museum, university or agency holding the remains or objects."
     },
     {
-     "column": "institution_names_all",
-     "label": "All institutions",
-     "meaning": "Every institution the notice names, where it names more than one, separated by |."
-    },
-    {
-     "column": "institution_type_derived",
-     "label": "Institution type",
-     "meaning": "Museum, university, federal agency, and so on.",
-     "rename_to": "institution_type"
+     "column": "additional_institution_names",
+     "label": "Additional institutions",
+     "meaning": "The institutions the notice names beyond the designated one, as a JSON list.",
+     "add": true
     },
     {
      "column": "institution_city",
@@ -778,6 +881,17 @@
      "column": "institution_state",
      "label": "Institution state",
      "meaning": "Its state."
+    },
+    {
+     "column": "institution_type_derived",
+     "label": "Institution type",
+     "meaning": "Museum, university, federal agency, and so on.",
+     "rename_to": "institution_type"
+    },
+    {
+     "column": "institution_split_flag",
+     "label": "Institution split (yes or no)",
+     "meaning": "Whether the notice's institution field named several institutions that were split into the designated one and the additional ones."
     },
     {
      "column": "responsible_party_statement",
@@ -797,32 +911,38 @@
     {
      "column": "mni_total_stated",
      "label": "Individuals",
-     "meaning": "The minimum number of individuals the notice states."
+     "meaning": "The minimum number of individuals the notice states.",
+     "rename_to": "individuals_stated"
     },
     {
      "column": "mni_statements",
      "label": "Individuals count, as stated",
-     "meaning": "The sentence stating the minimum number of individuals, kept where the number alone is ambiguous."
+     "meaning": "The sentence stating the minimum number of individuals, kept where the number alone is ambiguous.",
+     "rename_to": "individuals_statement"
     },
     {
      "column": "n_associated_funerary_objects_stated",
      "label": "Associated funerary objects",
-     "meaning": "Count stated in the notice."
+     "meaning": "Count stated in the notice.",
+     "rename_to": "associated_funerary_objects_stated"
     },
     {
      "column": "n_unassociated_funerary_objects_stated",
      "label": "Unassociated funerary objects",
-     "meaning": "Count stated in the notice."
+     "meaning": "Count stated in the notice.",
+     "rename_to": "unassociated_funerary_objects_stated"
     },
     {
      "column": "n_sacred_objects_stated",
      "label": "Sacred objects",
-     "meaning": "Count stated in the notice."
+     "meaning": "Count stated in the notice.",
+     "rename_to": "sacred_objects_stated"
     },
     {
      "column": "n_objects_of_cultural_patrimony_stated",
      "label": "Objects of cultural patrimony",
-     "meaning": "Count stated in the notice."
+     "meaning": "Count stated in the notice.",
+     "rename_to": "cultural_patrimony_objects_stated"
     },
     {
      "column": "cultural_items_total_stated",
@@ -838,6 +958,12 @@
      "column": "removal_states",
      "label": "Removal states",
      "meaning": "The states of those places."
+    },
+    {
+     "column": "removal_location_statements",
+     "label": "Removal location",
+     "meaning": "Where the holdings were removed from, as the notice states it, with the existing restrictions on sensitive location applied before export.",
+     "rename_to": "removal_location"
     },
     {
      "column": "repatriation_eligible_date",
@@ -860,16 +986,6 @@
      "meaning": "Whether the remains are determined culturally unidentifiable (yes or no)."
     },
     {
-     "column": "n_affiliated_named",
-     "label": "Affiliated parties named",
-     "meaning": "How many parties the notice names as culturally affiliated."
-    },
-    {
-     "column": "n_affiliated_resolved",
-     "label": "Affiliated parties resolved",
-     "meaning": "How many of those Cedar could resolve to a register entity."
-    },
-    {
      "column": "n_consulted_named",
      "label": "Consulted parties named",
      "meaning": "How many parties the notice names as consulted."
@@ -880,9 +996,14 @@
      "meaning": "How many of those Cedar could resolve to a register entity. The gap is real uncertainty, not an omission."
     },
     {
-     "column": "consulted_entity_ids",
-     "label": "Cedar IDs (consulted)",
-     "meaning": "Entities the notice says were consulted."
+     "column": "n_affiliated_named",
+     "label": "Affiliated parties named",
+     "meaning": "How many parties the notice names as culturally affiliated."
+    },
+    {
+     "column": "n_affiliated_resolved",
+     "label": "Affiliated parties resolved",
+     "meaning": "How many of those Cedar could resolve to a register entity."
     },
     {
      "column": "n_disposition_priority_named",
@@ -895,11 +1016,6 @@
      "meaning": "How many of those Cedar could resolve."
     },
     {
-     "column": "disposition_priority_entity_ids",
-     "label": "Cedar IDs (disposition priority)",
-     "meaning": "Entities with priority for disposition, where stated."
-    },
-    {
      "column": "n_repatriation_recipient_named",
      "label": "Recipients named",
      "meaning": "How many recipients the notice names."
@@ -908,11 +1024,6 @@
      "column": "n_repatriation_recipient_resolved",
      "label": "Recipients resolved",
      "meaning": "How many of those Cedar could resolve."
-    },
-    {
-     "column": "repatriation_recipient_entity_ids",
-     "label": "Cedar IDs (repatriation recipient)",
-     "meaning": "Entities the notice names to receive the repatriation."
     },
     {
      "column": "n_letter_of_support_named",
@@ -925,11 +1036,6 @@
      "meaning": "How many of those Cedar could resolve to a register entity."
     },
     {
-     "column": "letter_of_support_entity_ids",
-     "label": "Cedar IDs (letter of support)",
-     "meaning": "The Cedar IDs of the parties named as submitting a letter of support, separated by |."
-    },
-    {
      "column": "n_aboriginal_land_named",
      "label": "Aboriginal-land parties named",
      "meaning": "How many parties the notice names for aboriginal land."
@@ -938,11 +1044,6 @@
      "column": "n_aboriginal_land_resolved",
      "label": "Aboriginal-land parties resolved",
      "meaning": "How many of those Cedar could resolve."
-    },
-    {
-     "column": "aboriginal_land_entity_ids",
-     "label": "Cedar IDs (aboriginal land)",
-     "meaning": "Entities on whose aboriginal land the removal site lies, where stated."
     },
     {
      "column": "n_parties_named",
@@ -963,6 +1064,12 @@
      "column": "pdf_url",
      "label": "PDF",
      "meaning": "The notice as published, in PDF."
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -975,19 +1082,18 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
      "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns."
     },
     {
      "column": "entity_type",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
-     "rename_to": "cedar_entity_type"
+     "rename_to": "entity_class"
     },
     {
      "column": "cedar_entity_role",
@@ -996,16 +1102,46 @@
      "add": true
     },
     {
+     "column": "activity_id",
+     "label": "Activity ID",
+     "meaning": "A stable, source-based identifier for the activity (lda:<filing uuid> for a filing).",
+     "add": true
+    },
+    {
      "column": "activity_type",
      "label": "Activity type",
-     "meaning": "Which kind of documented advocacy the row is. Every row today is an LDA filing; other source families join under the same schema as they are obtained.",
+     "meaning": "Which kind of documented advocacy the row is. Every row today is an LDA filing; other source families populate other values only as they are actually sourced.",
      "add": true
     },
     {
      "column": "filing_uuid",
      "label": "Filing ID",
      "meaning": "The filing's identifier in the Senate LDA database.",
-     "rename_to": "filing_id"
+     "rename_to": "source_record_id"
+    },
+    {
+     "column": "filing_year",
+     "label": "Filing year",
+     "meaning": "The year the filing covers.",
+     "rename_to": "reporting_year"
+    },
+    {
+     "column": "filing_period",
+     "label": "Period",
+     "meaning": "Which reporting period of the year.",
+     "rename_to": "reporting_period"
+    },
+    {
+     "column": "dt_posted",
+     "label": "Posted",
+     "meaning": "When the filing was posted.",
+     "rename_to": "activity_date"
+    },
+    {
+     "column": "filing_type_display",
+     "label": "Filing type",
+     "meaning": "Registration, quarterly or year-end report, amendment, termination.",
+     "rename_to": "activity_title"
     },
     {
      "column": "client_name",
@@ -1043,43 +1179,39 @@
      "meaning": "Whether the client filed for itself rather than through a firm (yes or no)."
     },
     {
-     "column": "filing_type_display",
-     "label": "Filing type",
-     "meaning": "Registration, quarterly or year-end report, amendment, termination.",
-     "rename_to": "filing_type"
+     "column": "participant_name",
+     "label": "Participant",
+     "meaning": "The participant as the source names it, for consultations, testimony and meetings; blank for a filing.",
+     "add": true
     },
     {
-     "column": "filing_year",
-     "label": "Filing year",
-     "meaning": "The year the filing covers."
+     "column": "participant_role",
+     "label": "Participant role",
+     "meaning": "The participant's role, for consultations, testimony and meetings; blank for a filing.",
+     "add": true
     },
     {
-     "column": "filing_period",
-     "label": "Period",
-     "meaning": "Which reporting period of the year."
+     "column": "government_entities",
+     "label": "Government entities contacted",
+     "meaning": "Agencies and chambers the filing lists, separated by |.",
+     "rename_to": "government_bodies"
     },
     {
-     "column": "dt_posted",
-     "label": "Posted",
-     "meaning": "When the filing was posted.",
-     "rename_to": "posted_date"
+     "column": "lobbying_issues_codes",
+     "label": "Issue codes",
+     "meaning": "The LDA issue area codes on the filing.",
+     "rename_to": "issue_codes"
     },
     {
-     "column": "termination_date",
-     "label": "Termination date",
-     "meaning": "When the registration was terminated, where the filing is a termination."
+     "column": "specific_issues_text",
+     "label": "Specific issues",
+     "meaning": "What the filing says was lobbied on.",
+     "rename_to": "issues_text"
     },
     {
-     "column": "spend_usd",
-     "label": "Reported spend",
-     "meaning": "Whichever of the two the filing reports; the basis column says which.",
-     "rename_to": "amount_usd"
-    },
-    {
-     "column": "spend_basis",
-     "label": "Basis of spend",
-     "meaning": "Income, expenses, or none reported.",
-     "rename_to": "amount_basis"
+     "column": "affiliated_organizations",
+     "label": "Affiliated organizations",
+     "meaning": "Organizations the filing lists as affiliated with the client."
     },
     {
      "column": "income_usd",
@@ -1092,36 +1224,42 @@
      "meaning": "What a self-filer reported spending this period."
     },
     {
-     "column": "lobbying_issues_codes",
-     "label": "Issue codes",
-     "meaning": "The LDA issue area codes on the filing."
+     "column": "spend_usd",
+     "label": "Reported spend",
+     "meaning": "Whichever of the two the filing reports; the basis column says which.",
+     "rename_to": "reported_amount_usd"
     },
     {
-     "column": "specific_issues_text",
-     "label": "Specific issues",
-     "meaning": "What the filing says was lobbied on."
+     "column": "spend_basis",
+     "label": "Basis of spend",
+     "meaning": "Income, expenses, or none reported.",
+     "rename_to": "amount_basis"
     },
     {
-     "column": "government_entities",
-     "label": "Government entities contacted",
-     "meaning": "Agencies and chambers the filing lists, separated by |."
-    },
-    {
-     "column": "affiliated_organizations",
-     "label": "Affiliated organizations",
-     "meaning": "Organizations the filing lists as affiliated with the client."
+     "column": "termination_date",
+     "label": "Termination date",
+     "meaning": "When the registration was terminated, where the filing is a termination."
     },
     {
      "column": "supersession_status",
      "label": "Version status",
-     "meaning": "Whether a later amendment replaces this filing.",
-     "rename_to": "filing_status"
+     "meaning": "Whether a later amendment replaces this filing."
+    },
+    {
+     "column": "is_superseded",
+     "label": "Superseded (yes or no)",
+     "meaning": "Whether a later filing replaces this one; the default view counts current filings only."
     },
     {
      "column": "superseded_by_filing_uuid",
      "label": "Replaced by",
      "meaning": "The filing that replaces this one, where one does.",
-     "rename_to": "superseded_by_filing_id"
+     "rename_to": "superseded_by_record_id"
+    },
+    {
+     "column": "supersession_group_id",
+     "label": "Supersession group",
+     "meaning": "The group of filings (an original and its amendments) this filing belongs to."
     },
     {
      "column": "attribution_withdrawn",
@@ -1134,19 +1272,9 @@
      "meaning": "The reason recorded for the withdrawal."
     },
     {
-     "column": "attribution_method",
-     "label": "Attribution method",
-     "meaning": "How the client was linked to the Native entity (an identifier, or a name with corroboration)."
-    },
-    {
-     "column": "match_confidence",
-     "label": "Match confidence",
-     "meaning": "Cedar's confidence that the client is this entity."
-    },
-    {
      "column": "source_system",
      "label": "Source system",
-     "meaning": "Where the record came from: the Senate and House LDA database.",
+     "meaning": "Which source the record came from.",
      "add": true
     },
     {
@@ -1154,6 +1282,12 @@
      "label": "Source",
      "meaning": "The filing on lda.senate.gov.",
      "rename_to": "source_url"
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -1166,16 +1300,15 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
      "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns."
     },
     {
-     "column": "cedar_entity_type",
+     "column": "entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
      "add": true
@@ -1183,13 +1316,20 @@
     {
      "column": "cedar_entity_role",
      "label": "Entity role",
-     "meaning": "Why the entity is on this row: owner of the awardee, as resolved for the transaction's date.",
+     "meaning": "Why the entity is on this row: owner of the awardee.",
      "add": true
+    },
+    {
+     "column": "contract_transaction_unique_key",
+     "label": "Transaction ID",
+     "meaning": "USAspending's key for this transaction.",
+     "rename_to": "transaction_id"
     },
     {
      "column": "contract_award_unique_key",
      "label": "Award ID",
-     "meaning": "USAspending's key for the whole award; the source link is built from it."
+     "meaning": "USAspending's key for the whole award; the source link is built from it.",
+     "rename_to": "award_id"
     },
     {
      "column": "contract_number",
@@ -1202,9 +1342,14 @@
      "meaning": "The parent contract or vehicle, for orders."
     },
     {
-     "column": "contract_transaction_unique_key",
-     "label": "Transaction ID",
-     "meaning": "USAspending's key for this transaction."
+     "column": "action_date",
+     "label": "Action date",
+     "meaning": "The date of this award or modification."
+    },
+    {
+     "column": "fiscal_year",
+     "label": "Fiscal year",
+     "meaning": "The federal fiscal year of the action."
     },
     {
      "column": "awardee_name",
@@ -1232,41 +1377,6 @@
      "meaning": "The UEI of the parent FPDS declares for the contractor."
     },
     {
-     "column": "owner_attribution_status",
-     "label": "Ownership at the time",
-     "meaning": "Whether the entity's ownership of the awardee was confirmed as of the transaction."
-    },
-    {
-     "column": "owner_as_of_transaction_cedar_uid",
-     "label": "Owner as of the action",
-     "meaning": "The Cedar ID of the entity that owned the contractor on the action date where the ownership history resolves it; UNKNOWN where it does not. Never the current owner assumed backwards."
-    },
-    {
-     "column": "fiscal_year",
-     "label": "Fiscal year",
-     "meaning": "The federal fiscal year of the action."
-    },
-    {
-     "column": "action_date",
-     "label": "Action date",
-     "meaning": "The date of this award or modification."
-    },
-    {
-     "column": "total_obligations",
-     "label": "Amount obligated",
-     "meaning": "Dollars obligated by this transaction. Sum these, never the award value."
-    },
-    {
-     "column": "total_obligations_real2025",
-     "label": "Amount in 2025 dollars",
-     "meaning": "The same amount adjusted to 2025 dollars."
-    },
-    {
-     "column": "total_award_value",
-     "label": "Award value to date",
-     "meaning": "The whole award's value as restated on this row. Cumulative: never add it across rows."
-    },
-    {
      "column": "funding_agency",
      "label": "Funding agency",
      "meaning": "The agency paying for the work."
@@ -1280,7 +1390,7 @@
      "column": "award_base_description",
      "label": "Description",
      "meaning": "The award's own description of the work.",
-     "rename_to": "contract_description"
+     "rename_to": "description"
     },
     {
      "column": "naics_code",
@@ -1293,31 +1403,58 @@
      "meaning": "What that code means."
     },
     {
-     "column": "supersector",
-     "label": "Industry group",
-     "meaning": "The broad industry group the contract's NAICS code belongs to.",
-     "rename_to": "industry_group"
-    },
-    {
      "column": "product_or_service_code",
      "label": "Product or service code",
-     "meaning": "The federal product or service code (PSC), defined in the dictionary; the description is beside it."
+     "meaning": "The federal product or service code (PSC), defined in the dictionary; the description is beside it.",
+     "rename_to": "psc_code"
     },
     {
      "column": "product_or_service_code_description",
      "label": "Product or service",
-     "meaning": "What was bought."
+     "meaning": "What was bought.",
+     "rename_to": "psc_description"
+    },
+    {
+     "column": "sector",
+     "label": "Sector",
+     "meaning": "The two-digit sector code and the readable group consolidated into one readable sector through the dictionary.",
+     "combine_into": "sector"
+    },
+    {
+     "column": "supersector",
+     "label": "Industry group",
+     "meaning": "The broad industry group the contract's NAICS code belongs to.",
+     "combine_into": "sector"
+    },
+    {
+     "column": "total_obligations",
+     "label": "Amount obligated",
+     "meaning": "Dollars obligated by this transaction. Sum these, never the award value.",
+     "rename_to": "obligations_usd"
+    },
+    {
+     "column": "total_obligations_real2025",
+     "label": "Amount in 2025 dollars",
+     "meaning": "The same amount adjusted to 2025 dollars.",
+     "rename_to": "obligations_usd_real2025"
+    },
+    {
+     "column": "total_award_value",
+     "label": "Award value to date",
+     "meaning": "The whole award's value as restated on this row. Cumulative: never add it across rows.",
+     "rename_to": "cumulative_award_value_usd"
+    },
+    {
+     "column": "setaside_reported",
+     "label": "Set-aside reported (yes or no)",
+     "meaning": "Whether the award reports any set-aside; the classification beside it says which.",
+     "rename_to": "set_aside_reported"
     },
     {
      "column": "setaside",
      "label": "Set-aside",
-     "meaning": "The set-aside the award was made under, if any."
-    },
-    {
-     "column": "extent_competed_normalized",
-     "label": "Competition",
-     "meaning": "How the award was competed.",
-     "rename_to": "extent_competed"
+     "meaning": "The set-aside the award was made under, if any.",
+     "rename_to": "set_aside_classification"
     },
     {
      "column": "reported_8a",
@@ -1340,20 +1477,34 @@
      "meaning": "Whether the award reports a Native preference (yes or no)."
     },
     {
+     "column": "extent_competed",
+     "label": "Extent competed",
+     "meaning": "Raw and normalized competition labels consolidated through a validated dictionary.",
+     "combine_into": "competition_type"
+    },
+    {
+     "column": "extent_competed_normalized",
+     "label": "Competition",
+     "meaning": "How the award was competed.",
+     "combine_into": "competition_type"
+    },
+    {
      "column": "recipient_city_name",
      "label": "Awardee city",
-     "meaning": "City of the awardee's address."
+     "meaning": "City of the awardee's address.",
+     "rename_to": "recipient_city"
     },
     {
      "column": "recipient_state_code",
      "label": "Awardee state",
-     "meaning": "Its state."
+     "meaning": "Its state.",
+     "rename_to": "recipient_state"
     },
     {
      "column": "geo_recipient_county_name",
      "label": "Recipient county",
      "meaning": "The county of the contractor's address, which is not where the work is performed.",
-     "rename_to": "recipient_county_name"
+     "rename_to": "recipient_county"
     },
     {
      "column": "geo_recipient_county_fips",
@@ -1364,39 +1515,70 @@
     {
      "column": "place_of_perform_city",
      "label": "Place of performance",
-     "meaning": "City where the work is performed."
+     "meaning": "City where the work is performed.",
+     "rename_to": "performance_city"
     },
     {
      "column": "place_of_perform_state",
      "label": "Place of performance state",
-     "meaning": "Its state."
+     "meaning": "Its state.",
+     "rename_to": "performance_state"
     },
     {
      "column": "geo_pop_county_name",
      "label": "Place of performance county",
      "meaning": "The county where the contract is performed, as the award reports it.",
-     "rename_to": "place_of_performance_county_name"
+     "rename_to": "performance_county"
     },
     {
      "column": "geo_pop_county_fips",
      "label": "Place of performance county FIPS",
      "meaning": "The county code where the contract is performed.",
-     "rename_to": "place_of_performance_county_fips"
+     "rename_to": "performance_county_fips"
     },
     {
-     "column": "attribution_method",
-     "label": "How the entity was matched",
-     "meaning": "How Cedar linked the awardee to its Native owner."
+     "column": "recipient_geography_status",
+     "label": "Recipient geography status",
+     "meaning": "Whether the recipient's address was placed in a county: placed, placed with an ambiguous place name, or unplaced.",
+     "add": true
     },
     {
-     "column": "confidence_tier",
-     "label": "Match confidence",
-     "meaning": "Cedar's confidence in the link: A is strongest."
+     "column": "performance_geography_status",
+     "label": "Performance geography status",
+     "meaning": "The same for the place of performance.",
+     "add": true
+    },
+    {
+     "column": "attributed_flag",
+     "label": "Attributed (yes or no)",
+     "meaning": "Whether the row is attributed to the Native entity in the opening block; the totals count attributed rows only."
+    },
+    {
+     "column": "owner_attribution_status",
+     "label": "Ownership at the time",
+     "meaning": "Whether the entity's ownership of the awardee was confirmed as of the transaction."
+    },
+    {
+     "column": "owner_as_of_transaction_cedar_uid",
+     "label": "Owner as of the action",
+     "meaning": "The Cedar ID of the entity that owned the contractor on the action date where the ownership history resolves it; UNKNOWN where it does not. Never the current owner assumed backwards."
+    },
+    {
+     "column": "source_system",
+     "label": "Source system",
+     "meaning": "Which source the record came from.",
+     "add": true
     },
     {
      "column": "source_url",
      "label": "Source",
-     "meaning": "The award's page on USAspending.",
+     "meaning": "The official page for this record, written into the file so it cites itself.",
+     "add": true
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
      "add": true
     }
    ]
@@ -1410,16 +1592,16 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
-     "column": "cedar_entity_name",
+     "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
      "add": true
     },
     {
-     "column": "cedar_entity_type",
+     "column": "entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
      "add": true
@@ -1427,29 +1609,14 @@
     {
      "column": "cedar_entity_role",
      "label": "Entity role",
-     "meaning": "Why the entity is on this row: read from native_side: the Native owner of the subrecipient, of the prime, or of both.",
+     "meaning": "Why the entity is on this row: from native_direction: owner of the subcontractor, of the prime, or of both.",
      "add": true
-    },
-    {
-     "column": "direction",
-     "label": "Which side is Native",
-     "meaning": "Whether the prime, the sub, or both sides are Native-owned.",
-     "rename_to": "native_side"
-    },
-    {
-     "column": "sub_cedar_uid",
-     "label": "Subcontractor's Cedar ID",
-     "meaning": "The Native entity owning the subcontractor, where one does."
-    },
-    {
-     "column": "prime_cedar_uid",
-     "label": "Prime's Cedar ID",
-     "meaning": "The Native entity owning the prime contractor, where one does."
     },
     {
      "column": "subaward_source_record_id",
      "label": "Subaward ID",
-     "meaning": "The subaward report's identifier."
+     "meaning": "The subaward report's identifier.",
+     "rename_to": "subaward_record_id"
     },
     {
      "column": "subaward_number",
@@ -1457,54 +1624,82 @@
      "meaning": "The subaward's own number as the prime reported it."
     },
     {
-     "column": "prime_award_id",
-     "label": "Prime award number",
-     "meaning": "The prime contract's number."
+     "column": "subaward_sam_report_id",
+     "label": "Report ID",
+     "meaning": "The SAM subaward report's identifier: the version of the report this row comes from.",
+     "rename_to": "report_id"
     },
     {
-     "column": "prime_award_unique_key",
-     "label": "Prime award key",
-     "meaning": "USAspending's key for the prime award."
+     "column": "subaward_date",
+     "label": "Subaward date",
+     "meaning": "The date of the subaward."
+    },
+    {
+     "column": "fiscal_year",
+     "label": "Fiscal year",
+     "meaning": "The federal fiscal year of the subaward."
+    },
+    {
+     "column": "subaward_sam_report_year",
+     "label": "Report year",
+     "meaning": "The year of the report the subaward was filed in: the reporting period.",
+     "rename_to": "report_year"
+    },
+    {
+     "column": "award_kind",
+     "label": "Award type",
+     "meaning": "Whether the prime award is a contract or an assistance award. The two populations are never combined in a total."
+    },
+    {
+     "column": "subaward_type",
+     "label": "Subaward type",
+     "meaning": "Sub-contract or sub-grant, as reported."
+    },
+    {
+     "column": "description",
+     "label": "Description",
+     "meaning": "What the subcontract is for, as reported."
     },
     {
      "column": "sub_name",
      "label": "Subcontractor",
-     "meaning": "The subcontractor as reported."
+     "meaning": "The subcontractor as reported.",
+     "rename_to": "subcontractor_name"
     },
     {
      "column": "sub_uei",
      "label": "Subcontractor UEI",
-     "meaning": "Its Unique Entity ID."
+     "meaning": "Its Unique Entity ID.",
+     "rename_to": "subcontractor_uei"
     },
     {
      "column": "sub_cage",
      "label": "Subcontractor CAGE",
-     "meaning": "Its CAGE code, where reported."
+     "meaning": "Its CAGE code, where reported.",
+     "rename_to": "subcontractor_cage"
     },
     {
      "column": "sub_parent_name",
      "label": "Subcontractor's parent",
-     "meaning": "Its parent as reported."
+     "meaning": "Its parent as reported.",
+     "rename_to": "subcontractor_parent_name"
     },
     {
      "column": "sub_parent_uei",
      "label": "Subrecipient parent UEI",
-     "meaning": "The UEI of the subrecipient's declared parent."
+     "meaning": "The UEI of the subrecipient's declared parent.",
+     "rename_to": "subcontractor_parent_uei"
     },
     {
      "column": "sub_parent_cage",
      "label": "Subrecipient parent CAGE",
-     "meaning": "The CAGE code of the subrecipient's declared parent."
+     "meaning": "The CAGE code of the subrecipient's declared parent.",
+     "rename_to": "subcontractor_parent_cage"
     },
     {
-     "column": "sub_business_types",
-     "label": "Subcontractor business types",
-     "meaning": "The business types it reports (for example, Alaska Native Corporation owned)."
-    },
-    {
-     "column": "sub_native_tier",
-     "label": "Subrecipient attribution tier",
-     "meaning": "How firmly the subrecipient resolves to a Native owner (A strongest)."
+     "column": "sub_cedar_uid",
+     "label": "Subcontractor's Cedar ID",
+     "meaning": "The Native entity owning the subcontractor, where one does."
     },
     {
      "column": "prime_name",
@@ -1537,62 +1732,65 @@
      "meaning": "The CAGE code of the prime's declared parent."
     },
     {
-     "column": "prime_native_tier",
-     "label": "Prime attribution tier",
-     "meaning": "How firmly the prime resolves to a Native owner (A strongest)."
+     "column": "prime_cedar_uid",
+     "label": "Prime's Cedar ID",
+     "meaning": "The Native entity owning the prime contractor, where one does."
     },
     {
-     "column": "award_kind",
-     "label": "Award type",
-     "meaning": "Whether the prime award is a contract or an assistance award. The two populations are never combined in a total.",
-     "rename_to": "award_type"
+     "column": "direction",
+     "label": "Which side is Native",
+     "meaning": "Whether the prime, the sub, or both sides are Native-owned.",
+     "rename_to": "native_direction"
     },
     {
-     "column": "subaward_type",
-     "label": "Subaward type",
-     "meaning": "Sub-contract or sub-grant, as reported."
+     "column": "prime_award_id",
+     "label": "Prime award number",
+     "meaning": "The prime contract's number."
     },
     {
-     "column": "subaward_date",
-     "label": "Subaward date",
-     "meaning": "The date of the subaward."
-    },
-    {
-     "column": "fiscal_year",
-     "label": "Fiscal year",
-     "meaning": "The federal fiscal year of the subaward."
-    },
-    {
-     "column": "subaward_sam_report_year",
-     "label": "Report year",
-     "meaning": "The year of the report the subaward was filed in: the reporting period.",
-     "rename_to": "report_year"
-    },
-    {
-     "column": "subaward_sam_report_last_modified_date",
-     "label": "Report last modified",
-     "meaning": "When the report this row comes from was last modified: the version marker. A refreshed copy of the same report is not another subaward.",
-     "rename_to": "report_last_modified_date"
+     "column": "prime_award_unique_key",
+     "label": "Prime award key",
+     "meaning": "USAspending's key for the prime award."
     },
     {
      "column": "subaward_amount",
      "label": "Subaward amount",
-     "meaning": "Dollars of the subaward."
+     "meaning": "Dollars of the subaward.",
+     "rename_to": "subaward_amount_usd"
     },
     {
      "column": "subaward_amount_real2025",
      "label": "Amount in 2025 dollars",
-     "meaning": "The same amount adjusted to 2025 dollars."
+     "meaning": "The same amount adjusted to 2025 dollars.",
+     "rename_to": "subaward_amount_usd_real2025"
     },
     {
      "column": "prime_award_amount",
      "label": "Prime award amount",
-     "meaning": "The prime contract's value."
+     "meaning": "The prime contract's value.",
+     "rename_to": "prime_award_amount_usd"
     },
     {
-     "column": "description",
-     "label": "Description",
-     "meaning": "What the subcontract is for, as reported."
+     "column": "subaward_to_prime_ratio",
+     "label": "Subaward to prime ratio",
+     "meaning": "The subaward amount divided by the prime award amount, with the amount, period and version definitions the guide states; never recomputed from incompatible snapshots."
+    },
+    {
+     "column": "prime_top_awarding_agency",
+     "label": "Agency",
+     "meaning": "The department that awarded the prime contract.",
+     "rename_to": "awarding_agency"
+    },
+    {
+     "column": "prime_awarding_sub_agency",
+     "label": "Office",
+     "meaning": "The office within it.",
+     "rename_to": "awarding_subagency"
+    },
+    {
+     "column": "prime_set_aside",
+     "label": "Prime set-aside",
+     "meaning": "The set-aside category of the prime award, where reported."
     },
     {
      "column": "naics",
@@ -1610,65 +1808,55 @@
      "column": "psc",
      "label": "Product or service code",
      "meaning": "The federal product or service code of the subaward, where reported.",
-     "rename_to": "product_or_service_code"
+     "rename_to": "psc_code"
     },
     {
      "column": "psc_title",
      "label": "Product or service",
      "meaning": "What the product or service code means.",
-     "rename_to": "product_or_service_code_description"
+     "rename_to": "psc_description"
     },
     {
-     "column": "prime_top_awarding_agency",
-     "label": "Agency",
-     "meaning": "The department that awarded the prime contract.",
-     "rename_to": "awarding_agency"
-    },
-    {
-     "column": "prime_awarding_sub_agency",
-     "label": "Office",
-     "meaning": "The office within it.",
-     "rename_to": "awarding_sub_agency"
-    },
-    {
-     "column": "prime_set_aside",
-     "label": "Prime set-aside",
-     "meaning": "The set-aside category of the prime award, where reported."
+     "column": "sub_business_types",
+     "label": "Subcontractor business types",
+     "meaning": "The business types it reports (for example, Alaska Native Corporation owned).",
+     "rename_to": "subcontractor_business_types"
     },
     {
      "column": "geo_subawardee_city",
      "label": "Subrecipient city",
      "meaning": "The subrecipient's own city, never filled from the prime's address.",
-     "rename_to": "sub_city"
+     "rename_to": "subcontractor_city"
     },
     {
      "column": "sub_state",
      "label": "Subcontractor state",
-     "meaning": "Its state."
-    },
-    {
-     "column": "geo_subawardee_zip5",
-     "label": "Subrecipient ZIP",
-     "meaning": "The subrecipient's own five-digit ZIP.",
-     "rename_to": "sub_zip5"
-    },
-    {
-     "column": "geo_subawardee_country_code",
-     "label": "Subrecipient country",
-     "meaning": "The subrecipient's country code.",
-     "rename_to": "sub_country_code"
+     "meaning": "Its state.",
+     "rename_to": "subcontractor_state"
     },
     {
      "column": "geo_subawardee_county_name",
      "label": "Subrecipient county",
      "meaning": "The county of the subrecipient's address.",
-     "rename_to": "sub_county_name"
+     "rename_to": "subcontractor_county"
     },
     {
      "column": "geo_subawardee_county_fips",
      "label": "Subrecipient county FIPS",
      "meaning": "The county code of the subrecipient's address.",
-     "rename_to": "sub_county_fips"
+     "rename_to": "subcontractor_county_fips"
+    },
+    {
+     "column": "geo_subawardee_country_code",
+     "label": "Subrecipient country",
+     "meaning": "The subrecipient's country code.",
+     "rename_to": "subcontractor_country"
+    },
+    {
+     "column": "subcontractor_geography_status",
+     "label": "Subcontractor geography status",
+     "meaning": "Whether the subcontractor's own address was placed in a county: placed, placed with an ambiguous place name, or unplaced. Never filled from the prime's address.",
+     "add": true
     },
     {
      "column": "duplicate_status",
@@ -1695,6 +1883,12 @@
      "column": "source_url",
      "label": "Source",
      "meaning": "The prime award's page on USAspending."
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -1707,17 +1901,172 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is linked to. Join key across every collection."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID.",
+     "add": true
     },
     {
      "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "The entity's name as Cedar's register spells it, so one entity reads the same in every collection."
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
+     "add": true
     },
     {
      "column": "entity_class",
      "label": "Entity type",
-     "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village corporation, Native nonprofit, and so on)."
+     "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
+     "add": true
+    },
+    {
+     "column": "cedar_entity_role",
+     "label": "Entity role",
+     "meaning": "Why the entity is on this row: certifying_authority.",
+     "add": true
+    },
+    {
+     "column": "business_source_id",
+     "label": "Business source id",
+     "meaning": ""
+    },
+    {
+     "column": "business_name_raw",
+     "label": "Business name",
+     "meaning": "",
+     "rename_to": "business_name"
+    },
+    {
+     "column": "business_entity_id",
+     "label": "Business entity id",
+     "meaning": ""
+    },
+    {
+     "column": "certifying_authority_entity_id",
+     "label": "Certifying authority entity id",
+     "meaning": ""
+    },
+    {
+     "column": "certifying_authority_name",
+     "label": "Certifying authority name",
+     "meaning": ""
+    },
+    {
+     "column": "programme_name",
+     "label": "Program name",
+     "meaning": "",
+     "rename_to": "program_name"
+    },
+    {
+     "column": "directory_type",
+     "label": "Directory type",
+     "meaning": ""
+    },
+    {
+     "column": "assertion_class",
+     "label": "Assertion class",
+     "meaning": ""
+    },
+    {
+     "column": "identity_scope",
+     "label": "Identity scope",
+     "meaning": ""
+    },
+    {
+     "column": "identity_claim_text",
+     "label": "Identity claim text",
+     "meaning": ""
+    },
+    {
+     "column": "ownership_percent",
+     "label": "Ownership percent",
+     "meaning": ""
+    },
+    {
+     "column": "ownership_threshold_min",
+     "label": "Ownership threshold min",
+     "meaning": ""
+    },
+    {
+     "column": "certification_number",
+     "label": "Certification number",
+     "meaning": ""
+    },
+    {
+     "column": "certification_tier",
+     "label": "Certification tier",
+     "meaning": ""
+    },
+    {
+     "column": "certification_start",
+     "label": "Certification start",
+     "meaning": ""
+    },
+    {
+     "column": "certification_expiration",
+     "label": "Certification expiration",
+     "meaning": ""
+    },
+    {
+     "column": "business_license_number",
+     "label": "Business license number",
+     "meaning": ""
+    },
+    {
+     "column": "service_category_raw",
+     "label": "Service category",
+     "meaning": "",
+     "rename_to": "service_category"
+    },
+    {
+     "column": "naics",
+     "label": "Naics code",
+     "meaning": "",
+     "rename_to": "naics_code"
+    },
+    {
+     "column": "city",
+     "label": "City",
+     "meaning": ""
+    },
+    {
+     "column": "state_province",
+     "label": "State",
+     "meaning": "",
+     "rename_to": "state"
+    },
+    {
+     "column": "source_edition",
+     "label": "Source edition",
+     "meaning": ""
+    },
+    {
+     "column": "source_last_updated",
+     "label": "Source last updated",
+     "meaning": ""
+    },
+    {
+     "column": "first_seen",
+     "label": "First seen",
+     "meaning": ""
+    },
+    {
+     "column": "last_seen",
+     "label": "Last seen",
+     "meaning": ""
+    },
+    {
+     "column": "is_current",
+     "label": "Is current",
+     "meaning": ""
+    },
+    {
+     "column": "source_url",
+     "label": "Source",
+     "meaning": "The official page for this record, written into the file so it cites itself."
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -1730,25 +2079,25 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
      "column": "owner_hub_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
+     "rename_to": "canonical_name"
     },
     {
      "column": "owner_hub_entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
-     "rename_to": "cedar_entity_type"
+     "rename_to": "entity_class"
     },
     {
-     "column": "relation_class",
+     "column": "cedar_entity_role",
      "label": "Entity role",
-     "meaning": "Why the entity is on this row: read from relationship_type: owner, or affiliated entity, of the enterprise.",
-     "rename_to": "cedar_entity_role"
+     "meaning": "Why the entity is on this row: read from relationship_type.",
+     "add": true
     },
     {
      "column": "enterprise_id",
@@ -1764,12 +2113,7 @@
      "column": "name_variants_observed",
      "label": "Also seen as",
      "meaning": "Other spellings of the name in the sources, separated by |.",
-     "rename_to": "name_variants"
-    },
-    {
-     "column": "owner_class",
-     "label": "Owner kind",
-     "meaning": "The owner's kind in the collection's own terms: tribal government, ANC, NHO."
+     "rename_to": "alternative_names"
     },
     {
      "column": "parent_enterprise_id",
@@ -1782,30 +2126,26 @@
      "meaning": "The immediate parent, which may itself be an enterprise."
     },
     {
-     "column": "parent_is_hub",
-     "label": "Parent is the Native entity (yes or no)",
-     "meaning": "Whether the immediate parent is the Native entity itself rather than another enterprise."
+     "column": "relation_class",
+     "label": "Entity role",
+     "meaning": "Why the entity is on this row: read from relationship_type: owner, or affiliated entity, of the enterprise.",
+     "rename_to": "relationship_type"
     },
     {
-     "column": "hierarchy_level",
-     "label": "Level",
-     "meaning": "How many steps below the owner the enterprise sits."
-    },
-    {
-     "column": "relationship",
-     "label": "Relationship",
-     "meaning": "How the enterprise relates to the owner: wholly owned, subsidiary, affiliated, unspecified."
+     "column": "relationship_as_recorded",
+     "label": "Relationship as recorded",
+     "meaning": "The relationship in the source's own words, beside the normalized relationship type."
     },
     {
      "column": "ownership_percent_stated",
      "label": "Ownership share",
-     "meaning": "The percentage owned, where a source states it."
+     "meaning": "The percentage owned, where a source states it.",
+     "rename_to": "ownership_percent"
     },
     {
      "column": "sector",
      "label": "Sector",
-     "meaning": "The enterprise's sector.",
-     "rename_to": "industry"
+     "meaning": "The enterprise's sector."
     },
     {
      "column": "status",
@@ -1821,7 +2161,8 @@
     {
      "column": "state_province",
      "label": "State",
-     "meaning": "Its state or province."
+     "meaning": "Its state or province.",
+     "rename_to": "state"
     },
     {
      "column": "uei",
@@ -1849,31 +2190,28 @@
      "meaning": "The latest."
     },
     {
-     "column": "evidence_class",
-     "label": "Kind of evidence",
-     "meaning": "What kind of source establishes the relationship (the owner's own list, an audited report, a resolver)."
-    },
-    {
-     "column": "evidence_human_reviewed",
-     "label": "Reviewed by a person",
-     "meaning": "Whether a person reviewed the evidence (yes or no)."
-    },
-    {
      "column": "n_distinct_sources",
      "label": "Sources",
      "meaning": "How many distinct sources support the relationship.",
      "rename_to": "source_count"
     },
     {
-     "column": "fpds_parent_corroboration",
-     "label": "Federal records agree",
-     "meaning": "Whether the parent the enterprise declares in federal records agrees with this owner.",
-     "rename_to": "parent_corroboration"
+     "column": "evidence_class",
+     "label": "Kind of evidence",
+     "meaning": "What kind of source establishes the relationship (the owner's own list, an audited report, a resolver).",
+     "rename_to": "relationship_evidence_status"
     },
     {
      "column": "fpds_declared_parent_name",
      "label": "Parent declared in FPDS",
-     "meaning": "The parent the enterprise declares in federal contracting records, kept as evidence beside Cedar's relationship."
+     "meaning": "The parent the enterprise declares in federal contracting records, kept as evidence beside Cedar's relationship.",
+     "rename_to": "reported_federal_parent_name"
+    },
+    {
+     "column": "fpds_parent_corroboration",
+     "label": "Federal records agree",
+     "meaning": "Whether the parent the enterprise declares in federal records agrees with this owner.",
+     "rename_to": "federal_parent_corroboration"
     },
     {
      "column": "source_document",
@@ -1889,6 +2227,18 @@
      "column": "source_url",
      "label": "Source",
      "meaning": "Where the relationship is stated."
+    },
+    {
+     "column": "additional_source_urls",
+     "label": "Additional source URLs",
+     "meaning": "Further source URLs, as a JSON list; blank until the sources table supplies them.",
+     "add": true
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -1901,16 +2251,16 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
-     "column": "recipient_entity_name",
+     "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
+     "add": true
     },
     {
-     "column": "cedar_entity_type",
+     "column": "entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
      "add": true
@@ -1927,10 +2277,15 @@
      "meaning": "Cedar's identifier for the payment."
     },
     {
-     "column": "entity_attribution_status",
-     "label": "Attribution status",
-     "meaning": "Whether the row is keyed to a Native entity, to an aggregate, or unresolved. A blank Cedar ID has a stated reason here.",
-     "rename_to": "attribution_status"
+     "column": "source_record_id",
+     "label": "Source record ID",
+     "meaning": "The record's identifier in that source."
+    },
+    {
+     "column": "recipient_entity_name",
+     "label": "Native entity",
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
+     "rename_to": "recipient_name"
     },
     {
      "column": "beneficiary_entity_id",
@@ -1940,12 +2295,8 @@
     {
      "column": "beneficiary_entity_name",
      "label": "Beneficiary",
-     "meaning": "Who the payment is for, where different from the recipient."
-    },
-    {
-     "column": "beneficiary_note",
-     "label": "Beneficiary note",
-     "meaning": "How the source describes the beneficiary."
+     "meaning": "Who the payment is for, where different from the recipient.",
+     "rename_to": "beneficiary_name"
     },
     {
      "column": "payer_entity_id",
@@ -1955,7 +2306,8 @@
     {
      "column": "payer_entity_name",
      "label": "Payer",
-     "meaning": "Who made the payment (a federal office, a state)."
+     "meaning": "Who made the payment (a federal office, a state).",
+     "rename_to": "payer_name"
     },
     {
      "column": "operator_entity_id",
@@ -1965,7 +2317,8 @@
     {
      "column": "operator_entity_name",
      "label": "Operator",
-     "meaning": "The related operator's name, where a source supports one."
+     "meaning": "The related operator's name, where a source supports one.",
+     "rename_to": "operator_name"
     },
     {
      "column": "related_asset_ids",
@@ -2018,11 +2371,6 @@
      "meaning": "When the payment was made."
     },
     {
-     "column": "measurement_status",
-     "label": "Actual or estimated",
-     "meaning": "Whether the amount is an actual payment or an estimate."
-    },
-    {
      "column": "amount_usd",
      "label": "Amount",
      "meaning": "Dollars paid. The sign column says what a negative means."
@@ -2033,9 +2381,9 @@
      "meaning": "The same amount adjusted to 2025 dollars."
     },
     {
-     "column": "amount_sign_meaning",
-     "label": "What the sign means",
-     "meaning": "How to read a negative amount (a correction, a recoupment)."
+     "column": "measurement_status",
+     "label": "Actual or estimated",
+     "meaning": "Whether the amount is an actual payment or an estimate."
     },
     {
      "column": "aggregation_level",
@@ -2043,14 +2391,14 @@
      "meaning": "Whether the amount is specific to the entity, a regional aggregate or a countrywide aggregate. An aggregate is never assigned to one tribe."
     },
     {
+     "column": "amount_sign_meaning",
+     "label": "What the sign means",
+     "meaning": "How to read a negative amount (a correction, a recoupment)."
+    },
+    {
      "column": "land_status",
      "label": "Land status",
      "meaning": "Trust or fee land, where the source states it."
-    },
-    {
-     "column": "geography_note",
-     "label": "Place",
-     "meaning": "What the source says about where the revenue arose."
     },
     {
      "column": "allocation_formula",
@@ -2073,19 +2421,31 @@
      "meaning": "Where that rule is published."
     },
     {
+     "column": "geography_note",
+     "label": "Place",
+     "meaning": "What the source says about where the revenue arose."
+    },
+    {
+     "column": "entity_attribution_status",
+     "label": "Attribution status",
+     "meaning": "Whether the row is keyed to a Native entity, to an aggregate, or unresolved. A blank Cedar ID has a stated reason here.",
+     "rename_to": "attribution_status"
+    },
+    {
      "column": "source_system",
      "label": "Source system",
      "meaning": "Which source system the record came from."
     },
     {
-     "column": "source_record_id",
-     "label": "Source record ID",
-     "meaning": "The record's identifier in that source."
-    },
-    {
      "column": "source_url",
      "label": "Source",
      "meaning": "Where the payment is recorded."
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },
@@ -2098,19 +2458,19 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID."
     },
     {
      "column": "cedar_spine_canonical_name",
      "label": "Native entity",
-     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns.",
-     "rename_to": "cedar_entity_name"
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
+     "rename_to": "canonical_name"
     },
     {
      "column": "cedar_spine_entity_class",
      "label": "Entity type",
      "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
-     "rename_to": "cedar_entity_type"
+     "rename_to": "entity_class"
     },
     {
      "column": "cedar_entity_role",
@@ -2127,24 +2487,26 @@
     {
      "column": "org_name",
      "label": "Organization",
-     "meaning": "The organization's name as the IRS records it."
+     "meaning": "The organization's name as the IRS records it.",
+     "rename_to": "organization_name"
     },
     {
      "column": "cedar_native_entity_class",
      "label": "Organization type",
      "meaning": "Whether the organization is itself a tribe, an ANC, a Native organization.",
-     "rename_to": "org_entity_class"
+     "rename_to": "organization_entity_class"
     },
     {
      "column": "classification_ruling",
      "label": "Relationship to the entity",
-     "meaning": "Whether the organization is tribally controlled, tribally affiliated, or unruled."
+     "meaning": "Whether the organization is tribally controlled, tribally affiliated, or unruled.",
+     "combine_into": "inclusion_category"
     },
     {
      "column": "disposition",
      "label": "Inclusion basis",
      "meaning": "Why the organization is in Cedar: verified strictly, verified, or a candidate.",
-     "rename_to": "inclusion_basis"
+     "combine_into": "inclusion_category"
     },
     {
      "column": "city",
@@ -2164,34 +2526,26 @@
     {
      "column": "bmf_status",
      "label": "IRS status code",
-     "meaning": "The organization's status code in the Business Master File, defined in the dictionary."
+     "meaning": "The organization's status code in the Business Master File, defined in the dictionary.",
+     "rename_to": "irs_status"
     },
     {
      "column": "bmf_subsection",
      "label": "Tax subsection",
-     "meaning": "The 501(c) subsection (3 for charities)."
-    },
-    {
-     "column": "bmf_filing_req_cd",
-     "label": "Filing requirement code",
-     "meaning": "Which return the IRS requires, as a code defined in the dictionary."
+     "meaning": "The 501(c) subsection (3 for charities).",
+     "rename_to": "irs_subsection"
     },
     {
      "column": "bmf_foundation_cd",
      "label": "Foundation code",
-     "meaning": "The IRS foundation classification code, defined in the dictionary."
+     "meaning": "The IRS foundation classification code, defined in the dictionary.",
+     "rename_to": "irs_foundation_code"
     },
     {
      "column": "bmf_irs_ruling_yyyymm",
      "label": "IRS ruling date",
      "meaning": "When the IRS recognized the organization (year and month).",
      "rename_to": "irs_ruling_month"
-    },
-    {
-     "column": "tier",
-     "label": "Filing tier",
-     "meaning": "Which IRS return it files: full 990, 990-EZ or 990-N.",
-     "rename_to": "filing_tier"
     },
     {
      "column": "bmf_tax_period",
@@ -2202,35 +2556,44 @@
     {
      "column": "bmf_revenue_amt",
      "label": "Revenue",
-     "meaning": "Revenue in the latest return the IRS holds."
-    },
-    {
-     "column": "bmf_income_amt",
-     "label": "Income",
-     "meaning": "Income in that return."
+     "meaning": "Revenue in the latest return the IRS holds.",
+     "rename_to": "bmf_revenue_usd"
     },
     {
      "column": "bmf_asset_amt",
      "label": "Assets",
-     "meaning": "Assets in that return."
+     "meaning": "Assets in that return.",
+     "rename_to": "bmf_assets_usd"
+    },
+    {
+     "column": "bmf_income_amt",
+     "label": "Income",
+     "meaning": "Income in that return.",
+     "rename_to": "bmf_income_usd"
     },
     {
      "column": "bmf_vintage_fetched",
      "label": "IRS file date",
      "meaning": "The date of the IRS file these figures come from.",
-     "rename_to": "bmf_snapshot_date"
-    },
-    {
-     "column": "entity_match_method",
-     "label": "Attribution method",
-     "meaning": "How the organization was linked to the Native entity.",
-     "rename_to": "attribution_method"
+     "rename_to": "bmf_as_of_date"
     },
     {
      "column": "entity_tier",
      "label": "Match confidence",
      "meaning": "Cedar's confidence in the link to the entity: A is strongest.",
-     "rename_to": "attribution_tier"
+     "combine_into": "entity_link_status"
+    },
+    {
+     "column": "cedar_link_tier",
+     "label": "Cedar link tier",
+     "meaning": "Shown until the combined column replaces it.",
+     "combine_into": "entity_link_status"
+    },
+    {
+     "column": "key_review_disposition",
+     "label": "Key review disposition",
+     "meaning": "Shown until the combined column replaces it.",
+     "combine_into": "entity_link_status"
     },
     {
      "column": "source_dataset",
@@ -2242,6 +2605,12 @@
      "column": "source_url",
      "label": "Source",
      "meaning": "The IRS Business Master File."
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   }

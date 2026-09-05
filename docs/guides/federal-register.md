@@ -12,11 +12,9 @@ Tribal consultation events announced or reported in the Federal Register, one ro
 
 ## One row is
 
-**Today:** One tribal consultation event announced or reported in the Federal Register, one row per event and named participant; is_event_primary_row marks one row per event.
+One consultation event and named participant, as today; count events by is_event_primary_row, never rows.
 
-**When the specification is applied:** The same event-participant grain, declared: count events by consultation_event_id (or SUM of is_event_primary_row), never rows; a notice, the meeting it announces and an attendee are not three equivalent observations.
-
-**Grain change:** Owed (§5): merge duplicate representations of one document across federal_actions and this table, and cross-reference NAGPRA and Advocacy appearances of the same document rather than counting them as separate actions.
+This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
 ## Key identifiers
 
@@ -34,7 +32,7 @@ Tribal consultation events announced or reported in the Federal Register, one ro
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uid`, `cedar_entity_name`, `cedar_entity_type` and `cedar_entity_role`. `cedar_entity_role` is the participant's role as the notice states it (`participant_role` today: named, invited, not enumerated). A blank `cedar_uid` means the notice enumerates no participant, or names one Cedar could not resolve; it never means no tribe was consulted.
+The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`. `cedar_entity_role` is the participant's role as the notice states it (`participant_role` today: named, invited, not enumerated). A blank `cedar_uid` means the notice enumerates no participant, or names one Cedar could not resolve; it never means no tribe was consulted.
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -44,42 +42,45 @@ Corrections and withdrawals are separate Federal Register documents; each is its
 
 ## Field dictionary
 
-The approved header, in order (28 columns, of which 1 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros.
+The approved header, in the owner's exact order (31 columns, of which 1 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
-| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 2 | `cedar_entity_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 3 | `cedar_entity_type` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 4 | `cedar_entity_role` (was `participant_role`) | Entity role | Why the entity is on this row: read from participant_role. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 2 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
+| 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
+| 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: participant. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 5 | `consultation_event_id` | Event ID | Cedar's identifier for the consultation event. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `fr_document_number` | Document number | The Federal Register document number. | identifier, as text | the source states none, or not applicable to this row |
-| 7 | `action_type` (was `consultation_type`) | Kind of consultation | Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document. | text | the source states none, or not applicable to this row |
-| 8 | `document_role` | Document role | Whether the document announces a consultation or reports one that already happened. | text | the source states none, or not applicable to this row |
-| 9 | `topic` | Topic | What the consultation was about, from the document's title. | text | the source states none, or not applicable to this row |
-| 10 | `agency` | Agency | The department holding the consultation. | text | the source states none, or not applicable to this row |
-| 11 | `sub_agency` | Office | The office within the department. | text | the source states none, or not applicable to this row |
-| 12 | `program` | Program | The program or matter the consultation concerns, where the document names one. | text | the source states none, or not applicable to this row |
-| 13 | `publication_date` (was `notice_date`) | Notice date | The date the Federal Register document was published. | date (YYYY-MM-DD) | the source states no date |
+| 7 | `agency` | Agency | The department holding the consultation. | text | the source states none, or not applicable to this row |
+| 8 | `subagency` (was `sub_agency`) | Office | The office within the department. | text | the source states none, or not applicable to this row |
+| 9 | `program` | Program | The program or matter the consultation concerns, where the document names one. | text | the source states none, or not applicable to this row |
+| 10 | `activity_type` (was `consultation_type`) | Kind of consultation | Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document. | text | the source states none, or not applicable to this row |
+| 11 | `topic` | Topic | What the consultation was about, from the document's title. | text | the source states none, or not applicable to this row |
+| 12 | `document_role` | Document role | Whether the document announces a consultation or reports one that already happened. | text | the source states none, or not applicable to this row |
+| 13 | `notice_date` | Notice date | The date the Federal Register document was published. | date (YYYY-MM-DD) | the source states no date |
 | 14 | `event_start_date` | Event start | When the consultation began, as the notice states it. | date (YYYY-MM-DD) | the source states no date |
 | 15 | `event_end_date` | Event end | When it ended, where stated. | date (YYYY-MM-DD) | the source states no date |
-| 16 | `comment_deadline` | Comment deadline | The date written comments were due, where stated. | date (YYYY-MM-DD) | the source states no date |
-| 17 | `location` | Location | Where the consultation was held. | text | the source states none, or not applicable to this row |
-| 18 | `format` | Format | In person, virtual, teleconference, written comment, or a combination. | text | the source states none, or not applicable to this row |
-| 19 | `participant_name_as_published` | Participant as published | The tribe or organization named in the document, as it spells it. | text | the source states none, or not applicable to this row |
-| 20 | `has_written_comments` | Written comments invited | Whether the document invites written comments (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 21 | `has_summary` | Summary available (yes or no) | Whether a summary of the consultation is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
-| 22 | `has_transcript` | Transcript available (yes or no) | Whether a transcript is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
-| 23 | `is_event_primary_row` | Counts as one consultation | One row per event carries yes; the rest are additional participants of the same event. Count consultations by this column, not by rows. | yes or no (1 or 0) | not stated; 0 is no |
-| 24 | `n_participant_rows_for_event` | Participant rows for this event | How many rows this event has in the file. | number | not stated by the source; 0 means the source states none |
-| 25 | `related_nagpra_document_number` | related nagpra document number | The NAGPRA notice this document also is, where it is one. | — | owed: not in the file until the terminal builds it |
-| 26 | `federal_register_citation` | Citation | The Federal Register citation (volume FR page). | text | the source states none, or not applicable to this row |
-| 27 | `source_quote` | Source passage | The sentence in the document this row was read from. | text | the source states none, or not applicable to this row |
-| 28 | `source_url` | Source | The document on federalregister.gov. | web address | the source states none, or not applicable to this row |
+| 16 | `event_date_precision` | event date precision | day, month, year or unstated, translated from the date qualification. | — | owed: not in the file until the terminal builds it |
+| 17 | `participant_name` (was `participant_name_as_published`) | Participant as published | The tribe or organization named in the document, as it spells it. | text | the source states none, or not applicable to this row |
+| 18 | `participant_role` | Entity role | Why the entity is on this row: read from participant_role. | text | the source states none, or not applicable to this row |
+| 19 | `location` | Location | Where the consultation was held. | text | the source states none, or not applicable to this row |
+| 20 | `event_format` (was `format`) | Format | In person, virtual, teleconference, written comment, or a combination. | text | the source states none, or not applicable to this row |
+| 21 | `comment_deadline` | Comment deadline | The date written comments were due, where stated. | date (YYYY-MM-DD) | the source states no date |
+| 22 | `has_written_comments` | Written comments invited | Whether the document invites written comments (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
+| 23 | `has_summary` | Summary available (yes or no) | Whether a summary of the consultation is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
+| 24 | `has_transcript` | Transcript available (yes or no) | Whether a transcript is available from the source. | yes or no (1 or 0) | not stated; 0 is no |
+| 25 | `is_event_primary_row` | Counts as one consultation | One row per event carries yes; the rest are additional participants of the same event. Count consultations by this column, not by rows. | yes or no (1 or 0) | not stated; 0 is no |
+| 26 | `participant_rows_per_event` (was `n_participant_rows_for_event`) | Participant rows for this event | How many rows this event has in the file. | number | the source states none, or not applicable to this row |
+| 27 | `federal_register_citation` | Citation | The Federal Register citation (volume FR page). | text | the source states none, or not applicable to this row |
+| 28 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
+| 29 | `source_url` | Source | The document on federalregister.gov. | web address | the source states none, or not applicable to this row |
+| 30 | `source_quote` | Source passage | The sentence in the document this row was read from. | text | the source states none, or not applicable to this row |
+| 31 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank `cedar_uid` means no participant is enumerated or the named one is unresolved.
 - Blank event dates mean the notice announces no dated event (a written comment period, say).
@@ -105,9 +106,9 @@ A blank is never zero and never an invented date. Beyond the column-level rules 
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each ships blank-free, not blank: it is absent until it exists.
+Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
 
-- `related_nagpra_document_number` (derived:nagpra_notice_overlap): The NAGPRA notice this document also is, where it is one.
+- `event_date_precision` (derive:event_date_basis): day, month, year or unstated, translated from the date qualification.
 
 ## Release, citation and method
 

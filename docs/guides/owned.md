@@ -12,11 +12,11 @@ Firms certified or listed as Native-owned by a certifying authority: TERO vendor
 
 ## One row is
 
-**Today:** One business certified or listed as Native-owned by a certifying authority (no sample is published in this repository yet; the flagship is one of the nineteen samples still to be added).
+One business-directory or certification listing, as the builder declares it; distinct certifications are not collapsed into an invented business snapshot.
 
-**When the specification is applied:** One supported business, enriched by every directory listing whose identity is verified; certification by two authorities is one business, and same-name businesses are never merged without evidence.
+This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
-**Grain change:** Owed (§15): the map for this table is written when its sample lands, after `python scripts/import_cedar_manifest.py --audit` has run (the collection's supporting tables carried withheld names and were struck on 2026-09-05).
+**Note:** The 53 fields are the builder's CLEAN_COLUMNS declaration, not a shipped public export; no sample is in the repository. The publication gate (consent_status, publishable, withheld_fields, business_name_is_person_name, the WITHHELD list of owner names, contact and website fields) applies to every row before any preview, download, search index or Cedar answer; retiring the gate's columns does not retire the gate.
 
 ## Key identifiers
 
@@ -34,7 +34,7 @@ Firms certified or listed as Native-owned by a certifying authority: TERO vendor
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uid`, `cedar_entity_name`, `cedar_entity_type` and `cedar_entity_role`. `cedar_entity_role` is `certifying_authority`: the nation or office that lists or certifies the business, never its owner. Individual Native ownership is not tribal-government ownership.
+The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`. `cedar_entity_role` is `certifying_authority`: the nation or office that lists or certifies the business, never its owner. Individual Native ownership is not tribal-government ownership.
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -44,31 +44,46 @@ Multiple directory listings enrich one business record where identity is verifie
 
 ## Field dictionary
 
-The field dictionary is written when this collection's flagship sample lands in the repository and its field map is decided. The approved opening block and the specification's field list for it:
+The approved header, in the owner's exact order (32 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
-- `cedar_uid`
-- `cedar_entity_name`: The certifying authority's register name.
-- `cedar_entity_type`: The certifying authority's register class.
-- `cedar_entity_role`: A certifying nation's uid is an associated link labelled certifying_authority, not owner.
-- `business_id`: The business's own id; an existing business Cedar uid only where the identity system already assigns one.
-- `business_name`: Withheld where the publication policy withholds it; never reintroduced through aliases, source text or fallback fields.
-- `trade_name`: Where publishable.
-- `business_category`: Normalized across directories, with the issuing authority's own terminology kept beside it.
-- `services`
-- `city`: Publishable business location.
-- `state`
-- `contact_channels`: Publishable channels only.
-- `listing_authority`: The directory or certifying authority.
-- `program`: The certification or preference program, in the authority's terms.
-- `certification_status`
-- `certification_date`: Where stated.
-- `certification_expiry_date`: Where stated.
-- `observation_date`: When Cedar observed the listing; not historical coverage.
-- `source_url`
+| # | Column | Label | Definition | Type | Blank means |
+|---|---|---|---|---|---|
+| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 2 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
+| 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
+| 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: certifying_authority. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 5 | `business_source_id` | Business source id |  | identifier, as text | the source states none, or not applicable to this row |
+| 6 | `business_name` (was `business_name_raw`) | Business name |  | text | the source states none, or not applicable to this row |
+| 7 | `business_entity_id` | Business entity id |  | identifier, as text | the source states none, or not applicable to this row |
+| 8 | `certifying_authority_entity_id` | Certifying authority entity id |  | identifier, as text | the source states none, or not applicable to this row |
+| 9 | `certifying_authority_name` | Certifying authority name |  | text | the source states none, or not applicable to this row |
+| 10 | `program_name` (was `programme_name`) | Program name |  | text | the source states none, or not applicable to this row |
+| 11 | `directory_type` | Directory type |  | text | the source states none, or not applicable to this row |
+| 12 | `assertion_class` | Assertion class |  | text | the source states none, or not applicable to this row |
+| 13 | `identity_scope` | Identity scope |  | text | the source states none, or not applicable to this row |
+| 14 | `identity_claim_text` | Identity claim text |  | text | the source states none, or not applicable to this row |
+| 15 | `ownership_percent` | Ownership percent |  | text | the source states none, or not applicable to this row |
+| 16 | `ownership_threshold_min` | Ownership threshold min |  | text | the source states none, or not applicable to this row |
+| 17 | `certification_number` | Certification number |  | identifier, as text | the source states none, or not applicable to this row |
+| 18 | `certification_tier` | Certification tier |  | text | the source states none, or not applicable to this row |
+| 19 | `certification_start` | Certification start |  | text | the source states none, or not applicable to this row |
+| 20 | `certification_expiration` | Certification expiration |  | text | the source states none, or not applicable to this row |
+| 21 | `business_license_number` | Business license number |  | identifier, as text | the source states none, or not applicable to this row |
+| 22 | `service_category` (was `service_category_raw`) | Service category |  | text | the source states none, or not applicable to this row |
+| 23 | `naics_code` (was `naics`) | Naics code |  | text | the source states none, or not applicable to this row |
+| 24 | `city` | City |  | text | the source states none, or not applicable to this row |
+| 25 | `state` (was `state_province`) | State |  | text | the source states none, or not applicable to this row |
+| 26 | `source_edition` | Source edition |  | text | the source states none, or not applicable to this row |
+| 27 | `source_last_updated` | Source last updated |  | text | the source states none, or not applicable to this row |
+| 28 | `first_seen` | First seen |  | text | the source states none, or not applicable to this row |
+| 29 | `last_seen` | Last seen |  | text | the source states none, or not applicable to this row |
+| 30 | `is_current` | Is current |  | yes or no (1 or 0) | not stated; 0 is no |
+| 31 | `source_url` | Source | The official page for this record, written into the file so it cites itself. | web address | the source states none, or not applicable to this row |
+| 32 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank name means withheld under the publication policy, with the reason recorded.
 - Blank certification dates mean the authority states none.
@@ -92,23 +107,11 @@ A blank is never zero and never an invented date. Beyond the column-level rules 
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each ships blank-free, not blank: it is absent until it exists.
+Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):
 
-- `business_id` (pending:sample): The business's own id; an existing business Cedar uid only where the identity system already assigns one.
-- `business_name` (pending:sample): Withheld where the publication policy withholds it; never reintroduced through aliases, source text or fallback fields.
-- `trade_name` (pending:sample): Where publishable.
-- `business_category` (pending:sample): Normalized across directories, with the issuing authority's own terminology kept beside it.
-- `services` (pending:sample): see the field map
-- `city` (pending:sample): Publishable business location.
-- `state` (pending:sample): see the field map
-- `contact_channels` (pending:sample): Publishable channels only.
-- `listing_authority` (pending:sample): The directory or certifying authority.
-- `program` (pending:sample): The certification or preference program, in the authority's terms.
-- `certification_status` (pending:sample): see the field map
-- `certification_date` (pending:sample): Where stated.
-- `certification_expiry_date` (pending:sample): Where stated.
-- `observation_date` (pending:sample): When Cedar observed the listing; not historical coverage.
-- `source_url` (pending:sample): see the field map
+- `nation_id`: the certifying nation, in a namespace the declaration does not name (adjudicate).
+
+Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 

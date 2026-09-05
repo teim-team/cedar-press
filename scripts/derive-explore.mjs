@@ -47,17 +47,17 @@ const WITHHELD_CLASS = "Individually Native-owned business";
 // Column names are matched lowercased, in this order; the first present wins.
 const RULES = {
   entity_uid: [
-    "cedar_uid", "entity_cedar_uid", "owner_hub_cedar_uid", "resolved_native_entity_id",
+    "cedar_uid", "cedar_uids", "entity_cedar_uid", "owner_hub_cedar_uid", "resolved_native_entity_id",
     "sub_cedar_uid", "prime_cedar_uid", "cedar_entity_id", "entity_id", "entity_cedar_uids",
   ],
   entity_name: [
-    "canonical_name", "cedar_spine_canonical_name", "native_party_canonical_name",
+    "canonical_name", "canonical_names", "cedar_spine_canonical_name", "native_party_canonical_name",
     "tribe_canonical_name", "owner_hub_name", "cedar_entity_name", "tribe_name", "entity_name",
     "native_party", "client_name", "participant_name_as_published", "witness_organization",
     "recipient_name", "awardee_name", "sub_awardee_name", "enterprise_name", "name",
   ],
   entity_type: [
-    "entity_type", "entity_class", "cedar_native_entity_class", "cedar_spine_entity_class",
+    "entity_type", "entity_class", "entity_classes", "cedar_native_entity_class", "cedar_spine_entity_class",
     "owner_hub_entity_class", "native_party_type", "entity_class_scope",
   ],
   year: ["fiscal_year", "filing_year", "event_year", "publication_year", "tax_year", "year"],
@@ -141,6 +141,9 @@ function pickShape(columns, pattern, exclude) {
 export function contractFor(columns) {
   const c = {};
   c.entity_uid = pick(columns, RULES.entity_uid) ?? pickShape(columns, /cedar_uid$/, /candidate/);
+  // The approved plural block and the older pipe lists are lists; the
+  // overrides may still say so in their own words.
+  if (c.entity_uid && /_uids$|_ids$/.test(c.entity_uid)) c.entity_uid_list = true;
   c.entity_name = pick(columns, RULES.entity_name) ?? pickShape(columns, /canonical_name$/, null);
   c.entity_type = pick(columns, RULES.entity_type) ?? pickShape(columns, /entity_class$/, /scope/);
   c.year = pick(columns, RULES.year) ?? pickShape(columns, /_year$/, /base_year|built|report_year|fetched/);

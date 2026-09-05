@@ -12,11 +12,9 @@ Notices published under the Native American Graves Protection and Repatriation A
 
 ## One row is
 
-**Today:** One NAGPRA notice in the Federal Register, with the institution and the Native entities named in each role.
+One notice, as today, with its correction handling; no aggregation of counts.
 
-**When the specification is applied:** The same: one notice or document, with its correction relationship retained and each role's entities kept distinct.
-
-**Grain change:** Owed (§8): related_notice_id for corrections so a corrected notice does not repeat holdings in totals; names as published beside each role's ids so the resolved subset is not shown as the whole.
+This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
 ## Key identifiers
 
@@ -34,7 +32,7 @@ Notices published under the Native American Graves Protection and Repatriation A
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uid`, `cedar_entity_name`, `cedar_entity_type` and `cedar_entity_role`. The opening block carries the culturally affiliated entities (`cedar_entity_role` = culturally affiliated), separated by |. The other roles keep their own lists beside it: `consulted_entity_ids`, `disposition_priority_entity_ids`, `repatriation_recipient_entity_ids`, `letter_of_support_entity_ids`, `aboriginal_land_entity_ids`. These roles are legally different and are never collapsed into one list of tribes. The viewer finds a notice through any of them.
+The opening block of every row is `cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published`, aligned JSON arrays. `cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published` are aligned JSON arrays with one position per entity-role association across six roles: affiliated, consulted, disposition priority, repatriation recipient, letter of support, aboriginal land. An entity in two roles occupies two positions; the roles are legally different and are never flattened into one list of tribes. A named but unresolved party has null in `cedar_uids`; the twelve `n_*_named` and `n_*_resolved` counts keep the unresolved visible on every row, and `entity_names_as_published` carries the names once Cedar supplies them from the relationship evidence (null until then). Unpacking the arrays must keep the distinct `document_number`, so the expansion does not inflate notice counts or repeat stated counts.
 
 Further role-specific links on the row, each an entity of the record the viewer finds it by:
 
@@ -52,80 +50,73 @@ A correction is its own notice (`is_correction` = 1) and can restate the same ho
 
 ## Field dictionary
 
-The approved header, in order (59 columns, of which 7 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros.
+The approved header, in the owner's exact order (52 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
-| 1 | `cedar_uid` (was `affiliated_entity_ids`) | Cedar IDs | Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID. Several, separated by \|, where a row names several entities. | list, separated by | | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 2 | `cedar_entity_name` | Native entities | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 3 | `cedar_entity_type` | Entity types | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: culturally affiliated, as the notice determines. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 5 | `document_number` | Document number | The Federal Register document number. | identifier, as text | the source states none, or not applicable to this row |
-| 6 | `related_notice_id` | related notice id | The notice this one corrects, or is corrected by. | — | owed: not in the file until the terminal builds it |
-| 7 | `notice_type` | Notice type | Inventory completion, intent to repatriate, or correction. | text | the source states none, or not applicable to this row |
-| 8 | `process_stage` (was `statute_stage`) | Statute stage | Which stage of NAGPRA the notice is made under. | text | the source states none, or not applicable to this row |
-| 9 | `is_correction` | Correction | Whether this notice corrects an earlier one (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 10 | `publication_date` | Published | The date the notice was published. | date (YYYY-MM-DD) | the source states no date |
-| 11 | `title` | Title | The notice's title. | text | the source states none, or not applicable to this row |
-| 12 | `institution_name` | Institution | The museum, university or agency holding the remains or objects. | text | the source states none, or not applicable to this row |
-| 13 | `institution_names_all` | All institutions | Every institution the notice names, where it names more than one, separated by \|. | text | the source states none, or not applicable to this row |
-| 14 | `institution_type` (was `institution_type_derived`) | Institution type | Museum, university, federal agency, and so on. | text | the source states none, or not applicable to this row |
+| 1 | `cedar_uids` | Cedar IDs | The Native entities associated with this record, as a JSON array; one position per entity-role association. A named but unresolved party has null here and its name in the names-as-published column. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 2 | `canonical_names` | Native entities | Their register names, aligned position by position with the Cedar IDs. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
+| 3 | `entity_classes` | Entity types | Their register classes, aligned. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
+| 4 | `entity_roles` | Entity roles | The role of each association (affiliated, consulted, repatriation recipient; named in the bill), aligned. An entity in two roles occupies two positions. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
+| 5 | `entity_names_as_published` | Names as published | What the source called each entity, aligned; null until Cedar supplies it from the relationship evidence. A register name is not proof of what the source said. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
+| 6 | `document_number` | Document number | The Federal Register document number. | identifier, as text | the source states none, or not applicable to this row |
+| 7 | `publication_date` | Published | The date the notice was published. | date (YYYY-MM-DD) | the source states no date |
+| 8 | `publication_year` | Publication year | The year the notice was published. | year | the source states no date |
+| 9 | `notice_type` | Notice type | Inventory completion, intent to repatriate, or correction. | text | the source states none, or not applicable to this row |
+| 10 | `process_stage` (was `statute_stage`) | Statute stage | Which stage of NAGPRA the notice is made under. | text | the source states none, or not applicable to this row |
+| 11 | `is_correction` | Correction | Whether this notice corrects an earlier one (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
+| 12 | `title` | Title | The notice's title. | text | the source states none, or not applicable to this row |
+| 13 | `institution_name` | Institution | The museum, university or agency holding the remains or objects. | text | the source states none, or not applicable to this row |
+| 14 | `additional_institution_names` | Additional institutions | The institutions the notice names beyond the designated one, as a JSON list. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
 | 15 | `institution_city` | Institution city | Where the institution is. | text | the source states none, or not applicable to this row |
 | 16 | `institution_state` | Institution state | Its state. | text | the source states none, or not applicable to this row |
-| 17 | `responsible_party_statement` | Responsible party | The official the notice names as responsible for the holdings, as stated. | text | the source states none, or not applicable to this row |
-| 18 | `agency_names` | Publishing agency | The agency that published the notice. | list, separated by | | the source states none, or not applicable to this row |
-| 19 | `object_categories` | Object categories | Which categories of items the notice covers (human remains, associated funerary objects, sacred objects, objects of cultural patrimony). | text | the source states none, or not applicable to this row |
-| 20 | `mni_total_stated` | Individuals | The minimum number of individuals the notice states. | number | the source states none, or not applicable to this row |
-| 21 | `mni_statements` | Individuals count, as stated | The sentence stating the minimum number of individuals, kept where the number alone is ambiguous. | text | the source states none, or not applicable to this row |
-| 22 | `n_associated_funerary_objects_stated` | Associated funerary objects | Count stated in the notice. | number | not stated by the source; 0 means the source states none |
-| 23 | `n_unassociated_funerary_objects_stated` | Unassociated funerary objects | Count stated in the notice. | number | not stated by the source; 0 means the source states none |
-| 24 | `n_sacred_objects_stated` | Sacred objects | Count stated in the notice. | text | not stated by the source; 0 means the source states none |
-| 25 | `n_objects_of_cultural_patrimony_stated` | Objects of cultural patrimony | Count stated in the notice. | text | not stated by the source; 0 means the source states none |
-| 26 | `cultural_items_total_stated` | Cultural items total, as stated | A total the notice itself states. Cedar never adds the categories together. | text | the source states none, or not applicable to this row |
-| 27 | `removal_counties` | Removal counties | Where the remains or objects were removed from. | list, separated by | | the source states none, or not applicable to this row |
-| 28 | `removal_states` | Removal states | The states of those places. | list, separated by | | the source states none, or not applicable to this row |
-| 29 | `repatriation_eligible_date` | Repatriation eligible from | The date after which repatriation may proceed, as the notice states. Not evidence that a transfer happened. | text | the source states none, or not applicable to this row |
-| 30 | `response_deadline_date` | Response deadline | The date by which other claimants must respond. | date (YYYY-MM-DD) | the source states no date |
-| 31 | `lineal_descendant_determination` | Lineal descendant found | Whether a lineal descendant was determined (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 32 | `culturally_unidentifiable` | Culturally unidentifiable | Whether the remains are determined culturally unidentifiable (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 33 | `n_affiliated_named` | Affiliated parties named | How many parties the notice names as culturally affiliated. | number | not stated by the source; 0 means the source states none |
-| 34 | `n_affiliated_resolved` | Affiliated parties resolved | How many of those Cedar could resolve to a register entity. | number | not stated by the source; 0 means the source states none |
-| 35 | `affiliated_entity_names` | affiliated entity names | The affiliated parties as the notice names them. | — | owed: not in the file until the terminal builds it |
+| 17 | `institution_type` (was `institution_type_derived`) | Institution type | Museum, university, federal agency, and so on. | text | the source states none, or not applicable to this row |
+| 18 | `institution_split_flag` | Institution split (yes or no) | Whether the notice's institution field named several institutions that were split into the designated one and the additional ones. | yes or no (1 or 0) | not stated; 0 is no |
+| 19 | `responsible_party_statement` | Responsible party | The official the notice names as responsible for the holdings, as stated. | text | the source states none, or not applicable to this row |
+| 20 | `agency_names` | Publishing agency | The agency that published the notice. | list, separated by | | the source states none, or not applicable to this row |
+| 21 | `object_categories` | Object categories | Which categories of items the notice covers (human remains, associated funerary objects, sacred objects, objects of cultural patrimony). | text | the source states none, or not applicable to this row |
+| 22 | `individuals_stated` (was `mni_total_stated`) | Individuals | The minimum number of individuals the notice states. | number | the source states none, or not applicable to this row |
+| 23 | `individuals_statement` (was `mni_statements`) | Individuals count, as stated | The sentence stating the minimum number of individuals, kept where the number alone is ambiguous. | text | the source states none, or not applicable to this row |
+| 24 | `associated_funerary_objects_stated` (was `n_associated_funerary_objects_stated`) | Associated funerary objects | Count stated in the notice. | number | the source states none, or not applicable to this row |
+| 25 | `unassociated_funerary_objects_stated` (was `n_unassociated_funerary_objects_stated`) | Unassociated funerary objects | Count stated in the notice. | number | the source states none, or not applicable to this row |
+| 26 | `sacred_objects_stated` (was `n_sacred_objects_stated`) | Sacred objects | Count stated in the notice. | text | the source states none, or not applicable to this row |
+| 27 | `cultural_patrimony_objects_stated` (was `n_objects_of_cultural_patrimony_stated`) | Objects of cultural patrimony | Count stated in the notice. | text | the source states none, or not applicable to this row |
+| 28 | `cultural_items_total_stated` | Cultural items total, as stated | A total the notice itself states. Cedar never adds the categories together. | text | the source states none, or not applicable to this row |
+| 29 | `removal_counties` | Removal counties | Where the remains or objects were removed from. | list, separated by | | the source states none, or not applicable to this row |
+| 30 | `removal_states` | Removal states | The states of those places. | list, separated by | | the source states none, or not applicable to this row |
+| 31 | `removal_location` (was `removal_location_statements`) | Removal location | Where the holdings were removed from, as the notice states it, with the existing restrictions on sensitive location applied before export. | text | the source states none, or not applicable to this row |
+| 32 | `repatriation_eligible_date` | Repatriation eligible from | The date after which repatriation may proceed, as the notice states. Not evidence that a transfer happened. | text | the source states none, or not applicable to this row |
+| 33 | `response_deadline_date` | Response deadline | The date by which other claimants must respond. | date (YYYY-MM-DD) | the source states no date |
+| 34 | `lineal_descendant_determination` | Lineal descendant found | Whether a lineal descendant was determined (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
+| 35 | `culturally_unidentifiable` | Culturally unidentifiable | Whether the remains are determined culturally unidentifiable (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
 | 36 | `n_consulted_named` | Consulted parties named | How many parties the notice names as consulted. | number | not stated by the source; 0 means the source states none |
 | 37 | `n_consulted_resolved` | Consulted parties resolved | How many of those Cedar could resolve to a register entity. The gap is real uncertainty, not an omission. | number | not stated by the source; 0 means the source states none |
-| 38 | `consulted_entity_ids` | Cedar IDs (consulted) | Entities the notice says were consulted. | list, separated by | | the source states none, or not applicable to this row |
-| 39 | `consulted_entity_names` | consulted entity names | The consulted parties as the notice names them, so the unresolved are visible. | — | owed: not in the file until the terminal builds it |
+| 38 | `n_affiliated_named` | Affiliated parties named | How many parties the notice names as culturally affiliated. | number | not stated by the source; 0 means the source states none |
+| 39 | `n_affiliated_resolved` | Affiliated parties resolved | How many of those Cedar could resolve to a register entity. | number | not stated by the source; 0 means the source states none |
 | 40 | `n_disposition_priority_named` | Priority parties named | How many parties the notice names with disposition priority. | number | not stated by the source; 0 means the source states none |
 | 41 | `n_disposition_priority_resolved` | Priority parties resolved | How many of those Cedar could resolve. | number | not stated by the source; 0 means the source states none |
-| 42 | `disposition_priority_entity_ids` | Cedar IDs (disposition priority) | Entities with priority for disposition, where stated. | list, separated by | | the source states none, or not applicable to this row |
-| 43 | `disposition_priority_entity_names` | disposition priority entity names | Owed: see below. | — | owed: not in the file until the terminal builds it |
-| 44 | `n_repatriation_recipient_named` | Recipients named | How many recipients the notice names. | number | not stated by the source; 0 means the source states none |
-| 45 | `n_repatriation_recipient_resolved` | Recipients resolved | How many of those Cedar could resolve. | number | not stated by the source; 0 means the source states none |
-| 46 | `repatriation_recipient_entity_ids` | Cedar IDs (repatriation recipient) | Entities the notice names to receive the repatriation. | list, separated by | | the source states none, or not applicable to this row |
-| 47 | `repatriation_recipient_entity_names` | repatriation recipient entity names | Owed: see below. | — | owed: not in the file until the terminal builds it |
-| 48 | `n_letter_of_support_named` | Letters of support named | How many parties the notice names as having submitted a letter of support. | number | not stated by the source; 0 means the source states none |
-| 49 | `n_letter_of_support_resolved` | Letters of support resolved | How many of those Cedar could resolve to a register entity. | number | not stated by the source; 0 means the source states none |
-| 50 | `letter_of_support_entity_ids` | Cedar IDs (letter of support) | The Cedar IDs of the parties named as submitting a letter of support, separated by \|. | list, separated by | | the source states none, or not applicable to this row |
-| 51 | `letter_of_support_entity_names` | letter of support entity names | Owed: see below. | — | owed: not in the file until the terminal builds it |
-| 52 | `n_aboriginal_land_named` | Aboriginal-land parties named | How many parties the notice names for aboriginal land. | number | not stated by the source; 0 means the source states none |
-| 53 | `n_aboriginal_land_resolved` | Aboriginal-land parties resolved | How many of those Cedar could resolve. | number | not stated by the source; 0 means the source states none |
-| 54 | `aboriginal_land_entity_ids` | Cedar IDs (aboriginal land) | Entities on whose aboriginal land the removal site lies, where stated. | list, separated by | | the source states none, or not applicable to this row |
-| 55 | `aboriginal_land_entity_names` | aboriginal land entity names | Owed: see below. | — | owed: not in the file until the terminal builds it |
-| 56 | `n_parties_named` | Parties named in all | All parties the notice names, across roles. | number | not stated by the source; 0 means the source states none |
-| 57 | `n_entities_resolved` | Entities resolved in all | How many distinct register entities those resolve to. | number | not stated by the source; 0 means the source states none |
-| 58 | `source_url` | Source | The notice on federalregister.gov. | web address | the source states none, or not applicable to this row |
-| 59 | `pdf_url` | PDF | The notice as published, in PDF. | web address | the source states none, or not applicable to this row |
+| 42 | `n_repatriation_recipient_named` | Recipients named | How many recipients the notice names. | number | not stated by the source; 0 means the source states none |
+| 43 | `n_repatriation_recipient_resolved` | Recipients resolved | How many of those Cedar could resolve. | number | not stated by the source; 0 means the source states none |
+| 44 | `n_letter_of_support_named` | Letters of support named | How many parties the notice names as having submitted a letter of support. | number | not stated by the source; 0 means the source states none |
+| 45 | `n_letter_of_support_resolved` | Letters of support resolved | How many of those Cedar could resolve to a register entity. | number | not stated by the source; 0 means the source states none |
+| 46 | `n_aboriginal_land_named` | Aboriginal-land parties named | How many parties the notice names for aboriginal land. | number | not stated by the source; 0 means the source states none |
+| 47 | `n_aboriginal_land_resolved` | Aboriginal-land parties resolved | How many of those Cedar could resolve. | number | not stated by the source; 0 means the source states none |
+| 48 | `n_parties_named` | Parties named in all | All parties the notice names, across roles. | number | not stated by the source; 0 means the source states none |
+| 49 | `n_entities_resolved` | Entities resolved in all | How many distinct register entities those resolve to. | number | not stated by the source; 0 means the source states none |
+| 50 | `source_url` | Source | The notice on federalregister.gov. | web address | the source states none, or not applicable to this row |
+| 51 | `pdf_url` | PDF | The notice as published, in PDF. | web address | the source states none, or not applicable to this row |
+| 52 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank count column means the notice states no count for that category; 0 means it states zero.
 - A blank role list with `n_*_named` = 0 means the notice names no party in that role; with `n_*_named` > 0 it means the named parties did not resolve.
 
 ## Limitations
 
-- Counts are the notice's stated counts in the notice's own units. The minimum number of individuals (`mni_total_stated`), associated and unassociated funerary objects, sacred objects and objects of cultural patrimony are different measures and are never added into one total.
+- Counts are the notice's stated counts in the notice's own units. The minimum number of individuals (`individuals_stated`), associated and unassociated funerary objects, sacred objects and objects of cultural patrimony are different measures and are never added into one total.
 - A notice, an eligibility date or a named recipient does not establish that a physical transfer was completed.
 - Names as published beside each role's IDs are owed (§8), so the unresolved parties are visible; until then `n_*_named` against `n_*_resolved` is the measure of what is unresolved.
 
@@ -143,15 +134,7 @@ A blank is never zero and never an invented date. Beyond the column-level rules 
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each ships blank-free, not blank: it is absent until it exists.
-
-- `related_notice_id` (pending:corrections): The notice this one corrects, or is corrected by.
-- `consulted_entity_names` (pending:names as published): The consulted parties as the notice names them, so the unresolved are visible.
-- `affiliated_entity_names` (pending:names as published): The affiliated parties as the notice names them.
-- `disposition_priority_entity_names` (pending:names as published): see the field map
-- `repatriation_recipient_entity_names` (pending:names as published): see the field map
-- `letter_of_support_entity_names` (pending:names as published): see the field map
-- `aboriginal_land_entity_names` (pending:names as published): see the field map
+Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 

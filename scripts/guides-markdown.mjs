@@ -135,10 +135,10 @@ function guideFor(collection) {
   p("## One row is");
   p();
   if (map) {
-    p(`**Today:** ${map.row_today}`);
+    p(map.row);
     p();
-    p(`**When the specification is applied:** ${map.row_target}`);
-    if (map.grain_change) { p(); p(`**Grain change:** ${map.grain_change}`); }
+    p("This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.");
+    if (map.note) { p(); p(`**Note:** ${map.note}`); }
   }
   p();
   p("## Key identifiers");
@@ -162,7 +162,9 @@ function guideFor(collection) {
   p();
   p("## Entity relationships");
   p();
-  p(`The opening block of every row is \`cedar_uid\`, \`cedar_entity_name\`, \`cedar_entity_type\` and \`cedar_entity_role\`. ${prose.entity_relationships}`);
+  p(map?.plural
+    ? `The opening block of every row is \`cedar_uids\`, \`canonical_names\`, \`entity_classes\`, \`entity_roles\` and \`entity_names_as_published\`, aligned JSON arrays. ${prose.entity_relationships}`
+    : `The opening block of every row is \`cedar_uid\`, \`canonical_name\`, \`entity_class\` and \`cedar_entity_role\`. ${prose.entity_relationships}`);
   if (map?.entity_roles?.length) {
     p();
     p("Further role-specific links on the row, each an entity of the record the viewer finds it by:");
@@ -179,7 +181,7 @@ function guideFor(collection) {
   p("## Field dictionary");
   p();
   if (map && book && map.fields.length) {
-    p(`The approved header, in order (${map.order.length} columns, of which ${map.new.filter((n) => n.status).length} are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros.`);
+    p(`The approved header, in the owner's exact order (${map.order.length} columns, of which ${map.new.filter((n) => n.status).length} are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.`);
     p();
     p("| # | Column | Label | Definition | Type | Blank means |");
     p("|---|---|---|---|---|---|");
@@ -198,7 +200,8 @@ function guideFor(collection) {
       const source = field.column;
       const decision = decisionOf.get(source)?.decision ?? "add";
       const type = field.add
-        ? (/cedar_uid/.test(col) ? (map.entity_uid_list ? GUIDES.types.list : GUIDES.types.id) : /url/.test(col) ? GUIDES.types.url : GUIDES.types.text)
+        ? (map.plural && map.order.slice(0, 5).includes(col) || /^(additional_|entity_link_statuses$)/.test(col) ? GUIDES.types.json
+          : col === "cedar_uid" ? GUIDES.types.id : /url/.test(col) ? GUIDES.types.url : GUIDES.types.text)
         : typeOf(source, values(source));
       const was = field.rename_to ? ` (was \`${source}\`)` : "";
       p(`| ${i + 1} | \`${col}\`${was} | ${esc(field.label)} | ${esc(field.meaning)} | ${type} | ${blankMeans(col, decision, type)} |`);
@@ -223,7 +226,7 @@ function guideFor(collection) {
   }
   p("## Missing values");
   p();
-  p("A blank is never zero and never an invented date. Beyond the column-level rules above:");
+  p("A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:");
   p();
   for (const m of prose.missing_values) p(`- ${m}`);
   p();
@@ -242,8 +245,15 @@ function guideFor(collection) {
   p("## What is still owed");
   p();
   const owed = (map?.new ?? []).filter((n) => n.status);
+  const adjudicate = (map?.retire ?? []).filter((r) => r.disposition === "adjudicate" || r.value_level);
+  if (adjudicate.length) {
+    p("Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):");
+    p();
+    for (const r of adjudicate) p(`- \`${r.column}\`: ${esc(r.identifies)} (${r.disposition}).`);
+    p();
+  }
   if (owed.length) {
-    p("Target columns the specification asks for that the terminal has not yet built from the full table. Each ships blank-free, not blank: it is absent until it exists.");
+    p("Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.");
     p();
     for (const n of owed) p(`- \`${n.column}\` (${esc(n.from)}): ${esc(n.why || "see the field map")}`);
   } else {

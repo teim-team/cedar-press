@@ -82,6 +82,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (          # noqa: E402
     NEVER, GATES, PRODUCT_ID, product_id, FLAGSHIP as _CANON_FLAGSHIP,
+    apply_field_map, field_map, FieldMapRefusal,
     # `SPINE_TABLES` there, `SPINE` here: 1135 and 1137 both use the bare
     # name `SPINE` for the `data/spine` DIRECTORY, so the shared constant
     # had to say which it is. This file's local name is unchanged.
@@ -1044,8 +1045,13 @@ def main() -> int:
         # diffing two rebuilds saw columns appear and disappear with no note.
         # A requested column that is empty here is a COVERAGE FACT and it is
         # reported as one, in the README, by name.
-        want = [c for c in SHOW.get(did, cols) if c in cols]
-        asked = [c for c in SHOW.get(did, [])]
+        # A collection the field map knows takes the APPROVED HEADER, not
+        # SHOW's curation: the owner's specification of 2026-09-05 has the
+        # samples generated from the same header as the customer export, and
+        # the map's rules read diagnostics SHOW would have dropped.
+        mapped = bool(field_map().get(did, {}).get("fields"))
+        want = cols if mapped else [c for c in SHOW.get(did, cols) if c in cols]
+        asked = [] if mapped else [c for c in SHOW.get(did, [])]
         absent = [c for c in asked if c not in cols]
         cols = want or cols
         # Blank sentinels across the WHOLE table, not just the ten drawn
@@ -1064,6 +1070,12 @@ def main() -> int:
         if not rs:
             skipped.append(f"{did}: no publishable rows")
             continue
+        if mapped:
+            try:
+                apply_field_map(did, cols, rs, set(cols))
+            except FieldMapRefusal as e:
+                skipped.append(f"{did}: field map refused: {e}")
+                continue
         blank = [c for c in cols
                  if not any((r.get(c) or "").strip() for r in rs)]
         if blank:

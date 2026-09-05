@@ -472,6 +472,19 @@ function Human({ column, value, contract, item = null }) {
   const yesNo = /\(yes or no\)/.test(meaningFor(item?.key, column) ?? "") || /^(is_|has_|self_|reported_)|_flag$/.test(column);
   if (yesNo && /^(0|1|Y|N)$/i.test(text)) return /^(1|Y)$/i.test(text) ? "yes" : "no";
   if (text.includes("|") && !/^https?:/.test(text)) return text.split("|").map((p) => p.trim()).filter(Boolean).join(", ");
+  // A JSON array cell (the approved schema's plural block and lists) reads
+  // as a list, an unresolved member as "unresolved", an object by its url.
+  if (/^\[/.test(text)) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        if (!parsed.length) return "—";
+        return parsed.map((p) => (p == null ? "unresolved" : typeof p === "object" ? (p.url ?? JSON.stringify(p)) : String(p))).join(", ");
+      }
+    } catch {
+      // Not JSON: shown as it is.
+    }
+  }
   return text;
 }
 
