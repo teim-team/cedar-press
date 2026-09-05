@@ -1583,3 +1583,12 @@ on the importer's checkout (see the PR).
 | finding | what changed | proof |
 |---|---|---|
 | P1 `1185` run the planted verifier before loading untracked review data | The data-free proofs (vocabulary, no uid invented, planted F11/F13 through apply and verify) run first; the review export under `dist/` is checked last and its absence is UNMEASURED, exit 2, after the gates are proven. On a fresh checkout the selftest now proves the gates instead of raising. | `1185 selftest` on this checkout |
+
+### PR #61 round 2 — four findings on the head a212ec8, all right (2026-09-05)
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1180` reject stale superseded names during verification | `verify` compares every output row with the mapping `sourced_names()` computes now: a sourced row whose uid the sources no longer name, or whose name or source they give differently, and an internal row for a uid they do name, are `stale` and fail. The fixture plants the superseded uid still carrying its old name. | `1180 selftest` |
+| P2 `1180` preserve fixture failures when real inputs are absent | UNMEASURED on the real inputs returns 2 only when every fixture proof passed, else 1. | `1180 selftest` |
+| P1 `measure-samples` add a fixture for the index-only check | `--selftest` builds a throwaway git repository with four declared samples (committed, untracked, modified-unstaged, absent), and proves the record, `--check` stale and current, and the effect of staging. Eight assertions; the JS suite runs it. | `node scripts/measure-samples.mjs --selftest`; `npm test` |
+| P1 `measure-samples` compare sample bytes with the staged index version | Published means in the index, on disk, and byte-identical (`git diff --name-only` against the index); a tracked sample the importer overwrote and nobody staged is reported "on disk, modified and NOT staged". Each record entry now carries its `why`. | same selftest |

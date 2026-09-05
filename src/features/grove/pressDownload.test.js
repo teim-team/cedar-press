@@ -127,6 +127,15 @@ test("samples.published.json matches what public/ holds", () => {
   assert.equal(run.status, 0, run.stderr || run.stdout);
 });
 
+// And the measurement itself, proven on a planted repository where the disk
+// and the index disagree (a clean checkout never disagrees, so the check
+// above alone could not tell an index-aware measurement from a disk one).
+test("measure-samples tells committed, untracked, unstaged and absent apart", () => {
+  const script = fileURLToPath(new URL("../../../scripts/measure-samples.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--selftest"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr || run.stdout);
+});
+
 // A fetch that fails must not leave the button dead: the reader gets the
 // honest smaller file, and the filename says which one arrived.
 test("an unreadable sample falls back to the collection description", async () => {
