@@ -27,6 +27,7 @@ import {
   contractFor,
   csvCell,
   cutCsv,
+  evaluableScope,
   matchedBy,
   rowLinkStatus,
   CUT_VERSION,
@@ -788,6 +789,13 @@ test("a scope is never an entity: it has no uid, fills no entity block, and an u
   const f = facets(rows, REGISTER);
   assert.ok(!f.entities.some((e) => e.uid === "federally-recognized-tribes"));
   assert.deepEqual(f.scopes.map((s) => [s.code, s.count, s.evaluable]), [["federally-recognized-tribes", 3, true], ["federally-recognized-tribes-in-state:OK", 1, false]]);
+  // Evaluable follows the loaded elements: undated elements alone make the
+  // scope not evaluable, so the picker's toggle stays off (Codex, PR #70).
+  const undatedOnly = facets(rows.filter((r) => r.recordId === "b-undated"), REGISTER);
+  assert.deepEqual(undatedOnly.scopes.map((s) => [s.code, s.evaluable]), [["federally-recognized-tribes", false]]);
+  assert.equal(evaluableScope(FRT, REGISTER), true);
+  assert.equal(evaluableScope(FRT_UNDATED, REGISTER), false);
+  assert.equal(evaluableScope(FRT, buildRegister({ classes: [], entities: [] })), false, "a register without a date vouches for nothing");
   // A malformed scope code in a permalink is dropped and said so, never kept
   // as a filter that matches nothing (Codex, PR #69).
   const back = decodeCut("sc=federally-recognized-tribes:OK|federally-recognized-tribes-in-state|indian-country");
@@ -838,6 +846,10 @@ test("named and collective coexist; an entity filter finds named records only, u
   const explained = parseCsv(cutCsv(broad, { view: "cut", cut: broadCut, register: REGISTER }));
   assert.deepEqual(explained.rows.map((r) => r.matched_by), ["broad:federally-recognized-tribes", "named", "named"]);
   assert.equal(matchedBy(rows[1], { ...EMPTY_CUT, entities: ["CE-00134-BX"], scopes: ["federally-recognized-tribes"] }, REGISTER), "named|scope:federally-recognized-tribes");
+  // A row kept through its scope beside an entity that fails the type filter is not "named" (Codex, PR #70).
+  const mistyped = { ...EMPTY_CUT, entities: ["CE-00134-BX"], types: ["Alaska Native Regional Corporation"], scopes: ["federally-recognized-tribes"] };
+  assert.deepEqual(filterRows(rows, mistyped, REGISTER).map((r) => r.recordId), ["b-class", "b-both", "b-undated"]);
+  assert.equal(matchedBy(rows[1], mistyped, REGISTER), "scope:federally-recognized-tribes");
   // The link status travels with the row where the table carries it.
   const statused = { ...SCOPED_CONTRACT, link_status: "entity_link_status" };
   assert.equal(rowLinkStatus({ entity_link_status: "unresolved" }, statused), "unresolved");
