@@ -415,12 +415,26 @@ MASK_FLAGS = ("attributed_flag",)
 #: columns summable. Superseded filings are PUBLISHED - see above - so the
 #: fence, not a row gate, is what stops the double count.
 LOBBYING_FILE = "lobbying.csv"
-LOBBYING_FENCE = ("supersession_status NOT IN ('SUPERSEDED_BY_AMENDMENT', "
-                  "'SUPERSEDED_BY_LATER_AMENDMENT', "
-                  "'UNFLAGGED_DUPLICATE_CANDIDATE', "
-                  "'AMBIGUOUS_MULTIPLE_ORIGINALS', "
-                  "'AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT')",
+#: The statuses the fence excludes, as data, so that a Python reader of the
+#: spreadsheet (1174's review bundle) and a SQL reader apply the SAME fence
+#: instead of one of them re-summing the $37.35M the other one refuses.
+LOBBYING_SUPERSEDED = ("SUPERSEDED_BY_AMENDMENT",
+                       "SUPERSEDED_BY_LATER_AMENDMENT",
+                       "UNFLAGGED_DUPLICATE_CANDIDATE",
+                       "AMBIGUOUS_MULTIPLE_ORIGINALS",
+                       "AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT")
+LOBBYING_FENCE = ("supersession_status NOT IN (%s)"
+                  % ", ".join("'%s'" % v for v in LOBBYING_SUPERSEDED),
                   "attribution_withdrawn != '1'")
+
+
+def lobbying_row_counts(row) -> bool:
+    """`LOBBYING_FENCE`, read one row at a time. True when the row's money
+    may be summed: it is not superseded and its attribution stands."""
+    status = str(row.get("supersession_status") or "").strip().upper()
+    if status in LOBBYING_SUPERSEDED:
+        return False
+    return str(row.get("attribution_withdrawn") or "").strip() != "1"
 
 # ---------------------------------------------------------------------------
 # COLUMN-LEVEL PUBLICATION RULES
@@ -1231,7 +1245,20 @@ DEALS_INTERNAL = (
     "Event_Date_precision_basis",
     "Event_Date_source_value_verbatim",
     "Date_Basis",
+    # 1184 keeps the original source-type string beside the normalised
+    # category; the string is an operational note, not a type.
+    "Source_1_Type_detail",
+    "Source_2_Type_detail",
+    # 1185's F14 flags every unverified `Federal` capital source for a human;
+    # a review instruction is not a customer column.
+    "capital_source_review",
+    "capital_source_reviewed",
 )
+
+#: Columns the publish-time presentation layer ADDS to the deals table. They
+#: are public: `Caveat` is derived from the internal columns above, and
+#: `Candidate_Status` is what a reader needs instead of a Confidence sentence.
+DEALS_PRESENTATION_COLUMNS = ("Caveat", "Candidate_Status")
 
 #: DERIVED AT PUBLISH, not stored. Owner: "Keep Event_Year, but calculate
 #: Event_Quarter and Event_Month when producing the public file rather than
@@ -1284,6 +1311,14 @@ def recompute_derived(collection: str, header, rows) -> dict:
     if str(collection).strip().lower() != "deals":
         return changed
     have_month = {"day", "month"}
+    # THE HEADER TOO. The values were written into every row while the
+    # header was left as it arrived, so the day the canonical source stops
+    # storing these columns (the ruling above) `emit` would write `fhdr` and
+    # drop both derivatives on the floor, silently (Codex, PR #56). The
+    # header is a list the caller keeps; extend it in place.
+    for col in DEALS_DERIVED:
+        if col not in header:
+            header.append(col)
     for col in DEALS_DERIVED:
         changed[col] = 0
     for r in rows:
@@ -1306,6 +1341,60 @@ def recompute_derived(collection: str, header, rows) -> dict:
                 r[col] = val
                 changed[col] += 1
     return {k: v for k, v in changed.items() if v}
+
+
+def _script(number: str, stem: str):
+    """Import a numbered pipeline script as a module. Their names start with
+    digits, so `import` cannot name them; this is the one sanctioned way."""
+    import importlib.util
+    path = Path(__file__).resolve().parent / ("%s_%s.py" % (number, stem))
+    spec = importlib.util.spec_from_file_location("cedar_%s" % number, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def deals_public_view(header, rows) -> dict:
+    """The deals table as a customer should read it, applied AT PUBLISH.
+
+    Two scripts describe how the deals table ought to read and neither of
+    them reached a customer (Codex, PR #56, twice over):
+
+      1185  the owner's 2025-2026 fact-check, CORRECTIONS as data keyed by
+            Deal_ID with a precondition on each, written only to a review file
+      1184  the reviewer's presentation layer - a derived `Caveat`, source
+            types in an eight-value vocabulary, one-word Confidence - written
+            to `deals_presentation.csv`, which nothing read
+
+    So the Northern Circle withdrawal came back on the next `1137` build and
+    the Caveat column never existed. This applies both, in that order, to the
+    RAW source rows before the publication filter projects them - the caveats
+    are derived from `Date_Basis`, `record_class` and `Record_Scope`, which
+    are internal and are dropped a moment later. Same shape as
+    `recompute_derived`: the canonical file is never rewritten, and every
+    rebuild re-applies the same data.
+
+    Mutates `header` and `rows` in place. Returns what happened, for the build
+    log: corrections applied, corrections REFUSED (a precondition no longer
+    holds - the row moved since the review, and a correction that may not
+    describe the row is not applied), and the presentation counts. A refused
+    correction is reported, never silently skipped; the caller prints it.
+    """
+    out = {"corrections": 0, "refused": [], "caveats": 0, "unmapped": {}}
+    fact = _script("1185", "deals_fact_check_2025_2026")
+    log, skipped, _n13, _n14 = fact.apply_all(rows)
+    out["corrections"] = len(log)
+    out["refused"] = [(f, d, why) for f, d, why in skipped
+                      if why != "row not found"]
+    present = _script("1184", "deals_public_presentation")
+    unmapped, stats = present.transform(rows)
+    out["unmapped"] = unmapped
+    out["caveats"] = stats.get("caveats", 0)
+    for col in DEALS_PRESENTATION_COLUMNS + ("Source_1_Type_detail",
+                                             "Source_2_Type_detail"):
+        if col not in header:
+            header.append(col)
+    return out
 
 
 def denied_ueis() -> dict:

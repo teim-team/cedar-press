@@ -1196,6 +1196,7 @@ def measure_prime(path=None):
     """Read-only census of prime_contracts, by duckdb."""
     import duckdb
     p = str(path or PRIME)
+    import cedar_duck  # local, like every caller: `--help` must not need duckdb
     con = cedar_duck.connect()
     cols = [r[0] for r in con.execute(
         "SELECT column_name FROM (DESCRIBE SELECT * FROM read_csv_auto(?, all_varchar=true, "
@@ -1256,6 +1257,7 @@ def _leg_census(path, wd_uei, wd_cage):
     made the first version of this check report 8,352 phantom failures.
     """
     import duckdb
+    import cedar_duck  # local, like every caller: `--help` must not need duckdb
     con = cedar_duck.connect()
     con.execute("CREATE TABLE wdu(u VARCHAR); CREATE TABLE wdc(c VARCHAR)")
     for u in wd_uei:

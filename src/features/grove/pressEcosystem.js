@@ -42,12 +42,14 @@ export const ECOSYSTEM = Object.freeze({
   legislation: Object.freeze({
     sources: Object.freeze(["Congress.gov", "House and Senate roll calls"]),
     feeds: Object.freeze(["lobbying", "federal-register"]),
-    line: "A bill's subjects and sponsors meet the lobbying filings working the same issue.",
+    line: "A bill's subjects and sponsors meet the advocacy record working the same issue: filings, testimony and comments.",
   }),
+  // `lobbying` is the collection's id; the collection is Native Federal
+  // Advocacy & Engagement, of which registered lobbying is one channel.
   lobbying: Object.freeze({
-    sources: Object.freeze(["Senate LDA filings", "House disclosures", "Agency dockets"]),
-    feeds: Object.freeze(["legislation", "funding"]),
-    line: "Registrations link organizations to the policy they engage and the money that follows it.",
+    sources: Object.freeze(["Senate and House LDA filings", "Consultation notices", "FERC and NRC dockets", "IRS 990 Schedule C"]),
+    feeds: Object.freeze(["legislation", "federal-register", "funding"]),
+    line: "Registrations, consultations, docket filings and testimony link organizations to the policy they engage and the money that follows it.",
   }),
   deals: Object.freeze({
     sources: Object.freeze(["Press and trade reporting", "SEC filings", "Municipal bond filings"]),
@@ -121,7 +123,7 @@ export const FEEDS = Object.fromEntries(
  * out as prose. Kept beside the sources it classifies.
  */
 export const PROPER_NOUN =
-  /^(Grants|Congress|USAspending|FAADS|FSRS|Federal|National|Office|Senate|House|IRS|SEC|SAM|FPDS|SBA|ONRR|OSMRE|Osage|ANCSA|ANC)\b/;
+  /^(Grants|Congress|USAspending|FAADS|FSRS|Federal|National|Office|Senate|House|IRS|SEC|SAM|FPDS|SBA|ONRR|OSMRE|Osage|ANCSA|ANC|FERC|NRC)\b/;
 
 /** a, b and c: the list style the rest of the product uses. */
 export const say = (items) =>

@@ -9016,3 +9016,35 @@ Every mention above of a root-level `*_DATASET_PLAN.md`,
 the four entry points and the web client's config. `set_sam_key.ps1` is
 `code/set_sam_key.ps1`; the wave-5 xlsx sits in `cedar_source_registry/`.
 Entries above are left as written; this note is the correction.
+
+## 2026-09-05 — PR #56's twenty-six Codex threads, and the advocacy rename on the site
+
+Every thread on the 2026-09-04 data merge was open when it merged. All
+twenty-six reproduced against `main` and are answered in code on
+`claude/cedar-press-datasets-3n2wjf`; the table, with the proof for each, is
+`docs/CODEX_REVIEW_LOG.md` under "PR #56". The shape of the findings is worth
+one line here because it recurs: two guards raised `NameError` on the path
+their selftest is meant to prove (`1079`, `1170`); three verifiers could not
+exit non-zero (`1179` on contradictions, `1182`, `1185` with an open queue);
+three readers turned an absent input into an empty list and built on it
+(`1180`, `1187`, `1183`'s IRS leg); and two deals scripts (`1184`, `1185`)
+wrote files nothing read, so the fact-check corrections and the Caveat column
+never reached a customer. The last is now `cedar_publication.deals_public_view`,
+applied on the raw rows inside `1137.load` on every build - the same shape as
+`recompute_derived`, and the canonical file is never rewritten.
+
+Two more collapsed `\b` escapes surfaced beside the one Codex named: the same
+regex in `1187._orgkey` and a comment in `1183`. `1136 verify` is 0 bytes
+across 1,053 files. `1169.neid_vocabulary` reads the tracked crosswalk first,
+so a fresh checkout can run its selftest at all.
+
+The site: the lobbying collection is `Native Federal Advocacy & Engagement`
+(short `Advocacy`, id unchanged). The ecosystem sources, method domains and
+examples, cadence (`ON_CHANGE`), the research-access example and the press
+dump follow the catalog. Nothing on the site says "lobbying dataset" any more.
+
+NOT DONE HERE, CANNOT BE: twenty manifest samples exist only on the importer's
+checkout (ignored by `*.csv`, never force-added), so `main`'s deploy has been
+red since the merge. `.gitignore` now re-includes
+`public/data/cedar/samples/**/*.csv`, and `test_collection` fails naming any
+manifest sample that is not in the index. The owner has to `git add` them.

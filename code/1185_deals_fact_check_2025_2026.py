@@ -56,6 +56,11 @@ import sys
 from datetime import date
 from pathlib import Path
 
+#: HOW THE CORRECTIONS REACH A CUSTOMER. Not through OUT below - that is the
+#: owner's review copy. `cedar_publication.deals_public_view` calls
+#: `apply_all` on the raw deals source at every 1137 build, so a correction
+#: recorded here is re-applied on every rebuild and cannot be lost to the
+#: next delivery (Codex, PR #56: the review file had no consumer).
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "dist" / "qc_review" / "3_indian_country_deals_2025_2026.csv"
 REVIEW = ROOT / "review"
@@ -519,13 +524,20 @@ def verify() -> int:
     if bad_cap or bad_role or f13 or f01:
         ok = False
     print("  OK" if ok else "  FAIL")
-    if ok and queue:
+    if not ok:
+        return 1
+    if queue:
+        # A DISTINCT EXIT, NOT A PASS. The docstring promised that verify
+        # "refuses to report success while that queue is non-empty" and the
+        # code returned 0 anyway (Codex, PR #56). 2 keeps the open queue
+        # apart from a vocabulary failure for a caller that reads the status.
         print()
         print("  NOT FACT-CHECKED. %d rows have no row-specific source review."
               % queue)
         print("  The corrections applied are verified; the dataset as a whole")
-        print("  is not, and must not be described as such.")
-    return 0 if ok else 1
+        print("  is not, and must not be described as such.  (exit 2)")
+        return 2
+    return 0
 
 
 def selftest() -> int:

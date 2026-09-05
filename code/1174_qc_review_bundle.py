@@ -44,8 +44,12 @@ from __future__ import annotations
 
 import csv
 import re
+import sys
 from collections import defaultdict
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cedar_publication import lobbying_row_counts  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "dist" / "qc_review"
@@ -266,17 +270,29 @@ def lobbying():
     amendment behaviour is still visible from the entity row.
     """
     agg = defaultdict(lambda: defaultdict(set))
-    num = defaultdict(lambda: {"n": 0, "usd": 0.0, "sup": 0})
+    num = defaultdict(lambda: {"n": 0, "usd": 0.0, "sup": 0, "fenced_usd": 0.0})
     with (CUSTOMER / "lobbying.csv").open(encoding="utf-8-sig", errors="replace",
                                           newline="") as fh:
         for r in csv.DictReader(fh):
             if not in_window(r.get("filing_year")):
                 continue
-            key = ((r.get("cedar_uid") or "").strip()
-                   or "NO_UID::" + (r.get("client_name") or "").strip().upper())
+            # ONE ROW PER CLIENT means the client is IN the key. Keyed on the
+            # entity alone, a tribe's several subsidiaries filing as distinct
+            # LDA clients collapsed into one row with their spend combined
+            # and only three names surviving (Codex, PR #56).
+            uid = (r.get("cedar_uid") or "").strip()
+            client = (r.get("client_name") or "").strip().upper()
+            key = (uid or "NO_UID", client)
             a, n = agg[key], num[key]
             n["n"] += 1
-            n["usd"] += money(r.get("spend_usd"))
+            # THE FENCE. An amendment restates the filing it supersedes, so
+            # summing both counts the money twice; the shared fence in
+            # cedar_publication is what makes the money column summable, and
+            # this sheet presented the double-counted total (Codex, PR #56).
+            if lobbying_row_counts(r):
+                n["usd"] += money(r.get("spend_usd"))
+            else:
+                n["fenced_usd"] += money(r.get("spend_usd"))
             if (r.get("supersession_status") or "").upper().startswith("SUPERSEDED"):
                 n["sup"] += 1
             for col in ("client_name", "canonical_name", "registrant_name",
@@ -297,6 +313,7 @@ def lobbying():
             "n_filings": num[key]["n"],
             "n_superseded_filings": num[key]["sup"],
             "reported_spend_usd": round(num[key]["usd"], 2),
+            "spend_excluded_by_fence_usd": round(num[key]["fenced_usd"], 2),
             "years": " | ".join(sorted(a["filing_year"])),
             "filing_types": " | ".join(sorted(a["filing_type_display"])[:4]),
             "government_entities": " | ".join(sorted(a["government_entities"])[:3]),
@@ -359,12 +376,19 @@ def federal_contracting():
                 continue
             a = agg.get(cn)
             ob = _num(r.get("total_obligations"))
+            # total_award_value is CUMULATIVE, RESTATED PER ROW - docs/
+            # MONEY_TOTALLING_RULES.md: NEVER SUM, measured 18.88x overstated
+            # when summed. Obligations are summed; the award value is read
+            # off the latest action for the contract (Codex, PR #56).
+            av = _num(r.get("total_award_value"))
+            when = (r.get("action_date") or "").strip()
             if a is None:
-                agg[cn] = [ob, _num(r.get("total_award_value")), 1]
+                agg[cn] = [ob, av, 1, when]
             else:
                 a[0] += ob
-                a[1] += _num(r.get("total_award_value"))
                 a[2] += 1
+                if when >= a[3]:
+                    a[1], a[3] = av, when
     keep = {cn for cn, _v in sorted(agg.items(), key=lambda kv: -kv[1][0])[:CONTRACT_CAP]}
 
     best = {}
@@ -382,13 +406,14 @@ def federal_contracting():
 
     recs = []
     for cn, r in best.items():
-        ob, av, n = agg[cn]
+        ob, av, n, _when = agg[cn]
         r = dict(r)
         r["contract_total_obligations"] = "%.2f" % ob
         r["contract_total_award_value"] = "%.2f" % av
         r["n_rows_collapsed"] = str(n)
         r["grain_note"] = ("ONE ROW PER CONTRACT. %d source row(s) collapsed; "
-                           "modifications are summed, not listed." % n)
+                           "obligations are summed, award value is the latest "
+                           "action's restated total." % n)
         recs.append(r)
     recs.sort(key=lambda r: -_num(r.get("contract_total_obligations")))
     order = ["cedar_uid", "canonical_name", "awardee_name", "contract_number",

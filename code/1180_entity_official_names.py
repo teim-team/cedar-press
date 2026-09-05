@@ -154,8 +154,19 @@ EXTRA_SOURCES = (
 )
 
 
-def _read(path: Path) -> list:
+class Unmeasured(RuntimeError):
+    """A required input is absent. Raised, never converted to an empty list:
+    with the reconciliation directory missing, `build` used to fall back to
+    `cedar_internal` for every row and OVERWRITE the tracked table holding
+    576 BIA, 191 ANC and 185 NHO sourced names, and `verify` accepted the
+    result (Codex, PR #56)."""
+
+
+def _read(path: Path, required: bool = True) -> list:
     if not path.exists():
+        if required:
+            shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+            raise Unmeasured("UNMEASURED: required input absent: %s" % shown)
         return []
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         return list(csv.DictReader(fh))
@@ -196,11 +207,17 @@ def sourced_names():
 
 
 def build(apply: bool = False) -> int:
-    reg = _read(REGISTER)
+    try:
+        reg = _read(REGISTER)
+        picked, counts, collisions = sourced_names()
+    except Unmeasured as exc:
+        print("  %s" % exc)
+        print("  refusing to build: an absent source would be written back "
+              "as `cedar_internal` over sourced names")
+        return 2
     if not reg:
-        print("  register not found: %s" % REGISTER)
+        print("  register is empty: %s" % REGISTER)
         return 1
-    picked, counts, collisions = sourced_names()
 
     rows, changed, unsourced = [], 0, 0
     by_class = {}
@@ -260,7 +277,13 @@ def build(apply: bool = False) -> int:
 
 
 def verify() -> int:
-    rows = _read(OUT)
+    try:
+        rows = _read(OUT)
+        for f, _c, _s in RECON_FILES:
+            _read(RECON / f)
+    except Unmeasured as exc:
+        print("  %s" % exc)
+        return 2
     if not rows:
         print("  NOT BUILT: %s" % OUT)
         return 1
@@ -289,10 +312,21 @@ def selftest() -> int:
         if sid != "cedar_internal" and not url.startswith("https://"):
             print("  FAIL %s carries no URL" % sid)
             ok = False
-    picked, _, collisions = sourced_names()
+    try:
+        picked, _, collisions = sourced_names()
+    except Unmeasured as exc:
+        print("  %s" % exc)
+        return 2
     if not picked:
         print("  FAIL no reconciliation rows were read")
         ok = False
+    # the refusal itself, proven: a missing reconciliation file raises
+    try:
+        _read(RECON / "does_not_exist.csv")
+        print("  FAIL a missing required input read as an empty list")
+        ok = False
+    except Unmeasured:
+        print("  a missing required input raises UNMEASURED, never reads empty")
     # The named regression: the Yakama row must come out fully spelled.
     # The named regressions: three handles the owner or the audit called out.
     # Each asserts the SPECIFIC repair, not merely that something changed.

@@ -124,22 +124,48 @@ def main(argv: list) -> int:
         print("  name map: %d entries" % len(m))
         print("  enumerated column substituted, unrelated column untouched: %s"
               % ok)
+        # verify must go red on a file that still carries a handle, and green
+        # once it does not - proven on a temporary target, not asserted.
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            probe = Path(d) / "probe.csv"
+            probe.write_text("canonical_name,x\nConfederated Yakama,1\n",
+                             encoding="utf-8")
+            _, red_changed, _ = stream(probe, apply=False)
+            _, _, _ = stream(probe, apply=True)
+            _, green_changed, _ = stream(probe, apply=False)
+        red = red_changed == 1 and green_changed == 0
+        print("  verify would fail on the unfixed file and pass after apply: %s"
+              % red)
+        ok = ok and red
         print("  selftest %s" % ("PASS" if ok else "FAIL"))
         return 0 if ok else 1
 
     only = argv[2] if len(argv) > 2 else None
     apply = (cmd == "apply")
     print("  1182 stream official names   %s"
-          % ("APPLY" if apply else "REPORT (writes nothing)"))
-    total = 0
+          % ("APPLY" if apply else
+             "VERIFY (fails on any remaining handle)" if cmd == "verify" else
+             "REPORT (writes nothing)"))
+    total = total_cells = 0
     for path, cols in targets():
         if only and path.stem != only:
             continue
         rows, changed, cells = stream(path, apply=apply)
         total += changed
+        total_cells += cells
         print("    %-30s %8d rows  %7d row(s) renamed  %d cell(s)  [%s]"
               % (path.name, rows, changed, cells, ", ".join(cols)))
     print("    total rows renamed: %d" % total)
+    if cmd == "verify":
+        # A VERIFY THAT CANNOT FAIL VERIFIES NOTHING. This used to be the
+        # report with a different label and returned 0 over thousands of
+        # remaining short handles (Codex, PR #56).
+        if total or total_cells:
+            print("    FAIL: %d row(s) / %d cell(s) still carry a short handle"
+                  % (total, total_cells))
+            return 1
+        print("    PASS: no short handle remains in any target")
     return 0
 
 

@@ -502,17 +502,31 @@ def verify(root, record=False, only=None, quiet=False):
     if not per_tbl:
         raise RuntimeError("UNMEASURED: no consumer table was scanned")
 
+    # Two breaches, kept apart in the report because they call for different
+    # hands: UNKEYED_PLAIN is a ruling nobody applied (`emit` can), and
+    # KEYED_DISAGREES is a ruling the table CONTRADICTS - a customer-facing
+    # attribution to UID B while the adjudicated ledger says UID A. Codex
+    # (PR #56) was right that only the first one used to fail verification:
+    # a contradiction is not less of a defect than an absence, and `emit`
+    # would never repair it, so it must block until a human decides.
     viol = []
+    contra = []
     for ckey, per in per_tbl.items():
         for k, st in per.items():
-            n, a = st.get("UNKEYED_PLAIN", [0, 0.0])
-            if not n:
-                continue
             disp, _why = method_disposition(rule[k]["method"])
             if disp != "APPLY_ADJUDICATED":
                 continue
-            viol.append((ckey, k, n, a, rule[k], names.get(k, "")))
+            n, a = st.get("UNKEYED_PLAIN", [0, 0.0])
+            if n:
+                viol.append((ckey, k, n, a, rule[k], names.get(k, "")))
+            n, a = st.get("KEYED_DISAGREES", [0, 0.0])
+            if n:
+                contra.append((ckey, k, n, a, rule[k], names.get(k, "")))
     viol.sort(key=lambda v: -v[3])
+    contra.sort(key=lambda v: -v[3])
+    c_ids = len({v[1] for v in contra})
+    c_rows = sum(v[2] for v in contra)
+    c_usd = sum(v[3] for v in contra)
 
     ids = len({v[1] for v in viol})
     rows = sum(v[2] for v in viol)
@@ -531,21 +545,36 @@ def verify(root, record=False, only=None, quiet=False):
                   % (ckey, k[0], k[1], nm[:34], n, a, r["uid"], r["method"], r["tier"]))
         if len(viol) > 15:
             print("    ... %d more" % (len(viol) - 15))
+        print("  identifiers keyed AGAINST the ledger : %d  (%d rows, $%.0f)"
+              % (c_ids, c_rows, c_usd))
+        for ckey, k, n, a, r, nm in contra[:15]:
+            print("    %-46s %s|%s %-34s %6d rows $%15.0f keyed elsewhere, ledger %s (%s, tier %s)"
+                  % (ckey, k[0], k[1], nm[:34], n, a, r["uid"], r["method"], r["tier"]))
+        if len(contra) > 15:
+            print("    ... %d more" % (len(contra) - 15))
 
     bl_path = clean_dir(root) / BASELINE
     if record:
         bl_path.write_text(json.dumps(
             {"invariant": INVARIANT, "identifiers": ids, "rows": rows,
-             "usd": round(usd, 2), "recorded_at": stamp}, indent=1),
+             "usd": round(usd, 2), "contradicted_identifiers": c_ids,
+             "contradicted_rows": c_rows, "contradicted_usd": round(c_usd, 2),
+             "recorded_at": stamp}, indent=1),
             encoding="utf-8")
         print("  recorded baseline -> %s" % bl_path.name)
         return 0
 
-    if viol:
+    if viol or contra:
         if not quiet:
-            print("\nFAIL %s : %d identifiers / %d rows / $%.0f are settled in "
-                  "%s and unkeyed in a table that reads them."
-                  % (INVARIANT, ids, rows, usd, LEDGER_NAME))
+            if viol:
+                print("\nFAIL %s : %d identifiers / %d rows / $%.0f are settled in "
+                      "%s and unkeyed in a table that reads them."
+                      % (INVARIANT, ids, rows, usd, LEDGER_NAME))
+            if contra:
+                print("\nFAIL %s : %d identifiers / %d rows / $%.0f are settled in "
+                      "%s and keyed to a DIFFERENT uid in a table that reads them; "
+                      "a contradiction blocks until a human rules on it."
+                      % (INVARIANT, c_ids, c_rows, c_usd, LEDGER_NAME))
         return 1
     if not quiet:
         print("\nPASS %s : no adjudicated ledger ruling is unapplied in a "
@@ -616,7 +645,15 @@ def _fixture(tmp, planted):
              obligated_usd="500", cedar_uid="", confidence_tier="",
              excluded_flag="0", attribution_method="", action_date="2025-01-05"),
     ]
-    if planted:
+    if planted == "disagree":
+        # THE CONTRADICTION: adjudicated tier-A ruling says CE-FIXT1-AA, the
+        # row is keyed to something else. Must fail, and must be reported as
+        # a contradiction, not as an unkeyed gap.
+        rows.append(dict(recipient_uei="AAAAAAAAAAAA", recipient_name="FIXTURE NATION",
+                         obligated_usd="7777.77", cedar_uid="CE-WRONG-ZZ", confidence_tier="A",
+                         excluded_flag="0", attribution_method="ruling_applied",
+                         action_date="2025-01-07"))
+    elif planted:
         # THE VIOLATION: adjudicated tier-A ruling, row unkeyed, unexcluded,
         # in scope. This and only this must make the named detector fire.
         rows.append(dict(recipient_uei="AAAAAAAAAAAA", recipient_name="FIXTURE NATION",
@@ -686,6 +723,25 @@ def selftest():
             ok = False
             print("     FAIL - a REFUSED-method or tier-C subject was counted as "
                   "a breach")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        rc, out = run(tmp, planted="disagree")
+        print("2b. one planted CONTRADICTION: UEI AAAAAAAAAAAA keyed to CE-WRONG-ZZ "
+              "while the ledger settles it as CE-FIXT1-AA, $7,777.77")
+        print("     exit %d, expected 1" % rc)
+        if rc != 1:
+            ok = False
+            print("     FAIL - a row keyed AGAINST the adjudicated ledger passed")
+            print(out)
+        if "keyed to a DIFFERENT uid" not in out or "AAAAAAAAAAAA" not in out:
+            ok = False
+            print("     FAIL - the contradiction was not reported as one, naming the identifier")
+        if "identifiers in breach : 0" not in out:
+            ok = False
+            print("     FAIL - a contradiction was counted as an unkeyed gap")
+        if "7778" not in out.replace(",", ""):       # printed to the dollar
+            ok = False
+            print("     FAIL - it did not carry the planted dollars ($7,777.77)")
 
     # UNMEASURED rather than clean
     with tempfile.TemporaryDirectory() as tmp:

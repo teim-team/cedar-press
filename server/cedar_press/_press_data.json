@@ -452,7 +452,7 @@
         "from": 1999
       },
       "blurb": "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
-      "linkage": "Registrants and clients resolved to the tribes and Native organizations behind them, including firms retained on their behalf."
+      "linkage": "Every activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it, including firms retained on its behalf and organizations acting for many nations."
     },
     {
       "id": "contractors",
@@ -667,7 +667,7 @@
       "name": "Native Federal Advocacy & Engagement",
       "version": "v1",
       "updated": "2026-09-04",
-      "cadence": "Updated quarterly",
+      "cadence": "Updated as records arrive",
       "retired": false,
       "history": [
         {

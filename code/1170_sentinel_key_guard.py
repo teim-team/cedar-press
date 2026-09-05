@@ -396,6 +396,7 @@ def explode(argv):
     """
     import duckdb
 
+    import cedar_duck  # local, like every caller: `--help` must not need duckdb
     con = cedar_duck.connect()
     con.execute("PRAGMA threads=8")
     census = _load_census()
@@ -659,6 +660,7 @@ def verify(argv):
         raise SystemExit("UNMEASURED: no files to verify. A guard with no "
                          "input is not a passing guard.")
 
+    import cedar_duck  # local, like every caller: `--help` must not need duckdb
     con = cedar_duck.connect()
     con.execute("PRAGMA threads=8")
     all_v, evaluated, unmeasured = [], [], []
@@ -729,6 +731,7 @@ def selftest(argv):
     """
     import duckdb
 
+    import cedar_duck  # local, like every caller: `--help` must not need duckdb
     con = cedar_duck.connect()
     tmp = Path(tempfile.mkdtemp(prefix="1170_selftest_"))
     failures = []

@@ -121,7 +121,7 @@ from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, GROVE_SHELVES, BUILD_SHELVES,
     N_STOREFRONT_EXPECTED, N_BUILT_EXPECTED,
     row_ok, publishable_columns, shelves, subaward_warning,
-    recompute_derived,
+    recompute_derived, deals_public_view,
     translate_neid_values, enforce_denials, apply_official_names,
     DENIAL_MASK_REASON,
     BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
@@ -196,11 +196,28 @@ def load(path, gate=True, masked=None):
         masked = defaultdict(int)
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         rd = csv.DictReader(fh)
-        hdr = publishable_columns(rd.fieldnames or [])
+        raw_hdr = list(rd.fieldnames or [])
+        source = rd
+        if path.name == FLAGSHIP["deals"]:
+            # THE DEALS TABLE IS CORRECTED AND PRESENTED HERE, on the raw
+            # rows, before projection drops the internal columns the
+            # caveats derive from. See cedar_publication.deals_public_view:
+            # 1185's fact-check corrections and 1184's presentation layer
+            # used to write files nothing read (Codex, PR #56).
+            source = list(rd)
+            view = deals_public_view(raw_hdr, source)
+            print(f"      deals at publish: {view['corrections']} correction(s) "
+                  f"applied, {view['caveats']} row(s) given a Caveat")
+            for f, d, why in view["refused"]:
+                print(f"      !! correction {f} on {d} REFUSED: {why}")
+            for lbl, n in sorted(view["unmapped"].items(), key=lambda kv: -kv[1]):
+                print(f"      !! {n} row(s): source type {lbl[:70]!r} matched "
+                      f"no rule and ships blank")
+        hdr = publishable_columns(raw_hdr)
         rows, held = [], defaultdict(int)
         neid_translated, neid_ambiguous, neid_denied = [0], [0], [0]
         renamed = [0]
-        for r in rd:
+        for r in source:
             # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
             # so projecting first removes the personal-contact fields; running
             # `row_ok` on the RAW row instead fires its NEVER backstop on the

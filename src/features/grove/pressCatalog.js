@@ -32,7 +32,7 @@
  * one", so the question at every boundary is concrete rather than a count of
  * datasets:
  *
- *   Cedar Press   what happened          lobbying, and a lot of current intelligence
+ *   Cedar Press   what happened          advocacy, and a lot of current intelligence
  *   Cedar Press+  what drives it         federal contracting, and the specialized record
  *   Cedar Grove   the whole environment  every collection, and the research tools
  *
@@ -289,7 +289,7 @@ export const PRESS_CATALOG = Object.freeze([
     blurb:
       "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record.",
     linkage:
-      "Registrants and clients resolved to the tribes and Native organizations behind them, including firms retained on their behalf.",
+      "Every activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it, including firms retained on its behalf and organizations acting for many nations.",
   }),
   Object.freeze({
     id: "contractors",

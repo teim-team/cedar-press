@@ -61,7 +61,7 @@
  * (`UNMEASURED_FIELDS` in collection.js), so the cadence here is what Cedar
  * commits to maintain, declared per collection because the sources move at
  * different speeds: the Federal Register moves when the agencies move,
- * lobbying moves on filing quarters. A collection with no declared cadence
+ * lobbying disclosures on filing quarters. A collection with no declared cadence
  * states none rather than borrowing one.
  */
 
@@ -97,7 +97,10 @@ export const DECLARED_CADENCE = Object.freeze({
   legislation: CADENCE.MONTHLY,
   deals: CADENCE.CONTINUOUS,
   nagpra: CADENCE.ON_CHANGE,
-  lobbying: CADENCE.QUARTERLY,
+  // Advocacy: the LDA half arrives on filing quarters, but consultations,
+  // dockets, appeals and testimony arrive as the agencies publish them, so
+  // the collection as a whole moves as records arrive.
+  lobbying: CADENCE.ON_CHANGE,
   contractors: CADENCE.MONTHLY,
   subcontracting: CADENCE.MONTHLY,
   "natural-resources": CADENCE.QUARTERLY,

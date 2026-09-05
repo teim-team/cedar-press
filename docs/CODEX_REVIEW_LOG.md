@@ -1480,3 +1480,73 @@ reports it on a 3.11 interpreter; it predates this branch and was not edited.
 |---|---|---|
 | P2 Reject ledgers with a missing releases map | The root and `releases` must be plain objects and every entry a list of releases; anything else that parses is refused before a write, alongside anything that does not parse. `--ledger=<path>` lets a test point the script at a planted file, and `pressReleases.test.js` runs it against six malformed ledgers and requires exit 1 with the refusal named, then against a copy of the real one and requires exit 0. | `npm test` |
 | P2 Keep retired releases in the public feed | `buildReleases` keeps a read-only record for any ledger id the storefront no longer sells: last version, `retired: true`, no cadence, name as it shipped (now recorded in the ledger). The feed carries it so `#<id>-v0` still resolves; What's New shows "no longer on the shelf" in place of the shelf link; the overview's rail excludes it. Proved on a synthetic ledger. | `pressReleases.test.js` |
+
+---
+
+## PR #56 — twenty-six open threads on the 2026-09-04 data merge, answered on `claude/cedar-press-datasets-3n2wjf` (2026-09-05)
+
+PR #56 was merged with every Codex thread open. Each finding was read against
+`main` at `6e09300` before anything moved; all twenty-six reproduced. The
+workspace here has no `data/clean/` or `dist/customer/`, so every fix is proven
+by the script's own selftest on planted rows, or by a fixture in the shared
+module, never by a rebuild. Where a script's `report`/`build` needs the data,
+the change is stated as such below.
+
+### Guards that could not run
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1079` import `cedar_duck` before calling it | `measure_prime` and `_leg_census` import it locally, as the one existing caller does; `--help` still needs no duckdb. | `py -3 code/1079_quarantine_method_exposure.py selftest` |
+| P1 `1170` import `cedar_duck` in every standalone command | `explode`, `verify`, `selftest` each import it locally. | `py -3 code/1170_sentinel_key_guard.py selftest`, 10 of 10 |
+| P1 `cedar_duck` refuse an unbounded connection | `memory_limit` is set first and a failure closes the connection and raises; the spill settings stay best-effort. The selftest compares the cap in force with the REQUESTED one (decimal `GB` against DuckDB's binary report, 5% tolerance) and proves `not-a-size` is refused. | `py -3 code/cedar_duck.py` |
+| P1 `1183` restore the regex word-boundary escapes | The literal `0x08` bytes in `_namekey` are `\b` again; `1187._orgkey` carried the same four bytes and a 1183 comment a fifth, so the control-byte gate reads 0 across 1,053 files. The selftest asserts `Akiptan, Inc.` and `Akiptan` normalise alike. | `py -3 code/1136_control_byte_gate.py verify`; `1183 selftest` |
+| P1 `1176` escape embedded payloads before `</script>` | `_script_json` writes `<`, `>` and `&` as `\u003c`, `\u003e`, `\u0026`, which `JSON.parse` reads back unchanged and the HTML tokenizer cannot see. | inline check |
+
+### Verifiers that could not fail
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1179` fail on keyed disagreements | `KEYED_DISAGREES` under an adjudicated method is a second breach class, reported apart from the unkeyed gap ("keyed AGAINST the ledger"), recorded in the baseline, and exits 1. | `1179 selftest`, new case 2b |
+| P1 `1182` make `verify` reject remaining short handles | `verify` exits 1 when any row or cell would still change and says so; the selftest plants a handle in a temporary target and proves red-then-green. | `1182 selftest` |
+| P1 `1185` return failure while fact-check work remains | An open queue exits 2, distinct from a vocabulary failure, so a caller can tell "not fact-checked" from "wrong". | code |
+| P1 `1169` header-gate fixture (marked outdated) | Still true on `main`: no fixture planted a retired-scheme column in a delivered CSV. Fixture 2b does, against `check_no_retired_scheme_columns` itself. | `1169 selftest`, 15 of 15 |
+| P1 `.gitignore` use the retained crosswalk as the verifier vocabulary | `neid_vocabulary()` reads `data/spine/cedar_retired_neid_crosswalk.csv` (1,555) first and the ledger as a supplement; a fresh checkout now has a vocabulary, so the selftest runs here. | `1169 selftest` |
+
+### Absent inputs that read as empty
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1180` refuse to rebuild official names without reconciliations | `_read` raises `Unmeasured` for a required file; `build` exits 2 before touching the tracked table, and `verify` exits 2 too. On this checkout, which has no reconciliation directory, both now say so. | `1180 selftest`, `1180 verify` |
+| P1 `1187` refuse missing advocacy source tables | Same shape: every source is required (`NO_SOURCE_YET` is empty), `build` exits 2 naming the absent file. | `1187 selftest`; `1187` on this checkout |
+| P1 `1183` verify the IRS leg before minting | The BMF is queried for EVERY GiveNative EIN; one it does not hold is neither minted nor linked and is listed as `unregistered`. No BMF at all is UNMEASURED and `build` exits 2. | code; needs `data/raw/external/irs990` to run |
+| P1 `1183` preserve historical EIN links | The links file is merged, not truncated: a link absent from the current directory is marked `NOT_IN_CURRENT_DIRECTORY since <date>`, a rebound one keeps its old row as `SUPERSEDED`; `existing_ein_to_uid` and `verify` ignore superseded rows. Two new columns, `link_status` and `last_seen`. | code; the next `1183 build` on the owner's machine |
+
+### Money and grain
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1174` apply the supersession fence before totalling lobbying spend | `cedar_publication.LOBBYING_SUPERSEDED` is the fence as data, `LOBBYING_FENCE` is built from it, and `lobbying_row_counts(row)` is the Python reading; 1174 sums through it and carries the fenced money in `spend_excluded_by_fence_usd`. | code |
+| P1 `1174` keep distinct lobbying clients separate | The key is `(cedar_uid, client_name)`; one row per client, as the docstring says. | code |
+| P1 `1174` stop summing cumulative contract award values | `total_award_value` is taken from the latest `action_date` row for the contract; obligations are still summed; `grain_note` says which is which. | code |
+| P1 `1186` refuse ambiguous positive UEI mappings | All tier-A/B claims per UEI are collected; one surviving uid attributes at its best tier, more than one leaves the award blank under `REFUSED: ledger maps this UEI to N entities`. | `1186 selftest` on planted rows |
+| P1 `1186` give every skipped award transaction a disposition | A transaction with no award key or FAIN is kept under an `UNKEYED:<recipient>` award with its own basis; the count and dollars are printed. | code |
+| P2 `1186` refresh award metadata from the latest modification | When a later `action_date` is seen, its non-empty end date, description, program, agency, type, recipient name and state replace the first-seen values. | code |
+| P1 `1186` derive `data_as_of` from the source | The latest `fetched_date` (else `action_date`) among window transactions; none at all is UNMEASURED, exit 2. | code |
+| P2 `1187` exclude no-activity filings | Counted and printed as excluded, never emitted; `verify` fails if one ships. | code |
+| P1 `1187` carry source URLs into advocacy rows | Consultation, Schedule C and FERC rows carry their source URL (FERC falls back to the Federal Register document URL); `verify` fails any activity type that ships with no URL at all and reports blanks per type. | code |
+
+### The deals table
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1185` wire the fact-checked deals back into the generator | `cedar_publication.deals_public_view` applies `1185.apply_all` to the RAW deals rows inside `1137.load`, before projection, at every build. A correction whose precondition no longer holds is printed as REFUSED. `1185`'s review file stays a review file. | fixture through the hook |
+| P1 `1184` publish the deals presentation transform | The same hook then applies `1184.transform`: `Caveat` and `Candidate_Status` are public columns (`DEALS_PRESENTATION_COLUMNS`), the `*_Type_detail` and F14 review columns are `DEALS_INTERNAL`. The customer deals file gains two columns on the next build. | fixture through the hook; `publishable_columns` |
+| P1 `cedar_publication` add publish-time derivatives to the header | `recompute_derived` appends `Event_Quarter` and `Event_Month` to the header it is handed. | fixture |
+
+### What the owner has to do
+
+The customer files are not rebuilt here. On the next `1137` build the deals
+file gains `Caveat` and `Candidate_Status`; the 1174 review bundle, 1186 awards
+and 1187 advocacy outputs change shape as described; `1183 build` needs the
+IRS BMF on disk. And, unrelated to Codex: twenty manifest samples exist only
+on the importer's checkout (see the PR).

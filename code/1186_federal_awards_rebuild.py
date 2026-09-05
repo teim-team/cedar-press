@@ -120,6 +120,10 @@ NEVER_ATTRIBUTE = {
 #: attributable - the ledger's own definition - and X is a NEGATIVE ruling.
 ATTRIBUTABLE = ("A", "B")
 
+#: UEIs the ledger maps, at tier A/B, to MORE THAN ONE entity. Filled by
+#: `ledger()`, read by `build()` so the award carries the reason it is blank.
+AMBIGUOUS: dict = {}
+
 
 def _num(v) -> float:
     try:
@@ -142,6 +146,7 @@ def ledger():
     to that entity, whatever else the ledger says.
     """
     positive, refused = {}, defaultdict(set)
+    claims = defaultdict(dict)                 # ident -> {uid: best tier}
     if not LEDGER.exists():
         return positive, refused
     with LEDGER.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
@@ -156,11 +161,22 @@ def ledger():
             if tier == "X":
                 refused[ident].add(uid)
             elif tier in ATTRIBUTABLE:
-                positive.setdefault(ident, (uid, tier))
-    # a positive that is also refused for the SAME uid is refused
-    for ident, (uid, _t) in list(positive.items()):
-        if uid in refused.get(ident, ()):
-            del positive[ident]
+                held = claims[ident].get(uid)
+                if held is None or tier < held:
+                    claims[ident][uid] = tier
+    # ONE UID OR NONE. `setdefault` used to keep whichever positive row came
+    # first, so a UEI the ledger maps to two entities was attributed to an
+    # arbitrary one (Codex, PR #56). A positive that is also refused for the
+    # SAME uid is dropped first; if more than one uid survives, the UEI is
+    # ambiguous and stays blank, under its own basis, until a human rules.
+    AMBIGUOUS.clear()
+    for ident, per_uid in claims.items():
+        live = {u: t for u, t in per_uid.items() if u not in refused.get(ident, ())}
+        if len(live) == 1:
+            (uid, tier), = live.items()
+            positive[ident] = (uid, tier)
+        elif len(live) > 1:
+            AMBIGUOUS[ident] = sorted(live)
     return positive, refused
 
 
@@ -179,18 +195,34 @@ def aggregate():
     award, never the transactions themselves."""
     awards = {}
     seen_tx = 0
+    unkeyed = {"n": 0, "usd": 0.0}
+    as_of = ""
     with TX.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         for t in csv.DictReader(fh):
             y = _year(t.get("action_date"))
             if y not in WINDOW:
                 continue
             seen_tx += 1
+            # THE SOURCE CUTOFF, from the source. `fetched_date` is when the
+            # export captured the row; the latest one is how current the
+            # awards are. The run date said nothing about the data and made
+            # a stale export look current on every rebuild (Codex, PR #56).
+            f = (t.get("fetched_date") or t.get("action_date") or "").strip()[:10]
+            if f > as_of:
+                as_of = f
             key = (t.get("assistance_award_unique_key") or "").strip() \
                 or (t.get("award_id_fain") or "").strip()
-            if not key:
-                continue
-            a = awards.get(key)
             amt = _num(t.get("obligated_usd"))
+            if not key:
+                # NO AWARD KEY: kept, under an explicit grain, never dropped.
+                # These used to vanish after being counted in `seen_tx`, so
+                # the total lost their dollars without a counter (Codex,
+                # PR #56). One synthetic award per recipient, named as such.
+                unkeyed["n"] += 1
+                unkeyed["usd"] += amt
+                key = "UNKEYED:%s" % ((t.get("recipient_uei") or "").strip().upper()
+                                      or (t.get("recipient_name") or "").strip().upper())
+            a = awards.get(key)
             if a is None:
                 a = awards[key] = {
                     "award_id": key, "y2025": 0.0, "y2026": 0.0, "n_tx": 0,
@@ -216,7 +248,24 @@ def aggregate():
             d = (t.get("action_date") or "").strip()
             if d > a["last_action_date"]:
                 a["last_action_date"] = d
-    return awards, seen_tx
+                # THE LATEST ACTION DESCRIBES THE AWARD. Input order is not
+                # established, so the first row seen was an arbitrary one and
+                # an extension's end date or a corrected description could be
+                # lost (Codex, PR #56). Non-empty values from the latest
+                # action win; an empty cell never erases a known one.
+                for col, src in (("award_end_date", "period_of_performance_current_end_date"),
+                                 ("award_start_date", "period_of_performance_start_date"),
+                                 ("award_description", "award_description"),
+                                 ("program_code", "cfda"),
+                                 ("program_name", "cfda_title"),
+                                 ("awarding_agency", "awarding_agency_name"),
+                                 ("award_type", "assistance_type_description"),
+                                 ("recipient_name", "recipient_name"),
+                                 ("recipient_state", "recipient_state_code")):
+                    v = (t.get(src) or "").strip()
+                    if v:
+                        a[col] = v
+    return awards, seen_tx, unkeyed, as_of
 
 
 def build(apply: bool = False) -> int:
@@ -225,18 +274,30 @@ def build(apply: bool = False) -> int:
         return 1
     positive, refused = ledger()
     names = entity_names()
-    awards, seen_tx = aggregate()
+    awards, seen_tx, unkeyed, as_of = aggregate()
+    if seen_tx and not as_of:
+        print("  UNMEASURED: no transaction in window carries fetched_date or "
+              "action_date; data_as_of cannot be stated")
+        return 2
 
-    keyed = blocked_never = blocked_x = 0
+    keyed = blocked_never = blocked_x = blocked_ambiguous = 0
     rows = []
     for a in awards.values():
         uei = a["recipient_uei"].upper()
         rname = a["recipient_name"].strip().upper()
         uid = ent = etype = ""
         basis = "unresolved - no tier A/B ruling for this UEI"
+        if a["award_id"].startswith("UNKEYED:"):
+            basis = ("UNRESOLVED GRAIN: source transaction(s) carry no award "
+                     "key or FAIN; obligations kept at recipient grain")
         if rname in NEVER_ATTRIBUTE:
             basis = "REFUSED: " + NEVER_ATTRIBUTE[rname]
             blocked_never += 1
+        elif uei in AMBIGUOUS:
+            basis = ("REFUSED: ledger maps this UEI to %d entities (%s); "
+                     "left blank until a human rules"
+                     % (len(AMBIGUOUS[uei]), ", ".join(AMBIGUOUS[uei])))
+            blocked_ambiguous += 1
         elif uei in positive:
             cand, tier = positive[uei]
             if cand in refused.get(uei, ()):
@@ -264,8 +325,9 @@ def build(apply: bool = False) -> int:
             "last_action_date": a["last_action_date"],
             "recipient_state": a["recipient_state"],
             "source_url": ("https://www.usaspending.gov/award/%s" % a["award_id"]
-                           if a["award_id"] else ""),
-            "data_as_of": TODAY,
+                           if a["award_id"] and not a["award_id"].startswith("UNKEYED:")
+                           else ""),
+            "data_as_of": as_of,
             "attribution_basis": basis,
         })
     rows.sort(key=lambda r: -_num(r["obligated_window_usd"]))
@@ -276,6 +338,9 @@ def build(apply: bool = False) -> int:
     print("  1186 federal awards   %s"
           % ("BUILD" if apply else "REPORT (writes nothing)"))
     print("    transactions in window : %d" % seen_tx)
+    print("    data_as_of (source)    : %s" % as_of)
+    print("    without an award key   : %d transaction(s), $%.0f, kept under "
+          "UNKEYED:<recipient> rows" % (unkeyed["n"], unkeyed["usd"]))
     print("    AWARDS                 : %d   (%.1f transactions per award)"
           % (len(rows), seen_tx / len(rows) if rows else 0))
     print("    obligated 2025         : $%.0f" % t25)
@@ -285,6 +350,7 @@ def build(apply: bool = False) -> int:
     print("    keyed from the ledger  : %d  (tier A/B only)" % keyed)
     print("    refused, proven false  : %d" % blocked_never)
     print("    refused, tier X ruling : %d" % blocked_x)
+    print("    refused, ambiguous UEI : %d  (ledger names two entities)" % blocked_ambiguous)
     print("    left BLANK             : %d" % (len(rows) - keyed))
     print()
     print("    uei_exact_archive is NOT consulted. It produced 1,028 of the old")
@@ -333,8 +399,44 @@ def verify() -> int:
     return 0 if ok else 1
 
 
+def _ledger_from(rows):
+    """Run `ledger()` against planted rows instead of the file."""
+    import tempfile
+    global LEDGER
+    saved = LEDGER
+    cols = ["identifier_type", "identifier", "cedar_uid", "confidence_tier"]
+    with tempfile.TemporaryDirectory() as d:
+        LEDGER = Path(d) / "ledger.csv"
+        with LEDGER.open("w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=cols)
+            w.writeheader()
+            w.writerows(dict(zip(cols, r)) for r in rows)
+        try:
+            return ledger(), dict(AMBIGUOUS)
+        finally:
+            LEDGER = saved
+
+
 def selftest() -> int:
     ok = True
+    # ONE UID OR NONE, proven on planted rows: a UEI two tier-A rows map to
+    # two entities must not be attributed to either.
+    (pos_f, ref_f), amb = _ledger_from([
+        ("UEI", "AMBIG0000001", "CE-AAAAA-01", "A"),
+        ("UEI", "AMBIG0000001", "CE-BBBBB-02", "A"),
+        ("UEI", "CLEAN0000002", "CE-CCCCC-03", "B"),
+        ("UEI", "CLEAN0000002", "CE-CCCCC-03", "A"),
+        ("UEI", "XONLY0000003", "CE-DDDDD-04", "A"),
+        ("UEI", "XONLY0000003", "CE-DDDDD-04", "X"),
+    ])
+    if "AMBIG0000001" in pos_f or amb.get("AMBIG0000001") != ["CE-AAAAA-01", "CE-BBBBB-02"]:
+        print("  FAIL a UEI the ledger maps to two entities was attributed"); ok = False
+    elif pos_f.get("CLEAN0000002") != ("CE-CCCCC-03", "A"):
+        print("  FAIL one uid under two tiers must attribute at its best tier"); ok = False
+    elif "XONLY0000003" in pos_f:
+        print("  FAIL a tier-X refusal did not beat the positive for the same uid"); ok = False
+    else:
+        print("  ambiguous UEI left blank, single uid keeps its best tier, X beats A")
     pos, ref = ledger()
     print("  ledger: %d UEIs attributable (tier A/B), %d carrying a tier-X refusal"
           % (len(pos), len(ref)))

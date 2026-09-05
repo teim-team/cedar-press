@@ -8,7 +8,7 @@
 // since they last looked, not to audit ten separate histories.
 //
 // Three things keep it from being an endless page. Filters, because "what
-// changed in Lobbying" is the question people actually arrive with — sticky,
+// changed in Advocacy" is the question people actually arrive with — sticky,
 // because the feed will eventually hold hundreds of releases. A search box,
 // for the reader who remembers "an ownership correction involving
 // contracting" but not when it landed. And a page-at-a-time reveal, because a
