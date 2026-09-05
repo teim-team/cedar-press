@@ -1,14 +1,16 @@
 // The Explore card's model, proven on the real samples and on planted rows.
 //
 // The contracts are derived, so the first thing to prove is that every table
-// the shelf can open has one and that the file is current; the rest is the
-// cut: that the URL round-trips it, that the filters select what they say,
-// that the facets count what the pickers offer, and that the download says
-// which rows it holds and whose they are.
+// the shelf can open has one and that the file is current; then the
+// publication rule, on the served files and on the model; then the cut: that
+// the URL round-trips it and refuses what it cannot read without widening,
+// that the filters select what they say for rows naming several entities,
+// that the facets count what the pickers offer, and that the download is
+// exactly the records it lists.
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -16,12 +18,17 @@ import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import {
   CONTRACTS,
   EMPTY_CUT,
+  UNLINKED,
+  WITHHELD_TEXT,
   buildRegister,
   contractFor,
+  csvCell,
   cutCsv,
+  cutReadme,
   decodeCut,
   describeCut,
   encodeCut,
+  excludedBy,
   exploreTables,
   explorableCollections,
   facets,
@@ -31,9 +38,14 @@ import {
   observationOf,
   pageOf,
   parseCsv,
+  questionFor,
   rowAmount,
   rowDate,
+  rowEntities,
   rowEntity,
+  rowReplacement,
+  rowSource,
+  rowSuperseded,
   rowYear,
   sortRows,
   tableKey,
@@ -43,6 +55,8 @@ import {
 const REPO = fileURLToPath(new URL("../../../", import.meta.url));
 const PUBLIC = `${REPO}public`;
 const REGISTER = buildRegister(JSON.parse(readFileSync(`${PUBLIC}/data/cedar/register.json`, "utf8")));
+const PRESS = { workspace_tier: "press" };
+const PRO = { workspace_tier: "press_pro" };
 
 // The sample's path comes from the manifest, never from the key: the owned
 // collection's samples live under `native-owned-businesses/`, not `owned/`.
@@ -52,6 +66,14 @@ const load = (key) => {
   assert.ok(table, `${key}: no explorable table`);
   return parseCsv(readFileSync(`${PUBLIC}${table.path}`, "utf8"));
 };
+
+function* walk(dir) {
+  for (const name of readdirSync(dir)) {
+    const path = `${dir}/${name}`;
+    if (statSync(path).isDirectory()) yield* walk(path);
+    else if (name.endsWith(".csv")) yield path;
+  }
+}
 
 // ── The contracts ──────────────────────────────────────────────────────────
 
@@ -70,62 +92,118 @@ test("every published table has a contract and every contract names real columns
       assert.ok(contract, `${key} has a published sample and no contract`);
       const { columns } = load(key);
       assert.equal(contract.columns, columns.length, `${key}: contract counts ${contract.columns} columns, sample has ${columns.length}`);
-      for (const field of ["entity_uid", "entity_name", "entity_type", "year", "date", "amount", "source"]) {
+      for (const field of ["entity_uid", "entity_name", "entity_type", "year", "date", "amount", "source", "record_id", "subject", "superseded", "superseded_by", "amount_basis"]) {
         if (contract[field]) assert.ok(columns.includes(contract[field]), `${key}.${field} = ${contract[field]} is not a column`);
       }
-      for (const column of contract.observation) assert.ok(columns.includes(column), `${key} observation ${column} is not a column`);
+      for (const column of [...contract.observation, ...(contract.default_columns ?? [])]) {
+        assert.ok(columns.includes(column), `${key}: ${column} is not a column`);
+      }
     }
   }
 });
 
-test("every flagship table is entity-keyed or dated, so the universal filters have something to hold", () => {
-  // NAGPRA notices name institutions, not Native entities; the contract
-  // says so with a null uid and the card's filters say the same. The
-  // nonprofit register is a roster, not events: no row has a date.
-  const unkeyed = ["nagpra"];
-  const undated = ["nonprofits"];
+test("every flagship the shelf serves is declared reviewed, with its record id and its entity relationship", () => {
   for (const dataset of LAUNCH_COLLECTION) {
     const key = flagshipKey(dataset.id);
     if (!key) continue;
     const contract = contractFor(key);
-    if (!undated.includes(dataset.id)) assert.ok(contract.year || contract.date, `${key} has no year and no date`);
-    if (!unkeyed.includes(dataset.id)) assert.ok(contract.entity_uid, `${key} has no entity uid`);
+    assert.equal(contract.reviewed, true, `${key} is not declared reviewed in explore.overrides.json`);
+    assert.ok(contract.record_id, `${key} has no record id`);
+    assert.ok(contract.entity_role, `${key} does not say how its entity relates to the record`);
+    assert.ok(contract.default_columns?.length >= 5, `${key} declares no default columns`);
+    // A dated table says what its year means; a register says it has none.
+    if (contract.year || contract.date) assert.ok(contract.year_basis, `${key} has a year and no year basis`);
+    if (contract.amount) assert.ok(contract.amount_basis || contract.amount_label, `${key} has an amount and no basis`);
   }
 });
 
-test("the flagship comes first among a collection's tables and locked shelves stay listed", () => {
+test("the flagship comes first among a collection's tables and locked shelves stay listed with their reasons", () => {
   const tables = exploreTables("lobbying");
   assert.ok(tables.length > 1);
   assert.ok(tables[0].flagship);
   assert.equal(tables[0].key, "lobbying/native_entity_lobbying_disclosures");
-  const standard = explorableCollections({ workspace_tier: "press" });
+  const standard = explorableCollections(PRESS);
   assert.equal(standard.length, 12);
   assert.ok(standard.some((c) => c.open) && standard.some((c) => !c.open), "a standard reader sees open and locked collections");
+  // A collection whose flagship sample is not published says why rather
+  // than silently contributing nothing.
+  const owned = standard.find((c) => c.entry.id === "owned");
+  assert.equal(owned.flagship, null);
+  assert.match(owned.previewUnavailable, /not in the repository|withheld|no preview/i);
+});
+
+// ── The publication rule ───────────────────────────────────────────────────
+
+const WITHHELD_UID = REGISTER.entities.find((e) => e.withheld).uid;
+const NAMED = [...REGISTER.byUid.entries()].find(([, e]) => e.name);
+
+test("the register withholds exactly the names the publication rule withholds", () => {
+  const withheld = REGISTER.entities.filter((e) => e.withheld);
+  assert.equal(withheld.length, 45);
+  assert.ok(withheld.every((e) => e.type === "Individually Native-owned business" && e.name === null));
+  assert.equal(REGISTER.classes.length, 18);
+  assert.equal(REGISTER.byUid.get("CE-00134-BX")?.name, "Cherokee Nation");
+});
+
+test("no served sample carries a withheld name in any cell", () => {
+  // The importer strikes such a sample before it is copied; this is the
+  // proof on the files public/ actually holds. On 2026-09-05 six did.
+  const names = new Set(
+    readFileSync(`${REPO}data/spine/cedar_entity_names.csv`, "utf8").split("\n").slice(1)
+      .map((line) => parseCsv(`a,b,c\n${line}`).rows[0]).filter(Boolean)
+      .filter((r) => r.c === "Individually Native-owned business").map((r) => r.b.trim().toLowerCase()),
+  );
+  assert.equal(names.size, 45);
+  for (const path of walk(`${PUBLIC}/data/cedar/samples`)) {
+    const { rows } = parseCsv(readFileSync(path, "utf8"));
+    for (const row of rows) {
+      for (const [column, value] of Object.entries(row)) {
+        assert.ok(!names.has(String(value).trim().toLowerCase()), `${path.slice(PUBLIC.length)} column ${column} carries a withheld name; run python scripts/import_cedar_manifest.py --audit`);
+      }
+    }
+  }
+});
+
+test("a withheld register name never falls back to the table's own name column", () => {
+  const contract = { entity_uid: "cedar_uid", entity_name: "n", entity_type: "t" };
+  const entity = rowEntity({ cedar_uid: WITHHELD_UID, n: "Leaked Name LLC", t: "whatever" }, contract, REGISTER);
+  assert.equal(entity.name, null);
+  assert.equal(entity.withheld, true);
+  assert.equal(entity.type, "Individually Native-owned business");
+  // And the masked row is what every other path reads: the table view, the
+  // record, the search and the export.
+  const [item] = universalRows("lobbying/native_entity_lobbying_disclosures", [{ cedar_uid: WITHHELD_UID, canonical_name: "Leaked Name LLC", filing_year: "2020" }], REGISTER);
+  assert.equal(item.row.canonical_name, WITHHELD_TEXT);
+  assert.equal(filterRows([item], { ...EMPTY_CUT, q: "leaked" }).length, 0);
+  assert.ok(!cutCsv([item], { view: "table", columns: ["cedar_uid", "canonical_name"] }).includes("Leaked"));
+  assert.ok(!cutCsv([item], { view: "cut" }).includes("Leaked"));
+  assert.ok(cutCsv([item], { view: "cut" }).includes(WITHHELD_TEXT));
 });
 
 // ── Reading a row through its contract ─────────────────────────────────────
 
-test("a lobbying row reads its entity, year, amount and source from its own columns", () => {
+test("a lobbying row reads its entity, year, amount, basis, record id and source from its own columns", () => {
   const key = "lobbying/native_entity_lobbying_disclosures";
   const { rows } = load(key);
-  const contract = contractFor(key);
-  const entity = rowEntity(rows[0], contract, REGISTER);
-  assert.match(entity.uid, /^CE-/);
-  assert.ok(entity.name);
-  assert.ok(entity.type);
-  assert.equal(typeof rowYear(rows[0], contract), "number");
-  assert.equal(typeof rowAmount(rows[0], contract), "number");
-  assert.match(universalRows(key, [rows[0]], REGISTER)[0].source ?? "", /^https:/);
+  const [item] = universalRows(key, rows, REGISTER);
+  assert.match(item.entity.uid, /^CE-/);
+  assert.ok(item.entity.name);
+  assert.ok(item.entity.type);
+  assert.equal(typeof item.year, "number");
+  assert.equal(typeof item.amount, "number");
+  assert.ok(item.amountBasis);
+  assert.match(item.source, /^https:/);
+  assert.match(item.recordId, /^[0-9a-f-]{36}$/);
+  assert.equal(item.id, `${key}:${item.recordId}`);
+  assert.ok(item.subject, "the registrant's client is the record's own subject");
 });
 
-test("the register fills a name and type the table does not carry", () => {
+test("the register fills a name and type the table does not carry, and wins over the table's own", () => {
   const contract = { entity_uid: "cedar_uid", entity_name: null, entity_type: null };
-  const [uid, entry] = [...REGISTER.byUid.entries()].find(([, e]) => e.name);
+  const [uid, entry] = NAMED;
   const entity = rowEntity({ cedar_uid: uid }, contract, REGISTER);
   assert.equal(entity.name, entry.name);
   assert.equal(entity.type, entry.type);
-  // The register wins when both speak, so one entity reads the same in
-  // every collection; the table's own columns fill in for a uid it lacks.
   const own = rowEntity({ cedar_uid: uid, n: "Own name", t: "Own type" }, { ...contract, entity_name: "n", entity_type: "t" }, REGISTER);
   assert.equal(own.name, entry.name);
   assert.equal(own.type, entry.type);
@@ -134,14 +212,21 @@ test("the register fills a name and type the table does not carry", () => {
   assert.equal(unknown.type, "Own type");
 });
 
-test("a bill's several entities are all filterable, and a year falls back to the date", () => {
+test("a bill's several entities are each an entity, deduplicated, and a year falls back to the date only where no year column exists", () => {
   const contract = contractFor("legislation/native_bills");
   assert.ok(contract.entity_uid_list);
-  const row = { entity_cedar_uids: "CE-00134-BX|CE-00001-6S", introduced_date: "2019-03-04" };
-  const entity = rowEntity(row, contract, REGISTER);
-  assert.deepEqual(entity.uids, ["CE-00134-BX", "CE-00001-6S"]);
+  const row = { entity_cedar_uids: "CE-00134-BX|CE-00001-6S|CE-00134-BX", introduced_date: "2019-03-04" };
+  const entities = rowEntities(row, contract, REGISTER);
+  assert.deepEqual(entities.map((e) => e.uid), ["CE-00134-BX", "CE-00001-6S"]);
+  assert.deepEqual(entities.map((e) => e.type), ["Federally recognized tribe", "Federally recognized Alaska Native Village"]);
   assert.equal(rowYear(row, contract), 2019);
   assert.equal(rowDate(row, contract), "2019-03-04");
+  // A table WITH a year column never answers from its date: a blank fiscal
+  // year is a row with no year, not the action date's calendar year.
+  const funding = contractFor("funding/federal_funding_transactions");
+  assert.equal(rowYear({ fiscal_year: "", action_date: "2007-12-05" }, funding), null);
+  assert.equal(rowYear({ fiscal_year: "2008", action_date: "2007-12-05" }, funding), 2008);
+  assert.equal(funding.year_basis, "federal fiscal year");
 });
 
 test("an amount that is blank or not a number is null, never zero", () => {
@@ -150,7 +235,39 @@ test("an amount that is blank or not a number is null, never zero", () => {
   assert.equal(rowAmount({ x: "n/a" }, contract), null);
   assert.equal(rowAmount({ x: "$1,250.50" }, contract), 1250.5);
   assert.equal(rowAmount({ x: "0" }, contract), 0);
+  assert.equal(rowAmount({ x: "-4163330" }, contract), -4163330);
   assert.equal(rowAmount({ x: "5" }, { amount: null }), null);
+});
+
+test("a record-level source is built only where the table declares how, from its own identifiers", () => {
+  const funding = contractFor("funding/federal_funding_transactions");
+  assert.equal(rowSource({ assistance_award_unique_key: "ASST_NON_B07SR531832_086" }, funding), "https://www.usaspending.gov/award/ASST_NON_B07SR531832_086");
+  assert.equal(rowSource({ assistance_award_unique_key: "not a key!" }, funding), null);
+  const bills = contractFor("legislation/native_bills");
+  assert.equal(rowSource({ congress: "103", bill_type: "hr", number: "2366" }, bills), "https://www.congress.gov/bill/103rd-congress/house-bill/2366");
+  assert.equal(rowSource({ congress: "111", bill_type: "sjres", number: "14" }, bills), "https://www.congress.gov/bill/111th-congress/senate-joint-resolution/14");
+  assert.equal(rowSource({ congress: "103", bill_type: "??", number: "1" }, bills), null);
+  // A column URL wins over a builder; a table with neither has no source.
+  assert.equal(rowSource({ source_url: "https://x.example/1" }, { source: "source_url" }), "https://x.example/1");
+  assert.equal(rowSource({ source_url: "n/a" }, { source: "source_url" }), null);
+});
+
+test("supersession is read from the table and the replacement's link follows the table's own URL pattern", () => {
+  const key = "lobbying/native_entity_lobbying_disclosures";
+  const contract = contractFor(key);
+  const { rows } = load(key);
+  const items = universalRows(key, rows, REGISTER);
+  assert.ok(items.some((i) => i.superseded) && items.some((i) => !i.superseded), "the sample has both current and superseded filings");
+  const old = items.find((i) => i.superseded);
+  assert.ok(old.replacement?.id);
+  assert.ok(old.replacement.url.includes(old.replacement.id));
+  assert.equal(rowSuperseded({ is_superseded: "0" }, contract), false);
+  assert.equal(rowSuperseded({ supersession_status: "SUPERSEDED_BY_AMENDMENT" }, { superseded: "supersession_status" }), true);
+  assert.equal(rowReplacement({ superseded_by_filing_uuid: "" }, contract), null);
+  // Hidden by default, shown with history, and the exclusion is counted.
+  assert.equal(filterRows(items, EMPTY_CUT).length, items.filter((i) => !i.superseded).length);
+  assert.equal(filterRows(items, { ...EMPTY_CUT, history: true }).length, items.length);
+  assert.equal(excludedBy(items, EMPTY_CUT).superseded, items.filter((i) => i.superseded).length);
 });
 
 test("the observation is values joined, pipes read as lists, and never runs past its limit", () => {
@@ -160,16 +277,16 @@ test("the observation is values joined, pipes read as lists, and never runs past
   assert.ok(long.length <= 180 && long.endsWith("…"));
 });
 
-test("parseCsv keeps a newline inside a quoted cell and drops a cite_as row", () => {
-  const { columns, rows } = parseCsv('a,b\n1,"two\nlines"\ncite_as,"Lumecon"\n');
+test("parseCsv keeps a newline inside a quoted cell and keeps every record", () => {
+  const { columns, rows } = parseCsv('a,b\n1,"two\nlines"\n3,4\n');
   assert.deepEqual(columns, ["a", "b"]);
-  assert.equal(rows.length, 1);
+  assert.equal(rows.length, 2);
   assert.equal(rows[0].b, "two\nlines");
 });
 
 // ── The cut ────────────────────────────────────────────────────────────────
 
-test("a cut round-trips through the URL and a permalink of nothing is empty", () => {
+test("a cut round-trips through the URL, and a permalink of nothing is empty", () => {
   assert.equal(encodeCut(EMPTY_CUT), "");
   const cut = {
     entities: ["CE-00134-BX"],
@@ -180,29 +297,46 @@ test("a cut round-trips through the URL and a permalink of nothing is empty", ()
     q: "housing & water",
     sort: { by: "amount", dir: "desc" },
     page: 3,
+    history: true,
   };
-  assert.deepEqual(decodeCut(encodeCut(cut)), cut);
+  const back = decodeCut(encodeCut(cut));
+  assert.deepEqual(back, { ...cut, unknown: [], dropped: [] });
   const single = { ...EMPTY_CUT, collections: ["lobbying"], table: "lobbying/native_entity_lobbying_disclosures" };
-  assert.deepEqual(decodeCut(`?${encodeCut(single)}`), { ...single, entities: [], types: [] });
+  assert.deepEqual(decodeCut(`?${encodeCut(single)}`), { ...single, unknown: [], dropped: [] });
 });
 
-test("decodeCut refuses what it does not know instead of carrying it", () => {
-  const cut = decodeCut("e=not-a-uid|CE-00134-BX&c=funding|gaming&tb=gaming/nope&y=2024-2015&s=amount:sideways&p=-2");
+test("none and all are different answers, in the URL and back", () => {
+  const none = { ...EMPTY_CUT, types: [], collections: [] };
+  assert.equal(encodeCut(none), "t=&c=");
+  const back = decodeCut("t=&c=");
+  assert.deepEqual(back.types, []);
+  assert.deepEqual(back.collections, []);
+  assert.equal(decodeCut("").types, null);
+  assert.equal(decodeCut("").collections, null);
+  assert.equal(isNarrowed(back), true);
+  assert.equal(isNarrowed(EMPTY_CUT), false);
+});
+
+test("decodeCut refuses what it does not know, says so, and never widens a narrow request", () => {
+  const cut = decodeCut("e=not-a-uid|CE-00134-BX&c=gaming&tb=gaming/nope&y=2024-2015&s=amount:sideways&p=-2");
   assert.deepEqual(cut.entities, ["CE-00134-BX"]);
-  assert.deepEqual(cut.collections, ["funding"]);
+  // The one requested collection is unknown: the cut is of NO collection
+  // and names the unknown one, rather than of every collection.
+  assert.deepEqual(cut.collections, []);
+  assert.deepEqual(cut.unknown, ["gaming"]);
   assert.equal(cut.table, null);
   assert.deepEqual(cut.years, [2015, 2024]);
   assert.equal(cut.sort, null);
   assert.equal(cut.page, 1);
-  assert.equal(isNarrowed(cut), true);
-  assert.equal(isNarrowed(EMPTY_CUT), false);
+  assert.deepEqual(cut.dropped, ["entity not-a-uid", "table gaming/nope"]);
+  assert.deepEqual(decodeCut("y=lately").dropped, ["years lately"]);
 });
 
 const PLANTED = [
-  { cedar_uid: "CE-00134-BX", canonical_name: "Cherokee Nation", entity_type: "Federally recognized tribe", filing_year: "2019", spend_usd: "40000", registrant_name: "Firm A" },
-  { cedar_uid: "CE-00134-BX", canonical_name: "Cherokee Nation", entity_type: "Federally recognized tribe", filing_year: "2021", spend_usd: "", registrant_name: "Firm B" },
-  { cedar_uid: "CE-00001-6S", canonical_name: "Asa'carsarmiut Tribe", entity_type: "Federally recognized Alaska Native Village", filing_year: "", spend_usd: "10", registrant_name: "Firm C" },
-  { cedar_uid: "", canonical_name: "", entity_type: "", filing_year: "2020", spend_usd: "5", registrant_name: "Nobody" },
+  { cedar_uid: "CE-00134-BX", canonical_name: "Cherokee Nation", entity_type: "Federally recognized tribe", filing_year: "2019", spend_usd: "40000", registrant_name: "Firm A", filing_uuid: "aaa-1", is_superseded: "0" },
+  { cedar_uid: "CE-00134-BX", canonical_name: "Cherokee Nation", entity_type: "Federally recognized tribe", filing_year: "2021", spend_usd: "", registrant_name: "Firm B", filing_uuid: "bbb-2", is_superseded: "0" },
+  { cedar_uid: "CE-00001-6S", canonical_name: "Asa'carsarmiut Tribe", entity_type: "Federally recognized Alaska Native Village", filing_year: "", spend_usd: "10", registrant_name: "Firm C", filing_uuid: "ccc-3", is_superseded: "0" },
+  { cedar_uid: "", canonical_name: "", entity_type: "", filing_year: "2020", spend_usd: "5", registrant_name: "Nobody", filing_uuid: "ddd-4", is_superseded: "0" },
 ];
 const PLANTED_ROWS = universalRows("lobbying/native_entity_lobbying_disclosures", PLANTED, REGISTER);
 
@@ -214,9 +348,34 @@ test("filters select exactly what they say", () => {
   // A row with no year is outside every year range, and stays outside.
   const byYear = filterRows(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020] });
   assert.deepEqual(byYear.map((r) => r.year), [2019, 2020]);
-  const byQuery = filterRows(PLANTED_ROWS, { ...EMPTY_CUT, q: "firm b" });
-  assert.equal(byQuery.length, 1);
+  assert.equal(excludedBy(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020] }).undated, 1);
+  // The search reads every public cell, so a visible identifier is findable.
+  assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, q: "firm b" }).length, 1);
+  assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, q: "ccc-3" }).length, 1);
   assert.equal(filterRows(PLANTED_ROWS, EMPTY_CUT).length, 4);
+  // No type at all selects nothing; the unlinked token selects the unkeyed row.
+  assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, types: [] }).length, 0);
+  assert.deepEqual(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, types: [UNLINKED] }).map((r) => r.recordId), ["ddd-4"]);
+  assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, types: [UNLINKED, "Federally recognized tribe"] }).length, 3);
+});
+
+test("a record naming two differently classified entities filters by the matching entity, whatever the uid order", () => {
+  const tribe = "CE-00134-BX"; // Federally recognized tribe
+  const corporation = "CE-00076-76"; // Ahtna, Incorporated: Alaska Native Regional Corporation
+  for (const order of [`${tribe}|${corporation}`, `${corporation}|${tribe}`]) {
+    const rows = universalRows("legislation/native_bills", [{ bill_id: "1", entity_cedar_uids: order, introduced_date: "2010-01-01" }], REGISTER);
+    const cut = (entities, types) => filterRows(rows, { ...EMPTY_CUT, entities, types }).length;
+    assert.equal(cut([corporation], ["Alaska Native Regional Corporation"]), 1, order);
+    assert.equal(cut([corporation], ["Federally recognized tribe"]), 0, order);
+    assert.equal(cut([tribe], ["Federally recognized tribe"]), 1, order);
+    assert.equal(cut([], ["Alaska Native Regional Corporation"]), 1, order);
+    const f = facets(rows, REGISTER);
+    assert.deepEqual(f.types.map((t) => t.count), [1, 1]);
+    assert.equal(f.entities.length, 2);
+  }
+  // A cell that repeats a uid counts the entity once.
+  const twice = universalRows("legislation/native_bills", [{ bill_id: "2", entity_cedar_uids: `${tribe}|${tribe}` }], REGISTER);
+  assert.equal(facets(twice, REGISTER).entities[0].count, 1);
 });
 
 test("sorting is stable, puts blanks last and reads numbers as numbers", () => {
@@ -240,46 +399,54 @@ test("facets count what the pickers offer, from the rows before the cut", () => 
   assert.deepEqual(f.types[0], { type: "Federally recognized tribe", count: 2 });
   assert.deepEqual(f.years, { min: 2019, max: 2021 });
   assert.equal(f.keyed, 3);
+  assert.equal(f.unlinked, 1);
   assert.equal(f.dated, 3);
   assert.equal(f.total, 4);
 });
 
-test("the register withholds the names the publication rule withholds", () => {
-  const withheld = REGISTER.entities.filter((e) => e.name == null);
-  assert.equal(withheld.length, 45);
-  assert.ok(withheld.every((e) => e.type === "Individually Native-owned business"));
-  assert.equal(REGISTER.classes.length, 18);
-  assert.equal(REGISTER.byUid.get("CE-00134-BX")?.name, "Cherokee Nation");
-});
-
 test("the caption says the cut in words and never invents a filter", () => {
-  assert.equal(describeCut({ ...EMPTY_CUT, collections: ["funding", "deals"] }), "2 collections · every row");
+  assert.equal(describeCut({ ...EMPTY_CUT, collections: ["funding", "deals"] }), "2 collections · every record");
+  assert.equal(describeCut({ ...EMPTY_CUT, collections: [] }), "no collection · every record");
+  assert.equal(describeCut({ ...EMPTY_CUT, types: [] }), "all collections · no entity type");
   const said = describeCut(
-    { ...EMPTY_CUT, collections: ["lobbying"], entities: ["CE-00134-BX"], years: [2015, 2024], q: "water" },
+    { ...EMPTY_CUT, collections: ["lobbying"], entities: ["CE-00134-BX"], years: [2015, 2024], q: "water", history: true },
     { register: REGISTER, shown: 3, total: 10 },
   );
-  assert.equal(said, "Advocacy · Cherokee Nation · 2015–2024 · “water” · 3 of 10 sample rows");
+  assert.equal(said, "Advocacy · Cherokee Nation · 2015–2024 · “water” · including superseded versions · 3 of 10 sample records");
+  assert.equal(describeCut({ ...EMPTY_CUT, entities: [WITHHELD_UID] }, { register: REGISTER }), `all collections · ${WITHHELD_UID} (name withheld)`);
+  // The question to Cedar asks about the collection, not about rows it has not seen.
+  assert.match(questionFor({ ...EMPTY_CUT, collections: ["lobbying"] }, REGISTER), /What does this collection cover/);
 });
 
-test("the download carries a cite_as row per collection and the cut it answers", () => {
+test("the export is exactly the records it lists, re-imports as such, and its provenance travels in the README", () => {
   const rows = [
-    ...universalRows("lobbying/native_entity_lobbying_disclosures", PLANTED.slice(0, 1), REGISTER),
-    ...universalRows("deals/deals_classified", [{ cedar_uid: "CE-00134-BX", Event_Year: "2020", Announced_Value_USD: "7" }], REGISTER),
+    ...PLANTED_ROWS.slice(0, 1),
+    ...universalRows("deals/deals_classified", [{ Deal_ID: "D-1", cedar_uid: "CE-00134-BX", Event_Year: "2020", Announced_Value_USD: "7", Deal_Title: "=SUM(A1)" }], REGISTER),
   ];
   const cut = { ...EMPTY_CUT, collections: ["lobbying", "deals"], entities: ["CE-00134-BX"] };
-  const csv = cutCsv(rows, { view: "cut", cut, register: REGISTER });
-  const lines = csv.split("\n");
-  assert.equal(lines[0].split(",")[0], "entity_uid");
-  assert.equal(lines.filter((l) => l.startsWith("cite_as")).length, 2);
-  assert.ok(lines.at(-1).startsWith("cut,"));
-  assert.ok(lines.at(-1).includes("e=CE-00134-BX"));
-  assert.ok(csv.includes("cedarpress.ai"));
-  // Every line is as wide as the header: a ragged file is not a spreadsheet.
-  const width = lines[0].split(",").length;
-  for (const line of lines) assert.ok(parseCsv(`${lines[0]}\n${line}`).columns.length === width);
-  const table = cutCsv(rows.slice(0, 1), { view: "table", columns: ["cedar_uid", "spend_usd"], cut });
-  assert.equal(table.split("\n")[0], "cedar_uid,spend_usd");
-  assert.equal(table.split("\n")[1], "CE-00134-BX,40000");
+  const csv = cutCsv(rows, { view: "cut" });
+  const back = parseCsv(csv);
+  assert.equal(back.rows.length, 2, "one record in, one record out");
+  assert.equal(back.columns[0], "collection");
+  assert.ok(back.columns.includes("record_id") && back.columns.includes("amount_basis") && back.columns.includes("superseded"));
+  // Rectangular: every record has exactly the header's width.
+  for (const line of csv.split("\n").slice(1)) assert.equal(parseCsv(`${csv.split("\n")[0]}\n${line}`).rows.length, 1);
+  const widths = csv.split("\n").map((line) => parseCsv(`${line}\n`).columns.length);
+  assert.ok(widths.every((w) => w === widths[0]), `ragged: ${widths}`);
+  assert.equal(back.rows[1].record_id, "D-1");
+  assert.ok(!csv.includes("cite_as") && !csv.includes("\ncut,"));
+  // A cell a spreadsheet would run as a formula is neutralised; a negative number is not.
+  assert.ok(csv.includes("'=SUM(A1)"));
+  assert.equal(csvCell("-4163330"), "-4163330");
+  assert.equal(csvCell("-not a number"), "'-not a number");
+  assert.equal(csvCell("+1 (555) 000"), "'+1 (555) 000");
+  const readme = cutReadme(rows, { view: "cut", cut, register: REGISTER });
+  assert.ok(readme.includes("cedarpress.ai"));
+  assert.ok(readme.includes("e=CE-00134-BX"));
+  assert.ok(readme.includes("REDUCED"));
+  assert.equal((readme.match(/Lumecon, "/g) ?? []).length, 2, "one citation per collection");
+  const table = cutCsv(rows.slice(0, 1), { view: "table", columns: ["cedar_uid", "spend_usd"] });
+  assert.equal(table, "cedar_uid,spend_usd\nCE-00134-BX,40000");
 });
 
 test("every flagship sample reads through its contract without a thrown row", () => {
@@ -290,12 +457,17 @@ test("every flagship sample reads through its contract without a thrown row", ()
     const items = universalRows(key, rows, REGISTER);
     assert.equal(items.length, rows.length, key);
     const f = facets(items, REGISTER);
-    if (dataset.id !== "nonprofits") assert.ok(f.dated > 0, `${key}: no row has a year`);
+    if (contractFor(key).year_basis) assert.ok(f.dated > 0, `${key}: no row has a year`);
     assert.ok(items.every((item) => item.observation.length > 0), `${key}: a row has an empty observation`);
+    assert.ok(items.every((item) => item.recordId), `${key}: a row has no record id`);
   }
+  // A Cedar Press+ reader can open all twelve; a Cedar Press reader six.
+  assert.equal(explorableCollections(PRO).filter((c) => c.open).length, 12);
+  assert.equal(explorableCollections(PRESS).filter((c) => c.open).length, 6);
 });
 
-test("CONTRACTS is the derived file, frozen", () => {
+test("CONTRACTS is the derived file, frozen, and the withheld tables are gone from it", () => {
   assert.ok(Object.isFrozen(CONTRACTS));
   assert.ok(Object.keys(CONTRACTS).length > 100);
+  assert.equal(CONTRACTS["owned/individual_native_firm_register"], undefined);
 });

@@ -2182,6 +2182,14 @@
 .teim-rd .cp-ex__pickcue { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.8rem; }
 .teim-rd .cp-ex__pick[open] .cp-ex__pickbtn { border-color: var(--dteal); }
 .teim-rd .cp-ex__panel { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; width: min(28rem, 90vw); max-height: 24rem; overflow: auto; padding: 0.7rem; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 12px 30px rgba(10, 15, 38, 0.12); }
+.teim-rd .cp-ex__panelhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+.teim-rd .cp-ex__close { width: 2rem; height: 2rem; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 1.1rem; line-height: 1; cursor: pointer; }
+.teim-rd .cp-ex__badge { display: inline-block; margin-right: 0.4rem; padding: 0.05rem 0.4rem; border: 1px solid var(--amber); color: var(--amber); font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; vertical-align: middle; }
+.teim-rd .cp-ex__table tr.is-superseded td { color: var(--muted); }
+.teim-rd .cp-ex__superseded { margin: 0 0 0.6rem; font-size: 0.86rem; color: var(--ink-2); }
+.teim-rd .cp-ex__unlinkedopt { border-top: 2px solid var(--line) !important; }
+.teim-rd .cp-ex__years.is-outside .cp-ex__year { border-color: var(--amber); }
+.teim-rd .cp-ex__yearsnote { grid-column: 1 / span 3; }
 .teim-rd .cp-ex__panelrow { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; margin: 0.4rem 0; }
 .teim-rd .cp-ex__list { list-style: none; margin: 0; padding: 0; }
 .teim-rd .cp-ex__list li { border-top: 1px solid var(--line-soft); }

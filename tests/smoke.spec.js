@@ -197,8 +197,27 @@ test.describe("the subscriber's path", () => {
   });
 });
 
-test.describe("Explore the data", () => {
-  test("the card filters the sample rows, permalinks the cut and hands over the file", async ({ page }) => {
+test.describe("Explore the collections", () => {
+  /** A stored (uncompressed) ZIP, as pressDownload writes it: name -> text. */
+  function unzipStored(bytes) {
+    const files = {};
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let at = 0;
+    while (at + 30 <= bytes.length && view.getUint32(at, true) === 0x04034b50) {
+      const method = view.getUint16(at + 8, true);
+      const size = view.getUint32(at + 18, true);
+      const nameLength = view.getUint16(at + 26, true);
+      const extraLength = view.getUint16(at + 28, true);
+      const name = Buffer.from(bytes.subarray(at + 30, at + 30 + nameLength)).toString("utf8");
+      const start = at + 30 + nameLength + extraLength;
+      expect(method).toBe(0);
+      files[name] = Buffer.from(bytes.subarray(start, start + size)).toString("utf8");
+      at = start + size;
+    }
+    return files;
+  }
+
+  test("the card filters the preview records, permalinks the cut and hands over exactly what it lists", async ({ page }) => {
     // The card is one object, the cut, drawn four ways: the URL, the table,
     // the download and the question to Cedar. This walks the first three
     // on the real samples the build serves and asserts they agree.
@@ -209,10 +228,10 @@ test.describe("Explore the data", () => {
     const card = page.getByTestId("explore");
     await expect(card).toBeVisible();
     const caption = page.getByTestId("explore-caption");
-    // Every open collection contributes its flagship sample; the caption
-    // counts sample rows and says so, because ten rows is not the dataset.
-    await expect(caption).toContainText("sample rows");
-    await expect(caption).toContainText("12 collections");
+    // Every open collection contributes its dataset's preview; the caption
+    // counts sample records and says so, because ten rows is not the dataset.
+    await expect(caption).toContainText("sample records");
+    await expect(caption).toContainText("all collections");
     const rows = card.locator(".cp-ex__table tbody tr:not(.cp-ex__expanded)");
     await expect(rows.first()).toBeVisible();
 
@@ -220,41 +239,80 @@ test.describe("Explore the data", () => {
     // `click` and an expectation rather than `check`: the box is controlled
     // by the URL, and React Router commits a navigation in a transition, so
     // the instant after the click the box still reads its old state.
-    await page.getByTestId("explore-entity").locator("summary").click();
-    const first = page.getByTestId("explore-entity").locator(".cp-ex__list input[type=checkbox]").first();
+    const entityPicker = page.getByTestId("explore-entity");
+    await entityPicker.locator("summary").click();
+    await expect(entityPicker).toHaveAttribute("open", "");
+    const first = entityPicker.locator(".cp-ex__list input[type=checkbox]").first();
     await first.click();
     await expect(first).toBeChecked();
     await expect(page).toHaveURL(/[?&]e=CE-/);
-    await expect(caption).not.toContainText("every row");
+    await expect(caption).not.toContainText("every record");
+    // Escape closes the panel and the control keeps focus.
     await page.keyboard.press("Escape");
+    await expect(entityPicker).not.toHaveAttribute("open", "");
+    await expect(entityPicker.locator("summary")).toBeFocused();
 
     // The permalink reproduces the cut on a fresh load.
     const url = page.url();
     await page.goto(url);
-    await expect(page.getByTestId("explore-caption")).not.toContainText("every row");
+    await expect(page.getByTestId("explore-caption")).not.toContainText("every record");
+
+    // Typing a search and changing a filter at once: both survive, because
+    // nothing waits in a timer to overwrite the newer change.
+    await page.goto("/data");
+    await page.getByLabel("Search these records").fill("tribal");
+    await page.getByTestId("explore-type").locator("summary").click();
+    await page.getByTestId("explore-type").locator(".cp-ex__list input[type=checkbox]").first().click();
+    await expect(page).toHaveURL(/q=tribal/);
+    await expect(page).toHaveURL(/[?&]t=/);
+    await page.keyboard.press("Escape");
 
     // One collection, one table: the table view shows the table's own
     // columns and the header counts them.
     await page.goto("/data?c=lobbying&tb=lobbying%2Fnative_entity_lobbying_disclosures");
     await expect(page.getByTestId("explore-caption")).toContainText("columns");
     await expect(page.locator(".cp-ex__table--table")).toBeVisible();
-    // The universal filters still hold: a year range written in the URL
-    // narrows the rows, and a range outside the data empties them honestly.
+    // An out-of-coverage year range is shown AS REQUESTED, said in words,
+    // and the empty result says what it does not establish.
     await page.goto("/data?c=lobbying&y=1800-1801");
-    await expect(page.locator(".cp-ex__empty")).toContainText("No sample rows match");
+    await expect(page.locator(".cp-ex__empty")).toContainText("does not establish");
+    await expect(page.getByLabel("From year", { exact: true })).toHaveValue("1800");
+    await expect(page.getByLabel("To year", { exact: true })).toHaveValue("1801");
+    await expect(page.getByTestId("explore-years")).toContainText("Requested 1800–1801");
+    // Unchecking the last type is "none", never "everything".
+    await page.goto("/data?c=lobbying&t=");
+    await expect(page.locator(".cp-ex__empty")).toBeVisible();
+    await expect(page.getByTestId("explore-type")).toContainText("None");
+    // A link to a collection this catalog does not have is not widened.
+    await page.goto("/data?c=gaming");
+    await expect(page.getByTestId("explore-notes")).toContainText("Not a collection here: gaming");
+    await expect(page.locator(".cp-ex__empty")).toContainText("No collection is selected");
+    // A visible identifier is searchable.
+    await page.goto("/data?c=lobbying&tb=lobbying%2Fnative_entity_lobbying_disclosures&h=1");
+    const someId = await page.locator(".cp-ex__table--table tbody tr td:nth-child(3)").first().innerText();
+    await page.getByLabel("Search these records").fill(someId.trim());
+    await expect(page.locator(".cp-ex__table tbody tr:not(.cp-ex__expanded)")).toHaveCount(1);
 
-    // The download is the cut's rows, with the citation and the cut itself.
+    // The download is the cut's records and nothing else, re-importable as
+    // such, with the citation and the cut in the README beside it.
     await page.goto("/data?c=lobbying");
     await expect(page.locator(".cp-ex__table tbody tr").first()).toBeVisible();
+    const shown = await page.locator(".cp-ex__table tbody tr:not(.cp-ex__expanded)").count();
     const download = page.waitForEvent("download");
-    await card.getByRole("button", { name: /Download \d+ rows/ }).click();
+    await card.getByRole("button", { name: /Download summary results/ }).click();
     const file = await download;
-    expect(file.suggestedFilename()).toMatch(/^cedar-press-cut-.*\.csv$/);
-    const csv = (await (await file.createReadStream()).toArray()).map(String).join("");
-    expect(csv.split("\n")[0]).toContain("entity_uid");
-    expect(csv).toContain("cite_as");
-    expect(csv).toContain("cedarpress.ai");
-    expect(csv.split("\n").at(-1)).toMatch(/^cut,/);
+    expect(file.suggestedFilename()).toMatch(/^cedar-press-summary-results-.*\.zip$/);
+    const bytes = Buffer.concat((await (await file.createReadStream()).toArray()).map((c) => Buffer.from(c)));
+    const files = unzipStored(bytes);
+    expect(Object.keys(files).sort()).toEqual(["README.txt", "records.csv"]);
+    const lines = files["records.csv"].split("\n");
+    expect(lines[0].split(",")).toContain("record_id");
+    expect(lines.length - 1).toBe(shown);
+    const width = lines[0].split(",").length;
+    for (const line of lines) expect(line.split(",").length).toBeGreaterThanOrEqual(width);
+    expect(files["records.csv"]).not.toContain("cite_as");
+    expect(files["README.txt"]).toContain("cedarpress.ai");
+    expect(files["README.txt"]).toContain("c=lobbying");
     expect(errors).toEqual([]);
   });
 });

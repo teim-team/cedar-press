@@ -34,6 +34,7 @@ above is then true again in the only sense that matters.
 
 from __future__ import annotations
 
+import csv
 import dataclasses
 import datetime
 import json
@@ -311,9 +312,12 @@ class TestCrossLanguageParity(unittest.TestCase):
                     # RECORDED as such by scripts/measure-samples.mjs: the site
                     # says so instead of linking to a 404. An absence with no
                     # record is the failure below.
+                    # Or WITHHELD by the importer's publication rule, which
+                    # says why on the table itself (sample_withheld_why).
                     with self.subTest(dataset=dataset.id, table=table["table"]):
-                        self.assertTrue(table.get("sample_unpublished"),
-                                        f"{table['table']} has no sample and no record")
+                        recorded = (table.get("sample_unpublished")
+                                    or table.get("sample_withheld_why"))
+                        self.assertTrue(recorded, f"{table['table']} has no sample and no record")
                     continue
                 path = _REPO / "public" / table["sample_path"].lstrip("/")
                 # In the INDEX, not merely on this disk. `.gitignore` drops
@@ -628,6 +632,58 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
             capture_output=True, text=True, check=False, cwd=_REPO,
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
+    def test_a_sample_naming_a_withheld_firm_is_struck_before_it_is_copied(self) -> None:
+        # The publication rule, proven by injection: a planted manifest with
+        # two samples, one carrying a withheld name in an ordinary column,
+        # the other clean. The struck table loses its path and says why; the
+        # flagship entry follows; the clean one is untouched. And the served
+        # files: none carries such a name today (six did on 2026-09-05).
+        import tempfile
+        names = self.script.withheld_names(_REPO / "data" / "spine" / "cedar_entity_names.csv")
+        self.assertEqual(len(names), 45)
+        leaked = next(iter(names)).title()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            folder = root / "data" / "cedar" / "samples" / "fixture"
+            folder.mkdir(parents=True)
+            # Written by the csv module: a firm name with a comma in it must
+            # arrive as one quoted cell, or the planted leak is not a leak.
+            for name, firm in (("dirty", leaked), ("clean", "Cherokee Nation")):
+                with (folder / f"{name}__10.csv").open("w", encoding="utf-8", newline="") as handle:
+                    writer = csv.writer(handle)
+                    writer.writerow(["id", "firm", "amount"])
+                    writer.writerow(["1", firm, "5"])
+            at = "/data/cedar/samples/fixture"
+            manifest = {"collections": [{
+                "id": "fixture",
+                "sample": {"table": "dirty.csv", "path": f"{at}/dirty__10.csv"},
+                "tables": [
+                    {"table": "dirty.csv", "sample_path": f"{at}/dirty__10.csv"},
+                    {"table": "clean.csv", "sample_path": f"{at}/clean__10.csv"},
+                    {"table": "absent.csv", "sample_path": f"{at}/absent__10.csv"},
+                ],
+            }]}
+            struck = self.script.withhold_samples(manifest, root, names)
+        self.assertEqual([s["table"] for s in struck], ["dirty.csv"])
+        self.assertEqual(struck[0]["columns"], ["firm"])
+        dirty, clean, absent = manifest["collections"][0]["tables"]
+        self.assertIsNone(dirty["sample_path"])
+        self.assertIn("without recorded consent", dirty["sample_withheld_why"])
+        self.assertEqual(clean["sample_path"], f"{at}/clean__10.csv")
+        self.assertEqual(absent["sample_path"], f"{at}/absent__10.csv")
+        self.assertIsNone(manifest["collections"][0]["sample"]["path"])
+        flagship = manifest["collections"][0]["sample"]
+        self.assertIn("without recorded consent", flagship["unavailable_because"])
+        # The files public/ serves.
+        for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
+            with path.open(encoding="utf-8", newline="") as handle:
+                for row in csv.reader(handle):
+                    for cell in row:
+                        self.assertNotIn(
+                            cell.strip().lower(), names,
+                            f"{path} carries a withheld name; run import_cedar_manifest.py --audit",
+                        )
 
     def test_the_explore_contracts_match_the_samples(self) -> None:
         # The Explore card reads each table through a contract derived from

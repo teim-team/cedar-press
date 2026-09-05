@@ -409,6 +409,101 @@ def _float(value: str) -> float | None:
         return None
 
 
+#: The one entity class whose names the publication rule withholds absent
+#: recorded consent (code/cedar_domain.py may_publish_individual_native_field:
+#: a firm's own website is evidence, never permission).
+WITHHELD_CLASS = "Individually Native-owned business"
+
+WITHHELD_WHY = (
+    "The sample carries the name of an individually Native-owned firm without "
+    "recorded consent; may_publish_individual_native_field withholds it, so the "
+    "file is not published. The table is still in the release."
+)
+
+
+def withheld_names(spine_names: Path) -> frozenset[str]:
+    """Every register name in the withheld class, lowercased and trimmed."""
+    with spine_names.open(encoding="utf-8", newline="") as handle:
+        return frozenset(
+            row["name"].strip().lower()
+            for row in csv.DictReader(handle)
+            if row["entity_class"] == WITHHELD_CLASS and row["name"].strip()
+        )
+
+
+def sample_carries_withheld_name(sample: Path, names: frozenset[str]) -> list[str]:
+    """The columns of a sample file with a cell equal to a withheld name."""
+    hit: list[str] = []
+    with sample.open(encoding="utf-8", newline="") as handle:
+        reader = csv.reader(handle)
+        header = next(reader, [])
+        for row in reader:
+            for column, cell in zip(header, row):
+                if cell.strip().lower() in names and column not in hit:
+                    hit.append(column)
+    return hit
+
+
+def withhold_samples(manifest: dict, sample_root: Path, names: frozenset[str]) -> list[dict]:
+    """Strike every declared sample that carries a withheld name.
+
+    Applied to the manifest in place: the table keeps its row counts and its
+    release facts and loses its ``sample_path``, gaining ``sample_withheld_why``
+    and the columns that carried the name; a flagship so struck leaves the
+    collection's ``sample`` entry with the reason. Returns what was struck so
+    the caller can delete the files. Pure over its inputs, so the tests can
+    plant a sample and prove the strike; on 2026-09-05 six deployed sample
+    files under native-owned-businesses/ carried these names, and this is
+    what stops it recurring on the next import.
+    """
+    struck: list[dict] = []
+    for collection in manifest["collections"]:
+        flagship = collection.get("sample") or {}
+        for table in collection["tables"]:
+            path = table.get("sample_path")
+            if not path:
+                continue
+            file = sample_root / path.lstrip("/")
+            if not file.exists():
+                continue
+            columns = sample_carries_withheld_name(file, names)
+            if not columns:
+                continue
+            table["sample_path"] = None
+            table["sample_withheld_why"] = WITHHELD_WHY
+            table["sample_withheld_columns"] = columns
+            struck.append({"collection": collection["id"], "table": table["table"],
+                           "path": path, "columns": columns})
+            if flagship.get("path") == path:
+                collection["sample"] = {
+                    "table": flagship.get("table"),
+                    "path": None,
+                    "unavailable_because": WITHHELD_WHY,
+                }
+    return struck
+
+
+def audit(repo: Path = REPO) -> list[dict]:
+    """Apply the withholding rule to the committed manifest and public/ files.
+
+    ``python scripts/import_cedar_manifest.py --audit``. Rewrites the manifest,
+    deletes each struck file under public/, and prints what it struck. The
+    caller re-runs measure-samples and derive-explore (the test suites name
+    both when stale).
+    """
+    manifest_path = repo / "data" / "cedar" / "collections.manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    names = withheld_names(repo / "data" / "spine" / "cedar_entity_names.csv")
+    struck = withhold_samples(manifest, repo / "public", names)
+    for entry in struck:
+        (repo / "public" / entry["path"].lstrip("/")).unlink()
+    if struck:
+        manifest_path.write_text(
+            json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
+    return struck
+
+
 def copy_samples(workspace: Path, manifest: dict) -> int:
     """The ten-row samples the manifest points at, and nothing else.
 
@@ -421,6 +516,8 @@ def copy_samples(workspace: Path, manifest: dict) -> int:
     for collection in manifest["collections"]:
         cedar_id = collection["cedar"]["cedar_id"]
         for table in collection["tables"]:
+            if not table.get("sample_path"):
+                continue  # struck by withhold_samples: never copied
             name = f"{Path(table['table']).stem}__10.csv"
             source = source_root / cedar_id / name
             if not source.exists():
@@ -435,10 +532,26 @@ def copy_samples(workspace: Path, manifest: dict) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, default=DEFAULT_WORKSPACE)
+    parser.add_argument(
+        "--audit", action="store_true",
+        help="apply the publication rule to the committed manifest and public/ "
+             "samples instead of importing; strikes and deletes what it withholds",
+    )
     args = parser.parse_args()
+    if args.audit:
+        for entry in audit():
+            print(f"  withheld  {entry['path']}  ({', '.join(entry['columns'])})")
+        return 0
     workspace = args.workspace.resolve()
 
     manifest = build(workspace)
+    # The publication rule, before a file becomes a public asset: a sample
+    # that names an individually Native-owned firm without consent is struck
+    # from the manifest here and never copied below.
+    names = withheld_names(workspace / "data" / "spine" / "cedar_entity_names.csv")
+    struck = withhold_samples(manifest, workspace / "dist" / "review", names)
+    for entry in struck:
+        print(f"  withheld  {entry['path']}  ({', '.join(entry['columns'])})")
     out = REPO / "data" / "cedar" / "collections.manifest.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

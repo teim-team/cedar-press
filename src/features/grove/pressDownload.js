@@ -197,6 +197,19 @@ function zipOf(files) {
  * a dozen downloads. If a blocker is seen swallowing it, the fix is to
  * prefetch on hover, not to inline 1.4 MB of CSV into the page.
  */
+/** Hand the browser one ZIP of text files to save. The Explore card's export uses it. */
+export function saveZip(name, files) {
+  const blob = zipOf(files);
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = name;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
 export async function downloadAll(entries, archiveName = "cedar-press-samples.zip") {
   // Fetched together rather than one after another: a shelf is a dozen
   // collections and a serial await per tile is a dozen round trips before

@@ -73,9 +73,28 @@ const RULES = {
     "total_lobbying_expenditures", "award_amount", "amount",
   ],
   source: [
-    "source_url", "filing_url", "testimony_url", "document_url", "notice_url", "html_url", "url",
+    "source_url", "filing_url", "testimony_url", "document_url", "notice_url", "html_url", "source_1", "url",
   ],
+  // The record's own identifier, so a row can be cited and found again.
+  record_id: [
+    "filing_uuid", "deal_id", "document_number", "assistance_transaction_unique_key",
+    "contract_transaction_unique_key", "consultation_event_id", "bill_id", "enterprise_id",
+    "resource_revenue_event_id", "subaward_source_record_id", "ein",
+  ],
+  // Who the record itself names, which is not always the resolved entity:
+  // a subsidiary awardee, a registrant's client, the museum holding remains.
+  subject: [
+    "recipient_name", "client_name", "awardee_name", "sub_name", "enterprise_name",
+    "recipient_entity_name", "org_name", "native_party", "institution_name",
+    "participant_name_as_published",
+  ],
+  superseded: ["is_superseded", "supersession_status"],
+  superseded_by: ["superseded_by_filing_uuid"],
+  amount_basis: ["spend_basis", "value_type", "amount_sign_meaning", "measurement_status"],
 };
+
+/** "filing_year" -> "filing year", for the label over the year control. */
+const words = (column) => column.replace(/_/g, " ").toLowerCase();
 
 // Columns that describe the row, for the one-line observation, most telling
 // first. A table gets up to four of the ones it has.
@@ -128,8 +147,20 @@ export function contractFor(columns) {
   c.date = pick(columns, RULES.date)
     ?? pickShape(columns, /_date$/, /fetched|built|ruling|promoted|keyed|deadline|withdrawn|termination|modified|extract|refusal|probed|checked|retrieved|inactivated|release/);
   c.amount = pick(columns, RULES.amount) ?? pickShape(columns, /(_usd|_amount)$/, /real2025|inflation|_pct|share/);
-  c.source = pick(columns, RULES.source) ?? pickShape(columns, /url$/, /candidate/);
-  const taken = new Set(Object.values(c).filter(Boolean));
+  c.source = pick(columns, RULES.source) ?? pickShape(columns, /url$/, /candidate|allocation|evidence/);
+  c.record_id = pick(columns, RULES.record_id)
+    ?? pickShape(columns, /(_id|_uuid|_key|_number)$/, /entity|cedar|parent|prime_award|sub_|companion|sponsor|source_record|report/)
+    ?? columns[0] ?? null;
+  c.subject = pick(columns, RULES.subject);
+  if (c.subject === c.entity_name) c.subject = null;
+  c.superseded = pick(columns, RULES.superseded);
+  c.superseded_by = pick(columns, RULES.superseded_by);
+  c.amount_basis = c.amount ? pick(columns, RULES.amount_basis) : null;
+  // What "year" means here, said in the table's own terms. A table with a
+  // year column filters on that column and only that column; one with just
+  // a date filters on the date's calendar year, and the label says so.
+  c.year_basis = c.year ? words(c.year) : c.date ? `calendar year of ${words(c.date)}` : null;
+  const taken = new Set(Object.values(c).filter((v) => typeof v === "string"));
   const observation = [];
   const byNorm = new Map(columns.map((col) => [norm(col), col]));
   for (const name of OBSERVATION) {
@@ -217,7 +248,20 @@ export function derive() {
         continue;
       }
       const columns = header(path);
-      const contract = { ...contractFor(columns), ...(overrides[key] ?? {}) };
+      const override = overrides[key] ?? {};
+      const contract = { ...contractFor(columns), ...override };
+      // The year's meaning follows the year and date the override settled on,
+      // unless the override states it in its own words.
+      if (!("year_basis" in override)) {
+        contract.year_basis = contract.year ? words(contract.year) : contract.date ? `calendar year of ${words(contract.date)}` : null;
+      }
+      if (!("amount_basis" in override) && !contract.amount) contract.amount_basis = null;
+      // Derived by name, so PROPOSED, not certified: only a declaration in the
+      // overrides file, with its reason, marks a table's mapping reviewed.
+      contract.reviewed = override.reviewed === true;
+      for (const column of contract.default_columns ?? []) {
+        if (!columns.includes(column)) throw new Error(`${key}: default column ${column} is not in the sample`);
+      }
       contract.columns = columns.length;
       tables[key] = contract;
     }
@@ -226,10 +270,12 @@ export function derive() {
   return {
     generated_by: "scripts/derive-explore.mjs",
     note:
-      "Per table: which columns the Explore card reads as the entity, its type, the year, " +
-      "the date, the amount and the source, and which columns make the one-line observation. " +
-      "Derived from the published sample's header by name; data/cedar/explore.overrides.json " +
-      "wins where it speaks. Re-run after the importer copies samples.",
+      "Per table: which columns the Explore card reads as the record id, the entity, its type, " +
+      "the record's own subject, the year (and what year means there), the date, the amount and " +
+      "its basis, the source, supersession, and which columns make the one-line observation. " +
+      "Derived from the published sample's header by name, so PROPOSED; a table is `reviewed` " +
+      "only where data/cedar/explore.overrides.json declares it so, with its reason. " +
+      "Re-run after the importer copies samples.",
     unpublished,
     tables: sorted,
   };
