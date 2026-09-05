@@ -1577,3 +1577,9 @@ on the importer's checkout (see the PR).
 | finding | what changed | proof |
 |---|---|---|
 | P1 measure tracked samples instead of local files | Published means on disk AND in the git index (`git ls-files` over the samples directory); a sample the importer copied and nobody staged stays on the record, so the clean checkout CI builds from cannot disagree with it. No git is a refusal, not a disk-only guess. Proven here by copying an untracked file into place: the record did not move. | `node scripts/measure-samples.mjs --check` |
+
+### PR #61 — one finding, right (2026-09-05)
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1185` run the planted verifier before loading untracked review data | The data-free proofs (vocabulary, no uid invented, planted F11/F13 through apply and verify) run first; the review export under `dist/` is checked last and its absence is UNMEASURED, exit 2, after the gates are proven. On a fresh checkout the selftest now proves the gates instead of raising. | `1185 selftest` on this checkout |
