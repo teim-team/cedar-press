@@ -1175,6 +1175,12 @@
 @media (max-width: 900px) { .teim-rd .cp-link__in { grid-template-columns: 1fr; } }
 
 
+/* Six across on a wide screen, one row a shelf. `--cols` is the entry count
+ * capped at six (PressShelf), so a shelf of four is four across and never
+ * four-and-a-gap. Below this width the auto-fit rule above wraps. */
+@media (min-width: 1300px) {
+  .teim-rd .cp-band__grid { grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr)); }
+}
 @media (max-width: 1040px) {
   .teim-rd .cp-band__in { grid-template-columns: minmax(0, 1fr); }
   .teim-rd .cp-read { grid-column: 1; grid-row: auto; min-height: 0; }
@@ -2156,4 +2162,129 @@
   }
   /* Room at the end so the last chip can clear the fade when dragged. */
   .teim-rd .cp-filter__set--scroll::after { content: ''; flex: none; width: 1.4rem; }
+}
+
+/* ── Explore the data ────────────────────────────────────────────────────
+ * One card under the shelves: the toolbar, the caption, the table and the
+ * foot are one bordered thing, in the shelf's own language (hairlines, no
+ * radius, mono caps for labels). The shelf above it is untouched. */
+.teim-rd .cp-ex { max-width: 1560px; margin: 3.2rem auto 0; padding: 0 2.4rem; }
+.teim-rd .cp-ex__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem 2rem; align-items: start; margin-bottom: 1.2rem; }
+.teim-rd .cp-ex__title { font-family: var(--sans); font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0.3rem 0 0; }
+.teim-rd .cp-ex__lede { font-size: 0.98rem; line-height: 1.6; color: var(--ink-2); margin: 0.6rem 0 0; max-width: 72ch; }
+.teim-rd .cp-ex__card { border: 1px solid var(--line); background: var(--bg); }
+.teim-rd .cp-ex__bar { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem; padding: 0.9rem 1rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-ex__picklabel { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-ex__pick { position: relative; }
+.teim-rd .cp-ex__pickbtn { list-style: none; display: flex; flex-direction: column; gap: 0.15rem; min-width: 11rem; min-height: 44px; padding: 0.4rem 2rem 0.4rem 0.7rem; border: 1px solid var(--line); background: var(--bg); cursor: pointer; position: relative; }
+.teim-rd .cp-ex__pickbtn::-webkit-details-marker { display: none; }
+.teim-rd .cp-ex__pickvalue { font-size: 0.92rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 16rem; }
+.teim-rd .cp-ex__pickcue { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.8rem; }
+.teim-rd .cp-ex__pick[open] .cp-ex__pickbtn { border-color: var(--dteal); }
+.teim-rd .cp-ex__panel { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; width: min(28rem, 90vw); max-height: 24rem; overflow: auto; padding: 0.7rem; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 12px 30px rgba(10, 15, 38, 0.12); }
+.teim-rd .cp-ex__panelrow { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; margin: 0.4rem 0; }
+.teim-rd .cp-ex__list { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-ex__list li { border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-ex__list label, .teim-rd .cp-ex__lockbtn { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 0.6rem; width: 100%; padding: 0.4rem 0.2rem; font: inherit; font-size: 0.86rem; color: var(--ink); text-align: left; background: none; border: 0; cursor: pointer; }
+.teim-rd .cp-ex__lockbtn { grid-template-columns: minmax(0, 1fr) auto; color: var(--muted); }
+.teim-rd .cp-ex__list input[type="checkbox"] { accent-color: var(--dteal); width: 1rem; height: 1rem; margin: 0; }
+.teim-rd .cp-ex__lname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.teim-rd .cp-ex__lname small { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); }
+.teim-rd .cp-ex__ltype { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.teim-rd .cp-ex__lcount { font-family: var(--mono); font-size: 0.7rem; color: var(--dteal); min-width: 2ch; text-align: right; }
+.teim-rd .cp-ex__absent .cp-ex__lname { color: var(--muted); }
+.teim-rd .cp-ex__locked { opacity: 0.7; }
+.teim-rd .cp-ex__search, .teim-rd .cp-ex__q, .teim-rd .cp-ex__savebar input, .teim-rd .cp-ex__tablepick select, .teim-rd .cp-ex__year { font: inherit; font-size: 0.92rem; min-height: 44px; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 0; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-ex__search { width: 100%; box-sizing: border-box; }
+.teim-rd .cp-ex__q { flex: 1 1 14rem; min-width: 10rem; }
+.teim-rd .cp-ex__tablepick { display: flex; flex-direction: column; gap: 0.15rem; }
+.teim-rd .cp-ex__tablepick select { min-width: 12rem; max-width: 30rem; }
+.teim-rd .cp-ex__acts { display: flex; gap: 0.4rem; align-items: stretch; margin-left: auto; }
+.teim-rd .cp-ex__act { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0.45rem 0.9rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
+.teim-rd .cp-ex__act:hover:not(:disabled) { background: var(--dteal); border-color: var(--dteal); color: #fff; }
+.teim-rd .cp-ex__act:disabled { opacity: 0.5; cursor: default; }
+.teim-rd .cp-ex__clear, .teim-rd .cp-ex__link { border: 0; background: none; padding: 0 0.3rem; font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.teim-rd .cp-ex__clear:disabled { color: var(--muted); text-decoration: none; cursor: default; }
+.teim-rd .cp-ex__fine { font-size: 0.8rem; line-height: 1.45; color: var(--muted); }
+
+/* The year range: two native sliders on one track, thumbs alone take the
+ * pointer. --lo/--hi paint the chosen span on the track. */
+.teim-rd .cp-ex__years { display: grid; grid-template-columns: auto 5.2rem minmax(9rem, 1fr) 5.2rem auto; align-items: center; gap: 0.15rem 0.5rem; min-width: 22rem; padding: 0.4rem 0.7rem; border: 1px solid var(--line); }
+.teim-rd .cp-ex__years .cp-ex__picklabel { grid-column: 1 / -1; }
+.teim-rd .cp-ex__years.is-off { grid-template-columns: 1fr; }
+.teim-rd .cp-ex__year { min-height: 34px; padding: 0.2rem 0.4rem; font-family: var(--mono); font-size: 0.8rem; width: 100%; box-sizing: border-box; }
+.teim-rd .cp-ex__range { position: relative; height: 28px; }
+.teim-rd .cp-ex__track { position: absolute; left: 0; right: 0; top: 50%; height: 3px; transform: translateY(-50%); background: var(--line); }
+.teim-rd .cp-ex__track::after { content: ""; position: absolute; top: 0; bottom: 0; left: var(--lo, 0%); right: calc(100% - var(--hi, 100%)); background: var(--dteal); }
+.teim-rd .cp-ex__range input[type="range"] { position: absolute; left: 0; top: 0; width: 100%; height: 28px; margin: 0; background: none; pointer-events: none; appearance: none; -webkit-appearance: none; }
+.teim-rd .cp-ex__range input[type="range"]::-webkit-slider-runnable-track { background: none; }
+.teim-rd .cp-ex__range input[type="range"]::-moz-range-track { background: none; }
+.teim-rd .cp-ex__range input[type="range"]::-webkit-slider-thumb { pointer-events: auto; appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--dteal); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--dteal); cursor: pointer; }
+.teim-rd .cp-ex__range input[type="range"]::-moz-range-thumb { pointer-events: auto; width: 12px; height: 12px; border-radius: 50%; background: var(--dteal); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--dteal); cursor: pointer; }
+
+.teim-rd .cp-ex__savebar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); background: var(--teal-tint); }
+.teim-rd .cp-ex__savebar input { flex: 1 1 18rem; }
+.teim-rd .cp-ex__upgrade { margin: 0; padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); font-size: 0.9rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+.teim-rd .cp-ex__upgrade a { color: var(--dteal); font-weight: 700; }
+.teim-rd .cp-ex__saved { padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); font-size: 0.86rem; }
+.teim-rd .cp-ex__saved summary { cursor: pointer; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-ex__saved ul { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+.teim-rd .cp-ex__saved li { padding: 0.3rem 0; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-ex__caption { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; margin: 0; padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-ex__caption .cp-ex__clear { text-transform: none; letter-spacing: 0; font-family: var(--sans); }
+.teim-rd .cp-ex__note { margin: 0; padding: 0 1rem 0.5rem; }
+
+/* The table. Fixed to the card's width; the columns scroll inside it, and
+ * the entity column stays put so a row never loses whose it is. */
+.teim-rd .cp-ex__scroll { overflow-x: auto; border-top: 1px solid var(--line); }
+.teim-rd .cp-ex__table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.84rem; line-height: 1.4; color: var(--ink); }
+.teim-rd .cp-ex__table th, .teim-rd .cp-ex__table td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; text-align: left; white-space: nowrap; max-width: 24rem; overflow: hidden; text-overflow: ellipsis; background: var(--bg); }
+.teim-rd .cp-ex__table th { position: sticky; top: 0; z-index: 2; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+.teim-rd .cp-ex__sort { border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-transform: inherit; letter-spacing: inherit; }
+.teim-rd .cp-ex__sort.is-on { color: var(--dteal); }
+.teim-rd .cp-ex__table .cp-ex__pin { position: sticky; left: 2.4rem; z-index: 1; font-weight: 700; box-shadow: 1px 0 0 var(--line); max-width: 18rem; }
+.teim-rd .cp-ex__table th.cp-ex__pin { z-index: 3; }
+.teim-rd .cp-ex__table .cp-ex__more { position: sticky; left: 0; z-index: 1; width: 2.4rem; padding-inline: 0.5rem; }
+.teim-rd .cp-ex__table th.cp-ex__more { z-index: 3; }
+.teim-rd .cp-ex__morebtn { width: 1.4rem; height: 1.4rem; border: 1px solid var(--line); background: var(--bg); color: var(--dteal); font: inherit; font-weight: 700; line-height: 1; cursor: pointer; padding: 0; }
+.teim-rd .cp-ex__uid { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 400; color: var(--muted); }
+.teim-rd .cp-ex__unkeyed { color: var(--muted); font-weight: 400; }
+.teim-rd .cp-ex__coll { border: 0; background: none; padding: 0; font: inherit; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-ex__date { font-family: var(--mono); font-size: 0.74rem; }
+/* The cut view fits a desktop without scrolling: the type and the
+ * observation wrap, the rest stay one line. */
+.teim-rd .cp-ex__table--cut td:nth-child(3) { white-space: normal; min-width: 10rem; max-width: 14rem; }
+.teim-rd .cp-ex__table td.cp-ex__obs { white-space: normal; min-width: 18rem; max-width: 30rem; color: var(--ink-2); }
+.teim-rd .cp-ex__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.teim-rd .cp-ex__amount, .teim-rd th.cp-ex__c-amount { text-align: right; font-family: var(--mono); font-size: 0.76rem; }
+.teim-rd .cp-ex__table a { color: var(--dteal); font-weight: 600; }
+.teim-rd .cp-ex__table tr.is-open td { background: var(--teal-tint); }
+/* The record pins to the visible width of a table wider than the card
+ * (--vw, measured by the component), so its right half is never off in
+ * the scrolled-away part. */
+.teim-rd .cp-ex__expanded td { white-space: normal; max-width: none; background: var(--teal-tint); }
+.teim-rd .cp-ex__expanded .cp-ex__inner { position: sticky; left: 0; width: calc(var(--vw, 100%) - 1.4rem); box-sizing: border-box; }
+.teim-rd .cp-ex__record { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: 0.5rem 1.4rem; margin: 0.2rem 0 0.6rem; max-width: 100%; }
+.teim-rd .cp-ex__record div { min-width: 0; }
+.teim-rd .cp-ex__record div.is-blank { opacity: 0.55; }
+.teim-rd .cp-ex__record dt { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-ex__record dt small { display: inline; color: var(--dteal); letter-spacing: 0.06em; margin-left: 0.35rem; }
+.teim-rd .cp-ex__record dd { margin: 0.1rem 0 0; font-size: 0.84rem; overflow-wrap: anywhere; }
+.teim-rd .cp-ex__empty { margin: 0; padding: 1.4rem 1rem; font-size: 0.92rem; color: var(--muted); border-top: 1px solid var(--line); }
+.teim-rd .cp-ex__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 0.7rem 1rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-ex__foot .cp-read__cedar { margin-top: 0; }
+.teim-rd .cp-ex__foot .cp-read__cedar:disabled { color: var(--muted); cursor: default; text-decoration: none; }
+.teim-rd .cp-ex__pages { margin-left: auto; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 0.4rem; }
+.teim-rd .cp-ex__pages .cp-ex__clear { font-size: 1.1rem; text-decoration: none; }
+@media (max-width: 720px) {
+  .teim-rd .cp-ex { padding-inline: 1.15rem; }
+  .teim-rd .cp-ex__head { grid-template-columns: 1fr; }
+  .teim-rd .cp-ex__years { min-width: 0; width: 100%; grid-template-columns: 4.4rem minmax(4rem, 1fr) 4.4rem; }
+  .teim-rd .cp-ex__years .cp-ex__clear { grid-column: 1 / -1; justify-self: start; }
+  .teim-rd .cp-ex__table .cp-ex__pin { max-width: 11rem; }
+  .teim-rd .cp-ex__acts { margin-left: 0; width: 100%; }
+  /* A sheet pinned to the bottom of the screen. `top: auto` alone left a
+   * fixed panel at its static position, which on a long page is below the
+   * fold: visible to the DOM and unreachable by a finger. */
+  .teim-rd .cp-ex__panel { position: fixed; left: 1rem; right: 1rem; top: auto; bottom: 1rem; width: auto; max-height: 60vh; }
 }

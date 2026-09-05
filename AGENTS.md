@@ -9083,3 +9083,31 @@ The nineteen files still have to be added from the checkout that ran the
 importer, then `node scripts/measure-samples.mjs` and a commit. Until then the
 owned collection's flagship sample and eighteen table samples are absent from
 the site, and the site says so.
+
+## 2026-09-05 — Explore the data: one cut, four uses, no page knows a column
+
+The Collections page now carries a table under the shelves, and the rule that
+made it possible is the one to keep: the card never names a column of any
+collection. `scripts/derive-explore.mjs` reads each sample's header and writes
+a CONTRACT per table (`data/cedar/explore.json`, force-added like the
+manifest): which column is the entity uid, the name, the type, the year, the
+date, the amount, the source, and which make the observation line. Where the
+rule picks wrong, `data/cedar/explore.overrides.json` says so for that one
+table with its reason (prime contracts: obligations, never the cumulative
+award value - MONEY_TOTALLING_RULES; bills: several uids in one cell; the
+nonprofit register: no row date). The tests fail on a shipped table with no
+contract and on a stale file, naming the command; the importer re-runs it.
+
+The filters, the URL, the saved cut, the download and the question to Cedar
+are one object, the cut (`features/grove/explore.js`). Change what a cut is
+there and every use follows; add a control to the card that is not in the cut
+and the permalink lies. An amount is shown only where the table records one
+and is NEVER summed across collections. The entity register the pickers read
+(`public/data/cedar/register.json`) withholds the 45 individually
+Native-owned business names per `may_publish_individual_native_field`; keep it
+that way.
+
+Phase one is the ten-row samples and says "sample" in every count. The full
+tables, Cedar answering from the cut, and extracts pinned to a release and
+shared by link all need the API deployed, and the cut is the interface they
+consume; do not build a second query shape for them.

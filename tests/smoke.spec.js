@@ -197,6 +197,68 @@ test.describe("the subscriber's path", () => {
   });
 });
 
+test.describe("Explore the data", () => {
+  test("the card filters the sample rows, permalinks the cut and hands over the file", async ({ page }) => {
+    // The card is one object, the cut, drawn four ways: the URL, the table,
+    // the download and the question to Cedar. This walks the first three
+    // on the real samples the build serves and asserts they agree.
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data");
+
+    const card = page.getByTestId("explore");
+    await expect(card).toBeVisible();
+    const caption = page.getByTestId("explore-caption");
+    // Every open collection contributes its flagship sample; the caption
+    // counts sample rows and says so, because ten rows is not the dataset.
+    await expect(caption).toContainText("sample rows");
+    await expect(caption).toContainText("12 collections");
+    const rows = card.locator(".cp-ex__table tbody tr:not(.cp-ex__expanded)");
+    await expect(rows.first()).toBeVisible();
+
+    // Narrow to one entity from the picker; the URL now carries the cut.
+    // `click` and an expectation rather than `check`: the box is controlled
+    // by the URL, and React Router commits a navigation in a transition, so
+    // the instant after the click the box still reads its old state.
+    await page.getByTestId("explore-entity").locator("summary").click();
+    const first = page.getByTestId("explore-entity").locator(".cp-ex__list input[type=checkbox]").first();
+    await first.click();
+    await expect(first).toBeChecked();
+    await expect(page).toHaveURL(/[?&]e=CE-/);
+    await expect(caption).not.toContainText("every row");
+    await page.keyboard.press("Escape");
+
+    // The permalink reproduces the cut on a fresh load.
+    const url = page.url();
+    await page.goto(url);
+    await expect(page.getByTestId("explore-caption")).not.toContainText("every row");
+
+    // One collection, one table: the table view shows the table's own
+    // columns and the header counts them.
+    await page.goto("/data?c=lobbying&tb=lobbying%2Fnative_entity_lobbying_disclosures");
+    await expect(page.getByTestId("explore-caption")).toContainText("columns");
+    await expect(page.locator(".cp-ex__table--table")).toBeVisible();
+    // The universal filters still hold: a year range written in the URL
+    // narrows the rows, and a range outside the data empties them honestly.
+    await page.goto("/data?c=lobbying&y=1800-1801");
+    await expect(page.locator(".cp-ex__empty")).toContainText("No sample rows match");
+
+    // The download is the cut's rows, with the citation and the cut itself.
+    await page.goto("/data?c=lobbying");
+    await expect(page.locator(".cp-ex__table tbody tr").first()).toBeVisible();
+    const download = page.waitForEvent("download");
+    await card.getByRole("button", { name: /Download \d+ rows/ }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toMatch(/^cedar-press-cut-.*\.csv$/);
+    const csv = (await (await file.createReadStream()).toArray()).map(String).join("");
+    expect(csv.split("\n")[0]).toContain("entity_uid");
+    expect(csv).toContain("cite_as");
+    expect(csv).toContain("cedarpress.ai");
+    expect(csv.split("\n").at(-1)).toMatch(/^cut,/);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("Ask Cedar", () => {
   test("the launcher opens a panel and closes it again", async ({ page }, testInfo) => {
     const errors = watchConsole(page);

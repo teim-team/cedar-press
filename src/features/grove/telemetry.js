@@ -97,4 +97,9 @@ export const EVENT = Object.freeze({
   upgradeOpened: "press.upgrade_opened",
   articleOpened: "press.article_opened",
   cedarAsked: "press.cedar_asked",
+  // The Explore card: a cut narrowed (which filters, never which entity),
+  // downloaded as a file, or kept on the reader's device.
+  exploreCut: "press.explore_cut",
+  exploreDownloaded: "press.explore_downloaded",
+  exploreSaved: "press.explore_saved",
 });

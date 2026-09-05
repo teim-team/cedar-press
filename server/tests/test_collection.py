@@ -629,6 +629,17 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
+    def test_the_explore_contracts_match_the_samples(self) -> None:
+        # The Explore card reads each table through a contract derived from
+        # its sample header (scripts/derive-explore.mjs). A sample whose
+        # columns changed without the contract following fails here, naming
+        # the command; so does a register export behind the spine.
+        result = subprocess.run(  # noqa: S603
+            ["node", str(_REPO / "scripts" / "derive-explore.mjs"), "--check"],
+            capture_output=True, text=True, check=False, cwd=_REPO,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
     def test_the_release_ledger_is_tracked(self) -> None:
         # Codex, PR #52. `.gitignore` excludes `/data/*` as a directory, so a
         # file the site imports from data/cedar/ reaches the repository only
@@ -636,7 +647,8 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         # never committed, and `main` could not build. Every file the client
         # imports from data/cedar/ must be in the index.
         for name in ("collections.manifest.json", "releases.json",
-                     "samples.published.json"):
+                     "samples.published.json", "explore.json",
+                     "explore.overrides.json"):
             with self.subTest(file=name):
                 result = subprocess.run(  # noqa: S603
                     ["git", "-C", str(_REPO), "ls-files", "--error-unmatch",

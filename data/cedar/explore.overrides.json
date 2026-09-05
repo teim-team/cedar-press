@@ -1,0 +1,18 @@
+{
+  "_note": "Hand-written exceptions to scripts/derive-explore.mjs, one table at a time, each with its reason. The derived file is regenerated from the samples; this file wins where it speaks.",
+  "contractors/prime_contracts": {
+    "amount": "total_obligations",
+    "_why": "total_award_value is cumulative and restated on every modification row (docs/MONEY_TOTALLING_RULES.md: NEVER SUM); obligations are the row's own money."
+  },
+  "legislation/native_bills": {
+    "entity_uid": "entity_cedar_uids",
+    "entity_uid_list": true,
+    "year": null,
+    "_why": "A bill names several entities in one pipe-separated cell; the year is the introduced date's."
+  },
+  "nonprofits/np_orgs": {
+    "date": null,
+    "year": null,
+    "_why": "A register of organizations, not events: no row date. The card shows it without a year filter."
+  }
+}
