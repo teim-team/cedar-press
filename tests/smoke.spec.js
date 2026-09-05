@@ -325,6 +325,10 @@ test.describe("Explore the collections", () => {
     await expect(page.locator(".cp-ex__empty")).toBeVisible();
     await openFilters(page);
     await expect(page.getByTestId("explore-type")).toContainText("None");
+    // A link naming two collections says two, not "all".
+    await page.goto("/data?c=funding%7Cdeals");
+    await expect(page.getByTestId("explore-collection")).toContainText("2 collections from this link");
+    await expect(caption).toContainText("2 collections");
     // A link to a collection this catalog does not have is not widened.
     await page.goto("/data?c=gaming");
     await expect(page.getByTestId("explore-notes")).toContainText("Not a collection here: gaming");

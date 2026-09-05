@@ -73,6 +73,7 @@ import { TierName } from "./TierName";
 const REGISTER_PATH = "/data/cedar/register.json";
 const SAVED_KEY = "cp.explore.saved";
 const ALL = "__all__";
+const SUBSET = "__subset__";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
@@ -415,7 +416,7 @@ function YearRange({ cut, bounds, basis, onChange }) {
  * Locked collections are listed and disabled, and the line under the
  * control says what opens them.
  */
-function CollectionSelect({ value, collections, scope, onChange, onActive }) {
+function CollectionSelect({ value, subset, collections, scope, onChange, onActive }) {
   return (
     <label className="cp-ex__collection">
       <span className="cp-ex__picklabel">Collection</span>
@@ -427,6 +428,10 @@ function CollectionSelect({ value, collections, scope, onChange, onActive }) {
         onChange={(e) => { onChange(e.target.value); if (e.target.value !== ALL) onActive(e.target.value); }}
       >
         <option value={ALL}>All {scope.length} open collections (search across)</option>
+        {/* A link can name several collections; the control says so rather
+            than calling a subset "all" (Codex, PR #63). Choosing anything
+            else replaces it. */}
+        {subset ? <option value={SUBSET}>{subset.length} collections from this link: {subset.map(short).join(", ")}</option> : null}
         {collections.map(({ entry, open, previewUnavailable }) => (
           <option key={entry.id} value={entry.id} disabled={!open}>
             {entry.short}{open ? (previewUnavailable ? " · no preview yet" : "") : " · Cedar Press+ · locked"}
@@ -798,7 +803,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
     const stamp = new Date().toISOString().slice(0, 10);
     const files = [
       { name: "records.csv", text: cutCsv(filtered, { view, columns: tableColumns }) },
-      { name: "README.txt", text: cutReadme(filtered, { view, cut: said, register, columns: tableColumns, accessedOn: stamp }) },
+      { name: "README.txt", text: cutReadme(filtered, { view, cut: said, register, columns: tableColumns, accessedOn: stamp, missing: missing.map((k) => k.split("/")[0]) }) },
     ];
     saveZip(`cedar-press-${view === "table" ? "sample" : "summary"}-results-${stamp}.zip`, files);
     track(EVENT.exploreDownloaded, { rows: filtered.length, view, collections: selected.length });
@@ -854,10 +859,15 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   };
 
   const chooseCollection = (value) => {
+    if (value === SUBSET) return;
     if (value === ALL) write({ collections: null, table: null });
     else write({ collections: [value], table: null });
   };
-  const selectValue = cut.collections === null ? ALL : single ? single.entry.id : (selected.length ? ALL : "");
+  const subset = cut.collections !== null && selected.length > 1 ? selected : null;
+  const selectValue = cut.collections === null ? ALL : single ? single.entry.id : subset ? SUBSET : "";
+  // The file is the cut's records: not until every selected preview and the
+  // register have answered, and never silently short (Codex, PR #63).
+  const settling = loading || registerStatus === "loading";
   const lockedCount = collections.filter((c) => !c.open).length;
   const notes = [
     cut.unknown?.length ? `Not a collection here: ${cut.unknown.join(", ")}.` : "",
@@ -895,7 +905,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
         <div className="cp-ex__card">
           <div className="cp-ex__bar" role="group" aria-label="Filters">
-            <CollectionSelect value={selectValue} collections={collections} scope={scope} onChange={chooseCollection} onActive={onActive} />
+            <CollectionSelect value={selectValue} subset={subset} collections={collections} scope={scope} onChange={chooseCollection} onActive={onActive} />
             <input
               type="search"
               className="cp-ex__q"
@@ -912,7 +922,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             ) : filters}
             <div className="cp-ex__acts">
               <button type="button" className="cp-ex__act" onClick={() => setNaming((v) => !v)} aria-expanded={naming}>Save view</button>
-              <button type="button" className="cp-ex__act" onClick={download} disabled={!filtered.length}>
+              <button type="button" className="cp-ex__act" onClick={download} disabled={!filtered.length || settling} title={settling ? "Waiting for every selected preview to load" : undefined}>
                 <span aria-hidden="true">&#8595;</span> {view === "table" ? "Download sample results" : "Download summary results"}
               </button>
               <button type="button" className="cp-ex__act" onClick={copyLink}>{copied ? "Link copied" : "Copy link"}</button>

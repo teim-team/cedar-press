@@ -148,9 +148,12 @@ export function contractFor(columns) {
     ?? pickShape(columns, /_date$/, /fetched|built|ruling|promoted|keyed|deadline|withdrawn|termination|modified|extract|refusal|probed|checked|retrieved|inactivated|release/);
   c.amount = pick(columns, RULES.amount) ?? pickShape(columns, /(_usd|_amount)$/, /real2025|inflation|_pct|share/);
   c.source = pick(columns, RULES.source) ?? pickShape(columns, /url$/, /candidate|allocation|evidence/);
+  // A record id or none: the first column is not an identifier, and a
+  // repeated value there gave ten records one id (Codex, PR #63). A table
+  // with none falls back to its position in the sample.
   c.record_id = pick(columns, RULES.record_id)
     ?? pickShape(columns, /(_id|_uuid|_key|_number)$/, /entity|cedar|parent|prime_award|sub_|companion|sponsor|source_record|report/)
-    ?? columns[0] ?? null;
+    ?? null;
   c.subject = pick(columns, RULES.subject);
   if (c.subject === c.entity_name) c.subject = null;
   c.superseded = pick(columns, RULES.superseded);

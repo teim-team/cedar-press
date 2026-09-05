@@ -202,7 +202,14 @@ function Detail({ entry, owned }) {
           the collection's name alone: what downloads is ten real rows of the
           collection's flagship table, not the collection. */}
       {owned ? (
-        <button type="button" className="cp-read__act" onClick={() => downloadCsv(entry)}>
+        <button
+          type="button"
+          className="cp-read__act"
+          onClick={() => {
+            track(EVENT.collectionDownloaded, { collection: entry.id, shelf: entry.shelf });
+            downloadCsv(entry);
+          }}
+        >
           <span aria-hidden="true">&#8595;</span>{" "}
           {hasReleaseFile(entry)
             ? `Download a ten-row sample of ${entry.short || entry.name}`

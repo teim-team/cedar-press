@@ -349,6 +349,10 @@ test("filters select exactly what they say", () => {
   const byYear = filterRows(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020] });
   assert.deepEqual(byYear.map((r) => r.year), [2019, 2020]);
   assert.equal(excludedBy(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020] }).undated, 1);
+  // Counted within the rest of the cut: the undated row belongs to another
+  // entity, so a cut on Cherokee Nation did not exclude it by year.
+  assert.equal(excludedBy(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020], entities: ["CE-00134-BX"] }).undated, 0);
+  assert.equal(excludedBy(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020], entities: ["CE-00001-6S"] }).undated, 1);
   // The search reads every public cell, so a visible identifier is findable.
   assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, q: "firm b" }).length, 1);
   assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, q: "ccc-3" }).length, 1);
@@ -438,8 +442,17 @@ test("the export is exactly the records it lists, re-imports as such, and its pr
   // A cell a spreadsheet would run as a formula is neutralised; a negative number is not.
   assert.ok(csv.includes("'=SUM(A1)"));
   assert.equal(csvCell("-4163330"), "-4163330");
+  // Quoted for its commas, as any CSV cell with commas is; no apostrophe.
+  assert.equal(csvCell("-4,163,330.50"), '"-4,163,330.50"');
   assert.equal(csvCell("-not a number"), "'-not a number");
+  // The whole value must be a number for the minus to be exempt (Codex, PR #63).
+  assert.equal(csvCell("-1+2"), "'-1+2");
+  assert.equal(csvCell("-1+HYPERLINK(\"x\")"), `"'-1+HYPERLINK(""x"")"`);
+  assert.equal(csvCell("-1-1"), "'-1-1");
   assert.equal(csvCell("+1 (555) 000"), "'+1 (555) 000");
+  // A preview that could not be read is named in the README, never silently short.
+  const partial = cutReadme(rows, { view: "cut", cut, register: REGISTER, missing: ["deals"] });
+  assert.ok(partial.includes("NOT INCLUDED") && partial.includes("Deals"));
   const readme = cutReadme(rows, { view: "cut", cut, register: REGISTER });
   assert.ok(readme.includes("cedarpress.ai"));
   assert.ok(readme.includes("e=CE-00134-BX"));
@@ -464,6 +477,19 @@ test("every flagship sample reads through its contract without a thrown row", ()
   // A Cedar Press+ reader can open all twelve; a Cedar Press reader six.
   assert.equal(explorableCollections(PRO).filter((c) => c.open).length, 12);
   assert.equal(explorableCollections(PRESS).filter((c) => c.open).length, 6);
+});
+
+test("a table with no identifier column has no record id, and its rows keep distinct positional ids", () => {
+  // Codex, PR #63: the first column is not an identifier, and a repeated
+  // value there gave ten records one id.
+  const key = "funding/federal_funding_rulings_from_dofile";
+  assert.equal(contractFor(key)?.record_id, null);
+  const items = universalRows(key, [{ identifier_type: "x" }, { identifier_type: "x" }], REGISTER);
+  assert.notEqual(items[0].id, items[1].id);
+  assert.equal(items[0].recordId, null);
+  for (const [k, c] of Object.entries(CONTRACTS)) {
+    if (c.record_id) assert.ok(/(_id|_uuid|_key|_number|^ein$|^deal_id$)/i.test(c.record_id), `${k}: ${c.record_id} is not an identifier`);
+  }
 });
 
 test("CONTRACTS is the derived file, frozen, and the withheld tables are gone from it", () => {

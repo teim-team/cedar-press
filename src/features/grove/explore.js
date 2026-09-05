@@ -156,9 +156,13 @@ export function parseCsv(text) {
  * "=HYPERLINK(...)" must stay text. Programmatic readers see the apostrophe
  * only on those cells, and the README says so.
  */
+const NUMBER = /^-?\s*(\d[\d,]*)?(\.\d+)?$/;
+
 export function csvCell(value) {
   let text = String(value ?? "");
-  if (/^[=+@]/.test(text) || /^[\t\r]/.test(text) || (/^-/.test(text) && !/^-\s*[\d.]/.test(text))) text = `'${text}`;
+  // A leading minus is exempt only when the WHOLE value is a number:
+  // "-1+HYPERLINK(...)" starts like one and is not (Codex, PR #63).
+  if (/^[=+@]/.test(text) || /^[\t\r]/.test(text) || (/^-/.test(text) && !NUMBER.test(text))) text = `'${text}`;
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -529,10 +533,14 @@ export function filterRows(rows, cut) {
   });
 }
 
-/** What a cut left out and why, so the caption can say it. */
+/**
+ * What a cut left out and why, so the caption can say it: counted among the
+ * rows that satisfy the REST of the cut, so an undated record of another
+ * entity is not reported as excluded by the year range (Codex, PR #63).
+ */
 export function excludedBy(rows, cut) {
-  const undated = cut.years ? rows.filter((r) => r.year == null).length : 0;
-  const superseded = cut.history ? 0 : rows.filter((r) => r.superseded).length;
+  const undated = cut.years ? filterRows(rows, { ...cut, years: null }).filter((r) => r.year == null).length : 0;
+  const superseded = cut.history ? 0 : filterRows(rows, { ...cut, history: true }).filter((r) => r.superseded).length;
   return { undated, superseded };
 }
 
@@ -728,7 +736,7 @@ export function cutCsv(rows, { view, columns = [] }) {
  * cite it, and the cut that made it, so a reader can say exactly which rows
  * these were and reproduce them.
  */
-export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns = [], accessedOn = null }) {
+export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns = [], accessedOn = null, missing = [] }) {
   const collections = [...new Set(rows.map((item) => item.collection))].sort();
   const lines = [
     "Cedar Press · Explore the collections · sample export",
@@ -738,6 +746,9 @@ export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns 
       : `records.csv holds ${rows.length} sample record(s) across ${collections.length} collection(s) in a REDUCED summary shape: one line per record with the entity, its type, the date, a 180-character observation, the amount where the table records one (never comparable across collections) and the source. Use each collection's own download for the full columns.`,
     `Cut: ${describeCut(cut, { register })}`,
     `Cut query (cut version ${CUT_VERSION}): ${encodeCut(cut) || "(none)"}`,
+    ...(missing.length
+      ? ["", `NOT INCLUDED: the preview for ${missing.map((id) => PRESS_CATALOG_BY_ID[id]?.short ?? id).join(", ")} could not be read when this file was made, so the cut above selected more than this file holds.`]
+      : []),
     "",
     "These are ten-row SAMPLES of each table, not the release. Counts here are counts of sample records.",
     "Cells that a spreadsheet would read as a formula (a leading =, + or @) carry a leading apostrophe.",
