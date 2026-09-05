@@ -63,6 +63,7 @@ export function codebookFor(key) {
   return CODEBOOK[key] ?? null;
 }
 
+
 /** The plain-English label for a column, or a heading made from its name. */
 export function labelFor(key, column) {
   const field = CODEBOOK[key]?.fields.find((f) => f.column === column);
@@ -247,16 +248,44 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
   const uids = rowUids(row, contract);
   const ownName = cell(row, contract?.entity_name) || null;
   const ownType = cell(row, contract?.entity_type) || null;
-  if (!uids.length) {
-    return ownName ? [{ uid: null, name: ownName, type: ownType, withheld: false }] : [];
+  const primary = uids.length
+    ? uids.map((uid, i) => {
+      const known = register.byUid.get(uid);
+      if (known) return { uid, name: known.withheld ? null : known.name, type: known.type, withheld: known.withheld, role: null };
+      // Unknown to the register: the table's own columns describe the first
+      // uid only; the rest are uids and nothing more.
+      return { uid, name: i === 0 ? ownName : null, type: i === 0 ? ownType : null, withheld: false, role: null };
+    })
+    : ownName ? [{ uid: null, name: ownName, type: ownType, withheld: false, role: null }] : [];
+  // THE OTHER ROLES. A subaward names the prime's owner and the sub's; a
+  // NAGPRA notice names who was consulted and who receives; a payment names
+  // a beneficiary. The contract declares those columns with their roles, and
+  // every entity they name is an entity of the row, so an entity filter
+  // finds the row through any supported role and not only the first uid
+  // displayed. An entity already in the primary column is not repeated; its
+  // further role is noted on it instead.
+  const byUid = new Map(primary.filter((e) => e.uid).map((e) => [e.uid, e]));
+  for (const declared of contract?.entity_roles ?? []) {
+    const raw = cell(row, declared.column);
+    if (!raw) continue;
+    const parts = declared.list ? raw.split("|") : [raw];
+    for (const part of parts) {
+      const uid = part.trim();
+      if (!UID.test(uid)) continue;
+      const have = byUid.get(uid);
+      if (have) {
+        have.roles = [...(have.roles ?? []), declared.role];
+        continue;
+      }
+      const known = register.byUid.get(uid);
+      const entity = known
+        ? { uid, name: known.withheld ? null : known.name, type: known.type, withheld: known.withheld, role: declared.role }
+        : { uid, name: null, type: null, withheld: false, role: declared.role };
+      byUid.set(uid, entity);
+      primary.push(entity);
+    }
   }
-  return uids.map((uid, i) => {
-    const known = register.byUid.get(uid);
-    if (known) return { uid, name: known.withheld ? null : known.name, type: known.type, withheld: known.withheld };
-    // Unknown to the register: the table's own columns describe the first
-    // uid only; the rest are uids and nothing more.
-    return { uid, name: i === 0 ? ownName : null, type: i === 0 ? ownType : null, withheld: false };
-  });
+  return primary;
 }
 
 /** The first entity, for one-line displays; the full list is `entities`. */

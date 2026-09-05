@@ -1,5 +1,24 @@
 # Note for the terminal: column order and column count in the customer files
 
+> **Read with `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, which came after this
+> note and wins where they differ.** The owner's specification of 2026-09-05
+> changes four things here: (1) the identity block is `cedar_uid`,
+> `cedar_entity_name`, `cedar_entity_type`, **`cedar_entity_role`**, not
+> `cedar_uid`, `canonical_name`, `entity_class`; the role column says why the
+> entity is on the row. (2) The customer file is written from an **approved
+> field list**, not from the file's header minus a drop list: every current
+> column has a decision in `data/cedar/field_map.json` (rendered as
+> `docs/FIELD_MAP_2026-09-05.md`), and a column without one fails the build
+> instead of shipping. (3) Mixed-purpose `Notes` columns become substantive
+> fields and, only where needed, a short `research_note`; developer material
+> (script names, paths, run ids, parser templates, token matches, agreement
+> counts, proposed redirects, queues) never ships. (4) Funding and contractors
+> gain an award-recipient-fiscal-year public grain where the transaction
+> history supports it, with the transactions kept internally; lobbying becomes
+> the flagship of an Advocacy collection with `activity_id` and
+> `activity_type`. The tier-C controls, rule 4 (never drop for emptiness) and
+> rule 5 (identifiers stay, cells masked never columns) stand.
+
 Written 2026-09-05 from the twelve flagship samples in `public/data/cedar/samples/`
 (ten rows each, headers read in full) after the owner asked whether every column in
 each dataset is necessary and whether the Cedar variables come first. This is a
