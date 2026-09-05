@@ -633,57 +633,90 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
-    def test_a_sample_naming_a_withheld_firm_is_struck_before_it_is_copied(self) -> None:
-        # The publication rule, proven by injection: a planted manifest with
-        # two samples, one carrying a withheld name in an ordinary column,
-        # the other clean. The struck table loses its path and says why; the
-        # flagship entry follows; the clean one is untouched. And the served
-        # files: none carries such a name today (six did on 2026-09-05).
+    def test_a_sample_publishing_a_withheld_field_is_struck_before_it_is_copied(self) -> None:
+        # The publication rule, proven by injection, in the layout the IMPORT
+        # reads (dist/review/samples/<cedar_id>/) and the layout the AUDIT
+        # reads (public/<manifest path>): Codex, PR #63, found the first
+        # joined a URL to the bundle and struck nothing. Field-level, the way
+        # the rule is written: a row of the withheld class with an owner's
+        # name and no consent is struck even when no cell is the firm's
+        # canonical name; the same row with consent recorded is not; a row
+        # of another class carrying the same column is not; a firm's name
+        # under any column is the backstop.
         import tempfile
-        names = self.script.withheld_names(_REPO / "data" / "spine" / "cedar_entity_names.csv")
+        names, uids = self.script.withheld_entities(
+            _REPO / "data" / "spine" / "cedar_entity_names.csv")
         self.assertEqual(len(names), 45)
+        self.assertEqual(len(uids), 45)
         leaked = next(iter(names)).title()
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            folder = root / "data" / "cedar" / "samples" / "fixture"
-            folder.mkdir(parents=True)
-            # Written by the csv module: a firm name with a comma in it must
-            # arrive as one quoted cell, or the planted leak is not a leak.
-            for name, firm in (("dirty", leaked), ("clean", "Cherokee Nation")):
+        uid = next(iter(uids))
+        cls = self.script.WITHHELD_CLASS
+
+        def plant(folder: Path, rows_by_name: dict[str, list[list[str]]]) -> None:
+            folder.mkdir(parents=True, exist_ok=True)
+            for name, rows in rows_by_name.items():
                 with (folder / f"{name}__10.csv").open("w", encoding="utf-8", newline="") as handle:
                     writer = csv.writer(handle)
-                    writer.writerow(["id", "firm", "amount"])
-                    writer.writerow(["1", firm, "5"])
-            at = "/data/cedar/samples/fixture"
-            manifest = {"collections": [{
+                    writer.writerows(rows)
+
+        head = ["cedar_uid", "entity_class", "owner_name", "consent_status", "amount"]
+        samples = {
+            # No canonical name anywhere; the owner's name is the leak.
+            "owner": [head, [uid, cls, "A Person", "NOT_ASKED", "5"]],
+            "consented": [head, [uid, cls, "A Person", "OPTED_IN", "5"]],
+            "tribal": [head, ["CE-00134-BX", "Federally recognized tribe", "A Person", "", "5"]],
+            "named": [["id", "firm", "amount"], ["1", leaked, "5"]],
+            "clean": [["id", "firm", "amount"], ["1", "Cherokee Nation", "5"]],
+        }
+        at = "/data/cedar/samples/fixture"
+
+        def manifest() -> dict:
+            return {"collections": [{
                 "id": "fixture",
-                "sample": {"table": "dirty.csv", "path": f"{at}/dirty__10.csv"},
-                "tables": [
-                    {"table": "dirty.csv", "sample_path": f"{at}/dirty__10.csv"},
-                    {"table": "clean.csv", "sample_path": f"{at}/clean__10.csv"},
-                    {"table": "absent.csv", "sample_path": f"{at}/absent__10.csv"},
-                ],
+                "cedar": {"cedar_id": "fixture"},
+                "sample": {"table": "owner.csv", "path": f"{at}/owner__10.csv"},
+                "tables": [{"table": f"{name}.csv", "sample_path": f"{at}/{name}__10.csv"}
+                           for name in [*samples, "absent"]],
             }]}
-            struck = self.script.withhold_samples(manifest, root, names)
-        self.assertEqual([s["table"] for s in struck], ["dirty.csv"])
-        self.assertEqual(struck[0]["columns"], ["firm"])
-        dirty, clean, absent = manifest["collections"][0]["tables"]
-        self.assertIsNone(dirty["sample_path"])
-        self.assertIn("without recorded consent", dirty["sample_withheld_why"])
-        self.assertEqual(clean["sample_path"], f"{at}/clean__10.csv")
-        self.assertEqual(absent["sample_path"], f"{at}/absent__10.csv")
-        self.assertIsNone(manifest["collections"][0]["sample"]["path"])
-        flagship = manifest["collections"][0]["sample"]
-        self.assertIn("without recorded consent", flagship["unavailable_because"])
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            # The import layout.
+            plant(root / "dist" / "review" / "samples" / "fixture", samples)
+            imported = manifest()
+            struck = self.script.withhold_samples(
+                imported, self.script.review_sample(root), names, uids)
+            self.assertEqual(sorted(s["table"] for s in struck), ["named.csv", "owner.csv"])
+            by_table = {s["table"]: s for s in struck}
+            self.assertEqual(by_table["owner.csv"]["columns"], ["owner_name"])
+            self.assertEqual(by_table["named.csv"]["columns"], ["firm"])
+            tables = {t["table"]: t for t in imported["collections"][0]["tables"]}
+            self.assertIsNone(tables["owner.csv"]["sample_path"])
+            self.assertIn("without recorded consent", tables["owner.csv"]["sample_withheld_why"])
+            for kept in ("consented.csv", "tribal.csv", "clean.csv", "absent.csv"):
+                self.assertTrue(tables[kept]["sample_path"], kept)
+            flagship = imported["collections"][0]["sample"]
+            self.assertIsNone(flagship["path"])
+            self.assertIn("without recorded consent", flagship["unavailable_because"])
+            # The served copy of a struck sample from an earlier import goes.
+            plant(root / "public" / "data" / "cedar" / "samples" / "fixture", samples)
+            self.script.unpublish(root, struck)
+            served = root / "public" / "data" / "cedar" / "samples" / "fixture"
+            self.assertFalse((served / "owner__10.csv").exists())
+            self.assertFalse((served / "named__10.csv").exists())
+            self.assertTrue((served / "clean__10.csv").exists())
+            # The audit layout, on a public/ that still serves the two.
+            plant(served, samples)
+            audited = manifest()
+            struck_public = self.script.withhold_samples(
+                audited, self.script.public_sample(root), names, uids)
+            self.assertEqual(sorted(s["table"] for s in struck_public), ["named.csv", "owner.csv"])
         # The files public/ serves.
         for path in (_REPO / "public" / "data" / "cedar" / "samples").rglob("*.csv"):
-            with path.open(encoding="utf-8", newline="") as handle:
-                for row in csv.reader(handle):
-                    for cell in row:
-                        self.assertNotIn(
-                            cell.strip().lower(), names,
-                            f"{path} carries a withheld name; run import_cedar_manifest.py --audit",
-                        )
+            self.assertEqual(
+                self.script.sample_violations(path, names, uids), [],
+                f"{path} publishes a withheld field; run import_cedar_manifest.py --audit",
+            )
 
     def test_the_explore_contracts_match_the_samples(self) -> None:
         # The Explore card reads each table through a contract derived from

@@ -19,6 +19,13 @@ os.environ["CEDAR_PRESS_ACCOUNTS"] = json.dumps(
     {
         "reader@example.org": {"password": "correct-horse", "tier": "press"},
         "pro@example.org": {"password": "correct-horse", "tier": "press_pro"},
+        # Two seats of one subscription: the organization earns once.
+        "one@bank.example": {
+            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+        },
+        "two@bank.example": {
+            "password": "correct-horse", "tier": "press_pro", "account": "acct-bank"
+        },
     }
 )
 os.environ["CEDAR_PRESS_CODES"] = json.dumps(
@@ -630,3 +637,85 @@ class TestRateLimiting(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestShapeTheResearch(unittest.TestCase):
+    """The points endpoints: earning, spending, requests, and the subscription boundary."""
+
+    def setUp(self) -> None:
+        self.client = TestClient(app)
+
+    def _sign_in(self, email: str) -> TestClient:
+        c = TestClient(app)
+        signed = c.post("/auth/login", json={"email": email, "password": "correct-horse"})
+        self.assertEqual(signed.status_code, 200)
+        return c
+
+    def test_everything_needs_a_session(self) -> None:
+        for path in ("/press/priorities", "/press/influence", "/press/priorities/related?q=x"):
+            self.assertEqual(self.client.get(path).status_code, 401, path)
+        move = self.client.post(
+            "/press/priorities/ds-deals-back-to-2010/points", json={"points": 1}
+        )
+        self.assertEqual(move.status_code, 401)
+        ask = self.client.post("/press/requests", json={"text": "a request long enough"})
+        self.assertEqual(ask.status_code, 401)
+
+    def test_the_first_visit_of_the_month_credits_once_and_the_card_says_so(self) -> None:
+        c = self._sign_in("pro@example.org")
+        first = c.get("/press/influence").json()
+        self.assertEqual(first["points_per_active_month"], 2)
+        self.assertTrue(first["credited_this_month"])
+        before = first["points_available"]
+        for _ in range(5):
+            c.get("/me")
+            c.get("/press/influence")
+        self.assertEqual(c.get("/press/influence").json()["points_available"], before)
+
+    def test_points_move_and_the_list_shows_points_and_subscribers(self) -> None:
+        c = self._sign_in("reader@example.org")
+        available = c.get("/press/influence").json()["points_available"]
+        self.assertGreaterEqual(available, 1)
+        moved = c.post("/press/priorities/ds-tribal-state-compacts/points", json={"points": 1})
+        self.assertEqual(moved.status_code, 200, moved.text)
+        self.assertEqual(moved.json()["points_available"], available - 1)
+        listed = c.get("/press/priorities").json()
+        row = next(p for p in listed["priorities"] if p["id"] == "ds-tribal-state-compacts")
+        self.assertGreaterEqual(row["points"], 1)
+        self.assertGreaterEqual(row["subscribers"], 1)
+        self.assertEqual(listed["rules"]["expiry_months"], 12)
+        # More than is available is refused with a message the client shows.
+        refused = c.post("/press/priorities/ds-tribal-state-compacts/points", json={"points": 99})
+        self.assertEqual(refused.status_code, 400)
+        self.assertIn("Not enough", refused.json()["message"])
+        unknown = c.post("/press/priorities/nope/points", json={"points": 1})
+        self.assertEqual(unknown.status_code, 400)
+        # And back.
+        back = c.post("/press/priorities/ds-tribal-state-compacts/points", json={"points": -1})
+        self.assertEqual(back.status_code, 200)
+        self.assertEqual(back.json()["points_available"], available)
+
+    def test_two_seats_share_one_subscription(self) -> None:
+        one = self._sign_in("one@bank.example")
+        two = self._sign_in("two@bank.example")
+        a = one.get("/press/influence").json()
+        b = two.get("/press/influence").json()
+        self.assertEqual(a["account_id"], "acct-bank")
+        self.assertEqual(a["points_available"], b["points_available"])
+
+    def test_a_request_is_read_against_the_priorities_and_kept_beside_one(self) -> None:
+        c = self._sign_in("pro@example.org")
+        text = "I wish you had a dataset showing which tribal enterprises own which subsidiaries"
+        hits = c.get("/press/priorities/related", params={"q": text}).json()["matches"]
+        self.assertEqual(hits[0]["id"], "ds-enterprise-ownership")
+        sent = c.post(
+            "/press/requests",
+            json={"text": text, "use_case": "credit analysis", "priority_id": hits[0]["id"],
+                  "support_points": 1},
+        )
+        self.assertEqual(sent.status_code, 201, sent.text)
+        self.assertEqual(sent.json()["status"], "associated")
+        self.assertIn("support", sent.json())
+        card = c.get("/press/influence").json()
+        self.assertEqual(card["requests"][0]["title"], hits[0]["title"])
+        self.assertEqual(c.post("/press/requests", json={"text": "short"}).status_code, 400)

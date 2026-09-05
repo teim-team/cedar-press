@@ -753,6 +753,7 @@ Elijah's own Dippel correspondence proves that **no reliable corporate-hierarchy
 Name similarity ≠ relatedness ("Cherokee Inc." trap). DBA ≠ legal name. Subsidiaries don't share parent names. Firm ≠ establishment. Identifiers change on ownership events. Therefore: match conservatively, leave ambiguous blank and flagged (the 34 unmatched BGOV tribes and 3 corrected village-corp region mappings are the model — my own auto-matcher produced Sea Lion→Koniag via a token trap; audit every automated match against ground truth).
 
 ## Queue (highest value first)
+0. **Column order and count in the customer files** — `docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md`: the Cedar identity block (`cedar_uid`, `canonical_name`, `entity_class`) first in every table, tier-C bookkeeping out of `dist/customer/` and the samples, `source_url` written where the site builds it today. Per-table lists with the reasoning; the owner decides.
 1. Get the **do-file**; review the 117 QC-flagged panel rows against it.
 2. Comprehensive FPDS pull (both methodologies) via HigherGov/USAspending → upload → match through Entity_Master aliases + NEID; build the ownership-change ledger from the deal rows.
 3. TBCP + HUD ONAP award lists via manual download → row-per-award (path to 500+; channel inventory with counts lives in Backfill_Plan).
@@ -9120,3 +9121,18 @@ tables, Cedar answering from the cut, and extracts pinned to a release and
 shared by link all need the API deployed with authorization on every request,
 and the cut is the interface they consume; do not build a second query shape
 for them.
+
+## 2026-09-05 — Shape the Research: points that inform, on an append-only ledger
+
+Cedar Press subscribers now earn Cedar Points and put them on research
+questions and data priorities (`server/cedar_press/priorities.py`,
+`docs/ARCHITECTURE.md` "Shape the Research"). The rules to keep: the
+SUBSCRIPTION earns, once a month, on the first sign-in of the month (the
+unique index is the rule; do not "award a point per login"); Press 1, Press+
+2; twelve-month expiry, oldest spent first; points and subscriber counts are
+both shown, always; the ledger is append-only and a balance is a sum, never a
+stored number; the priorities file is the owner's editorial data and the
+service never writes it. A request in a subscriber's words is read against
+the list (the same function in both languages) and kept beside the priority
+as evidence. Points inform and the copy says so; never let a total set the
+agenda mechanically, and never count a point on the client.

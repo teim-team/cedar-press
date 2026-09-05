@@ -409,52 +409,122 @@ def _float(value: str) -> float | None:
         return None
 
 
-#: The one entity class whose names the publication rule withholds absent
-#: recorded consent (code/cedar_domain.py may_publish_individual_native_field:
-#: a firm's own website is evidence, never permission).
-WITHHELD_CLASS = "Individually Native-owned business"
+#: The publication rule itself, from the workspace's own module: the withheld
+#: class, the per-field lists and the predicate. Loaded by path so this script
+#: cannot drift from the rule it enforces; if the module is missing the
+#: importer refuses rather than guessing (fail closed).
+def _publication_rule():
+    import importlib.util
+    source = REPO / "code" / "cedar_domain.py"
+    spec = importlib.util.spec_from_file_location("cedar_domain", source)
+    if spec is None or spec.loader is None:
+        raise SystemExit(f"publication rule not found at {source}; refusing to import samples")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_RULE = _publication_rule()
+WITHHELD_CLASS = _RULE.INDIVIDUAL_NATIVE_CLASS
+WITHHELD_FIELDS = frozenset(_RULE.INDIVIDUAL_NATIVE_WITHHELD_FIELDS)
+may_publish_individual_native_field = _RULE.may_publish_individual_native_field
 
 WITHHELD_WHY = (
-    "The sample carries the name of an individually Native-owned firm without "
-    "recorded consent; may_publish_individual_native_field withholds it, so the "
-    "file is not published. The table is still in the release."
+    "The sample carries a field the publication rule withholds for an individually "
+    "Native-owned firm without recorded consent (may_publish_individual_native_field), "
+    "so the file is not published. The table is still in the release."
 )
 
 
-def withheld_names(spine_names: Path) -> frozenset[str]:
-    """Every register name in the withheld class, lowercased and trimmed."""
+def withheld_entities(spine_names: Path) -> tuple[frozenset[str], frozenset[str]]:
+    """The withheld class in the register: (names lowercased and trimmed, uids)."""
+    names: set[str] = set()
+    uids: set[str] = set()
     with spine_names.open(encoding="utf-8", newline="") as handle:
-        return frozenset(
-            row["name"].strip().lower()
-            for row in csv.DictReader(handle)
-            if row["entity_class"] == WITHHELD_CLASS and row["name"].strip()
-        )
+        for row in csv.DictReader(handle):
+            if row["entity_class"] != WITHHELD_CLASS:
+                continue
+            uids.add(row["cedar_uid"].strip())
+            if row["name"].strip():
+                names.add(row["name"].strip().lower())
+    return frozenset(names), frozenset(uids)
 
 
-def sample_carries_withheld_name(sample: Path, names: frozenset[str]) -> list[str]:
-    """The columns of a sample file with a cell equal to a withheld name."""
+def withheld_names(spine_names: Path) -> frozenset[str]:
+    return withheld_entities(spine_names)[0]
+
+
+def sample_violations(sample: Path, names: frozenset[str], uids: frozenset[str]) -> list[str]:
+    """The columns of a sample that publish what the rule withholds.
+
+    Field-level, the way the rule is written (Codex, PR #63): a row is an
+    individual-business row when any cell is one of the class's uids or
+    names or its ``entity_class`` is the class; on such a row every non-empty
+    column in the withheld-field list is a violation unless
+    ``may_publish_individual_native_field`` releases it for that row's
+    ``consent_status`` and ``firm_legal_name_is_person``. A cell equal to a
+    withheld name under ANY column is a violation as well (the backstop for a
+    name carried under a header the list does not know), again unless the
+    row records consent.
+    """
     hit: list[str] = []
     with sample.open(encoding="utf-8", newline="") as handle:
-        reader = csv.reader(handle)
-        header = next(reader, [])
-        for row in reader:
-            for column, cell in zip(header, row):
-                if cell.strip().lower() in names and column not in hit:
+        for row in csv.DictReader(handle):
+            cells = {column: (value or "").strip() for column, value in row.items() if column}
+            individual = (
+                cells.get("entity_class") == WITHHELD_CLASS
+                or any(value in uids for value in cells.values())
+                or any(value.lower() in names for value in cells.values())
+            )
+            if not individual:
+                continue
+            consent = cells.get("consent_status", "NOT_ASKED")
+            person = cells.get("firm_legal_name_is_person")
+            for column, value in cells.items():
+                if not value:
+                    continue
+                withheld_field = column in WITHHELD_FIELDS and not may_publish_individual_native_field(
+                    column, name_is_person=person, consent_status=consent
+                )
+                named = value.lower() in names and consent.upper() != "OPTED_IN"
+                if (withheld_field or named) and column not in hit:
                     hit.append(column)
     return hit
 
 
-def withhold_samples(manifest: dict, sample_root: Path, names: frozenset[str]) -> list[dict]:
-    """Strike every declared sample that carries a withheld name.
+def sample_carries_withheld_name(sample: Path, names: frozenset[str]) -> list[str]:
+    """The name backstop alone; kept for callers that have no uid list."""
+    return sample_violations(sample, names, frozenset())
 
-    Applied to the manifest in place: the table keeps its row counts and its
-    release facts and loses its ``sample_path``, gaining ``sample_withheld_why``
-    and the columns that carried the name; a flagship so struck leaves the
-    collection's ``sample`` entry with the reason. Returns what was struck so
-    the caller can delete the files. Pure over its inputs, so the tests can
-    plant a sample and prove the strike; on 2026-09-05 six deployed sample
-    files under native-owned-businesses/ carried these names, and this is
-    what stops it recurring on the next import.
+
+def review_sample(workspace: Path):
+    """Where the importer reads a table's sample: the review bundle's layout."""
+    def locate(collection: dict, table: dict) -> Path:
+        cedar_id = collection["cedar"]["cedar_id"]
+        return workspace / "dist" / "review" / "samples" / cedar_id / f"{Path(table['table']).stem}__10.csv"
+    return locate
+
+
+def public_sample(repo: Path):
+    """Where the site serves a table's sample: the manifest's own path under public/."""
+    def locate(collection: dict, table: dict) -> Path:
+        return repo / "public" / table["sample_path"].lstrip("/")
+    return locate
+
+
+def withhold_samples(manifest: dict, locate, names: frozenset[str], uids: frozenset[str] = frozenset()) -> list[dict]:
+    """Strike every declared sample that publishes what the rule withholds.
+
+    ``locate(collection, table)`` says where the file is: the review bundle's
+    layout on an import, ``public/`` on an audit (Codex, PR #63: the manifest
+    path is a URL, not the bundle's layout, and joining it to the bundle found
+    nothing and struck nothing). Applied to the manifest in place: the table
+    keeps its row counts and its release facts and loses its ``sample_path``,
+    gaining ``sample_withheld_why`` and the offending columns; a flagship so
+    struck leaves the collection's ``sample`` entry with the reason. Returns
+    what was struck, with the served path, so the caller deletes the file
+    an earlier import may have published. Pure over its inputs, so the tests
+    can plant a sample and prove the strike.
     """
     struck: list[dict] = []
     for collection in manifest["collections"]:
@@ -463,10 +533,10 @@ def withhold_samples(manifest: dict, sample_root: Path, names: frozenset[str]) -
             path = table.get("sample_path")
             if not path:
                 continue
-            file = sample_root / path.lstrip("/")
+            file = locate(collection, table)
             if not file.exists():
                 continue
-            columns = sample_carries_withheld_name(file, names)
+            columns = sample_violations(file, names, uids)
             if not columns:
                 continue
             table["sample_path"] = None
@@ -483,6 +553,14 @@ def withhold_samples(manifest: dict, sample_root: Path, names: frozenset[str]) -
     return struck
 
 
+def unpublish(repo: Path, struck: list[dict]) -> None:
+    """Delete the served copy of every struck sample, if an earlier import published one."""
+    for entry in struck:
+        served = repo / "public" / entry["path"].lstrip("/")
+        if served.exists():
+            served.unlink()
+
+
 def audit(repo: Path = REPO) -> list[dict]:
     """Apply the withholding rule to the committed manifest and public/ files.
 
@@ -493,10 +571,9 @@ def audit(repo: Path = REPO) -> list[dict]:
     """
     manifest_path = repo / "data" / "cedar" / "collections.manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    names = withheld_names(repo / "data" / "spine" / "cedar_entity_names.csv")
-    struck = withhold_samples(manifest, repo / "public", names)
-    for entry in struck:
-        (repo / "public" / entry["path"].lstrip("/")).unlink()
+    names, uids = withheld_entities(repo / "data" / "spine" / "cedar_entity_names.csv")
+    struck = withhold_samples(manifest, public_sample(repo), names, uids)
+    unpublish(repo, struck)
     if struck:
         manifest_path.write_text(
             json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -548,8 +625,11 @@ def main() -> int:
     # The publication rule, before a file becomes a public asset: a sample
     # that names an individually Native-owned firm without consent is struck
     # from the manifest here and never copied below.
-    names = withheld_names(workspace / "data" / "spine" / "cedar_entity_names.csv")
-    struck = withhold_samples(manifest, workspace / "dist" / "review", names)
+    names, uids = withheld_entities(workspace / "data" / "spine" / "cedar_entity_names.csv")
+    struck = withhold_samples(manifest, review_sample(workspace), names, uids)
+    # And the copy an earlier import may have published: skipping the new
+    # copy alone would leave the old file served (Codex, PR #63).
+    unpublish(REPO, struck)
     for entry in struck:
         print(f"  withheld  {entry['path']}  ({', '.join(entry['columns'])})")
     out = REPO / "data" / "cedar" / "collections.manifest.json"

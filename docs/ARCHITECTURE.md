@@ -63,10 +63,10 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 63 — `features/grove` 39, `pages/grove` 22, `components/grove` 1, `styles/grove` 1 |
-| Path references to rewrite | 224, across 58 files |
-| Referencing files inside `src/` | 24 — `pages/` 18, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 34 — `server/cedar_press/` 7, `scripts/` 6, `docs/` 6, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1, `AGENTS.md` 1 |
+| Files to move | 69 — `features/grove` 42, `pages/grove` 25, `components/grove` 1, `styles/grove` 1 |
+| Path references to rewrite | 247, across 62 files |
+| Referencing files inside `src/` | 27 — `pages/` 21, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 35 — `server/cedar_press/` 8, `scripts/` 6, `docs/` 6, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1, `AGENTS.md` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 224 references get rewritten?" is a question the build, the
+First, "did all 247 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 224 references get rewritten?",
+is one of the three things that answer "did all 247 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
@@ -354,6 +354,49 @@ a release, shareable by opaque link, private by default, with the rows
 following the viewer's own entitlement (`may_open`) and every open logged.
 `CUT_VERSION` names the cut's shape so the service can accept older links and
 say what changed.
+
+## Shape the Research
+
+A Cedar Press subscription earns Cedar Points for using the product and
+spends them on what Cedar should research or build next. The rule and the
+ledger are `server/cedar_press/priorities.py`; the endpoints are in `app.py`
+(`/press/priorities`, `/press/priorities/related`, `/press/influence`,
+`/press/priorities/{id}/points`, `/press/requests`); the client is
+`features/grove/pressPriorities.js` (the seed, the words, the same
+related-priority search), `features/grove/usePriorities.js` (the reads),
+`pages/grove/CedarPressPriorities.jsx` (the page), `pages/grove/PressInfluence.jsx`
+(the profile's card) and `pages/grove/PressPrioritiesBlock.jsx` (the homepage).
+
+THE RULE. The SUBSCRIPTION (not each seat) earns points once per calendar
+month, the first time anyone on it signs in that month: Cedar Press 1, Cedar
+Press+ 2. The unique index on (account, month) is what makes a refresh, a
+sign-out and back, or forty sessions credit nothing more. Points expire
+twelve months after the month they were earned if unspent, oldest spent
+first. A subscriber puts points on priorities in any amounts and takes them
+back; every priority shows its points and how many subscriptions put them
+there. Points inform; feasibility, data quality, research value and Cedar's
+editorial judgment sit beside them, and the copy says so.
+
+THE LEDGER IS APPEND-ONLY: `research_points_ledger` rows say why every point
+came or went (`monthly_activity`, `allocation`, `refund`, `expiration`);
+`priority_allocations` is derived for the totals; `research_requests` keeps
+a subscriber's own words beside the priority they read as related, with the
+stated use, so Cedar sees behind a priority the points, the subscriptions and
+the requests. Two seats naming one `account` in `CEDAR_PRESS_ACCOUNTS` share
+one ledger.
+
+THE PRIORITIES ARE THE OWNER'S: `data/cedar/priorities.json` (force-added)
+holds the titles, descriptions, types (research question or dataset),
+statuses (interest, under review, research underway, data construction
+underway, published), what got published and what evolved from what. The
+service re-seeds those fields on start and never writes them; counts live
+only in the ledger. The store is SQLite through the standard library, at
+`CEDAR_PRESS_DB` (in memory when unset, which a deployment must not leave).
+
+WITHOUT THE SERVICE the page lists the seeded priorities with no counts and
+says the counting begins with the service; nothing counts a point on the
+client, and a build without the service never shows a zero that means
+"unknown".
 
 ## Interface conventions
 

@@ -206,3 +206,5 @@ _profile_cache.json
 # gitlink with no .gitmodules entry they become an unusable pseudo-submodule
 # and `git submodule status` fails on a fresh checkout.
 .claude/worktrees/
+# Shape the Research: the service's SQLite ledger, when CEDAR_PRESS_DB points here.
+server/var/

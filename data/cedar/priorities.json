@@ -1,0 +1,21 @@
+{
+  "_note": "Shape the Research: the priorities subscribers can put Cedar Points toward. The owner edits this file: titles, descriptions, type (research_question or dataset), status (interest, under_review, research_underway, data_construction_underway, published), published_output (a path or URL once something ships) and evolved_from (a research question that became a dataset, or the reverse). The service seeds and re-seeds its table from this file on start; points and subscriber counts live in the service's ledger and are never written here.",
+  "rules": {
+    "points_per_active_month": { "press": 1, "press_pro": 2 },
+    "expiry_months": 12,
+    "note": "A subscription earns its points the first time anyone on it signs in during a calendar month; a month without a sign-in earns nothing, and sign-ins after the first earn nothing more. Points expire twelve months after they were earned if unspent. Priorities are considered alongside feasibility, data quality, research value and Cedar's editorial judgment; points do not set the agenda mechanically."
+  },
+  "priorities": [
+    { "id": "rq-tribal-enterprise-revenue", "type": "research_question", "title": "How much revenue do tribal enterprises generate?", "description": "An estimate of the revenue of tribally owned enterprises, by sector and by owner, with the evidence behind it and the gaps stated.", "status": "interest" },
+    { "id": "rq-energy-financing", "type": "research_question", "title": "How are tribes financing energy development?", "description": "The capital behind tribal energy projects: federal grants and loans, tax credits, private partners and tribal equity, project by project where the record allows.", "status": "interest" },
+    { "id": "rq-federal-funding-composition", "type": "research_question", "title": "How has federal funding composition changed by tribal nation?", "description": "For each nation, which programs and agencies the money comes from and how that mix has moved over the fiscal years Cedar covers.", "status": "interest" },
+    { "id": "rq-native-cdfi-lending", "type": "research_question", "title": "What is happening with Native CDFI lending?", "description": "Lending volumes, products and borrowers across the certified Native CDFIs, and how the sector has grown.", "status": "interest" },
+    { "id": "ds-enterprise-ownership", "type": "dataset", "title": "Tribal enterprise ownership and subsidiary relationships", "description": "A more complete record of tribal enterprises, their subsidiaries, ownership changes and parent relationships, building on the Native Enterprises collection.", "status": "interest" },
+    { "id": "ds-tribal-state-compacts", "type": "dataset", "title": "Tribal-state compact database", "description": "Gaming, tax, water and other compacts between tribes and states: the parties, the terms that can be stated, the dates and the documents.", "status": "interest" },
+    { "id": "ds-tribal-energy-projects", "type": "dataset", "title": "Tribal energy project database", "description": "Energy projects on tribal lands or owned by tribes: technology, capacity, partners, financing and status.", "status": "interest" },
+    { "id": "ds-deals-back-to-2010", "type": "dataset", "title": "Expand Deals backward to 2010", "description": "Extend the Indian Country Deals collection from its current floor back to 2010, with the same verification standard.", "status": "interest" },
+    { "id": "ds-tero-business-directories", "type": "dataset", "title": "Add more tribal TERO and business directories", "description": "Harvest and reconcile more tribal employment rights office and business directories into the Native-owned business register.", "status": "interest" },
+    { "id": "ds-historical-lobbying", "type": "dataset", "title": "Improve historical lobbying coverage", "description": "Close the gaps in pre-2008 Lobbying Disclosure Act filings and their attribution to Native entities.", "status": "interest" },
+    { "id": "ds-lending-capital-markets", "type": "dataset", "title": "Add lending and capital-market transactions", "description": "Loans, bonds and other capital-market transactions involving Native entities, from the sources that record them.", "status": "interest" }
+  ]
+}

@@ -16,11 +16,13 @@ import { fileURLToPath } from "node:url";
 
 import { LAUNCH_COLLECTION, collectionTables } from "./collection.js";
 import {
+  CODEBOOK,
   CONTRACTS,
   EMPTY_CUT,
   UNLINKED,
   WITHHELD_TEXT,
   buildRegister,
+  codebookColumns,
   contractFor,
   csvCell,
   cutCsv,
@@ -35,6 +37,8 @@ import {
   filterRows,
   flagshipKey,
   isNarrowed,
+  labelFor,
+  meaningFor,
   observationOf,
   pageOf,
   parseCsv,
@@ -349,6 +353,10 @@ test("filters select exactly what they say", () => {
   const byYear = filterRows(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020] });
   assert.deepEqual(byYear.map((r) => r.year), [2019, 2020]);
   assert.equal(excludedBy(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020] }).undated, 1);
+  // Counted within the rest of the cut: the undated row belongs to another
+  // entity, so a cut on Cherokee Nation did not exclude it by year.
+  assert.equal(excludedBy(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020], entities: ["CE-00134-BX"] }).undated, 0);
+  assert.equal(excludedBy(PLANTED_ROWS, { ...EMPTY_CUT, years: [2019, 2020], entities: ["CE-00001-6S"] }).undated, 1);
   // The search reads every public cell, so a visible identifier is findable.
   assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, q: "firm b" }).length, 1);
   assert.equal(filterRows(PLANTED_ROWS, { ...EMPTY_CUT, q: "ccc-3" }).length, 1);
@@ -438,8 +446,17 @@ test("the export is exactly the records it lists, re-imports as such, and its pr
   // A cell a spreadsheet would run as a formula is neutralised; a negative number is not.
   assert.ok(csv.includes("'=SUM(A1)"));
   assert.equal(csvCell("-4163330"), "-4163330");
+  // Quoted for its commas, as any CSV cell with commas is; no apostrophe.
+  assert.equal(csvCell("-4,163,330.50"), '"-4,163,330.50"');
   assert.equal(csvCell("-not a number"), "'-not a number");
+  // The whole value must be a number for the minus to be exempt (Codex, PR #63).
+  assert.equal(csvCell("-1+2"), "'-1+2");
+  assert.equal(csvCell("-1+HYPERLINK(\"x\")"), `"'-1+HYPERLINK(""x"")"`);
+  assert.equal(csvCell("-1-1"), "'-1-1");
   assert.equal(csvCell("+1 (555) 000"), "'+1 (555) 000");
+  // A preview that could not be read is named in the README, never silently short.
+  const partial = cutReadme(rows, { view: "cut", cut, register: REGISTER, missing: ["deals"] });
+  assert.ok(partial.includes("NOT INCLUDED") && partial.includes("Deals"));
   const readme = cutReadme(rows, { view: "cut", cut, register: REGISTER });
   assert.ok(readme.includes("cedarpress.ai"));
   assert.ok(readme.includes("e=CE-00134-BX"));
@@ -464,6 +481,54 @@ test("every flagship sample reads through its contract without a thrown row", ()
   // A Cedar Press+ reader can open all twelve; a Cedar Press reader six.
   assert.equal(explorableCollections(PRO).filter((c) => c.open).length, 12);
   assert.equal(explorableCollections(PRESS).filter((c) => c.open).length, 6);
+});
+
+test("a table with no identifier column has no record id, and its rows keep distinct positional ids", () => {
+  // Codex, PR #63: the first column is not an identifier, and a repeated
+  // value there gave ten records one id.
+  const key = "funding/federal_funding_rulings_from_dofile";
+  assert.equal(contractFor(key)?.record_id, null);
+  const items = universalRows(key, [{ identifier_type: "x" }, { identifier_type: "x" }], REGISTER);
+  assert.notEqual(items[0].id, items[1].id);
+  assert.equal(items[0].recordId, null);
+  for (const [k, c] of Object.entries(CONTRACTS)) {
+    if (c.record_id) assert.ok(/(_id|_uuid|_key|_number|^ein$|^deal_id$)/i.test(c.record_id), `${k}: ${c.record_id} is not an identifier`);
+  }
+});
+
+test("the codebook names real columns in every flagship, with a label and a meaning each, and its document is current", () => {
+  const script = fileURLToPath(new URL("../../../scripts/codebook-markdown.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr || run.stdout);
+  for (const dataset of LAUNCH_COLLECTION) {
+    const key = flagshipKey(dataset.id);
+    if (!key) continue;
+    const book = CODEBOOK[key];
+    assert.ok(book, `${key} has no codebook entry`);
+    assert.ok(book.row && book.where, `${key}: no row or where`);
+    const { columns } = load(key);
+    for (const field of book.fields) {
+      assert.ok(field.label && field.meaning, `${key}.${field.column} lacks a label or meaning`);
+      if (!field.add) assert.ok(columns.includes(field.column), `${key}: codebook column ${field.column} is not in the sample`);
+    }
+    // The identity block leads, in the register's order.
+    // (plural, and with the role in brackets, where a row names several)
+    const lead = book.fields.slice(0, 3).map((f) => f.label);
+    assert.match(lead[0], /^Cedar IDs?/, key);
+    assert.match(lead[1], /^Native entit/, key);
+    assert.match(lead[2], /^Entity types?/, key);
+    // Every column the contract declares as a default is a column the codebook explains.
+    const listed = new Set(book.fields.map((f) => f.column));
+    for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
+    assert.ok(codebookColumns(key, columns).length >= 10, `${key}: fewer than ten codebook columns present`);
+  }
+  // The identity block's class is the register's, never a scope or a source's own type (Codex, PR #64).
+  assert.equal(contractFor("legislation/native_bills").entity_type, null);
+  assert.equal(contractFor("deals/deals_classified").entity_type, null);
+  assert.equal(contractFor("nonprofits/np_orgs").entity_type, "cedar_spine_entity_class");
+  assert.equal(labelFor("lobbying/native_entity_lobbying_disclosures", "registrant_name"), "Registrant");
+  assert.match(meaningFor("lobbying/native_entity_lobbying_disclosures", "spend_basis"), /Income, expenses/);
+  assert.equal(labelFor("lobbying/native_entity_lobbying_disclosures", "not_a_column"), "Not a column");
 });
 
 test("CONTRACTS is the derived file, frozen, and the withheld tables are gone from it", () => {

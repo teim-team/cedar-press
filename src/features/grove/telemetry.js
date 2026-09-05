@@ -102,4 +102,7 @@ export const EVENT = Object.freeze({
   exploreCut: "press.explore_cut",
   exploreDownloaded: "press.explore_downloaded",
   exploreSaved: "press.explore_saved",
+  // Shape the Research: points moved (never which priority) and a request sent.
+  priorityAllocated: "press.priority_allocated",
+  researchRequested: "press.research_requested",
 });

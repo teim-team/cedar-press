@@ -166,4 +166,37 @@ export async function askCedar({ question, collectionId, signal } = {}) {
   });
 }
 
+// ── Shape the Research ──────────────────────────────────────────────────
+
+/** Every priority with its points and subscriber count, most supported first. */
+export async function fetchPriorities({ signal } = {}) {
+  return request("/press/priorities", { signal });
+}
+
+/** What this subscription has and has done; the service credits the month first, once. */
+export async function fetchInfluence({ signal } = {}) {
+  return request("/press/influence", { signal });
+}
+
+/** Put points on a priority (positive) or take them back (negative). */
+export async function movePoints({ priorityId, points }) {
+  return request(`/press/priorities/${encodeURIComponent(priorityId)}/points`, {
+    method: "POST",
+    body: { points },
+  });
+}
+
+/** The priorities a request reads as being about, as the service reads it. */
+export async function fetchRelatedPriorities({ text, signal } = {}) {
+  return request(`/press/priorities/related?q=${encodeURIComponent(text ?? "")}`, { signal });
+}
+
+/** A subscriber's own words, beside the priority they are about, with a point on it if asked. */
+export async function submitResearchRequest({ text, useCase, priorityId, supportPoints = 0 }) {
+  return request("/press/requests", {
+    method: "POST",
+    body: { text, use_case: useCase || null, priority_id: priorityId || null, support_points: supportPoints },
+  });
+}
+
 export { ApiError };

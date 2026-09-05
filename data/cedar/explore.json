@@ -37,7 +37,7 @@
       "date": null,
       "amount": "owner_obligations_usd",
       "source": null,
-      "record_id": "owner_rank",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -64,7 +64,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "uei",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -87,7 +87,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "child_uei",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -146,7 +146,7 @@
         "total_obligations",
         "naics_description",
         "setaside",
-        "extent_competed"
+        "extent_competed_normalized"
       ],
       "columns": 72
     },
@@ -214,7 +214,7 @@
       "date": null,
       "amount": "obligations_usd",
       "source": null,
-      "record_id": "cedar_uid",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -324,21 +324,21 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "generated",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "generated",
         "variant_class",
-        "grain_note",
-        "novelty"
+        "grain_note"
       ],
       "search": [
+        "generated",
         "variant_class",
-        "grain_note",
-        "novelty"
+        "grain_note"
       ],
       "reviewed": false,
       "columns": 13
@@ -496,7 +496,7 @@
     "deals/deals_classified": {
       "entity_uid": "cedar_uid",
       "entity_name": "native_party_canonical_name",
-      "entity_type": "Native_Party_Type",
+      "entity_type": null,
       "year": "Event_Year",
       "date": "Event_Date",
       "amount": "Announced_Value_USD",
@@ -534,7 +534,7 @@
         "Status",
         "Source_1"
       ],
-      "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration.",
+      "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration. Native_Party_Type is the party's type as the source published it, not the register's class.",
       "columns": 40
     },
     "deals/deals_federal_awards_additions": {
@@ -605,7 +605,7 @@
       "date": "ruled_date",
       "amount": null,
       "source": null,
-      "record_id": "native_party",
+      "record_id": null,
       "subject": "native_party",
       "superseded": null,
       "superseded_by": null,
@@ -633,7 +633,7 @@
       "date": "ruled_date",
       "amount": null,
       "source": null,
-      "record_id": "native_party",
+      "record_id": null,
       "subject": "native_party",
       "superseded": null,
       "superseded_by": null,
@@ -661,7 +661,7 @@
       "date": "resolved_date",
       "amount": null,
       "source": null,
-      "record_id": "native_party",
+      "record_id": null,
       "subject": "native_party",
       "superseded": null,
       "superseded_by": null,
@@ -777,7 +777,7 @@
       "date": null,
       "amount": null,
       "source": "source_1_url",
-      "record_id": "native_party",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -805,16 +805,18 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "axis",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "axis",
         "value"
       ],
       "search": [
+        "axis",
         "value"
       ],
       "reviewed": false,
@@ -1039,21 +1041,19 @@
       "date": null,
       "amount": null,
       "source": "url",
-      "record_id": "agency",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
-        "status",
-        "source",
-        "http_status"
+        "agency",
+        "status"
       ],
       "search": [
-        "status",
-        "source",
-        "http_status"
+        "agency",
+        "status"
       ],
       "reviewed": false,
       "columns": 8
@@ -1196,7 +1196,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "publication_year",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1219,16 +1219,18 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "normalized_department",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "normalized_department",
         "share_of_notices"
       ],
       "search": [
+        "normalized_department",
         "share_of_notices"
       ],
       "reviewed": false,
@@ -1292,7 +1294,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "publication_year",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1413,21 +1415,21 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "fr_name",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "fr_name",
         "kind",
-        "previously_listed_as",
-        "see_instead"
+        "previously_listed_as"
       ],
       "search": [
+        "fr_name",
         "kind",
-        "previously_listed_as",
-        "see_instead"
+        "previously_listed_as"
       ],
       "reviewed": false,
       "columns": 7
@@ -1440,7 +1442,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "tier",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1467,7 +1469,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "relevance_tier",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1486,16 +1488,18 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "theme",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": "publication year",
       "observation": [
+        "theme",
         "share_of_classifiable"
       ],
       "search": [
+        "theme",
         "share_of_classifiable"
       ],
       "reviewed": false,
@@ -1590,7 +1594,7 @@
       "date": null,
       "amount": null,
       "source": "url",
-      "record_id": "source",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1598,13 +1602,13 @@
       "year_basis": null,
       "observation": [
         "status",
-        "what_was_swept",
-        "probe_evidence"
+        "source",
+        "what_was_swept"
       ],
       "search": [
         "status",
-        "what_was_swept",
-        "probe_evidence"
+        "source",
+        "what_was_swept"
       ],
       "reviewed": false,
       "columns": 7
@@ -1670,21 +1674,21 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "source",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "source",
         "host",
-        "coverage_state",
-        "records_swept"
+        "coverage_state"
       ],
       "search": [
+        "source",
         "host",
-        "coverage_state",
-        "records_swept"
+        "coverage_state"
       ],
       "reviewed": false,
       "columns": 9
@@ -1697,7 +1701,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "recipient_name",
+      "record_id": null,
       "subject": "recipient_name",
       "superseded": null,
       "superseded_by": null,
@@ -1751,21 +1755,21 @@
       "date": null,
       "amount": "obligated_usd",
       "source": null,
-      "record_id": "agency",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": "fiscal year",
       "observation": [
+        "agency",
         "pct_with_duns",
-        "pct_with_duns_tribal_rows_only",
-        "pct_business_type_other_X"
+        "pct_with_duns_tribal_rows_only"
       ],
       "search": [
+        "agency",
         "pct_with_duns",
-        "pct_with_duns_tribal_rows_only",
-        "pct_business_type_other_X"
+        "pct_with_duns_tribal_rows_only"
       ],
       "reviewed": false,
       "columns": 11
@@ -1830,22 +1834,22 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "identifier_type",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "identifier_type",
         "identifier",
-        "ruling",
-        "reason"
+        "ruling"
       ],
       "search": [
         "entity_name",
+        "identifier_type",
         "identifier",
-        "ruling",
-        "reason"
+        "ruling"
       ],
       "reviewed": false,
       "columns": 7
@@ -1901,7 +1905,7 @@
       "date": null,
       "amount": "total_obligated_usd",
       "source": null,
-      "record_id": "canonical_name",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1929,7 +1933,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "fiscal_year",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1956,7 +1960,7 @@
       "date": null,
       "amount": "total_obligated_usd",
       "source": null,
-      "record_id": "recipient_uei",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -1984,7 +1988,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "recipient_uei",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -2003,7 +2007,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "year",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -2373,7 +2377,7 @@
     "legislation/native_bills": {
       "entity_uid": "entity_cedar_uids",
       "entity_name": null,
-      "entity_type": "entity_class_scope",
+      "entity_type": null,
       "year": null,
       "date": "introduced_date",
       "amount": null,
@@ -2395,7 +2399,7 @@
         "chamber"
       ],
       "entity_uid_list": true,
-      "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number.",
+      "_why": "One row per bill. reviewed 2026-09-05 from the sample header and its ten rows: a bill names several entities in one pipe-separated cell; the year is the introduced date's, and later actions have their own dates. The source link is the bill's congress.gov page, built from congress, bill type and number. entity_class_scope is a class-level scope, not the entities' class; the register answers the class from each uid.",
       "reviewed": true,
       "entity_role": "named in the bill",
       "source_builder": {
@@ -2504,21 +2508,21 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "issue_area",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "issue_area",
         "source_or_forum",
-        "coverage_state",
-        "what_was_swept"
+        "coverage_state"
       ],
       "search": [
+        "issue_area",
         "source_or_forum",
-        "coverage_state",
-        "what_was_swept"
+        "coverage_state"
       ],
       "reviewed": false,
       "columns": 8
@@ -2693,21 +2697,21 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "department",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "department",
         "fr_documents",
-        "fr_share_of_agency_mentions",
-        "lobbying_filings_targeting"
+        "fr_share_of_agency_mentions"
       ],
       "search": [
+        "department",
         "fr_documents",
-        "fr_share_of_agency_mentions",
-        "lobbying_filings_targeting"
+        "fr_share_of_agency_mentions"
       ],
       "reviewed": false,
       "columns": 11
@@ -2720,17 +2724,19 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "department",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": "year",
       "observation": [
+        "department",
         "fr_documents",
         "lobbying_filings_targeting"
       ],
       "search": [
+        "department",
         "fr_documents",
         "lobbying_filings_targeting"
       ],
@@ -2881,7 +2887,7 @@
       "date": null,
       "amount": null,
       "source": "url",
-      "record_id": "source",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -2889,13 +2895,13 @@
       "year_basis": null,
       "observation": [
         "status",
-        "what_was_swept",
-        "probe_evidence"
+        "source",
+        "what_was_swept"
       ],
       "search": [
         "status",
-        "what_was_swept",
-        "probe_evidence"
+        "source",
+        "what_was_swept"
       ],
       "reviewed": false,
       "columns": 7
@@ -2992,7 +2998,7 @@
       "date": "ruled_date",
       "amount": "spend_usd",
       "source": null,
-      "record_id": "client_name",
+      "record_id": null,
       "subject": "client_name",
       "superseded": null,
       "superseded_by": null,
@@ -3020,7 +3026,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "filing_year",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -3073,21 +3079,21 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "issue_family",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": "filing year",
       "observation": [
+        "issue_family",
         "share_of_classified_filings",
-        "share_of_family_mentions",
-        "preferred_series_for_trend"
+        "share_of_family_mentions"
       ],
       "search": [
+        "issue_family",
         "share_of_classified_filings",
-        "share_of_family_mentions",
-        "preferred_series_for_trend"
+        "share_of_family_mentions"
       ],
       "reviewed": false,
       "columns": 9
@@ -3128,21 +3134,21 @@
       "date": null,
       "amount": "total_spend_reported_usd",
       "source": null,
-      "record_id": "scope",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "scope",
         "total_filings",
-        "hhi_filings",
-        "hhi_spend"
+        "hhi_filings"
       ],
       "search": [
+        "scope",
         "total_filings",
-        "hhi_filings",
-        "hhi_spend"
+        "hhi_filings"
       ],
       "reviewed": false,
       "columns": 28
@@ -3237,16 +3243,18 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "government_entity_as_filed",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "government_entity_as_filed",
         "normalized_department"
       ],
       "search": [
+        "government_entity_as_filed",
         "normalized_department"
       ],
       "reviewed": false,
@@ -3260,7 +3268,7 @@
       "date": null,
       "amount": "total_spend_usd",
       "source": null,
-      "record_id": "client_name",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -3333,7 +3341,7 @@
       "date": null,
       "amount": null,
       "source": "source_index_url",
-      "record_id": "index_year",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -3523,7 +3531,7 @@
       "date": null,
       "amount": "total_lobbying_spend_usd",
       "source": null,
-      "record_id": "entity_id",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -3576,7 +3584,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "publication_year",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -3677,7 +3685,7 @@
         "notice_type",
         "title",
         "mni_total_stated",
-        "cultural_items_total_stated",
+        "n_associated_funerary_objects_stated",
         "repatriation_recipient_entity_ids",
         "source_url"
       ],
@@ -3773,21 +3781,21 @@
       "date": null,
       "amount": null,
       "source": "source_url",
-      "record_id": "source_system",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "source_system",
         "publisher",
-        "attribute",
-        "coverage_state"
+        "attribute"
       ],
       "search": [
+        "source_system",
         "publisher",
-        "attribute",
-        "coverage_state"
+        "attribute"
       ],
       "reviewed": false,
       "columns": 8
@@ -3920,21 +3928,21 @@
       "date": "issue_date",
       "amount": "par_amount",
       "source": "source_url",
-      "record_id": "issuer",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": "calendar year of issue date",
       "observation": [
+        "issuer",
         "cusip",
-        "instrument_type",
-        "maturity"
+        "instrument_type"
       ],
       "search": [
+        "issuer",
         "cusip",
-        "instrument_type",
-        "maturity"
+        "instrument_type"
       ],
       "reviewed": false,
       "columns": 19
@@ -4045,7 +4053,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "cedar_uid",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -4073,7 +4081,7 @@
       "date": "fy_start_date",
       "amount": null,
       "source": "source_url",
-      "record_id": "report_id",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -4315,7 +4323,7 @@
     "nonprofits/np_orgs": {
       "entity_uid": "cedar_uid",
       "entity_name": "cedar_spine_canonical_name",
-      "entity_type": "cedar_native_entity_class",
+      "entity_type": "cedar_spine_entity_class",
       "year": null,
       "date": null,
       "amount": "bmf_revenue_amt",
@@ -4335,7 +4343,7 @@
         "city",
         "state"
       ],
-      "_why": "A register of organizations, not events: no row date. reviewed 2026-09-05 from the sample header and its ten rows: source_url is the IRS BMF, the dataset's source, not a per-organization page.",
+      "_why": "A register of organizations, not events: no row date. reviewed 2026-09-05 from the sample header and its ten rows: source_url is the IRS BMF, the dataset's source, not a per-organization page. cedar_spine_entity_class is the register's class of the linked entity; cedar_native_entity_class is the organization's own kind.",
       "reviewed": true,
       "entity_role": "the tribe or Native entity the organization is linked to",
       "amount_label": "revenue in the IRS Business Master File",
@@ -4346,7 +4354,6 @@
         "city",
         "ntee_code",
         "bmf_revenue_amt",
-        "bmf_status",
         "source_url"
       ],
       "columns": 67
@@ -4415,21 +4422,21 @@
       "date": null,
       "amount": "total_obligations_usd",
       "source": null,
-      "record_id": "cell_type",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
       "amount_basis": null,
       "year_basis": null,
       "observation": [
+        "cell_type",
         "dimension_1",
-        "dimension_2",
-        "value_suppressed_small_cell"
+        "dimension_2"
       ],
       "search": [
+        "cell_type",
         "dimension_1",
-        "dimension_2",
-        "value_suppressed_small_cell"
+        "dimension_2"
       ],
       "reviewed": false,
       "columns": 11
@@ -4442,7 +4449,7 @@
       "date": null,
       "amount": "total_usd",
       "source": null,
-      "record_id": "prime_uei",
+      "record_id": null,
       "subject": "sub_name",
       "superseded": null,
       "superseded_by": null,
@@ -4467,7 +4474,7 @@
       "date": null,
       "amount": null,
       "source": null,
-      "record_id": "confidence_tier",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -4494,7 +4501,7 @@
       "date": null,
       "amount": "total_subaward_usd",
       "source": null,
-      "record_id": "uei",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
@@ -4521,7 +4528,7 @@
       "date": null,
       "amount": "total_subaward_usd",
       "source": null,
-      "record_id": "uei",
+      "record_id": null,
       "subject": null,
       "superseded": null,
       "superseded_by": null,
