@@ -242,7 +242,7 @@ export function deriveRegister() {
   entities.sort((a, b) => (a[1] ?? "\uffff").localeCompare(b[1] ?? "\uffff") || a[0].localeCompare(b[0]));
   return {
     generated_by: "scripts/derive-explore.mjs",
-    source: "data/spine/cedar_entity_names.csv and cedar_entity_types.csv",
+    source: "data/spine/cedar_entity_names.csv, cedar_entity_types.csv, and cedar_identity_register.csv (as_of: its latest mint date)",
     note:
       "Each entity is [cedar_uid, name, class index into `classes`]. A null name is " +
       `withheld by the publication rule for ${WITHHELD_CLASS} (code/cedar_domain.py).`,

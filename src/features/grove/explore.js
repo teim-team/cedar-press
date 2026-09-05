@@ -385,17 +385,28 @@ export function rowLinkStatus(row, contract) {
  * entity is unknown to the register). Only a register-class definition is
  * evaluable here, per entity, from the entity's class; no count is made.
  */
-export function scopeCovers(element, entity, register = EMPTY_REGISTER) {
+/**
+ * Whether membership of a scope element can be evaluated at all against
+ * this register: a register-class definition, and an element dated on or
+ * after the register's own date. The register vouches for an entity's class
+ * from then on and not before, so an element whose population is defined at
+ * an unknown date, or at an earlier date, is not evaluable here (Codex, PR
+ * #69); a dated membership source for earlier dates is the terminal's. The
+ * picker enables the broader-group toggle only where some loaded element is
+ * evaluable (Codex, PR #70).
+ */
+export function evaluableScope(element, register = EMPTY_REGISTER) {
   const el = typeof element === "string" ? { scope: element } : element ?? {};
-  const defn = scopeDefinition(el.scope);
-  const membership = defn?.membership;
-  if (!membership || membership.kind !== "register_class") return null;
-  // The register vouches for an entity's class on and after its own date and
-  // not before: an element whose population is defined at an unknown date,
-  // or at a date before the register, has unknown membership here (Codex,
-  // PR #69). A dated membership source for earlier dates is the terminal's.
-  if (!register.asOf || el.as_of_rule === "unknown" || !/^\d{4}-\d{2}-\d{2}$/.test(el.as_of ?? "")) return null;
-  if (el.as_of < register.asOf) return null;
+  const membership = scopeDefinition(el.scope)?.membership;
+  if (!membership || membership.kind !== "register_class") return false;
+  if (!register.asOf || el.as_of_rule === "unknown" || !/^\d{4}-\d{2}-\d{2}$/.test(el.as_of ?? "")) return false;
+  return el.as_of >= register.asOf;
+}
+
+export function scopeCovers(element, entity, register = EMPTY_REGISTER) {
+  if (!evaluableScope(element, register)) return null;
+  const el = typeof element === "string" ? { scope: element } : element;
+  const membership = scopeDefinition(el.scope).membership;
   const known = entity?.uid ? register.byUid.get(entity.uid) : null;
   const type = known?.type ?? entity?.type ?? null;
   if (!type) return null;
@@ -853,9 +864,14 @@ export function facets(rows, register = EMPTY_REGISTER) {
     if (linked.length) keyed += 1; else unlinked += 1;
     if (item.scopes?.length) {
       scoped += 1;
-      for (const code of new Set(item.scopes.map((el) => el.scope))) {
-        const seen = scopes.get(code) ?? { code, name: scopeName(code), evaluable: scopeDefinition(code)?.membership?.kind === "register_class", count: 0 };
+      const codes = new Set(item.scopes.map((el) => el.scope));
+      for (const code of codes) {
+        const seen = scopes.get(code) ?? { code, name: scopeName(code), evaluable: false, count: 0 };
         seen.count += 1;
+        // Evaluable if any loaded element of this scope is: a definition
+        // that could be evaluated is not enough when every element is
+        // undated (Codex, PR #70).
+        if (item.scopes.some((el) => el.scope === code && evaluableScope(el, register))) seen.evaluable = true;
         scopes.set(code, seen);
       }
     }
@@ -974,7 +990,10 @@ const UNIVERSAL_HEADER = [
 export function matchedBy(item, cut, register = EMPTY_REGISTER) {
   const reasons = [];
   const entities = new Set(cut.entities ?? []);
-  if (entities.size && item.entity.entities.some((e) => e.uid && entities.has(e.uid))) reasons.push("named");
+  // The same entity-and-type test the filter applies: a row kept through a
+  // scope beside a named entity that fails the type filter is not "named"
+  // (Codex, PR #70).
+  if (entities.size && entityPasses(item, entities, cut.types ?? null)) reasons.push("named");
   for (const el of scopeHits(item, new Set(cut.scopes ?? []))) reasons.push(`scope:${el.scope}`);
   for (const el of broadHits(item, cut, register)) reasons.push(`broad:${el.scope}`);
   return [...new Set(reasons)].join("|");
