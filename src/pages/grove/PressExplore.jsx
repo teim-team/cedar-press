@@ -1,13 +1,19 @@
 // REVIEW OWNER: Havala
 //
-// Explore the collections: one card under the shelves, over every collection
-// at once.
+// Explore the collections: one viewer under the shelves.
 //
-// The shelf above stays what it is. A tile is still the download and the
-// reader beside it still says what a collection holds. This card is where
-// the records are, and it is one thing: a toolbar of three filters that mean
-// the same in every collection (which entity, which kind of entity, which
-// years), which collections, a search, and the table those select.
+// A tile on the shelf opens its collection here; the collection control at
+// the top of the viewer does the same, and offers every open collection at
+// once as its own explicit choice. Three filters mean the same in every
+// collection (which entity, which kind of entity, which years), and the
+// year's meaning is stated for the collection in view.
+//
+// ONE DATASET PER COLLECTION
+// A collection is one dataset to a reader: its flagship table, with the
+// columns its reviewed declaration puts first and the rest one click away.
+// The release's supporting tables are not browsing options; a link can still
+// name one (`tb=`) and the viewer honours it, but nothing here asks a
+// subscriber to understand the pipeline.
 //
 // ONE OBJECT, THE CUT
 // The filters are the URL. `features/grove/explore.js` says what a cut is;
@@ -26,7 +32,7 @@
 //
 // A SAMPLE, AND SAID SO
 // Phase one reads the ten-row samples the site already serves. The caption
-// counts sample records and says "sample"; the full tables need the serving
+// counts sample records and says "preview"; the full tables need the serving
 // layer this repository has not deployed. Everything in this file is a
 // function of static files and the reader's own entitlement.
 
@@ -35,7 +41,6 @@ import { useSearchParams } from "react-router";
 
 import {
   CUT_VERSION,
-  EMPTY_CUT,
   EMPTY_REGISTER,
   PAGE_SIZE,
   UNLINKED,
@@ -67,11 +72,18 @@ import { TierName } from "./TierName";
 
 const REGISTER_PATH = "/data/cedar/register.json";
 const SAVED_KEY = "cp.explore.saved";
+const ALL = "__all__";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 function short(id) {
   return PRESS_CATALOG_BY_ID[id]?.short ?? id;
+}
+
+/** "filing_type_display" -> "Filing type display", for a column heading. */
+function heading(column) {
+  const words = String(column).replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 // ── Static data ────────────────────────────────────────────────────────────
@@ -136,6 +148,20 @@ function useSampleRows(tables, register) {
     return { rows, missing, columns, loading };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wanted, loaded, register]);
+}
+
+/** Whether the viewport is a phone's: the table becomes a list of records. */
+function useNarrow() {
+  const query = "(max-width: 720px)";
+  const [narrow, setNarrow] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.(query).matches);
+  useEffect(() => {
+    const media = window.matchMedia?.(query);
+    if (!media) return undefined;
+    const onChange = () => setNarrow(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+  return narrow;
 }
 
 // ── Saved views, on this device ────────────────────────────────────────────
@@ -320,7 +346,9 @@ function TypePicker({ cut, facets, register, onChange }) {
  * by the preview's own years and clamps what it can show; the typed boxes
  * carry the requested values and commit on Enter or blur, so a reader can
  * clear a box and type. A request outside the preview's years is drawn as
- * such and said in words, never rewritten into a different request.
+ * such and said in words, never rewritten into a different request. On a
+ * phone only the two boxes show (a two-thumb slider is not something to
+ * ship untested with touch assistive technology).
  */
 function YearRange({ cut, bounds, basis, onChange }) {
   const requested = cut.years;
@@ -382,95 +410,120 @@ function YearRange({ cut, bounds, basis, onChange }) {
   );
 }
 
-function CollectionPicker({ cut, scope, onChange, onActive, onLocked }) {
-  const chosen = cut.collections === null ? scope : cut.collections;
-  const all = cut.collections === null;
-  const toggle = (id) => {
-    const next = new Set(chosen);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    // Every open collection checked again is "no restriction"; anything
-    // less is the set the reader made, down to nothing at all.
-    onChange(scope.every((c) => next.has(c)) ? null : [...next].filter((c) => scope.includes(c)));
-  };
-  const value = all ? `All ${scope.length} open` : chosen.length === 0 ? "None" : chosen.length === 1 ? short(chosen[0]) : `${chosen.length} of ${scope.length}`;
+/**
+ * Which collection: one, or every open one at once, as an explicit choice.
+ * Locked collections are listed and disabled, and the line under the
+ * control says what opens them.
+ */
+function CollectionSelect({ value, collections, scope, onChange, onActive }) {
   return (
-    <Picker label="Collections" value={value} testId="explore-collections">
-      <div className="cp-ex__panelrow">
-        <span className="cp-ex__fine">Each collection contributes its dataset's preview.</span>
-        {all ? null : <button type="button" className="cp-ex__clear" onClick={() => onChange(null)}>All open</button>}
-      </div>
-      <ul className="cp-ex__list">
-        {onLocked.entries.map(({ entry, open: can, previewUnavailable }) => (
-          <li key={entry.id} className={can ? "" : "cp-ex__locked"} onMouseEnter={() => onActive(entry.id)}>
-            {can ? (
-              <label>
-                <input type="checkbox" checked={chosen.includes(entry.id)} onChange={() => toggle(entry.id)} />
-                <span className="cp-ex__lname">{entry.short}{previewUnavailable ? <small> · no preview yet</small> : null}</span>
-                <span className="cp-ex__ltype"><TierName name={entry.shelf === "pro" ? "Cedar Press+" : "Cedar Press"} /></span>
-              </label>
-            ) : (
-              <button type="button" className="cp-ex__lockbtn" onClick={() => onLocked.point(entry)}>
-                <span className="cp-ex__lname">{entry.short}</span>
-                <span className="cp-ex__ltype"><TierName name="Cedar Press+" /> · locked</span>
-              </button>
-            )}
-          </li>
+    <label className="cp-ex__collection">
+      <span className="cp-ex__picklabel">Collection</span>
+      <select
+        className="cp-ex__select"
+        aria-label="Collection"
+        data-testid="explore-collection"
+        value={value}
+        onChange={(e) => { onChange(e.target.value); if (e.target.value !== ALL) onActive(e.target.value); }}
+      >
+        <option value={ALL}>All {scope.length} open collections (search across)</option>
+        {collections.map(({ entry, open, previewUnavailable }) => (
+          <option key={entry.id} value={entry.id} disabled={!open}>
+            {entry.short}{open ? (previewUnavailable ? " · no preview yet" : "") : " · Cedar Press+ · locked"}
+          </option>
         ))}
-      </ul>
-    </Picker>
+      </select>
+    </label>
   );
 }
 
-// ── The table ──────────────────────────────────────────────────────────────
-
-function SortHead({ column, label, sort, onSort, pinned, className }) {
-  const on = sort?.by === column;
-  const dir = on ? sort.dir : null;
-  return (
-    <th scope="col" className={`${className ?? ""}${pinned ? " cp-ex__pin" : ""}`} aria-sort={on ? (dir === "asc" ? "ascending" : "descending") : "none"}>
-      <button type="button" className={`cp-ex__sort${on ? " is-on" : ""}`} onClick={() => onSort(column)}>
-        {label}
-        <span aria-hidden="true">{dir === "asc" ? " ↑" : dir === "desc" ? " ↓" : ""}</span>
-      </button>
-    </th>
-  );
-}
+// ── The record ─────────────────────────────────────────────────────────────
 
 const ROLES = ["record_id", "entity_uid", "entity_name", "entity_type", "subject", "year", "date", "amount", "amount_basis", "source", "superseded", "superseded_by"];
+const ATTRIBUTION = /source|attribution|match|confidence|basis|evidence|tier|ruling|verif|quote|fetched|built|retrieved|promoted|review|method|scope|population|vintage|withdrawn|supersession|superseded|duplicate/i;
+const TECHNICAL = /(^|_)(id|ids|uid|uids|uuid|key|code|fips|flag|hash|token|index)$|^(is_|has_|n_|geo_|dt_)|_normalized$|_norm$|_real2025$|deflator|inflation|_share$|_ambiguous$|_count$|_pct$|_percent$|_rank$/i;
 
-/** A cell's value for a person: a link where it is one, a dash where it is empty. */
-function Value({ value }) {
+/**
+ * A record's columns in three groups: what the record says (the declared
+ * default columns and the roles), where it came from (source and
+ * attribution), and the technical fields (identifiers, flags, geography,
+ * derived numbers). Complete, but with a hierarchy.
+ */
+function groupColumns(columns, contract) {
+  const roles = new Set(ROLES.map((k) => contract?.[k]).filter(Boolean));
+  const main = new Set([...(contract?.default_columns ?? []), ...roles, ...(contract?.observation ?? [])]);
+  const groups = { main: [], attribution: [], technical: [] };
+  for (const column of columns) {
+    if (main.has(column) && !(TECHNICAL.test(column) && !roles.has(column))) groups.main.push(column);
+    else if (ATTRIBUTION.test(column) && !TECHNICAL.test(column)) groups.attribution.push(column);
+    else groups.technical.push(column);
+  }
+  // Main columns in the declared order, so the record reads the way the table does.
+  const order = [...(contract?.default_columns ?? []), ...columns];
+  groups.main.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  return groups;
+}
+
+/** A cell for a person: links, dates, money, yes/no, lists; a dash for nothing. */
+function Human({ column, value, contract }) {
   if (value === "" || value == null) return "—";
   const text = String(value);
-  if (/^https?:\/\/\S+$/i.test(text)) return <a href={text} target="_blank" rel="noreferrer">{text}</a>;
+  if (/^https?:\/\/\S+$/i.test(text)) return <a href={text} target="_blank" rel="noreferrer">{text.replace(/^https?:\/\/(www\.)?/, "").slice(0, 80)}{text.length > 88 ? "…" : ""}</a>;
+  if (contract?.amount === column) {
+    const n = Number(text.replace(/[$,\s]/g, ""));
+    return Number.isFinite(n) ? money.format(n) : text;
+  }
+  if (/^\d{4}-\d{2}-\d{2}T/.test(text)) return text.slice(0, 10);
+  if (/^(is_|has_)|_flag$/.test(column) && /^(0|1)$/.test(text)) return text === "1" ? "yes" : "no";
+  if (text.includes("|") && !/^https?:/.test(text)) return text.split("|").map((p) => p.trim()).filter(Boolean).join(", ");
   return text;
 }
 
-function Expanded({ item, columns, span }) {
-  const contract = contractFor(item.key);
-  const role = (column) => ROLES.find((k) => contract?.[k] === column) ?? (contract?.observation?.includes(column) ? "observation" : null);
+function Fields({ columns, item, contract, roleOf }) {
   return (
-    <tr className="cp-ex__expanded">
-      <td colSpan={span}>
-        <div className="cp-ex__inner">
-        {item.superseded ? (
-          <p className="cp-ex__superseded">
-            <b>Superseded.</b> A later version replaces this record
-            {item.replacement?.url ? <>: <a href={item.replacement.url} target="_blank" rel="noreferrer">{item.replacement.id}</a></> : item.replacement?.id ? <>: {item.replacement.id}</> : null}.
-          </p>
-        ) : null}
-        <dl className="cp-ex__record">
-          {columns.map((column) => (
-            <div key={column} className={item.row[column] === "" ? "is-blank" : ""}>
-              <dt>{column}{role(column) ? <small> {role(column).replace(/_/g, " ")}</small> : null}</dt>
-              <dd><Value value={item.row[column]} /></dd>
-            </div>
-          ))}
-        </dl>
-        <p className="cp-ex__fine">{short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"} · preview row</p>
+    <dl className="cp-ex__record">
+      {columns.map((column) => (
+        <div key={column} className={item.row[column] === "" ? "is-blank" : ""}>
+          <dt>{heading(column)}{roleOf(column) ? <small> {roleOf(column).replace(/_/g, " ")}</small> : null}</dt>
+          <dd><Human column={column} value={item.row[column]} contract={contract} /></dd>
         </div>
-      </td>
-    </tr>
+      ))}
+    </dl>
+  );
+}
+
+function Record({ item, columns }) {
+  const contract = contractFor(item.key);
+  const roleOf = (column) => ROLES.find((k) => contract?.[k] === column) ?? (contract?.observation?.includes(column) ? "observation" : null);
+  const groups = groupColumns(columns, contract);
+  return (
+    <div className="cp-ex__inner">
+      {item.superseded ? (
+        <p className="cp-ex__superseded">
+          <b>Superseded.</b> A later version replaces this record
+          {item.replacement?.url ? <>: <a href={item.replacement.url} target="_blank" rel="noreferrer">{item.replacement.id}</a></> : item.replacement?.id ? <>: {item.replacement.id}</> : null}.
+        </p>
+      ) : null}
+      {item.entity.entities.length > 1 ? (
+        <p className="cp-ex__fine">Entities named: {item.entity.entities.map((e) => e.name ?? (e.withheld ? WITHHELD_TEXT : e.uid)).join("; ")}{contract?.entity_role ? ` · ${contract.entity_role}` : ""}</p>
+      ) : contract?.entity_role && item.entity.uid ? (
+        <p className="cp-ex__fine">Entity: {item.entity.name ?? WITHHELD_TEXT} ({item.entity.uid}) · {contract.entity_role}</p>
+      ) : null}
+      <Fields columns={groups.main} item={item} contract={contract} roleOf={roleOf} />
+      {groups.attribution.length ? (
+        <details className="cp-ex__group" open>
+          <summary>Source and attribution ({groups.attribution.length})</summary>
+          <Fields columns={groups.attribution} item={item} contract={contract} roleOf={roleOf} />
+        </details>
+      ) : null}
+      {groups.technical.length ? (
+        <details className="cp-ex__group">
+          <summary>Technical fields ({groups.technical.length})</summary>
+          <Fields columns={groups.technical} item={item} contract={contract} roleOf={roleOf} />
+        </details>
+      ) : null}
+      <p className="cp-ex__fine">{short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"} · preview row</p>
+    </div>
   );
 }
 
@@ -488,7 +541,22 @@ function EntityCell({ item }) {
   );
 }
 
-function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entityColumn }) {
+// ── The table, and the list it becomes on a phone ──────────────────────────
+
+function SortHead({ column, label, sort, onSort, pinned, className }) {
+  const on = sort?.by === column;
+  const dir = on ? sort.dir : null;
+  return (
+    <th scope="col" className={`${className ?? ""}${pinned ? " cp-ex__pin" : ""}`} aria-sort={on ? (dir === "asc" ? "ascending" : "descending") : "none"}>
+      <button type="button" className={`cp-ex__sort${on ? " is-on" : ""}`} onClick={() => onSort(column)}>
+        {label}
+        <span aria-hidden="true">{dir === "asc" ? " ↑" : dir === "desc" ? " ↓" : ""}</span>
+      </button>
+    </th>
+  );
+}
+
+function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAmount, entityColumn, contract }) {
   const [openId, setOpenId] = useState(null);
   // The scroll container's own width, as a CSS variable, so an expanded
   // record can pin itself to the visible part of a table wider than it.
@@ -509,10 +577,12 @@ function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entity
     ["collection", "Collection"],
     ["date", "Date"],
     ["observation", "Observation"],
-    ...(showAmount ? [["amount", "Amount, where recorded"]] : []),
+    // "Amount" alone: the basis is written under each value, and a value
+    // is shown only where the row's table records one.
+    ...(showAmount ? [["amount", "Amount"]] : []),
     ["source", "Source"],
   ];
-  const heads = view === "table" ? columns.map((c) => [c, c, c === entityColumn]) : universal;
+  const heads = view === "table" ? columns.map((c) => [c, heading(c), c === entityColumn]) : universal;
   const span = heads.length + 1;
   return (
     <div className="cp-ex__scroll" ref={scrollRef}>
@@ -521,7 +591,7 @@ function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entity
           <tr>
             <th scope="col" className="cp-ex__more"><span className="cp-badge__sr">Open the record</span></th>
             {heads.map(([column, label, pinned]) => (
-              <SortHead key={column} column={column} label={label} sort={sort} onSort={onSort} pinned={pinned} className={`cp-ex__c-${column === "amount" ? "amount" : "text"}`} />
+              <SortHead key={column} column={column} label={label} sort={sort} onSort={onSort} pinned={pinned} className={`cp-ex__c-${column === "amount" || column === contract?.amount ? "amount" : "text"}`} />
             ))}
           </tr>
         </thead>
@@ -529,7 +599,7 @@ function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entity
           {items.map((item) => {
             const isOpen = openId === item.id;
             return [
-              <tr key={item.id} className={`${isOpen ? "is-open" : ""}${item.superseded ? " is-superseded" : ""}`}>
+              <tr key={item.id} data-testid="explore-record" data-record-id={item.recordId ?? ""} className={`${isOpen ? "is-open" : ""}${item.superseded ? " is-superseded" : ""}`}>
                 <td className="cp-ex__more">
                   <button type="button" className="cp-ex__morebtn" aria-expanded={isOpen} onClick={() => setOpenId(isOpen ? null : item.id)}>
                     <span aria-hidden="true">{isOpen ? "−" : "+"}</span>
@@ -538,9 +608,10 @@ function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entity
                 </td>
                 {view === "table"
                   ? columns.map((column) => (
-                    <td key={column} className={column === entityColumn ? "cp-ex__pin" : ""}>
+                    <td key={column} className={`${column === entityColumn ? "cp-ex__pin" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
                       {column === entityColumn && item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
-                      <Value value={item.row[column]} />
+                      {column === entityColumn && item.entity.withheld ? <em>{WITHHELD_TEXT}</em> : <Human column={column} value={item.row[column]} contract={contract} />}
+                      {column === entityColumn && item.entity.uid ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
                     </td>
                   ))
                   : (
@@ -567,7 +638,11 @@ function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entity
                     </>
                   )}
               </tr>,
-              isOpen ? <Expanded key={`${item.id}-x`} item={item} columns={columns.length ? columns : Object.keys(item.row)} span={span} /> : null,
+              isOpen ? (
+                <tr key={`${item.id}-x`} className="cp-ex__expanded">
+                  <td colSpan={span}><Record item={item} columns={allColumns.length ? allColumns : Object.keys(item.row)} /></td>
+                </tr>
+              ) : null,
             ];
           })}
         </tbody>
@@ -576,14 +651,41 @@ function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entity
   );
 }
 
-// ── The card ───────────────────────────────────────────────────────────────
+/** The same records as compact rows for a phone: who, where, when, what; tap for the record. */
+function Cards({ items, allColumns, onActive }) {
+  const [openId, setOpenId] = useState(null);
+  return (
+    <ul className="cp-ex__cards">
+      {items.map((item) => {
+        const isOpen = openId === item.id;
+        return (
+          <li key={item.id} data-testid="explore-record" data-record-id={item.recordId ?? ""} className={`${isOpen ? "is-open" : ""}${item.superseded ? " is-superseded" : ""}`}>
+            <button type="button" className="cp-ex__cardbtn" aria-expanded={isOpen} onClick={() => { setOpenId(isOpen ? null : item.id); onActive(item.collection); }}>
+              <span className="cp-ex__cardwho">
+                {item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
+                <EntityCell item={item} />
+              </span>
+              <span className="cp-ex__cardmeta">{short(item.collection)} · {item.date ?? "undated"}{item.amount != null ? ` · ${money.format(item.amount)}` : ""}</span>
+              <span className="cp-ex__cardobs cp-ex__clamp">{item.observation || "—"}</span>
+            </button>
+            {isOpen ? <Record item={item} columns={allColumns.length ? allColumns : Object.keys(item.row)} /> : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
-export default function PressExplore({ user, onActive = () => {} }) {
+// ── The viewer ─────────────────────────────────────────────────────────────
+
+export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
   const [params, setParams] = useSearchParams();
   const cut = useMemo(() => decodeCut(params.toString()), [params]);
   const { register, status: registerStatus, retry: retryRegister } = useRegister();
   const collections = useMemo(() => explorableCollections(user), [user]);
   const scope = useMemo(() => collections.filter((c) => c.open).map((c) => c.entry.id), [collections]);
+  const narrow = useNarrow();
+  const sectionRef = useRef(null);
 
   // The requested scope, the authorized scope and the available scope are
   // three things, and the caption says where they differ: a collection the
@@ -594,8 +696,10 @@ export default function PressExplore({ user, onActive = () => {} }) {
   const lockedOut = requested.filter((id) => !scope.includes(id));
   const selected = requested.filter((id) => scope.includes(id));
   const single = selected.length === 1 ? collections.find((c) => c.entry.id === selected[0]) : null;
-  const table = cut.table && single && cut.table.startsWith(`${single.entry.id}/`)
-    ? single.tables.find((t) => t.key === cut.table) ?? null
+  // One collection is one dataset: its flagship, unless a link names one of
+  // the release's supporting tables.
+  const table = single
+    ? (cut.table && cut.table.startsWith(`${single.entry.id}/`) ? single.tables.find((t) => t.key === cut.table) : null) ?? single.flagship
     : null;
   const view = table ? "table" : "cut";
   const selectedKey = selected.join("|");
@@ -619,16 +723,40 @@ export default function PressExplore({ user, onActive = () => {} }) {
   const write = (next) => {
     setParams(encodeCut({ ...cut, ...next, page: "page" in next ? next.page : 1 }), { replace: true });
   };
-  const narrow = (next) => {
+  const narrowTo = (next) => {
     write(next);
     track(EVENT.exploreCut, { filters: Object.keys(next), view });
   };
+
+  // A tile click on the shelf: this collection, and the viewer in view.
+  const pickN = pick?.n ?? 0;
+  useEffect(() => {
+    if (!pick || !scope.includes(pick.id)) return;
+    write({ collections: [pick.id], table: null });
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickN]);
+  // And the other way: the tile of the collection in view stays lit.
+  const singleId = single?.entry.id ?? null;
+  useEffect(() => { onSelected(singleId); }, [singleId, onSelected]);
+  // While the viewer is on screen, Cedar's floating launcher steps aside:
+  // the viewer's own foot carries the Cedar action, and a launcher over the
+  // records covers the evidence.
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      document.body.toggleAttribute("data-cp-explore-in-view", entry.isIntersecting);
+    }, { threshold: 0.15 });
+    observer.observe(node);
+    return () => { observer.disconnect(); document.body.removeAttribute("data-cp-explore-in-view"); };
+  }, []);
 
   const [saved, setSaved] = useState(() => (typeof window === "undefined" ? [] : readSaved()));
   const [naming, setNaming] = useState(false);
   const [name, setName] = useState("");
   const [copied, setCopied] = useState(false);
-  const [upgrade, setUpgrade] = useState(null);
+  const [showAll, setShowAll] = useState(false);
 
   const said = { ...cut, collections: cut.collections === null ? null : selected, table: table?.key ?? null };
   const caption = describeCut(said, { register, shown: filtered.length, total: rows.length });
@@ -636,11 +764,13 @@ export default function PressExplore({ user, onActive = () => {} }) {
   const contract = table ? contractFor(table.key) : null;
   const entityColumn = contract ? (contract.entity_name ?? contract.entity_uid ?? null) : null;
   const tableColumns = table ? columns.get(table.key) ?? [] : [];
-  // Shown with the entity first (its name, then its uid), so the pinned
-  // column is the leftmost one and nothing scrolls underneath it. The
-  // download keeps the table's own order.
+  // The entity first (its name, then its uid), then the declared default
+  // columns, then, on request, everything else. The download keeps the
+  // table's own order and every column.
   const lead = contract ? [contract.entity_name, contract.entity_uid].filter((c) => c && tableColumns.includes(c)) : [];
-  const shownColumns = table ? [...new Set([...lead, ...tableColumns])] : [];
+  const defaults = (contract?.default_columns ?? []).filter((c) => tableColumns.includes(c));
+  const allColumns = table ? [...new Set([...lead, ...tableColumns])] : [];
+  const shownColumns = table ? (showAll || !defaults.length ? allColumns : [...new Set([...lead.slice(0, 1), ...defaults])]) : [];
   const yearBasis = table
     ? contract?.year_basis
     : tables.length === 1
@@ -648,7 +778,7 @@ export default function PressExplore({ user, onActive = () => {} }) {
       : tables.length > 1 ? "each collection's own basis" : null;
 
   const onSort = (by) => {
-    const dir = cut.sort?.by === by ? (cut.sort.dir === "asc" ? "desc" : "asc") : (by === "amount" || by === "date" ? "desc" : "asc");
+    const dir = cut.sort?.by === by ? (cut.sort.dir === "asc" ? "desc" : "asc") : (by === "amount" || by === "date" || by === contract?.amount ? "desc" : "asc");
     write({ sort: { by, dir } });
   };
 
@@ -670,7 +800,7 @@ export default function PressExplore({ user, onActive = () => {} }) {
       id: `${savedAt}-${saved.length}`,
       name: label,
       // The collections as they stood, spelled out: "all I can open" saved
-      // as an empty list would mean something else under another plan or
+      // as no restriction would mean something else under another plan or
       // a later catalog.
       cut: encodeCut({ ...cut, collections: selected, page: 1 }),
       version: CUT_VERSION,
@@ -711,10 +841,11 @@ export default function PressExplore({ user, onActive = () => {} }) {
     }));
   };
 
-  const pointAtUpgrade = (entry) => {
-    track(EVENT.lockedCollectionTapped, { shelf: entry.shelf, from: "explore" });
-    setUpgrade(entry);
+  const chooseCollection = (value) => {
+    if (value === ALL) write({ collections: null, table: null });
+    else write({ collections: [value], table: null });
   };
+  const selectValue = cut.collections === null ? ALL : single ? single.entry.id : (selected.length ? ALL : "");
   const lockedCount = collections.filter((c) => !c.open).length;
   const notes = [
     cut.unknown?.length ? `Not a collection here: ${cut.unknown.join(", ")}.` : "",
@@ -727,17 +858,25 @@ export default function PressExplore({ user, onActive = () => {} }) {
     registerStatus === "failed" ? "The entity register did not load: names and types may be missing." : "",
   ].filter(Boolean);
 
+  const filters = (
+    <>
+      <EntityPicker cut={cut} facets={facets} register={register} onChange={(entities) => narrowTo({ entities })} />
+      <TypePicker cut={cut} facets={facets} register={register} onChange={(types) => narrowTo({ types })} />
+      <YearRange cut={cut} bounds={facets.years} basis={yearBasis} onChange={(years) => narrowTo({ years })} />
+    </>
+  );
+
   return (
-    <section className="cp-ex" id="explore" aria-label="Explore the collections" data-testid="explore">
+    <section className="cp-ex" id="explore" aria-label="Explore the collections" data-testid="explore" ref={sectionRef}>
       <div className="cp-ex__in">
         <div className="cp-ex__head">
           <div>
             <span className="cp-sec__band">Explore the collections</span>
             <h3 className="cp-ex__title">Choose a collection, find an entity, and browse the records.</h3>
             <p className="cp-ex__lede">
-              This preview includes up to ten sample records per published table. The entity, entity
-              type and year filters work the same way in every collection; the year's meaning is stated
-              for the collection you are in.
+              This preview includes up to ten sample records per published table. Click a collection
+              on the shelves above, or choose one here; the entity, entity type and year filters work
+              the same way in every collection.
             </p>
           </div>
           <span className="cp-kind cp-kind--data">Preview · ten-record samples</span>
@@ -745,35 +884,21 @@ export default function PressExplore({ user, onActive = () => {} }) {
 
         <div className="cp-ex__card">
           <div className="cp-ex__bar" role="group" aria-label="Filters">
-            <EntityPicker cut={cut} facets={facets} register={register} onChange={(entities) => narrow({ entities })} />
-            <TypePicker cut={cut} facets={facets} register={register} onChange={(types) => narrow({ types })} />
-            <YearRange cut={cut} bounds={facets.years} basis={yearBasis} onChange={(years) => narrow({ years })} />
-            <CollectionPicker
-              cut={cut}
-              scope={scope}
-              onChange={(ids) => write({ collections: ids, table: null })}
-              onActive={onActive}
-              onLocked={{ entries: collections, point: pointAtUpgrade }}
-            />
-            {single && single.tables.length > 1 ? (
-              <label className="cp-ex__tablepick">
-                <span className="cp-ex__picklabel">Table</span>
-                <select value={table?.key ?? ""} onChange={(e) => write({ table: e.target.value || null, sort: null })} aria-label="Table">
-                  <option value="">Summary of {single.entry.short}</option>
-                  {single.tables.map((t) => (
-                    <option key={t.key} value={t.key}>{t.table}{t.flagship ? " · the dataset" : " · supporting table"}</option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
+            <CollectionSelect value={selectValue} collections={collections} scope={scope} onChange={chooseCollection} onActive={onActive} />
             <input
               type="search"
               className="cp-ex__q"
               placeholder="Search these records"
               aria-label="Search these records"
               value={cut.q}
-              onChange={(e) => narrow({ q: e.target.value })}
+              onChange={(e) => narrowTo({ q: e.target.value })}
             />
+            {narrow ? (
+              <details className="cp-ex__filters">
+                <summary className="cp-ex__act">Filters{isNarrowed(cut) ? " · on" : ""}</summary>
+                <div className="cp-ex__filtersin">{filters}</div>
+              </details>
+            ) : filters}
             <div className="cp-ex__acts">
               <button type="button" className="cp-ex__act" onClick={() => setNaming((v) => !v)} aria-expanded={naming}>Save view</button>
               <button type="button" className="cp-ex__act" onClick={download} disabled={!filtered.length}>
@@ -782,6 +907,20 @@ export default function PressExplore({ user, onActive = () => {} }) {
               <button type="button" className="cp-ex__act" onClick={copyLink}>{copied ? "Link copied" : "Copy link"}</button>
             </div>
           </div>
+          {lockedCount ? (
+            <p className="cp-ex__fine cp-ex__note">
+              {lockedCount} more collection{lockedCount === 1 ? "" : "s"} on <TierName name="Cedar Press+" />.{" "}
+              <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">Get <TierName name="Cedar Press+" /> at Tribal Business News <span aria-hidden="true">&#8594;</span></a>
+            </p>
+          ) : null}
+          {single ? (
+            <p className="cp-ex__scope" data-testid="explore-scope">
+              <b>{single.entry.name}.</b> {single.entry.blurb}
+              {contract?.entity_role ? <> The entity on each record is <em>{contract.entity_role}</em>.</> : null}
+              {contract?.year_basis ? <> Years are the <em>{contract.year_basis}</em>.</> : <> This is a register, not a series of events: the year filter does not apply.</>}
+              {contract?.amount ? <> Amounts are <em>{contract.amount_label ?? heading(contract.amount)}</em>.</> : null}
+            </p>
+          ) : null}
 
           {naming ? (
             <form className="cp-ex__savebar" onSubmit={save}>
@@ -789,14 +928,6 @@ export default function PressExplore({ user, onActive = () => {} }) {
               <button type="submit" className="cp-ex__act">Keep on this device</button>
               <span className="cp-ex__fine">A saved view is the filters, not the results: it re-runs on the current release. It stays in this browser; the link above is how to share it.</span>
             </form>
-          ) : null}
-
-          {upgrade ? (
-            <p className="cp-ex__upgrade">
-              <b>{upgrade.short}</b> is on <TierName name="Cedar Press+" />, which opens {lockedCount} more collections.{" "}
-              <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">Get <TierName name="Cedar Press+" /> at Tribal Business News <span aria-hidden="true">&#8594;</span></a>
-              <button type="button" className="cp-ex__clear" onClick={() => setUpgrade(null)}>Close</button>
-            </p>
           ) : null}
 
           {saved.length ? (
@@ -817,7 +948,12 @@ export default function PressExplore({ user, onActive = () => {} }) {
           <p className="cp-ex__caption" data-testid="explore-caption">
             {caption}
             {loading ? " · loading" : ""}
-            {view === "table" ? ` · ${tableColumns.length} columns` : ""}
+            {view === "table" ? ` · ${shownColumns.length} of ${tableColumns.length} columns` : ""}
+            {view === "table" && defaults.length && !narrow ? (
+              <button type="button" className="cp-ex__clear" onClick={() => setShowAll((v) => !v)}>
+                {showAll ? "Show the main columns" : `Show all ${tableColumns.length} columns`}
+              </button>
+            ) : null}
             {isNarrowed(cut) || cut.history ? (
               <button type="button" className="cp-ex__clear" onClick={() => write({ entities: [], types: null, years: null, q: "", sort: null, history: false })}>Clear filters</button>
             ) : null}
@@ -831,16 +967,22 @@ export default function PressExplore({ user, onActive = () => {} }) {
           {notes.length ? <p className="cp-ex__fine cp-ex__note" data-testid="explore-notes">{notes.join(" ")}</p> : null}
 
           {paged.rows.length ? (
-            <Rows
-              view={view}
-              items={paged.rows}
-              columns={shownColumns}
-              sort={cut.sort}
-              onSort={onSort}
-              onActive={onActive}
-              showAmount={showAmount}
-              entityColumn={entityColumn}
-            />
+            narrow ? (
+              <Cards items={paged.rows} allColumns={allColumns} onActive={onActive} />
+            ) : (
+              <Rows
+                view={view}
+                items={paged.rows}
+                columns={shownColumns}
+                allColumns={allColumns}
+                sort={cut.sort}
+                onSort={onSort}
+                onActive={onActive}
+                showAmount={showAmount}
+                entityColumn={entityColumn}
+                contract={contract}
+              />
+            )
           ) : (
             <p className="cp-ex__empty">
               {loading

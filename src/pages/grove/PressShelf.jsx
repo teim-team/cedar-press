@@ -12,10 +12,13 @@
 // to be empty, and a square cannot say what a collection is without turning
 // back into the card this replaced.
 //
-// A badge is the download. Click it and you get the file, with no second
-// step, no detail page and no button drawn on top of it. A locked badge
-// clicks too: it walks you to the panel that says what opens it. What's New
-// is the one page that tracks changes; the per-collection pages are gone.
+// A badge opens its collection in the viewer below and lights up; the
+// reader beside the grid describes the collection and carries its sample
+// download, on every pointer. That replaced "a badge is the download"
+// (2026-09-05 review): a reader who clicks a collection wants to see its
+// records, and the file is one more click in the panel that says what it
+// is. A locked badge clicks too: it walks you to the panel that says what
+// opens it. What's New is the one page that tracks changes.
 //
 // THE TWO SHELVES INVERT
 // Cedar Press sits on teal with white tiles and teal marks; Cedar Press+ sits
@@ -27,11 +30,12 @@
 // Tiles lay out six across on a wide screen, one row a shelf, so the two
 // tiers read as two rows of six; below that width the grid wraps by itself.
 //
-// THE ACTIVE COLLECTION IS SHARED
-// Which tile is lit and which collection the reader describes is one piece
-// of state held by the shelf, not by each band: the Explore card below
-// points at a collection too (hover its name in a row, choose it in the
-// picker), and the tile lights and the reader speaks for it wherever it is.
+// THE ACTIVE COLLECTION IS SHARED, AND SELECTION IS NOT HOVER
+// The shelf holds two things: the collection the pointer is on (the reader
+// follows it) and the collection the viewer below is showing (its tile
+// stays lit). Clicking a tile selects it in the viewer; choosing one in the
+// viewer lights its tile; hovering changes what is described, never what
+// is selected.
 //
 // FILTERED TO DATA, THIS IS THE READER'S OWN SHELF
 // No locked band and no Cedar Grove. Somebody who asked to see the
@@ -120,8 +124,8 @@ function useReveal() {
   return [ref, seen, instant];
 }
 
-function Badge({ entry, open, onEnter, active, index, onLocked, onOpen }) {
-  const className = `cp-badge${active ? " is-on" : ""}${open ? " cp-badge--act" : " cp-badge--locked"}`;
+function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen }) {
+  const className = `cp-badge${active || selected ? " is-on" : ""}${selected ? " is-selected" : ""}${open ? " cp-badge--act" : " cp-badge--locked"}`;
   // The selection is sticky on every pointer, not only touch: the read panel
   // carries its own actions (Ask Cedar, the touch download), and clearing on
   // mouse-leave or blur unmounted those buttons under the very pointer
@@ -153,25 +157,12 @@ function Badge({ entry, open, onEnter, active, index, onLocked, onOpen }) {
       </li>
     );
   }
-  // A tile without a release extract must not promise one: what it hands
-  // over is a description of the collection, and the label says so until the
-  // real release bundle exists.
-  const released = hasReleaseFile(entry);
   return (
     <li style={style}>
-      <button type="button" className={className} onClick={() => onOpen(entry)} {...watch}>
+      <button type="button" className={className} onClick={() => onOpen(entry)} aria-pressed={selected} {...watch}>
         {inner}
         <span className="cp-badge__cue" aria-hidden="true">&#8595;</span>
-        {/* "Sample", not the collection's name alone. What downloads is ten
-            real rows of the collection's flagship table, not the collection:
-            the full tables run to millions of rows and are not served yet. A
-            label promising more than the file contains is the one defect this
-            page cannot afford. */}
-        <span className="cp-badge__sr">
-          {released
-            ? `Download a ten-row sample of ${entry.name}`
-            : `Download the ${entry.name} collection description; the sample file is pending`}
-        </span>
+        <span className="cp-badge__sr">Open {entry.name} in the viewer below</span>
       </button>
     </li>
   );
@@ -204,21 +195,18 @@ function Detail({ entry, owned }) {
       <p className="cp-read__foot">
         {coverageLabel(entry)}
         {" · "}
-        {freshnessLine(entry.id) ||
-          (owned
-            ? hasReleaseFile(entry)
-              ? COARSE ? "Tap for a ten-row sample" : "Click for a ten-row sample"
-              : `Sample pending; ${COARSE ? "tap" : "click"} for the collection description`
-            : "Locked")}
+        {freshnessLine(entry.id) || (owned ? "Opens in the viewer below" : "Locked")}
       </p>
-      {/* On touch the tile's first tap lands here, so the panel carries the
-          action itself rather than sending the finger back to the grid. */}
-      {COARSE && owned ? (
+      {/* The download lives here, on every pointer: the panel says what the
+          file is before the finger or the cursor takes it. "Sample", not
+          the collection's name alone: what downloads is ten real rows of the
+          collection's flagship table, not the collection. */}
+      {owned ? (
         <button type="button" className="cp-read__act" onClick={() => downloadCsv(entry)}>
           <span aria-hidden="true">&#8595;</span>{" "}
           {hasReleaseFile(entry)
             ? `Download a ten-row sample of ${entry.short || entry.name}`
-            : "Download the description"}
+            : "Download the collection description (sample pending)"}
         </button>
       ) : null}
       {/* Cedar, already scoped: the reader looking at this description is
@@ -245,7 +233,7 @@ function Detail({ entry, owned }) {
 }
 
 
-function Band({ tier, user, index, hovered, setHovered }) {
+function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
   const entries = collectionsOnShelf(tier.shelf);
 
   // Off the tier's own shelf, never off its first entry: Grove's band leads
@@ -258,7 +246,9 @@ function Band({ tier, user, index, hovered, setHovered }) {
   // them, and a shelf's earliest year must not be a harvest date.
   const starts = entries.map((entry) => coverageFrom(entry)).filter(Boolean);
   const from = starts.length ? Math.min(...starts) : null;
-  const active = entries.find((entry) => entry.id === hovered) || null;
+  // The reader follows the pointer; with nothing under it, it describes
+  // the collection the viewer is showing.
+  const active = entries.find((entry) => entry.id === (hovered ?? selectedId)) || null;
   const [ref, seen, instant] = useReveal();
 
   // A locked tile's click walks the reader to the answer: the panel that
@@ -273,22 +263,13 @@ function Band({ tier, user, index, hovered, setHovered }) {
     window.setTimeout(() => setPulse(false), 900);
   };
 
-  // On a coarse pointer the first tap reads, the second (or the panel's own
-  // button) downloads: hover cannot introduce the collection first, so the
-  // tap that would have done both walks the reader to the panel instead.
-  const [armed, setArmed] = useState(null);
+  // A tile selects its collection in the viewer below and lights; the
+  // reader keeps describing it, with the download, until the pointer moves
+  // to another tile.
   const openTile = (entry) => {
     track(EVENT.collectionViewed, { collection: entry.id, shelf: tier.shelf });
-    if (COARSE && armed !== entry.id) {
-      setArmed(entry.id);
-      setHovered(entry.id);
-      readRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      setPulse(true);
-      window.setTimeout(() => setPulse(false), 900);
-      return;
-    }
-    track(EVENT.collectionDownloaded, { collection: entry.id, shelf: tier.shelf });
-    downloadCsv(entry);
+    setHovered(entry.id);
+    onPick(entry.id);
   };
 
   return (
@@ -348,6 +329,7 @@ function Band({ tier, user, index, hovered, setHovered }) {
               entry={entry}
               open={owned}
               active={active?.id === entry.id}
+              selected={selectedId === entry.id}
               onEnter={() => setHovered(entry.id)}
               onLocked={pointAtUpgrade}
               onOpen={openTile}
@@ -377,11 +359,7 @@ function Band({ tier, user, index, hovered, setHovered }) {
                 {COARSE
                   ? "Tap a collection to see what it holds."
                   : "Point at a collection to see what it holds."}
-                {owned
-                  ? COARSE
-                    ? " Its download is then one tap away."
-                    : " Open it to explore the data and take the release."
-                  : ""}
+                {owned ? " Click it to browse its records below; its sample download is here." : ""}
               </p>
             </div>
           )}
@@ -479,12 +457,17 @@ export default function PressShelf({ user }) {
   const shelves = PRESS_TIERS.filter((tier) => tier.storefront);
   const grove = PRESS_TIERS.find((tier) => !tier.storefront);
   const [hovered, setHovered] = useState(null);
+  // What the viewer shows (its tile stays lit), and the latest tile click,
+  // numbered so clicking the same tile twice scrolls to the viewer twice.
+  const [selectedId, setSelectedId] = useState(null);
+  const [pick, setPick] = useState(null);
+  const onPick = (id) => setPick((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
   return (
     <div id="catalog" className="cp-bands">
       {shelves.map((tier, index) => (
-        <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} />
+        <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} selectedId={selectedId} onPick={onPick} />
       ))}
-      <PressExplore user={user} onActive={setHovered} />
+      <PressExplore user={user} pick={pick} onActive={setHovered} onSelected={setSelectedId} />
       {grove ? <GroveTeaser tier={grove} /> : null}
     </div>
   );

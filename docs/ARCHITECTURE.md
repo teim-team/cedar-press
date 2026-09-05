@@ -329,7 +329,22 @@ filter and a type filter are satisfied by the same one. A table with a year
 column answers the year filter from that column only; `year_basis` is shown
 over the control.
 
-Phase one, shipped: the card over the ten-row samples, static on Pages, the
+THE TILES DRIVE THE VIEWER. A tile on the shelf selects its collection in
+the viewer and stays lit while the viewer shows it; the reader beside the
+grid describes the collection and carries its sample download on every
+pointer; hovering changes what is described, never what is selected. A
+collection is ONE DATASET to a reader: its flagship table with the declared
+default columns first and the rest one click away; supporting tables are not
+browsing options (a `tb=` link is still honoured). A record opens in three
+groups: what it says, its source and attribution, and its technical fields
+folded away, with links, dates, money and flags rendered for a person and
+the raw values kept for the download. On a phone the records are a list
+(who, where, when, what; tap for the record), the three pickers sit behind
+"Filters", and the year control is two boxes. Cedar's floating launcher
+steps aside while the viewer is on screen; the viewer's foot carries the
+Cedar action.
+
+Phase one, shipped: the viewer over the ten-row samples, static on Pages, the
 caption counting sample records and saying so, and what it is not showing
 (locked, no preview, unreachable, undated, superseded). Not shipped, and
 needing the API deployed: the full tables behind the same cut (a rows-and-
