@@ -188,6 +188,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (          # noqa: E402
     NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
     is_publication_eligible, mask_attribution, MASK, translate_neid_values,
+    apply_official_names,
     enforce_denials, DENIAL_MASK_REASON,
 )
 
@@ -357,6 +358,18 @@ def build(mode: str) -> int:
                         # its sibling. The rule belongs to
                         # `cedar_publication`, so every writer calls it.
                         translate_neid_values(r)
+                        # AND the short handle. Measured 2026-09-04: the
+                        # ten-row samples this script writes are copied
+                        # verbatim into public/data/cedar/samples/ by
+                        # scripts/import_cedar_manifest.py, and 77 of
+                        # them shipped a retired NEID while 3 shipped
+                        # `Confederated Yakama` - AFTER every file in
+                        # dist/customer had been cleaned of both. The
+                        # samples read the INTERNAL tables, so they
+                        # bypass the publication layer unless the gates
+                        # are applied here too. Same rule, same module,
+                        # every writer.
+                        apply_official_names(r)
                         # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY WRITER.
                         # Codex, PR #50: 1137 enforced the denials and this
                         # writer did not, so rebuilding after the Omaha ruling

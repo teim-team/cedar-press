@@ -1,5 +1,5 @@
 {
-  "built": "2026-09-03",
+  "built": "2026-09-04",
   "rows_per_dataset": 100,
   "datasets": [
     {
@@ -17,8 +17,8 @@
       "columns": 9,
       "curated": 1,
       "curated_columns_absent": "",
-      "distinct_entities": 88,
-      "full_columns": 60
+      "distinct_entities": 100,
+      "full_columns": 40
     },
     {
       "dataset": "federal-register",
@@ -26,7 +26,7 @@
       "columns": 8,
       "curated": 1,
       "curated_columns_absent": "",
-      "distinct_entities": 93,
+      "distinct_entities": 100,
       "full_columns": 45
     },
     {
@@ -81,7 +81,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 70
+      "full_columns": 69
     },
     {
       "dataset": "natural-resources",
@@ -89,8 +89,8 @@
       "columns": 8,
       "curated": 1,
       "curated_columns_absent": "",
-      "distinct_entities": 9,
-      "full_columns": 52
+      "distinct_entities": 26,
+      "full_columns": 51
     },
     {
       "dataset": "nest",
@@ -99,7 +99,7 @@
       "curated": 1,
       "curated_columns_absent": "",
       "distinct_entities": 100,
-      "full_columns": 88
+      "full_columns": 85
     },
     {
       "dataset": "nonprofits",

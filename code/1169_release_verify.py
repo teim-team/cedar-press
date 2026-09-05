@@ -135,6 +135,64 @@ def check_csv_identity(vocab: set) -> Check:
     return c
 
 
+def check_sample_identity(vocab: set) -> Check:
+    """The samples the live site serves - the surface that actually leaked.
+
+    THIS CHECK EXISTS BECAUSE NOTHING CAUGHT IT. Measured 2026-09-04: while
+    every file in dist/customer was clean, 77 files under
+    public/data/cedar/samples/ carried a retired NEID and 3 carried the
+    corrupt short handle `Confederated Yakama`. They are copied verbatim from
+    dist/review/samples/ by scripts/import_cedar_manifest.py, which reads the
+    INTERNAL tables and therefore bypasses the publication layer entirely.
+
+    Two gates already passed on the same tree - the delivered CSVs were clean
+    and no delivered file carried a retired-scheme COLUMN - so the release
+    read as identity-clean while the site served the retired scheme to the
+    public. A gate that checks the artifact the customer downloads but not the
+    sample the website shows is a gate with a hole the exact size of the
+    failure that keeps recurring.
+
+    The owner's words for the pattern, 2026-09-04: "I don't want to be like,
+    oh, where is this NEID coming from? Oh, it's from an older script."
+    """
+    trees = [ROOT / "dist" / "review" / "samples",
+             ROOT / "public" / "data" / "cedar" / "samples"]
+    present = [t for t in trees if t.exists()]
+    c = Check("sample trees carry no retired identity",
+              "dist/review/samples + public/data/cedar/samples, every cell",
+              blocking=True)
+    if not present:
+        c.status = "NOT_ESTABLISHED"
+        c.detail = ("neither sample tree exists; an absent tree must never "
+                    "read as a clean one")
+        return c
+    hits, files = 0, []
+    for tree in present:
+        for p_ in sorted(tree.rglob("*.csv")):
+            n = 0
+            try:
+                with p_.open(encoding="utf-8-sig", errors="replace",
+                             newline="") as fh:
+                    for row in csv.DictReader(fh):
+                        for v in row.values():
+                            if not v or "-" not in v:
+                                continue
+                            for tok in (v.split("|") if "|" in v else [v]):
+                                if tok.strip() in vocab:
+                                    n += 1
+            except OSError:
+                continue
+            if n:
+                files.append("%s=%d" % (p_.name, n))
+                hits += n
+    c.measured = {"retired_identifier_values": hits,
+                  "files_scanned": sum(len(list(t.rglob('*.csv'))) for t in present)}
+    c.status = "PASS" if hits == 0 else "FAIL"
+    c.detail = ("no retired identifiers in either sample tree" if hits == 0
+                else "; ".join(files[:8]))
+    return c
+
+
 def check_db_identity(vocab: set) -> Check:
     """The check that would have caught the headline contradiction."""
     c = Check("customer database identity migration",
@@ -435,6 +493,150 @@ def check_preview_complete() -> Check:
     return c
 
 
+def check_no_retired_scheme_columns() -> Check:
+    """No delivered file may carry a CICD column, under ANY of its names.
+
+    THE REASON THIS IS A GATE AND NOT A FIX.
+
+    The owner asked for the CICD identifier to be removed six times across
+    three days, and it came back every time, because each fix removed the
+    names that were known that day:
+
+        2026-09-01  843 dropped `tribe_id` from three named files
+        2026-09-03  the rule moved into publishable_columns() - 77 more files
+        2026-09-03  the VALUES, hiding in entity_id and affiliated_entity_ids
+        2026-09-04  `handle`, which had been documented as Cedar's own
+                    readable code and was not - it is the CICD crosswalk's
+
+    A list of names cannot close a defect whose shape is "a name nobody
+    thought of". This check is written the other way round: anything matching
+    the retired scheme's SHAPE fails, and a legitimate column that happens to
+    match has to be named as an exception here, in the open, once.
+
+    `cedar_uid` is the identity. `canonical_name` is what a person reads.
+    There is no third thing a column called `handle` could be doing.
+    """
+    c = Check("no CICD/retired-scheme column in any delivered file",
+              "dist/customer/*.csv + dist/preview/*.csv headers", blocking=True)
+    import re as _re
+    bad = _re.compile(r"(^|_)(handle|neid|tribe_id)($|_)", _re.I)
+    # Columns that match the shape and are NOT the retired scheme. Empty today;
+    # every future entry needs a reason beside it.
+    ALLOWED: set = set()
+    hits = []
+    for p in sorted(list(CUSTOMER.glob("*.csv")) + list(PREVIEW.glob("*.csv"))):
+        try:
+            with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+                hdr = next(csv.reader(fh), []) or []
+        except OSError:
+            continue
+        for col in hdr:
+            if bad.search(col) and col not in ALLOWED:
+                hits.append(f"{p.name}:{col}")
+    c.measured = {"columns": len(hits)}
+    c.status = "PASS" if not hits else "FAIL"
+    c.detail = ("no retired-scheme column survives" if not hits
+                else f"{len(hits)}: " + "; ".join(hits[:6]))
+    return c
+
+
+def check_definition_agreement() -> Check:
+    """Every place that tells a customer what a dataset IS must say the same thing.
+
+    The definition of Indian Country Deals was typed into four places
+    independently and all four had drifted:
+
+        the website catalog       "Announced transactions across Indian Country"
+        the manifest builder      "Documented public transactions"
+        the descriptor JSON       omitted divestitures and investments entirely
+        the dataset-doc generator led with fabrication risk, not with subject
+
+    So a customer reading the site and a customer reading the codebook were
+    told the dataset covered different things - and no test could see it,
+    because each copy was internally consistent. Prose has no build step.
+
+    `cedar_publication.DATASET_DEFINITION` is now the one copy. The two Python
+    consumers import it, so they cannot drift. The other two are DATA - a JSON
+    file and a JavaScript literal the site ships - which nothing forces to
+    agree, and this check is what forces them.
+
+    NOT_ESTABLISHED, not PASS, when a collection has no ruled definition: an
+    unruled dataset is a normal state, and a gate that reports "fine" for a
+    thing it never looked at is the silent zero this project keeps finding.
+    """
+    c = Check("dataset definition agrees everywhere",
+              "cedar_publication.DATASET_DEFINITION vs site + descriptors",
+              blocking=True)
+    try:
+        from cedar_publication import DATASET_DEFINITION
+    except Exception as exc:                                   # pragma: no cover
+        c.status = "FAIL"
+        c.detail = f"cannot read the canonical definitions: {exc}"
+        return c
+    if not DATASET_DEFINITION:
+        c.status = "NOT_ESTABLISHED"
+        c.detail = "no collection has a ruled definition yet"
+        return c
+
+    import json as _json
+    import re as _re
+    drift, checked = [], 0
+
+    desc_p = ROOT / "docs" / "datasets" / "_descriptors.json"
+    cat_p = ROOT / "src" / "features" / "grove" / "pressCatalog.js"
+    try:
+        desc = _json.loads(desc_p.read_text(encoding="utf-8"))
+    except Exception:
+        desc = None
+    try:
+        cat = cat_p.read_text(encoding="utf-8")
+    except OSError:
+        cat = None
+
+    for coll, canon in sorted(DATASET_DEFINITION.items()):
+        if desc is None:
+            drift.append(f"{coll}: _descriptors.json unreadable")
+        elif coll not in desc:
+            drift.append(f"{coll}: absent from _descriptors.json")
+        else:
+            checked += 1
+            if (desc[coll].get("tracks") or "").strip() != canon:
+                drift.append(f"{coll}: _descriptors.json tracks")
+        if cat is None:
+            drift.append(f"{coll}: pressCatalog.js unreadable")
+            continue
+        # The blurb is a JS string literal split over several lines by the
+        # formatter, so it is reassembled from its parts before comparing.
+        # Comparing the raw source text would fail on rewrapping alone.
+        parts = cat.split(f'id: "{coll}"')
+        if len(parts) < 2:
+            drift.append(f"{coll}: absent from pressCatalog.js")
+            continue
+        m = _re.search(r'blurb:\s*((?:\s*"[^"]*")+)', parts[1])
+        if not m:
+            drift.append(f"{coll}: no blurb in pressCatalog.js")
+            continue
+        checked += 1
+        # A blurb carrying an escaped quote needs a more careful scan than this
+        # one. Refuse it loudly rather than compare a string this cannot
+        # reassemble correctly and report a drift that is really a parse bug.
+        if chr(92) + '"' in m.group(1):
+            drift.append(f"{coll}: pressCatalog.js blurb contains an escaped "
+                         f"quote this check cannot reassemble")
+            continue
+        got = "".join(_re.findall(r'"([^"]*)"', m.group(1)))
+        if got.strip() != canon:
+            drift.append(f"{coll}: pressCatalog.js blurb")
+
+    c.measured = {"collections": len(DATASET_DEFINITION),
+                  "copies_checked": checked, "drifted": len(drift)}
+    c.status = "PASS" if not drift else "FAIL"
+    c.detail = (f"{checked} copies of {len(DATASET_DEFINITION)} definition(s) "
+                f"agree with cedar_publication"
+                if not drift else "; ".join(drift[:6]))
+    return c
+
+
 def check_no_regression() -> Check:
     c = Check("no-regression chain (62)", "repo-wide ratchet metrics",
               blocking=True)
@@ -480,8 +682,10 @@ def run_all() -> list:
     if not vocab:
         sys.exit("FATAL: NEID vocabulary is empty - every membership test "
                  "would pass vacuously. Refusing to report a release verdict.")
-    return [check_csv_identity(vocab), check_db_identity(vocab),
-            check_preview_complete(),
+    return [check_csv_identity(vocab), check_sample_identity(vocab),
+            check_db_identity(vocab),
+            check_preview_complete(), check_no_retired_scheme_columns(),
+            check_definition_agreement(),
             check_artifacts_agree(vocab), check_uid_integrity(),
             check_rulings_applied(), check_no_regression(), check_semantics()]
 def _fixture_fails(name, build, run):
@@ -499,8 +703,15 @@ def _fixture_fails(name, build, run):
     reimplementation of it.
     """
     import tempfile
-    global CUSTOMER, DB, CLEAN, SPINE, PREVIEW
-    saved = (CUSTOMER, DB, CLEAN, SPINE, PREVIEW)
+    # BOTH sides added a global here and each was right about its own check.
+    # ROOT: check_definition_agreement reads the site catalog and the
+    # descriptor JSON by ROOT-relative path, so its fixture must be able to
+    # move ROOT. PREVIEW: main's preview-completeness check needs the same.
+    # Taking either alone would leave one check's fixture unable to reach its
+    # own inputs - and a fixture that cannot reach a check's inputs proves
+    # nothing about that check, which is what this harness exists to prevent.
+    global CUSTOMER, DB, CLEAN, SPINE, ROOT, PREVIEW
+    saved = (CUSTOMER, DB, CLEAN, SPINE, ROOT, PREVIEW)
     try:
         with tempfile.TemporaryDirectory() as d:
             build(Path(d))
@@ -509,7 +720,7 @@ def _fixture_fails(name, build, run):
             print(f"    {'ok  ' if ok else 'FAIL'}  {name}  (returned {got.status})")
             return ok
     finally:
-        CUSTOMER, DB, CLEAN, SPINE, PREVIEW = saved
+        CUSTOMER, DB, CLEAN, SPINE, ROOT, PREVIEW = saved
         globals()["_RULING_OVERRIDE"] = None
 
 
@@ -612,6 +823,29 @@ def selftest() -> int:
     ok.append(_fixture_fails("a verified denial still attributed in the data",
                              b5, check_rulings_applied))
 
+    # 6. the website and the codebook telling a customer two different things.
+    #    Both copies are planted CORRECTLY first and one is then perturbed, so
+    #    the fixture proves the check reads the files rather than that it fails
+    #    on a tree where they are simply missing.
+    def b6(root):
+        global ROOT
+        from cedar_publication import DATASET_DEFINITION
+        coll, canon = sorted(DATASET_DEFINITION.items())[0]
+        (root / "docs" / "datasets").mkdir(parents=True)
+        (root / "src" / "features" / "grove").mkdir(parents=True)
+        (root / "docs" / "datasets" / "_descriptors.json").write_text(
+            json.dumps({coll: {"tracks": canon}}), encoding="utf-8")
+        # The drift: one word changed, of the kind a hand edit to the site
+        # actually produces. Nothing about the file's shape gives it away.
+        drifted = canon.replace("Material", "Announced", 1)
+        (root / "src" / "features" / "grove" / "pressCatalog.js").write_text(
+            f'{{\n  id: "{coll}",\n  blurb:\n    "{drifted}",\n}}\n',
+            encoding="utf-8")
+        ROOT = root
+
+    ok.append(_fixture_fails("the site and the codebook define a dataset "
+                             "differently", b6, check_definition_agreement))
+
     # 5b. The preview set, in the three ways it can lie. Codex, PR #48: the
     #     check was added to `run_all()` and this selftest still exercised
     #     seven, so it could regress to an unconditional PASS while the
@@ -671,7 +905,48 @@ def selftest() -> int:
 
     ok.append(_preview_passes())
 
-    # 6 and 7. The two checks with no implementation yet must say exactly that
+    # 5c. The sample trees. This check was added AFTER 77 files under
+    #     public/data/cedar/samples/ shipped a retired NEID while every
+    #     delivered CSV was clean and two other identity gates passed. A gate
+    #     added without a fixture is a gate nobody has seen fire.
+    def b5c(root):
+        global ROOT
+        (root / "dist" / "review" / "samples" / "gaming").mkdir(parents=True)
+        (root / "dist" / "review" / "samples" / "gaming" / "x__10.csv").write_text(
+            "cedar_uid,tribe_entity_id\nCE-0012G-ES,TRBF-KAIBAB-00\n",
+            encoding="utf-8")
+        ROOT = root
+
+    ok.append(_fixture_fails("a sample tree carrying a retired identifier",
+                             b5c, lambda: check_sample_identity(
+                                 neid_vocabulary())))
+
+    # 5d. And the positive control: a clean sample tree must PASS, or the
+    #     check above could be hardwired to FAIL and still look proven.
+    def _sample_clean_passes():
+        import tempfile          # local, matching _fixture_fails' own import
+        global ROOT
+        saved = ROOT
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                root = Path(d)
+                (root / "dist" / "review" / "samples" / "gaming").mkdir(parents=True)
+                (root / "dist" / "review" / "samples" / "gaming"
+                 / "x__10.csv").write_text(
+                    "cedar_uid,name\nCE-0012G-ES,Blackfeet Tribe\n",
+                    encoding="utf-8")
+                ROOT = root
+                got = check_sample_identity(neid_vocabulary())
+                good = got.status == "PASS"
+                print(f"    {'ok  ' if good else 'FAIL'}  a clean sample tree "
+                      f"passes  (returned {got.status})")
+                return good
+        finally:
+            ROOT = saved
+
+    ok.append(_sample_clean_passes())
+
+    # 8 and 9. The two checks with no implementation yet must say exactly that
     #    and must block. An absent check has to read as absent, never as a pass;
     #    asserting the contract is the only honest control available for them.
     for fn, label in ((check_no_regression, "no-regression"),

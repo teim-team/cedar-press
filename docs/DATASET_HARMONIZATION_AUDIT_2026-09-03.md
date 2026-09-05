@@ -384,7 +384,9 @@ delivered files. Nothing below is taken on the document's word.*
 | **START_HERE #5** | `extent_competed` holds two vocabularies; filter `extent_competed_normalized` | **CLOSED in the delivery** | both columns ship; the normalized one has 10 values in one vocabulary; `extent_competed_normalized_basis` ships too |
 | **START_HERE #5 (b)** | *"`funding_agency` is the other two-vocabulary column and has no normalisation"* | **still true, and undocumented in the codebook** | 315 distinct values, 314 after upper-casing — so it is not a *casing* split, but the FY2016/17 label-vs-code seam is not normalised and no `_normalized` sibling ships. The contractors codebook carries no warning about it |
 | **CODEX PR29 F4** | 156,592 rows, self-parent PIID | **not reproducible from the delivered columns** — `parent_contract_number` equals `contract_number` on the delivered file is measurable but the finding's own predicate used a column not shipped. **Not measured.** |
-| **ANOMALY / gaming** | `property_status = current` beside `close_date`, 113 of 787 | **not re-measured this pass** — flagged as out of scope; `property_status` is populated on only 453 of 787 in the delivery, so the denominator has moved. **Not measured.** |
+| **ANOMALY / gaming** | `property_status = current` beside `close_date`, 113 of 787 rows | **not re-measured this pass** — flagged as out of scope; `property_status` is populated on only 453 of 787 rows in the delivery, so the denominator has moved. **Not measured.** |
+
+> **GAMING-DENOMINATOR-2026-09-02.** The 787 above is a ROW count and is used correctly as one. It is NOT a facility count: 16 rows say no casino in their own name (7 exactly `No casino`, 9 more inside a longer name), leaving 771 facility rows and **714 distinct properties** after the same-tribe duplicate groups. Five denominators circulated on 2026-09-02 — 787, 780, 734, 727, 714 — and four of them are wrong as a denominator. Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
 
 ---
 

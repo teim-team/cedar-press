@@ -30,7 +30,8 @@ import re
 import sys
 import time
 
-import duckdb
+import duckdb  # noqa: F401  (kept: types/exceptions)
+import cedar_duck
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CUST = os.path.join(ROOT, "dist", "customer")
@@ -103,7 +104,7 @@ def census():
 # ---------------------------------------------------------------- profile
 def profile(only=None):
     _ensure_out()
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.execute("PRAGMA threads=4")
     out = {}
     for d in DATASETS:
@@ -206,7 +207,7 @@ UID_COLS = {
 
 def identity():
     _ensure_out()
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.execute("PRAGMA threads=4")
     parts = []
     for d, (uid, name) in UID_COLS.items():

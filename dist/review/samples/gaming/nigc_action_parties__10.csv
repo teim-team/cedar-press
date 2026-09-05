@@ -1,11 +1,11 @@
-record_id,record_table,role,tribe_entity_id,tribe_canonical_name,cedar_uid,party_name_verbatim,resolve_method,resolve_status,record_scope,built_by,built_date
-NIGCEA-6C1557C8FB5E,nigc_enforcement_actions.csv,respondent,TRBF-GRTRVS-00,Grand Traverse,CE-0014T-MK,2026.01.12 NOV-26-01 Grand Traverse,resolver:containment,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-1DA43CA46FED,nigc_enforcement_actions.csv,respondent,TRBF-ALCOUS-00,Alabama-Coushatta,CE-0011Z-30,Alabama-Coushatta Tribe of Texas SA-24-01,resolver:alias,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-A4F7222B4B53,nigc_enforcement_actions.csv,respondent,TRBF-CMNCHE-00,Comanche Nation,CE-0013G-K9,Comanche Indian Tribe,resolver:core,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-6115AD1C5018,nigc_enforcement_actions.csv,respondent,TRBF-CHKNAT-00,Cherokee Nation,CE-00134-BX,Cherokee Nation of Oklahoma,ruling:corrected,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-2B624A30B8E6,nigc_enforcement_actions.csv,respondent,TRBF-CHKSWN-00,The Chickasaw Nation,CE-00135-HP,Chickasaw Nation 	NOV-02-05,resolver:core,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-ED1DADF6ED02,nigc_enforcement_actions.csv,respondent,TRBF-SCFXMS-00,Sac & Fox of Mississippi,CE-0019N-F6,Sac & Fox Tribe of the Mississippi in Iowa 	NOV-03-02,resolver:alias,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-DE4A73F2ABFB,nigc_enforcement_actions.csv,respondent,TRBF-SCLARA-00,Pueblo of Santa Clara,CE-0019Q-VR,Santa Clara 	SA-03-01,resolver:core,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-AA51CAAA5179,nigc_enforcement_actions.csv,respondent,TRBF-CYOTEV-00,Coyote Valley,CE-00140-R9,Coyote Valley Band of Pomo Indians,resolver:containment,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-5FD4F1869398,nigc_enforcement_actions.csv,respondent,TRBF-CROWMT-00,Crow,CE-0013W-VN,Crow Tribe of Montana,resolver:alias,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
-NIGCEA-2E31BC7D7F74,nigc_enforcement_actions.csv,respondent,TRBF-SMNLOK-00,The Seminole Nation of Oklahoma,CE-001AA-J3,Seminole Nation of Oklahoma,resolver:core,resolved,entity,code/586_promote_nigc_gaming.py,2026-09-01
+record_id,record_table,role,tribe_entity_id,tribe_canonical_name,cedar_uid,party_name_verbatim,resolve_method,resolve_status,built_date
+NIGCEA-6C1557C8FB5E,nigc_enforcement_actions.csv,respondent,CE-0014T-MK,"Grand Traverse Band of Ottawa and Chippewa Indians, Michigan",CE-0014T-MK,2026.01.12 NOV-26-01 Grand Traverse,resolver:containment,resolved,2026-09-01
+NIGCEA-1DA43CA46FED,nigc_enforcement_actions.csv,respondent,CE-0011Z-30,Alabama-Coushatta Tribe of Texas,CE-0011Z-30,Alabama-Coushatta Tribe of Texas SA-24-01,resolver:alias,resolved,2026-09-01
+NIGCEA-A4F7222B4B53,nigc_enforcement_actions.csv,respondent,CE-0013G-K9,"Comanche Nation, Oklahoma",CE-0013G-K9,Comanche Indian Tribe,resolver:core,resolved,2026-09-01
+NIGCEA-6115AD1C5018,nigc_enforcement_actions.csv,respondent,CE-00134-BX,Cherokee Nation,CE-00134-BX,Cherokee Nation of Oklahoma,ruling:corrected,resolved,2026-09-01
+NIGCEA-2B624A30B8E6,nigc_enforcement_actions.csv,respondent,CE-00135-HP,The Chickasaw Nation,CE-00135-HP,Chickasaw Nation 	NOV-02-05,resolver:core,resolved,2026-09-01
+NIGCEA-ED1DADF6ED02,nigc_enforcement_actions.csv,respondent,CE-0019N-F6,Sac & Fox Tribe of the Mississippi in Iowa,CE-0019N-F6,Sac & Fox Tribe of the Mississippi in Iowa 	NOV-03-02,resolver:alias,resolved,2026-09-01
+NIGCEA-DE4A73F2ABFB,nigc_enforcement_actions.csv,respondent,CE-0019Q-VR,"Pueblo of Santa Clara, New Mexico",CE-0019Q-VR,Santa Clara 	SA-03-01,resolver:core,resolved,2026-09-01
+NIGCEA-AA51CAAA5179,nigc_enforcement_actions.csv,respondent,CE-00140-R9,Coyote Valley Band of Pomo Indians of California,CE-00140-R9,Coyote Valley Band of Pomo Indians,resolver:containment,resolved,2026-09-01
+NIGCEA-5FD4F1869398,nigc_enforcement_actions.csv,respondent,CE-0013W-VN,Crow Tribe of Montana,CE-0013W-VN,Crow Tribe of Montana,resolver:alias,resolved,2026-09-01
+NIGCEA-2E31BC7D7F74,nigc_enforcement_actions.csv,respondent,CE-001AA-J3,The Seminole Nation of Oklahoma,CE-001AA-J3,Seminole Nation of Oklahoma,resolver:core,resolved,2026-09-01

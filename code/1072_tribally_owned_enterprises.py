@@ -1466,8 +1466,9 @@ def federal_contracting_index():
     """
     names, ueis, cages = set(), set(), set()
     try:
-        import duckdb
-        con = duckdb.connect()
+        import duckdb  # noqa: F401  (kept: types/exceptions)
+        import cedar_duck
+        con = cedar_duck.connect()
         q = ("SELECT DISTINCT awardee_name, awardee_uei, cage_code FROM "
              "read_csv_auto(?, header=true, all_varchar=true, "
              "ignore_errors=true, sample_size=-1)")

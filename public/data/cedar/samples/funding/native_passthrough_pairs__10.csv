@@ -1,11 +1,11 @@
 from_tribe_id,from_entity,to_tribe_id,to_entity,n_subawards,countable_usd,first_year,last_year,award_kinds,built_date
-TRBF-CHKNAT-00,Cherokee Nation,TRBF-CHKNAT-00,Cherokee Nation,401,383406386.64,2014,2025,assistance|contract,2026-09-02
-TRBF-SCFXOK-00,Sac and Fox Nation,TRBF-SCFXOK-00,Sac and Fox Nation,1,35505854.0,2023,2023,assistance,2026-09-02
-TRBF-SCFXOK-00,Sac and Fox Nation,TRBF-ASHAWN-00,Absentee-Shawnee,15,23266871.0,2021,2026,assistance,2026-09-02
-ANRC-BRBYCO-00,Bristol Bay Native Corporation,TRBF-WKWTOK-00,Wichita,18,13645355.85,2016,2017,contract,2026-09-02
-ANRC-ARCSLO-00,Arctic Slope Regional Corporation,ANRC-ARCSLO-00,Arctic Slope Regional Corporation,24,11809695.0,2011,2025,assistance|contract,2026-09-02
-AKNF-ALTIIQ-00-KONIAG,Alutiiq,SGVF-CHGCMT-00,Chugachmiut self-governance consortium,1,9993934.0,2024,2024,assistance,2026-09-02
-ANRC-BRBYCO-00,Bristol Bay Native Corporation,ANRC-CKINLT-00,"Cook Inlet Region, Incorporated",4,8275485.34,2014,2014,contract,2026-09-02
-AKNF-PRBLFC-00,Pribilof Islands,TRBF-LWSXMN-00,Lower Sioux,9,7040067.0,2011,2020,assistance,2026-09-02
-AKNF-VEAGLE-00-DOYONL-TNNACH,Eagle,ANRC-BRBYCO-00,Bristol Bay Native Corporation,13,6287030.38,2017,2019,contract,2026-09-02
-TRBF-DUCKWT-00,Duckwater,TRBF-DUCKWT-00,Duckwater,2,5468470.0,2021,2021,contract,2026-09-02
+CE-00134-BX,Cherokee Nation,CE-00134-BX,Cherokee Nation,401,383406386.64,2014,2025,assistance|contract,2026-09-02
+CE-0019P-NZ,Sac and Fox Nation,CE-0019P-NZ,Sac and Fox Nation,1,35505854.0,2023,2023,assistance,2026-09-02
+CE-0019P-NZ,Sac and Fox Nation,CE-00124-6D,Absentee-Shawnee,15,23266871.0,2021,2026,assistance,2026-09-02
+CE-0007A-ZA,Bristol Bay Native Corporation,CE-001C5-Y6,Wichita,18,13645355.85,2016,2017,contract,2026-09-02
+CE-00078-KR,Arctic Slope Regional Corporation,CE-00078-KR,Arctic Slope Regional Corporation,24,11809695.0,2011,2025,assistance|contract,2026-09-02
+CE-0000D-E5,Alutiiq,CE-0010F-Y0,Chugachmiut self-governance consortium,1,9993934.0,2024,2024,assistance,2026-09-02
+CE-0007A-ZA,Bristol Bay Native Corporation,CE-0007D-HN,"Cook Inlet Region, Incorporated",4,8275485.34,2014,2014,contract,2026-09-02
+CE-00053-BV,Pribilof Islands,CE-0016J-EB,Lower Sioux,9,7040067.0,2011,2020,assistance,2026-09-02
+CE-0006R-ER,Eagle,CE-0007A-ZA,Bristol Bay Native Corporation,13,6287030.38,2017,2019,contract,2026-09-02
+CE-00145-P6,Duckwater,CE-00145-P6,Duckwater,2,5468470.0,2021,2021,contract,2026-09-02

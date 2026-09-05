@@ -625,12 +625,13 @@ class Evidence:
         table otherwise.  On a resumed `apply` the live table already carries
         the withdrawals, and aggregating it reported $9,344 of withdrawn
         dollars where the true figure is $16.99B."""
-        import duckdb
+        import duckdb  # noqa: F401  (kept: types/exceptions)
+        import cedar_duck
         pre = Path(str(PRIME) + TAG)
         src = str(pre if pre.exists() else PRIME)
         if pre.exists():
             print(f"  prime aggregates read from {pre.name} (the pre-state)")
-        con = duckdb.connect()
+        con = cedar_duck.connect()
         # DETERMINISTIC representative name: most frequently filed, ties broken
         # alphabetically.  `mode()` has no defined tie-break and made this pass
         # irreproducible; `allnames` carries every spelling the registrant filed.
@@ -1195,7 +1196,7 @@ def measure_prime(path=None):
     """Read-only census of prime_contracts, by duckdb."""
     import duckdb
     p = str(path or PRIME)
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     cols = [r[0] for r in con.execute(
         "SELECT column_name FROM (DESCRIBE SELECT * FROM read_csv_auto(?, all_varchar=true, "
         "sample_size=1000))", [p]).fetchall()]
@@ -1255,7 +1256,7 @@ def _leg_census(path, wd_uei, wd_cage):
     made the first version of this check report 8,352 phantom failures.
     """
     import duckdb
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     con.execute("CREATE TABLE wdu(u VARCHAR); CREATE TABLE wdc(c VARCHAR)")
     for u in wd_uei:
         con.execute("INSERT INTO wdu VALUES (?)", [u])

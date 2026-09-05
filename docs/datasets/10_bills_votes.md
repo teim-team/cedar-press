@@ -1,6 +1,6 @@
 # Dataset 10 — Native Bills & Congressional Votes
 
-*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press ($500) - Congressional Votes and Proposed Legislation***
+*Maintenance doc. Generated 2026-09-04. Tier: **Cedar Press ($500) - Congressional Votes and Proposed Legislation***
 
 ## What this is
 
@@ -39,6 +39,10 @@ No open contract point. Next action: **maintain**.
 | `congressional_correspondence_log.csv` *(internal-by-decision)* | 0 | — | no dated column |
 | `congressional_correspondence_systems.csv` | 257 | `publication_date` | 1999–2026 (interior gap: 2000, 2001, 2002, 2003, 2004, 2005, +12 more) · **thin: 2016, 2019** |
 | `member_positions.csv` | 136,119 | — | no dated column |
+| `native_bill_action_coverage.csv` | — | — | **not built** |
+| `native_bill_actions.csv` | — | — | **not built** |
+| `native_bill_cosponsor_coverage.csv` | — | — | **not built** |
+| `native_bill_cosponsors.csv` | — | — | **not built** |
 | `native_bill_outcomes.csv` | 3,069 | `introduced_date` | 1973–2026 (interior gap: 1974) · **thin: 1975, 1976, 1977, 1978, 1979, 1980, +12 more** |
 | `native_bills.csv` | 3,069 | `introduced_date` | 1973–2026 (interior gap: 1974) · **thin: 1975, 1976, 1977, 1978, 1979, 1980, +12 more** |
 | `native_bills_entity_bridge.csv` | 676 | — | no dated column |
@@ -53,14 +57,14 @@ No open contract point. Next action: **maintain**.
 
 | File | Rows | Size |
 |---|---:|---:|
-| `data/clean/native_bills.csv` | 3,069 | 1 MB |
-| `data/clean/bill_votes.csv` | 423 | 335 KB |
+| `data/clean/native_bills.csv` | 3,069 | 4 MB |
+| `data/clean/bill_votes.csv` | 423 | 548 KB |
 | `data/clean/member_positions.csv` | 136,119 | 14 MB |
 | `data/clean/native_bill_outcomes.csv` | 3,069 | 2 MB |
 | `data/clean/native_bills_entity_bridge.csv` | 676 | 204 KB |
 | `data/clean/bill_votes_entity_bridge.csv` | 75 | 18 KB |
 | `data/clean/native_bills_entity_class.csv` | 2,694 | 1 MB |
-| `data/clean/native_bills_subject_sweep.csv` | 2,414 | 1 MB |
+| `data/clean/native_bills_subject_sweep.csv` | 2,409 | 1 MB |
 | `data/clean/bill_votes_official_verification.csv` | 305 | 108 KB |
 
 ## Refresh

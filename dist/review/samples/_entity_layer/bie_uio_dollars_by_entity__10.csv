@@ -1,11 +1,11 @@
-tribe_id,canonical_name,entity_class,bie_operation_type,parent_native_entity,rolls_up_to_a_tribe,total_usd,usd_faads_all_agencies,usd_federal_funding,usd_nonprofit_990,usd_prime_contracts,usd_subawards,n_transactions,built_date,cedar_uid
-BIE-SANTAF-00,Santa Fe Indian School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,279577240.9,5655271.0,272809721.37,0.0,645245.95,467002.58,325,2026-08-06,CE-000H4-DM
-BIE-STNDN1-00,Standing Rock Community School,BIE School,tribally_controlled,TRBF-STNDRK-00|Standing Rock,"AFFILIATION ONLY - tier B, not ownership",149505760.83,112076.0,142410197.66,0.0,,6983487.17,321,2026-08-06,CE-000HS-B1
-BIE-DZLTHN-00,Dzilth-Na-O-Dith-Hle Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,103513480.64,52553.0,103460927.64,,,,195,2026-08-06,CE-000EE-TY
-BIE-CHOOSH-00,Ch'ooshgai Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,87148852.26,67399.0,86703837.7,,7000.0,370615.56,161,2026-08-06,CE-000DQ-BF
-BIE-CRZYHR-00,Crazy Horse School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,70228841.2,3974142.0,66254699.2,,,,248,2026-08-06,CE-000E5-4X
-BIE-LTTLSN-00,Little Singer Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,54637547.75,1452003.0,53147044.75,,38500.0,,191,2026-08-06,CE-000FP-FP
-BIE-PINONX-00,Pinon Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,36175696.89,1712332.0,34317236.61,,10700.0,135428.28,186,2026-08-06,CE-000GN-ED
-BIE-QLTTRB-00,Quileute Tribal School,BIE School,tribally_controlled,TRBF-QUILTE-00|Quileute,"AFFILIATION ONLY - tier B, not ownership",26116671.09,-5782.0,25946621.97,0.0,,175831.12,256,2026-08-06,CE-000GV-J3
-UIO-MRCNHL-00,American Indian Health Service of Chicago,Urban Indian Organization,,,NO - no tribal owner (Title V UIO),19476645.0,1006134.0,4820802.0,0.0,13649709.0,,55,2026-08-06,CE-001FH-N2
-BIE-HKYWNG-00,Ohkay Owingeh Community School,BIE School,tribally_controlled,TRBF-OKYOWG-00|Ohkay Owingeh,"AFFILIATION ONLY - tier B, not ownership",8943156.0,15368.0,8822188.0,,,105600.0,65,2026-08-06,CE-000ER-PR
+canonical_name,entity_class,bie_operation_type,parent_native_entity,rolls_up_to_a_tribe,total_usd,usd_faads_all_agencies,usd_federal_funding,usd_nonprofit_990,usd_prime_contracts,usd_subawards,n_transactions,built_date,cedar_uid
+Santa Fe Indian School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,279577240.9,5655271.0,272809721.37,0.0,645245.95,467002.58,325,2026-08-06,CE-000H4-DM
+Standing Rock Community School,BIE School,tribally_controlled,CE-001AZ-GG|Standing Rock,"AFFILIATION ONLY - tier B, not ownership",149505760.83,112076.0,142410197.66,0.0,,6983487.17,321,2026-08-06,CE-000HS-B1
+Dzilth-Na-O-Dith-Hle Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,103513480.64,52553.0,103460927.64,,,,195,2026-08-06,CE-000EE-TY
+Ch'ooshgai Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,87148852.26,67399.0,86703837.7,,7000.0,370615.56,161,2026-08-06,CE-000DQ-BF
+Crazy Horse School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,70228841.2,3974142.0,66254699.2,,,,248,2026-08-06,CE-000E5-4X
+Little Singer Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,54637547.75,1452003.0,53147044.75,,38500.0,,191,2026-08-06,CE-000FP-FP
+Pinon Community School,BIE School,tribally_controlled,,UNRESOLVED - parent not identified,36175696.89,1712332.0,34317236.61,,10700.0,135428.28,186,2026-08-06,CE-000GN-ED
+Quileute Tribal School,BIE School,tribally_controlled,CE-00192-XB|Quileute,"AFFILIATION ONLY - tier B, not ownership",26116671.09,-5782.0,25946621.97,0.0,,175831.12,256,2026-08-06,CE-000GV-J3
+American Indian Health Service of Chicago,Urban Indian Organization,,,NO - no tribal owner (Title V UIO),19476645.0,1006134.0,4820802.0,0.0,13649709.0,,55,2026-08-06,CE-001FH-N2
+Ohkay Owingeh Community School,BIE School,tribally_controlled,CE-0017V-9W|Ohkay Owingeh,"AFFILIATION ONLY - tier B, not ownership",8943156.0,15368.0,8822188.0,,,105600.0,65,2026-08-06,CE-000ER-PR

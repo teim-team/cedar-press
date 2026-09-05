@@ -471,15 +471,68 @@ PREFIX_CLASS_OBSERVED = {
     "CDFI": {"Native Community Development Financial Institution": 64,
              "Native Financial Institution": 29},
     "TRBS": {"State-recognized tribe": 64},
-    "ITO":  {"Intertribal Organization": 55},
+    "ITO":  {"Intertribal Organization": 56},
     "CEDAR-ENT": {"Individually Native-owned business": 45},
     "UIO":  {"Urban Indian Organization": 43},
     "TCU":  {"Tribal College or University": 37},
     "CNSF": {"Federal-level constituency entity": 22},
     "ANRC": {"Alaska Native Regional Corporation": 12},
-    "SGVF": {"Federal-level self-governance consortium": 9},
+    "SGVF": {"Federal-level self-governance consortium": 29},
     "CNSS": {"State-level constituency entity": 3},
 }
+
+#: CLASSES WITH NO PREFIX, BY DESIGN. The map above is prefix -> class, and
+#: the prefix is the RETIRED CICD scheme. An entity minted after 2026-09-04
+#: has no prefix and never will, so it cannot appear above and its absence is
+#: not drift.
+NO_PREFIX_CLASSES = frozenset({"Native nonprofit"})
+
+
+def declared_total() -> int:
+    """What PREFIX_CLASS_OBSERVED claims the register holds."""
+    return sum(n for classes in PREFIX_CLASS_OBSERVED.values()
+               for n in classes.values())
+
+
+def count_drift(register_path=None):
+    """Measured register counts vs the declared hint. Returns a list of rows.
+
+    WHY THIS EXISTS. `415_audit_identity_layer` reads PREFIX_CLASS_OBSERVED to
+    detect drift between the hint and the data - and on 2026-09-04 the DETECTOR
+    HAD ITSELF DRIFTED: it declared SGVF=9 against a live 29 and ITO=55 against
+    56, and its total came to 1,534 against a 1,555-row register. A hand-typed
+    number in a project whose stated discipline is "every figure is measured
+    when it is written" is a number that goes stale silently.
+
+    This does not auto-heal the constant, on purpose. Auto-measuring would make
+    the drift check vacuous - it would always agree with itself. The constant
+    stays a DECLARATION a human made, and this reports where reality has moved
+    away from it, so the fix is a deliberate edit with a reason.
+    """
+    import csv as _csv
+    from pathlib import Path as _Path
+    path = _Path(register_path) if register_path else (
+        CEDAR / "data" / "spine" / "cedar_identity_register.csv")
+    if not path.exists():
+        return [{"issue": "register not found", "path": str(path)}]
+    counts = {}
+    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for row in _csv.DictReader(fh):
+            cls = (row.get("entity_class") or "").strip()
+            counts[cls] = counts.get(cls, 0) + 1
+    declared = {}
+    for classes in PREFIX_CLASS_OBSERVED.values():
+        for cls, n in classes.items():
+            declared[cls] = declared.get(cls, 0) + n
+    out = []
+    for cls in sorted(set(declared) | set(counts)):
+        if cls in NO_PREFIX_CLASSES:
+            continue
+        d, m = declared.get(cls, 0), counts.get(cls, 0)
+        if d != m:
+            out.append({"entity_class": cls, "declared": d, "measured": m,
+                        "drift": m - d})
+    return out
 
 #: entity_class -> the prefix a NEW entity of that class gets. The inverse of
 #: PREFIX_CLASS_OBSERVED with the ambiguity resolved by a decision, not by a

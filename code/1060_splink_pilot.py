@@ -121,8 +121,9 @@ def log(*a):
 
 
 def duck():
-    import duckdb
-    return duckdb.connect()
+    import duckdb  # noqa: F401  (kept: types/exceptions)
+    import cedar_duck
+    return cedar_duck.connect()
 
 
 # ===================== prep =====================

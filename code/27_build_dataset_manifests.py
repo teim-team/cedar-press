@@ -32,6 +32,7 @@ dist/manifests/VALIDATION.md  the validator's own report
 """
 
 import csv
+from cedar_publication import dataset_definition
 import json
 import re
 from datetime import date
@@ -223,8 +224,9 @@ SPEC = {
     "deals": {
         "file": None,
         "name": "Indian Country Deals",
-        "measure": "Documented public transactions where a Native entity is a principal: "
-                   "acquisitions, divestitures, financings, land purchases and major capital projects",
+        # Read from cedar_publication, not typed. This string used to be one
+        # of four independent copies that had drifted apart.
+        "measure": dataset_definition("deals"),
         "unit": "Nominal US dollars, as disclosed. Value types are labeled and not mixed.",
         "universe": "Federally recognized tribes, state-recognized tribes, Alaska Native "
                     "corporations and Native Hawaiian Organizations, plus their subsidiaries",

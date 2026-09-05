@@ -1,11 +1,11 @@
-identifier_type,identifier,entity_name,ruling,reason,evidence_url,source_file,source_line
-recipient_name_exact,"agua caliente solar, llc","agua caliente solar, llc",EXCLUDE,flag=1 then 'drop if flag==1' (line 1275). this enterprise appears to have no connection to the tribe,,fed_funding_do_file_corrtd.do,21
-recipient_name_exact,"buena vista, city of","buena vista, city of",EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,fed_funding_do_file_corrtd.do,87
-recipient_name_exact,chippewa cree construction corp,chippewa cree construction corp,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275). rocky boy schools and chippewa cree tribe/health care are not flagged because they are affiliated with the tribe,,fed_funding_do_file_corrtd.do,157
-recipient_name_exact,comanche,comanche,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,fed_funding_do_file_corrtd.do,180
-recipient_name_exact,confederated tribes,confederated tribes,INCLUDE,assigned tribe_id=59. cond:==1 note: I assined the last one based on primary city of performance,,fed_funding_do_file_corrtd.do,198
-recipient_name_exact,eastern band of cherokee i,eastern band of cherokee i,INCLUDE,assigned tribe_id=80.,,fed_funding_do_file_corrtd.do,298
-recipient_name_exact,upper lake rancheria koi,upper lake rancheria koi,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275). Koi nation lives on lower lake rancheria,,fed_funding_do_file_corrtd.do,377
-recipient_name_exact,kiowa young men`s association,kiowa young men`s association,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,fed_funding_do_file_corrtd.do,472
-recipient_name_exact,klamath river inter-tribal fish & water commission,klamath river inter-tribal fish & water commission,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,fed_funding_do_file_corrtd.do,476
-recipient_name_exact,klamath river inter tribal fis,klamath river inter tribal fis,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,fed_funding_do_file_corrtd.do,476
+identifier_type,identifier,entity_name,ruling,reason,evidence_url,source_line
+recipient_name_exact,"agua caliente solar, llc","agua caliente solar, llc",EXCLUDE,flag=1 then 'drop if flag==1' (line 1275). this enterprise appears to have no connection to the tribe,,21
+recipient_name_exact,"buena vista, city of","buena vista, city of",EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,87
+recipient_name_exact,chippewa cree construction corp,chippewa cree construction corp,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275). rocky boy schools and chippewa cree tribe/health care are not flagged because they are affiliated with the tribe,,157
+recipient_name_exact,comanche,comanche,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,180
+recipient_name_exact,confederated tribes,confederated tribes,INCLUDE,assigned tribe_id=59. cond:==1 note: I assined the last one based on primary city of performance,,198
+recipient_name_exact,eastern band of cherokee i,eastern band of cherokee i,INCLUDE,assigned tribe_id=80.,,298
+recipient_name_exact,upper lake rancheria koi,upper lake rancheria koi,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275). Koi nation lives on lower lake rancheria,,377
+recipient_name_exact,kiowa young men`s association,kiowa young men`s association,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,472
+recipient_name_exact,klamath river inter-tribal fish & water commission,klamath river inter-tribal fish & water commission,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,476
+recipient_name_exact,klamath river inter tribal fis,klamath river inter tribal fis,EXCLUDE,flag=1 then 'drop if flag==1' (line 1275).,,476

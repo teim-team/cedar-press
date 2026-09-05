@@ -121,7 +121,9 @@ from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, GROVE_SHELVES, BUILD_SHELVES,
     N_STOREFRONT_EXPECTED, N_BUILT_EXPECTED,
     row_ok, publishable_columns, shelves, subaward_warning,
-    translate_neid_values, enforce_denials, DENIAL_MASK_REASON,
+    recompute_derived,
+    translate_neid_values, enforce_denials, apply_official_names,
+    DENIAL_MASK_REASON,
     BLOCKED_STATES, MASK_COLS, MASK_FLAGS, LINEAGE_COLS, LINEAGE_SUFFIXES,
     is_publication_eligible, mask_attribution, MASK,
     LOBBYING_FILE, LOBBYING_FENCE, lobbying_overstatement, lobbying_warning,
@@ -196,7 +198,8 @@ def load(path, gate=True, masked=None):
         rd = csv.DictReader(fh)
         hdr = publishable_columns(rd.fieldnames or [])
         rows, held = [], defaultdict(int)
-        neid_translated, neid_ambiguous = [0], [0]
+        neid_translated, neid_ambiguous, neid_denied = [0], [0], [0]
+        renamed = [0]
         for r in rd:
             # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
             # so projecting first removes the personal-contact fields; running
@@ -217,6 +220,14 @@ def load(path, gate=True, masked=None):
             # Cedar's own key. The 12 NEIDs that claim more than one uid are
             # refused and left standing rather than guessed.
             n_tr, n_amb = translate_neid_values(r)
+            # AND THE SHORT HANDLE, which is the same class of defect one
+            # layer up. `translate_neid_values` retires a bad IDENTIFIER;
+            # this retires a bad NAME. Owner, 2026-09-04: "there should be no
+            # short handle we cant use it reliable". Seven customer datasets
+            # carried `Confederated Yakama` for the Confederated Tribes and
+            # Bands of the Yakama Nation, because the register's short handle
+            # propagated into every one of them.
+            renamed[0] += apply_official_names(r)
             # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY DATASET.
             # Applying the municipal-PHA ruling to the assistance table left 14
             # rows of the DELIVERED subcontracting.csv still carrying
@@ -903,6 +914,34 @@ def build(dry: bool, only: tuple = ()) -> int:
         # codebook and the notes all present the same order. Doing it inside
         # `emit` alone would have shipped a spreadsheet whose columns ran in a
         # different order from the codebook describing it.
+        # THE PUBLICATION RULES GET THE LAST WORD, NOT THE FIRST.
+        #
+        # `publishable_columns` ran back at load time, on each source file. But
+        # everything between here and there SYNTHESISES columns - the one-to-many
+        # branch above manufactures `n_<table>` counts - and a column invented
+        # after the filter had never been filtered at all. That is how three
+        # columns the owner ruled out on 4 September 2026 survived the ruling
+        # and shipped: `n_ownership_events`, `n_seminole_bond_disclosures` and
+        # `n_tribal_resolution_financings` were removed from the source schema
+        # and then re-created here, further down the same build.
+        #
+        # Filtering again at the end costs one pass and closes the whole class,
+        # not the three instances.
+        _pre = list(fhdr)
+        fhdr = publishable_columns(fhdr)
+        _late = [c for c in _pre if c not in fhdr]
+        if _late:
+            print(f"      publication filter removed {len(_late)} "
+                  f"late-synthesised column(s): {', '.join(_late)}")
+
+        # Derivatives are computed here, from the column they derive from, so
+        # they cannot disagree with it. See cedar_publication.recompute_derived.
+        _moved = recompute_derived(coll, fhdr, frows)
+        if _moved:
+            print("      derived at publish: "
+                  + ", ".join(f"{k} ({v:,} row(s) corrected)"
+                              for k, v in sorted(_moved.items())))
+
         fhdr = order_columns(fhdr, fmeta.get("key_columns"), own_cols)
 
         files = size = 0

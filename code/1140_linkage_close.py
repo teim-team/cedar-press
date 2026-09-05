@@ -180,7 +180,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
-import duckdb
+import duckdb  # noqa: F401  (kept: types/exceptions)
+import cedar_duck
 
 csv.field_size_limit(10_000_000)
 
@@ -305,7 +306,7 @@ def rd(p: Path) -> str:
 
 
 def q1(sql: str):
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         return con.sql(sql).fetchone()
     finally:
@@ -381,7 +382,7 @@ def rewrite(p: Path, transform, add_cols=()):
 
 def spine_map():
     """tribe_id -> (canonical_name, cedar_uid), read once."""
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         rows = con.sql(
             f"SELECT tribe_id, coalesce(canonical_name,''), "
@@ -399,7 +400,7 @@ def live_ledger():
     is not WITHDRAW or HOLD, and the identifier resolves to exactly one
     entity.  Ambiguity is refused rather than broken by a tiebreak.
     """
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         rows = con.sql(f"""
             SELECT identifier_type, upper(trim(identifier)) AS id,
@@ -437,7 +438,7 @@ CLASS_DISCLAIMER = (
 
 
 def bills_plan():
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         rows = con.sql(f"""
             SELECT bill_id, tribe_id, coalesce(cedar_uid,''),
@@ -597,7 +598,7 @@ def do_assistance(apply_it: bool):
 
 def contracts_plan():
     cage, uei = live_ledger()
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         con.sql("SET preserve_insertion_order=false")
         con.sql("CREATE TABLE lc(id VARCHAR, tid VARCHAR, tier VARCHAR)")
@@ -704,7 +705,7 @@ def do_contracts(apply_it: bool):
 # --------------------------------------------------------------------------
 
 def ledger_plan():
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         con.sql(f"CREATE VIEW LED AS SELECT * FROM {rd(LEDGER)}")
         con.sql(f"CREATE VIEW MAPP AS SELECT DISTINCT "
@@ -959,7 +960,7 @@ PARENT_MIN_OBS = 20
 
 def parent_candidates():
     """child UEI -> (tribe_id, parent_uei, parent_name, n_observations)."""
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         con.sql("SET preserve_insertion_order=false")
         con.sql(f"""CREATE VIEW live AS SELECT identifier_type,
@@ -1054,7 +1055,7 @@ def do_parents(apply_it: bool):
 
 
 def q1_all(sql):
-    con = duckdb.connect()
+    con = cedar_duck.connect()
     try:
         return con.sql(sql).fetchall()
     finally:

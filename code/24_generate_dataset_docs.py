@@ -16,6 +16,8 @@ Output: docs/datasets/<key>.md
 
 import csv
 
+from cedar_publication import dataset_definition
+
 csv.field_size_limit(10 ** 8)
 from datetime import date
 from pathlib import Path
@@ -167,9 +169,12 @@ SPEC = {
             "annual-report archive depth. Neither needs a key.",
         ],
         "title": "Dataset 1 — Indian Country Deals",
-        "what": "Dated M&A, financing, land, and award events where a Native entity is a "
-                "principal. The only dataset built from press rather than an API, and "
-                "therefore the highest fabrication risk in the project.",
+        # The definition is canonical (cedar_publication.DATASET_DEFINITION);
+        # the sentence after it is this generator's own caveat about SOURCING,
+        # which belongs here and not in the customer-facing definition.
+        "what": dataset_definition("deals") + " This is the only Cedar dataset "
+                "built from press rather than an API, and therefore the one "
+                "carrying the highest fabrication risk in the project.",
         # THE TRUTH, and the file this dataset's docs must name first:
         # `deals_classified.csv` (cedar_domain.DEALS_TRUTH), 935 rows, the
         # merged and withdrawal-honouring superset of everything below.

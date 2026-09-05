@@ -599,6 +599,13 @@ def run_detectors(detectors: list[dict], quick: bool = False,
             reader = csv.DictReader(fh)
             for row in reader:
                 n += 1
+                # lint-ok: class4 - the truncation is RECORDED, not hidden.
+                # `capped` is set here, carried into the per-file result
+                # (`r["capped"] = r["capped"] or capped`), written to the
+                # run record as `capped: true`, and printed beside the
+                # figure as the literal word CAPPED. class4 is about a
+                # budget that truncates and still marks COMPLETE; this one
+                # marks itself truncated, and `quick` is off by default.
                 if quick and n > QUICK_CAP:
                     capped = True
                     n -= 1
