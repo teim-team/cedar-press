@@ -12,11 +12,11 @@ Firms certified or listed as Native-owned by a certifying authority: TERO vendor
 
 ## One row is
 
-One business-directory or certification listing, as today; distinct certifications are not merged into a business snapshot.
+One business-directory or certification listing, as the builder declares it; distinct certifications are not collapsed into an invented business snapshot.
 
 This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
-**Note:** The 53-column baseline is the builder's declaration, not a verified public export, and no sample is in this repository. The field-by-field decisions are written when the sample lands, after `python scripts/import_cedar_manifest.py --audit` has run; the publication restrictions apply to every field before any preview, download, search index or Cedar answer.
+**Note:** The 53 fields are the builder's CLEAN_COLUMNS declaration, not a shipped public export; no sample is in the repository. The publication gate (consent_status, publishable, withheld_fields, business_name_is_person_name, the WITHHELD list of owner names, contact and website fields) applies to every row before any preview, download, search index or Cedar answer; retiring the gate's columns does not retire the gate.
 
 ## Key identifiers
 
@@ -44,44 +44,46 @@ Multiple directory listings enrich one business record where identity is verifie
 
 ## Field dictionary
 
-The field dictionary is written when this collection's flagship sample lands in the repository and its field map is decided. The approved opening block and the specification's field list for it:
+The approved header, in the owner's exact order (32 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
-- `cedar_uid`
-- `canonical_name`: The certifying authority's register name.
-- `entity_class`: The certifying authority's register class.
-- `cedar_entity_role`: certifying_authority, never owner; a missing business identity is never filled with the nation's uid.
-- `business_source_id`
-- `business_name`
-- `business_entity_id`
-- `certifying_authority_entity_id`
-- `certifying_authority_name`
-- `program_name`
-- `directory_type`
-- `assertion_class`
-- `identity_scope`
-- `identity_claim_text`
-- `ownership_percent`
-- `ownership_threshold_min`
-- `certification_number`
-- `certification_tier`
-- `certification_start`
-- `certification_expiration`
-- `business_license_number`
-- `service_category`
-- `naics_code`
-- `city`
-- `state`
-- `source_edition`
-- `source_last_updated`
-- `first_seen`
-- `last_seen`
-- `is_current`
-- `source_url`
-- `research_note`: A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time.
+| # | Column | Label | Definition | Type | Blank means |
+|---|---|---|---|---|---|
+| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 2 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
+| 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
+| 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: certifying_authority. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 5 | `business_source_id` | Business source id |  | identifier, as text | the source states none, or not applicable to this row |
+| 6 | `business_name` (was `business_name_raw`) | Business name |  | text | the source states none, or not applicable to this row |
+| 7 | `business_entity_id` | Business entity id |  | identifier, as text | the source states none, or not applicable to this row |
+| 8 | `certifying_authority_entity_id` | Certifying authority entity id |  | identifier, as text | the source states none, or not applicable to this row |
+| 9 | `certifying_authority_name` | Certifying authority name |  | text | the source states none, or not applicable to this row |
+| 10 | `program_name` (was `programme_name`) | Program name |  | text | the source states none, or not applicable to this row |
+| 11 | `directory_type` | Directory type |  | text | the source states none, or not applicable to this row |
+| 12 | `assertion_class` | Assertion class |  | text | the source states none, or not applicable to this row |
+| 13 | `identity_scope` | Identity scope |  | text | the source states none, or not applicable to this row |
+| 14 | `identity_claim_text` | Identity claim text |  | text | the source states none, or not applicable to this row |
+| 15 | `ownership_percent` | Ownership percent |  | text | the source states none, or not applicable to this row |
+| 16 | `ownership_threshold_min` | Ownership threshold min |  | text | the source states none, or not applicable to this row |
+| 17 | `certification_number` | Certification number |  | identifier, as text | the source states none, or not applicable to this row |
+| 18 | `certification_tier` | Certification tier |  | text | the source states none, or not applicable to this row |
+| 19 | `certification_start` | Certification start |  | text | the source states none, or not applicable to this row |
+| 20 | `certification_expiration` | Certification expiration |  | text | the source states none, or not applicable to this row |
+| 21 | `business_license_number` | Business license number |  | identifier, as text | the source states none, or not applicable to this row |
+| 22 | `service_category` (was `service_category_raw`) | Service category |  | text | the source states none, or not applicable to this row |
+| 23 | `naics_code` (was `naics`) | Naics code |  | text | the source states none, or not applicable to this row |
+| 24 | `city` | City |  | text | the source states none, or not applicable to this row |
+| 25 | `state` (was `state_province`) | State |  | text | the source states none, or not applicable to this row |
+| 26 | `source_edition` | Source edition |  | text | the source states none, or not applicable to this row |
+| 27 | `source_last_updated` | Source last updated |  | text | the source states none, or not applicable to this row |
+| 28 | `first_seen` | First seen |  | text | the source states none, or not applicable to this row |
+| 29 | `last_seen` | Last seen |  | text | the source states none, or not applicable to this row |
+| 30 | `is_current` | Is current |  | yes or no (1 or 0) | not stated; 0 is no |
+| 31 | `source_url` | Source | The official page for this record, written into the file so it cites itself. | web address | the source states none, or not applicable to this row |
+| 32 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank name means withheld under the publication policy, with the reason recorded.
 - Blank certification dates mean the authority states none.
@@ -105,35 +107,11 @@ A blank is never zero and never an invented date. Beyond the column-level rules 
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
+Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):
 
-- `business_source_id` (pending:sample): see the field map
-- `business_name` (pending:sample): see the field map
-- `business_entity_id` (pending:sample): see the field map
-- `certifying_authority_entity_id` (pending:sample): see the field map
-- `certifying_authority_name` (pending:sample): see the field map
-- `program_name` (pending:sample): see the field map
-- `directory_type` (pending:sample): see the field map
-- `assertion_class` (pending:sample): see the field map
-- `identity_scope` (pending:sample): see the field map
-- `identity_claim_text` (pending:sample): see the field map
-- `ownership_percent` (pending:sample): see the field map
-- `ownership_threshold_min` (pending:sample): see the field map
-- `certification_number` (pending:sample): see the field map
-- `certification_tier` (pending:sample): see the field map
-- `certification_start` (pending:sample): see the field map
-- `certification_expiration` (pending:sample): see the field map
-- `business_license_number` (pending:sample): see the field map
-- `service_category` (pending:sample): see the field map
-- `naics_code` (pending:sample): see the field map
-- `city` (pending:sample): see the field map
-- `state` (pending:sample): see the field map
-- `source_edition` (pending:sample): see the field map
-- `source_last_updated` (pending:sample): see the field map
-- `first_seen` (pending:sample): see the field map
-- `last_seen` (pending:sample): see the field map
-- `is_current` (pending:sample): see the field map
-- `source_url` (pending:sample): see the field map
+- `nation_id`: the certifying nation, in a namespace the declaration does not name (adjudicate).
+
+Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 

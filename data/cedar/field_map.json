@@ -68,6 +68,7 @@
     "source_url"
    ],
    "note": "The owner's list carries recipient_duns (40 columns). The retirement rule in the same addendum says DUNS is used internally to reconcile historical records and is not published; the later rule wins, DUNS is internal_crosswalk, and the file ships 39.",
+   "header_source": "sample",
    "fields": [
     {
      "column": "assistance_transaction_unique_key",
@@ -616,6 +617,7 @@
     "participant_name",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "consultation_event_id",
@@ -954,6 +956,7 @@
     "outcome",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "bill_id",
@@ -1293,6 +1296,7 @@
     "value_basis",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "Deal_ID",
@@ -1695,6 +1699,7 @@
     "individuals_stated",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "document_number",
@@ -2245,6 +2250,8 @@
     "reported_amount_usd",
     "source_url"
    ],
+   "withdrawn_flag": "attribution_withdrawn",
+   "header_source": "sample",
    "fields": [
     {
      "column": "filing_uuid",
@@ -2677,6 +2684,7 @@
     "owner_attribution_status",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "contract_number",
@@ -3276,6 +3284,7 @@
     "duplicate_status",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "sub_uei",
@@ -3891,6 +3900,7 @@
     "aggregation_level",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "resource_revenue_event_id",
@@ -4307,6 +4317,7 @@
     "operating_status",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "enterprise_id",
@@ -4837,6 +4848,7 @@
     "bmf_revenue_usd",
     "source_url"
    ],
+   "header_source": "sample",
    "fields": [
     {
      "column": "EIN",
@@ -5353,7 +5365,7 @@
   "owned/native_owned_businesses": {
    "collection": "owned",
    "public_file": "owned.csv",
-   "row": "One business-directory or certification listing, as today; distinct certifications are not merged into a business snapshot.",
+   "row": "One business-directory or certification listing, as the builder declares it; distinct certifications are not collapsed into an invented business snapshot.",
    "opening": [
     "cedar_uid",
     "canonical_name",
@@ -5362,8 +5374,8 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "constant:certifying_authority (the nation or office that lists or certifies the business, never its owner)",
-   "columns_today": null,
+   "entity_role": "constant:certifying_authority",
+   "columns_today": 53,
    "columns_target": 32,
    "default_viewer": [
     "canonical_name",
@@ -5375,170 +5387,356 @@
     "state",
     "source_url"
    ],
-   "note": "The 53-column baseline is the builder's declaration, not a verified public export, and no sample is in this repository. The field-by-field decisions are written when the sample lands, after `python scripts/import_cedar_manifest.py --audit` has run; the publication restrictions apply to every field before any preview, download, search index or Cedar answer.",
-   "fields": [],
-   "new": [
+   "note": "The 53 fields are the builder's CLEAN_COLUMNS declaration, not a shipped public export; no sample is in the repository. The publication gate (consent_status, publishable, withheld_fields, business_name_is_person_name, the WITHHELD list of owner names, contact and website fields) applies to every row before any preview, download, search index or Cedar answer; retiring the gate's columns does not retire the gate.",
+   "header_source": "builder declaration: code/330_build_native_owned_businesses.py CLEAN_COLUMNS",
+   "fields": [
     {
      "column": "business_source_id",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "decision": "keep",
+     "why": "The listing's own identifier in its source.",
+     "spec": "§10"
     },
     {
-     "column": "business_name",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "column": "source_id",
+     "decision": "internal",
+     "why": "The source's internal code; certifying_authority_name and directory_type say what the source is.",
+     "spec": "§10"
     },
     {
-     "column": "business_entity_id",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "column": "source_business_key",
+     "decision": "internal",
+     "why": "Matching key.",
+     "spec": "§10"
     },
     {
      "column": "certifying_authority_entity_id",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "decision": "keep",
+     "why": "The certifying nation's or office's Cedar uid: the opening block's cedar_uid is copied from it under the role certifying_authority, and it stays here as the separately searchable authority link.",
+     "spec": "retirement",
+     "retire": {
+      "identifies": "the certifying authority, a canonical Native entity",
+      "disposition": "object_id",
+      "replacement": "kept; also copied into cedar_uid with role certifying_authority",
+      "column": "certifying_authority_entity_id"
+     }
     },
     {
      "column": "certifying_authority_name",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
-     "column": "program_name",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "column": "nation_id",
+     "decision": "internal",
+     "why": "An identifier of the certifying nation in another namespace; its equivalence to certifying_authority_entity_id is not settled from the declaration. Stops the dataset until adjudicated.",
+     "spec": "retirement",
+     "retire": {
+      "identifies": "the certifying nation, in a namespace the declaration does not name",
+      "disposition": "adjudicate",
+      "replacement": "certifying_authority_entity_id",
+      "column": "nation_id"
+     }
     },
     {
-     "column": "directory_type",
-     "from": "pending:sample",
+     "column": "programme_name",
+     "decision": "rename",
+     "to": "program_name",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
+    },
+    {
+     "column": "business_name_raw",
+     "decision": "rename",
+     "to": "business_name",
+     "why": "The business name as listed; masked where the publication policy withholds it, never reintroduced through aliases or fallback fields.",
+     "spec": "§10"
+    },
+    {
+     "column": "business_name_normalized",
+     "decision": "internal",
+     "why": "Normalization plumbing.",
+     "spec": "§10"
+    },
+    {
+     "column": "business_name_is_person_name",
+     "decision": "internal",
+     "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
+     "spec": "§10"
+    },
+    {
+     "column": "business_entity_id",
+     "decision": "keep",
+     "why": "The business's own Cedar entity id where the approved identity system assigns one; never filled with the certifying nation's uid.",
+     "spec": "retirement",
+     "retire": {
+      "identifies": "the business as a register entity, where the identity system assigns one",
+      "disposition": "object_id",
+      "replacement": "kept as business_entity_id",
+      "column": "business_entity_id"
+     }
+    },
+    {
+     "column": "business_entity_name",
+     "decision": "internal",
+     "why": "The register's name for the business entity; business_name carries the listing's name and the register name is reachable by business_entity_id.",
+     "spec": "§10"
+    },
+    {
+     "column": "business_entity_class",
+     "decision": "internal",
+     "why": "Not in the approved list.",
+     "spec": "§10"
+    },
+    {
+     "column": "resolution_method",
+     "decision": "internal",
+     "why": "Matching method.",
+     "spec": "§10"
+    },
+    {
+     "column": "record_scope",
+     "decision": "internal",
+     "why": "Pipeline scope marker.",
+     "spec": "§10"
     },
     {
      "column": "assertion_class",
-     "from": "pending:sample",
+     "decision": "keep",
+     "why": "The authority's substantive claim: ownership, membership, vendor listing.",
+     "spec": "§10"
+    },
+    {
+     "column": "directory_type",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
      "column": "identity_scope",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
      "column": "identity_claim_text",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "decision": "keep",
+     "why": "The verbatim ownership or relationship claim; masked where the policy withholds it.",
+     "spec": "§10"
+    },
+    {
+     "column": "inclusion_basis",
+     "decision": "internal",
+     "why": "Not in the approved list; assertion_class and identity_scope carry why the row is in Cedar.",
+     "spec": "§10"
     },
     {
      "column": "ownership_percent",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
      "column": "ownership_threshold_min",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
+    },
+    {
+     "column": "verification_basis",
+     "decision": "internal",
+     "why": "Verification note.",
+     "spec": "§10"
     },
     {
      "column": "certification_number",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
      "column": "certification_tier",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
      "column": "certification_start",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
      "column": "certification_expiration",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
      "column": "business_license_number",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
-     "column": "service_category",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "column": "federal_contract_number",
+     "decision": "internal",
+     "why": "Not in the approved list.",
+     "spec": "§10"
     },
     {
-     "column": "naics_code",
-     "from": "pending:sample",
+     "column": "service_category_raw",
+     "decision": "rename",
+     "to": "service_category",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
+    },
+    {
+     "column": "naics",
+     "decision": "rename",
+     "to": "naics_code",
+     "why": "",
+     "spec": "§10"
     },
     {
      "column": "city",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
-     "column": "state",
-     "from": "pending:sample",
+     "column": "state_province",
+     "decision": "rename",
+     "to": "state",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
     },
     {
-     "column": "source_edition",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "column": "owner_name_present",
+     "decision": "internal",
+     "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
+     "spec": "§10"
     },
     {
-     "column": "source_last_updated",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "column": "n_owners_named",
+     "decision": "internal",
+     "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
+     "spec": "§10"
     },
     {
-     "column": "first_seen",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
-    },
-    {
-     "column": "last_seen",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
-    },
-    {
-     "column": "is_current",
-     "from": "pending:sample",
-     "why": "",
-     "status": "pending"
+     "column": "withheld_fields",
+     "decision": "internal",
+     "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
+     "spec": "§10"
     },
     {
      "column": "source_url",
-     "from": "pending:sample",
+     "decision": "keep",
      "why": "",
-     "status": "pending"
+     "spec": "§10"
+    },
+    {
+     "column": "source_edition",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "source_last_updated",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "harvest_date",
+     "decision": "internal",
+     "why": "Build timestamp.",
+     "spec": "§10"
+    },
+    {
+     "column": "first_seen",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "last_seen",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "is_current",
+     "decision": "keep",
+     "why": "",
+     "spec": "§10"
+    },
+    {
+     "column": "ingestion_method",
+     "decision": "internal",
+     "why": "Raw diagnostic.",
+     "spec": "§10"
+    },
+    {
+     "column": "ocr_mean_confidence",
+     "decision": "internal",
+     "why": "OCR diagnostic.",
+     "spec": "§10"
+    },
+    {
+     "column": "raw_snapshot_uri",
+     "decision": "internal",
+     "why": "Raw snapshot.",
+     "spec": "§10"
+    },
+    {
+     "column": "source_terms_status",
+     "decision": "internal",
+     "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
+     "spec": "§10"
+    },
+    {
+     "column": "consent_status",
+     "decision": "internal",
+     "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
+     "spec": "§10"
+    },
+    {
+     "column": "suppression_key",
+     "decision": "internal",
+     "why": "Suppression machinery.",
+     "spec": "§10"
+    },
+    {
+     "column": "publishable",
+     "decision": "internal",
+     "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
+     "spec": "§10"
+    },
+    {
+     "column": "validation_flags",
+     "decision": "internal",
+     "why": "Diagnostics.",
+     "spec": "§10"
+    },
+    {
+     "column": "record_hash",
+     "decision": "internal",
+     "why": "Build bookkeeping.",
+     "spec": "§10"
+    },
+    {
+     "column": "built_by_script",
+     "decision": "internal",
+     "why": "Script name.",
+     "spec": "§10"
+    }
+   ],
+   "new": [
+    {
+     "column": "cedar_uid",
+     "from": "rule:copy:certifying_authority_entity_id",
+     "why": "The certifying authority's uid, under the role certifying_authority; never the business's identity."
     },
     {
      "column": "canonical_name",
@@ -5553,7 +5751,7 @@
     {
      "column": "cedar_entity_role",
      "from": "constant:certifying_authority",
-     "why": "certifying_authority, never owner; a missing business identity is never filled with the nation's uid."
+     "why": "certifying_authority, never owner."
     },
     {
      "column": "research_note",
@@ -5595,7 +5793,26 @@
     "source_url",
     "research_note"
    ],
-   "retire": []
+   "retire": [
+    {
+     "identifies": "the certifying authority, a canonical Native entity",
+     "disposition": "object_id",
+     "replacement": "kept; also copied into cedar_uid with role certifying_authority",
+     "column": "certifying_authority_entity_id"
+    },
+    {
+     "identifies": "the certifying nation, in a namespace the declaration does not name",
+     "disposition": "adjudicate",
+     "replacement": "certifying_authority_entity_id",
+     "column": "nation_id"
+    },
+    {
+     "identifies": "the business as a register entity, where the identity system assigns one",
+     "disposition": "object_id",
+     "replacement": "kept as business_entity_id",
+     "column": "business_entity_id"
+    }
+   ]
   }
  }
 }

@@ -109,7 +109,7 @@ The approved header, in the owner's exact order (52 columns, of which 0 are owed
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank count column means the notice states no count for that category; 0 means it states zero.
 - A blank role list with `n_*_named` = 0 means the notice names no party in that role; with `n_*_named` > 0 it means the named parties did not resolve.

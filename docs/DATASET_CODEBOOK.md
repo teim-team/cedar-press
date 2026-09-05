@@ -460,13 +460,42 @@ Collection `owned` · table `native_owned_businesses` · 4,273 rows in the full 
 
 **Where:** workspace dist/customer/owned.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/native-owned-businesses/native_owned_businesses.csv. NOT AUDITED: the sample is not in the repository yet; run scripts/import_cedar_manifest.py --audit after adding it.
 
-**Columns a subscriber sees (3):**
+**Columns a subscriber sees (32):**
 
 | # | Column | Label | Meaning |
 |---|---|---|---|
-| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the Native entity this record is linked to. Join key across every collection. |
-| 2 | `canonical_name` | Native entity | The entity's name as Cedar's register spells it, so one entity reads the same in every collection. |
-| 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village corporation, Native nonprofit, and so on). |
+| 1 | `cedar_uid` (*to add*) | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. |
+| 2 | `canonical_name` (*to add*) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. |
+| 3 | `entity_class` (*to add*) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. |
+| 4 | `cedar_entity_role` (*to add*) | Entity role | Why the entity is on this row: certifying_authority. |
+| 5 | `business_source_id` | Business source id |  |
+| 6 | `business_name_raw` (*rename to `business_name`*) | Business name |  |
+| 7 | `business_entity_id` | Business entity id |  |
+| 8 | `certifying_authority_entity_id` | Certifying authority entity id |  |
+| 9 | `certifying_authority_name` | Certifying authority name |  |
+| 10 | `programme_name` (*rename to `program_name`*) | Program name |  |
+| 11 | `directory_type` | Directory type |  |
+| 12 | `assertion_class` | Assertion class |  |
+| 13 | `identity_scope` | Identity scope |  |
+| 14 | `identity_claim_text` | Identity claim text |  |
+| 15 | `ownership_percent` | Ownership percent |  |
+| 16 | `ownership_threshold_min` | Ownership threshold min |  |
+| 17 | `certification_number` | Certification number |  |
+| 18 | `certification_tier` | Certification tier |  |
+| 19 | `certification_start` | Certification start |  |
+| 20 | `certification_expiration` | Certification expiration |  |
+| 21 | `business_license_number` | Business license number |  |
+| 22 | `service_category_raw` (*rename to `service_category`*) | Service category |  |
+| 23 | `naics` (*rename to `naics_code`*) | Naics code |  |
+| 24 | `city` | City |  |
+| 25 | `state_province` (*rename to `state`*) | State |  |
+| 26 | `source_edition` | Source edition |  |
+| 27 | `source_last_updated` | Source last updated |  |
+| 28 | `first_seen` | First seen |  |
+| 29 | `last_seen` | Last seen |  |
+| 30 | `is_current` | Is current |  |
+| 31 | `source_url` | Source | The official page for this record, written into the file so it cites itself. |
+| 32 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
 ### Native Enterprises
 

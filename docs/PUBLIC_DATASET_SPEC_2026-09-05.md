@@ -981,3 +981,97 @@ Casino City IDs: first make sure every useful casino/entity relationship that de
 CICD/NEID: these are retired identity systems. Find every remaining dependency, translate validated entity references to Cedar UID, resolve or flag anything that cannot be translated, then remove the old identifier and prevent its reintroduction.
 
 The rule: migrate → reconcile → verify → retire → regression-test, not simply "drop these columns."
+
+
+---
+
+# The column specification document (received after the addendum)
+
+*Recorded verbatim. It restates the addendum's lists with the evidence, the shared rules, the limits on automatic merging and the acceptance tests. Its Funding list keeps `recipient_duns`; the owner's own retirement rule, above, says DUNS is not published, and that rule is applied.*
+
+Cedar Press: exact public column specification
+
+Prepared 2026-09-05. This is a recommended, fixed public schema for each of the 12 Cedar Press datasets, not a claim that production CSVs have been rebuilt. Scope: column selection, order, naming, source-field harmonization, and public presentation. No row aggregation, deduplication, filtering-policy change, or UID reassignment is authorized by this specification.
+
+## Evidence and scope
+
+The observed counts below were read from eleven published flagship CSV headers at commit 02fb4de3442fde199f1fd4dd9329fdc43d64c402. Individually Owned Native Businesses uses the 53-field builder declaration because its public flagship was not available in the inspected materials. Those 53 fields are not a count of a shipped public dataset. Full combined customer exports can contain additional source-prefixed fields; their exact headers and values have not been validated here.
+
+The companion JSON provides exact ordered headers and explicit mappings for every observed source column. It is a design contract, not an automatically safe drop-all-other-columns script. A meaningful unmatched field in the full combined export blocks migration until its destination is accounted for. No ignored columns, empty-sample shortcuts, or changes disguised as cleanup.
+
+## Shared rules
+
+Use the existing stable names cedar_uid, canonical_name, and entity_class, followed by cedar_entity_role. This avoids adding another set of identity aliases. Registry lookup supplies the same canonical identity across datasets; actual awardee, business, organization, and participant names remain separate. A Cedar UID identifies the canonical Native entity, not the record/event/enterprise by convenience. Retain role-specific Native IDs when they are not duplicates.
+
+Legislation and NAGPRA use the deliberate plural equivalent: cedar_uids, canonical_names, entity_classes, entity_roles, entity_names_as_published. These five fields are parallel JSON arrays, one position per entity-role association, including null UID slots for unresolved named parties. This represents a genuinely repeating relationship without creating duplicate event rows. Never store a pipe-separated list inside singular cedar_uid, choose the first tribe arbitrarily, or sort the five lists independently. The viewer renders readable names and roles and indexes every resolved UID. Export users must unpack associations before a membership join, while retaining distinct event IDs for counts and money. If the current link evidence cannot reconstruct an association, preserve the available information and explicit unresolved counts; do not invent it.
+
+research_note is restricted to a short factual qualification that changes interpretation. It is blank where unnecessary. It must not become a destination for every removed developer note. Keep numerical inclusion controls, uncertain dates, amendment/withdrawal status, geography uncertainty, monetary basis, and publication restrictions effective before removing their technical explanations.
+
+IDs and codes are text, including EIN, DUNS, CAGE, UEI, FIPS, NAICS, and PSC. Preserve leading zeros. Dates preserve their true precision. Missing money is null, not zero. JSON list fields have a documented element schema and a distinction between unknown/null and known-empty []. Canonical names withheld by policy cannot fall back to raw names. Retired identification systems are translated only through approved, unambiguous crosswalks.
+
+Citations, release metadata, source dictionaries, and stable deflator methods belong in a researcher guide/data dictionary, not fake CSV rows or repeated developer columns. Per-record source vintages and material qualifications remain when they vary substantively.
+
+## Column counts
+
+Counts below compare the inspected header/declaration with the proposed public header, including added common identity fields and analytical controls. They are schema counts, not measurements of a rebuilt delivery.
+
+|Dataset                                                          |Inspected fields|Proposed fields|Net reduction|
+|-----------------------------------------------------------------|---------------:|--------------:|------------:|
+|Federal Funding                                                  |63              |40             |23           |
+|Federal Register and Agency Actions                              |39              |31             |8            |
+|Legislation                                                      |37              |29             |8            |
+|Indian Country Deals                                             |40              |33             |7            |
+|NAGPRA                                                           |69              |52             |17           |
+|Advocacy and Government Engagement                               |43              |38             |5            |
+|Federal Prime Contracting                                        |72              |49             |23           |
+|Federal Subcontracting                                           |78              |54             |24           |
+|Natural Resources                                                |45              |38             |7            |
+|Individually Owned Native Businesses (builder, not public export)|53              |32             |21           |
+|NEST                                                             |65              |30             |35           |
+|Native Nonprofits                                                |67              |24             |43           |
+
+## The twelve lists
+
+The exact ordered lists and default viewer columns are those of the addendum above, dataset for dataset, and are not repeated here. The per-dataset guidance this document adds:
+
+1. Federal Funding. Keep attribution and partial-year controls. Removing their implementation notes must not make unattributed funding count as Native-attributed funding. Retain DUNS for historical joins and all four distinct loan measures. Do not combine transaction-level and cumulative loan fields or infer equivalent meanings from similar names. Consolidate normalized recipient descriptions only after conflict checks. County FIPS remain text. Map geographic ambiguity into the two public geography-status fields before retiring matcher diagnostics. Inspected source: public/data/cedar/samples/funding/federal_funding_transactions__10.csv at 02fb4de.
+
+2. Federal Register and Agency Actions. Retain document_role, is_event_primary_row, and participant_rows_per_event. The consultation ID is not necessarily a unique row key. Keep event dates distinct from publication and comment deadlines. A scheduled opportunity is not evidence of attendance. Date and location evidence must first be translated into accurate public dates, precision, and necessary qualifications; then remove pipeline-only explanations. Keep factual source quotations, not developer instructions.
+
+3. Legislation. Use the plural identity block because a bill can concern several Native entities. Keep class-wide scope separate from registry classification. Keep rollcall_count and the sponsorship and status fields. Retire has_rollcall only after proving it is equivalent to the count under all null and coverage states; zero observed votes must not imply complete coverage. Preserve uncertain or unresolved named entities. Multi-entity fields require aligned associations, not independently sorted lists. No arbitrary first tribe is allowed.
+
+4. Indian Country Deals. Keep the lower and upper date bounds. A precision label does not preserve an uncertain interval. Month and quarter may be derived only from adequate date precision. Replace overlapping category fields with deal_type and transaction_structure only through a value-level crosswalk that preserves event scope. Keep industry versus broad sector when they differ substantively. Keep whole-project value separate from the announced transaction value. Convert Notes into a concise factual research_note; do not discard closing-date disclaimers or ownership-share limitations.
+
+5. NAGPRA. Keep all six named/resolved count pairs and both overall counts. They distinguish missing entity links from absence of a named relationship. Combine the six role-specific ID lists into aligned association arrays only after the role-to-ID transformation has been verified exactly. Fetch unresolved source names from the underlying relationship evidence; do not invent names or imply the linked subset is complete. Do not combine persons, funerary objects, sacred objects, cultural patrimony, and stated cultural-item totals. Preserve substantive measurement limitations. An eligibility date is not a confirmed transfer date. Institution geography belongs to the designated institution, not automatically every additional institution. Keep institution_split_flag until its substantive implications are represented and tested.
+
+6. Advocacy and Government Engagement. This is not limited to lobbying disclosures. The activity fields accommodate documented consultations, testimony, comments, calendars, ex parte activity, and relevant nonprofit reports where actual approved records exist. Preserve income, expenses, and the selected reported amount with its basis. These are not three additive measures. Non-monetary activity has a null amount, not zero. Retain supersession and attribution-withdrawal controls. Do not keep a withdrawn Native attribution merely because the underlying filing remains a valid public record. For LDA, activity_date may use the posted date only with its meaning clearly stated in the source-type dictionary. A reporting year/period is not the day lobbying occurred.
+
+7. Federal Prime Contracting. Keep transaction and award identifiers, contractor CAGE/UEI, parent identifiers, actual awardee name, and transaction-date ownership attribution. Retain all four reported preference flags and distinguish reported set-aside from Cedar classification. Native ownership and use of a procurement preference are different facts. Rename total_obligations only after verifying its incremental transaction meaning against the producer. The cumulative award value remains clearly labeled and is never added across transaction rows. Drop repeated cumulative-value deflation and internal ruling diagnostics only after their effects on publication eligibility and attribution have been applied. Retain geography-status information rather than silently presenting ambiguous county assignments as certain.
+
+8. Federal Subcontracting. Keep prime and subcontractor Cedar links and all four CAGE fields. A Native prime does not make its subcontractor Native. Preserve duplicate_status, subaward_exceeds_prime_flag, and action_date_precedes_ffata_flag. They are analytical controls, not removable developer clutter. Keep the amount ratio only as its validated source measure, with denominator/date/version limitations documented. Do not recompute a superficially plausible ratio using incompatible amounts. Use subcontractor geography, never substitute the prime recipient or prime performance county. Prime contextual geography can remain in the underlying contract source rather than repeated here.
+
+9. Natural Resources. Do not collapse payer, recipient, beneficiary, and operator. Role-specific entity IDs must retain their declared namespace; only validated Cedar IDs join to the Native entity registry. Keep measurement_status, aggregation_level, amount_sign_meaning, and attribution_status. An aggregate Indian Country amount cannot be made tribe-specific through a convenient join. Retain commodity versus product, allocation formula and effective dates, and related_asset_ids even where currently sparse. Move repeated deflator parameters to dataset documentation. Keep beneficiary qualifications and meaningful geography caveats, but remove implementation commentary from those text fields.
+
+10. Individually Owned Native Businesses. The inspected source is the builder declaration (code/330_build_native_owned_businesses.py, CLEAN_COLUMNS), not a verified public sample. The public export remains subject to the actual publication gate. Keep the verbatim ownership or relationship claim, assertion_class, identity_scope, ownership threshold, and issuer-specific certification. A vendor list is not proof of Native ownership. Do not replace the business entity with the certifying nation. Leading Cedar attribution is populated only from an approved relationship and its explicit role; certifying-authority links remain separately searchable. Contact details, personal names, website/DBA fields restricted by the current policy, and raw diagnostics do not enter the public schema. Apply field-level masking before any viewer, export, or search index sees the data.
+
+11. NEST. Use the Cedar block for the approved associated Native owner or affiliate, while enterprise_id and enterprise_name continue to identify the actual business. Keep the direct parent, ownership percentage, relationship-as-recorded, federal-parent disagreement/corroboration, and observation years. Observation year is not incorporation year or ownership effective year. Remove duplicate owner-hub identity columns after equality checks, unapproved candidate UEIs, repeated name normalization, and constellation/matcher notes. Never replace an approved identifier with a candidate. Any enterprise_existing_cedar_uid that is a verified distinct Native entity identifier must be represented before retirement; apparent duplicates must be checked on the full data. The default instruction is to stop on a non-equivalent identity, not discard it.
+
+12. Native Nonprofits. Keep EIN, organization name, the organization's own class, and its relationship to the canonical Native entity. A Native-serving nonprofit is not automatically a tribal government or Native-controlled. Keep BMF revenue, assets, and income separately, under their actual source definitions. Do not label bmf_income_amt as profit/net income without producer and source-definition verification. Preserve the tax period and BMF snapshot date separately. Do not fabricate financial years from download dates, or append newer 990/SEFA measures to older BMF values as though they were the same observation. Consolidate material classification/link outcomes into inclusion_category, entity_link_status, and a factual research_note. Private review narratives, token comparisons, redirect proposals, and coder agreement statistics stay internal.
+
+## Important limits on automatic merging
+
+A rename is not a redefinition. Funding and contracting retain their existing transaction-grain measures. A date field cannot silently change from fiscal reporting year to calendar year. Nonprofit BMF amounts keep their own definitions. A consultation document does not become an attended event, and a vendor/certification authority does not become a business owner.
+
+Do not merge columns solely because their names look similar. Verify equivalence across the complete approved output, including source-specific populations, blank values, amendments, and historical records. Conflicting status/category fields require an explicit value mapping. Potential duplicate identity columns require equality and role checks. Any supposedly redundant field that contains otherwise unrepresented research information or a distinct official ID must be mapped before the export can proceed.
+
+No source family is represented by an invented row or an automatically generated narrative. The Advocacy schema accommodates non-LDA sources but does not establish that they are collected. The Native-Owned schema is source-informed design, not publication approval. NAGPRA named-party reconstruction must use existing evidence, not guessed identities. Supplementary source fields that carry additional substantive measures in the full combined tables must be accounted for before this schema is enforced.
+
+## Implementation order and acceptance
+
+Apply the schema at the real customer-export writer, then generate samples, the viewer codebook, and Explore mappings from that same approved header. Changing viewer visibility alone does not clean downloads. Retain raw source data and internal evidence.
+
+For each dataset, retain a before/after schema map and prove: (1) no unauthorized row-count, record-key, record-multiplicity, or total change; (2) identical values for simple renames; (3) reviewed, loss-accounted transformations for combined fields; (4) unchanged publication/attribution/financial/date controls; (5) no restricted text or identifying values leak through notes or lists; and (6) source/UID links and export filters agree with the viewer.
+
+Old source columns not observed in this review do not get a default disposition. Stop and report them. An all-empty column in a sample is not evidence it is unnecessary. Do not claim a full-data validation from header checks.
+
+Keep all columns in each approved downloadable dataset, with the smaller default viewer selection shown above. Do not ship a second expanded public dataset or an internal-audit table by default. Technical evidence remains internal; research documentation remains available to customers. Data dictionaries must define the meaning of the public controls and any source-specific non-additivity.

@@ -949,13 +949,21 @@ def register() -> dict:
     path = ROOT / "data" / "spine" / "cedar_entity_names.csv"
     if not path.exists():
         return _REGISTER
+    # A canonical name the publication rule withholds (an individually
+    # Native-owned firm without recorded consent) is blank here, so nothing
+    # downstream can fall back to it: the class still ships, the name does
+    # not. The rule is code/cedar_domain.py's, imported rather than copied.
+    import cedar_domain  # noqa: PLC0415
+    withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
     out: dict = {}
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         for row in csv.DictReader(fh):
             uid = (row.get("cedar_uid") or "").strip()
-            if uid:
-                out[uid] = ((row.get("name") or "").strip(),
-                            (row.get("entity_class") or "").strip())
+            if not uid:
+                continue
+            cls = (row.get("entity_class") or "").strip()
+            name = "" if cls == withheld_class else (row.get("name") or "").strip()
+            out[uid] = (name, cls)
     _REGISTER = out
     return _REGISTER
 
@@ -1033,6 +1041,8 @@ def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
     col = lambda target: row.get(source_of.get(target, target), "")  # noqa: E731
     if name == "blank":
         return ""
+    if name == "copy":
+        return (col(arg) or "").strip()
     if name == "geography_status":
         return _geography_status(row, arg)
     if name == "source_system":
@@ -1130,7 +1140,8 @@ def apply_field_map(collection: str, header: list, rows: list,
         target = n["column"]
         if n.get("status"):
             continue
-        if src == "register" or target in OPENING_SINGULAR + OPENING_PLURAL:
+        if src == "register" or (target in OPENING_SINGULAR + OPENING_PLURAL
+                                 and not src.startswith("rule:copy:")):
             continue
         if src.startswith("constant:"):
             for b in per_row:
@@ -1175,17 +1186,29 @@ def apply_field_map(collection: str, header: list, rows: list,
 
     # 4. THE OPENING BLOCK.
     role_src = next((n for n in entry.get("new", []) if n["column"] == "cedar_entity_role"), None)
+    withdrawn = entry.get("withdrawn_flag")
     for row, b in zip(rows, per_row, strict=True):
+        if "cedar_uid" in b:
+            row["cedar_uid"] = b.pop("cedar_uid")
+        if withdrawn and (row.get(withdrawn) or "").strip().upper() in ("1", "Y", "YES", "TRUE"):
+            # A withdrawn Native attribution is withdrawn: the filing stays,
+            # the Cedar block does not carry the entity it no longer names.
+            row["cedar_uid"] = ""
         if not plural:
             uid = (row.get("cedar_uid") or "").strip()
             known = reg.get(uid)
             if known:
                 row["canonical_name"] = known[0]
                 row["entity_class"] = known[1]
+            elif not uid:
+                # No entity: no name, no class, no role. A table's own name
+                # column never stands in for an attribution the row lacks.
+                row["canonical_name"] = ""
+                row["entity_class"] = ""
             else:
                 row.setdefault("canonical_name", "")
                 row.setdefault("entity_class", "")
-            if role_src:
+            if role_src and uid:
                 src = role_src.get("from", "")
                 if src.startswith("constant:"):
                     row["cedar_entity_role"] = src[len("constant:"):]
@@ -1193,6 +1216,8 @@ def apply_field_map(collection: str, header: list, rows: list,
                     row["cedar_entity_role"] = (row.get(src[4:]) or "").strip()
                 else:
                     row.setdefault("cedar_entity_role", "")
+            elif not uid:
+                row["cedar_entity_role"] = ""
         row.update(b)
 
     # 5. THE HEADER: the approved order minus what is owed, then anything the

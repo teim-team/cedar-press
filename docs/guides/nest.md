@@ -79,7 +79,7 @@ The approved header, in the owner's exact order (30 columns, of which 0 are owed
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank `ownership_percent` means the source states no percentage.
 - A blank `uei` means the owner published none; Cedar does not pad with plausible matches.

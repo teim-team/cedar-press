@@ -80,7 +80,7 @@ The approved header, in the owner's exact order (31 columns, of which 1 are owed
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank `cedar_uid` means no participant is enumerated or the named one is unresolved.
 - Blank event dates mean the notice announces no dated event (a written comment period, say).

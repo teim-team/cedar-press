@@ -1907,17 +1907,172 @@
     {
      "column": "cedar_uid",
      "label": "Cedar ID",
-     "meaning": "Cedar's permanent identifier for the Native entity this record is linked to. Join key across every collection."
+     "meaning": "Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID.",
+     "add": true
     },
     {
      "column": "canonical_name",
      "label": "Native entity",
-     "meaning": "The entity's name as Cedar's register spells it, so one entity reads the same in every collection."
+     "meaning": "That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns.",
+     "add": true
     },
     {
      "column": "entity_class",
      "label": "Entity type",
-     "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village corporation, Native nonprofit, and so on)."
+     "meaning": "Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register.",
+     "add": true
+    },
+    {
+     "column": "cedar_entity_role",
+     "label": "Entity role",
+     "meaning": "Why the entity is on this row: certifying_authority.",
+     "add": true
+    },
+    {
+     "column": "business_source_id",
+     "label": "Business source id",
+     "meaning": ""
+    },
+    {
+     "column": "business_name_raw",
+     "label": "Business name",
+     "meaning": "",
+     "rename_to": "business_name"
+    },
+    {
+     "column": "business_entity_id",
+     "label": "Business entity id",
+     "meaning": ""
+    },
+    {
+     "column": "certifying_authority_entity_id",
+     "label": "Certifying authority entity id",
+     "meaning": ""
+    },
+    {
+     "column": "certifying_authority_name",
+     "label": "Certifying authority name",
+     "meaning": ""
+    },
+    {
+     "column": "programme_name",
+     "label": "Program name",
+     "meaning": "",
+     "rename_to": "program_name"
+    },
+    {
+     "column": "directory_type",
+     "label": "Directory type",
+     "meaning": ""
+    },
+    {
+     "column": "assertion_class",
+     "label": "Assertion class",
+     "meaning": ""
+    },
+    {
+     "column": "identity_scope",
+     "label": "Identity scope",
+     "meaning": ""
+    },
+    {
+     "column": "identity_claim_text",
+     "label": "Identity claim text",
+     "meaning": ""
+    },
+    {
+     "column": "ownership_percent",
+     "label": "Ownership percent",
+     "meaning": ""
+    },
+    {
+     "column": "ownership_threshold_min",
+     "label": "Ownership threshold min",
+     "meaning": ""
+    },
+    {
+     "column": "certification_number",
+     "label": "Certification number",
+     "meaning": ""
+    },
+    {
+     "column": "certification_tier",
+     "label": "Certification tier",
+     "meaning": ""
+    },
+    {
+     "column": "certification_start",
+     "label": "Certification start",
+     "meaning": ""
+    },
+    {
+     "column": "certification_expiration",
+     "label": "Certification expiration",
+     "meaning": ""
+    },
+    {
+     "column": "business_license_number",
+     "label": "Business license number",
+     "meaning": ""
+    },
+    {
+     "column": "service_category_raw",
+     "label": "Service category",
+     "meaning": "",
+     "rename_to": "service_category"
+    },
+    {
+     "column": "naics",
+     "label": "Naics code",
+     "meaning": "",
+     "rename_to": "naics_code"
+    },
+    {
+     "column": "city",
+     "label": "City",
+     "meaning": ""
+    },
+    {
+     "column": "state_province",
+     "label": "State",
+     "meaning": "",
+     "rename_to": "state"
+    },
+    {
+     "column": "source_edition",
+     "label": "Source edition",
+     "meaning": ""
+    },
+    {
+     "column": "source_last_updated",
+     "label": "Source last updated",
+     "meaning": ""
+    },
+    {
+     "column": "first_seen",
+     "label": "First seen",
+     "meaning": ""
+    },
+    {
+     "column": "last_seen",
+     "label": "Last seen",
+     "meaning": ""
+    },
+    {
+     "column": "is_current",
+     "label": "Is current",
+     "meaning": ""
+    },
+    {
+     "column": "source_url",
+     "label": "Source",
+     "meaning": "The official page for this record, written into the file so it cites itself."
+    },
+    {
+     "column": "research_note",
+     "label": "Research note",
+     "meaning": "A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying.",
+     "add": true
     }
    ]
   },

@@ -625,9 +625,12 @@ test("the field map decides every column of every sampled flagship in the owner'
     else assert.deepEqual(lead, ["Cedar ID", "Native entity", "Entity type", "Entity role"], key);
   }
   assert.equal(sampled, 11);
+  // The unsampled flagship is decided from the builder's 53-field declaration.
   const owned = FIELD_MAP["owned/native_owned_businesses"];
-  assert.ok(owned && owned.columns_today === null);
+  assert.equal(owned.columns_today, 53);
+  assert.match(owned.header_source, /builder declaration/);
   assert.match(owned.entity_role, /certifying_authority/);
+  assert.ok(owned.fields.some((f) => f.column === "nation_id" && f.retire?.disposition === "adjudicate"));
 });
 
 test("a JSON-array cell reads as a list in the viewer, before and after the export changes shape", () => {

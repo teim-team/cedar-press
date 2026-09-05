@@ -96,7 +96,7 @@ Until the combined columns exist, the file carries their sources, each with its 
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank `cedar_uid` with `attributed_flag` = 0 means unattributed, not non-Native.
 - A blank loan column on a grant row means not applicable; on a loan row it means the source did not report it.

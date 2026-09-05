@@ -78,7 +78,7 @@ The approved header, in the owner's exact order (29 columns, of which 0 are owed
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - An empty `cedar_uids` with `relevance_scope` other than tribe-specific means the bill names no entity, which is correct for most Native legislation.
 - A blank `companion_bill_id` means no companion was identified.

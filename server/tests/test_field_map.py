@@ -62,6 +62,10 @@ REFUSED_AS_SAMPLED = {
 }
 
 
+def has_sample(collection: str, table: str) -> bool:
+    return (SAMPLES / collection / f"{table}__10.csv").exists()
+
+
 def sample(collection: str, table: str):
     path = SAMPLES / collection / f"{table}__10.csv"
     with path.open(encoding="utf-8-sig", newline="") as fh:
@@ -89,6 +93,8 @@ class TestApplyFieldMap(unittest.TestCase):
             if not entry["fields"]:
                 continue
             table = entry["key"].split("/")[1]
+            if not has_sample(coll, table):
+                continue
             with self.subTest(collection=coll):
                 header, rows = sample(coll, table)
                 if coll in REFUSED_AS_SAMPLED:
@@ -264,6 +270,62 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertIsNotNone(pub.RETIRED_TOKEN.search("cedar_neid"))
         self.assertIsNotNone(pub.RETIRED_TOKEN.search("casino_city_id 4412"))
 
+    def test_a_withdrawn_attribution_clears_the_cedar_block_and_keeps_the_filing(self):
+        header, rows = sample("lobbying", "native_entity_lobbying_disclosures")
+        rows[2]["attribution_withdrawn"] = "1"
+        rows[2]["attribution_withdrawn_reason"] = "client is a county housing authority"
+        kept = rows[2]["filing_uuid"]
+        pub.apply_field_map("lobbying", header, rows, set(header))
+        self.assertEqual(rows[2]["source_record_id"], kept)
+        block = (rows[2]["cedar_uid"], rows[2]["canonical_name"], rows[2]["entity_class"])
+        self.assertEqual(block, ("", "", ""))
+        self.assertEqual(rows[2]["attribution_withdrawn"], "1")
+        self.assertTrue(rows[1]["cedar_uid"])
+
+    def test_the_owned_map_is_declared_from_the_builder_and_copies_the_authority_uid(self):
+        entry = pub.field_map()["owned"]
+        self.assertEqual(entry["columns_today"], 53)
+        self.assertIn("builder declaration", entry["header_source"])
+        header = [f["column"] for f in entry["fields"]]
+        rows = [{c: "" for c in header} for _ in range(2)]
+        some_uid = next(iter(pub.register()))
+        for r in rows:
+            r["certifying_authority_entity_id"] = some_uid
+            r["business_name_raw"] = "Example Builders LLC"
+            r["programme_name"] = "TERO vendor list"
+        result = pub.apply_field_map("owned", header, rows, set(header))
+        self.assertEqual(header[:4], list(pub.OPENING_SINGULAR))
+        self.assertEqual(header, entry["order"])
+        self.assertEqual(rows[0]["cedar_uid"], some_uid)
+        self.assertEqual(rows[0]["cedar_entity_role"], "certifying_authority")
+        self.assertEqual(rows[0]["business_name"], "Example Builders LLC")
+        self.assertIn("certifying_authority_entity_id", header)
+        self.assertNotIn("nation_id", header)
+        adjudicated = [r["column"] for r in result["retirement"]
+                       if r["disposition"] == "adjudicate"]
+        self.assertEqual(adjudicated, ["nation_id"])
+        # A populated nation_id stops the dataset until it is adjudicated.
+        rows2 = [dict(r) for r in rows]
+        header2 = [f["column"] for f in entry["fields"]]
+        rows2 = [{c: "" for c in header2} for _ in range(1)]
+        rows2[0]["nation_id"] = "NATION-17"
+        with self.assertRaises(pub.UnadjudicatedIdentifier):
+            pub.apply_field_map("owned", header2, rows2, set(header2))
+
+    def test_a_withheld_register_name_never_falls_back_to_a_raw_name(self):
+        import cedar_domain
+        reg = pub.register()
+        withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
+        withheld = [uid for uid, (name, cls) in reg.items() if cls == withheld_class]
+        self.assertTrue(withheld, "the register carries the withheld class")
+        self.assertTrue(all(reg[uid][0] == "" for uid in withheld))
+        header, rows = sample("contractors", "prime_contracts")
+        rows[0]["cedar_uid"] = withheld[0]
+        rows[0]["canonical_name"] = "A Raw Name That Must Not Ship"
+        pub.apply_field_map("contractors", header, rows, set(header))
+        self.assertEqual(rows[0]["canonical_name"], "")
+        self.assertEqual(rows[0]["entity_class"], cedar_domain.INDIVIDUAL_NATIVE_CLASS)
+
     def test_an_undecided_flagship_column_stops_the_build_by_name(self):
         header, rows = sample("contractors", "prime_contracts")
         header.append("new_upstream_field")
@@ -295,7 +357,7 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_the_map_and_the_codebook_name_the_same_shipped_columns(self):
         codebook = json.loads((ROOT / "data" / "cedar" / "codebook.json").read_text("utf-8"))
         for coll, entry in pub.field_map().items():
-            if not entry["fields"]:
+            if not entry["fields"] or entry["key"] not in codebook["tables"]:
                 continue
             book = codebook["tables"][entry["key"]]
             listed = {f["column"] for f in book["fields"] if not f.get("add")}

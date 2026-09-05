@@ -87,7 +87,7 @@ The approved header, in the owner's exact order (38 columns, of which 0 are owed
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank `amount_usd` means the filing reports no amount (a registration, a termination, an activity below the threshold).
 - A blank `superseded_by_filing_id` on a current filing is expected; on a superseded one it means the successor was not identified.

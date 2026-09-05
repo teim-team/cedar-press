@@ -91,7 +91,7 @@ The approved header, in the owner's exact order (38 columns, of which 0 are owed
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank `cedar_uid` with `attribution_status` naming an aggregate means the source suppressed the entity, not that no tribe received revenue.
 - Blank `period_start` and `period_end` mean the source states a date but no period.

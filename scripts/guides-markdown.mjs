@@ -226,7 +226,7 @@ function guideFor(collection) {
   }
   p("## Missing values");
   p();
-  p("A blank is never zero and never an invented date. Beyond the column-level rules above:");
+  p("A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:");
   p();
   for (const m of prose.missing_values) p(`- ${m}`);
   p();

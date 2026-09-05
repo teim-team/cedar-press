@@ -29,6 +29,9 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 | `nonprofits` | `entity_id` | unknown: an earlier or different entity link that disagrees with cedar_uid on at least one row | cedar_uid | adjudicate | 2 | 2 |
 | `nonprofits` | `cedar_spine_entity_id` | the spine entity the organization was keyed to before a redirect that cedar_uid reflects and this column does not, on at least one row | cedar_uid | adjudicate | 9 | 9 |
 | `nonprofits` | `key_redirect_proposed_entity_id` | a proposed redirect of the entity link | cedar_uid, once the redirect is ruled | internal_crosswalk | 0 | 0 |
+| `owned` | `certifying_authority_entity_id` | the certifying authority, a canonical Native entity | kept; also copied into cedar_uid with role certifying_authority | object_id | — | 0 |
+| `owned` | `nation_id` | the certifying nation, in a namespace the declaration does not name | certifying_authority_entity_id | adjudicate | — | 0 |
+| `owned` | `business_entity_id` | the business as a register entity, where the identity system assigns one | kept as business_entity_id | object_id | — | 0 |
 
 The three findings that stop a dataset today, from the samples: Funding's `attribution_status` carries the value `cedar_neid` on every sample row (a vocabulary naming the retired scheme; recode it); NEST's `enterprise_existing_cedar_uid` is populated where the enterprise is itself a register entity and differs from the owner's uid (adjudicate: the enterprise's own cedar_uid is a real cross-reference, not an alias); Nonprofits' `entity_id` and `cedar_spine_entity_id` disagree with `cedar_uid` on the same row (adjudicate: the link was redirected and the two columns were not). None of these is deleted; the writer refuses those three datasets until they are settled.
 

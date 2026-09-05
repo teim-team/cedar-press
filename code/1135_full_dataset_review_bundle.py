@@ -186,6 +186,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # as a script or loaded by importlib from another module.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (          # noqa: E402
+    FLAGSHIP as _FLAGSHIP, apply_field_map, FieldMapRefusal,
     NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
     is_publication_eligible, mask_attribution, MASK, translate_neid_values,
     apply_official_names,
@@ -399,6 +400,31 @@ def build(mode: str) -> int:
             except OSError as e:
                 man.append({"collection": coll, "table": tname, "note": str(e)})
                 continue
+
+            # THE APPROVED HEADER, on the flagship, HERE TOO. Owner's
+            # specification of 2026-09-05: "Apply the schema at the real
+            # customer-export writer, then generate samples, the viewer
+            # codebook, and Explore mappings from that same approved header."
+            # The live site importer consumes THESE samples, so a flagship
+            # written here under the old header would put the site and
+            # dist/customer on different schemas - the same defect class as
+            # the NEID translation above. Same rule, same module, every
+            # writer: a refusal (an undecided column, an unadjudicated
+            # identifier, a retired scheme in a value) holds the table and
+            # says why in the manifest rather than shipping it.
+            if _FLAGSHIP.get(coll) == tname:
+                try:
+                    _fm = apply_field_map(coll, cols, kept, set(cols))
+                    if _fm.get("mapped"):
+                        for _r in _fm["retirement"]:
+                            print(f"      retired: {coll} | {_r['column']} | "
+                                  f"{_r['disposition']} | {_r['rows_affected']:,} | "
+                                  f"{_r['unresolved']:,}")
+                except FieldMapRefusal as e:
+                    man.append({"collection": coll, "table": tname,
+                                "note": f"field map refused: {e}"})
+                    print(f"      !! {coll}/{tname}: {e}")
+                    continue
 
             # ---- ten rows, every table, shippable or not ------------------
             s = spread(kept, N)

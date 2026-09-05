@@ -90,7 +90,7 @@ Until the combined columns exist, the file carries their sources, each with its 
 
 ## Missing values
 
-A blank is never zero and never an invented date. Beyond the column-level rules above:
+A blank is never zero and never an invented date. A blank JSON-list cell means unknown; `[]` means known to be empty (no additional source, no additional institution); a null element inside a list is one member the evidence names but does not resolve. Identifiers and codes are text with their leading zeros. Beyond the column-level rules above:
 
 - A blank `announced_value_usd` means the value was not published, never zero.
 - A blank `closing_date` means no source confirms a closing.
