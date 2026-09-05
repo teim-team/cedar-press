@@ -518,7 +518,12 @@ def verify() -> int:
     if not OUT.exists():
         print("  NOT BUILT: %s" % OUT)
         return 1
-    rows = _read(OUT)
+    return verify_rows(_read(OUT))
+
+
+def verify_rows(rows: list) -> int:
+    """The checks, on rows in memory, so the selftest can prove each gate
+    fires on a planted row and clears on the repaired one (Codex, PR #59)."""
     ok = True
     bad_t = sorted({r["activity_type"] for r in rows} - set(ACTIVITY_TYPES))
     bad_a = sorted({r["amount_type"] for r in rows} - set(AMOUNT_TYPES))
@@ -575,6 +580,33 @@ def selftest() -> int:
         print("  FAIL a missing required source read as an empty list"); ok = False
     except Unmeasured:
         print("  a missing required source raises UNMEASURED, never reads empty")
+    # THE PER-ROW URL GATE, proven: one sourced row and one blank among the
+    # same activity type fails (the type-level gate let this through), and
+    # the same rows with the URL restored pass. Same for a no-activity filing.
+    import io
+    import contextlib
+    names = {}
+    sourced = _row(names, "", "agency_meeting", "FX-1", "2025-03-01", "Fixture Nation",
+                   "", "FERC", "P-1234", "", "", "FERC ex parte filing", "FX-1",
+                   "https://www.federalregister.gov/d/2025-00001", "")
+    blank = _row(names, "", "agency_meeting", "FX-2", "2025-03-02", "Fixture Nation",
+                 "", "FERC", "P-1234", "", "", "Federal Register ex parte notice", "FX-2",
+                 "", "")
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc_blank = verify_rows([sourced, blank])
+        blank["source_url"] = "https://www.federalregister.gov/d/2025-00002"
+        rc_fixed = verify_rows([sourced, blank])
+        noact = _row(names, "", "registered_lobbying", "LD-1", "2025-04-01", "Fixture",
+                     "Firm", "Senate", "", "", "", "LDA quarterly filing", "LD-1",
+                     "https://lda.senate.gov/x", "no activity")
+        rc_noact = verify_rows([sourced, noact])
+    if (rc_blank, rc_fixed, rc_noact) != (1, 0, 1):
+        print("  FAIL verify: one blank URL %d (expected 1), restored %d (expected 0), "
+              "no-activity filing %d (expected 1)" % (rc_blank, rc_fixed, rc_noact))
+        ok = False
+    else:
+        print("  verify fails one blank URL among sourced rows, passes restored, "
+              "fails a shipped no-activity filing")
     print("  selftest %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 

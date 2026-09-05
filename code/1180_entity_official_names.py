@@ -190,6 +190,11 @@ def sourced_names():
             name = (row.get(namecol) or "").strip()
             if not uid or not name:
                 continue            # excludes every *_only row: no uid there
+            if (row.get("link_status") or "").startswith("SUPERSEDED"):
+                # 1183 keeps a rebound EIN's old row as history. History is
+                # not a name claim: the superseded uid may be the unrelated
+                # entity whose bad match caused the rebinding (Codex, PR #59).
+                continue
             route = ""
             note = row.get("note") or ""
             if "resolved via " in note:
@@ -309,19 +314,12 @@ def verify() -> int:
 def selftest() -> int:
     """Every non-internal source must cite a URL, and the corrupt handles the
     owner complained about must actually be corrected by this build."""
+    global RECON, EXTRA_SOURCES, OUT
     ok = True
     for sid, (_, url, _) in SOURCES.items():
         if sid != "cedar_internal" and not url.startswith("https://"):
             print("  FAIL %s carries no URL" % sid)
             ok = False
-    try:
-        picked, _, collisions = sourced_names()
-    except Unmeasured as exc:
-        print("  %s" % exc)
-        return 2
-    if not picked:
-        print("  FAIL no reconciliation rows were read")
-        ok = False
     # the refusal itself, proven: a missing reconciliation file raises
     try:
         _read(RECON / "does_not_exist.csv")
@@ -329,6 +327,70 @@ def selftest() -> int:
         ok = False
     except Unmeasured:
         print("  a missing required input raises UNMEASURED, never reads empty")
+    # verify() ITSELF on a fixture tree (Codex, PR #59): complete inputs pass,
+    # an absent EXTRA_SOURCES file is UNMEASURED, restored it passes again.
+    # And a superseded EIN link must not become a name claim.
+    import io
+    import contextlib
+    import tempfile
+    saved = (RECON, EXTRA_SOURCES, OUT)
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "recon").mkdir()
+            for f, col, _s in RECON_FILES:
+                (root / "recon" / f).write_text(
+                    "cedar_uid,%s,note\nCE-FIXT1-AA,Fixture Nation,resolved via fixture\n"
+                    % col, encoding="utf-8")
+            extra = root / "cedar_nonprofit_ein_links.csv"
+            extra.write_text(
+                "EIN,cedar_uid,name,link_basis,link_tier,link_status,last_seen\n"
+                "123456789,CE-FIXT2-BB,Fixture Foundation,fixture,A,active,2026-09-05\n"
+                "123456789,CE-FIXT3-CC,Fixture Foundation,fixture,A,"
+                "SUPERSEDED 2026-09-05 by CE-FIXT2-BB,2026-09-04\n", encoding="utf-8")
+            (root / "names.csv").write_text(
+                "cedar_uid,name,entity_class,name_source\n"
+                "CE-FIXT1-AA,Fixture Nation,Federally recognized tribe,bia_federal_register\n",
+                encoding="utf-8")
+            RECON, EXTRA_SOURCES, OUT = root / "recon", ((extra, "name", "givenative"),), root / "names.csv"
+            picked, _c, _x = sourced_names()
+            if "CE-FIXT3-CC" in picked:
+                print("  FAIL a SUPERSEDED EIN link became a name claim"); ok = False
+            elif picked.get("CE-FIXT2-BB", ("",))[0] != "Fixture Foundation":
+                print("  FAIL the active EIN link did not source a name"); ok = False
+            else:
+                print("  a superseded EIN link is history, the active one sources the name")
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc_full = verify()
+            extra.rename(extra.with_suffix(".away"))
+            with contextlib.redirect_stdout(buf):
+                rc_gone = verify()
+            extra.with_suffix(".away").rename(extra)
+            with contextlib.redirect_stdout(buf):
+                rc_back = verify()
+            if (rc_full, rc_gone, rc_back) != (0, 2, 0):
+                print("  FAIL verify() on the fixture: complete %d, extra source absent %d, "
+                      "restored %d (expected 0, 2, 0)" % (rc_full, rc_gone, rc_back))
+                ok = False
+            else:
+                print("  verify() passes complete inputs, is UNMEASURED without the "
+                      "extra source, passes again restored")
+    finally:
+        RECON, EXTRA_SOURCES, OUT = saved
+    # THE REAL INPUTS, after the fixture proofs, so a checkout without the
+    # reconciliation directory still proves the gates before it says
+    # UNMEASURED about the data.
+    try:
+        picked, _, collisions = sourced_names()
+    except Unmeasured as exc:
+        print("  %s" % exc)
+        print("  selftest UNMEASURED on this checkout (gates proven above: %s)"
+              % ("PASS" if ok else "FAIL"))
+        return 2
+    if not picked:
+        print("  FAIL no reconciliation rows were read")
+        ok = False
     # The named regression: the Yakama row must come out fully spelled.
     # The named regressions: three handles the owner or the audit called out.
     # Each asserts the SPECIFIC repair, not merely that something changed.

@@ -1561,3 +1561,13 @@ on the importer's checkout (see the PR).
 | P2 catalog: do not claim every advocacy activity is resolved | The linkage line says a row is keyed where the record names an entity exactly and keeps a blank key otherwise. Press dump regenerated. | `npm test` |
 | P1 `1187` fail when any advocacy row lacks its source URL | The FR ex parte branch carries `source_url` (falling back to the Federal Register document URL) and `verify` fails on any blank, not only on a type with none. | `1187 selftest`; code |
 | P1 `1180` verify every required official-name input | `verify` loads through `sourced_names()`, the build's own path, so an absent `EXTRA_SOURCES` file is UNMEASURED there too. | `1180 verify` on this checkout |
+
+### PR #59 — five late findings, all right (2026-09-05, on PR #60)
+
+| finding | what changed | proof |
+|---|---|---|
+| P2 `1183` exclude superseded EIN links from official names | `1180.sourced_names()` skips a link whose `link_status` starts with `SUPERSEDED`; history stays in the file and stops being a name claim. | `1180 selftest`, fixture |
+| P1 `1185` let verified F13 dates pass verification | `verify` rejects an ICDBG row only when it still carries the placeholder day (`2025-04-09`); a sourced day passes. `verify_rows` runs on rows in memory, and the selftest runs apply-then-verify on the planted rows. | `1185 selftest` |
+| P1 `1187` exercise the per-row URL gate in selftest | `verify_rows` on planted rows: one blank URL among sourced rows of the same type fails, restored it passes, and a shipped no-activity filing fails. | `1187 selftest` |
+| P2 catalog: do not claim all advocacy links are exact | "resolved to the tribe or Native organization behind it where the record supports the link". Press dump regenerated. | `npm test` |
+| P1 `1180` prove the extra-source verifier path with a fixture | The selftest builds a fixture tree (three reconciliation files, the EIN-links extra source, an output table), runs `verify()` complete (0), with the extra source removed (2), restored (0); the fixture proofs run before the real-data part, so a checkout without the reconciliation directory still proves the gates before reporting UNMEASURED. | `1180 selftest` |
