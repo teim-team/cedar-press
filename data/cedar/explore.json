@@ -1,0 +1,3416 @@
+{
+  "generated_by": "scripts/derive-explore.mjs",
+  "note": "Per table: which columns the Explore card reads as the entity, its type, the year, the date, the amount and the source, and which columns make the one-line observation. Derived from the published sample's header by name; data/cedar/explore.overrides.json wins where it speaks. Re-run after the importer copies samples.",
+  "unpublished": [
+    "funding/bie_uio_dollars_by_entity",
+    "funding/bie_uio_identifier_links",
+    "legislation/native_bill_action_coverage",
+    "legislation/native_bill_actions",
+    "legislation/native_bill_cosponsor_coverage",
+    "legislation/native_bill_cosponsors",
+    "nagpra/nagpra_notice_source_corroboration",
+    "nagpra/nagpra_nps_grant_awards",
+    "nagpra/nagpra_nps_intended_dispositions",
+    "nagpra/nagpra_nps_inventories",
+    "nagpra/nagpra_nps_notice_index",
+    "nagpra/nagpra_nps_summaries",
+    "nagpra/nagpra_nps_unclaimed_remains",
+    "lobbying/fr_ex_parte_notices",
+    "lobbying/fr_ex_parte_parties",
+    "lobbying/fr_ex_parte_party_entity_links",
+    "owned/native_owned_businesses",
+    "nonprofits/fac_native_nontribal_sefa_programs",
+    "nonprofits/fac_native_nontribal_single_audits"
+  ],
+  "tables": {
+    "contractors/contractor_ranking": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": "owner_obligations_usd",
+      "source": "link_evidence_url",
+      "observation": [
+        "owner_name",
+        "owner_class",
+        "owner_entity_class_as_recorded"
+      ],
+      "search": [
+        "owner_name",
+        "owner_class",
+        "owner_entity_class_as_recorded"
+      ],
+      "columns": 44
+    },
+    "contractors/fpds_uei_cage_map": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "legal_business_name"
+      ],
+      "search": [
+        "legal_business_name"
+      ],
+      "columns": 6
+    },
+    "contractors/fpds_uei_edges": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "child_name",
+        "parent_name",
+        "edge_type"
+      ],
+      "search": [
+        "child_name",
+        "parent_name",
+        "edge_type"
+      ],
+      "columns": 11
+    },
+    "contractors/prime_contracts": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": "action_date",
+      "amount": "total_obligations",
+      "source": null,
+      "observation": [
+        "sector",
+        "naics_description"
+      ],
+      "search": [
+        "canonical_name",
+        "sector",
+        "naics_description"
+      ],
+      "_why": "total_award_value is cumulative and restated on every modification row (docs/MONEY_TOTALLING_RULES.md: NEVER SUM); obligations are the row's own money.",
+      "columns": 72
+    },
+    "contractors/prime_contracts_archive_backfill": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": "total_award_value",
+      "source": null,
+      "observation": [
+        "sector",
+        "contract_number",
+        "parent_contract_number"
+      ],
+      "search": [
+        "canonical_name",
+        "sector",
+        "contract_number",
+        "parent_contract_number"
+      ],
+      "columns": 38
+    },
+    "contractors/prime_contracts_awards": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": "total_obligated_usd",
+      "source": null,
+      "observation": [
+        "sector",
+        "contract_number",
+        "first_award_fy"
+      ],
+      "search": [
+        "canonical_name",
+        "sector",
+        "contract_number",
+        "first_award_fy"
+      ],
+      "columns": 30
+    },
+    "contractors/prime_contracts_entity_year": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": "obligations_usd",
+      "source": null,
+      "observation": [
+        "attribution_name_variants_n",
+        "attribution_names",
+        "owner_attribution_statuses"
+      ],
+      "search": [
+        "canonical_name",
+        "attribution_name_variants_n",
+        "attribution_names",
+        "owner_attribution_statuses"
+      ],
+      "columns": 16
+    },
+    "contractors/prime_contracts_published": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": "total_obligated_usd",
+      "source": null,
+      "observation": [
+        "sector",
+        "contract_number",
+        "first_award_fy"
+      ],
+      "search": [
+        "canonical_name",
+        "sector",
+        "contract_number",
+        "first_award_fy"
+      ],
+      "columns": 24
+    },
+    "contractors/sam_prime_contracts_fy2000_2007": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "sam_transaction_key",
+        "contract_number",
+        "modification_number"
+      ],
+      "search": [
+        "sam_transaction_key",
+        "contract_number",
+        "modification_number"
+      ],
+      "columns": 89
+    },
+    "contractors/sam_prime_contracts_fy2000_2007_PUBLISHABLE": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "sam_transaction_key",
+        "contract_number",
+        "modification_number"
+      ],
+      "search": [
+        "sam_transaction_key",
+        "contract_number",
+        "modification_number"
+      ],
+      "columns": 79
+    },
+    "contractors/sam_prime_contracts_fy2000_2007_reconciliation": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "generated",
+        "variant_class",
+        "grain_note"
+      ],
+      "search": [
+        "generated",
+        "variant_class",
+        "grain_note"
+      ],
+      "columns": 13
+    },
+    "deals/deals_2000_2019_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_2026_ytd_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 28
+    },
+    "deals/deals_anc_reports_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_ancsa_portal_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_ancsa_portal_v2_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_classified": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "native_party_canonical_name",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "sector"
+      ],
+      "search": [
+        "native_party_canonical_name",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "sector"
+      ],
+      "columns": 40
+    },
+    "deals/deals_federal_awards_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_historical_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_party_attribution": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": "ruled_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "native_party",
+        "party_role",
+        "parent_native_entity"
+      ],
+      "search": [
+        "canonical_name",
+        "native_party",
+        "party_role",
+        "parent_native_entity"
+      ],
+      "columns": 13
+    },
+    "deals/deals_party_attribution_agent": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": "ruled_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "native_party",
+        "party_role",
+        "parent_native_entity"
+      ],
+      "search": [
+        "canonical_name",
+        "native_party",
+        "party_role",
+        "parent_native_entity"
+      ],
+      "columns": 18
+    },
+    "deals/deals_party_autoresolved": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": "resolved_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "native_party",
+        "party_role",
+        "instrumentality_kind"
+      ],
+      "search": [
+        "canonical_name",
+        "native_party",
+        "party_role",
+        "instrumentality_kind"
+      ],
+      "columns": 11
+    },
+    "deals/deals_party_matches": {
+      "entity_uid": null,
+      "entity_name": "native_party",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "proposed_name",
+        "match_method",
+        "source_files"
+      ],
+      "search": [
+        "native_party",
+        "proposed_name",
+        "match_method",
+        "source_files"
+      ],
+      "columns": 6
+    },
+    "deals/deals_press_edgar_ancsa_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_sec_2010_2017_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/deals_source_index": {
+      "entity_uid": null,
+      "entity_name": "native_party",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_1_url",
+      "observation": [
+        "source_1_label",
+        "source_1_kind",
+        "source_2_label"
+      ],
+      "search": [
+        "native_party",
+        "source_1_label",
+        "source_1_kind",
+        "source_2_label"
+      ],
+      "columns": 10
+    },
+    "deals/deals_taxonomy": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "axis",
+        "value"
+      ],
+      "search": [
+        "axis",
+        "value"
+      ],
+      "columns": 4
+    },
+    "deals/deals_tribal_debt_additions": {
+      "entity_uid": null,
+      "entity_name": "Native_Party",
+      "entity_type": "Native_Party_Type",
+      "year": "Event_Year",
+      "date": "Event_Date",
+      "amount": "Announced_Value_USD",
+      "source": null,
+      "observation": [
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "search": [
+        "Native_Party",
+        "Deal_Title",
+        "Description",
+        "Deal_Category",
+        "Status"
+      ],
+      "columns": 29
+    },
+    "deals/ownership_events": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_canonical_name",
+      "entity_type": null,
+      "year": "event_year",
+      "date": "effective_date",
+      "amount": "announced_value_usd",
+      "source": "source_url",
+      "observation": [
+        "deal_category",
+        "acquirer_entity",
+        "target_entity"
+      ],
+      "search": [
+        "tribe_canonical_name",
+        "deal_category",
+        "acquirer_entity",
+        "target_entity"
+      ],
+      "columns": 30
+    },
+    "deals/seminole_bond_disclosures": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_canonical_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": "filing_date",
+      "amount": "amount_usd",
+      "source": "source_url",
+      "observation": [
+        "obligor_name_as_published",
+        "conduit_issuer_as_published",
+        "disclosure_class"
+      ],
+      "search": [
+        "tribe_canonical_name",
+        "obligor_name_as_published",
+        "conduit_issuer_as_published",
+        "disclosure_class"
+      ],
+      "columns": 35
+    },
+    "deals/tribal_resolution_financings": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "entity_name",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "tribe",
+        "entity_match_method",
+        "instrument_number"
+      ],
+      "search": [
+        "entity_name",
+        "tribe",
+        "entity_match_method",
+        "instrument_number"
+      ],
+      "columns": 33
+    },
+    "federal-register/consultation_agency_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": null,
+      "source": "consultation_page_url",
+      "observation": [
+        "agency",
+        "parent_department",
+        "agency_key"
+      ],
+      "search": [
+        "agency",
+        "parent_department",
+        "agency_key"
+      ],
+      "columns": 25
+    },
+    "federal-register/consultation_events": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_name",
+      "entity_type": null,
+      "year": null,
+      "date": "notice_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "topic",
+        "program",
+        "agency",
+        "consultation_type"
+      ],
+      "search": [
+        "tribe_name",
+        "topic",
+        "program",
+        "agency",
+        "consultation_type"
+      ],
+      "columns": 39
+    },
+    "federal-register/consultation_source_probe": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "url",
+      "observation": [
+        "source_host",
+        "source_name",
+        "question"
+      ],
+      "search": [
+        "source_host",
+        "source_name",
+        "question"
+      ],
+      "columns": 12
+    },
+    "federal-register/correspondence_foia_source_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "url",
+      "observation": [
+        "agency",
+        "status"
+      ],
+      "search": [
+        "agency",
+        "status"
+      ],
+      "columns": 8
+    },
+    "federal-register/dear_tribal_leader_letters": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "source_index_year",
+      "date": "letter_date",
+      "amount": null,
+      "source": "document_url",
+      "observation": [
+        "subject_as_published",
+        "agency"
+      ],
+      "search": [
+        "subject_as_published",
+        "agency"
+      ],
+      "columns": 26
+    },
+    "federal-register/dtll_source_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "url",
+      "observation": [
+        "agency",
+        "source_host",
+        "series"
+      ],
+      "search": [
+        "agency",
+        "source_host",
+        "series"
+      ],
+      "columns": 13
+    },
+    "federal-register/federal_actions": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 32
+    },
+    "federal-register/federal_actions_entity_bridge": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "document_number",
+        "matched_span",
+        "matched_in"
+      ],
+      "search": [
+        "tribe_canonical_name",
+        "document_number",
+        "matched_span",
+        "matched_in"
+      ],
+      "columns": 13
+    },
+    "federal-register/federal_actions_raw": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 25
+    },
+    "federal-register/fr_abstract_availability_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "share_with_abstract"
+      ],
+      "search": [
+        "share_with_abstract"
+      ],
+      "columns": 4
+    },
+    "federal-register/fr_consultation_by_agency": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "normalized_department",
+        "share_of_notices"
+      ],
+      "search": [
+        "normalized_department",
+        "share_of_notices"
+      ],
+      "columns": 3
+    },
+    "federal-register/fr_consultation_notices": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": "publication_date",
+      "amount": null,
+      "source": "html_url",
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 11
+    },
+    "federal-register/fr_consultation_referenced": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 5
+    },
+    "federal-register/fr_consultation_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [],
+      "search": [],
+      "columns": 3
+    },
+    "federal-register/fr_content_classification": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": "publication_date",
+      "amount": null,
+      "source": "html_url",
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 13
+    },
+    "federal-register/fr_ex_parte_notices": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 26
+    },
+    "federal-register/fr_ex_parte_parties": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency_names",
+        "relationship"
+      ],
+      "search": [
+        "agency_names",
+        "relationship"
+      ],
+      "columns": 28
+    },
+    "federal-register/fr_ex_parte_party_entity_links": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "source_dataset",
+        "document_number",
+        "party_as_printed"
+      ],
+      "search": [
+        "source_dataset",
+        "document_number",
+        "party_as_printed"
+      ],
+      "columns": 12
+    },
+    "federal-register/fr_recognized_entities": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "fr_name",
+        "kind",
+        "previously_listed_as"
+      ],
+      "search": [
+        "fr_name",
+        "kind",
+        "previously_listed_as"
+      ],
+      "columns": 7
+    },
+    "federal-register/fr_relevance_stratum_audit": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "corpus_documents",
+        "sampled",
+        "hand_coded_tribal_subject"
+      ],
+      "search": [
+        "corpus_documents",
+        "sampled",
+        "hand_coded_tribal_subject"
+      ],
+      "columns": 5
+    },
+    "federal-register/fr_relevance_tier_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [],
+      "search": [],
+      "columns": 3
+    },
+    "federal-register/fr_theme_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "theme",
+        "share_of_classifiable"
+      ],
+      "search": [
+        "theme",
+        "share_of_classifiable"
+      ],
+      "columns": 5
+    },
+    "federal-register/nepa_administrative_record_parties": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "nepa_number",
+        "event_class",
+        "channel"
+      ],
+      "search": [
+        "nepa_number",
+        "event_class",
+        "channel"
+      ],
+      "columns": 22
+    },
+    "federal-register/nepa_eplanning_projects": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "program",
+        "agency",
+        "city"
+      ],
+      "search": [
+        "program",
+        "agency",
+        "city"
+      ],
+      "columns": 26
+    },
+    "federal-register/nepa_project_documents": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "nepa_number",
+        "document_type_as_published",
+        "document_record_type"
+      ],
+      "search": [
+        "nepa_number",
+        "document_type_as_published",
+        "document_record_type"
+      ],
+      "columns": 20
+    },
+    "federal-register/nepa_source_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "url",
+      "observation": [
+        "status",
+        "source",
+        "what_was_swept"
+      ],
+      "search": [
+        "status",
+        "source",
+        "what_was_swept"
+      ],
+      "columns": 7
+    },
+    "federal-register/section_106_consultation_events": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_name",
+      "entity_type": null,
+      "year": null,
+      "date": "notice_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency",
+        "consultation_type"
+      ],
+      "search": [
+        "tribe_name",
+        "agency",
+        "consultation_type"
+      ],
+      "columns": 41
+    },
+    "federal-register/section_106_project_parties": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "notice_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency",
+        "document_number",
+        "event_class"
+      ],
+      "search": [
+        "agency",
+        "document_number",
+        "event_class"
+      ],
+      "columns": 24
+    },
+    "federal-register/section_106_source_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "source",
+        "host",
+        "coverage_state"
+      ],
+      "search": [
+        "source",
+        "host",
+        "coverage_state"
+      ],
+      "columns": 9
+    },
+    "funding/faads_attribution_audit_sample": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "recipient_name",
+        "recipient_state",
+        "recipient_type"
+      ],
+      "search": [
+        "canonical_name",
+        "recipient_name",
+        "recipient_state",
+        "recipient_type"
+      ],
+      "columns": 12
+    },
+    "funding/faads_entity_attribution": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_class",
+      "year": "fiscal_year",
+      "date": "action_date",
+      "amount": "obligated_usd",
+      "source": null,
+      "observation": [
+        "cfda_title",
+        "agency"
+      ],
+      "search": [
+        "canonical_name",
+        "cfda_title",
+        "agency"
+      ],
+      "columns": 30
+    },
+    "funding/faads_identifier_coverage_by_agency_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": "obligated_usd",
+      "source": null,
+      "observation": [
+        "agency",
+        "pct_with_duns",
+        "pct_with_duns_tribal_rows_only"
+      ],
+      "search": [
+        "agency",
+        "pct_with_duns",
+        "pct_with_duns_tribal_rows_only"
+      ],
+      "columns": 11
+    },
+    "funding/faads_transactions": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "recipient_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": "action_date",
+      "amount": "obligated_usd",
+      "source": "source_url",
+      "observation": [
+        "cfda_title",
+        "agency"
+      ],
+      "search": [
+        "recipient_name",
+        "cfda_title",
+        "agency"
+      ],
+      "columns": 25
+    },
+    "funding/faads_transactions_all_agencies": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "recipient_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": "action_date",
+      "amount": "obligated_usd",
+      "source": "source_url",
+      "observation": [
+        "cfda_title",
+        "agency"
+      ],
+      "search": [
+        "recipient_name",
+        "cfda_title",
+        "agency"
+      ],
+      "columns": 40
+    },
+    "funding/federal_funding_rulings_from_dofile": {
+      "entity_uid": null,
+      "entity_name": "entity_name",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "evidence_url",
+      "observation": [
+        "identifier_type",
+        "identifier",
+        "ruling"
+      ],
+      "search": [
+        "entity_name",
+        "identifier_type",
+        "identifier",
+        "ruling"
+      ],
+      "columns": 7
+    },
+    "funding/federal_funding_transactions": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": "action_date",
+      "amount": "obligated_usd",
+      "source": null,
+      "observation": [
+        "cfda_title",
+        "awarding_agency_name"
+      ],
+      "search": [
+        "canonical_name",
+        "cfda_title",
+        "awarding_agency_name"
+      ],
+      "columns": 63
+    },
+    "funding/federal_funding_tribe_year_panel": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": "total_obligated_usd",
+      "source": null,
+      "observation": [
+        "obl_type_02_block_grant",
+        "obl_type_03_formula_grant",
+        "obl_type_04_project_grant"
+      ],
+      "search": [
+        "canonical_name",
+        "obl_type_02_block_grant",
+        "obl_type_03_formula_grant",
+        "obl_type_04_project_grant"
+      ],
+      "columns": 14
+    },
+    "funding/federal_funding_year_comparison_2026-08-05": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "A_raw_all_recipients",
+        "A_raw_rows",
+        "A_clean_lower48_attributed"
+      ],
+      "search": [
+        "A_raw_all_recipients",
+        "A_raw_rows",
+        "A_clean_lower48_attributed"
+      ],
+      "columns": 10
+    },
+    "funding/funding_identifier_harvest": {
+      "entity_uid": null,
+      "entity_name": "recipient_name",
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": "total_obligated_usd",
+      "source": null,
+      "observation": [
+        "recipient_duns",
+        "recipient_ein",
+        "recipient_state"
+      ],
+      "search": [
+        "recipient_name",
+        "recipient_duns",
+        "recipient_ein",
+        "recipient_state"
+      ],
+      "columns": 15
+    },
+    "funding/funding_identifier_netnew_ueis": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [],
+      "search": [],
+      "columns": 1
+    },
+    "funding/inflation_deflator": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "gdp_deflator_index",
+        "factor_to_base",
+        "source"
+      ],
+      "search": [
+        "gdp_deflator_index",
+        "factor_to_base",
+        "source"
+      ],
+      "columns": 6
+    },
+    "funding/native_passthrough": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": "subaward_date",
+      "amount": "amount_usd",
+      "source": null,
+      "observation": [
+        "relationship",
+        "source_dataset",
+        "duplicate_status"
+      ],
+      "search": [
+        "relationship",
+        "source_dataset",
+        "duplicate_status"
+      ],
+      "columns": 22
+    },
+    "funding/native_passthrough_pairs": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": "countable_usd",
+      "source": null,
+      "observation": [
+        "from_entity",
+        "to_entity",
+        "award_kinds"
+      ],
+      "search": [
+        "from_entity",
+        "to_entity",
+        "award_kinds"
+      ],
+      "columns": 10
+    },
+    "funding/usac_erate_tribal_commitments": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "funding_year",
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "application_number",
+        "billed_entity_number",
+        "chosen_category_of_service"
+      ],
+      "search": [
+        "application_number",
+        "billed_entity_number",
+        "chosen_category_of_service"
+      ],
+      "columns": 75
+    },
+    "funding/usac_erate_tribal_entities": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_funding_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "ros_entity_number",
+        "ros_entity_name",
+        "tribal_type"
+      ],
+      "search": [
+        "ros_entity_number",
+        "ros_entity_name",
+        "tribal_type"
+      ],
+      "columns": 26
+    },
+    "funding/usac_rhc_hcp_directory": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "filing_hcp",
+        "filing_hcp_city",
+        "filing_hcp_county"
+      ],
+      "search": [
+        "filing_hcp",
+        "filing_hcp_city",
+        "filing_hcp_county"
+      ],
+      "columns": 20
+    },
+    "funding/usac_rhc_native_candidate_lines": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "funding_year",
+      "date": "funding_commitment_date",
+      "amount": "original_committed_amount",
+      "source": "source_url",
+      "observation": [
+        "program",
+        "status"
+      ],
+      "search": [
+        "program",
+        "status"
+      ],
+      "columns": 63
+    },
+    "legislation/bill_votes": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "date",
+      "amount": null,
+      "source": "official_source_url",
+      "observation": [
+        "chamber",
+        "congress",
+        "rollnumber"
+      ],
+      "search": [
+        "chamber",
+        "congress",
+        "rollnumber"
+      ],
+      "columns": 71
+    },
+    "legislation/bill_votes_entity_bridge": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": "date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "entity_match_method",
+        "chamber"
+      ],
+      "search": [
+        "tribe_canonical_name",
+        "entity_match_method",
+        "chamber"
+      ],
+      "columns": 10
+    },
+    "legislation/bill_votes_official_verification": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "chamber",
+        "congress",
+        "session"
+      ],
+      "search": [
+        "chamber",
+        "congress",
+        "session"
+      ],
+      "columns": 26
+    },
+    "legislation/congressional_correspondence_log": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency",
+        "bureau_recipient",
+        "congressional_office"
+      ],
+      "search": [
+        "agency",
+        "bureau_recipient",
+        "congressional_office"
+      ],
+      "columns": 24
+    },
+    "legislation/congressional_correspondence_systems": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency",
+        "bureau_or_office",
+        "system_name"
+      ],
+      "search": [
+        "agency",
+        "bureau_or_office",
+        "system_name"
+      ],
+      "columns": 18
+    },
+    "legislation/member_positions": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "build_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "icpsr",
+        "party",
+        "state_abbrev"
+      ],
+      "search": [
+        "icpsr",
+        "party",
+        "state_abbrev"
+      ],
+      "columns": 17
+    },
+    "legislation/native_bill_outcomes": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "introduced_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "title",
+        "congress",
+        "chamber"
+      ],
+      "search": [
+        "title",
+        "congress",
+        "chamber"
+      ],
+      "columns": 25
+    },
+    "legislation/native_bills": {
+      "entity_uid": "entity_cedar_uids",
+      "entity_name": null,
+      "entity_type": "entity_class_scope",
+      "year": null,
+      "date": "introduced_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "title",
+        "congress",
+        "chamber"
+      ],
+      "search": [
+        "title",
+        "congress",
+        "chamber"
+      ],
+      "entity_uid_list": true,
+      "_why": "A bill names several entities in one pipe-separated cell; the year is the introduced date's.",
+      "columns": 37
+    },
+    "legislation/native_bills_entity_bridge": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "matched_span",
+        "matched_in",
+        "entity_match_method"
+      ],
+      "search": [
+        "tribe_canonical_name",
+        "matched_span",
+        "matched_in",
+        "entity_match_method"
+      ],
+      "columns": 12
+    },
+    "legislation/native_bills_entity_class": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": "entity_class",
+      "year": null,
+      "date": "build_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "title",
+        "congress",
+        "bill_type"
+      ],
+      "search": [
+        "title",
+        "congress",
+        "bill_type"
+      ],
+      "columns": 13
+    },
+    "legislation/native_bills_subject_sweep": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "introduced_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "title",
+        "congress",
+        "chamber"
+      ],
+      "search": [
+        "title",
+        "congress",
+        "chamber"
+      ],
+      "columns": 21
+    },
+    "legislation/native_issue_litigation_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "issue_area",
+        "source_or_forum",
+        "coverage_state"
+      ],
+      "search": [
+        "issue_area",
+        "source_or_forum",
+        "coverage_state"
+      ],
+      "columns": 8
+    },
+    "legislation/native_issue_litigation_positions": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "filing_year",
+      "date": "filing_date",
+      "amount": "grant_cash_usd",
+      "source": "source_url",
+      "observation": [
+        "issue_area",
+        "case_name",
+        "court"
+      ],
+      "search": [
+        "issue_area",
+        "case_name",
+        "court"
+      ],
+      "columns": 38
+    },
+    "lobbying/admin_appeal_decisions": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "decision_year",
+      "date": "decision_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "board",
+        "board_name",
+        "citation"
+      ],
+      "search": [
+        "board",
+        "board_name",
+        "citation"
+      ],
+      "columns": 50
+    },
+    "lobbying/admin_appeal_parties": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "decision_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "board",
+        "citation",
+        "party_role"
+      ],
+      "search": [
+        "board",
+        "citation",
+        "party_role"
+      ],
+      "columns": 32
+    },
+    "lobbying/admin_appeal_positions": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "decision_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "organisation_name",
+        "matter_type",
+        "native_entity_name"
+      ],
+      "search": [
+        "organisation_name",
+        "matter_type",
+        "native_entity_name"
+      ],
+      "columns": 24
+    },
+    "lobbying/advocacy_passthrough": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": "grant_year",
+      "date": null,
+      "amount": "grant_amount_usd",
+      "source": null,
+      "observation": [
+        "funder_name",
+        "funder_type",
+        "recipient_ein"
+      ],
+      "search": [
+        "funder_name",
+        "funder_type",
+        "recipient_ein"
+      ],
+      "columns": 28
+    },
+    "lobbying/advocacy_passthrough_2026-08-07": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": "grant_year",
+      "date": null,
+      "amount": "grant_amount_usd",
+      "source": null,
+      "observation": [
+        "funder_name",
+        "funder_type",
+        "recipient_ein"
+      ],
+      "search": [
+        "funder_name",
+        "funder_type",
+        "recipient_ein"
+      ],
+      "columns": 28
+    },
+    "lobbying/agency_attention_vs_advocacy": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "department",
+        "fr_documents",
+        "fr_share_of_agency_mentions"
+      ],
+      "search": [
+        "department",
+        "fr_documents",
+        "fr_share_of_agency_mentions"
+      ],
+      "columns": 11
+    },
+    "lobbying/agency_attention_vs_advocacy_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "department",
+        "fr_documents",
+        "lobbying_filings_targeting"
+      ],
+      "search": [
+        "department",
+        "fr_documents",
+        "lobbying_filings_targeting"
+      ],
+      "columns": 4
+    },
+    "lobbying/earmarks": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "recipient_name",
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency",
+        "chamber",
+        "requesting_member"
+      ],
+      "search": [
+        "recipient_name",
+        "agency",
+        "chamber",
+        "requesting_member"
+      ],
+      "columns": 23
+    },
+    "lobbying/ferc_docket_filings": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "filed_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "filing_occurrence_seq",
+        "docket_number",
+        "subdocket"
+      ],
+      "search": [
+        "filing_occurrence_seq",
+        "docket_number",
+        "subdocket"
+      ],
+      "columns": 38
+    },
+    "lobbying/ferc_docket_parties": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": "resolved_native_entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "docket_number",
+        "subdocket",
+        "docket_program"
+      ],
+      "search": [
+        "docket_number",
+        "subdocket",
+        "docket_program"
+      ],
+      "columns": 17
+    },
+    "lobbying/ferc_ex_parte_communications": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "filed_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "docket_number",
+        "subdocket",
+        "accession_number"
+      ],
+      "search": [
+        "docket_number",
+        "subdocket",
+        "accession_number"
+      ],
+      "columns": 33
+    },
+    "lobbying/ferc_ex_parte_parties": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "notice_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "linked_accession_number",
+        "fr_document_number",
+        "fr_citation"
+      ],
+      "search": [
+        "linked_accession_number",
+        "fr_document_number",
+        "fr_citation"
+      ],
+      "columns": 43
+    },
+    "lobbying/ferc_source_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "url",
+      "observation": [
+        "status",
+        "source",
+        "what_was_swept"
+      ],
+      "search": [
+        "status",
+        "source",
+        "what_was_swept"
+      ],
+      "columns": 7
+    },
+    "lobbying/ferc_tribal_dockets": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "docket_number",
+        "subdocket",
+        "docket_prefix"
+      ],
+      "search": [
+        "docket_number",
+        "subdocket",
+        "docket_prefix"
+      ],
+      "columns": 28
+    },
+    "lobbying/hearing_appearances": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "witness_organization",
+      "entity_type": null,
+      "year": null,
+      "date": "hearing_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "hearing_title",
+        "witness_name",
+        "witness_title",
+        "committee"
+      ],
+      "search": [
+        "witness_organization",
+        "hearing_title",
+        "witness_name",
+        "witness_title",
+        "committee"
+      ],
+      "columns": 25
+    },
+    "lobbying/hearing_bill_links": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "hearing_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "hearing_title",
+        "committee",
+        "relationship"
+      ],
+      "search": [
+        "hearing_title",
+        "committee",
+        "relationship"
+      ],
+      "columns": 16
+    },
+    "lobbying/lobbying_client_attribution": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": "ruled_date",
+      "amount": "spend_usd",
+      "source": null,
+      "observation": [
+        "client_name",
+        "client_role",
+        "ruling"
+      ],
+      "search": [
+        "canonical_name",
+        "client_name",
+        "client_role",
+        "ruling"
+      ],
+      "columns": 11
+    },
+    "lobbying/lobbying_disclosure_verbosity_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "filing_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "mean_issue_families_per_filing",
+        "mean_segments_per_filing"
+      ],
+      "search": [
+        "mean_issue_families_per_filing",
+        "mean_segments_per_filing"
+      ],
+      "columns": 4
+    },
+    "lobbying/lobbying_issue_families_filing": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "client_name",
+      "entity_type": null,
+      "year": "filing_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "filing_uuid",
+        "lda_issue_codes",
+        "issue_families"
+      ],
+      "search": [
+        "client_name",
+        "filing_uuid",
+        "lda_issue_codes",
+        "issue_families"
+      ],
+      "columns": 18
+    },
+    "lobbying/lobbying_issue_family_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "filing_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "issue_family",
+        "share_of_classified_filings",
+        "share_of_family_mentions"
+      ],
+      "search": [
+        "issue_family",
+        "share_of_classified_filings",
+        "share_of_family_mentions"
+      ],
+      "columns": 9
+    },
+    "lobbying/lobbying_registrant_client_relationships": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "client_name",
+      "entity_type": "native_entity_class",
+      "year": "first_filing_year",
+      "date": null,
+      "amount": "spend_reported_usd",
+      "source": "first_filing_url",
+      "observation": [
+        "registrant_name",
+        "registrant_state",
+        "client_state_on_filing"
+      ],
+      "search": [
+        "client_name",
+        "registrant_name",
+        "registrant_state",
+        "client_state_on_filing"
+      ],
+      "columns": 38
+    },
+    "lobbying/lobbying_registrant_concentration": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": "total_spend_reported_usd",
+      "source": null,
+      "observation": [
+        "scope",
+        "total_filings",
+        "hhi_filings"
+      ],
+      "search": [
+        "scope",
+        "total_filings",
+        "hhi_filings"
+      ],
+      "columns": 28
+    },
+    "lobbying/lobbying_registrant_identifiers": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "np_990_tax_year",
+      "date": null,
+      "amount": "assistance_total_obligated_usd",
+      "source": "np_990_source_url",
+      "observation": [
+        "registrant_name",
+        "registrant_state",
+        "identifier_type"
+      ],
+      "search": [
+        "registrant_name",
+        "registrant_state",
+        "identifier_type"
+      ],
+      "columns": 46
+    },
+    "lobbying/lobbying_registrant_native_ownership_evidence": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "native_entity_canonical_name",
+      "entity_type": "native_entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "evidence_url",
+      "observation": [
+        "registrant_name",
+        "evidence_route",
+        "claim"
+      ],
+      "search": [
+        "native_entity_canonical_name",
+        "registrant_name",
+        "evidence_route",
+        "claim"
+      ],
+      "columns": 24
+    },
+    "lobbying/lobbying_registrants": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": "spend_reported_usd",
+      "source": "native_ownership_evidence_url",
+      "observation": [
+        "registrant_name",
+        "registrant_name_variants",
+        "registrant_city"
+      ],
+      "search": [
+        "registrant_name",
+        "registrant_name_variants",
+        "registrant_city"
+      ],
+      "columns": 51
+    },
+    "lobbying/lobbying_target_entities": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "government_entity_as_filed",
+        "normalized_department"
+      ],
+      "search": [
+        "government_entity_as_filed",
+        "normalized_department"
+      ],
+      "columns": 3
+    },
+    "lobbying/lobbying_unmatched_clients": {
+      "entity_uid": null,
+      "entity_name": "client_name",
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": "total_spend_usd",
+      "source": null,
+      "observation": [
+        "top_registrant",
+        "top_issue_codes",
+        "native_token_hit"
+      ],
+      "search": [
+        "client_name",
+        "top_registrant",
+        "top_issue_codes",
+        "native_token_hit"
+      ],
+      "columns": 13
+    },
+    "lobbying/native_entity_lobbying_disclosures": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_type",
+      "year": "filing_year",
+      "date": "dt_posted",
+      "amount": "spend_usd",
+      "source": "filing_url",
+      "observation": [
+        "filing_type_display",
+        "registrant_name",
+        "government_entities",
+        "specific_issues_text"
+      ],
+      "search": [
+        "canonical_name",
+        "filing_type_display",
+        "registrant_name",
+        "government_entities",
+        "specific_issues_text"
+      ],
+      "columns": 43
+    },
+    "lobbying/nonprofit_schedule_c_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "index_year",
+      "date": null,
+      "amount": null,
+      "source": "source_index_url",
+      "observation": [
+        "index_target_returns",
+        "downloaded",
+        "parsed_here"
+      ],
+      "search": [
+        "index_target_returns",
+        "downloaded",
+        "parsed_here"
+      ],
+      "columns": 13
+    },
+    "lobbying/nonprofit_schedule_c_lobbying": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "cedar_entity_name",
+      "entity_type": "cedar_entity_class",
+      "year": "tax_year",
+      "date": null,
+      "amount": "total_lobbying_usd",
+      "source": "source_url",
+      "observation": [
+        "ein",
+        "taxpayer_name_as_filed",
+        "return_type"
+      ],
+      "search": [
+        "cedar_entity_name",
+        "ein",
+        "taxpayer_name_as_filed",
+        "return_type"
+      ],
+      "columns": 54
+    },
+    "lobbying/nrc_meeting_participants": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "meeting_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "meeting_number",
+        "participant_type",
+        "participant_name_withheld_reason"
+      ],
+      "search": [
+        "meeting_number",
+        "participant_type",
+        "participant_name_withheld_reason"
+      ],
+      "columns": 32
+    },
+    "lobbying/nrc_public_meetings": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "meeting_year",
+      "date": "meeting_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "meeting_number",
+        "time_start",
+        "time_end"
+      ],
+      "search": [
+        "meeting_number",
+        "time_start",
+        "time_end"
+      ],
+      "columns": 34
+    },
+    "lobbying/oira_federal_action_links": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "meeting_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "relationship",
+        "rin",
+        "federal_action_document_number"
+      ],
+      "search": [
+        "relationship",
+        "rin",
+        "federal_action_document_number"
+      ],
+      "columns": 10
+    },
+    "lobbying/oira_meeting_participants": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "meeting_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency",
+        "rin",
+        "participant_name"
+      ],
+      "search": [
+        "agency",
+        "rin",
+        "participant_name"
+      ],
+      "columns": 20
+    },
+    "lobbying/oira_meetings": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "meeting_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "agency",
+        "channel",
+        "rin"
+      ],
+      "search": [
+        "agency",
+        "channel",
+        "rin"
+      ],
+      "columns": 22
+    },
+    "lobbying/tribe_year_lobbying_panel": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_type",
+      "year": "filing_year",
+      "date": null,
+      "amount": "total_lobbying_spend_usd",
+      "source": null,
+      "observation": [
+        "entity_state",
+        "top_lobbying_issue_codes",
+        "top_government_entities"
+      ],
+      "search": [
+        "canonical_name",
+        "entity_state",
+        "top_lobbying_issue_codes",
+        "top_government_entities"
+      ],
+      "columns": 14
+    },
+    "nagpra/fr_nagpra_title_index": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": "publication_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 10
+    },
+    "nagpra/fr_nagpra_title_index_year": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "share_with_abstract"
+      ],
+      "search": [
+        "share_with_abstract"
+      ],
+      "columns": 4
+    },
+    "nagpra/nagpra_notice_entity_bridge": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "relationship",
+        "document_number",
+        "notice_type"
+      ],
+      "search": [
+        "canonical_name",
+        "relationship",
+        "document_number",
+        "notice_type"
+      ],
+      "columns": 14
+    },
+    "nagpra/nagpra_notice_institutions": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "publication_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "document_number",
+        "institution_seq",
+        "institution_name"
+      ],
+      "search": [
+        "document_number",
+        "institution_seq",
+        "institution_name"
+      ],
+      "columns": 16
+    },
+    "nagpra/nagpra_notices": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "publication_year",
+      "date": "publication_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "title",
+        "agency_names"
+      ],
+      "search": [
+        "title",
+        "agency_names"
+      ],
+      "columns": 69
+    },
+    "natural-resources/anc_ceiling_roster": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": "parent_entity_class",
+      "year": null,
+      "date": "row_disposition_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "status",
+        "corporation_name",
+        "anc_class"
+      ],
+      "search": [
+        "status",
+        "corporation_name",
+        "anc_class"
+      ],
+      "columns": 19
+    },
+    "natural-resources/ancsa_filings_index": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "filing_date",
+      "amount": null,
+      "source": "portal_url",
+      "observation": [
+        "corporation_name",
+        "document_type",
+        "period_covered"
+      ],
+      "search": [
+        "corporation_name",
+        "document_type",
+        "period_covered"
+      ],
+      "columns": 19
+    },
+    "natural-resources/nd_severance_allocation": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "statute_cite",
+        "effective_start",
+        "effective_end"
+      ],
+      "search": [
+        "statute_cite",
+        "effective_start",
+        "effective_end"
+      ],
+      "columns": 17
+    },
+    "natural-resources/resource_asset_source_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "source_system",
+        "publisher",
+        "attribute"
+      ],
+      "search": [
+        "source_system",
+        "publisher",
+        "attribute"
+      ],
+      "columns": 8
+    },
+    "natural-resources/resource_assets": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "first_production_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "status",
+        "state"
+      ],
+      "search": [
+        "status",
+        "state"
+      ],
+      "columns": 46
+    },
+    "natural-resources/resource_bia_mineral_acreage_tracts": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "state",
+        "objectid",
+        "regional_office"
+      ],
+      "search": [
+        "state",
+        "objectid",
+        "regional_office"
+      ],
+      "columns": 19
+    },
+    "natural-resources/resource_parties": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "entity_name",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "relationship",
+        "object_type",
+        "entity_is_native"
+      ],
+      "search": [
+        "entity_name",
+        "relationship",
+        "object_type",
+        "entity_is_native"
+      ],
+      "columns": 16
+    },
+    "natural-resources/resource_revenue": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "payment_date",
+      "amount": "amount_usd",
+      "source": "source_url",
+      "observation": [
+        "recipient_entity_name",
+        "beneficiary_entity_name",
+        "beneficiary_note"
+      ],
+      "search": [
+        "recipient_entity_name",
+        "beneficiary_entity_name",
+        "beneficiary_note"
+      ],
+      "columns": 45
+    },
+    "natural-resources/tribal_bond_issuances": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "issue_date",
+      "amount": "par_amount",
+      "source": "source_url",
+      "observation": [
+        "issuer",
+        "cusip",
+        "instrument_type"
+      ],
+      "search": [
+        "issuer",
+        "cusip",
+        "instrument_type"
+      ],
+      "columns": 19
+    },
+    "natural-resources/tribal_tax_bases": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "tribe_name",
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": "tax_remitted_usd",
+      "source": "source_url",
+      "observation": [
+        "state",
+        "tax_type",
+        "period_start"
+      ],
+      "search": [
+        "tribe_name",
+        "state",
+        "tax_type",
+        "period_start"
+      ],
+      "columns": 22
+    },
+    "nest/nest_enterprise_relations": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "owner_hub_name",
+      "entity_type": null,
+      "year": "source_fiscal_year",
+      "date": "source_edition_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "relationship",
+        "child_name_as_recorded",
+        "parent_name_as_recorded"
+      ],
+      "search": [
+        "owner_hub_name",
+        "relationship",
+        "child_name_as_recorded",
+        "parent_name_as_recorded"
+      ],
+      "columns": 23
+    },
+    "nest/nest_enterprises": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "owner_hub_name",
+      "entity_type": "owner_hub_entity_class",
+      "year": "first_observed_year",
+      "date": "source_edition_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "sector",
+        "relationship",
+        "status",
+        "city"
+      ],
+      "search": [
+        "owner_hub_name",
+        "sector",
+        "relationship",
+        "status",
+        "city"
+      ],
+      "columns": 65
+    },
+    "nest/nest_entity_dual_role": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "dual_role",
+        "dual_role_class",
+        "role_as_register_entity"
+      ],
+      "search": [
+        "canonical_name",
+        "dual_role",
+        "dual_role_class",
+        "role_as_register_entity"
+      ],
+      "columns": 23
+    },
+    "nonprofits/fac_tribal_single_audits": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "entity_name",
+      "entity_type": "entity_type",
+      "year": "audit_year",
+      "date": "fy_start_date",
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "auditee_name",
+        "auditee_ein",
+        "auditee_city"
+      ],
+      "search": [
+        "entity_name",
+        "auditee_name",
+        "auditee_ein",
+        "auditee_city"
+      ],
+      "columns": 36
+    },
+    "nonprofits/grantmaker_funding_coverage": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "funder_key",
+        "funder_name_canonical",
+        "funder_ein"
+      ],
+      "search": [
+        "funder_key",
+        "funder_name_canonical",
+        "funder_ein"
+      ],
+      "columns": 14
+    },
+    "nonprofits/grantmaker_funding_flows": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "cedar_funder_spine_canonical_name",
+      "entity_type": "cedar_funder_spine_entity_class",
+      "year": "tax_year",
+      "date": null,
+      "amount": "cash_grant_usd",
+      "source": "source_url",
+      "observation": [
+        "funder_key",
+        "funder_ein",
+        "funder_name_as_filed"
+      ],
+      "search": [
+        "cedar_funder_spine_canonical_name",
+        "funder_key",
+        "funder_ein",
+        "funder_name_as_filed"
+      ],
+      "columns": 59
+    },
+    "nonprofits/grantmaker_funding_overlap": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "funder_key",
+        "funder_ein",
+        "funder_name_canonical"
+      ],
+      "search": [
+        "funder_key",
+        "funder_ein",
+        "funder_name_canonical"
+      ],
+      "columns": 19
+    },
+    "nonprofits/np_ein_entity_hub": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "entity_canonical_name",
+      "entity_type": "entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "ein",
+        "org_name",
+        "native_entity_class"
+      ],
+      "search": [
+        "entity_canonical_name",
+        "ein",
+        "org_name",
+        "native_entity_class"
+      ],
+      "columns": 17
+    },
+    "nonprofits/np_ein_uei_bridge": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "ein",
+        "org_name",
+        "match_method"
+      ],
+      "search": [
+        "ein",
+        "org_name",
+        "match_method"
+      ],
+      "columns": 15
+    },
+    "nonprofits/np_financials": {
+      "entity_uid": null,
+      "entity_name": "cedar_spine_canonical_name",
+      "entity_type": "cedar_native_entity_class",
+      "year": "tax_year",
+      "date": null,
+      "amount": "schedc_527_amount",
+      "source": "source_url",
+      "observation": [
+        "state",
+        "ein",
+        "org_name"
+      ],
+      "search": [
+        "cedar_spine_canonical_name",
+        "state",
+        "ein",
+        "org_name"
+      ],
+      "columns": 77
+    },
+    "nonprofits/np_grantee_financials": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "tax_year",
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "ein",
+        "org_name",
+        "return_type"
+      ],
+      "search": [
+        "ein",
+        "org_name",
+        "return_type"
+      ],
+      "columns": 19
+    },
+    "nonprofits/np_org_scale": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_filing_year",
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "state",
+        "ein",
+        "org_name"
+      ],
+      "search": [
+        "state",
+        "ein",
+        "org_name"
+      ],
+      "columns": 30
+    },
+    "nonprofits/np_orgs": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "cedar_spine_canonical_name",
+      "entity_type": "cedar_native_entity_class",
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": "source_url",
+      "observation": [
+        "city",
+        "state"
+      ],
+      "search": [
+        "cedar_spine_canonical_name",
+        "city",
+        "state"
+      ],
+      "_why": "A register of organizations, not events: no row date. The card shows it without a year filter.",
+      "columns": 67
+    },
+    "nonprofits/np_schedule_i_filers": {
+      "entity_uid": null,
+      "entity_name": "cedar_filer_spine_canonical_name",
+      "entity_type": "cedar_filer_spine_entity_class",
+      "year": "tax_year",
+      "date": null,
+      "amount": "part2_cash_grant_total_usd",
+      "source": "source_url",
+      "observation": [
+        "filer_ein",
+        "filer_name_as_filed",
+        "filer_state"
+      ],
+      "search": [
+        "cedar_filer_spine_canonical_name",
+        "filer_ein",
+        "filer_name_as_filed",
+        "filer_state"
+      ],
+      "columns": 39
+    },
+    "nonprofits/np_schedule_i_grants": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "recipient_entity_canonical_name",
+      "entity_type": "cedar_filer_spine_entity_class",
+      "year": "tax_year",
+      "date": null,
+      "amount": "cash_grant_usd",
+      "source": "source_url",
+      "observation": [
+        "filer_ein",
+        "filer_name_as_filed",
+        "filer_state"
+      ],
+      "search": [
+        "recipient_entity_canonical_name",
+        "filer_ein",
+        "filer_name_as_filed",
+        "filer_state"
+      ],
+      "columns": 65
+    },
+    "owned/individual_native_exclusion_pairs": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "ruled_date",
+      "amount": null,
+      "source": null,
+      "observation": [
+        "identifier_type",
+        "identifier",
+        "firm_name_norm"
+      ],
+      "search": [
+        "identifier_type",
+        "identifier",
+        "firm_name_norm"
+      ],
+      "columns": 17
+    },
+    "owned/individual_native_firm_contracts": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_class",
+      "year": "fiscal_year",
+      "date": null,
+      "amount": "total_obligations_usd",
+      "source": null,
+      "observation": [
+        "identifier_type",
+        "identifier",
+        "recipient_states"
+      ],
+      "search": [
+        "canonical_name",
+        "identifier_type",
+        "identifier",
+        "recipient_states"
+      ],
+      "columns": 28
+    },
+    "owned/individual_native_firm_contracts_published": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": "entity_class",
+      "year": null,
+      "date": null,
+      "amount": "total_obligations_usd",
+      "source": null,
+      "observation": [
+        "cell_type",
+        "dimension_1",
+        "dimension_2"
+      ],
+      "search": [
+        "cell_type",
+        "dimension_1",
+        "dimension_2"
+      ],
+      "columns": 11
+    },
+    "owned/individual_native_firm_register": {
+      "entity_uid": "cedar_uid",
+      "entity_name": "canonical_name",
+      "entity_type": "entity_class",
+      "year": null,
+      "date": "ruled_date",
+      "amount": "total_obligations_usd",
+      "source": "native_ownership_evidence_url",
+      "observation": [
+        "state",
+        "identifier_type",
+        "identifier"
+      ],
+      "search": [
+        "canonical_name",
+        "state",
+        "identifier_type",
+        "identifier"
+      ],
+      "columns": 54
+    },
+    "owned/individual_native_ownership_verification": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "self_description_fetch_date",
+      "amount": "total_obligations_usd",
+      "source": "self_description_url",
+      "observation": [
+        "awardee_name_modal",
+        "awardee_name_variants",
+        "recipient_state_modal"
+      ],
+      "search": [
+        "awardee_name_modal",
+        "awardee_name_variants",
+        "recipient_state_modal"
+      ],
+      "columns": 61
+    },
+    "owned/individual_native_prior_rulings": {
+      "entity_uid": null,
+      "entity_name": "entity_name",
+      "entity_type": null,
+      "year": null,
+      "date": "ruled_date",
+      "amount": null,
+      "source": "evidence_url",
+      "observation": [
+        "identifier_type",
+        "identifier",
+        "ruling_text"
+      ],
+      "search": [
+        "entity_name",
+        "identifier_type",
+        "identifier",
+        "ruling_text"
+      ],
+      "columns": 12
+    },
+    "owned/individual_native_verification_candidates": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": "self_description_fetch_date",
+      "amount": "total_obligations_usd",
+      "source": "self_description_url",
+      "observation": [
+        "awardee_name_modal",
+        "awardee_name_variants",
+        "recipient_state_modal"
+      ],
+      "search": [
+        "awardee_name_modal",
+        "awardee_name_variants",
+        "recipient_state_modal"
+      ],
+      "columns": 41
+    },
+    "subcontracting/prime_sub_network": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": "total_usd",
+      "source": null,
+      "observation": [
+        "naics_modal",
+        "prime_name",
+        "sub_name"
+      ],
+      "search": [
+        "naics_modal",
+        "prime_name",
+        "sub_name"
+      ],
+      "columns": 11
+    },
+    "subcontracting/subaward_entity_rollup": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": null,
+      "date": null,
+      "amount": null,
+      "source": null,
+      "observation": [
+        "usd_as_prime_a",
+        "usd_as_subawardee_b",
+        "usd_both_sides"
+      ],
+      "search": [
+        "usd_as_prime_a",
+        "usd_as_subawardee_b",
+        "usd_both_sides"
+      ],
+      "columns": 9
+    },
+    "subcontracting/subaward_identifier_harvest": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": "total_subaward_usd",
+      "source": null,
+      "observation": [
+        "state",
+        "legal_business_name",
+        "role"
+      ],
+      "search": [
+        "state",
+        "legal_business_name",
+        "role"
+      ],
+      "columns": 14
+    },
+    "subcontracting/subaward_identifier_netnew": {
+      "entity_uid": null,
+      "entity_name": null,
+      "entity_type": null,
+      "year": "first_year",
+      "date": null,
+      "amount": "total_subaward_usd",
+      "source": null,
+      "observation": [
+        "state",
+        "legal_business_name",
+        "role"
+      ],
+      "search": [
+        "state",
+        "legal_business_name",
+        "role"
+      ],
+      "columns": 19
+    },
+    "subcontracting/subawards": {
+      "entity_uid": "cedar_uid",
+      "entity_name": null,
+      "entity_type": null,
+      "year": "fiscal_year",
+      "date": "subaward_date",
+      "amount": "subaward_amount",
+      "source": "source_url",
+      "observation": [
+        "description",
+        "sub_name",
+        "sub_state"
+      ],
+      "search": [
+        "description",
+        "sub_name",
+        "sub_state"
+      ],
+      "columns": 78
+    }
+  }
+}

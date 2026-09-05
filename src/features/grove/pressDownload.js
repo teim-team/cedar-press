@@ -102,7 +102,12 @@ async function defaultFetchText(path) {
 export async function downloadCsv(entry) {
   const { csv, name } = await csvFor(entry);
   if (!csv) return;
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  saveTextFile(name, csv);
+}
+
+/** Hand the browser one text file to save. The Explore card's cut uses it too. */
+export function saveTextFile(name, text) {
+  const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;

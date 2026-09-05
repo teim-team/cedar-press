@@ -63,10 +63,10 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 60 — `features/grove` 37, `pages/grove` 21, `components/grove` 1, `styles/grove` 1 |
-| Path references to rewrite | 214, across 56 files |
-| Referencing files inside `src/` | 23 — `pages/` 17, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
-| Referencing files outside `src/` | 33 — `server/cedar_press/` 7, `scripts/` 6, `docs/` 6, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1 |
+| Files to move | 63 — `features/grove` 39, `pages/grove` 22, `components/grove` 1, `styles/grove` 1 |
+| Path references to rewrite | 224, across 58 files |
+| Referencing files inside `src/` | 24 — `pages/` 18, `features/` 2, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Referencing files outside `src/` | 34 — `server/cedar_press/` 7, `scripts/` 6, `docs/` 6, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `package.json` 1, `.env.example` 1, `AGENTS.md` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row
 — twelve files also touched by an open PR, which would each have become a
@@ -79,7 +79,7 @@ as its own commit — moving the four directories to `press/` and rewriting the
 references in one pass — for two reasons that are about review rather than
 about risk.
 
-First, "did all 214 references get rewritten?" is a question the build, the
+First, "did all 224 references get rewritten?" is a question the build, the
 suites and the smoke run answer, and not one a reader can answer from a diff.
 Folded into a change that also alters behaviour or prose, the rename hides
 that change instead of accompanying it.
@@ -97,7 +97,7 @@ day the four directories move, the same measurement turns into the stale-path
 sweep and names every file that still spells the old one.
 
 One precondition, found while re-measuring the rows above. `npm run test:smoke`
-is one of the three things that answer "did all 214 references get rewritten?",
+is one of the three things that answer "did all 224 references get rewritten?",
 and until this commit it could answer for the wrong tree: `playwright.config.js`
 hardcoded port 4180 and kept `reuseExistingServer` on outside CI, so a run in
 one checkout attached to a preview server another checkout had left listening
@@ -281,6 +281,41 @@ a declared cadence per collection and, when a later release ships, editorial
 change notes. `pressDownload.js` builds the file, and every download carries
 its own citation, because provenance that lives only in the interface is
 provenance a reader loses on save.
+
+## Explore the data
+
+The card under the shelves (`pages/grove/PressExplore.jsx`) shows every
+collection's rows through the same three filters: which entity, which kind of
+entity, which years. It can do that because no page knows a collection's
+column names. `data/cedar/explore.json` is a CONTRACT per table, derived from
+the sample header by `scripts/derive-explore.mjs` and corrected in
+`data/cedar/explore.overrides.json`, that says which of the table's columns
+are the entity uid, the name, the type, the year, the date, the amount and the
+source, and which columns make the one-line observation. The importer re-runs
+the derivation after copying samples; `--check` fails a stale file and the
+suites run it. The entity register the pickers read is exported to
+`public/data/cedar/register.json` by the same script, with the names the
+publication rule withholds written null.
+
+`features/grove/explore.js` is the model. Everything the card shows is a
+function of one object, the CUT: entities, entity types, a year range, the
+collections, one table or none, a search, a sort and a page. The cut is the
+URL (`?e=…&t=…&y=2015-2024&c=…&tb=…&q=…`), so a permalink reproduces it; a
+saved cut is a permalink with a name; the download is the cut's rows with a
+`cite_as` row per collection and the cut written last; the question to Cedar
+is the cut said in words. Two views of the same rows: several collections show
+seven universal columns (an amount only where a selected table records one,
+never totalled across collections); one table shows all of its own columns,
+entity pinned, the rest scrolling.
+
+Phase one, shipped: the card over the ten-row samples, static on Pages, the
+caption counting sample rows and saying so; saved cuts in the browser's own
+storage, marked "on this device". Not shipped, and needing the API deployed:
+the full tables behind the same cut (a rows-and-facets endpoint), Cedar
+answering from the cut rather than from the collection profile, and saved
+extracts pinned to a release, shareable by opaque link, private by default,
+with the rows following the viewer's own entitlement (`may_open`) and every
+open logged. The cut object is the interface those phases consume unchanged.
 
 ## Interface conventions
 

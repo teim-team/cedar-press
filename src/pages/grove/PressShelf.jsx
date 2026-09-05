@@ -24,9 +24,14 @@
 // available thing and a greyed-out thing. A locked tile looks like its
 // shelf; the band's own eyebrow and the reader panel carry the lock.
 //
-// Tiles lay out in balanced rows, not as many as the width allows: the column
-// count comes from the entry count (`--cols`), so six read as three and three
-// and four as two and two.
+// Tiles lay out six across on a wide screen, one row a shelf, so the two
+// tiers read as two rows of six; below that width the grid wraps by itself.
+//
+// THE ACTIVE COLLECTION IS SHARED
+// Which tile is lit and which collection the reader describes is one piece
+// of state held by the shelf, not by each band: the Explore card below
+// points at a collection too (hover its name in a row, choose it in the
+// picker), and the tile lights and the reader speaks for it wherever it is.
 //
 // FILTERED TO DATA, THIS IS THE READER'S OWN SHELF
 // No locked band and no Cedar Grove. Somebody who asked to see the
@@ -59,6 +64,7 @@ import { freshnessLine } from "../../features/grove/pressReleases";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
+import PressExplore from "./PressExplore";
 import { TierName } from "./TierName";
 
 /**
@@ -239,9 +245,8 @@ function Detail({ entry, owned }) {
 }
 
 
-function Band({ tier, user, index }) {
+function Band({ tier, user, index, hovered, setHovered }) {
   const entries = collectionsOnShelf(tier.shelf);
-  const [hovered, setHovered] = useState(null);
 
   // Off the tier's own shelf, never off its first entry: Grove's band leads
   // with the collections Cedar Press also carries, so asking about entry
@@ -334,7 +339,7 @@ function Band({ tier, user, index }) {
 
         <ul
           className="cp-band__grid"
-          style={{ "--cols": Math.ceil(Math.sqrt(entries.length)) }}
+          style={{ "--cols": Math.min(entries.length, 6) }}
         >
           {entries.map((entry, position) => (
             <Badge
@@ -473,11 +478,13 @@ function GroveTeaser({ tier }) {
 export default function PressShelf({ user }) {
   const shelves = PRESS_TIERS.filter((tier) => tier.storefront);
   const grove = PRESS_TIERS.find((tier) => !tier.storefront);
+  const [hovered, setHovered] = useState(null);
   return (
     <div id="catalog" className="cp-bands">
       {shelves.map((tier, index) => (
-        <Band key={tier.id} tier={tier} user={user} index={index} />
+        <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} />
       ))}
+      <PressExplore user={user} onActive={setHovered} />
       {grove ? <GroveTeaser tier={grove} /> : null}
     </div>
   );

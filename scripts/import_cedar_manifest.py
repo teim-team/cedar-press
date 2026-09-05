@@ -453,6 +453,14 @@ def main() -> int:
     )
     if measured.returncode != 0:
         raise SystemExit(f"measure-samples failed:\n{measured.stderr}")
+    # The Explore card's per-table contracts are read off the sample headers
+    # just copied, so they follow every import for the same reason.
+    derived = subprocess.run(  # noqa: S603
+        ["node", str(REPO / "scripts" / "derive-explore.mjs")],
+        capture_output=True, text=True, check=False,
+    )
+    if derived.returncode != 0:
+        raise SystemExit(f"derive-explore failed:\n{derived.stderr}")
 
     print(f"  manifest  {out.relative_to(REPO)}")
     print(f"  storefront {len(manifest['collections'])} collections")

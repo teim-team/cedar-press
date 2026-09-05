@@ -1,121 +1,140 @@
 {
   "generated_by": "scripts/measure-samples.mjs",
-  "note": "Every path here is declared by collections.manifest.json and absent from public/ in this checkout. Measured, never typed; re-run the script after adding or removing a sample file.",
+  "note": "Every path here is declared by collections.manifest.json and not published: absent from public/, on disk but not in the git index, or on disk with changes not staged. Measured, never typed; re-run the script after `git add`ing or removing a sample file.",
   "reason": "The ten-row sample of {table} was produced with this release but is not in the repository yet, so the site cannot serve it.",
   "unpublished": [
     {
       "collection": "funding",
       "table": "bie_uio_dollars_by_entity.csv",
       "path": "/data/cedar/samples/funding/bie_uio_dollars_by_entity__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "funding",
       "table": "bie_uio_identifier_links.csv",
       "path": "/data/cedar/samples/funding/bie_uio_identifier_links__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "legislation",
       "table": "native_bill_action_coverage.csv",
       "path": "/data/cedar/samples/legislation/native_bill_action_coverage__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "legislation",
       "table": "native_bill_actions.csv",
       "path": "/data/cedar/samples/legislation/native_bill_actions__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "legislation",
       "table": "native_bill_cosponsor_coverage.csv",
       "path": "/data/cedar/samples/legislation/native_bill_cosponsor_coverage__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "legislation",
       "table": "native_bill_cosponsors.csv",
       "path": "/data/cedar/samples/legislation/native_bill_cosponsors__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "lobbying",
       "table": "fr_ex_parte_notices.csv",
       "path": "/data/cedar/samples/lobbying/fr_ex_parte_notices__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "lobbying",
       "table": "fr_ex_parte_parties.csv",
       "path": "/data/cedar/samples/lobbying/fr_ex_parte_parties__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "lobbying",
       "table": "fr_ex_parte_party_entity_links.csv",
       "path": "/data/cedar/samples/lobbying/fr_ex_parte_party_entity_links__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nagpra",
       "table": "nagpra_notice_source_corroboration.csv",
       "path": "/data/cedar/samples/nagpra/nagpra_notice_source_corroboration__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nagpra",
       "table": "nagpra_nps_grant_awards.csv",
       "path": "/data/cedar/samples/nagpra/nagpra_nps_grant_awards__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nagpra",
       "table": "nagpra_nps_intended_dispositions.csv",
       "path": "/data/cedar/samples/nagpra/nagpra_nps_intended_dispositions__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nagpra",
       "table": "nagpra_nps_inventories.csv",
       "path": "/data/cedar/samples/nagpra/nagpra_nps_inventories__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nagpra",
       "table": "nagpra_nps_notice_index.csv",
       "path": "/data/cedar/samples/nagpra/nagpra_nps_notice_index__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nagpra",
       "table": "nagpra_nps_summaries.csv",
       "path": "/data/cedar/samples/nagpra/nagpra_nps_summaries__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nagpra",
       "table": "nagpra_nps_unclaimed_remains.csv",
       "path": "/data/cedar/samples/nagpra/nagpra_nps_unclaimed_remains__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "owned",
       "table": "native_owned_businesses.csv",
       "path": "/data/cedar/samples/native-owned-businesses/native_owned_businesses__10.csv",
-      "flagship": true
+      "flagship": true,
+      "why": "not in repository"
     },
     {
       "collection": "nonprofits",
       "table": "fac_native_nontribal_sefa_programs.csv",
       "path": "/data/cedar/samples/nonprofits/fac_native_nontribal_sefa_programs__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     },
     {
       "collection": "nonprofits",
       "table": "fac_native_nontribal_single_audits.csv",
       "path": "/data/cedar/samples/nonprofits/fac_native_nontribal_single_audits__10.csv",
-      "flagship": false
+      "flagship": false,
+      "why": "not in repository"
     }
   ]
 }

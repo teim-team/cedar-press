@@ -517,13 +517,23 @@ def verify() -> int:
         return 1
     with OUT.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         rows = list(csv.DictReader(fh))
+    return verify_rows(rows)
+
+
+def verify_rows(rows: list) -> int:
+    """The checks, on rows already in memory, so the selftest can run the
+    complete apply-then-verify path on planted rows (Codex, PR #59)."""
     ok = True
     bad_cap = sorted({(r.get("capital_source") or "").strip() for r in rows} -
                      set(CAPITAL_SOURCE) - {""})
     bad_role = sorted({(r.get("native_party_role") or "").strip() for r in rows} -
                       set(ROLE) - {""})
+    # THE PLACEHOLDER, not every day. A refreshed ICDBG row that gained a
+    # sourced day is exactly what the F13 guard now keeps; rejecting it here
+    # would block the rebuild the guard exists to allow (Codex, PR #59).
     f13 = [r for r in rows if F13_RE.match((r.get("Deal_ID") or "").strip())
-           and (r.get("Event_Date_precision") or "") == "day"]
+           and (r.get("Event_Date_precision") or "") == "day"
+           and (r.get("Event_Date") or "").strip() == F13_PLACEHOLDER]
     f01 = [r for r in rows if r.get("Deal_ID") == "FA-HUD-0211"
            and (r.get("cedar_uid") or "").strip()]
     # THE QUEUE IS A COLUMN NOW, NOT A FILE. When the deliverables were
@@ -535,7 +545,7 @@ def verify() -> int:
     print("  rows                          : %d" % len(rows))
     print("  capital_source off-vocabulary : %s" % (bad_cap or "none"))
     print("  native_party_role off-vocab   : %s" % (bad_role or "none"))
-    print("  F13 rows still day-precision  : %d" % len(f13))
+    print("  F13 rows still on placeholder : %d" % len(f13))
     print("  F01 uid still attached        : %d" % len(f01))
     print("  verification queue outstanding: %d" % queue)
     if bad_cap or bad_role or f13 or f01:
@@ -558,15 +568,11 @@ def verify() -> int:
 
 
 def selftest() -> int:
+    """The proofs that need no data run FIRST, so a fresh checkout - where
+    the review export under dist/ is ignored and absent - still proves the
+    gates before it reports UNMEASURED about the data (Codex, PR #61)."""
     ok = True
-    rows = _read()
-    by = {(r.get("Deal_ID") or "").strip(): r for r in rows}
-    for c in CORRECTIONS:
-        if c["deal"] not in by:
-            print("  FAIL %s names a Deal_ID not in the file: %s"
-                  % (c["f"], c["deal"]))
-            ok = False
-    for v in (c for c in CORRECTIONS for c in [c]):
+    for v in CORRECTIONS:
         cs = v["set"].get("capital_source")
         if cs and cs not in CAPITAL_SOURCE:
             print("  FAIL %s writes capital_source %r, off-vocabulary"
@@ -575,20 +581,13 @@ def selftest() -> int:
         if rl and rl not in ROLE:
             print("  FAIL %s writes role %r, off-vocabulary" % (v["f"], rl))
             ok = False
-    n13 = sum(1 for d in by if F13_RE.match(d))
-    if n13 != 36:
-        print("  FAIL F13 pattern matches %d rows, expected 36" % n13)
-        ok = False
-    else:
-        print("  F13 pattern matches exactly 36 ICDBG rows")
-    # no correction may invent a uid
-    for c in CORRECTIONS:
-        u = c["set"].get("cedar_uid")
+        # no correction may invent a uid
+        u = v["set"].get("cedar_uid")
         if u:
             print("  FAIL %s sets a cedar_uid (%s); the handoff forbids it"
-                  % (c["f"], u)); ok = False
-    print("  %d corrections, all Deal_IDs present, no uid invented"
-          % len(CORRECTIONS))
+                  % (v["f"], u)); ok = False
+    print("  %d corrections, vocabulary held, no uid invented" % len(CORRECTIONS))
+
     # F11/F13 keep a date that is not the placeholder they were written against
     planted = [{"Deal_ID": F11_ROWS[0], "Event_Date": "2025-09-12",
                 "Event_Date_precision": "day"},
@@ -606,6 +605,42 @@ def selftest() -> int:
         ok = False
     else:
         print("  F11/F13 blank only the placeholder they were written against")
+    # and the same rows through verify: the kept sourced day passes, the
+    # placeholder that apply_all missed (planted here untouched) fails
+    import io
+    import contextlib
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc_applied = verify_rows(planted)
+        rc_placeholder = verify_rows([{"Deal_ID": "FA-HUD-0192",
+                                       "Event_Date": F13_PLACEHOLDER,
+                                       "Event_Date_precision": "day"}])
+    if rc_applied != 0 or rc_placeholder != 1:
+        print("  FAIL verify after apply: kept day %d (expected 0), placeholder %d (expected 1)"
+              % (rc_applied, rc_placeholder)); ok = False
+    else:
+        print("  verify passes the kept sourced day and fails the unsupported placeholder")
+
+    # THE REAL INPUT, last. dist/ is ignored, so a fresh checkout has no review
+    # export; that is UNMEASURED about the data, not a failure of the gates.
+    if not SRC.exists():
+        print("  UNMEASURED: review export absent: %s" % SRC.relative_to(ROOT))
+        print("  selftest UNMEASURED on this checkout (gates proven above: %s)"
+              % ("PASS" if ok else "FAIL"))
+        return 2 if ok else 1
+    rows = _read()
+    by = {(r.get("Deal_ID") or "").strip(): r for r in rows}
+    for c in CORRECTIONS:
+        if c["deal"] not in by:
+            print("  FAIL %s names a Deal_ID not in the file: %s"
+                  % (c["f"], c["deal"]))
+            ok = False
+    n13 = sum(1 for d in by if F13_RE.match(d))
+    if n13 != 36:
+        print("  FAIL F13 pattern matches %d rows, expected 36" % n13)
+        ok = False
+    else:
+        print("  F13 pattern matches exactly 36 ICDBG rows")
+    print("  all %d correction Deal_IDs present in the review export" % len(CORRECTIONS))
     print("  selftest %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 

@@ -1561,3 +1561,34 @@ on the importer's checkout (see the PR).
 | P2 catalog: do not claim every advocacy activity is resolved | The linkage line says a row is keyed where the record names an entity exactly and keeps a blank key otherwise. Press dump regenerated. | `npm test` |
 | P1 `1187` fail when any advocacy row lacks its source URL | The FR ex parte branch carries `source_url` (falling back to the Federal Register document URL) and `verify` fails on any blank, not only on a type with none. | `1187 selftest`; code |
 | P1 `1180` verify every required official-name input | `verify` loads through `sourced_names()`, the build's own path, so an absent `EXTRA_SOURCES` file is UNMEASURED there too. | `1180 verify` on this checkout |
+
+### PR #59 — five late findings, all right (2026-09-05, on PR #60)
+
+| finding | what changed | proof |
+|---|---|---|
+| P2 `1183` exclude superseded EIN links from official names | `1180.sourced_names()` skips a link whose `link_status` starts with `SUPERSEDED`; history stays in the file and stops being a name claim. | `1180 selftest`, fixture |
+| P1 `1185` let verified F13 dates pass verification | `verify` rejects an ICDBG row only when it still carries the placeholder day (`2025-04-09`); a sourced day passes. `verify_rows` runs on rows in memory, and the selftest runs apply-then-verify on the planted rows. | `1185 selftest` |
+| P1 `1187` exercise the per-row URL gate in selftest | `verify_rows` on planted rows: one blank URL among sourced rows of the same type fails, restored it passes, and a shipped no-activity filing fails. | `1187 selftest` |
+| P2 catalog: do not claim all advocacy links are exact | "resolved to the tribe or Native organization behind it where the record supports the link". Press dump regenerated. | `npm test` |
+| P1 `1180` prove the extra-source verifier path with a fixture | The selftest builds a fixture tree (three reconciliation files, the EIN-links extra source, an output table), runs `verify()` complete (0), with the extra source removed (2), restored (0); the fixture proofs run before the real-data part, so a checkout without the reconciliation directory still proves the gates before reporting UNMEASURED. | `1180 selftest` |
+
+### PR #60 — one late finding, right (2026-09-05, on PR #61)
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 measure tracked samples instead of local files | Published means on disk AND in the git index (`git ls-files` over the samples directory); a sample the importer copied and nobody staged stays on the record, so the clean checkout CI builds from cannot disagree with it. No git is a refusal, not a disk-only guess. Proven here by copying an untracked file into place: the record did not move. | `node scripts/measure-samples.mjs --check` |
+
+### PR #61 — one finding, right (2026-09-05)
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1185` run the planted verifier before loading untracked review data | The data-free proofs (vocabulary, no uid invented, planted F11/F13 through apply and verify) run first; the review export under `dist/` is checked last and its absence is UNMEASURED, exit 2, after the gates are proven. On a fresh checkout the selftest now proves the gates instead of raising. | `1185 selftest` on this checkout |
+
+### PR #61 round 2 — four findings on the head a212ec8, all right (2026-09-05)
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1180` reject stale superseded names during verification | `verify` compares every output row with the mapping `sourced_names()` computes now: a sourced row whose uid the sources no longer name, or whose name or source they give differently, and an internal row for a uid they do name, are `stale` and fail. The fixture plants the superseded uid still carrying its old name. | `1180 selftest` |
+| P2 `1180` preserve fixture failures when real inputs are absent | UNMEASURED on the real inputs returns 2 only when every fixture proof passed, else 1. | `1180 selftest` |
+| P1 `measure-samples` add a fixture for the index-only check | `--selftest` builds a throwaway git repository with four declared samples (committed, untracked, modified-unstaged, absent), and proves the record, `--check` stale and current, and the effect of staging. Eight assertions; the JS suite runs it. | `node scripts/measure-samples.mjs --selftest`; `npm test` |
+| P1 `measure-samples` compare sample bytes with the staged index version | Published means in the index, on disk, and byte-identical (`git diff --name-only` against the index); a tracked sample the importer overwrote and nobody staged is reported "on disk, modified and NOT staged". Each record entry now carries its `why`. | same selftest |
