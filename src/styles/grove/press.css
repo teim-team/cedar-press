@@ -2379,6 +2379,8 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-inf__points { font-size: 1.15rem; color: var(--ink); margin: 0.4rem 0 0; }
 .teim-rd .cp-inf__points b { color: var(--dteal); }
 .teim-rd .cp-inf__next { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); margin: 0.2rem 0 0; }
+.teim-rd .cp-inf__note { font-size: 0.84rem; line-height: 1.5; color: var(--muted); margin: 0.5rem 0 0; }
+.teim-rd .cp-inf__note + .cp-set__body, .teim-rd .cp-inf__next + .cp-set__body { margin-top: 0.8rem; }
 .teim-rd .cp-inf__h { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin: 1rem 0 0.3rem; }
 .teim-rd .cp-inf__table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .teim-rd .cp-inf__table td { padding: 0.35rem 0; border-top: 1px solid var(--line-soft); vertical-align: top; }
@@ -2391,10 +2393,15 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-inf__requests small { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-inf__foot { margin-top: 0.9rem; }
 /* The homepage block. */
-.teim-rd .cp-prib { max-width: 1560px; margin: 2rem auto 0; padding: 0 2.4rem; }
-.teim-rd .cp-prib__in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.4rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card, 14px); background: var(--bg); }
-.teim-rd .cp-prib__list { margin: 0.6rem 0 0.8rem; padding-left: 1.2rem; }
-.teim-rd .cp-prib__list li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.25rem 0; font-size: 0.95rem; }
+.teim-rd .cp-prib { margin-top: 2.2rem; }
+.teim-rd .cp-prib__in { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card, 14px); background: var(--bg); }
+.teim-rd .cp-prib__in.is-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+/* A flex <li> drops its marker, so the rank is drawn by a counter. */
+.teim-rd .cp-prib__list { margin: 0.6rem 0 0.8rem; padding: 0; list-style: none; counter-reset: rank; max-width: 44rem; }
+.teim-rd .cp-prib__list li { display: flex; align-items: baseline; gap: 0.7rem; padding: 0.3rem 0; font-size: 0.95rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-prib__list li:first-child { border-top: 0; }
+.teim-rd .cp-prib__list li::before { counter-increment: rank; content: counter(rank); font-family: var(--mono); font-size: 0.68rem; color: var(--muted); min-width: 1rem; }
+.teim-rd .cp-prib__title { flex: 1 1 0; min-width: 0; }
 .teim-rd .cp-prib__title { font-weight: 700; color: var(--ink); }
 .teim-rd .cp-prib__points { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--dteal); white-space: nowrap; }
 .teim-rd .cp-prib__shipped p { font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); margin: 0.5rem 0 0; }
@@ -2403,4 +2410,8 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
   .teim-rd .cp-pri__side { position: static; }
   .teim-rd .cp-prib__in { grid-template-columns: 1fr; }
 }
-@media (max-width: 720px) { .teim-rd .cp-prib { padding-inline: 1.15rem; } }
+@media (max-width: 720px) {
+  .teim-rd .cp-prib__in { padding: 1rem 1.1rem; }
+  .teim-rd .cp-prib__list li { flex-wrap: wrap; row-gap: 0.15rem; }
+  .teim-rd .cp-prib__points { flex-basis: 100%; padding-left: 1.7rem; }
+}
