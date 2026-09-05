@@ -472,11 +472,15 @@ def build(apply: bool = False) -> int:
     link_path = SPINE / "cedar_nonprofit_ein_links.csv"
     fields = ["EIN", "cedar_uid", "name", "link_basis", "link_tier",
               "link_status", "last_seen"]
+    # A LIST PER EIN. One dict entry per EIN kept only the last row read, so
+    # after a reassignment (a SUPERSEDED row and an active row for the same
+    # EIN) the second rebuild dropped the history it had just written
+    # (Codex, PR #58). Every prior row is carried forward.
     prior = {}
     for r in _read(link_path):
         e = norm_ein(r.get("EIN"))
         if e:
-            prior[e] = {c: r.get(c, "") for c in fields}
+            prior.setdefault(e, []).append({c: r.get(c, "") for c in fields})
     current = {}
     for uid, ein, name in minted:
         current[ein] = [ein, uid, name,
@@ -486,21 +490,25 @@ def build(apply: bool = False) -> int:
                         "existing Cedar entity matched on exact EIN", "A"]
     out_rows, kept, retired = [], 0, 0
     for ein, row in current.items():
-        old = prior.pop(ein, None)
-        if old and old["cedar_uid"] and old["cedar_uid"] != row[1]:
-            # a binding never changes silently: keep the old one, retired,
-            # so the change is visible in the file itself
-            old["link_status"] = "SUPERSEDED %s by %s" % (TODAY, row[1])
-            out_rows.append(old)
+        for old in prior.pop(ein, []):
+            if old.get("link_status", "").startswith("SUPERSEDED"):
+                out_rows.append(old)             # history, carried as is
+            elif old["cedar_uid"] and old["cedar_uid"] != row[1]:
+                # a binding never changes silently: keep the old one,
+                # retired, so the change is visible in the file itself
+                old["link_status"] = "SUPERSEDED %s by %s" % (TODAY, row[1])
+                out_rows.append(old)
+            # same uid: the active row below replaces it
         out_rows.append(dict(zip(fields, row + ["active", TODAY])))
-    for ein, old in prior.items():
-        if not old.get("link_status", "").startswith("SUPERSEDED"):
-            if old.get("link_status", "active") in ("", "active"):
-                old["link_status"] = "NOT_IN_CURRENT_DIRECTORY since %s" % TODAY
-                retired += 1
-            else:
-                kept += 1
-        out_rows.append(old)
+    for ein, olds in prior.items():
+        for old in olds:
+            if not old.get("link_status", "").startswith("SUPERSEDED"):
+                if old.get("link_status", "active") in ("", "active"):
+                    old["link_status"] = "NOT_IN_CURRENT_DIRECTORY since %s" % TODAY
+                    retired += 1
+                else:
+                    kept += 1
+            out_rows.append(old)
     with link_path.open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=fields)
         w.writeheader()

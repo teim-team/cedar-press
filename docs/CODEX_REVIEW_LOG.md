@@ -1550,3 +1550,14 @@ file gains `Caveat` and `Candidate_Status`; the 1174 review bundle, 1186 awards
 and 1187 advocacy outputs change shape as described; `1183 build` needs the
 IRS BMF on disk. And, unrelated to Codex: twenty manifest samples exist only
 on the importer's checkout (see the PR).
+
+### PR #58 — six findings on the fixes above, all right (2026-09-05)
+
+| finding | what changed | proof |
+|---|---|---|
+| P1 `1182` refuse verification when no table is scanned | The scanned-file count is tracked; zero is UNMEASURED and exits 2, naming the directory and the selector. | `1182 selftest`, new case; `1182 verify` on this checkout |
+| P1 `1185` preserve later verified dates when applying corrections | F11 and F13 now carry the placeholder value they were written against (`2025-06-30`, `2025-04-09`); a row holding any other date is skipped as a failed precondition and reported, like every row in `CORRECTIONS`. Necessary now that the block runs on every build. | `1185 selftest` on planted rows |
+| P2 `1183` keep all superseded EIN-link history across rebuilds | Prior links are held as a list per EIN; superseded rows are carried forward as they are, so a reassignment's history survives the second rebuild. | code |
+| P2 catalog: do not claim every advocacy activity is resolved | The linkage line says a row is keyed where the record names an entity exactly and keeps a blank key otherwise. Press dump regenerated. | `npm test` |
+| P1 `1187` fail when any advocacy row lacks its source URL | The FR ex parte branch carries `source_url` (falling back to the Federal Register document URL) and `verify` fails on any blank, not only on a type with none. | `1187 selftest`; code |
+| P1 `1180` verify every required official-name input | `verify` loads through `sourced_names()`, the build's own path, so an absent `EXTRA_SOURCES` file is UNMEASURED there too. | `1180 verify` on this checkout |

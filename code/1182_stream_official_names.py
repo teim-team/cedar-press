@@ -138,6 +138,12 @@ def main(argv: list) -> int:
         print("  verify would fail on the unfixed file and pass after apply: %s"
               % red)
         ok = ok and red
+        import io
+        import contextlib
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = main([argv[0], "verify", "no-such-target-1182"])
+        print("  verify with nothing to scan exits 2, UNMEASURED: %s" % (rc == 2))
+        ok = ok and rc == 2
         print("  selftest %s" % ("PASS" if ok else "FAIL"))
         return 0 if ok else 1
 
@@ -147,16 +153,24 @@ def main(argv: list) -> int:
           % ("APPLY" if apply else
              "VERIFY (fails on any remaining handle)" if cmd == "verify" else
              "REPORT (writes nothing)"))
-    total = total_cells = 0
+    total = total_cells = scanned = 0
     for path, cols in targets():
         if only and path.stem != only:
             continue
         rows, changed, cells = stream(path, apply=apply)
+        scanned += 1
         total += changed
         total_cells += cells
         print("    %-30s %8d rows  %7d row(s) renamed  %d cell(s)  [%s]"
               % (path.name, rows, changed, cells, ", ".join(cols)))
-    print("    total rows renamed: %d" % total)
+    print("    total rows renamed: %d  (%d file(s) scanned)" % (total, scanned))
+    if not scanned:
+        # NOTHING SCANNED IS NOTHING MEASURED. With dist/customer absent, or
+        # a selector matching no file, the loop ran zero times and `verify`
+        # printed PASS over an unmeasured condition (Codex, PR #58).
+        print("    UNMEASURED: no target scanned under %s%s"
+              % (CUSTOMER, (" matching %r" % only) if only else ""))
+        return 2
     if cmd == "verify":
         # A VERIFY THAT CANNOT FAIL VERIFIES NOTHING. This used to be the
         # report with a different label and returned 0 over thousands of
