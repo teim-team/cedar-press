@@ -227,12 +227,32 @@ function cell(row, column) {
   return value == null ? "" : String(value).trim();
 }
 
-/** The uids a row names, each once: one, or several from a pipe-separated cell. */
+/**
+ * The members of a list cell. The samples carry pipe-separated lists; the
+ * approved public schema carries JSON arrays (`["CE-…","CE-…"]`, a null for
+ * an unresolved party). Both are read, so the viewer serves the file it is
+ * given before and after the export changes.
+ */
+export function listCell(raw) {
+  const text = String(raw ?? "").trim();
+  if (!text) return [];
+  if (text.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return parsed.map((p) => (p == null ? "" : String(p).trim()));
+    } catch {
+      // Not JSON after all: fall through to the pipe form.
+    }
+  }
+  return text.split("|").map((p) => p.trim());
+}
+
+/** The uids a row names, each once: one, or several from a list cell. */
 export function rowUids(row, contract) {
   const raw = cell(row, contract?.entity_uid);
   if (!raw) return [];
-  const parts = contract?.entity_uid_list ? raw.split("|") : [raw];
-  return [...new Set(parts.map((p) => p.trim()).filter((p) => UID.test(p)))];
+  const parts = contract?.entity_uid_list ? listCell(raw) : [raw];
+  return [...new Set(parts.filter((p) => UID.test(p)))];
 }
 
 /**
@@ -268,7 +288,7 @@ export function rowEntities(row, contract, register = EMPTY_REGISTER) {
   for (const declared of contract?.entity_roles ?? []) {
     const raw = cell(row, declared.column);
     if (!raw) continue;
-    const parts = declared.list ? raw.split("|") : [raw];
+    const parts = declared.list ? listCell(raw) : [raw];
     for (const part of parts) {
       const uid = part.trim();
       if (!UID.test(uid)) continue;

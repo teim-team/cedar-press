@@ -835,45 +835,94 @@ def apply_official_names(row: dict) -> int:
 # THE APPROVED FIELD LIST - the export is generated FROM it, not filtered down
 # to it.
 #
-# Owner's specification, 2026-09-05 (docs/PUBLIC_DATASET_SPEC_2026-09-05.md
-# §17): "Generate public exports from approved field lists. ... New upstream
-# fields must require a publication decision rather than appearing
-# automatically in customer data." Everything above this line is a DENY list -
-# DROP_COLS, NEVER, NEID_COLS, PROPOSED_COLS, the lineage suffixes - and a deny
-# list fails open: a column nobody has looked at ships. `data/cedar/
-# field_map.json` is the allow list: one decision per column of each
-# flagship's header, and the approved public header in order. This applier
-# reads it, and REFUSES a flagship column that has no decision.
+# Owner's specification, 2026-09-05, and its addendum the same day
+# (docs/PUBLIC_DATASET_SPEC_2026-09-05.md): "Generate public exports from
+# approved field lists. ... New upstream fields must require a publication
+# decision rather than appearing automatically in customer data." And the
+# retirement rule: "migrate -> reconcile -> verify -> retire ->
+# regression-test, not simply 'drop these columns'." Everything above this
+# line is a DENY list - DROP_COLS, NEVER, NEID_COLS, PROPOSED_COLS, the
+# lineage suffixes - and a deny list fails open: a column nobody has looked
+# at ships. `data/cedar/field_map.json` is the allow list: one decision per
+# column of each flagship's header, the approved public header in exact
+# order, and a retirement entry for every competing entity identifier.
 #
-# It is deliberately narrow. It renames, drops what is internal or
-# documented, fills the opening block from the register, orders the header as
-# the map says and appends anything the build synthesised after the flagship
-# (the `n_<table>` counts, the `<table>__col` joins) behind it. It does not
-# combine, derive an annual grain, or write a research note: those are the
-# terminal's, on the full table, and the map lists them as owed until they
-# exist. The deny lists above still run first; this does not replace them.
+# This applier reads it and REFUSES four things by name: a flagship column
+# with no decision; an alias of cedar_uid that disagrees with it on any row;
+# a competing identifier the map says must be adjudicated, wherever it is
+# populated; and a retired scheme's name (CICD, NEID, Casino City) in a
+# shipped column name or a shipped value. What it builds: the opening block
+# from the register (singular, or the plural aligned JSON arrays), the
+# constants, and the small named rules below. What it does NOT do is the
+# terminal's, on the full table: the combine crosswalks, the editorial
+# research_note, the names as published; the map lists each as owed and the
+# target column is absent until it exists, never blank. The deny lists
+# above still run first; this does not replace them.
 # ---------------------------------------------------------------------------
 
 FIELD_MAP_PATH = ROOT / "data" / "cedar" / "field_map.json"
-OPENING_BLOCK = ("cedar_uid", "cedar_entity_name", "cedar_entity_type",
-                 "cedar_entity_role")
+OPENING_SINGULAR = ("cedar_uid", "canonical_name", "entity_class",
+                    "cedar_entity_role")
+OPENING_PLURAL = ("cedar_uids", "canonical_names", "entity_classes",
+                  "entity_roles", "entity_names_as_published")
+#: A retired scheme's name inside a value or a column name. `_` and a word
+#: boundary both separate, so `cedar_neid` and `neid_join_status` match and
+#: `Oneida` does not.
+RETIRED_TOKEN = re.compile(r"(?<![a-z])(neid|cicd|casino_?city)(?![a-z])", re.I)
+#: Column names that may never reach a public header, whatever the map says.
+PROHIBITED_PUBLIC_COLUMN = re.compile(
+    r"duns|neid|cicd|casino_?city|tribe_id|_candidate|proposed|resolver|"
+    r"built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime", re.I)
 _FIELD_MAP: dict = {}
 _REGISTER: dict = {}
+_UID = re.compile(r"^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$")
 
 
-class UndecidedColumns(SystemExit):
-    """A flagship carries a column the field map has no decision for."""
+class FieldMapRefusal(SystemExit):
+    """The applier refused a dataset; `collection` and `columns` say why."""
 
-    def __init__(self, collection: str, columns: list):
+    def __init__(self, collection: str, columns: list, message: str):
         self.collection, self.columns = collection, list(columns)
-        super().__init__(
-            f"{collection}: {len(self.columns)} column(s) have no decision in "
-            f"{FIELD_MAP_PATH.relative_to(ROOT)} and cannot ship until they "
-            f"do: {', '.join(self.columns)}")
+        super().__init__(f"{collection}: {message}")
+
+
+class UndecidedColumns(FieldMapRefusal):
+    def __init__(self, collection: str, columns: list):
+        super().__init__(collection, columns,
+                         f"{len(columns)} column(s) have no decision in "
+                         f"{FIELD_MAP_PATH.relative_to(ROOT)} and cannot ship "
+                         f"until they do: {', '.join(columns)}")
+
+
+class AliasDisagreement(FieldMapRefusal):
+    def __init__(self, collection: str, column: str, n: int, example: tuple):
+        super().__init__(collection, [column],
+                         f"{column} is declared an alias of cedar_uid and "
+                         f"disagrees with it on {n} row(s) (e.g. {example[0]!r} "
+                         f"against {example[1]!r}); the crosswalk is not "
+                         f"validated and the dataset does not ship")
+
+
+class UnadjudicatedIdentifier(FieldMapRefusal):
+    def __init__(self, collection: str, column: str, n: int):
+        super().__init__(collection, [column],
+                         f"{column} carries a competing identifier on {n} "
+                         f"row(s) whose object is not settled (retirement "
+                         f"disposition `adjudicate`); the dataset stops until "
+                         f"it is adjudicated, and the column is neither "
+                         f"retained nor deleted")
+
+
+class RetiredIdentifierPresent(FieldMapRefusal):
+    def __init__(self, collection: str, where: str, n: int, example: str):
+        super().__init__(collection, [where],
+                         f"a retired scheme's name is still in {where} on {n} "
+                         f"row(s) (e.g. {example!r}); translate to cedar_uid or "
+                         f"recode the vocabulary before this ships")
 
 
 def field_map() -> dict:
-    """collection id -> the map's table entry, keyed by collection."""
+    """collection id -> the map's table entry (with its key)."""
     global _FIELD_MAP
     if _FIELD_MAP:
         return _FIELD_MAP
@@ -888,12 +937,11 @@ def field_map() -> dict:
 
 
 def register() -> dict:
-    """cedar_uid -> (name, class) from the two spine files the site reads.
+    """cedar_uid -> (name, class) from the register the publication uses.
 
-    Names come from `cedar_entity_names.csv` (the register the publication
-    uses) and classes from the same file's `entity_class`. A uid the register
-    does not know maps to nothing, and the opening block stays blank for it:
-    a blank says unknown; a guess would say something false.
+    A uid the register does not know maps to nothing and the opening block
+    stays blank for it: a blank says unknown; a guess would say something
+    false.
     """
     global _REGISTER
     if _REGISTER:
@@ -912,28 +960,127 @@ def register() -> dict:
     return _REGISTER
 
 
-def _role_of(entry: dict, row: dict) -> str:
-    """The row's cedar_entity_role: a constant, or read from a role column."""
-    for n in entry.get("new", []):
-        if n["column"] != "cedar_entity_role":
-            continue
-        src = n.get("from", "")
-        if src.startswith("constant:"):
-            return src[len("constant:"):]
-        if src.startswith("map:"):
-            col = src[len("map:"):]
-            return (row.get(col) or "").strip()
-    return ""
+def _js(value) -> str:
+    """A JSON array cell, ASCII-safe never (names carry diacritics)."""
+    return json.dumps(value, ensure_ascii=False)
+
+
+def _ordinal(n: int) -> str:
+    if 10 <= n % 100 <= 20:
+        return f"{n}th"
+    return f"{n}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th') }"
+
+
+_BILL_TYPES = {"hr": "house-bill", "s": "senate-bill", "hjres": "house-joint-resolution",
+               "sjres": "senate-joint-resolution", "hconres": "house-concurrent-resolution",
+               "sconres": "senate-concurrent-resolution", "hres": "house-resolution",
+               "sres": "senate-resolution"}
+
+
+def _geography_status(row: dict, prefix: str) -> str:
+    """placed, placed_ambiguous or unplaced, from the geo_* diagnostics.
+
+    A rule the specification asks for ("translate geographic ambiguity into
+    the two geography-status fields before removing the detailed matching
+    diagnostics") and one the terminal confirms on the full table: the
+    thresholds here are the columns' own flags, not a judgement.
+    """
+    county = (row.get(f"{prefix}_county_name") or row.get(f"{prefix}_county_fips") or "").strip()
+    if not county:
+        return "unplaced"
+    if (row.get(f"{prefix}_place_ambiguous") or "").strip() == "1":
+        return "placed_ambiguous"
+    return "placed"
+
+
+def _plural_block(entry: dict, row: dict, reg: dict) -> dict:
+    """The five aligned arrays, one position per entity-role association."""
+    pairs = []
+    primary = entry["entity_uid"]
+    role0 = entry.get("primary_role") or "associated"
+    for uid in (row.get(primary) or "").split("|"):
+        uid = uid.strip()
+        if uid:
+            pairs.append((uid, role0))
+    for declared in entry.get("entity_roles") or []:
+        for uid in (row.get(declared["column"]) or "").split("|"):
+            uid = uid.strip()
+            if uid:
+                pairs.append((uid, declared["role"]))
+    uids = [u if _UID.match(u) else None for u, _ in pairs]
+    names = [reg[u][0] if u and u in reg else None for u in uids]
+    classes = [reg[u][1] if u and u in reg else None for u in uids]
+    roles = [r for _, r in pairs]
+    out = {"cedar_uids": _js(uids), "canonical_names": _js(names),
+           "entity_classes": _js(classes), "entity_roles": _js(roles),
+           "entity_names_as_published": _js([None] * len(pairs))}
+    # Legislation carries link tiers aligned to its primary list.
+    tiers_col = next((f["column"] for f in entry["fields"]
+                      if f["decision"] == "derive" and f.get("to") == "entity_link_statuses"), None)
+    if tiers_col:
+        tiers = [t.strip() or None for t in (row.get(tiers_col) or "").split("|")]
+        n_primary = len([1 for u in (row.get(primary) or "").split("|") if u.strip()])
+        tiers = (tiers + [None] * n_primary)[:n_primary] if n_primary else []
+        out["entity_link_statuses"] = _js(tiers + [None] * (len(pairs) - n_primary))
+    return out
+
+
+def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
+    """One `rule:` value for one row, or None when the rule is not built here."""
+    parts = spec.split(":")
+    name = parts[1] if len(parts) > 1 else ""
+    arg = ":".join(parts[2:]) if len(parts) > 2 else ""
+    col = lambda target: row.get(source_of.get(target, target), "")  # noqa: E731
+    if name == "blank":
+        return ""
+    if name == "geography_status":
+        return _geography_status(row, arg)
+    if name == "source_system":
+        v = (col(arg) or "").strip().lower()
+        if v.startswith("usaspending"):
+            return "usaspending"
+        if "faads" in v:
+            return "faads"
+        return v.split("_")[0] if v else ""
+    if name == "prefixed_id":
+        prefix, target = arg.split(":", 1)
+        v = (col(target) or "").strip()
+        return f"{prefix}:{v}" if v else ""
+    if name == "url":
+        kind, target = arg.split(":", 1)
+        if kind == "usaspending_award":
+            key = (col(target) or "").strip()
+            ok = re.match(r"^[A-Z]+_[A-Z]+_[A-Za-z0-9_.-]+$", key)
+            return f"https://www.usaspending.gov/award/{key}" if ok else ""
+        if kind == "congress_bill":
+            congress, btype, number = (col(t).strip() for t in target.split("|"))
+            kind2 = _BILL_TYPES.get(btype.lower())
+            if not (congress.isdigit() and kind2 and number.isdigit()):
+                return ""
+            return f"https://www.congress.gov/bill/{_ordinal(int(congress))}-congress/{kind2}/{number}"
+        return ""
+    if name == "additional_sources":
+        url_col, type_col = arg.split("|")
+        url = (row.get(url_col) or "").strip()
+        kind = (row.get(type_col) or "").strip() or None
+        return _js([{"url": url, "source_type": kind}] if url else [])
+    if name == "additional_institutions":
+        all_col, one_col = arg.split("|")
+        names = [n.strip() for n in re.split(r"\||;", row.get(all_col) or "") if n.strip()]
+        first = (row.get(one_col) or "").strip()
+        return _js([n for n in names if n != first])
+    return None
 
 
 def apply_field_map(collection: str, header: list, rows: list,
                     own_cols=None) -> dict:
     """Rewrite `header` and every row in `rows` IN PLACE to the approved list.
 
-    Returns what it did, for the build log and the manifest: the columns
-    renamed, dropped (with their decision), added, and the target columns the
-    map still lists as owed. Raises `UndecidedColumns` - which is a
-    `SystemExit` - when the flagship carries a column with no decision.
+    Returns what it did, for the build log, the manifest and the retirement
+    report: the columns renamed, dropped (with their decision), built, owed,
+    the synthesised columns appended, and one retirement line per competing
+    identifier with the rows it was populated on. Raises a `FieldMapRefusal`
+    (a `SystemExit`) rather than ship a dataset it cannot vouch for.
 
     `own_cols` is the flagship's own header. Columns outside it were
     synthesised by the build (joins and counts); they are not the map's to
@@ -941,90 +1088,141 @@ def apply_field_map(collection: str, header: list, rows: list,
     """
     entry = field_map().get(collection)
     if not entry or not entry.get("fields"):
-        # No map for this collection (gaming; the unsampled flagship): the
-        # deny lists have run and the header is left as it was.
         return {"mapped": False}
     own = set(own_cols if own_cols is not None else header)
     decision = {f["column"]: f for f in entry["fields"]}
     undecided = [c for c in header if c in own and c not in decision]
     if undecided:
         raise UndecidedColumns(collection, undecided)
-    drop, rename = [], {}
-    for c in header:
-        if c not in decision:
-            continue
-        d = decision[c]
-        if d["decision"] in ("keep", "withhold"):
-            continue
-        if d["decision"] == "rename":
-            rename[c] = d["to"]
-        else:
-            # combine, derive, document, internal: the column itself does not
-            # ship; a combined or derived target is written by the terminal
-            # and listed as owed until it is.
-            drop.append((c, d["decision"]))
-    dropped = {c for c, _ in drop}
-    # Drop before renaming, so a raw column marked internal cannot be
-    # clobbered by - or clobber - the normalized one renamed onto its name
-    # (contractors: extent_competed <- extent_competed_normalized).
-    for r in rows:
-        for c in dropped:
-            r.pop(c, None)
-        for old, new in rename.items():
-            if old in r:
-                r[new] = r.pop(old)
-    # The opening block: uid from the map's uid column (renamed above where it
-    # had another name), name and class from the register, role as declared.
+    uid_col = entry["entity_uid"]
+    plural = bool(entry.get("plural"))
     reg = register()
-    lists = bool(entry.get("entity_uid_list"))
-    added = []
-    for r in rows:
-        uid = (r.get("cedar_uid") or "").strip()
-        uids = [u.strip() for u in uid.split("|")] if lists else [uid]
-        known = [reg.get(u) for u in uids]
-        if "cedar_entity_name" not in r or not (r.get("cedar_entity_name") or "").strip():
-            r["cedar_entity_name"] = "|".join(k[0] if k else "" for k in known)
-        else:
-            # The register rewrites a renamed name column in place where it
-            # knows the uid; a uid it does not know keeps the table's value.
-            names = [k[0] if k else None for k in known]
-            if all(names):
-                r["cedar_entity_name"] = "|".join(names)
-        r["cedar_entity_type"] = "|".join(k[1] if k else "" for k in known)
-        # A table whose role column was renamed onto cedar_entity_role keeps
-        # its own values; the constant or the mapped column fills the rest.
-        role = _role_of(entry, r)
-        if role or "cedar_entity_role" not in r:
-            r["cedar_entity_role"] = role
-    # Anything the map builds at write time from a constant.
+
+    # 1. THE RETIREMENT CHECKS, on the rows as they arrived.
+    retirement = []
+    for r in entry.get("retire", []):
+        col = r["column"]
+        populated = sum(1 for row in rows if (row.get(col) or "").strip())
+        line = {"column": col, "identifies": r["identifies"],
+                "replacement": r.get("replacement", "cedar_uid"),
+                "disposition": r["disposition"], "rows_affected": populated,
+                "unresolved": 0}
+        if r["disposition"] == "alias_verified":
+            bad = [(row.get(col), row.get(uid_col)) for row in rows
+                   if (row.get(col) or "").strip() and (row.get(uid_col) or "").strip()
+                   and row.get(col).strip() != row.get(uid_col).strip()]
+            if bad:
+                raise AliasDisagreement(collection, col, len(bad), bad[0])
+        elif r["disposition"] == "adjudicate":
+            line["unresolved"] = populated
+            if populated:
+                raise UnadjudicatedIdentifier(collection, col, populated)
+        retirement.append(line)
+
+    # 2. THE RULES, computed before anything is dropped (they read the
+    # diagnostics that are about to leave).
+    rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
+    source_of = {to: c for c, to in rename.items()}
+    built_cols = []
+    per_row = [dict() for _ in rows]
     for n in entry.get("new", []):
         src = n.get("from", "")
-        if n["column"] in OPENING_BLOCK or n.get("status"):
+        target = n["column"]
+        if n.get("status"):
+            continue
+        if src == "register" or target in OPENING_SINGULAR + OPENING_PLURAL:
             continue
         if src.startswith("constant:"):
-            value = src[len("constant:"):]
-            for r in rows:
-                r[n["column"]] = value
-            added.append(n["column"])
-    present = set()
-    for r in rows[:1]:
-        present = set(r)
-    if not rows:
-        present = {rename.get(c, c) for c in header if c not in dropped} | set(OPENING_BLOCK)
+            for b in per_row:
+                b[target] = src[len("constant:"):]
+            built_cols.append(target)
+        elif src.startswith("map:"):
+            mcol = source_of.get(src[4:], src[4:])
+            for b, row in zip(per_row, rows, strict=True):
+                b[target] = (row.get(mcol) or "").strip()
+            built_cols.append(target)
+        elif src.startswith("rule:"):
+            if src == "rule:plural_block":
+                continue
+            for b, row in zip(per_row, rows, strict=True):
+                v = _rule(entry, src, row, source_of)
+                if v is not None:
+                    b[target] = v
+            built_cols.append(target)
+    if plural:
+        for b, row in zip(per_row, rows, strict=True):
+            b.update(_plural_block(entry, row, reg))
+        built_cols.extend([c for c in OPENING_PLURAL if c not in built_cols])
+        if any("entity_link_statuses" in b for b in per_row):
+            built_cols.append("entity_link_statuses")
+
+    # 3. DROP, then RENAME (so a raw column marked internal cannot clobber, or
+    # be clobbered by, the normalized one renamed onto its name).
+    drop = [(f["column"], f["decision"]) for f in entry["fields"]
+            if f["decision"] not in ("keep", "withhold", "rename")]
+    dropped = {c for c, _ in drop}
+    if plural:
+        dropped.add(uid_col)
+    # Renames are applied in two phases (read every source, then write every
+    # target) so a chain - funding's `assistance_type` -> `assistance_type_code`
+    # beside `assistance_type_description` -> `assistance_type` - cannot
+    # depend on the order the map happens to list them in.
+    for row in rows:
+        for c in dropped:
+            row.pop(c, None)
+        moved = {new: row.pop(old) for old, new in rename.items() if old in row}
+        row.update(moved)
+
+    # 4. THE OPENING BLOCK.
+    role_src = next((n for n in entry.get("new", []) if n["column"] == "cedar_entity_role"), None)
+    for row, b in zip(rows, per_row, strict=True):
+        if not plural:
+            uid = (row.get("cedar_uid") or "").strip()
+            known = reg.get(uid)
+            if known:
+                row["canonical_name"] = known[0]
+                row["entity_class"] = known[1]
+            else:
+                row.setdefault("canonical_name", "")
+                row.setdefault("entity_class", "")
+            if role_src:
+                src = role_src.get("from", "")
+                if src.startswith("constant:"):
+                    row["cedar_entity_role"] = src[len("constant:"):]
+                elif src.startswith("map:"):
+                    row["cedar_entity_role"] = (row.get(src[4:]) or "").strip()
+                else:
+                    row.setdefault("cedar_entity_role", "")
+        row.update(b)
+
+    # 5. THE HEADER: the approved order minus what is owed, then anything the
+    # build synthesised, then nothing else.
+    present = set(rows[0]) if rows else (
+        {rename.get(c, c) for c in header if c not in dropped}
+        | set(entry["opening"]) | set(built_cols))
     owed = [c for c in entry["order"] if c not in present]
     ordered = [c for c in entry["order"] if c in present]
-    extra = [c for c in header if c not in own and c not in dropped]
-    # A synthesised column may collide with an approved name; the approved
-    # one wins and the synthesised one is dropped with the collision named.
-    extra = [c for c in extra if c not in ordered]
+    extra = [c for c in header if c not in own and c not in dropped and c not in ordered]
     header[:] = ordered + extra
-    # A row that lacks an approved column reads as blank, never as absent.
-    for r in rows:
+    for row in rows:
         for c in header:
-            r.setdefault(c, "")
+            row.setdefault(c, "")
+        for c in [k for k in row if k not in header]:
+            row.pop(c)
+
+    # 6. THE REGRESSION GATE: no prohibited name in the header, no retired
+    # scheme's name in a shipped value.
+    bad_names = [c for c in header if PROHIBITED_PUBLIC_COLUMN.search(c)]
+    if bad_names:
+        raise RetiredIdentifierPresent(collection, "the header", len(bad_names),
+                                       ", ".join(bad_names))
+    for c in header:
+        hits = [row[c] for row in rows if RETIRED_TOKEN.search(row.get(c) or "")]
+        if hits:
+            raise RetiredIdentifierPresent(collection, c, len(hits), hits[0][:60])
     return {"mapped": True, "renamed": rename, "dropped": drop,
-            "added": list(OPENING_BLOCK) + added, "owed": owed,
-            "synthesised": extra}
+            "built": list(entry["opening"]) + built_cols, "owed": owed,
+            "synthesised": extra, "retirement": retirement}
 
 
 # INTERNAL WORKING COLUMNS. 843 states plainly that the `*_proposed*` columns

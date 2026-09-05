@@ -1,23 +1,22 @@
 # Note for the terminal: column order and column count in the customer files
 
 > **Read with `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`, which came after this
-> note and wins where they differ.** The owner's specification of 2026-09-05
-> changes four things here: (1) the identity block is `cedar_uid`,
-> `cedar_entity_name`, `cedar_entity_type`, **`cedar_entity_role`**, not
-> `cedar_uid`, `canonical_name`, `entity_class`; the role column says why the
-> entity is on the row. (2) The customer file is written from an **approved
-> field list**, not from the file's header minus a drop list: every current
-> column has a decision in `data/cedar/field_map.json` (rendered as
-> `docs/FIELD_MAP_2026-09-05.md`), and a column without one fails the build
-> instead of shipping. (3) Mixed-purpose `Notes` columns become substantive
-> fields and, only where needed, a short `research_note`; developer material
-> (script names, paths, run ids, parser templates, token matches, agreement
-> counts, proposed redirects, queues) never ships. (4) Funding and contractors
-> gain an award-recipient-fiscal-year public grain where the transaction
-> history supports it, with the transactions kept internally; lobbying becomes
-> the flagship of an Advocacy collection with `activity_id` and
-> `activity_type`. The tier-C controls, rule 4 (never drop for emptiness) and
-> rule 5 (identifiers stay, cells masked never columns) stand.
+> note and wins where they differ.** The owner's specification of 2026-09-05,
+> with its later addendum the same day, settles what this note proposed: the
+> identity block is `cedar_uid`, `canonical_name`, `entity_class`,
+> **`cedar_entity_role`**; Legislation and NAGPRA carry the plural block
+> (`cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles`,
+> `entity_names_as_published`) as aligned JSON arrays, never several ids in
+> one singular column; every dataset ends with `research_note`; the customer
+> file is written from an **approved field list** (`data/cedar/field_map.json`,
+> rendered as `docs/FIELD_MAP_2026-09-05.md`, exact order per dataset) and a
+> column without a decision fails the build instead of shipping; developer
+> material never ships; and every competing entity identifier (the retired
+> schemes, DUNS, candidate and proposed ids, duplicate aliases of `cedar_uid`)
+> is migrated, verified and retired under the rule in the addendum, with
+> `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` accounting for each. This pass
+> changes columns, never rows or identities. Rule 4 (never drop for emptiness)
+> and rule 5 (mask cells, never columns) stand.
 
 Written 2026-09-05 from the twelve flagship samples in `public/data/cedar/samples/`
 (ten rows each, headers read in full) after the owner asked whether every column in

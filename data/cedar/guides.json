@@ -11,20 +11,21 @@
   "url": "web address",
   "id": "identifier, as text",
   "list": "list, separated by |",
+  "json": "JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member)",
   "text": "text"
  },
  "collections": {
   "funding": {
    "population": "Federal financial assistance transactions whose recipient Cedar links to a Native entity, together with candidate rows the pipeline could not attribute, which ship with `attributed_flag` = 0 so that the totals a reader builds can be reproduced against Cedar's own (docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md). A payment to a tribal government, to an intertribal consortium acting for many tribes, and to a Native-serving non-Native organization are different facts and are kept distinguishable by `business_types_description` and `attribution_method`; a consortium's award is never attributed to each member tribe.",
-   "identifiers": "`assistance_award_unique_key` names the award and `assistance_transaction_unique_key` the transaction within it; `award_id_fain` is the official Federal Award Identification Number and `recipient_uei` the recipient's registration. Retired identifier schemes are not in the file, its text or its values, and must not be reconstructed from it.",
-   "time_and_geography": "`fiscal_year` is the federal fiscal year (October to September) of `action_date`; `fy_partial_flag` marks rows in a fiscal year the source had not finished reporting when Cedar pulled it, and a partial year must not be compared to a complete one. Recipient geography (`recipient_city_name`, `recipient_state_code`, `recipient_county_name`) is where the recipient is registered; place-of-performance geography is where the funded work is performed, and the two are different columns because they are different places.",
-   "entity_relationships": "`cedar_entity_role` is `recipient` on every row: the Native entity is the recipient or the entity that stands behind the recipient, resolved by identifier first and by name only with corroboration (`attribution_method`, `confidence_tier`). The recipient's own name stays in `recipient_name`; the register's name is `cedar_entity_name`. Where `attributed_flag` is 0 the opening block is blank: the row is a candidate Cedar could not attribute, not a non-Native recipient.",
+   "identifiers": "`transaction_id` names the transaction and `award_id` the award; `fain` is the official Federal Award Identification Number and `recipient_uei` the recipient's registration. DUNS is used internally to reconcile historical records to the UEI and the Cedar ID and is not published; retired identity schemes appear in no column, value or text.",
+   "time_and_geography": "`fiscal_year` is the federal fiscal year (October to September) of `action_date`; `fy_partial_flag` marks rows in a fiscal year the source had not finished reporting when Cedar pulled it, and a partial year must not be compared to a complete one. Recipient geography (`recipient_city`, `recipient_state`, `recipient_county_name`) is where the recipient is registered; place-of-performance geography is where the funded work is performed, and the two are different columns because they are different places.",
+   "entity_relationships": "`cedar_entity_role` is `recipient` on every row: the Native entity is the recipient or the entity that stands behind the recipient, resolved by identifier first and by name only with corroboration (`attribution_method`, `confidence_tier`). The recipient's own name stays in `recipient_name`; the register's name is `canonical_name`. Where `attributed_flag` is 0 the opening block is blank: the row is a candidate Cedar could not attribute, not a non-Native recipient.",
    "revisions": "USAspending re-reports awards; a transaction can appear with corrected values in a later archive. Cedar rebuilds from the current archive and states the archive's date in the release; it does not stack archives. Apparent duplicate transactions are retained on purpose: they are distinct modifications to one award that agree on every published field, and removing them would have destroyed $8.29B of real obligations (collection descriptor, measured 2026-09-02).",
    "limitations": [
     "Two source families cover the years: the USAspending archive (FY2007 onward) and the historical FAADS files (FY2001 to FY2007). They both hold FY2007, and 98.9% of the modern table's FY2007 dollars sit on awards the archive table also carries (docs/MONEY_TOTALLING_RULES.md, the FY2007 seam). `source_system` says which family a row is from; never stack the two families for one year.",
     "Coverage begins where the source does. An award that is not in the file, or a blank amount, is not evidence that no funding reached the entity.",
-    "The award-recipient-fiscal-year product the specification asks for (§4) is owed: the terminal measures whether stable award identity and compatible transaction measures support it before it ships. Until then the row is the transaction.",
-    "Loan measures (face value, subsidy cost) describe credit instruments and are not obligations; `credit_instrument_flag` marks the rows they belong to."
+    "Loan measures (face value, subsidy cost) describe credit instruments and are not obligations; `credit_instrument_flag` marks the rows they belong to.",
+    "This pass changes columns, never rows: the row stays the transaction. The annual product the earlier brief mentioned was withdrawn by the owner's column specification."
    ],
    "missing_values": [
     "A blank `cedar_uid` with `attributed_flag` = 0 means unattributed, not non-Native.",
@@ -32,12 +33,12 @@
     "A blank `recipient_county_name` means the address could not be placed in one county with confidence; the city and state still ship."
    ],
    "suitable_analyses": [
-    "Obligations by fiscal year, program (`cfda`), agency or entity, counting `attributed_flag` = 1 rows and excluding partial fiscal years, or stating them.",
+    "Obligations by fiscal year, program (`program_code`), agency or entity, counting `attributed_flag` = 1 rows and excluding partial fiscal years, or stating them.",
     "Which programs reach which entities, and first and last action dates per award.",
-    "Constant-dollar comparisons across years using `obligated_usd_real2025` (base year 2025; the deflator is stated in the release, not on the row)."
+    "Constant-dollar comparisons across years using `obligations_usd_real2025` (base year 2025; the deflator is stated in the release, not on the row)."
    ],
    "unsafe_aggregations": [
-    "Summing `obligated_usd` across both source families for FY2007, or stacking the FAADS and USAspending files for a multi-year series without the seam rule above.",
+    "Summing `obligations_usd` across both source families for FY2007, or stacking the FAADS and USAspending files for a multi-year series without the seam rule above.",
     "Adding loan face values or subsidy costs to obligations, or to each other.",
     "Attributing a consortium's or a Native-serving organization's award to a member tribe.",
     "Treating a partial fiscal year (`fy_partial_flag` = 1) as a complete one in a year-on-year comparison.",
@@ -75,14 +76,14 @@
    "population": "Bills in Congress that concern Native nations or organizations, judged relevant by Congress.gov's policy area and Cedar's subject classification with the basis recorded. Most legislation affecting Indian Country names no single tribe, so a row scoped to Indian Country as a whole is the correct representation, not a gap (collection descriptor).",
    "identifiers": "`bill_id` is Congress, bill type and number (`103-hr-2366`); `companion_bill_id` names the companion in the other chamber; `sponsor_bioguide_id` identifies the sponsor. A new introduction in a later Congress is a different bill even under the same title.",
    "time_and_geography": "`introduced_date` and `latest_action_date` are the bill's own dates; `status` is current as of `latest_action_date`. There is no geography beyond the entities named.",
-   "entity_relationships": "`cedar_uid` lists every entity the bill names, separated by |, with `cedar_entity_name` and `cedar_entity_type` in the same order and `entity_link_tiers` saying how firmly each resolves. `relevance_scope` says whether the bill is tribe-specific, class-wide or topic-wide, and `relevance_class_scope` names the class a class-wide bill is about. A broad Indigenous-policy bill does not name every tribe and is not attributed to any.",
+   "entity_relationships": "`cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published` are aligned JSON arrays: each position is one entity-role association, the role here being named in the bill. A named but unresolved party has null in `cedar_uids` and its name in `entity_names_as_published` once Cedar supplies it from the relationship evidence (null until then); `entity_link_statuses` is aligned the same way. `bill_scope` says whether the bill is tribe-specific, class-wide or topic-wide, and `affected_entity_classes` names the class a class-wide bill is about, kept apart from the named entities' registry classes. A broad Indigenous-policy bill does not name every tribe and is not attributed to any. Unpacking the arrays for analysis must keep the distinct `bill_id`, so the expansion does not inflate bill counts.",
    "revisions": "Status is derived from the action history on each rebuild; a bill's row changes as it moves. Passage by one chamber is not enactment; `status` distinguishes them.",
    "limitations": [
     "Whether member votes and actions ship inside this file under a `record_type`, or remain the collection's supporting tables, is owed (§6). The bill table promises bills; `has_rollcall` and `rollcall_count` summarize the votes without replacing them.",
     "Relevance coding is a judgment with its basis recorded in the workspace; the readable category ships, the agreement statistics do not."
    ],
    "missing_values": [
-    "An empty `cedar_uid` with `relevance_scope` other than tribe-specific means the bill names no entity, which is correct for most Native legislation.",
+    "An empty `cedar_uids` with `relevance_scope` other than tribe-specific means the bill names no entity, which is correct for most Native legislation.",
     "A blank `companion_bill_id` means no companion was identified."
    ],
    "suitable_analyses": [
@@ -100,7 +101,7 @@
    "population": "Announced transactions and awards involving a Native party: acquisitions, joint ventures, project financings, bond issuances, grants and major capital projects, with the parties, the instrument and the announced value where one was published. This is the one Cedar dataset that does not exist elsewhere, so every row carries a source link (collection descriptor). Inclusion is by a documented transaction, not by a press mention.",
    "identifiers": "`deal_id` is Cedar's identifier for the event. Parties are named as published (`native_party`, `counterparty`); the Native party's register identity is the opening block.",
    "time_and_geography": "`event_date` is the announcement date at the precision `event_date_precision` states (day, month or year); no day is invented for a month-precision date. `closing_date` ships only where a source confirms it (owed). `state` and `location` are the deal's or project's location as published.",
-   "entity_relationships": "`cedar_entity_role` is the Native party's role in the deal: acquirer, borrower, issuer, partner, grantee, seller. `native_party_type` is the party's kind as the source states it and `cedar_entity_type` the register's class; they can differ and both ship.",
+   "entity_relationships": "`cedar_entity_role` is the canonical Native entity's relationship to the deal (the Native party itself, or the owner of the party), and `native_party_role` is the party's own role in the deal: acquirer, borrower, issuer, partner, grantee, seller. A subsidiary's role as buyer is different from its owner's role as owner, and both ship. `native_party_type` is the party's kind as the source states it and `entity_class` the register's class.",
    "revisions": "A new source confirming an existing transaction enriches the row; a press release naming several distinct transactions can produce several rows. `verification_status` says how the row was verified. The consolidation of the three overlapping category fields into one `deal_category`, and of the two status fields into one `status`, is owed until the terminal tests where they disagree (§7).",
    "limitations": [
     "Values are announced values. `value_basis` says what the announced value measures; `project_total_value_usd` is the whole project's value and is not the Native participant's share, which is never allocated by guesswork.",
@@ -126,10 +127,10 @@
    "population": "Notices published under the Native American Graves Protection and Repatriation Act in the Federal Register: notices of inventory completion and of intent to repatriate, with the institution and the Native entities the notice names in each role. Affiliations are taken from the notice's own text, which is the legally operative statement (collection descriptor).",
    "identifiers": "`document_number` is the Federal Register document number. `related_notice_id` (owed) links a correction to the notice it corrects. `source_url` and `pdf_url` are the official text.",
    "time_and_geography": "`publication_date` is the notice's publication; `repatriation_eligible_date` and `response_deadline_date` are the dates the notice states. Institution geography (`institution_city`, `institution_state`) is where the holdings are; removal geography (`removal_counties`, `removal_states`) is where they were removed from, at county level. Precise removal sites do not ship.",
-   "entity_relationships": "The opening block carries the culturally affiliated entities (`cedar_entity_role` = culturally affiliated), separated by |. The other roles keep their own lists beside it: `consulted_entity_ids`, `disposition_priority_entity_ids`, `repatriation_recipient_entity_ids`, `letter_of_support_entity_ids`, `aboriginal_land_entity_ids`. These roles are legally different and are never collapsed into one list of tribes. The viewer finds a notice through any of them.",
+   "entity_relationships": "`cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published` are aligned JSON arrays with one position per entity-role association across six roles: affiliated, consulted, disposition priority, repatriation recipient, letter of support, aboriginal land. An entity in two roles occupies two positions; the roles are legally different and are never flattened into one list of tribes. A named but unresolved party has null in `cedar_uids`; the twelve `n_*_named` and `n_*_resolved` counts keep the unresolved visible on every row, and `entity_names_as_published` carries the names once Cedar supplies them from the relationship evidence (null until then). Unpacking the arrays must keep the distinct `document_number`, so the expansion does not inflate notice counts or repeat stated counts.",
    "revisions": "A correction is its own notice (`is_correction` = 1) and can restate the same holdings; totals must not add a notice and its correction. The bridge names 51,338 party relationships and resolves 47,688; the `n_*_named` and `n_*_resolved` pairs carry that gap on every row as real uncertainty (docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md).",
    "limitations": [
-    "Counts are the notice's stated counts in the notice's own units. The minimum number of individuals (`mni_total_stated`), associated and unassociated funerary objects, sacred objects and objects of cultural patrimony are different measures and are never added into one total.",
+    "Counts are the notice's stated counts in the notice's own units. The minimum number of individuals (`individuals_stated`), associated and unassociated funerary objects, sacred objects and objects of cultural patrimony are different measures and are never added into one total.",
     "A notice, an eligibility date or a named recipient does not establish that a physical transfer was completed.",
     "Names as published beside each role's IDs are owed (§8), so the unresolved parties are visible; until then `n_*_named` against `n_*_resolved` is the measure of what is unresolved."
    ],
@@ -151,7 +152,7 @@
   "lobbying": {
    "population": "Federal advocacy by Native entities. The flagship is one row per Lobbying Disclosure Act filing whose client resolves to a Native entity; `activity_type` names the source family so that other documented families (consultation, testimony, agency dockets, ex parte records, comments, nonprofit Schedule C) can join under the same schema as they are obtained and supported. The Lobbying Disclosure Act sees a fraction of tribal advocacy: 300 entities appear in LDA filings, 669 in a non-LDA channel, and only 4 are visible to the LDA and nowhere else (collection descriptor, measured 2026-09-02).",
    "identifiers": "`activity_id` (owed) is the collection-wide key; `filing_id` is the LDA filing's own identifier; `client_id` and `registrant_id` are the LDA database's identifiers for the parties; `superseded_by_filing_id` names the amendment that replaces a filing.",
-   "time_and_geography": "`filing_year` and `filing_period` are the reporting period; `posted_date` is when the filing was posted. Client and registrant states are the parties' registered states, not where the lobbying happened.",
+   "time_and_geography": "`reporting_year` and `reporting_period` are the reporting period; `posted_date` is when the filing was posted. Client and registrant states are the parties' registered states, not where the lobbying happened.",
    "entity_relationships": "`cedar_entity_role` is `client`: the Native entity is the filing's client, resolved to the register with `attribution_method` and `match_confidence`. The client's own name stays in `client_name`. A withdrawn attribution (`attribution_withdrawn` = 1) is a real filing that stays in the file with its Cedar link withdrawn and the reason stated; its spend is not Native lobbying.",
    "revisions": "Amendments supersede the filings they amend. `filing_status` is current or superseded; the default view counts current filings only, and the original and its amendment are never two spendings.",
    "limitations": [
@@ -177,38 +178,38 @@
   },
   "contractors": {
    "population": "Federal prime contract transactions awarded to firms owned by a Native entity: tribally owned firms, ANC and NHO subsidiaries and individually Native-owned businesses, FY2000 to current, matched to the entity that ultimately owns the awardee. Coverage begins at FY2000 because Native identification does not exist in the pre-2000 federal record, and $65.2B of candidate rows remain unattributed rather than assigned by guesswork (collection descriptor, measured 2026-09-02).",
-   "identifiers": "`contract_award_unique_key` names the award and `contract_transaction_unique_key` the transaction; `contract_number` and `parent_contract_number` are the contract's own numbers; `awardee_uei` and `cage_code` identify the contractor and `parent_uei` its declared parent. CAGE is kept because it persists across the DUNS-to-UEI change; a UEI, CAGE or name is masked on a row of an individually owned firm without recorded consent, never dropped as a column.",
-   "time_and_geography": "`fiscal_year` is the federal fiscal year of `action_date`. Recipient geography (`recipient_city_name`, `recipient_state_code`, `recipient_county_name`) is the contractor's address; place-of-performance geography is where the work is performed.",
+   "identifiers": "`award_id` names the award and `transaction_id` the transaction; `contract_number` and `parent_contract_number` are the contract's own numbers; `awardee_uei` and `cage_code` identify the contractor and `parent_uei` its declared parent. CAGE is kept because it persists across the DUNS-to-UEI change; a UEI, CAGE or name is masked on a row of an individually owned firm without recorded consent, never dropped as a column.",
+   "time_and_geography": "`fiscal_year` is the federal fiscal year of `action_date`. Recipient geography (`recipient_city`, `recipient_state`, `recipient_county_name`) is the contractor's address; place-of-performance geography is where the work is performed.",
    "entity_relationships": "`cedar_entity_role` is the owner of the awardee as resolved for the transaction's date. The contractor's own name stays in `awardee_name` and is never replaced by the owner's. `owner_attribution_status` says whether ownership is known for that date, and `owner_as_of_transaction_cedar_uid` names the owner as of the action where the ownership history resolves it; UNKNOWN ships as unknown, and current ownership is never assigned backwards.",
-   "revisions": "FPDS reports modifications as further transactions on the award. `total_obligations` is the incremental obligation on each transaction, negative for a deobligation, and is the additive measure; `total_award_value` is the award's ceiling, non-additive across transactions and years.",
+   "revisions": "FPDS reports modifications as further transactions on the award. `obligations_usd` is the incremental obligation on each transaction, negative for a deobligation, and is the additive measure; `cumulative_award_value_usd` is the award's ceiling, non-additive across transactions and years.",
    "limitations": [
-    "The award-recipient-fiscal-year public record the specification asks for (§10) is owed: annual obligations from incremental measures, with an attribution-period grain or a stated qualification where ownership changes within a year. Until then the row is the transaction.",
-    "Ownership, preference eligibility and use of a preference are different concepts: `setaside` is the category used on the award; the four `reported_*` columns are reported preference use.",
-    "Award obligations are not contractor revenue or economic impact."
+    "Ownership, preference eligibility and use of a preference are different concepts: `set_aside_classification` is the category used on the award; the four `reported_*` columns are reported preference use.",
+    "Award obligations are not contractor revenue or economic impact.",
+    "This pass changes columns, never rows: the row stays the transaction or modification, and genuine modifications are never collapsed. The annual record the earlier brief mentioned was withdrawn by the owner's column specification."
    ],
    "missing_values": [
     "`owner_as_of_transaction_cedar_uid` = UNKNOWN means the ownership history does not cover the date; the row is still attributed to the entity in the opening block by its current resolution.",
-    "A blank `place_of_perform_city` means the award reports none."
+    "A blank `performance_city` means the award reports none."
    ],
    "suitable_analyses": [
-    "Obligations by fiscal year, agency, NAICS and entity, summing `total_obligations`.",
+    "Obligations by fiscal year, agency, NAICS and entity, summing `obligations_usd`.",
     "Contractors per entity and awards per contractor.",
     "Set-aside and competition categories by year."
    ],
    "unsafe_aggregations": [
-    "Summing `total_award_value` across transactions or years.",
+    "Summing `cumulative_award_value_usd` across transactions or years.",
     "Assigning a full year's obligations to a current owner where `owner_attribution_status` says the owner as of the action is unknown or different.",
     "Adding subawards from the subcontracting collection to prime obligations: a subaward is a slice of a prime already counted."
    ]
   },
   "subcontracting": {
    "population": "Reported subawards where the prime, the subrecipient or both are owned by a Native entity, drawn from FSRS subaward reporting through USAspending and keyed to the prime award. Both sides are resolved independently, so a Native prime paying a non-Native sub and the reverse are distinguishable (collection descriptor).",
-   "identifiers": "`subaward_source_record_id` makes the row unique; `subaward_number` is the subaward's own number; `prime_award_id` and `prime_award_unique_key` name the prime award. UEIs and CAGE codes identify each side and its declared parent; a UEI, CAGE or name is masked on a row of an individually owned firm without recorded consent.",
-   "time_and_geography": "`subaward_date` and `fiscal_year` are the subaward's; `report_year` and `report_last_modified_date` are the report's, which is the version marker. Subrecipient geography (`sub_city`, `sub_state`, `sub_zip5`, `sub_county_name`) is the subrecipient's own and is never filled from the prime's address; the prime's geography does not ship here.",
-   "entity_relationships": "`native_side` says which side creates the Native connection (sub, prime or both) and `cedar_entity_role` is read from it. `sub_cedar_uid` and `prime_cedar_uid` are role-specific links and both ship; the viewer finds a row through either. A Native prime does not make its subcontractors Native.",
+   "identifiers": "`subaward_record_id` makes the row unique; `subaward_number` is the subaward's own number; `prime_award_id` and `prime_award_unique_key` name the prime award. UEIs and CAGE codes identify each side and its declared parent; a UEI, CAGE or name is masked on a row of an individually owned firm without recorded consent.",
+   "time_and_geography": "`subaward_date` and `fiscal_year` are the subaward's; `report_year` and `report_last_modified_date` are the report's, which is the version marker. Subrecipient geography (`sub_city`, `subcontractor_state`, `sub_zip5`, `sub_county_name`) is the subrecipient's own and is never filled from the prime's address; the prime's geography does not ship here.",
+   "entity_relationships": "`native_direction` says which side creates the Native connection (sub, prime or both) and `cedar_entity_role` is read from it. `sub_cedar_uid` and `prime_cedar_uid` are role-specific links and both ship; the viewer finds a row through either. A Native prime does not make its subcontractors Native.",
    "revisions": "Repeat monthly filings of one subaward are retained and flagged, not deleted: `duplicate_status` is primary for the countable filing and names the repeat otherwise. Summing without that filter lands 63.4% above the correct total: $57.02B unfiltered against $34.91B correct, a $22.11B difference, which is 38.8% of the unfiltered figure (collection descriptor and docs/MONEY_TOTALLING_RULES.md, measured 2026-09-02).",
    "limitations": [
-    "`subaward_amount` is additive only where `duplicate_status` is primary and `subaward_exceeds_prime_flag` is not yes; a subaward exceeding its prime is a real filing that is never summed.",
+    "`subaward_amount_usd` is additive only where `duplicate_status` is primary and `subaward_exceeds_prime_flag` is not yes; a subaward exceeding its prime is a real filing that is never summed.",
     "`action_date_precedes_ffata_flag` marks filings whose action dates precede the reporting requirement and are known filer anomalies; do not read such a date as when the work happened.",
     "`award_type` separates contract subawards from assistance subawards; the two populations are never combined in one total.",
     "The subaward-to-prime ratio does not ship: numerator and denominator have not been shown to cover compatible definitions, periods and versions (§11)."
@@ -223,14 +224,14 @@
     "Subrecipient geography of Native primes' subawards."
    ],
    "unsafe_aggregations": [
-    "Summing `subaward_amount` over every row.",
+    "Summing `subaward_amount_usd` over every row.",
     "Adding subaward amounts to prime obligations as independent federal spending.",
     "Summing successive report versions of one subaward."
    ]
   },
   "natural-resources": {
    "population": "Payments and distributions of natural-resource revenue reaching tribes and individual allottees from minerals, oil and gas, coal, timber and surface leases, with each row's measurement status and aggregation level stated. Where Interior suppresses the entity by law the row is published as an aggregate and labelled as one: 88.1% (9,791 national plus 167 state of 11,305 rows) of rows are aggregate for that reason (collection descriptor, measured 2026-09-02). Individual allottee detail is never published.",
-   "identifiers": "`resource_revenue_event_id` names the event; `source_system` and `source_record_id` name the record in its source. `beneficiary_entity_id`, `payer_entity_id` and `operator_entity_id` are the other parties' identifiers, which are Cedar IDs only where the party is a Native entity. A cross-reference to the Federal Funding award (`related_funding_award_id`) is owed where a reliable identifier exists.",
+   "identifiers": "`resource_revenue_event_id` names the event; `source_system` and `source_record_id` name the record in its source. `beneficiary_entity_id`, `payer_entity_id` and `operator_entity_id` keep their declared namespaces and are Cedar IDs only where the party is a Native entity; only verified Cedar IDs are used as Native entity join keys.",
    "time_and_geography": "`period_type`, `period_start` and `period_end` are the period the amount covers; `payment_date` is the payment's or announcement's date, and `measurement_status` says which it is (an actual payment, an announced allocation, a budget). `geography_note` and `land_status` carry what the source states about place and land.",
    "entity_relationships": "`cedar_entity_role` is `recipient`. `beneficiary_entity_id` names the beneficiary where it differs from the recipient (a distribution to allottees through a tribe, say), with `beneficiary_note` explaining. `attribution_status` says whether the row is keyed to an entity, to an aggregate or unresolved, so a blank `cedar_uid` has a stated reason.",
    "revisions": "Sources restate prior periods; `amount_sign_meaning` says what a negative or an adjustment means. Allocation rules (`allocation_formula` and its effective dates) are documented with their periods and never used to fill an unsupported tribal share.",
@@ -258,16 +259,16 @@
   "nest": {
    "population": "Enterprises (subsidiaries, holding companies, joint ventures, affiliates) and the Native entity that owns or is affiliated with each, built from what each owner publishes about itself: audited ANCSA annual reports, nations' own enterprise registers, ANC and NHO subsidiary directories. Ownership is recorded only where a source asserted it; a shared name or address is not evidence and does not create a row (collection descriptor).",
    "identifiers": "`enterprise_id` is Cedar's permanent, check-digited identifier for the enterprise; `parent_enterprise_id` names the immediate parent enterprise; `uei` and `cage_code` are the enterprise's official identifiers where the owner published them.",
-   "time_and_geography": "`first_observed_year` and `last_observed_year` are when Cedar observed the relationship, not when it began or ended; `ownership_effective_start` and `ownership_effective_end` (owed) will carry the effective period where a source states it. `city` and `state_province` are the enterprise's business location.",
-   "entity_relationships": "`cedar_entity_role` is `ownership` or `affiliation`, from the relationship class; `relationship` is the finer type (subsidiary, joint venture, management). `parent_is_hub` says whether the immediate parent is the Native entity itself; `hierarchy_level` is the depth below it. `parent_corroboration` says whether the parent FPDS declares agrees, and a contested affiliation ships as contested, never as verified ownership; `fpds_declared_parent_name` is kept as evidence.",
+   "time_and_geography": "`first_observed_year` and `last_observed_year` are when Cedar observed the relationship, not when it began or ended; `ownership_effective_start` and `ownership_effective_end` (owed) will carry the effective period where a source states it. `city` and `state` are the enterprise's business location.",
+   "entity_relationships": "`cedar_entity_role` is read from `relationship_type` (ownership or affiliation), and `relationship_as_recorded` keeps the source's own words. `parent_enterprise_id` and `parent_name` name the immediate parent enterprise; a blank parent enterprise means the parent is the Native entity itself. `federal_parent_corroboration` says whether the parent FPDS declares agrees, and a contested affiliation ships as contested, never as verified ownership; `reported_federal_parent_name` is kept as evidence. The enterprise's own identifier is `enterprise_id`; where an enterprise is itself a register entity, that cross-reference is adjudicated before it ships rather than published as an alias.",
    "revisions": "A relationship is re-observed on each source edition (`source_edition_date`). Duplicate observations are merged only on confirmed identity. Multiple owners of one enterprise are held in the collection's relations table and are owed in this file (§13); an arbitrary primary owner is never chosen.",
    "limitations": [
     "The file is not a census of Native enterprises; it holds what owners publish and what corroborates it.",
-    "A firm serving a tribe is not thereby owned by it; `evidence_class` and `evidence_human_reviewed` say what supports each row.",
+    "A firm serving a tribe is not thereby owned by it; `relationship_evidence_status` and `evidence_human_reviewed` say what supports each row.",
     "Historical existence and continuous ownership are not inferred from a current page."
    ],
    "missing_values": [
-    "A blank `ownership_percent_stated` means the source states no percentage.",
+    "A blank `ownership_percent` means the source states no percentage.",
     "A blank `uei` means the owner published none; Cedar does not pad with plausible matches."
    ],
    "suitable_analyses": [
@@ -285,11 +286,11 @@
    "population": "Nonprofit organizations in the IRS Business Master File that are Native-led, tribally affiliated or Native-serving, with their EIN, BMF financial measures and filing status. Native status is established from what an organization says about itself in its own filing, never from an NTEE code and never from a name (collection descriptor). Tribal instrumentalities largely do not file under IRC section 7871, so the largest tribal institutions can be absent by law.",
    "identifiers": "`ein` is the organization's Employer Identification Number, kept as text with leading zeros. `inclusion_basis` says why the organization is in Cedar.",
    "time_and_geography": "`tax_period` is the reporting period the BMF amounts belong to; `bmf_snapshot_date` is when the BMF snapshot was taken and is a retrieval date, not a tax year; `irs_ruling_month` is when the IRS ruled on exemption. `city` and `state` are the organization's address.",
-   "entity_relationships": "`cedar_entity_role` is the associated Native entity; `native_relationship` (owed) will say whether the organization is controlled by, serves, or is the linked entity. `org_entity_class` is the organization's own kind (ANC, tribal college, CDFI) and is distinct from `cedar_entity_type`, the linked entity's class. A nonprofit serving several tribes is not assigned to one by a shared word in its name; `attribution_method` and `attribution_tier` say how the link was made.",
+   "entity_relationships": "`cedar_entity_role` is the associated Native entity; `inclusion_category` says whether the organization is Native-serving, Native-controlled, a tribal government's own organization or a candidate, and `entity_link_status` how firmly the link is established, each consolidated through a documented crosswalk (owed). `organization_entity_class` is the organization's own kind (ANC, tribal college, CDFI) and is distinct from `entity_class`, the linked entity's class. A nonprofit serving several tribes is not assigned to one by a shared word in its name.",
    "revisions": "A newer BMF snapshot is not a new annual financial observation. The organization-EIN-reporting-period financial table (the collection's `np_financials.csv`) is where financial analysis belongs; whether it ships inside this file or beside it is owed (§14).",
    "limitations": [
-    "`bmf_revenue_amt`, `bmf_income_amt` and `bmf_asset_amt` are the Business Master File's own measures under their own names; `bmf_income_amt` is not net income and none is relabelled until the source definition is confirmed.",
-    "IRS codes (`bmf_status`, `bmf_subsection`, `bmf_filing_req_cd`, `bmf_foundation_cd`) are defined in the dictionary and carry the IRS's meaning.",
+    "`bmf_revenue_usd`, `bmf_income_usd` and `bmf_assets_usd` are the Business Master File's own measures under their own names; `bmf_income_usd` is not net income and none is relabelled until the source definition is confirmed.",
+    "IRS codes (`irs_status`, `irs_subsection`, `bmf_filing_req_cd`, `irs_foundation_code`) are defined in the dictionary and carry the IRS's meaning.",
     "Place-named organizations that are not Native are excluded rather than left to inflate totals."
    ],
    "missing_values": [

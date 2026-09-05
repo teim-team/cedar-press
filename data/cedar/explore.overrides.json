@@ -14,21 +14,20 @@
   },
   "default_columns": [
    "canonical_name",
-   "fiscal_year",
    "action_date",
    "awardee_name",
    "funding_agency",
+   "award_base_description",
    "total_obligations",
-   "naics_description",
-   "setaside",
-   "extent_competed_normalized"
+   "owner_attribution_status"
   ],
   "entity_roles": [
    {
     "column": "owner_as_of_transaction_cedar_uid",
     "role": "owner as of the action date"
    }
-  ]
+  ],
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "legislation/native_bills": {
   "entity_uid": "entity_cedar_uids",
@@ -43,17 +42,15 @@
    "kind": "congress_bill"
   },
   "default_columns": [
-   "entity_names",
-   "congress",
    "bill_id",
    "title",
+   "congress",
    "introduced_date",
    "sponsor",
-   "policy_area",
-   "outcome",
-   "latest_action_date"
+   "outcome"
   ],
-  "entity_type": null
+  "entity_type": null,
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "nonprofits/np_orgs": {
   "date": null,
@@ -65,15 +62,16 @@
   "amount": "bmf_revenue_amt",
   "amount_label": "revenue in the IRS Business Master File",
   "default_columns": [
-   "org_name",
    "cedar_spine_canonical_name",
+   "org_name",
+   "EIN",
    "state",
-   "city",
-   "ntee_code",
+   "bmf_tax_period",
    "bmf_revenue_amt",
    "source_url"
   ],
-  "entity_type": "cedar_spine_entity_class"
+  "entity_type": "cedar_spine_entity_class",
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "lobbying/native_entity_lobbying_disclosures": {
   "reviewed": true,
@@ -84,16 +82,14 @@
   "default_columns": [
    "canonical_name",
    "filing_year",
-   "filing_period",
    "client_name",
    "registrant_name",
-   "spend_usd",
-   "spend_basis",
    "filing_type_display",
-   "supersession_status",
+   "spend_usd",
    "filing_url"
   ],
-  "_why": "One row per LDA filing. reviewed 2026-09-05 from the sample header and its ten rows: money is the registrant's reported income or expense (spend_basis says which); superseded filings stay as history and are hidden by default."
+  "_why": "One row per LDA filing. reviewed 2026-09-05 from the sample header and its ten rows: money is the registrant's reported income or expense (spend_basis says which); superseded filings stay as history and are hidden by default.",
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "funding/federal_funding_transactions": {
   "reviewed": true,
@@ -107,15 +103,15 @@
   },
   "default_columns": [
    "canonical_name",
-   "fiscal_year",
    "action_date",
+   "fiscal_year",
    "recipient_name",
-   "awarding_agency_name",
    "cfda_title",
    "obligated_usd",
-   "assistance_type_description"
+   "attribution_status"
   ],
-  "_why": "One row per USAspending assistance transaction. reviewed 2026-09-05 from the sample header and its ten rows: the fiscal year is the federal one, so an October action sits in the next year; negative obligations are de-obligations, kept as recorded. The source link is built from the award key on USAspending, the same pattern the subawards table records in its own source_url."
+  "_why": "One row per USAspending assistance transaction. reviewed 2026-09-05 from the sample header and its ten rows: the fiscal year is the federal one, so an October action sits in the next year; negative obligations are de-obligations, kept as recorded. The source link is built from the award key on USAspending, the same pattern the subawards table records in its own source_url.",
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "federal-register/consultation_events": {
   "reviewed": true,
@@ -123,17 +119,16 @@
   "entity_role": "participant named in the notice",
   "year_basis": "calendar year of the notice date",
   "default_columns": [
+   "notice_date",
    "topic",
    "agency",
-   "notice_date",
-   "consultation_type",
+   "document_role",
    "event_start_date",
-   "comment_deadline",
    "participant_name_as_published",
-   "federal_register_citation",
    "source_url"
   ],
-  "_why": "One row per consultation event and participant. reviewed 2026-09-05 from the sample header and its ten rows: most rows name no single entity, and the card says so rather than hiding them."
+  "_why": "One row per consultation event and participant. reviewed 2026-09-05 from the sample header and its ten rows: most rows name no single entity, and the card says so rather than hiding them.",
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "deals/deals_classified": {
   "reviewed": true,
@@ -145,15 +140,13 @@
    "native_party_canonical_name",
    "Event_Date",
    "Deal_Title",
-   "Deal_Category",
-   "Counterparty_or_Funder",
    "Announced_Value_USD",
    "Value_Type",
-   "Status",
    "Source_1"
   ],
   "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration. Native_Party_Type is the party's type as the source published it, not the register's class.",
-  "entity_type": null
+  "entity_type": null,
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "nagpra/nagpra_notices": {
   "entity_uid": "affiliated_entity_ids",
@@ -164,13 +157,11 @@
   "subject": "institution_name",
   "year_basis": "publication year",
   "default_columns": [
-   "institution_name",
    "publication_date",
    "notice_type",
-   "title",
+   "institution_name",
+   "statute_stage",
    "mni_total_stated",
-   "n_associated_funerary_objects_stated",
-   "repatriation_recipient_entity_ids",
    "source_url"
   ],
   "_why": "One row per Federal Register NAGPRA notice. reviewed 2026-09-05 from the sample header and its ten rows: the record's subject is the holding institution; the Native entities are those the notice finds culturally affiliated (other roles, consulted and recipient, are in the record).",
@@ -200,7 +191,8 @@
     "role": "aboriginal land",
     "list": true
    }
-  ]
+  ],
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "subcontracting/subawards": {
   "reviewed": true,
@@ -209,13 +201,12 @@
   "amount_label": "subaward amount",
   "year_basis": "federal fiscal year",
   "default_columns": [
+   "subaward_date",
    "sub_name",
    "prime_name",
-   "subaward_date",
-   "fiscal_year",
+   "direction",
    "subaward_amount",
-   "description",
-   "prime_top_awarding_agency",
+   "duplicate_status",
    "source_url"
   ],
   "_why": "One row per reported subaward. reviewed 2026-09-05 from the sample header and its ten rows.",
@@ -228,7 +219,8 @@
     "column": "prime_cedar_uid",
     "role": "owner of the prime"
    }
-  ]
+  ],
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "nest/nest_enterprises": {
   "reviewed": true,
@@ -237,16 +229,17 @@
   "date": null,
   "year": null,
   "default_columns": [
-   "enterprise_name",
    "owner_hub_name",
-   "relationship",
+   "enterprise_name",
+   "parent_name",
+   "relation_class",
+   "ownership_percent_stated",
    "sector",
    "status",
-   "city",
-   "state_province",
    "source_url"
   ],
-  "_why": "A register of enterprises, one row each, not events: no row date, so the year filter does not apply. reviewed 2026-09-05 from the sample header and its ten rows."
+  "_why": "A register of enterprises, one row each, not events: no row date, so the year filter does not apply. reviewed 2026-09-05 from the sample header and its ten rows.",
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
  "natural-resources/resource_revenue": {
   "reviewed": true,
@@ -255,13 +248,12 @@
   "amount_label": "amount, as the source states it",
   "year_basis": "calendar year of the payment date",
   "default_columns": [
-   "recipient_entity_name",
    "payment_date",
+   "resource_type",
    "revenue_type",
-   "commodity",
-   "payer_entity_name",
+   "recipient_entity_name",
    "amount_usd",
-   "measurement_status",
+   "aggregation_level",
    "source_url"
   ],
   "_why": "One row per revenue event. reviewed 2026-09-05 from the sample header and its ten rows: measurement_status says whether the amount is an actual payment or something else.",
@@ -270,6 +262,7 @@
     "column": "beneficiary_entity_id",
     "role": "beneficiary"
    }
-  ]
+  ],
+  "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  }
 }

@@ -12,11 +12,11 @@ Firms certified or listed as Native-owned by a certifying authority: TERO vendor
 
 ## One row is
 
-**Today:** One business certified or listed as Native-owned by a certifying authority (no sample is published in this repository yet; the flagship is one of the nineteen samples still to be added).
+One business-directory or certification listing, as today; distinct certifications are not merged into a business snapshot.
 
-**When the specification is applied:** One supported business, enriched by every directory listing whose identity is verified; certification by two authorities is one business, and same-name businesses are never merged without evidence.
+This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
-**Grain change:** Owed (§15): the map for this table is written when its sample lands, after `python scripts/import_cedar_manifest.py --audit` has run (the collection's supporting tables carried withheld names and were struck on 2026-09-05).
+**Note:** The 53-column baseline is the builder's declaration, not a verified public export, and no sample is in this repository. The field-by-field decisions are written when the sample lands, after `python scripts/import_cedar_manifest.py --audit` has run; the publication restrictions apply to every field before any preview, download, search index or Cedar answer.
 
 ## Key identifiers
 
@@ -34,7 +34,7 @@ Firms certified or listed as Native-owned by a certifying authority: TERO vendor
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uid`, `cedar_entity_name`, `cedar_entity_type` and `cedar_entity_role`. `cedar_entity_role` is `certifying_authority`: the nation or office that lists or certifies the business, never its owner. Individual Native ownership is not tribal-government ownership.
+The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`. `cedar_entity_role` is `certifying_authority`: the nation or office that lists or certifies the business, never its owner. Individual Native ownership is not tribal-government ownership.
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -47,24 +47,37 @@ Multiple directory listings enrich one business record where identity is verifie
 The field dictionary is written when this collection's flagship sample lands in the repository and its field map is decided. The approved opening block and the specification's field list for it:
 
 - `cedar_uid`
-- `cedar_entity_name`: The certifying authority's register name.
-- `cedar_entity_type`: The certifying authority's register class.
-- `cedar_entity_role`: A certifying nation's uid is an associated link labelled certifying_authority, not owner.
-- `business_id`: The business's own id; an existing business Cedar uid only where the identity system already assigns one.
-- `business_name`: Withheld where the publication policy withholds it; never reintroduced through aliases, source text or fallback fields.
-- `trade_name`: Where publishable.
-- `business_category`: Normalized across directories, with the issuing authority's own terminology kept beside it.
-- `services`
-- `city`: Publishable business location.
+- `canonical_name`: The certifying authority's register name.
+- `entity_class`: The certifying authority's register class.
+- `cedar_entity_role`: certifying_authority, never owner; a missing business identity is never filled with the nation's uid.
+- `business_source_id`
+- `business_name`
+- `business_entity_id`
+- `certifying_authority_entity_id`
+- `certifying_authority_name`
+- `program_name`
+- `directory_type`
+- `assertion_class`
+- `identity_scope`
+- `identity_claim_text`
+- `ownership_percent`
+- `ownership_threshold_min`
+- `certification_number`
+- `certification_tier`
+- `certification_start`
+- `certification_expiration`
+- `business_license_number`
+- `service_category`
+- `naics_code`
+- `city`
 - `state`
-- `contact_channels`: Publishable channels only.
-- `listing_authority`: The directory or certifying authority.
-- `program`: The certification or preference program, in the authority's terms.
-- `certification_status`
-- `certification_date`: Where stated.
-- `certification_expiry_date`: Where stated.
-- `observation_date`: When Cedar observed the listing; not historical coverage.
+- `source_edition`
+- `source_last_updated`
+- `first_seen`
+- `last_seen`
+- `is_current`
 - `source_url`
+- `research_note`: A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time.
 
 ## Missing values
 
@@ -92,22 +105,34 @@ A blank is never zero and never an invented date. Beyond the column-level rules 
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each ships blank-free, not blank: it is absent until it exists.
+Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
 
-- `business_id` (pending:sample): The business's own id; an existing business Cedar uid only where the identity system already assigns one.
-- `business_name` (pending:sample): Withheld where the publication policy withholds it; never reintroduced through aliases, source text or fallback fields.
-- `trade_name` (pending:sample): Where publishable.
-- `business_category` (pending:sample): Normalized across directories, with the issuing authority's own terminology kept beside it.
-- `services` (pending:sample): see the field map
-- `city` (pending:sample): Publishable business location.
+- `business_source_id` (pending:sample): see the field map
+- `business_name` (pending:sample): see the field map
+- `business_entity_id` (pending:sample): see the field map
+- `certifying_authority_entity_id` (pending:sample): see the field map
+- `certifying_authority_name` (pending:sample): see the field map
+- `program_name` (pending:sample): see the field map
+- `directory_type` (pending:sample): see the field map
+- `assertion_class` (pending:sample): see the field map
+- `identity_scope` (pending:sample): see the field map
+- `identity_claim_text` (pending:sample): see the field map
+- `ownership_percent` (pending:sample): see the field map
+- `ownership_threshold_min` (pending:sample): see the field map
+- `certification_number` (pending:sample): see the field map
+- `certification_tier` (pending:sample): see the field map
+- `certification_start` (pending:sample): see the field map
+- `certification_expiration` (pending:sample): see the field map
+- `business_license_number` (pending:sample): see the field map
+- `service_category` (pending:sample): see the field map
+- `naics_code` (pending:sample): see the field map
+- `city` (pending:sample): see the field map
 - `state` (pending:sample): see the field map
-- `contact_channels` (pending:sample): Publishable channels only.
-- `listing_authority` (pending:sample): The directory or certifying authority.
-- `program` (pending:sample): The certification or preference program, in the authority's terms.
-- `certification_status` (pending:sample): see the field map
-- `certification_date` (pending:sample): Where stated.
-- `certification_expiry_date` (pending:sample): Where stated.
-- `observation_date` (pending:sample): When Cedar observed the listing; not historical coverage.
+- `source_edition` (pending:sample): see the field map
+- `source_last_updated` (pending:sample): see the field map
+- `first_seen` (pending:sample): see the field map
+- `last_seen` (pending:sample): see the field map
+- `is_current` (pending:sample): see the field map
 - `source_url` (pending:sample): see the field map
 
 ## Release, citation and method

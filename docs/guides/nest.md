@@ -12,11 +12,9 @@ Enterprises (subsidiaries, holding companies, joint ventures, affiliates) and th
 
 ## One row is
 
-**Today:** One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it.
+One enterprise-relationship, as the producer declares it.
 
-**When the specification is applied:** One enterprise-owner relationship, with an effective period where known; businesses are counted by distinct enterprise_id, and an enterprise with several owners shows each.
-
-**Grain change:** Owed (§13): ownership effective dates separated from observation dates; multiple owners visible (nest_enterprise_relations.csv holds the assertions); duplicate observations merged only on confirmed identity.
+This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
 ## Key identifiers
 
@@ -30,11 +28,11 @@ Enterprises (subsidiaries, holding companies, joint ventures, affiliates) and th
 
 ## Time and geography
 
-`first_observed_year` and `last_observed_year` are when Cedar observed the relationship, not when it began or ended; `ownership_effective_start` and `ownership_effective_end` (owed) will carry the effective period where a source states it. `city` and `state_province` are the enterprise's business location.
+`first_observed_year` and `last_observed_year` are when Cedar observed the relationship, not when it began or ended; `ownership_effective_start` and `ownership_effective_end` (owed) will carry the effective period where a source states it. `city` and `state` are the enterprise's business location.
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uid`, `cedar_entity_name`, `cedar_entity_type` and `cedar_entity_role`. `cedar_entity_role` is `ownership` or `affiliation`, from the relationship class; `relationship` is the finer type (subsidiary, joint venture, management). `parent_is_hub` says whether the immediate parent is the Native entity itself; `hierarchy_level` is the depth below it. `parent_corroboration` says whether the parent FPDS declares agrees, and a contested affiliation ships as contested, never as verified ownership; `fpds_declared_parent_name` is kept as evidence.
+The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`. `cedar_entity_role` is read from `relationship_type` (ownership or affiliation), and `relationship_as_recorded` keeps the source's own words. `parent_enterprise_id` and `parent_name` name the immediate parent enterprise; a blank parent enterprise means the parent is the Native entity itself. `federal_parent_corroboration` says whether the parent FPDS declares agrees, and a contested affiliation ships as contested, never as verified ownership; `reported_federal_parent_name` is kept as evidence. The enterprise's own identifier is `enterprise_id`; where an enterprise is itself a register entity, that cross-reference is adjudicated before it ships rather than published as an alias.
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -44,55 +42,52 @@ A relationship is re-observed on each source edition (`source_edition_date`). Du
 
 ## Field dictionary
 
-The approved header, in order (33 columns, of which 2 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros.
+The approved header, in the owner's exact order (30 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
-| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 2 | `cedar_entity_name` (was `owner_hub_name`) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 3 | `cedar_entity_type` (was `owner_hub_entity_class`) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 4 | `cedar_entity_role` (was `relation_class`) | Entity role | Why the entity is on this row: read from relationship_type: owner, or affiliated entity, of the enterprise. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 2 | `canonical_name` (was `owner_hub_name`) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
+| 3 | `entity_class` (was `owner_hub_entity_class`) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
+| 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: read from relationship_type. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 5 | `enterprise_id` | Enterprise ID | Cedar's identifier for the enterprise. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `enterprise_name` | Enterprise | The enterprise's name. | text | the source states none, or not applicable to this row |
-| 7 | `name_variants` (was `name_variants_observed`) | Also seen as | Other spellings of the name in the sources, separated by \|. | list, separated by | | the source states none, or not applicable to this row |
-| 8 | `owner_class` | Owner kind | The owner's kind in the collection's own terms: tribal government, ANC, NHO. | text | the source states none, or not applicable to this row |
-| 9 | `parent_enterprise_id` | Parent enterprise ID | The immediate parent enterprise's ID, where the parent is an enterprise rather than the Native entity itself. | identifier, as text | the source states none, or not applicable to this row |
-| 10 | `parent_name` | Parent | The immediate parent, which may itself be an enterprise. | text | the source states none, or not applicable to this row |
-| 11 | `parent_is_hub` | Parent is the Native entity (yes or no) | Whether the immediate parent is the Native entity itself rather than another enterprise. | yes or no (1 or 0) | not stated; 0 is no |
-| 12 | `hierarchy_level` | Level | How many steps below the owner the enterprise sits. | number | the source states none, or not applicable to this row |
-| 13 | `relationship` | Relationship | How the enterprise relates to the owner: wholly owned, subsidiary, affiliated, unspecified. | text | the source states none, or not applicable to this row |
-| 14 | `ownership_percent_stated` | Ownership share | The percentage owned, where a source states it. | text | the source states none, or not applicable to this row |
-| 15 | `ownership_effective_start` | ownership effective start | When the ownership began, where a source states it. | — | owed: not in the file until the terminal builds it |
-| 16 | `ownership_effective_end` | ownership effective end | When it ended, where a source states it. | — | owed: not in the file until the terminal builds it |
-| 17 | `industry` (was `sector`) | Sector | The enterprise's sector. | text | the source states none, or not applicable to this row |
-| 18 | `operating_status` (was `status`) | Status | Operating, dissolved, or unknown. | text | the source states none, or not applicable to this row |
-| 19 | `city` | City | Where the enterprise is. | text | the source states none, or not applicable to this row |
-| 20 | `state_province` | State | Its state or province. | text | the source states none, or not applicable to this row |
-| 21 | `uei` | UEI | Its federal Unique Entity ID, where one is published. | identifier, as text | the source states none, or not applicable to this row |
-| 22 | `cage_code` | CAGE code | The enterprise's CAGE code, where known. | identifier, as text | the source states none, or not applicable to this row |
-| 23 | `in_federal_contracting` | Federal contractor | Whether the enterprise appears in federal contracting records (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 24 | `first_observed_year` | First seen | The earliest year a source names the enterprise. | year | the source states no date |
-| 25 | `last_observed_year` | Last seen | The latest. | year | the source states no date |
-| 26 | `evidence_class` | Kind of evidence | What kind of source establishes the relationship (the owner's own list, an audited report, a resolver). | text | the source states none, or not applicable to this row |
-| 27 | `evidence_human_reviewed` | Reviewed by a person | Whether a person reviewed the evidence (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 28 | `source_count` (was `n_distinct_sources`) | Sources | How many distinct sources support the relationship. | number | the source states none, or not applicable to this row |
-| 29 | `parent_corroboration` (was `fpds_parent_corroboration`) | Federal records agree | Whether the parent the enterprise declares in federal records agrees with this owner. | text | the source states none, or not applicable to this row |
-| 30 | `fpds_declared_parent_name` | Parent declared in FPDS | The parent the enterprise declares in federal contracting records, kept as evidence beside Cedar's relationship. | text | the source states none, or not applicable to this row |
-| 31 | `source_document` | Source document | The document, where the source is a file. | text | the source states none, or not applicable to this row |
-| 32 | `source_edition_date` | Source date | The date of that source. | date (YYYY-MM-DD) | the source states no date |
-| 33 | `source_url` | Source | Where the relationship is stated. | web address | the source states none, or not applicable to this row |
+| 7 | `alternative_names` (was `name_variants_observed`) | Also seen as | Other spellings of the name in the sources, separated by \|. | list, separated by | | the source states none, or not applicable to this row |
+| 8 | `parent_enterprise_id` | Parent enterprise ID | The immediate parent enterprise's ID, where the parent is an enterprise rather than the Native entity itself. | identifier, as text | the source states none, or not applicable to this row |
+| 9 | `parent_name` | Parent | The immediate parent, which may itself be an enterprise. | text | the source states none, or not applicable to this row |
+| 10 | `relationship_type` (was `relation_class`) | Entity role | Why the entity is on this row: read from relationship_type: owner, or affiliated entity, of the enterprise. | text | the source states none, or not applicable to this row |
+| 11 | `relationship_as_recorded` | Relationship as recorded | The relationship in the source's own words, beside the normalized relationship type. | text | the source states none, or not applicable to this row |
+| 12 | `ownership_percent` (was `ownership_percent_stated`) | Ownership share | The percentage owned, where a source states it. | text | the source states none, or not applicable to this row |
+| 13 | `sector` | Sector | The enterprise's sector. | text | the source states none, or not applicable to this row |
+| 14 | `operating_status` (was `status`) | Status | Operating, dissolved, or unknown. | text | the source states none, or not applicable to this row |
+| 15 | `city` | City | Where the enterprise is. | text | the source states none, or not applicable to this row |
+| 16 | `state` (was `state_province`) | State | Its state or province. | text | the source states none, or not applicable to this row |
+| 17 | `uei` | UEI | Its federal Unique Entity ID, where one is published. | identifier, as text | the source states none, or not applicable to this row |
+| 18 | `cage_code` | CAGE code | The enterprise's CAGE code, where known. | identifier, as text | the source states none, or not applicable to this row |
+| 19 | `in_federal_contracting` | Federal contractor | Whether the enterprise appears in federal contracting records (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
+| 20 | `first_observed_year` | First seen | The earliest year a source names the enterprise. | year | the source states no date |
+| 21 | `last_observed_year` | Last seen | The latest. | year | the source states no date |
+| 22 | `source_count` (was `n_distinct_sources`) | Sources | How many distinct sources support the relationship. | number | the source states none, or not applicable to this row |
+| 23 | `relationship_evidence_status` (was `evidence_class`) | Kind of evidence | What kind of source establishes the relationship (the owner's own list, an audited report, a resolver). | text | the source states none, or not applicable to this row |
+| 24 | `reported_federal_parent_name` (was `fpds_declared_parent_name`) | Parent declared in FPDS | The parent the enterprise declares in federal contracting records, kept as evidence beside Cedar's relationship. | text | the source states none, or not applicable to this row |
+| 25 | `federal_parent_corroboration` (was `fpds_parent_corroboration`) | Federal records agree | Whether the parent the enterprise declares in federal records agrees with this owner. | text | the source states none, or not applicable to this row |
+| 26 | `source_document` | Source document | The document, where the source is a file. | text | the source states none, or not applicable to this row |
+| 27 | `source_edition_date` | Source date | The date of that source. | date (YYYY-MM-DD) | the source states no date |
+| 28 | `source_url` | Source | Where the relationship is stated. | web address | the source states none, or not applicable to this row |
+| 29 | `additional_source_urls` | Additional source URLs | Further source URLs, as a JSON list; blank until the sources table supplies them. | JSON array (one list; aligned with its neighbours where the definition says so; null for an unresolved member) | the source states none, or not applicable to this row |
+| 30 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 
 A blank is never zero and never an invented date. Beyond the column-level rules above:
 
-- A blank `ownership_percent_stated` means the source states no percentage.
+- A blank `ownership_percent` means the source states no percentage.
 - A blank `uei` means the owner published none; Cedar does not pad with plausible matches.
 
 ## Limitations
 
 - The file is not a census of Native enterprises; it holds what owners publish and what corroborates it.
-- A firm serving a tribe is not thereby owned by it; `evidence_class` and `evidence_human_reviewed` say what supports each row.
+- A firm serving a tribe is not thereby owned by it; `relationship_evidence_status` and `evidence_human_reviewed` say what supports each row.
 - Historical existence and continuous ownership are not inferred from a current page.
 
 ## Suitable analyses
@@ -109,10 +104,11 @@ A blank is never zero and never an invented date. Beyond the column-level rules 
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each ships blank-free, not blank: it is absent until it exists.
+Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):
 
-- `ownership_effective_start` (pending:relations): When the ownership began, where a source states it.
-- `ownership_effective_end` (pending:relations): When it ended, where a source states it.
+- `enterprise_existing_cedar_uid`: the enterprise as a register entity in its own right, distinct from its owner (adjudicate).
+
+Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 

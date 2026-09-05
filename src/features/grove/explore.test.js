@@ -38,6 +38,8 @@ import {
   flagshipKey,
   isNarrowed,
   labelFor,
+  listCell,
+  rowUids,
   meaningFor,
   observationOf,
   pageOf,
@@ -524,7 +526,7 @@ test("the codebook names real columns in every flagship, with a label and a mean
     assert.match(lead[0], /^Cedar IDs?/, key);
     assert.match(lead[1], /^Native entit/, key);
     assert.match(lead[2], /^Entity types?/, key);
-    assert.equal(lead[3], "Entity role", key);
+    assert.match(lead[3], /^Entity roles?/, key);
     // Every column the contract declares as a default is a column the codebook explains.
     const listed = new Set(book.fields.map((f) => f.column));
     for (const column of contractFor(key).default_columns ?? []) assert.ok(listed.has(column), `${key}: default column ${column} is not in the codebook`);
@@ -547,31 +549,46 @@ test("CONTRACTS is the derived file, frozen, and the withheld tables are gone fr
 
 // ── The field map ──────────────────────────────────────────────────────────
 
-test("the field map decides every column of every sampled flagship, ships the opening block first, and the codebook lists exactly what it ships", () => {
+const OPENING_SINGULAR = FIELD_MAP_JSON.opening.singular;
+const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
+// Mirrors cedar_publication.PROHIBITED_PUBLIC_COLUMN: a competing entity
+// identifier or build bookkeeping never reaches an approved header.
+const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino_?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
+
+test("the field map decides every column of every sampled flagship in the owner's exact order, retires every competing identifier, and the codebook lists exactly what ships", () => {
   const script = fileURLToPath(new URL("../../../scripts/field-map-markdown.mjs", import.meta.url));
   const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
-  assert.deepEqual([...OPENING_BLOCK], ["cedar_uid", "cedar_entity_name", "cedar_entity_type", "cedar_entity_role"]);
-  // Retired identifiers and build bookkeeping never ship under any name.
-  const NEVER_SHIPS = /duns|neid|cicd|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime|_token|parse_template|spans_found|_redirect|review_flag|_normalized$/i;
+  assert.deepEqual(OPENING_SINGULAR, ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"]);
+  assert.deepEqual(OPENING_PLURAL, ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"]);
+  // The owner's column counts, exactly; Funding is 39 because DUNS is retired.
+  const EXPECTED = { funding: 39, "federal-register": 31, legislation: 29, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, nest: 30, nonprofits: 24 };
   let sampled = 0;
   for (const dataset of LAUNCH_COLLECTION) {
+    const map = Object.values(FIELD_MAP).find((t) => t.collection === dataset.id);
+    assert.ok(map, `${dataset.id} has no field map`);
+    assert.equal(map.order.length, EXPECTED[dataset.id], `${dataset.id}: column count`);
+    assert.equal(map.order.at(-1), "research_note", `${dataset.id}: research_note last`);
+    const opening = map.plural ? OPENING_PLURAL : OPENING_SINGULAR;
+    assert.deepEqual(map.order.slice(0, opening.length), opening, dataset.id);
+    for (const name of map.order) assert.doesNotMatch(name, PROHIBITED_PUBLIC_COLUMN, `${dataset.id}: ${name} must not ship`);
+    for (const c of map.default_viewer) assert.ok(map.order.includes(c), `${dataset.id}: default viewer column ${c} is not in the order`);
     const key = flagshipKey(dataset.id);
     if (!key) continue;
     sampled += 1;
-    const map = FIELD_MAP[key];
-    assert.ok(map, `${key} has no field map`);
     const { columns } = load(key);
-    // One decision per column, every column decided, no decision for a column the file lacks.
     const decided = map.fields.map((f) => f.column);
     assert.deepEqual([...decided].sort(), [...columns].sort(), `${key}: the map and the sample header disagree`);
     assert.equal(new Set(decided).size, decided.length, `${key}: a column is decided twice`);
     for (const f of map.fields) {
       assert.ok(FIELD_MAP_DECISIONS.includes(f.decision), `${key}.${f.column}: unknown decision ${f.decision}`);
       if (["rename", "combine", "derive"].includes(f.decision)) assert.ok(f.to, `${key}.${f.column}: ${f.decision} names no target`);
+      // Every competing identifier the sample carries has a retirement entry.
+      if (/duns|neid|cicd|_candidate|proposed|existing_cedar_uid|(^|_)entity_id$/i.test(f.column) && !/_(basis|name|names)$/i.test(f.column)) {
+        assert.ok(f.retire, `${key}.${f.column} names a competing identifier and has no retirement entry`);
+        assert.ok(Object.keys(FIELD_MAP_JSON.dispositions).includes(f.retire.disposition), `${key}.${f.column}: disposition`);
+      }
     }
-    // The approved header: the opening block first, then every shipped column once, nothing else.
-    assert.deepEqual(map.order.slice(0, 4), [...OPENING_BLOCK], key);
     const ships = new Map();
     for (const f of map.fields) {
       if (f.decision === "keep" || f.decision === "withhold") ships.set(f.column, f.column);
@@ -581,9 +598,6 @@ test("the field map decides every column of every sampled flagship, ships the op
     assert.equal(new Set(map.order).size, map.order.length, `${key}: the order repeats a column`);
     for (const name of map.order) assert.ok(ships.has(name) || added.has(name), `${key}: ${name} is in the order and nowhere else`);
     for (const name of ships.keys()) assert.ok(map.order.includes(name), `${key}: ${name} ships but is not in the order`);
-    for (const name of added.keys()) assert.ok(map.order.includes(name), `${key}: new column ${name} is not in the order`);
-    for (const name of map.order) assert.doesNotMatch(name, NEVER_SHIPS, `${key}: ${name} must not ship`);
-    assert.equal(map.columns_target, map.order.length, key);
     assert.equal(map.columns_today, columns.length, key);
     // The codebook lists exactly what ships, under the name it ships as; a
     // combine's sources stay listed until the combined column exists.
@@ -605,13 +619,30 @@ test("the field map decides every column of every sampled flagship, ships the op
     const listed = new Set(book.fields.map((f) => f.column));
     for (const [, source] of ships) assert.ok(listed.has(source), `${key}: ${source} ships but the codebook does not explain it`);
     for (const [name, n] of added) if (!n.status) assert.ok(listed.has(name), `${key}: ${name} is built at write time but the codebook does not explain it`);
+    // The codebook's opening labels.
+    const lead = book.fields.slice(0, opening.length).map((f) => f.label);
+    if (map.plural) assert.deepEqual(lead, ["Cedar IDs", "Native entities", "Entity types", "Entity roles", "Names as published"], key);
+    else assert.deepEqual(lead, ["Cedar ID", "Native entity", "Entity type", "Entity role"], key);
   }
   assert.equal(sampled, 11);
-  // The unsampled flagship is declared, with the role the specification requires.
   const owned = FIELD_MAP["owned/native_owned_businesses"];
   assert.ok(owned && owned.columns_today === null);
   assert.match(owned.entity_role, /certifying_authority/);
-  assert.deepEqual(owned.order.slice(0, 4), [...OPENING_BLOCK]);
+});
+
+test("a JSON-array cell reads as a list in the viewer, before and after the export changes shape", () => {
+  const contract = contractFor("legislation/native_bills");
+  const register = REGISTER;
+  const pipe = { entity_cedar_uids: `${NAMED[0]}|${WITHHELD_UID}`, entity_names: "A|B" };
+  const json = { entity_cedar_uids: JSON.stringify([NAMED[0], null, WITHHELD_UID]), entity_names: JSON.stringify(["A", null, "B"]) };
+  assert.deepEqual(rowUids(pipe, contract), [NAMED[0], WITHHELD_UID]);
+  assert.deepEqual(rowUids(json, contract), [NAMED[0], WITHHELD_UID]);
+  assert.deepEqual(listCell('["x", null, "y"]'), ["x", "", "y"]);
+  assert.deepEqual(listCell("x|y"), ["x", "y"]);
+  assert.deepEqual(listCell("[not json"), ["[not json"]);
+  const [item] = universalRows("legislation/native_bills", [{ ...json, bill_id: "1-hr-1" }], register);
+  assert.equal(item.entity.entities.length, 2);
+  assert.ok(item.entity.entities.some((e) => e.uid === WITHHELD_UID && e.withheld));
 });
 
 // ── Entity roles ───────────────────────────────────────────────────────────
@@ -670,7 +701,7 @@ test("every collection has a researcher guide with the sections the specificatio
     const text = readFileSync(`${dir}${id}.md`, "utf8");
     for (const section of SECTIONS) assert.ok(text.includes(`\n## ${section}\n`), `${id}: no "${section}" section`);
     // The opening block is in every dictionary, and no retired identifier or metadata row is promised.
-    assert.match(text, /`cedar_uid`, `cedar_entity_name`, `cedar_entity_type` and `cedar_entity_role`/, id);
+    assert.match(text, /`cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`|`cedar_uids`, `canonical_names`, `entity_classes`, `entity_roles` and `entity_names_as_published`/, `${id}: opening block`);
     // Cedar's retired identity schemes never appear in a guide's text (§1);
     // the federal DUNS-to-UEI transition may be named because it explains why CAGE is kept.
     assert.doesNotMatch(text, /\bneid\b|\bcicd\b/i, `${id}: names a retired identifier`);

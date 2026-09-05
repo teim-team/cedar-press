@@ -12,11 +12,9 @@ Federal advocacy by Native entities. The flagship is one row per Lobbying Disclo
 
 ## One row is
 
-**Today:** One Lobbying Disclosure Act filing whose client resolves to a Native entity.
+One filing or activity record, as today; other source families join under activity_type only as they are actually sourced.
 
-**When the specification is applied:** One advocacy activity, with activity_type saying which source family it is; LDA filings are the first family, one row per filing, and other documented families (consultations, testimony, ex parte, comments) join under the same schema only as they are obtained and supported.
-
-**Grain change:** Owed (§9): the activity schema over the other source families the collection already holds in the workspace (hearing_appearances, ferc_ex_parte_*, oira_meetings, nrc_public_meetings, advocacy_passthrough). Each family is evaluated against the common schema before it ships; a lead is not coverage.
+This pass changes columns, never rows: no aggregation, deduplication, change of publication eligibility or reassignment of Cedar IDs.
 
 ## Key identifiers
 
@@ -30,11 +28,11 @@ Federal advocacy by Native entities. The flagship is one row per Lobbying Disclo
 
 ## Time and geography
 
-`filing_year` and `filing_period` are the reporting period; `posted_date` is when the filing was posted. Client and registrant states are the parties' registered states, not where the lobbying happened.
+`reporting_year` and `reporting_period` are the reporting period; `posted_date` is when the filing was posted. Client and registrant states are the parties' registered states, not where the lobbying happened.
 
 ## Entity relationships
 
-The opening block of every row is `cedar_uid`, `cedar_entity_name`, `cedar_entity_type` and `cedar_entity_role`. `cedar_entity_role` is `client`: the Native entity is the filing's client, resolved to the register with `attribution_method` and `match_confidence`. The client's own name stays in `client_name`. A withdrawn attribution (`attribution_withdrawn` = 1) is a real filing that stays in the file with its Cedar link withdrawn and the reason stated; its spend is not Native lobbying.
+The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` and `cedar_entity_role`. `cedar_entity_role` is `client`: the Native entity is the filing's client, resolved to the register with `attribution_method` and `match_confidence`. The client's own name stays in `client_name`. A withdrawn attribution (`attribution_withdrawn` = 1) is a real filing that stays in the file with its Cedar link withdrawn and the reason stated; its spend is not Native lobbying.
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -44,45 +42,48 @@ Amendments supersede the filings they amend. `filing_status` is current or super
 
 ## Field dictionary
 
-The approved header, in order (35 columns, of which 1 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros.
+The approved header, in the owner's exact order (38 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
-| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the Native entity this record is attributed to. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 2 | `cedar_entity_name` (was `canonical_name`) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) are kept in their own columns. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 3 | `cedar_entity_type` (was `entity_type`) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 2 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
+| 3 | `entity_class` (was `entity_type`) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
 | 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: client. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
-| 5 | `activity_id` | activity id | A collection-wide activity identifier (lda:<filing_id> for this family) so families share one key space. | — | owed: not in the file until the terminal builds it |
-| 6 | `activity_type` | Activity type | Which kind of documented advocacy the row is. Every row today is an LDA filing; other source families join under the same schema as they are obtained. | text | the source states none, or not applicable to this row |
-| 7 | `filing_id` (was `filing_uuid`) | Filing ID | The filing's identifier in the Senate LDA database. | identifier, as text | the source states none, or not applicable to this row |
-| 8 | `client_name` | Client | The client as the filing names it (the Native entity, in its own spelling). | text | the source states none, or not applicable to this row |
-| 9 | `client_id` | Client ID | The client's identifier in the Lobbying Disclosure Act database. | identifier, as text | the source states none, or not applicable to this row |
-| 10 | `client_state` | Client state | The client's state. | text | the source states none, or not applicable to this row |
-| 11 | `registrant_name` | Registrant | The lobbying firm or, for a self-filer, the client itself. | text | the source states none, or not applicable to this row |
-| 12 | `registrant_id` | Registrant ID | The registrant's identifier in the Lobbying Disclosure Act database. | identifier, as text | the source states none, or not applicable to this row |
-| 13 | `registrant_state` | Registrant state | The registrant's state. | text | the source states none, or not applicable to this row |
-| 14 | `self_filed` | Self-filed | Whether the client filed for itself rather than through a firm (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 15 | `filing_type` (was `filing_type_display`) | Filing type | Registration, quarterly or year-end report, amendment, termination. | text | the source states none, or not applicable to this row |
-| 16 | `filing_year` | Filing year | The year the filing covers. | year | the source states no date |
-| 17 | `filing_period` | Period | Which reporting period of the year. | text | the source states none, or not applicable to this row |
-| 18 | `posted_date` (was `dt_posted`) | Posted | When the filing was posted. | date and time | the source states no date |
-| 19 | `termination_date` | Termination date | When the registration was terminated, where the filing is a termination. | text | the source states none, or not applicable to this row |
-| 20 | `amount_usd` (was `spend_usd`) | Reported spend | Whichever of the two the filing reports; the basis column says which. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
-| 21 | `amount_basis` (was `spend_basis`) | Basis of spend | Income, expenses, or none reported. | text | the source states none, or not applicable to this row |
-| 22 | `income_usd` | Income reported | What the registrant reported receiving from the client this period. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
-| 23 | `expenses_usd` | Expenses reported | What a self-filer reported spending this period. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
-| 24 | `lobbying_issues_codes` | Issue codes | The LDA issue area codes on the filing. | text | the source states none, or not applicable to this row |
-| 25 | `specific_issues_text` | Specific issues | What the filing says was lobbied on. | text | the source states none, or not applicable to this row |
-| 26 | `government_entities` | Government entities contacted | Agencies and chambers the filing lists, separated by \|. | list, separated by | | the source states none, or not applicable to this row |
-| 27 | `affiliated_organizations` | Affiliated organizations | Organizations the filing lists as affiliated with the client. | text | the source states none, or not applicable to this row |
-| 28 | `filing_status` (was `supersession_status`) | Version status | Whether a later amendment replaces this filing. | text | the source states none, or not applicable to this row |
-| 29 | `superseded_by_filing_id` (was `superseded_by_filing_uuid`) | Replaced by | The filing that replaces this one, where one does. | identifier, as text | the source states none, or not applicable to this row |
-| 30 | `attribution_withdrawn` | Attribution withdrawn | Whether Cedar withdrew its link between this filing and the entity after review (yes or no). A withdrawn filing stays in the file; its spend is not counted as the entity's. | yes or no (1 or 0) | not stated; 0 is no |
-| 31 | `attribution_withdrawn_reason` | Why withdrawn | The reason recorded for the withdrawal. | text | the source states none, or not applicable to this row |
-| 32 | `attribution_method` | Attribution method | How the client was linked to the Native entity (an identifier, or a name with corroboration). | text | the source states none, or not applicable to this row |
-| 33 | `match_confidence` | Match confidence | Cedar's confidence that the client is this entity. | text | the source states none, or not applicable to this row |
-| 34 | `source_system` | Source system | Where the record came from: the Senate and House LDA database. | text | the source states none, or not applicable to this row |
-| 35 | `source_url` (was `filing_url`) | Source | The filing on lda.senate.gov. | web address | the source states none, or not applicable to this row |
+| 5 | `activity_id` | Activity ID | A stable, source-based identifier for the activity (lda:<filing uuid> for a filing). | text | the source states none, or not applicable to this row |
+| 6 | `activity_type` | Activity type | Which kind of documented advocacy the row is. Every row today is an LDA filing; other source families populate other values only as they are actually sourced. | text | the source states none, or not applicable to this row |
+| 7 | `source_record_id` (was `filing_uuid`) | Filing ID | The filing's identifier in the Senate LDA database. | identifier, as text | the source states none, or not applicable to this row |
+| 8 | `reporting_year` (was `filing_year`) | Filing year | The year the filing covers. | year | the source states no date |
+| 9 | `reporting_period` (was `filing_period`) | Period | Which reporting period of the year. | text | the source states none, or not applicable to this row |
+| 10 | `activity_date` (was `dt_posted`) | Posted | When the filing was posted. | date and time | the source states no date |
+| 11 | `activity_title` (was `filing_type_display`) | Filing type | Registration, quarterly or year-end report, amendment, termination. | text | the source states none, or not applicable to this row |
+| 12 | `client_name` | Client | The client as the filing names it (the Native entity, in its own spelling). | text | the source states none, or not applicable to this row |
+| 13 | `client_id` | Client ID | The client's identifier in the Lobbying Disclosure Act database. | identifier, as text | the source states none, or not applicable to this row |
+| 14 | `client_state` | Client state | The client's state. | text | the source states none, or not applicable to this row |
+| 15 | `registrant_name` | Registrant | The lobbying firm or, for a self-filer, the client itself. | text | the source states none, or not applicable to this row |
+| 16 | `registrant_id` | Registrant ID | The registrant's identifier in the Lobbying Disclosure Act database. | identifier, as text | the source states none, or not applicable to this row |
+| 17 | `registrant_state` | Registrant state | The registrant's state. | text | the source states none, or not applicable to this row |
+| 18 | `self_filed` | Self-filed | Whether the client filed for itself rather than through a firm (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
+| 19 | `participant_name` | Participant | The participant as the source names it, for consultations, testimony and meetings; blank for a filing. | text | the source states none, or not applicable to this row |
+| 20 | `participant_role` | Participant role | The participant's role, for consultations, testimony and meetings; blank for a filing. | text | the source states none, or not applicable to this row |
+| 21 | `government_bodies` (was `government_entities`) | Government entities contacted | Agencies and chambers the filing lists, separated by \|. | list, separated by | | the source states none, or not applicable to this row |
+| 22 | `issue_codes` (was `lobbying_issues_codes`) | Issue codes | The LDA issue area codes on the filing. | text | the source states none, or not applicable to this row |
+| 23 | `issues_text` (was `specific_issues_text`) | Specific issues | What the filing says was lobbied on. | text | the source states none, or not applicable to this row |
+| 24 | `affiliated_organizations` | Affiliated organizations | Organizations the filing lists as affiliated with the client. | text | the source states none, or not applicable to this row |
+| 25 | `income_usd` | Income reported | What the registrant reported receiving from the client this period. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
+| 26 | `expenses_usd` | Expenses reported | What a self-filer reported spending this period. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
+| 27 | `reported_amount_usd` (was `spend_usd`) | Reported spend | Whichever of the two the filing reports; the basis column says which. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
+| 28 | `amount_basis` (was `spend_basis`) | Basis of spend | Income, expenses, or none reported. | text | the source states none, or not applicable to this row |
+| 29 | `termination_date` | Termination date | When the registration was terminated, where the filing is a termination. | text | the source states none, or not applicable to this row |
+| 30 | `supersession_status` | Version status | Whether a later amendment replaces this filing. | text | the source states none, or not applicable to this row |
+| 31 | `is_superseded` | Superseded (yes or no) | Whether a later filing replaces this one; the default view counts current filings only. | yes or no (1 or 0) | not stated; 0 is no |
+| 32 | `superseded_by_record_id` (was `superseded_by_filing_uuid`) | Replaced by | The filing that replaces this one, where one does. | identifier, as text | the source states none, or not applicable to this row |
+| 33 | `supersession_group_id` | Supersession group | The group of filings (an original and its amendments) this filing belongs to. | identifier, as text | the source states none, or not applicable to this row |
+| 34 | `attribution_withdrawn` | Attribution withdrawn | Whether Cedar withdrew its link between this filing and the entity after review (yes or no). A withdrawn filing stays in the file; its spend is not counted as the entity's. | yes or no (1 or 0) | not stated; 0 is no |
+| 35 | `attribution_withdrawn_reason` | Why withdrawn | The reason recorded for the withdrawal. | text | the source states none, or not applicable to this row |
+| 36 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
+| 37 | `source_url` (was `filing_url`) | Source | The filing on lda.senate.gov. | web address | the source states none, or not applicable to this row |
+| 38 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
 
 ## Missing values
 
@@ -112,9 +113,7 @@ A blank is never zero and never an invented date. Beyond the column-level rules 
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each ships blank-free, not blank: it is absent until it exists.
-
-- `activity_id` (derived:filing_id): A collection-wide activity identifier (lda:<filing_id> for this family) so families share one key space.
+Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
