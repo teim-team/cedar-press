@@ -16,7 +16,7 @@ export default function PressPrioritiesBlock({ signedIn }) {
   const shipped = published(priorities)[0] ?? null;
   return (
     <section className="cp-prib cp-fade" aria-label="Subscriber research priorities" data-testid="priorities-block">
-      <div className="cp-prib__in">
+      <div className={`cp-prib__in${shipped ? " is-two" : ""}`}>
         <div>
           <span className="cp-sec__band">Subscriber research priorities</span>
           <ol className="cp-prib__list">

@@ -47,14 +47,14 @@ export function PressInfluence({ influence, tier, status, brief = false }) {
           </p>
         </>
       ) : status === "static" ? (
-        <p className="cp-inf__next">
+        <p className="cp-inf__note">
           This build is not connected to the Cedar Press service, which keeps the ledger. Points are
           counted there; nothing is counted here.
         </p>
       ) : status === "failed" ? (
-        <p className="cp-inf__next">The service did not answer; your points are unchanged and will show when it does.</p>
+        <p className="cp-inf__note">The service did not answer; your points are unchanged and will show when it does.</p>
       ) : (
-        <p className="cp-inf__next">Reading your ledger…</p>
+        <p className="cp-inf__note">Reading your ledger…</p>
       )}
       <p className="cp-set__body">{earningLine(tier)}{rate ? ` Unspent points expire after ${EXPIRY_MONTHS} months.` : ""}</p>
 
