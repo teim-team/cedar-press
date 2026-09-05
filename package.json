@@ -9,7 +9,10 @@
     "test": "node --test \"src/features/grove/*.test.js\"",
     "build": "vite build && cp dist-site/index.html dist-site/404.html",
     "preview": "vite preview",
-    "test:smoke": "playwright test"
+    "test:smoke": "playwright test",
+    "prerender": "node scripts/prerender.mjs",
+    "build:site": "npm run build && npm run prerender",
+    "seo:check": "node scripts/seo-head.mjs --check"
   },
   "dependencies": {
     "@datadog/browser-rum": "^7.9.0",

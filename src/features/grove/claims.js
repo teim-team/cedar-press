@@ -188,7 +188,6 @@ const PROOF_PHRASES = Object.freeze([
 // ordinary nouns in this domain ("establishment counts") and forbidding them
 // would flag honest sentences constantly.
 const OBSERVATION_PHRASES = Object.freeze([
-  { pattern: /\bcreat(?:es|ed|e|ing)\b/i, phrase: "created" },
   { pattern: /\badd(?:s|ed|ing)?\b/i, phrase: "added" },
   { pattern: /\b(?:brings?|brought|bringing)\b/i, phrase: "brought" },
   { pattern: /\bactual\b/i, phrase: "actual" },

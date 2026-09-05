@@ -908,26 +908,6 @@ def build(dry: bool, only: tuple = ()) -> int:
                         fhdr.remove(f"{pre}__{c2}")
                     joined.pop()
 
-        # SWEEP THE PRIOR BUILD FIRST. Nothing here removed old artifacts, so a
-        # dataset that stops qualifying for a workbook kept its old one for
-        # ever - `funding.xlsx` survived the introduction of the 200,000-row
-        # cap and sat on disk looking current at 701,955 rows. That is the same
-        # defect the freshness gate exists to catch, one file type over: a
-        # deliverable that no longer corresponds to anything.
-        if not dry:
-            # Sweep EVERY artifact of the previous build, notes included.
-            # Codex, PR #35: if a later build runs without reportlab, an old
-            # __NOTES.pdf survives, notes() records generation as unavailable,
-            # and verify passes because it only checks the path exists - a
-            # current CSV shipping beside outdated notes. A failed
-            # regeneration has to be visibly absent.
-            for _pat in (f"{coll}.csv", f"{coll}__*.csv",
-                         f"{coll}__NOTES.txt", f"{coll}__NOTES.pdf",
-                         f"{coll}__NOTES.pdf.absent",
-                         f"{coll}__CODEBOOK.md", f"{coll}.xlsx"):
-                for stale_f in OUT.glob(_pat):
-                    stale_f.unlink()
-
         # BAND THE COLUMNS BEFORE ANYTHING IS WRITTEN, so the CSV, the
         # codebook and the notes all present the same order. Doing it inside
         # `emit` alone would have shipped a spreadsheet whose columns ran in a
@@ -993,6 +973,32 @@ def build(dry: bool, only: tuple = ()) -> int:
         files = size = 0
         kind = ""
         if not dry:
+            # SWEEP THE PRIOR BUILD, AND ONLY NOW. Nothing here once removed
+            # old artifacts, so a dataset that stopped qualifying for a
+            # workbook kept its old one for ever - `funding.xlsx` survived the
+            # introduction of the 200,000-row cap and sat on disk looking
+            # current at 701,955 rows. That is the same defect the freshness
+            # gate exists to catch, one file type over: a deliverable that no
+            # longer corresponds to anything.
+            #
+            # Sweep EVERY artifact of the previous build, notes included.
+            # Codex, PR #35: if a later build runs without reportlab, an old
+            # __NOTES.pdf survives, notes() records generation as unavailable,
+            # and verify passes because it only checks the path exists - a
+            # current CSV shipping beside outdated notes. A failed
+            # regeneration has to be visibly absent.
+            #
+            # AFTER the field map, not before it (Codex, PR #66): the map
+            # refuses a dataset it cannot vouch for by raising, and a sweep
+            # that had already run turned that refusal into a missing
+            # delivery. The last valid release stays on disk until its
+            # replacement has passed every check that can stop it.
+            for _pat in (f"{coll}.csv", f"{coll}__*.csv",
+                         f"{coll}__NOTES.txt", f"{coll}__NOTES.pdf",
+                         f"{coll}__NOTES.pdf.absent",
+                         f"{coll}__CODEBOOK.md", f"{coll}.xlsx"):
+                for stale_f in OUT.glob(_pat):
+                    stale_f.unlink()
             files, size, kind = emit(coll, fhdr, frows, fpath)
             prof = profile(fhdr, frows)
             codebook(coll, c, fname, fmeta, fhdr, frows, prof, joined,

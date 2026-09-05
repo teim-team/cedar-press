@@ -2,6 +2,8 @@
 // organizes it and the storefront predicate the pages filter on.
 
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
@@ -94,4 +96,10 @@ test("the storefront predicate is the shelf list", () => {
 test("the Press+ rollup spells the pro shelf's count", () => {
   const rollup = GROVE_INCLUDES.find((entry) => entry.id === "all-pro");
   assert.ok(rollup.blurb.startsWith(`The ${spellCount(collectionsOnShelf("pro").length)} specialized`), rollup.blurb);
+});
+
+test("the structured data and the sitemap are generated from the catalog and are current", () => {
+  const script = fileURLToPath(new URL("../../../scripts/seo-head.mjs", import.meta.url));
+  const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
+  assert.equal(run.status, 0, `${run.stdout}\n${run.stderr}\nrun: node scripts/seo-head.mjs`);
 });

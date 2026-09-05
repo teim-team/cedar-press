@@ -853,5 +853,47 @@
         }
       ]
     }
-  }
+  },
+  "workKinds": [
+    {
+      "id": "tribal_government",
+      "label": "Tribal government"
+    },
+    {
+      "id": "tribal_enterprise",
+      "label": "Tribal enterprise or corporation"
+    },
+    {
+      "id": "anc_nho",
+      "label": "ANC or NHO"
+    },
+    {
+      "id": "native_nonprofit",
+      "label": "Native nonprofit or association"
+    },
+    {
+      "id": "federal",
+      "label": "Federal agency"
+    },
+    {
+      "id": "state_local",
+      "label": "State or local government"
+    },
+    {
+      "id": "lender_investor",
+      "label": "Lender, investor or fund"
+    },
+    {
+      "id": "advisor",
+      "label": "Law, accounting or consulting firm"
+    },
+    {
+      "id": "media",
+      "label": "Newsroom or media"
+    },
+    {
+      "id": "academic",
+      "label": "University or research institute"
+    }
+  ]
 }

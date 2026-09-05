@@ -18,6 +18,8 @@
  * directly here instead; the substance is unchanged.
  */
 
+import { contactHref } from "./appLink.js";
+
 /**
  * The domains the collections are built out of. Each one has its own legal
  * definitions, administrative systems, reporting conventions, historical
@@ -233,7 +235,7 @@ export const REPLICATION_CALLOUTS = Object.freeze([
  */
 export const TRIBAL_REQUEST = Object.freeze({
   mailto:
-    "mailto:contact@lumecon.ai?subject=Tribal%20Data%20Request",
+    contactHref("Tribal Data Request"),
   policy:
     "Cedar will not release a tribe-specific data package because an individual claims affiliation with a tribe. Requests must be submitted or expressly authorized by the federally recognized tribal government, and Cedar may independently verify the requester's authority before releasing any records.",
   eligibility: Object.freeze([

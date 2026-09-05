@@ -140,7 +140,14 @@ export async function downloadCollection(id) {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new ApiError(`Download failed (${response.status}).`, "DOWNLOAD_FAILED", response.status);
+    // The service says why (`NOT_INCLUDED`, `NO_SAMPLE`), and the reader is
+    // told that rather than a status code.
+    const payload = await response.json().catch(() => null);
+    throw new ApiError(
+      payload?.message || `Download failed (${response.status}).`,
+      payload?.code || "DOWNLOAD_FAILED",
+      response.status,
+    );
   }
   return {
     blob: await response.blob(),

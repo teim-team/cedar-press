@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { askCedar } from "../../api.js";
-import { appUrl } from "../../features/grove/appLink.js";
+import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
@@ -245,7 +245,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
             <p className="cedar-widget__note">
               Cedar is answering inside the platform while the press surface is being wired
               in. Send the question to{" "}
-              <a href="mailto:contact@lumecon.ai?subject=Cedar%20Press%20question">
+              <a href={contactHref("Cedar Press question")}>
                 the research desk
               </a>{" "}
               and a person answers it, or{" "}

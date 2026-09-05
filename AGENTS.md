@@ -5,7 +5,7 @@
 
 ## HOW TO READ THIS FILE (added 2026-09-02)
 
-**This file is ~6,000 lines and growing, and it is not an onboarding document.**
+**This file is ~9,000 lines and growing, and it is not an onboarding document.**
 (Exact count: `wc -l AGENTS.md` — do not trust a figure typed here, including this
 one.) Everything below
 `CURRENT STATE (2026-08-06)` is an **append-only journal** — named gate failures,
@@ -753,7 +753,9 @@ Elijah's own Dippel correspondence proves that **no reliable corporate-hierarchy
 Name similarity ≠ relatedness ("Cherokee Inc." trap). DBA ≠ legal name. Subsidiaries don't share parent names. Firm ≠ establishment. Identifiers change on ownership events. Therefore: match conservatively, leave ambiguous blank and flagged (the 34 unmatched BGOV tribes and 3 corrected village-corp region mappings are the model — my own auto-matcher produced Sea Lion→Koniag via a token trap; audit every automated match against ground truth).
 
 ## Queue (highest value first)
-0. **The public dataset specification** — `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (the owner's, verbatim: the brief, then the exact column specification and the identifier retirement rule, which win where they differ), `docs/FIELD_MAP_2026-09-05.md` (every current column decided, the approved header per dataset in exact order, what is owed), `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` (every competing identifier with its disposition) and `docs/guides/` (one researcher guide per collection). The site side is done: `1137` generates the customer header from `data/cedar/field_map.json` through `cedar_publication.apply_field_map` and refuses an undecided column, a disagreeing alias, an unadjudicated identifier or a retired scheme's name in a value. The terminal's part, per dataset, on the full tables: verify every rename value for value; test every `combine` for agreement before one column replaces its sources (funding's recipient type, contractors' sector and competition type, deals' type, structure and status, nonprofits' inclusion category and link status); prove the pass changed columns and never rows, multiplicity, event identity, totals or eligibility (§ Required validation); write the owed derivations (deals' `research_note` from Notes, the Federal Register's `event_date_precision`, names as published from the bridges); settle the three retirement findings that stop a dataset (recode funding's `attribution_status` vocabulary; adjudicate NEST's `enterprise_existing_cedar_uid` and nonprofits' `entity_id` / `cedar_spine_entity_id`); migrate the supporting-table identifiers the report lists; run `--audit` and write the `owned` map when its sample lands; then re-measure each guide's figures from the finished file.
+0. **The public dataset specification** — `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (the owner's, verbatim; it governs) with `docs/FIELD_MAP_2026-09-05.md` (every current column decided, the approved header per dataset, what is owed) and `docs/guides/` (one researcher guide per collection). The site side is done: `1137` now generates the customer header from `data/cedar/field_map.json` through `cedar_publication.apply_field_map` and refuses an undecided column. The terminal's part, per dataset, on the full tables: validate each decision; test every `combine` for agreement before one column replaces its sources (deals categories and status); measure whether funding and contractors support the award-recipient-fiscal-year grain (§4, §10); decide vote and action record types for legislation (§6); bring the other advocacy families under `activity_type` (§9); write names as published beside NAGPRA's roles and `related_notice_id` (§8); recode `attribution_status` values that name the retired scheme; run `--audit` and write the `owned` map when its sample lands (§15); then report per dataset the counts §17 asks for and re-measure each guide's figures from the finished file. `docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md` stands where the specification did not change it.
+0a. **Superseded later on 2026-09-05, kept as written (this journal is append-only).** The entry above was the morning's statement; the one below stands.
+0b. **The public dataset specification** — `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (the owner's, verbatim: the brief, then the exact column specification and the identifier retirement rule, which win where they differ), `docs/FIELD_MAP_2026-09-05.md` (every current column decided, the approved header per dataset in exact order, what is owed), `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` (every competing identifier with its disposition) and `docs/guides/` (one researcher guide per collection). The site side is done: `1137` generates the customer header from `data/cedar/field_map.json` through `cedar_publication.apply_field_map` and refuses an undecided column, a disagreeing alias, an unadjudicated identifier or a retired scheme's name in a value. The terminal's part, per dataset, on the full tables: verify every rename value for value; test every `combine` for agreement before one column replaces its sources (funding's recipient type, contractors' sector and competition type, deals' type, structure and status, nonprofits' inclusion category and link status); prove the pass changed columns and never rows, multiplicity, event identity, totals or eligibility (§ Required validation); write the owed derivations (deals' `research_note` from Notes, the Federal Register's `event_date_precision`, names as published from the bridges); settle the three retirement findings that stop a dataset (recode funding's `attribution_status` vocabulary; adjudicate NEST's `enterprise_existing_cedar_uid` and nonprofits' `entity_id` / `cedar_spine_entity_id`); migrate the supporting-table identifiers the report lists; run `--audit` and write the `owned` map when its sample lands; then re-measure each guide's figures from the finished file.
 1. Get the **do-file**; review the 117 QC-flagged panel rows against it.
 2. Comprehensive FPDS pull (both methodologies) via HigherGov/USAspending → upload → match through Entity_Master aliases + NEID; build the ownership-change ledger from the deal rows.
 3. TBCP + HUD ONAP award lists via manual download → row-per-award (path to 500+; channel inventory with counts lives in Backfill_Plan).
@@ -9161,3 +9163,34 @@ one returns to a public header. The guides quote figures only from a named
 repository document and say the finished table is re-measured at release.
 When a sample's header changes, the map, the codebook, the two documents
 and the guides all have to change with it, and the suites say which.
+
+## 2026-09-05 (evening): the second pass on the site, and what the writer refuses now
+
+- **The loss guard.** `cedar_publication.apply_field_map` now refuses a dataset
+  where a column marked `combine` or `derive` is populated and its target is
+  neither built by a rule here, nor kept or renamed from the row, nor supplied
+  by the terminal (Codex, PR #66). Five sampled flagships fail closed until the
+  terminal delivers the combines: funding (`recipient_type`), the Federal
+  Register (`event_date_precision`), deals (`deal_type`, then `Notes` into
+  `research_note`), contractors (`competition_type`), nonprofits
+  (`inclusion_category`). `server/tests/test_field_map.py` stands in for the
+  terminal with `supply_owed_targets`; the refusal names both columns.
+- **Withholding, last and failing closed.** For a row whose `cedar_uid` the
+  register classes as individually Native-owned, the columns the map marks
+  `withhold` leave blank; the upstream masks (241, 242) and the register's
+  blank name stand, this is the check before emission.
+- **1137 sweeps after the map.** The prior release stays on disk until its
+  replacement has passed every check that can stop it.
+- **The site.** The nine satellite pages and the Explore viewer are code-split;
+  the three public pages are prerendered to static HTML (`npm run build:site`);
+  every page sets its own title, description, canonical and robots meta; the
+  JSON-LD carries a `DataCatalog` and twelve `Dataset` entries generated from
+  the catalog (`scripts/seo-head.mjs`); `server/` serves `/press/profile`, so
+  every route the client calls is served by the service in this repository;
+  connected downloads go through the service and a refusal is shown.
+- **Not done, and named:** public per-entity pages (a product decision); the
+  dead exports the audit listed in `claims.js` and a dozen
+  other modules (tree-shaken, still maintained); the 64 unused `press.css`
+  classes; `redesign.css` carrying the platform's rules the press pages never
+  use (a designer's pass, since `press.css` depends on its cascade).
+

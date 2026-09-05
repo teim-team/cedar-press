@@ -1,19 +1,31 @@
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
+// The stylesheets, once, in cascade order: the base (fonts and the element
+// rules), the design system's tokens and the auth split, then the press
+// pages' own rules, which are written under `.teim-rd` and re-pin the paper
+// palette over the base. Every page used to import the three itself; the
+// bundler deduplicated them, but the order was documented in one page of ten.
+import "./index.css";
+import "./styles/redesign.css";
+import "./styles/grove/press.css";
+
 import { AuthProvider } from "./context/AuthProvider.jsx";
 import { startTelemetry } from "./features/grove/telemetry.js";
-import CedarPress from "./pages/grove/CedarPress.jsx";
-import CedarPressArticles from "./pages/grove/CedarPressArticles.jsx";
-import CedarPressData from "./pages/grove/CedarPressData.jsx";
-import CedarPressArticle from "./pages/grove/CedarPressArticle.jsx";
-import CedarPressMethods from "./pages/grove/CedarPressMethods.jsx";
-import CedarPressResearchAccess from "./pages/grove/CedarPressResearchAccess.jsx";
-import CedarPressSettings from "./pages/grove/CedarPressSettings.jsx";
-import CedarPressPriorities from "./pages/grove/CedarPressPriorities.jsx";
-import CedarPressTribalRequest from "./pages/grove/CedarPressTribalRequest.jsx";
-import CedarPressWhatsNew from "./pages/grove/CedarPressWhatsNew.jsx";
+import {
+  CedarPress,
+  CedarPressArticle,
+  CedarPressArticles,
+  CedarPressData,
+  CedarPressMethods,
+  CedarPressPriorities,
+  CedarPressResearchAccess,
+  CedarPressSettings,
+  CedarPressTribalRequest,
+  CedarPressWhatsNew,
+  PageArriving,
+} from "./pages/grove/pages.jsx";
 import {
   PRESS_ARTICLES_PATH,
   PRESS_ARTICLE_PATH,
@@ -38,6 +50,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <BrowserRouter>
+        <Suspense fallback={<PageArriving />}>
         <Routes>
           <Route path={PRESS_PATH} element={<CedarPress />} />
           <Route path={PRESS_ARTICLES_PATH} element={<CedarPressArticles />} />
@@ -51,6 +64,7 @@ createRoot(document.getElementById("root")).render(
           <Route path={PRESS_ARTICLE_PATH} element={<CedarPressArticle />} />
           <Route path="*" element={<Navigate to={PRESS_PATH} replace />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   </StrictMode>,

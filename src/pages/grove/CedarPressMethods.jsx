@@ -11,10 +11,8 @@
 // Public on purpose: someone deciding whether to pay should be able to read
 // exactly how the work is done first.
 
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 import { Link } from "react-router";
+import { contactHref } from "../../features/grove/appLink.js";
 
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
@@ -226,7 +224,7 @@ export default function CedarPressMethods() {
             ))}
           </ul>
           <p className="cp-msec__close">
-            <a className="cp-m__more" href="mailto:contact@lumecon.ai?subject=Cedar%20correction">
+            <a className="cp-m__more" href={contactHref("Cedar correction")}>
               Found something wrong? Send a correction <span aria-hidden="true">&#8594;</span>
             </a>
           </p>

@@ -29,6 +29,8 @@
 // So the file is fetched at click time. `hasSample` answers from the manifest
 // alone, with no fetch, because a tile has to label itself before the click.
 
+import { downloadCollection } from "../../api.js";
+import { isConnected } from "../../config.js";
 import { collectionCitation, collectionCsv, hasSample, samplePath } from "./collection.js";
 import { coverageLabel } from "./pressAccess.js";
 
@@ -99,7 +101,20 @@ async function defaultFetchText(path) {
   }
 }
 
+/**
+ * The collection's file, to the browser. CONNECTED (config.js), the service
+ * serves it: `GET /press/collections/:id/download` enforces the entitlement
+ * and hands over what the platform published, and a refusal (`NOT_INCLUDED`,
+ * `NO_SAMPLE`) is thrown with the service's own sentence for the caller to
+ * show. STANDALONE, the shipped sample or the collection's description, as
+ * `csvFor` decides.
+ */
 export async function downloadCsv(entry) {
+  if (isConnected()) {
+    const { blob, filename } = await downloadCollection(entry.id);
+    saveBlob(filename, blob);
+    return;
+  }
   const { csv, name } = await csvFor(entry);
   if (!csv) return;
   saveTextFile(name, csv);
@@ -107,7 +122,16 @@ export async function downloadCsv(entry) {
 
 /** Hand the browser one text file to save. The Explore card's cut uses it too. */
 export function saveTextFile(name, text) {
-  const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+  saveBlob(name, new Blob([text], { type: "text/csv;charset=utf-8" }));
+}
+
+/**
+ * One browser download of one Blob. Every file this client hands over goes
+ * through here: a plain `.csv` (text/csv) or a stored `.zip`
+ * (application/zip), named for what it is, so nothing arrives as an untyped
+ * octet-stream that a browser or a mail gateway has to guess at.
+ */
+function saveBlob(name, blob) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -199,15 +223,7 @@ function zipOf(files) {
  */
 /** Hand the browser one ZIP of text files to save. The Explore card's export uses it. */
 export function saveZip(name, files) {
-  const blob = zipOf(files);
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = name;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
+  saveBlob(name, zipOf(files));
 }
 
 export async function downloadAll(entries, archiveName = "cedar-press-samples.zip") {
@@ -219,13 +235,5 @@ export async function downloadAll(entries, archiveName = "cedar-press-samples.zi
     .filter((file) => file.csv)
     .map((file) => ({ name: file.name, text: file.csv }));
   if (!files.length) return;
-  const blob = zipOf(files);
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = archiveName;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
+  saveBlob(archiveName, zipOf(files));
 }

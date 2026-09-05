@@ -781,10 +781,37 @@ export function questionFor(cut, register = EMPTY_REGISTER) {
 
 // ── The download ───────────────────────────────────────────────────────────
 
+// `entity_name` and `entity_type` describe the FIRST entity, the one the
+// viewer leads with. `entity_uids`, `entity_names`, `entity_types` and
+// `entity_roles` are pipe-separated and aligned position for position, so a
+// NAGPRA notice naming nine parties exports nine uids beside nine names and
+// nine roles, never one name standing beside nine ids (Codex, PR #66).
 const UNIVERSAL_HEADER = [
-  "collection", "table", "record_id", "entity_uids", "entity_name", "entity_type", "record_subject",
+  "collection", "table", "record_id", "entity_uids", "entity_name", "entity_type",
+  "entity_names", "entity_types", "entity_roles", "record_subject",
   "date", "year", "observation", "amount", "amount_basis", "superseded", "source",
 ];
+
+/** One entity's exportable name: the register's, the withheld marker, or its uid. */
+const exportName = (entity) => (entity.withheld ? WITHHELD_TEXT : entity.name ?? entity.uid ?? "");
+
+/**
+ * The aligned pipe lists for the linked entities of a record, in the viewer's
+ * order. An entity from the table's own entity column carries the contract's
+ * role; one that arrived through a further role column carries only the role
+ * that column declares, so a notice with consulted parties and no affiliated
+ * one never exports them as affiliated.
+ */
+export function entityVectors(entity, contract = null) {
+  const linked = (entity.entities ?? []).filter((e) => e.uid);
+  const rolesOf = (e) => [...(e.role ? [e.role] : contract?.entity_role ? [contract.entity_role] : []), ...(e.roles ?? [])];
+  return {
+    uids: linked.map((e) => e.uid).join("|"),
+    names: linked.map(exportName).join("|"),
+    types: linked.map((e) => e.type ?? "").join("|"),
+    roles: linked.map((e) => rolesOf(e).join("; ")).join("|"),
+  };
+}
 
 /**
  * The rows a cut selects, as a rectangular file: a header and one line per
@@ -800,12 +827,16 @@ export function cutCsv(rows, { view, columns = [] }) {
   for (const item of rows) {
     const values = view === "table"
       ? columns.map((column) => item.row[column])
-      : [
-        item.collection, item.key.split("/")[1], item.recordId, item.entity.uids.join("|"),
-        item.entity.withheld ? WITHHELD_TEXT : item.entity.name, item.entity.type, item.subject,
-        item.date, item.year, item.observation, item.amount, item.amountBasis,
-        item.superseded ? "1" : "0", item.source,
-      ];
+      : (() => {
+        const vectors = entityVectors(item.entity, contractFor(item.key));
+        return [
+          item.collection, item.key.split("/")[1], item.recordId, vectors.uids,
+          item.entity.withheld ? WITHHELD_TEXT : item.entity.name, item.entity.type,
+          vectors.names, vectors.types, vectors.roles, item.subject,
+          item.date, item.year, item.observation, item.amount, item.amountBasis,
+          item.superseded ? "1" : "0", item.source,
+        ];
+      })();
     lines.push(values.map(csvCell).join(","));
   }
   return lines.join("\n");
@@ -823,7 +854,7 @@ export function cutReadme(rows, { view, cut, register = EMPTY_REGISTER, columns 
     "",
     view === "table"
       ? `records.csv holds ${rows.length} sample record(s) from ${scopeOf(cut)} with the table's own ${columns.length} columns.`
-      : `records.csv holds ${rows.length} sample record(s) across ${collections.length} collection(s) in a REDUCED summary shape: one line per record with the entity, its type, the date, a 180-character observation, the amount where the table records one (never comparable across collections) and the source. Use each collection's own download for the full columns.`,
+      : `records.csv holds ${rows.length} sample record(s) across ${collections.length} collection(s) in a REDUCED summary shape: one line per record with the entity, its type, the date, a 180-character observation, the amount where the table records one (never comparable across collections) and the source. entity_uids, entity_names, entity_types and entity_roles are pipe-separated lists aligned position for position (the first position is the entity_name/entity_type entity); a record naming several parties carries them all. Use each collection's own download for the full columns.`,
     `Cut: ${describeCut(cut, { register })}`,
     `Cut query (cut version ${CUT_VERSION}): ${encodeCut(cut) || "(none)"}`,
     ...(missing.length

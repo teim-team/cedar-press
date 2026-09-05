@@ -5,10 +5,8 @@
  * The Cedar Press routes, as constants rather than strings scattered across
  * pages. Six surfaces, split by who is standing in front of them.
  *
- * The routes themselves are registered on grove/10-app-integration, which
- * owns App.jsx. A page added here is not reachable until that branch names
- * it, and the two are reviewed separately on purpose: this branch decides
- * what a surface is, that one decides that the app has it.
+ * The routes are registered in src/main.jsx, the standalone site's entry. A
+ * page added here is not reachable until main.jsx names it.
  *
  * - PRESS_PATH is the reader's page: the briefs, the collection and the
  *   citation register, and nothing arguing for the product, because whoever
@@ -20,8 +18,7 @@
  *   the URL can be sent to a council office and land on exactly that.
  * - PRESS_RESEARCH_PATH is limited research access, for a narrow project that
  *   does not warrant a subscription.
- *
- * The routes themselves are registered on the branch that owns App.jsx.
+
  */
 
 export const PRESS_PATH = "/";

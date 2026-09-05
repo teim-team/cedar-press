@@ -46,9 +46,15 @@ application deployed as a static build, with a Python API alongside it.
 npm install
 npm run dev        # development server
 npm run test       # unit tests
-npm run test:smoke # end-to-end checks against a build
+npm run test:smoke # end-to-end checks against a build (prerendered, as deployed)
 npm run build      # production build
+npm run build:site # the build, then the three public pages prerendered to HTML
+npm run seo:check  # the structured data and sitemap are current with the catalog
 ```
+
+The API is a FastAPI service in [`server/`](server/README.md); it serves every
+route the client calls, and pointing `VITE_API_URL` at it is the whole switch
+from the standalone build to a connected one.
 
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) covers how the code is
 organized, how the client and the API fit together, and how to run the API.

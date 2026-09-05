@@ -46,13 +46,12 @@
 // header; the server has to answer identically before real data sits behind
 // any of this.
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-// Whether this device points with a finger: no hover means the point-to-read
-// affordance below becomes tap-to-read, and a tile's download moves one tap
-// further so nobody takes a file before reading what it is.
-const COARSE = typeof window !== "undefined" && !!window.matchMedia?.("(hover: none)").matches;
-
+// Whether this device points with a finger (pointer.js): no hover means the
+// point-to-read affordance below becomes tap-to-read, and a tile's download
+// moves one tap further so nobody takes a file before reading what it is.
+import { COARSE } from "../../features/grove/pointer.js";
 import { appUrl } from "../../features/grove/appLink.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { canOpenDataset, coverageFrom, coverageLabel } from "../../features/grove/pressAccess";
@@ -68,7 +67,10 @@ import { freshnessLine } from "../../features/grove/pressReleases";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
-import PressExplore from "./PressExplore";
+// The viewer is the largest thing on the site (its own module, the contracts
+// and the codebook), and it is below the shelves: fetched when the page is,
+// not before the gate can paint.
+const PressExplore = lazy(() => import("./PressExplore"));
 import { TierName } from "./TierName";
 
 /**
@@ -179,6 +181,11 @@ function hasCedarProfile(id) {
 
 /** What the reader says about the collection under the cursor. */
 function Detail({ entry, owned }) {
+  // What the service said when it refused the file, connected; nothing
+  // otherwise. A button that silently does nothing is the failure this
+  // replaces. Keyed by the collection where it is rendered, so a refusal
+  // never outlives the collection it was about.
+  const [refusal, setRefusal] = useState(null);
   return (
     <div className="cp-read__on">
       <span className="cp-read__cap">
@@ -207,7 +214,8 @@ function Detail({ entry, owned }) {
           className="cp-read__act"
           onClick={() => {
             track(EVENT.collectionDownloaded, { collection: entry.id, shelf: entry.shelf });
-            downloadCsv(entry);
+            setRefusal(null);
+            downloadCsv(entry).catch((error) => setRefusal(error?.message || "The download did not go through."));
           }}
         >
           <span aria-hidden="true">&#8595;</span>{" "}
@@ -216,6 +224,7 @@ function Detail({ entry, owned }) {
             : "Download the collection description (sample pending)"}
         </button>
       ) : null}
+      {refusal ? <p className="cp-read__foot" role="alert">{refusal}</p> : null}
       {/* Cedar, already scoped: the reader looking at this description is
           one click from asking how the collection was built or what its
           headline figures are, without restating which collection. The
@@ -356,7 +365,7 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
             it never cuts in while someone is reading something else. */}
         <aside ref={readRef} className={`cp-read${pulse ? " is-pulse" : ""}`} aria-live="polite">
           {active ? (
-            <Detail entry={active} owned={owned} />
+            <Detail key={active.id} entry={active} owned={owned} />
           ) : (
             <div className="cp-read__idle">
               <span className="cp-read__cap">
@@ -474,7 +483,9 @@ export default function PressShelf({ user }) {
       {shelves.map((tier, index) => (
         <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} selectedId={selectedId} onPick={onPick} />
       ))}
-      <PressExplore user={user} pick={pick} onActive={setHovered} onSelected={setSelectedId} />
+      <Suspense fallback={<section className="cp-sec" aria-busy="true" aria-label="Explore the collections" />}>
+        <PressExplore user={user} pick={pick} onActive={setHovered} onSelected={setSelectedId} />
+      </Suspense>
       {grove ? <GroveTeaser tier={grove} /> : null}
     </div>
   );

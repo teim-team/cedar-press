@@ -10,6 +10,8 @@
 // sticky selection — so a reader gets more than the label before
 // committing a tap, without a second control on every tile.
 import { useState } from "react";
+import { contactHref } from "../../features/grove/appLink.js";
+import { COARSE } from "../../features/grove/pointer.js";
 import { Link } from "react-router";
 
 import { PRESS_ARTICLES, TBN_PLANS_URL } from "../../features/grove/pressArticles";
@@ -32,7 +34,7 @@ import {
   WhatsNewIcon,
 } from "./pressHubIcons";
 
-const CONTACT_HREF = "mailto:contact@lumecon.ai?subject=Cedar%20Press";
+const CONTACT_HREF = contactHref("Cedar Press");
 
 /** The collections THIS reader's plan opens: a Cedar Press subscriber has
  *  the standard shelf, not the whole catalog, and a tile that counts the
@@ -116,7 +118,7 @@ function sections(user) {
   ];
 }
 
-const IDLE_NOTE = "Point at a section for what it holds.";
+const IDLE_NOTE = COARSE ? "Tap a section for what it holds." : "Point at a section for what it holds.";
 
 export default function PressHub({ user }) {
   const [help, setHelp] = useState(null);

@@ -1,6 +1,5 @@
 /* Self-hosted brand fonts (Inter, JetBrains Mono, Spectral). No Google Fonts. */
 @import "./styles/fonts.css";
-@import "./styles/workspace.css";
 
 :root {
     color-scheme: light;
@@ -180,7 +179,8 @@ a {
     text-decoration: none;
 }
 
-/* Dark theme, opt-in via data-theme="dark" on <html> (see themePreference.js).
+/* Dark theme, opt-in via data-theme="dark" on <html>. Nothing on this site
+   sets it (the press pages pin the paper palette); kept with the design system.
    The white-surface design stays the default; dark flips the UA color scheme,
    the page canvas behind the app, and autofilled controls. Component tokens are
    remapped in redesign.css under the same selector. */

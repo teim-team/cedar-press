@@ -160,6 +160,10 @@ REPORT_CITATION_HREF: str = _DATA["reportCitationHref"]
 #: not exist when this comment first claimed it; ``server/tests/test_access.py``
 #: is it, and it compares this set against ``canReadCedarPress`` in
 #: ``src/features/grove/pressAccess.js`` tier by tier.
+#: What a reader may say they work on: the ids ``readerWork.js`` offers, so
+#: ``PATCH /press/profile`` accepts exactly what the Settings page can send.
+WORK_KINDS = frozenset(kind["id"] for kind in _DATA.get("workKinds", []))
+
 PRESS_TIERS = frozenset({"press", "press_pro"})
 
 

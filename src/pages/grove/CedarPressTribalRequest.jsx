@@ -12,10 +12,8 @@
 // not covered by default, because a program that releases tribe-specific
 // records on a claim of affiliation is not a program anyone should trust.
 
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 import { Link } from "react-router";
+import { contactHref } from "../../features/grove/appLink.js";
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { TRIBAL_REQUEST } from "../../features/grove/pressMethod";
@@ -29,7 +27,7 @@ import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 
 const REQUEST_HREF =
-  "mailto:contact@lumecon.ai?subject=Cedar%20Tribal%20Data%20Request";
+  contactHref("Cedar Tribal Data Request");
 
 // The policy this page renders is declared once, in pressMethod.js, where
 // its tests live. This file carried its own copies of every list until
@@ -38,7 +36,11 @@ const REQUEST_HREF =
 const { included: COVERS, eligibility: REQUESTERS, verification: VERIFICATION, steps: STEPS, excluded: EXCLUDED } = TRIBAL_REQUEST;
 
 export default function CedarPressTribalRequest() {
-  useDocumentTitle("Tribal data request");
+  useDocumentTitle("Tribal data request", {
+    index: true,
+    description:
+      "Federally recognized tribal governments can request and review the Cedar records maintained about their nation, its enterprises and affiliated entities, and submit corrections. No subscription required.",
+  });
   // Links here sit at the bottom of long pages; without the reset the
   // destination opens mid-scroll, past its headline.
   useScrollToTop();

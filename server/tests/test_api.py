@@ -144,6 +144,19 @@ class TestCatalog(unittest.TestCase):
         for key in ("id", "name", "version", "vintage", "updated"):
             self.assertIn(key, payload[0])
 
+    def test_the_reader_profile_round_trips_per_seat(self) -> None:
+        self.assertEqual(client.get("/press/profile").json()["work"], None)
+        saved = client.patch("/press/profile", json={"work": "media"}).json()
+        self.assertEqual(saved["work"], "media")
+        self.assertEqual(client.get("/press/profile").json()["work"], "media")
+        refused = client.patch("/press/profile", json={"work": "astronaut"})
+        self.assertEqual(refused.status_code, 400)
+        self.assertEqual(refused.json()["code"], "UNKNOWN_WORK")
+        self.assertEqual(client.get("/press/profile").json()["work"], "media")
+        self.assertEqual(client.patch("/press/profile", json={"work": None}).json()["work"], None)
+        client.cookies.clear()
+        self.assertEqual(client.get("/press/profile").status_code, 401)
+
     def test_articles_are_served(self) -> None:
         self.assertTrue(client.get("/press/articles").json()["articles"])
 

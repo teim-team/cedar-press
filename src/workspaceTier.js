@@ -1,22 +1,13 @@
 /**
  * REVIEW OWNER: Brian
  *
- * Tier resolution and tier copy shared across the app.
+ * Tier resolution and tier copy shared across the site.
  *
- * Division of labour on this branch: Brian reviews login, signup and
- * anything that decides account identity, hierarchy or entitlement.
- * Kaylyn reviews product behaviour and UI. See docs/review/REVIEWERS.md.
- */
-
-/**
- * Workspace tier helper.
- *
- * `workspaceTier` arrives on the session payload (set by
- * server/repositories/users.js and returned from /me), and
- * `resolveTier` reads it directly. Unknown or missing values fall
- * back to "sprout" to match the server's rule in
- * server/lib/tierCapabilities.js (pre-signup rows are provisioned
- * pilot accounts; self-serve signup sets "free" explicitly).
+ * `workspace_tier` arrives on the session payload (`/me`, from the FastAPI
+ * service in server/: session.py names the field for exactly this reader)
+ * and `resolveTier` reads it directly. Unknown or missing values fall back
+ * to "sprout", the platform's rule for a provisioned account that has not
+ * chosen a plan; the two Cedar Press tiers are `press` and `press_pro`.
  */
 
 /** @typedef {"free" | "sprout" | "sapling" | "tree" | "grove" | "press" | "press_pro"} WorkspaceTier */

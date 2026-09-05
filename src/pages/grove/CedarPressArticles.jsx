@@ -4,9 +4,6 @@
 // one-page reader when the hub split the surface: a front page, not a row
 // of tiles — the newest brief leads at double width, the rest stack beside
 // it, and growth appends to the stack with the archive living at TBN.
-import "../../index.css";
-import "../../styles/redesign.css";
-import "../../styles/grove/press.css";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";

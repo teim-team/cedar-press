@@ -56,7 +56,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from cedar_press import codes, priorities, ratelimit, repository, shelf
+from cedar_press import codes, press_catalog, priorities, ratelimit, repository, shelf
 from cedar_press.session import (
     Session,
     account_exists,
@@ -263,6 +263,39 @@ def submit_request(
         return result
     except priorities.PointsError as exc:
         raise _points_error(exc) from exc
+
+
+# ── The reader ────────────────────────────────────────────────────────────
+
+
+class ReaderProfile(BaseModel):
+    """What the reader says they work on; ``None`` withdraws the answer."""
+
+    work: str | None = None
+
+
+@app.get("/press/profile")
+def read_profile(session: Session = Depends(require_session)) -> dict[str, object]:
+    """The reader's declared work, per seat (``readerWork.js``)."""
+    return _priorities.profile(session.email)
+
+
+@app.patch("/press/profile")
+def write_profile(
+    body: ReaderProfile, session: Session = Depends(require_session)
+) -> dict[str, object]:
+    """Record what the reader declared. The vocabulary is the client's own
+    (``WORK_KINDS``, dumped into ``_press_data.json``), so an answer the
+    Settings page cannot offer is refused rather than stored."""
+    if body.work is not None and body.work not in press_catalog.WORK_KINDS:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "UNKNOWN_WORK",
+                "message": "That is not one of the kinds of work the service asks about.",
+            },
+        )
+    return _priorities.set_profile(session.email, body.work)
 
 
 @app.post("/auth/login")
