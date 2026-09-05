@@ -9210,3 +9210,25 @@ the uid-level reconciliation of the recognized-tribe classes against the
 BIA list of 2026-01-30 (the register's class totals give 577; the list
 states 575); per-state and regional scopes only when a source requires them.
 
+## 2026-09-05 (late): Codex's fourteen findings on PRs #68 and #69, in code
+
+Both PRs merged before Codex finished; the findings landed afterwards and are
+answered here. The writer: a combine or derive target counts as delivered only
+by what it will carry (a blank builder such as `rule:blank` delivers nothing;
+a combine whose target bears a source's own name keeps that carrier and holds
+the dataset for the other sources); a scope code in a raw identity list is
+refused before the plural block can recast it as null; `bill_scope` accepts
+`general` and `tribe-specific` and stops on anything else; the Federal
+Register's `entity_link_status` is held to its four values (nonprofits' column
+of the same name is a combine of tiers and is not). The viewer: membership is
+evaluated only for an element dated on or after the register's own date
+(`register.json` now carries `as_of`, the latest mint date), so an undated
+scope never brings a record in; a chosen entity that fails the type filter
+brings nothing in through its group; a malformed scope code in a permalink is
+dropped and named; the link status travels with the row and words the blank;
+`matched_by` is exported whenever the cut asked for scopes or the broader
+group; the cut is version 2. The site: an error boundary with a reload
+around the lazy routes and the lazy viewer; the article's download shows a
+refusal like the shelf; the prerender reveals every section and carries each
+page's own Open Graph, Twitter and robots tags.
+

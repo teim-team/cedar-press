@@ -26,7 +26,7 @@
 // chart: a figure is its caption, its source and its provenance, because a
 // chart nobody can interrogate is the fake dashboard this product avoids.
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
 
@@ -157,6 +157,10 @@ function BodyPair({ images }) {
  * the upgrade will ever have, and the least deserving of a trick.
  */
 function DrawnFrom({ id, user }) {
+  // What the service said when it refused the file, connected; the same
+  // feedback the shelf gives, so the button never appears to do nothing
+  // (Codex, PR #68).
+  const [refusal, setRefusal] = useState(null);
   const entry = PRESS_CATALOG_BY_ID[id];
   if (!entry) return null;
   const open = canOpenDataset(user, entry);
@@ -170,7 +174,15 @@ function DrawnFrom({ id, user }) {
         // The file, right here. The per-collection pages are gone: a tile
         // is a download everywhere in the product, and this block keeps
         // that contract at the end of a piece.
-        <button type="button" className="cp-ar__take" onClick={() => downloadCsv(entry).catch(() => {})}>
+        <>
+        <button
+          type="button"
+          className="cp-ar__take"
+          onClick={() => {
+            setRefusal(null);
+            downloadCsv(entry).catch((error) => setRefusal(error?.message || "The download did not go through."));
+          }}
+        >
           {/* Same honesty as the shelf tiles: what downloads is ten real rows
               of the collection's flagship table, not the collection, and a
               collection without even a sample delivers its description. The
@@ -180,6 +192,8 @@ function DrawnFrom({ id, user }) {
             : "Download the collection description"}{" "}
           <span aria-hidden="true">&#8595;</span>
         </button>
+        {refusal ? <p className="cp-ar__drawblurb" role="alert">{refusal}</p> : null}
+        </>
       ) : (
         <p className="cp-ar__locked">
           Included in <TierName name={upgrade.name} />.{" "}

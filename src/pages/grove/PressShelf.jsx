@@ -52,6 +52,7 @@ import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from "re
 // point-to-read affordance below becomes tap-to-read, and a tile's download
 // moves one tap further so nobody takes a file before reading what it is.
 import { COARSE } from "../../features/grove/pointer.js";
+import { PageBoundary } from "./PageBoundary.jsx";
 import { appUrl } from "../../features/grove/appLink.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { canOpenDataset, coverageFrom, coverageLabel } from "../../features/grove/pressAccess";
@@ -483,9 +484,11 @@ export default function PressShelf({ user }) {
       {shelves.map((tier, index) => (
         <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} selectedId={selectedId} onPick={onPick} />
       ))}
-      <Suspense fallback={<section className="cp-sec" aria-busy="true" aria-label="Explore the collections" />}>
-        <PressExplore user={user} pick={pick} onActive={setHovered} onSelected={setSelectedId} />
-      </Suspense>
+      <PageBoundary what="The viewer">
+        <Suspense fallback={<section className="cp-sec" aria-busy="true" aria-label="Explore the collections" />}>
+          <PressExplore user={user} pick={pick} onActive={setHovered} onSelected={setSelectedId} />
+        </Suspense>
+      </PageBoundary>
       {grove ? <GroveTeaser tier={grove} /> : null}
     </div>
   );

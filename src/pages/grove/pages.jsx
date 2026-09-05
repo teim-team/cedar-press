@@ -11,9 +11,10 @@
  * paint; split, the first bundle is a third smaller and the viewer's 38 kB
  * arrives only on the Collections page.
  *
- * A chunk that fails to arrive (the connection dropped between clicks)
- * throws from the lazy import; React surfaces that as an error, and a reload
- * fetches it again.
+ * A chunk that fails to arrive (the connection dropped between clicks, or
+ * a deployment replaced the hashed assets under an open tab) rejects the
+ * lazy import; PageBoundary.jsx catches it and offers the reload that
+ * fetches the current assets.
  */
 import { lazy } from "react";
 

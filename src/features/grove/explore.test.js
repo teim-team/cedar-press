@@ -27,6 +27,10 @@ import {
   contractFor,
   csvCell,
   cutCsv,
+  matchedBy,
+  rowLinkStatus,
+  CUT_VERSION,
+
   broadHits,
   rowScopes,
   scopeCovers,
@@ -737,8 +741,11 @@ test("a row's entities include every declared role column, so an entity filter f
 
 const SCOPED_KEY = "legislation/native_bills";
 const SCOPED_CONTRACT = { ...contractFor(SCOPED_KEY), scopes: "collective_scopes", link_status: "entity_link_statuses" };
-const FRT = { scope: "federally-recognized-tribes", relationship: "general_subject", as_of: null, as_of_rule: "unknown", basis: "bill_scope=general" };
-const OK_STATE = { scope: "federally-recognized-tribes-in-state:OK", relationship: "applies_to", as_of: "2021-01-01", as_of_rule: "source_defined", basis: "section 2" };
+// Dated on or after the register's own date, so membership is evaluable.
+const FRT = { scope: "federally-recognized-tribes", relationship: "addressed", as_of: "2026-09-05", as_of_rule: "record_date", basis: "notice addressee" };
+// The relationship Legislation's rule writes: no date can be established, so membership is unknown.
+const FRT_UNDATED = { scope: "federally-recognized-tribes", relationship: "general_subject", as_of: null, as_of_rule: "unknown", basis: "bill_scope=general" };
+const OK_STATE = { scope: "federally-recognized-tribes-in-state:OK", relationship: "applies_to", as_of: "2026-09-05", as_of_rule: "source_defined", basis: "section 2" };
 function scopedRows(register = REGISTER) {
   const contract = SCOPED_CONTRACT;
   const base = { congress: "117", bill_type: "hr", bill_number: "1", introduced_date: "2021-03-01", title: "t" };
@@ -755,6 +762,8 @@ function scopedRows(register = REGISTER) {
     { ...base, bill_id: "b-state", entity_cedar_uids: "", collective_scopes: JSON.stringify([OK_STATE]) },
     // 6. not evaluated
     { ...base, bill_id: "b-unread", entity_cedar_uids: "", collective_scopes: "" },
+    // 7. the class, at an unknown date: what Legislation's rule writes today
+    { ...base, bill_id: "b-undated", entity_cedar_uids: "", collective_scopes: JSON.stringify([FRT_UNDATED]) },
   ];
   return raws.map((raw, i) => {
     const entity = rowEntities(raw, contract, register);
@@ -778,16 +787,30 @@ test("a scope is never an entity: it has no uid, fills no entity block, and an u
   // The picker's facets count scopes apart from entities.
   const f = facets(rows, REGISTER);
   assert.ok(!f.entities.some((e) => e.uid === "federally-recognized-tribes"));
-  assert.deepEqual(f.scopes.map((s) => [s.code, s.count, s.evaluable]), [["federally-recognized-tribes", 2, true], ["federally-recognized-tribes-in-state:OK", 1, false]]);
+  assert.deepEqual(f.scopes.map((s) => [s.code, s.count, s.evaluable]), [["federally-recognized-tribes", 3, true], ["federally-recognized-tribes-in-state:OK", 1, false]]);
+  // A malformed scope code in a permalink is dropped and said so, never kept
+  // as a filter that matches nothing (Codex, PR #69).
+  const back = decodeCut("sc=federally-recognized-tribes:OK|federally-recognized-tribes-in-state|indian-country");
+  assert.deepEqual(back.scopes, ["indian-country"]);
+  assert.deepEqual(back.dropped, ["scope federally-recognized-tribes:OK", "scope federally-recognized-tribes-in-state"]);
+  assert.equal(CUT_VERSION, 2);
 });
 
 test("named and collective coexist; an entity filter finds named records only, unless the reader asks for the broader group", () => {
   const rows = scopedRows();
   const ids = (cut) => filterRows(rows, cut, REGISTER).map((r) => r.recordId);
   assert.deepEqual(ids({ ...EMPTY_CUT, entities: ["CE-00134-BX"] }), ["b-both", "b-named"]);
-  // Broad: the class record joins, once, with its reason; the unresolved and the unread do not.
+  // Broad: the dated class record joins, once, with its reason; the
+  // unresolved, the unread and the UNDATED class record do not (membership
+  // at an unknown date is unknown, and unknown is never a match).
   const broad = filterRows(rows, { ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true }, REGISTER);
   assert.deepEqual(broad.map((r) => r.recordId), ["b-class", "b-both", "b-named"]);
+  assert.equal(scopeCovers(FRT_UNDATED, REGISTER.byUid.get("CE-00134-BX"), REGISTER), null);
+  assert.equal(scopeCovers({ ...FRT, as_of: "2001-01-01", as_of_rule: "source_defined" }, REGISTER.byUid.get("CE-00134-BX"), REGISTER), null, "before the register's date is unknown");
+  assert.equal(scopeCovers(FRT, REGISTER.byUid.get("CE-00134-BX"), REGISTER), true);
+  // A chosen entity that fails the type filter brings nothing in through its group.
+  const typed = filterRows(rows, { ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true, types: ["Alaska Native Regional Corporation"] }, REGISTER);
+  assert.deepEqual(typed.map((r) => r.recordId), []);
   const why = broadHits(broad[0], { ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true }, REGISTER);
   assert.equal(why.length, 1);
   assert.equal(why[0].scope, "federally-recognized-tribes");
@@ -796,19 +819,30 @@ test("named and collective coexist; an entity filter finds named records only, u
   // Ambiguous membership stays unknown: the state scope never expands.
   assert.equal(scopeCovers("federally-recognized-tribes-in-state:OK", REGISTER.byUid.get("CE-00134-BX"), REGISTER), null);
   assert.ok(!broad.some((r) => r.recordId === "b-state"));
-  // Selecting the scope itself finds the records covering it, named or not.
-  assert.deepEqual(ids({ ...EMPTY_CUT, scopes: ["federally-recognized-tribes"] }), ["b-class", "b-both"]);
+  // Selecting the scope itself finds the records covering it, named or not, dated or not.
+  assert.deepEqual(ids({ ...EMPTY_CUT, scopes: ["federally-recognized-tribes"] }), ["b-class", "b-both", "b-undated"]);
   assert.deepEqual(ids({ ...EMPTY_CUT, scopes: ["federally-recognized-tribes-in-state"] }), ["b-state"], "a parameterised scope is found by its family");
   // Overlapping matches do not multiply rows: a record matching through a name and two scopes appears once.
-  assert.deepEqual(ids({ ...EMPTY_CUT, entities: ["CE-00134-BX"], scopes: ["federally-recognized-tribes"], broad: true }), ["b-class", "b-both", "b-named"]);
+  assert.deepEqual(ids({ ...EMPTY_CUT, entities: ["CE-00134-BX"], scopes: ["federally-recognized-tribes"], broad: true }), ["b-class", "b-both", "b-named", "b-undated"]);
   // The cut says what it did.
   assert.match(describeCut({ ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true }, { register: REGISTER }), /broader group/);
   assert.match(describeCut({ ...EMPTY_CUT, scopes: ["federally-recognized-tribes"] }), /Federally recognized tribes collectively/);
-  // The export keeps the population out of the entity columns.
+  // The export keeps the population out of the entity columns, and says how
+  // each row got into a cut that asked for scopes or the broader group.
   const csv = cutCsv([rows[0]], { view: "cut" });
   const back = parseCsv(csv);
   assert.equal(back.rows[0].entity_uids, "");
   assert.ok(back.rows[0].collective_scopes.includes("federally-recognized-tribes"));
+  assert.ok(!csv.split("\n")[0].includes("matched_by"), "no reasons column unless the cut asks for scopes");
+  const broadCut = { ...EMPTY_CUT, entities: ["CE-00134-BX"], broad: true };
+  const explained = parseCsv(cutCsv(broad, { view: "cut", cut: broadCut, register: REGISTER }));
+  assert.deepEqual(explained.rows.map((r) => r.matched_by), ["broad:federally-recognized-tribes", "named", "named"]);
+  assert.equal(matchedBy(rows[1], { ...EMPTY_CUT, entities: ["CE-00134-BX"], scopes: ["federally-recognized-tribes"] }, REGISTER), "named|scope:federally-recognized-tribes");
+  // The link status travels with the row where the table carries it.
+  const statused = { ...SCOPED_CONTRACT, link_status: "entity_link_status" };
+  assert.equal(rowLinkStatus({ entity_link_status: "unresolved" }, statused), "unresolved");
+  assert.equal(rowLinkStatus({ entity_link_status: "banana" }, statused), null);
+  assert.equal(rowLinkStatus({ entity_link_statuses: "[\"A\"]" }, SCOPED_CONTRACT), null, "the plural tiers are not this vocabulary");
 });
 
 test("the contract guard fires on each violation it names, and passes a clean override", () => {

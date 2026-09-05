@@ -989,6 +989,50 @@ def scope_elements(value: str, collection: str, column: str):
     return parsed
 
 
+def owed_derivations(entry: dict, rename: dict, built_cols: list, rows: list):
+    """Every combine or derive whose target the customer would NOT receive if
+    the source left now, with the rows that would lose something.
+
+    The target counts as delivered only by what it will actually carry: a
+    column kept or renamed from another column, a rule that builds a value
+    (a blank builder such as `rule:blank` delivers nothing), or a value
+    supplied on the row under the target's name by something other than
+    the source itself. A combine whose target is named like one of its own
+    sources (contractors' `sector`) is delivered only where the OTHER sources
+    are blank; otherwise their content has nowhere to go yet (Codex, PR #68:
+    a source reading as its own populated target is not a replacement).
+    Yields (field, target, stuck) for every such field, stuck being 0 where
+    nothing would be lost; tests read the same list to stand in for the
+    terminal.
+    """
+    kept = {f["column"] for f in entry["fields"] if f["decision"] in ("keep", "withhold")}
+    blank_built = {n["column"] for n in entry.get("new", [])
+                   if not n.get("status") and n.get("from") == "rule:blank"}
+    carriers = {f["column"] for f in entry["fields"]
+                if f["decision"] == "combine" and f["to"] == f["column"]}
+    delivered = (kept | set(rename.values()) | set(built_cols)) - blank_built
+    for f in entry["fields"]:
+        if f["decision"] not in ("combine", "derive"):
+            continue
+        target = f["to"]
+        if f["column"] == target:
+            continue                      # the carrier: kept, see apply_field_map
+        # Delivered by another column or a value-building rule, and not a
+        # `blocking` derive (held to the row: Deals' Notes into research_note).
+        if target in delivered and not f.get("blocking"):
+            yield f, target, 0
+            continue
+        if target in carriers:
+            # The carrier's own value is the other source's, not this one's
+            # folded in: any content here has nowhere to go yet.
+            stuck = sum(1 for row in rows if (row.get(f["column"]) or "").strip())
+        else:
+            stuck = sum(1 for row in rows
+                        if (row.get(f["column"]) or "").strip()
+                        and not (row.get(target) or "").strip())
+        yield f, target, stuck
+
+
 class RetiredIdentifierPresent(FieldMapRefusal):
     def __init__(self, collection: str, where: str, n: int, example: str):
         super().__init__(collection, [where],
@@ -1173,8 +1217,12 @@ def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
         cls = (row.get(class_col) or "").strip()
         if not kind:
             return "null"
-        if kind != "general":
+        if kind == "tribe-specific":
             return "[]"
+        if kind != "general":
+            # A classification the rule does not know is not "evaluated and
+            # names none"; it stops the dataset (Codex, PR #69).
+            raise ScopeRefused(entry["collection"], "collective_scopes", 1, f"{scope_col}={kind!r}")
         code = _CLASS_TO_SCOPE.get(cls.lower())
         if not code:
             raise ScopeRefused(entry["collection"], "collective_scopes", 1, f"class {cls!r}")
@@ -1230,6 +1278,21 @@ def apply_field_map(collection: str, header: list, rows: list,
     uid_col = entry["entity_uid"]
     plural = bool(entry.get("plural"))
     reg = register()
+
+    # 0. A SCOPE CODE IS NOT AN IDENTITY, checked on the rows as they arrived:
+    # the plural block below consumes the raw uid lists and would recast a
+    # population code as an unresolved entity (null) before any later gate
+    # saw it (Codex, PR #69). Every identity source is read raw here.
+    scope_codes = set(scopes()["scopes"])
+    identity_cols = {uid_col} | {d["column"] for d in entry.get("entity_roles") or []}
+    identity_cols |= {c for c in header if c.endswith("_cedar_uid") or c.endswith("_entity_id")
+                      or c.endswith("_entity_ids")}
+    for c in sorted(identity_cols):
+        hits = [row[c] for row in rows
+                if any(part.strip().split(":")[0] in scope_codes
+                       for part in (row.get(c) or "").split("|"))]
+        if hits:
+            raise ScopeRefused(collection, c, len(hits), hits[0][:60])
 
     # 1. THE RETIREMENT CHECKS, on the rows as they arrived.
     retirement = []
@@ -1308,26 +1371,19 @@ def apply_field_map(collection: str, header: list, rows: list,
     # terminal delivers the target; the refusal names both columns and the
     # rows that would have lost something. A source that is blank on every
     # row loses nothing and may go.
-    kept = {f["column"] for f in entry["fields"] if f["decision"] in ("keep", "withhold")}
-    delivered = kept | set(rename.values()) | set(built_cols)
-    for f in entry["fields"]:
-        if f["decision"] not in ("combine", "derive"):
-            continue
-        target = f["to"]
-        # A `blocking` derive (Deals' Notes into research_note) is held to
-        # the row: the target built blank here is not the caveat arriving.
-        if target in delivered and not f.get("blocking"):
-            continue
-        stuck = sum(1 for row in rows
-                    if (row.get(f["column"]) or "").strip()
-                    and not (row.get(target) or "").strip())
+    for f, target, stuck in owed_derivations(entry, rename, built_cols, rows):
         if stuck:
             raise OwedDerivation(collection, f["column"], target, stuck)
+    # A combine whose target carries one of its own sources' names (contractors'
+    # `sector` from sector and supersector) keeps that source column: it is the
+    # target's carrier, not something to drop beneath it (Codex, PR #68).
+    carriers = {f["column"] for f in entry["fields"]
+                if f["decision"] == "combine" and f["to"] == f["column"]}
 
     # 3. DROP, then RENAME (so a raw column marked internal cannot clobber, or
     # be clobbered by, the normalized one renamed onto its name).
     drop = [(f["column"], f["decision"]) for f in entry["fields"]
-            if f["decision"] not in ("keep", "withhold", "rename")]
+            if f["decision"] not in ("keep", "withhold", "rename") and f["column"] not in carriers]
     dropped = {c for c, _ in drop}
     if plural:
         dropped.add(uid_col)
@@ -1414,6 +1470,18 @@ def apply_field_map(collection: str, header: list, rows: list,
     if "collective_scopes" in header:
         for row in rows:
             scope_elements(row.get("collective_scopes"), collection, "collective_scopes")
+    # The link-status vocabulary, where the map declares the column as that
+    # vocabulary (the Federal Register's owed column names the four values);
+    # nonprofits' column of the same name is a combine of link tiers with a
+    # vocabulary of its own, and is not held to this one.
+    declared = any(n["column"] == "entity_link_status" and "no_individual_named" in n.get("from", "")
+                   for n in entry.get("new", []))
+    if "entity_link_status" in header and declared:
+        allowed = set(scopes()["link_statuses"])
+        bad = [row["entity_link_status"] for row in rows
+               if (row.get("entity_link_status") or "").strip() not in allowed]
+        if bad:
+            raise ScopeRefused(collection, "entity_link_status", len(bad), str(bad[0])[:60])
     scope_codes = set(scopes()["scopes"])
     for c in [c for c in header if c in ("cedar_uid",) or c in OPENING_PLURAL[:1]
               or c.endswith("_cedar_uid") or c.endswith("_entity_id")]:

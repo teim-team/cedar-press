@@ -26,6 +26,7 @@ import {
   CedarPressWhatsNew,
   PageArriving,
 } from "./pages/grove/pages.jsx";
+import { PageBoundary } from "./pages/grove/PageBoundary.jsx";
 import {
   PRESS_ARTICLES_PATH,
   PRESS_ARTICLE_PATH,
@@ -50,6 +51,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <BrowserRouter>
+        <PageBoundary>
         <Suspense fallback={<PageArriving />}>
         <Routes>
           <Route path={PRESS_PATH} element={<CedarPress />} />
@@ -65,6 +67,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="*" element={<Navigate to={PRESS_PATH} replace />} />
         </Routes>
         </Suspense>
+        </PageBoundary>
       </BrowserRouter>
     </AuthProvider>
   </StrictMode>,
