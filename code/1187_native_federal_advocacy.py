@@ -82,7 +82,10 @@ ACTIVITY_TYPES = ("registered_lobbying", "tribal_consultation",
                   "agency_meeting", "regulatory_comment",
                   "congressional_testimony", "formal_letter",
                   "nonprofit_lobbying_disclosure")
-NO_SOURCE_YET = ("congressional_testimony", "formal_letter")
+#: `congressional_testimony` was here until 2026-09-04, when a source was
+#: found. Declaring an empty category rather than deleting it is what made
+#: the gap visible enough to close.
+NO_SOURCE_YET = ("formal_letter",)
 
 AMOUNT_TYPES = ("lobbying_income", "lobbying_expense",
                 "irs_lobbying_expenditure", "")
@@ -132,8 +135,35 @@ def _row(names, uid, atype, aid, adate, party, rep, fed, topic,
     }
 
 
+def _orgkey(x: str) -> str:
+    """Normalised form for EXACT organization-name equality, not similarity."""
+    import re as _re
+    x = (x or "").lower()
+    x = _re.sub(r"(inc|incorporated|corp|corporation|llc|ltd|co|the)", " ", x)
+    x = _re.sub(r"[^a-z0-9]+", " ", x)
+    return " ".join(x.split())
+
+
+def org_index():
+    """entity name -> cedar_uid, for resolving a witness's organization.
+
+    EXACT normalised equality only. A witness organization that does not match
+    an entity name exactly keeps a BLANK uid - the alternative is fuzzy
+    matching, which was measured and rejected earlier today when Museum of the
+    Cherokee Indian/People and Catawba Nation/Foundation scored identically at
+    0.50 with opposite truths.
+    """
+    out = {}
+    for r in _read(NAMES):
+        k = _orgkey(r.get("name", ""))
+        if k:
+            out.setdefault(k, r["cedar_uid"])
+    return out
+
+
 def collect(names):
     rows, counts = [], {}
+    by_org = org_index()
 
     # 1. registered lobbying. SUPERSEDED FILINGS ARE REPLACED, NOT REPEATED -
     #    the reviewer's rule, and the reason the old file needed an
@@ -277,8 +307,36 @@ def collect(names):
     rows += sc
     counts["nonprofit_lobbying_disclosure"] = len(sc)
 
+    # 6. congressional testimony. ACQUIRED 2026-09-04 - this category was
+    #    declared-and-empty until then, which is why it was declared rather
+    #    than deleted: a visible gap is one somebody can fill.
+    #
+    #    One row per WITNESS per hearing, because the witness's ORGANIZATION is
+    #    what links to a Cedar entity. The source deliberately did NOT filter
+    #    for Native affiliation - any keyword filter would silently drop tribal
+    #    enterprises whose name carries no Native token - so entity resolution
+    #    happens here, and a witness Cedar cannot place keeps a blank uid like
+    #    every other unresolved row.
+    tst = []
+    for r in _read(ROOT / "data" / "source" / "advocacy"
+                   / "congressional_testimony_2025_2026.csv"):
+        d = (r.get("activity_date") or "").strip()
+        if _year(d) not in WINDOW:
+            continue
+        org = (r.get("witness_organization") or "").strip()
+        tst.append(_row(names, by_org.get(_orgkey(org), ""),
+                        "congressional_testimony",
+                        (r.get("testimony_id") or "").strip(), d,
+                        org, r.get("witness_name"), r.get("committee"),
+                        r.get("hearing_title"), "", "",
+                        "congressional hearing witness list",
+                        r.get("source_record_id"), r.get("source_url"),
+                        (r.get("witness_title") or "").strip()))
+    rows += tst
+    counts["congressional_testimony"] = len(tst)
+
     for t in NO_SOURCE_YET:
-        counts[t] = 0
+        counts.setdefault(t, 0)
     return rows, counts
 
 
@@ -345,7 +403,8 @@ def selftest() -> int:
     if set(NO_SOURCE_YET) - set(ACTIVITY_TYPES):
         print("  FAIL a no-source type is not in the vocabulary"); ok = False
     else:
-        print("  the 2 sourceless activity types are declared, not deleted")
+        print("  the %d sourceless activity type(s) are declared, not deleted"
+              % len(NO_SOURCE_YET))
     if _q("2026-04-15") != "Q2" or _q("2026-01-01") != "Q1" or _q("") != "":
         print("  FAIL quarter derivation"); ok = False
     else:

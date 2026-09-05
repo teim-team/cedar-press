@@ -135,6 +135,64 @@ def check_csv_identity(vocab: set) -> Check:
     return c
 
 
+def check_sample_identity(vocab: set) -> Check:
+    """The samples the live site serves - the surface that actually leaked.
+
+    THIS CHECK EXISTS BECAUSE NOTHING CAUGHT IT. Measured 2026-09-04: while
+    every file in dist/customer was clean, 77 files under
+    public/data/cedar/samples/ carried a retired NEID and 3 carried the
+    corrupt short handle `Confederated Yakama`. They are copied verbatim from
+    dist/review/samples/ by scripts/import_cedar_manifest.py, which reads the
+    INTERNAL tables and therefore bypasses the publication layer entirely.
+
+    Two gates already passed on the same tree - the delivered CSVs were clean
+    and no delivered file carried a retired-scheme COLUMN - so the release
+    read as identity-clean while the site served the retired scheme to the
+    public. A gate that checks the artifact the customer downloads but not the
+    sample the website shows is a gate with a hole the exact size of the
+    failure that keeps recurring.
+
+    The owner's words for the pattern, 2026-09-04: "I don't want to be like,
+    oh, where is this NEID coming from? Oh, it's from an older script."
+    """
+    trees = [ROOT / "dist" / "review" / "samples",
+             ROOT / "public" / "data" / "cedar" / "samples"]
+    present = [t for t in trees if t.exists()]
+    c = Check("sample trees carry no retired identity",
+              "dist/review/samples + public/data/cedar/samples, every cell",
+              blocking=True)
+    if not present:
+        c.status = "NOT_ESTABLISHED"
+        c.detail = ("neither sample tree exists; an absent tree must never "
+                    "read as a clean one")
+        return c
+    hits, files = 0, []
+    for tree in present:
+        for p_ in sorted(tree.rglob("*.csv")):
+            n = 0
+            try:
+                with p_.open(encoding="utf-8-sig", errors="replace",
+                             newline="") as fh:
+                    for row in csv.DictReader(fh):
+                        for v in row.values():
+                            if not v or "-" not in v:
+                                continue
+                            for tok in (v.split("|") if "|" in v else [v]):
+                                if tok.strip() in vocab:
+                                    n += 1
+            except OSError:
+                continue
+            if n:
+                files.append("%s=%d" % (p_.name, n))
+                hits += n
+    c.measured = {"retired_identifier_values": hits,
+                  "files_scanned": sum(len(list(t.rglob('*.csv'))) for t in present)}
+    c.status = "PASS" if hits == 0 else "FAIL"
+    c.detail = ("no retired identifiers in either sample tree" if hits == 0
+                else "; ".join(files[:8]))
+    return c
+
+
 def check_db_identity(vocab: set) -> Check:
     """The check that would have caught the headline contradiction."""
     c = Check("customer database identity migration",
@@ -624,7 +682,8 @@ def run_all() -> list:
     if not vocab:
         sys.exit("FATAL: NEID vocabulary is empty - every membership test "
                  "would pass vacuously. Refusing to report a release verdict.")
-    return [check_csv_identity(vocab), check_db_identity(vocab),
+    return [check_csv_identity(vocab), check_sample_identity(vocab),
+            check_db_identity(vocab),
             check_preview_complete(), check_no_retired_scheme_columns(),
             check_definition_agreement(),
             check_artifacts_agree(vocab), check_uid_integrity(),
@@ -845,6 +904,47 @@ def selftest() -> int:
             PREVIEW = saved
 
     ok.append(_preview_passes())
+
+    # 5c. The sample trees. This check was added AFTER 77 files under
+    #     public/data/cedar/samples/ shipped a retired NEID while every
+    #     delivered CSV was clean and two other identity gates passed. A gate
+    #     added without a fixture is a gate nobody has seen fire.
+    def b5c(root):
+        global ROOT
+        (root / "dist" / "review" / "samples" / "gaming").mkdir(parents=True)
+        (root / "dist" / "review" / "samples" / "gaming" / "x__10.csv").write_text(
+            "cedar_uid,tribe_entity_id\nCE-0012G-ES,TRBF-KAIBAB-00\n",
+            encoding="utf-8")
+        ROOT = root
+
+    ok.append(_fixture_fails("a sample tree carrying a retired identifier",
+                             b5c, lambda: check_sample_identity(
+                                 neid_vocabulary())))
+
+    # 5d. And the positive control: a clean sample tree must PASS, or the
+    #     check above could be hardwired to FAIL and still look proven.
+    def _sample_clean_passes():
+        import tempfile          # local, matching _fixture_fails' own import
+        global ROOT
+        saved = ROOT
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                root = Path(d)
+                (root / "dist" / "review" / "samples" / "gaming").mkdir(parents=True)
+                (root / "dist" / "review" / "samples" / "gaming"
+                 / "x__10.csv").write_text(
+                    "cedar_uid,name\nCE-0012G-ES,Blackfeet Tribe\n",
+                    encoding="utf-8")
+                ROOT = root
+                got = check_sample_identity(neid_vocabulary())
+                good = got.status == "PASS"
+                print(f"    {'ok  ' if good else 'FAIL'}  a clean sample tree "
+                      f"passes  (returned {got.status})")
+                return good
+        finally:
+            ROOT = saved
+
+    ok.append(_sample_clean_passes())
 
     # 8 and 9. The two checks with no implementation yet must say exactly that
     #    and must block. An absent check has to read as absent, never as a pass;
