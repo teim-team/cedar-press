@@ -2277,8 +2277,12 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-ex__table th { position: sticky; top: 0; z-index: 2; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
 .teim-rd .cp-ex__sort { border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-transform: inherit; letter-spacing: inherit; }
 .teim-rd .cp-ex__sort.is-on { color: var(--dteal); }
-.teim-rd .cp-ex__table .cp-ex__pin { position: sticky; left: 2.4rem; z-index: 1; font-weight: 700; box-shadow: 1px 0 0 var(--line); max-width: 18rem; }
+.teim-rd .cp-ex__table .cp-ex__pin { position: sticky; left: var(--more-w, 2.4rem); z-index: 1; font-weight: 700; box-shadow: 1px 0 0 var(--line); max-width: 18rem; }
 .teim-rd .cp-ex__table th.cp-ex__pin { z-index: 3; }
+/* The identity block pins as a pair: the uid at a fixed width, the name
+ * beside it at the offset that width gives. */
+.teim-rd .cp-ex__table .cp-ex__pin--uid { width: 7.5rem; min-width: 7.5rem; max-width: 7.5rem; font-family: var(--mono); font-size: 0.74rem; font-weight: 400; box-shadow: none; }
+.teim-rd .cp-ex__table .cp-ex__pin--name { left: calc(var(--more-w, 2.4rem) + var(--uid-w, 7.5rem)); }
 .teim-rd .cp-ex__table .cp-ex__more { position: sticky; left: 0; z-index: 1; width: 2.4rem; padding-inline: 0.5rem; }
 .teim-rd .cp-ex__table th.cp-ex__more { z-index: 3; }
 .teim-rd .cp-ex__morebtn { width: 1.4rem; height: 1.4rem; border: 1px solid var(--line); background: var(--bg); color: var(--dteal); font: inherit; font-weight: 700; line-height: 1; cursor: pointer; padding: 0; }

@@ -560,17 +560,27 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   const [openId, setOpenId] = useState(null);
   // The scroll container's own width, as a CSS variable, so an expanded
   // record can pin itself to the visible part of a table wider than it.
+  // And the pinned columns' own widths, so the name pins exactly where the
+  // uid ends: a fixed offset in CSS left a gap a scrolled column showed
+  // through.
   const scrollRef = useRef(null);
+  const columnsKey = columns.join("|");
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return undefined;
-    const measure = () => node.style.setProperty("--vw", `${node.clientWidth}px`);
+    const measure = () => {
+      node.style.setProperty("--vw", `${node.clientWidth}px`);
+      const more = node.querySelector("th.cp-ex__more");
+      const uid = node.querySelector("th.cp-ex__pin--uid");
+      node.style.setProperty("--more-w", `${more ? more.getBoundingClientRect().width : 0}px`);
+      node.style.setProperty("--uid-w", `${uid ? uid.getBoundingClientRect().width : 0}px`);
+    };
     measure();
     if (typeof ResizeObserver === "undefined") return undefined;
     const observer = new ResizeObserver(measure);
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [columnsKey]);
   const universal = [
     ["entity", "Entity", true],
     ["entity_type", "Entity type"],
@@ -582,7 +592,8 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
     ...(showAmount ? [["amount", "Amount"]] : []),
     ["source", "Source"],
   ];
-  const heads = view === "table" ? columns.map((c) => [c, heading(c), c === entityColumn]) : universal;
+  const pinned = (c) => c === entityColumn || c === contract?.entity_uid;
+  const heads = view === "table" ? columns.map((c) => [c, heading(c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   const span = heads.length + 1;
   return (
     <div className="cp-ex__scroll" ref={scrollRef}>
@@ -590,8 +601,8 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
         <thead>
           <tr>
             <th scope="col" className="cp-ex__more"><span className="cp-badge__sr">Open the record</span></th>
-            {heads.map(([column, label, pinned]) => (
-              <SortHead key={column} column={column} label={label} sort={sort} onSort={onSort} pinned={pinned} className={`cp-ex__c-${column === "amount" || column === contract?.amount ? "amount" : "text"}`} />
+            {heads.map(([column, label, pin, pinClass]) => (
+              <SortHead key={column} column={column} label={label} sort={sort} onSort={onSort} pinned={pin} className={`cp-ex__c-${column === "amount" || column === contract?.amount ? "amount" : "text"}${pinClass ?? ""}`} />
             ))}
           </tr>
         </thead>
@@ -608,10 +619,10 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
                 </td>
                 {view === "table"
                   ? columns.map((column) => (
-                    <td key={column} className={`${column === entityColumn ? "cp-ex__pin" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
+                    <td key={column} className={`${pinned(column) ? "cp-ex__pin" : ""}${column === contract?.entity_uid ? " cp-ex__pin--uid" : column === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""}${column === contract?.amount ? " cp-ex__amount" : ""}`}>
                       {column === entityColumn && item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
                       {column === entityColumn && item.entity.withheld ? <em>{WITHHELD_TEXT}</em> : <Human column={column} value={item.row[column]} contract={contract} />}
-                      {column === entityColumn && item.entity.uid ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
+                      {column === entityColumn && item.entity.uid && !columns.includes(contract?.entity_uid) ? <small className="cp-ex__uid">{item.entity.uids.join(" · ")}</small> : null}
                     </td>
                   ))
                   : (
@@ -764,13 +775,14 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   const contract = table ? contractFor(table.key) : null;
   const entityColumn = contract ? (contract.entity_name ?? contract.entity_uid ?? null) : null;
   const tableColumns = table ? columns.get(table.key) ?? [] : [];
-  // The entity first (its name, then its uid), then the declared default
+  // The Cedar identity block first, in the register's order (uid, name,
+  // class), whatever order the file keeps; then the declared default
   // columns, then, on request, everything else. The download keeps the
   // table's own order and every column.
-  const lead = contract ? [contract.entity_name, contract.entity_uid].filter((c) => c && tableColumns.includes(c)) : [];
+  const lead = contract ? [contract.entity_uid, contract.entity_name, contract.entity_type].filter((c) => c && tableColumns.includes(c)) : [];
   const defaults = (contract?.default_columns ?? []).filter((c) => tableColumns.includes(c));
   const allColumns = table ? [...new Set([...lead, ...tableColumns])] : [];
-  const shownColumns = table ? (showAll || !defaults.length ? allColumns : [...new Set([...lead.slice(0, 1), ...defaults])]) : [];
+  const shownColumns = table ? (showAll || !defaults.length ? allColumns : [...new Set([...lead, ...defaults])]) : [];
   const yearBasis = table
     ? contract?.year_basis
     : tables.length === 1

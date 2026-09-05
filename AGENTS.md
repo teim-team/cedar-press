@@ -753,6 +753,7 @@ Elijah's own Dippel correspondence proves that **no reliable corporate-hierarchy
 Name similarity ≠ relatedness ("Cherokee Inc." trap). DBA ≠ legal name. Subsidiaries don't share parent names. Firm ≠ establishment. Identifiers change on ownership events. Therefore: match conservatively, leave ambiguous blank and flagged (the 34 unmatched BGOV tribes and 3 corrected village-corp region mappings are the model — my own auto-matcher produced Sea Lion→Koniag via a token trap; audit every automated match against ground truth).
 
 ## Queue (highest value first)
+0. **Column order and count in the customer files** — `docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md`: the Cedar identity block (`cedar_uid`, `canonical_name`, `entity_class`) first in every table, tier-C bookkeeping out of `dist/customer/` and the samples, `source_url` written where the site builds it today. Per-table lists with the reasoning; the owner decides.
 1. Get the **do-file**; review the 117 QC-flagged panel rows against it.
 2. Comprehensive FPDS pull (both methodologies) via HigherGov/USAspending → upload → match through Entity_Master aliases + NEID; build the ownership-change ledger from the deal rows.
 3. TBCP + HUD ONAP award lists via manual download → row-per-award (path to 500+; channel inventory with counts lives in Backfill_Plan).
