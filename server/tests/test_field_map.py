@@ -560,8 +560,10 @@ class TestApplyFieldMap(unittest.TestCase):
         pub.apply_field_map("legislation", header, rows, set(header))
         got = [[e["scope"] for e in json.loads(r["collective_scopes"])] for r in rows[:6]]
         self.assertEqual(got, [["indian-country"],
-                               ["federally-recognized-tribes", "alaska-native-corporations"],
-                               ["alaska-native-corporations"],
+                               ["federally-recognized-tribes",
+                                "alaska-native-village-corporations"],
+                               ["alaska-native-regional-corporations",
+                                "alaska-native-village-corporations"],
                                ["alaska-native-villages"],
                                ["intertribal-organizations"],
                                ["native-hawaiian-organizations"]])
@@ -620,6 +622,8 @@ class TestApplyFieldMap(unittest.TestCase):
                     dict(element, scope="indian-country", relationship="covers"),
                     dict(element, scope="federally-recognized-tribes-in-state"),
                     dict(element, scope="indian-country", as_of="2026"),
+                    dict(element, scope="indian-country", as_of="2026-99-99"),
+                    dict(element, scope="indian-country", as_of="2026-02-30"),
                     dict(element, scope="indian-country", as_of_rule="record_date", as_of=None)):
             header, rows, own = supplied(bad)
             with self.assertRaises(pub.ScopeRefused):

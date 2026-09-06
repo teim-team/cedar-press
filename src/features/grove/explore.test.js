@@ -45,6 +45,7 @@ import {
   exploreTables,
   explorableCollections,
   facets,
+  isCalendarDate,
   filterRows,
   flagshipKey,
   isNarrowed,
@@ -796,6 +797,10 @@ test("a scope is never an entity: it has no uid, fills no entity block, and an u
   assert.equal(evaluableScope(FRT, REGISTER), true);
   assert.equal(evaluableScope(FRT_UNDATED, REGISTER), false);
   assert.equal(evaluableScope(FRT, buildRegister({ classes: [], entities: [] })), false, "a register without a date vouches for nothing");
+  assert.equal(evaluableScope({ ...FRT, as_of: "2026-99-99" }, REGISTER), false, "date-shaped is not a date (Codex, PR #72)");
+  assert.equal(evaluableScope({ ...FRT, as_of: "2026-02-30" }, REGISTER), false);
+  assert.equal(isCalendarDate("2024-02-29"), true);
+  assert.equal(isCalendarDate("2023-02-29"), false);
   // A malformed scope code in a permalink is dropped and said so, never kept
   // as a filter that matches nothing (Codex, PR #69).
   const back = decodeCut("sc=federally-recognized-tribes:OK|federally-recognized-tribes-in-state|indian-country");

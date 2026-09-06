@@ -114,6 +114,7 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import datetime as _dt
 import json
 import re
 import sys
@@ -956,11 +957,14 @@ _CLASS_TO_SCOPE = {
     "federally recognized tribes": "federally-recognized-tribes",
     "federally recognized alaska native village": "alaska-native-villages",
     "alaska native village government": "alaska-native-villages",
+    # A kind of corporation keeps its own scope: the umbrella is for a source
+    # that names ANCs as one population, and a scope is never wider than the
+    # source's claim (Codex, PR #72).
     "alaska native corporation": "alaska-native-corporations",
     "alaska native corporations": "alaska-native-corporations",
-    "alaska native village corporation": "alaska-native-corporations",
-    "alaska native regional corporation": "alaska-native-corporations",
-    "ancsa group corporation": "alaska-native-corporations",
+    "alaska native village corporation": "alaska-native-village-corporations",
+    "alaska native regional corporation": "alaska-native-regional-corporations",
+    "ancsa group corporation": "ancsa-group-corporations",
     "native hawaiian organization": "native-hawaiian-organizations",
     "intertribal organization": "intertribal-organizations",
     "indian country": "indian-country",
@@ -994,8 +998,15 @@ def scope_elements(value: str, collection: str, column: str):
         if rule not in vocab["as_of_rules"]:
             raise ScopeRefused(collection, column, 1, f"as_of_rule {rule!r}")
         as_of = el.get("as_of")
-        if as_of is not None and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(as_of)):
-            raise ScopeRefused(collection, column, 1, f"as_of {as_of!r} is not a date")
+        if as_of is not None:
+            # A real calendar date, not a date-shaped string: 2026-99-99 would
+            # otherwise sort as current in the viewer (Codex, PR #72).
+            try:
+                if not isinstance(as_of, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", as_of):
+                    raise ValueError(as_of)
+                _dt.date.fromisoformat(as_of)
+            except ValueError:
+                raise ScopeRefused(collection, column, 1, f"as_of {as_of!r} is not a date") from None
         if rule != "unknown" and as_of is None:
             raise ScopeRefused(collection, column, 1, f"as_of_rule {rule!r} without an as_of")
         if not str(el.get("basis") or "").strip():

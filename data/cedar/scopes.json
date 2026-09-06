@@ -64,7 +64,7 @@
     },
     "alaska-native-corporations": {
       "name": "Alaska Native Corporations",
-      "definition": "The regional, village and group corporations organised under ANCSA. Not federally recognized tribes; a source that uses the ISDA definition of Indian tribe (Yellen v. Confederated Tribes of the Chehalis Reservation, 2021) reaches them where the recognized-tribe list does not, and the two scopes are recorded separately.",
+      "definition": "The ANCSA corporations as a whole, where a source addresses them as one population (a statute naming 'Alaska Native Corporations'). A source that names a kind of corporation gets that kind's own scope below, never this umbrella: a scope may not be wider than the source's claim.",
       "membership": {
         "kind": "register_class",
         "classes": [
@@ -97,6 +97,39 @@
         "kind": "register_class",
         "classes": [
           "Intertribal Organization"
+        ],
+        "reconciled_against_official_list": false
+      }
+    },
+    "alaska-native-village-corporations": {
+      "name": "Alaska Native village corporations",
+      "definition": "The village corporations organised under ANCSA, as a class, where the source names that kind.",
+      "membership": {
+        "kind": "register_class",
+        "classes": [
+          "Alaska Native Village Corporation"
+        ],
+        "reconciled_against_official_list": false
+      }
+    },
+    "alaska-native-regional-corporations": {
+      "name": "Alaska Native regional corporations",
+      "definition": "The twelve (thirteen with the at-large) regional corporations organised under ANCSA, as a class, where the source names that kind.",
+      "membership": {
+        "kind": "register_class",
+        "classes": [
+          "Alaska Native Regional Corporation"
+        ],
+        "reconciled_against_official_list": false
+      }
+    },
+    "ancsa-group-corporations": {
+      "name": "ANCSA group corporations",
+      "definition": "The group corporations organised under ANCSA, as a class, where the source names that kind.",
+      "membership": {
+        "kind": "register_class",
+        "classes": [
+          "ANCSA Group Corporation"
         ],
         "reconciled_against_official_list": false
       }

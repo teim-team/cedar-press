@@ -399,8 +399,15 @@ export function evaluableScope(element, register = EMPTY_REGISTER) {
   const el = typeof element === "string" ? { scope: element } : element ?? {};
   const membership = scopeDefinition(el.scope)?.membership;
   if (!membership || membership.kind !== "register_class") return false;
-  if (!register.asOf || el.as_of_rule === "unknown" || !/^\d{4}-\d{2}-\d{2}$/.test(el.as_of ?? "")) return false;
+  if (!register.asOf || el.as_of_rule === "unknown" || !isCalendarDate(el.as_of)) return false;
   return el.as_of >= register.asOf;
+}
+
+/** YYYY-MM-DD, and a day that exists: 2026-99-99 is date-shaped and not a date. */
+export function isCalendarDate(text) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text ?? "")) return false;
+  const parsed = new Date(`${text}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === text;
 }
 
 export function scopeCovers(element, entity, register = EMPTY_REGISTER) {
