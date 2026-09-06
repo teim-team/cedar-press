@@ -3815,8 +3815,9 @@ carries over to `CB-` unchanged. ADR-030's place register is the establishment
 layer, already built. The 45 `Individually Native-owned business` entities
 keep their uids and gain business ids with an equivalence row.
 
-**Open for the owner.** Whether the id carries the standard's two check
-characters (recommended) or is the plain sequence the reviewer wrote; whether
-the individually owned entity class stays open to new mints. Both are stated
-in the decision file.
+**Decided the same day.** The id carries the standard's two check characters
+over the uid's alphabet (`CB-0001842-XQ`), and the `Individually Native-owned
+business` entity class closes to new mints: its 45 entities keep their uids
+and gain business ids with an equivalence row, and every future privately
+owned Native firm is a `CB-` only.
 <!-- END ADR-043-CEDAR-BUSINESS-ID -->

@@ -9243,7 +9243,8 @@ individually owned entity class, the NEST enterprise register, the place
 register, the identifier ledger, ADR-008, the constellation's name-only
 firms, the deals parties), restates them as the verify-and-regression
 contract the uid already has, lists what the terminal owns and what this
-repository does once the register exists, and leaves two choices to the
-owner: check characters on the id, and whether the individually owned entity
-class stays open. Documentation only; no code changed.
+repository does once the register exists, and records the owner's two further decisions:
+the id carries two check characters over the uid's alphabet, and the
+individually owned entity class closes to new mints. Documentation only; no
+code changed.
 
