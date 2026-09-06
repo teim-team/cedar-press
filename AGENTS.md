@@ -9232,3 +9232,18 @@ around the lazy routes and the lazy viewer; the article's download shows a
 refusal like the shelf; the prerender reveals every section and carries each
 page's own Open Graph, Twitter and robots tags.
 
+## 2026-09-06: the Cedar Business ID, recorded for the terminal
+
+The owner adopted a reviewer's proposal for a second permanent identifier,
+`CB-`, for commercial businesses, kept impermeable to `cedar_uid`
+(`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`, ADR-043, pointers in
+`docs/ARCHITECTURE.md` and `docs/IDENTIFIER_STANDARD.md`). The decision file
+quotes the rules, reconciles them with what the spine already holds (the
+individually owned entity class, the NEST enterprise register, the place
+register, the identifier ledger, ADR-008, the constellation's name-only
+firms, the deals parties), restates them as the verify-and-regression
+contract the uid already has, lists what the terminal owns and what this
+repository does once the register exists, and leaves two choices to the
+owner: check characters on the id, and whether the individually owned entity
+class stays open. Documentation only; no code changed.
+

@@ -445,6 +445,23 @@ is added, and `cedar_uid` keeps meaning the canonical Native entity.
 - Nothing here displays a national membership count: the register's class
   totals are reconciled against the official list on the terminal first.
 
+## The Cedar Business ID: a second identity, kept apart from the uid
+
+On 2026-09-06 the owner adopted a reviewer's proposal for a permanent
+business identifier separate from `cedar_uid`
+(`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`, ADR-043). `CE-` keeps
+meaning the canonical Native institution; `CB-` names a distinct commercial
+business, whoever owns it. The id encodes nothing, never changes, and is
+never traded for a uid except by an adjudication that keeps both. Ownership
+is a dated relationship, registrations are attributes, name changes are
+aliases, and successors get new ids. The register is the terminal's to build,
+seeded from the NEST enterprises, the certified-firm directories, the
+contracting awardees and the deal parties. This repository's part comes
+after: a `cedar_business_id` column declared in the field map where a
+business is a party, the writer refusing a `CB-` id in an identity column,
+and the publication rule for individually owned businesses extended to the
+id. Nothing here mints or validates one yet.
+
 ## The public dataset specification
 
 `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` is the owner's specification for
