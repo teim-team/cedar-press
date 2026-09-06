@@ -114,6 +114,7 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import datetime as _dt
 import json
 import re
 import sys
@@ -948,13 +949,24 @@ def scopes() -> dict:
 
 #: The register class a terminal's class-level scope column names, to the
 #: scope code that population has in the vocabulary. Lower-cased keys.
+#: The labels code/73's CLASS_MAP writes (and 1140 pipe-joins into
+#: `entity_class_scope`), each to its population. A label not here stops the
+#: dataset: the vocabulary is closed on purpose.
 _CLASS_TO_SCOPE = {
     "federally recognized tribe": "federally-recognized-tribes",
     "federally recognized tribes": "federally-recognized-tribes",
     "federally recognized alaska native village": "alaska-native-villages",
+    "alaska native village government": "alaska-native-villages",
+    # A kind of corporation keeps its own scope: the umbrella is for a source
+    # that names ANCs as one population, and a scope is never wider than the
+    # source's claim (Codex, PR #72).
     "alaska native corporation": "alaska-native-corporations",
     "alaska native corporations": "alaska-native-corporations",
+    "alaska native village corporation": "alaska-native-village-corporations",
+    "alaska native regional corporation": "alaska-native-regional-corporations",
+    "ancsa group corporation": "ancsa-group-corporations",
     "native hawaiian organization": "native-hawaiian-organizations",
+    "intertribal organization": "intertribal-organizations",
     "indian country": "indian-country",
 }
 
@@ -982,8 +994,21 @@ def scope_elements(value: str, collection: str, column: str):
             raise ScopeRefused(collection, column, 1, f"scope {code!r}")
         if el.get("relationship") not in vocab["relationships"]:
             raise ScopeRefused(collection, column, 1, f"relationship {el.get('relationship')!r}")
-        if el.get("as_of_rule") not in vocab["as_of_rules"]:
-            raise ScopeRefused(collection, column, 1, f"as_of_rule {el.get('as_of_rule')!r}")
+        rule = el.get("as_of_rule")
+        if rule not in vocab["as_of_rules"]:
+            raise ScopeRefused(collection, column, 1, f"as_of_rule {rule!r}")
+        as_of = el.get("as_of")
+        if as_of is not None:
+            # A real calendar date, not a date-shaped string: 2026-99-99 would
+            # otherwise sort as current in the viewer (Codex, PR #72).
+            try:
+                if not isinstance(as_of, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", as_of):
+                    raise ValueError(as_of)
+                _dt.date.fromisoformat(as_of)
+            except ValueError:
+                raise ScopeRefused(collection, column, 1, f"as_of {as_of!r} is not a date") from None
+        if rule != "unknown" and as_of is None:
+            raise ScopeRefused(collection, column, 1, f"as_of_rule {rule!r} without an as_of")
         if not str(el.get("basis") or "").strip():
             raise ScopeRefused(collection, column, 1, f"scope {code!r} without a basis")
     return parsed
@@ -1223,12 +1248,24 @@ def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
             # A classification the rule does not know is not "evaluated and
             # names none"; it stops the dataset (Codex, PR #69).
             raise ScopeRefused(entry["collection"], "collective_scopes", 1, f"{scope_col}={kind!r}")
-        code = _CLASS_TO_SCOPE.get(cls.lower())
-        if not code:
-            raise ScopeRefused(entry["collection"], "collective_scopes", 1, f"class {cls!r}")
+        # 1140 pipe-joins the classes a bill's title names (about a tenth of
+        # general bills carry two); a general bill naming no class concerns
+        # Indian Country without a defined population. One element per
+        # distinct population, in the order the classes came.
+        labels = [c.strip() for c in cls.split("|") if c.strip()]
+        codes = []
+        for label in labels:
+            code = _CLASS_TO_SCOPE.get(label.lower())
+            if not code:
+                raise ScopeRefused(entry["collection"], "collective_scopes", 1, f"class {label!r}")
+            if code not in codes:
+                codes.append(code)
+        if not codes:
+            codes = ["indian-country"]
         return _js([{"scope": code, "relationship": "general_subject", "as_of": None,
                      "as_of_rule": "unknown",
-                     "basis": f"{scope_col}={kind}; {class_col}={cls}"}])
+                     "basis": f"{scope_col}={kind}; {class_col}={cls or '(none)'}"}
+                    for code in codes])
     if name == "additional_sources":
         url_col, type_col = arg.split("|")
         url = (row.get(url_col) or "").strip()
@@ -1482,8 +1519,12 @@ def apply_field_map(collection: str, header: list, rows: list,
                if (row.get("entity_link_status") or "").strip() not in allowed]
         if bad:
             raise ScopeRefused(collection, "entity_link_status", len(bad), str(bad[0])[:60])
+    # The singular identity columns, after the renames. The plural block's
+    # `cedar_uids` is rebuilt here from the raw lists step 0 already checked,
+    # so it is not read again (a JSON array can never match a bare code, and
+    # a check that cannot fire is not a check).
     scope_codes = set(scopes()["scopes"])
-    for c in [c for c in header if c in ("cedar_uid",) or c in OPENING_PLURAL[:1]
+    for c in [c for c in header if c == "cedar_uid"
               or c.endswith("_cedar_uid") or c.endswith("_entity_id")]:
         hits = [row[c] for row in rows
                 if (row.get(c) or "").split(":")[0].strip() in scope_codes]

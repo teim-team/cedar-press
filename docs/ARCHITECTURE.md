@@ -175,7 +175,10 @@ carrying `code` — the shape `pressSignup.pressSignupError` already reads.
 
 Every row is implemented by the FastAPI service in `server/`; nothing in
 teim-app or the Cedar engine serves a `/press/*` route, so that service is
-the server this client is built for. `/press/profile` was the last gap
+the server this client is built for. How the platform stores accounts and
+tiers, how it wires the Cedar engine, and what moving a subscriber into its
+Postgres would take (tables, the cookie across origins, the ledger, the error
+envelope) is measured in `docs/PLATFORM_INTEGRATION_2026-09-06.md`. `/press/profile` was the last gap
 (2026-09-05): it now reads and writes `reader_profiles` in the same SQLite
 store as the Cedar Points ledger, validated against the vocabulary
 `readerWork.js` offers (dumped into `_press_data.json` so the two cannot

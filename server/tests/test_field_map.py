@@ -543,6 +543,30 @@ class TestApplyFieldMap(unittest.TestCase):
         rows[0]["entity_class_scope"] = "Every Native person"
         with self.assertRaises(pub.ScopeRefused):
             pub.apply_field_map("legislation", header, rows, set(header))
+        # The labels 73 writes and 1140 pipe-joins all translate; a general
+        # bill naming no class concerns Indian Country generally; two classes
+        # give two elements in order, once each.
+        header, rows = sample("legislation", "native_bills")
+        for r in rows:
+            r["bill_scope"] = "general"
+        rows[0]["entity_class_scope"] = ""
+        rows[1]["entity_class_scope"] = ("Federally Recognized Tribe|"
+                                         "Alaska Native Village Corporation")
+        rows[2]["entity_class_scope"] = ("Alaska Native Regional Corporation|"
+                                         "Alaska Native Village Corporation")
+        rows[3]["entity_class_scope"] = "Alaska Native Village Government"
+        rows[4]["entity_class_scope"] = "Intertribal Organization"
+        rows[5]["entity_class_scope"] = "Native Hawaiian Organization"
+        pub.apply_field_map("legislation", header, rows, set(header))
+        got = [[e["scope"] for e in json.loads(r["collective_scopes"])] for r in rows[:6]]
+        self.assertEqual(got, [["indian-country"],
+                               ["federally-recognized-tribes",
+                                "alaska-native-village-corporations"],
+                               ["alaska-native-regional-corporations",
+                                "alaska-native-village-corporations"],
+                               ["alaska-native-villages"],
+                               ["intertribal-organizations"],
+                               ["native-hawaiian-organizations"]])
         # So does a bill_scope value the rule does not know: it is not
         # "evaluated and names none" (Codex, PR #69).
         header, rows = sample("legislation", "native_bills")
@@ -596,7 +620,11 @@ class TestApplyFieldMap(unittest.TestCase):
         # scope without its parameter, likewise; a good element ships.
         for bad in (dict(element, scope="indian-country", basis=""),
                     dict(element, scope="indian-country", relationship="covers"),
-                    dict(element, scope="federally-recognized-tribes-in-state")):
+                    dict(element, scope="federally-recognized-tribes-in-state"),
+                    dict(element, scope="indian-country", as_of="2026"),
+                    dict(element, scope="indian-country", as_of="2026-99-99"),
+                    dict(element, scope="indian-country", as_of="2026-02-30"),
+                    dict(element, scope="indian-country", as_of_rule="record_date", as_of=None)):
             header, rows, own = supplied(bad)
             with self.assertRaises(pub.ScopeRefused):
                 pub.apply_field_map("federal-register", header, rows, own)

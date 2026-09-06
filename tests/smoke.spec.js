@@ -551,7 +551,7 @@ test.describe("crawlers", () => {
       expect(response.status()).toBe(200);
       const body = await response.text();
       expect(body).toContain(heading);
-      expect(body).toMatch(/<meta name="robots" content="index, follow">/);
+      expect(body).toMatch(/<meta name="robots" content="index, follow" ?\/?>/);
       expect(body).toContain('<script type="application/ld+json">');
     });
   }
