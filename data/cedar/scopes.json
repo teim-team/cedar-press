@@ -89,6 +89,17 @@
       "membership": {
         "kind": "none"
       }
+    },
+    "intertribal-organizations": {
+      "name": "Intertribal organizations",
+      "definition": "The class of intertribal organizations a source addresses as a class. An actual intertribal organization is an entity in the register with its own uid; this scope is the class, never a stand-in for one of them.",
+      "membership": {
+        "kind": "register_class",
+        "classes": [
+          "Intertribal Organization"
+        ],
+        "reconciled_against_official_list": false
+      }
     }
   },
   "link_statuses": {

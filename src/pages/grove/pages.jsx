@@ -19,15 +19,19 @@
 import { lazy } from "react";
 
 export { default as CedarPress } from "./CedarPress.jsx";
+// The two other prerendered pages are eager too: a lazy route's first commit
+// clears the prerendered markup and paints the fallback until its chunk
+// arrives, which is the blank the prerender exists to prevent. They are
+// small (about a kilobyte gzipped each).
+export { default as CedarPressResearchAccess } from "./CedarPressResearchAccess.jsx";
+export { default as CedarPressTribalRequest } from "./CedarPressTribalRequest.jsx";
 
 export const CedarPressArticles = lazy(() => import("./CedarPressArticles.jsx"));
 export const CedarPressData = lazy(() => import("./CedarPressData.jsx"));
 export const CedarPressArticle = lazy(() => import("./CedarPressArticle.jsx"));
 export const CedarPressMethods = lazy(() => import("./CedarPressMethods.jsx"));
-export const CedarPressResearchAccess = lazy(() => import("./CedarPressResearchAccess.jsx"));
 export const CedarPressSettings = lazy(() => import("./CedarPressSettings.jsx"));
 export const CedarPressPriorities = lazy(() => import("./CedarPressPriorities.jsx"));
-export const CedarPressTribalRequest = lazy(() => import("./CedarPressTribalRequest.jsx"));
 export const CedarPressWhatsNew = lazy(() => import("./CedarPressWhatsNew.jsx"));
 
 /**

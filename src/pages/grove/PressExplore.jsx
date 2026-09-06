@@ -982,7 +982,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   const filters = (
     <>
       <EntityPicker cut={cut} facets={facets} register={register} onChange={(entities) => narrowTo({ entities })} />
-      {facets.scopes.length ? <ScopePicker cut={cut} facets={facets} onChange={(next) => narrowTo(next)} /> : null}
+      {facets.scopes.length || cut.scopes?.length ? <ScopePicker cut={cut} facets={facets} onChange={(next) => narrowTo(next)} /> : null}
       <TypePicker cut={cut} facets={facets} register={register} onChange={(types) => narrowTo({ types })} />
       <YearRange cut={cut} bounds={facets.years} basis={yearBasis} onChange={(years) => narrowTo({ years })} />
     </>
@@ -1081,7 +1081,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               </button>
             ) : null}
             {isNarrowed(cut) || cut.history ? (
-              <button type="button" className="cp-ex__clear" onClick={() => write({ entities: [], types: null, years: null, q: "", sort: null, history: false })}>Clear filters</button>
+              <button type="button" className="cp-ex__clear" onClick={() => write({ entities: [], scopes: [], broad: false, types: null, years: null, q: "", sort: null, history: false })}>Clear filters</button>
             ) : null}
             {cut.history ? (
               <button type="button" className="cp-ex__clear" onClick={() => write({ history: false })}>Hide superseded versions</button>

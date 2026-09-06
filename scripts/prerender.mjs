@@ -20,7 +20,11 @@ import { fileURLToPath } from "node:url";
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const OUT = `${ROOT}dist-site`;
 const PORT = Number(process.env.CEDAR_PRESS_PRERENDER_PORT) || 41999;
-const PAGES = ["/", "/tribal-data-request", "/research-access"];
+// The door last: once `/` is written to dist-site/index.html the preview
+// server's SPA fallback would serve the prerendered door for any route not
+// yet captured, and a readiness wait on `#root h1` would be satisfied by the
+// wrong page.
+const PAGES = ["/tribal-data-request", "/research-access", "/"];
 
 async function waitFor(url, tries = 60) {
   for (let i = 0; i < tries; i += 1) {
@@ -56,7 +60,10 @@ async function main() {
     const shell = readFileSync(`${OUT}/index.html`, "utf8");
     for (const path of PAGES) {
       await page.goto(`http://localhost:${PORT}${path}`, { waitUntil: "networkidle" });
-      await page.locator("#root h1").first().waitFor({ timeout: 15_000 });
+      // Ready when the route itself has set its canonical address, not when
+      // any heading exists.
+      const expected = `https://cedarpress.ai${path}`;
+      await page.waitForFunction((want) => document.querySelector('link[rel="canonical"]')?.getAttribute("href") === want && document.querySelector("#root h1"), expected, { timeout: 15_000 });
       // The head is the shell's (its asset links, policy and structured data
       // are what the build wrote); the root's markup and the page's own head
       // values come from the render: title, description, canonical, the
@@ -92,8 +99,7 @@ async function main() {
         const pattern = new RegExp(`(<meta\\s+${which}="${key}"\\s+content=")[^"]*(")`);
         if (pattern.test(out)) out = out.replace(pattern, `$1${attr(meta[key])}$2`);
       }
-      if (meta.robots) out = out.replace("</head>", `    <meta name="robots" content="${attr(meta.robots)}" />\n  </head>`);
-      out = out.replace("</head>", '  <meta name="robots" content="index, follow">\n  </head>');
+      out = out.replace("</head>", `    <meta name="robots" content="${attr(meta.robots || "index, follow")}" />\n  </head>`);
       // Written twice for a satellite page: `path.html`, which GitHub Pages
       // and the preview server both serve at the extensionless address the
       // sitemap and the canonical name, and `path/index.html` for the
