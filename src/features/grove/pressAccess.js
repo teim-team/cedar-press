@@ -56,12 +56,14 @@
  * the two must answer identically.
  *
  * WHO ANSWERS
- * The session payload carries the server's resolution as `user.press`
- * ({ canRead, shelfReach }, from tierCapabilities.pressShelfReach), and when
- * it is present it is the answer: a renewal or a capability change on the
- * server reaches the browser through the payload rather than waiting for a
- * client release. The tier map below is the fallback for a payload written
- * before the field existed, and it must stay identical to the server's.
+ * When the session payload carries `user.press` ({ canRead, shelfReach })
+ * it is the answer: a renewal or a capability change on the server reaches
+ * the browser through the payload rather than waiting for a client release.
+ * NO SERVER SENDS IT TODAY (measured 2026-09-06,
+ * docs/PLATFORM_INTEGRATION_2026-09-06.md): neither this repository's
+ * FastAPI service nor the platform's tierCapabilities has a press
+ * resolution, so the tier map below is what actually decides, and it must
+ * stay identical to whatever the server grows.
  */
 
 import { resolveTier } from "../../workspaceTier.js";
