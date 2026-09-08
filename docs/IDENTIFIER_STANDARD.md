@@ -124,6 +124,20 @@ guessed.
 
 ---
 
+### A second register for businesses, decided 2026-09-06
+
+`cedar_uid` identifies the canonical Native institution and nothing else. A
+business that is not one (an operating subsidiary, a privately owned Native
+firm, a vendor, a deal target) gets a **Cedar Business ID**, `CB-`, from a
+separate register with the same contract: encodes nothing, never changes,
+never reused, never dropped, never a substitute for a uid. Ownership is a
+relationship; registrations are attributes; name changes are aliases. The
+decision and its reconciliation with the NEST, place and identifier ledgers
+are in `docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md` (ADR-043). It
+supersedes ADR-008.
+
+---
+
 ## 1. There is one identity system, and it is ours
 
 **`cedar_uid` is the identity (see §0); the class-prefixed handle below is the

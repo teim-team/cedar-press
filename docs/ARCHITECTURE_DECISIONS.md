@@ -3786,3 +3786,38 @@ unattended. Fixed by reading the shapes the pass itself writes; V6 asserts it an
 a fixture runs `apply` a second time and checks the survivors. **Every in-place
 enricher in this repo should be run twice before it is believed.**
 <!-- END ADR-042-FULLDATA-THREE-GAPS -->
+
+<!-- BEGIN ADR-043-CEDAR-BUSINESS-ID -->
+## ADR-043 — a second permanent identifier for businesses, impermeable to the Cedar UID (decided 2026-09-06)
+
+**Status:** decided by the owner 2026-09-06 on a reviewer's proposal; recorded
+in full in `docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`. Not implemented in
+this repository; the register is the terminal's.
+
+**Decision.** `cedar_uid` (`CE-`) keeps meaning the canonical Native
+institution and nothing else. A second register, the Cedar Business Register,
+mints a **Cedar Business ID** (`CB-`) for every distinct commercial business:
+operating subsidiaries, privately owned Native firms, sole proprietorships,
+vendors, contractors, acquisition targets, suppliers. The id encodes nothing,
+never changes, is never reused or dropped, and is never promoted to or demoted
+from a uid except by an adjudication that leaves both ids and an equivalence
+row. Native ownership is a dated relationship with a source, never part of the
+id. Registrations (UEI, CAGE, EIN, DUNS, state and tribal vendor numbers) are
+attributes in the identifier ledger, never the identity. Name changes are
+aliases; legal successors get new ids and a `SUCCESSOR_OF` edge. Establishments
+are children of the business. When uncertain, `CB-` first.
+
+**What it supersedes and absorbs.** ADR-008 (a registration as a legal person)
+is superseded: the business register is the legal-person layer, and a
+registration hangs off it. ADR-020's NEST register is the business register's
+largest seed and its rule that a NEST id may never stand in for a `cedar_uid`
+carries over to `CB-` unchanged. ADR-030's place register is the establishment
+layer, already built. The 45 `Individually Native-owned business` entities
+keep their uids and gain business ids with an equivalence row.
+
+**Decided the same day.** The id carries the standard's two check characters
+over the uid's alphabet (`CB-0001842-XQ`), and the `Individually Native-owned
+business` entity class closes to new mints: its 45 entities keep their uids
+and gain business ids with an equivalence row, and every future privately
+owned Native firm is a `CB-` only.
+<!-- END ADR-043-CEDAR-BUSINESS-ID -->
