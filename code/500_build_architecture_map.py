@@ -177,7 +177,7 @@ COLLECTIONS: list[dict] = [
     # `native-owned-businesses`, not a bigger version of it:
     #   native-owned-businesses   a nation CERTIFIED or LISTED this firm
     #                             -> affiliated_with
-    #   nest                      a nation, ANC or NHO OWNS this enterprise,
+    #   need                      a nation, ANC or NHO OWNS this enterprise,
     #                             or published a non-ownership tie to it
     #                             -> owned_by / affiliated_with, declared per
     #                                row in `relation_class`
@@ -185,9 +185,9 @@ COLLECTIONS: list[dict] = [
     # native_owned_businesses runs down to `vendor_relationship`, which is no
     # ownership claim at all, and flattening it is what
     # docs/PUBLICATION_POLICY.md refuses.
-    {"id": "nest", "name": "NEST: Native Enterprise Structures and Ties",
+    {"id": "need", "name": "Cedar Native Entity Enterprise Dataset (NEED)",
      "shelf": "pro", "prefixes": [],
-     "tables": r"^nest_"},
+     "tables": r"^need_"},
     # Added 2026-09-02 by code/1105_newsletter_corpus_ship.py. The 15th
     # collection. It is a FINDING AID, not a text corpus: one row per
     # publication channel a Native entity operates, with the archive depth its

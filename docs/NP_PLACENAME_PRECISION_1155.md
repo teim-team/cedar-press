@@ -351,7 +351,7 @@ is here; the decision is the integrator's.
 - **`cedar_publication verify` - PASS**, 0 problems.
 - **`846_session_audit` - 29/30.** The one FAIL is `1137 verify rc=1`: four
   datasets are stale against `data/clean`, and three are not this pass's -
-  `federal-register`, `nagpra`, `nest`, plus `nonprofits`. `dist/` and
+  `federal-register`, `nagpra`, `need`, plus `nonprofits`. `dist/` and
   `code/1137` are outside this lane, so the export was not rebuilt. Remediation
   for the nonprofits quarter is
   `py -3 code/1137_customer_dataset_combine.py build nonprofits`; until it runs,

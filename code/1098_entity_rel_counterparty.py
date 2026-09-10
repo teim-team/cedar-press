@@ -52,24 +52,24 @@ government is deliberately absent from a register of Native entities.
 
 The defect is that the identity of the counterparty is only in prose. So this
 pass promotes it into declared columns, verbatim, and links it to the sub-hub
-register that DOES have ids for enterprises - NEST.
+register that DOES have ids for enterprises - NEED.
 
-WHAT THE NEST LINK IS, AND WHAT IT IS NOT
+WHAT THE NEED LINK IS, AND WHAT IT IS NOT
 ------------------------------------------
-`data/spine/cedar_nest_id_register.csv` holds 1,610 `CEDAR-NEST-` ids. It is
+`data/spine/cedar_need_id_register.csv` holds 1,610 `CEDAR-NEST-` ids. It is
 **not a parallel entity space**: an owned enterprise is a sub-hub of its owning
 nation, exactly like a facility or a registration, and `CEDAR-NEST-` is the
-sub-hub prefix for the enterprise level. The spine register keys HUBS; the NEST
-register keys one class of SUB-HUB under them. Every NEST row already carries
+sub-hub prefix for the enterprise level. The spine register keys HUBS; the NEED
+register keys one class of SUB-HUB under them. Every NEED row already carries
 `owner_hub_cedar_uid` pointing into the spine, which is the whole relation.
 
 This pass makes the bridge visible in the other direction. A firm on an
-`owned_by` edge is resolved to a NEST enterprise only when BOTH sides agree on
+`owned_by` edge is resolved to a NEED enterprise only when BOTH sides agree on
 the owner:
 
-    rung 1  the firm's PUBLISHED UEI equals a NEST enterprise's published UEI
-    rung 2  the firm's PUBLISHED CAGE equals a NEST enterprise's published CAGE
-    rung 3  the normalised firm name is UNIQUE among the NEST enterprises whose
+    rung 1  the firm's PUBLISHED UEI equals a NEED enterprise's published UEI
+    rung 2  the firm's PUBLISHED CAGE equals a NEED enterprise's published CAGE
+    rung 3  the normalised firm name is UNIQUE among the NEED enterprises whose
             `owner_hub_handle` is this edge's own owner
 
 Rung 3 is a name method and would be weak alone; it is admitted only because the
@@ -77,28 +77,28 @@ owner hub is fixed by the edge, which is the independent corroborator
 `ENTITY_MATCH_RULES` step 3 asks for. A name matching two enterprises under one
 hub resolves to neither.
 
-**NEST's own `uei_candidate` is NOT used to link.** It is an exact-name proposal
+**NEED's own `uei_candidate` is NOT used to link.** It is an exact-name proposal
 into the SBA DSBS extract, not a published identifier. 23 further edges would
 resolve through it; they are counted in the report and deliberately not written,
 because a candidate on one side plus a candidate on the other is not evidence.
 
 **AND WHERE THE TWO SIDES DISAGREE ABOUT THE OWNER, NEITHER WINS.** A published
-UEI matching a NEST enterprise whose owner hub is NOT this edge's owner is
-refused, the refusal is written into `counterparty_nest_basis`, and the case
-goes to `review/entity_rel_nest_owner_conflicts_<date>.csv`. One fired, and it
+UEI matching a NEED enterprise whose owner hub is NOT this edge's owner is
+refused, the refusal is written into `counterparty_need_basis`, and the case
+goes to `review/entity_rel_need_owner_conflicts_<date>.csv`. One fired, and it
 is the first cross-source ownership disagreement the entity layer has produced:
 
     Laulima Government Solutions, LLC   UEI QTJZT9K41S61
       entity_relationships  ->  Bering Straits Native Corporation  ANRC-BERSTR-00
                                 tier A, "Ruled by Elijah 2026-08-06:
                                 re-attributed ... the earlier claim was wrong"
-      nest / shard-H        ->  Alaka'ina Foundation               NHO-ALAKAI-00
+      need / shard-H        ->  Alaka'ina Foundation               NHO-ALAKAI-00
                                 parent_declared_subsidiary_list,
                                 source http://beringalakaina.com/
 
 The source host names BOTH parents. `ENTITY_MATCH_RULES` rule 11 - a joint
 venture genuinely has two parents - so this is very likely a JV recorded as sole
-ownership on each side independently, which is precisely the defect NEST names
+ownership on each side independently, which is precisely the defect NEED names
 itself most exposed to. It is REFUSED, not reconciled, and no row on either side
 was altered.
 
@@ -110,13 +110,13 @@ MEASURED
       named but with no identifier (TDHE)              148
       declared non-entity (the United States)           56
       UNPARSED                                           0
-    resolved to a NEST enterprise sub-hub              262  of 1,462  17.9%
+    resolved to a NEED enterprise sub-hub              262  of 1,462  17.9%
       rung 1  published UEI                             29
       rung 2  published CAGE                             0
       rung 3  unique name under the same owner hub     233
       refused, owner disagreement                        1
       not resolved                                   1,200
-      (23 more would resolve through NEST's
+      (23 more would resolve through NEED's
        uei_candidate and are REFUSED - see above)
 
 THE NAMED INVARIANTS
@@ -126,8 +126,8 @@ THE NAMED INVARIANTS
   I2  ANTI-FABRICATION. every promoted name and identifier appears VERBATIM as
       a substring of that row's own `notes`. A value that does not survive that
       test is not written.
-  I3  every `counterparty_nest_enterprise_id` exists in nest_enterprises.csv AND
-      its `owner_hub_handle` equals the edge's populated endpoint. A NEST link
+  I3  every `counterparty_need_enterprise_id` exists in need_enterprises.csv AND
+      its `owner_hub_handle` equals the edge's populated endpoint. A NEED link
       that crosses owners is refused, not reconciled.
   I4  a row with BOTH endpoints populated carries no counterparty columns. This
       enricher may not describe an edge that is already complete.
@@ -150,10 +150,10 @@ csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 
 TABLE = ROOT / "data" / "clean" / "entity_relationships.csv"
-NEST = ROOT / "data" / "clean" / "nest_enterprises.csv"
+NEED = ROOT / "data" / "clean" / "need_enterprises.csv"
 MANIFEST = ROOT / "docs" / "ENTITY_REL_COUNTERPARTY.json"
 BAK_TAG = f".bak_{TODAY}_pre_1098_entity_rel_counterparty"
-CONFLICTS = ROOT / "review" / f"entity_rel_nest_owner_conflicts_{TODAY}.csv"
+CONFLICTS = ROOT / "review" / f"entity_rel_need_owner_conflicts_{TODAY}.csv"
 
 NEW = [
     "counterparty_side",
@@ -162,8 +162,8 @@ NEW = [
     "counterparty_identifier_type",
     "counterparty_identifier",
     "counterparty_identity_state",
-    "counterparty_nest_enterprise_id",
-    "counterparty_nest_basis",
+    "counterparty_need_enterprise_id",
+    "counterparty_need_basis",
     "counterparty_extraction_basis",
 ]
 
@@ -233,11 +233,11 @@ def base_digest(rows, base_fields):
     return h.hexdigest()
 
 
-def nest_index():
+def need_index():
     """(by published UEI, by published CAGE, by (owner handle, norm name))."""
-    if not NEST.exists():
+    if not NEED.exists():
         return {}, {}, {}, {}, {}, {}, {}, {}, {}
-    rows, _ = read_table(NEST)
+    rows, _ = read_table(NEED)
     byuei, bycage, byname, cand = {}, {}, {}, {}
     owner, oname, orel, oev, ourl = {}, {}, {}, {}, {}
     for r in rows:
@@ -312,19 +312,19 @@ def build(dry_run=False) -> int:
     before_digest = base_digest(rows, base_fields)
     n_before = len(rows)
 
-    (byuei, bycage, byname, cand, nest_owner, nest_owner_name,
-     nest_rel, nest_ev, nest_url) = nest_index()
+    (byuei, bycage, byname, cand, need_owner, need_owner_name,
+     need_rel, need_ev, need_url) = need_index()
     conflicts = []
 
     out_fields = list(fields) + [c for c in NEW if c not in fields]
     stats = {"rows": n_before, "blank_endpoint_rows": 0, "unparsed": 0,
              "kind": {}, "identifier_type": {}, "identity_state": {},
-             "nest_rung1_published_uei": 0, "nest_rung2_published_cage": 0,
-             "nest_rung3_unique_name_under_owner": 0,
-             "nest_unresolved": 0,
-             "nest_refused_ambiguous_under_owner": 0,
-             "nest_refused_owner_disagreement": 0,
-             "nest_would_resolve_via_nest_uei_candidate_REFUSED": 0}
+             "need_rung1_published_uei": 0, "need_rung2_published_cage": 0,
+             "need_rung3_unique_name_under_owner": 0,
+             "need_unresolved": 0,
+             "need_refused_ambiguous_under_owner": 0,
+             "need_refused_owner_disagreement": 0,
+             "need_would_resolve_via_need_uei_candidate_REFUSED": 0}
 
     for r in rows:
         # Every row gets every column, blank by default. Written as a plain
@@ -362,14 +362,14 @@ def build(dry_run=False) -> int:
             s = byuei.get(cp["ival"], set())
             if len(s) == 1:
                 c_eid = next(iter(s))
-                if nest_owner.get(c_eid) == owner:
+                if need_owner.get(c_eid) == owner:
                     eid, basis = c_eid, \
-                        "rung1_published_uei_equals_nest_published_uei"
-                    stats["nest_rung1_published_uei"] += 1
+                        "rung1_published_uei_equals_need_published_uei"
+                    stats["need_rung1_published_uei"] += 1
                 else:
                     basis = ("REFUSED_owner_disagreement_on_published_uei:"
-                             f"{c_eid}:nest_owner={nest_owner.get(c_eid)}")
-                    stats["nest_refused_owner_disagreement"] += 1
+                             f"{c_eid}:need_owner={need_owner.get(c_eid)}")
+                    stats["need_refused_owner_disagreement"] += 1
                     conflicts.append({
                         "relationship_id": r.get("relationship_id"),
                         "firm_name_as_recorded": cp["name"],
@@ -379,12 +379,12 @@ def build(dry_run=False) -> int:
                         "entity_relationships_evidence":
                             r.get("evidence_text") or "",
                         "entity_relationships_tier": r.get("tier") or "",
-                        "nest_enterprise_id": c_eid,
-                        "nest_owner_hub_handle": nest_owner.get(c_eid, ""),
-                        "nest_owner_hub_name": nest_owner_name.get(c_eid, ""),
-                        "nest_relationship": nest_rel.get(c_eid, ""),
-                        "nest_evidence_class": nest_ev.get(c_eid, ""),
-                        "nest_source_url": nest_url.get(c_eid, ""),
+                        "need_enterprise_id": c_eid,
+                        "need_owner_hub_handle": need_owner.get(c_eid, ""),
+                        "need_owner_hub_name": need_owner_name.get(c_eid, ""),
+                        "need_relationship": need_rel.get(c_eid, ""),
+                        "need_evidence_class": need_ev.get(c_eid, ""),
+                        "need_source_url": need_url.get(c_eid, ""),
                         "disposition": "UNRESOLVED_TWO_DECLARED_OWNERS",
                         "note": ("Both sides assert sole ownership of one "
                                  "registration. ENTITY_MATCH_RULES rule 11: a "
@@ -397,25 +397,25 @@ def build(dry_run=False) -> int:
             s = bycage.get(cp["ival"], set())
             if len(s) == 1:
                 c_eid = next(iter(s))
-                if nest_owner.get(c_eid) == owner:
+                if need_owner.get(c_eid) == owner:
                     eid, basis = c_eid, \
-                        "rung2_published_cage_equals_nest_published_cage"
-                    stats["nest_rung2_published_cage"] += 1
+                        "rung2_published_cage_equals_need_published_cage"
+                    stats["need_rung2_published_cage"] += 1
                 else:
                     basis = ("REFUSED_owner_disagreement_on_published_cage:"
-                             f"{c_eid}:nest_owner={nest_owner.get(c_eid)}")
-                    stats["nest_refused_owner_disagreement"] += 1
+                             f"{c_eid}:need_owner={need_owner.get(c_eid)}")
+                    stats["need_refused_owner_disagreement"] += 1
         if not eid and not basis:
             s = byname.get((owner, norm(cp["name"])), set())
             if len(s) == 1:
                 eid, basis = next(iter(s)), \
-                    ("rung3_normalised_name_unique_among_nest_enterprises_"
+                    ("rung3_normalised_name_unique_among_need_enterprises_"
                      "of_this_same_owner_hub")
-                stats["nest_rung3_unique_name_under_owner"] += 1
+                stats["need_rung3_unique_name_under_owner"] += 1
             elif len(s) > 1:
-                stats["nest_refused_ambiguous_under_owner"] += 1
+                stats["need_refused_ambiguous_under_owner"] += 1
                 basis = (f"REFUSED_ambiguous: the normalised firm name matches "
-                         f"{len(s)} NEST enterprises under owner hub {owner} "
+                         f"{len(s)} NEED enterprises under owner hub {owner} "
                          f"({'|'.join(sorted(s))}). A name matching two "
                          f"enterprises resolves to neither.")
         if not eid:
@@ -423,23 +423,23 @@ def build(dry_run=False) -> int:
             # dropped is 293 class 2c, and the house rule is that a refusal
             # leaving no trace is indistinguishable from a row nobody noticed.
             if cp["ityp"] == "UEI" and len(cand.get(cp["ival"], ())) == 1:
-                stats["nest_would_resolve_via_nest_uei_candidate_REFUSED"] += 1
+                stats["need_would_resolve_via_need_uei_candidate_REFUSED"] += 1
                 basis = (f"UNRESOLVED_candidate_only: this UEI matches the "
-                         f"`uei_candidate` of exactly one NEST enterprise "
+                         f"`uei_candidate` of exactly one NEED enterprise "
                          f"({next(iter(cand[cp['ival']]))}), which is an "
                          f"exact-name proposal into the SBA DSBS extract and "
                          f"NOT a published identifier. A candidate on one side "
                          f"plus a candidate on the other is not evidence.")
             elif not basis:
-                basis = (f"UNRESOLVED: no NEST enterprise carries the published "
+                basis = (f"UNRESOLVED: no NEED enterprise carries the published "
                          f"{cp['ityp'] or 'identifier'} {cp['ival']}, and none "
                          f"under owner hub {owner} carries the normalised name "
                          f"{norm(cp['name'])!r}. The firm is a registration "
                          f"sub-hub Cedar has not otherwise recorded; the "
                          f"identifier on this row is its identity.")
-            stats["nest_unresolved"] += 1
-        r["counterparty_nest_enterprise_id"] = eid
-        r["counterparty_nest_basis"] = basis
+            stats["need_unresolved"] += 1
+        r["counterparty_need_enterprise_id"] = eid
+        r["counterparty_need_basis"] = basis
 
     if base_digest(rows, base_fields) != before_digest:
         print("  [1098] FATAL: a base field changed. Refusing to write.")
@@ -459,12 +459,12 @@ def build(dry_run=False) -> int:
         print(f"  [1098] {k}")
         for a, b in sorted(stats[k].items(), key=lambda kv: -kv[1]):
             print(f"          {a:<48} {b:>6,}")
-    print("  [1098] NEST sub-hub resolution, owned_by firms only")
-    for k in ("nest_rung1_published_uei", "nest_rung2_published_cage",
-              "nest_rung3_unique_name_under_owner",
-              "nest_refused_ambiguous_under_owner",
-              "nest_refused_owner_disagreement", "nest_unresolved",
-              "nest_would_resolve_via_nest_uei_candidate_REFUSED"):
+    print("  [1098] NEED sub-hub resolution, owned_by firms only")
+    for k in ("need_rung1_published_uei", "need_rung2_published_cage",
+              "need_rung3_unique_name_under_owner",
+              "need_refused_ambiguous_under_owner",
+              "need_refused_owner_disagreement", "need_unresolved",
+              "need_would_resolve_via_need_uei_candidate_REFUSED"):
         print(f"          {k:<56} {stats[k]:>6,}")
     print(f"  [1098] blank-endpoint rows {stats['blank_endpoint_rows']:,} | "
           f"UNPARSED {stats['unparsed']:,}")
@@ -494,9 +494,9 @@ def verify(path: Path | None = None) -> int:
     if missing:
         print(f"  [1098] verify: columns absent {missing} - run the enricher")
         return 1
-    nest_rows, _ = read_table(NEST) if NEST.exists() else ([], [])
-    nest_hub = {(r.get("enterprise_id") or "").strip():
-                (r.get("owner_hub_handle") or "").strip() for r in nest_rows}
+    need_rows, _ = read_table(NEED) if NEED.exists() else ([], [])
+    need_hub = {(r.get("enterprise_id") or "").strip():
+                (r.get("owner_hub_handle") or "").strip() for r in need_rows}
     fails = []
     n_blank = 0
     for r in rows:
@@ -533,14 +533,14 @@ def verify(path: Path | None = None) -> int:
             fails.append(("I2", rid, "promoted identifier is not a verbatim "
                                      "substring of this row's notes"))
         # I3
-        eid = (r.get("counterparty_nest_enterprise_id") or "").strip()
+        eid = (r.get("counterparty_need_enterprise_id") or "").strip()
         if eid:
-            if eid not in nest_hub:
-                fails.append(("I3", rid, f"NEST id {eid} not in "
-                                         "nest_enterprises.csv"))
-            elif nest_hub[eid] != tgt:
-                fails.append(("I3", rid, f"NEST id {eid} owner hub "
-                                         f"{nest_hub[eid]} != edge owner "
+            if eid not in need_hub:
+                fails.append(("I3", rid, f"NEED id {eid} not in "
+                                         "need_enterprises.csv"))
+            elif need_hub[eid] != tgt:
+                fails.append(("I3", rid, f"NEED id {eid} owner hub "
+                                         f"{need_hub[eid]} != edge owner "
                                          f"{tgt}"))
     print(f"  [1098] verify: {len(rows):,} rows | {n_blank:,} blank-endpoint "
           f"| {len(fails)} breach(es)")
@@ -584,9 +584,9 @@ def selftest() -> int:
                 return r
         raise SystemExit("no complete row to mutate")
 
-    def first_nest(rs):
+    def first_need(rs):
         for r in rs:
-            if (r.get("counterparty_nest_enterprise_id") or "").strip():
+            if (r.get("counterparty_need_enterprise_id") or "").strip():
                 return r
         return None
 
@@ -606,16 +606,16 @@ def selftest() -> int:
     run_case("I4 counterparty column on a complete edge",
              lambda rs: first_complete(rs).__setitem__("counterparty_kind",
                                                        "firm_registration"))
-    if first_nest(rows) is not None:
-        run_case("I3 NEST id that is not in nest_enterprises.csv",
-                 lambda rs: first_nest(rs).__setitem__(
-                     "counterparty_nest_enterprise_id",
+    if first_need(rows) is not None:
+        run_case("I3 NEED id that is not in need_enterprises.csv",
+                 lambda rs: first_need(rs).__setitem__(
+                     "counterparty_need_enterprise_id",
                      "CEDAR-NEST-999999-ZZ"))
 
         def cross(rs):
-            r = first_nest(rs)
+            r = first_need(rs)
             r["target_entity_id"] = "TRBF-NOTTHEOWNER-00"
-        run_case("I3 NEST id whose owner hub is not the edge's owner", cross)
+        run_case("I3 NEED id whose owner hub is not the edge's owner", cross)
 
     write_table(tmp, rows, fields)
     rc = verify(tmp)

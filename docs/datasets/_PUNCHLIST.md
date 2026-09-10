@@ -19,7 +19,7 @@
 | `nagpra` | 0 | 1 | 4 | 1 | **6** |
 | `subcontracting` | 0 | 1 | 4 | 1 | **6** |
 | `native-owned-businesses` | 0 | 1 | 2 | 1 | **4** |
-| `nest` | 0 | 2 | 0 | 0 | **2** |
+| `need` | 0 | 2 | 0 | 0 | **2** |
 
 ## `gaming`
 
@@ -722,9 +722,9 @@
 - **C9 / low** · `(dataset)` — have a DIFFERENT session execute the runbook from the document alone - written is not tested  
   *evidence:* runbook exists, execution never verified
 
-## `nest`
+## `need`
 
-- **C12 / high** · `nest_enterprise_relations.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
+- **C12 / high** · `need_enterprise_relations.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
   *evidence:* no basis column of any kind
-- **C9 / high** · `(dataset)` — write docs/datasets/nest.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
+- **C9 / high** · `(dataset)` — write docs/datasets/need.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
   *evidence:* no runbook

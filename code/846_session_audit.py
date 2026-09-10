@@ -530,7 +530,7 @@ def _ready():
     if not p.exists():
         return (False, "readiness table absent")
     rs = rows(p)
-    # A dataset UNDER CONSTRUCTION is not a regression. NEST registered itself
+    # A dataset UNDER CONSTRUCTION is not a regression. NEED registered itself
     # before it had tables and turned this claim red at 02:4x; the honest
     # statement is that everything which DECLARES shippable tables passes, and
     # anything still being built is named rather than counted as a failure.

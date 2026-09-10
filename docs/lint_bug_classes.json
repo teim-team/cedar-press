@@ -2837,7 +2837,7 @@
       "cedar_negative_constraints.csv": [
         "1163_negative_decision_registry.py"
       ],
-      "cedar_nest_id_register.csv": [
+      "cedar_need_id_register.csv": [
         "1072_tribally_owned_enterprises.py"
       ],
       "cedar_observations.csv": [
@@ -3170,15 +3170,15 @@
       "nd_severance_allocation.csv": [
         "113_build_nd_severance.py"
       ],
-      "nest_enterprise_relations.csv": [
+      "need_enterprise_relations.csv": [
         "1072_tribally_owned_enterprises.py"
       ],
-      "nest_enterprises.csv": [
+      "need_enterprises.csv": [
         "1072_tribally_owned_enterprises.py",
-        "1102_nest_corroboration_adjudication.py"
+        "1102_need_corroboration_adjudication.py"
       ],
-      "nest_entity_dual_role.csv": [
-        "1130_nest_owner_v6_reconcile.py"
+      "need_entity_dual_role.csv": [
+        "1130_need_owner_v6_reconcile.py"
       ],
       "nho_ito_spine_crosswalk.csv": [
         "163_promote_nho_universe_in_place.py"
@@ -3592,9 +3592,9 @@
         "771_normalize_nboa_certification_dates.py",
         "953_nob_federal_identifier_candidates.py"
       ],
-      "nest_enterprises.csv": [
+      "need_enterprises.csv": [
         "1072_tribally_owned_enterprises.py",
-        "1102_nest_corroboration_adjudication.py"
+        "1102_need_corroboration_adjudication.py"
       ],
       "nho_ito_spine_crosswalk.csv": [
         "163_promote_nho_universe_in_place.py",

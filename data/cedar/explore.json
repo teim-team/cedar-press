@@ -4289,7 +4289,7 @@
       "reviewed": false,
       "columns": 22
     },
-    "nest/nest_enterprise_relations": {
+    "need/need_enterprise_relations": {
       "entity_uid": "cedar_uid",
       "entity_name": "owner_hub_name",
       "entity_type": null,
@@ -4319,7 +4319,7 @@
       "reviewed": false,
       "columns": 23
     },
-    "nest/nest_enterprises": {
+    "need/need_enterprises": {
       "entity_uid": "cedar_uid",
       "entity_name": "owner_hub_name",
       "entity_type": "owner_hub_entity_class",
@@ -4364,7 +4364,7 @@
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
       "columns": 65
     },
-    "nest/nest_entity_dual_role": {
+    "need/need_entity_dual_role": {
       "entity_uid": "cedar_uid",
       "entity_name": "canonical_name",
       "entity_type": "entity_class",

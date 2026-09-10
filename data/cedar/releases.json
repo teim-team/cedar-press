@@ -253,15 +253,15 @@
         "blockers": []
       }
     ],
-    "nest": [
+    "need": [
       {
         "version": "v0",
         "date": "2026-09-02",
-        "name": "NEST: Native Enterprise Structures and Ties",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "tables": 3,
         "rowsLabel": "5,757 rows",
         "preview": {
-          "table": "nest_enterprises.csv",
+          "table": "need_enterprises.csv",
           "rows": 10,
           "of": 4799
         },
@@ -270,11 +270,11 @@
       {
         "version": "v1",
         "date": "2026-09-04",
-        "name": "NEST: Native Enterprise Structures and Ties",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "tables": 3,
         "rowsLabel": "14,868 rows",
         "preview": {
-          "table": "nest_enterprises.csv",
+          "table": "need_enterprises.csv",
           "rows": 10,
           "of": 5820
         },

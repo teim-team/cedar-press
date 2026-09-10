@@ -1069,7 +1069,7 @@ in full in `data/clean/cedar_corroboration_disagreements.csv`, verdict
 refutation** — the miner scores *Tongass Tlingit Cultural Heritage Institute*
 as `placename_only` — so these are a queue, not a correction.
 
-**2. `nest_enterprises.n_distinct_sources = 438` is not 438 corroborations.**
+**2. `need_enterprises.n_distinct_sources = 438` is not 438 corroborations.**
 At observation grain the same population reaches two evidence FAMILIES on 40
 groups, rising to 141 of 1,615 once the FPDS declared-parent family from
 `code/1102` is added. The gap is one filer's AS 45.55.139 report across several
@@ -2540,7 +2540,7 @@ is correctly gated on `coll == "lobbying"`.
 **HA-6 · S2 · The codebooks' "Quirks to know" bullets are selected from THIS
 FILE by naked substring match, and it misfires in both directions.** 66 bullets
 across 13 codebooks; **only 3 name their dataset in the heading**. **Four of
-`nest`'s six matched on the word `honest`.** `native-owned-businesses` gets
+`need`'s six matched on the word `honest`.** `native-owned-businesses` gets
 **zero**, because this file writes `native_owned_businesses` with underscores
 and the matcher tries hyphens and spaces. And `contractors` ships M1's heading —
 the "does not exist" line above — to a paying customer, beside the 1.48 GB file.

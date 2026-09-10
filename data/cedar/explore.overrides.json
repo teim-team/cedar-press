@@ -222,7 +222,7 @@
   ],
   "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does."
  },
- "nest/nest_enterprises": {
+ "need/need_enterprises": {
   "reviewed": true,
   "record_id": "enterprise_id",
   "entity_role": "owner hub of the enterprise",

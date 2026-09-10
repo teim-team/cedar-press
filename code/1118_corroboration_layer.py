@@ -94,10 +94,10 @@ R-C  A FAMILY PAIR THAT SHARES AN UPSTREAM FOR THIS PREDICATE COLLAPSES.
 ===========================================================================
 THE SIX PAIRS, AND WHAT EACH TESTS
 ===========================================================================
-P1  nest_identifier    an enterprise CAGE the PARENT published on its own
+P1  need_identifier    an enterprise CAGE the PARENT published on its own
                        site, against the same CAGE in `fpds_uei_cage_map`.
                        entity_self_published + federal_transactional.
-P2  nest_ownership     `data/staging/nest/ownership_edges_staged.jsonl` at
+P2  need_ownership     `data/staging/need/ownership_edges_staged.jsonl` at
                        OBSERVATION grain (3,796 rows for 1,610 enterprises),
                        plus the FPDS declared-parent column.
                        audited_filing + entity_self_published
@@ -416,10 +416,10 @@ class Store:
 
 
 # ===========================================================================
-# P1  NEST identifier: a CAGE the parent published, against FPDS
+# P1  NEED identifier: a CAGE the parent published, against FPDS
 # ===========================================================================
-def p1_nest_identifier(S):
-    nest = rd(P("data", "clean", "nest_enterprises.csv"))
+def p1_need_identifier(S):
+    need = rd(P("data", "clean", "need_enterprises.csv"))
     fmap = rd(P("data", "clean", "fpds_uei_cage_map.csv"))
     by_cage = collections.defaultdict(list)
     for r in fmap:
@@ -428,7 +428,7 @@ def p1_nest_identifier(S):
             by_cage[c].append(r)
 
     b = collections.Counter()
-    for r in nest:
+    for r in need:
         basis = (r.get("identifier_basis") or "").strip()
         cage = (r.get("cage_code") or "").strip().upper()
         if not basis:
@@ -440,7 +440,7 @@ def p1_nest_identifier(S):
         sid = r.get("enterprise_id") or r.get("enterprise_name")
         lbl = r.get("enterprise_name", "")
         # side A - the parent's own page
-        S.observe(pair="P1_nest_identifier", dataset="nest",
+        S.observe(pair="P1_need_identifier", dataset="need",
                   subject=sid, subject_label=lbl,
                   predicate="enterprise.identifier.CAGE",
                   predicate_class="identifier_binding",
@@ -449,17 +449,17 @@ def p1_nest_identifier(S):
                   source_label="parent's own published company page (%s)"
                                % clip(r.get("evidence_class"), 60),
                   upstream_key="url:" + (norm_url(r.get("source_url"))
-                                         or "nest:" + str(sid)),
+                                         or "need:" + str(sid)),
                   evidence_url=r.get("source_url", ""),
                   quote=basis,
-                  origin_table="data/clean/nest_enterprises.csv")
+                  origin_table="data/clean/need_enterprises.csv")
         hits = by_cage.get(cage, [])
         if not hits:
             b["self_published_cage_absent_from_fpds"] += 1
             continue
         b["self_published_cage_matched_in_fpds"] += 1
         h = max(hits, key=lambda x: int(x.get("n_observations") or 0))
-        S.observe(pair="P1_nest_identifier", dataset="nest",
+        S.observe(pair="P1_need_identifier", dataset="need",
                   subject=sid, subject_label=lbl,
                   predicate="enterprise.identifier.CAGE",
                   predicate_class="identifier_binding",
@@ -474,13 +474,13 @@ def p1_nest_identifier(S):
                   quote="uei=%s legal_business_name=%s"
                         % (h.get("uei"), h.get("legal_business_name")),
                   origin_table="data/clean/fpds_uei_cage_map.csv")
-        # disagreement test - the federal legal name against NEST's name
+        # disagreement test - the federal legal name against NEED's name
         fed = (h.get("legal_business_name") or "").strip()
         if fed and nname(fed) and nname(lbl) and nname(fed) != nname(lbl):
             if not (toks(fed) & toks(lbl)):
                 S.disagree(
-                    pair="P1_nest_identifier", dataset="nest",
-                    fact_id=factid("P1_nest_identifier", sid,
+                    pair="P1_need_identifier", dataset="need",
+                    fact_id=factid("P1_need_identifier", sid,
                                    "enterprise.identifier.CAGE",
                                    "identifier_binding", cage),
                     subject_label=lbl,
@@ -497,12 +497,12 @@ def p1_nest_identifier(S):
                          "federal award record binds the same CAGE to a name "
                          "sharing no distinctive token. One of the two is "
                          "about a different legal person.")
-    S.account("data/clean/nest_enterprises.csv (P1 self-published CAGE)",
-              len(nest), dict(b))
+    S.account("data/clean/need_enterprises.csv (P1 self-published CAGE)",
+              len(need), dict(b))
 
 
 # ===========================================================================
-# P2  NEST ownership at OBSERVATION grain
+# P2  NEED ownership at OBSERVATION grain
 # ===========================================================================
 EVIDENCE_CLASS_FAMILY = {
     "audited_annual_report_as_45_55_139": "audited_filing",
@@ -512,8 +512,8 @@ EVIDENCE_CLASS_FAMILY = {
 }
 
 
-def p2_nest_ownership(S):
-    edges = rj(P("data", "staging", "nest", "ownership_edges_staged.jsonl"))
+def p2_need_ownership(S):
+    edges = rj(P("data", "staging", "need", "ownership_edges_staged.jsonl"))
     b = collections.Counter()
     for e in edges:
         ec = e.get("evidence_class", "")
@@ -536,7 +536,7 @@ def p2_nest_ownership(S):
         else:
             up = "url:" + (norm_url(e.get("source_url"))
                            or "src:" + str(e.get("source_id")))
-        S.observe(pair="P2_nest_ownership", dataset="nest",
+        S.observe(pair="P2_need_ownership", dataset="need",
                   subject=subj, subject_label=child,
                   predicate="enterprise.owned_by",
                   predicate_class="ownership",
@@ -548,14 +548,14 @@ def p2_nest_ownership(S):
                   evidence_url=e.get("source_url", ""),
                   quote=e.get("quote", ""),
                   observed_date=e.get("source_edition_date", ""),
-                  origin_table="data/staging/nest/ownership_edges_staged.jsonl")
-    S.account("data/staging/nest/ownership_edges_staged.jsonl",
+                  origin_table="data/staging/need/ownership_edges_staged.jsonl")
+    S.account("data/staging/need/ownership_edges_staged.jsonl",
               len(edges), dict(b))
 
     # the FPDS declared-parent family, already adjudicated by 1102
-    nest = rd(P("data", "clean", "nest_enterprises.csv"))
+    need = rd(P("data", "clean", "need_enterprises.csv"))
     b2 = collections.Counter()
-    for r in nest:
+    for r in need:
         v = (r.get("fpds_parent_corroboration") or "").strip()
         hub = (r.get("owner_hub_cedar_uid") or r.get("owner_hub_handle")
                or r.get("owner_hub_name") or "")
@@ -563,7 +563,7 @@ def p2_nest_ownership(S):
         subj = "%s|%s" % (hub, nname(child))
         if v == "CORROBORATED":
             b2["fpds_declared_parent_corroborates"] += 1
-            S.observe(pair="P2_nest_ownership", dataset="nest",
+            S.observe(pair="P2_need_ownership", dataset="need",
                       subject=subj, subject_label=child,
                       predicate="enterprise.owned_by",
                       predicate_class="ownership",
@@ -578,18 +578,18 @@ def p2_nest_ownership(S):
                           r.get("fpds_declared_parent_uei") or child),
                       evidence_url="",
                       quote=clip(r.get("fpds_parent_corroboration_basis"), 400),
-                      origin_table="data/clean/nest_enterprises.csv")
+                      origin_table="data/clean/need_enterprises.csv")
         elif v == "CONTRADICTED":
             b2["fpds_declared_parent_contradicts"] += 1
             S.disagree(
-                pair="P2_nest_ownership", dataset="nest",
-                fact_id=factid("P2_nest_ownership", subj,
+                pair="P2_need_ownership", dataset="need",
+                fact_id=factid("P2_need_ownership", subj,
                                "enterprise.owned_by", "ownership", ""),
                 subject_label=child, predicate="enterprise.owned_by",
                 verdict="DECLARED_PARENT_IS_A_DIFFERENT_ENTITY",
                 a_family="audited_filing/entity_self_published",
                 a_value=r.get("owner_hub_name", ""),
-                a_source="NEST evidence_class=%s source_id=%s"
+                a_source="NEED evidence_class=%s source_id=%s"
                          % (r.get("evidence_class"), r.get("source_id")),
                 a_url=r.get("source_url", ""),
                 a_quote=clip(r.get("hub_resolution_note")
@@ -602,7 +602,7 @@ def p2_nest_ownership(S):
                 b_url="", b_quote=clip(r.get("fpds_parent_corroboration_basis"),
                                        400),
                 note="The firm told FPDS a parent that resolves to a Cedar "
-                     "entity other than the owner NEST publishes. "
+                     "entity other than the owner NEED publishes. "
                      "ENTITY_MATCH_RULES rule 12 says suspect the PARENT row "
                      "first; this layer records the conflict and refuses to "
                      "pick.")
@@ -610,8 +610,8 @@ def p2_nest_ownership(S):
             b2["fpds_" + v.lower()] += 1
         else:
             b2["fpds_column_blank"] += 1
-    S.account("data/clean/nest_enterprises.csv (P2 FPDS declared parent)",
-              len(nest), dict(b2))
+    S.account("data/clean/need_enterprises.csv (P2 FPDS declared parent)",
+              len(need), dict(b2))
 
 
 # ===========================================================================
@@ -1442,7 +1442,7 @@ def independence(observations):
 SHIPPING_DATASETS = [
     "_entity_layer", "contractors", "deals", "federal-register", "funding",
     "gaming", "legislation", "lobbying", "nagpra", "native-owned-businesses",
-    "natural-resources", "nest", "newsletters", "nonprofits", "subcontracting",
+    "natural-resources", "need", "newsletters", "nonprofits", "subcontracting",
 ]
 # What this layer actually reached, and if not, WHY NOT - never a blank.
 CENSUS_REASON = {
@@ -1490,8 +1490,8 @@ CENSUS_REASON = {
 
 def build():
     S = Store()
-    p1_nest_identifier(S)
-    p2_nest_ownership(S)
+    p1_need_identifier(S)
+    p2_need_ownership(S)
     deal_meta = p3_deals(S)
     p4_nonprofit_native(S)
     p5_gaming_affiliation(S)

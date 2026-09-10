@@ -36,7 +36,7 @@
  *   pro       Cedar Press+ and above
  *   grove     Cedar Grove only, and never on Cedar Press
  *
- * The shelves nest upward, so Cedar Press+ reaches standard and pro, and Grove
+ * The shelves need upward, so Cedar Press+ reaches standard and pro, and Grove
  * and Tree reach all three — which on this storefront means all twelve, since
  * nothing Cedar Press sells sits on the grove shelf. A collection PLACED on
  * the grove shelf opens for nobody here; see `canOpenDataset`.

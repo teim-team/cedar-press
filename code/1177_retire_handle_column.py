@@ -77,9 +77,9 @@ TARGETS = {
     "data/clean/cedar_entity_freshness.csv": ("handle", "cedar_uid"),
     "data/clean/cedar_harvest_coverage_matrix.csv": ("handle", "cedar_uid"),
     "data/clean/entity_dated_public_facts.csv": ("handle", "cedar_uid"),
-    "data/clean/nest_enterprise_relations.csv": ("owner_hub_handle", "owner_hub_cedar_uid"),
-    "data/clean/nest_enterprises.csv": ("owner_hub_handle", "owner_hub_cedar_uid"),
-    "data/clean/nest_entity_dual_role.csv": ("handle", "cedar_uid"),
+    "data/clean/need_enterprise_relations.csv": ("owner_hub_handle", "owner_hub_cedar_uid"),
+    "data/clean/need_enterprises.csv": ("owner_hub_handle", "owner_hub_cedar_uid"),
+    "data/clean/need_entity_dual_role.csv": ("handle", "cedar_uid"),
     "data/spine/cedar_identity_register.csv": ("handle", "cedar_uid"),
 }
 

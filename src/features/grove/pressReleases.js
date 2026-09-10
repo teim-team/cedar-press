@@ -110,7 +110,7 @@ export const DECLARED_CADENCE = Object.freeze({
   nonprofits: CADENCE.ANNUAL,
   // Structures change when a parent publishes a new edition of its filings or
   // its enterprise register, which is not a calendar either.
-  nest: CADENCE.ON_CHANGE,
+  need: CADENCE.ON_CHANGE,
 });
 
 /**

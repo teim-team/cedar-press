@@ -34,7 +34,7 @@ WHAT `whose_ownership` SEPARATES, and why it is three populations
     TRIBAL_GOVERNMENT_ENTITY             the tribe itself owns it
     SHAREHOLDER_OR_DESCENDANT_OR_SPOUSE  ANCSA shareholder directories
     PARENT_CORPORATION                   an ANC naming its own subsidiary
-These do not nest and they are not interchangeable. A study of individual
+These do not need and they are not interchangeable. A study of individual
 Native business ownership wants the first three and specifically NOT the
 fourth; a study of tribal enterprise wants the fourth. Collapsing them is the
 same error as collapsing entity and individual ownership in a SAM flag.

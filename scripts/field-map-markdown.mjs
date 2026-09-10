@@ -182,7 +182,7 @@ export function renderMap() {
   p("- Every `combine`: the sources are tested for agreement across the full table before one column replaces them; until then the sources stay in the workspace and the target is absent.");
   p("- Every `derive` marked owed: the editorial `research_note` for Deals, the date precision for the Federal Register, the names as published for Legislation and NAGPRA from the bridge.");
   p("- The Native-owned businesses map, written when its sample lands and the audit has run.");
-  p("- The two adjudications the retirement report names (NEST's `enterprise_existing_cedar_uid`, Nonprofits' `entity_id` and `cedar_spine_entity_id`) and the recoding of Funding's `attribution_status` vocabulary: the writer stops those datasets until they are settled.");
+  p("- The two adjudications the retirement report names (NEED's `enterprise_existing_cedar_uid`, Nonprofits' `entity_id` and `cedar_spine_entity_id`) and the recoding of Funding's `attribution_status` vocabulary: the writer stops those datasets until they are settled.");
   p();
   return lines.join("\n") + "\n";
 }
@@ -219,7 +219,7 @@ export function renderRetirement() {
     }
   }
   p();
-  p("The three findings that stop a dataset today, from the samples: Funding's `attribution_status` carries the value `cedar_neid` on every sample row (a vocabulary naming the retired scheme; recode it); NEST's `enterprise_existing_cedar_uid` is populated where the enterprise is itself a register entity and differs from the owner's uid (adjudicate: the enterprise's own cedar_uid is a real cross-reference, not an alias); Nonprofits' `entity_id` and `cedar_spine_entity_id` disagree with `cedar_uid` on the same row (adjudicate: the link was redirected and the two columns were not). None of these is deleted; the writer refuses those three datasets until they are settled.");
+  p("The three findings that stop a dataset today, from the samples: Funding's `attribution_status` carries the value `cedar_neid` on every sample row (a vocabulary naming the retired scheme; recode it); NEED's `enterprise_existing_cedar_uid` is populated where the enterprise is itself a register entity and differs from the owner's uid (adjudicate: the enterprise's own cedar_uid is a real cross-reference, not an alias); Nonprofits' `entity_id` and `cedar_spine_entity_id` disagree with `cedar_uid` on the same row (adjudicate: the link was redirected and the two columns were not). None of these is deleted; the writer refuses those three datasets until they are settled.");
   p();
   p("## Supporting tables");
   p();

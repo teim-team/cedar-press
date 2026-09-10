@@ -40,7 +40,7 @@ OUT = os.path.join(ROOT, "docs", "harmonization_audit_2026-09-03")
 DATASETS = [
     "contractors", "deals", "federal-register", "funding", "gaming",
     "legislation", "lobbying", "nagpra", "native-owned-businesses",
-    "natural-resources", "nest", "nonprofits", "subcontracting",
+    "natural-resources", "need", "nonprofits", "subcontracting",
 ]
 
 # columns whose full distinct-value set we always want, regardless of cardinality
@@ -199,7 +199,7 @@ UID_COLS = {
     "gaming": ("cedar_uid", "tribe_canonical_name"),
     "lobbying": ("cedar_uid", "canonical_name"),
     "natural-resources": ("cedar_uid", None),
-    "nest": ("cedar_uid", None),
+    "need": ("cedar_uid", None),
     "nonprofits": ("cedar_uid", "tribe_canonical_name"),
     "subcontracting": ("cedar_uid", None),
 }

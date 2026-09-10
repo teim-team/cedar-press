@@ -902,7 +902,7 @@ def selftest() -> int:
         _preview_tree(root,
                       [{"dataset": "deals", "rows": 1, "columns": 2},
                        {"dataset": "funding", "rows": 1, "columns": 1}],
-                      {"deals": "a,b\n", "nest": "a\n1\n"})
+                      {"deals": "a,b\n", "need": "a\n1\n"})
 
     for label, build_fn in (("a preview the manifest says was NOT built, still on disk", b6),
                             ("a preview whose shape is not the one declared", b7),

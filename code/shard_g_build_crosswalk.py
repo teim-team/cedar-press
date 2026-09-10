@@ -549,7 +549,7 @@ def unique_name_match(pool, reg_rows, name_of, state_of, city_of):
                 rc, pc = core(name_of(d)), s["_core"]
                 sm = sim(rn, s["_n"])
                 # a nested residual only counts when the SHORTER residual is at
-                # least two tokens or >= 6 characters - "BANK" must not nest into
+                # least two tokens or >= 6 characters - "BANK" must not need into
                 # "Pinnacle Bank".
                 short = rc if len(rc) <= len(pc) else pc
                 strong = len(short) >= 2 or len("".join(short)) >= 6

@@ -391,7 +391,7 @@ def d_simple_counts():
     out = []
     for rel, noun in (
         ("deals_classified.csv", "deals"),
-        ("nest_enterprises.csv", "NEST enterprises"),
+        ("need_enterprises.csv", "NEED enterprises"),
         ("tribal_newsletter_corpus.csv", "newsletter corpus rows"),
         ("nonprofit_schedule_c_lobbying.csv", "Schedule C rows"),
     ):
@@ -406,13 +406,13 @@ def d_simple_counts():
             + " - **the absence records are the most valuable part of that table "
             "and quoting only the channel count hides them**"
         )
-    ne = read("nest_enterprises.csv")
-    if ne is not None and col(ne, "in_federal_contracting", "nest_enterprises.csv"):
+    ne = read("need_enterprises.csv")
+    if ne is not None and col(ne, "in_federal_contracting", "need_enterprises.csv"):
         absent = sum(
             1 for r in ne if (r["in_federal_contracting"] or "").strip().upper() in ("N", "NO", "0", "FALSE")
         )
         out.append(
-            "NEST: **%d of %d (%s) absent from federal contracting** - the finding, "
+            "NEED: **%d of %d (%s) absent from federal contracting** - the finding, "
             "not a gap" % (absent, len(ne), pct(absent, len(ne)))
         )
     return "row counts", "\n".join("- " + x for x in out)

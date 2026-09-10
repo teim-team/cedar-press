@@ -149,7 +149,7 @@ PREVIEW: dict[str, list[str]] = {
         "business_name_raw", "certifying_authority_name", "programme_name",
         "service_category_raw", "city", "state_province", "harvest_date",
         "business_source_id"],
-    "nest": [
+    "need": [
         "enterprise_name", "owner_hub_name", "relation_class", "owner_class",
         "city", "state_province", "in_federal_contracting", "cedar_uid"],
     "gaming": [
@@ -163,7 +163,7 @@ PREVIEW: dict[str, list[str]] = {
 #: A generic "find the entity column" test returned one entity for four
 #: datasets and the previews were all the same thing repeated. The reason is
 #: not a missing column - it is that the unit differs. A bill has no single
-#: tribe; a NAGPRA notice is about an institution; a NEST row IS an
+#: tribe; a NAGPRA notice is about an institution; a NEED row IS an
 #: enterprise. Stating the unit per dataset is the honest version of a rule
 #: that cannot be generic.
 DIVERSITY: dict[str, str] = {
@@ -178,7 +178,7 @@ DIVERSITY: dict[str, str] = {
     "nonprofits": "org_name",
     "natural-resources": "recipient_entity_name",
     "native-owned-businesses": "business_name_raw",
-    "nest": "enterprise_name",
+    "need": "enterprise_name",
     "gaming": "facility_name",
 }
 

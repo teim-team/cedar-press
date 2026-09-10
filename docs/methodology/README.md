@@ -16,11 +16,11 @@ One paper per **delivered** dataset. The set is `cedar_publication.BUILD_SHELVES
 | [`nagpra.md`](nagpra.md) | NAGPRA | `standard` | Cedar Press | 6,792 | READY |
 | [`native-owned-businesses.md`](native-owned-businesses.md) | Native-Owned Businesses | `pro` | Cedar Press | 2,446 | READY |
 | [`natural-resources.md`](natural-resources.md) | Natural Resource Revenues | `pro` | Cedar Press | 11,305 | READY |
-| [`nest.md`](nest.md) | NEST: Native Enterprise Structures and Ties | `pro` | Cedar Press | 4,798 | READY |
+| [`need.md`](need.md) | Cedar Native Entity Enterprise Dataset (NEED) | `pro` | Cedar Press | 4,798 | READY |
 | [`nonprofits.md`](nonprofits.md) | Native Nonprofits | `pro` | Cedar Press | 12,764 | READY |
 | [`subcontracting.md`](subcontracting.md) | Federal Subcontracting | `pro` | Cedar Press | 89,809 | READY |
 
-`_entity_layer.md` is kept and is **not** in that count. It is the shared identity chapter the other papers lean on — infrastructure, not a product, with no `dist/customer/` spreadsheet. Counting it as the thirteenth dataset is what hid the missing `nest` paper.
+`_entity_layer.md` is kept and is **not** in that count. It is the shared identity chapter the other papers lean on — infrastructure, not a product, with no `dist/customer/` spreadsheet. Counting it as the thirteenth dataset is what hid the missing `need` paper.
 
 **These are not the product copy and not the codebooks.** Customer-facing description lives in `docs/datasets/_descriptors.json`; field definitions, grain and per-column fill rates live in `dist/customer/<id>__CODEBOOK.md`.
 

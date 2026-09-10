@@ -499,11 +499,11 @@ Collection `owned` · table `native_owned_businesses` · 4,273 rows in the full 
 
 ### Native Enterprises
 
-Collection `nest` · table `nest_enterprises` · 5,820 rows in the full table · Cedar Press+ shelf
+Collection `need` · table `need_enterprises` · 5,820 rows in the full table · Cedar Press+ shelf
 
 **One row is** One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it and how.
 
-**Where:** workspace dist/customer/nest.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nest/nest_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.
+**Where:** workspace dist/customer/need.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/need/need_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.
 
 **Columns a subscriber sees (30):**
 

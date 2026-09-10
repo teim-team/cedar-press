@@ -455,7 +455,7 @@ business, whoever owns it. The id encodes nothing, never changes, and is
 never traded for a uid except by an adjudication that keeps both. Ownership
 is a dated relationship, registrations are attributes, name changes are
 aliases, and successors get new ids. The register is the terminal's to build,
-seeded from the NEST enterprises, the certified-firm directories, the
+seeded from the NEED enterprises, the certified-firm directories, the
 contracting awardees and the deal parties. This repository's part comes
 after: a `cedar_business_id` column declared in the field map where a
 business is a party, the writer refusing a `CB-` id in an identity column,
@@ -510,7 +510,7 @@ one retirement-report row per identifier with the rows affected.
 `1137_customer_dataset_combine.py` calls it after the deny lists and
 before writing. `server/tests/test_field_map.py` runs it over the sample
 files and asserts the three refusals the samples carry today (Funding's
-`attribution_status` value `cedar_neid`; NEST's
+`attribution_status` value `cedar_neid`; NEED's
 `enterprise_existing_cedar_uid`; Nonprofits' `entity_id` and
 `cedar_spine_entity_id`, which disagree with `cedar_uid` on the same row).
 What the applier does NOT do is the terminal's, on the full table: the

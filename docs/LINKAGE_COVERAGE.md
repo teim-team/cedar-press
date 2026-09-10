@@ -18,7 +18,7 @@
 | `legislation` | `native_bills.csv` | 3,069 | 591 | 19.26% | 2,478 | — |
 | `federal-register` | `consultation_events.csv` | 11,402 | 10,396 | 91.18% | 1,006 | — |
 | `nagpra` | `nagpra_notices.csv` | 6,792 | 6,169 | 90.83% | 623 | — |
-| `nest` | `nest_enterprises.csv` | 4,798 | 4,798 | 100.00% | 0 | — |
+| `need` | `need_enterprises.csv` | 4,798 | 4,798 | 100.00% | 0 | — |
 
 **Across the 13 measured flagships: 1,485,083 of 2,093,620 rows (70.93%) carry a resolved Cedar entity.** That total sums tables whose rows are not the same kind of thing - a contract award and a NAGPRA notice each count as one - so it is a SCALE figure and never a quality figure. Quote the per-dataset rows.
 
@@ -274,7 +274,7 @@
 | University of Nevada, Las Vegas | 9 |
 | Arizona State Museum, University of Arizona | 8 |
 
-## `nest` - `nest_enterprises.csv`
+## `need` - `need_enterprises.csv`
 
 **Denominator: 4,798 rows.** One row is one tribally / ANC / NHO-owned enterprise. The owner hub is this table's KEY, so coverage is 100% by construction; the informative figure is the alternative below - how many enterprises also carry their OWN spine entity.
 

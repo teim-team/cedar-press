@@ -96,7 +96,7 @@ survives, and the ANCSA cases are the load-bearing ones: `CE-0005G-S0` (Saxman �
 Cape Fox Corporation) and `CE-00020-A0` (Fort Yukon ∥ Gana-A'Yoo ∥ K'oyitl'ots'ina)
 are the village-government-versus-village-corporation question in its purest form —
 the same class as five of the eight cards in the reconciliation, and the same class
-the NEST agent independently named. Collapsing them by rule would assert that a
+the NEED agent independently named. Collapsing them by rule would assert that a
 village government and its ANCSA corporation are one legal person, which is false
 under 25 U.S.C. §5123 and 43 U.S.C. §1607.
 

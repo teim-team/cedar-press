@@ -151,7 +151,7 @@ FLAGSHIP = {
     "nagpra": "nagpra_notices.csv",
     "newsletters": "tribal_newsletter_corpus.csv",
     "_entity_layer": "cedar_identity_register.csv",
-    "nest": "nest_enterprises.csv",
+    "need": "need_enterprises.csv",
 }
 # >>> END GENERATED FLAGSHIP COMPAT
 assert FLAGSHIP == _CANON_FLAGSHIP, (
@@ -441,10 +441,10 @@ SHOW = {
     # which it holds. `uei` is on 102 of 1,482 rows and `uei_candidate` on 597;
     # both ship, and the candidate is a PROPOSAL that may not key a dollar.
     # `relation_class` was ABSENT from this list until 2026-09-02, and it is
-    # the column the dataset exists to carry: NEST separates a STRUCTURE
+    # the column the dataset exists to carry: NEED separates a STRUCTURE
     # (ownership - nation, holding company, operating company) from a TIE (a
     # published relationship that is not ownership, such as a joint venture).
-    # `500.COLLECTIONS` says in as many words that this is why `nest` is a
+    # `500.COLLECTIONS` says in as many words that this is why `need` is a
     # different collection from `native-owned-businesses` and must not be
     # merged with it - and the ten rows a customer saw could not show the
     # difference. `relationship` alone is the verbatim source string, not the
@@ -461,7 +461,7 @@ SHOW = {
                     "archive_latest_year", "archive_depth_n_issues",
                     "back_issues_open", "business_content",
                     "discovery_technique", "retrieved_date"],
-    "nest": ["enterprise_id", "enterprise_name", "relation_class",
+    "need": ["enterprise_id", "enterprise_name", "relation_class",
              "relationship_as_recorded", "hierarchy_level", "parent_name",
              "owner_hub_cedar_uid",
              "owner_hub_name", "owner_class", "relationship", "sector",

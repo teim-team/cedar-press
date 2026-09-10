@@ -335,17 +335,17 @@ def _js_catalog_ids():
 
 
 class TestTheCatalogDriftIsClosed(unittest.TestCase):
-    """The `nest` snapshot drift is FIXED, so the tests that pinned it are gone.
+    """The `need` snapshot drift is FIXED, so the tests that pinned it are gone.
 
     `TestTheDriftsThisSliceFound` asserted that the Python catalog snapshot was
-    one collection behind the JavaScript one - `nest` on the shelf, in the
+    one collection behind the JavaScript one - `need` on the shelf, in the
     browser's catalog, unknown to the service - and its own failure message
     said to delete it once the gap emptied. Two branches then merged: the
     python-first slice that found the drift, and the repricing branch that
     regenerated the snapshot as part of its own work. The gap closed as a side
     effect of combining them, which is the merge doing its job.
 
-    Verified before deleting rather than on the test's say-so: `nest` is in
+    Verified before deleting rather than on the test's say-so: `need` is in
     `press_catalog.CATALOG` (13 ids) and in `pressCatalog.js`.
 
     What replaces it is the assertion that matters going forward - not that a

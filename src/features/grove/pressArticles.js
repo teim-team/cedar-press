@@ -221,7 +221,7 @@ export const PRESS_ARTICLES = Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Prime Contracting and in the enterprise structures NEST publishes. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible.",
+          "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Prime Contracting and in the enterprise structures NEED publishes. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible.",
       }),
       Object.freeze({
         kind: BLOCK.PULL,

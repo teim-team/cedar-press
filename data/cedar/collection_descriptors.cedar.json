@@ -118,14 +118,14 @@
     "sample_file": "samples/natural-resources__sample.csv",
     "needs_copy": false
   },
-  "nest": {
-    "cedar_id": "nest",
-    "product_id": "nest",
+  "need": {
+    "cedar_id": "need",
+    "product_id": "need",
     "status": "READY",
     "blockers": [],
     "n_rows": 5399,
     "n_tables": 2,
-    "sample_file": "samples/nest__sample.csv",
+    "sample_file": "samples/need__sample.csv",
     "needs_copy": false
   },
   "newsletters": {

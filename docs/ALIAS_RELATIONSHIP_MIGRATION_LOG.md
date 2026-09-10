@@ -285,20 +285,20 @@ Nine columns now carry what the sentence carried —
 148, `brand_family` 106, `federal_government` 56),
 `counterparty_name_as_recorded`, `counterparty_identifier_type` and
 `_identifier`, `counterparty_identity_state`, and a
-`counterparty_nest_enterprise_id` bridge — under an **anti-fabrication
+`counterparty_need_enterprise_id` bridge — under an **anti-fabrication
 invariant: every promoted value is a verbatim substring of that row's own
 `notes`**, proved to fire.
 
-262 of 1,462 firms (17.9%) bridge to a NEST enterprise sub-hub, and only where
+262 of 1,462 firms (17.9%) bridge to a NEED enterprise sub-hub, and only where
 both sides agree on the owner (published UEI 29, published CAGE 0, unique name
-under the same hub 233). 23 more would resolve through NEST's own
+under the same hub 233). 23 more would resolve through NEED's own
 `uei_candidate` and are refused: a candidate on one side plus a candidate on the
 other is not evidence. Every unresolved row now records WHY.
 
 **One resolved on the identifier and disagreed about the owner** — the entity
 layer's first cross-source ownership disagreement. `Laulima Government
 Solutions, LLC` (UEI `QTJZT9K41S61`) is Bering Straits here at tier A and
-Alakaina Foundation in NEST, sourced from `beringalakaina.com` — a host naming
+Alakaina Foundation in NEED, sourced from `beringalakaina.com` — a host naming
 both parents. Rule 11: a joint venture genuinely has two. **Refused, not
-reconciled.** `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`, owner
+reconciled.** `review/entity_rel_need_owner_conflicts_2026-09-02.csv`, owner
 queue **EL-2**.

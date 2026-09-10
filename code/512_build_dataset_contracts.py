@@ -2917,22 +2917,22 @@ GRAIN_INT_READY = {
 }
 GRAIN.update(GRAIN_INT_READY)
 
-# --- NEST: Native Enterprise Structures and Ties ---------------------------
-# Workstream `nest`, 2026-09-02, code/1072_tribally_owned_enterprises.py.
+# --- Cedar Native Entity Enterprise Dataset (NEED) ---------------------------
+# Workstream `need`, 2026-09-02, code/1072_tribally_owned_enterprises.py.
 # The 14th collection. Two tables, and the split between them is the point:
 # one row per ENTERPRISE in the first, one row per ASSERTION about it in the
 # second. Collapsing them would make `n_source_observations` unrecoverable,
 # and that column is how a reader judges whether a row rests on ten audited
 # filings or on one web page.
-GRAIN_NEST = {
-    "nest_enterprises.csv": _d(
+GRAIN_NEED = {
+    "need_enterprises.csv": _d(
         "one row per ENTERPRISE that a Native entity owns or has published a "
         "tie to - a sub-hub of its owner, never a spine entity in its own "
         "right (docs/IDENTIFIER_STANDARD.md §2). Identity is the Cedar-minted "
         "`enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always "
         "a spine entity. NOT one row per assertion - a firm named in ten "
         "annual reports is ONE row here and ten rows in "
-        "nest_enterprise_relations.csv. NOT one row per legal entity either: "
+        "need_enterprise_relations.csv. NOT one row per legal entity either: "
         "the grain is (owner hub, enterprise), so a joint venture between two "
         "Native owners is correctly two rows, one per parent, which is what "
         "ENTITY_MATCH_RULES rule 11 says a JV is.",
@@ -2941,15 +2941,15 @@ GRAIN_NEST = {
                           "owner_hub_cedar_uid": "many",
                           "parent_enterprise_id": "many",
                           "cedar_uid": "many"},
-        declared_by="workstream nest 2026-09-02: enterprise_id confirmed "
+        declared_by="workstream need 2026-09-02: enterprise_id confirmed "
                     "1,610 distinct / 0 blank on the FULL 1,610-row file with "
                     "csv.reader; 0 literal duplicate rows; "
                     "(owner_hub_cedar_uid, enterprise_name_normalized) tested "
                     "and also unique at 1,610, and is the key the append-only "
-                    "id register data/spine/cedar_nest_id_register.csv binds "
+                    "id register data/spine/cedar_need_id_register.csv binds "
                     "so that a rebuild re-uses the same enterprise_id instead "
                     "of re-keying the dataset"),
-    "nest_enterprise_relations.csv": _d(
+    "need_enterprise_relations.csv": _d(
         "one row per ASSERTION that a named source made about one "
         "parent->enterprise relationship: (enterprise, asserting source, "
         "document, edition). A wholly-owned subsidiary named in nine "
@@ -2965,7 +2965,7 @@ GRAIN_NEST = {
                           "enterprise_id": "many",
                           "owner_hub_cedar_uid": "many",
                           "cedar_uid": "many"},
-        declared_by="workstream nest 2026-09-02: enterprise_edge_id confirmed "
+        declared_by="workstream need 2026-09-02: enterprise_edge_id confirmed "
                     "3,789 distinct / 0 blank on the FULL 3,789-row file with "
                     "csv.reader; 0 literal duplicate rows. Two same-source "
                     "restatements of one firm (Goldbelt's `CP Marine` / `CP "
@@ -2973,33 +2973,33 @@ GRAIN_NEST = {
                     "`... Inc`) collide by design and are collapsed in the "
                     "build - one page saying a thing twice is one assertion"),
 }
-GRAIN.update(GRAIN_NEST)
+GRAIN.update(GRAIN_NEED)
 
-# --- NEST DUAL ROLE: an ANC/NHO is a hub AND an enterprise (1130) ----------
-GRAIN_NEST_DUAL = {
-    "nest_entity_dual_role.csv": _d(
+# --- NEED DUAL ROLE: an ANC/NHO is a hub AND an enterprise (1130) ----------
+GRAIN_NEED_DUAL = {
+    "need_entity_dual_role.csv": _d(
         "one row per REGISTER ENTITY for which there is evidence that the "
         "entity ITSELF trades - an ANCSA corporation or an NHO is not only a "
-        "hub that owns, it is a corporation that sells, and NEST's model "
+        "hub that owns, it is a corporation that sells, and NEED's model "
         "treated it only as a hub. This table RECORDS that second role; it "
-        "does NOT duplicate the entity into nest_enterprises.csv, because "
-        "NEST's key is (owner hub, normalised name) and a self-row would "
+        "does NOT duplicate the entity into need_enterprises.csv, because "
+        "NEED's key is (owner hub, normalised name) and a self-row would "
         "make the hub its own subsidiary - the exact thing 1072's build "
         "already refuses by testing the child against every deterministic "
         "rendering of the hub's name. NOT one row per enterprise owned "
-        "(`n_nest_enterprises_owned` is a count, join nest_enterprises on "
+        "(`n_need_enterprises_owned` is a count, join need_enterprises on "
         "owner_hub_cedar_uid for those) and NOT a roster of ANCs - an entity "
         "reaching none of the three evidence rungs is absent, and absence "
         "here means `no evidence was found`, never `it does not trade`.",
         primary_key=["cedar_uid"],
         join_cardinality={"cedar_uid": "one"},
-        declared_by="workstream nest-owner-v6 2026-09-02, "
-                    "code/1130_nest_owner_v6_reconcile.py: cedar_uid tested "
+        declared_by="workstream need-owner-v6 2026-09-02, "
+                    "code/1130_need_owner_v6_reconcile.py: cedar_uid tested "
                     "unique and non-blank on the full file; every value "
                     "checked present in data/spine/cedar_identity_register.csv "
                     "by invariant I3, which a fixture proves fires"),
 }
-GRAIN.update(GRAIN_NEST_DUAL)
+GRAIN.update(GRAIN_NEED_DUAL)
 
 # --- FAC NON-TRIBAL: the Single Audits 147's entity_type filter cannot see --
 GRAIN_FAC_NONTRIBAL = {

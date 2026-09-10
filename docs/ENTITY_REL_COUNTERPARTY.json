@@ -9,8 +9,8 @@
     "counterparty_identifier_type",
     "counterparty_identifier",
     "counterparty_identity_state",
-    "counterparty_nest_enterprise_id",
-    "counterparty_nest_basis",
+    "counterparty_need_enterprise_id",
+    "counterparty_need_basis",
     "counterparty_extraction_basis"
   ],
   "base_fields_md5": "99a3417d670ede491557232c2be95619",
@@ -35,11 +35,11 @@
     "DECLARED_NON_ENTITY_OUT_OF_SCOPE": 56,
     "NAMED_SUB_HUB_NO_IDENTIFIER": 148
   },
-  "nest_rung1_published_uei": 29,
-  "nest_rung2_published_cage": 0,
-  "nest_rung3_unique_name_under_owner": 233,
-  "nest_unresolved": 1200,
-  "nest_refused_ambiguous_under_owner": 0,
-  "nest_refused_owner_disagreement": 1,
-  "nest_would_resolve_via_nest_uei_candidate_REFUSED": 23
+  "need_rung1_published_uei": 29,
+  "need_rung2_published_cage": 0,
+  "need_rung3_unique_name_under_owner": 233,
+  "need_unresolved": 1200,
+  "need_refused_ambiguous_under_owner": 0,
+  "need_refused_owner_disagreement": 1,
+  "need_would_resolve_via_need_uei_candidate_REFUSED": 23
 }

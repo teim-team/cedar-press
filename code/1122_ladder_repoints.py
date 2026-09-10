@@ -83,12 +83,12 @@ keying either:** `senecanationgroup.com/about` says *"The Seneca Nation is a
 sovereign Nation rooted in its ancestral homelands in Western New York"*, so
 this is the Seneca Nation of Indians (NY, `CE-001AC-YN`) and NOT the
 Seneca-Cayuga Nation (OK, `CE-001AB-RW`). Corroborated on disk:
-`nest_enterprises.csv` already holds `Seneca Holdings` as an enterprise of
+`need_enterprises.csv` already holds `Seneca Holdings` as an enterprise of
 `CE-001AC-YN`. -> **REPOINT.**
 
 **ARCTIC SLOPE MISSION SERVICES LLC** - UEI WTJEFSM3P945, 2,260 rows,
 $480,272,641.51, keyed to `CE-0002B-CK`, the Native **Village** of Iñupiat.
-No web rung was needed: `nest_enterprises.csv` holds
+No web rung was needed: `need_enterprises.csv` holds
 **`ASRC Federal Mission Services`, uei `WTJEFSM3P945`, cage `6FRX9`**, under
 hub **Arctic Slope Regional Corporation** `CE-00078-KR`. This is the
 `ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` family
@@ -332,11 +332,11 @@ _r("CAGE", "821D8", "REPOINT", "CE-001AC-YN",
    "is a sovereign Nation rooted in its ancestral homelands in Western New "
    "York\", so this is the Seneca Nation of Indians (NY) and NOT the "
    "Seneca-Cayuga Nation (OK, CE-001AB-RW). Corroborated on disk: "
-   "nest_enterprises.csv holds 'Seneca Holdings' under CE-001AC-YN. Replaces "
+   "need_enterprises.csv holds 'Seneca Holdings' under CE-001AC-YN. Replaces "
    "a need_v6 link to the Golden Hill Paugussett (CT) whose only shared word "
    "was 'hill'.")
 _r("UEI", "WTJEFSM3P945", "REPOINT", "CE-00078-KR",
-   "Repointed 2026-09-02 by code/1122. nest_enterprises.csv holds 'ASRC "
+   "Repointed 2026-09-02 by code/1122. need_enterprises.csv holds 'ASRC "
    "Federal Mission Services' with uei WTJEFSM3P945 and cage 6FRX9 under hub "
    "Arctic Slope Regional Corporation CE-00078-KR - an identifier match, on "
    "disk, from the parent's own declared subsidiary list. The link replaced "

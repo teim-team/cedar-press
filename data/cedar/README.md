@@ -414,7 +414,7 @@ the scoreboard — `py -3 code/518_dataset_readiness.py` — rather than quote
 this line.** There are three statuses and no fourth.
 
 Otherwise unchanged: up from 4 when this branch first opened and 11 two days
-ago, with `nest` (tribally owned enterprises) the fourteenth collection,
+ago, with `need` (tribally owned enterprises) the fourteenth collection,
 landed mid-branch and shipping a sample like the rest.
 
 **This section previously said 11 of 13, and named `subcontracting` at 42% of
@@ -608,7 +608,7 @@ column holds two vocabularies and must be read through
 **The scope is one table, measured in both directions.** The same
 case-insensitive sweep over the eleven other flagship tables — `subawards`,
 `np_orgs`, `deals_classified`, `gaming_facilities`, `nagpra_notices`,
-`native_owned_businesses`, `nest_enterprises`, `resource_revenue`,
+`native_owned_businesses`, `need_enterprises`, `resource_revenue`,
 `lobbying_registrants`, `bill_votes`, `consultation_events` — returns **0
 cells**. This is `prime_contracts.csv` and nothing else.
 
@@ -799,7 +799,7 @@ must never be collapsed. Two processes reached the same refusal separately.
 
 `760` emitted a descriptor for it and named it as needing copy. **Nothing
 warned that it had no sample** — which is Codex finding 7 from round 2, now
-three times over: `owned`'s id mismatch, `nest` landing mid-branch, and this.
+three times over: `owned`'s id mismatch, `need` landing mid-branch, and this.
 It ships now with a sample and copy.
 
 **1,889 rows, and 481 of them are `probe_absence`** — an entity that was
@@ -936,8 +936,8 @@ directions is a number that will be wrong twice. It states the ladder instead:
 
 ### Claims re-measured against live data, and one that is already done
 
-- **`nest`** — 1,610 enterprises, **977 (60.7%) with `in_federal_contracting =
-  N`**, confirmed to the row. It already **has** a sample (`nest__sample.csv`,
+- **`need`** — 1,610 enterprises, **977 (60.7%) with `in_federal_contracting =
+  N`**, confirmed to the row. It already **has** a sample (`need__sample.csv`,
   10 rows, 17 columns) and full editorial copy; the brief asking for both is
   describing a gap that was closed on the previous push.
 - **`natural-resources` is aggregate by publisher, not by our failure** —
@@ -964,7 +964,7 @@ already worked changed shape.
 **The claim that the two engines agree is asserted, not stated.**
 `py -3 code/770_sample_extracts.py proveequal <table>` runs both on the same
 file and exits 1 unless the sampled rows match cell for cell. It passes on
-`nest_enterprises` (1.9 MB), `native_owned_businesses` (6.0 MB), `np_orgs`
+`need_enterprises` (1.9 MB), `native_owned_businesses` (6.0 MB), `np_orgs`
 (13.7 MB), `nagpra_notices` (10.8 MB) and `subawards` (82.7 MB).
 
 **And the first version of it shipped a five-row sample.** `contractors` came

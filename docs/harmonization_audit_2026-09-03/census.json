@@ -50,8 +50,8 @@
    "bytes": 24432382,
    "mtime": "2026-09-03T00:37:39"
   },
-  "nest": {
-   "file": "dist/customer/nest.csv",
+  "need": {
+   "file": "dist/customer/need.csv",
    "bytes": 9599684,
    "mtime": "2026-09-03T00:37:41"
   },
@@ -77,7 +77,7 @@
   "nagpra": 76,
   "native-owned-businesses": 70,
   "natural-resources": 52,
-  "nest": 88,
+  "need": 88,
   "nonprofits": 73,
   "subcontracting": 86
  },
@@ -1003,7 +1003,7 @@
    "n_resource_parties",
    "n_tribal_tax_bases"
   ],
-  "nest": [
+  "need": [
    "cedar_uid",
    "uei",
    "cage_code",
@@ -1071,27 +1071,27 @@
    "built_date",
    "fpds_parent_corroboration_basis",
    "duplicate_name_variant_basis",
-   "n_nest_enterprise_relations",
-   "nest_entity_dual_role__handle",
-   "nest_entity_dual_role__canonical_name",
-   "nest_entity_dual_role__entity_class",
-   "nest_entity_dual_role__dual_role",
-   "nest_entity_dual_role__dual_role_class",
-   "nest_entity_dual_role__role_as_register_entity",
-   "nest_entity_dual_role__role_as_enterprise",
-   "nest_entity_dual_role__is_nest_owner_hub",
-   "nest_entity_dual_role__n_nest_enterprises_owned",
-   "nest_entity_dual_role__evidence_rungs",
-   "nest_entity_dual_role__own_uei",
-   "nest_entity_dual_role__own_cage",
-   "nest_entity_dual_role__own_is_8a_certified",
-   "nest_entity_dual_role__own_is_federal_contractor",
-   "nest_entity_dual_role__owner_rows_naming_this_entity_as_an_enterprise",
-   "nest_entity_dual_role__enterprise_name_as_recorded",
-   "nest_entity_dual_role__verification_sources",
-   "nest_entity_dual_role__evidence_families",
-   "nest_entity_dual_role__representation_rule",
-   "nest_entity_dual_role__dual_role_basis"
+   "n_need_enterprise_relations",
+   "need_entity_dual_role__handle",
+   "need_entity_dual_role__canonical_name",
+   "need_entity_dual_role__entity_class",
+   "need_entity_dual_role__dual_role",
+   "need_entity_dual_role__dual_role_class",
+   "need_entity_dual_role__role_as_register_entity",
+   "need_entity_dual_role__role_as_enterprise",
+   "need_entity_dual_role__is_need_owner_hub",
+   "need_entity_dual_role__n_need_enterprises_owned",
+   "need_entity_dual_role__evidence_rungs",
+   "need_entity_dual_role__own_uei",
+   "need_entity_dual_role__own_cage",
+   "need_entity_dual_role__own_is_8a_certified",
+   "need_entity_dual_role__own_is_federal_contractor",
+   "need_entity_dual_role__owner_rows_naming_this_entity_as_an_enterprise",
+   "need_entity_dual_role__enterprise_name_as_recorded",
+   "need_entity_dual_role__verification_sources",
+   "need_entity_dual_role__evidence_families",
+   "need_entity_dual_role__representation_rule",
+   "need_entity_dual_role__dual_role_basis"
   ],
   "nonprofits": [
    "cedar_uid",
@@ -1266,17 +1266,17 @@
    "gaming",
    "lobbying",
    "natural-resources",
-   "nest",
+   "need",
    "nonprofits",
    "subcontracting"
   ],
   "cage_code": [
    "contractors",
-   "nest"
+   "need"
   ],
   "parent_name": [
    "contractors",
-   "nest"
+   "need"
   ],
   "recipient_city_name": [
    "contractors",
@@ -1320,7 +1320,7 @@
   "sector": [
    "contractors",
    "deals",
-   "nest"
+   "need"
   ],
   "recipient_state_code": [
    "contractors",
@@ -1385,7 +1385,7 @@
    "contractors",
    "federal-register",
    "natural-resources",
-   "nest",
+   "need",
    "nonprofits"
   ],
   "geo_key_tier": [
@@ -1411,7 +1411,7 @@
    "nagpra",
    "native-owned-businesses",
    "natural-resources",
-   "nest",
+   "need",
    "nonprofits",
    "subcontracting"
   ],
@@ -1437,7 +1437,7 @@
   ],
   "population_basis": [
    "funding",
-   "nest"
+   "need"
   ],
   "entity_id": [
    "gaming",
@@ -1451,7 +1451,7 @@
   "city": [
    "gaming",
    "native-owned-businesses",
-   "nest",
+   "need",
    "nonprofits"
   ],
   "state": [
@@ -1492,20 +1492,20 @@
   ],
   "source_id": [
    "native-owned-businesses",
-   "nest"
+   "need"
   ],
   "record_scope": [
    "native-owned-businesses",
    "natural-resources",
-   "nest"
+   "need"
   ],
   "assertion_class": [
    "native-owned-businesses",
-   "nest"
+   "need"
   ],
   "identity_scope": [
    "native-owned-businesses",
-   "nest"
+   "need"
   ],
   "naics": [
    "native-owned-businesses",
@@ -1513,15 +1513,15 @@
   ],
   "state_province": [
    "native-owned-businesses",
-   "nest"
+   "need"
   ],
   "publishable": [
    "native-owned-businesses",
-   "nest"
+   "need"
   ],
   "publishable_basis": [
    "native-owned-businesses",
-   "nest"
+   "need"
   ],
   "source_dataset": [
    "nonprofits",

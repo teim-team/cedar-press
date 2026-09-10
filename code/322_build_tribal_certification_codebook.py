@@ -51,7 +51,7 @@ DESCRIPTIONS = {
     'searched':
         'What was looked for, required whenever the verdict is RULE_NOT_PUBLISHED, so the next pass extends the search instead of inheriting the conclusion.',
     'whose_ownership':
-        'WHOSE ownership qualifies, and these are DIFFERENT POPULATIONS that do not nest: THIS_TRIBE_MEMBER / ANY_FEDERALLY_RECOGNIZED_TRIBE_MEMBER / ANY_NATIVE_PERSON / TRIBAL_GOVERNMENT_ENTITY / SHAREHOLDER_OR_DESCENDANT_OR_SPOUSE / PARENT_CORPORATION / MIXED_SEE_TIERS. A study of individual Native business ownership wants the first three and specifically NOT the sixth.',
+        'WHOSE ownership qualifies, and these are DIFFERENT POPULATIONS that do not need: THIS_TRIBE_MEMBER / ANY_FEDERALLY_RECOGNIZED_TRIBE_MEMBER / ANY_NATIVE_PERSON / TRIBAL_GOVERNMENT_ENTITY / SHAREHOLDER_OR_DESCENDANT_OR_SPOUSE / PARENT_CORPORATION / MIXED_SEE_TIERS. A study of individual Native business ownership wants the first three and specifically NOT the sixth.',
     "certification_rule_id":
         "Identifier for one (authority, programme) rule. Keyed on the "
         "authority's spine id plus a programme slug, never on row position.",

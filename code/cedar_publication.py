@@ -495,7 +495,7 @@ NEID_COLS = (
     "handle",
     "handle_prefix",
     "owner_hub_handle",
-    "nest_entity_dual_role__handle",
+    "need_entity_dual_role__handle",
     "tribe_id",
     "tribe_id_neid",
     "entity_tribe_ids",
@@ -516,7 +516,7 @@ NEID_COLS = (
 #     26,513  lobbying.entity_id
 #     18,972  nagpra.affiliated_entity_ids
 #     17,104  nagpra.consulted_entity_ids
-#      5,820  nest.owner_hub_handle
+#      5,820  need.owner_hub_handle
 #      3,576  native-owned-businesses.certifying_authority_entity_id
 #
 # A name gate was never going to be enough, and the owner's complaint - "I told
@@ -600,7 +600,7 @@ def neid_map():
     # because picking one would write a guess into a customer file. But a
     # refusal that can be settled on evidence is not caution, it is an
     # unresolved defect left standing - and this one was blocking the release
-    # gate on 27 rows across lobbying, gaming and nest.
+    # gate on 27 rows across lobbying, gaming and need.
     #
     # TRBF-FSCWSA-00 decodes to Fort Sill Chiricahua Warm Springs Apache. The
     # handle is that tribe's own initials. The second claimant, the
@@ -699,7 +699,7 @@ def translate_neid_values(row: dict):
         #                                               (Ahtna, Inc) via..."
         #     3,576  native-owned-businesses.suppression_key
         #                                              "SUPPRESS::TRBF-TULALP-00"
-        #     1,193  nest.hub_resolution_note
+        #     1,193  need.hub_resolution_note
         #       957  natural-resources.entity_attribution_basis
         #       504  funding.attribution_basis
         #        12  gaming.entity_match_basis
@@ -760,7 +760,7 @@ def official_names() -> dict:
 #: reading headers - `gaming_properties__entity` does not have "name" in it.
 NAME_COLS = ("canonical_name", "native_party_canonical_name",
              "tribe_canonical_name", "cedar_spine_canonical_name",
-             "nest_entity_dual_role__canonical_name",
+             "need_entity_dual_role__canonical_name",
              "register_canonical_name", "withdrawn_canonical_name",
              "gaming_properties__entity",
              "gaming_properties__ultimate_parent_entity",
@@ -1601,8 +1601,8 @@ LINEAGE_COLS = (
                               # the evidence is in `federal_link_method` and
                               # `federal_identifier_match_basis`, both kept.
     "raw_snapshot_uri",       # native-owned-businesses, data/staging paths
-    "built_by",               # `nest_entity_dual_role.built_by`. Reached the
-                              # export as `nest_entity_dual_role__built_by`
+    "built_by",               # `need_entity_dual_role.built_by`. Reached the
+                              # export as `need_entity_dual_role__built_by`
                               # because 1137 prefixes a joined column with its
                               # source table - which is why the check below
                               # strips the join prefix before testing.
@@ -1731,7 +1731,7 @@ FLAGSHIP = {
     # Enterprises, not relations: the relation table is one row per ASSERTION
     # and a buyer's first question is which firms a nation owns, not how many
     # sources said so.
-    "nest":                     "nest_enterprises.csv",
+    "need":                     "need_enterprises.csv",
 }
 
 
@@ -2483,8 +2483,8 @@ def is_lineage_column(name: str) -> bool:
     named = {c.lower() for c in LINEAGE_COLS}
     n = (name or "").lower()
     # A joined column arrives as `<source table>__<its own name>`, so the test
-    # runs on both. Without this, `nest_entity_dual_role.built_by` survived the
-    # drop and shipped `1130_nest_owner_v6_reconcile.py` on 1,701 rows - the
+    # runs on both. Without this, `need_entity_dual_role.built_by` survived the
+    # drop and shipped `1130_need_owner_v6_reconcile.py` on 1,701 rows - the
     # rule was right and the name it was given had a prefix on it.
     for cand in (n, n.rsplit("__", 1)[-1]):
         if cand in named or any(cand.endswith(s) for s in LINEAGE_SUFFIXES):
@@ -2504,7 +2504,7 @@ def publishable_columns(header) -> list:
       lineage      `LINEAGE_COLS` / `LINEAGE_SUFFIXES` - the script or local
                    file that BUILT the row, which is not its provenance.
                    Added 2026-09-02; measured cost of not having it:
-                   `nest.built_by_script` shipped a Python filename on all
+                   `need.built_by_script` shipped a Python filename on all
                    4,798 rows and `contractors.ruling_source_file` shipped
                    `review/rulings_inbox_2026-08-08_elijah_batch2.csv` on
                    81,797 of the first 300,000.

@@ -132,7 +132,7 @@ firm, a vendor, a deal target) gets a **Cedar Business ID**, `CB-`, from a
 separate register with the same contract: encodes nothing, never changes,
 never reused, never dropped, never a substitute for a uid. Ownership is a
 relationship; registrations are attributes; name changes are aliases. The
-decision and its reconciliation with the NEST, place and identifier ledgers
+decision and its reconciliation with the NEED, place and identifier ledgers
 are in `docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md` (ADR-043). It
 supersedes ADR-008.
 
@@ -168,7 +168,7 @@ Those are ENTITY (hub) prefixes. Two prefixes name SUB-HUBS and are **not** enti
 
 | prefix | what it names | register |
 |---|---|---|
-| `CEDAR-NEST-nnnnnn-CC` | an enterprise a nation, ANC or NHO owns | `data/spine/cedar_nest_id_register.csv` |
+| `CEDAR-NEST-nnnnnn-CC` | an enterprise a nation, ANC or NHO owns. The collection was renamed NEST → NEED on 2026-09-10 and the prefix was NOT: these ids are issued, and a prefix is never rewritten — `docs/NEED_RENAME_2026-09-10.md` | `data/spine/cedar_need_id_register.csv` |
 | `CEDAR-PLACE-nnnnnn-CC` | a **physical place** an entity operates — gaming property, BIE school, IHS facility, BIA office, distinguished by a `place_class` COLUMN, never by the prefix | `data/spine/cedar_place_id_register.csv` |
 
 *Verified against the spine 2026-08-28: every prefix above is present, and no

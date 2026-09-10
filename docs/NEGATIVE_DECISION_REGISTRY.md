@@ -67,7 +67,7 @@ model:
 | `ruling` | `cedar_rulings.csv` | 8, of which 4 negative |
 | `agrees_with_shipped = 0` | `review/temporal_asof_ownership.csv` | 411 |
 | `parent_entity_type` vs `parent_entity_id` | `anc_tribal_subsidiary_lookup.csv` | 23 |
-| `owner_hub_cedar_uid` | `nest_enterprises.csv` | 20 |
+| `owner_hub_cedar_uid` | `need_enterprises.csv` | 20 |
 
 So:
 
@@ -219,8 +219,8 @@ one read from disk, none invented.
 | seeder | source | events | HARD | SOFT |
 |---|---|---|---|---|
 | `goldbelt_anc_lookup` | `data/raw/external/anc_tribal_subsidiary_lookup.csv` | 23 | 23 | 0 |
-| `goldbelt_nest_published` | `data/clean/nest_enterprises.csv` | 19 | 19 | 0 |
-| `uttc_united_auburn` | `data/clean/nest_enterprises.csv` | 1 | 1 | 0 |
+| `goldbelt_need_published` | `data/clean/need_enterprises.csv` | 19 | 19 | 0 |
+| `uttc_united_auburn` | `data/clean/need_enterprises.csv` | 1 | 1 | 0 |
 | `np_placename_refusals` | `data/clean/np_orgs.csv` | 517 | 0 | 517 |
 | `quarantine_1079_withdraw` | `review/1079_quarantine_triage_2026-09-02.csv` | 743 | 21 | 722 |
 | `quarantine_1079_hold` | `review/1079_quarantine_triage_2026-09-02.csv` | 758 | 0 | 758 |
@@ -235,7 +235,7 @@ Notes on the judgement calls:
 - **Goldbelt is recorded at two grains** — the 23 lookup rows and the 19 rows
   the export actually publishes. `1157` fixed the lookup path today; the
   OWNERV6 path still keys 19 Goldbelt enterprises to Tlingit & Haida in
-  `data/clean/nest_enterprises.csv`, and `dist/customer/nest.csv` ships them. An
+  `data/clean/need_enterprises.csv`, and `dist/customer/need.csv` ships them. An
   event keyed to `enterprise_id` is what the gate can test.
 - **The 517 place-name refusals are SOFT**, and that is the point. `1155`
   measured its rungs on a 210-row sample; it did not rule 517 organisations one
@@ -277,7 +277,7 @@ Notes on the judgement calls:
 733 active HARD constraints vs 2,074,875 published rows in 13 files: 20 violations
 ```
 
-All 20 in `dist/customer/nest.csv`, and all 20 are the two cases the owner named
+All 20 in `dist/customer/need.csv`, and all 20 are the two cases the owner named
 by hand:
 
 - **19 × Goldbelt → Tlingit & Haida** (`CE-0006B-0K`). `1157` repaired the

@@ -30,7 +30,7 @@ G2  PARENTAGE_STATEMENT_NOT_A_TRANSACTION
     date and no consideration. The screen's own tier D is defined as exactly
     this class; 24 rows leaked past it into tier A because the phrase also
     appears inside sentences that carry a transaction verb. These belong in
-    `nest_enterprise_relations.csv`, which already records them from audited
+    `need_enterprise_relations.csv`, which already records them from audited
     filings under Alaska Statute 45.55.139.
 
 G3  FEDERAL_AWARD_NOT_A_DEAL
@@ -67,7 +67,7 @@ G5  PARTY_IS_PUBLISHER_NOT_TRANSACTOR
 G6  INTRA_FAMILY_RELABELLING
     A move between two sub-hubs of one nation is a relabelling, not a
     transaction - the owner's own example is "All Native Group -> Ho-Chunk
-    Inc". Re-run here against `nest_enterprise_relations.csv`, which did not
+    Inc". Re-run here against `need_enterprise_relations.csv`, which did not
     exist when the newsletter screen ran its own intra-family test.
 
     TWO MEASURED CORRECTIONS TO THIS GATE, both made after the first version
@@ -81,7 +81,7 @@ G6  INTRA_FAMILY_RELABELLING
          `chartered_by` a nation is a separate legal person - the ledger's own
          instrumentality rule - and folding it into the nation's corporate
          family would refuse real transactions. Within
-         `nest_enterprise_relations.csv` the same discipline applies: only
+         `need_enterprise_relations.csv` the same discipline applies: only
          `relation_class = ownership` counts, and `joint_venture` (157 edges)
          and `passive_investment` (10) are EXCLUDED from the family, because a
          joint venture between two families is exactly the transaction this
@@ -299,7 +299,7 @@ TRANSFER_VERB = re.compile(
 def build_family_map():
     """name -> set(hub uid), and hub uid -> set(member names).
 
-    Built from `nest_enterprise_relations.csv` OWNERSHIP edges only. See the
+    Built from `need_enterprise_relations.csv` OWNERSHIP edges only. See the
     module docstring, correction (i), for why the constellation file is not
     read here and why joint ventures are excluded.
     """
@@ -317,7 +317,7 @@ def build_family_map():
     # class this repo has thirteen recorded instances of. Name them.
     skipped = Counter()
     eg = {}
-    for r in read(CLEAN / "nest_enterprise_relations.csv", required=False):
+    for r in read(CLEAN / "need_enterprise_relations.csv", required=False):
         hub = r.get("owner_hub_cedar_uid") or ""
         if not hub:
             skipped["no_owner_hub_cedar_uid"] += 1
@@ -339,7 +339,7 @@ def build_family_map():
             if norm(n):
                 fam[norm(n)].add(hub)
                 members[hub].add(norm(n))
-    print(f"  nest edges: {kept:,} ownership kept, {sum(skipped.values()):,} skipped:")
+    print(f"  need edges: {kept:,} ownership kept, {sum(skipped.values()):,} skipped:")
     for tag, n in skipped.most_common():
         print(f"      {n:>5}  {tag:<34} e.g. {eg[tag][:64]}")
     print("  cedar_constellation_edges.csv NOT USED as a family source: "
@@ -386,20 +386,20 @@ def intra_family(party, counterparty, text, fam, hub_name, norm, members,
     label = f"hub {h} ({hub_name.get(h, h)})"
 
     if not has_sentence:
-        return True, (f"both sides resolve to {label} in nest_enterprise_relations "
+        return True, (f"both sides resolve to {label} in need_enterprise_relations "
                       f"and there is no source sentence - an identifier flip inside "
                       f"one family is a relabelling, the owner's 'All Native Group -> "
                       f"Ho-Chunk Inc' case")
 
     if REORG_PHRASE.search(text or ""):
-        return True, (f"both sides resolve to {label} in nest_enterprise_relations "
+        return True, (f"both sides resolve to {label} in need_enterprise_relations "
                       f"AND the passage uses a reorganisation verb, not a transfer "
                       f"verb - a relabelling of companies already inside the family")
 
     if TRANSFER_VERB.search(text or ""):
         return False, ""
 
-    return True, (f"both sides resolve to {label} in nest_enterprise_relations "
+    return True, (f"both sides resolve to {label} in need_enterprise_relations "
                   f"and the passage performs no transfer - it states a standing "
                   f"internal relationship")
 
@@ -485,7 +485,7 @@ def gate_newsletter(r, fam, hub_name, norm, members):
     if PARENTAGE_PHRASE.search(phrase):
         return ("G2_PARENTAGE_STATEMENT_NOT_A_TRANSACTION",
                 f"matched phrase {phrase!r} states standing corporate parentage, "
-                f"not a dated transfer; belongs in nest_enterprise_relations.csv")
+                f"not a dated transfer; belongs in need_enterprise_relations.csv")
 
     if AWARD_PHRASE.search(phrase):
         return ("G3_FEDERAL_AWARD_NOT_A_DEAL",
@@ -605,7 +605,7 @@ def main(argv):
 
     fam, hub_name, norm, members = build_family_map()
     print(f"family map: {len(fam):,} names -> {len(hub_name):,} hubs "
-          f"(nest_enterprise_relations, ownership edges only)")
+          f"(need_enterprise_relations, ownership edges only)")
 
     ledger, lidx, prior = existing_ledger()
     # Every comparison is against the ledger MINUS this script's own prior

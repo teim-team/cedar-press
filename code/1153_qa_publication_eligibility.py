@@ -451,7 +451,7 @@ def write(disp, mx, st):
           "than on the status label - which matters, because the label is on "
           "1,405 of the still-attributed rows and the unlabelled "
           "`cluster_v3` rows beside them carried $16.00B.", "",
-          "- **QA-NEST-SOURCEDOC** `nest.source_document` is a real "
+          "- **QA-NEST-SOURCEDOC** `need.source_document` is a real "
           "source-document column on 825 rows and the owner's own research "
           "dataset, named by its path on this machine, on 3,189. It is kept "
           "because dropping it would delete the 825; the fix is upstream.", "",

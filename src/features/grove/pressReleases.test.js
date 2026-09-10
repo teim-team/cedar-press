@@ -324,6 +324,6 @@ test("dates are spelled one way everywhere", () => {
   assert.match(freshnessLine("funding"),
                /^Updated [A-Z][a-z]+\.? \d{1,2} · monthly$/);
   assert.equal(freshnessLine("not-a-collection"), "");
-  assert.equal(latestRelease("nest").version, releaseFor("nest").version);
+  assert.equal(latestRelease("need").version, releaseFor("need").version);
   assert.equal(latestRelease("not-a-collection"), null);
 });

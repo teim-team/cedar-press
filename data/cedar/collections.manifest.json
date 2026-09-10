@@ -2986,9 +2986,9 @@
       }
     },
     {
-      "id": "nest",
+      "id": "need",
       "descriptor": {
-        "id": "nest",
+        "id": "need",
         "shelf": "pro",
         "level": "entity",
         "origin": "lumecon",
@@ -2997,30 +2997,30 @@
         "version": "v1",
         "updated": "2026-09-04",
         "downloads": null,
-        "name": "NEST: Native Enterprise Structures and Ties",
-        "short_name": "NEST",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+        "short_name": "NEED",
         "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities — the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
         "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own “Our Companies” and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",
         "method": "Two relations, declared per row and never conflated: a STRUCTURE is ownership — nation, holding company, operating company — and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees."
       },
       "cedar": {
-        "cedar_id": "nest",
+        "cedar_id": "need",
         "status": "READY",
         "blockers": [],
         "n_rows": 14868,
         "n_tables": 3
       },
       "sample": {
-        "table": "nest_enterprises.csv",
-        "path": "/data/cedar/samples/nest/nest_enterprises__10.csv",
+        "table": "need_enterprises.csv",
+        "path": "/data/cedar/samples/need/need_enterprises__10.csv",
         "rows": 10,
         "of": 5820,
         "columns": 65
       },
       "tables": [
         {
-          "table": "nest_enterprise_relations.csv",
-          "sample_path": "/data/cedar/samples/nest/nest_enterprise_relations__10.csv",
+          "table": "need_enterprise_relations.csv",
+          "sample_path": "/data/cedar/samples/need/need_enterprise_relations__10.csv",
           "rows_in": 8690,
           "rows_published": 8690,
           "rows_withheld": 0,
@@ -3035,8 +3035,8 @@
           }
         },
         {
-          "table": "nest_enterprises.csv",
-          "sample_path": "/data/cedar/samples/nest/nest_enterprises__10.csv",
+          "table": "need_enterprises.csv",
+          "sample_path": "/data/cedar/samples/need/need_enterprises__10.csv",
           "rows_in": 5820,
           "rows_published": 5820,
           "rows_withheld": 0,
@@ -3051,8 +3051,8 @@
           }
         },
         {
-          "table": "nest_entity_dual_role.csv",
-          "sample_path": "/data/cedar/samples/nest/nest_entity_dual_role__10.csv",
+          "table": "need_entity_dual_role.csv",
+          "sample_path": "/data/cedar/samples/need/need_entity_dual_role__10.csv",
           "rows_in": 358,
           "rows_published": 358,
           "rows_withheld": 0,

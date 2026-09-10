@@ -24,7 +24,7 @@ re-measured, and the re-measurement is printed beside it.*
 > Row counts, snapshot 2026-09-03 01:0x: contractors 1,217,768 · deals 1,073 ·
 > federal-register 11,402 · funding 701,955 · gaming 787 · legislation 3,069 ·
 > lobbying 27,825 · nagpra 6,792 · native-owned-businesses 3,725 ·
-> natural-resources 11,305 · nest 5,820 · nonprofits 12,689 ·
+> natural-resources 11,305 · need 5,820 · nonprofits 12,689 ·
 > subcontracting 70,597. **Total 2,074,807 rows, 1,147 columns.**
 
 ---
@@ -58,12 +58,12 @@ re-measured, and the re-measurement is printed beside it.*
 | **H7** | S1 | The same file's prose describes rows it does not contain | `subcontracting__NOTES.txt` says Cedar "RETAINS all of them and flags the repeats in `duplicate_status`; it does not delete them" and quotes "87,355 of 89,809 rows (97.27%)" and "47,561 rows". The delivered file is 70,597 rows, `duplicate_status = 'primary'` on **100%**, either-leg coverage **69,278/70,597 = 98.13%**, `sub_cedar_uid` 38,563 |
 | **H8** | S2 | Booleans use **six** vocabularies across the delivery, four of them inside one dataset | `0`/`1` (48 columns) · `Y`/`N` (11) · `yes` (11) · `Yes`/`No` (2) · `True`/`False` (1) · `Y`/`N`/`UNKNOWN` (1). `native-owned-businesses` alone ships `publishable`=`Y`, `publishable_before_1100`=`Y`/`N`, `is_current`=`True`/`False`, `owner_name_present`=`0`/`1` |
 | **H9** | S2 | `pre_2000_flag` — one name, three encodings | `contractors`: `'0'` on all 1,217,768. `legislation`: `'1'` on 585, blank on 2,484. `subcontracting`: **blank on all 70,597** |
-| **H10** | S2 | State is spelled 6 ways as a column and 4 ways as a value | Columns: `state` · `State` · `state_province` · `institution_state` · `sub_state` · `recipient_state_code` · `place_of_perform_state` · `entity_state`/`client_state`/`registrant_state` · `owner_hub_state`. Values: `nest.state_province` **567 of 5,820 rows are not USPS** (`Alaska` 211 beside `AK` 714; `Virginia` 109 beside `VA` 164; **12 rows hold the sentence `The business owner has hidden this information from public searches`**). `subcontracting.sub_state` **536 rows** hold `Michigan`/`MICHIGAN` beside `MI`. `native-owned-businesses.state_province` **110 rows** including truncations `Ne`, `Uta`, `Alas`, `Okl`, `Min`, `Geo`, `Tex`, `Nev`, `Ariz`. `deals.State` holds `Multi` (42), `Intl` (3), `Multiple`, `United Kingdom`, `AL / AK` |
+| **H10** | S2 | State is spelled 6 ways as a column and 4 ways as a value | Columns: `state` · `State` · `state_province` · `institution_state` · `sub_state` · `recipient_state_code` · `place_of_perform_state` · `entity_state`/`client_state`/`registrant_state` · `owner_hub_state`. Values: `need.state_province` **567 of 5,820 rows are not USPS** (`Alaska` 211 beside `AK` 714; `Virginia` 109 beside `VA` 164; **12 rows hold the sentence `The business owner has hidden this information from public searches`**). `subcontracting.sub_state` **536 rows** hold `Michigan`/`MICHIGAN` beside `MI`. `native-owned-businesses.state_province` **110 rows** including truncations `Ne`, `Uta`, `Alas`, `Okl`, `Min`, `Geo`, `Tex`, `Nev`, `Ariz`. `deals.State` holds `Multi` (42), `Intl` (3), `Multiple`, `United Kingdom`, `AL / AK` |
 | **H11** | S2 | The subaward money fence is printed into **all 13** codebooks; **12 have no `subaward_amount`** | `code/1137_customer_dataset_combine.py` L~388 emits `subaward_warning()` unconditionally, while the lobbying fence two lines below is correctly gated by `if coll == "lobbying"` |
-| **H12** | S2 | The codebooks' "Quirks to know" bullets are chosen by naked substring match | **66 bullets across 13 codebooks; only 3 have the dataset's name in the heading.** **4 of `nest`'s 6 matched on the word `honest`.** `native-owned-businesses` gets **0** — `KNOWN_ISSUES.md` writes `native_owned_businesses` with underscores and the matcher looks for hyphens or spaces. `contractors` ships the bullet *"M1 · OPEN, BLOCKING A SHIP · `dist/customer/contractors.csv` does not exist"* — the file is 1.48 GB and 1,217,768 rows |
+| **H12** | S2 | The codebooks' "Quirks to know" bullets are chosen by naked substring match | **66 bullets across 13 codebooks; only 3 have the dataset's name in the heading.** **4 of `need`'s 6 matched on the word `honest`.** `native-owned-businesses` gets **0** — `KNOWN_ISSUES.md` writes `native_owned_businesses` with underscores and the matcher looks for hyphens or spaces. `contractors` ships the bullet *"M1 · OPEN, BLOCKING A SHIP · `dist/customer/contractors.csv` does not exist"* — the file is 1.48 GB and 1,217,768 rows |
 | **H13** | S2 | Provenance is not harmonized, and one dataset has none | `source_url` on **7 of 13**; **`lobbying` (27,825 rows) carries no source URL, no fetched date and no built date**; `nagpra.fetched_date` exists and is **blank on all 6,792 rows**; `funding.fetched_date` on 225,031 of 701,955 (32.1%); `built_date` (5 datasets) vs **`build_date`** (legislation) — one letter, one concept |
 | **H14** | S2 | `funding` ships 12 always-blank BIE columns described as deliberate sparsity; they are a join that could never match | `bie_uio_dollars_by_entity.csv` holds 114 `cedar_uid`s, all valid register keys. **0 of the 114 appear in `funding.csv`'s 669 distinct `cedar_uid`s.** The codebook says "kept deliberately … Sparsity is a coverage fact." The disjointness is not stated |
-| **H15** | S3 | Dates are ISO almost everywhere and not quite | `native-owned-businesses.certification_expiration` **45 of 750 non-ISO** (`8-13-2025`); `certification_start` **77 of 117**. `gaming.open_date` mixes `1994` / `2002-11` / ISO and holds **float years `2013.0`, `2005.0`**; `close_date` likewise. `nest.source_edition_date` 101 bare `YYYY`. `subcontracting.subaward_sam_report_last_modified_date` is **100% `YYYY-MM-DD 00:00:00+00`**, the only tz-stamped column in the delivery |
+| **H15** | S3 | Dates are ISO almost everywhere and not quite | `native-owned-businesses.certification_expiration` **45 of 750 non-ISO** (`8-13-2025`); `certification_start` **77 of 117**. `gaming.open_date` mixes `1994` / `2002-11` / ISO and holds **float years `2013.0`, `2005.0`**; `close_date` likewise. `need.source_edition_date` 101 bare `YYYY`. `subcontracting.subaward_sam_report_last_modified_date` is **100% `YYYY-MM-DD 00:00:00+00`**, the only tz-stamped column in the delivery |
 | **H16** | S3 | Prose and build notes inside controlled vocabularies | `gaming.property_status_literal` — one value is a 200-character correction narrative beginning *"Temporarily Closed \| CORRECTED 2026-09-01 (code/587) from `current`…"*. `gaming.…nigc_management_contract_status` = `not_held_by_cedar_press_this_session` on all 774. `subcontracting.prime_native_tier` = `source_filter` on 74 rows in an otherwise A/B column |
 | **H17** | S3 | "Tier" is 14 column names and 4 unrelated concepts | Confidence: `confidence_tier`, `entity_tier`, `cedar_link_tier`, `identifier_ruling_tier`, `native_party_attribution_tier`, `federal_link_tier`, `prime_native_tier`, `sub_native_tier`, `link_tier`, `entity_link_tiers` (pipe-delimited: `B|A|B`), `tier`. **Method, not tier**: `geo_key_tier` = `derived_place_modal` / `exact_award_summary` / `exact_transaction`. **Source programme label**: `certification_tier` — 18 values, four spellings of one idea (`Priority 1` 201, `Priority #1` 142, `Preference Level 1` 113, `PREFERENCE 1` 91) plus `BID LIMIT: NOT APPLICABLE` |
 | **H18** | S3 | Status vocabularies split by case and style | UPPER_SNAKE (`RULED_ATTRIBUTED`, `CANDIDATE_NAME_ONLY`, `SEALED_BY_STATUTE_OR_COMPACT`), lower_snake (`cedar_neid`, `reported_revenue`, `operating`), Title Case (`Primary verified`, `Approved`), hyphenated-lower (`died-in-committee`). `native-owned-businesses` carries `federal_link_status = NO_MATCH` **and** `federal_identifier_match_status = no_match` — the same token, two cases, two columns apart |
@@ -98,12 +98,12 @@ The shared spine, in full (`docs/harmonization_audit_2026-09-03/census.json`):
 
 | n | column | datasets |
 |---:|---|---|
-| 10 | `cedar_uid` | contractors, deals, federal-register, funding, gaming, lobbying, natural-resources, nest, nonprofits, subcontracting |
-| 7 | `source_url` | federal-register, nagpra, native-owned-businesses, natural-resources, nest, nonprofits, subcontracting |
+| 10 | `cedar_uid` | contractors, deals, federal-register, funding, gaming, lobbying, natural-resources, need, nonprofits, subcontracting |
+| 7 | `source_url` | federal-register, nagpra, native-owned-businesses, natural-resources, need, nonprofits, subcontracting |
 | 6 | `fetched_date` | federal-register, funding, gaming, nagpra, natural-resources, subcontracting |
-| 5 | `built_date` | contractors, federal-register, natural-resources, nest, nonprofits |
+| 5 | `built_date` | contractors, federal-register, natural-resources, need, nonprofits |
 | 4 | `deflator_factor_2025`, `inflation_base_year` | contractors, funding, natural-resources, subcontracting |
-| 4 | `city` | gaming, native-owned-businesses, nest, nonprofits |
+| 4 | `city` | gaming, native-owned-businesses, need, nonprofits |
 | 3 | `fiscal_year` | contractors, funding, subcontracting |
 | 3 | `confidence_tier` | contractors, funding, nonprofits |
 | 3 | `canonical_name`, `attribution_method` | contractors, funding, lobbying |
@@ -131,7 +131,7 @@ The shared spine, in full (`docs/harmonization_audit_2026-09-03/census.json`):
 | **`entity_id`** | gaming/lobbying/nonprofits — the register's **`handle`** (`TRBF-MHATAT-00`), 100% resolvable | `native-owned-businesses.business_entity_id` — mixes `CEDAR-ENT-000061` and `ANVC-HUNATO-00` (5 rows) | two id grammars under one name |
 | **`pre_2000_flag`** | contractors — `'0'` on 100% | legislation — `'1'` on 585, blank on the rest; subcontracting — blank on 100% | three encodings of one boolean |
 | **`*_tier` suffix** | confidence grades A/B/C/X | `geo_key_tier` — a **method** name | a `_tier` column that is not a tier |
-| **`state`** | gaming/nonprofits/nagpra — clean USPS, 0 offenders | nest/native-owned-businesses/subcontracting/deals — mixed spellings and non-state tokens | see H10 |
+| **`state`** | gaming/nonprofits/nagpra — clean USPS, 0 offenders | need/native-owned-businesses/subcontracting/deals — mixed spellings and non-state tokens | see H10 |
 
 ---
 
@@ -142,7 +142,7 @@ The shared spine, in full (`docs/harmonization_audit_2026-09-03/census.json`):
 | vocabulary | columns | example |
 |---|---:|---|
 | `0` / `1` | 48 (+5 all-`0`, +9 all-`1`) | `contractors.attributed_flag` |
-| `Y` / `N` | 11 (+4 all-`Y`) | `nest.parent_is_hub` |
+| `Y` / `N` | 11 (+4 all-`Y`) | `need.parent_is_hub` |
 | `yes` (lower, only value present) | 11 | `subcontracting.subaward_exceeds_prime_flag` (676) |
 | `Yes` / `No` | 2 | `deals.Threshold_Exception`, `gaming.native_american_flag` |
 | `True` / `False` | 1 | `native-owned-businesses.is_current` |
@@ -152,7 +152,7 @@ The shared spine, in full (`docs/harmonization_audit_2026-09-03/census.json`):
 
 | dataset.column | non-USPS rows | worst values |
 |---|---:|---|
-| `nest.state_province` | **567 of 5,820** (41 values) | `Alaska` 211 · `Virginia` 109 · `Hawaii` 36 · **`The business owner has hidden this information from public searches` 12** |
+| `need.state_province` | **567 of 5,820** (41 values) | `Alaska` 211 · `Virginia` 109 · `Hawaii` 36 · **`The business owner has hidden this information from public searches` 12** |
 | `subcontracting.sub_state` | **536 of 70,176** (64 values) | `Michigan` 67 · `OKLAHOMA` 51 · `MICHIGAN` 46 · `Oklahoma` 40 |
 | `native-owned-businesses.state_province` | **110 of 3,725** (15 values) | `Ariz` 36 · `Wisconsin` 24 · `Alaska` 16 · `Ne` 14 · `Uta` 5 · `Alas` 2 · `Okl` 2 |
 | `deals.State` | **48 of 940** (5 values) | `Multi` 42 · `Intl` 3 · `Multiple` · `United Kingdom` · `AL / AK` |
@@ -177,7 +177,7 @@ Not clean:
 | `native-owned-businesses.certification_expiration` | **45 of 750** | `8-13-2025`, `09-10-2025` |
 | `gaming.open_date` | **448 of 636** | `1994`, `2002-11` |
 | `gaming.close_date` | **91 of 148** | `2006-11`, **`2013.0`, `2005.0`** — a float year |
-| `nest.source_edition_date` | **101 of 5,248** | bare `YYYY` |
+| `need.source_edition_date` | **101 of 5,248** | bare `YYYY` |
 | `subcontracting.subaward_sam_report_last_modified_date` | **70,054 of 70,054** | `2016-09-30 00:00:00+00` |
 
 `WHAT_IS_MISSING.md` §4 said the six date formats in
@@ -193,7 +193,7 @@ values, uncapped, all 13 files (`null_sentinels.json`):
 | dataset | columns hit | worst |
 |---|---:|---|
 | contractors | 9 | `owner_as_of_transaction_cedar_uid` **1,066,926** · `cage_code` **398,840** · `place_of_perform_city` 88,269 · `place_of_perform_state` 87,068 · `extent_competed` 9,411 |
-| nest | 3 | `status` 211 (`unknown`) |
+| need | 3 | `status` 211 (`unknown`) |
 | nonprofits | 2 | `tier` 129 (`UNKNOWN`) |
 | gaming | 2 | `…compact_status` 153 (`unknown`) |
 | funding | 3 | `cfda_title` 1,070 |
@@ -220,7 +220,7 @@ populated in the codebook's `fill %`.
 | subcontracting | 32,369 | 169 | `prime_cedar_uid` 32,203 · `sub_cedar_uid` 38,563 |
 | lobbying | 26,513 | 302 | `entity_id` (handle) 26,513 |
 | federal-register | 10,396 | 396 | — |
-| nest | 5,820 | 707 | `owner_hub_cedar_uid` 5,820 (correctly cedar_uid) |
+| need | 5,820 | 707 | `owner_hub_cedar_uid` 5,820 (correctly cedar_uid) |
 | deals | 959 | 331 | `native_party_entity_id` (handle) 959 |
 | gaming | 785 | 284 | `entity_id` (handle) 228 |
 | natural-resources | 705 | 17 | `recipient_entity_id` (handle) 705 |
@@ -293,7 +293,7 @@ is not fixed.** Specimens, all one `cedar_uid`:
 | nagpra | nagpra_notices.csv | 6,792 | 6,792 | 0 | 0 |
 | native-owned-businesses | native_owned_businesses.csv | 4,273 | 3,725 | **−548** | **548** ✔ |
 | natural-resources | resource_revenue.csv | 11,305 | 11,305 | 0 | 0 |
-| nest | nest_enterprises.csv | 5,820 | 5,820 | 0 | 0 |
+| need | need_enterprises.csv | 5,820 | 5,820 | 0 | 0 |
 | nonprofits | np_orgs.csv | 12,764 | 12,689 | **−75** | **75** ✔ |
 | subcontracting | subawards.csv | 89,809 | 70,597 | **−19,212** | **19,212** ✔ |
 
@@ -311,7 +311,7 @@ is not fixed.** Specimens, all one `cedar_uid`:
 | nagpra | **1** | 9 | object-count columns conditional on the notice type ✔ | **`fetched_date` — 0 of 6,792** |
 | native-owned-businesses | **3** | 17 | `publish_hold*` conditional on a hold existing | `person_name_check_1100` |
 | natural-resources | **3** | 8 | | `operator_entity_id`, `operator_entity_name`, `related_asset_ids`; `cedar_uid` 705 of 11,305 (6.2%) is the lowest identity coverage of the ten |
-| nest | 0 | 12 | mostly conditional evidence columns ✔ | — |
+| need | 0 | 12 | mostly conditional evidence columns ✔ | — |
 | nonprofits | 0 | 15 | ruling/refusal columns conditional ✔ | — |
 | subcontracting | **1** | 9 | `sub_cage`/`prime_cage`/`psc` are FPDS-side and legitimately thin | `pre_2000_flag` |
 

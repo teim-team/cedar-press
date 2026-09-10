@@ -524,8 +524,8 @@ the fix cannot hide a real gap.** An earlier ungated version was measured at
 <!-- BEGIN MASTER-LIST-SWEEP-2026-09-02 -->
 # THE REGISTER IS A SEARCH KEY — which sources to sweep next, measured
 
-*Added 2026-09-02 by workstream `nest-owner-v6`
-(`code/1130_nest_owner_v6_reconcile.py`). Every number below was measured on
+*Added 2026-09-02 by workstream `need-owner-v6`
+(`code/1130_need_owner_v6_reconcile.py`). Every number below was measured on
 this machine with no network call. Owner:*
 
 > *"Our native entity master list is pretty comprehensive... it can be as
@@ -629,15 +629,15 @@ two, and `identifiers` is where it pays fastest, because
 ## 2026-09-02 — what these two passes left open, in order of value per hour
 
 *From `code/1132_fac_nontribal_native_audits.py` and
-`code/1133_nest_owner_v6_builder_input.py`. Full write-ups:
+`code/1133_need_owner_v6_builder_input.py`. Full write-ups:
 `docs/FAC_NONTRIBAL_SINGLE_AUDITS_LOG_2026-09-02.md` and the
-`NEST-OWNER-V6-INPUT-2026-09-02` block in `docs/NEST_BUILD_LOG.md`.
+`NEST-OWNER-V6-INPUT-2026-09-02` block in `docs/NEED_BUILD_LOG.md`.
 Model decisions **ADR-033** and **ADR-034**.*
 
 1. **986 Alaska Native corporate subsidiaries are held, not lost, and one
    column would release them.** `1072 assemble` holds **1,281 rows** across
    **221 village governments** under `ANCSA_OWNERSHIP_RULING` rule 2, and 986
-   of the firms on them are in NEST under no hub at all. The guard is right —
+   of the firms on them are in NEED under no hub at all. The guard is right —
    the ruling says a village government asserted as owner of an ANC resolves
    to *"nothing … refuse, send to review"*, and `held_rows.csv` IS that review
    queue. What closes it is a per-row source naming the CORPORATION, the way
@@ -655,16 +655,16 @@ Model decisions **ADR-033** and **ADR-034**.*
    to a publication-policy guard.
 
 3. **3,140 SBA-certified Native firms with no owner nation named** are
-   registered in `data/staging/nest/owner_v6_refused.csv` under
-   `SBA_CERTIFIED_BUT_NO_OWNER_NAMED`, with name and UEI. They are not NEST
-   rows (NEST's grain needs an owner) and they belong to
+   registered in `data/staging/need/owner_v6_refused.csv` under
+   `SBA_CERTIFIED_BUT_NO_OWNER_NAMED`, with name and UEI. They are not NEED
+   rows (NEED's grain needs an owner) and they belong to
    `native-owned-businesses` / the individually-Native-owned class. The
    register makes the promotion a **join, not a re-harvest**. Largest single
    block of unhubbed enterprise identity on this machine.
 
 4. **172 cross-hub UEI disagreements need an adjudication.**
-   `data/staging/nest/owner_v6_uei_already_held.csv`. One federal registration
-   that NEST and the owner's file place under two different owners. Must not
+   `data/staging/need/owner_v6_uei_already_held.csv`. One federal registration
+   that NEED and the owner's file place under two different owners. Must not
    be settled by whichever pass ran last.
 
 5. **The FAC historic (pre-2016) download is `NOT_ACQUIRED`, not absent.**
@@ -677,7 +677,7 @@ Model decisions **ADR-033** and **ADR-034**.*
    Confederated Salish and Kootenai (ambiguous against Cedar's truncated
    `Confederated Salish`) and `NHO-MANUKAI-00` Manu Kai LLC.
 
-7. **`py -3 code/build.py plan nest` mislabels `1072` as an in-place
+7. **`py -3 code/build.py plan need` mislabels `1072` as an in-place
    enricher.** It is a FULL REBUILD; `1102` is the enricher and must run last.
    The plan currently lists all three of 1072/1102/1130 under *Phase 2* and
    *Phase 1* as empty, so a reader following it would run them in an order
@@ -700,13 +700,13 @@ Model decisions **ADR-033** and **ADR-034**.*
    each carry one, because that is two enterprises fusing and needs evidence.
    **Not done here**: retiring or repointing an id needs an owner ruling.
    Written up in the `NEST-OWNER-V6-INPUT-2026-09-02` block of
-   `docs/NEST_BUILD_LOG.md`.
+   `docs/NEED_BUILD_LOG.md`.
 
 9. **`1130`'s I6b was hiding item 8 and is corrected.** It asserted
-   `len(register) == len(NEST)` under the name `register_covers_nest`. An
+   `len(register) == len(NEED)` under the name `register_covers_need`. An
    append-only register exceeds the live table the first time a cluster key
    changes, so that equality measures "nothing has ever changed", not
-   coverage. It now asserts every live NEST id has a binding, and reports the
+   coverage. It now asserts every live NEED id has a binding, and reports the
    orphan count beside it. This repo's signature defect, found in a gate.
 <!-- END FAC-NONTRIBAL-AND-NEST-INPUT-2026-09-02 -->
 
@@ -760,7 +760,7 @@ Indian Country revenue in AGGREGATE, which is a fact about the world.
   that were claiming `cedar_neid` with a blank key now say `unattributed`,
   which is what is true today. The repoint to `SGVF-BRSTLB-00` still needs the
   owner's yes/no.
-- **`data/staging/nest_owner_v6/` was being written by another workstream
+- **`data/staging/need_owner_v6/` was being written by another workstream
   during this pass (14:59) and was left alone.** The "3,306 of the owner's v6
   UEIs are in no Cedar table" figure was NOT re-measured and is not disputed.
 - **`dist/customer/legislation.csv` does not yet carry the ten new columns.**
@@ -903,10 +903,10 @@ is a task with a measurement, not a feeling.*
    has the same shape, from `772`.
 
 4. **The 50 Akima operating companies are in the business directory and NOT in
-   NEST.** They are admitted exactly as ASRC Federal (TBD-056) and Doyon
+   NEED.** They are admitted exactly as ASRC Federal (TBD-056) and Doyon
    (TBD-059) already are — `directory_type = subsidiary_directory`,
    `identity_scope = parent_asserted_subsidiary`. Whether a
-   parent-asserted subsidiary should ALSO become a `nest_enterprises` row is
+   parent-asserted subsidiary should ALSO become a `need_enterprises` row is
    `1072_tribally_owned_enterprises.load_sources()`'s decision and this pass did
    not open that file. If it should, these 50 are a ready-made source 8, and
    `1130`'s reconciliation is the check that says whether they are already

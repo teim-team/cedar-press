@@ -51,7 +51,7 @@ test("the Cedar Press+ promise names every pro-shelf collection", () => {
     subcontracting: "subcontracting",
     "natural-resources": "resource revenue",
     owned: "individually owned native businesses",
-    nest: "enterprise structures",
+    need: "enterprise structures",
     nonprofits: "nonprofit",
   };
   for (const entry of collectionsOnShelf("pro")) {

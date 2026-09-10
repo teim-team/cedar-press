@@ -80,7 +80,7 @@ csv.field_size_limit(2 ** 31 - 1)
 
 PRIME = os.path.join(ROOT, "data", "clean", "prime_contracts.csv")
 SUB = os.path.join(ROOT, "data", "clean", "subawards.csv")
-NEST = os.path.join(ROOT, "data", "clean", "nest_enterprises.csv")
+NEED = os.path.join(ROOT, "data", "clean", "need_enterprises.csv")
 CICD_SERIES = os.path.join(ROOT, "data", "staging", "cicd_published",
                            "cicd_prime_series_1981_2021.csv")
 CICD_PROV = os.path.join(ROOT, "data", "staging", "cicd_published", "_provenance.json")
@@ -362,12 +362,12 @@ def read_cicd_series() -> dict:
     }
 
 
-def read_nest() -> dict:
-    if not os.path.exists(NEST):
+def read_need() -> dict:
+    if not os.path.exists(NEED):
         return {"present": False}
     n = absent = present_fc = 0
     by_class = collections.Counter()
-    with open(NEST, encoding="utf-8", errors="replace", newline="") as fh:
+    with open(NEED, encoding="utf-8", errors="replace", newline="") as fh:
         for d in csv.DictReader(fh):
             n += 1
             by_class[(d.get("owner_hub_entity_class") or "").strip() or "(blank)"] += 1
@@ -378,7 +378,7 @@ def read_nest() -> dict:
                 absent += 1
     return {
         "present": True,
-        "source": stamp(NEST),
+        "source": stamp(NEED),
         "rows": n,
         "in_federal_contracting": present_fc,
         "absent_from_federal_contracting": absent,
@@ -539,13 +539,13 @@ def entity_comparison(P, S, N) -> dict:
         "cedar_entities_carrying_prime_dollars_any_year": P["entities_all_years"],
         "cedar_entities_fy2021": P["fy_distinct_entities"].get("2021"),
         "cedar_federally_recognized_tribes_fy2021": P["fy_distinct_trbf"].get("2021"),
-        "cedar_nest_enterprises": N.get("rows"),
-        "cedar_nest_absent_from_federal_contracting": N.get("absent_from_federal_contracting"),
-        "cedar_nest_absent_pct": N.get("absent_pct"),
+        "cedar_need_enterprises": N.get("rows"),
+        "cedar_need_absent_from_federal_contracting": N.get("absent_from_federal_contracting"),
+        "cedar_need_absent_pct": N.get("absent_pct"),
         "what_the_two_sides_count": (
             "CICD's 391 is entities it linked to a CONTRACT and its 2,623 is the awardee "
             "ENTERPRISES under them, both over 1981-2021. Cedar's entity count is hubs carrying "
-            "prime dollars in prime_contracts.tribe_id; Cedar's nest_enterprises.csv is an "
+            "prime dollars in prime_contracts.tribe_id; Cedar's need_enterprises.csv is an "
             "OWNERSHIP register that deliberately includes enterprises with NO federal "
             "contracting at all. The two enterprise counts are therefore NOT the same object and "
             "the arithmetic gap between them is a scope difference, not a coverage finding. "
@@ -565,7 +565,7 @@ def measure() -> dict:
     print(f"       {S['rows_all']:,} rows; all {B(S['usd_all_rows'])} / "
           f"primary {B(S['usd_primary'])} / countable {B(S['usd_countable'])}", flush=True)
     C = read_cicd_series()
-    N = read_nest()
+    N = read_need()
     prior = read_prior_byyear()
     cmp_ = compare(P, S, C, prior)
     payload = {
@@ -583,7 +583,7 @@ def measure() -> dict:
         "comparison_A_graphed_prime_series": cmp_,
         "comparison_B_prose_combined_total": combined_comparison(P, S, C, cmp_),
         "comparison_C_entity_and_enterprise_counts": entity_comparison(P, S, N),
-        "cedar_nest": N,
+        "cedar_need": N,
     }
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2)

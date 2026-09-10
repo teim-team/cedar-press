@@ -4347,7 +4347,7 @@
   },
   {
    "class": "C14",
-   "where": "data/clean/nest_enterprises.csv",
+   "where": "data/clean/need_enterprises.csv",
    "line": 0,
    "what": "`status` carries sentinel string(s) {'unknown': 226} on 226 of 1,610 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
    "size": 226,
@@ -4356,7 +4356,7 @@
   },
   {
    "class": "C14",
-   "where": "data/clean/nest_enterprises.csv",
+   "where": "data/clean/need_enterprises.csv",
    "line": 0,
    "what": "`sector` carries sentinel string(s) {'N/A': 1} on 1 of 1,610 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
    "size": 1,
@@ -6561,7 +6561,7 @@
   },
   {
    "class": "C7",
-   "where": "data/clean/nest_enterprise_relations.csv",
+   "where": "data/clean/need_enterprise_relations.csv",
    "line": 0,
    "what": "`evidence_class` is an interface column (4 distinct value(s) over 3,789 populated rows) but 1 value(s) on 301 rows are FREE TEXT. Prose in `attribution_method` broke another pass on 1,486 rows.",
    "size": 301,
@@ -6570,7 +6570,7 @@
   },
   {
    "class": "C7",
-   "where": "data/clean/nest_enterprise_relations.csv",
+   "where": "data/clean/need_enterprise_relations.csv",
    "line": 0,
    "what": "`hub_resolution_method` is an interface column (5 distinct value(s) over 3,789 populated rows) but 1 value(s) on 91 rows are FREE TEXT. Prose in `attribution_method` broke another pass on 1,486 rows.",
    "size": 91,
@@ -6579,7 +6579,7 @@
   },
   {
    "class": "C7",
-   "where": "data/clean/nest_enterprises.csv",
+   "where": "data/clean/need_enterprises.csv",
    "line": 0,
    "what": "`owner_hub_entity_class` is an interface column (6 distinct value(s) over 1,610 populated rows) but 2 value(s) on 1,188 rows are FREE TEXT. Prose in `attribution_method` broke another pass on 1,486 rows.",
    "size": 1188,
@@ -6588,7 +6588,7 @@
   },
   {
    "class": "C7",
-   "where": "data/clean/nest_enterprises.csv",
+   "where": "data/clean/need_enterprises.csv",
    "line": 0,
    "what": "`evidence_class` is an interface column (4 distinct value(s) over 1,610 populated rows) but 1 value(s) on 193 rows are FREE TEXT. Prose in `attribution_method` broke another pass on 1,486 rows.",
    "size": 193,
@@ -6597,7 +6597,7 @@
   },
   {
    "class": "C7",
-   "where": "data/clean/nest_enterprises.csv",
+   "where": "data/clean/need_enterprises.csv",
    "line": 0,
    "what": "`hub_resolution_method` is an interface column (5 distinct value(s) over 1,610 populated rows) but 1 value(s) on 83 rows are FREE TEXT. Prose in `attribution_method` broke another pass on 1,486 rows.",
    "size": 83,

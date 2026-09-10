@@ -114,7 +114,7 @@
     "1105_newsletter_corpus_ship.py",
     "111_build_advocacy_passthrough.py",
     "112_pull_grantee_990s.py",
-    "1130_nest_owner_v6_reconcile.py",
+    "1130_need_owner_v6_reconcile.py",
     "1132_fac_nontribal_native_audits.py",
     "113_build_nd_severance.py",
     "132_build_schedule_i_layer.py",
@@ -134,7 +134,7 @@
     "1105_newsletter_corpus_ship.py",
     "111_build_advocacy_passthrough.py",
     "112_pull_grantee_990s.py",
-    "1130_nest_owner_v6_reconcile.py",
+    "1130_need_owner_v6_reconcile.py",
     "1132_fac_nontribal_native_audits.py",
     "113_build_nd_severance.py",
     "132_build_schedule_i_layer.py",
@@ -2326,7 +2326,7 @@
    "851_build_constellation_edges.py"
   ],
   "cedar_correction_register.csv": [
-   "1133_nest_owner_v6_builder_input.py",
+   "1133_need_owner_v6_builder_input.py",
    "354_correction_register.py",
    "587_gaming_facility_corrections.py"
   ],
@@ -2581,7 +2581,7 @@
   "cedar_identifier_ledger.csv": [
    "03_apply_exclusions_and_tier.py",
    "1122_ladder_repoints.py",
-   "1130_nest_owner_v6_reconcile.py",
+   "1130_need_owner_v6_reconcile.py",
    "1132_fac_nontribal_native_audits.py",
    "1134_repair_ledger_state_uei_contamination.py",
    "510_assertions.py",
@@ -2594,7 +2594,7 @@
    "1075_fix_old_harbor_attribution.py",
    "1079_quarantine_method_exposure.py",
    "1099_crosstribe_legalname_audit.py",
-   "1102_nest_corroboration_adjudication.py",
+   "1102_need_corroboration_adjudication.py",
    "1103_decision_queue_clearance.py",
    "1112_harvest_coverage_matrix.py",
    "1114_capability_statement_harvest.py",
@@ -2689,7 +2689,7 @@
    "1112_harvest_coverage_matrix.py",
    "1117_ladder_adjudication.py",
    "1122_ladder_repoints.py",
-   "1130_nest_owner_v6_reconcile.py",
+   "1130_need_owner_v6_reconcile.py",
    "1141_gaming_quality_pass.py",
    "503_identity.py",
    "510_assertions.py",
@@ -2717,9 +2717,9 @@
   "cedar_navajo_audited_actuals.csv": [
    "83_build_resource_ledger.py"
   ],
-  "cedar_nest_id_register.csv": [
+  "cedar_need_id_register.csv": [
    "1072_tribally_owned_enterprises.py",
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "cedar_observations.csv": [
    "515_temporal.py"
@@ -2836,7 +2836,7 @@
    "111_build_advocacy_passthrough.py",
    "1124_register_acquire_codebooks.py",
    "112_pull_grantee_990s.py",
-   "1130_nest_owner_v6_reconcile.py",
+   "1130_need_owner_v6_reconcile.py",
    "1132_fac_nontribal_native_audits.py",
    "113_build_nd_severance.py",
    "117_build_gaming_devices.py",
@@ -2922,7 +2922,7 @@
    "136_build_congressional_correspondence_and_foia_index.py"
   ],
   "conservation.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "consultation_agency_coverage.csv": [
    "96_build_consultation_events.py"
@@ -2960,7 +2960,7 @@
    "136_build_congressional_correspondence_and_foia_index.py"
   ],
   "corroboration_pairs.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "courtlistener_recap_sample_2026-08-26.csv": [
    "219_probe_courtlistener_recap.py"
@@ -3177,7 +3177,7 @@
    "701_enterprise_and_business_list_sweep.py"
   ],
   "enterprise_reconciliation.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "entities.csv": [
    "1060_splink_pilot.py"
@@ -3247,7 +3247,7 @@
    "129_build_review_queue.py"
   ],
   "evidence_conflicts.csv": [
-   "1102_nest_corroboration_adjudication.py"
+   "1102_need_corroboration_adjudication.py"
   ],
   "f.csv": [
    "1114_capability_statement_harvest.py"
@@ -3461,7 +3461,7 @@
   ],
   "fpds_uei_edges.csv": [
    "1079_quarantine_method_exposure.py",
-   "1102_nest_corroboration_adjudication.py",
+   "1102_need_corroboration_adjudication.py",
    "169_build_identifier_graph.py",
    "18_spiderweb_v2_and_cage_backfill.py",
    "20_build_subcontracts.py",
@@ -3828,7 +3828,7 @@
    "573_ws3_grain_and_money.py",
    "781_upstream_grain_columns.py"
   ],
-  "held_for_nest_ownership.csv": [
+  "held_for_need_ownership.csv": [
    "1072_tribally_owned_enterprises.py"
   ],
   "held_rows.csv": [
@@ -4077,10 +4077,10 @@
    "1103_decision_queue_clearance.py"
   ],
   "native_entity_enterprise_dataset_v3.csv": [
-   "1133_nest_owner_v6_builder_input.py"
+   "1133_need_owner_v6_builder_input.py"
   ],
   "native_entity_enterprise_dataset_v6_geocoded.csv": [
-   "1133_nest_owner_v6_builder_input.py"
+   "1133_need_owner_v6_builder_input.py"
   ],
   "native_entity_lobbying_disclosures.csv": [
    "1091_lobby_amendment_supersession.py",
@@ -4152,26 +4152,26 @@
   "nepa_eplanning_projects.csv": [
    "519_closure_federal_register.py"
   ],
-  "nest_enterprise_relations.csv": [
+  "need_enterprise_relations.csv": [
    "1072_tribally_owned_enterprises.py",
    "1088_merge_staged_deals.py"
   ],
-  "nest_enterprises.csv": [
+  "need_enterprises.csv": [
    "1072_tribally_owned_enterprises.py",
    "1098_entity_rel_counterparty.py",
-   "1102_nest_corroboration_adjudication.py",
+   "1102_need_corroboration_adjudication.py",
    "1112_harvest_coverage_matrix.py",
    "1116_ruling_propagation_2026_09_02.py",
    "1118_corroboration_layer.py",
    "1128_cicd_benchmark_refresh_2026_09_02.py",
-   "1130_nest_owner_v6_reconcile.py",
-   "1133_nest_owner_v6_builder_input.py"
+   "1130_need_owner_v6_reconcile.py",
+   "1133_need_owner_v6_builder_input.py"
   ],
-  "nest_entity_dual_role.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+  "need_entity_dual_role.csv": [
+   "1130_need_owner_v6_reconcile.py"
   ],
-  "nest_not_in_owner.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+  "need_not_in_owner.csv": [
+   "1130_need_owner_v6_reconcile.py"
   ],
   "nho_doi_notification_roster.csv": [
    "163_promote_nho_universe_in_place.py",
@@ -4395,10 +4395,10 @@
    "522_mine_rulings.py"
   ],
   "owner_v6_conservation.csv": [
-   "1133_nest_owner_v6_builder_input.py"
+   "1133_need_owner_v6_builder_input.py"
   ],
   "owner_v6_refused.csv": [
-   "1133_nest_owner_v6_builder_input.py"
+   "1133_need_owner_v6_builder_input.py"
   ],
   "ownership_change_invariants.json": [
    "1010_ownership_change_from_contracting.py"
@@ -4407,7 +4407,7 @@
    "70_key_unjoined_datasets.py"
   ],
   "parent_crosswalk.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "per_property_gaming_revenue_FINAL_v3_audited.csv": [
    "23d_build_gaming_facilities.py"
@@ -4644,7 +4644,7 @@
   "sba_dsbs_native_entities.csv": [
    "08_build_review_page.py",
    "1072_tribally_owned_enterprises.py",
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "schedule_i_grantees_2026-08-06.csv": [
    "111_build_advocacy_passthrough.py",
@@ -4986,7 +4986,7 @@
    "1070_anc_nho_business_sweep.py"
   ],
   "version_comparison.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "village_corp_namesake_pairs.csv": [
    "52_add_village_corporations.py",
@@ -5922,18 +5922,18 @@
    "classification": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: cedar_harvest_conservation.csv, cedar_nest_id_register.csv, codebook_master.csv, held_rows.csv, nest_enterprise_relations.csv, nest_enterprises.csv, sweep_1070_refused.csv"
+    "read-modify-writes: cedar_harvest_conservation.csv, cedar_need_id_register.csv, codebook_master.csv, held_rows.csv, need_enterprise_relations.csv, need_enterprises.csv, sweep_1070_refused.csv"
    ],
    "mtime": "2026-09-02T14:33:13",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
     "cedar_harvest_conservation.csv",
-    "cedar_nest_id_register.csv",
+    "cedar_need_id_register.csv",
     "codebook_master.csv",
     "held_rows.csv",
-    "nest_enterprise_relations.csv",
-    "nest_enterprises.csv",
+    "need_enterprise_relations.csv",
+    "need_enterprises.csv",
     "sweep_1070_refused.csv"
    ],
    "reads": [
@@ -5941,13 +5941,13 @@
     "cedar_constellation_edges.csv",
     "cedar_harvest_conservation.csv",
     "cedar_identity_register.csv",
-    "cedar_nest_id_register.csv",
+    "cedar_need_id_register.csv",
     "codebook_master.csv",
-    "held_for_nest_ownership.csv",
+    "held_for_need_ownership.csv",
     "held_rows.csv",
     "native_owned_businesses.csv",
-    "nest_enterprise_relations.csv",
-    "nest_enterprises.csv",
+    "need_enterprise_relations.csv",
+    "need_enterprises.csv",
     "prime_contracts.csv",
     "sba_dsbs_native_entities.csv",
     "sweep_1070_refused.csv",
@@ -5960,13 +5960,13 @@
    "writes": [
     "ancsa_mine_log.csv",
     "cedar_harvest_conservation.csv",
-    "cedar_nest_id_register.csv",
+    "cedar_need_id_register.csv",
     "codebook_master.csv",
     "evidence_conflicts.csv",
     "fpds_uei_cage_map.csv",
     "held_rows.csv",
-    "nest_enterprise_relations.csv",
-    "nest_enterprises.csv",
+    "need_enterprise_relations.csv",
+    "need_enterprises.csv",
     "sweep_1070_refused.csv"
    ]
   },
@@ -6349,7 +6349,7 @@
     "cedar_identity_register.csv",
     "fac_tribal_single_audits.csv",
     "federal_funding_transactions.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "np_ein_entity_hub.csv",
     "np_orgs.csv",
     "prime_contracts.csv",
@@ -6540,13 +6540,13 @@
     "deals_press_edgar_ancsa_additions.csv",
     "deals_sec_edgar_1032_held_terms.csv",
     "deals_sec_edgar_1032_staged.csv",
-    "nest_enterprise_relations.csv"
+    "need_enterprise_relations.csv"
    ],
    "templated": [
-    "matched phrase {} states standing corporate parentage, not a dated transfer; belongs in nest_enterprise_relations.csv"
+    "matched phrase {} states standing corporate parentage, not a dated transfer; belongs in need_enterprise_relations.csv"
    ],
    "unknown": [
-    "states standing corporate parentage, not a dated transfer; belongs in nest_enterprise_relations.csv"
+    "states standing corporate parentage, not a dated transfer; belongs in need_enterprise_relations.csv"
    ],
    "writes": [
     "deals_1088_disposition.json",
@@ -6842,14 +6842,14 @@
    ],
    "reads": [
     "entity_relationships.csv",
-    "nest_enterprises.csv"
+    "need_enterprises.csv"
    ],
    "templated": [
-    "NEST id {} not in nest_enterprises.csv"
+    "NEED id {} not in need_enterprises.csv"
    ],
    "unknown": [
-    "I3 NEST id that is not in nest_enterprises.csv",
-    "not in nest_enterprises.csv"
+    "I3 NEED id that is not in need_enterprises.csv",
+    "not in need_enterprises.csv"
    ],
    "writes": [
     "ENTITY_REL_COUNTERPARTY.json",
@@ -6966,31 +6966,31 @@
     "np_orgs.csv"
    ]
   },
-  "1102_nest_corroboration_adjudication.py": {
+  "1102_need_corroboration_adjudication.py": {
    "classification": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: evidence_conflicts.csv, nest_enterprises.csv"
+    "read-modify-writes: evidence_conflicts.csv, need_enterprises.csv"
    ],
    "mtime": "2026-09-02T06:37:17",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
     "evidence_conflicts.csv",
-    "nest_enterprises.csv"
+    "need_enterprises.csv"
    ],
    "reads": [
     "cedar_identifier_ledger_final.csv",
     "evidence_conflicts.csv",
     "fpds_uei_edges.csv",
-    "nest_enterprises.csv"
+    "need_enterprises.csv"
    ],
    "templated": [],
    "unknown": [],
    "writes": [
-    "NEST_CORROBORATION.json",
+    "NEED_CORROBORATION.json",
     "evidence_conflicts.csv",
-    "nest_enterprises.csv"
+    "need_enterprises.csv"
    ]
   },
   "1103_decision_queue_clearance.py": {
@@ -7365,7 +7365,7 @@
     "gaming_web_harvest_observations.csv",
     "native_business_identifier_crosswalk.csv",
     "native_owned_businesses.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "targets.csv",
     "tribal_certification_sources_2026-08-26.csv",
     "tribal_newsletter_corpus.csv",
@@ -7475,7 +7475,7 @@
     "dear_tribal_leader_letters.csv",
     "gaming_employment_observations.csv",
     "gaming_facilities.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "nonprofit_schedule_c_coverage.csv",
     "nonprofit_schedule_c_lobbying.csv",
     "prime_contracts.csv",
@@ -7543,7 +7543,7 @@
     "gaming_property_self_published_assertions.csv",
     "identifier_findings.csv",
     "native_business_identifier_crosswalk.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "np_orgs.csv"
    ],
    "templated": [],
@@ -7842,7 +7842,7 @@
     "cedar_vs_cicd_2026_09_02.json",
     "cedar_vs_cicd_by_year.csv",
     "cicd_prime_series_1981_2021.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "prime_contracts.csv",
     "subawards.csv"
    ],
@@ -7928,11 +7928,11 @@
     "np_grantee_financials.csv"
    ]
   },
-  "1130_nest_owner_v6_reconcile.py": {
+  "1130_need_owner_v6_reconcile.py": {
    "classification": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: codebook_master.csv, conservation.csv, corroboration_pairs.csv, enterprise_reconciliation.csv, nest_entity_dual_role.csv, nest_not_in_owner.csv, parent_crosswalk.csv, version_comparison.csv"
+    "read-modify-writes: codebook_master.csv, conservation.csv, corroboration_pairs.csv, enterprise_reconciliation.csv, need_entity_dual_role.csv, need_not_in_owner.csv, parent_crosswalk.csv, version_comparison.csv"
    ],
    "mtime": "2026-09-02T14:54:42",
    "never_run": false,
@@ -7942,22 +7942,22 @@
     "conservation.csv",
     "corroboration_pairs.csv",
     "enterprise_reconciliation.csv",
-    "nest_entity_dual_role.csv",
-    "nest_not_in_owner.csv",
+    "need_entity_dual_role.csv",
+    "need_not_in_owner.csv",
     "parent_crosswalk.csv",
     "version_comparison.csv"
    ],
    "reads": [
     "cedar_identifier_ledger.csv",
     "cedar_identity_register.csv",
-    "cedar_nest_id_register.csv",
+    "cedar_need_id_register.csv",
     "codebook_master.csv",
     "conservation.csv",
     "corroboration_pairs.csv",
     "enterprise_reconciliation.csv",
-    "nest_enterprises.csv",
-    "nest_entity_dual_role.csv",
-    "nest_not_in_owner.csv",
+    "need_enterprises.csv",
+    "need_entity_dual_role.csv",
+    "need_not_in_owner.csv",
     "parent_crosswalk.csv",
     "sba_dsbs_native_entities.csv",
     "version_comparison.csv"
@@ -7981,8 +7981,8 @@
     "corroboration_pairs.csv",
     "enterprise_reconciliation.csv",
     "ledger_shared_upstream_findings.csv",
-    "nest_entity_dual_role.csv",
-    "nest_not_in_owner.csv",
+    "need_entity_dual_role.csv",
+    "need_not_in_owner.csv",
     "parent_crosswalk.csv",
     "v3_recovery_candidates.csv",
     "version_comparison.csv"
@@ -8060,23 +8060,23 @@
     "source_coverage_fac_nontribal.csv"
    ]
   },
-  "1133_nest_owner_v6_builder_input.py": {
+  "1133_need_owner_v6_builder_input.py": {
    "classification": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: nest_enterprises.csv"
+    "read-modify-writes: need_enterprises.csv"
    ],
    "mtime": "2026-09-02T14:59:39",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
-    "nest_enterprises.csv"
+    "need_enterprises.csv"
    ],
    "reads": [
     "cedar_correction_register.csv",
     "native_entity_enterprise_dataset_v3.csv",
     "native_entity_enterprise_dataset_v6_geocoded.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "owner_v6_conservation.csv",
     "owner_v6_refused.csv"
    ],
@@ -8086,8 +8086,8 @@
     "owner_v6_uei_already_held.csv"
    ],
    "writes": [
-    "nest_enterprises.csv",
-    "nest_owner_v6_builder_input.json"
+    "need_enterprises.csv",
+    "need_owner_v6_builder_input.json"
    ]
   },
   "1134_repair_ledger_state_uei_contamination.py": {
@@ -8218,7 +8218,7 @@
     "native_bills.csv",
     "native_entity_lobbying_disclosures.csv",
     "native_owned_businesses.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "np_orgs.csv",
     "prime_contracts.csv",
     "resource_revenue.csv",
@@ -15611,9 +15611,9 @@
     "nepa_administrative_record_parties.csv",
     "nepa_eplanning_projects.csv",
     "nepa_project_documents.csv",
-    "nest_enterprise_relations.csv",
-    "nest_enterprises.csv",
-    "nest_entity_dual_role.csv",
+    "need_enterprise_relations.csv",
+    "need_enterprises.csv",
+    "need_entity_dual_role.csv",
     "nho_doi_notification_roster.csv",
     "nho_ownership_changes.csv",
     "nho_register.csv",
@@ -18548,7 +18548,7 @@
     "native_bills.csv",
     "native_entity_lobbying_disclosures.csv",
     "native_owned_businesses.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "np_orgs.csv",
     "prime_contracts.csv"
    ],
@@ -21312,7 +21312,7 @@
     "native_bills.csv",
     "native_entity_lobbying_disclosures.csv",
     "native_owned_businesses.csv",
-    "nest_enterprises.csv",
+    "need_enterprises.csv",
     "np_orgs.csv",
     "prime_contracts.csv",
     "resource_revenue.csv",
@@ -22177,8 +22177,8 @@
   "ND_TRIBAL_TAX_LOG.md": [
    "116_build_nd_tribal_taxes.py"
   ],
-  "NEST_CORROBORATION.json": [
-   "1102_nest_corroboration_adjudication.py"
+  "NEED_CORROBORATION.json": [
+   "1102_need_corroboration_adjudication.py"
   ],
   "NEWSLETTER_CORPUS.md": [
    "995_write_newsletter_docs.py"
@@ -23129,7 +23129,7 @@
   "cedar_navajo_audited_actuals.csv": [
    "83_build_resource_ledger.py"
   ],
-  "cedar_nest_id_register.csv": [
+  "cedar_need_id_register.csv": [
    "1072_tribally_owned_enterprises.py"
   ],
   "cedar_observations.csv": [
@@ -23216,7 +23216,7 @@
    "1105_newsletter_corpus_ship.py",
    "111_build_advocacy_passthrough.py",
    "112_pull_grantee_990s.py",
-   "1130_nest_owner_v6_reconcile.py",
+   "1130_need_owner_v6_reconcile.py",
    "1132_fac_nontribal_native_audits.py",
    "113_build_nd_severance.py",
    "132_build_schedule_i_layer.py",
@@ -23282,7 +23282,7 @@
    "136_build_congressional_correspondence_and_foia_index.py"
   ],
   "conservation.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "consultation_events.csv": [
    "1089_fr_consultation_overlap_and_event_parse.py"
@@ -23325,7 +23325,7 @@
    "541_shard_j_mine_990_mission_text.py"
   ],
   "corroboration_pairs.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "courtlistener_recap_dockets_2026-08-26.csv": [
    "219_probe_courtlistener_recap.py"
@@ -23489,7 +23489,7 @@
    "1103_decision_queue_clearance.py"
   ],
   "enterprise_reconciliation.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "entities.csv": [
    "1060_splink_pilot.py"
@@ -23547,7 +23547,7 @@
   ],
   "evidence_conflicts.csv": [
    "1072_tribally_owned_enterprises.py",
-   "1102_nest_corroboration_adjudication.py"
+   "1102_need_corroboration_adjudication.py"
   ],
   "faads_attribution_audit_sample.csv": [
    "73_faads_name_attribution.py"
@@ -24113,7 +24113,7 @@
    "1060_splink_pilot.py"
   ],
   "ledger_shared_upstream_findings.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "ledger_state_repair_1134_cells.csv": [
    "1134_repair_ledger_state_uei_contamination.py"
@@ -24316,22 +24316,22 @@
   "nepa_source_coverage.csv": [
    "134_build_nepa_eplanning.py"
   ],
-  "nest_enterprise_relations.csv": [
+  "need_enterprise_relations.csv": [
    "1072_tribally_owned_enterprises.py"
   ],
-  "nest_enterprises.csv": [
+  "need_enterprises.csv": [
    "1072_tribally_owned_enterprises.py",
-   "1102_nest_corroboration_adjudication.py",
-   "1133_nest_owner_v6_builder_input.py"
+   "1102_need_corroboration_adjudication.py",
+   "1133_need_owner_v6_builder_input.py"
   ],
-  "nest_entity_dual_role.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+  "need_entity_dual_role.csv": [
+   "1130_need_owner_v6_reconcile.py"
   ],
-  "nest_not_in_owner.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+  "need_not_in_owner.csv": [
+   "1130_need_owner_v6_reconcile.py"
   ],
-  "nest_owner_v6_builder_input.json": [
-   "1133_nest_owner_v6_builder_input.py"
+  "need_owner_v6_builder_input.json": [
+   "1133_need_owner_v6_builder_input.py"
   ],
   "nho_doi_notification_roster.csv": [
    "05_parse_doi_nho_list.py"
@@ -24485,7 +24485,7 @@
    "31_build_dataset5_linked.py"
   ],
   "parent_crosswalk.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "party_rulings_unresolved.csv": [
    "33_apply_party_rulings.py"
@@ -25051,7 +25051,7 @@
    "1070_anc_nho_business_sweep.py"
   ],
   "v3_recovery_candidates.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "variable_display.json": [
    "109_build_variable_registry.py"
@@ -25068,7 +25068,7 @@
    "701_enterprise_and_business_list_sweep.py"
   ],
   "version_comparison.csv": [
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_need_owner_v6_reconcile.py"
   ],
   "village_corp_namesake_pairs.csv": [
    "52_add_village_corporations.py"

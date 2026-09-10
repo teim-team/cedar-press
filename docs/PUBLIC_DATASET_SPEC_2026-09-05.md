@@ -299,7 +299,7 @@ Move build notes and allocation-code details internally. Keep aggregation level,
 
 Explain which amounts can be compared or summed, payment versus announcement dates, aggregate coverage, beneficiary populations, and geographic limitations. Absence of a named tribal recipient is not zero tribal revenue.
 
-## 13. NEST
+## 13. NEED
 
 ### Public purpose and row unit
 
@@ -404,7 +404,7 @@ Complete the work dataset by dataset, prioritizing validated 2025-2026 coverage 
 
 I've now specified the exact public column order for all 12 datasets, along with a field-by-field map showing what stays, gets renamed or combined, or moves out of the customer-facing files.
 
-The largest reductions are Native Nonprofits from 67 to 24 columns, NEST from 65 to 30, and Prime Contracting from 72 to 49. Those starting counts come from the current published sample headers, not the older review bundle.
+The largest reductions are Native Nonprofits from 67 to 24 columns, NEED from 65 to 30, and Prime Contracting from 72 to 49. Those starting counts come from the current published sample headers, not the older review bundle.
 
 This is the exact specification for the next export, not a claim that the production files have already been rewritten. I also removed the earlier suggestion to aggregate funding and contracting into annual rows from this task. This pass changes columns, not row structure or Cedar identities.
 
@@ -481,7 +481,7 @@ These compare the inspected source headers with the recommended public headers. 
 | Federal Subcontracting | 78 | 54 |
 | Natural Resources | 45 | 38 |
 | Individually Owned Native Businesses | 53* | 32 |
-| NEST | 65 | 30 |
+| NEED | 65 | 30 |
 | Native Nonprofits | 67 | 24 |
 
 *The 53-column Native-Owned Businesses baseline is the builder's column declaration, not a verified public export. Its publication restrictions still apply.
@@ -855,7 +855,7 @@ Do not add private owner names, contact information, restricted website/DBA
 fields, raw snapshots, OCR diagnostics, or suppression machinery to the
 public schema.
 
-## 11. NEST: 30 columns
+## 11. NEED: 30 columns
 
 Preserve the enterprise/relationship unit declared by the current producer.
 
@@ -1027,7 +1027,7 @@ Counts below compare the inspected header/declaration with the proposed public h
 |Federal Subcontracting                                           |78              |54             |24           |
 |Natural Resources                                                |45              |38             |7            |
 |Individually Owned Native Businesses (builder, not public export)|53              |32             |21           |
-|NEST                                                             |65              |30             |35           |
+|NEED                                                             |65              |30             |35           |
 |Native Nonprofits                                                |67              |24             |43           |
 
 ## The twelve lists
@@ -1054,7 +1054,7 @@ The exact ordered lists and default viewer columns are those of the addendum abo
 
 10. Individually Owned Native Businesses. The inspected source is the builder declaration (code/330_build_native_owned_businesses.py, CLEAN_COLUMNS), not a verified public sample. The public export remains subject to the actual publication gate. Keep the verbatim ownership or relationship claim, assertion_class, identity_scope, ownership threshold, and issuer-specific certification. A vendor list is not proof of Native ownership. Do not replace the business entity with the certifying nation. Leading Cedar attribution is populated only from an approved relationship and its explicit role; certifying-authority links remain separately searchable. Contact details, personal names, website/DBA fields restricted by the current policy, and raw diagnostics do not enter the public schema. Apply field-level masking before any viewer, export, or search index sees the data.
 
-11. NEST. Use the Cedar block for the approved associated Native owner or affiliate, while enterprise_id and enterprise_name continue to identify the actual business. Keep the direct parent, ownership percentage, relationship-as-recorded, federal-parent disagreement/corroboration, and observation years. Observation year is not incorporation year or ownership effective year. Remove duplicate owner-hub identity columns after equality checks, unapproved candidate UEIs, repeated name normalization, and constellation/matcher notes. Never replace an approved identifier with a candidate. Any enterprise_existing_cedar_uid that is a verified distinct Native entity identifier must be represented before retirement; apparent duplicates must be checked on the full data. The default instruction is to stop on a non-equivalent identity, not discard it.
+11. NEED. Use the Cedar block for the approved associated Native owner or affiliate, while enterprise_id and enterprise_name continue to identify the actual business. Keep the direct parent, ownership percentage, relationship-as-recorded, federal-parent disagreement/corroboration, and observation years. Observation year is not incorporation year or ownership effective year. Remove duplicate owner-hub identity columns after equality checks, unapproved candidate UEIs, repeated name normalization, and constellation/matcher notes. Never replace an approved identifier with a candidate. Any enterprise_existing_cedar_uid that is a verified distinct Native entity identifier must be represented before retirement; apparent duplicates must be checked on the full data. The default instruction is to stop on a non-equivalent identity, not discard it.
 
 12. Native Nonprofits. Keep EIN, organization name, the organization's own class, and its relationship to the canonical Native entity. A Native-serving nonprofit is not automatically a tribal government or Native-controlled. Keep BMF revenue, assets, and income separately, under their actual source definitions. Do not label bmf_income_amt as profit/net income without producer and source-definition verification. Preserve the tax period and BMF snapshot date separately. Do not fabricate financial years from download dates, or append newer 990/SEFA measures to older BMF values as though they were the same observation. Consolidate material classification/link outcomes into inclusion_category, entity_link_status, and a factual research_note. Private review narratives, token comparisons, redirect proposals, and coder agreement statistics stay internal.
 

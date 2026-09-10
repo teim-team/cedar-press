@@ -26,7 +26,7 @@ Thirteen datasets are built. Twelve are sold on the Cedar Press storefront; `gam
 | `nagpra` | standard | Cedar Press | 6,792 | 76 | 11.8 MB | 100 | 1 |
 | `native-owned-businesses` | pro | Cedar Press | 3,725 | 70 | 5.8 MB | 100 | 3 |
 | `natural-resources` | pro | Cedar Press | 11,305 | 52 | 24.4 MB | 100 | 3 |
-| `nest` | pro | Cedar Press | 5,820 | 88 | 9.6 MB | 100 | 0 |
+| `need` | pro | Cedar Press | 5,820 | 88 | 9.6 MB | 100 | 0 |
 | `nonprofits` | pro | Cedar Press | 12,689 | 73 | 14.1 MB | 100 | 0 |
 | `subcontracting` | pro | Cedar Press | 70,597 | 86 | 91.4 MB | 100 | 1 |
 | **total** | | | **2,074,807** | | **2.30 GB** | | |
@@ -90,9 +90,9 @@ The CICD/NEID identifiers are retired; Cedar's own key is the identity. `cedar_p
 | `natural-resources` | `beneficiary_entity_id` | 586 | 586 | `TRBF-CROWMT-00` |
 | `natural-resources` | `payer_entity_id` | 67 | 67 | `ANRC-ALEUTC-00` |
 | `natural-resources` | `recipient_entity_id` | 705 | 705 | `ANRC-AHTNAI-00` |
-| `nest` | `fpds_parent_resolves_to` | 361 | 361 | `AKNF-ALGACQ-00-CALSTA-ASVCPR` |
-| `nest` | `nest_entity_dual_role__handle` | 2,319 | 2,319 | `AKNF-AGDAGX-00-ALEUTC-PRBLFA` |
-| `nest` | `owner_hub_handle` | 5,820 | 5,820 | `AKNF-AFGNAK-00-KONIAG` |
+| `need` | `fpds_parent_resolves_to` | 361 | 361 | `AKNF-ALGACQ-00-CALSTA-ASVCPR` |
+| `need` | `need_entity_dual_role__handle` | 2,319 | 2,319 | `AKNF-AGDAGX-00-ALEUTC-PRBLFA` |
+| `need` | `owner_hub_handle` | 5,820 | 5,820 | `AKNF-AFGNAK-00-KONIAG` |
 | `nonprofits` | `cedar_spine_entity_id` | 591 | 591 | `ANRC-AHTNAI-00` |
 | `nonprofits` | `entity_id` | 84 | 84 | `AKNF-YKTTLN-00-SEALSK-TLNGHD` |
 | `nonprofits` | `key_redirect_proposed_entity_id` | 12 | 12 | `CDFI-YRKLLN-00` |
@@ -114,7 +114,7 @@ Screened and **not** counted above: `contractors.award_base_description` 3 cell(
 | `nagpra` | **NONE** | — |
 | `native-owned-businesses` | **NONE** | — |
 | `natural-resources` | `cedar_uid` | `cedar_uid` 705 |
-| `nest` | `cedar_uid` | `cedar_uid` 5,820 |
+| `need` | `cedar_uid` | `cedar_uid` 5,820 |
 | `nonprofits` | `cedar_uid`, `cedar_spine_entity_id` | `cedar_uid` 555; `cedar_spine_entity_id` 591 |
 | `subcontracting` | `cedar_uid`, `prime_cedar_uid`, `sub_cedar_uid` | `cedar_uid` 32,369; `prime_cedar_uid` 32,203; `sub_cedar_uid` 38,563 |
 
@@ -620,23 +620,23 @@ Headings in `docs/KNOWN_ISSUES.md` that MENTION `natural-resources` — a mentio
 - A2 · S3 · Three collections were documented as planning a script "not in the repository" — all three scripts exist
 - C4 · S2 · Nine grain rulings only a human can make
 
-### `nest` — NEST: Native Enterprise Structures and Ties
+### `need` — Cedar Native Entity Enterprise Dataset (NEED)
 
 `5,820` rows × `88` columns · 9.6 MB · shelf `pro` · sold through Cedar Press — *measured (delivered)*
 
 **What one row is.** one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md §2). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row p
 
-**Join provenance.** Flagship table `nest_enterprises.csv`, measured at 5,820 rows. *(builder's record for the rest of this paragraph.)*
+**Join provenance.** Flagship table `need_enterprises.csv`, measured at 5,820 rows. *(builder's record for the rest of this paragraph.)*
 
 Folded in one-to-one, cardinality re-measured on the rows actually loaded rather than trusted from the contracts file:
 
-- `nest_entity_dual_role(cedar_uid)`
+- `need_entity_dual_role(cedar_uid)`
 
 Counted, **not** joined. These are one-to-many on the shared key; joining them would multiply the flagship's rows and inflate every money total, so each contributes a count column instead:
 
-- `nest_enterprise_relations(1:many on cedar_uid -> n_nest_enterprise_relations)`
+- `need_enterprise_relations(1:many on cedar_uid -> n_need_enterprise_relations)`
 
-Measured in the delivered header: 20 column(s) carry a join prefix, from 1 source table(s) — `nest_entity_dual_role`; 4 count column(s).
+Measured in the delivered header: 20 column(s) carry a join prefix, from 1 source table(s) — `need_entity_dual_role`; 4 count column(s).
 
 **What was withheld, and why.**
 
@@ -651,11 +651,11 @@ Measured in the delivered header: 20 column(s) carry a join prefix, from 1 sourc
 **Known defects.**
 
 - retired NEID identifiers still ship as VALUES in `fpds_parent_resolves_to` — 361 row(s), 361 identifier(s) (e.g. `AKNF-ALGACQ-00-CALSTA-ASVCPR`). The 2026-09-03 retirement dropped the NEID columns by NAME; a name gate cannot see the same identifier under another column name
-- retired NEID identifiers still ship as VALUES in `nest_entity_dual_role__handle` — 2,319 row(s), 2,319 identifier(s) (e.g. `AKNF-AGDAGX-00-ALEUTC-PRBLFA`). The 2026-09-03 retirement dropped the NEID columns by NAME; a name gate cannot see the same identifier under another column name
+- retired NEID identifiers still ship as VALUES in `need_entity_dual_role__handle` — 2,319 row(s), 2,319 identifier(s) (e.g. `AKNF-AGDAGX-00-ALEUTC-PRBLFA`). The 2026-09-03 retirement dropped the NEID columns by NAME; a name gate cannot see the same identifier under another column name
 - retired NEID identifiers still ship as VALUES in `owner_hub_handle` — 5,820 row(s), 5,820 identifier(s) (e.g. `AKNF-AFGNAK-00-KONIAG`). The 2026-09-03 retirement dropped the NEID columns by NAME; a name gate cannot see the same identifier under another column name
 - 12 column(s) are under 10% populated — real, but do not build a headline on them: `constellation_edge_id`, `constellation_note`, `duplicate_name_variant_basis`, `duplicate_name_variant_group`, `enterprise_existing_cedar_uid`, `fpds_parent_resolves_to`, `hub_resolution_note`, `name_variants_observed`, `ownership_percent_stated`, `parent_enterprise_id` …
 
-Headings in `docs/KNOWN_ISSUES.md` that MENTION `nest` — a mention, found by substring, not a finding about this dataset:
+Headings in `docs/KNOWN_ISSUES.md` that MENTION `need` — a mention, found by substring, not a finding about this dataset:
 
 - A1 · S3 · `502_archive_candidates.py` was proposing a LIVE crawler for archival
 - Corroboration: what the family count exposed (workstream CORROBORATION, 2026-09-02)

@@ -57,7 +57,7 @@ export function ProcessRail() {
 export function EcosystemDiagram() {
   // Select a collection and the whole answer appears at once: the
   // records it is built from fan outward (Prime Contracting starts at
-  // SAM.gov and FPDS, NEST at the ANCSA audited filings), and the
+  // SAM.gov and FPDS, NEED at the ANCSA audited filings), and the
   // collections that reinforce it light up on the ring. A click pins the same view for
   // touch and for reading at leisure. The middle is Cedar working with
   // human reviewers on the entity resolution layer, floated above the
