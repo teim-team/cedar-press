@@ -268,7 +268,7 @@ the one suggested; one was right in principle and disproportionate in remedy.
 | 4 | `contractors__sample.csv` | self-referential `parent_contract_number` | **Right** | 1 row sampled; **156,592 rows, 12.86%**, two distinct causes |
 | 5 | `gaming__sample.csv` | joint operation exposes one operator | **Right, remedy disproportionate** | **1 of 787**; the obvious generalisation produces 57 false operators |
 | 6 | `nagpra__sample.csv` | notice-type text inside institution name | **Right** | 1 row sampled; **966 rows**; distinct institutions 2,184 → 1,798 |
-| 7 | `README.md` | `owned` has no `owned__sample.csv` | **Right** | and the same hole existed in reverse for the new `nest` descriptor |
+| 7 | `README.md` | `owned` has no `owned__sample.csv` | **Right** | and the same hole existed in reverse for the new `need` descriptor |
 | 8 | `nagpra__sample.csv` | one notice's institutions all get Yale's address | **Right, and worse** | `institution_count` said 4 for 6; `institution_names_all` had **invented an institution** |
 
 ### Finding 2 — the one that moves money. `code/1075_fix_old_harbor_attribution.py`
@@ -407,9 +407,9 @@ real dataclass on `main`: **14 of 14 construct.**
 
 ### Findings found by this side while addressing Codex's
 
-- **A descriptor with no sample, the mirror of finding 7.** The `nest`
+- **A descriptor with no sample, the mirror of finding 7.** The `need`
   collection landed mid-branch and 760 emitted a 14th descriptor for a dataset
-  with no sample file at all. `nest__sample.csv` now ships; `sample_file` is a
+  with no sample file at all. `need__sample.csv` now ships; `sample_file` is a
   field in the `.cedar.json` sibling and every one of the 14 resolves.
 - **The two `PRODUCT_ID` maps could drift silently.** 770 now reads 760's dict
   and exits 1 if they differ. One dict, two call sites, one updated, is exactly
@@ -423,7 +423,7 @@ real dataclass on `main`: **14 of 14 construct.**
   prints which. Found by diffing `dist/` against the product repo after the
   push, not by any gate.
 - **A concurrent rebuild moved a sample out from under the branch.** The
-  `nest` workstream rebuilt `nest_enterprises.csv` between the sample being
+  `need` workstream rebuilt `need_enterprises.csv` between the sample being
   drawn and the branch being pushed, so the ten shipped rows were already a
   different ten. Caught by the same `dist/`-vs-repo diff and refreshed in
   `4c3ac3a`. **Re-diff after pushing, not before**: the window that matters is
@@ -463,7 +463,7 @@ Codex's own summary comment states its triggers: *"Reviews are triggered when
 you open a pull request for review, mark a draft as ready, or comment
 '@codex review'."* **A push is not a trigger.** The summary comment on #29
 still named `3fe58a5` as the last reviewed commit — so `6c4801f` (the eight
-round-2 replies) and `4c3ac3a` (the nest refresh) were **never reviewed by
+round-2 replies) and `4c3ac3a` (the need refresh) were **never reviewed by
 anything**, and pushing again would simply have produced a third unreviewed
 commit. The auth correction at the top of this file fixed *posting*; this
 fixes *getting reviewed*. **Every cycle must end with an `@codex review`
@@ -786,7 +786,7 @@ untouched, so nothing that already worked changed shape. Threshold 200 MB.
 **The equivalence is asserted, not claimed.** `770 proveequal <table>` runs
 both engines on the same file and exits 1 unless every sampled cell matches:
 
-    nest_enterprises.csv          1.9 MB   PASS  10 rows x 17 cols
+    need_enterprises.csv          1.9 MB   PASS  10 rows x 17 cols
     native_owned_businesses.csv   6.0 MB   PASS  10 rows x 16 cols
     nagpra_notices.csv           10.8 MB   PASS  10 rows x 16 cols
     np_orgs.csv                  13.7 MB   PASS  10 rows x 15 cols
@@ -983,9 +983,9 @@ must not be adopted yet.** 787 − 53 (the extra rows in the 52 groups marked
 
 ### Coordinator claims re-measured, and one already closed
 
-- **`nest` 977 of 1,610 (60.7%) absent from federal contracting** — confirmed
+- **`need` 977 of 1,610 (60.7%) absent from federal contracting** — confirmed
   exactly. But the brief's *"still needs a sample and copy"* is **stale**:
-  `nest__sample.csv` (10 rows, 17 columns) and full editorial copy in
+  `need__sample.csv` (10 rows, 17 columns) and full editorial copy in
   `docs/datasets/_descriptors.json` both shipped on the previous push.
 - **`natural-resources` aggregate share is 88.1%, not 87%** —
   `national_aggregate` 9,791 + `state_aggregate` 167 = 9,958 of 11,305,
@@ -1284,7 +1284,7 @@ processes agreed rather than one correcting the other.**
 ### The fifteenth collection had a descriptor and no sample
 
 `newsletters`. That is Codex round-2 finding 7 for the **third** time —
-`owned`'s id mismatch, `nest` landing mid-branch, and now this. `760` named it
+`owned`'s id mismatch, `need` landing mid-branch, and now this. `760` named it
 as needing copy; **nothing warned that it had no sample**, because the check
 runs from the descriptor side only.
 
@@ -1314,10 +1314,10 @@ measure their names.
 
 ### Also fixed, unprompted
 
-- **`relation_class` was missing from the `nest` sample** — the column the
+- **`relation_class` was missing from the `need` sample** — the column the
   dataset exists to carry, separating a STRUCTURE (ownership) from a TIE (a
   published non-ownership relationship). `500.COLLECTIONS` states in as many
-  words that this is why `nest` is not merged with `native-owned-businesses`,
+  words that this is why `need` is not merged with `native-owned-businesses`,
   and the ten rows a customer saw could not show the difference.
 - **Attribution fell and that is the fix working.** The C4 table shipped
   `888,958 / 1,217,768 = 73.0%` as current. Live: **789,456 (64.8%)**,
@@ -1330,8 +1330,8 @@ measure their names.
 
 ### Claims in the brief that did not reproduce, with the measurement
 
-- **"NEST has no sample at all."** It has had one since the previous push:
-  `nest__sample.csv`, 10 rows, entries in both `FLAGSHIP` and `SHOW`, full
+- **"NEED has no sample at all."** It has had one since the previous push:
+  `need__sample.csv`, 10 rows, entries in both `FLAGSHIP` and `SHOW`, full
   editorial copy, `sample_file` resolving. This is the **second** time that
   item has arrived already closed.
 - **"787 − 16 non-places = 771 − 57 = 714."** Measured: **8** non-place rows,

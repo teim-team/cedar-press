@@ -64,7 +64,7 @@ checked**. Gaming is the one dimension that is genuinely finished.
 **No such excuse exists for CAGE / UEI / DUNS.** Every entity is in scope, and 92.5% of
 them have never had a capability statement or government-contracting page looked for.
 The 85 `HARVESTED` come almost entirely from `native_business_identifier_crosswalk.csv`
-and `nest_enterprises.csv`, i.e. from businesses *under* an entity, not from the entity's
+and `need_enterprises.csv`, i.e. from businesses *under* an entity, not from the entity's
 own published statement.
 
 ### 189 entities have never been looked at for **any** of the five
@@ -115,7 +115,7 @@ went.
 | `docs/SHARD_COVERAGE.md`: **1,254 with a URL** | **1,275** entities have ≥1 2xx URL of a non-dead type; 1,484 have any non-blank URL string. Neither is 1,254 |
 | gaming web harvest = **1,166** observations | file holds **1,175** |
 | newsletter corpus = **1,195** | file holds **1,889** — 1,394 `publication_channel` + **481 `probe_absence`** + 13 flagged + 1 contact-point. The absence rows are the most valuable part of that table and quoting 1,195 hides them |
-| `native_owned_businesses.csv` 2,916 · `nest_enterprises.csv` 1,610 | **confirmed exactly** |
+| `native_owned_businesses.csv` 2,916 · `need_enterprises.csv` 1,610 | **confirmed exactly** |
 | 127 entities point at a site that does not name them | **confirmed exactly** — 127 `DOMAIN_NOT_THE_ENTITY`, plus 6 `HIJACKED_OR_WRONG_DOMAIN`, so 133 entities carry the flag |
 | 14 spine entities have an all-stopword name | **7 re-derived** with the stopword list in `code/1112` (`Council`, `Eek`, `Koi`, `Ute`, `Council Native Corporation`, `Alaska Native Village Corporation Association`, `Hawaiian Native Corporation`). The 14 is not reproducible from any list on disk; the four named in `docs/NATIVE_BUSINESS_ANC_NHO_SWEEP_2026-09-02.md` are all in the 7 |
 

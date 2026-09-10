@@ -35,7 +35,7 @@ THE ROUTES, cheapest first
 --------------------------
 R1 `ondisk_uei`   ZERO NETWORK. Cedar already holds exact UEIs for tail
                   entities (tier-A identifier ledger, the BIE/UIO links, the
-                  FAC audit rows, the NEST enterprise table) AND ~1.9M federal
+                  FAC audit rows, the NEED enterprise table) AND ~1.9M federal
                   transactions carrying `awardee_uei` / `recipient_uei` beside
                   an `action_date`. Nothing had joined the two, because those
                   transaction rows are `unattributed` -- the entity is absent
@@ -255,7 +255,7 @@ def sane_date(d):
 LEDGER = "cedar_identifier_ledger_final.csv"
 UEI_SOURCES = (("bie_uio_identifier_links.csv", "uei"),
                ("fac_tribal_single_audits.csv", "auditee_uei"),
-               ("nest_enterprises.csv", "uei"))
+               ("need_enterprises.csv", "uei"))
 EIN_SOURCES = (("np_ein_entity_hub.csv", "ein"),
                ("np_orgs.csv", "EIN"),
                ("bie_uio_identifier_links.csv", "ein"),

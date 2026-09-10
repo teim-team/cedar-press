@@ -576,7 +576,7 @@ test("the field map decides every column of every sampled flagship in the owner'
   assert.deepEqual(OPENING_SINGULAR, ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"]);
   assert.deepEqual(OPENING_PLURAL, ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"]);
   // The owner's column counts, exactly; Funding is 39 because DUNS is retired.
-  const EXPECTED = { funding: 39, "federal-register": 33, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, nest: 30, nonprofits: 24 };
+  const EXPECTED = { funding: 39, "federal-register": 33, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, need: 30, nonprofits: 24 };
   let sampled = 0;
   for (const dataset of LAUNCH_COLLECTION) {
     const map = Object.values(FIELD_MAP).find((t) => t.collection === dataset.id);

@@ -525,7 +525,7 @@ On `subawards.csv` the columns are named `geo_prime_award_recipient_county_fips`
 Three things that make a bare difference wrong:
 
 - **The Native sum is a FLOOR.** It counts only recipients Cedar has attributed. Better matching moves it up and the difference down, never the other way. The difference is therefore a CEILING.
-- **Obligations are SIGNED.** A deobligation is a negative row, so a county's Native sum can legitimately exceed its all-recipient sum. Only the ROW COUNTS nest.
+- **Obligations are SIGNED.** A deobligation is a negative row, so a county's Native sum can legitimately exceed its all-recipient sum. Only the ROW COUNTS need.
 - **Two of the three datasets are not the federal universe.** `prime_contracts.csv` and `federal_funding_transactions.csv` are Native-CANDIDATE corpora — their recipient universe was pulled from Native entity lists — so their place-of-performance sum for a county is *Cedar's corpus performed there*, not *all federal money there*. Only `faads_transactions_all_agencies.csv` is unfiltered, and only for FY2001–2007. Reading a difference on the other two as 'money that bypassed Native entities' is the single most likely misuse of this table.
 
 | dataset | rows | obligations | Native rows | Native obligations | counties |

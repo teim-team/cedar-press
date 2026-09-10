@@ -178,7 +178,7 @@ row, so a county whose non-Native rows net negative has an all-recipient sum
 *below* its Native sum with nothing whatever wrong. This happens in **49 cells**
 of `geo_county_two_sums.csv`. An invariant asserting the Native sum nests inside
 the all-recipient sum fired on all 49 — the invariant was wrong, not the data.
-Only the ROW COUNTS nest, and that is now what I3 tests.
+Only the ROW COUNTS need, and that is now what I3 tests.
 
 ### 5. `SS000` is not a county
 

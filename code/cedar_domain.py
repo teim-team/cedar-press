@@ -1211,8 +1211,8 @@ PROMOTED_TABLE_PRODUCERS = frozenset({
     "build_v2.py",
     "build_skipped_v2.py",
     "build_log_doc.py",
-    # Added 2026-09-02, workstream `nest`. 1072 IS the producer of
-    # nest_enterprises.csv / nest_enterprise_relations.csv: reading the staged
+    # Added 2026-09-02, workstream `need`. 1072 IS the producer of
+    # need_enterprises.csv / need_enterprise_relations.csv: reading the staged
     # harvests under data/staging/ is its whole job, and it reads EVERY part -
     # its own ANCSA mine, shards E and H, the 701 enterprise register, the
     # ANC/tribe subsidiary lookup and every business-registry file - then

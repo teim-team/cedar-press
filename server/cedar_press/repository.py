@@ -46,7 +46,7 @@ SHELF_BY_TIER: dict[str, str] = {
     "tree": "grove",
 }
 
-#: Shelves nest upward: a plan that reaches "pro" also reaches "standard",
+#: Shelves need upward: a plan that reaches "pro" also reaches "standard",
 #: mirroring SHELF_ORDER in ``features/grove/pressAccess.js``.
 SHELF_ORDER: tuple[str, ...] = ("standard", "pro", "grove")
 

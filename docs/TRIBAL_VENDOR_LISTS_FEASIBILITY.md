@@ -661,7 +661,7 @@ Wayback layer turns into a time series.
 **Shelf: `pro`.** The pro shelf already holds `contractors`,
 `subcontracting`, `natural-resources` and `nonprofits` — all entity-level
 commercial identity — and this is specifically the **verification layer for
-`contractors`**. Someone buying one wants the other. Shelves nest upward, so
+`contractors`**. Someone buying one wants the other. Shelves need upward, so
 Grove licensees see it too. And an unclassified dataset defaults to `pro`
 anyway: *an entry nobody has placed must not fall open to the cheapest plan.*
 

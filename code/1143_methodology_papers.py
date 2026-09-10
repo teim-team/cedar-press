@@ -5,7 +5,7 @@ Cedar Press - 1143: THIRTEEN datasets, thirteen methodology papers. One each.
     py -3 code/1143_methodology_papers.py            # report, writes nothing
     py -3 code/1143_methodology_papers.py report
     py -3 code/1143_methodology_papers.py build
-    py -3 code/1143_methodology_papers.py build nest # one dataset
+    py -3 code/1143_methodology_papers.py build need # one dataset
     py -3 code/1143_methodology_papers.py verify     # exits 1 on missing OR stale
 
 WHY THIS EXISTS
@@ -18,11 +18,11 @@ everything we have good."*
 Twelve papers were written by hand on 2026-09-02 and they are good. Two things
 were wrong with them anyway.
 
-**1. `nest` had no paper.** `docs/methodology/README.md` listed thirteen and
+**1. `need` had no paper.** `docs/methodology/README.md` listed thirteen and
 counted `_entity_layer` as the thirteenth. But `_entity_layer` is
 infrastructure - `cedar_publication.BUILD_SHELVES` excludes it by name, and it
 has no `dist/customer/` spreadsheet. The dataset that *is* delivered and had no
-paper was `nest`. A README that counts to thirteen while the delivered set
+paper was `need`. A README that counts to thirteen while the delivered set
 counts to thirteen a different way is how a gap hides in plain sight; the same
 conflation is what let `newsletters` ship as an unwanted storefront slot.
 
@@ -1434,7 +1434,7 @@ def _write_readme(man: dict, ready: dict) -> None:
           "`_entity_layer.md` is kept and is **not** in that count. It is the "
           "shared identity chapter the other papers lean on — infrastructure, "
           "not a product, with no `dist/customer/` spreadsheet. Counting it as "
-          "the thirteenth dataset is what hid the missing `nest` paper.", "",
+          "the thirteenth dataset is what hid the missing `need` paper.", "",
           "**These are not the product copy and not the codebooks.** Customer-"
           "facing description lives in `docs/datasets/_descriptors.json`; field "
           "definitions, grain and per-column fill rates live in "

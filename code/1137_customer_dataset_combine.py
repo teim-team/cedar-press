@@ -31,7 +31,7 @@ From `shelf` in `500_build_architecture_map.py`, via `cedar_publication`:
     standard  funding · federal-register · legislation · deals · nagpra ·
               lobbying                                     -- Cedar Press
     pro       contractors · subcontracting ·
-              native-owned-businesses · nest ·
+              native-owned-businesses · need ·
               natural-resources · nonprofits               -- Cedar Press
     grove     gaming                                       -- Cedar Grove
 

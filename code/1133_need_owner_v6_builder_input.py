@@ -1,38 +1,38 @@
 #!/usr/bin/env python3
-"""1133 - THE OWNER'S v6 ENTERPRISE FILE, AS AN INPUT TO THE NEST BUILDER.
+"""1133 - THE OWNER'S v6 ENTERPRISE FILE, AS AN INPUT TO THE NEED BUILDER.
 
-    py -3 code/1133_nest_owner_v6_builder_input.py report    # decisions, no writes
-    py -3 code/1133_nest_owner_v6_builder_input.py apply     # stage the builder input
-    py -3 code/1133_nest_owner_v6_builder_input.py verify    # exits 1 when the rows
-                                                             # are NOT in NEST
-    py -3 code/1133_nest_owner_v6_builder_input.py selftest  # proves verify FIRES
+    py -3 code/1133_need_owner_v6_builder_input.py report    # decisions, no writes
+    py -3 code/1133_need_owner_v6_builder_input.py apply     # stage the builder input
+    py -3 code/1133_need_owner_v6_builder_input.py verify    # exits 1 when the rows
+                                                             # are NOT in NEED
+    py -3 code/1133_need_owner_v6_builder_input.py selftest  # proves verify FIRES
 
 Zero network. MINTS ZERO Cedar ids - `1072 build` mints them, from the
-append-only `data/spine/cedar_nest_id_register.csv`, which stays the only place
-an enterprise id is created. Does not write `nest_enterprises.csv`. Does not
+append-only `data/spine/cedar_need_id_register.csv`, which stays the only place
+an enterprise id is created. Does not write `need_enterprises.csv`. Does not
 touch `data/spine/cedar_identifier_ledger.csv` (another workstream owns it).
 
 ===========================================================================
 WHY THIS EXISTS: 1130 MEASURED THE GAP AND DELIBERATELY DID NOT CLOSE IT
 ===========================================================================
-`code/1130_nest_owner_v6_reconcile.py` put the owner's 18,110-row file through
-NEST's own clustering and found **4,786 net-new enterprises**. It wrote them to
+`code/1130_need_owner_v6_reconcile.py` put the owner's 18,110-row file through
+NEED's own clustering and found **4,786 net-new enterprises**. It wrote them to
 staging and stopped, because `1072 build` is a FULL REBUILD of
-`nest_enterprises.csv` and an in-place append would be reverted by the next run
+`need_enterprises.csv` and an in-place append would be reverted by the next run
 while printing a larger row count - the FERC rebuild/in-place collision in
 `START_HERE.md`, four times over.
 
 The fix is not to append more carefully. It is to make the owner's file an
 **INPUT** to `1072`, so the rows are re-derived on every rebuild:
 
-    1133 apply                -> data/staging/nest/owner_v6_edges.jsonl
+    1133 apply                -> data/staging/need/owner_v6_edges.jsonl
     1072 load_sources()       -> source 7 reads that file
     1072 assemble             -> hub resolution + the ANCSA guards
     1072 build                -> clustering + id minting
     1102 (enricher) re-run    -> its 8 columns, which a rebuild blanks
 
 1133 owns the DECISIONS (which rows may enter, and on what evidence); 1072 owns
-the clustering and the ids. The split is deliberate: every other NEST source is
+the clustering and the ids. The split is deliberate: every other NEED source is
 staged by a sibling script and read by `load_sources()` the same way
 (`1070`'s held CSV is source 6a), and putting 4,786 rows of reasoning inside a
 shared file that many workstreams edit is how a shared file gets clobbered.
@@ -68,14 +68,14 @@ result.** Inheriting the row while dropping its sign is exactly how 317
 different dataset.** They are self-certified Native-owned businesses in the SBA
 certification register - `SALCO LLC`, `HAKU SYSTEMS LLC`, `MAKWA GLOBAL
 SERVICES, LLC`, 8(a) certified. That is an evidenced Native firm. It is not a
-NEST row, because NEST's grain is (owner hub, enterprise name) and no owner
+NEED row, because NEED's grain is (owner hub, enterprise name) and no owner
 nation is named on any of them. They are registered for
 `native-owned-businesses` / the individually-Native-owned class rather than
 forced onto a hub, and the register names each one so the promotion is a join
 and not a re-harvest.
 
 Nothing is deleted. All 12,085 are written to
-`data/staging/nest/owner_v6_refused.csv` with the measured reason.
+`data/staging/need/owner_v6_refused.csv` with the measured reason.
 
 ===========================================================================
 DECISION 2 - THE 160 v3-ONLY ROWS ARE NOT 158 LOST FIRMS. DO NOT RECOVER THEM.
@@ -99,7 +99,7 @@ differently:
 and **0 of 160 carry a name string v6 also carries under that UEI**, which is
 why a name-keyed comparison reports them as missing.
 
-NEST clusters on the normalised NAME, and `norm()` strips a trailing corporate
+NEED clusters on the normalised NAME, and `norm()` strips a trailing corporate
 form but not `limited liability` in the middle of one - so
 `glacier technologies` and `glacier technologies limited liability` are two
 keys, and rapidfuzz declines to fuse them because their lengths differ by 18
@@ -109,7 +109,7 @@ created up to 158 duplicate enterprises**, which is the exact defect the
 duplicate rows once.
 
 So the v3 strings are recorded as OBSERVED NAME VARIANTS keyed on UEI -
-`data/staging/nest/owner_v3_name_variants.csv` - and not as enterprises. The
+`data/staging/need/owner_v3_name_variants.csv` - and not as enterprises. The
 loss the recovery list described does not exist; what does exist is 160 extra
 renderings of names Cedar already holds, which is worth having and is worth
 nothing as rows.
@@ -141,18 +141,18 @@ Cedar until a source does.
 DECISION 4 - A UEI CEDAR ALREADY HOLDS IS A CORROBORATION, NOT A NEW FIRM
 ===========================================================================
 A UEI is one federal registration for one firm. An owner row whose UEI is
-already carried by a live NEST row is that firm again under a different name
+already carried by a live NEED row is that firm again under a different name
 rendering, and emitting it would create a second enterprise for one company -
 the same duplication as decision 2, arriving by a different door.
 
 **But a collision only matters when the row would create a NEW cluster.** Where
-NEST already holds `(this hub, this normalised name)` the row MERGES onto the
+NEED already holds `(this hub, this normalised name)` the row MERGES onto the
 existing enterprise and raises its observation count, which is a corroboration
 and is the whole reason for putting the file through the builder's clustering
 instead of appending it. Refusing on the UEI alone discarded 173 of those; the
 rule tests the clustering key first.
 
-Measured against the live NEST table, the rows that WOULD create a new
+Measured against the live NEED table, the rows that WOULD create a new
 enterprise for a firm Cedar already registers: **21** on the same hub and
 **172** on a different one. Both are refused and registered in
 `owner_v6_uei_already_held.csv` - the same-hub ones as a name-rendering
@@ -162,11 +162,11 @@ adjudication and must not be settled by whichever pass ran last.
 ===========================================================================
 DECISION 5 - THE 212 ALASKA VILLAGE-GOVERNMENT HUBS ARE LEFT TO 1072'S GUARD
 ===========================================================================
-`1130` found that 223 net-new clusters are held by NEST under a different hub,
+`1130` found that 223 net-new clusters are held by NEED under a different hub,
 and that the large majority hub an ANCSA corporation's subsidiary on the Native
 Village GOVERNMENT - `Alutiiq LLC` and `Afognak Diversified Services` under
 `AKNF-AFGNAK-00-KONIAG` rather than under Afognak Native Corporation.
-`ANCSA_OWNERSHIP_RULING` rule 2 settles every one and **NEST is right on all of
+`ANCSA_OWNERSHIP_RULING` rule 2 settles every one and **NEED is right on all of
 them**.
 
 This pass adds no new guard for it, because `1072.stage_assemble` already has
@@ -181,10 +181,10 @@ owner's file names no corporation, so these are HELD - written to
 as its own source 5, with the repoint machinery applied. They are a restatement
 of an input the builder already has.
 
-*(A correction to the record while measuring this: `docs/NEST_BUILD_LOG.md`
+*(A correction to the record while measuring this: `docs/NEED_BUILD_LOG.md`
 states the split as 212 / 20 / 14 = 223, which does not add up - those three
 numbers sum to 246. The live
-`data/staging/nest_owner_v6/enterprise_reconciliation.csv` says
+`data/staging/need_owner_v6/enterprise_reconciliation.csv` says
 **196 / 14 / 13 = 223**, which does. The doc's table is from an earlier run;
 the file is right.)*
 
@@ -196,7 +196,7 @@ An owner row reaches `owner_v6_edges.jsonl` when ALL of these hold:
   1. it carries a `tribe_id` that crosswalks to a live register `cedar_uid`
      (`1130.resolve_parent`, imported - ONE crosswalk, not a second copy);
   2. its `enterprise_name` is non-blank after `tidy`;
-  3. its UEI, if it has one, is not already carried by a live NEST row.
+  3. its UEI, if it has one, is not already carried by a live NEED row.
 
 Everything else is written to a register with its reason. `1072` then applies
 its own refusals on top - restricted publishers, the ANCSA village-government
@@ -206,15 +206,15 @@ them.
 Reads   <dissertation>/native_entity_enterprise_dataset_v6_geocoded.csv
         <dissertation>/native_entity_enterprise_dataset_v3.csv  (variants only)
         data/spine/cedar_identity_register.csv
-        data/clean/nest_enterprises.csv
-        code/1130_nest_owner_v6_reconcile.py   (the parent crosswalk)
+        data/clean/need_enterprises.csv
+        code/1130_need_owner_v6_reconcile.py   (the parent crosswalk)
         code/1072_tribally_owned_enterprises.py (norm/tidy - ONE normaliser)
-Writes  data/staging/nest/owner_v6_edges.jsonl        <- the builder input
-        data/staging/nest/owner_v6_refused.csv
-        data/staging/nest/owner_v6_uei_already_held.csv
-        data/staging/nest/owner_v3_name_variants.csv
-        data/staging/nest/owner_v6_conservation.csv
-        docs/nest_owner_v6_builder_input.json
+Writes  data/staging/need/owner_v6_edges.jsonl        <- the builder input
+        data/staging/need/owner_v6_refused.csv
+        data/staging/need/owner_v6_uei_already_held.csv
+        data/staging/need/owner_v3_name_variants.csv
+        data/staging/need/owner_v6_conservation.csv
+        docs/need_owner_v6_builder_input.json
 """
 from __future__ import annotations
 
@@ -235,9 +235,9 @@ ROOT = Path(__file__).resolve().parent.parent
 CODE = ROOT / "code"
 CLEAN = ROOT / "data" / "clean"
 SPINE = ROOT / "data" / "spine"
-STAGE = ROOT / "data" / "staging" / "nest"
+STAGE = ROOT / "data" / "staging" / "need"
 DOCS = ROOT / "docs"
-SCRIPT = "code/1133_nest_owner_v6_builder_input.py"
+SCRIPT = "code/1133_need_owner_v6_builder_input.py"
 TODAY = dt.date.today().isoformat()
 
 OWNER_DIR = Path(os.path.expanduser("~")) / "Desktop" / "dissertation" / \
@@ -250,7 +250,7 @@ OUT_REFUSED = STAGE / "owner_v6_refused.csv"
 OUT_UEIHELD = STAGE / "owner_v6_uei_already_held.csv"
 OUT_VARIANTS = STAGE / "owner_v3_name_variants.csv"
 OUT_CONSV = STAGE / "owner_v6_conservation.csv"
-OUT_JSON = DOCS / "nest_owner_v6_builder_input.json"
+OUT_JSON = DOCS / "need_owner_v6_builder_input.json"
 
 SOURCE_ID = "OWNERV6"
 OWNER_DOC = ("native_entity_enterprise_dataset_v6_geocoded.csv "
@@ -260,7 +260,7 @@ OWNER_DOC = ("native_entity_enterprise_dataset_v6_geocoded.csv "
 # The floor `verify` holds. Set BELOW a measured green run so a real
 # regression fails and ordinary drift does not.
 FLOOR_EDGES = 5000
-FLOOR_NEST_ROWS = 2800
+FLOOR_NEED_ROWS = 2800
 
 
 def rd(p):
@@ -302,14 +302,14 @@ def _load(path, name):
 def load_1072():
     """`norm` and `tidy` come from the builder itself. Two normalisers that
     drift are two clusterings, and this file would be measuring the drift."""
-    return _load(CODE / "1072_tribally_owned_enterprises.py", "nest1072")
+    return _load(CODE / "1072_tribally_owned_enterprises.py", "need1072")
 
 
 def load_1130():
     """`resolve_parent` is the ONE parent crosswalk. Re-implementing it here
     would be a second detector for one class, which is why `248` is a retired
     stub pointing at `293`."""
-    return _load(CODE / "1130_nest_owner_v6_reconcile.py", "nest1130")
+    return _load(CODE / "1130_need_owner_v6_reconcile.py", "need1130")
 
 
 # ---------------------------------------------------------------------------
@@ -317,7 +317,7 @@ def load_1130():
 # ---------------------------------------------------------------------------
 # `1130.family_of` classifies the owner's `verification_source` into the 1118
 # families. Those are families, not evidence classes, so they are mapped once,
-# here, into the vocabulary `nest_enterprises.evidence_class` already carries -
+# here, into the vocabulary `need_enterprises.evidence_class` already carries -
 # and where no existing class is truthful, a new one is declared rather than
 # an existing one stretched to cover it.
 #
@@ -367,7 +367,7 @@ FAMILY_TO_EVIDENCE_CLASS = {
 # THIS CHECK EXISTS BECAUSE THIS PASS TRIPPED IT. The owner's v6 file is an
 # earlier vintage than the corrections, and its first ingest put
 # `BRISTOL BAY AREA HEALTH CORPORATION` back under Bristol Bay Native
-# Corporation (`ANRC-BRBYCO-00` / `CE-0007A-ZA`) as a NEST enterprise. That is
+# Corporation (`ANRC-BRBYCO-00` / `CE-0007A-ZA`) as a NEED enterprise. That is
 # finding **FA-01**, settled 2026-08-26 and again on 2026-08-29: BBAHC is a
 # separate tribal health organisation, `SGVF-BRSTLB-00`; 742 rows were
 # unlinked, the ledgers marked tier X, and the refutation harvested by `510`
@@ -405,31 +405,31 @@ def build_context():
     reg_by_uid = {r["cedar_uid"]: r for r in reg}
     # NEVER LET AN INSTRUMENT SCAN ITS OWN OUTPUT (AGENT_FIELD_GUIDE rule 10,
     # five instruments in this repo have now done it). The UEI-collision and
-    # already-clustered tests below ask "does NEST ALREADY hold this firm" -
-    # and after the first ingest NEST holds THIS SCRIPT'S OWN ROWS, so the
+    # already-clustered tests below ask "does NEED ALREADY hold this firm" -
+    # and after the first ingest NEED holds THIS SCRIPT'S OWN ROWS, so the
     # answer would depend on whether 1072 had been run yet. Rows whose
     # source_id is this pass are excluded, which makes `apply` idempotent and
     # its output independent of build order.
-    nest_all = rd(CLEAN / "nest_enterprises.csv")
-    nest = [r for r in nest_all if SOURCE_ID not in (r.get("source_id") or "")]
+    need_all = rd(CLEAN / "need_enterprises.csv")
+    need = [r for r in need_all if SOURCE_ID not in (r.get("source_id") or "")]
     uei_owner = {}          # UEI -> (enterprise_id, hub uid, name, column)
-    nest_keys = set()       # (hub uid, normalised name) - the clustering key
-    for r in nest:
+    need_keys = set()       # (hub uid, normalised name) - the clustering key
+    for r in need:
         for c in ("uei", "uei_candidate"):
             u = norm_uei(r.get(c))
             if u:
                 uei_owner.setdefault(u, (r["enterprise_id"],
                                          r["owner_hub_cedar_uid"],
                                          r["enterprise_name"], c))
-        nest_keys.add((r["owner_hub_cedar_uid"],
+        need_keys.add((r["owner_hub_cedar_uid"],
                        r.get("enterprise_name_normalized") or ""))
     corrections = load_corrections(m72)
-    return (m72, m30, reg, by_handle, by_stem, reg_by_uid, nest, uei_owner,
-            nest_keys, corrections)
+    return (m72, m30, reg, by_handle, by_stem, reg_by_uid, need, uei_owner,
+            need_keys, corrections)
 
 
 def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
-             nest_keys, corrections):
+             need_keys, corrections):
     """-> (edges, refused, uei_held, counts). No writes."""
     edges, refused, uei_held = [], [], []
     counts = Counter()
@@ -489,7 +489,7 @@ def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
                 refuse("SBA_CERTIFIED_BUT_NO_OWNER_NAMED",
                        "a real, evidenced Native-owned firm in the SBA "
                        "certification register, with NO owner nation named on "
-                       "the row. NEST's grain is (owner hub, enterprise "
+                       "the row. NEED's grain is (owner hub, enterprise "
                        "name), so it cannot hold this row. It belongs to "
                        "`native-owned-businesses` / the individually "
                        "Native-owned class, and this register is the join "
@@ -528,12 +528,12 @@ def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
 
         u = norm_uei(r.get("enterprise_uei"))
         # A UEI collision only matters when this row would create a NEW
-        # cluster. Where NEST already holds (this hub, this normalised name)
+        # cluster. Where NEED already holds (this hub, this normalised name)
         # the row MERGES onto the existing enterprise and raises its
         # observation count - that is a corroboration and it is the point of
         # putting the file through the builder's clustering rather than
         # appending it. Refusing those would have discarded 173 of them.
-        creates_new = (uid, m72.norm(name)) not in nest_keys
+        creates_new = (uid, m72.norm(name)) not in need_keys
         if u and u in uei_owner and creates_new:
             eid, hub, ename, col = uei_owner[u]
             same = (hub == uid)
@@ -545,26 +545,26 @@ def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
                 "owner_tribe_id": tid, "owner_hub_cedar_uid": uid,
                 "owner_hub_name": (reg_by_uid.get(uid) or {}).get(
                     "canonical_name", ""),
-                "nest_enterprise_id": eid, "nest_enterprise_name": ename,
-                "nest_owner_hub_cedar_uid": hub,
-                "nest_owner_hub_name": (reg_by_uid.get(hub) or {}).get(
+                "need_enterprise_id": eid, "need_enterprise_name": ename,
+                "need_owner_hub_cedar_uid": hub,
+                "need_owner_hub_name": (reg_by_uid.get(hub) or {}).get(
                     "canonical_name", ""),
-                "nest_uei_column": col,
+                "need_uei_column": col,
                 "collision_basis": (
-                    "a UEI is ONE federal registration for ONE firm. NEST "
+                    "a UEI is ONE federal registration for ONE firm. NEED "
                     "already carries it, so emitting this row would create a "
                     "second enterprise for one company - the duplication the "
                     "merged-not-appended design of 1072 exists to stop. "
-                    + ("Same hub: this is a corroboration of a row NEST "
+                    + ("Same hub: this is a corroboration of a row NEED "
                        "already holds, under a different name rendering."
                        if same else
-                       "DIFFERENT HUB: the owner's file and NEST disagree "
+                       "DIFFERENT HUB: the owner's file and NEED disagree "
                        "about who owns this firm. That needs an adjudication "
                        "and must not be settled by whichever pass ran last.")),
                 "built_by": SCRIPT, "built_date": TODAY})
-            refuse("UEI_ALREADY_HELD_BY_NEST_" + ("SAME_HUB" if same
+            refuse("UEI_ALREADY_HELD_BY_NEED_" + ("SAME_HUB" if same
                                                   else "OTHER_HUB"),
-                   "UEI %s is already on NEST row %s (%s)" % (u, eid, ename))
+                   "UEI %s is already on NEED row %s (%s)" % (u, eid, ename))
             continue
 
         fam, _why = m30.family_of(r.get("verification_source") or "")
@@ -680,7 +680,7 @@ def v3_variants(m72):
                 "the same UEI is one federal registration for one firm, so "
                 "this is v6's row under a different name string, not a firm "
                 "v6 lost. Recovering it as an enterprise would create a "
-                "duplicate, because NEST clusters on the normalised NAME and "
+                "duplicate, because NEED clusters on the normalised NAME and "
                 "these two normalise apart. Recorded as an observed name "
                 "variant." if peers else
                 "no v6 row carries this UEI. This one IS a candidate, and it "
@@ -695,19 +695,19 @@ def run(write):
         print("The owner's v6 file is not on this machine:\n  %s" % V6)
         return 2
     ctx = build_context()
-    (m72, m30, reg, by_handle, by_stem, reg_by_uid, nest, uei_owner,
-     nest_keys, corrections) = ctx
+    (m72, m30, reg, by_handle, by_stem, reg_by_uid, need, uei_owner,
+     need_keys, corrections) = ctx
     rows = rd(V6)
     print("=== 1133 %s ===" % ("apply" if write else "report"))
     print("  owner v6            %6d rows" % len(rows))
-    print("  live NEST           %6d enterprises, %d not from this pass, "
+    print("  live NEED           %6d enterprises, %d not from this pass, "
           "%d distinct UEIs held"
-          % (len(rd(CLEAN / "nest_enterprises.csv")), len(nest),
+          % (len(rd(CLEAN / "need_enterprises.csv")), len(need),
              len(uei_owner)))
 
     edges, refused, uei_held, counts, xwalk = classify(
         rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
-        nest_keys, corrections)
+        need_keys, corrections)
 
     print("  EMITTED as builder input   %6d edges on %d hubs"
           % (len(edges), len({e["hub_cedar_uid"] for e in edges})))
@@ -782,17 +782,17 @@ def run(write):
     print("  -> %s" % OUT_UEIHELD)
     print("  -> %s" % OUT_VARIANTS)
     print("  -> %s" % OUT_CONSV)
-    print("\n  NEXT, IN THIS ORDER - the rows are not in NEST until it is run:")
+    print("\n  NEXT, IN THIS ORDER - the rows are not in NEED until it is run:")
     print("    py -3 code/1072_tribally_owned_enterprises.py assemble")
     print("    py -3 code/1072_tribally_owned_enterprises.py build")
-    print("    py -3 code/1102_nest_corroboration_adjudication.py   "
+    print("    py -3 code/1102_need_corroboration_adjudication.py   "
           "# enricher, runs LAST")
-    print("    py -3 code/1133_nest_owner_v6_builder_input.py verify")
+    print("    py -3 code/1133_need_owner_v6_builder_input.py verify")
     return 0
 
 
 # ---------------------------------------------------------------------------
-# verify -- FAILS when the rows are not in NEST
+# verify -- FAILS when the rows are not in NEED
 # ---------------------------------------------------------------------------
 def _verify():
     fail, note = [], []
@@ -809,19 +809,19 @@ def _verify():
     # W2 - THE ONE THAT MATTERS. A staged file is not a delivered row.
     # A conservation check would pass on a no-op (AGENT_FIELD_GUIDE rule 5),
     # so this asserts the INTENDED delta on the table the consumer reads.
-    nest = rd(CLEAN / "nest_enterprises.csv")
-    if not nest:
-        fail.append("W2 nest_enterprises.csv is absent or empty")
+    need = rd(CLEAN / "need_enterprises.csv")
+    if not need:
+        fail.append("W2 need_enterprises.csv is absent or empty")
         return False, fail, note
-    mine = [r for r in nest if SOURCE_ID in (r.get("source_id") or "")]
-    if len(mine) < FLOOR_NEST_ROWS:
-        fail.append("W2 only %d NEST rows carry source_id %s (floor %d). "
+    mine = [r for r in need if SOURCE_ID in (r.get("source_id") or "")]
+    if len(mine) < FLOOR_NEED_ROWS:
+        fail.append("W2 only %d NEED rows carry source_id %s (floor %d). "
                     "The input is staged but 1072 has NOT ingested it - run "
                     "`1072 assemble` then `1072 build`."
-                    % (len(mine), SOURCE_ID, FLOOR_NEST_ROWS))
+                    % (len(mine), SOURCE_ID, FLOOR_NEED_ROWS))
     else:
-        note.append("W2 %d of %d NEST rows carry source_id %s"
-                    % (len(mine), len(nest), SOURCE_ID))
+        note.append("W2 %d of %d NEED rows carry source_id %s"
+                    % (len(mine), len(need), SOURCE_ID))
 
     # W3 - no relation_class invented on these rows.
     #
@@ -878,11 +878,11 @@ def _verify():
     else:
         note.append("W5 conservation balances, 0 unaccounted")
 
-    # W6 - the 8,928 `unmatched` rows must be absent from NEST
+    # W6 - the 8,928 `unmatched` rows must be absent from NEED
     # W6 tests a NAME, and a name is not unique. 11 names refused as
     # `unmatched` on one row of the owner's file are ALSO carried by a
     # properly hubbed row of the same file, so a bare name test reported them
-    # as leaks when the row that reached NEST was the legitimate one. The
+    # as leaks when the row that reached NEED was the legitimate one. The
     # banned set is therefore the refused names MINUS every name this pass
     # emitted - which is what "a name that could only have come from the
     # refused block" actually means.
@@ -903,10 +903,10 @@ def _verify():
                 if (r.get("enterprise_name") or "").strip().lower() in banned]
         if leak:
             fail.append("W6 %d rows the owner's own file marks `unmatched` "
-                        "reached NEST (e.g. %s)"
+                        "reached NEED (e.g. %s)"
                         % (len(leak), leak[0].get("enterprise_name")))
         else:
-            note.append("W6 0 of %d `unmatched` names reached NEST"
+            note.append("W6 0 of %d `unmatched` names reached NEED"
                         % len(banned))
 
     # W7 - no APPLIED CORRECTION was re-imported. `62` scans every sibling
@@ -975,8 +975,8 @@ def cmd_selftest():
                         any(x.startswith("W1") for x in f)))
         OUT_EDGES.write_text(full, encoding="utf-8")
 
-        # W2: NEST has not ingested it. Simulated on a COPY of the table.
-        p = CLEAN / "nest_enterprises.csv"
+        # W2: NEED has not ingested it. Simulated on a COPY of the table.
+        p = CLEAN / "need_enterprises.csv"
         baks[p] = p.with_suffix(".csv.selftest_bak")
         shutil.copy2(p, baks[p])
         rows = rd(p)
@@ -984,7 +984,7 @@ def cmd_selftest():
             r["source_id"] = (r.get("source_id") or "").replace(SOURCE_ID, "")
         wcsv(p, rows, first=list(rows[0].keys()))
         o, f, _ = _verify()
-        results.append(("W2 NEST has not ingested", not o,
+        results.append(("W2 NEED has not ingested", not o,
                         any(x.startswith("W2") for x in f)))
         shutil.copy2(baks[p], p)
         baks[p].unlink(missing_ok=True)
@@ -1012,7 +1012,7 @@ def cmd_selftest():
         baks[p].unlink(missing_ok=True)
         baks.pop(p)
 
-        # W7: a WITHDRAWN link back in NEST (the FA-01 shape)
+        # W7: a WITHDRAWN link back in NEED (the FA-01 shape)
         m72 = load_1072()
         corr = load_corrections(m72)
         rows2 = rd(p)

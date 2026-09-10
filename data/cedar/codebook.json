@@ -2076,11 +2076,11 @@
     }
    ]
   },
-  "nest/nest_enterprises": {
-   "collection": "nest",
+  "need/need_enterprises": {
+   "collection": "need",
    "dataset": "Native Enterprises",
    "row": "One enterprise (a subsidiary, a joint venture, an affiliate) with the Native entity that owns or is affiliated with it and how.",
-   "where": "workspace dist/customer/nest.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nest/nest_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.",
+   "where": "workspace dist/customer/need.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/need/need_enterprises.csv; built from owners' own subsidiary listings, annual reports and federal identifier records.",
    "fields": [
     {
      "column": "cedar_uid",

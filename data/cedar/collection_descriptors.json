@@ -176,7 +176,7 @@
     "method": "Attribution routes through a party table rather than a single owner column, because one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law the row is published as an aggregate and labelled as one \u2014 88.1% (9,791 national plus 167 state of 11,305 rows) of rows are aggregate for that reason, and none are unattributed for want of effort. Individual allottee detail is never published: Osage rows carry a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier."
   },
   {
-    "id": "nest",
+    "id": "need",
     "shelf": "pro",
     "level": "entity",
     "origin": "lumecon",
@@ -185,8 +185,8 @@
     "version": "v0",
     "updated": "2026-09-02",
     "downloads": 0,
-    "name": "NEST: Native Enterprise Structures and Ties",
-    "short_name": "NEST",
+    "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+    "short_name": "NEED",
     "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities \u2014 the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
     "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own \u201cOur Companies\u201d and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",
     "method": "Two relations, declared per row and never conflated: a STRUCTURE is ownership \u2014 nation, holding company, operating company \u2014 and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees."

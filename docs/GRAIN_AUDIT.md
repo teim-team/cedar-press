@@ -262,15 +262,15 @@ one published legislative ACTION on a Native bill - a referral, a committee repo
 | `individual_native_verification_candidates.csv` | 335 | DECLARED_VALIDATED | `verification_id` | — |
 | `native_owned_businesses.csv` | 2,393 | DECLARED_VALIDATED | `business_source_id` | `business_entity_id`→1, `business_name_normalized`→10, `business_source_id`→1, `certifying_authority_entity_id`→836, `source_id`→836 |
 
-### NEST: Native Enterprise Structures and Ties  (`nest`)
+### Cedar Native Entity Enterprise Dataset (NEED)  (`need`)
 
 3 of 3 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→444, `enterprise_edge_id`→1, `enterprise_id`→15, `owner_hub_cedar_uid`→444 |
-| `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→197, `enterprise_id`→1, `owner_hub_cedar_uid`→197, `parent_enterprise_id`→34 |
-| `nest_entity_dual_role.csv` | — | DECLARED_VALIDATED | `cedar_uid` | `cedar_uid`→1 |
+| `need_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→444, `enterprise_edge_id`→1, `enterprise_id`→15, `owner_hub_cedar_uid`→444 |
+| `need_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→197, `enterprise_id`→1, `owner_hub_cedar_uid`→197, `parent_enterprise_id`→34 |
+| `need_entity_dual_role.csv` | — | DECLARED_VALIDATED | `cedar_uid` | `cedar_uid`→1 |
 
 ### The Native Press: Tribal Newsletters and Periodicals  (`newsletters`)
 

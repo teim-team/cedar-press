@@ -69,7 +69,7 @@ test("an absent or unknown tier reads nothing", () => {
   }
 });
 
-test("the shelves nest upward", () => {
+test("the shelves need upward", () => {
   assert.equal(shelfReach(as("press")), SHELF.STANDARD);
   assert.equal(shelfReach(as("press_pro")), SHELF.PRO);
   assert.equal(shelfReach(as("grove")), SHELF.GROVE);

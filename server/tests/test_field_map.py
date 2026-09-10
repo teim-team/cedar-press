@@ -65,7 +65,7 @@ REFUSED_AS_SAMPLED = {
     "federal-register": (("event_date_basis",), pub.OwedDerivation),
     "deals": (("Deal_Category", "Notes"), pub.OwedDerivation),
     "contractors": (("extent_competed",), pub.OwedDerivation),
-    "nest": (("enterprise_existing_cedar_uid",), pub.UnadjudicatedIdentifier),
+    "need": (("enterprise_existing_cedar_uid",), pub.UnadjudicatedIdentifier),
     # entity_id and cedar_spine_entity_id both disagree with cedar_uid on the
     # Menominee row: neither is an alias, and neither is deleted unadjudicated.
     "nonprofits": (("entity_id", "cedar_spine_entity_id"), pub.UnadjudicatedIdentifier),
@@ -78,7 +78,7 @@ REFUSED_AS_SAMPLED = {
 # them: the retired vocabulary recoded, the unadjudicated ids adjudicated away.
 IDENTIFIERS_TO_SETTLE = {
     "funding": {"attribution_status": "attributed"},
-    "nest": {"enterprise_existing_cedar_uid": ""},
+    "need": {"enterprise_existing_cedar_uid": ""},
     "nonprofits": {"entity_id": "", "cedar_spine_entity_id": ""},
 }
 

@@ -534,7 +534,7 @@ def binding_map(reg_rows):
 
 def render(ordinal):
     """`CEDAR-PLACE-000123-K7`. Allocation is permanent and locked in
-    cedar_ids; transcription safety comes from 503 - the same split NEST
+    cedar_ids; transcription safety comes from 503 - the same split NEED
     uses, so there is one check-character implementation in the project."""
     return "CEDAR-PLACE-%06d-%s" % (ordinal,
                                     m503.check_chars(m503.encode(ordinal)))

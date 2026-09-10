@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""1072 - NEST: Native Enterprise Structures and Ties.
+"""1072 - Cedar Native Entity Enterprise Dataset (NEED).
 
     Enterprise ownership and affiliation across tribes, Alaska Native
     corporations, Native Hawaiian organizations, and state-recognized
     Native entities.   -- the owner, 2026-09-02
 
-Collection id `nest`. The 14th dataset, and it is DISTINCT from
+Collection id `need`. The 14th dataset, and it is DISTINCT from
 `native-owned-businesses` by the relation it publishes:
 
     native-owned-businesses   a nation CERTIFIED or LISTED this firm
                               -> relation `affiliated_with`, identity_scope
                                  gradient down to `vendor_relationship`
-    nest (this)               a nation, ANC or NHO OWNS this enterprise
+    need (this)               a nation, ANC or NHO OWNS this enterprise
                               -> relation `owned_by`, and that is a CLAIM,
                                  so every row carries the source that asserts
                                  it and the evidence class of that source
@@ -44,8 +44,8 @@ STAGES
   assemble  zero network. Merges every staged ownership assertion Cedar
             already holds into one normalised edge set, with the ANCSA and
             named-collision guards applied.
-  build     writes data/clean/nest_enterprises.csv and
-            data/clean/nest_enterprise_relations.csv, minting a Cedar sub-hub
+  build     writes data/clean/need_enterprises.csv and
+            data/clean/need_enterprise_relations.csv, minting a Cedar sub-hub
             id per enterprise.
   verify    invariants. Exits 1 when one breaks.
   selfcheck proves `verify` FIRES, by injecting each violation into a COPY.
@@ -82,7 +82,7 @@ BUILT = date.today().isoformat()
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"
-STAGE = CEDAR / "data" / "staging" / "nest"
+STAGE = CEDAR / "data" / "staging" / "need"
 INTERIM = CEDAR / "data" / "interim"
 RAW = CEDAR / "data" / "raw"
 REVIEW = CEDAR / "review"
@@ -92,16 +92,16 @@ MINE_LOG = STAGE / "ancsa_mine_log.csv"
 EDGES_STAGED = STAGE / "ownership_edges_staged.jsonl"
 HELD = STAGE / "held_rows.csv"
 SWEEP_1070 = (CEDAR / "data" / "staging" / "native_business_sweep_1070"
-              / "held_for_nest_ownership.csv")
+              / "held_for_need_ownership.csv")
 SWEEP_REFUSED = STAGE / "sweep_1070_refused.csv"
 CONFLICTS = STAGE / "evidence_conflicts.csv"
 
-OUT_ENT = CLEAN / "nest_enterprises.csv"
-OUT_EDGE = CLEAN / "nest_enterprise_relations.csv"
+OUT_ENT = CLEAN / "need_enterprises.csv"
+OUT_EDGE = CLEAN / "need_enterprise_relations.csv"
 # Append-only binding of (owner hub, normalised name) -> enterprise_id.
 # Kept in data/spine because an identifier a customer joins on must
 # survive a staging wipe, and because it is identity, not output.
-IDREG = SPINE / "cedar_nest_id_register.csv"
+IDREG = SPINE / "cedar_need_id_register.csv"
 
 # ---------------------------------------------------------------------------
 # EXCLUSIONS. docs/PUBLICATION_POLICY.md - TERMS_STATED_RESTRICTIVE publishers
@@ -192,7 +192,7 @@ def write_csv(path: Path, cols: list, rows: list) -> None:
        writer was written.** `code/845_regenerate_guard.py` found 33 writers
        in this repo holding one. So the header is the canonical list this
        build produces UNIONED with whatever the live file already carries -
-       a column a sibling workstream added to a NEST table survives a
+       a column a sibling workstream added to a NEED table survives a
        rebuild here, and is carried through with an empty value rather than
        dropped.
     """
@@ -688,7 +688,7 @@ def load_hard_ownership_denials():
 
     THE SUBJECT IS KEYED TWO WAYS and both have to be handled: the seeds taken
     from `anc_tribal_subsidiary_lookup.csv` carry the FIRM NAME in
-    `subject_record_id`, while the seed taken from `nest_enterprises.csv`
+    `subject_record_id`, while the seed taken from `need_enterprises.csv`
     carries the ENTERPRISE_ID. The id form is resolved back to (hub, name)
     through the append-only id register, so one lookup serves both.
     """
@@ -703,7 +703,7 @@ def load_hard_ownership_denials():
         if (c.get("predicate") != "owned_by" or c.get("strength") != "HARD"
                 or c.get("constraint_state") != "ACTIVE"
                 or c.get("suppresses") != "Y"
-                or c.get("dataset_scope") not in ("nest", "ALL")):
+                or c.get("dataset_scope") not in ("need", "ALL")):
             continue
         subj, cand = (c.get("subject_record_id") or ""), (c.get("candidate_cedar_uid") or "")
         if not cand:
@@ -921,10 +921,10 @@ def load_sources() -> tuple:
     #     and all 56 intertribal organisations - and staged 1,106 rows in the
     #     58-column native_owned_businesses schema. The integrator merged the
     #     523 `assertion_class = RELATIONSHIP` rows into that file, because
-    #     affiliation is its scope, and HELD the 583 OWNERSHIP rows for NEST,
+    #     affiliation is its scope, and HELD the 583 OWNERSHIP rows for NEED,
     #     because `relation_class` puts ownership here.
     #
-    #     THIS IS A MERGE, NOT AN APPEND. 170 of the 583 are already NEST rows
+    #     THIS IS A MERGE, NOT AN APPEND. 170 of the 583 are already NEED rows
     #     by normalised name - 265 come from the same 358 audited AS 45.55.139
     #     village-corporation reports this script mines itself. They are fed
     #     through the SAME clustering as every other source, so a restatement
@@ -951,7 +951,7 @@ def load_sources() -> tuple:
         #     quality preference.
         if "HTML heading/anchor scrape" in vb or "HEADING_SCRAPE" in vf:
             prov["_1070_refused_unreviewed_heading_scrape"] += 1
-            sweep_refused.append({**r, "nest_refusal":
+            sweep_refused.append({**r, "need_refusal":
                 "unreviewed HTML heading/anchor scrape, flagged as such by the "
                 "sweep itself. ASRC's block alone carries `Blank`, `No Results "
                 "Found`, `Employee Resources` and seven natural persons' names "
@@ -969,7 +969,7 @@ def load_sources() -> tuple:
         #     refuses at source selection.
         if dtype == "shareholder_vendor" or scope == "shareholder_descendant_or_spouse":
             prov["_1070_refused_shareholder_owned_not_corporation_owned"] += 1
-            sweep_refused.append({**r, "nest_refusal":
+            sweep_refused.append({**r, "need_refusal":
                 "identity_scope is shareholder_descendant_or_spouse - owned by "
                 "a shareholder, NOT by the corporation. Belongs in "
                 "native_owned_businesses as affiliation; admitting it here "
@@ -986,7 +986,7 @@ def load_sources() -> tuple:
         if scope in ("association_member",
                      "tribally_owned_entity_of_a_member_nation"):
             prov["_1070_refused_listing_association_is_not_the_owner"] += 1
-            sweep_refused.append({**r, "nest_refusal":
+            sweep_refused.append({**r, "need_refusal":
                 "identity_scope=" + repr(scope) + ": the keyed authority is "
                 "the LISTING association, not the owner. The hub must be the "
                 "owning nation, and this row does not name it"})
@@ -1089,24 +1089,24 @@ def load_sources() -> tuple:
             prov["business_registry_" + sid] += 1
 
     # 7. THE OWNER'S OWN ENTERPRISE DATASET, v6 - staged by
-    #    `code/1133_nest_owner_v6_builder_input.py apply`.
+    #    `code/1133_need_owner_v6_builder_input.py apply`.
     #
     #    18,110 rows the owner built on this machine. `1130` measured 4,786
     #    net-new enterprises in it and deliberately did NOT append them,
     #    because THIS function's build is a full rebuild and an in-place
     #    append is reverted by it while printing a larger row count. This is
     #    the fix: the file is an INPUT, so the rows come back on every
-    #    rebuild and their ids stay bound by `cedar_nest_id_register.csv`.
+    #    rebuild and their ids stay bound by `cedar_need_id_register.csv`.
     #
     #    1133 owns the admission decisions and every one is registered with a
-    #    measured reason in `data/staging/nest/owner_v6_refused.csv`. The two
+    #    measured reason in `data/staging/need/owner_v6_refused.csv`. The two
     #    that matter here:
     #      * 8,927 rows whose OWN `attribution_method` is `unmatched` are
     #        refused. They are the owner's unattributed FPDS residue and they
     #        include natural persons' names.
     #      * 3,140 SBA-certified firms with no owner nation named are refused
-    #        and registered for `native-owned-businesses`. NEST's grain is
-    #        (owner hub, enterprise name); a row with no owner is not a NEST
+    #        and registered for `native-owned-businesses`. NEED's grain is
+    #        (owner hub, enterprise name); a row with no owner is not a NEED
     #        row.
     #
     #    `relationship` ARRIVES AS `unspecified` ON PURPOSE. v6 has 31 columns
@@ -1118,11 +1118,11 @@ def load_sources() -> tuple:
     #    absence must never print as a clean result (AGENT_FIELD_GUIDE rule
     #    4), so the line below is emitted either way and `stage_assemble`
     #    prints the per-source count.
-    _ov6 = CEDAR / "data/staging/nest/owner_v6_edges.jsonl"
+    _ov6 = CEDAR / "data/staging/need/owner_v6_edges.jsonl"
     _ov6_rows = read_jsonl(_ov6)
     if not _ov6_rows:
         print(f"  ! owner v6 builder input ABSENT or EMPTY ({_ov6}). "
-              f"Run `py -3 code/1133_nest_owner_v6_builder_input.py apply` "
+              f"Run `py -3 code/1133_need_owner_v6_builder_input.py apply` "
               f"first, or this build silently omits ~5,800 assertions.")
         prov["_owner_v6_INPUT_ABSENT"] += 1
     for r in _ov6_rows:
@@ -1310,7 +1310,7 @@ def stage_assemble(argv) -> int:
                 # Doyon's own page names Huna Totem and Klawock Heenya;
                 # reading it at face value would convert two independent
                 # ANCSA corporations into subsidiaries of a third.
-                # NOT dropped: DOWNGRADED. NEST is Structures AND Ties, and
+                # NOT dropped: DOWNGRADED. NEED is Structures AND Ties, and
                 # this is a real, published tie that is not ownership. The
                 # row survives with `relationship = shareholding_or_ancestry`
                 # so a reader can see the relationship without Cedar
@@ -1354,11 +1354,11 @@ def stage_assemble(argv) -> int:
     hcols = sorted({k for h in held for k in h}) if held else ["hold_reason"]
     write_csv(HELD, hcols, held)
     # The 1070 refusals are a REGISTER, not a deletion. Every refused row keeps
-    # its 58 staged columns plus `nest_refusal`, so the integrator can see
-    # exactly which of the 583 held rows NEST declined and on what stated
+    # its 58 staged columns plus `need_refusal`, so the integrator can see
+    # exactly which of the 583 held rows NEED declined and on what stated
     # ground - and reverse any of them without re-harvesting.
     if sweep_refused:
-        scols = ["nest_refusal"] + [k for k in sweep_refused[0] if k != "nest_refusal"]
+        scols = ["need_refusal"] + [k for k in sweep_refused[0] if k != "need_refusal"]
         write_csv(SWEEP_REFUSED, scols, sweep_refused)
         print(f"  1070 refused {len(sweep_refused)} -> {SWEEP_REFUSED}")
 
@@ -1401,7 +1401,7 @@ OWNER_CLASS = {
 }
 
 # ---------------------------------------------------------------------------
-# STRUCTURES AND TIES - the two relations NEST publishes, and the vocabulary
+# STRUCTURES AND TIES - the two relations NEED publishes, and the vocabulary
 # that keeps them apart.
 # ---------------------------------------------------------------------------
 # The dataset's name commits it to two relations, not one, and the row has to
@@ -1627,9 +1627,9 @@ def stage_build(argv) -> int:
     # THE SCOPE SPLIT WITH THE CONSTELLATION, made explicit in the data.
     # `data/clean/cedar_constellation_edges.csv` (ADR-014) records SERVICE
     # relationships - who serves a community, including `registered_with` for
-    # a TERO-certified firm. NEST records OWNERSHIP AND CORPORATE AFFILIATION
+    # a TERO-certified firm. NEED records OWNERSHIP AND CORPORATE AFFILIATION
     # of enterprises. A TERO-certified firm is a constellation edge and is
-    # NOT a NEST row unless the nation also owns it, which is why this build
+    # NOT a NEED row unless the nation also owns it, which is why this build
     # takes only sources declaring `directory_type = subsidiary_directory`.
     # The file is READ, never written, and where the two agree the
     # constellation's own edge id is carried so the corroboration is visible
@@ -1661,7 +1661,7 @@ def stage_build(argv) -> int:
             if (h, norm(c)) not in idreg]
     if need:
         got = cedar_ids.allocate("CEDAR-NEST", len(need),
-                                 note="NEST enterprise sub-hubs, 1072")
+                                 note="NEED enterprise sub-hubs, 1072")
         for (h, nk), raw in zip(need, got):
             ordinal = int(raw.rsplit("-", 1)[1])
             eid = f"{raw}-{m503.check_chars(m503.encode(ordinal))}"
@@ -1787,7 +1787,7 @@ def stage_build(argv) -> int:
             "owner_hub_cedar_uid": hub_uid,
             # `cedar_uid` is the documented external join key and every
             # shipped Cedar table carries it (IDENTIFIER_STANDARD §0). On a
-            # NEST row it is the OWNER's uid, not the enterprise's: the
+            # NEED row it is the OWNER's uid, not the enterprise's: the
             # enterprise is a sub-hub and sub-hubs are never spine entities,
             # so it has no `CE-` uid of its own and inventing one would put a
             # non-entity into the entity namespace. Its own identity is
@@ -1832,7 +1832,7 @@ def stage_build(argv) -> int:
             # `"OWNERSHIP"` until 2026-09-02, which put the word OWNERSHIP on
             # **3,286 of 4,798 published rows whose own `relation_class` said
             # `affiliation` and whose `relationship` said `unspecified`**
-            # (measured on `dist/customer/nest.csv`, 2026-09-02). Two columns
+            # (measured on `dist/customer/need.csv`, 2026-09-02). Two columns
             # of the same row contradicting each other, with the stronger
             # claim in the summary column - which is exactly the promotion the
             # owner flagged in the ten-row review. A constant is not an
@@ -1863,7 +1863,7 @@ def stage_build(argv) -> int:
             "constellation_note": (
                 "the service constellation records a relationship between this "
                 "firm and this hub; cedar_constellation_edges.csv is SERVICE "
-                "(who serves whom), NEST is OWNERSHIP AND CORPORATE "
+                "(who serves whom), NEED is OWNERSHIP AND CORPORATE "
                 "AFFILIATION - the two corroborate, they do not duplicate"
                 if con_edge.get((hub_uid, nk)) else ""),
             "source_id": best["source_id"],
@@ -2381,7 +2381,7 @@ def stage_selfcheck(argv) -> int:
 # A clean table that no `codebook_master.csv` block documents at 60% column
 # overlap is INVISIBLE to `87_build_dataset_notes.py`, to `512`'s shippable
 # list and therefore to `518`'s scoreboard - it reports the collection as
-# NOT_TESTED with "0 tables", which is what NEST did on its first run.
+# NOT_TESTED with "0 tables", which is what NEED did on its first run.
 # `docs/GAMING_SOURCE_AUDIT_2026-08-26.md` is the expensive version of this:
 # the gaming collection shipped 912 of 104,412 rows because of it.
 #
@@ -2395,8 +2395,8 @@ def stage_selfcheck(argv) -> int:
 CB_FIELDS = ["dataset", "variable", "type", "units", "pct_filled", "n_rows",
              "published", "access_tier", "description", "generated"]
 
-CB_BLOCK = {"nest_enterprises.csv": "18a_nest_enterprises",
-            "nest_enterprise_relations.csv": "18b_nest_enterprise_relations"}
+CB_BLOCK = {"need_enterprises.csv": "18a_need_enterprises",
+            "need_enterprise_relations.csv": "18b_need_enterprise_relations"}
 
 CB_DESC = {
     "enterprise_id":
@@ -2406,7 +2406,7 @@ CB_DESC = {
         "503_identity check characters over two independent weightings, so a "
         "single substitution or an adjacent transposition in a transcribed id "
         "is caught. Bound to (owner hub, normalised name) in the append-only "
-        "register data/spine/cedar_nest_id_register.csv, so a rebuild reuses "
+        "register data/spine/cedar_need_id_register.csv, so a rebuild reuses "
         "it rather than re-keying the dataset. Never reused.",
     "enterprise_name": "The enterprise's name as its owner writes it, taken "
         "from the most authoritative and most recent source that named it.",
@@ -2420,7 +2420,7 @@ CB_DESC = {
     "owner_hub_cedar_uid": "The Cedar uid of the entity that owns this "
         "enterprise - a nation, an ANCSA corporation or an NHO. Always a "
         "spine entity.",
-    "cedar_uid": "The documented external join key. On a NEST row it is the "
+    "cedar_uid": "The documented external join key. On a NEED row it is the "
         "OWNER's uid, not the enterprise's: an enterprise is a sub-hub and "
         "sub-hubs are never spine entities (IDENTIFIER_STANDARD §2). The "
         "enterprise's own identity is `enterprise_id`.",
@@ -2507,7 +2507,7 @@ CB_DESC = {
         "parent_self_published_company_list | "
         "parent_declared_subsidiary_list.",
     "n_source_observations": "How many separate assertions in "
-        "nest_enterprise_relations.csv stand behind this row.",
+        "need_enterprise_relations.csv stand behind this row.",
     "n_distinct_sources": "How many distinct sources those assertions come "
         "from. One source repeated ten times is one source.",
     "first_observed_year": "The earliest year any source named this "
@@ -2518,10 +2518,10 @@ CB_DESC = {
         "nation owns. The row does not pretend it is new.",
     "constellation_edge_id": "The matching edge in "
         "cedar_constellation_edges.csv where one exists. That file records "
-        "SERVICE relationships (who serves a community); NEST records "
+        "SERVICE relationships (who serves a community); NEED records "
         "ownership and corporate affiliation. The two corroborate; they do "
         "not duplicate, and a TERO-certified firm is a constellation edge "
-        "and not a NEST row unless the nation also owns it.",
+        "and not a NEED row unless the nation also owns it.",
     "constellation_note": "Why the constellation edge is a corroboration "
         "rather than the same fact twice.",
     "evidence_human_reviewed": "Y where at least one assertion behind this "
@@ -2563,8 +2563,8 @@ CB_DESC = {
         "an ownership claim checkable rather than asserted.",
 }
 
-CB_GENERIC = ("Column of the NEST enterprise register. See "
-              "docs/NEST_BUILD_LOG.md for how it is derived.")
+CB_GENERIC = ("Column of the NEED enterprise register. See "
+              "docs/NEED_BUILD_LOG.md for how it is derived.")
 
 
 def _cb_type(vals):
@@ -2685,28 +2685,28 @@ def stage_conserve(argv) -> int:
     for h in held:
         k = "refused:" + h.get("hold_class", "UNKNOWN").lower()
         ex.setdefault(k, (h.get("hold_reason") or "")[:200])
-    add("data/staging/nest/raw_ownership_assertions", raw,
+    add("data/staging/need/raw_ownership_assertions", raw,
         [("emitted:assertion_kept_with_a_resolved_owner_and_a_named_source",
           len(kept))]
         + [(f"refused:{k.lower()}", v) for k, v in sorted(hold_groups.items())],
         ex)
 
     # 1b. THE 1070 HANDOFF, accounted separately. 583 OWNERSHIP rows were
-    #     held for NEST by the integrator; a reader has to be able to see
+    #     held for NEED by the integrator; a reader has to be able to see
     #     where each one went without re-deriving it, because a refusal that
     #     leaves no trace is indistinguishable from a row nobody noticed.
     sweep_rows = read_csv(SWEEP_1070)
     if sweep_rows:
         refused = read_csv(SWEEP_REFUSED)
-        by_reason = Counter((r.get("nest_refusal") or "")[:70] for r in refused)
+        by_reason = Counter((r.get("need_refusal") or "")[:70] for r in refused)
         ingested = len(sweep_rows) - len(refused)
-        add("data/staging/native_business_sweep_1070/held_for_nest_ownership.csv",
+        add("data/staging/native_business_sweep_1070/held_for_need_ownership.csv",
             len(sweep_rows),
-            [("emitted:ingested_into_nest_via_the_shared_clustering", ingested)]
+            [("emitted:ingested_into_need_via_the_shared_clustering", ingested)]
             + [(f"refused:{k}", v) for k, v in sorted(by_reason.items())],
-            {"emitted:ingested_into_nest_via_the_shared_clustering":
+            {"emitted:ingested_into_need_via_the_shared_clustering":
              "fed through the same (owner hub, normalised name) clustering as "
-             "every other source, so a restatement of a firm NEST already "
+             "every other source, so a restatement of a firm NEED already "
              "holds raises its observation count instead of creating a second "
              "row"})
 
@@ -2714,7 +2714,7 @@ def stage_conserve(argv) -> int:
     rc = Counter(r["relation_class"] for r in ents)
     nosrc = sum(1 for r in ents
                 if not (r["source_url"].strip() or r["source_document"].strip()))
-    add("data/clean/nest_enterprises.csv", len(ents), [
+    add("data/clean/need_enterprises.csv", len(ents), [
         ("emitted:ownership_asserted_by_the_owner_itself",
          rc.get("ownership", 0)),
         ("emitted:published_tie_that_is_NOT_ownership_relation_class_affiliation",
@@ -2727,13 +2727,13 @@ def stage_conserve(argv) -> int:
     # 3. THE RELATIONS TABLE, by evidence class - the honest picture of what
     #    this dataset rests on.
     ec = Counter(e["evidence_class"] for e in edges)
-    add("data/clean/nest_enterprise_relations.csv", len(edges),
+    add("data/clean/need_enterprise_relations.csv", len(edges),
         [("emitted:" + k, v) for k, v in sorted(ec.items())])
 
     prior = [r for r in read_csv(CONSERVATION)
-             if not (r.get("source_table") or "").split("/")[-1].startswith("nest")
-             and "staging/nest" not in (r.get("source_table") or "")
-             and "held_for_nest_ownership" not in (r.get("source_table") or "")]
+             if not (r.get("source_table") or "").split("/")[-1].startswith("need")
+             and "staging/need" not in (r.get("source_table") or "")
+             and "held_for_need_ownership" not in (r.get("source_table") or "")]
     bak = CONSERVATION.with_suffix(
         f".csv.bak_{BUILT}_pre_1072_tribally_owned_enterprises")
     if CONSERVATION.exists() and not bak.exists():
@@ -2742,7 +2742,7 @@ def stage_conserve(argv) -> int:
     for r in out:
         print(f"  {r['source_table'].split('/')[-1]:<34} {r['rows']:>6}  "
               f"{r['pct']:>6}%  {r['disposition'][:64]}")
-    print(f"  ledger {len(prior)} prior rows + {len(out)} NEST rows; "
+    print(f"  ledger {len(prior)} prior rows + {len(out)} NEED rows; "
           f"backup {bak.name}")
     return 0
 

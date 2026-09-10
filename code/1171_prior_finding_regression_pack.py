@@ -198,10 +198,10 @@ DETECTORS: list[dict] = [
 
     # ---- named bad row 1: AVCP -> Arctic Slope Regional Corporation --------
     {
-        "id": "AVCP_ATTRIBUTED_TO_ASRC_NEST",
+        "id": "AVCP_ATTRIBUTED_TO_ASRC_NEED",
         "prior_ids": ["CP-038", "CP-116"],
         "what": "AVCP Regional Housing Authority carried as an enterprise of Arctic Slope Regional Corporation",
-        "file": ("customer", "nest.csv"),
+        "file": ("customer", "need.csv"),
         "cols": ["enterprise_name", "owner_hub_name", "owner_hub_cedar_uid", "publishable"],
         "pred": lambda r: "AVCP" in up(r, "enterprise_name") and "ARCTIC SLOPE" in up(r, "owner_hub_name"),
         "clean": {"enterprise_name": "AVCP REGIONAL HOUSING AUTHORITY", "owner_hub_name": "Association of Village Council Presidents", "owner_hub_cedar_uid": "CE-00000-00", "publishable": "Y"},
@@ -334,7 +334,7 @@ DETECTORS: list[dict] = [
         "id": "ENTITY_IS_ITS_OWN_ENTERPRISE",
         "prior_ids": ["CP-118"],
         "what": "the enterprise and its owner hub fold to the same entity core (Tohono O'odham Nation owned by Tohono O'odham)",
-        "file": ("customer", "nest.csv"),
+        "file": ("customer", "need.csv"),
         "cols": ["enterprise_name", "owner_hub_name", "owner_hub_cedar_uid", "publishable"],
         "pred": lambda r: (
             bool(entity_core(r.get("enterprise_name")))

@@ -1,34 +1,41 @@
-# Methodology — NEST: Native Enterprise Structures and Ties
+# Methodology — Cedar Native Entity Enterprise Dataset (NEED)
 
 <!-- BEGIN GENERATED:IDENTITY -->
 
-**`nest` — NEST: Native Enterprise Structures and Ties.** Delivered as `dist/customer/nest.csv`: **4,798 rows × 91 columns, 7.9 MB**, built from the flagship table `data/clean/nest_enterprises.csv`. Shelf `pro`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+**`need` — Cedar Native Entity Enterprise Dataset (NEED).** Delivered as `dist/customer/need.csv`: **4,798 rows × 91 columns, 7.9 MB**, built from the flagship table `data/clean/need_enterprises.csv`. Shelf `pro`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
 
 > **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
 >
-> Everything between `<!-- BEGIN EDITORIAL:nest -->` and `<!-- END EDITORIAL:nest -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+> Everything between `<!-- BEGIN EDITORIAL:need -->` and `<!-- END EDITORIAL:need -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
 >
-> This paper is **not** the codebook. `dist/customer/nest__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+> This paper is **not** the codebook. `dist/customer/need__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
 >
 > Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
 
 <!-- END GENERATED:IDENTITY -->
 
-<!-- BEGIN EDITORIAL:nest -->
-**`nest`. One delivered file, `nest.csv` — 5,820 rows × 88 columns, built from
-`nest_enterprises.csv` (5,820 × 68) with `nest_entity_dual_role.csv` folded in
-one-to-one and `nest_enterprise_relations.csv` (8,690 rows) counted rather than
+<!-- BEGIN EDITORIAL:need -->
+**Renamed 2026-09-10.** This paper was written on 2026-09-02 for the same
+collection under its first name, NEST — "NEST: Native Enterprise Structures
+and Ties". The collection id, the three tables, the delivered file and two
+columns moved to `need`; the issued enterprise ids (`CEDAR-NEST-nnnnnn-CC`)
+and edge ids (`NESTREL-`) did not, because an identifier is permanent. The
+full account is `docs/NEED_RENAME_2026-09-10.md`.
+
+**`need`. One delivered file, `need.csv` — 5,820 rows × 88 columns, built from
+`need_enterprises.csv` (5,820 × 68) with `need_entity_dual_role.csv` folded in
+one-to-one and `need_enterprise_relations.csv` (8,690 rows) counted rather than
 joined.** [measured 2026-09-02]
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from
 where, how the rows were made, how entities were attributed, what was decided
 and why, what the known limits are, and how often it has to be re-pulled. It is
 not the product copy (`docs/datasets/_descriptors.json`) and not the codebook
-(`dist/customer/nest__CODEBOOK.md`, which carries the grain, the folded-in
+(`dist/customer/need__CODEBOOK.md`, which carries the grain, the folded-in
 tables and the per-column fill rates and is not repeated here).*
 
 **A note on the figures.** `[measured 2026-09-02]` means the figure was
-re-counted from the delivered file, `dist/customer/nest.csv`, or from the named
+re-counted from the delivered file, `dist/customer/need.csv`, or from the named
 staging or spine artefact, on 2026-09-02, reading the whole file rather than
 sampling. `[from the record — <doc>]` means it came from a build log, a
 docstring or an ADR without independent measurement, usually because it
@@ -37,7 +44,7 @@ current count. Where a doc and the data disagreed, **the data won**; the
 disagreements are listed at the end.
 
 **Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated
-2026-09-02: `nest` READY, 2 tables, 2/2 grain, 2/2 keys, duplicates clean, 0
+2026-09-02: `need` READY, 2 tables, 2/2 grain, 2/2 keys, duplicates clean, 0
 aggregation-unsafe, rebuild declared. The scoreboard counts 2 tables; the
 architecture map counts 3, and that is in the stale-claims list.]
 
@@ -45,7 +52,7 @@ architecture map counts 3, and that is in the stale-claims list.]
 
 ## The one thing to understand before any number in this dataset
 
-**Most rows in NEST do not say that anybody owns anything.** The name commits
+**Most rows in NEED do not say that anybody owns anything.** The name commits
 the dataset to two relations — *Structures **and** Ties* — and after the
 2026-09-02 ingest of the owner's own enterprise file the ties are the majority:
 
@@ -60,7 +67,7 @@ The mechanism is one column over. `relationship` reads the literal string
 `unspecified` on **3,187 rows** [measured], because the source those rows come
 from — `native_entity_enterprise_dataset_v6_geocoded.csv` — has 31 columns and
 **not one of them states a relationship word.** No source said "subsidiary", so
-NEST does not say it. Everything else in the vocabulary is somebody's stated
+NEED does not say it. Everything else in the vocabulary is somebody's stated
 word:
 
 | `relationship` | rows | class |
@@ -81,7 +88,7 @@ word:
 > ⚠ **`assertion_class` reads `OWNERSHIP` on all 4,798 rows and is not the
 > column that answers this question.** [measured] It records which staging lane
 > a row came down — the `1070` sweep split its harvest into `OWNERSHIP` and
-> `RELATIONSHIP` and NEST took the ownership lane — and it has been constant
+> `RELATIONSHIP` and NEED took the ownership lane — and it has been constant
 > since. Filtering on it returns the whole table. **`relation_class` is the
 > column that says what was claimed.**
 
@@ -93,7 +100,7 @@ happened once, at scale, inside this build.** The first ingest published
 `canon_rel(x.get("relationship") or "subsidiary")`, so a blank is coerced to
 `subsidiary` and lands as `relation_class = ownership`. Invariant **W3** in
 `1133` caught it; the fix was to emit the literal word `unspecified` rather than
-a blank. [from the record — `docs/NEST_BUILD_LOG.md`, ADR-034] Today
+a blank. [from the record — `docs/NEED_BUILD_LOG.md`, ADR-034] Today
 `relationship = unspecified` and `relation_class = ownership` co-occur on **zero
 rows** [measured]. The two columns are coherent in the other direction too: 3,187
 of the 3,286 affiliation rows are `unspecified`, and the other 99 carry a stated
@@ -108,19 +115,19 @@ lands in `relationship_as_recorded` (34 distinct values against `relationship`'s
 10) and is classed `affiliation`, the weaker reading, because guessing upward is
 the direction that fabricates.**
 
-**So the honest one-line reading of NEST is:** 1,512 rows where a named source
+**So the honest one-line reading of NEED is:** 1,512 rows where a named source
 asserted that a Native nation, ANCSA corporation or NHO owns a named firm, plus
 3,286 rows where a named source placed a firm under a Native owner without
 saying on what terms. Both are useful. They are not the same fact.
 
 ### And the second thing: this is a structure table, not a money table
 
-**There is no money column in NEST.** Not one of the 91 delivered columns holds
+**There is no money column in NEED.** Not one of the 91 delivered columns holds
 a dollar figure [measured — the numeric columns are `hierarchy_level`,
 `n_source_observations`, `n_distinct_sources`, `n_auto_ruled_observations`,
 `first_observed_year`, `last_observed_year`, `ownership_percent_stated`,
-`fpds_declared_parent_observations`, `n_nest_enterprise_relations` and the
-dual-role counts]. **`nest` does not appear anywhere in
+`fpds_declared_parent_observations`, `n_need_enterprise_relations` and the
+dual-role counts]. **`need` does not appear anywhere in
 `docs/MONEY_TOTALLING_RULES.md`** [measured 2026-09-02 — grepped; every hit is
 the substring inside the word *honest*]. That absence is correct, and §5 says
 what follows from it.
@@ -131,7 +138,7 @@ what follows from it.
 
 Every input was already on this machine when the build ran. **`1072`, `1073`,
 `1130` and `1133` make zero network requests** [from the record —
-`docs/NEST_BUILD_LOG.md` and each script's docstring]. That is
+`docs/NEED_BUILD_LOG.md` and each script's docstring]. That is
 `docs/PULL_DISCIPLINE.md` tier 1 — re-read what you own before you pull — which
 is why the acquisition story is mostly about *earlier* passes.
 
@@ -148,8 +155,8 @@ Seven source families reach the delivered table and each is visible on the row:
 | `shard-H` | 100 | 100 | NHO parent-declared lists with SBA DSBS identifiers |
 | eight `TBD-*` registries | 6 | 91 | business-registry subsidiary directories |
 
-[measured 2026-09-02 — rows from `dist/customer/nest.csv`, assertions from
-`data/clean/nest_enterprise_relations.csv`]
+[measured 2026-09-02 — rows from `dist/customer/need.csv`, assertions from
+`data/clean/need_enterprise_relations.csv`]
 
 The ranking inverts between the two grains, and that is the AS 45.55.139 source
 working as designed: one filer names the same subsidiary in every year it files,
@@ -180,7 +187,7 @@ disk. [from the record — `docs/ANCSA_PORTAL_BUILD_LOG.md`]
 `data/raw/external/ancsa_portal_v3/` and 166 regional-corporation texts in
 `data/interim/ancsa_txt/`. Shard E had read the regional half; **nobody had read
 the village half.** Per-document outcomes, from
-`data/staging/nest/ancsa_mine_log.csv` [measured 2026-09-02]:
+`data/staging/need/ancsa_mine_log.csv` [measured 2026-09-02]:
 
 | outcome | documents |
 |---|---:|
@@ -193,7 +200,7 @@ the village half.** Per-document outcomes, from
 Yield: **2,168 ownership assertions, 36 distinct parents, 540 distinct
 child-name strings** (512 once normalised), split `wholly_owned` 1,850 ·
 `majority_owned` 235 · `joint_venture` 83 [measured 2026-09-02 —
-`data/staging/nest/ancsa_consolidation_edges.jsonl`].
+`data/staging/need/ancsa_consolidation_edges.jsonl`].
 
 **`NOTE_NAMES_NONE` is a finding, not a miss.** Afognak's 2017 note reads
 *"...and its majority-owned subsidiaries (collectively, the Corporation), most
@@ -215,7 +222,7 @@ lowercase connector broke the name run, so `ENTITY_MATCH_RULES` rule 1 — **a n
 whose whole distinctive token set is one generic word is not a firm** — is
 applied at *extraction*, not only at matching; and page furniture bleeds in
 (`1 ANNUAL REPORT The Kuskokwim, Corporation` is a running header). [from the
-record — `docs/NEST_BUILD_LOG.md`]
+record — `docs/NEED_BUILD_LOG.md`]
 
 **The anti-fabrication rule here is absolute: every emitted name is a verbatim
 substring of the source document by construction, and a name that does not
@@ -252,7 +259,7 @@ mining task.**
         native_entity_enterprise_dataset_v6_geocoded.csv
 
 **18,110 rows, 16,632 distinct normalised enterprise names, 658 distinct
-parents** [from the record — `docs/NEST_BUILD_LOG.md`, `1130`], built by the
+parents** [from the record — `docs/NEED_BUILD_LOG.md`, `1130`], built by the
 owner on this machine months earlier and the largest `ON_DISK_NOT_PROMOTED`
 asset in the project. It supplies **3,189 of the 4,798 delivered rows (66.5%)**
 [measured], which makes it by a distance the largest single contributor.
@@ -264,8 +271,8 @@ columns only** — `hq_city`, `hq_state`, `hq_zip`, `hq_county_geoid` — and in
 every one v6 is the fix. **v5's `hq_state` is not a state:** on 11,390 of its
 16,638 populated cells it is a 12-character UEI, and on 11,935 it is *this row's
 own* `enterprise_uei`. v6 carries a two-letter code on all 14,629 and zero UEIs.
-[from the record — `docs/NEST_BUILD_LOG.md` `1130` §1; preserved as a measurement
-in `data/staging/nest_owner_v6/version_comparison.csv`, with invariants I13a/I13b
+[from the record — `docs/NEED_BUILD_LOG.md` `1130` §1; preserved as a measurement
+in `data/staging/need_owner_v6/version_comparison.csv`, with invariants I13a/I13b
 exiting 1 if either half stops being true] **v6 is authoritative; v5 must not be
 read for geography.**
 
@@ -273,14 +280,14 @@ read for geography.**
 `data/spine/cedar_identifier_ledger.state` holds this row's own identifier on
 **12,127** rows — the identical count to `hq_state` in the owner's v1, v2 and v3.
 Two counts agreeing to the row is not coincidence: Cedar's identifier ledger was
-built from a pre-v6 vintage and inherited the corruption. The NEST log calls it a
+built from a pre-v6 vintage and inherited the corruption. The NEED log calls it a
 **column shift**; `docs/KNOWN_ISSUES.md` Lesson 3 subsequently measured the shift
 width at **zero** and named the real cause —
 `sam_extracts/build_master_entity_registry.py:126`, a pandas `agg` whose
 missing-column fallback substitutes `awardee_uei` for
 `recipient_location_state_code`. **A shift is a parser bug you fix once; a silent
 column substitution produces a full column of plausible values and recurs on the
-next renamed column.** The NEST log does not yet carry the correction.
+next renamed column.** The NEED log does not yet carry the correction.
 
 **Why it is an INPUT and not an append.** `1130` measured 4,786 net-new
 enterprises and **deliberately did not append them**, because `1072 build` is a
@@ -289,11 +296,11 @@ larger row count and looking like progress. This is the FERC collision —
 `code/133` rebuilding `ferc_docket_filings.csv` reverted `code/168`'s in-place
 entity links four times in one day — and it is the standing hazard in
 `docs/START_HERE.md`. **ADR-034** settles it: the file becomes **source 7** of
-`1072.load_sources()`, staged as `data/staging/nest/owner_v6_edges.jsonl` by
+`1072.load_sources()`, staged as `data/staging/need/owner_v6_edges.jsonl` by
 `1133 apply` (**5,791 edges** [measured]), so the rows are re-derived on every
 rebuild and their ids stay bound by the append-only register. **`1133` owns the
 admission decisions; `1072` owns the clustering, the guards and the ids; `1133`
-writes not one byte of `nest_enterprises.csv`.**
+writes not one byte of `need_enterprises.csv`.**
 
 **Source 7 is loud when it is absent.** `load_sources()` prints a named warning
 and records `_owner_v6_INPUT_ABSENT` in the provenance counter if the staged file
@@ -334,7 +341,7 @@ is missing or empty, because an absence must never print as a clean result.
 ### 1.4 What was deliberately not used
 
 - **`cedar_identifier_ledger_final.csv` was refused wholesale as an identifier
-  source.** Nothing in NEST is inherited from it. It carries **227,540 rows worth
+  source.** Nothing in NEED is inherited from it. It carries **227,540 rows worth
   $45,932,912,319** on quarantined methods with no exclusion recorded —
   `uei_exact` 172,338 / $38,191,057,346 + `cage_exact` 14,149 / $7,252,015,101 +
   `parent_uei` 41,055 / $489,839,872, measured disjointly across all three legs
@@ -349,17 +356,17 @@ is missing or empty, because an absence must never print as a clean result.
 - **D&B-derived recipient addresses are not used.** `IDENTIFIER_STANDARD` §4
   forbids their bulk dissemination and they attach to every base award dated
   before 2022-04-04. A licence restriction, distinct from terms and from consent,
-  and the reason NEST carries city and state and **no street address anywhere**.
+  and the reason NEED carries city and state and **no street address anywhere**.
 - **`cedar_constellation_edges.csv` is read and never written.** ADR-014's
   constellation records **service** relationships — who serves a community,
-  including `registered_with` for a TERO-certified firm. NEST records ownership.
-  A TERO-certified firm is a constellation edge and is **not** a NEST row unless
-  the nation also owns it; where a NEST enterprise does match one, its `edge_id`
+  including `registered_with` for a TERO-certified firm. NEED records ownership.
+  A TERO-certified firm is a constellation edge and is **not** a NEED row unless
+  the nation also owns it; where a NEED enterprise does match one, its `edge_id`
   rides in `constellation_edge_id` so the corroboration is visible instead of the
   relationship being rebuilt under a second name — **41 rows** [measured]. **The
   near-zero overlap is the evidence that the scope split is real:** the
   constellation's unkeyed from-sides are clinics, schools and service
-  organisations; NEST's are operating companies. **NEST does not close the
+  organisations; NEED's are operating companies. **NEED does not close the
   constellation's name-only backlog**, and a pass that tries should know that
   before it starts.
 - **`native_owned_businesses.csv` is a different relation and the two must never
@@ -371,7 +378,7 @@ is missing or empty, because an absence must never print as a clean result.
 
 ### 1.5 Terms of use, and the ruling that changed the answer mid-build
 
-Sources marked `TERMS_STATED_RESTRICTIVE` were excluded from NEST **by every
+Sources marked `TERMS_STATED_RESTRICTIVE` were excluded from NEED **by every
 route** — the publisher's page, its WordPress media API, the Wayback Machine, and
 any harmonised derivative of data an earlier pass already fetched — matched on
 both the asserting parent's name and the source host. The guard is
@@ -411,7 +418,7 @@ from their public role** — the business row may be harvested, `owner_name_raw`
 `email` / `phone` / `address_raw` may not be published; EMMA/MSRB with CUSIP
 Global Services as a second licensor; and Casino City and D-U-N-S.
 
-**NEST's guard predates the ruling and still enforces the old answer** — 414 held
+**NEED's guard predates the ruling and still enforces the old answer** — 414 held
 rows on a refusal that has been lifted. §4.2.
 
 ---
@@ -424,7 +431,7 @@ rows on a refusal that has been lifted. §4.2.
 1. **`code/1031_ancsa_45_55_139_annual_reports.py`** — pulled the AS 45.55.139
    PDFs from the STAR portal into `data/raw/external/ancsa_portal_v3/` and
    extracted a text layer with PyMuPDF plus per-page tesseract at 300 dpi. **The
-   only network-bearing step in the chain**, and it ran before NEST existed.
+   only network-bearing step in the chain**, and it ran before NEED existed.
 2. **`code/1073_ancsa_consolidation_subsidiaries.py`** — the WORKSTREAM
    NBOA-EXPAND prototype that established the *Principles of Consolidation*
    route, the `wholly_owned` / `majority_owned` / `equity_or_jv` gradient, and the
@@ -435,7 +442,7 @@ rows on a refusal that has been lifted. §4.2.
 3. **`code/1070_anc_nho_business_sweep.py`** — swept 822 entities (all 191 ANCs,
    all 210 NHOs, 365 tribal governments `701` never reached, all 56 intertribal
    organisations), staged 1,106 rows in the 58-column `native_owned_businesses`
-   schema, and **held the 583 OWNERSHIP rows for NEST** while the 523
+   schema, and **held the 583 OWNERSHIP rows for NEED** while the 523
    `RELATIONSHIP` rows went to the business file. §2.1.
 4. **`code/1072_tribally_owned_enterprises.py`** — the builder.
    `mine | assemble | build | codebook | conserve | verify | selfcheck`. `mine`
@@ -446,29 +453,29 @@ rows on a refusal that has been lifted. §4.2.
    on `(owner_hub_cedar_uid, enterprise_name_normalized)`, mints an
    `enterprise_id` per cluster from the append-only register, and writes both
    clean tables.
-5. **`code/1130_nest_owner_v6_reconcile.py`** — `versions | build | codebook |
+5. **`code/1130_need_owner_v6_reconcile.py`** — `versions | build | codebook |
    verify | selftest`. Established that v6 is authoritative, crosswalked the
    owner's 658 parents onto Cedar handles, and built
-   **`nest_entity_dual_role.csv`** (ADR-032). **It mints zero enterprise ids and
-   writes nothing into `nest_enterprises.csv`**; invariant **I6** asserts it
+   **`need_entity_dual_role.csv`** (ADR-032). **It mints zero enterprise ids and
+   writes nothing into `need_enterprises.csv`**; invariant **I6** asserts it
    appears on 0 rows of the id register.
-6. **`code/1133_nest_owner_v6_builder_input.py`** — `report | apply | verify |
+6. **`code/1133_need_owner_v6_builder_input.py`** — `report | apply | verify |
    selftest`. Turns the owner's file into source 7. Admission decisions in §4.
    **Zero ids minted.**
-7. **`code/1102_nest_corroboration_adjudication.py`** — **the in-place enricher,
+7. **`code/1102_need_corroboration_adjudication.py`** — **the in-place enricher,
    and it runs LAST.** Adds the FPDS corroboration family (§3.4), the
    duplicate-name-variant flags, and the Chugach adjudication.
    `code/1098_entity_rel_counterparty.py` and
    `code/1081_stale_tail_dated_facts.py` also touch the file in place [from the
    record — `docs/ARCHITECTURE.md` line 374 lists all four writers].
-8. **`code/1137_customer_dataset_combine.py`** — builds `dist/customer/nest.csv`
-   by folding `nest_entity_dual_role.csv` in one-to-one on `cedar_uid` (22
-   columns) and **counting** `nest_enterprise_relations.csv` rather than joining
+8. **`code/1137_customer_dataset_combine.py`** — builds `dist/customer/need.csv`
+   by folding `need_entity_dual_role.csv` in one-to-one on `cedar_uid` (22
+   columns) and **counting** `need_enterprise_relations.csv` rather than joining
    it (one column). 68 + 22 + 1 = the 91 delivered columns [measured].
 
 **Shared files touched additively, each with a backup:** `cedar_ids.py` (one
 prefix), `cedar_domain.py` (one `PROMOTED_TABLE_PRODUCERS` entry), `500`, `512`
-(`GRAIN_NEST`, `GRAIN_NEST_DUAL`), `518`, `526`,
+(`GRAIN_NEED`, `GRAIN_NEED_DUAL`), `518`, `526`,
 `docs/datasets/_descriptors.json`, and `codebook_master.csv` (**appended** 81 + 27
 rows, never rewritten). **Nothing was written to the spine's entity register, to
 `cedar_constellation_edges.csv`, or to `native_owned_businesses.csv`.**
@@ -477,22 +484,22 @@ rows, never rewritten). **Nothing was written to the spine's entity register, to
 
 583 ownership rows arrived from the sweep. A plain append would have been wrong
 on a third of them: the integrator measured **170 of the 583 already present in
-NEST by normalised name** before splitting them, and 265 come from the *same* 358
+NEED by normalised name** before splitting them, and 265 come from the *same* 358
 audited reports `1072` mines itself. So they are fed through the same clustering
-as every other source, and a restatement of a firm NEST already holds raises that
+as every other source, and a restatement of a firm NEED already holds raises that
 enterprise's `n_source_observations` instead of creating a second row.
 
 ```
-held for NEST                                        583
+held for NEED                                        583
   refused: unreviewed HTML heading/anchor scrape     229
   refused: shareholder-owned, not corporation-owned   57
   ingested                                           297
-    merged onto an enterprise NEST already held      167
+    merged onto an enterprise NEED already held      167
     net new enterprises                              128
 ```
 
-[from the record — `docs/NEST_BUILD_LOG.md`. The two refusal counts reproduce
-exactly against `data/staging/nest/sweep_1070_refused.csv`, 286 rows, and the 128
+[from the record — `docs/NEED_BUILD_LOG.md`. The two refusal counts reproduce
+exactly against `data/staging/need/sweep_1070_refused.csv`, 286 rows, and the 128
 net-new reproduces as `source_id = SWEEP1070` on 128 delivered rows [measured]]
 
 **Both refusals rest on the staged file's OWN declared caveat, not on a judgement
@@ -514,7 +521,7 @@ and has not fired: USET lists *Choctaw Fresh Produce*, which **is** tribally
 owned, by **Mississippi Choctaw** and not by USET, the keyed authority, and the
 hub must be the owning nation or the row does not exist.
 
-**Every refusal keeps its full 58 staged columns plus a `nest_refusal` sentence**,
+**Every refusal keeps its full 58 staged columns plus a `need_refusal` sentence**,
 so any of it can be reversed without re-harvesting. **A refusal that leaves no
 trace is indistinguishable from a row nobody noticed.**
 
@@ -523,14 +530,14 @@ trace is indistinguishable from a row nobody noticed.**
 ```
 py -3 code/1072_tribally_owned_enterprises.py verify      -> exit 0, 8 invariants
 py -3 code/1072_tribally_owned_enterprises.py selfcheck   -> 8/8 PASS
-py -3 code/1133_nest_owner_v6_builder_input.py verify     -> exit 0, 6 invariants
-py -3 code/1133_nest_owner_v6_builder_input.py selftest   -> 5/5 fixtures FIRE
-py -3 code/1130_nest_owner_v6_reconcile.py verify         -> exit 0, 31 invariants
-py -3 code/1102_nest_corroboration_adjudication.py verify -> 0 breaches
+py -3 code/1133_need_owner_v6_builder_input.py verify     -> exit 0, 6 invariants
+py -3 code/1133_need_owner_v6_builder_input.py selftest   -> 5/5 fixtures FIRE
+py -3 code/1130_need_owner_v6_reconcile.py verify         -> exit 0, 31 invariants
+py -3 code/1102_need_corroboration_adjudication.py verify -> 0 breaches
 py -3 code/293_lint_bug_classes.py                        -> 0 findings in 1072_*, 1130_*
 ```
 
-[from the record — `docs/NEST_BUILD_LOG.md`]
+[from the record — `docs/NEED_BUILD_LOG.md`]
 
 **Six of `1072`'s eight invariants are proved to FIRE** by injecting the
 violation into a copy of the live file, asserting exit 1 *and* that the named
@@ -559,13 +566,13 @@ success.**
 ### 2.3 Row conservation
 
 ```
-edges kept by assemble   data/staging/nest/ownership_edges_staged.jsonl   7,976   [measured]
-edges held by assemble   data/staging/nest/held_rows.csv                  1,712   [measured]
+edges kept by assemble   data/staging/need/ownership_edges_staged.jsonl   7,976   [measured]
+edges held by assemble   data/staging/need/held_rows.csv                  1,712   [measured]
                                                                         -------
                          raw assertions reaching assemble                 9,688
 
-relations rows built     data/clean/nest_enterprise_relations.csv         7,559   [measured]
-enterprises built        data/clean/nest_enterprises.csv                  4,798   [measured]
+relations rows built     data/clean/need_enterprise_relations.csv         7,559   [measured]
+enterprises built        data/clean/need_enterprises.csv                  4,798   [measured]
 sum of n_source_observations across the delivered file                    7,559   [measured]
 ```
 
@@ -575,7 +582,7 @@ reconcilable. The 417-row gap between staged edges and relations rows is collaps
 within `(enterprise, source, document, edition)` — the relations table's declared
 grain [from the record — `docs/DATASET_CONTRACTS.md`].
 
-On the owner's file, from `data/staging/nest/owner_v6_conservation.csv` [measured
+On the owner's file, from `data/staging/need/owner_v6_conservation.csv` [measured
 2026-09-02]:
 
 ```
@@ -592,7 +599,7 @@ owner v3   19,846 rows in   19,846 accounted   0 unaccounted
 
 ## 3. How entities were attributed
 
-### 3.0 NEST does not carry a column called `attribution_method`, and that is deliberate
+### 3.0 NEED does not carry a column called `attribution_method`, and that is deliberate
 
 `docs/schema/attribution_method_vocabulary.json` states the problem in its own
 `why` field: *"`attribution_method` is three different columns sharing a name — a
@@ -605,20 +612,20 @@ gated against its OWN vocabulary."*
 | **an evidence provenance** | `cedar_assertions.csv`, `cedar_identifier_ledger.csv` | `elijah_ruling`, `web_verified`, `unmatched` |
 | **a name-match algorithm** | `native_entity_lobbying_disclosures.csv` | `core_token_set`, `exact_normalized_skeleton`, `contains_canonical` |
 
-**None of the three appears in NEST under that name.** `attribution_method` is
-not among the 91 delivered columns, nor the 68 of `nest_enterprises.csv`, nor the
-25 of `nest_enterprise_relations.csv`, nor the 27 of `nest_entity_dual_role.csv`
-[measured 2026-09-02]. NEST splits the senses into separately named columns:
+**None of the three appears in NEED under that name.** `attribution_method` is
+not among the 91 delivered columns, nor the 68 of `need_enterprises.csv`, nor the
+25 of `need_enterprise_relations.csv`, nor the 27 of `need_entity_dual_role.csv`
+[measured 2026-09-02]. NEED splits the senses into separately named columns:
 **`hub_resolution_method`** carries the *join method* (how the row reached its
 owner hub), **`evidence_class`** carries the *evidence provenance* (what kind of
 document asserted it) — both in §3.2 — and ten `*_basis` / `*_note` columns carry,
 per field, the sentence saying which lookup answered.
 
-**Where the third sense does bear on NEST it arrives from outside, on the owner's
+**Where the third sense does bear on NEED it arrives from outside, on the owner's
 file, and it arrives as a NEGATIVE.** `attribution_method = unmatched` on 8,927 of
 his v6 rows is his resolver reporting that it could **not** attribute the firm to
 any Native entity — the `cedar_identifier_ledger.csv` sense of the word, an
-evidence provenance, where `unmatched` carries 9,569 rows. §4.3 covers what NEST
+evidence provenance, where `unmatched` carries 9,569 rows. §4.3 covers what NEED
 did with them.
 
 ### 3.1 `enterprise_id` is a sub-hub id, and an enterprise is never a spine entity
@@ -642,7 +649,7 @@ of the facts are true. The implemented sub-hubs are `facility_id`, `property_id`
 `np_ein_entity_hub`, the FERC docket filer layer, `CEDAR-PLACE-` (ADR-030) — and,
 since 2026-09-02, `CEDAR-NEST-`.
 
-**ADR-020 settles what that means for joins.** `cedar_nest_id_register.csv` is
+**ADR-020 settles what that means for joins.** `cedar_need_id_register.csv` is
 **the enterprise level of the existing sub-hub layer, exactly as `facility_id` is
 the facility level. It is not a parallel entity space, it may never be joined as
 if it were one, and a `CEDAR-NEST-` id may not appear where a `cedar_uid` is
@@ -793,7 +800,7 @@ anything at all.
 ### 3.4 Corroboration: a fourth evidence family that was already on disk
 
 `docs/ASSERTION_LAYER.md` measured that every fact in Cedar rests on exactly one
-source. NEST is one of the few places that is partly untrue:
+source. NEED is one of the few places that is partly untrue:
 
 | `n_distinct_sources` | 1 | 2 | 3 | 4 | 5 |
 |---|---:|---:|---:|---:|---:|
@@ -802,7 +809,7 @@ source. NEST is one of the few places that is partly untrue:
 [measured 2026-09-02 — **760 of 4,798 (15.8%) rest on more than one source**]
 
 **But a source count is not a family count, and `docs/KNOWN_ISSUES.md` §2 says
-so:** *"`nest_enterprises.n_distinct_sources = 438` is not 438 corroborations…
+so:** *"`need_enterprises.n_distinct_sources = 438` is not 438 corroborations…
 The gap is one filer's AS 45.55.139 report across several fiscal years: three
 documents, one observer. A buyer can reasonably read 438 as corroboration. It
 should ship beside an `n_independent_families` column."* **That column does not
@@ -817,7 +824,7 @@ government**, made by the **child** rather than the parent and therefore
 independent of both the audited filing and the corporate site. Rule 11's measured
 **20-observation ownership floor** applies; below it an edge is a joint venture.
 **The test is not "the names match"** but *"the declared parent resolves, through
-the identifier ledger, to the owner hub NEST already asserts"* — two independent
+the identifier ledger, to the owner hub NEED already asserts"* — two independent
 parties agreeing about the **owner**.
 
 | `fpds_parent_corroboration` | rows | rung 1, published UEI | rung 2, exact normalised name |
@@ -830,20 +837,20 @@ parties agreeing about the **owner**.
 
 [measured 2026-09-02]
 
-**The contradictions are mostly the LEDGER's defect, not NEST's.** At the
+**The contradictions are mostly the LEDGER's defect, not NEED's.** At the
 pre-ingest count of 8, six resolved to `AKNF-INPTAS-00-ARCSLO`, the **village
 government**, which rule 2 forbids — five Bowhead/UIC rows plus Rockford and
-UMIAQ — and two were collisions on the tokens `Eagle` and `Vista`. **NEST was on
+UMIAQ — and two were collisions on the tokens `Eagle` and `Vista`. **NEED was on
 the correct side of 6 of 8.** Two stayed open and neither side was repointed:
-`Nisga'a Tek LLC` (NEST Tlingit & Haida vs Goldbelt, 254 observations) and
-`Broadleaf, Inc` (NEST The Hawai'i Pacific Foundation vs ASRC, 325), in
-`review/nest_fpds_parent_contradictions_2026-09-02.csv`. [from the record —
+`Nisga'a Tek LLC` (NEED Tlingit & Haida vs Goldbelt, 254 observations) and
+`Broadleaf, Inc` (NEED The Hawai'i Pacific Foundation vs ASRC, 325), in
+`review/need_fpds_parent_contradictions_2026-09-02.csv`. [from the record —
 `docs/ENTITY_LAYER_DEEPENING_2026-09-02.md` §3] **The 22 in the delivered file
 have not been re-triaged at the new row count** — a limit, not a finding.
 
 ### 3.5 The conflict register, and why `relationship` fuses three axes
 
-**This is the first thing in NEST that *can* disagree, and getting the count
+**This is the first thing in NEED that *can* disagree, and getting the count
 right took three versions:**
 
 | version | reported | what it was actually measuring |
@@ -852,7 +859,7 @@ right took three versions:**
 | v2 | 23 conflicts | 21 were Calista's `wholly_owned` vs `operating_company` — **a SHARE and a ROLE**, which cannot disagree, because a wholly-owned company is very often an operating one |
 | v3 | **2 conflicts** | two values on the *same* axis |
 
-[from the record — `docs/NEST_BUILD_LOG.md`]
+[from the record — `docs/NEED_BUILD_LOG.md`]
 
 **The modelling observation is the durable part: `relationship` carries three
 orthogonal axes in one column.** `wholly_owned` / `majority_owned` state the
@@ -889,16 +896,16 @@ rival claim, it is the owner's v6 file stating no relationship word at all. §6.
 > *"ANCs and NHOs are themselves entities, but they're also enterprises too."*
 > — the owner, 2026-09-02
 
-He is right and NEST's model was wrong: an ANCSA corporation was only ever an
+He is right and NEED's model was wrong: an ANCSA corporation was only ever an
 `owner_hub_cedar_uid`, a hub that owns. **It is also a corporation that trades.**
 
-**The obvious fix is wrong.** Adding the corporation to `nest_enterprises.csv` as
+**The obvious fix is wrong.** Adding the corporation to `need_enterprises.csv` as
 a row hubbed on itself breaks the key and makes a hub its own subsidiary — the
 exact thing `1072` already refuses after `The Eyak Corporation` and `Coushatta`.
 **ADR-032: the second role is RECORDED, not duplicated.**
-`data/clean/nest_entity_dual_role.csv`, one row per entity keyed on `cedar_uid`,
-joined to `nest_enterprises` on `owner_hub_cedar_uid`. **The register keeps ONE
-row for the entity; NEST keeps ZERO rows for it.** Invariant **I12** holds the
+`data/clean/need_entity_dual_role.csv`, one row per entity keyed on `cedar_uid`,
+joined to `need_enterprises` on `owner_hub_cedar_uid`. **The register keeps ONE
+row for the entity; NEED keeps ZERO rows for it.** Invariant **I12** holds the
 no-self-subsidiary line.
 
 **358 entities carry a dual role** — `REGISTER_ENTITY_AND_ENTERPRISE` 292 ·
@@ -926,7 +933,7 @@ reaching NHOs, becomes only those two, or loses R3. [from the record — ADR-032
 **In the delivered file the join is smaller than 358 suggests.** The dual-role
 columns are populated on **1,701 of 4,798 rows (35.5%), covering 139 of the 472
 owner hubs** [measured]; the other 219 dual-role entities are register entities
-that are not NEST owner hubs. **A consumer asking "what does this ANC own" reads
+that are not NEED owner hubs. **A consumer asking "what does this ANC own" reads
 the enterprise rows; asking "does this ANC itself sell" reads the dual-role
 block. Neither question is answered by a row that pretends to be the other.**
 
@@ -939,7 +946,7 @@ of what was declined. **Nothing was deleted.**
 
 ### 4.1 The three hold classes inside the builder — 1,712 rows
 
-`data/staging/nest/held_rows.csv` [measured 2026-09-02]: `ANCSA_VILLAGE_GOVERNMENT`
+`data/staging/need/held_rows.csv` [measured 2026-09-02]: `ANCSA_VILLAGE_GOVERNMENT`
 **1,281** · `TERMS_STATED_RESTRICTIVE` **414** · `HUB_UNRESOLVED` **17**.
 
 **The 17 unresolved hubs are honest residue and none was forced.** Named in the
@@ -958,7 +965,7 @@ Self-Governance.**
 The original build refused **84 assertions** from `ANC_TRIBE_LOOKUP` on
 `TERMS_STATED_RESTRICTIVE`: **NANA Regional Corporation 43, Chickasaw Nation 24,
 Forest County Potawatomi 9, Yakama Nation 8** [from the record —
-`docs/NEST_BUILD_LOG.md`]. The count reproduces: **84 rows of `held_rows.csv`
+`docs/NEED_BUILD_LOG.md`]. The count reproduces: **84 rows of `held_rows.csv`
 carry `source_id = ANC_TRIBE_LOOKUP` and a `TERMS_STATED_RESTRICTIVE` hold**
 [measured]. Source 7 brought **330 more**, for **414** [measured]; the Akima
 block alone — `akima.com/our-company/` — is 52 of them.
@@ -979,16 +986,16 @@ touch still bind here.
 
 **The task that commissioned the ingest described them that way. They were
 measured instead, and they are four different things.**
-`data/staging/nest/owner_v6_refused.csv`, 12,319 rows in nine named dispositions
+`data/staging/need/owner_v6_refused.csv`, 12,319 rows in nine named dispositions
 [measured 2026-09-02]:
 
 | refusal | rows | what the owner's own file says |
 |---|---:|---|
 | `OWNER_FILE_SAYS_UNMATCHED` | **8,927** | `attribution_method = unmatched`, `data_sources = master_entity_registry`, `verification_source` **blank on all 8,927** |
 | `SBA_CERTIFIED_BUT_NO_OWNER_NAMED` | **3,140** | `parent_entity_type = TRIBAL_ENTITY_UNCROSSWALKED_SBA` |
-| `UEI_ALREADY_HELD_BY_NEST_OTHER_HUB` | 172 | §4.5 |
+| `UEI_ALREADY_HELD_BY_NEED_OTHER_HUB` | 172 | §4.5 |
 | `PARENT_UNRESOLVED_UNRESOLVED_NOT_IN_REGISTER` | 26 | the parent handle is in no Cedar register |
-| `UEI_ALREADY_HELD_BY_NEST_SAME_HUB` | 20 | §4.5 |
+| `UEI_ALREADY_HELD_BY_NEED_SAME_HUB` | 20 | §4.5 |
 | `NO_TRIBE_ID_ON_THE_ROW` | 17 | 16 AIHEC tribal colleges + 1 tribal-press row |
 | `PARENT_UNRESOLVED_UNRESOLVED_AMBIGUOUS` | 12 | the handle resolves to more than one entity |
 | `BLANK_ENTERPRISE_NAME` | 4 | no name to key on |
@@ -1007,14 +1014,14 @@ of 8,927 rows and would publish natural persons into a business dataset. **This 
 `START_HERE` §1b in a third vocabulary: `unmatched` is a NEGATIVE result.**
 Inheriting the row while dropping its sign is exactly how 317 `elijah_ruling`
 tier-X refusals were once published as confident attributions. Invariant **W6**
-fails the build if any of these names reaches NEST — **scoped to names the emitted
+fails the build if any of these names reaches NEED — **scoped to names the emitted
 set does not also carry**, because 11 of them are *also* carried by a properly
 hubbed row and a bare name test called those leaks.
 
 **The 3,140 SBA rows are real firms with no owner named.** `SALCO LLC`, `HAKU
 SYSTEMS LLC`, `MAKWA GLOBAL SERVICES, LLC` — self-certified Native-owned, 8(a),
-in the SBA certification register. **That is evidence.** It is not a NEST row:
-NEST's grain is (owner hub, enterprise name) and **no owner nation is named on any
+in the SBA certification register. **That is evidence.** It is not a NEED row:
+NEED's grain is (owner hub, enterprise name) and **no owner nation is named on any
 of them**. They are registered for `native-owned-businesses` and the
 individually-Native-owned class, by name and UEI, so the promotion is **a join and
 not a re-harvest**, and **the route to them is the identifier, not the name.**
@@ -1030,9 +1037,9 @@ v3-only rows whose UEI is ALSO IN v6                          160 of 160
 v3-only rows whose exact name string is in v6 under that UEI    0 of 160
 ```
 
-[from the record — `docs/NEST_BUILD_LOG.md` Decision 2; the 160 reproduces
+[from the record — `docs/NEED_BUILD_LOG.md` Decision 2; the 160 reproduces
 exactly in `owner_v6_conservation.csv` as `v3_only_name_uei_present_in_v6: 160`
-against 19,846 v3 rows in, and `data/staging/nest/owner_v3_name_variants.csv`
+against 19,846 v3 rows in, and `data/staging/need/owner_v3_name_variants.csv`
 holds 160 rows [measured]]
 
 Every one is the same firm, under the same federal registration, spelled
@@ -1040,7 +1047,7 @@ differently — `GLACIER TECHNOLOGIES LLC` against `Glacier Technologies Limited
 Liability Company`, `GOLDBELT HAWK L.L.C.` against `Goldbelt Hawk Llc`, `CADDO
 INDUSTRIES ENTERPRISE` against `CADDO INDUSTRIES ENTERPRISES`.
 
-NEST clusters on the normalised **name**. `norm()` strips a trailing corporate
+NEED clusters on the normalised **name**. `norm()` strips a trailing corporate
 form but not `limited liability` in the middle of one, so `glacier technologies`
 and `glacier technologies limited liability` are two keys — and rapidfuzz declines
 to fuse them because the merge rule caps the length difference at 6 while theirs
@@ -1056,15 +1063,15 @@ like 598 rows, 438 of which are renderings v6 still holds.
 ### 4.5 A UEI Cedar already holds is a corroboration, not a new firm
 
 A UEI is one federal registration for one firm, so an owner row carrying a UEI a
-live NEST row already holds **is that firm again**. **But the collision only
-matters when the row would create a NEW cluster.** Where NEST already holds
+live NEED row already holds **is that firm again**. **But the collision only
+matters when the row would create a NEW cluster.** Where NEED already holds
 `(this hub, this normalised name)` the row MERGES and raises the observation
 count, which is the entire point of putting the file through the builder's
 clustering. Refusing on the UEI alone discarded **173** of exactly those, so the
 rule tests the clustering key first. What is refused: **20** same-hub and **172**
 cross-hub rows that would have created a second enterprise for a firm Cedar
 already registers [measured; the build log says 21 same-hub]. Registered in
-`data/staging/nest/owner_v6_uei_already_held.csv`, 192 rows [measured]. **The
+`data/staging/need/owner_v6_uei_already_held.csv`, 192 rows [measured]. **The
 cross-hub ones are an ownership disagreement needing adjudication, and they must
 not be settled by whichever pass ran last.**
 
@@ -1074,7 +1081,7 @@ not be settled by whichever pass ran last.**
 it is the most important refusal in this section.** The first build put
 
 ```
-nest_enterprises.csv  1 row(s) still key ANRC-BRBYCO-00 to
+need_enterprises.csv  1 row(s) still key ANRC-BRBYCO-00 to
                       'BRISTOL BAY AREA HEALTH CORPORATION'   [FA-01]
 ```
 
@@ -1091,7 +1098,7 @@ looking exactly like coverage.**
 `code/354_correction_register.py`) and refuses any edge whose `(entity,
 normalised name)` is an applied withdrawal. It catches exactly one row,
 `APPLIED_CORRECTION_FA-01`, registered with the correction's own reason text.
-Invariant **W7** fails the build if a withdrawn link reaches NEST, and its fixture
+Invariant **W7** fails the build if a withdrawn link reaches NEED, and its fixture
 injects one and proves it fires. **The point of checking it in `1133` rather than
 relying on `62` is timing: a red `62` is found *after* the rebuild, and `W7` is
 found before it.** The register holds **178 rows, 130 distinct `(entity_id,
@@ -1110,13 +1117,13 @@ build log gives 273 / 66, both stale]
 
 ### 4.8 The largest single open item — 1,281 rows, not 212
 
-`1130` measured 223 hub disagreements between the owner's file and NEST, of which
-**212 hub an ANCSA subsidiary on the Native Village GOVERNMENT** while NEST hubs
+`1130` measured 223 hub disagreements between the owner's file and NEED, of which
+**212 hub an ANCSA subsidiary on the Native Village GOVERNMENT** while NEED hubs
 it on the corporation. That was a count of net-new **clusters**. Put the whole raw
 file through `1072 assemble` and the count of **rows** the guard has to hold is
 **1,281 across 221 distinct village governments** — Chenega 128, Barrow 123,
 Pribilof Islands 98, Eagle 78, Afognak 53, Tyonek 51 [measured 2026-09-02].
-**986 of the firms named on them are in NEST under no hub at all**, so this is not
+**986 of the firms named on them are in NEED under no hub at all**, so this is not
 a rounding difference: **it is the single largest block of Alaska Native corporate
 structure still outside the dataset.**
 
@@ -1128,32 +1135,32 @@ repoint these. **The correction belongs in the owner's file, with the ruling
 attached.**
 
 This is the `ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` defect family —
-334 defects, $24.52B — and NEST has reached it from **six independent
+334 defects, $24.52B — and NEED has reached it from **six independent
 directions**: the lookup file's self-contradicting columns, the FPDS
 declared-parent contradictions, the owner-file hub disagreements, the raw-row
 assemble count, the 83 successful repoints, and the ledger resolutions of §3.4.
-**NEST is on the correct side of every one.**
+**NEED is on the correct side of every one.**
 
 ---
 
 ## 5. Money
 
-**NEST has no money column, and the right thing to do with that is to say it
+**NEED has no money column, and the right thing to do with that is to say it
 rather than imply a total exists.** Not one of the 91 delivered columns holds a
-dollar figure, and `nest` appears nowhere in `docs/MONEY_TOTALLING_RULES.md`
-[both measured 2026-09-02]. That file governs the money tables and NEST is not
+dollar figure, and `need` appears nowhere in `docs/MONEY_TOTALLING_RULES.md`
+[both measured 2026-09-02]. That file governs the money tables and NEED is not
 one of them.
 
 **A structure table is not a money table**, and the temptation it creates is easy
-to name. NEST tells you that a nation owns a firm. It does **not** tell you what
+to name. NEED tells you that a nation owns a firm. It does **not** tell you what
 that firm earned, obligated, expended or distributed. The dollars attached to
 these firms live in `prime_contracts.csv`, `federal_funding_transactions.csv`,
 the subaward tables, `fac_tribal_single_audits.csv` and the gaming tables, each
 with its own totalling rules, denominator and double-count hazards. **Joining
-NEST to any of them to produce a "tribally owned enterprise revenue" figure is a
+NEED to any of them to produce a "tribally owned enterprise revenue" figure is a
 join this dataset does not license**, for three independently sufficient reasons:
-68.5% of NEST rows assert affiliation rather than ownership; `uei` is populated on
-52.2% of rows, so the join is partial in a way that is not random; and NEST's
+68.5% of NEED rows assert affiliation rather than ownership; `uei` is populated on
+52.2% of rows, so the join is partial in a way that is not random; and NEED's
 grain is `(owner hub, enterprise)`, so a joint venture is correctly two rows, one
 per parent, and a naive money join double-counts it.
 
@@ -1162,7 +1169,7 @@ per parent, and a naive money join double-counts it.
 **May be summed:**
 
 - **`n_source_observations`** — one row per enterprise, summing to **7,559**,
-  exactly the row count of `nest_enterprise_relations.csv` [measured both sides].
+  exactly the row count of `need_enterprise_relations.csv` [measured both sides].
   This is the file's one honest total.
 - **Row counts under any single-valued filter** — `relation_class`, `owner_class`,
   `in_federal_contracting`, `evidence_class`, `source_id`, each populated on all
@@ -1170,7 +1177,7 @@ per parent, and a naive money join double-counts it.
 
 **May NOT be summed:**
 
-- **`n_nest_enterprise_relations` is a fan-out count carried at the WRONG grain.**
+- **`n_need_enterprise_relations` is a fan-out count carried at the WRONG grain.**
   It is computed per `cedar_uid` — per **owner hub** — and replicated onto every
   enterprise row of that hub. Summing it across the file gives **352,617** against
   a true relations count of **7,559**, a **46.6× overstatement** [measured]. The
@@ -1178,9 +1185,9 @@ per parent, and a naive money join double-counts it.
   returns 7,559 exactly [measured]. The codebook's closing note warns that a raw
   column sum is not the dataset's answer; **this is the column it is warning
   about.**
-- **Every `nest_entity_dual_role__*` count**, for the same reason: the block is
+- **Every `need_entity_dual_role__*` count**, for the same reason: the block is
   folded one-to-one on `cedar_uid` and repeats on every enterprise row of that
-  hub. `nest_entity_dual_role__n_nest_enterprises_owned` sums to **68,021** across
+  hub. `need_entity_dual_role__n_need_enterprises_owned` sums to **68,021** across
   rows and **1,701** de-duplicated by hub [measured] — and even the de-duplicated
   figure counts *rows*, not entities, because only 139 of the 358 dual-role
   entities appear here.
@@ -1221,7 +1228,7 @@ count. The 429 name-only rows are the exposed set.
 ## 6. Known limits, stated plainly
 
 **A permanent id stopped resolving, and it is an open defect in `1072`.** The
-append-only register holds **4,800 bindings** while NEST settles at **4,798**, so
+append-only register holds **4,800 bindings** while NEED settles at **4,798**, so
 **two bindings no longer resolve** [measured 2026-09-02]:
 
 | orphaned binding | key | why |
@@ -1232,7 +1239,7 @@ append-only register holds **4,800 bindings** while NEST settles at **4,798**, s
 Nothing was lost. The owner's file carries the same firm as `C P Leasing, Inc`,
 which normalises to `c p leasing`; rapidfuzz **correctly** fused the two
 renderings; the fused cluster's canonical key became `c p leasing`; and `1072`
-minted a new id for a company that already had one. The firm is in NEST today as
+minted a new id for a company that already had one. The firm is in NEED today as
 `CEDAR-NEST-001611-0W`, `C P Leasing, Inc`, with `CP Leasing` in
 `name_variants_observed` [measured]. **But `enterprise_id` is permanent, and a
 customer who joined on `CEDAR-NEST-000004-R4` now gets nothing.** The cause is
@@ -1240,15 +1247,15 @@ structural: `1072` binds the id to the cluster's **canonical** name, so the
 arrival of a name **variant** can move the key. **It happened once in 3,190 mints
 and it will happen again.** Retiring or repointing an id needs evidence and an
 owner ruling, so neither was done. What *was* done is the part worth copying:
-**`1130`'s invariant I6b asserted `len(register) == len(NEST)`, which is not what
+**`1130`'s invariant I6b asserted `len(register) == len(NEED)`, which is not what
 its name says** — an append-only register exceeds the live table the first time
 any cluster key changes, which is the register *working*. I6b now asserts what it
 is called and **reports the orphan count beside it**. `docs/WORK_QUEUE.md`
 carries the defect.
 
 **The staged edge count wobbles by 2 and the table does not.** `1133` asks "does
-NEST already hold this firm" to avoid minting a second enterprise for one company
-— and after the first ingest **NEST holds this script's own rows**, which is
+NEED already hold this firm" to avoid minting a second enterprise for one company
+— and after the first ingest **NEED holds this script's own rows**, which is
 `AGENT_FIELD_GUIDE` rule 10 (five instruments in this repo have scanned their own
 output). Rows whose `source_id` is `OWNERV6` are excluded from that context, but
 the exclusion is not perfectly stable, because `source_id` is the *best* source of
@@ -1257,11 +1264,11 @@ a cluster and a cluster mixing this file with another can flip. Measured over fo
 
 ```
 staged edges       5,791  ->  5,789  ->  5,791  ->  5,789
-nest_enterprises   4,798      4,798      4,798      4,798
+need_enterprises   4,798      4,798      4,798      4,798
 ids minted             0          0          0          0
 ```
 
-[from the record — `docs/NEST_BUILD_LOG.md`; the staged file holds **5,791** edges
+[from the record — `docs/NEED_BUILD_LOG.md`; the staged file holds **5,791** edges
 today [measured]]
 
 **The enterprise table and the id register are a fixed point; only the staged edge
@@ -1280,15 +1287,15 @@ Ahtna, Bering Straits, Doyon, Koniag and Sealaska carry a `third_source_says`
 sentence describing Chugach Commercial Holdings. **The adjudication was broadcast
 rather than joined.**
 
-**NEST holds companies twice, and the count has grown.** Clustering is on
+**NEED holds companies twice, and the count has grown.** Clustering is on
 `(owner hub, normalised name)` and **a trailing parenthetical survives
 normalisation**:
 
 ```
-CEDAR-NEST-000001-6S  Aan Hít                       NESTDUP-0001
-CEDAR-NEST-000002-CJ  Aan Hít (Village House)       NESTDUP-0001
-CEDAR-NEST-000012-8C  Goldbelt Hawk LLC (GbHawk)    NESTDUP-0002
-CEDAR-NEST-001630-JQ  Goldbelt Hawk Llc             NESTDUP-0002
+CEDAR-NEST-000001-6S  Aan Hít                       NEEDDUP-0001
+CEDAR-NEST-000002-CJ  Aan Hít (Village House)       NEEDDUP-0001
+CEDAR-NEST-000012-8C  Goldbelt Hawk LLC (GbHawk)    NEEDDUP-0002
+CEDAR-NEST-001630-JQ  Goldbelt Hawk Llc             NEEDDUP-0002
 ```
 
 `1102` found **25 groups / 50 rows** at 1,610 enterprises; the delivered file
@@ -1299,7 +1306,7 @@ merged-not-appended design exists to do. **FLAGGED, NOT MERGED:** merging retire
 ids out of an append-only register, `IDENTIFIER_STANDARD` forbids retiring an id
 as a side effect, and `AGENT_FIELD_GUIDE` §4 says measure duplicates before
 collapsing them. Register:
-`review/nest_name_variant_duplicates_2026-09-02.csv`. **The absent-from-FPDS share
+`review/need_name_variant_duplicates_2026-09-02.csv`. **The absent-from-FPDS share
 is unaffected**: the duplicates are ANC subsidiaries that *are* present in
 contracting, so collapsing them would raise the absent share, not lower it. **The
 floor stays a floor.**
@@ -1316,7 +1323,7 @@ rows (15.8%) rest on more than one source [measured], but the same source family
 across several fiscal years counts as several sources. `KNOWN_ISSUES` §2 names the
 missing column — `n_independent_families` — and it has not been built. Relatedly,
 **the 22 FPDS contradictions have not been re-triaged at the new row count**: the
-8 that existed at 1,610 rows were adjudicated in full and NEST was correct on 6,
+8 that existed at 1,610 rows were adjudicated in full and NEED was correct on 6,
 and nothing states which of the extra 14 are the ledger's village-government
 defect and which are real.
 
@@ -1351,9 +1358,9 @@ Y` on all 4,798 rows — declarations of the population, not discriminators.
 
 ## 7. Refresh
 
-**`nest` is not in the refresh register at all.** `docs/REFRESH_CADENCE.json`
+**`need` is not in the refresh register at all.** `docs/REFRESH_CADENCE.json`
 (regenerated 2026-09-02 by `code/630_refresh_cadence.py`) tracks **55 sources
-across 13 datasets, and `nest` is not one of them** [measured 2026-09-02].
+across 13 datasets, and `need` is not one of them** [measured 2026-09-02].
 
 | source | cadence | what a re-pull changes | route |
 |---|---|---|---|
@@ -1381,7 +1388,7 @@ coverage as a fraction of the roster without saying this.
 `1072 build` is a **full rebuild**; `1102` is an **in-place enricher on the same
 file** and must run **last**, or its corroboration, duplicate flags and
 adjudication are reverted while the row count still looks right.
-`py -3 code/build.py plan nest` currently prints **0 full rebuilds**, files
+`py -3 code/build.py plan need` currently prints **0 full rebuilds**, files
 `1072`, `1102` and `1130` all under in-place enrichers, and **does not list
 `1133` at all** [measured 2026-09-02, run]. It also reports enricher backups
 present on both tables with *"re-run unknown"*, which is the manifest failing to
@@ -1391,7 +1398,7 @@ name what to re-run.
 observer-grade ownership evidence in the dataset — the only source where a parent
 asserts ownership about itself under a filing obligation, with an auditor's
 signature on the page. Everything else is a corporate website, a compiled
-directory, or a resolver output. **If that leg ages, NEST does not get less
+directory, or a resolver output. **If that leg ages, NEED does not get less
 complete; it gets less credible**, because the share of rows resting on an audited
 filing falls while the row count holds.
 
@@ -1401,18 +1408,18 @@ filing falls while the row count holds.
 
 Ordered by how much damage acting on the wrong value would do.
 
-1. **`docs/NEST_BUILD_LOG.md`'s `relation_class` split is inverted relative to the
+1. **`docs/NEED_BUILD_LOG.md`'s `relation_class` split is inverted relative to the
    delivered file.** The log reads `ownership 1,512 / affiliation 98`. Measured:
    **`affiliation` 3,286 / `ownership` 1,512** [measured 2026-09-02]. The
    *ownership* count is exactly right and unchanged; affiliation grew by 3,188
    with the owner-file ingest, and the log's own later block explains why without
    updating the earlier table. **This is the highest-damage stale figure in the
    document**: a reader who takes the first table at face value concludes 94% of
-   NEST is an ownership claim when it is 31.5%.
+   NEED is an ownership claim when it is 31.5%.
 
 2. **The build log states the delivered row count as 4,799 in the ingest section
    and 4,798 in the results table of the same block.** The delivered file holds
-   **4,798**, `data/clean/nest_enterprises.csv` holds **4,798**, and
+   **4,798**, `data/clean/need_enterprises.csv` holds **4,798**, and
    `dist/customer/MANIFEST.csv` says **4,798** [measured]. **4,798 is right.** The
    same sentence gives `source_id = OWNERV6` as *"3,190 of 4,799"*; it is **3,189
    of 4,798** [measured]. 3,190 is the *ids minted* count (register 1,610 →
@@ -1428,7 +1435,7 @@ Ordered by how much damage acting on the wrong value would do.
    **A buyer quoting "60.7%" is nine points high and describing a table a third
    the size.**
 
-4. **`docs/NEST_BUILD_LOG.md` Decision 1 gives the unhubbed block as 12,085 rows
+4. **`docs/NEED_BUILD_LOG.md` Decision 1 gives the unhubbed block as 12,085 rows
    with an `unmatched` bucket of 8,928.** Measured from `owner_v6_refused.csv` and
    `owner_v6_conservation.csv`: **12,084** and **8,927**. ADR-034 already says
    8,927, so the log is inconsistent with the ADR written from the same pass. The
@@ -1443,20 +1450,20 @@ Ordered by how much damage acting on the wrong value would do.
    missing-column fallback in `sam_extracts/build_master_entity_registry.py:126`
    substituting `awardee_uei` for `recipient_location_state_code`. **A shift is a
    parser bug you fix once; a silent column substitution recurs on the next
-   renamed column.** Anyone reading the NEST log alone will look for the wrong bug.
+   renamed column.** Anyone reading the NEED log alone will look for the wrong bug.
 
 6. **The whole FILES block of the build log predates the ingest, and six of its
    artefact sizes are wrong.** Measured 2026-09-02:
 
    | artefact | the log says | measured |
    |---|---:|---:|
-   | `nest_enterprises.csv` | 1,610 rows, 59 columns | **4,798 rows, 68 columns** |
-   | `nest_enterprise_relations.csv` | 3,789 rows | **7,559 rows** (25 columns ✓) |
-   | `cedar_nest_id_register.csv` | 1,610 bindings | **4,800** |
+   | `need_enterprises.csv` | 1,610 rows, 59 columns | **4,798 rows, 68 columns** |
+   | `need_enterprise_relations.csv` | 3,789 rows | **7,559 rows** (25 columns ✓) |
+   | `cedar_need_id_register.csv` | 1,610 bindings | **4,800** |
    | `ownership_edges_staged.jsonl` | 3,499 | **7,976** |
    | `held_rows.csv` | 101 refusals | **1,712** |
    | `evidence_conflicts.csv` | 2 conflicts | **45** |
-   | `codebook/18a_nest_enterprises.csv` | 59 variables | **68** |
+   | `codebook/18a_need_enterprises.csv` | 59 variables | **68** |
    | `ancsa_consolidation_edges.jsonl` 2,168 · `sweep_1070_refused.csv` 286 · `ancsa_mine_log.csv` 524 · `18b` 25 | | all ✓ |
 
    **`held_rows.csv` at 101 → 1,712 is the one that matters**, because that file
@@ -1464,7 +1471,7 @@ Ordered by how much damage acting on the wrong value would do.
    measure of the open work. A reader taking the FILES block at face value
    under-reads the queue by a factor of seventeen.
 
-7. **`py -3 code/build.py plan nest` is wrong about the pipeline it describes.**
+7. **`py -3 code/build.py plan need` is wrong about the pipeline it describes.**
    It prints **0 full rebuilds** and files `1072` under in-place enrichers when
    `1072 build` is the full rebuild and `1102` is the enricher that must follow
    it; and **it does not mention `1133` at all** [measured 2026-09-02, run]. The
@@ -1486,7 +1493,7 @@ Ordered by how much damage acting on the wrong value would do.
    are the v1 error the build log says was fixed** — an `unspecified` value scored
    as a rival claim — and all 45 carry `1102`'s Chugach-specific adjudication text.
 
-10. **The build log says NEST holds "25 companies twice, 25 groups, 50 rows".**
+10. **The build log says NEED holds "25 companies twice, 25 groups, 50 rows".**
     The delivered file carries **62 `duplicate_name_variant_group` values across
     126 rows** [measured]. The reasoning is unchanged and correct; the count is
     2.5× stale, and it is the count a reader would use to size the clean-up.
@@ -1504,7 +1511,7 @@ Ordered by how much damage acting on the wrong value would do.
     disagreements"* table reads 212 / 20 / 14; a later block correctly notes those
     sum to 246 and gives the live file as 196 / 14 / 13 = 223. Re-measured after
     the ingest, `1130` having been re-run,
-    `data/staging/nest_owner_v6/enterprise_reconciliation.csv` reads
+    `data/staging/need_owner_v6/enterprise_reconciliation.csv` reads
     `ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` **185** ·
     `UNADJUDICATED_HUB_DISAGREEMENT` **19** · `ANC_TIER_DISAGREEMENT` **9** =
     **213** [measured]. **Neither the original table nor its correction matches the
@@ -1518,10 +1525,10 @@ Ordered by how much damage acting on the wrong value would do.
     178** and is right, so the log and the ADR disagree with the script they
     describe. Low damage — W7 checks membership, not cardinality.
 
-14. **`docs/DATASET_READINESS.md` reports `nest` at 2 tables;
+14. **`docs/DATASET_READINESS.md` reports `need` at 2 tables;
     `docs/ARCHITECTURE.md` line 375 lists 3.** The third is
-    `nest_entity_dual_role.csv` (358 rows), which the build log records as
-    *"already done"* on the strength of `500`'s `^nest_` regex claiming it. The
+    `need_entity_dual_role.csv` (358 rows), which the build log records as
+    *"already done"* on the strength of `500`'s `^need_` regex claiming it. The
     map does claim it; **the scoreboard still counts 2** [measured, both files as
     regenerated]. The consequence is the reason the build log gave for leaving the
     line undone: **a new table entering a collection can only move a READY score
@@ -1530,7 +1537,7 @@ Ordered by how much damage acting on the wrong value would do.
 15. **`docs/methodology/README.md` says "Scoreboard, 2026-09-02: READY 9 / 13" and
     names four BLOCKED datasets.** `docs/DATASET_READINESS.md`, regenerated the
     same day, says **READY 15 / 15, BLOCKED 0, NOT_TESTED 0** [measured]. Not a
-    NEST figure, but it is the header every reader of these papers meets first.
+    NEED figure, but it is the header every reader of these papers meets first.
 
 16. **Two small-print counts that did not reproduce, both low damage.** `1133`'s
     UEI-collision refusals are given as *"21 same-hub and 172 cross-hub"*;
@@ -1538,7 +1545,7 @@ Ordered by how much damage acting on the wrong value would do.
     Bering Straits' shareholder-owned-businesses directory"* while the build log,
     the conservation block and the refusal file all say **57**; **57 reproduces**.
     The code comment is the one that is wrong, which is the worse place for it.
-<!-- END EDITORIAL:nest -->
+<!-- END EDITORIAL:need -->
 
 <!-- BEGIN GENERATED:MEASURED -->
 
@@ -1546,9 +1553,9 @@ Ordered by how much damage acting on the wrong value would do.
 
 # Appendix M — measured from the delivered file
 
-*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/nest.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/need.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
 
-*Grain, folded-in tables and per-column fill rates are in `dist/customer/nest__CODEBOOK.md` and are deliberately not repeated here.*
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/need__CODEBOOK.md` and are deliberately not repeated here.*
 
 ## M1 · Sources, as the delivered rows themselves record them
 
@@ -1666,13 +1673,13 @@ Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper do
 
 ## M2 · How the rows were built — the pipeline, in order
 
-**One documented rebuild:** `py -3 code/build.py run nest --execute`. `py -3 code/build.py plan nest` prints the ordering below live; it is reproduced here so the paper stands alone.
+**One documented rebuild:** `py -3 code/build.py run need --execute`. `py -3 code/build.py plan need` prints the ordering below live; it is reproduced here so the paper stands alone.
 
 The collection holds **3 tables**. Those with a named build stage, flagship first:
 
 | table | rebuilt by | then enriched by (must run LAST) | status |
 |---|---|---|---|
-| `nest_enterprises.csv` **(flagship)** | — | — | shippable |
+| `need_enterprises.csv` **(flagship)** | — | — | shippable |
 
 **A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
 
@@ -1737,7 +1744,7 @@ Two families are refused as **COLUMNS** rather than as rows, by `cedar_publicati
 
 That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
 
-**`docs/MONEY_TOTALLING_RULES.md` states no one-line rule for `nest_enterprises.csv`.** Where this dataset carries a money column and the rules document does not fence it, treat that as an open item, not as permission.
+**`docs/MONEY_TOTALLING_RULES.md` states no one-line rule for `need_enterprises.csv`.** Where this dataset carries a money column and the rules document does not fence it, treat that as an open item, not as permission.
 
 ### Time span, measured
 
@@ -1762,12 +1769,12 @@ The twelve-point contract a dataset is held to — grain declared and validated;
 
 ## M7 · Fingerprint — what makes this paper stale
 
-`verify` re-measures the four values below against `dist/customer/nest.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+`verify` re-measures the four values below against `dist/customer/need.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
 
 ```json
 {
-  "dataset": "nest",
-  "file": "dist/customer/nest.csv",
+  "dataset": "need",
+  "file": "dist/customer/need.csv",
   "bytes": 7904594,
   "rows": 4798,
   "columns": 91,

@@ -170,7 +170,7 @@ LEVEL = {
 #: EVERY storefront collection goes to v1 on 2026-09-04, and the reason is that
 #: every one of them actually changed. This was not a cosmetic re-import:
 #:
-#:   nest          preview `of` 4,799 -> 5,820 rows
+#:   need          preview `of` 4,799 -> 5,820 rows
 #:   nonprofits    10 tables / 123,293 rows -> 12 / 131,090
 #:   owned         gained a preview it did not have
 #:   all twelve    rebuilt from datasets whose identity layer changed - the
@@ -190,7 +190,7 @@ VERSION = {
     "lobbying": "v1",
     "nagpra": "v1",
     "natural-resources": "v1",
-    "nest": "v1",
+    "need": "v1",
     "nonprofits": "v1",
     "owned": "v1",
     "subcontracting": "v1",

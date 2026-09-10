@@ -281,7 +281,7 @@ does not re-derive them.
 | a coverage scan reporting `nagpra`, `legislation` and `native-owned-businesses` as having **no entity key** | only `legislation` was true. `nagpra` is 90.83% linked through six LIST-VALUED role columns; `native-owned-businesses` is 94.89% linked through the certifying nation | ADR-037 §2, §3 |
 
 **"3,306 of the owner's v6 UEIs are in no Cedar table at all" was NOT
-re-measured here** and is not disputed. `data/staging/nest_owner_v6/` was being
+re-measured here** and is not disputed. `data/staging/need_owner_v6/` was being
 written by another workstream during this pass (14:59) and was left alone.
 
 ---

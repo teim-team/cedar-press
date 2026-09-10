@@ -15,7 +15,7 @@ Every number here is measured from disk on the run that wrote this file. The one
 | **Federal Prime Contracting** (`contractors`) | pro | 0 | 0 | 0 | 0 |
 | **Federal Subcontracting** (`subcontracting`) | pro | 0 | 0 | 0 | 0 |
 | **Native-Owned Businesses** (`native-owned-businesses`) | pro | 0 | 0 | 0 | 0 |
-| **NEST: Native Enterprise Structures and Ties** (`nest`) | pro | 0 | 0 | 0 | 0 |
+| **Cedar Native Entity Enterprise Dataset (NEED)** (`need`) | pro | 0 | 0 | 0 | 0 |
 | **The Native Press: Tribal Newsletters and Periodicals** (`newsletters`) | withdrawn | 0 | 0 | 0 | 0 |
 | **Natural Resource Revenues** (`natural-resources`) | pro | 0 | 0 | 0 | 0 |
 | **Native Nonprofits** (`nonprofits`) | pro | 0 | 0 | 0 | 0 |
@@ -80,7 +80,7 @@ Every number here is measured from disk on the run that wrote this file. The one
 
 ---
 
-## NEST: Native Enterprise Structures and Ties  ·  `nest`  ·  pro
+## Cedar Native Entity Enterprise Dataset (NEED)  ·  `need`  ·  pro
 
 *No `dist/` directory claimed — this collection does not ship yet.*
 

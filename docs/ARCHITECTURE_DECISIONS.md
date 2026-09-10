@@ -1242,7 +1242,7 @@ file beside each table is the signal.
 
 <!-- BEGIN ADR-020-SUBHUB-REGISTERS -->
 
-## ADR-020 — `cedar_nest_id_register.csv` is a SUB-HUB register, not a second entity space. And a blank endpoint is a sub-hub Cedar declined to mint.
+## ADR-020 — `cedar_need_id_register.csv` is a SUB-HUB register, not a second entity space. And a blank endpoint is a sub-hub Cedar declined to mint.
 
 *Decided 2026-09-02 by the `_entity_layer` deepening pass
 (`code/1098_entity_rel_counterparty.py`). This ADR answers two questions that
@@ -1250,7 +1250,7 @@ were being asked as if they were separate and are one question.*
 
 ### The question
 
-1,375 NEST enterprises hold Cedar-minted ids in `data/spine/cedar_nest_id_register.csv`
+1,375 NEED enterprises hold Cedar-minted ids in `data/spine/cedar_need_id_register.csv`
 (1,610 bindings today), and the standing open item asks whether those are
 sub-hubs of their owning nation or a parallel identifier space. Separately,
 `entity_relationships.csv` has a blank endpoint on **1,772 of 2,292 rows
@@ -1266,14 +1266,14 @@ identifies a **registration**, and a registration is a sub-hub. So:
 | register | grain | prefix | keyed to |
 |---|---|---|---|
 | `cedar_identity_register.csv` | one row per Native entity (HUB) | `CE-` + class handle | itself |
-| `cedar_nest_id_register.csv` | one row per owned ENTERPRISE (SUB-HUB) | `CEDAR-NEST-` | `owner_hub_cedar_uid` -> the spine |
+| `cedar_need_id_register.csv` | one row per owned ENTERPRISE (SUB-HUB) | `CEDAR-NEST-` | `owner_hub_cedar_uid` -> the spine |
 | `gaming_facilities.facility_id` | one row per facility (SUB-HUB) | — | its entity |
 | `np_ein_entity_hub` | one row per EIN filer (SUB-HUB) | — | its entity |
 
 `CEDAR-NEST-` is **the enterprise level of the existing sub-hub layer**, exactly
 as `facility_id` is the facility level. It is not a parallel entity space, it may
 never be joined as if it were one, and a `CEDAR-NEST-` id may not appear where a
-`cedar_uid` is expected. Every NEST row already carries `owner_hub_cedar_uid`
+`cedar_uid` is expected. Every NEED row already carries `owner_hub_cedar_uid`
 into the spine, which is the entire relation; nothing further is needed and
 nothing should be minted to express it.
 
@@ -1304,7 +1304,7 @@ register of Native entities.
 promotes it into nine declared columns — `counterparty_kind`,
 `counterparty_name_as_recorded`, `counterparty_identifier_type`,
 `counterparty_identifier`, `counterparty_identity_state` and a
-`counterparty_nest_enterprise_id` bridge — with an anti-fabrication invariant
+`counterparty_need_enterprise_id` bridge — with an anti-fabrication invariant
 that every promoted value is a **verbatim substring of that row's own `notes`**.
 
 ### And the same answer settles the constellation
@@ -1331,20 +1331,20 @@ never the 278.
 
 ### The bridge, and the one thing it refused
 
-1098 resolves an `owned_by` firm to a NEST enterprise only when both sides agree
+1098 resolves an `owned_by` firm to a NEED enterprise only when both sides agree
 on the OWNER: rung 1 published UEI, rung 2 published CAGE, rung 3 the normalised
 name unique among the enterprises of that same owner hub. **262 of 1,462 (17.9%)
-resolve.** 23 more would resolve through NEST's own `uei_candidate` and are
+resolve.** 23 more would resolve through NEED's own `uei_candidate` and are
 refused — a candidate on one side plus a candidate on the other is not evidence.
 
 **One resolved on the identifier and disagreed about the owner, and it is the
 first cross-source ownership disagreement the entity layer has produced:**
 `Laulima Government Solutions, LLC` (UEI `QTJZT9K41S61`) is Bering Straits
 Native Corporation in `entity_relationships` (tier A, owner ruling) and
-Alaka'ina Foundation in NEST (`parent_declared_subsidiary_list`, source
+Alaka'ina Foundation in NEED (`parent_declared_subsidiary_list`, source
 `http://beringalakaina.com/`). The source host names both parents;
 `ENTITY_MATCH_RULES` rule 11 says a joint venture genuinely has two. **Refused,
-not reconciled** — `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`.
+not reconciled** — `review/entity_rel_need_owner_conflicts_2026-09-02.csv`.
 
 <!-- END ADR-020-SUBHUB-REGISTERS -->
 
@@ -1610,7 +1610,7 @@ a descriptive note does NOT.
 datasets in this same session: `nagpra_notices.csv`,
 `nagpra_notice_institutions.csv`, `federal_actions.csv`, `bill_votes.csv`,
 `native_bills.csv` and `native_entity_lobbying_disclosures.csv` were all left
-alone. `cedar_constellation_edges.csv` and `nest_enterprise_relations.csv` were
+alone. `cedar_constellation_edges.csv` and `need_enterprise_relations.csv` were
 **READ ONLY**; the two defects found in them are reported in `AGENTS.md`, not
 repaired, because they belong to `852` and `1072`.
 
@@ -2091,7 +2091,7 @@ against claims nobody has adjudicated.
 its own numbers are unchanged; this layer measures the SHIPPING datasets one
 level out and **the two counts must never be added together**.
 `code/503_identity.py` and `docs/ENTITY_MATCH_RULES.md` own whether two names
-are one entity — untouched. Nothing in `nest_enterprises.csv`,
+are one entity — untouched. Nothing in `need_enterprises.csv`,
 `deals_classified.csv`, `np_orgs.csv`, `gaming_facilities.csv` or
 `cedar_identifier_ledger_final.csv` was edited; five merge proposals are in the
 doc, each naming its owner.
@@ -2419,7 +2419,7 @@ the one unforgivable act in an identity system.
 
 **One check-character implementation in the project.** `1129` renders the
 ordinal `cedar_ids` allocates and appends `503`'s two characters — the same
-split NEST uses for `CEDAR-NEST-nnnnnn-CC`. Allocation is permanent and locked
+split NEED uses for `CEDAR-NEST-nnnnnn-CC`. Allocation is permanent and locked
 in one place; transcription safety comes from another; neither is
 re-implemented.
 
@@ -2456,7 +2456,7 @@ is kept beside them as evidence of where the row came from.
 | **Federal awards and contracts** | **3** | PIID and UEI are stable, federally assigned, and already the join key. A Cedar id here would be a second name for something that already has one. |
 | **Federal Register and NAGPRA documents** | **3** | the FR document number and the NAGPRA notice id are stable federal identifiers. `federal_actions.csv` and `nagpra_notices.csv` — the two datasets already READY — key on them today. |
 | **Geographies** | **3** | FIPS and GEOID are stable, versioned and universally understood. Minting over them would make Cedar's geography unjoinable to every other dataset in the world. |
-| **Enterprises** | **already minted** | `CEDAR-NEST-nnnnnn-CC`, 1,610 bindings in `data/spine/cedar_nest_id_register.csv`. The owner's *"enterprises in general makes sense"* is **already satisfied**. A second enterprise id is the "billion IDs" failure in its purest form. |
+| **Enterprises** | **already minted** | `CEDAR-NEST-nnnnnn-CC`, 1,610 bindings in `data/spine/cedar_need_id_register.csv`. The owner's *"enterprises in general makes sense"* is **already satisfied**. A second enterprise id is the "billion IDs" failure in its purest form. |
 | **Deals** | **already minted** | `deals_classified.Deal_ID` is Cedar-minted. See EVENTS below — it needs GENERALISING, not a sibling. |
 | **People** | **policy, not a test outcome** | never, for any reason. A natural person's data held apart from their public role is `CONSTRAINED`, and a person-level identifier is precisely the artefact that would make re-identification cheap. |
 
@@ -2771,12 +2771,12 @@ row it sits on. Fixed at `code/99`, applied by importing 99's own function.
 <!-- BEGIN ADR-032-NEST-DUAL-ROLE -->
 ## ADR-032 — An ANC or an NHO is BOTH a register entity and an enterprise, and the second role is RECORDED, not duplicated
 
-**Decided 2026-09-02** by workstream `nest-owner-v6`,
-`code/1130_nest_owner_v6_reconcile.py`. Owner's design correction:
+**Decided 2026-09-02** by workstream `need-owner-v6`,
+`code/1130_need_owner_v6_reconcile.py`. Owner's design correction:
 *"ANCs and NHOs are themselves entities, but they're also enterprises too. So
 they're a unique one."*
 
-**Context.** NEST modelled an ANCSA corporation only as an
+**Context.** NEED modelled an ANCSA corporation only as an
 `owner_hub_cedar_uid` — a hub that owns subsidiaries. That is half of it.
 Arctic Slope Regional Corporation holds UEI `CY16XXPHX213`, is a federal
 contractor in its own right and sells; so do all eight regional corporations
@@ -2784,7 +2784,7 @@ the owner's dataset reaches, and so do 13 NHOs registered as firms in the SBA
 certification register.
 
 **The obvious fix is wrong.** Adding the corporation to
-`nest_enterprises.csv` as a row hubbed on itself breaks the dataset's key,
+`need_enterprises.csv` as a row hubbed on itself breaks the dataset's key,
 `(owner_hub_cedar_uid, enterprise_name_normalized)`, and makes a hub its own
 subsidiary. `1072` already refuses exactly that — `The Eyak Corporation` and
 `Coushatta Tribe of Louisiana` each published as a two-level chain that was
@@ -2792,11 +2792,11 @@ one company twice, and the build now tests the child against every
 deterministic rendering of the hub's name.
 
 **The decision.** A new one-row-per-entity table,
-`data/clean/nest_entity_dual_role.csv`, keyed on `cedar_uid`.
+`data/clean/need_entity_dual_role.csv`, keyed on `cedar_uid`.
 
-* The register keeps ONE row for the entity. NEST keeps ZERO rows for it.
+* The register keeps ONE row for the entity. NEED keeps ZERO rows for it.
 * The dual role is declared in its own table and joined to
-  `nest_enterprises.csv` on `owner_hub_cedar_uid`.
+  `need_enterprises.csv` on `owner_hub_cedar_uid`.
 * Three evidence rungs, recorded per row, never collapsed into a boolean:
   `R1_DECLARED_BY_OWNER_DATASET`, `R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER`,
   `R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS`.
@@ -2810,15 +2810,15 @@ deterministic rendering of the hub's name.
   not unique in the register or in DSBS.
 
 **Grain declared** in `code/512_build_dataset_contracts.py` as its own
-`GRAIN_NEST_DUAL` dict. **Codebook** registered as
-`18c_nest_entity_dual_role` (27 variables), appended to
+`GRAIN_NEED_DUAL` dict. **Codebook** registered as
+`18c_need_entity_dual_role` (27 variables), appended to
 `codebook_master.csv`, never rewritten. Invariants **I11a–I11d** and **I12**
 in `1130 verify` hold the ANC reach, the NHO reach, the second evidence
 family and the no-self-subsidiary line, and a fixture proves I11a fires.
 
 **Consequence.** A consumer asking "what does this ANC own" reads
-`nest_enterprises`; asking "does this ANC itself sell" reads
-`nest_entity_dual_role`. Neither question is answered by a row that pretends
+`need_enterprises`; asking "does this ANC itself sell" reads
+`need_entity_dual_role`. Neither question is answered by a row that pretends
 to be the other.
 <!-- END ADR-032-NEST-DUAL-ROLE -->
 
@@ -2861,19 +2861,19 @@ in `512` as `GRAIN_FAC_NONTRIBAL`.
 <!-- END ADR-033-FAC-NONTRIBAL -->
 
 <!-- BEGIN ADR-034-OWNER-V6-BUILDER-INPUT -->
-## ADR-034 — The owner's enterprise dataset is an INPUT to the NEST builder, not an append to its output
+## ADR-034 — The owner's enterprise dataset is an INPUT to the NEED builder, not an append to its output
 
 **Decided 2026-09-02** by workstream `NEST-OWNER-V6-INPUT-1133`,
-`code/1133_nest_owner_v6_builder_input.py`.
+`code/1133_need_owner_v6_builder_input.py`.
 
 **Context.** `1130` measured 4,786 net-new enterprises in the owner's
 18,110-row v6 file and deliberately did not append them, because `1072 build`
 is a full rebuild and the append would be reverted by the next run.
 
 **Decision.** The file becomes source **7** of `1072.load_sources()`, staged as
-`data/staging/nest/owner_v6_edges.jsonl` by `1133 apply`. The rows are
+`data/staging/need/owner_v6_edges.jsonl` by `1133 apply`. The rows are
 therefore re-derived on every rebuild, and their ids stay bound by the
-append-only `cedar_nest_id_register.csv`. `1133` owns the admission decisions;
+append-only `cedar_need_id_register.csv`. `1133` owns the admission decisions;
 `1072` owns the clustering, the guards and the ids. Nothing is post-processed.
 
 **Four admission decisions, each measured rather than assumed:**
@@ -2883,9 +2883,9 @@ append-only `cedar_nest_id_register.csv`. `1133` owns the admission decisions;
   `Goldenlook Of San Antonio Inc`, and natural persons (`Benward, Ursula`,
   `William Woolard`). `unmatched` is a NEGATIVE result and inheriting the row
   while dropping its sign is the 148 defect at 8,927x scale.
-* **3,140 SBA-certified firms with no owner nation named are REFUSED to NEST**
-  and registered for `native-owned-businesses`. NEST's grain is (owner hub,
-  enterprise name); a row with no owner is not a NEST row.
+* **3,140 SBA-certified firms with no owner nation named are REFUSED to NEED**
+  and registered for `native-owned-businesses`. NEED's grain is (owner hub,
+  enterprise name); a row with no owner is not a NEED row.
 * **The 160 v3-only rows are NOT recovered.** 160 of 160 carry a UEI that IS in
   v6 — they are the same registrations under a different name string, and
   recovering them would have created up to 158 duplicate enterprises. Recorded
@@ -2906,7 +2906,7 @@ append-only `cedar_nest_id_register.csv`. `1133` owns the admission decisions;
   a correction will re-assert what the correction withdrew, and it arrives
   looking like coverage.
 
-**Consequence.** NEST 1,610 → **4,798 enterprises** (3,189 carrying
+**Consequence.** NEED 1,610 → **4,798 enterprises** (3,189 carrying
 `source_id = OWNERV6`), 3,190 ids minted, 472 owner hubs, relations
 3,789 → 7,559. `1072 verify` PASS on all 8 invariants; `1102` (the enricher)
 must run LAST after any rebuild.
@@ -3341,7 +3341,7 @@ this decides what they are made of from here.*
 `docs/methodology/README.md` listed thirteen papers and reached thirteen by
 counting `_entity_layer`. The delivered set also reaches thirteen - twelve
 storefront datasets plus gaming through Cedar Grove - and the two thirteens are
-not the same thirteen. **`nest` had no paper and nothing noticed**, because a
+not the same thirteen. **`need` had no paper and nothing noticed**, because a
 count that agrees is not a set that agrees. Exactly the conflation that let
 `newsletters` ship as an unwanted storefront slot.
 
@@ -3809,8 +3809,8 @@ are children of the business. When uncertain, `CB-` first.
 
 **What it supersedes and absorbs.** ADR-008 (a registration as a legal person)
 is superseded: the business register is the legal-person layer, and a
-registration hangs off it. ADR-020's NEST register is the business register's
-largest seed and its rule that a NEST id may never stand in for a `cedar_uid`
+registration hangs off it. ADR-020's NEED register is the business register's
+largest seed and its rule that a NEED id may never stand in for a `cedar_uid`
 carries over to `CB-` unchanged. ADR-030's place register is the establishment
 layer, already built. The 45 `Individually Native-owned business` entities
 keep their uids and gain business ids with an equivalence row.

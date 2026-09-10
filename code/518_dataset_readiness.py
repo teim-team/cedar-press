@@ -188,9 +188,9 @@ NATURAL_SCOPE = {
     "gaming": "entity",               # a facility has an operator
     "natural-resources": "entity",    # a lease has a lessor
     "native-owned-businesses": "entity",
-    # NEST asserts an owner on every row by construction - an enterprise with
-    # no owner hub is not a NEST row - so its natural scope is `entity`.
-    "nest": "entity",
+    # NEED asserts an owner on every row by construction - an enterprise with
+    # no owner hub is not a NEED row - so its natural scope is `entity`.
+    "need": "entity",
     "nagpra": "entity",               # notices name affiliated tribes
     "_entity_layer": "hub",
     "legislation": "indian_country",  # a bill's subject is usually general
@@ -226,7 +226,7 @@ OWNERS = {
     # scored as unkeyed. 8/8 tables measured, 0 unmeasured.
     "natural-resources":        "READY - maintain",
     "native-owned-businesses":  "enterprise (READY - extending)",
-    "nest":                     "nest (new 2026-09-02, code/1072)",
+    "need":                     "need (new 2026-09-02, code/1072)",
     "nonprofits":               "grain-ws5",
     "lobbying":                 "grain-ws4",
     # 2026-09-02: grain-legislation closed the last blocker by ruling

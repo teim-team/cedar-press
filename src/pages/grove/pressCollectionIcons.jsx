@@ -112,7 +112,7 @@ const NonprofitsIcon = (
 );
 
 /** A parent node tied to two subsidiaries, and the tie between them: who owns whom. */
-const NestIcon = (
+const NeedIcon = (
   <svg {...glyph}>
     <circle cx="14" cy="7" r="3.6" />
     <circle cx="6.5" cy="21" r="3.1" />
@@ -190,7 +190,7 @@ export const COLLECTION_ICONS = {
   "natural-resources": ResourcesIcon,
   owned: OwnedIcon,
   nonprofits: NonprofitsIcon,
-  nest: NestIcon,
+  need: NeedIcon,
   census: CensusIcon,
   labor: LaborIcon,
   economy: EconomyIcon,

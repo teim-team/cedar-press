@@ -338,7 +338,7 @@ see. **29 crosswalk rows** are gated this way today, on **16 linked directory ro
 
 ---
 
-## UPDATE 2026-09-02 — the crosswalk is on the table now, and the other half of the 1070 split needed NEST's refusal
+## UPDATE 2026-09-02 — the crosswalk is on the table now, and the other half of the 1070 split needed NEED's refusal
 
 *`code/1100_nob_crosswalk_promotion.py`. Full write-up:
 **`docs/ENTITY_LAYER_DEEPENING_2026-09-02.md`** section 4.*
@@ -376,8 +376,8 @@ The 523 rows with no crosswalk row are `NOT_ATTEMPTED`, named as such: `1001`
 ran before they were merged in. An honest state (ADR-010), not a no-match.
 
 **2. The refusal that was applied to one half of a split.** `code/1070` staged
-1,106 rows; the 583 OWNERSHIP rows went to NEST and the 523 RELATIONSHIP rows
-came here. **NEST refused 229 of its 583 as an "unreviewed HTML heading/anchor
+1,106 rows; the 583 OWNERSHIP rows went to NEED and the 523 RELATIONSHIP rows
+came here. **NEED refused 229 of its 583 as an "unreviewed HTML heading/anchor
 scrape"** because the block yields page furniture and natural persons' names.
 That refusal was never applied to the 523. Measured before this pass:
 

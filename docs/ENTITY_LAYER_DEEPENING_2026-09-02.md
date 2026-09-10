@@ -1,4 +1,4 @@
-# The entity layer, `nest`, `native-owned-businesses` and `nonprofits` — deepening pass, 2026-09-02
+# The entity layer, `need`, `native-owned-businesses` and `nonprofits` — deepening pass, 2026-09-02
 
 *Five scripts, `code/1098`–`code/1102`, each with `verify` (exit 1 on breach)
 and `selftest` (the violation injected into a copy, exit 1 asserted, the copy
@@ -16,10 +16,10 @@ struck and the correction is stated, per `docs/DOC_CONTRADICTIONS_2026-08-26.md`
 
 | dataset | what changed | the measurement that mattered |
 |---|---|---|
-| `_entity_layer` | 1,772 blank endpoints promoted from prose into 9 declared columns, 262 bridged to NEST | **the "466 recover nothing" rows recover a CAGE. Recovery is 1,462/1,462, 100%** |
+| `_entity_layer` | 1,772 blank endpoints promoted from prose into 9 declared columns, 262 bridged to NEED | **the "466 recover nothing" rows recover a CAGE. Recovery is 1,462/1,462, 100%** |
 | `_entity_layer` | 13 ledger rows flagged where the legal name is another sovereign's official name | **$3.55M on ONE row, 285 of 285 awards in the wrong state, tier A, published** |
-| `nest` | a fourth evidence family, on disk, unused | **87 ownership assertions independently corroborated, up from 60** |
-| `nest` | Chugach adjudicated; a duplicate class found | **25 companies are held twice; 8 of the 50 rows are Chugach** |
+| `need` | a fourth evidence family, on disk, unused | **87 ownership assertions independently corroborated, up from 60** |
+| `need` | Chugach adjudicated; a duplicate class found | **25 companies are held twice; 8 of the 50 rows are Chugach** |
 | `native-owned-businesses` | the crosswalk promoted onto the table | **178 published "business names" are natural persons** |
 | `nonprofits` | `keyed_name_match_*`, and 13 redirects | **461 of 1,423 live keys are place-name collisions; the existing flag reaches 160** |
 
@@ -69,29 +69,29 @@ Nine columns now carry what the sentence carried, with an **anti-fabrication
 invariant (I2): every promoted value is a verbatim substring of that row's own
 `notes`.** A value that does not survive that test is not written.
 
-### The NEST bridge, and the register question — see ADR-020
+### The NEED bridge, and the register question — see ADR-020
 
-`data/spine/cedar_nest_id_register.csv` is **the enterprise level of the
+`data/spine/cedar_need_id_register.csv` is **the enterprise level of the
 existing sub-hub layer**, exactly as `facility_id` is the facility level. Not a
 parallel entity space; a `CEDAR-NEST-` id may never stand where a `cedar_uid`
 is expected. Full decision, with the table of registers, in **ADR-020**.
 
-262 of 1,462 `owned_by` firms (17.9%) resolve to a NEST enterprise, and only
+262 of 1,462 `owned_by` firms (17.9%) resolve to a NEED enterprise, and only
 when **both sides agree about the owner**:
 
 ```
-rung 1  published UEI equals a NEST published UEI          29
-rung 2  published CAGE equals a NEST published CAGE         0
+rung 1  published UEI equals a NEED published UEI          29
+rung 2  published CAGE equals a NEED published CAGE         0
 rung 3  normalised name unique among the enterprises of
         this same owner hub                               233
 refused, owner disagreement                                 1
 unresolved                                              1,200
-(23 more would resolve through NEST's own uei_candidate
+(23 more would resolve through NEED's own uei_candidate
  and are REFUSED - a candidate on one side plus a
  candidate on the other is not evidence)
 ```
 
-**Every unresolved row now says why**, in `counterparty_nest_basis`. A counter
+**Every unresolved row now says why**, in `counterparty_need_basis`. A counter
 that does not name what it dropped is `293` class 2c.
 
 ### The first cross-source ownership disagreement the entity layer has produced
@@ -101,14 +101,14 @@ Laulima Government Solutions, LLC        UEI QTJZT9K41S61
   entity_relationships  ->  Bering Straits Native Corporation   ANRC-BERSTR-00
                             tier A, "Ruled by Elijah 2026-08-06: re-attributed
                             ... the earlier claim was wrong"
-  nest / shard-H        ->  Alaka'ina Foundation                NHO-ALAKAI-00
+  need / shard-H        ->  Alaka'ina Foundation                NHO-ALAKAI-00
                             parent_declared_subsidiary_list,
                             source http://beringalakaina.com/
 ```
 
 **The source host names both parents.** `ENTITY_MATCH_RULES` rule 11: a joint
 venture genuinely has two. **Refused, not reconciled**; no link written, neither
-side altered. `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`, and
+side altered. `review/entity_rel_need_owner_conflicts_2026-09-02.csv`, and
 owner queue item **EL-2**.
 
 ---
@@ -202,30 +202,30 @@ Owner queue item **EL-1**; register
 
 ---
 
-## 3. `nest` — a fourth evidence family that was already on this machine
+## 3. `need` — a fourth evidence family that was already on this machine
 
-`code/1102_nest_corroboration_adjudication.py`
+`code/1102_need_corroboration_adjudication.py`
 
 `docs/ASSERTION_LAYER.md`: every fact in Cedar rests on exactly one source.
-NEST had 60 enterprises on two independent families (an audited AS 45.55.139
+NEED had 60 enterprises on two independent families (an audited AS 45.55.139
 filing and the parent's own website) and its next-pass list named the Alaska
 Division of Corporations — a network fetch — as the cheapest third.
 
 **`data/clean/fpds_uei_edges.csv` is a fourth family and it is local.** It
 records the parent a registrant declared **about itself**, to the federal
 government: identifier-grade (rule 11), made by the CHILD, and therefore
-independent of both families NEST already has. Rule 11's measured
+independent of both families NEED already has. Rule 11's measured
 **20-observation ownership floor** applies; below it an edge is a joint venture.
 
 The test is not "the names match" but **"the declared parent resolves, through
-the identifier ledger, to the owner hub NEST already asserts"** — two
+the identifier ledger, to the owner hub NEED already asserts"** — two
 independent parties agreeing about the OWNER.
 
 ```
 reached an FPDS edge at or above the 20-observation floor      272
   rung 1, published UEI                                         28
   rung 2, exact normalised name                                244
-CORROBORATED - the declared parent lands on NEST's own owner     87
+CORROBORATED - the declared parent lands on NEED's own owner     87
 CONTRADICTED - it lands on a different Cedar entity                8
 PARENT_UNRESOLVED - the parent UEI is in no ledger row           177
 PARENT_BELOW_JV_FLOOR - an edge exists but under 20 obs           71
@@ -236,20 +236,20 @@ NO_DECLARED_PARENT                                             1,267
 
 ### The 8 contradictions are mostly the ledger's fault — rule 12, from a fifth direction
 
-| enterprise | NEST says | the ledger resolves the declared parent to |
+| enterprise | NEED says | the ledger resolves the declared parent to |
 |---|---|---|
 | Bowhead Manufacturing / Professional Solutions / Transportation, Rockford Corporation, UMIAQ Environmental | Ukpeaġvik Iñupiat **Corporation** | `AKNF-INPTAS-00-ARCSLO`, the **village government** |
 | Goldbelt Eagle, LLC | Goldbelt, Incorporated | `AKNF-VEAGLE-00-…`, the Native Village of **Eagle** |
 | Vista Defense Technologies, LLC | Bristol Bay Native Corporation | `TRBF-BNVSTA-00`, Buena **Vista** Rancheria |
 
 `ANCSA_OWNERSHIP_RULING` rule 2 says the first five cannot be what the ledger
-says; the other two are collisions on `Eagle` and `Vista`. **NEST is the correct
+says; the other two are collisions on `Eagle` and `Vista`. **NEED is the correct
 side on 6 of 8.** This is the `ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION`
 family (334 defects, $24.52B) reached from a fifth direction. Two stay open:
-`Nisga'a Tek LLC` (NEST Tlingit & Haida vs Goldbelt, 254 obs) and
-`Broadleaf, Inc` (NEST The Hawai'i Pacific Foundation vs ASRC, 325 obs).
+`Nisga'a Tek LLC` (NEED Tlingit & Haida vs Goldbelt, 254 obs) and
+`Broadleaf, Inc` (NEED The Hawai'i Pacific Foundation vs ASRC, 325 obs).
 Neither side was repointed —
-`review/nest_fpds_parent_contradictions_2026-09-02.csv`.
+`review/need_fpds_parent_contradictions_2026-09-02.csv`.
 
 ### Chugach, adjudicated: the audited filing UPHELD, now on two of three sources
 
@@ -266,17 +266,17 @@ the conflict register did not state:
    corporation**. Four parallel siblings at one tier, two of them named
    *Holdings*.
 
-**`relationship` does not fuse two axes, it fuses three.** NEST already found
+**`relationship` does not fuse two axes, it fuses three.** NEED already found
 SHARE (`wholly_owned`) vs ROLE (`holding_company`). This pair adds the third: a
 **consolidation note answers where an entity SITS**; a **business directory
 answers what a firm SELLS**; both render into the same six words. The audited
 filing answers the question the column is asking. `holding_company` stands, and
-the adjudication is written onto `data/staging/nest/evidence_conflicts.csv`
+the adjudication is written onto `data/staging/need/evidence_conflicts.csv`
 itself.
 
-### NEST holds 25 companies twice, and it costs a corroboration each
+### NEED holds 25 companies twice, and it costs a corroboration each
 
-Found while reading the Chugach rows. NEST clusters on (owner hub, normalised
+Found while reading the Chugach rows. NEED clusters on (owner hub, normalised
 name) and **a trailing parenthetical survives normalisation**:
 
 ```
@@ -293,12 +293,12 @@ plain row already carries 2 or 3. The 25th is a **gloss**, not an acronym:
 
 The cost is double: **25 rows of overstatement in a 1,610-row headline, and 25
 lost corroborations**, because a restatement that fails to cluster raises
-nobody's source count — which is exactly what NEST's merge exists to do.
+nobody's source count — which is exactly what NEED's merge exists to do.
 
 **FLAGGED, NOT MERGED.** Merging retires 25 `CEDAR-NEST-` ids out of an
 append-only register; `docs/IDENTIFIER_STANDARD.md` forbids retiring an id as a
 side effect and `docs/AGENT_FIELD_GUIDE.md` §4 says measure duplicates before
-collapsing them. Register: `review/nest_name_variant_duplicates_2026-09-02.csv`.
+collapsing them. Register: `review/need_name_variant_duplicates_2026-09-02.csv`.
 
 ### The headline is unaffected and here is why that is worth saying
 
@@ -351,10 +351,10 @@ a no-match.
 
 ### Part two: 178 published "business names" are natural persons
 
-`code/1070`'s sweep staged 1,106 rows. The 583 OWNERSHIP rows went to NEST,
+`code/1070`'s sweep staged 1,106 rows. The 583 OWNERSHIP rows went to NEED,
 which **refused 229 of them** as *"unreviewed HTML heading/anchor scrape"* —
 the block yields page furniture and **natural persons' names**, which
-`docs/NEST_BUILD_LOG.md` makes a hard rule. The 523 RELATIONSHIP rows were
+`docs/NEED_BUILD_LOG.md` makes a hard rule. The 523 RELATIONSHIP rows were
 merged into this table and **the same refusal was never applied to them.**
 
 Measured on the live table before this pass:
@@ -380,7 +380,7 @@ undecidable                  258
 publishable  Y -> N          523
 ```
 
-`publish_hold = Y` with a basis naming NEST's identical refusal; the prior value
+`publish_hold = Y` with a basis naming NEED's identical refusal; the prior value
 preserved verbatim in `publishable_before_1100`, so the hold reverses with one
 column copy. **Written once** — a second run would otherwise capture the value
 this script just changed and lose the original `Y`; the preserved-value column
@@ -530,14 +530,14 @@ Register: `review/np_live_key_review_2026-09-02.csv`.
 
 | hole | size, measured 2026-09-02 | why it is still open |
 |---|---:|---|
-| `owned_by` firms with no NEST sub-hub | **1,200 of 1,462 (82.1%)** | each carries a published UEI or CAGE and is a registration sub-hub Cedar has not otherwise recorded. Closing it means harvesting more subsidiary lists, not minting ids |
+| `owned_by` firms with no NEED sub-hub | **1,200 of 1,462 (82.1%)** | each carries a published UEI or CAGE and is a registration sub-hub Cedar has not otherwise recorded. Closing it means harvesting more subsidiary lists, not minting ids |
 | constellation from-sides with no `cedar_uid` | **2,408 of 3,153 (76.4%)** | **not a hole.** All 2,365 TERO ones join to `native_owned_businesses` on `from_record_key`; 186 now carry a federal UEI; **278 are natural persons' names and must never be minted.** ADR-020 |
 | ledger cross-government collisions | **13 rows, $5.72M, 8 published** | awaiting owner ruling EL-1. Flagged, nothing repointed |
 | the Laulima two-owner disagreement | **1 row** | awaiting owner ruling EL-2 |
 | `Ohkay Owingeh` missing the alias `San Juan Pueblo` | **1 spine row** | a one-line spine edit, deliberately not made by this pass |
-| NEST enterprises on one source | **1,172 of 1,610 (72.8%)** | 87 now have an independent second family; the next cheapest is the Alaska Division of Corporations and it needs the network |
-| NEST duplicate name variants | **25 groups, 50 rows** | flagged; merging retires ids and is an owner decision |
-| NEST open parent contradictions | **2 rows** | Nisga'a Tek, Broadleaf |
+| NEED enterprises on one source | **1,172 of 1,610 (72.8%)** | 87 now have an independent second family; the next cheapest is the Alaska Division of Corporations and it needs the network |
+| NEED duplicate name variants | **25 groups, 50 rows** | flagged; merging retires ids and is an owner decision |
+| NEED open parent contradictions | **2 rows** | Nisga'a Tek, Broadleaf |
 | `native_owned_businesses.business_entity_id` | **still 4 of 2,916** | correctly so — a UEI is not an entity id. What was missing was the federal-link family, now present on all 2,916 |
 | NHO directory coverage | **`SOURCE_DOES_NOT_PUBLISH`, 210 probed, 4 lists** | the record is the SBA 8(a) register and the NHOA directory. `NOT_ACQUIRED` |
 | nonprofits held on a state disagreement | **461 of 1,423 live keys (32.4%)** | flagged, not withdrawn; 50 of them read `NATIVE_VERIFIED_STRICT` |
@@ -553,26 +553,26 @@ code/1098_entity_rel_counterparty.py        build | dry | verify | selftest
 code/1099_crosstribe_legalname_audit.py     build | dry | verify | selftest
 code/1100_nob_crosswalk_promotion.py        build | dry | verify | selftest
 code/1101_np_keyed_name_support.py          build | dry | verify | selftest
-code/1102_nest_corroboration_adjudication.py build | dry | verify | selftest
+code/1102_need_corroboration_adjudication.py build | dry | verify | selftest
 
 data/clean/entity_relationships.csv          +9 columns   2,292 rows unchanged
 data/clean/cedar_identifier_ledger_final.csv +4 columns  20,577 rows unchanged
 data/clean/native_owned_businesses.csv      +16 columns   2,916 rows unchanged
 data/clean/np_orgs.csv                       +9 columns  12,764 rows unchanged
-data/clean/nest_enterprises.csv              +9 columns   1,610 rows unchanged
-data/staging/nest/evidence_conflicts.csv     +5 columns       2 rows unchanged
+data/clean/need_enterprises.csv              +9 columns   1,610 rows unchanged
+data/staging/need/evidence_conflicts.csv     +5 columns       2 rows unchanged
 
-review/entity_rel_nest_owner_conflicts_2026-09-02.csv        1
+review/entity_rel_need_owner_conflicts_2026-09-02.csv        1
 review/ledger_crossgov_name_collisions_2026-09-02.csv       13
-review/nest_fpds_parent_contradictions_2026-09-02.csv        8
-review/nest_name_variant_duplicates_2026-09-02.csv          50
+review/need_fpds_parent_contradictions_2026-09-02.csv        8
+review/need_name_variant_duplicates_2026-09-02.csv          50
 review/np_live_key_review_2026-09-02.csv                   535
 review/OWNER_DECISION_QUEUE.md                  APPENDED EL-1, EL-2, EL-3
 
 docs/ARCHITECTURE_DECISIONS.md   APPENDED inside <!-- BEGIN ADR-020-SUBHUB-REGISTERS -->
 docs/ENTITY_REL_COUNTERPARTY.json · docs/CROSSTRIBE_LEGALNAME_AUDIT.json ·
 docs/NOB_CROSSWALK_PROMOTION.json · docs/NP_KEYED_NAME_SUPPORT.json ·
-docs/NEST_CORROBORATION.json
+docs/NEED_CORROBORATION.json
 ```
 
 **Every table was written with a `.bak_2026-09-02_pre_<stem>` backup** — the

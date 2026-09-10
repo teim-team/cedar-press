@@ -1,37 +1,37 @@
 #!/usr/bin/env python3
 """
-Cedar Press - 1102: A SECOND, GENUINELY INDEPENDENT EVIDENCE FAMILY FOR NEST
+Cedar Press - 1102: A SECOND, GENUINELY INDEPENDENT EVIDENCE FAMILY FOR NEED
                     OWNERSHIP - THE PARENT THE SUBSIDIARY DECLARED TO FPDS.
-                    PLUS THE CHUGACH ADJUDICATION, AND THE 25 COMPANIES NEST
+                    PLUS THE CHUGACH ADJUDICATION, AND THE 25 COMPANIES NEED
                     HOLDS TWICE.
 
-    py -3 code/1102_nest_corroboration_adjudication.py            # enrich
-    py -3 code/1102_nest_corroboration_adjudication.py verify     # exit 1
-    py -3 code/1102_nest_corroboration_adjudication.py selftest   # prove FIRES
+    py -3 code/1102_need_corroboration_adjudication.py            # enrich
+    py -3 code/1102_need_corroboration_adjudication.py verify     # exit 1
+    py -3 code/1102_need_corroboration_adjudication.py selftest   # prove FIRES
 
 PART ONE - THE SECOND FAMILY
 -----------------------------
 `docs/ASSERTION_LAYER.md`: every fact in Cedar rests on exactly one source.
-NEST is the first dataset with an answer - 60 enterprises corroborated by two
+NEED is the first dataset with an answer - 60 enterprises corroborated by two
 independent evidence FAMILIES (an audited AS 45.55.139 filing and the parent's
 own website). Its own next-pass list names the Alaska Division of Corporations
 as the cheapest third, which is a network fetch.
 
 **There is a fourth family already on this machine and nobody had used it for
-NEST: `data/clean/fpds_uei_edges.csv`.** It records the parent a registrant
+NEED: `data/clean/fpds_uei_edges.csv`.** It records the parent a registrant
 declared to FPDS **about itself**, which is:
 
   * an identifier-grade assertion (`ENTITY_MATCH_RULES` rule 11);
   * made by the CHILD, to the federal government, under a registration
     obligation - so it is independent of both the parent's audited filing and
-    the parent's marketing site, which are the two families NEST already has;
+    the parent's marketing site, which are the two families NEED already has;
   * already governed by a measured threshold: an edge observed **20+ times is
     ownership**; below that it is a joint venture or a co-award.
 
 The corroboration test is deliberately not "the names match". It is:
 
     the firm's declared FPDS parent, at 20+ observations, resolves through
-    `cedar_identifier_ledger_final.csv` to THE SAME OWNER HUB that NEST
+    `cedar_identifier_ledger_final.csv` to THE SAME OWNER HUB that NEED
     already asserts - or to a SIBLING enterprise under that same hub.
 
 Two independent parties therefore have to agree about the OWNER, not about a
@@ -40,59 +40,59 @@ string. Two routes reach the firm:
     rung 1  the firm's PUBLISHED UEI is the edge's `child_uei`
     rung 2  the firm's normalised name equals the edge's `child_name`.
             A name match alone would be weak; here the corroborator is that
-            the DECLARED PARENT independently lands on the owner NEST already
+            the DECLARED PARENT independently lands on the owner NEED already
             asserts, which is the second signal checklist step 3 asks for.
 
 MEASURED, over all 1,610 enterprises
     reached an FPDS edge at or above the 20-observation floor      272
       rung 1, published UEI                                         28
       rung 2, exact normalised name                                244
-    CORROBORATED - the declared parent lands on NEST's own owner     87
+    CORROBORATED - the declared parent lands on NEED's own owner     87
     CONTRADICTED - it lands on a different Cedar entity                8
     PARENT_UNRESOLVED - the parent UEI is in no ledger row           177
     PARENT_BELOW_JV_FLOOR - an edge exists but under 20 obs           71
     NO_DECLARED_PARENT                                             1,267
 
-**87 is more than the 60 two-family corroborations NEST had**, and it is a
+**87 is more than the 60 two-family corroborations NEED had**, and it is a
 different 87: this family is the child's own federal registration, where the
 other two are the parent's audited filing and the parent's website.
 
 PART TWO - THE 9 CONTRADICTIONS ARE MOSTLY THE LEDGER'S FAULT, AGAIN
 ----------------------------------------------------------------------
 `ENTITY_MATCH_RULES` rule 12: when a declared parent contradicts an
-attribution, suspect the PARENT row first. It holds here too, and NEST comes
+attribution, suspect the PARENT row first. It holds here too, and NEED comes
 out ahead on 7 of the 9:
 
     Bowhead Manufacturing / Professional Solutions / Transportation,
     Rockford Corporation, UMIAQ Environmental
-        NEST      -> Ukpeagvik Inupiat Corporation      (the CORPORATION)
+        NEED      -> Ukpeagvik Inupiat Corporation      (the CORPORATION)
         ledger    -> AKNF-INPTAS-00-ARCSLO              (the VILLAGE GOVERNMENT)
         `ANCSA_OWNERSHIP_RULING` rule 2 and
         `cedar_domain.village_government_owns_an_anc()` (always False) say the
         ledger's link cannot exist. This is the
         ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION family (334 defects,
-        $24.52B) reached from a FIFTH direction, and NEST is the correct side.
+        $24.52B) reached from a FIFTH direction, and NEED is the correct side.
 
     Goldbelt Eagle, LLC
-        NEST -> Goldbelt, Incorporated;  ledger -> AKNF-VEAGLE-00-...,
+        NEED -> Goldbelt, Incorporated;  ledger -> AKNF-VEAGLE-00-...,
         the Native Village of EAGLE. A collision on the word `Eagle`.
 
     Vista Defense Technologies, LLC
-        NEST -> Bristol Bay Native Corporation; ledger -> TRBF-BNVSTA-00,
+        NEED -> Bristol Bay Native Corporation; ledger -> TRBF-BNVSTA-00,
         Buena VISTA Rancheria. A collision on the word `Vista`.
 
     The two that are NOT explained away and go to the register as open:
-        Nisga'a Tek LLC   NEST Tlingit & Haida   vs ledger Goldbelt (254 obs)
-        Broadleaf, Inc    NEST The Hawai'i Pacific Foundation
+        Nisga'a Tek LLC   NEED Tlingit & Haida   vs ledger Goldbelt (254 obs)
+        Broadleaf, Inc    NEED The Hawai'i Pacific Foundation
                           vs FPDS parent ARCTIC SLOPE REGIONAL CORPORATION
 
 Nothing is repointed here. The contradictions are written to
-`review/nest_fpds_parent_contradictions_<date>.csv` with both sides' evidence.
+`review/need_fpds_parent_contradictions_<date>.csv` with both sides' evidence.
 
 PART THREE - CHUGACH, ADJUDICATED
 -----------------------------------
-`data/staging/nest/evidence_conflicts.csv` holds the only two real evidence
-conflicts in NEST: `Chugach Government Solutions, LLC` and `Chugach Regional
+`data/staging/need/evidence_conflicts.csv` holds the only two real evidence
+conflicts in NEED: `Chugach Government Solutions, LLC` and `Chugach Regional
 Development, LLC`, audited filing `holding_company` against web list
 `operating_company`.
 
@@ -112,16 +112,16 @@ side of the conflict register states:
     *Holdings*.
 
 **Adjudication: the audited filing stands, now on two of three sources rather
-than on rank alone.** And the modelling lesson generalises the one NEST already
+than on rank alone.** And the modelling lesson generalises the one NEED already
 learned: `relationship` does not fuse two axes, it fuses THREE. A consolidation
 note answers *where does this entity sit in the consolidation*; a business
 directory answers *what does this firm sell*. Both render the answer into the
 same six words. A conflict check that does not know which question was asked
 manufactures disagreements - which is exactly how v1 produced 37 and v2 23.
 
-PART FOUR - NEST HOLDS 25 COMPANIES TWICE, AND IT COSTS A CORROBORATION EACH
+PART FOUR - NEED HOLDS 25 COMPANIES TWICE, AND IT COSTS A CORROBORATION EACH
 ------------------------------------------------------------------------------
-Found while reading the Chugach rows. NEST clusters on (owner hub, normalised
+Found while reading the Chugach rows. NEED clusters on (owner hub, normalised
 name), and a **trailing parenthetical survives normalisation**:
 
     CEDAR-NEST-000473-WH  Chugach Government Solutions, LLC   2 observations
@@ -137,13 +137,13 @@ is a GLOSS, not an acronym: `Aan Hit` / `Aan Hit (Village House)`.
 
 So the cost is counted twice over: 25 rows of overstatement in a 1,610-row
 headline, **and** 25 lost corroborations, because a restatement that fails to
-cluster raises nobody's source count. That is the exact thing NEST's own merge
+cluster raises nobody's source count. That is the exact thing NEED's own merge
 was designed to do and the acronym form slipped past it.
 
 **They are FLAGGED, not merged.** `docs/IDENTIFIER_STANDARD.md`: a
 `cedar_uid` - and by the same rule a `CEDAR-NEST-` id - is never retired
 without evidence and never as a side effect. Merging would retire 25 ids that
-are already in `data/spine/cedar_nest_id_register.csv`, which is append-only.
+are already in `data/spine/cedar_need_id_register.csv`, which is append-only.
 `docs/AGENT_FIELD_GUIDE.md` §4 also says measure duplicates before collapsing
 them: this pass measures and names them, and the collapse is an owner decision.
 
@@ -179,14 +179,14 @@ try:
 except Exception:
     pass
 
-NEST = ROOT / "data" / "clean" / "nest_enterprises.csv"
+NEED = ROOT / "data" / "clean" / "need_enterprises.csv"
 EDGES = ROOT / "data" / "clean" / "fpds_uei_edges.csv"
 LEDGER = ROOT / "data" / "clean" / "cedar_identifier_ledger_final.csv"
-CONFLICTS = ROOT / "data" / "staging" / "nest" / "evidence_conflicts.csv"
-CONTRA = ROOT / "review" / f"nest_fpds_parent_contradictions_{TODAY}.csv"
-DUPES = ROOT / "review" / f"nest_name_variant_duplicates_{TODAY}.csv"
-MANIFEST = ROOT / "docs" / "NEST_CORROBORATION.json"
-BAK_TAG = f".bak_{TODAY}_pre_1102_nest_corroboration_adjudication"
+CONFLICTS = ROOT / "data" / "staging" / "need" / "evidence_conflicts.csv"
+CONTRA = ROOT / "review" / f"need_fpds_parent_contradictions_{TODAY}.csv"
+DUPES = ROOT / "review" / f"need_name_variant_duplicates_{TODAY}.csv"
+MANIFEST = ROOT / "docs" / "NEED_CORROBORATION.json"
+BAK_TAG = f".bak_{TODAY}_pre_1102_need_corroboration_adjudication"
 
 #: ENTITY_MATCH_RULES rule 11. Measured, not chosen: every real ownership case
 #: is observed 100+ times and every sub-20 disagreement was a joint venture.
@@ -250,7 +250,7 @@ def digest(rows, fields):
 
 
 def build(dry_run=False) -> int:
-    rows, fields = read_table(NEST)
+    rows, fields = read_table(NEED)
     base = [c for c in fields if c not in NEW]
     before = digest(rows, base)
     n_before = len(rows)
@@ -299,7 +299,7 @@ def build(dry_run=False) -> int:
         if len(members) < 2 or not bn:
             continue
         gi += 1
-        gid = f"NESTDUP-{gi:04d}"
+        gid = f"NEEDDUP-{gi:04d}"
         st["dupe_groups"] += 1
         st["dupe_rows"] += len(members)
         withp = [m for m in members if PAREN.search(m.get("enterprise_name")
@@ -387,7 +387,7 @@ def build(dry_run=False) -> int:
             f"declared FPDS parent '{best[1]}' ({best[0]}) observed {best[2]}x, "
             f"at or above the {JV_FLOOR}-observation ownership floor; resolved "
             "through cedar_identifier_ledger_final.csv to "
-            f"{resolves or '(no Cedar entity)'}; NEST asserts owner hub {hub}. "
+            f"{resolves or '(no Cedar entity)'}; NEED asserts owner hub {hub}. "
             "The FPDS declaration is made by the CHILD about itself and is "
             "independent of both the parent's audited filing and the parent's "
             "own website.")
@@ -397,11 +397,11 @@ def build(dry_run=False) -> int:
             contra.append({
                 "enterprise_id": r.get("enterprise_id"),
                 "enterprise_name": r.get("enterprise_name"),
-                "nest_owner_hub_handle": hub,
-                "nest_owner_hub_name": r.get("owner_hub_name"),
-                "nest_relationship": r.get("relationship"),
-                "nest_evidence_class": r.get("evidence_class"),
-                "nest_n_distinct_sources": r.get("n_distinct_sources"),
+                "need_owner_hub_handle": hub,
+                "need_owner_hub_name": r.get("owner_hub_name"),
+                "need_relationship": r.get("relationship"),
+                "need_evidence_class": r.get("evidence_class"),
+                "need_n_distinct_sources": r.get("n_distinct_sources"),
                 "fpds_declared_parent_name": best[1],
                 "fpds_declared_parent_uei": best[0],
                 "fpds_declared_parent_observations": str(best[2]),
@@ -412,7 +412,7 @@ def build(dry_run=False) -> int:
                          "contradicts an attribution, suspect the PARENT row "
                          "first. Check whether the ledger row for the parent "
                          "UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_"
-                         "CORPORATION defect before treating this as a NEST "
+                         "CORPORATION defect before treating this as a NEED "
                          "error.")})
 
     for r in rows:
@@ -424,7 +424,7 @@ def build(dry_run=False) -> int:
         r["duplicate_name_variant_basis"] = (
             f"{nmem} enterprises under owner hub {r.get('owner_hub_handle')} "
             f"share the parenthetical-stripped normalised name '{bn}'; the "
-            f"variant is {kind}. NEST clusters on (owner hub, normalised name) "
+            f"variant is {kind}. NEED clusters on (owner hub, normalised name) "
             "and a trailing parenthetical survives normalisation, so a "
             "restatement of a firm already held became a second row instead of "
             "raising the first row's source count. FLAGGED, NOT MERGED - a "
@@ -438,7 +438,7 @@ def build(dry_run=False) -> int:
         return 1
 
     if not dry_run:
-        write_table(NEST, rows, out_fields, tag=BAK_TAG)
+        write_table(NEED, rows, out_fields, tag=BAK_TAG)
         if contra:
             write_table(CONTRA, contra, list(contra[0].keys()))
         if dupes:
@@ -451,7 +451,7 @@ def build(dry_run=False) -> int:
         for c in crows:
             for a in add:
                 c.setdefault(a, "")
-            c["adjudicated_by"] = "code/1102_nest_corroboration_adjudication.py"
+            c["adjudicated_by"] = "code/1102_need_corroboration_adjudication.py"
             c["adjudicated_date"] = TODAY
             c["third_source"] = ("anc_tribal_subsidiary_lookup.csv "
                                  "(ANC_TRIBE_LOOKUP)")
@@ -498,8 +498,8 @@ def build(dry_run=False) -> int:
         print(f"  [1102] adjudicated {CONFLICTS.relative_to(ROOT)}")
         MANIFEST.write_text(json.dumps(
             {"built": TODAY,
-             "script": "1102_nest_corroboration_adjudication.py",
-             "table": "data/clean/nest_enterprises.csv",
+             "script": "1102_need_corroboration_adjudication.py",
+             "table": "data/clean/need_enterprises.csv",
              "columns_added": NEW, "jv_observation_floor": JV_FLOOR,
              "base_fields_md5": before,
              "contradictions": contra, **st}, indent=2), encoding="utf-8")
@@ -508,7 +508,7 @@ def build(dry_run=False) -> int:
 
 
 def verify(path: Path | None = None) -> int:
-    p = path or NEST
+    p = path or NEED
     rows, fields = read_table(p)
     if any(c not in fields for c in NEW):
         print("  [1102] verify: columns absent - run the enricher first")
@@ -560,11 +560,11 @@ def verify(path: Path | None = None) -> int:
 
 def selftest() -> int:
     import tempfile
-    rows, fields = read_table(NEST)
+    rows, fields = read_table(NEED)
     if any(c not in fields for c in NEW):
         print("  [1102] selftest: run the enricher first")
         return 1
-    tmp = Path(tempfile.mkdtemp()) / "nest_enterprises.csv"
+    tmp = Path(tempfile.mkdtemp()) / "need_enterprises.csv"
     cases = []
 
     def run(label, mut):
@@ -603,7 +603,7 @@ def selftest() -> int:
     def orphan(rs):
         for r in rs:
             if not (r.get("duplicate_name_variant_group") or "").strip():
-                r["duplicate_name_variant_group"] = "NESTDUP-9999"
+                r["duplicate_name_variant_group"] = "NEEDDUP-9999"
                 return
     run("I4 a duplicate group with one member", orphan)
 

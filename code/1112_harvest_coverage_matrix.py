@@ -259,9 +259,9 @@ def collect_outputs():
            s(r, "checked_date"))
 
     # --- enterprises
-    for r in rd(P("data", "clean", "nest_enterprises.csv")):
+    for r in rd(P("data", "clean", "need_enterprises.csv")):
         ev(s(r, "owner_hub_cedar_uid", "cedar_uid"), "enterprises", "HARVESTED",
-           "data/clean/nest_enterprises.csv",
+           "data/clean/need_enterprises.csv",
            "%s rel=%s" % (s(r, "enterprise_name"), s(r, "relationship")), s(r, "retrieved_date"))
     for r in rj(P("data", "staging", "tribal_enterprises", "enterprise_register.jsonl")):
         ev(s(r, "tribe_cedar_uid", "tribe_id"), "enterprises", "HARVESTED",
@@ -308,10 +308,10 @@ def collect_outputs():
                "data/clean/native_business_identifier_crosswalk.csv",
                "%s=%s tier=%s" % (s(r, "identifier_type"), s(r, "identifier_value"),
                                   s(r, "identifier_tier")), s(r, "built_date"))
-    for r in rd(P("data", "clean", "nest_enterprises.csv")):
+    for r in rd(P("data", "clean", "need_enterprises.csv")):
         if s(r, "uei") or s(r, "cage_code"):
             ev(s(r, "owner_hub_cedar_uid"), "identifiers", "HARVESTED",
-               "data/clean/nest_enterprises.csv",
+               "data/clean/need_enterprises.csv",
                "%s uei=%s cage=%s" % (s(r, "enterprise_name"), s(r, "uei"), s(r, "cage_code")),
                s(r, "retrieved_date"))
     for r in rj(P("data", "staging", "entity_profiles", "shard_h_identifiers.jsonl")):

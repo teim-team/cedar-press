@@ -135,7 +135,7 @@
         },
         {
           "kind": "p",
-          "text": "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Prime Contracting and in the enterprise structures NEST publishes. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible."
+          "text": "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Prime Contracting and in the enterprise structures NEED publishes. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible."
         },
         {
           "kind": "pull",
@@ -515,9 +515,9 @@
       "linkage": "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately."
     },
     {
-      "id": "nest",
-      "short": "NEST",
-      "name": "Native Enterprise Structures and Ties",
+      "id": "need",
+      "short": "NEED",
+      "name": "Cedar Native Entity Enterprise Dataset",
       "shelf": "pro",
       "coverage": {
         "kind": "series",
@@ -772,8 +772,8 @@
         }
       ]
     },
-    "nest": {
-      "name": "NEST: Native Enterprise Structures and Ties",
+    "need": {
+      "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "version": "v1",
       "updated": "2026-09-04",
       "cadence": "Updated as records arrive",
@@ -785,7 +785,7 @@
           "kind": "data",
           "changed": [
             "Release: 3 tables, 14,868 rows.",
-            "A 10-row preview of nest_enterprises.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of need_enterprises.csv, the collection's flagship table, downloads from the shelf."
           ]
         },
         {
@@ -794,7 +794,7 @@
           "kind": "data",
           "changed": [
             "First release on Cedar Press: 3 tables, 5,757 rows.",
-            "A 10-row preview of nest_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
+            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         }
       ]

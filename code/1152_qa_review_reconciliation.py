@@ -46,7 +46,7 @@ subject of the row. The owner ruled that too broad:
     identify the row subject.' The issue is 'the role of the Cedar UID must be
     unambiguous.'"*
 
-So NEST carrying `enterprise_id = CEDAR-NEST-...` beside `cedar_uid = Ahtna` is
+So NEED carrying `enterprise_id = CEDAR-NEST-...` beside `cedar_uid = Ahtna` is
 CORRECT. Both findings are rewritten rather than discarded, and the test
 changes with them: not "does cedar_uid identify the subject" but "does every
 dataset declare the ROLE its cedar_uid plays, and does it resolve to a Native
@@ -205,7 +205,7 @@ def check_internal_paths():
     READS THE FIRST 2,000 ROWS PER FILE and the cap is deliberate here -
     running this regex over every cell of a 1.2M-row, 80-column file is 97M
     matches. The counts below are therefore a LOWER BOUND, not a population:
-    `nest.source_document` reports 669 and is 3,189 on the whole file. For the
+    `need.source_document` reports 669 and is 3,189 on the whole file. For the
     full measure, and for the split between a column that is build lineage and
     a column whose values MIX evidence with a code path,
     `code/1153_qa_publication_eligibility.py` reads every row.
@@ -544,9 +544,9 @@ def scan_subcontracting():
     return f
 
 
-def scan_nest():
-    """One pass over dist/customer/nest.csv - 4,798 rows."""
-    _say("scanning nest.csv")
+def scan_need():
+    """One pass over dist/customer/need.csv - 4,798 rows."""
+    _say("scanning need.csv")
     urlok = re.compile(r"^https?://[^\s<>\"]+$")
     f = {"rows": 0, "uid_is_owner_hub": 0, "unspecified_affiliation_ownership_pub": 0,
          "unreviewed_but_publishable": 0, "url_malformed": 0, "url_blank": 0,
@@ -562,7 +562,7 @@ def scan_nest():
             "source_url", "status", "status_basis", "sector",
             "fpds_declared_parent_name", "fpds_parent_resolves_to"]
     norm = lambda s: re.sub(r"[^a-z]", "", (s or "").lower().replace("the", ""))
-    for r in _stream("nest", cols):
+    for r in _stream("need", cols):
         f["rows"] += 1
         if r.get("cedar_uid") and r["cedar_uid"] == r.get("owner_hub_cedar_uid"):
             f["uid_is_owner_hub"] += 1
@@ -620,7 +620,7 @@ def scan_nest():
                 "publishable": r.get("publishable", ""),
                 "evidence_human_reviewed": r.get("evidence_human_reviewed", "")}
     f["assertion_class"] = Counter()
-    for r in _stream("nest", ["assertion_class", "relation_class"]):
+    for r in _stream("need", ["assertion_class", "relation_class"]):
         f["assertion_class"][(r.get("relation_class", ""),
                               r.get("assertion_class", ""))] += 1
     return f
@@ -1527,9 +1527,9 @@ def chk_cp145(ev):
             f"and no column says which")
 
 
-# ---- NEST ------------------------------------------------------------------
-def _nest_named(ev, eid, expected, why):
-    n = ev["nest"]
+# ---- NEED ------------------------------------------------------------------
+def _need_named(ev, eid, expected, why):
+    n = ev["need"]
     r = n["named_rows"].get(eid)
     if not r:
         return (FIXED, f"{eid} no longer ships")
@@ -1550,20 +1550,20 @@ def _nest_named(ev, eid, expected, why):
 
 def chk_cp116(ev):
     """Goldbelt Hawk assigned to Tlingit & Haida."""
-    return _nest_named(ev, "CEDAR-NEST-001630-JQ", "Goldbelt Incorporated",
+    return _need_named(ev, "CEDAR-NEST-001630-JQ", "Goldbelt Incorporated",
                        "FPDS names the parent and Cedar names a different one.")
 
 
 def chk_cp117(ev):
     """A Bismarck college assigned to a California rancheria."""
-    return _nest_named(ev, "CEDAR-NEST-002101-BF", "ND Associates of Tribal Colleges",
+    return _need_named(ev, "CEDAR-NEST-002101-BF", "ND Associates of Tribal Colleges",
                        "The owner hub is 1,500 miles from the enterprise.")
 
 
 def chk_cp118(ev):
     """A tribal government emitted as a business it owns."""
-    n = ev["nest"]
-    base = _nest_named(ev, "CEDAR-NEST-004386-96", None,
+    n = ev["need"]
+    base = _need_named(ev, "CEDAR-NEST-004386-96", None,
                        "The enterprise IS the owner hub.")
     return (base[0], base[1] + f" Population: {_pct(n['self_owned'], n['rows'])} "
                                f"rows have an enterprise_name that normalises to "
@@ -1575,7 +1575,7 @@ def chk_cp118(ev):
 
 def chk_cp119(ev):
     """cedar_uid repeats the owner hub on every row."""
-    n = ev["nest"]
+    n = ev["need"]
     return _v(n["uid_is_owner_hub"],
               f"cedar_uid equals owner_hub_cedar_uid on "
               f"{_pct(n['uid_is_owner_hub'], n['rows'])} rows. Under the owner's "
@@ -1587,7 +1587,7 @@ def chk_cp119(ev):
 
 def chk_cp120(ev):
     """An affiliation asserted as ownership."""
-    n = ev["nest"]
+    n = ev["need"]
     pairs = "; ".join(f"relation_class={a or 'blank'} -> assertion_class="
                       f"{b or 'blank'}: {c:,}"
                       for (a, b), c in n["assertion_class"].most_common(4))
@@ -1603,7 +1603,7 @@ def chk_cp120(ev):
 
 def chk_cp121(ev):
     """Auto-only rows are publishable."""
-    n = ev["nest"]
+    n = ev["need"]
     named = [k for k, r in n["named_rows"].items()
              if r["evidence_human_reviewed"].upper() == "N"
              and r["publishable"].upper() == "Y"]
@@ -1618,9 +1618,9 @@ def chk_cp121(ev):
 
 def chk_cp123(ev):
     """A URL column holding a URL plus a sentence."""
-    n = ev["nest"]
+    n = ev["need"]
     if not n["url_malformed"]:
-        return (FIXED, "every filled nest.source_url parses as a bare URL")
+        return (FIXED, "every filled need.source_url parses as a bare URL")
     return (CONFIRMED,
             f"{_pct(n['url_malformed'], n['rows'])} source_url values are not "
             f"URLs - they are a URL with prose appended, e.g. "
@@ -1629,7 +1629,7 @@ def chk_cp123(ev):
 
 def chk_cp124(ev):
     """No public source at all."""
-    n = ev["nest"]
+    n = ev["need"]
     return _v(n["url_blank"],
               f"source_url is blank on {_pct(n['url_blank'], n['rows'])} rows. "
               f"Adding the {n['url_malformed']:,} malformed ones, "
@@ -1639,7 +1639,7 @@ def chk_cp124(ev):
 
 def chk_cp127(ev):
     """Operating status inferred from being mentioned."""
-    n = ev["nest"]
+    n = ev["need"]
     op = n["status"].get("operating", 0)
     return _v(n["status_basis_named_by_owner"],
               f"status=operating on {_pct(op, n['rows'])} rows, and status_basis "
@@ -1650,7 +1650,7 @@ def chk_cp127(ev):
 
 def chk_cp128(ev):
     """A sector column that is three vocabularies at once."""
-    n = ev["nest"]
+    n = ev["need"]
     return _v(n["sector_catchall"],
               f"sector takes {len(n['sector'])} distinct values over {n['rows']:,} "
               f"rows: blank on {_pct(n['sector_blank'], n['rows'])}, and "
@@ -1661,7 +1661,7 @@ def chk_cp128(ev):
 
 def chk_cp129(ev):
     """FPDS names an intermediate parent Cedar cannot resolve."""
-    n = ev["nest"]
+    n = ev["need"]
     return _v(n["fpds_parent_declared_unresolved"],
               f"{_pct(n['fpds_parent_declared_unresolved'], n['fpds_parent_declared'])} "
             f"rows that carry an fpds_declared_parent_name have a blank "
@@ -2368,7 +2368,7 @@ def classify(f, ev):
         undoc = [k for k, v in ev["uid"].items() if not v["role_documented"]]
         return (HUMAN,
                 "REWRITTEN per owner ruling 2026-09-02: the test is not "
-                "whether cedar_uid names the row subject - a NEST row keyed "
+                "whether cedar_uid names the row subject - a NEED row keyed "
                 "enterprise_id with cedar_uid=owner is correct - but whether "
                 "its ROLE is unambiguous and it always resolves to a Native "
                 f"entity. Measured: {len(ev['uid'])} datasets carry cedar_uid, "
@@ -2454,7 +2454,7 @@ def gather():
     ev["contractors"] = scan_contractors()
     ev["funding"] = scan_funding()
     ev["subcontracting"] = scan_subcontracting()
-    ev["nest"] = scan_nest()
+    ev["need"] = scan_need()
     ev["nonprofits"] = scan_nonprofits()
     ev["nagpra"] = scan_nagpra()
     ev["lobbying"] = scan_lobbying()
@@ -2502,7 +2502,7 @@ def main() -> int:
         print(f"      STILL GENERIC: {', '.join(still)}")
 
     c, s, n, f_, lg, lb, ng, fr, d, nr, o, b = (
-        ev["contractors"], ev["subcontracting"], ev["nest"], ev["funding"],
+        ev["contractors"], ev["subcontracting"], ev["need"], ev["funding"],
         ev["legislation"], ev["lobbying"], ev["nagpra"], ev["federal_register"],
         ev["deals"], ev["natural_resources"], ev["owned"], ev["bundle"])
     print("\n    the measurements the verdicts rest on")
@@ -2520,9 +2520,9 @@ def main() -> int:
     print(f"      subcontracting subaward > prime                   : "
           f"{_pct(s['exceeds_prime'], s['rows'])}, "
           f"{s['ratio_over_10']:,} over 10x")
-    print(f"      nest publishable with no human review             : "
+    print(f"      need publishable with no human review             : "
           f"{_pct(n['unreviewed_but_publishable'], n['rows'])}")
-    print(f"      nest affiliation asserted as OWNERSHIP            : "
+    print(f"      need affiliation asserted as OWNERSHIP            : "
           f"{_pct(n['unspecified_affiliation_ownership_pub'], n['rows'])}")
     print(f"      nagpra institution_count=1 over a joined name     : "
           f"{_pct(ng['count1_but_conjoined'], ng['rows'])}")

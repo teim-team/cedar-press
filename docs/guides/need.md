@@ -1,6 +1,6 @@
-# NEST: Native Enterprise Structures and Ties: a researcher's guide
+# Cedar Native Entity Enterprise Dataset (NEED): a researcher's guide
 
-Collection `nest` · public file `nest.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `need` · public file `need.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own “Our Companies” and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 5,820. This is the count the release recorded for `nest_enterprises.csv`, not the sum of the collection's 3 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-04):** 5,820. This is the count the release recorded for `need_enterprises.csv`, not the sum of the collection's 3 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -38,7 +38,7 @@ Joining detailed collections on `cedar_uid` alone multiplies rows: one entity ha
 
 ## Revisions
 
-A relationship is re-observed on each source edition (`source_edition_date`). Duplicate observations are merged only on confirmed identity. Multiple owners of one enterprise are held in the collection's relations table and are owed in this file (§13); an arbitrary primary owner is never chosen.
+A relationship is re-observed on each source edition (`source_edition_date`). Duplicate observations are merged only on confirmed identity. Multiple owners of one enterprise are held in the collection's relations table and are owed in this file (§13); an arbitrary primary owner is never chosen. The collection was renamed on 2026-09-10: it was published as NEST, "NEST: Native Enterprise Structures and Ties", through v1, and the tables, the public file and the two `is_nest_owner_hub` / `n_nest_enterprises_owned` columns were renamed with it. Enterprise identifiers were NOT renamed and still read `CEDAR-NEST-`; edge identifiers still read `NESTREL-`. An identifier is permanent, so a v0 or v1 citation resolves unchanged.
 
 ## Field dictionary
 
@@ -114,7 +114,7 @@ Nothing beyond the grain and harmonization work named above.
 
 **Version:** v1. **Release date:** 2026-09-04.
 
-**Cite as:** Lumecon, "NEST: Native Enterprise Structures and Ties" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Cedar Native Entity Enterprise Dataset (NEED)" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Two relations, declared per row and never conflated: a STRUCTURE is ownership — nation, holding company, operating company — and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees.
 

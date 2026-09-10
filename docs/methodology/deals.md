@@ -587,11 +587,11 @@ rows carry `is_ownership_claim = N`; its tiers are `registered_with` (2,365),
 `declares_service_to` (588), `managed_under_contract` (78), `located_within`
 (78) and `chartered_by` (44). `code/1071_identifier_driven_deal_sweep.py` builds
 its family closure from that file at every tier, and
-`nest_enterprise_relations.csv` - the file that actually carries 3,613 ownership
-edges - is not read by it at all. Within `nest`, `joint_venture` (157 edges) and
+`need_enterprise_relations.csv` - the file that actually carries 3,613 ownership
+edges - is not read by it at all. Within `need`, `joint_venture` (157 edges) and
 `passive_investment` (10) are also excluded from a family here, because a joint
 venture between two families is the transaction this dataset exists to record.
-An `affiliation` edge in `nest` reading *"Doyon, Limited publishes these as its
+An `affiliation` edge in `need` reading *"Doyon, Limited publishes these as its
 own operating companies"* makes **Huna Totem Corporation** - an independent
 Hoonah village corporation - a member of Doyon's family, and cost five real
 Doyon rows before it was caught.

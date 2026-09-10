@@ -86,7 +86,7 @@ INVARIANTS (verify exits 1 on any failure)
      dataset's own total obligations exactly.
   I2 ROW PARTITION: same, in rows.
   I3 ROW SUBSET: in every cell the Native row count <= the all-recipient row
-     count. Only the ROW counts nest. The first draft of this invariant also
+     count. Only the ROW counts need. The first draft of this invariant also
      required the Native MONEY to be <= the all-recipient money, and it fired on
      49 real cells -- wrongly. Obligations are SIGNED: a county whose non-Native
      rows net negative through deobligations has an all-recipient sum below its
@@ -134,7 +134,7 @@ FLOOR = ("The Native sum is a FLOOR: attribution can miss and never invents. "
 SIGNED = ("Obligations are SIGNED: a deobligation is a negative row. A county's "
           "Native sum can therefore exceed its all-recipient sum without any "
           "error, when the non-Native rows in that county net negative. Only the "
-          "ROW COUNTS are guaranteed to nest.")
+          "ROW COUNTS are guaranteed to need.")
 
 DATASETS = [
     {
@@ -546,7 +546,7 @@ def write_demo(stats):
          if win["aiannh_geoids_observed"] else ""))
     A("4. **Obligations are signed.** A deobligation is a negative row, so a "
       "county's Native sum can exceed its all-recipient sum with nothing wrong. "
-      "Only the ROW COUNTS are guaranteed to nest.")
+      "Only the ROW COUNTS are guaranteed to need.")
     A(f"5. **Coverage, dataset-wide.** {int(ds['unallocated_pop_rows']):,} rows "
       f"carrying ${float(ds['unallocated_pop_usd']):,.2f} have NO "
       f"place-of-performance county key and sit in no county's POP sum; "

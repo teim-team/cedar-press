@@ -89,14 +89,14 @@ Reported, never dropped. A column here is an upstream DATA problem: the value sh
 | dataset | column | plumbing / filled | % | kind |
 |---|---|---:|---:|---|
 | funding | `attribution_basis` | 184,077 / 701,955 | 26.2 | SOME_VALUES |
-| nest | `source_document` | 4,295 / 5,120 | 83.9 | SOME_VALUES |
+| need | `source_document` | 4,295 / 5,120 | 83.9 | SOME_VALUES |
 | legislation | `outcome_basis` | 3,069 / 3,069 | 100.0 | EVERY_VALUE |
 | legislation | `entity_link_basis` | 3,069 / 3,069 | 100.0 | EVERY_VALUE |
 | legislation | `native_bill_action_coverage__action_lookup_basis` | 3,061 / 3,069 | 99.7 | SOME_VALUES |
 | legislation | `entity_class_scope_basis` | 2,456 / 2,456 | 100.0 | EVERY_VALUE |
 | natural-resources | `cedar_uid_basis` | 586 / 586 | 100.0 | EVERY_VALUE |
 | gaming | `open_date_source_value_placeholder_basis` | 295 / 295 | 100.0 | EVERY_VALUE |
-| nest | `nest_entity_dual_role__verification_sources` | 281 / 2,406 | 11.7 | SOME_VALUES |
+| need | `need_entity_dual_role__verification_sources` | 281 / 2,406 | 11.7 | SOME_VALUES |
 | deals | `Notes` | 141 / 1,039 | 13.6 | SOME_VALUES |
 | gaming | `close_date_source_value_placeholder_basis` | 76 / 76 | 100.0 | EVERY_VALUE |
 | nonprofits | `exclusion_reason` | 27 / 4,960 | 0.5 | SOME_VALUES |
@@ -114,7 +114,7 @@ Reported, never dropped. A column here is an upstream DATA problem: the value sh
 
 - **QA-CP016 is RESOLVED, not open.** It was logged here as needing an owner because 3,469 quarantined rows read `ruling_status = RULED_ATTRIBUTED` and a positive human ruling should not be discarded by a batch-level quarantine. **The premise was false.** Those rows are `cluster_v3` (3,330) and `need_v6` (139), and **no row anywhere in the quarantine is tier A** - 227,540 of 227,540 are tier B on `identifier_ruling_tier` and on `confidence_tier`, while `ENTITY_MATCH_RULES` rule 8 reserves tier A for an owner ruling. They are the quarantined method’s own output wearing an adjudication-shaped name. Masked by `BLOCKED_COMBINATIONS`, keyed on the method and the tier rather than on the status label - which matters, because the label is on 1,405 of the still-attributed rows and the unlabelled `cluster_v3` rows beside them carried $16.00B.
 
-- **QA-NEST-SOURCEDOC** `nest.source_document` is a real source-document column on 825 rows and the owner's own research dataset, named by its path on this machine, on 3,189. It is kept because dropping it would delete the 825; the fix is upstream.
+- **QA-NEST-SOURCEDOC** `need.source_document` is a real source-document column on 825 rows and the owner's own research dataset, named by its path on this machine, on 3,189. It is kept because dropping it would delete the 825; the fix is upstream.
 
 - **QA-GEOREASON** `subcontracting.geo_subawardee_county_gap_reason` opens every one of its 85,858 filled values with `closed 2026-09-02 by code/1109_subawardee_geo_promote:` and then states a real method. The sentence is evidence with a build note welded to the front of it; the fix is to stop writing the prefix.
 

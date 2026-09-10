@@ -161,11 +161,11 @@ because nothing in either suite compares the two maps.
 human running `node scripts/dump-press.mjs`. The step was skipped:
 
 ```
-js  PRESS_CATALOG:      13 entries, includes `nest`
+js  PRESS_CATALOG:      13 entries, includes `need`
 py  press_catalog.CATALOG: 12 entries, does not
 ```
 
-`nest` is one of the storefront's pinned twelve — `test_collection.py` asserts
+`need` is one of the storefront's pinned twelve — `test_collection.py` asserts
 it by name. It is on the shelf, it is in the browser's catalog, and the
 service's catalog has never heard of it. Regenerating the dump adds exactly
 that one entry and nothing else, which is the proof it is staleness and not a

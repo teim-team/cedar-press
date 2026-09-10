@@ -79,7 +79,7 @@ a new judgement. **Consequence: 681 of 786 gaming facilities have zero voting
 families for their tribal affiliation.**
 
 **3. A member association's directory is the member speaking.** `shard-H` in
-NEST is `nhoassociation.org/members.html`. It is folded into
+NEED is `nhoassociation.org/members.html`. It is folded into
 `entity_self_published` rather than given a family, because a members list
 reports what members submitted about themselves.
 
@@ -122,8 +122,8 @@ general — it is a property of two sources *about one thing*.
 
 | pair | dataset | facts | 0 fam | 1 fam | **≥2 fam** |
 |---|---|---:|---:|---:|---:|
-| P1 NEST identifier — parent's own CAGE × FPDS | nest | 107 | 0 | 31 | **76** |
-| P2 NEST ownership — audited filing × own site × FPDS-declared parent | nest | 1,615 | 0 | 1,474 | **141** |
+| P1 NEED identifier — parent's own CAGE × FPDS | need | 107 | 0 | 31 | **76** |
+| P2 NEED ownership — audited filing × own site × FPDS-declared parent | need | 1,615 | 0 | 1,474 | **141** |
 | P3 deals — `Source_1` × `Source_2` | deals | 1,073 | 2 | 1,022 | **49** |
 | P4 nonprofit Native status — Cedar's inference × the org's own 990 words | nonprofits | 784 | 716 | 68 | **0** |
 | P5 gaming affiliation — CGCC × the property's own site | gaming | 786 | 681 | 100 | **5** |
@@ -131,7 +131,7 @@ general — it is a property of two sources *about one thing*.
 
 ### P1 — the cheapest real corroboration in the project
 
-107 NEST rows carry a CAGE **published by the parent on its own site**
+107 NEED rows carry a CAGE **published by the parent on its own site**
 (`identifier_basis`). **76 of those 107 CAGEs appear in
 `fpds_uei_cage_map.csv`** — the parent says it, and a federal award record
 independently shows the same code in use. Two families, 76 facts, zero
@@ -141,11 +141,11 @@ The other 31 are as interesting: **a CAGE a parent publishes that has never
 appeared on a federal award.** Not a defect — a firm can hold a CAGE and not
 win work — but it is the honest boundary of the corroboration.
 
-### P2 — NEST's own multi-source column is not a multi-family column
+### P2 — NEED's own multi-source column is not a multi-family column
 
-`nest_enterprises.n_distinct_sources` reports **438 rows with more than one
+`need_enterprises.n_distinct_sources` reports **438 rows with more than one
 source**. At observation grain, in
-`data/staging/nest/ownership_edges_staged.jsonl` (3,796 rows), the same
+`data/staging/need/ownership_edges_staged.jsonl` (3,796 rows), the same
 population reaches **two evidence families on 40 groups.** The gap is almost
 entirely one filer's AS 45.55.139 report across several fiscal years: three
 documents, one observer.
@@ -283,14 +283,14 @@ signal in the organisation's own words**.
 
 **None of these rows were changed.** `np_orgs.csv` is not this layer's to edit.
 
-### The 8 NEST ownership contradictions
+### The 8 NEED ownership contradictions
 
 The firm's declared FPDS parent resolves to a Cedar entity other than the
-owner NEST publishes. `ENTITY_MATCH_RULES` rule 12 says suspect the parent row
-first, and `code/1102` already adjudicated seven of these in NEST's favour —
+owner NEED publishes. `ENTITY_MATCH_RULES` rule 12 says suspect the parent row
+first, and `code/1102` already adjudicated seven of these in NEED's favour —
 they are carried here so the conflict stays visible rather than closed:
 
-| firm | NEST says | FPDS declared parent resolves to |
+| firm | NEED says | FPDS declared parent resolves to |
 |---|---|---|
 | Bowhead Manufacturing / Professional Solutions / Transportation, Rockford Corporation, UMIAQ Environmental *(5)* | Ukpeaġvik Iñupiat Corporation | `AKNF-INPTAS-00-ARCSLO` (the **village government**) |
 | Nisga'a Tek LLC | Tlingit & Haida | `ANVC-GLDBLT-00` |
@@ -384,7 +384,7 @@ every rejection named.** It immediately surfaced the P4 denominator —
 | dataset | status | facts examined | ≥2 families | wholly single-sourced |
 |---|---|---:|---:|:-:|
 | `_entity_layer` | MEASURED (identifier bindings only) | 34 | 16 | N |
-| `nest` | MEASURED | 1,722 | 217 | N |
+| `need` | MEASURED | 1,722 | 217 | N |
 | `deals` | MEASURED | 1,073 | 49 | N |
 | `nonprofits` | MEASURED | 817 | 33 | N |
 | `gaming` | MEASURED | 786 | 5 | N |
@@ -454,9 +454,9 @@ Nothing below was applied. Each names the owner.
    express that SAM and FPDS are one family for a name and two for an
    identifier binding. That distinction is what earns P1's 76 corroborations,
    and the assertion layer cannot currently make it.
-2. **`nest_enterprises.csv` should carry `n_independent_families` beside
+2. **`need_enterprises.csv` should carry `n_independent_families` beside
    `n_distinct_sources`.** 438 and 141 are both true and only one of them is
-   corroboration. Owner: the NEST workstream.
+   corroboration. Owner: the NEED workstream.
 3. **`deals_classified.csv` should carry the measured family count beside
    `Verification_Status`.** 13 rows claim independent corroboration and cite
    one family. Owner: the deals workstream. *Do not rewrite the labels* —

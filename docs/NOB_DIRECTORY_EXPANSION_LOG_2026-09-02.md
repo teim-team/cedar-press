@@ -313,10 +313,10 @@ rather than a re-harvest.
   `review/tribal_vendor_list_registry_2026-08-26.csv` records no `list_url` for
   either. That is `ROUTE_NOT_FOUND`, not `CHECKED_ABSENT`, and it is a
   discovery task.
-- **Nothing here touched NEST.** The 50 Akima operating companies are admitted
+- **Nothing here touched NEED.** The 50 Akima operating companies are admitted
   as a `subsidiary_directory` / `parent_asserted_subsidiary` business-directory
   source, exactly as ASRC Federal (TBD-056) and Doyon (TBD-059) already are.
-  Whether they should ALSO become `nest_enterprises` rows is `1072`'s decision
+  Whether they should ALSO become `need_enterprises` rows is `1072`'s decision
   and its `load_sources()` is the place for it — this pass did not open that
   file.
 - **The two `native_owned_businesses.bak_*.csv` files in `data/clean` are still

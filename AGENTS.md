@@ -755,7 +755,7 @@ Name similarity ≠ relatedness ("Cherokee Inc." trap). DBA ≠ legal name. Subs
 ## Queue (highest value first)
 0. **The public dataset specification** — `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (the owner's, verbatim; it governs) with `docs/FIELD_MAP_2026-09-05.md` (every current column decided, the approved header per dataset, what is owed) and `docs/guides/` (one researcher guide per collection). The site side is done: `1137` now generates the customer header from `data/cedar/field_map.json` through `cedar_publication.apply_field_map` and refuses an undecided column. The terminal's part, per dataset, on the full tables: validate each decision; test every `combine` for agreement before one column replaces its sources (deals categories and status); measure whether funding and contractors support the award-recipient-fiscal-year grain (§4, §10); decide vote and action record types for legislation (§6); bring the other advocacy families under `activity_type` (§9); write names as published beside NAGPRA's roles and `related_notice_id` (§8); recode `attribution_status` values that name the retired scheme; run `--audit` and write the `owned` map when its sample lands (§15); then report per dataset the counts §17 asks for and re-measure each guide's figures from the finished file. `docs/COLUMN_ORDER_NOTE_FOR_THE_TERMINAL_2026-09-05.md` stands where the specification did not change it.
 0a. **Superseded later on 2026-09-05, kept as written (this journal is append-only).** The entry above was the morning's statement; the one below stands.
-0b. **The public dataset specification** — `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (the owner's, verbatim: the brief, then the exact column specification and the identifier retirement rule, which win where they differ), `docs/FIELD_MAP_2026-09-05.md` (every current column decided, the approved header per dataset in exact order, what is owed), `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` (every competing identifier with its disposition) and `docs/guides/` (one researcher guide per collection). The site side is done: `1137` generates the customer header from `data/cedar/field_map.json` through `cedar_publication.apply_field_map` and refuses an undecided column, a disagreeing alias, an unadjudicated identifier or a retired scheme's name in a value. The terminal's part, per dataset, on the full tables: verify every rename value for value; test every `combine` for agreement before one column replaces its sources (funding's recipient type, contractors' sector and competition type, deals' type, structure and status, nonprofits' inclusion category and link status); prove the pass changed columns and never rows, multiplicity, event identity, totals or eligibility (§ Required validation); write the owed derivations (deals' `research_note` from Notes, the Federal Register's `event_date_precision`, names as published from the bridges); settle the three retirement findings that stop a dataset (recode funding's `attribution_status` vocabulary; adjudicate NEST's `enterprise_existing_cedar_uid` and nonprofits' `entity_id` / `cedar_spine_entity_id`); migrate the supporting-table identifiers the report lists; run `--audit` and write the `owned` map when its sample lands; then re-measure each guide's figures from the finished file.
+0b. **The public dataset specification** — `docs/PUBLIC_DATASET_SPEC_2026-09-05.md` (the owner's, verbatim: the brief, then the exact column specification and the identifier retirement rule, which win where they differ), `docs/FIELD_MAP_2026-09-05.md` (every current column decided, the approved header per dataset in exact order, what is owed), `docs/IDENTIFIER_RETIREMENT_2026-09-05.md` (every competing identifier with its disposition) and `docs/guides/` (one researcher guide per collection). The site side is done: `1137` generates the customer header from `data/cedar/field_map.json` through `cedar_publication.apply_field_map` and refuses an undecided column, a disagreeing alias, an unadjudicated identifier or a retired scheme's name in a value. The terminal's part, per dataset, on the full tables: verify every rename value for value; test every `combine` for agreement before one column replaces its sources (funding's recipient type, contractors' sector and competition type, deals' type, structure and status, nonprofits' inclusion category and link status); prove the pass changed columns and never rows, multiplicity, event identity, totals or eligibility (§ Required validation); write the owed derivations (deals' `research_note` from Notes, the Federal Register's `event_date_precision`, names as published from the bridges); settle the three retirement findings that stop a dataset (recode funding's `attribution_status` vocabulary; adjudicate NEED's `enterprise_existing_cedar_uid` and nonprofits' `entity_id` / `cedar_spine_entity_id`); migrate the supporting-table identifiers the report lists; run `--audit` and write the `owned` map when its sample lands; then re-measure each guide's figures from the finished file.
 1. Get the **do-file**; review the 117 QC-flagged panel rows against it.
 2. Comprehensive FPDS pull (both methodologies) via HigherGov/USAspending → upload → match through Entity_Master aliases + NEID; build the ownership-change ledger from the deal rows.
 3. TBCP + HUD ONAP award lists via manual download → row-per-award (path to 500+; channel inventory with counts lives in Backfill_Plan).
@@ -4145,7 +4145,7 @@ refuses `RULE_NOT_PUBLISHED` without a `searched` value.
   **spouses and grandchildren qualify**, so a listed business may have no Native
   owner at all.
 
-`whose_ownership` separates populations that DO NOT NEST and must never be
+`whose_ownership` separates populations that DO NOT NEED and must never be
 collapsed: `THIS_TRIBE_MEMBER` / `ANY_FEDERALLY_RECOGNIZED_TRIBE_MEMBER` /
 `ANY_NATIVE_PERSON` / `TRIBAL_GOVERNMENT_ENTITY` /
 `SHAREHOLDER_OR_DESCENDANT_OR_SPOUSE` / `PARENT_CORPORATION`.
@@ -6269,12 +6269,12 @@ Each has a matching control (C1–C4) proving it does not over-fire.
 
 ---
 
-## GATE ATTRIBUTION 2026-09-02 — workstream `nest` (dataset 14)
+## GATE ATTRIBUTION 2026-09-02 — workstream `need` (dataset 14)
 
-`code/1072_tribally_owned_enterprises.py` built **NEST: Native Enterprise
-Structures and Ties** — `data/clean/nest_enterprises.csv` (1,482) and
-`nest_enterprise_relations.csv` (3,492). `518` reports **READY 14 / 14**. Full
-record in **`docs/NEST_BUILD_LOG.md`**.
+`code/1072_tribally_owned_enterprises.py` built **NEED: Native Enterprise
+Structures and Ties** — `data/clean/need_enterprises.csv` (1,482) and
+`need_enterprise_relations.csv` (3,492). `518` reports **READY 14 / 14**. Full
+record in **`docs/NEED_BUILD_LOG.md`**.
 
 **`62_no_regression_check.py` exits 1.** Naming what is and is not this
 workstream's, with the measurement, per standing rule 15.
@@ -6294,7 +6294,7 @@ workstream's, with the measurement, per standing rule 15.
 - `contract_violations = 11`. The 11 are four `federal_funding_*` declarations
   naming the dropped `tribe_id` column and seven orphan shippable tables
   (`native_owned_businesses*`, `prime_contracts.bak_*`, `regulations_gov_*`,
-  `sam_native_class_distributions`). **NEST contributed 2 and they are fixed** —
+  `sam_native_class_distributions`). **NEED contributed 2 and they are fixed** —
   both tables now carry `cedar_uid`, which is the documented external join key
   and which the declaration had promised before the column existed.
 - `rulings_unapplied 1,215 → 2,894`, `files_with_columns_lost_vs_backup = 4`,
@@ -6304,13 +6304,13 @@ workstream's, with the measurement, per standing rule 15.
 
 **OURS, and open:**
 
-- **`nest_enterprises.csv` and `nest_enterprise_relations.csv` are BUILT and
+- **`need_enterprises.csv` and `need_enterprise_relations.csv` are BUILT and
   DOCUMENTED but NOT SHIPPED.** They are 2 of the ~20 tables behind
   `tables_missing_from_25_TABLES`, `tables_missing_notes_contract`,
   `ship_tables_at_zero` and `tables_undocumented_in_codebook`; the other ~18 are
   the geography workstream's `geo_*` tables and the constellation's
   `cedar_constellation_*`. Codebook blocks **are** registered
-  (`18a_nest_enterprises`, `18b_nest_enterprise_relations`, appended to
+  (`18a_need_enterprises`, `18b_need_enterprise_relations`, appended to
   `codebook_master.csv` rather than rewriting it, backup
   `.bak_2026-09-02_pre_1072_tribally_owned_enterprises`). What remains is the
   chain in `docs/SHIPPING_RUNBOOK.md` — `87 → 25 → 27` — which rewrites
@@ -6325,7 +6325,7 @@ workstream's, with the measurement, per standing rule 15.
 (`845:418`, called from `scan_csv`). Mid-edit by its own workstream, not caused
 here. Its instruction was followed anyway: `1072.write_csv` derives its header
 as `CANONICAL + [c for c in live if c not in CANONICAL]`, so a column another
-workstream adds to a NEST table survives a rebuild instead of being deleted.
+workstream adds to a NEED table survives a rebuild instead of being deleted.
 
 ---
 
@@ -6379,24 +6379,24 @@ wrote **zero** files into `data/clean/`: `tables_undocumented_in_codebook
 13 → 19`, `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, and the two
 tables that stopped shipping (`hearing_bill_links` 465 → 464,
 `native_bills_subject_sweep` 2,414 → 2,409). The same failures are already
-named, with owners, in the `1072` NEST entry immediately above — the new
-tables are the geography, constellation and NEST workstreams'. Recorded here
+named, with owners, in the `1072` NEED entry immediately above — the new
+tables are the geography, constellation and NEED workstreams'. Recorded here
 so that reading this entry alone does not imply the gate was green.
 
 ### ADDENDUM — the 1070 handoff, merged the same day
 
 `code/1070_anc_nho_business_sweep.py` staged **583 `assertion_class = OWNERSHIP`
-rows** for NEST (`data/staging/native_business_sweep_1070/held_for_nest_ownership.csv`),
+rows** for NEED (`data/staging/native_business_sweep_1070/held_for_need_ownership.csv`),
 the integrator having merged the 523 `RELATIONSHIP` rows into
-`native_owned_businesses.csv`. NEST **merged** them rather than appending:
+`native_owned_businesses.csv`. NEED **merged** them rather than appending:
 
 ```
 583 held -> 229 refused (unreviewed heading scrape) + 57 refused (shareholder-
 owned, not corporation-owned) + 297 ingested -> 167 merged onto enterprises
-NEST already held + 128 net new
+NEED already held + 128 net new
 ```
 
-`nest_enterprises.csv` 1,482 -> **1,610**; `nest_enterprise_relations.csv`
+`need_enterprises.csv` 1,482 -> **1,610**; `need_enterprise_relations.csv`
 3,492 -> **3,789**. `518` still reports **READY 14 / 14**, `293` still reports
 **zero findings in `1072_*`**, and `verify`/`selfcheck` are still 8/8.
 
@@ -6404,15 +6404,15 @@ NEST already held + 128 net new
 ASRC's leadership page, alongside `Blank`, `No Results Found` and
 `Employee Resources`. The sweep had flagged them itself
 (`HEADING_SCRAPE_ON_A_DIRECTORY_INDEX`, *"review before resolving"*) and was
-right to. Every refusal keeps its full 58 staged columns plus a `nest_refusal`
-sentence in `data/staging/nest/sweep_1070_refused.csv` — flag, never delete —
+right to. Every refusal keeps its full 58 staged columns plus a `need_refusal`
+sentence in `data/staging/need/sweep_1070_refused.csv` — flag, never delete —
 so any of them can be reversed without re-harvesting. **Whoever owns 1070
 should look at that file: the same scrape route also fed
 `native_owned_businesses.csv`, and nothing in this pass checked whether those
 person names reached it too.**
 
 **A conflict check produced a plausible wrong number twice before it produced
-the right one**, and the correction is a modelling fact about NEST's own
+the right one**, and the correction is a modelling fact about NEED's own
 schema: `relationship` carries two orthogonal axes in one column. `wholly_owned`
 / `majority_owned` state the SHARE; `holding_company` / `operating_company` /
 `division` state the ROLE; `subsidiary` states neither. v1 reported 37
@@ -6621,9 +6621,9 @@ rows carry `is_ownership_claim = N`; its tiers are `registered_with` (2,365),
 `declares_service_to` (588), `managed_under_contract` (78), `located_within`
 (78), `chartered_by` (44). **`code/1071_identifier_driven_deal_sweep.py` builds
 its family closure from that file at every tier and never reads
-`nest_enterprise_relations.csv`, which holds the 3,613 actual ownership edges.**
+`need_enterprise_relations.csv`, which holds the 3,613 actual ownership edges.**
 Reported here, not repaired — `1071` is not this workstream's file.
-Related, in `nest_enterprise_relations.csv`: an `affiliation` /
+Related, in `need_enterprise_relations.csv`: an `affiliation` /
 `shareholding_or_ancestry` edge (`NESTREL-291D0B2DBBCBD1`) records **Huna Totem
 Corporation** — an independent Hoonah village corporation — under **Doyon,
 Limited**, quoting Doyon's own *"Operating more than a dozen for-profit
@@ -6768,7 +6768,7 @@ of the specification.
 
 *Standing rule 15 says a FAIL is stop-work and that "pre-existing, not mine" is
 not a disposition — name the owner with a measurement or fix it. This is the
-naming. Written by the `_entity_layer` / `nest` / `native-owned-businesses` /
+naming. Written by the `_entity_layer` / `need` / `native-owned-businesses` /
 `nonprofits` deepening pass (`code/1098`–`1102`,
 `docs/ENTITY_LAYER_DEEPENING_2026-09-02.md`).*
 
@@ -6776,7 +6776,7 @@ naming. Written by the `_entity_layer` / `nest` / `native-owned-businesses` /
 enriched in place, all rows conserved and no column lost —
 `entity_relationships.csv` (16→25 cols), `cedar_identifier_ledger_final.csv`
 (22→26), `native_owned_businesses.csv` (58→74), `np_orgs.csv` (57→66),
-`nest_enterprises.csv` (59→68) — plus `data/staging/nest/evidence_conflicts.csv`
+`need_enterprises.csv` (59→68) — plus `data/staging/need/evidence_conflicts.csv`
 (9→14, 2 rows), an APPEND of 47 rows to `codebook_master.csv`, five `review/`
 registers, one marked ADR block, and five doc appends. **No table was created,
 no table was rebuilt, nothing was shipped, nothing was committed.**
@@ -6789,8 +6789,8 @@ no table was rebuilt, nothing was shipped, nothing was committed.**
 | `lint_new_defect_instances = 26`, and the `lint_class1/2c/3/4/5/7` rises | **not one named instance is from `1098`–`1102`.** `293` names them: `1011_cross_dataset_reconciliation.py` (class 1), `1060_splink_pilot.py` (2c ×2, class 3), `1085_prime_psc_desc_repull.py`, `1086_faads_award_key_promote.py`, `846_session_audit.py`, `852_extend_constellation_edges.py`, `873_build_aiannh_crosswalk.py` (2c), `992_newsletter_deal_candidates.py` (class 3), `1030_sec_edgar_native_transactions.py`, `1031_ancsa_45_55_139_annual_reports.py` (class 4). **Re-measured after this pass's last write: `py -3 code/293_lint_bug_classes.py` returns ZERO findings in `1098`, `1099`, `1100`, `1101` and `1102` across all seven classes.** Three class-2a and three class-2c findings WERE raised against this pass's first drafts and were **fixed, not waived** — the 2a by replacing `setdefault` with plain assignment (these enrichers recompute their own columns and must not carry a stale value forward), the 2c by writing the refusal reason onto the row rather than only into a counter. |
 | `regenerate_new_unsafe_writers = 1` | **`code/1107_punchlist_claim_verify.py`**, named by `845`: markdown → `docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md`. All five scripts in this pass derive their header from the live file (`fields = list(live_fields) + [c for c in NEW if c not in fields]`) and `845` class 1 and class 3 are both **0**. |
 | `tables_missing_codebook_block 3→22`, `tables_undocumented_in_codebook 3→21`, `tables_missing_from_25_TABLES 179→211`, `tables_missing_from_27_SPEC 194→218`, `tables_missing_notes_contract 14→22`, `ship_tables_at_zero 13→21` | **new tables from other passes.** The gate lists them: `geo_award_county_crosswalk.csv` (1,050,968 rows), `geo_place_county_crosswalk.csv`, `geo_county_two_sums.csv`, `geo_county_dim.csv`, `geo_point_aiannh_assignment.csv`, `geo_aiannh_dim.csv`, `dear_tribal_leader_letters.csv`, `entity_dated_public_facts.csv`, `gaming_web_harvest_*`, `cedar_entity_freshness.csv`, `tribal_newsletter_*`. **This pass created no table in `data/clean`.** Its outputs are new COLUMNS on five already-registered tables, and all 47 of them were appended to `codebook_master.csv` with descriptions — `codebook_undocumented_public` is still **0** and `duns_marked_publishable` is still **0**. |
-| `contract_violations = 11`, `contract_orphan_shippable = 7` | same population as the row above — an unregistered new table has no owning collection and no contract. `py -3 code/518_dataset_readiness.py` run after this pass: **READY 13 / 14**, and all four datasets this pass touched (`_entity_layer`, `nest`, `native-owned-businesses`, `nonprofits`) are READY. The single BLOCKED is `deals`, on `C1 grain UNSTATED` for `deals_press_edgar_ancsa_additions.csv`. |
-| `rulings_unapplied 1,215 → 2,894` | **this pass applied no ruling and minted no tier.** Everything it found is FLAGGED and filed: 13 ledger collisions, 1 owner disagreement, 8 NEST parent contradictions, 25 duplicate groups, 535 nonprofit key reviews — all in `review/*_2026-09-02.csv`, with three items appended to `review/OWNER_DECISION_QUEUE.md` (EL-1, EL-2, EL-3). A proposal on a row is not an unapplied ruling; `cedar_rulings.csv` was not written. |
+| `contract_violations = 11`, `contract_orphan_shippable = 7` | same population as the row above — an unregistered new table has no owning collection and no contract. `py -3 code/518_dataset_readiness.py` run after this pass: **READY 13 / 14**, and all four datasets this pass touched (`_entity_layer`, `need`, `native-owned-businesses`, `nonprofits`) are READY. The single BLOCKED is `deals`, on `C1 grain UNSTATED` for `deals_press_edgar_ancsa_additions.csv`. |
+| `rulings_unapplied 1,215 → 2,894` | **this pass applied no ruling and minted no tier.** Everything it found is FLAGGED and filed: 13 ledger collisions, 1 owner disagreement, 8 NEED parent contradictions, 25 duplicate groups, 535 nonprofit key reviews — all in `review/*_2026-09-02.csv`, with three items appended to `review/OWNER_DECISION_QUEUE.md` (EL-1, EL-2, EL-3). A proposal on a row is not an unapplied ruling; `cedar_rulings.csv` was not written. |
 | `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` gone from `data/clean`; `hearing_bill_links.csv` 465→464; `native_bills_subject_sweep.csv` 2,414→2,409 | none of the three was read or written by this pass. |
 
 ### The one thing worth generalising from this
@@ -7154,7 +7154,7 @@ not be rebuilt from the file the agent was told to write. Repaired by
 
 **It recurs.** 47 more rows were written straight to the master by five other
 blocks (`02m_native_owned_businesses`, `05e_identifier_ledger`,
-`05p_entity_relationships`, `06_nonprofit/np_orgs`, `18a_nest_enterprises`)
+`05p_entity_relationships`, `06_nonprofit/np_orgs`, `18a_need_enterprises`)
 while this pass was running. That is the lost-update race `cedar_codebook.py`
 exists to end. **Write the fragment, never the master, then run
 `py -3 code/cedar_codebook.py build`** — and run `1108 repair` first if it
@@ -8595,13 +8595,13 @@ for each dropped column a real source column survives (`source_url`,
 data problems and none a reason to drop a column:
 `subcontracting.geo_subawardee_county_gap_reason` (every value opens `closed
 2026-09-02 by code/1109_subawardee_geo_promote:` and then states a real
-method), `nest.source_document` (3,189 of 4,014 are the owner's research
+method), `need.source_document` (3,189 of 4,014 are the owner's research
 dataset named by its path on this machine; the other 825 are real annual
 reports), `funding.attribution_basis` (184,077 of 701,955).
 
-**One trap inside the fix.** `nest_entity_dual_role.built_by` survived the first
+**One trap inside the fix.** `need_entity_dual_role.built_by` survived the first
 pass because 1137 prefixes a joined column with its source table, so the export
-saw `nest_entity_dual_role__built_by` and the rule was looking at the whole
+saw `need_entity_dual_role__built_by` and the rule was looking at the whole
 name. `is_lineage_column()` now tests the segment after `__` as well. A
 name-based rule has to know that names get prefixed.
 
@@ -8742,7 +8742,7 @@ belongs to whoever owns `1079` and the ruling vocabulary.
 **Gates after the rebuild:** `846` **31/31** (the suite grew to 31 — `1156`'s
 doc-claim gate is another workstream's), `845 verify` ok, `cedar_publication`
 / `1137` / `1151` / `1152` / `1153 verify` all ok. Four datasets
-(`federal-register`, `nagpra`, `nest`, `nonprofits`) had gone STALE from other
+(`federal-register`, `nagpra`, `need`, `nonprofits`) had gone STALE from other
 agents' concurrent writes to `data/clean` and were rebuilt to clear it.
 
 <!-- END QA-CP016-RESOLVED-2026-09-02 -->
@@ -9239,7 +9239,7 @@ The owner adopted a reviewer's proposal for a second permanent identifier,
 (`docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`, ADR-043, pointers in
 `docs/ARCHITECTURE.md` and `docs/IDENTIFIER_STANDARD.md`). The decision file
 quotes the rules, reconciles them with what the spine already holds (the
-individually owned entity class, the NEST enterprise register, the place
+individually owned entity class, the NEED enterprise register, the place
 register, the identifier ledger, ADR-008, the constellation's name-only
 firms, the deals parties), restates them as the verify-and-regression
 contract the uid already has, lists what the terminal owns and what this

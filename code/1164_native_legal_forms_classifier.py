@@ -610,7 +610,7 @@ SCAN = [
     ("data/clean/np_orgs.csv", "org_name", "cedar_uid", None),
     ("data/clean/fac_tribal_single_audits.csv", "auditee_name", "cedar_uid", "total_amount_expended"),
     ("data/clean/fac_native_nontribal_single_audits.csv", "auditee_name", "entity_id", "total_amount_expended"),
-    ("data/clean/nest_enterprises.csv", "enterprise_name", "owner_hub_cedar_uid", None),
+    ("data/clean/need_enterprises.csv", "enterprise_name", "owner_hub_cedar_uid", None),
     ("data/clean/native_entity_lobbying_disclosures.csv", "client_name", "entity_id", "spend_usd"),
 ]
 

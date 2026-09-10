@@ -385,11 +385,11 @@ export const PRESS_CATALOG = Object.freeze([
       "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately.",
   }),
   Object.freeze({
-    id: "nest",
-    short: "NEST",
-    name: "Native Enterprise Structures and Ties",
+    id: "need",
+    short: "NEED",
+    name: "Cedar Native Entity Enterprise Dataset",
     shelf: "pro",
-    // Series. Floor: min(first_observed_year) in dist/customer/nest.csv, which
+    // Series. Floor: min(first_observed_year) in dist/customer/need.csv, which
     // is the earliest year any source named an enterprise or a tie. The runs of
     // source editions are what date a relationship, so this is an observation
     // series with a left edge rather than a roster.
@@ -440,7 +440,7 @@ export const PRESS_TAXONOMY = Object.freeze([
     id: "enterprises",
     name: "Enterprises and Ownership",
     lede: "Who owns what across Indian Country, and how that changes.",
-    collections: Object.freeze(["owned", "nest"]),
+    collections: Object.freeze(["owned", "need"]),
   }),
   Object.freeze({
     id: "institutions",

@@ -19,7 +19,7 @@ BLOCKED 0 · NOT_TESTED 0
 | `nagpra` | **READY** | 5 | 5/5 | 5/5 | clean | 0 | declared |
 | `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `natural-resources` | **READY** | 9 | 9/9 | 9/9 | clean | 0 | declared |
-| `nest` | **READY** | 2 | 2/2 | 2/2 | clean | 0 | declared |
+| `need` | **READY** | 2 | 2/2 | 2/2 | clean | 0 | declared |
 | `newsletters` | **READY** | 2 | 2/2 | 2/2 | clean | 0 | declared |
 | `nonprofits` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
 | `subcontracting` | **READY** | 3 | 3/3 | 3/3 | clean | 0 | declared |

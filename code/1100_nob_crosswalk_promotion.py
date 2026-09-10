@@ -48,13 +48,13 @@ are populated, **196 of 196 are the same string.** That is checked, not assumed
 PART TWO - THE REFUSAL THAT WAS APPLIED TO ONE HALF OF A SPLIT
 ---------------------------------------------------------------
 `code/1070_anc_nho_business_sweep.py` staged 1,106 rows. The integrator split
-them by `assertion_class`: the 583 OWNERSHIP rows went to NEST, the 523
+them by `assertion_class`: the 583 OWNERSHIP rows went to NEED, the 523
 RELATIONSHIP rows were merged into this table.
 
-NEST then **refused 229 of its 583 on one ground**: *"unreviewed HTML
+NEED then **refused 229 of its 583 on one ground**: *"unreviewed HTML
 heading/anchor scrape"*, because the block yields `Blank`, `No Results Found`,
 `Employee Resources` **and seven natural persons' names scraped off a
-leadership page**, and `docs/NEST_BUILD_LOG.md` records that as a hard rule -
+leadership page**, and `docs/NEED_BUILD_LOG.md` records that as a hard rule -
 *"a natural person's name may never enter this dataset"*.
 
 The same refusal was never applied to the 523 that came here. Measured on the
@@ -85,7 +85,7 @@ WHAT THIS PASS DOES ABOUT IT, AND WHAT IT REFUSES TO DO
    re-litigated here.
 2. **It puts a publish hold on the unreviewed scrape**, whatever the detector
    says, because the caveat is about the whole block and not about one row:
-   `publish_hold = Y`, `publish_hold_basis` naming NEST's identical refusal, and
+   `publish_hold = Y`, `publish_hold_basis` naming NEED's identical refusal, and
    `publishable` set to `N`.
 3. **It deletes nothing and loses nothing.** The prior value of `publishable`
    is preserved verbatim in `publishable_before_1100`, so the hold is
@@ -282,7 +282,7 @@ def build(dry_run=False) -> int:
             r["publish_hold_basis"] = (
                 "the row's own verification_basis says 'HTML heading/anchor "
                 "scrape - not a table; review before resolving'. "
-                "docs/NEST_BUILD_LOG.md refused 229 rows of the SAME code/1070 "
+                "docs/NEED_BUILD_LOG.md refused 229 rows of the SAME code/1070 "
                 "harvest on exactly this ground, because the block yields page "
                 "furniture and natural persons' names; the refusal was applied "
                 "to the OWNERSHIP half of the split and not to this one. "

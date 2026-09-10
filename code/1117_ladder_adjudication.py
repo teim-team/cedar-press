@@ -126,7 +126,7 @@ TWO ENTITIES IN ONE COMMUNITY, CHECKED BEFORE KEYING
   attribution nobody has ruled on. It is not applied here and it is flagged.
 * **Sea Lion.** `Sea Lion Security & Control Systems` and `Sea Lion
   International` (Anchorage, $6.08M) were NOT keyed. The register holds `Sea
-  Lion Corporation` `CE-000BV-SK`, and `nest_enterprises.csv` holds a `Sea Lion
+  Lion Corporation` `CE-000BV-SK`, and `need_enterprises.csv` holds a `Sea Lion
   Corporation` owned by **Choggiung, Ltd.** `CE-00088-R8`. Two Cedar records
   disagree about which entity that name is. Unresolved until they are
   reconciled.
@@ -302,7 +302,7 @@ _key("Hui Huliau Technology Services Llc", "ACCEPT", "CE-000VE-VE", R_WEB,
      "huihuliau.com header, verbatim: \"Hui Huliau, A Native Hawaiian "
      "Organization\", with Hui Huliau Technology Services listed under 'Our "
      "Companies'; the site's address is Waianae HI, the contractor's own "
-     "city. Corroborated on disk: nest_enterprises.csv holds 'Hui Huliau "
+     "city. Corroborated on disk: need_enterprises.csv holds 'Hui Huliau "
      "Technology Services, LLC' with uei KW1DMENKNVU4 under hub "
      "CE-000VE-VE, identifier_basis 'CAGE published by the parent "
      "(parent_declared_subsidiary_list)'.")
@@ -315,13 +315,13 @@ _key("Indian Walk In Center", "ACCEPT", "CE-001FV-HW", R_UEI,
      "is a parked GoDaddy page, and uihi.org's Salt Lake City programme "
      "profile names only the current organisation.")
 _key("Paug Vik & Ghemm Company Jv", "ACCEPT", "CE-000BB-S3", R_WEB,
-     "nest_enterprises.csv holds 'Paug-Vik & Ghemm JV, LLC' and 'Paug- Vik & "
+     "need_enterprises.csv holds 'Paug-Vik & Ghemm JV, LLC' and 'Paug- Vik & "
      "Ghemm JV II, LLC' as enterprises of hub Paug-Vik Incorporated, Ltd. "
      "(CE-000BB-S3), from the parent's own declared subsidiary list. "
      "Anchorage AK. Cedar already attributes joint ventures to the Native "
      "member - 38,132 JV rows / $8.85B are keyed that way today.")
 _key("Neeser Paug Vik Jv, Llc", "ACCEPT", "CE-000BB-S3", R_UEI,
-     "nest_enterprises.csv holds 'Neeser Paug-Vik JV, LLC' with "
+     "need_enterprises.csv holds 'Neeser Paug-Vik JV, LLC' with "
      "uei_candidate KVXHALMXN7J5 - this exact UEI - under hub CE-000BB-S3, "
      "relationship 'wholly_owned'.")
 _key("Gana-A'Yoo Construction Services Jv, Llc", "ACCEPT", "CE-0008X-PN", R_WEB,
@@ -365,7 +365,7 @@ _key("Shee Atika Management Llc", "ACCEPT", "CE-000BX-55", R_ADDR,
      "registered name, the corporation's stated portfolio of operating "
      "companies.")
 _key("Dawson-Hawaiian Builders Ii", "ACCEPT", "CE-000TK-MV", R_WEB,
-     "nest_enterprises.csv holds five Dawson entities - Dawson Enterprises, "
+     "need_enterprises.csv holds five Dawson entities - Dawson Enterprises, "
      "Dawson Federal, Dawson Global, Dawson Solutions, Dawson Technical - "
      "under hub Hawaiian Native Corporation CE-000TK-MV, each with its own "
      "UEI. The register carries 'Dawson' as an alias of Hawaiian Native "
@@ -471,7 +471,7 @@ _key("Tanadgusix Corporation", "ACCEPT", "CE-000CR-CR", R_ADDR,
      "name is Aleut, not a shared English token (ENTITY_MATCH_RULES rule 14).")
 _key("Colorado Professional Resources, L.L.C.", "REPOINT", "CE-00139-9T",
      R_UEI,
-     "nest_enterprises.csv holds 'Colorado Professional Resources' with "
+     "need_enterprises.csv holds 'Colorado Professional Resources' with "
      "uei_candidate M5RSKDDD9KJ7 - this exact UEI - under hub Chitimacha "
      "CE-00139-9T, relationship 'wholly_owned'. The queue's rank-1 (Southern "
      "Ute) is the token 'Colorado'.")
@@ -513,7 +513,7 @@ _unres(["Sea Lion Security & Control Systems Llc", "Sea Lion International, "
         "Llc"],
        "TWO CEDAR RECORDS DISAGREE about the name 'Sea Lion Corporation'. The "
        "register holds it as an Alaska Native Village Corporation "
-       "CE-000BV-SK; nest_enterprises.csv holds a 'Sea Lion Corporation' as "
+       "CE-000BV-SK; need_enterprises.csv holds a 'Sea Lion Corporation' as "
        "an enterprise of hub Choggiung, Ltd. CE-00088-R8. Both firms file "
        "from Anchorage, which is where most ANC subsidiaries file and "
        "therefore discriminates nothing. Held until Cedar's two records are "

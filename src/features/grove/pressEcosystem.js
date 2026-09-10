@@ -13,7 +13,7 @@
 // The ring used to be a list of ten display names typed here, and it drifted
 // from the catalog twice: it carried Gaming after the storefront stopped
 // selling it, and never gained Subcontracting, Native-Owned Businesses or
-// NEST after they arrived. It is keyed by collection id now, the labels come
+// NEED after they arrived. It is keyed by collection id now, the labels come
 // from the catalog's own short names, and a test requires every storefront
 // collection to be on the ring. The name-keyed RING, SOURCES and FEEDS the
 // diagram and the solver read are derived from that one map.
@@ -53,12 +53,12 @@ export const ECOSYSTEM = Object.freeze({
   }),
   deals: Object.freeze({
     sources: Object.freeze(["Press and trade reporting", "SEC filings", "Municipal bond filings"]),
-    feeds: Object.freeze(["nest", "contractors", "nonprofits"]),
+    feeds: Object.freeze(["need", "contractors", "nonprofits"]),
     line: "A deal reveals an ownership transfer, and that change improves every collection holding the entity.",
   }),
   contractors: Object.freeze({
     sources: Object.freeze(["SAM.gov", "FPDS", "SBA 8(a) records"]),
-    feeds: Object.freeze(["deals", "funding", "nest"]),
+    feeds: Object.freeze(["deals", "funding", "need"]),
     line: "Vendors roll up to parent entities, so a transfer found in Deals recredits the award history.",
   }),
   subcontracting: Object.freeze({
@@ -78,7 +78,7 @@ export const ECOSYSTEM = Object.freeze({
   }),
   owned: Object.freeze({
     sources: Object.freeze(["Tribal TERO offices", "Business licensing departments", "Enterprise registers"]),
-    feeds: Object.freeze(["contractors", "nest"]),
+    feeds: Object.freeze(["contractors", "need"]),
     line: "A certified business carries the nation whose office lists it, and the contracting record shows what it has been awarded.",
   }),
   nonprofits: Object.freeze({
@@ -86,7 +86,7 @@ export const ECOSYSTEM = Object.freeze({
     feeds: Object.freeze(["funding", "deals"]),
     line: "Filings, grants and affiliations describe one institution once the entity layer joins them.",
   }),
-  nest: Object.freeze({
+  need: Object.freeze({
     sources: Object.freeze(["ANCSA audited filings", "Enterprise registers", "ANC and NHO subsidiary directories"]),
     feeds: Object.freeze(["contractors", "deals", "owned"]),
     line: "Every subsidiary and holding company names its parent, so an award or a transaction anywhere in the family rolls up to the nation or corporation behind it.",

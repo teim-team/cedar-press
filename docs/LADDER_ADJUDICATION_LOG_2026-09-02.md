@@ -69,7 +69,7 @@ UIHI's Salt Lake City programme profile names only the current organisation.
 
 Two more on-disk rungs earned their place and cost nothing:
 
-* **`nest_enterprises.csv`** settled `ASRC Federal Mission Services`
+* **`need_enterprises.csv`** settled `ASRC Federal Mission Services`
   (uei `WTJEFSM3P945`, $480.3M), `Neeser Paug-Vik JV` (uei `KVXHALMXN7J5`),
   `Hui Huliau Technology Services` (uei `KW1DMENKNVU4`, $38.7M) and
   `Colorado Professional Resources` (uei `M5RSKDDD9KJ7`) — **by UEI**, from
@@ -180,7 +180,7 @@ so the detector can learn the exception.
   `CE-001AB-RW`).
 * **Sea Lion — and here Cedar contradicts ITSELF.** The register holds `Sea
   Lion Corporation` as a village corporation `CE-000BV-SK`;
-  `nest_enterprises.csv` holds a `Sea Lion Corporation` as an enterprise of
+  `need_enterprises.csv` holds a `Sea Lion Corporation` as an enterprise of
   **Choggiung, Ltd.** `CE-00088-R8`. Two Cedar records, two owners, one name.
   `Sea Lion Security & Control Systems` and `Sea Lion International` ($6.08M)
   are left **UNRESOLVED** rather than keyed to a name Cedar cannot resolve

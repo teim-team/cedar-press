@@ -329,7 +329,7 @@ Treat those two as unconfirmed until someone reads them.
 
 ### Convergent evidence from a second, independent pass
 
-While this reconciliation ran, a separate agent auditing `nest.csv` for ownership-
+While this reconciliation ran, a separate agent auditing `need.csv` for ownership-
 versus-affiliation defects reached the same structural conclusion from the opposite
 direction. Its residual defect class, in its own words, is **"mostly one family:
 `X Corporation` keyed to `X village government`."** That is precisely the class that

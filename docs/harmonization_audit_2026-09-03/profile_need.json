@@ -1,6 +1,6 @@
 {
  "snapshot": {
-  "file": "dist/customer/nest.csv",
+  "file": "dist/customer/need.csv",
   "bytes": 9599684,
   "mtime": "2026-09-03T00:37:41"
  },
@@ -628,7 +628,7 @@
    "pct_blank": 99.2955,
    "approx_distinct": 1,
    "vocabulary": {
-    "the service constellation records a relationship between this firm and this hub; cedar_constellation_edges.csv is SERVICE (who serves whom), NEST is OWNERSHIP AND CORPORATE AFFILIATION - the two corroborate, they do not duplicate": 41
+    "the service constellation records a relationship between this firm and this hub; cedar_constellation_edges.csv is SERVICE (who serves whom), NEED is OWNERSHIP AND CORPORATE AFFILIATION - the two corroborate, they do not duplicate": 41
    }
   },
   "source_url": {
@@ -696,25 +696,25 @@
    "pct_blank": 97.5258,
    "approx_distinct": 77
   },
-  "n_nest_enterprise_relations": {
+  "n_need_enterprise_relations": {
    "nonblank": 5820,
    "blank": 0,
    "pct_blank": 0.0,
    "approx_distinct": 81
   },
-  "nest_entity_dual_role__handle": {
+  "need_entity_dual_role__handle": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
    "approx_distinct": 228
   },
-  "nest_entity_dual_role__canonical_name": {
+  "need_entity_dual_role__canonical_name": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
    "approx_distinct": 232
   },
-  "nest_entity_dual_role__entity_class": {
+  "need_entity_dual_role__entity_class": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -731,7 +731,7 @@
     "Federal-level self-governance consortium": 6
    }
   },
-  "nest_entity_dual_role__dual_role": {
+  "need_entity_dual_role__dual_role": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -740,7 +740,7 @@
     "Y": 2319
    }
   },
-  "nest_entity_dual_role__dual_role_class": {
+  "need_entity_dual_role__dual_role_class": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -751,7 +751,7 @@
     "NHO_ORGANISATION_AND_ENTERPRISE": 14
    }
   },
-  "nest_entity_dual_role__role_as_register_entity": {
+  "need_entity_dual_role__role_as_register_entity": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -760,7 +760,7 @@
     "hub in the Cedar identity register": 2319
    }
   },
-  "nest_entity_dual_role__role_as_enterprise": {
+  "need_entity_dual_role__role_as_enterprise": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -769,7 +769,7 @@
     "this entity itself trades - it holds the identifiers and the federal-contractor status on its OWN legal name": 2319
    }
   },
-  "nest_entity_dual_role__is_nest_owner_hub": {
+  "need_entity_dual_role__is_need_owner_hub": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -779,7 +779,7 @@
     "N": 593
    }
   },
-  "nest_entity_dual_role__n_nest_enterprises_owned": {
+  "need_entity_dual_role__n_need_enterprises_owned": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -824,7 +824,7 @@
     "13": 13
    }
   },
-  "nest_entity_dual_role__evidence_rungs": {
+  "need_entity_dual_role__evidence_rungs": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -836,19 +836,19 @@
     "R1_DECLARED_BY_OWNER_DATASET": 85
    }
   },
-  "nest_entity_dual_role__own_uei": {
+  "need_entity_dual_role__own_uei": {
    "nonblank": 2234,
    "blank": 3586,
    "pct_blank": 61.6151,
    "approx_distinct": 209
   },
-  "nest_entity_dual_role__own_cage": {
+  "need_entity_dual_role__own_cage": {
    "nonblank": 650,
    "blank": 5170,
    "pct_blank": 88.8316,
    "approx_distinct": 46
   },
-  "nest_entity_dual_role__own_is_8a_certified": {
+  "need_entity_dual_role__own_is_8a_certified": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -858,7 +858,7 @@
     "Y": 217
    }
   },
-  "nest_entity_dual_role__own_is_federal_contractor": {
+  "need_entity_dual_role__own_is_federal_contractor": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -868,7 +868,7 @@
     "N": 85
    }
   },
-  "nest_entity_dual_role__owner_rows_naming_this_entity_as_an_enterprise": {
+  "need_entity_dual_role__owner_rows_naming_this_entity_as_an_enterprise": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -881,13 +881,13 @@
     "4": 17
    }
   },
-  "nest_entity_dual_role__enterprise_name_as_recorded": {
+  "need_entity_dual_role__enterprise_name_as_recorded": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
    "approx_distinct": 186
   },
-  "nest_entity_dual_role__verification_sources": {
+  "need_entity_dual_role__verification_sources": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -904,7 +904,7 @@
     "https://www.coushatta.org/government/;sam_uei_to_tribe_assignment_v3.csv": 3
    }
   },
-  "nest_entity_dual_role__evidence_families": {
+  "need_entity_dual_role__evidence_families": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
@@ -919,16 +919,16 @@
     "cedar_inference;entity_self_published": 3
    }
   },
-  "nest_entity_dual_role__representation_rule": {
+  "need_entity_dual_role__representation_rule": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,
    "approx_distinct": 1,
    "vocabulary": {
-    "RECORDED, NOT DUPLICATED. This entity keeps ONE row in the identity register and ZERO rows in nest_enterprises.csv for itself. NEST's key is (owner hub, normalised name); a self-row would make the hub its own subsidiary, which the 1072 build already refuses by testing the child against every deterministic rendering of the hub's name. The dual role therefore lives here, keyed to the cedar_uid, and a consumer joins it to nest_enterprises on owner_hub_cedar_uid.": 2319
+    "RECORDED, NOT DUPLICATED. This entity keeps ONE row in the identity register and ZERO rows in need_enterprises.csv for itself. NEED's key is (owner hub, normalised name); a self-row would make the hub its own subsidiary, which the 1072 build already refuses by testing the child against every deterministic rendering of the hub's name. The dual role therefore lives here, keyed to the cedar_uid, and a consumer joins it to need_enterprises on owner_hub_cedar_uid.": 2319
    }
   },
-  "nest_entity_dual_role__dual_role_basis": {
+  "need_entity_dual_role__dual_role_basis": {
    "nonblank": 2319,
    "blank": 3501,
    "pct_blank": 60.1546,

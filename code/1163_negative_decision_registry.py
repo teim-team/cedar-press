@@ -441,7 +441,7 @@ def _seed_goldbelt_lookup() -> list[dict]:
                 f"the spine's ANVC-GLDBLT-00, Goldbelt, Incorporated. This "
                 f"denies the EDGE only - Goldbelt is an ANCSA corporation and "
                 f"is Native."),
-            dataset_scope="nest",
+            dataset_scope="need",
             as_of_date=(r.get("fetched_date") or "").strip(),
             evidence_id=(r.get("source_url") or "").strip(),
             evidence_strength="STRUCTURAL_RULE",
@@ -452,24 +452,24 @@ def _seed_goldbelt_lookup() -> list[dict]:
     return out
 
 
-def _seed_goldbelt_nest() -> list[dict]:
+def _seed_goldbelt_need() -> list[dict]:
     """The same ruling, at the grain the EXPORT publishes.
 
-    `1157` fixed the lookup path.  Measured on `data/clean/nest_enterprises.csv`
+    `1157` fixed the lookup path.  Measured on `data/clean/need_enterprises.csv`
     2026-09-02 the OWNERV6 path still keys Goldbelt-named enterprises to
-    Tlingit & Haida's `CE-0006B-0K`, and `dist/customer/nest.csv` ships them.
+    Tlingit & Haida's `CE-0006B-0K`, and `dist/customer/need.csv` ships them.
     An event keyed to `enterprise_id` is what the release gate can actually
     test, so the ruling is recorded at both grains.
     """
     out = []
-    for r in read_csv(CLEAN / "nest_enterprises.csv"):
+    for r in read_csv(CLEAN / "need_enterprises.csv"):
         name = (r.get("enterprise_name") or "").strip()
         hub = (r.get("owner_hub_cedar_uid") or "").strip()
         if not name.upper().startswith("GOLDBELT") or hub != "CE-0006B-0K":
             continue
         eid = (r.get("enterprise_id") or "").strip()
         out.append(ev(
-            decision_id=did("goldbelt-nest", eid, hub),
+            decision_id=did("goldbelt-need", eid, hub),
             subject_record_id=eid,
             subject_entity_id=(r.get("enterprise_existing_cedar_uid") or "").strip(),
             candidate_cedar_uid=hub,
@@ -481,13 +481,13 @@ def _seed_goldbelt_nest() -> list[dict]:
                 f"ANCSA_OWNERSHIP_RULING rules 2 and 4 forbid the edge and "
                 f"make the real tie ancestral association. Correct owner: the "
                 f"spine's ANVC-GLDBLT-00 / CE-0008Y-WE."),
-            dataset_scope="nest",
+            dataset_scope="need",
             as_of_date="2026-08-26",
             evidence_id="docs/ANCSA_OWNERSHIP_RULING.md",
             evidence_strength="STRUCTURAL_RULE",
             review_status="ADJUDICATED", reviewer="Elijah Moreno",
             decided_at="2026-08-26",
-            source_table="data/clean/nest_enterprises.csv",
+            source_table="data/clean/need_enterprises.csv",
         ))
     return out
 
@@ -495,8 +495,8 @@ def _seed_goldbelt_nest() -> list[dict]:
 def _seed_uttc() -> list[dict]:
     """United Tribes Technical College is not owned by United Auburn.
 
-    The owner's own ten-row NEST review, quoted verbatim in
-    `code/1157_nest_relationship_resolution_qa.py`: *"The ten-row review caught
+    The owner's own ten-row NEED review, quoted verbatim in
+    `code/1157_need_relationship_resolution_qa.py`: *"The ten-row review caught
     Goldbelt Hawk -> Tlingit & Haida and United Tribes Technical College ->
     United Auburn."*  The mechanism is the token `united`, which has been in
     `cedar_domain.NAME_TRAPS` since 2026-08-07 with this exact case named in
@@ -508,7 +508,7 @@ def _seed_uttc() -> list[dict]:
     about the OWNER, and says nothing about UTTC being Native.
     """
     out = []
-    for r in read_csv(CLEAN / "nest_enterprises.csv"):
+    for r in read_csv(CLEAN / "need_enterprises.csv"):
         if (r.get("enterprise_name") or "").strip().lower() \
                 != "united tribes technical college":
             continue
@@ -527,16 +527,16 @@ def _seed_uttc() -> list[dict]:
                 "Community (CA). The only thing they share is the token "
                 "'united', which cedar_domain.NAME_TRAPS has listed since "
                 "2026-08-07 naming this exact pair. Owner-ruled in the ten-row "
-                "NEST review, quoted in code/1157. Denies the OWNER only; UTTC "
+                "NEED review, quoted in code/1157. Denies the OWNER only; UTTC "
                 "is a tribal college and is Native."),
-            dataset_scope="nest",
+            dataset_scope="need",
             as_of_date="2026-09-02",
-            evidence_id="code/1157_nest_relationship_resolution_qa.py (owner "
-                        "quote, ten-row NEST review)",
+            evidence_id="code/1157_need_relationship_resolution_qa.py (owner "
+                        "quote, ten-row NEED review)",
             evidence_strength="ADJUDICATED_BY_OWNER",
             review_status="ADJUDICATED", reviewer="Elijah Moreno",
             decided_at="2026-09-02",
-            source_table="data/clean/nest_enterprises.csv",
+            source_table="data/clean/need_enterprises.csv",
         ))
     return out
 
@@ -1031,7 +1031,7 @@ def _seed_cedar_rulings() -> list[dict]:
 
 SEEDERS = (
     ("goldbelt_anc_lookup", _seed_goldbelt_lookup),
-    ("goldbelt_nest_published", _seed_goldbelt_nest),
+    ("goldbelt_need_published", _seed_goldbelt_need),
     ("uttc_united_auburn", _seed_uttc),
     ("np_placename_refusals", _seed_placename),
     ("quarantine_1079_withdraw", _seed_1079),
@@ -1240,7 +1240,7 @@ def stage_build() -> int:
 #: and that is REPORTED as untested rather than passing quietly - rule 9, an
 #: absence of evidence must not print as evidence of absence.
 PROBES = {
-    "nest": {"ids": ("enterprise_id", "uei", "cage_code"),
+    "need": {"ids": ("enterprise_id", "uei", "cage_code"),
              "uids": ("owner_hub_cedar_uid", "owner_hub_handle"),
              "dates": ()},
     "nonprofits": {"ids": ("EIN", "ein"),
@@ -1471,21 +1471,21 @@ def stage_selftest() -> int:
     hard = [c for c in cons if c["suppresses"] == "Y"
             and c["predicate"] in PAIR_PREDICATES
             and c["subject_record_id"] and c["candidate_cedar_uid"]
-            and c["dataset_scope"].split(":")[0] == "nest"]
+            and c["dataset_scope"].split(":")[0] == "need"]
     soft = [c for c in cons if c["strength"] == "SOFT"
             and c["predicate"] == "same_entity_as"
             and c["subject_record_id"] and c["candidate_cedar_uid"]
             and c["dataset_scope"].split(":")[0] == "nonprofits"]
     if not hard or not soft:
-        print(f"  1163 selftest  CANNOT RUN: hard-nest={len(hard)} "
+        print(f"  1163 selftest  CANNOT RUN: hard-need={len(hard)} "
               f"soft-nonprofit={len(soft)}. Run `seed` first.")
         return 1
     h, s = hard[0], soft[0]
     fails = []
     tmp = Path(tempfile.mkdtemp(prefix="ndr_selftest_"))
     try:
-        def nest(eid, uid):
-            write_csv(tmp / "nest.csv",
+        def need(eid, uid):
+            write_csv(tmp / "need.csv",
                       ["enterprise_id", "enterprise_name",
                        "owner_hub_cedar_uid"],
                       [{"enterprise_id": eid,
@@ -1493,7 +1493,7 @@ def stage_selftest() -> int:
                         "owner_hub_cedar_uid": uid}])
 
         # A. the gate MUST fire on a real active hard constraint
-        nest(h["subject_record_id"], h["candidate_cedar_uid"])
+        need(h["subject_record_id"], h["candidate_cedar_uid"])
         n, d, v = release_check(tmp)
         print(f"    A  violating row      -> {n} violation(s)   "
               f"[{h['constraint_id']} {h['reason_code']}]")
@@ -1501,7 +1501,7 @@ def stage_selftest() -> int:
             fails.append(f"A: expected exactly 1 violation, got {n}")
 
         # B. and MUST be silent on a pair no constraint names
-        nest(h["subject_record_id"], "CE-ZZZZZ-ZZ")
+        need(h["subject_record_id"], "CE-ZZZZZ-ZZ")
         n, d, v = release_check(tmp)
         print(f"    B  innocent row       -> {n} violation(s)")
         if n != 0:
@@ -1509,7 +1509,7 @@ def stage_selftest() -> int:
                          f"everything, which is not a gate")
 
         # C. rule 1 - a SOFT constraint must NOT suppress
-        (tmp / "nest.csv").unlink()
+        (tmp / "need.csv").unlink()
         write_csv(tmp / "nonprofits.csv", ["EIN", "cedar_uid"],
                   [{"EIN": s["subject_record_id"],
                     "cedar_uid": s["candidate_cedar_uid"]}])

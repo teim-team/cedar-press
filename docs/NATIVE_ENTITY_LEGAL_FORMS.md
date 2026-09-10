@@ -362,7 +362,7 @@ corporation** — the exact assertion §1607(a) and the BIA list refute.
 diacritics and punctuation, and `selftest` asserts
 `_fold("Eklutna, Inc.") != _fold("Eklutna")` and
 `_fold("The Port Graham Corporation") != _fold("Port Graham")`. The sibling trap,
-from the NEST audit: indexing **head tokens** turns `white`, `arctic`, `old` and
+from the NEED audit: indexing **head tokens** turns `white`, `arctic`, `old` and
 `port` into brands and would repoint nine White Earth bodies to an Alaska
 corporation. Neither end of the name is safe to shorten.
 
@@ -1004,7 +1004,7 @@ Indian Tribal governments … that is organized or incorporated exclusively unde
 the laws of one or more of the owning Indian Tribal governments."* This is the
 tribal-LLC / tribal-corporate-code entity, and after 2026-01-15 it is
 disregarded for federal income tax exactly as a §17 corporation is.
-**Justification:** `data/clean/nest_enterprises.csv` holds **5,820** enterprises,
+**Justification:** `data/clean/need_enterprises.csv` holds **5,820** enterprises,
 **4,101** with `owner_class = tribal_government`. Most are this form and Cedar
 does not distinguish it from **(c)**. `SUB_HUB_ROLLS_UP`.
 
@@ -1124,7 +1124,7 @@ Measured 2026-09-03 against `data/spine/cedar_entity_spine.csv` (1,555 rows).
 | `AK_REGIONAL_HOUSING_AUTHORITY` | **none** | **0 — GAP; 1 held as `Intertribal Organization`** |
 | `NATIVE_HAWAIIAN_ORGANIZATION` | Native Hawaiian Organization | 210 |
 | `NHO_OWNED_FIRM` | **none** (sub-hub) | n/a |
-| `TRIBAL_8A_CONCERN` | **none** (sub-hub) | n/a — `nest_enterprises.csv` is the nearest layer, 5,820 rows |
+| `TRIBAL_8A_CONCERN` | **none** (sub-hub) | n/a — `need_enterprises.csv` is the nearest layer, 5,820 rows |
 | `ISDEAA_TRIBAL_ORGANIZATION` | Intertribal Organization · Federal-level self-governance consortium | 56 · 29 |
 | `AK_TRIBAL_HEALTH_ORGANIZATION` | Federal-level self-governance consortium (15 of 29) | ANTHC classed `Intertribal Organization` — inconsistent |
 | `TRIBAL_NONPROFIT_501C3` | **none** (sub-hub) | `np_orgs.csv`, 12,764 rows |
@@ -1448,7 +1448,7 @@ guard, because it will not stay that way.)*
 **NOT MEASURED.**
 - Whether any Cedar entity actually *has* a §17 or OIWA §3 charter. Cedar holds
   no column for it, so the honest count is not zero — it is unmeasured.
-- Whether the 5,820 `nest_enterprises` rows are tribal-law or state-law
+- Whether the 5,820 `need_enterprises` rows are tribal-law or state-law
   entities. The distinction decides taxability (Rev. Rul. 94-16) and no column
   carries it.
 - Whether MOWA Choctaw Housing Authority is a NAHASDA TDHE. Turns on

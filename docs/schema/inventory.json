@@ -9009,9 +9009,9 @@
    "unscanned": false
   },
   {
-   "table": "nest_enterprise_relations.csv",
+   "table": "need_enterprise_relations.csv",
    "location": "clean",
-   "collection": "nest",
+   "collection": "need",
    "shelf": "pro",
    "status": "shippable",
    "internal_reason": "",
@@ -9041,21 +9041,21 @@
    "export_class": "SAFE_TO_AGGREGATE",
    "aggregation_safe": "1",
    "ships_in_db": true,
-   "ships_notes_dir": "18b_nest_enterprise_relations",
+   "ships_notes_dir": "18b_need_enterprise_relations",
    "ship_fate": "NOTES_WRITTEN",
    "unscanned": false
   },
   {
-   "table": "nest_enterprises.csv",
+   "table": "need_enterprises.csv",
    "location": "clean",
-   "collection": "nest",
+   "collection": "need",
    "shelf": "pro",
    "status": "shippable",
    "internal_reason": "",
    "rows": 1610,
    "n_cols": 59,
    "grain_declared": true,
-   "grain": "one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md \u00a72). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in nest_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.",
+   "grain": "one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md \u00a72). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in need_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.",
    "primary_key": [
     "enterprise_id"
    ],
@@ -9078,7 +9078,7 @@
    "export_class": "SAFE_TO_AGGREGATE",
    "aggregation_safe": "1",
    "ships_in_db": true,
-   "ships_notes_dir": "18a_nest_enterprises",
+   "ships_notes_dir": "18a_need_enterprises",
    "ship_fate": "NOTES_WRITTEN",
    "unscanned": false
   },
@@ -12304,7 +12304,7 @@
    "unscanned": false
   },
   {
-   "table": "cedar_nest_id_register.csv",
+   "table": "cedar_need_id_register.csv",
    "location": "spine",
    "collection": "_spine",
    "shelf": "",
@@ -13730,20 +13730,20 @@
    "kind": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: cedar_harvest_conservation.csv, cedar_nest_id_register.csv, codebook_master.csv, held_rows.csv, nest_enterprise_relations.csv, nest_enterprises.csv, sweep_1070_refused.csv"
+    "read-modify-writes: cedar_harvest_conservation.csv, cedar_need_id_register.csv, codebook_master.csv, held_rows.csv, need_enterprise_relations.csv, need_enterprises.csv, sweep_1070_refused.csv"
    ],
    "never_run": false,
    "never_run_reason": "",
    "writes": [
     "ancsa_mine_log.csv",
     "cedar_harvest_conservation.csv",
-    "cedar_nest_id_register.csv",
+    "cedar_need_id_register.csv",
     "codebook_master.csv",
     "evidence_conflicts.csv",
     "fpds_uei_cage_map.csv",
     "held_rows.csv",
-    "nest_enterprise_relations.csv",
-    "nest_enterprises.csv",
+    "need_enterprise_relations.csv",
+    "need_enterprises.csv",
     "sweep_1070_refused.csv"
    ],
    "reads": [
@@ -13751,13 +13751,13 @@
     "cedar_constellation_edges.csv",
     "cedar_harvest_conservation.csv",
     "cedar_identity_register.csv",
-    "cedar_nest_id_register.csv",
+    "cedar_need_id_register.csv",
     "codebook_master.csv",
-    "held_for_nest_ownership.csv",
+    "held_for_need_ownership.csv",
     "held_rows.csv",
     "native_owned_businesses.csv",
-    "nest_enterprise_relations.csv",
-    "nest_enterprises.csv",
+    "need_enterprise_relations.csv",
+    "need_enterprises.csv",
     "prime_contracts.csv",
     "sba_dsbs_native_entities.csv",
     "sweep_1070_refused.csv",

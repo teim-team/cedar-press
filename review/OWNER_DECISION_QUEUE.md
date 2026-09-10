@@ -1602,16 +1602,16 @@ not refusals. Full list in `docs/GAMING_WEB_HARVEST_LOG.md`.
 
 ## NEST-1 — Ho-Chunk: repoint five ledger rows from the Ho-Chunk Nation of Wisconsin to the Winnebago Tribe of Nebraska?
 
-*Raised 2026-09-02 by workstream `nest` (`code/1072_tribally_owned_enterprises.py`).
+*Raised 2026-09-02 by workstream `need` (`code/1072_tribally_owned_enterprises.py`).
 A recommendation, not an edit: these rows belong to another workstream's table.*
 
 **Your own ruling is already the answer** — *"Ho-Chunk means a sub-hub, or
 Winnebago casino is a sub-hub. And then the hub is Winnebago Tribe."* This item
-exists only to say which rows it applies to and what NEST found independently.
+exists only to say which rows it applies to and what NEED found independently.
 
-**What NEST holds, from the parents' own published company lists:**
+**What NEED holds, from the parents' own published company lists:**
 
-| enterprise | owner in NEST | source |
+| enterprise | owner in NEED | source |
 |---|---|---|
 | Ho-Chunk Inc | Winnebago (`TRBF-WNNBGO-00`) | `hochunkinc.com` |
 | Ho-Chunk Farms | Winnebago | `hochunkinc.com` |
@@ -1626,7 +1626,7 @@ of Wisconsin** (`TRBF-HOCHNK-00`) — a different federally recognized tribe tha
 shares one word — and separately `Ho-Chunk Nation` CAGE `3VFL3`, **tier A**, is
 keyed to Winnebago. The contamination runs in both directions.
 
-**Why NEST did not simply match its way to this.** The naive version of its
+**Why NEED did not simply match its way to this.** The naive version of its
 "a named firm that resolves to a Cedar hub is not that hub's subsidiary" guard
 **held Ho-Chunk, Inc. and lost the row**, because `norm()` strips `Inc` and the
 name then equals the spine's `Ho-Chunk`. The rule that fixed it is structural
@@ -1640,7 +1640,7 @@ which looks like the same collision inverted.
 
 - **Yes** → the ledger agrees with what both nations publish about themselves,
   and dollars stop crossing between two tribes.
-- **No** → NEST and the ledger will disagree about the same five firms, and a
+- **No** → NEED and the ledger will disagree about the same five firms, and a
   customer joining the two datasets on `cedar_uid` sees it.
 
 **Verification protocol, your own (ENTITY_MATCH_RULES rule 13):** the addresses.
@@ -1651,7 +1651,7 @@ Wisconsin. Rung 1 settles it.
 > `prime_contracts.csv`: **21 rows on UEIs `DMA6EKCMAPB7` and `S4LTC7CL8RW7`
 > moved to Winnebago**, each asserted to carry `recipient_city_name =
 > WINNEBAGO` before being touched, and Wisconsin keeps its 17 Black River Falls
-> rows — rung 1 run as a precondition rather than as a spot check. NEST and
+> rows — rung 1 run as a precondition rather than as a spot check. NEED and
 > `prime_contracts` now agree.
 > **Still open:** the ledger rows themselves (`cedar_identifier_ledger_final.csv`),
 > and the tier-A `Ho-Chunk Nation` CAGE `3VFL3` row keyed to Winnebago, which
@@ -1765,14 +1765,14 @@ wrong?
 - `entity_relationships.csv`, tier A: owned by **Bering Straits Native
   Corporation** — *"Ruled by Elijah 2026-08-06: re-attributed to Bering Straits
   Native Corporation (matched by exact); the earlier claim was wrong."*
-- `nest_enterprises.csv`, shard-H `parent_declared_subsidiary_list`: a
+- `need_enterprises.csv`, shard-H `parent_declared_subsidiary_list`: a
   subsidiary of **Alaka'ina Foundation**, source `http://beringalakaina.com/`.
 
 **The host name contains both.** `ENTITY_MATCH_RULES` rule 11: a JV genuinely
 has two parents. No link was written and neither side was altered.
-File: `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`.
+File: `review/entity_rel_need_owner_conflicts_2026-09-02.csv`.
 
-**If JV:** NEST should carry it as `relation_class = affiliation`, not ownership.
+**If JV:** NEED should carry it as `relation_class = affiliation`, not ownership.
 **If one side wrong:** name which, and the other is withdrawn.
 
 ---
@@ -1781,10 +1781,10 @@ File: `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`.
 
 **Decision:** ratify the publish hold, or name a review route.
 
-`code/1070`'s sweep staged 1,106 rows. The 583 OWNERSHIP rows went to NEST,
+`code/1070`'s sweep staged 1,106 rows. The 583 OWNERSHIP rows went to NEED,
 which **refused 229 of them** as *"unreviewed HTML heading/anchor scrape"* —
 the block yields page furniture and **natural persons' names**, and
-`docs/NEST_BUILD_LOG.md` makes that a hard rule. The 523 RELATIONSHIP rows were
+`docs/NEED_BUILD_LOG.md` makes that a hard rule. The 523 RELATIONSHIP rows were
 merged into `native_owned_businesses.csv` and **the same refusal was never
 applied to them**. Measured on the live table before this pass:
 
@@ -1982,13 +1982,13 @@ may need its own ruling.
 misnamed and the sample is wrong: `770.FLAGSHIP` must be repointed away from
 `native_owned_businesses.csv`, and the directory needs its own collection —
 which is arguably the truer shape anyway, since it is the same
-certified-vs-owned distinction that already justified splitting `nest` out as
+certified-vs-owned distinction that already justified splitting `need` out as
 a separate collection rather than merging it here.
 
 **A third option, and it may be the best one.** Make the directory its own
-collection (`certified-businesses` or similar) alongside `nest` and the
+collection (`certified-businesses` or similar) alongside `need` and the
 individual-firm set, on exactly the `500.COLLECTIONS` reasoning that kept
-`nest` separate: *certified or listed by a nation* is a different relation
+`need` separate: *certified or listed by a nation* is a different relation
 from *owned by a nation* and from *owned by an individual person*. Three
 relations, three collections, no collection carrying a table it does not
 describe.
@@ -2635,7 +2635,7 @@ visible in the contracting record.
 | `Hui O Ka Koa, Llc` (Honolulu) | $64.30M | HI, matches the proposal — and the proposal rests on the word `koa` | `huiokakoa.com` does not resolve | co-located UEIs are a generic Honolulu list |
 | `Friend Contractors - White Mountain Jv` (Kodiak AK) | $19.48M | **Kodiak, ~1,000 km from White Mountain**; its neighbours are a Kodiak/Alutiiq cluster | no site | — |
 | `Ascg Incorporated Of New Mexico` | $16.57M | Albuquerque only | `ascg.com` does not resolve | — |
-| `Sea Lion Security & Control` + `Sea Lion International` | $6.08M | both Anchorage, which discriminates nothing | — | **Cedar contradicts itself**: the register holds `Sea Lion Corporation` as a village corporation `CE-000BV-SK`, `nest_enterprises.csv` holds a `Sea Lion Corporation` under **Choggiung, Ltd.** `CE-00088-R8` |
+| `Sea Lion Security & Control` + `Sea Lion International` | $6.08M | both Anchorage, which discriminates nothing | — | **Cedar contradicts itself**: the register holds `Sea Lion Corporation` as a village corporation `CE-000BV-SK`, `need_enterprises.csv` holds a `Sea Lion Corporation` under **Choggiung, Ltd.** `CE-00088-R8` |
 | `Indian Walk In Center` — **settled**, listed to show the route | $33.20M | — | uicsl.org names no former name; `indianwalkincenter.org` is a parked GoDaddy page | **the UEI carries BOTH names in `prime_contracts`** |
 
 The Sea Lion row is the only one that is Cedar's own fault. **Which record is
@@ -2919,16 +2919,16 @@ made, and this pass is the first thing to move it.
 ---
 
 <!-- BEGIN OWNER-V6-NEST-2026-09-02 -->
-# Your own enterprise dataset, reconciled against NEST — four decisions
+# Your own enterprise dataset, reconciled against NEED — four decisions
 
-*Added 2026-09-02 by `code/1130_nest_owner_v6_reconcile.py`. Evidence is in
-`data/staging/nest_owner_v6/`. Nothing was appended to NEST and no id was
+*Added 2026-09-02 by `code/1130_need_owner_v6_reconcile.py`. Evidence is in
+`data/staging/need_owner_v6/`. Nothing was appended to NEED and no id was
 minted; these four answers decide what happens next.*
 
 **The headline, so the decisions have a size.** Your
 `native_entity_enterprise_dataset_v6_geocoded.csv` (18,110 rows, 658 parents)
-was put through NEST's own `(owner hub, normalised name)` clustering:
-**440 enterprises we already hold, 4,786 net new, and 1,170 NEST holds that
+was put through NEED's own `(owner hub, normalised name)` clustering:
+**440 enterprises we already hold, 4,786 net new, and 1,170 NEED holds that
 your file does not** — 614 of those in no form at all, and 592 of the 614 are
 firms that appear in no federal contracting record, which is exactly what the
 scraping was for.
@@ -2951,7 +2951,7 @@ survive normalisation and are absent from v6 — all 160 carry a UEI
 LLC`, `UMIAQ DESIGN, LLC`, `CHEROKEE SERVICES GROUP LLC`, …).
 
 > **The question:** do we carry those 160 forward, or did you drop them on
-> purpose? List: `data/staging/nest_owner_v6/v3_recovery_candidates.csv`.
+> purpose? List: `data/staging/need_owner_v6/v3_recovery_candidates.csv`.
 > **If you say carry**, they join the ingest in OV6-2. **If you say dropped
 > on purpose**, we record the reason so nobody re-adds them.
 
@@ -2968,7 +2968,7 @@ are 2,338 `cedar_inference` (a resolver output), 1,855 `federal_registry`,
 474 `human_ruling` (your hand file), 257 the entity's own website.
 
 `1130` refuses to propose a relation for any of them — an affiliation
-recorded as ownership is the defect NEST is most exposed to.
+recorded as ownership is the defect NEED is most exposed to.
 
 > **The question:** ingest all 4,786 as `affiliation` and let a later pass
 > upgrade the ones a source actually supports? Or ingest only the 721 whose
@@ -2985,13 +2985,13 @@ recorded as ownership is the defect NEST is most exposed to.
 Afognak Native **Corporation**. Same at Aleknagik, Agdaagux and Arctic
 Village: 212 rows in all. `ANCSA_OWNERSHIP_RULING` rule 2 says a village
 government cannot own an ANCSA corporation, and Cedar's own
-`village_government_owns_an_anc()` returns `False` unconditionally. NEST is on
+`village_government_owns_an_anc()` returns `False` unconditionally. NEED is on
 the corporation side on all 212.
 
 > **The question:** confirm the ruling applies, and we hand you the list to
 > repoint in your file rather than us silently overriding it. Column
 > `hub_disagreement_class` in
-> `data/staging/nest_owner_v6/enterprise_reconciliation.csv`.
+> `data/staging/need_owner_v6/enterprise_reconciliation.csv`.
 
 ---
 
@@ -3007,14 +3007,14 @@ handles). The eight that did not:
   Self-Governance. These are register additions, not matching failures.
 * **`TRBF-CSAKT-00` Confederated Salish & Kootenai** — held as ambiguous
   because Cedar's canonical name is the truncated `Confederated Salish` and
-  `Kootenai` is a separate tribe. NEST's `held_rows.csv` already holds this
+  `Kootenai` is a separate tribe. NEED's `held_rows.csv` already holds this
   same entity for the same reason, so it is one ruling that clears two places.
 * **`NHO-MANUKAI-00` Manu Kai LLC** — also already in `held_rows.csv`; not in
   the spine.
 
 > **The question:** mint the six intertribal organisations, and rule
 > `Confederated Salish & Kootenai` onto `TRBF-CSKTFR-00` (12 rows here, plus
-> the NEST holds).
+> the NEED holds).
 
 ---
 

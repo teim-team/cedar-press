@@ -217,7 +217,7 @@ def block():
       "the other way. The difference is therefore a CEILING.")
     A("- **Obligations are SIGNED.** A deobligation is a negative row, so a "
       "county's Native sum can legitimately exceed its all-recipient sum. Only "
-      "the ROW COUNTS nest.")
+      "the ROW COUNTS need.")
     A("- **Two of the three datasets are not the federal universe.** "
       "`prime_contracts.csv` and `federal_funding_transactions.csv` are "
       "Native-CANDIDATE corpora — their recipient universe was pulled from Native "

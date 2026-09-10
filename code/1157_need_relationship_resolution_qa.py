@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""1157 - NEST relationship-resolution QA: the wrong-owner class.
+"""1157 - NEED relationship-resolution QA: the wrong-owner class.
 
 WHY THIS EXISTS
 ---------------
-The owner reviewed NEST twice and reached the same verdict twice:
+The owner reviewed NEED twice and reached the same verdict twice:
 
     "The ten-row review caught Goldbelt Hawk -> Tlingit & Haida and United
      Tribes Technical College -> United Auburn, along with affiliation being
@@ -14,12 +14,12 @@ The owner reviewed NEST twice and reached the same verdict twice:
 Two defects, and they are not the same defect.
 
 DEFECT 1 - AFFILIATION PROMOTED TO OWNERSHIP.  Measured on
-`dist/customer/nest.csv` 2026-09-02, and it was real but it was NOT where a
+`dist/customer/need.csv` 2026-09-02, and it was real but it was NOT where a
 reader would look for it:
 
   * `relation_class` was honest.  1,512 ownership / 3,286 affiliation, and
     **every one of the 1,512 had at least one edge in
-    `nest_enterprise_relations.csv` that itself asserts ownership** - 0 rows
+    `need_enterprise_relations.csv` that itself asserts ownership** - 0 rows
     published as ownership on a collapse rather than on a source.  The
     `unspecified` guard held too: 0 blank `relationship`, 3,187 written
     literally.
@@ -93,7 +93,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-SCRIPT = "code/1157_nest_relationship_resolution_qa.py"
+SCRIPT = "code/1157_need_relationship_resolution_qa.py"
 BUILT = date.today().isoformat()
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
@@ -101,11 +101,11 @@ SPINE = CEDAR / "data" / "spine"
 RAW = CEDAR / "data" / "raw"
 REVIEW = CEDAR / "review"
 
-ENT = CLEAN / "nest_enterprises.csv"
-EDGE = CLEAN / "nest_enterprise_relations.csv"
+ENT = CLEAN / "need_enterprises.csv"
+EDGE = CLEAN / "need_enterprise_relations.csv"
 REGISTER = SPINE / "cedar_identity_register.csv"
 LOOKUP = RAW / "external" / "anc_tribal_subsidiary_lookup.csv"
-OUT = REVIEW / f"nest_wrong_owner_candidates_{BUILT}.csv"
+OUT = REVIEW / f"need_wrong_owner_candidates_{BUILT}.csv"
 
 csv.field_size_limit(10 ** 9)
 
@@ -386,7 +386,7 @@ def candidate_row(r, hub, ev, defect_class, why, corp):
 
 def stage_report(argv) -> int:
     m, cands = measure()
-    print("=== 1157 report - NEST relationship resolution ===")
+    print("=== 1157 report - NEED relationship resolution ===")
     for k, v in m.items():
         print("  %-62s %7d" % (k, v))
     from collections import Counter

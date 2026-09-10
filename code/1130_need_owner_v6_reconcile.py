@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-1130 - RECONCILE THE OWNER'S OWN ENTERPRISE DATASET AGAINST NEST.
+1130 - RECONCILE THE OWNER'S OWN ENTERPRISE DATASET AGAINST NEED.
 
-    py -3 code/1130_nest_owner_v6_reconcile.py versions      # which file is authoritative
-    py -3 code/1130_nest_owner_v6_reconcile.py build         # crosswalk + reconcile + dual role + pairs
-    py -3 code/1130_nest_owner_v6_reconcile.py codebook      # register the dual-role block so it can ship
-    py -3 code/1130_nest_owner_v6_reconcile.py verify        # exits 1 on breach, and on a MISSING merge
-    py -3 code/1130_nest_owner_v6_reconcile.py selftest      # proves verify FIRES
+    py -3 code/1130_need_owner_v6_reconcile.py versions      # which file is authoritative
+    py -3 code/1130_need_owner_v6_reconcile.py build         # crosswalk + reconcile + dual role + pairs
+    py -3 code/1130_need_owner_v6_reconcile.py codebook      # register the dual-role block so it can ship
+    py -3 code/1130_need_owner_v6_reconcile.py verify        # exits 1 on breach, and on a MISSING merge
+    py -3 code/1130_need_owner_v6_reconcile.py selftest      # proves verify FIRES
 
 READ-ONLY against every Cedar table and against the owner's dissertation
 directory.  Zero network requests.  MINTS ZERO Cedar ids.  Does not commit.
@@ -14,7 +14,7 @@ directory.  Zero network requests.  MINTS ZERO Cedar ids.  Does not commit.
 ===========================================================================
 WHY THIS IS A RECONCILIATION AND NOT AN APPEND
 ===========================================================================
-`data/clean/nest_enterprises.csv` holds 1,610 enterprises.  The owner built
+`data/clean/need_enterprises.csv` holds 1,610 enterprises.  The owner built
 his own on this machine, at
 
     C:/Users/esm247/Desktop/dissertation/data/tribal_federal_spending/
@@ -23,23 +23,23 @@ his own on this machine, at
 and nobody in this project has read it.  It is the largest
 `ON_DISK_NOT_PROMOTED` asset here (AGENT_FIELD_GUIDE §5).
 
-NEST clusters on **(owner hub, normalised name)** and binds that key to a
+NEED clusters on **(owner hub, normalised name)** and binds that key to a
 permanent `enterprise_id` in the append-only register
-`data/spine/cedar_nest_id_register.csv`.  The only honest way to compare two
+`data/spine/cedar_need_id_register.csv`.  The only honest way to compare two
 enterprise universes is to put the second one through the FIRST one's
-clustering - a plain append would have restated a firm NEST already holds as
+clustering - a plain append would have restated a firm NEED already holds as
 a second row, which is the defect the "merged, not appended" design of
 `1072` exists to stop, and which already cost 25 duplicate rows and 25 lost
-corroborations (NEST_BUILD_LOG, UPDATE 2026-09-02 §3).
+corroborations (NEED_BUILD_LOG, UPDATE 2026-09-02 §3).
 
 `norm()` below is COPIED VERBATIM from `code/1072_tribally_owned_enterprises.py`
 and the copy is checked at run time: `verify` re-derives
-`enterprise_name_normalized` for all 1,610 live NEST rows and exits 1 if a
+`enterprise_name_normalized` for all 1,610 live NEED rows and exits 1 if a
 single one disagrees.  Two normalisers that drift are two clusterings, and
 the whole comparison would be measuring the drift instead of the data.
 
-**Nothing is written into NEST.**  `1072 build` is a FULL REBUILD of
-`nest_enterprises.csv`; an in-place append here would be reverted by it and
+**Nothing is written into NEED.**  `1072 build` is a FULL REBUILD of
+`need_enterprises.csv`; an in-place append here would be reverted by it and
 would look like pure progress while it happened (START_HERE, the FERC
 rebuild/in-place collision, four times).  The net-new set is written as a
 PROPOSAL for `1072` to ingest through its own clustering, on its own next
@@ -49,20 +49,20 @@ run, so the id register stays the only place an id is minted.
 READS
 ===========================================================================
     <dissertation>/native_entity_enterprise_dataset{,_v2,_v3,_v5*,_v6*}.csv
-    data/clean/nest_enterprises.csv
+    data/clean/need_enterprises.csv
     data/spine/cedar_identity_register.csv
-    data/spine/cedar_nest_id_register.csv
+    data/spine/cedar_need_id_register.csv
     data/spine/cedar_identifier_ledger.csv        (dual-role identifier rung)
 
 WRITES
-    data/staging/nest_owner_v6/version_comparison.csv
-    data/staging/nest_owner_v6/parent_crosswalk.csv
-    data/staging/nest_owner_v6/enterprise_reconciliation.csv
-    data/staging/nest_owner_v6/nest_not_in_owner.csv
-    data/staging/nest_owner_v6/v3_recovery_candidates.csv
-    data/staging/nest_owner_v6/corroboration_pairs.csv
-    data/staging/nest_owner_v6/conservation.csv
-    data/clean/nest_entity_dual_role.csv
+    data/staging/need_owner_v6/version_comparison.csv
+    data/staging/need_owner_v6/parent_crosswalk.csv
+    data/staging/need_owner_v6/enterprise_reconciliation.csv
+    data/staging/need_owner_v6/need_not_in_owner.csv
+    data/staging/need_owner_v6/v3_recovery_candidates.csv
+    data/staging/need_owner_v6/corroboration_pairs.csv
+    data/staging/need_owner_v6/conservation.csv
+    data/clean/need_entity_dual_role.csv
 """
 import csv, os, re, sys, json, datetime, collections, unicodedata
 
@@ -71,7 +71,7 @@ csv.field_size_limit(10 ** 8)
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def P(*a): return os.path.join(ROOT, *a)
 
-BUILT_BY = "1130_nest_owner_v6_reconcile.py"
+BUILT_BY = "1130_need_owner_v6_reconcile.py"
 BUILT_DATE = datetime.date.today().isoformat()
 
 OWNER_DIR = os.path.join(
@@ -87,26 +87,26 @@ OWNER_FILES = {
 }
 AUTHORITATIVE = "v6"
 
-STAGE = P("data", "staging", "nest_owner_v6")
+STAGE = P("data", "staging", "need_owner_v6")
 OUT_VERSIONS = os.path.join(STAGE, "version_comparison.csv")
 OUT_XWALK    = os.path.join(STAGE, "parent_crosswalk.csv")
 OUT_RECON    = os.path.join(STAGE, "enterprise_reconciliation.csv")
-OUT_NESTONLY = os.path.join(STAGE, "nest_not_in_owner.csv")
+OUT_NEEDONLY = os.path.join(STAGE, "need_not_in_owner.csv")
 OUT_V3REC    = os.path.join(STAGE, "v3_recovery_candidates.csv")
 OUT_PAIRS    = os.path.join(STAGE, "corroboration_pairs.csv")
 OUT_CONSV    = os.path.join(STAGE, "conservation.csv")
 OUT_LEDGER   = os.path.join(STAGE, "ledger_shared_upstream_findings.csv")
-OUT_DUAL     = P("data", "clean", "nest_entity_dual_role.csv")
+OUT_DUAL     = P("data", "clean", "need_entity_dual_role.csv")
 
-NEST      = P("data", "clean", "nest_enterprises.csv")
+NEED      = P("data", "clean", "need_enterprises.csv")
 REGISTER  = P("data", "spine", "cedar_identity_register.csv")
-NEST_IDS  = P("data", "spine", "cedar_nest_id_register.csv")
+NEED_IDS  = P("data", "spine", "cedar_need_id_register.csv")
 LEDGER    = P("data", "spine", "cedar_identifier_ledger.csv")
 DSBS      = P("data", "raw", "external", "sba_dsbs_native_entities.csv")
 
 
 # ---------------------------------------------------------------------------
-# NAME NORMALISATION - VERBATIM from 1072.  verify re-derives NEST's own
+# NAME NORMALISATION - VERBATIM from 1072.  verify re-derives NEED's own
 # enterprise_name_normalized with it and exits 1 on a single disagreement.
 # ---------------------------------------------------------------------------
 _SUFFIX = re.compile(
@@ -423,7 +423,7 @@ def family_of(vsrc):
 
 
 # The SBA DSBS upstream key.  It MUST be identical on both sides, because
-# NEST's own `uei_candidate` came from the same extract - two readings of one
+# NEED's own `uei_candidate` came from the same extract - two readings of one
 # document are one observation (1118 R-A), and calling them two would be the
 # exact "copying a source into your own table does not corroborate it" error
 # START_HERE item 0 records.
@@ -456,9 +456,9 @@ def cmd_build():
     if not owner:
         raise SystemExit("the owner's %s is empty or absent at %s"
                          % (AUTHORITATIVE, owner_path(AUTHORITATIVE)))
-    nest = rd(NEST)
-    if not nest:
-        raise SystemExit("data/clean/nest_enterprises.csv is empty or absent")
+    need = rd(NEED)
+    if not need:
+        raise SystemExit("data/clean/need_enterprises.csv is empty or absent")
     reg, by_handle, by_stem, _regnames = load_register()
     live_uids = {r["cedar_uid"] for r in reg}
 
@@ -498,13 +498,13 @@ def cmd_build():
     b["NO_PARENT_ID_ON_ROW_rows_excluded_from_parent_universe"] = 0
     account("owner v6 distinct non-blank tribe_id", len(xw), dict(b))
 
-    # ---- 2. reconciliation through NEST's own clustering ------------------
-    nest_key = {}
-    for r in nest:
-        nest_key[(r["owner_hub_cedar_uid"], r["enterprise_name_normalized"])] = r
-    nest_names = collections.defaultdict(list)
-    for r in nest:
-        nest_names[r["enterprise_name_normalized"]].append(r)
+    # ---- 2. reconciliation through NEED's own clustering ------------------
+    need_key = {}
+    for r in need:
+        need_key[(r["owner_hub_cedar_uid"], r["enterprise_name_normalized"])] = r
+    need_names = collections.defaultdict(list)
+    for r in need:
+        need_names[r["enterprise_name_normalized"]].append(r)
 
     clusters = {}          # (uid, nk) -> aggregate of the owner's rows
     disp = collections.Counter()
@@ -555,13 +555,13 @@ def cmd_build():
         c["state"] = c["state"] or (r.get("hq_state") or "").strip()
         c["vdate"] = c["vdate"] or (r.get("verified_date") or "").strip()
 
-    # An owner hub that is an Alaska Native VILLAGE GOVERNMENT while NEST
+    # An owner hub that is an Alaska Native VILLAGE GOVERNMENT while NEED
     # holds the same firm under an ANCSA CORPORATION is not a tie to break.
     # `ANCSA_OWNERSHIP_RULING` rule 2 and
     # `cedar_domain.village_government_owns_an_anc()` (always False) say the
     # owner's side cannot be right.  This is the
     # ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION family reached from a
-    # SIXTH direction, and NEST is on the correct side of every one.
+    # SIXTH direction, and NEED is on the correct side of every one.
     ANC_CLASSES = {"Alaska Native Regional Corporation",
                    "Alaska Native Village Corporation",
                    "ANCSA Group Corporation"}
@@ -572,8 +572,8 @@ def cmd_build():
     recon = []
     already = net_new = 0
     for k, c in sorted(clusters.items()):
-        hit = nest_key.get(k)
-        elsewhere = [x for x in nest_names.get(k[1], [])
+        hit = need_key.get(k)
+        elsewhere = [x for x in need_names.get(k[1], [])
                      if x["owner_hub_cedar_uid"] != k[0]]
         hd_class, hd_basis = "", ""
         if elsewhere:
@@ -582,11 +582,11 @@ def cmd_build():
             if a in GOV_CLASSES and bs <= ANC_CLASSES:
                 hd_class = "ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION"
                 hd_basis = (
-                    "the owner's file hubs this firm on a %s; NEST hubs it "
+                    "the owner's file hubs this firm on a %s; NEED hubs it "
                     "on %s. A Native Village GOVERNMENT does not own an "
                     "ANCSA corporation - ANCSA_OWNERSHIP_RULING rule 2, and "
                     "cedar_domain.village_government_owns_an_anc() is "
-                    "always False. NEST is on the correct side; this is a "
+                    "always False. NEED is on the correct side; this is a "
                     "correction to make in HIS file, not in ours."
                     % (a, "; ".join(sorted(bs))))
             elif a in ANC_CLASSES and bs <= ANC_CLASSES:
@@ -597,28 +597,28 @@ def cmd_build():
                             "consolidation note to settle, not a name.")
             else:
                 hd_class = "UNADJUDICATED_HUB_DISAGREEMENT"
-                hd_basis = ("owner hub class %r vs NEST hub class(es) %s. "
+                hd_basis = ("owner hub class %r vs NEED hub class(es) %s. "
                             "Neither side is refuted by a standing ruling; "
                             "held for rule 13's ladder."
                             % (a, sorted(bs)))
         if hit:
             already += 1
-            status = "ALREADY_IN_NEST"
-            basis = ("(owner hub, normalised name) is already a NEST key -> "
+            status = "ALREADY_IN_NEED"
+            basis = ("(owner hub, normalised name) is already a NEED key -> "
                      "%s. This is a RESTATEMENT and must raise that "
                      "enterprise's source count, not create a row."
                      % hit["enterprise_id"])
         else:
             net_new += 1
-            status = "NET_NEW_TO_NEST"
-            basis = ("no NEST row carries this (owner hub, normalised name); "
+            status = "NET_NEW_TO_NEED"
+            basis = ("no NEED row carries this (owner hub, normalised name); "
                      "%s" % ("the same normalised name IS held under %d other "
                              "hub(s): %s - a HUB DISAGREEMENT, not an absence"
                              % (len({x['owner_hub_cedar_uid'] for x in elsewhere}),
                                 "; ".join(sorted({x["owner_hub_name"]
                                                   for x in elsewhere}))[:200])
                             if elsewhere else
-                            "and no NEST row carries the name under any hub"))
+                            "and no NEED row carries the name under any hub"))
             if elsewhere:
                 status = "NET_NEW_HUB_DISAGREEMENT"
         fam = collections.Counter()
@@ -629,9 +629,9 @@ def cmd_build():
             cedar_uid=c["cedar_uid"],
             enterprise_name=c["owner_enterprise_name"],
             enterprise_name_normalized=c["enterprise_name_normalized"],
-            matched_nest_enterprise_id=hit["enterprise_id"] if hit else "",
-            matched_nest_relationship=hit.get("relationship", "") if hit else "",
-            matched_nest_relation_class=(hit.get("relation_class", "")
+            matched_need_enterprise_id=hit["enterprise_id"] if hit else "",
+            matched_need_relationship=hit.get("relationship", "") if hit else "",
+            matched_need_relation_class=(hit.get("relation_class", "")
                                          if hit else ""),
             owner_rows_in_cluster=c["owner_rows"],
             owner_uei=";".join(sorted(c["ueis"])),
@@ -655,7 +655,7 @@ def cmd_build():
                 "relationship word, so this pass may not propose "
                 "`structures` (ownership) OR `ties` (affiliation) from it. "
                 "An affiliation recorded as ownership is the defect this "
-                "dataset is most exposed to (NEST_BUILD_LOG), and guessing "
+                "dataset is most exposed to (NEED_BUILD_LOG), and guessing "
                 "upward is the direction that fabricates."),
             ownership_claim_carried="NO - provenance only",
             ownership_claim_basis=(
@@ -668,7 +668,7 @@ def cmd_build():
               required_first=("reconciliation_status", "cedar_uid",
                               "enterprise_name"))
 
-    # ---- 3. the third number: what NEST holds and the owner does not ------
+    # ---- 3. the third number: what NEED holds and the owner does not ------
     owner_keys = set(clusters)
     owner_names = {k[1] for k in clusters}
     owner_ueis = set()
@@ -681,8 +681,8 @@ def cmd_build():
             owner_ueis.add(v)
     owner_all_names = {norm(r.get("enterprise_name", "")) for r in owner} - {""}
 
-    nestonly, nb = [], collections.Counter()
-    for r in nest:
+    needonly, nb = [], collections.Counter()
+    for r in need:
         k = (r["owner_hub_cedar_uid"], r["enterprise_name_normalized"])
         if k in owner_keys:
             nb["in_owner_on_the_same_hub"] += 1
@@ -697,7 +697,7 @@ def cmd_build():
         else:
             reason = "ABSENT_FROM_OWNER_ENTIRELY"
             nb["absent_from_owner_entirely"] += 1
-        nestonly.append(dict(
+        needonly.append(dict(
             disposition=reason,
             enterprise_id=r["enterprise_id"],
             enterprise_name=r["enterprise_name"],
@@ -713,13 +713,13 @@ def cmd_build():
             matched_owner_by_name="Y" if by_name else "N",
             matched_owner_by_identifier="Y" if by_id else "N",
             disposition_basis=(
-                "NEST holds this enterprise; the owner's v6 does not carry "
+                "NEED holds this enterprise; the owner's v6 does not carry "
                 "it on this hub. This is what Cedar's own scraping added."),
             built_by=BUILT_BY, built_date=BUILT_DATE))
-    write_csv(OUT_NESTONLY, nestonly,
+    write_csv(OUT_NEEDONLY, needonly,
               required_first=("disposition", "enterprise_id",
                               "enterprise_name"))
-    account("data/clean/nest_enterprises.csv", len(nest), dict(nb))
+    account("data/clean/need_enterprises.csv", len(need), dict(nb))
 
     # ---- 4. v3 rows v6 dropped -------------------------------------------
     v3 = rd(owner_path("v3"))
@@ -824,28 +824,28 @@ def cmd_build():
     # ---- 5. corroboration pairs, for 1118 ---------------------------------
     # Shape is 1118.Store.observe()'s keyword set exactly, so adopting them is
     # a loop and not a translation.  Both SIDES of each pair are emitted, and
-    # the SBA side carries the SAME upstream_key as NEST's own DSBS candidate
+    # the SBA side carries the SAME upstream_key as NEED's own DSBS candidate
     # so 1118 R-A collapses the echo instead of booking it as a second source.
     pairs, pb = [], collections.Counter()
-    nest_by_uei = collections.defaultdict(list)
-    for r in nest:
+    need_by_uei = collections.defaultdict(list)
+    for r in need:
         for col in ("uei", "uei_candidate"):
             v = (r.get(col) or "").strip().upper()
             if v and v != "NAN":
-                nest_by_uei[v].append((col, r))
+                need_by_uei[v].append((col, r))
     for r in owner:
         u = (r.get("enterprise_uei") or "").strip().upper()
         if not u or u == "NAN":
             pb["owner_row_carries_no_uei"] += 1
             continue
-        hits = nest_by_uei.get(u)
+        hits = need_by_uei.get(u)
         if not hits:
-            pb["owner_uei_not_held_by_nest"] += 1
+            pb["owner_uei_not_held_by_need"] += 1
             continue
         vs = (r.get("verification_source") or "").strip()
         fam, fam_note = family_of(vs)
         col, nr = hits[0]
-        pb["owner_uei_matched_nest_%s" % col] += 1
+        pb["owner_uei_matched_need_%s" % col] += 1
         if fam == "federal_registry" and "sba" in vs.lower():
             upstream = SBA_UPSTREAM % u
         elif vs.startswith("http"):
@@ -855,7 +855,7 @@ def cmd_build():
             upstream = "ownerfile:%s" % (vs or "unattributed")
         pairs.append(dict(
             pair="P7_owner_v6_identifier",
-            dataset="nest",
+            dataset="need",
             subject=nr["enterprise_id"],
             subject_label=nr["enterprise_name"],
             predicate="enterprise.identifier.UEI",
@@ -873,8 +873,8 @@ def cmd_build():
             origin_table=("<owner>/tribal_federal_spending/clean/%s"
                           % OWNER_FILES[AUTHORITATIVE]),
             observed_date=(r.get("verified_date") or "").strip(),
-            nest_side_column=col,
-            nest_side_basis=(nr.get("identifier_basis") if col == "uei"
+            need_side_column=col,
+            need_side_basis=(nr.get("identifier_basis") if col == "uei"
                              else nr.get("uei_candidate_basis")) or "",
             echo_risk=(
                 "ECHO - same SBA DSBS extract on both sides; 1118 R-A "
@@ -898,7 +898,7 @@ def cmd_build():
             len(owner), dict(pb))
 
     # ---- 6. THE ANC / NHO DUAL ROLE ---------------------------------------
-    dual = build_dual_role(owner, nest, reg, tid2uid, live_uids, account)
+    dual = build_dual_role(owner, need, reg, tid2uid, live_uids, account)
     write_csv(OUT_DUAL, dual,
               required_first=("cedar_uid", "handle", "canonical_name",
                               "entity_class", "dual_role"))
@@ -920,8 +920,8 @@ def cmd_build():
     print("THE THREE RECONCILIATION COUNTS")
     print("=" * 74)
     print("  owner enterprise clusters, hubbed        %6d" % len(clusters))
-    print("    1. ALREADY IN NEST                     %6d" % already)
-    print("    2. NET NEW TO NEST                     %6d" % net_new)
+    print("    1. ALREADY IN NEED                     %6d" % already)
+    print("    2. NET NEW TO NEED                     %6d" % net_new)
     print("       of which a HUB DISAGREEMENT         %6d"
           % sum(1 for r in recon
                 if r["reconciliation_status"] == "NET_NEW_HUB_DISAGREEMENT"))
@@ -929,7 +929,7 @@ def cmd_build():
             r["hub_disagreement_class"] for r in recon
             if r["hub_disagreement_class"]).most_common():
         print("         %-36s %6d" % (cl, n))
-    print("    3. NEST HOLDS, OWNER DOES NOT          %6d" % len(nestonly))
+    print("    3. NEED HOLDS, OWNER DOES NOT          %6d" % len(needonly))
     print("       absent from his file entirely       %6d"
           % nb["absent_from_owner_entirely"])
     print("       present, on a different hub/key     %6d"
@@ -951,7 +951,7 @@ def cmd_build():
     print("  v3 rows absent from v6 (recovery candidates): %d" % len(v3rec))
     print("  Cedar enterprise ids minted by this script: 0")
     print()
-    for p in (OUT_VERSIONS, OUT_XWALK, OUT_RECON, OUT_NESTONLY, OUT_V3REC,
+    for p in (OUT_VERSIONS, OUT_XWALK, OUT_RECON, OUT_NEEDONLY, OUT_V3REC,
               OUT_PAIRS, OUT_LEDGER, OUT_CONSV, OUT_DUAL):
         print("  wrote %s" % os.path.relpath(p, ROOT))
 
@@ -960,11 +960,11 @@ def cmd_build():
 # THE DUAL ROLE
 # ===========================================================================
 # The owner's design correction: an ANC is a corporation that TRADES, not
-# only a hub that owns, and NEST's model treats it only as a hub.  The fix is
+# only a hub that owns, and NEED's model treats it only as a hub.  The fix is
 # a DECLARED dual role keyed to the register entity - not a second
-# nest_enterprises row, because duplicating the row is what would break the
+# need_enterprises row, because duplicating the row is what would break the
 # (owner hub, normalised name) key and put a hub in its own subsidiary list
-# ("a hub is not its own subsidiary", NEST_BUILD_LOG).
+# ("a hub is not its own subsidiary", NEED_BUILD_LOG).
 #
 # Two rungs of evidence, and the rung is recorded on the row:
 #   R1 DECLARED_BY_OWNER_DATASET - the owner's own file carries a row whose
@@ -980,9 +980,9 @@ def cmd_build():
 #      than a restatement of his file.  Rule 14: an NHO says it is one,
 #      because the certification is the point.
 # A row that reaches none of the three is not written.
-def build_dual_role(owner, nest, reg, tid2uid, live_uids, account):
+def build_dual_role(owner, need, reg, tid2uid, live_uids, account):
     by_uid = {r["cedar_uid"]: r for r in reg}
-    owns = collections.Counter(r["owner_hub_cedar_uid"] for r in nest)
+    owns = collections.Counter(r["owner_hub_cedar_uid"] for r in need)
 
     # R3 index: SBA DSBS by exact normalised legal name.  Uniqueness is
     # required on both sides - a name matching two DSBS firms, or two
@@ -1100,8 +1100,8 @@ def build_dual_role(owner, nest, reg, tid2uid, live_uids, account):
             role_as_enterprise=("this entity itself trades - it holds the "
                                 "identifiers and the federal-contractor "
                                 "status on its OWN legal name"),
-            is_nest_owner_hub="Y" if owns.get(uid) else "N",
-            n_nest_enterprises_owned=owns.get(uid, 0),
+            is_need_owner_hub="Y" if owns.get(uid) else "N",
+            n_need_enterprises_owned=owns.get(uid, 0),
             evidence_rungs=";".join(sorted(e["rungs"])),
             own_uei=";".join(sorted(e["ueis"])),
             own_cage=";".join(sorted(e["cages"])),
@@ -1114,13 +1114,13 @@ def build_dual_role(owner, nest, reg, tid2uid, live_uids, account):
             evidence_families=";".join(fams),
             representation_rule=(
                 "RECORDED, NOT DUPLICATED. This entity keeps ONE row in the "
-                "identity register and ZERO rows in nest_enterprises.csv "
-                "for itself. NEST's key is (owner hub, normalised name); a "
+                "identity register and ZERO rows in need_enterprises.csv "
+                "for itself. NEED's key is (owner hub, normalised name); a "
                 "self-row would make the hub its own subsidiary, which the "
                 "1072 build already refuses by testing the child against "
                 "every deterministic rendering of the hub's name. The dual "
                 "role therefore lives here, keyed to the cedar_uid, and a "
-                "consumer joins it to nest_enterprises on "
+                "consumer joins it to need_enterprises on "
                 "owner_hub_cedar_uid."),
             dual_role_basis=(
                 "%s%sEvidence rungs: %s."
@@ -1154,12 +1154,12 @@ def build_dual_role(owner, nest, reg, tid2uid, live_uids, account):
 # The fragment is written whole; the master is APPENDED, never rewritten -
 # `41_build_codebooks.py` is the one script on NEVER_RUN because it rewrites
 # it from a hardcoded dict.  Same pattern as 1072's `codebook` stage.
-CB_BLOCK = "18c_nest_entity_dual_role"
+CB_BLOCK = "18c_need_entity_dual_role"
 CB_FIELDS = ["dataset", "variable", "type", "units", "pct_filled", "n_rows",
              "published", "access_tier", "description", "generated"]
 CB_DESC = {
     "cedar_uid": "THE KEY. The register entity that holds BOTH roles. One "
-                 "row per entity; join nest_enterprises.csv on "
+                 "row per entity; join need_enterprises.csv on "
                  "owner_hub_cedar_uid for what it owns.",
     "dual_role": "Always Y. A row exists only where evidence was found; "
                  "absence means no evidence, never `it does not trade`.",
@@ -1170,14 +1170,14 @@ CB_DESC = {
                       "is the SBA certification register and is a "
                       "federal_registry observer, independent of the owner's "
                       "file.",
-    "n_nest_enterprises_owned": "COUNT of nest_enterprises rows hubbed here. "
+    "n_need_enterprises_owned": "COUNT of need_enterprises rows hubbed here. "
                                 "It is a count, not a key - do not sum it "
                                 "against anything.",
-    "representation_rule": "Why this entity is NOT also a nest_enterprises "
+    "representation_rule": "Why this entity is NOT also a need_enterprises "
                            "row. Constant by design.",
 }
-CB_GENERIC = ("Recorded by code/1130_nest_owner_v6_reconcile.py; see "
-              "docs/NEST_BUILD_LOG.md, the OWNER-V6 section.")
+CB_GENERIC = ("Recorded by code/1130_need_owner_v6_reconcile.py; see "
+              "docs/NEED_BUILD_LOG.md, the OWNER-V6 section.")
 
 
 def _cb_type(vals):
@@ -1192,7 +1192,7 @@ def _cb_type(vals):
 def cmd_codebook():
     rows = rd(OUT_DUAL)
     if not rows:
-        print("  ! nest_entity_dual_role.csv has no rows - run `build` first")
+        print("  ! need_entity_dual_role.csv has no rows - run `build` first")
         return 1
     hdr = list(rows[0].keys())
     frag = []
@@ -1223,7 +1223,7 @@ def cmd_codebook():
     have = {(r["dataset"], r["variable"]) for r in existing}
     new = [r for r in frag if (r["dataset"], r["variable"]) not in have]
     if new:
-        bak = master + ".bak_%s_pre_1130_nest_owner_v6_reconcile" % BUILT_DATE
+        bak = master + ".bak_%s_pre_1130_need_owner_v6_reconcile" % BUILT_DATE
         if not os.path.exists(bak):
             with open(master, "rb") as a, open(bak, "wb") as bfh:
                 bfh.write(a.read())
@@ -1246,9 +1246,9 @@ def cmd_codebook():
 FLOORS = dict(
     parent_crosswalk_resolved=600,
     reconciliation_rows=1000,
-    already_in_nest=100,
+    already_in_need=100,
     net_new=1000,
-    nest_not_in_owner=100,
+    need_not_in_owner=100,
     dual_role_rows=25,
     corroboration_pairs=100,
     v3_recovery=50,
@@ -1266,19 +1266,19 @@ def cmd_verify(quiet=False):
             print("  [%s] %-34s %s" % ("PASS" if ok else "FAIL", name, msg))
 
     # I0 - the normaliser has not drifted from 1072's.
-    nest = rd(NEST)
-    say(bool(nest), "I0a_nest_readable", "%d NEST rows" % len(nest))
-    drift = [r["enterprise_id"] for r in nest
+    need = rd(NEED)
+    say(bool(need), "I0a_need_readable", "%d NEED rows" % len(need))
+    drift = [r["enterprise_id"] for r in need
              if norm(r["enterprise_name"]) != r["enterprise_name_normalized"]]
     say(not drift, "I0b_normaliser_matches_1072",
-        "%d of %d NEST rows re-derive their own enterprise_name_normalized"
-        % (len(nest) - len(drift), len(nest)))
+        "%d of %d NEED rows re-derive their own enterprise_name_normalized"
+        % (len(need) - len(drift), len(need)))
 
     # I1 - EVERY output landed and is NON-EMPTY.  An empty target set must
     # never read as success (AGENT_FIELD_GUIDE rule 5).
     for path, floor_key in ((OUT_VERSIONS, None), (OUT_XWALK, None),
                             (OUT_RECON, "reconciliation_rows"),
-                            (OUT_NESTONLY, "nest_not_in_owner"),
+                            (OUT_NEEDONLY, "need_not_in_owner"),
                             (OUT_V3REC, "v3_recovery"),
                             (OUT_PAIRS, "corroboration_pairs"),
                             (OUT_LEDGER, None),
@@ -1295,7 +1295,7 @@ def cmd_verify(quiet=False):
 
     xw = rd(OUT_XWALK)
     recon = rd(OUT_RECON)
-    nestonly = rd(OUT_NESTONLY)
+    needonly = rd(OUT_NEEDONLY)
     dual = rd(OUT_DUAL)
     pairs = rd(OUT_PAIRS)
 
@@ -1318,44 +1318,44 @@ def cmd_verify(quiet=False):
 
     # I4 - the reconciliation reached BOTH verdicts.  A pass that classified
     # everything one way has not reconciled anything.
-    a = sum(1 for r in recon if r["reconciliation_status"] == "ALREADY_IN_NEST")
+    a = sum(1 for r in recon if r["reconciliation_status"] == "ALREADY_IN_NEED")
     n = sum(1 for r in recon
             if r["reconciliation_status"].startswith("NET_NEW"))
-    say(a >= FLOORS["already_in_nest"], "I4a_already_in_nest",
-        "%d (floor %d)" % (a, FLOORS["already_in_nest"]))
+    say(a >= FLOORS["already_in_need"], "I4a_already_in_need",
+        "%d (floor %d)" % (a, FLOORS["already_in_need"]))
     say(n >= FLOORS["net_new"], "I4b_net_new",
         "%d (floor %d)" % (n, FLOORS["net_new"]))
     say(a + n == len(recon), "I4c_status_total",
         "%d + %d == %d rows" % (a, n, len(recon)))
 
-    # I5 - every ALREADY_IN_NEST row names a LIVE enterprise_id.
-    live_ent = {r["enterprise_id"] for r in nest}
+    # I5 - every ALREADY_IN_NEED row names a LIVE enterprise_id.
+    live_ent = {r["enterprise_id"] for r in need}
     miss = [r["enterprise_name"] for r in recon
-            if r["reconciliation_status"] == "ALREADY_IN_NEST"
-            and r["matched_nest_enterprise_id"] not in live_ent]
+            if r["reconciliation_status"] == "ALREADY_IN_NEED"
+            and r["matched_need_enterprise_id"] not in live_ent]
     say(not miss, "I5_matched_ids_live", "%d dangling matches" % len(miss))
 
     # I6 - THIS PASS MINTED NOTHING.  The append-only register is the only
     # place an enterprise id may come from, and a rebuild must mint zero.
-    idreg = rd(NEST_IDS)
+    idreg = rd(NEED_IDS)
     mine = [r for r in idreg if BUILT_BY in (r.get("minted_by") or "")]
     say(not mine, "I6_minted_zero_ids",
-        "%d rows in cedar_nest_id_register.csv carry this script" % len(mine))
-    # I6b ASSERTS WHAT ITS NAME SAYS: the register COVERS NEST - every live
+        "%d rows in cedar_need_id_register.csv carry this script" % len(mine))
+    # I6b ASSERTS WHAT ITS NAME SAYS: the register COVERS NEED - every live
     # enterprise_id has a binding. It previously asserted
-    # `len(idreg) == len(nest)`, which is a different claim and a stricter
+    # `len(idreg) == len(need)`, which is a different claim and a stricter
     # one: it says NO CLUSTER KEY HAS EVER CHANGED. An APPEND-ONLY register
     # exceeds the live table the first time one does, which is the register
     # working, not failing.
     #
     # CORRECTED 2026-09-02 by workstream NEST-OWNER-V6-INPUT-1133, on a live
-    # case. Ingesting the owner's v6 file through 1072 took NEST 1,610 ->
+    # case. Ingesting the owner's v6 file through 1072 took NEED 1,610 ->
     # 4,799 and the register 1,610 -> 4,800, and the extra binding is
     # `CEDAR-NEST-000004-R4`, `(CE-0006B-0K, "cp leasing")`. The owner's file
     # carries the same firm as `C P Leasing, Inc`, which normalises to
     # `c p leasing`; rapidfuzz correctly fused the two renderings, the fused
     # cluster's key became `c p leasing`, and a NEW id was minted for a
-    # company that already had one. Nothing was lost - the firm is in NEST
+    # company that already had one. Nothing was lost - the firm is in NEED
     # with the old spelling in `name_variants_observed` - but a PERMANENT id
     # a customer may have joined on has stopped resolving.
     #
@@ -1364,12 +1364,12 @@ def cmd_verify(quiet=False):
     # is reported as `orphaned_register_bindings` rather than hidden by this
     # invariant. Retiring or repointing an id needs evidence and an owner
     # ruling, so this pass does neither. docs/WORK_QUEUE.md carries it.
-    live_ids = {r["enterprise_id"] for r in nest}
+    live_ids = {r["enterprise_id"] for r in need}
     unbound = live_ids - {r["enterprise_id"] for r in idreg}
     orphaned = len(idreg) - len(live_ids & {r["enterprise_id"] for r in idreg})
-    say(not unbound, "I6b_register_covers_nest",
-        "%d live NEST id(s) with NO register binding; %d register binding(s) "
-        "no longer resolve to a NEST row (append-only history, reported not "
+    say(not unbound, "I6b_register_covers_need",
+        "%d live NEED id(s) with NO register binding; %d register binding(s) "
+        "no longer resolve to a NEED row (append-only history, reported not "
         "failed): %s"
         % (len(unbound), orphaned, sorted(unbound)[:3] or "-"))
 
@@ -1382,11 +1382,11 @@ def cmd_verify(quiet=False):
         "%d rows assert ownership this pass has no source for"
         % len(laundered))
 
-    # I8 - relation_class stays split in NEST itself.
-    rc = collections.Counter(r.get("relation_class", "") for r in nest)
+    # I8 - relation_class stays split in NEED itself.
+    rc = collections.Counter(r.get("relation_class", "") for r in need)
     say(set(rc) <= {"ownership", "affiliation"} and len(rc) == 2,
         "I8_relation_class_split",
-        "NEST relation_class = %s" % dict(rc))
+        "NEED relation_class = %s" % dict(rc))
 
     # I9 - conservation: rows in == sum of NAMED dispositions, every table.
     consv = rd(OUT_CONSV)
@@ -1429,13 +1429,13 @@ def cmd_verify(quiet=False):
         "%d rows carry the SBA DSBS rung, which is federal_registry and is "
         "not a restatement of the owner's file" % r3)
 
-    # I12 - the dual role does NOT duplicate a NEST row.  An entity may not
+    # I12 - the dual role does NOT duplicate a NEED row.  An entity may not
     # be its own subsidiary.
-    selfsub = [r["enterprise_id"] for r in nest
+    selfsub = [r["enterprise_id"] for r in need
                if r["owner_hub_cedar_uid"] == r.get("enterprise_existing_cedar_uid")
                and r.get("enterprise_existing_cedar_uid")]
     say(not selfsub, "I12_no_hub_is_its_own_subsidiary",
-        "%d NEST rows where the hub is the enterprise" % len(selfsub))
+        "%d NEED rows where the hub is the enterprise" % len(selfsub))
 
     # I13 - v6 really is the authoritative file, re-measured.
     vers = {r["version"]: r for r in rd(OUT_VERSIONS)}
