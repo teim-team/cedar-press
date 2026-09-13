@@ -9,6 +9,7 @@ import test from "node:test";
 import {
   IDENTIFIERS,
   KEPT_OUTSIDE,
+  LINKAGE_COVERAGE,
   LINKAGE_MOVES,
   LOOP_CLOSE,
   LOOP_STAGES,
@@ -104,6 +105,46 @@ test("what is kept outside the identifiers is named", () => {
   }
   assert.match(text, /effective dates/i, "relationships must carry dates");
   assert.match(text, /source/i, "relationships must carry a source");
+});
+
+test("the coverage figures are the generated file's, to the digit", () => {
+  // Codex, PR #77: the page promised an organization's whole footprint while
+  // four collections sit far below the average. The measured figure is on the
+  // page now, and it is copied from a generated file, so it is exactly the
+  // kind of number that goes stale silently. It does not get to.
+  const doc = readFileSync(new URL("../../../docs/LINKAGE_COVERAGE.md", import.meta.url), "utf8");
+  const total = doc.match(/([\d,]+) of ([\d,]+) rows \(([\d.]+)%\) carry a resolved Cedar entity/);
+  assert.ok(total, "LINKAGE_COVERAGE.md no longer states its headline total in the expected shape");
+  const num = (text) => Number(text.replace(/,/g, ""));
+  assert.equal(LINKAGE_COVERAGE.linked, num(total[1]));
+  assert.equal(LINKAGE_COVERAGE.rows, num(total[2]));
+  // Both named extremes have to still be the extremes, or the page is holding
+  // up a spread that has moved.
+  const pcts = [...doc.matchAll(/^\| `[^`]+` \| `[^`]+` \|[^|]+\|[^|]+\| ([\d.]+)% \|/gm)].map((m) => Number(m[1]));
+  assert.ok(pcts.length >= 10, `expected the per-dataset table, found ${pcts.length} rows`);
+  assert.equal(Math.max(...pcts).toFixed(2) + "%", LINKAGE_COVERAGE.best.pct);
+  assert.equal(Math.min(...pcts).toFixed(2) + "%", LINKAGE_COVERAGE.worst.pct);
+  // And the note the page renders has to carry both, not just the flattering
+  // one. Prose writes 100% where the table writes 100.00%, so compare values.
+  const inNote = new Set(
+    [...LINKAGE_COVERAGE.note.matchAll(/([\d.]+)%/g)].map((m) => Number(m[1])),
+  );
+  assert.ok(inNote.has(Number(LINKAGE_COVERAGE.best.pct.replace("%", ""))), "the note hides the best figure");
+  assert.ok(inNote.has(Number(LINKAGE_COVERAGE.worst.pct.replace("%", ""))), "the note hides the worst figure");
+});
+
+test("the business card states the exception rather than overclaiming", () => {
+  // Codex, PR #77: the copy said an individually owned firm carries a business
+  // id and no entity id, while the register shows that class carrying CE- uids
+  // today. The rule is true going forward; the exception is dated and on the
+  // page.
+  const business = IDENTIFIERS.find((item) => item.id === "business");
+  assert.ok(business.exception, "the dated exception is gone; did the 45 lose their uids?");
+  const index = register.classes.findIndex((entry) => entry.code === WITHHELD_CLASS);
+  const count = register.entities.filter((entity) => entity[2] === index).length;
+  assert.equal(count, 45, `the register holds ${count} of that class; the exception says forty-five`);
+  assert.match(business.exception, /forty-five/i);
+  assert.match(business.exception, /closed to new mints/i);
 });
 
 test("the prose keeps the brand lock", () => {

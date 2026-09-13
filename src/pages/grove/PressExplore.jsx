@@ -633,11 +633,19 @@ function RecordProvenance({ item, contract }) {
   const entry = PRESS_CATALOG_BY_ID[item.collection] ?? null;
   const release = releaseFor(item.collection);
   const citation = collectionCitation(item.collection, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
-  const copy = () => {
-    navigator.clipboard?.writeText(citation).then(
-      () => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); },
-      () => {},
-    );
+  // Codex, PR #77: the Clipboard API is absent on a non-secure origin and
+  // rejected outright under some permission policies, and this handler did
+  // nothing in both cases, so the button gave the reader neither a citation
+  // nor an error. `copyLink` in this same file already had the right answer;
+  // this is the same answer.
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(citation);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.prompt("Copy this citation", citation);
+    }
   };
   return (
     <div className="cp-ex__prov">

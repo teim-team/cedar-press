@@ -28,7 +28,7 @@ import {
   METHOD_COMMITMENTS,
   expertiseSentence,
 } from "../../features/grove/pressMethod";
-import { WITHHELD_NOTE } from "../../features/grove/pressIdentity";
+import { LINKAGE_COVERAGE, WITHHELD_NOTE } from "../../features/grove/pressIdentity";
 import {
   EcosystemDiagram,
   FeedbackLoop,
@@ -192,17 +192,27 @@ export default function CedarPressMethods() {
         <section className="cp-msec cp-fade" aria-label="What the identifiers make possible">
           <span className="cp-sec__band">Linkage</span>
           <h2 className="cp-msec__title">Twelve datasets stop behaving like twelve datasets.</h2>
+          {/* Codex, PR #77: this said the identifier "was already on every row"
+              and promised the "whole footprint". LINKAGE_COVERAGE.md measures
+              70.93% across the flagships and 6.24% on Natural Resource
+              Revenues, so "every row" was false and "whole footprint" would
+              have a subscriber read a partial answer as a complete one. The
+              measured figure sits under the claim now. */}
           <p className="cp-msec__lede">
-            Start from any keyword, agency, year or nation. What comes back is one
-            organization&rsquo;s whole footprint rather than the rows that happened to spell its
-            name your way, because the identifier was already on every row before the question
-            was asked. An answer in one collection is a key into the others, so a finding can be
-            followed rather than only reported.
+            Start from any keyword, agency, year or nation. What comes back is the rows Cedar can
+            attribute to that organization rather than the rows that happened to spell its name
+            your way, because the identifier was put on them before the question was asked. An
+            answer in one collection is a key into the others, so a finding can be followed
+            rather than only reported.
           </p>
           <LinkageMoves />
           <p className="cp-msec__close">
             That is the difference between a shelf of files and a collection: the files hold
             records, and the collection holds an organization.
+          </p>
+          <p className="cp-msec__aside">
+            {LINKAGE_COVERAGE.note} Measured {LINKAGE_COVERAGE.measuredOn}, and re-measured with every
+            release.
           </p>
         </section>
 

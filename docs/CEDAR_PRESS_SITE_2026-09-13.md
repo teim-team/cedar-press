@@ -200,6 +200,41 @@ Recorded so the terminal is not surprised by the diff.
 
 ---
 
+## 5b. Codex's four findings on PR #77, and what each one changed
+
+All four were correct. Recorded because two of them were claims about the
+workspace that the site had got wrong, not style notes.
+
+**P1, the unminted business identifier.** Already half-fixed by the
+specification work above: the card marks the register as being minted. Codex
+also caught a second thing the specification work missed. The copy said flatly
+that an individually owned firm carries a business id and no entity id, while
+the published register shows all 45 firms in that class carrying `CE-` uids
+today. ADR-043 closes the class to new mints and gives those 45 an equivalence
+row rather than taking their uids away, so the rule is true going forward and
+false about the firms that already exist. The card now states the dated
+exception, and a test pins the count at 45 against the register.
+
+**P1, "the identifier was already on every row".** `docs/LINKAGE_COVERAGE.md`
+measures 1,485,083 of 2,093,620 flagship rows (70.93%) carrying a resolved
+Cedar entity, with contracting at 65.02%, legislation at 19.26%, nonprofits at
+11.15% and natural resources at 6.24%. The page promised a "whole footprint",
+which would have a subscriber read a 6% answer as a complete one. The measured
+figure is now on the page, naming both extremes, and `pressIdentity.test.js`
+reads the generated file and fails if any digit drifts. **The terminal owns
+re-running `code/1139_linkage_coverage.py apply` when the flagships change; the
+site will fail its own build rather than quote a stale figure.**
+
+**P2, the homepage search.** It searches the ten-row release previews Explore
+reads, not the full tables, so an entity present in a million-row collection can
+return nothing. It now says what it covers under the box.
+
+**P2, the citation copy button.** No fallback when the Clipboard API is absent
+or refused. It now mirrors `copyLink`'s prompt, as that handler in the same file
+already did.
+
+---
+
 ## 6. What the terminal owns after this
 
 1. Mint `CB-` per `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §8, then flip
@@ -208,6 +243,10 @@ Recorded so the terminal is not surprised by the diff.
    (§3.2). If it does, record it here; if it does not, the current sentence
    is the strongest defensible one and should stay.
 3. If the request tally matters, cluster free-text `use_case` (§4).
-4. Nothing else. No dataset, no schema and no publication rule changed in
+4. Re-run `code/1139_linkage_coverage.py apply` whenever a flagship changes.
+   The site quotes its headline total and both extremes and tests them against
+   the generated file, so a stale measurement fails the build rather than
+   shipping.
+5. Nothing else. No dataset, no schema and no publication rule changed in
    this work; the site was brought into line with rules the workspace already
    held.

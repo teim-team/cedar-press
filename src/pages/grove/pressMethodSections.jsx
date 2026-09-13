@@ -275,6 +275,7 @@ export function IdentityPair() {
             ))}
           </ul>
           <p className="cp-idp__note">{identifier.note}</p>
+          {identifier.exception ? <p className="cp-idp__exc">{identifier.exception}</p> : null}
           {identifier.live ? null : (
             <p className="cp-idp__pending">The business register is being minted. The form and its rules are settled.</p>
           )}

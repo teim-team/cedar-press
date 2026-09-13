@@ -1148,6 +1148,7 @@
 @media (max-width: 760px) { .teim-rd .cp-idp { grid-template-columns: minmax(0, 1fr); } }
 
 .teim-rd .cp-idp__shape.is-pending { color: var(--muted); background: transparent; border-style: dashed; }
+.teim-rd .cp-idp__exc { font-size: 0.85rem; line-height: 1.55; color: var(--muted); margin: -0.4rem 0 1rem; padding-left: 0.85rem; border-left: 2px solid var(--line); }
 .teim-rd .cp-idp__pending { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); line-height: 1.6; margin: -0.5rem 0 1rem; }
 
 /* Why both identifiers: two subjects and the edge between them.
@@ -2487,6 +2488,7 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-search__go { flex: none; font: inherit; font-weight: 700; font-size: 0.95rem; padding: 0.85rem 1.5rem; border: 1px solid var(--dteal); border-radius: 999px; background: var(--dteal); color: #fff; cursor: pointer; transition: background 0.18s ease, transform 0.18s ease; }
 .teim-rd .cp-search__go:hover:not(:disabled) { background: var(--teal-dark); transform: translateY(-1px); }
 .teim-rd .cp-search__go:disabled { opacity: 0.45; cursor: default; }
+.teim-rd .cp-search__scope { font-size: 0.84rem; line-height: 1.5; color: var(--muted); margin: 0.7rem 0 0; }
 .teim-rd .cp-search__eg { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; margin: 0.8rem 0 0; }
 .teim-rd .cp-search__eg > span { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-right: 0.2rem; }
 .teim-rd .cp-search__chip { font: inherit; font-size: 0.82rem; padding: 0.3rem 0.75rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--ink-2); cursor: pointer; transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease; }
