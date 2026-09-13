@@ -18,11 +18,15 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD } from "./demoAccount.js";
+// The twelve, read from the catalog rather than typed: a list typed here
+// would pass while the door advertised something else.
+import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 
 // The throwaway account playwright.config.js provisions into the build it
 // starts. It is not a credential and it opens nothing that is deployed
 // anywhere; see tests/demoAccount.js.
 const ACCOUNT = { email: EMAIL, password: PASSWORD };
+const STOREFRONT_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short || entry.name);
 
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
@@ -765,6 +769,19 @@ test.describe("crawlers", () => {
       expect(body).toContain('<script type="application/ld+json">');
     });
   }
+
+  test("the door names all twelve collections in the HTML a crawler fetches", async ({ request }) => {
+    // The strip is what a visitor uses to preview what they get, and it is
+    // also the only place the door spells the twelve out at readable size.
+    // Prerendered, so it is text in the document rather than something that
+    // appears after a script runs; a crawler and a reader with JS off both
+    // get the list.
+    const body = await (await request.get("/")).text();
+    const names = STOREFRONT_NAMES;
+    expect(names).toHaveLength(12);
+    for (const name of names) expect(body).toContain(name);
+    expect(body).toContain("Twelve collections");
+  });
 
   test("a page behind the gate is not offered to crawlers", async ({ request }) => {
     // Unknown and gated paths get the shell (404.html is the shell), whose
