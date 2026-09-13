@@ -86,7 +86,9 @@ test.describe("the gate", () => {
     await expect(page.locator(".cp-app__item")).toHaveCount(12);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
-    await page.getByRole("button", { name: /Prime Contracting/ }).click();
+    // Scoped to the frame: the door now also carries a full-size strip of the
+    // same twelve below it, so an unscoped name matches two controls.
+    await page.getByTestId("press-frame").getByRole("button", { name: /Prime Contracting/ }).click();
     const stage = page.locator('[data-testid="collection-stage"][data-collection="contractors"]');
     await expect(stage).toBeVisible();
     await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
@@ -537,6 +539,33 @@ test.describe("the question mark", () => {
     const width = page.viewportSize().width;
     expect(box.x).toBeGreaterThanOrEqual(-1);
     expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the door's twelve", () => {
+  // A visitor deciding whether to subscribe should be able to see what the
+  // twelve are and what each holds without signing in. The product frame's
+  // rail has always been clickable, but the frame renders at about 0.63
+  // scale: seventeen-pixel rows in six-point type.
+  test("the pre-login page previews all twelve and drives the frame", async ({ page }, testInfo) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    const tiles = page.locator(".cp-dcol__tile");
+    await tiles.first().waitFor();
+    await expect(tiles).toHaveCount(12);
+    // Grouped by the plan each comes with, which is the question a visitor has.
+    await expect(page.locator(".cp-dcol__tier")).toHaveCount(2);
+    await expect(page.locator(".cp-dcol__shelf").first()).toContainText("See what's happening");
+
+    const pane = page.locator(".cp-app__pane");
+    const before = await pane.innerText();
+    const target = tiles.nth(8);
+    if (testInfo.project.name === "desktop") await target.hover(); else await target.tap();
+    // The line under the strip answers whether or not the frame is on screen,
+    // and the frame above follows the same selection.
+    await expect(page.locator(".cp-dcol__note")).not.toContainText(/for what it holds|window above/);
+    await expect(pane).not.toHaveText(before);
     expect(errors).toEqual([]);
   });
 });

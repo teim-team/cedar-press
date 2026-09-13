@@ -1126,6 +1126,47 @@
 /* ── What Cedar will not do ─────────────────────────────────────────────
  * Four commitments, each on its own rule: restraint set like the promises
  * it is, not folded into a paragraph. */
+/* ── The twelve, on the door ─────────────────────────────────────────────
+ * Below the product frame, driving it. The frame's own rail is real and has
+ * always been clickable, but it renders at about 0.63 scale, so a rail row is
+ * seventeen pixels tall and six-point type: visible, not pointable. This is
+ * the same twelve at full size, grouped by the plan they come with, because
+ * the question a visitor has is what they get for which one.
+ */
+.teim-rd .cp-dcol { max-width: var(--door-max); margin: 2.6rem auto 0; padding: 0 var(--door-pad); }
+.teim-rd .cp-dcol__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 1rem; margin-bottom: 1.1rem; }
+.teim-rd .cp-dcol__lede { font-family: var(--sans); font-size: 1.02rem; font-weight: 700; letter-spacing: -0.014em; color: var(--ink); margin: 0; }
+.teim-rd .cp-dcol__shelf { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 1.2rem; align-items: start; padding: 1.1rem 0; border-top: 1px solid var(--door-rule); }
+.teim-rd .cp-dcol__tier { display: flex; flex-direction: column; gap: 0.2rem; font-family: var(--sans); font-size: 0.95rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); padding-top: 0.35rem; }
+.teim-rd .cp-dcol__tier small { font-family: var(--sans); font-size: 0.8rem; font-weight: 500; letter-spacing: 0; color: var(--door-ink-3); line-height: 1.4; }
+/* The li stretches to the row's tallest; the button has to fill it, or a
+ * name that wraps to two lines leaves its neighbours short and the row
+ * count stops sitting on one baseline. */
+.teim-rd .cp-dcol__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.55rem; }
+.teim-rd .cp-dcol__grid > li { display: flex; }
+.teim-rd .cp-dcol__tile { display: flex; flex-direction: column; align-items: flex-start; gap: 0.45rem; width: 100%; height: 100%; min-height: 92px; padding: 0.7rem 0.7rem 0.6rem; border: 1px solid var(--door-rule); border-radius: 4px; background: var(--door-surface); box-shadow: var(--door-shadow-control); text-align: left; font: inherit; cursor: pointer; transition: border-color 0.16s var(--door-ease), box-shadow 0.16s var(--door-ease), transform 0.18s var(--door-ease); }
+.teim-rd .cp-dcol__tile:hover { border-color: var(--teal-line); box-shadow: var(--door-shadow-surface); transform: translateY(-2px); }
+.teim-rd .cp-dcol__tile:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-dcol__tile.is-on { border-color: var(--dteal); background: var(--teal-tint); box-shadow: var(--door-shadow-surface); }
+.teim-rd .cp-dcol__mark { display: grid; place-items: center; width: 26px; height: 26px; color: var(--dteal); }
+.teim-rd .cp-dcol__mark svg { width: 21px; height: 21px; }
+.teim-rd .cp-dcol__name { font-family: var(--sans); font-size: 0.75rem; font-weight: 700; line-height: 1.24; letter-spacing: -0.008em; color: var(--ink); overflow-wrap: anywhere; }
+.teim-rd .cp-dcol__rows { font-family: var(--mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: auto; }
+.teim-rd .cp-dcol__note { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 1.1rem 0 0; min-height: 3.1em; max-width: 96ch; padding-top: 1rem; border-top: 1px solid var(--door-rule); }
+.teim-rd .cp-dcol__note b { color: var(--ink); }
+.teim-rd .cp-dcol__meta { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+@media (max-width: 1180px) {
+  .teim-rd .cp-dcol__shelf { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; }
+  .teim-rd .cp-dcol__tier { flex-direction: row; align-items: baseline; gap: 0.6rem; padding-top: 0; }
+}
+@media (max-width: 900px) { .teim-rd .cp-dcol__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) {
+  .teim-rd .cp-dcol__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .teim-rd .cp-dcol__tile { min-height: 84px; }
+  .teim-rd .cp-dcol__note { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-dcol__tile { transition: none; } .teim-rd .cp-dcol__tile:hover { transform: none; } }
+
 /* ── The twelve collections, as a strip ──────────────────────────────────
  * Between the section tiles and the priorities block on the overview, which
  * was the page's one real gap. Point-to-read, same as the tiles above it and

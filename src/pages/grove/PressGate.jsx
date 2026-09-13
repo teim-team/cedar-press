@@ -78,6 +78,7 @@ import {
 } from "./pressGateIcons";
 import CollectionPreview from "./PressCollectionPreview";
 import PressDoorCedar from "./PressDoorCedar";
+import PressDoorCollections from "./PressDoorCollections";
 import { TierName } from "./TierName";
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
@@ -527,6 +528,8 @@ export default function PressGate({ user }) {
                                 className={`cp-app__item${on ? " is-on" : ""}`}
                                 aria-pressed={on}
                                 onClick={() => pick(entry)}
+                                onMouseEnter={() => setSelectedId(entry.id)}
+                                onFocus={() => setSelectedId(entry.id)}
                               >
                                 <span className="cp-app__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id]}</span>
                                 <span className="cp-app__label">
@@ -555,7 +558,27 @@ export default function PressGate({ user }) {
               current release.
             </figcaption>
           </figure>
+
         </div>
+
+        {/* THE TWELVE, AT A SIZE YOU CAN ACTUALLY POINT AT.
+            Its own band under the hero, full page width. Inside the hero's
+            split it landed in the right-hand column and every tile shrank to
+            one character wide.
+
+            The frame's rail lists all twelve and has always been clickable,
+            but the frame renders the real app at 1280px and scales it to fit,
+            so a rail row is about seventeen pixels tall in six-point type:
+            visible, not pointable. A visitor deciding whether to subscribe
+            should be able to see what the twelve are and what each holds.
+
+            Pointing at one drives the frame above and answers in the line
+            below, so it works whether or not the frame is still on screen. */}
+        <PressDoorCollections
+          selectedId={selectedId}
+          onPick={pick}
+          onPoint={setSelectedId}
+        />
 
         {/* The provenance band: every source system the twelve collections
             name, on a slow run so the breadth reads as breadth rather than
