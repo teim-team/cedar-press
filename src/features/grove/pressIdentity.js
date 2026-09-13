@@ -8,24 +8,40 @@
  * lives here where a test can hold it to the register and the schemas.
  *
  * WHY TWO
- * A nation, an agency, an NHO, a consortium and an enterprise a nation owns are
- * all entities, and they get a Cedar entity id: `cedar_uid`, documented in
- * `docs/IDENTIFIER_STANDARD.md`, permanent, encoding nothing, surviving
- * recognition changes and renames and acquisitions.
+ * The owner's specification of 2026-09-13 (docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md)
+ * sets two separate permanent namespaces, both identity anchors for the Cedar
+ * graph and neither a descriptive label, a classification or a source-system
+ * id:
  *
- * A firm that is Native-owned without being owned by a nation is not an entity
- * in that sense, and Cedar does not promote it to one. It gets a business id at
- * the source-record layer (`business_source_id`) and, once resolved, an
- * `entity_id` in the harmonized business registry. It carries that id from the
- * first sighting, because the day a nation acquires the firm the history has to
- * already exist. A history you start keeping on the day it becomes interesting
- * is not a history.
+ *   CE-  one canonical Native entity. A federally recognized tribe, an Alaska
+ *        Native corporation, an NHO, a tribal government, a Native nonprofit
+ *        or another defined class in the register. Live today as `cedar_uid`,
+ *        documented in docs/IDENTIFIER_STANDARD.md.
+ *   CB-  one distinct business or enterprise. A tribal operating company, a
+ *        subsidiary, a holding company, a vendor, a privately owned Native
+ *        firm. Specified, and not yet minted anywhere in the workspace.
+ *
+ * A NATION AND THE COMPANY IT OWNS ARE TWO SUBJECTS. An earlier draft of this
+ * file said the entity id names "an enterprise a nation owns", which the
+ * register does not back (it holds no tribal-enterprise class) and which the
+ * specification reverses: the enterprise is a CB-, and the ownership between
+ * the two is a dated relationship row with a source. Collapsing them makes
+ * "what has this nation been involved in" and "what has this enterprise won"
+ * the same query with the same wrong answer.
+ *
+ * A firm that is Native-owned without being owned by a nation carries a
+ * business id and no entity id, from the first sighting, because the day a
+ * nation acquires it the history has to already exist. A history you start
+ * keeping on the day it becomes interesting is not a history. (The 45
+ * `Individually Native-owned business` entities minted before ADR-043 keep
+ * their uids and gain business ids; the class is closed to new mints.)
  *
  * EVIDENCE, NOT ASSERTION
  * Every class code named below is a class the published register really holds,
- * and every field named below is a field the registry schemas really declare.
- * `pressIdentity.test.js` reads `public/data/cedar/register.json` and
- * `cedar_source_registry/schema/*.json` and fails if either drifts. It also
+ * and every column named below is one the specification names.
+ * `pressIdentity.test.js` reads `public/data/cedar/register.json` and fails if
+ * it drifts, and holds the entity sample to a uid the register really has. It
+ * also
  * pins the withholding claim: the register ships the individually owned firms
  * with a uid and no name, which is the whole point of the second identifier
  * and would be a lie to state if the file stopped doing it.
@@ -41,19 +57,51 @@ export const REGISTER_SOURCE = "data/cedar/register.json";
 /**
  * The two identifiers, as the page renders them.
  *
+ * WRITTEN AGAINST THE OWNER'S SPECIFICATION OF 2026-09-13, recorded verbatim
+ * in docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md. Two separate permanent
+ * namespaces, both identity anchors for the Cedar graph and neither a
+ * descriptive label, a classification or a source-system id.
+ *
  * `classes` are register class codes this identifier covers, checked against
- * the published register. `fields` are schema field names, checked against the
- * registry schemas. `survives` is what the identifier is designed to outlive,
- * which is the only reason to have minted it in the first place.
+ * the published register. `fields` are the role-specific column names the
+ * specification names. `survives` is what the identifier is designed to
+ * outlive, which is the only reason to mint one.
  */
 export const IDENTIFIERS = Object.freeze([
   Object.freeze({
     id: "entity",
     label: "Cedar entity id",
-    shape: "CE-1A7K3-MQ",
+    // Cherokee Nation's real uid, and the same one the worked example uses.
+    //
+    // Codex, PR #78: this was CE-00001-6S, which the published register binds
+    // to Asa'carsarmiut Tribe, and the worked example paired it with Cherokee
+    // Nation. A methods page whose whole argument is that identifiers resolve
+    // to one entity, printing an identifier that resolves to a different one.
+    // The test now checks the NAME the register gives the uid, not merely
+    // that the uid exists, which is the check that missed it.
+    shape: "CE-00134-BX",
+    live: true,
+    // Codex, PR #78: the card advertised the specification's role-specific
+    // names, and not one of them appears in a published table. `cedar_uid` is
+    // on 66. A customer following the page could not join a current export.
+    //
+    // Two rows now: what ships, and what the standard is renaming it to. The
+    // test holds `fields` against the real contracts and `becoming` against
+    // the specification, so neither half can drift into the other.
     fields: Object.freeze(["cedar_uid"]),
+    becoming: Object.freeze([
+      "native_entity_uid",
+      "recipient_native_entity_uid",
+      "owner_cedar_uid",
+      "parent_cedar_uid",
+    ]),
     names:
-      "A government, an agency, an NHO, a consortium, a college, a CDFI, a nonprofit, or an enterprise a nation owns.",
+      "One canonical Native entity, across every Cedar dataset. A federally recognized tribe, an Alaska Native corporation, a Native Hawaiian organization, a tribal government, a Native nonprofit or another defined entity class in the register.",
+    // Enterprises are NOT on this list any more. The earlier copy said the
+    // entity id names "an enterprise a nation owns", which the register does
+    // not back (it holds no tribal-enterprise class) and which the owner's
+    // specification reverses: an operating enterprise is a business id, and
+    // the ownership between the two is a dated relationship.
     classes: Object.freeze([
       "Federally recognized tribe",
       "Federally recognized Alaska Native Village",
@@ -69,44 +117,123 @@ export const IDENTIFIERS = Object.freeze([
     ]),
     survives: Object.freeze([
       "A nation wins federal recognition and its class changes",
-      "A nation or an enterprise renames",
-      "An enterprise is reorganized under a new parent",
+      "Cedar corrects the name or an attribute it holds",
+      "A dataset would be tidier if the id moved, and it does not",
     ]),
     note:
-      "The id encodes nothing, so nothing about the entity can force it to be rewritten. Two check characters catch every single-character transcription error and every adjacent transposition on the live register.",
+      "An opaque serial with a check component. Neither part encodes geography, entity type, ownership, legal status, dataset or ordering, so nothing Cedar learns about an entity can force its identity to be rewritten. Never recycled.",
   }),
   Object.freeze({
     id: "business",
     label: "Cedar business id",
-    // NO SAMPLE ON PURPOSE, and this is not an oversight.
+    // SPECIFIED, NOT YET MINTED. The owner set this display form on
+    // 2026-09-13; ADR-043 in docs/ARCHITECTURE_DECISIONS.md carries a
+    // check-character variant (CB-0001842-XQ) and the specification says a
+    // check convention can come later, so the plain serial is what ships on
+    // the page. No CB- exists in data/spine yet, which is why `live` is
+    // false and the section says so in one line rather than implying a
+    // register that is already populated.
     //
-    // The entity card can show CE-1A7K3-MQ because that form is minted, in
-    // `data/spine/cedar_identity_register.csv`, and documented in
-    // docs/IDENTIFIER_STANDARD.md. The business id's customer-facing form is
-    // `CB-0000001`, decided by the owner on 2026-09-06 and recorded in
-    // docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md, and nothing in the
-    // workspace mints it yet. This card showed `TBD-030:4033` for a day,
-    // which is a `business_source_id`: real, but a source-record key with a
-    // source code inside it, and the decision's first rule is that the
-    // number means nothing. Showing it as the Cedar business id was showing
-    // the reader the wrong object.
-    //
-    // The concept ships today under the two field names below. The sample
-    // goes back the day CB- is minted, and not before.
-    shape: null,
-    fields: Object.freeze(["business_source_id", "entity_id"]),
+    // It showed `TBD-030:4033` for a day. That is a real business_source_id
+    // and the wrong object: a source-record key with a source code inside
+    // it, which the specification classes as an external identifier, never
+    // an identity.
+    shape: "CB-0000001",
+    live: false,
+    // Nothing ships a business id yet, so there is no live column to name.
+    fields: Object.freeze([]),
+    becoming: Object.freeze(["business_uid"]),
     names:
-      "A firm, as one source named it, and then the resolved firm those sightings add up to.",
+      "One distinct business or enterprise. A tribal operating company, a subsidiary, a holding company, a vendor, a contractor, an acquisition target or a privately owned Native firm.",
     classes: Object.freeze(["Individually Native-owned business"]),
     survives: Object.freeze([
-      "A firm appears in four directories under four spellings",
-      "A certifying office and a nation disagree about it",
-      "A nation acquires the firm and it becomes an enterprise",
+      "The name, the DBA, the address or the NAICS code changes",
+      "A certification lapses, or the owner changes entirely",
+      "The business is dissolved or acquired, and keeps its record",
     ]),
     note:
-      "One per business, stable, never reused. It means nothing on purpose: ownership, state, trade and size all change, and an identifier that encodes any of them has to be rewritten the day it does. An individually owned firm carries a business id and no entity id, from the first sighting, so the record is continuous if a nation later buys it.",
+      "Opaque, append-only, never reused. It identifies the business, not its owner, not a citizenship or certification claim, not a UEI, CAGE, EIN, DUNS or SAM registration, not a location, brand, project or contract, and not a person. A surviving legal business keeps its id through a change; a genuine legal successor gets a new one.",
+    // Codex, PR #77, and it was right: the displayed copy said flatly that an
+    // individually owned firm carries a business id and no entity id, while
+    // the published register shows the 45 firms in that class carrying CE-
+    // uids today. ADR-043 closed the class to new mints and gives those 45 an
+    // equivalence row rather than taking their uids away, so the rule is true
+    // going forward and false about the firms that already exist. Said as
+    // what it is: a rule with a dated exception, on the page, not in a
+    // comment.
+    // Codex, PR #78: this said the 45 firms have equivalence rows and that
+    // every firm resolved from here carries a business id only. No CB- value
+    // and no equivalence row exists in data/spine, so both were present-tense
+    // claims about a register that has not been written. Future tense, which
+    // is also what the governing decision says.
+    exception:
+      "Forty-five privately owned firms were minted into the entity register before this rule and keep their entity ids. The class is closed to new mints: when the business register is written, those firms gain a business id with an equivalence row to their entity id, and every firm resolved after it carries a business id alone.",
   }),
 ]);
+
+/**
+ * What each identifier is NOT, which is half of what makes it useful.
+ *
+ * The specification is emphatic about this and it is the part a reader who
+ * has seen other vendors' "unique IDs" will not expect: everything that can
+ * change, be missing, be shared or be misreported by a source lives outside
+ * the identifier, in a dated row with its evidence.
+ */
+export const KEPT_OUTSIDE = Object.freeze([
+  Object.freeze({
+    id: "relationships",
+    label: "Ownership and structure",
+    body:
+      "Owner, parent, subsidiary, operator and affiliation are relationship rows carrying both ids, a type, effective dates, a source and a confidence. None of it is inside either identifier.",
+  }),
+  Object.freeze({
+    id: "external",
+    label: "Everyone else's identifiers",
+    body:
+      "UEI, CAGE, EIN, SAM registrations, NAICS, state registrations, websites and aliases sit in an attribute ledger. They change, go missing, get shared and get reported wrong. A Cedar id does none of those things.",
+  }),
+  Object.freeze({
+    id: "events",
+    label: "What happened",
+    body:
+      "An award, a deal, a filing, a notice, a bill and a subcontract each keep their own record id and link out to the entity or the business the source actually named. A Cedar id says who; a dataset id says what.",
+  }),
+]);
+
+/**
+ * Why two namespaces rather than one, as the worked example the owner uses.
+ *
+ * A single id space collapses an enterprise into its tribal owner, and then
+ * "what has this nation been involved in" and "what has this enterprise won"
+ * become the same query with the same wrong answer.
+ */
+export const WHY_BOTH = Object.freeze({
+  entity: Object.freeze({
+    id: "CE-00134-BX",
+    name: "Cherokee Nation",
+    role: "The Native government, in the entity register.",
+  }),
+  business: Object.freeze({
+    id: "CB-0000001",
+    // The entity side of this example is real and checked: CE-00134-BX is
+    // Cherokee Nation in the published register. The business side cannot be,
+    // because no CB- register exists, so CB-0000001 is the FORM and not this
+    // enterprise's identifier. Marked, so a reader does not transcribe it as
+    // one. This is the same error Codex caught on the entity side of PR #78,
+    // one card over, and the fix is to say which of the two is a real
+    // identifier rather than to print both as though they were.
+    pending: true,
+    name: "Cherokee Nation Businesses",
+    role: "A distinct operating enterprise, in the business register.",
+  }),
+  edge: "owns or controls, with effective dates and a source",
+  questions: Object.freeze([
+    "What activity is associated with this nation?",
+    "What contracts has this enterprise received?",
+  ]),
+  close:
+    "Two questions, two answers. A contract, a deal, a lobbying filing or a subsidiary links to whichever of the two the source actually identified, and to both where it named both. A Cedar entity id never goes in a business column, and a business id never goes in an entity column.",
+});
 
 /**
  * The class the PUBLIC LOOKUP withholds names for, and what that does and
@@ -139,6 +266,39 @@ export const WITHHELD_CLASS = "Individually Native-owned business";
 /** What Cedar publishes about a firm it will not name, said plainly. */
 export const WITHHELD_NOTE =
   "A firm carries its business id whether or not its name is ever published. Where a nation's own commerce office published its certified businesses and shared them under stated terms, they are in the collection by name. Where the only evidence is a federal award file, the activity publishes and the owner's name and address do not, because a person who won a contract did not consent to being ranked by obligations. The identifier holds both cases in one series.";
+
+/**
+ * MEASURED LINKAGE COVERAGE, and why it is on the page.
+ *
+ * Codex, PR #77: the linkage section said the identifier "was already on every
+ * row before the question was asked" and promised an organization's "whole
+ * footprint". `docs/LINKAGE_COVERAGE.md` measures 1,485,083 of 2,093,620
+ * flagship rows carrying a resolved Cedar entity, and four collections sit far
+ * below that. A subscriber told the footprint is whole will read a 6% answer
+ * as a complete one, which is the exact failure the door's "published with its
+ * limits" pillar exists to prevent.
+ *
+ * So the number goes on the page beside the claim. It is also the more
+ * convincing version: a product that publishes 6.24% next to 100% is a
+ * product measuring itself.
+ *
+ * EVERY FIGURE HERE IS COPIED FROM THAT FILE, which is generated by
+ * `code/1139_linkage_coverage.py apply` and must not be hand-edited.
+ * `pressIdentity.test.js` reads the file and fails if any figure drifts.
+ */
+export const LINKAGE_COVERAGE = Object.freeze({
+  // The date the generated file states. A regeneration moves it, the test
+  // notices, and the figures above get updated with it.
+  measuredOn: "2026-09-02",
+  source: "docs/LINKAGE_COVERAGE.md",
+  linked: 1485083,
+  rows: 2093620,
+  /** Named because an average hides them, and the spread is the honest fact. */
+  best: Object.freeze({ label: "Cedar Native Entity Enterprise Dataset", pct: "100.00%" }),
+  worst: Object.freeze({ label: "Natural Resource Revenues", pct: "6.24%" }),
+  note:
+    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity. The spread is wide and deliberate: NEED is at 100% and Natural Resource Revenues at 6.24%, because a royalty line often names a lease and no organization at all. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure rather than an average that hides them.",
+});
 
 /**
  * What the identifiers make possible, which is the argument for the layer.

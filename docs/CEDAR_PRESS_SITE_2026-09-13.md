@@ -14,17 +14,17 @@ rule).
 
 ## 0. The one thing to act on
 
-**`CB-` is decided and unminted, and the site is now written around that
-gap.** The Methods page names a Cedar business id, describes it correctly
-per the 2026-09-06 decision, and deliberately shows **no sample**, because
-the only form that exists is `business_source_id` (for example
-`TBD-030:4033`), which carries a source code and therefore breaks the
-decision's first rule that the number means nothing.
+**`CB-` is specified and unminted, and the site now says so on its face.**
+The owner's identity specification of the same day is recorded in
+`docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md`; that file is the authority on the
+model and lists four disagreements with earlier documents that the terminal
+owns reconciling.
 
-`src/features/grove/pressIdentity.js` carries `shape: null` on that card with
-the reason beside it, and `pressIdentity.test.js` asserts it stays null. When
-the terminal mints `CB-`, that assertion fails on purpose: change it, set
-`shape: "CB-0000001"`, and the card shows the sample.
+The Methods page shows both display forms, `CE-00001-6S` and `CB-0000001`, and
+marks the business register as being minted rather than implying a populated
+register. `src/features/grove/pressIdentity.js` carries `live: false` on that
+card; `pressIdentity.test.js` asserts it, so when the terminal mints `CB-` the
+assertion fails on purpose. Flip `live` and the liveness line goes away.
 
 ---
 
@@ -35,19 +35,30 @@ carries the argument the product is actually sold on, in three sections.
 
 ### Identity
 
-Two identifiers, side by side.
+Two identifiers, side by side, written against the specification.
 
 | | Cedar entity id | Cedar business id |
 |---|---|---|
-| Names | government, agency, NHO, consortium, college, CDFI, nonprofit, nation-owned enterprise | a firm as one source named it, then the resolved firm those sightings add up to |
-| Form shown | `CE-1A7K3-MQ` | none yet, see §0 |
-| Fields | `cedar_uid` | `business_source_id`, `entity_id` |
-| Survives | recognition change, rename, reorganisation | four spellings in four directories, a source conflict, acquisition by a nation |
+| Identifies | one canonical Native entity | one distinct business or enterprise |
+| Form shown | `CE-00001-6S` (live, and a real uid in the register) | `CB-0000001` (specified, not minted) |
+| Columns | `native_entity_uid`, `recipient_native_entity_uid`, `owner_cedar_uid`, `parent_cedar_uid` | `business_uid` |
+| Survives | recognition change, an attribute correction, a dataset that would be tidier without it | name, DBA, address, NAICS, certification, owner, dissolution, acquisition |
+
+Two further sections carry the rest of the model:
+
+- **Two subjects** — the worked example. Cherokee Nation as `CE-…`, Cherokee
+  Nation Businesses as `CB-…`, the dated ownership edge between them, and the
+  two questions that stop being the same question: *what activity is associated
+  with this nation* and *what contracts has this enterprise received*.
+- **Kept outside** — ownership and structure live in relationship rows with
+  dates and a source; UEI, CAGE, EIN, SAM, NAICS and state registrations live
+  in an attribute ledger; awards, deals, filings, notices and bills keep their
+  own record ids and link out.
 
 The load-bearing case, in the owner's framing: an individually owned firm
 affiliated with a nation but not owned by one gets a **business id and no
-entity id**, from first sighting, so the series is continuous if a nation
-later buys it.
+entity id**, from first sighting, so the series is continuous if a nation later
+buys it.
 
 ### Linkage
 
@@ -77,9 +88,12 @@ build if any of these drift.
 | `Individually Native-owned business` is a register class | same file |
 | Every row in that class ships with a uid and a **null** name | same file, and the count equals its own `withheld_names` |
 | `cedar_uid` is the documented permanent identity | `docs/IDENTIFIER_STANDARD.md` |
-| `business_source_id`, `entity_id` are real fields | `cedar_source_registry/schema/{source_record,harmonized_entity}.schema.json` |
+| The columns shown are the specification's, and no external identifier is presented as a Cedar id | `IDENTIFIERS[].fields`, checked against a deny-list of `business_source_id`, `entity_id`, `uei`, `cage`, `ein` |
+| `CE-00001-6S` is a uid the published register really holds | `public/data/cedar/register.json` |
+| The worked example keeps the two namespaces apart | `WHY_BOTH`, prefixes asserted |
+| UEI, CAGE, EIN and NAICS are named as things kept outside the id | `KEPT_OUTSIDE` |
 | The sample uid uses Crockford base32 with I, L, O, U removed | regex on `IDENTIFIERS[0].shape` |
-| The business card shows no sample | `shape === null`, see §0 |
+| The business register is not claimed as live | `IDENTIFIERS[1].live === false`, see §0 |
 | The loop does not claim Federal Reserve **use** or **endorsement** | regex over `LOOP_STAGES` |
 | No em dash, no antithesis, no comma-splice fragment | regex over all displayed prose |
 
@@ -93,7 +107,12 @@ The forty-two source kinds behind the door are proved the same way by
 
 Three, all recorded here rather than papered over.
 
-**3.1 `CB-` is decided and unminted.** §0. The terminal owns minting it.
+**3.1 `CB-` is specified and unminted.** §0. Four further disagreements
+between the specification and earlier documents (check characters on `CB-`,
+Cherokee Nation Businesses as an entity or a business, the absent
+tribal-enterprise class, and whether the harmonized registry's own keys are
+Cedar ids) are listed in `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §7. The
+terminal owns all of them.
 
 **3.2 The Federal Reserve claim is bounded to affiliation.** The owner's
 framing was "our team has developed methods that even the Federal Reserve
@@ -181,14 +200,86 @@ Recorded so the terminal is not surprised by the diff.
 
 ---
 
+## 5b. Codex's four findings on PR #77, and what each one changed
+
+All four were correct. Recorded because two of them were claims about the
+workspace that the site had got wrong, not style notes.
+
+**P1, the unminted business identifier.** Already half-fixed by the
+specification work above: the card marks the register as being minted. Codex
+also caught a second thing the specification work missed. The copy said flatly
+that an individually owned firm carries a business id and no entity id, while
+the published register shows all 45 firms in that class carrying `CE-` uids
+today. ADR-043 closes the class to new mints and gives those 45 an equivalence
+row rather than taking their uids away, so the rule is true going forward and
+false about the firms that already exist. The card now states the dated
+exception, and a test pins the count at 45 against the register.
+
+**P1, "the identifier was already on every row".** `docs/LINKAGE_COVERAGE.md`
+measures 1,485,083 of 2,093,620 flagship rows (70.93%) carrying a resolved
+Cedar entity, with contracting at 65.02%, legislation at 19.26%, nonprofits at
+11.15% and natural resources at 6.24%. The page promised a "whole footprint",
+which would have a subscriber read a 6% answer as a complete one. The measured
+figure is now on the page, naming both extremes, and `pressIdentity.test.js`
+reads the generated file and fails if any digit drifts. **The terminal owns
+re-running `code/1139_linkage_coverage.py apply` when the flagships change; the
+site will fail its own build rather than quote a stale figure.**
+
+**P2, the homepage search.** It searches the ten-row release previews Explore
+reads, not the full tables, so an entity present in a million-row collection can
+return nothing. It now says what it covers under the box.
+
+**P2, the citation copy button.** No fallback when the Clipboard API is absent
+or refused. It now mirrors `copyLink`'s prompt, as that handler in the same file
+already did.
+
+---
+
+## 5c. The declared column view was never read
+
+Not a Codex finding, and the oldest outstanding item from the owner's relayed
+design review: "the signed-in table should default to entity, date, agency,
+description, amount and status, with the raw ids in the expanded record."
+
+It turned out that view already exists in the workspace and the site was
+ignoring it. Eleven flagship contracts declare `default_columns`, 6 to 8
+columns each, chosen by the owner and recorded in
+`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`. Prime Contracting declares exactly the
+reviewer's shape:
+
+```
+canonical_name, action_date, awardee_name, funding_agency,
+award_base_description, total_obligations, owner_attribution_status
+```
+
+`PressExplore.jsx` preferred the **codebook** and fell back to
+`default_columns`. The codebook is a dictionary of every column in the table, so
+the fallback was unreachable and the declared view was never used once. Prime
+Contracting opened on 44 columns beginning with five raw ids; the other ten
+flagships opened on 27 to 54.
+
+The declared view now wins, the codebook is the fallback for a table that has
+not declared one, and "Show all 72 columns" still reaches everything. A smoke
+test pins it.
+
+**Nothing in the workspace changed for this.** If a flagship should show
+different columns, edit its `default_columns` in the contract and the site
+follows.
+
+---
+
 ## 6. What the terminal owns after this
 
-1. Mint `CB-` per `docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`, then flip
-   `IDENTIFIERS[1].shape` and its test in `cedar-press`.
+1. Mint `CB-` per `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §8, then flip
+   `IDENTIFIERS[1].live` and its test in `cedar-press`.
 2. Decide whether evidence exists for institutional Federal Reserve use
    (§3.2). If it does, record it here; if it does not, the current sentence
    is the strongest defensible one and should stay.
 3. If the request tally matters, cluster free-text `use_case` (§4).
-4. Nothing else. No dataset, no schema and no publication rule changed in
+4. Re-run `code/1139_linkage_coverage.py apply` whenever a flagship changes.
+   The site quotes its headline total and both extremes and tests them against
+   the generated file, so a stale measurement fails the build rather than
+   shipping.
+5. Nothing else. No dataset, no schema and no publication rule changed in
    this work; the site was brought into line with rules the workspace already
    held.

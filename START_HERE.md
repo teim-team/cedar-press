@@ -20,10 +20,16 @@
 >
 > Do not commit. An integrator verifies claims against live data and commits.
 
-**Read order:** `README.md` → **this file** → **`docs/AGENT_FIELD_GUIDE.md`** →
-`AGENTS.md` (~9,000 lines, mostly an append-only journal — read the top section and
-then grep it for your dataset; do not read it linearly) → `docs/PULL_DISCIPLINE.md`
-→ the build log for whatever you are touching.
+**Read order:** `README.md` → **`docs/TERMINAL_HANDOFF.md`** → **this file** →
+**`docs/AGENT_FIELD_GUIDE.md`** → `AGENTS.md` (~9,000 lines, mostly an append-only
+journal — read the top section and then grep it for your dataset; do not read it
+linearly) → `docs/PULL_DISCIPLINE.md` → the build log for whatever you are touching.
+
+> **`docs/TERMINAL_HANDOFF.md` is second on purpose.** It is one table: what the
+> published site is waiting on from this workspace, and which test fails when a
+> data change moves under a claim the site already makes. It is rewritten in
+> place rather than appended to, so it is short and it is never a journal. Read
+> it after every pull, before you plan a session.
 
 `README.md` covers the site and the API (how to run, test and deploy them);
 `docs/ARCHITECTURE.md` covers how the site is built and how the data reaches it.

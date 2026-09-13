@@ -81,6 +81,13 @@ function SearchStart() {
           Search <span aria-hidden="true">&#8594;</span>
         </button>
       </form>
+      {/* Codex, PR #77: this searches the ten-row release previews Explore
+          reads, not the full tables, so an entity that exists in a
+          million-row collection can return nothing because it was not in the
+          sample. A search box implies more reach than a browse table does, so
+          it says what it covers on its face rather than leaving the reader to
+          infer it from the badge further down the page. */}
+      <p className="cp-search__scope">Searches the ten-record preview of every collection your plan opens.</p>
       <p className="cp-search__eg">
         <span>For example</span>
         {["Cherokee Nation", "housing block grant", "Alaska Native corporation"].map((example) => (

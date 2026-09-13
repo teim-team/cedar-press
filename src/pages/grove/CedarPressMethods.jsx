@@ -28,14 +28,16 @@ import {
   METHOD_COMMITMENTS,
   expertiseSentence,
 } from "../../features/grove/pressMethod";
-import { WITHHELD_NOTE } from "../../features/grove/pressIdentity";
+import { LINKAGE_COVERAGE, WITHHELD_NOTE } from "../../features/grove/pressIdentity";
 import {
   EcosystemDiagram,
   FeedbackLoop,
   IdentityPair,
+  KeptOutside,
   LinkageMoves,
   MethodsByCollection,
   ProcessRail,
+  WhyBoth,
 } from "./pressMethodSections";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -138,10 +140,10 @@ export default function CedarPressMethods() {
             A 990 says who filed it. A royalty statement says who was paid. A docket says who
             appeared. None of them says whether those three are the same nation, and no public
             system will tell you. Cedar assigns the key none of them carries and keeps it
-            current. A Cedar entity id names a government, an agency, an NHO, a college, a
-            nonprofit or an enterprise a nation owns. A Cedar business id names a firm as a
-            source named it, and then the resolved firm those sightings add up to. Most
-            enterprises carry both.
+            current, in two namespaces that never mix. A Cedar entity id names one canonical
+            Native entity. A Cedar business id names one distinct business or enterprise. The
+            ownership between them is a dated relationship carrying its source, which is what
+            keeps a nation and the company it owns from collapsing into one row.
           </p>
           <IdentityPair />
           {/* The owner's challenge, 2026-09-13: is it wrong that Cedar does
@@ -158,20 +160,63 @@ export default function CedarPressMethods() {
           <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
         </section>
 
+        {/* WHY TWO NAMESPACES. The owner's worked example, and the argument
+            the rest of the page rests on: one id space collapses an
+            enterprise into its tribal owner, and then "what has this nation
+            been involved in" and "what has this enterprise won" become the
+            same query with the same wrong answer. */}
+        <section className="cp-msec cp-fade" aria-label="Why both identifiers">
+          <span className="cp-sec__band">Two subjects</span>
+          <h2 className="cp-msec__title">A nation and the company it owns are not one thing.</h2>
+          <p className="cp-msec__lede">
+            A Native entity can own or operate a business. That does not make the business and
+            the entity the same subject, and a single identifier space is a decision to treat
+            them as one. Cedar keeps two, and puts the ownership between them where it can carry
+            dates and a source.
+          </p>
+          <WhyBoth />
+        </section>
+
+        <section className="cp-msec cp-fade" aria-label="What the identifiers do not carry">
+          <span className="cp-sec__band">Kept outside</span>
+          <h2 className="cp-msec__title">Anything that can change stays out of the identifier.</h2>
+          <p className="cp-msec__lede">
+            The reason a Cedar id is worth building a collection on is everything it refuses to
+            hold. An identifier that encodes ownership has to be rewritten when a firm is sold;
+            one that encodes a state has to be rewritten when the firm moves. Cedar&rsquo;s encode
+            nothing, so they never move.
+          </p>
+          <KeptOutside />
+        </section>
+
         <section className="cp-msec cp-fade" aria-label="What the identifiers make possible">
           <span className="cp-sec__band">Linkage</span>
           <h2 className="cp-msec__title">Twelve datasets stop behaving like twelve datasets.</h2>
+          {/* Codex, PR #77: this said the identifier "was already on every row"
+              and promised the "whole footprint". LINKAGE_COVERAGE.md measures
+              70.93% across the flagships and 6.24% on Natural Resource
+              Revenues, so "every row" was false and "whole footprint" would
+              have a subscriber read a partial answer as a complete one. The
+              measured figure sits under the claim now. */}
           <p className="cp-msec__lede">
-            Start from any keyword, agency, year or nation. What comes back is one
-            organization&rsquo;s whole footprint rather than the rows that happened to spell its
-            name your way, because the identifier was already on every row before the question
-            was asked. An answer in one collection is a key into the others, so a finding can be
-            followed rather than only reported.
+            Start from any keyword, agency, year or nation. What comes back is the rows Cedar can
+            attribute to that organization rather than the rows that happened to spell its name
+            your way, because the identifier was put on them before the question was asked. An
+            answer in one collection is a key into the others, so a finding can be followed
+            rather than only reported.
           </p>
           <LinkageMoves />
           <p className="cp-msec__close">
             That is the difference between a shelf of files and a collection: the files hold
             records, and the collection holds an organization.
+          </p>
+          <p className="cp-msec__aside">
+            {/* "re-measured with every release" was a process claim the site
+                cannot back: the figure comes from a generated file, and
+                nothing in the release path re-runs the generator. The date it
+                was measured is a fact, so that is what it says. */}
+            {LINKAGE_COVERAGE.note} Measured {LINKAGE_COVERAGE.measuredOn} against the built
+            collections.
           </p>
         </section>
 

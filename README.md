@@ -75,6 +75,7 @@ It has its own entry points and its own conventions:
 
 | | |
 |---|---|
+| **What the site needs from the workspace** | [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md) — read this after every pull. One table of open items, and the tests that fail when the workspace moves under a published claim. |
 | Start here | [`START_HERE.md`](START_HERE.md) |
 | Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
 | Current state of the datasets | [`docs/DATASET_READINESS.md`](docs/DATASET_READINESS.md) (regenerate: `py -3 code/518_dataset_readiness.py`) and [`docs/TWELVE_DATASET_PLAN.md`](docs/TWELVE_DATASET_PLAN.md) |

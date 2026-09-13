@@ -455,6 +455,41 @@ test.describe("Explore the collections", () => {
   });
 });
 
+test.describe("the table's default columns", () => {
+  // Eleven flagships declare a 6-8 column view in their contract, chosen by
+  // the owner and recorded in docs/PUBLIC_DATASET_SPEC_2026-09-05.md. The
+  // viewer preferred the CODEBOOK, which is a dictionary of every column, so
+  // `listed` was never empty and the declared view was never read: Prime
+  // Contracting opened on 44 columns beginning with five raw ids.
+  test("a single collection opens on the declared view, not the whole dictionary", async ({ page }, testInfo) => {
+    // A phone gets the card list instead of a table, which carries the four
+    // things a thumb can read and is a different presentation of the same
+    // narrowing. The column choice is a desktop question.
+    test.skip(testInfo.project.name !== "desktop", "desktop renders the table; a phone renders cards");
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=contractors");
+    await page.locator(".cp-ex__table thead th").first().waitFor();
+    const heads = await page.locator(".cp-ex__table thead th").allInnerTexts();
+    // The declared seven, plus the pinned uid and the row opener.
+    expect(heads.length).toBeLessThanOrEqual(10);
+    const text = heads.join(" | ").toUpperCase();
+    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT"]) {
+      expect(text).toContain(wanted);
+    }
+    // The raw keys stay in the open record, where the reviewer asked for them.
+    for (const raw of ["TRANSACTION ID", "AWARDEE UEI", "PRODUCT OR SERVICE CODE", "RECIPIENT COUNTY FIPS"]) {
+      expect(text).not.toContain(raw);
+    }
+    // And everything is still one click away.
+    const all = page.getByRole("button", { name: /Show all \d+ columns/ });
+    await expect(all).toBeVisible();
+    await all.click();
+    expect((await page.locator(".cp-ex__table thead th").allInnerTexts()).length).toBeGreaterThan(30);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("Shape the research", () => {
   test("the priorities page lists both kinds, says the counting needs the service, and the profile carries the card", async ({ page }) => {
     // This build has no service, so no point is counted and no point can be
@@ -714,8 +749,26 @@ test.describe("Methods", () => {
     await expect(cards).toHaveCount(2);
     await expect(cards.first()).toContainText("Cedar entity id");
     await expect(cards.nth(1)).toContainText("Cedar business id");
-    // The sample uid is one a reader could really transcribe.
+    // Both display forms, per the owner's specification of 2026-09-13.
     await expect(page.locator(".cp-idp__shape").first()).toHaveText(/^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
+    await expect(page.locator(".cp-idp__shape").nth(1)).toHaveText(/^CB-\d{7}$/);
+    // The business register is not claimed as live while nothing mints it.
+    await expect(page.locator(".cp-idp__pending")).toContainText("being minted");
+    // A nation and the company it owns are two subjects, and the page says so
+    // with the ownership as a dated edge rather than a merged row.
+    // The uid on the page must be the nation's real one. It was not: the
+    // example paired CE-00001-6S with Cherokee Nation, which the register
+    // binds to Asa'carsarmiut Tribe.
+    await expect(page.locator(".cp-wb__id").first()).toHaveText("CE-00134-BX");
+    await expect(page.locator(".cp-wb__card").first()).toContainText("Cherokee Nation");
+    await expect(page.locator(".cp-wb__id").nth(1)).toHaveText(/^CB-/);
+    // The entity card advertises the column the exports actually carry.
+    await expect(page.locator(".cp-idp__card").first()).toContainText("cedar_uid");
+    await expect(page.locator(".cp-wb__edgelabel")).toContainText(/effective dates/i);
+    await expect(page.locator(".cp-wb__close")).toContainText("never goes in a business column");
+    // Everything that can change is named as living outside the identifier.
+    await expect(page.locator(".cp-ko")).toContainText("UEI");
+    await expect(page.locator(".cp-ko")).toContainText("NAICS");
     // The loop says where the methods come from. It must not say the Federal
     // Reserve uses or endorses them: the workspace evidences affiliation and
     // nothing more, and that is the one claim here a reader could disprove.

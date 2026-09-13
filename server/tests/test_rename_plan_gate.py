@@ -103,6 +103,39 @@ def _refs_row(root: Path) -> tuple[str, int, int]:
             f"{_REFS_ROW.pattern!r}; these injections have nothing to perturb")
     return m.group(0), int(m.group(1)), int(m.group(2))
 
+
+def _breakdown_pair(root: Path) -> tuple[tuple[str, int], tuple[str, int]]:
+    """Two labels from the OUTSIDE breakdown, with their counts as they stand.
+
+    Same lesson as `_refs_row`, learned a second time. The stale-breakdown
+    injection carried the literals '`scripts/` 7' and '`docs/` 6', and the day
+    a document legitimately cited three more source paths the '`docs/` 6'
+    anchor stopped existing: the fixture reported "has just injected nothing"
+    while the gate itself was working perfectly. A control pinned to a value
+    the world is allowed to move is not a control.
+
+    Returns the two largest labels in the row, which are the two the injection
+    moves a file between. Largest, so neither can be driven below zero.
+    """
+    text = (root / _DOC).read_text(encoding="utf-8")
+    anchor = text.index(_TABLE_ANCHOR)
+    row = re.search(
+        r"\| Referencing files outside `src/` \| \d+ &mdash; (.+?) \|",
+        text[anchor:],
+    ) or re.search(
+        r"\| Referencing files outside `src/` \| \d+ [^|]*?\u2014 (.+?) \|",
+        text[anchor:],
+    )
+    if not row:
+        raise AssertionError(
+            f"{_DOC} has no 'Referencing files outside' breakdown after "
+            f"{_TABLE_ANCHOR!r}; this injection has nothing to perturb")
+    parts = re.findall(r"(`[^`]+`) (\d+)", row.group(1))
+    if len(parts) < 2:
+        raise AssertionError(f"{_DOC}'s outside breakdown has fewer than two labels")
+    ranked = sorted(((label, int(n)) for label, n in parts), key=lambda p: -p[1])
+    return ranked[0], ranked[1]
+
 #: What the four directories are renamed TO in the simulated-rename injection.
 #: Only the name matters; nothing reads the new paths.
 _NEW_NAME = "press"
@@ -230,11 +263,19 @@ class TestTheRenameGateFires(unittest.TestCase):
         # area. The row's total is untouched and the parts still sum to it, so
         # every headline check and the adds-up check both stay green. Only the
         # per-label comparison can see this, which is the point of adding it.
+        # Derived, never typed: move one file from the largest label to the
+        # second largest. The total is untouched and the parts still sum to
+        # it, so only the per-label comparison can see the defect.
+        (big, big_n), (small, small_n) = _breakdown_pair(self.root)
         with (
             injected(
-                self.root / _DOC, "`scripts/` 7", "`scripts/` 6", after=_TABLE_ANCHOR
+                self.root / _DOC, f"{big} {big_n}", f"{big} {big_n - 1}",
+                after=_TABLE_ANCHOR,
             ),
-            injected(self.root / _DOC, "`docs/` 6", "`docs/` 7", after=_TABLE_ANCHOR),
+            injected(
+                self.root / _DOC, f"{small} {small_n}", f"{small} {small_n + 1}",
+                after=_TABLE_ANCHOR,
+            ),
         ):
             report = self._assert_red(
                 "test_the_measurement_in_the_plan_is_the_current_one"
