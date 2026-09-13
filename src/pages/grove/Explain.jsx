@@ -152,6 +152,11 @@ export default function Explain({ label, children }) {
         hidden={!open}
       >
         {children}
+        {/* Under 560px the panel is a bottom sheet, and the question mark
+            that opened it has usually scrolled behind it. Tapping outside
+            already closes it, but a sheet with no visible way out reads as
+            stuck. Hidden on a pointer that hovers, where leaving does it. */}
+        <button type="button" className="cp-ex1__done" onClick={close}>Close</button>
       </span>
     </span>
   );

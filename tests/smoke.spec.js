@@ -520,6 +520,12 @@ test.describe("the question mark", () => {
       await expect(panel).toBeVisible();
       await btn.tap();
       await expect(panel).toBeHidden();
+      // The sheet carries its own way out: the question mark that opened it
+      // has usually scrolled behind it by then.
+      await btn.tap();
+      await expect(panel).toBeVisible();
+      await panel.getByRole("button", { name: "Close" }).tap();
+      await expect(panel).toBeHidden();
     }
 
     // Whatever the pointer, the panel carries the collection's own declared
