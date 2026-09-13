@@ -68,7 +68,7 @@ function WorkCard() {
   };
 
   return (
-    <section className="cp-set__card" aria-label="What you work on">
+    <section className="cp-set__card cp-fade" aria-label="What you work on">
       <span className="cp-set__cap">What you work on</span>
       <p className="cp-set__body">
         Give us more detail and we curate the collections better: what you work on decides
@@ -132,7 +132,7 @@ export default function CedarPressSettings() {
         </section>
 
         <div className="cp-set cp-fade">
-          <section className="cp-set__card" aria-label="Subscription">
+          <section className="cp-set__card cp-fade" aria-label="Subscription">
             <span className="cp-set__cap">Subscription</span>
             <dl className="cp-set__rows">
               <div>
@@ -176,7 +176,7 @@ export default function CedarPressSettings() {
               pages work with or without a subscription, and the gate and
               footer name them to non-subscribers too. This card is the
               signed-in convenience. */}
-          <section className="cp-set__card" aria-label="Requests and support">
+          <section className="cp-set__card cp-fade" aria-label="Requests and support">
             <span className="cp-set__cap">Requests &amp; support</span>
             <ul className="cp-set__links">
               <li>
@@ -209,7 +209,7 @@ export default function CedarPressSettings() {
             </ul>
           </section>
 
-          <section className="cp-set__card" aria-label="The platform">
+          <section className="cp-set__card cp-fade" aria-label="The platform">
             <span className="cp-set__cap">Beyond Cedar Press</span>
             <p className="cp-set__body">
               Cedar Grove carries the same collections into the environment they were built for:

@@ -52,7 +52,7 @@ export default function CedarPressResearchAccess() {
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast nav={entitled} user={entitled ? user : null} />
 
-        <section className="cp-trh">
+        <section className="cp-trh cp-fade">
           <div>
             <p className="cp-hero__access">Limited research access</p>
             <h1 className="cp-trh__title">

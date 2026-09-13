@@ -69,7 +69,8 @@ import {
   sortRows,
   universalRows,
 } from "../../features/grove/explore.js";
-import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
+import { LAUNCH_COLLECTION, collectionCitation } from "../../features/grove/collection.js";
+import { releaseFor } from "../../features/grove/pressReleases.js";
 import { saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
@@ -586,7 +587,75 @@ function Record({ item, columns }) {
           <Fields columns={groups.technical} item={item} contract={contract} plain={false} />
         </details>
       ) : null}
-      <p className="cp-ex__fine">{short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"} · preview row</p>
+      <RecordProvenance item={item} contract={contract} />
+    </div>
+  );
+}
+
+/**
+ * The foot of an open record: where it came from and how to cite it.
+ *
+ * The review's point was that the expanded row is the thing worth paying for,
+ * and it was ending on a grey line of ids. A researcher opening a record wants
+ * four things and had to leave the page for three of them: the document behind
+ * the row, how the row reached the entity it is filed under, which release it
+ * belongs to, and a citation they can paste. All four are here now, and none
+ * of them is generated: the citation is `collectionCitation`, the same function
+ * the download embeds, and the resolution sentence is the collection's own
+ * `linkage` declaration.
+ */
+function RecordProvenance({ item, contract }) {
+  const [copied, setCopied] = useState(false);
+  const entry = PRESS_CATALOG_BY_ID[item.collection] ?? null;
+  const release = releaseFor(item.collection);
+  const citation = collectionCitation(item.collection, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
+  const copy = () => {
+    navigator.clipboard?.writeText(citation).then(
+      () => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); },
+      () => {},
+    );
+  };
+  return (
+    <div className="cp-ex__prov">
+      <div className="cp-ex__provgrid">
+        <div>
+          <span className="cp-ex__provcap">The document</span>
+          {item.source ? (
+            <a href={item.source} target="_blank" rel="noreferrer">Open the source record <span aria-hidden="true">&#8599;</span></a>
+          ) : (
+            <span className="cp-ex__fine">This row's table carries no per-record link. The collection's sources are on its methods entry.</span>
+          )}
+        </div>
+        <div>
+          <span className="cp-ex__provcap">How it reached the entity</span>
+          {/* The role is appended only when the linkage sentence does not
+              already say it; on Federal Funding the two were the same clause
+              twice in a row. */}
+          <span className="cp-ex__fine">
+            {entry?.linkage ?? "Resolved to the Cedar entity register."}
+            {contract?.entity_role && !(entry?.linkage ?? "").toLowerCase().includes(contract.entity_role.toLowerCase())
+              ? ` The entity on this row is ${contract.entity_role}.`
+              : ""}
+          </span>
+        </div>
+        <div>
+          <span className="cp-ex__provcap">Where it sits</span>
+          <span className="cp-ex__fine">
+            {short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"}
+            {release ? ` · release ${release.version}, ${release.cadence.toLowerCase()}` : ""}
+            {" · preview row"}
+          </span>
+        </div>
+      </div>
+      {citation ? (
+        <div className="cp-ex__cite">
+          <span className="cp-ex__provcap">Cite it</span>
+          <code>{citation}</code>
+          <button type="button" className="cp-ex__act cp-ex__citebtn" onClick={copy}>
+            {copied ? "Copied" : "Copy citation"}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -682,7 +751,10 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   const heads = view === "table" ? columns.map((c) => [c, labelFor(items[0]?.key, c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   const span = heads.length + 1;
   return (
-    <div className="cp-ex__scroll" ref={scrollRef}>
+    // A scrollable region with no focusable child is unreachable by keyboard,
+    // and the fade on its right edge is what says it scrolls at all: the last
+    // column used to sit half-cut against the border and read as broken.
+    <div className="cp-ex__scroll" ref={scrollRef} tabIndex={0} role="region" aria-label="Records, scroll sideways for more columns">
       <table className={`cp-ex__table cp-ex__table--${view}`}>
         <thead>
           <tr>

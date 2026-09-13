@@ -28,11 +28,14 @@ import {
   METHOD_COMMITMENTS,
   expertiseSentence,
 } from "../../features/grove/pressMethod";
-import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
-import { coverageLabel } from "../../features/grove/pressAccess";
-import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { releaseFor } from "../../features/grove/pressReleases";
-import { EcosystemDiagram, ProcessRail, EntityTimeline } from "./pressMethodSections";
+import {
+  EcosystemDiagram,
+  FeedbackLoop,
+  IdentityPair,
+  LinkageMoves,
+  MethodsByCollection,
+  ProcessRail,
+} from "./pressMethodSections";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 
@@ -98,18 +101,55 @@ export default function CedarPressMethods() {
           </p>
         </section>
 
-        <section className="cp-msec cp-fade" aria-label="Maintenance">
-          <span className="cp-sec__band">Maintenance</span>
-          <h2 className="cp-msec__title">Accuracy has a time dimension.</h2>
+        {/* THE ARGUMENT THIS PAGE EXISTS FOR.
+            Everything above says the records are gathered carefully. This says
+            why the result is one collection rather than twelve datasets, and it
+            is the only section whose claims a competitor would have to match
+            rather than buy. The two identifiers are load-bearing, so they are
+            named, shown at transcription size and checked against the published
+            register by `pressIdentity.test.js`. */}
+        <section className="cp-msec cp-fade" aria-label="The identity layer">
+          <span className="cp-sec__band">Identity</span>
+          <h2 className="cp-msec__title">Two identifiers, maintained by hand where it counts.</h2>
           <p className="cp-msec__lede">
-            A collection can be correct when published and wrong a year later if nobody maintains the
-            organizations behind it. Cedar is built to stay current.
+            No public system will tell you that a vendor in a federal contract is owned by a
+            nation, and none of the systems Cedar reads shares a key with any of the others.
+            Cedar assigns its own and keeps it current. A Cedar entity id names a government, an
+            agency, an NHO or an enterprise a nation owns. A Cedar business id names a firm as a
+            source named it, and then the resolved firm those sightings add up to. Most
+            enterprises carry both.
           </p>
-          <EntityTimeline />
+          <IdentityPair />
           <p className="cp-msec__close">
-            Cedar preserves both current identity and the lineage needed to read older records
-            correctly.
+            A firm that is Native-owned without being owned by a nation gets the business id from
+            the first sighting. If a nation acquires it later, the history is already there. The
+            published register carries those firms by identifier with their names withheld, which
+            is how a private business can be tracked for continuity without being listed in a
+            directory.
           </p>
+        </section>
+
+        <section className="cp-msec cp-fade" aria-label="What the identifiers make possible">
+          <span className="cp-sec__band">Linkage</span>
+          <h2 className="cp-msec__title">Start anywhere. The answer still holds together.</h2>
+          <p className="cp-msec__lede">
+            Any keyword, any agency, any year, any nation. What comes back is one
+            organization&rsquo;s whole footprint rather than the rows that happened to spell its
+            name your way, because the identifier was already on every row before the question
+            was asked.
+          </p>
+          <LinkageMoves />
+        </section>
+
+        <section className="cp-msec cp-fade" aria-label="How the collections improve">
+          <span className="cp-sec__band">The loop</span>
+          <h2 className="cp-msec__title">It gets more accurate the longer it runs.</h2>
+          <p className="cp-msec__lede">
+            Cedar builds and trains models on its own resolved records. A researcher rules on
+            every final output. The ruling goes back into the evidence the models read, so the
+            collection is the input to the next pass over it.
+          </p>
+          <FeedbackLoop />
         </section>
 
         {/* The philosophy above; the specifics here. A researcher's next
@@ -122,58 +162,7 @@ export default function CedarPressMethods() {
         <section className="cp-msec cp-fade" aria-label="Methods by collection">
           <span className="cp-sec__band">Methods by collection</span>
           <h2 className="cp-msec__title">The specifics, collection by collection.</h2>
-          <div className="cp-mbc">
-            {PRESS_CATALOG.map((entry) => {
-              const launch = LAUNCH_COLLECTION.find((dataset) => dataset.id === entry.id);
-              const release = releaseFor(entry.id);
-              return (
-                <details className="cp-mbc__row" key={entry.id}>
-                  <summary>
-                    <span className="cp-mbc__name">{entry.name}</span>
-                    <span className="cp-mbc__meta">
-                      {release ? `${release.version} · ` : ""}
-                      {coverageLabel(entry)}
-                    </span>
-                  </summary>
-                  <div className="cp-mbc__body">
-                    <p>{entry.blurb}</p>
-                    <p>
-                      <span className="cp-mbc__cap">Entity resolution</span>
-                      {entry.linkage}
-                    </p>
-                    {launch ? (
-                      <p>
-                        <span className="cp-mbc__cap">Method</span>
-                        {launch.method}
-                      </p>
-                    ) : null}
-                    <p className="cp-mbc__facts">
-                      {launch ? <>Sources: {launch.sources} &middot; </> : null}
-                      {coverageLabel(entry)}
-                      {release ? (
-                        <>
-                          {" "}&middot; {release.cadence} &middot; current release {release.version}
-                        </>
-                      ) : null}
-                    </p>
-                    <button
-                      type="button"
-                      className="cp-read__cedar"
-                      onClick={() =>
-                        window.dispatchEvent(
-                          new CustomEvent("cedar:ask-collection", {
-                            detail: { id: entry.id, name: entry.name },
-                          }),
-                        )
-                      }
-                    >
-                      Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
-                    </button>
-                  </div>
-                </details>
-              );
-            })}
-          </div>
+          <MethodsByCollection />
         </section>
 
         {/* Restraint, stated as commitments rather than left implicit: the

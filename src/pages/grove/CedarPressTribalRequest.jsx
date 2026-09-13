@@ -55,7 +55,7 @@ export default function CedarPressTribalRequest() {
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast nav={entitled} user={entitled ? user : null} />
 
-        <section className="cp-trh">
+        <section className="cp-trh cp-fade">
           <div>
             <p className="cp-hero__access">For federally recognized tribal governments</p>
             <h1 className="cp-trh__title">See what Cedar knows about your nation.</h1>

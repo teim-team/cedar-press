@@ -186,21 +186,6 @@ export const MAINTENANCE_TRACKED = Object.freeze([
 ]);
 
 /**
- * One organization's lineage, as an illustration of what "maintained" means.
- * Generic on purpose: it demonstrates the shape of a tracked history without
- * asserting anything about a real enterprise. Rendered by `EntityTimeline`
- * on the Methods page, which carried its own copy until 2026-09-04.
- */
-export const MAINTENANCE_TIMELINE = Object.freeze([
-  Object.freeze({ year: "2017", event: "Enterprise created" }),
-  Object.freeze({ year: "2019", event: "Subsidiary added" }),
-  Object.freeze({ year: "2021", event: "Property acquired" }),
-  Object.freeze({ year: "2023", event: "Entity renamed" }),
-  Object.freeze({ year: "2025", event: "Ownership changed" }),
-  Object.freeze({ year: "2026", event: "Historical records reconciled" }),
-]);
-
-/**
  * The collections that feed the shared entity layer, and are fed by it, live
  * in `pressEcosystem.js` (`ECOSYSTEM`), keyed by catalog id, because that is
  * the module the diagram draws from. A second list here carried different
