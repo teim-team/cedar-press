@@ -173,9 +173,27 @@ test.describe("the gate", () => {
     await expect(page.locator(".cp-dc__msg--you").last()).toContainText(first.trim());
     await expect(page.locator(".cp-dc__followups")).toHaveCount(1);
 
+    // An explicit close hands focus back, because the launcher was hidden and
+    // a keyboard user would otherwise be dropped at the top of the document.
     await page.locator(".cp-dc__close").click();
     await expect(panel).toHaveCount(0);
     await expect(launcher).toBeVisible();
+    await expect(launcher).toBeFocused();
+
+    // Codex, PR #80: a dismissal is not a close. Clicking outside handed focus
+    // back to the launcher a frame after the browser focused what was clicked,
+    // so dismissing the sheet ate the click that dismissed it and the control
+    // had to be clicked twice. The sheet is not modal; the click belongs to
+    // the control. `#cp-tab-signin` sits in the header, which a sheet anchored
+    // to the bottom edge never covers at either viewport.
+    const behind = page.locator("#cp-tab-signin");
+    await expect(behind).toBeVisible();
+    await launcher.click();
+    await expect(panel).toBeVisible();
+    await page.locator(".cp-dc__input").click();
+    await behind.click();
+    await expect(panel).toHaveCount(0);
+    await expect(behind).toBeFocused();
     expect(errors).toEqual([]);
   });
 
@@ -606,6 +624,30 @@ test.describe("the question mark", () => {
     const width = page.viewportSize().width;
     expect(box.x).toBeGreaterThanOrEqual(-1);
     expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+
+    // Codex, PR #80: the placement ran only when `open` changed, so a panel
+    // left open across a rotation or a crossing of the 560px breakpoint kept
+    // the nudge measured for the old viewport — and on the bottom sheet, which
+    // pins itself to the gutters, a negative nudge takes its left edge off the
+    // screen. Resize it while it is open and it has to still be inside.
+    //
+    // Opened without the mouse resting on it, because a resize moves the
+    // pointer out of a hovered panel and closing on that is correct: it is the
+    // LATCHED panel that has to survive a viewport change. A phone taps; on
+    // desktop the keyboard latches the same way.
+    const before = page.viewportSize();
+    await page.mouse.move(4, 4);
+    await btn.blur();
+    await expect(panel).toBeHidden();
+    if (testInfo.project.name === "desktop") await btn.focus(); else await btn.tap();
+    await expect(panel).toBeVisible();
+    for (const next of [{ width: 640, height: 900 }, { width: 380, height: 820 }, before]) {
+      await page.setViewportSize(next);
+      await expect(panel).toBeVisible();
+      const now = await panel.boundingBox();
+      expect(now.x).toBeGreaterThanOrEqual(-1);
+      expect(now.x + now.width).toBeLessThanOrEqual(next.width + 1);
+    }
     expect(errors).toEqual([]);
   });
 });

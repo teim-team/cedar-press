@@ -96,8 +96,13 @@ export default function Explain({ label, children }) {
   // left edge below zero and cut off the start of every line, which is worse
   // than the overflow it was avoiding. Flip only when flipping actually helps,
   // and clamp what is left over either way.
-  useEffect(() => {
-    if (!open) return;
+  //
+  // Codex, PR #80: it also ran only when `open` changed, so a latched panel
+  // kept a stale nudge across a rotation or a crossing of the 560px
+  // breakpoint — and a negative nudge on the bottom sheet, which pins itself
+  // to the gutters, pushes its left edge off the screen. It re-measures on
+  // resize and rotation now, and the sheet refuses to be translated at all.
+  const place = useCallback(() => {
     const panel = panelRef.current;
     const anchor = wrapRef.current;
     if (!panel || !anchor) return;
@@ -125,7 +130,20 @@ export default function Explain({ label, children }) {
     if (chosen.right > room - edge) nudge = room - edge - chosen.right;
     if (chosen.left + nudge < edge) nudge = edge - chosen.left;
     setShift(nudge);
-  }, [open]);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    place();
+    // Both, because a rotation does not always surface as a resize and a
+    // breakpoint crossing does not always surface as a rotation.
+    window.addEventListener("resize", place);
+    window.addEventListener("orientationchange", place);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("orientationchange", place);
+    };
+  }, [open, place]);
 
   // `tapped` is read inside the handlers and never during render: a tap fires
   // pointerdown and then, on some browsers, a synthetic mouseenter, and

@@ -301,18 +301,29 @@ export const LINKAGE_COVERAGE = Object.freeze({
   /**
    * THE UNLINKED ROWS, SPLIT BY WHETHER THEY COULD EVER CARRY AN ENTITY.
    *
-   * Codex, PR #79, and the arithmetic is worse than it said. The page called
-   * the spread "mostly deliberate", which counted two of three STATUS LABELS
-   * as intentional and then let that stand for the rows. By row it is the
-   * other way round. The generated table's last column gives, per flagship,
-   * how many rows can name an entity at all; the rest of the denominator
-   * structurally cannot.
+   * Codex, PR #79: the page called the spread "mostly deliberate", which
+   * counted two of three STATUS LABELS as intentional and then let that stand
+   * for the rows. By row it is the other way round.
    *
-   *   608,537 unlinked      82,055 (13.5%) cannot name an entity
-   *                        526,482 (86.5%) could and do not
+   * Codex, PR #80, on the replacement: the fix overreached in the other
+   * direction. The generated table's last column - how many rows can name an
+   * entity at all - is present for FOUR flagships and `-` for the other nine,
+   * and `-` means NOT MEASURED, not zero. Deriving `unresolved` by subtracting
+   * the four flagships' structural count from ALL unlinked rows published the
+   * nine unmeasured flagships' rows as work still to do. That is the same
+   * error in a smaller place: a denominator nobody stated.
    *
-   * So most unlinked rows are work still to do, and saying otherwise
-   * understates it to someone deciding whether to pay.
+   * So the split is stated over the population it was measured on, and the
+   * remainder is named rather than absorbed:
+   *
+   *   608,537 unlinked   600,689 measured (4 flagships)   82,055 cannot name
+   *                                                      518,634 could and does not
+   *                        7,848 not measured (9 flagships)
+   *
+   * 86.3% of the measured population is work still to do, and the conclusion
+   * survives being scoped honestly - which is the only reason it is worth
+   * printing. The nine account for 1.3% of unlinked rows; if their split ever
+   * gets measured these numbers move and the test says so.
    *
    * The per-collection split is the part actually worth showing, because it
    * cuts both ways: Natural Resource Revenues' 6.24% is 97.6% structural, a
@@ -321,8 +332,12 @@ export const LINKAGE_COVERAGE = Object.freeze({
    * not. One number, two completely different meanings.
    */
   unlinked: 608537,
+  /** The four flagships whose row carries a third denominator. */
+  measuredUnlinked: 600689,
   structural: 82055,
-  unresolved: 526482,
+  unresolved: 518634,
+  /** Nine flagships, `-` in the third-denominator column. Not zero. */
+  unmeasured: 7848,
   mostlyStructural: Object.freeze({ label: "Natural Resource Revenues", pct: "6.24%", share: "97.6%" }),
   mostlyUnresolved: Object.freeze({ label: "Federal Prime Contracting", pct: "65.02%", share: "84.8%" }),
   // The caveat the generated file puts in bold, carried across verbatim in
@@ -330,7 +345,7 @@ export const LINKAGE_COVERAGE = Object.freeze({
   caveat:
     "The total sums thirteen tables whose rows are not the same kind of thing. A contract award and a NAGPRA notice each count as one, so the figure is a measure of scale and never of quality. The per-dataset rows are the ones to quote, and each collection publishes its own.",
   note:
-    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity, and the spread runs from 100% to 6.24%. What a low number means is not the same in two collections: 97.6% of what is unlinked in Natural Resource Revenues could never carry an entity, because a royalty line names a lease and no organization, while 84.8% of what is unlinked in Federal Prime Contracting could be resolved and is not yet. Of 608,537 unlinked rows across all thirteen, 82,055 are structural and 526,482 are work still to do. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure.",
+    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity, and the spread runs from 100% to 6.24%. What a low number means is not the same in two collections: 97.6% of what is unlinked in Natural Resource Revenues could never carry an entity, because a royalty line names a lease and no organization, while 84.8% of what is unlinked in Federal Prime Contracting could be resolved and is not yet. Of 608,537 unlinked rows across all thirteen, 600,689 sit in the four flagships that publish a third denominator, and there 82,055 could never name an entity while 518,634 could and do not. The remaining 7,848 sit in nine flagships where that split has not been measured, and they are not counted either way. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure.",
 });
 
 /**

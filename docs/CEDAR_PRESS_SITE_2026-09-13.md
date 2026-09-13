@@ -360,6 +360,52 @@ where the rule lives.
 
 ---
 
+## 5g. Codex's three on #80, and the one that mattered
+
+**The unlinked split had a denominator nobody stated.** `docs/LINKAGE_COVERAGE.md`
+carries a third denominator — how many rows can name an entity at all — for
+**four** of the thirteen flagships. The other nine read `—`, and `—` means not
+measured, not zero. The #79 correction derived `unresolved` by subtracting the
+four flagships' structural count from *all* unlinked rows, which published nine
+flagships' unmeasured rows as work still to do. Same class of error as the one
+it was fixing, in a smaller place.
+
+Stated over the population it was measured on:
+
+| | rows |
+|---|---:|
+| unlinked, all thirteen | 608,537 |
+| measured, four flagships | 600,689 |
+| — cannot name an entity | 82,055 |
+| — could and does not | 518,634 |
+| not measured, nine flagships | 7,848 |
+
+**86.3% of the measured population is work still to do**, against the 86.5%
+the cross-product claimed. The conclusion survives being scoped honestly, which
+is the only reason it is worth printing at all. `pressIdentity.test.js` now
+asserts `structural + unresolved === measuredUnlinked` — the assertion that
+fails if anyone reintroduces the cross-product — and that the note prints every
+one of the five figures.
+
+The other two were interaction bugs, both real:
+
+- **A dismissal is not a close.** Clicking outside the door's Cedar sheet
+  handed focus back to the launcher one frame after the browser focused
+  whatever was clicked, so dismissing the sheet ate the click that dismissed
+  it. `close(restoreFocus)` — true for the close button and Escape, false for
+  an outside pointerdown.
+- **A latched tooltip kept a stale nudge.** `Explain.jsx` measured its
+  placement only when `open` changed, so a rotation or a crossing of the 560px
+  breakpoint left the desktop offset applied to a bottom sheet that pins itself
+  to the gutters. It re-measures on resize and rotation, and the sheet carries
+  `translate: none !important` so it cannot be nudged even for the frame in
+  between.
+
+Both are held by smoke tests verified against the bug: reverting either fix
+turns the test red on both projects.
+
+---
+
 ## 6. What the terminal owns after this
 
 1. Mint `CB-` per `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §8, then flip

@@ -1228,7 +1228,7 @@
    button, because a 30rem panel hanging off a word mid-paragraph has nowhere
    to go on a 390px screen. */
 @media (max-width: 560px) {
-  .teim-rd .cp-ex1__panel, .teim-rd .cp-ex1__panel.is-flipped { position: fixed; left: 1rem; right: 1rem; top: auto; bottom: 1rem; width: auto; max-width: none; max-height: 55vh; overflow-y: auto; box-shadow: 0 -8px 40px -12px rgba(10, 15, 38, 0.45); }
+  .teim-rd .cp-ex1__panel, .teim-rd .cp-ex1__panel.is-flipped { position: fixed; left: 1rem; right: 1rem; top: auto; bottom: 1rem; width: auto; max-width: none; max-height: 55vh; overflow-y: auto; box-shadow: 0 -8px 40px -12px rgba(10, 15, 38, 0.45); translate: none !important; }
   .teim-rd .cp-ex1__done { display: block; width: 100%; margin-top: 0.9rem; padding: 0.7rem 1rem; min-height: 44px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); font: inherit; font-size: 0.8rem; font-weight: 700; color: var(--dteal); cursor: pointer; }
   .teim-rd .cp-ex1__done:active { background: var(--teal-tint); }
 }

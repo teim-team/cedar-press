@@ -70,10 +70,16 @@ export default function PressDoorCedar() {
     track(EVENT.cedarAsked, { length: question.length, gated: true, intent: intent.id });
   }, []);
 
-  // The launcher is hidden while the panel is open, so closing has to hand
-  // focus back to it once it is on the page again.
-  const close = useCallback(() => {
-    const returning = panelRef.current?.contains(document.activeElement);
+  // The launcher is hidden while the panel is open, so an explicit close has
+  // to hand focus back to it once it is on the page again.
+  //
+  // `restoreFocus` is false for a click outside the sheet. Codex, PR #80: the
+  // browser is about to focus whatever was clicked, and the queued frame would
+  // then pull focus off it and onto the launcher — dismissing the sheet would
+  // eat the click that dismissed it, and the reader would have to click the
+  // field a second time. A dismissal leaves focus where the pointer put it.
+  const close = useCallback((restoreFocus = true) => {
+    const returning = restoreFocus && panelRef.current?.contains(document.activeElement);
     setOpen(false);
     if (returning) requestAnimationFrame(() => fabRef.current?.focus());
   }, []);
@@ -106,7 +112,7 @@ export default function PressDoorCedar() {
       const panel = panelRef.current;
       if (!panel) return;
       if (panel.contains(event.target) || fabRef.current?.contains(event.target)) return;
-      close();
+      close(false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onOutside);
@@ -160,7 +166,7 @@ export default function PressDoorCedar() {
               </span>
               <span className="cp-dc__context">Cedar Press · Questions about the collections</span>
             </span>
-            <button type="button" className="cp-dc__close" onClick={close} aria-label="Close Cedar">
+            <button type="button" className="cp-dc__close" onClick={() => close()} aria-label="Close Cedar">
               <span aria-hidden="true">&times;</span>
             </button>
           </header>
@@ -210,7 +216,7 @@ export default function PressDoorCedar() {
                           return link.external ? (
                             <a key={key} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
                           ) : (
-                            <Link key={key} to={link.to} onClick={close}>{link.label}</Link>
+                            <Link key={key} to={link.to} onClick={() => close(false)}>{link.label}</Link>
                           );
                         })}
                       </p>

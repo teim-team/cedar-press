@@ -250,22 +250,58 @@ test("the unlinked split is derived from the generated table, not asserted", () 
   assert.ok(rows.length >= 10, `expected the per-dataset table, found ${rows.length} rows`);
   const num = (text) => Number(text.replace(/,/g, ""));
   let unlinked = 0;
+  let measuredUnlinked = 0;
   let structural = 0;
+  let measuredFlagships = 0;
   for (const [, , total, , unl, canCol] of rows) {
     unlinked += num(unl);
     // The last column names how many rows can carry an entity at all; the
-    // rest of the denominator structurally cannot.
+    // rest of that denominator structurally cannot. Codex, PR #80: it is
+    // present for four flagships and `-` for nine, and `-` is NOT MEASURED,
+    // not zero. A row without it contributes to `unlinked` and to nothing
+    // else — folding it into either side invents a measurement.
     const can = canCol.match(/of ([\d,]+)/);
-    if (can) structural += num(total) - num(can[1]);
+    if (!can) continue;
+    measuredFlagships += 1;
+    measuredUnlinked += num(unl);
+    structural += num(total) - num(can[1]);
   }
+  assert.ok(measuredFlagships > 0 && measuredFlagships < rows.length,
+    "the third denominator is now on every flagship or none; the copy assumes a subset");
   assert.equal(LINKAGE_COVERAGE.unlinked, unlinked);
+  assert.equal(LINKAGE_COVERAGE.measuredUnlinked, measuredUnlinked);
   assert.equal(LINKAGE_COVERAGE.structural, structural);
-  assert.equal(LINKAGE_COVERAGE.unresolved, unlinked - structural);
+  assert.equal(LINKAGE_COVERAGE.unresolved, measuredUnlinked - structural);
+  assert.equal(LINKAGE_COVERAGE.unmeasured, unlinked - measuredUnlinked);
+  // The two sides account for the measured population and nothing more. This
+  // is the assertion that fails if anyone reintroduces the cross-product.
+  assert.equal(
+    LINKAGE_COVERAGE.structural + LINKAGE_COVERAGE.unresolved,
+    LINKAGE_COVERAGE.measuredUnlinked,
+    "the split covers rows whose disposition was never measured",
+  );
+  assert.ok(
+    LINKAGE_COVERAGE.unmeasured > 0,
+    "every flagship is measured now; say so plainly instead of naming a remainder",
+  );
   // The claim the page must not make again: most unlinked rows are NOT
   // intentional. If that ever reverses, this fails and the copy gets rewritten.
   assert.ok(
     LINKAGE_COVERAGE.unresolved > LINKAGE_COVERAGE.structural,
     "most unlinked rows are now structural; the note says the opposite",
+  );
+  // Every figure the note prints is one of these, and the remainder is named
+  // rather than absorbed — the whole point of the correction.
+  const comma = (n) => n.toLocaleString("en-US");
+  for (const key of ["unlinked", "measuredUnlinked", "structural", "unresolved", "unmeasured"]) {
+    assert.ok(
+      LINKAGE_COVERAGE.note.includes(comma(LINKAGE_COVERAGE[key])),
+      `the note does not print ${key}`,
+    );
+  }
+  assert.ok(
+    !LINKAGE_COVERAGE.note.includes(comma(unlinked - structural)),
+    "the note still prints the cross-product figure",
   );
   assert.ok(!/mostly deliberate|mostly intentional/i.test(LINKAGE_COVERAGE.note));
   assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyStructural.share));
