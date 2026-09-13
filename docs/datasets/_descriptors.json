@@ -92,7 +92,7 @@
     "method": "Each entity holds one permanent identifier that is never reused and never changes, separate from the human-readable handle, which retires when an entity is reclassified. Relationships are hub-and-sub-hub: a holding company and a casino are sub-hubs of the nation that owns them, never peers of it. Identity claims are append-only with their evidence attached, so a later correction is recorded as a correction rather than overwriting what was believed before. Each entity carries both the name people use and, for the 536 entities the BIA annual list names, the legally operative Federal Register name — 510 of the two differ, so a buyer searching either string finds the same permanent identifier."
   },
   "need": {
-    "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+    "name": "Cedar Native Entity Enterprise Dataset (Cedar NEED)",
     "short_name": "NEED",
     "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities — the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
     "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own “Our Companies” and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",

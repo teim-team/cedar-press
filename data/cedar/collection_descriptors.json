@@ -185,7 +185,7 @@
     "version": "v0",
     "updated": "2026-09-02",
     "downloads": 0,
-    "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+    "name": "Cedar Native Entity Enterprise Dataset (Cedar NEED)",
     "short_name": "NEED",
     "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities \u2014 the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
     "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own \u201cOur Companies\u201d and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",

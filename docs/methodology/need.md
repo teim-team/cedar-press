@@ -1,8 +1,8 @@
-# Methodology — Cedar Native Entity Enterprise Dataset (NEED)
+# Methodology — Cedar Native Entity Enterprise Dataset (Cedar NEED)
 
 <!-- BEGIN GENERATED:IDENTITY -->
 
-**`need` — Cedar Native Entity Enterprise Dataset (NEED).** Delivered as `dist/customer/need.csv`: **4,798 rows × 91 columns, 7.9 MB**, built from the flagship table `data/clean/need_enterprises.csv`. Shelf `pro`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+**`need` — Cedar Native Entity Enterprise Dataset (Cedar NEED).** Delivered as `dist/customer/need.csv`: **4,798 rows × 91 columns, 7.9 MB**, built from the flagship table `data/clean/need_enterprises.csv`. Shelf `pro`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
 
 > **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
 >
@@ -52,7 +52,7 @@ architecture map counts 3, and that is in the stale-claims list.]
 
 ## The one thing to understand before any number in this dataset
 
-**Most rows in NEED do not say that anybody owns anything.** The name commits
+**Most rows in Cedar NEED do not say that anybody owns anything.** The name commits
 the dataset to two relations — *Structures **and** Ties* — and after the
 2026-09-02 ingest of the owner's own enterprise file the ties are the majority:
 
@@ -67,7 +67,7 @@ The mechanism is one column over. `relationship` reads the literal string
 `unspecified` on **3,187 rows** [measured], because the source those rows come
 from — `native_entity_enterprise_dataset_v6_geocoded.csv` — has 31 columns and
 **not one of them states a relationship word.** No source said "subsidiary", so
-NEED does not say it. Everything else in the vocabulary is somebody's stated
+Cedar NEED does not say it. Everything else in the vocabulary is somebody's stated
 word:
 
 | `relationship` | rows | class |
@@ -88,7 +88,7 @@ word:
 > ⚠ **`assertion_class` reads `OWNERSHIP` on all 4,798 rows and is not the
 > column that answers this question.** [measured] It records which staging lane
 > a row came down — the `1070` sweep split its harvest into `OWNERSHIP` and
-> `RELATIONSHIP` and NEED took the ownership lane — and it has been constant
+> `RELATIONSHIP` and Cedar NEED took the ownership lane — and it has been constant
 > since. Filtering on it returns the whole table. **`relation_class` is the
 > column that says what was claimed.**
 
@@ -115,14 +115,14 @@ lands in `relationship_as_recorded` (34 distinct values against `relationship`'s
 10) and is classed `affiliation`, the weaker reading, because guessing upward is
 the direction that fabricates.**
 
-**So the honest one-line reading of NEED is:** 1,512 rows where a named source
+**So the honest one-line reading of Cedar NEED is:** 1,512 rows where a named source
 asserted that a Native nation, ANCSA corporation or NHO owns a named firm, plus
 3,286 rows where a named source placed a firm under a Native owner without
 saying on what terms. Both are useful. They are not the same fact.
 
 ### And the second thing: this is a structure table, not a money table
 
-**There is no money column in NEED.** Not one of the 91 delivered columns holds
+**There is no money column in Cedar NEED.** Not one of the 91 delivered columns holds
 a dollar figure [measured — the numeric columns are `hierarchy_level`,
 `n_source_observations`, `n_distinct_sources`, `n_auto_ruled_observations`,
 `first_observed_year`, `last_observed_year`, `ownership_percent_stated`,
@@ -280,14 +280,14 @@ read for geography.**
 `data/spine/cedar_identifier_ledger.state` holds this row's own identifier on
 **12,127** rows — the identical count to `hq_state` in the owner's v1, v2 and v3.
 Two counts agreeing to the row is not coincidence: Cedar's identifier ledger was
-built from a pre-v6 vintage and inherited the corruption. The NEED log calls it a
+built from a pre-v6 vintage and inherited the corruption. The Cedar NEED log calls it a
 **column shift**; `docs/KNOWN_ISSUES.md` Lesson 3 subsequently measured the shift
 width at **zero** and named the real cause —
 `sam_extracts/build_master_entity_registry.py:126`, a pandas `agg` whose
 missing-column fallback substitutes `awardee_uei` for
 `recipient_location_state_code`. **A shift is a parser bug you fix once; a silent
 column substitution produces a full column of plausible values and recurs on the
-next renamed column.** The NEED log does not yet carry the correction.
+next renamed column.** The Cedar NEED log does not yet carry the correction.
 
 **Why it is an INPUT and not an append.** `1130` measured 4,786 net-new
 enterprises and **deliberately did not append them**, because `1072 build` is a
@@ -341,7 +341,7 @@ is missing or empty, because an absence must never print as a clean result.
 ### 1.4 What was deliberately not used
 
 - **`cedar_identifier_ledger_final.csv` was refused wholesale as an identifier
-  source.** Nothing in NEED is inherited from it. It carries **227,540 rows worth
+  source.** Nothing in Cedar NEED is inherited from it. It carries **227,540 rows worth
   $45,932,912,319** on quarantined methods with no exclusion recorded —
   `uei_exact` 172,338 / $38,191,057,346 + `cage_exact` 14,149 / $7,252,015,101 +
   `parent_uei` 41,055 / $489,839,872, measured disjointly across all three legs
@@ -356,17 +356,17 @@ is missing or empty, because an absence must never print as a clean result.
 - **D&B-derived recipient addresses are not used.** `IDENTIFIER_STANDARD` §4
   forbids their bulk dissemination and they attach to every base award dated
   before 2022-04-04. A licence restriction, distinct from terms and from consent,
-  and the reason NEED carries city and state and **no street address anywhere**.
+  and the reason Cedar NEED carries city and state and **no street address anywhere**.
 - **`cedar_constellation_edges.csv` is read and never written.** ADR-014's
   constellation records **service** relationships — who serves a community,
-  including `registered_with` for a TERO-certified firm. NEED records ownership.
-  A TERO-certified firm is a constellation edge and is **not** a NEED row unless
-  the nation also owns it; where a NEED enterprise does match one, its `edge_id`
+  including `registered_with` for a TERO-certified firm. Cedar NEED records ownership.
+  A TERO-certified firm is a constellation edge and is **not** a Cedar NEED row unless
+  the nation also owns it; where a Cedar NEED enterprise does match one, its `edge_id`
   rides in `constellation_edge_id` so the corroboration is visible instead of the
   relationship being rebuilt under a second name — **41 rows** [measured]. **The
   near-zero overlap is the evidence that the scope split is real:** the
   constellation's unkeyed from-sides are clinics, schools and service
-  organisations; NEED's are operating companies. **NEED does not close the
+  organisations; Cedar NEED's are operating companies. **Cedar NEED does not close the
   constellation's name-only backlog**, and a pass that tries should know that
   before it starts.
 - **`native_owned_businesses.csv` is a different relation and the two must never
@@ -378,7 +378,7 @@ is missing or empty, because an absence must never print as a clean result.
 
 ### 1.5 Terms of use, and the ruling that changed the answer mid-build
 
-Sources marked `TERMS_STATED_RESTRICTIVE` were excluded from NEED **by every
+Sources marked `TERMS_STATED_RESTRICTIVE` were excluded from Cedar NEED **by every
 route** — the publisher's page, its WordPress media API, the Wayback Machine, and
 any harmonised derivative of data an earlier pass already fetched — matched on
 both the asserting parent's name and the source host. The guard is
@@ -418,7 +418,7 @@ from their public role** — the business row may be harvested, `owner_name_raw`
 `email` / `phone` / `address_raw` may not be published; EMMA/MSRB with CUSIP
 Global Services as a second licensor; and Casino City and D-U-N-S.
 
-**NEED's guard predates the ruling and still enforces the old answer** — 414 held
+**Cedar NEED's guard predates the ruling and still enforces the old answer** — 414 held
 rows on a refusal that has been lifted. §4.2.
 
 ---
@@ -431,7 +431,7 @@ rows on a refusal that has been lifted. §4.2.
 1. **`code/1031_ancsa_45_55_139_annual_reports.py`** — pulled the AS 45.55.139
    PDFs from the STAR portal into `data/raw/external/ancsa_portal_v3/` and
    extracted a text layer with PyMuPDF plus per-page tesseract at 300 dpi. **The
-   only network-bearing step in the chain**, and it ran before NEED existed.
+   only network-bearing step in the chain**, and it ran before Cedar NEED existed.
 2. **`code/1073_ancsa_consolidation_subsidiaries.py`** — the WORKSTREAM
    NBOA-EXPAND prototype that established the *Principles of Consolidation*
    route, the `wholly_owned` / `majority_owned` / `equity_or_jv` gradient, and the
@@ -442,7 +442,7 @@ rows on a refusal that has been lifted. §4.2.
 3. **`code/1070_anc_nho_business_sweep.py`** — swept 822 entities (all 191 ANCs,
    all 210 NHOs, 365 tribal governments `701` never reached, all 56 intertribal
    organisations), staged 1,106 rows in the 58-column `native_owned_businesses`
-   schema, and **held the 583 OWNERSHIP rows for NEED** while the 523
+   schema, and **held the 583 OWNERSHIP rows for Cedar NEED** while the 523
    `RELATIONSHIP` rows went to the business file. §2.1.
 4. **`code/1072_tribally_owned_enterprises.py`** — the builder.
    `mine | assemble | build | codebook | conserve | verify | selfcheck`. `mine`
@@ -484,9 +484,9 @@ rows, never rewritten). **Nothing was written to the spine's entity register, to
 
 583 ownership rows arrived from the sweep. A plain append would have been wrong
 on a third of them: the integrator measured **170 of the 583 already present in
-NEED by normalised name** before splitting them, and 265 come from the *same* 358
+Cedar NEED by normalised name** before splitting them, and 265 come from the *same* 358
 audited reports `1072` mines itself. So they are fed through the same clustering
-as every other source, and a restatement of a firm NEED already holds raises that
+as every other source, and a restatement of a firm Cedar NEED already holds raises that
 enterprise's `n_source_observations` instead of creating a second row.
 
 ```
@@ -599,7 +599,7 @@ owner v3   19,846 rows in   19,846 accounted   0 unaccounted
 
 ## 3. How entities were attributed
 
-### 3.0 NEED does not carry a column called `attribution_method`, and that is deliberate
+### 3.0 Cedar NEED does not carry a column called `attribution_method`, and that is deliberate
 
 `docs/schema/attribution_method_vocabulary.json` states the problem in its own
 `why` field: *"`attribution_method` is three different columns sharing a name — a
@@ -612,20 +612,20 @@ gated against its OWN vocabulary."*
 | **an evidence provenance** | `cedar_assertions.csv`, `cedar_identifier_ledger.csv` | `elijah_ruling`, `web_verified`, `unmatched` |
 | **a name-match algorithm** | `native_entity_lobbying_disclosures.csv` | `core_token_set`, `exact_normalized_skeleton`, `contains_canonical` |
 
-**None of the three appears in NEED under that name.** `attribution_method` is
+**None of the three appears in Cedar NEED under that name.** `attribution_method` is
 not among the 91 delivered columns, nor the 68 of `need_enterprises.csv`, nor the
 25 of `need_enterprise_relations.csv`, nor the 27 of `need_entity_dual_role.csv`
-[measured 2026-09-02]. NEED splits the senses into separately named columns:
+[measured 2026-09-02]. Cedar NEED splits the senses into separately named columns:
 **`hub_resolution_method`** carries the *join method* (how the row reached its
 owner hub), **`evidence_class`** carries the *evidence provenance* (what kind of
 document asserted it) — both in §3.2 — and ten `*_basis` / `*_note` columns carry,
 per field, the sentence saying which lookup answered.
 
-**Where the third sense does bear on NEED it arrives from outside, on the owner's
+**Where the third sense does bear on Cedar NEED it arrives from outside, on the owner's
 file, and it arrives as a NEGATIVE.** `attribution_method = unmatched` on 8,927 of
 his v6 rows is his resolver reporting that it could **not** attribute the firm to
 any Native entity — the `cedar_identifier_ledger.csv` sense of the word, an
-evidence provenance, where `unmatched` carries 9,569 rows. §4.3 covers what NEED
+evidence provenance, where `unmatched` carries 9,569 rows. §4.3 covers what Cedar NEED
 did with them.
 
 ### 3.1 `enterprise_id` is a sub-hub id, and an enterprise is never a spine entity
@@ -800,7 +800,7 @@ anything at all.
 ### 3.4 Corroboration: a fourth evidence family that was already on disk
 
 `docs/ASSERTION_LAYER.md` measured that every fact in Cedar rests on exactly one
-source. NEED is one of the few places that is partly untrue:
+source. Cedar NEED is one of the few places that is partly untrue:
 
 | `n_distinct_sources` | 1 | 2 | 3 | 4 | 5 |
 |---|---:|---:|---:|---:|---:|
@@ -824,7 +824,7 @@ government**, made by the **child** rather than the parent and therefore
 independent of both the audited filing and the corporate site. Rule 11's measured
 **20-observation ownership floor** applies; below it an edge is a joint venture.
 **The test is not "the names match"** but *"the declared parent resolves, through
-the identifier ledger, to the owner hub NEED already asserts"* — two independent
+the identifier ledger, to the owner hub Cedar NEED already asserts"* — two independent
 parties agreeing about the **owner**.
 
 | `fpds_parent_corroboration` | rows | rung 1, published UEI | rung 2, exact normalised name |
@@ -837,20 +837,20 @@ parties agreeing about the **owner**.
 
 [measured 2026-09-02]
 
-**The contradictions are mostly the LEDGER's defect, not NEED's.** At the
+**The contradictions are mostly the LEDGER's defect, not Cedar NEED's.** At the
 pre-ingest count of 8, six resolved to `AKNF-INPTAS-00-ARCSLO`, the **village
 government**, which rule 2 forbids — five Bowhead/UIC rows plus Rockford and
-UMIAQ — and two were collisions on the tokens `Eagle` and `Vista`. **NEED was on
+UMIAQ — and two were collisions on the tokens `Eagle` and `Vista`. **Cedar NEED was on
 the correct side of 6 of 8.** Two stayed open and neither side was repointed:
-`Nisga'a Tek LLC` (NEED Tlingit & Haida vs Goldbelt, 254 observations) and
-`Broadleaf, Inc` (NEED The Hawai'i Pacific Foundation vs ASRC, 325), in
+`Nisga'a Tek LLC` (Cedar NEED Tlingit & Haida vs Goldbelt, 254 observations) and
+`Broadleaf, Inc` (Cedar NEED The Hawai'i Pacific Foundation vs ASRC, 325), in
 `review/need_fpds_parent_contradictions_2026-09-02.csv`. [from the record —
 `docs/ENTITY_LAYER_DEEPENING_2026-09-02.md` §3] **The 22 in the delivered file
 have not been re-triaged at the new row count** — a limit, not a finding.
 
 ### 3.5 The conflict register, and why `relationship` fuses three axes
 
-**This is the first thing in NEED that *can* disagree, and getting the count
+**This is the first thing in Cedar NEED that *can* disagree, and getting the count
 right took three versions:**
 
 | version | reported | what it was actually measuring |
@@ -896,7 +896,7 @@ rival claim, it is the owner's v6 file stating no relationship word at all. §6.
 > *"ANCs and NHOs are themselves entities, but they're also enterprises too."*
 > — the owner, 2026-09-02
 
-He is right and NEED's model was wrong: an ANCSA corporation was only ever an
+He is right and Cedar NEED's model was wrong: an ANCSA corporation was only ever an
 `owner_hub_cedar_uid`, a hub that owns. **It is also a corporation that trades.**
 
 **The obvious fix is wrong.** Adding the corporation to `need_enterprises.csv` as
@@ -905,7 +905,7 @@ exact thing `1072` already refuses after `The Eyak Corporation` and `Coushatta`.
 **ADR-032: the second role is RECORDED, not duplicated.**
 `data/clean/need_entity_dual_role.csv`, one row per entity keyed on `cedar_uid`,
 joined to `need_enterprises` on `owner_hub_cedar_uid`. **The register keeps ONE
-row for the entity; NEED keeps ZERO rows for it.** Invariant **I12** holds the
+row for the entity; Cedar NEED keeps ZERO rows for it.** Invariant **I12** holds the
 no-self-subsidiary line.
 
 **358 entities carry a dual role** — `REGISTER_ENTITY_AND_ENTERPRISE` 292 ·
@@ -933,7 +933,7 @@ reaching NHOs, becomes only those two, or loses R3. [from the record — ADR-032
 **In the delivered file the join is smaller than 358 suggests.** The dual-role
 columns are populated on **1,701 of 4,798 rows (35.5%), covering 139 of the 472
 owner hubs** [measured]; the other 219 dual-role entities are register entities
-that are not NEED owner hubs. **A consumer asking "what does this ANC own" reads
+that are not Cedar NEED owner hubs. **A consumer asking "what does this ANC own" reads
 the enterprise rows; asking "does this ANC itself sell" reads the dual-role
 block. Neither question is answered by a row that pretends to be the other.**
 
@@ -1014,14 +1014,14 @@ of 8,927 rows and would publish natural persons into a business dataset. **This 
 `START_HERE` §1b in a third vocabulary: `unmatched` is a NEGATIVE result.**
 Inheriting the row while dropping its sign is exactly how 317 `elijah_ruling`
 tier-X refusals were once published as confident attributions. Invariant **W6**
-fails the build if any of these names reaches NEED — **scoped to names the emitted
+fails the build if any of these names reaches Cedar NEED — **scoped to names the emitted
 set does not also carry**, because 11 of them are *also* carried by a properly
 hubbed row and a bare name test called those leaks.
 
 **The 3,140 SBA rows are real firms with no owner named.** `SALCO LLC`, `HAKU
 SYSTEMS LLC`, `MAKWA GLOBAL SERVICES, LLC` — self-certified Native-owned, 8(a),
-in the SBA certification register. **That is evidence.** It is not a NEED row:
-NEED's grain is (owner hub, enterprise name) and **no owner nation is named on any
+in the SBA certification register. **That is evidence.** It is not a Cedar NEED row:
+Cedar NEED's grain is (owner hub, enterprise name) and **no owner nation is named on any
 of them**. They are registered for `native-owned-businesses` and the
 individually-Native-owned class, by name and UEI, so the promotion is **a join and
 not a re-harvest**, and **the route to them is the identifier, not the name.**
@@ -1047,7 +1047,7 @@ differently — `GLACIER TECHNOLOGIES LLC` against `Glacier Technologies Limited
 Liability Company`, `GOLDBELT HAWK L.L.C.` against `Goldbelt Hawk Llc`, `CADDO
 INDUSTRIES ENTERPRISE` against `CADDO INDUSTRIES ENTERPRISES`.
 
-NEED clusters on the normalised **name**. `norm()` strips a trailing corporate
+Cedar NEED clusters on the normalised **name**. `norm()` strips a trailing corporate
 form but not `limited liability` in the middle of one, so `glacier technologies`
 and `glacier technologies limited liability` are two keys — and rapidfuzz declines
 to fuse them because the merge rule caps the length difference at 6 while theirs
@@ -1063,8 +1063,8 @@ like 598 rows, 438 of which are renderings v6 still holds.
 ### 4.5 A UEI Cedar already holds is a corroboration, not a new firm
 
 A UEI is one federal registration for one firm, so an owner row carrying a UEI a
-live NEED row already holds **is that firm again**. **But the collision only
-matters when the row would create a NEW cluster.** Where NEED already holds
+live Cedar NEED row already holds **is that firm again**. **But the collision only
+matters when the row would create a NEW cluster.** Where Cedar NEED already holds
 `(this hub, this normalised name)` the row MERGES and raises the observation
 count, which is the entire point of putting the file through the builder's
 clustering. Refusing on the UEI alone discarded **173** of exactly those, so the
@@ -1098,7 +1098,7 @@ looking exactly like coverage.**
 `code/354_correction_register.py`) and refuses any edge whose `(entity,
 normalised name)` is an applied withdrawal. It catches exactly one row,
 `APPLIED_CORRECTION_FA-01`, registered with the correction's own reason text.
-Invariant **W7** fails the build if a withdrawn link reaches NEED, and its fixture
+Invariant **W7** fails the build if a withdrawn link reaches Cedar NEED, and its fixture
 injects one and proves it fires. **The point of checking it in `1133` rather than
 relying on `62` is timing: a red `62` is found *after* the rebuild, and `W7` is
 found before it.** The register holds **178 rows, 130 distinct `(entity_id,
@@ -1117,13 +1117,13 @@ build log gives 273 / 66, both stale]
 
 ### 4.8 The largest single open item — 1,281 rows, not 212
 
-`1130` measured 223 hub disagreements between the owner's file and NEED, of which
-**212 hub an ANCSA subsidiary on the Native Village GOVERNMENT** while NEED hubs
+`1130` measured 223 hub disagreements between the owner's file and Cedar NEED, of which
+**212 hub an ANCSA subsidiary on the Native Village GOVERNMENT** while Cedar NEED hubs
 it on the corporation. That was a count of net-new **clusters**. Put the whole raw
 file through `1072 assemble` and the count of **rows** the guard has to hold is
 **1,281 across 221 distinct village governments** — Chenega 128, Barrow 123,
 Pribilof Islands 98, Eagle 78, Afognak 53, Tyonek 51 [measured 2026-09-02].
-**986 of the firms named on them are in NEED under no hub at all**, so this is not
+**986 of the firms named on them are in Cedar NEED under no hub at all**, so this is not
 a rounding difference: **it is the single largest block of Alaska Native corporate
 structure still outside the dataset.**
 
@@ -1135,32 +1135,32 @@ repoint these. **The correction belongs in the owner's file, with the ruling
 attached.**
 
 This is the `ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` defect family —
-334 defects, $24.52B — and NEED has reached it from **six independent
+334 defects, $24.52B — and Cedar NEED has reached it from **six independent
 directions**: the lookup file's self-contradicting columns, the FPDS
 declared-parent contradictions, the owner-file hub disagreements, the raw-row
 assemble count, the 83 successful repoints, and the ledger resolutions of §3.4.
-**NEED is on the correct side of every one.**
+**Cedar NEED is on the correct side of every one.**
 
 ---
 
 ## 5. Money
 
-**NEED has no money column, and the right thing to do with that is to say it
+**Cedar NEED has no money column, and the right thing to do with that is to say it
 rather than imply a total exists.** Not one of the 91 delivered columns holds a
 dollar figure, and `need` appears nowhere in `docs/MONEY_TOTALLING_RULES.md`
-[both measured 2026-09-02]. That file governs the money tables and NEED is not
+[both measured 2026-09-02]. That file governs the money tables and Cedar NEED is not
 one of them.
 
 **A structure table is not a money table**, and the temptation it creates is easy
-to name. NEED tells you that a nation owns a firm. It does **not** tell you what
+to name. Cedar NEED tells you that a nation owns a firm. It does **not** tell you what
 that firm earned, obligated, expended or distributed. The dollars attached to
 these firms live in `prime_contracts.csv`, `federal_funding_transactions.csv`,
 the subaward tables, `fac_tribal_single_audits.csv` and the gaming tables, each
 with its own totalling rules, denominator and double-count hazards. **Joining
-NEED to any of them to produce a "tribally owned enterprise revenue" figure is a
+Cedar NEED to any of them to produce a "tribally owned enterprise revenue" figure is a
 join this dataset does not license**, for three independently sufficient reasons:
-68.5% of NEED rows assert affiliation rather than ownership; `uei` is populated on
-52.2% of rows, so the join is partial in a way that is not random; and NEED's
+68.5% of Cedar NEED rows assert affiliation rather than ownership; `uei` is populated on
+52.2% of rows, so the join is partial in a way that is not random; and Cedar NEED's
 grain is `(owner hub, enterprise)`, so a joint venture is correctly two rows, one
 per parent, and a naive money join double-counts it.
 
@@ -1228,7 +1228,7 @@ count. The 429 name-only rows are the exposed set.
 ## 6. Known limits, stated plainly
 
 **A permanent id stopped resolving, and it is an open defect in `1072`.** The
-append-only register holds **4,800 bindings** while NEED settles at **4,798**, so
+append-only register holds **4,800 bindings** while Cedar NEED settles at **4,798**, so
 **two bindings no longer resolve** [measured 2026-09-02]:
 
 | orphaned binding | key | why |
@@ -1239,7 +1239,7 @@ append-only register holds **4,800 bindings** while NEED settles at **4,798**, s
 Nothing was lost. The owner's file carries the same firm as `C P Leasing, Inc`,
 which normalises to `c p leasing`; rapidfuzz **correctly** fused the two
 renderings; the fused cluster's canonical key became `c p leasing`; and `1072`
-minted a new id for a company that already had one. The firm is in NEED today as
+minted a new id for a company that already had one. The firm is in Cedar NEED today as
 `CEDAR-NEST-001611-0W`, `C P Leasing, Inc`, with `CP Leasing` in
 `name_variants_observed` [measured]. **But `enterprise_id` is permanent, and a
 customer who joined on `CEDAR-NEST-000004-R4` now gets nothing.** The cause is
@@ -1254,8 +1254,8 @@ is called and **reports the orphan count beside it**. `docs/WORK_QUEUE.md`
 carries the defect.
 
 **The staged edge count wobbles by 2 and the table does not.** `1133` asks "does
-NEED already hold this firm" to avoid minting a second enterprise for one company
-— and after the first ingest **NEED holds this script's own rows**, which is
+Cedar NEED already hold this firm" to avoid minting a second enterprise for one company
+— and after the first ingest **Cedar NEED holds this script's own rows**, which is
 `AGENT_FIELD_GUIDE` rule 10 (five instruments in this repo have scanned their own
 output). Rows whose `source_id` is `OWNERV6` are excluded from that context, but
 the exclusion is not perfectly stable, because `source_id` is the *best* source of
@@ -1287,7 +1287,7 @@ Ahtna, Bering Straits, Doyon, Koniag and Sealaska carry a `third_source_says`
 sentence describing Chugach Commercial Holdings. **The adjudication was broadcast
 rather than joined.**
 
-**NEED holds companies twice, and the count has grown.** Clustering is on
+**Cedar NEED holds companies twice, and the count has grown.** Clustering is on
 `(owner hub, normalised name)` and **a trailing parenthetical survives
 normalisation**:
 
@@ -1323,7 +1323,7 @@ rows (15.8%) rest on more than one source [measured], but the same source family
 across several fiscal years counts as several sources. `KNOWN_ISSUES` §2 names the
 missing column — `n_independent_families` — and it has not been built. Relatedly,
 **the 22 FPDS contradictions have not been re-triaged at the new row count**: the
-8 that existed at 1,610 rows were adjudicated in full and NEED was correct on 6,
+8 that existed at 1,610 rows were adjudicated in full and Cedar NEED was correct on 6,
 and nothing states which of the extra 14 are the ledger's village-government
 defect and which are real.
 
@@ -1398,7 +1398,7 @@ name what to re-run.
 observer-grade ownership evidence in the dataset — the only source where a parent
 asserts ownership about itself under a filing obligation, with an auditor's
 signature on the page. Everything else is a corporate website, a compiled
-directory, or a resolver output. **If that leg ages, NEED does not get less
+directory, or a resolver output. **If that leg ages, Cedar NEED does not get less
 complete; it gets less credible**, because the share of rows resting on an audited
 filing falls while the row count holds.
 
@@ -1415,7 +1415,7 @@ Ordered by how much damage acting on the wrong value would do.
    with the owner-file ingest, and the log's own later block explains why without
    updating the earlier table. **This is the highest-damage stale figure in the
    document**: a reader who takes the first table at face value concludes 94% of
-   NEED is an ownership claim when it is 31.5%.
+   Cedar NEED is an ownership claim when it is 31.5%.
 
 2. **The build log states the delivered row count as 4,799 in the ingest section
    and 4,798 in the results table of the same block.** The delivered file holds
@@ -1450,7 +1450,7 @@ Ordered by how much damage acting on the wrong value would do.
    missing-column fallback in `sam_extracts/build_master_entity_registry.py:126`
    substituting `awardee_uei` for `recipient_location_state_code`. **A shift is a
    parser bug you fix once; a silent column substitution recurs on the next
-   renamed column.** Anyone reading the NEED log alone will look for the wrong bug.
+   renamed column.** Anyone reading the Cedar NEED log alone will look for the wrong bug.
 
 6. **The whole FILES block of the build log predates the ingest, and six of its
    artefact sizes are wrong.** Measured 2026-09-02:
@@ -1493,7 +1493,7 @@ Ordered by how much damage acting on the wrong value would do.
    are the v1 error the build log says was fixed** — an `unspecified` value scored
    as a rival claim — and all 45 carry `1102`'s Chugach-specific adjudication text.
 
-10. **The build log says NEED holds "25 companies twice, 25 groups, 50 rows".**
+10. **The build log says Cedar NEED holds "25 companies twice, 25 groups, 50 rows".**
     The delivered file carries **62 `duplicate_name_variant_group` values across
     126 rows** [measured]. The reasoning is unchanged and correct; the count is
     2.5× stale, and it is the count a reader would use to size the clean-up.
@@ -1537,7 +1537,7 @@ Ordered by how much damage acting on the wrong value would do.
 15. **`docs/methodology/README.md` says "Scoreboard, 2026-09-02: READY 9 / 13" and
     names four BLOCKED datasets.** `docs/DATASET_READINESS.md`, regenerated the
     same day, says **READY 15 / 15, BLOCKED 0, NOT_TESTED 0** [measured]. Not a
-    NEED figure, but it is the header every reader of these papers meets first.
+    Cedar NEED figure, but it is the header every reader of these papers meets first.
 
 16. **Two small-print counts that did not reproduce, both low damage.** `1133`'s
     UEI-collision refusals are given as *"21 same-hub and 172 cross-hub"*;

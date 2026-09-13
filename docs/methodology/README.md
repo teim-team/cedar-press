@@ -16,7 +16,7 @@ One paper per **delivered** dataset. The set is `cedar_publication.BUILD_SHELVES
 | [`nagpra.md`](nagpra.md) | NAGPRA | `standard` | Cedar Press | 6,792 | READY |
 | [`native-owned-businesses.md`](native-owned-businesses.md) | Native-Owned Businesses | `pro` | Cedar Press | 2,446 | READY |
 | [`natural-resources.md`](natural-resources.md) | Natural Resource Revenues | `pro` | Cedar Press | 11,305 | READY |
-| [`need.md`](need.md) | Cedar Native Entity Enterprise Dataset (NEED) | `pro` | Cedar Press | 4,798 | READY |
+| [`need.md`](need.md) | Cedar Native Entity Enterprise Dataset (Cedar NEED) | `pro` | Cedar Press | 4,798 | READY |
 | [`nonprofits.md`](nonprofits.md) | Native Nonprofits | `pro` | Cedar Press | 12,764 | READY |
 | [`subcontracting.md`](subcontracting.md) | Federal Subcontracting | `pro` | Cedar Press | 89,809 | READY |
 

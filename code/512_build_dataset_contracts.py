@@ -2917,7 +2917,7 @@ GRAIN_INT_READY = {
 }
 GRAIN.update(GRAIN_INT_READY)
 
-# --- Cedar Native Entity Enterprise Dataset (NEED) ---------------------------
+# --- Cedar Native Entity Enterprise Dataset (Cedar NEED) ---------------------
 # Workstream `need`, 2026-09-02, code/1072_tribally_owned_enterprises.py.
 # The 14th collection. Two tables, and the split between them is the point:
 # one row per ENTERPRISE in the first, one row per ASSERTION about it in the

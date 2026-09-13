@@ -386,7 +386,10 @@ export const PRESS_CATALOG = Object.freeze([
   }),
   Object.freeze({
     id: "need",
-    short: "NEED",
+    // Always "Cedar NEED", never the bare acronym: the Federal Reserve
+    // publishes a NEED of its own, and the people reading this page know
+    // theirs. The prefix is the whole point of the name.
+    short: "Cedar NEED",
     name: "Cedar Native Entity Enterprise Dataset",
     shelf: "pro",
     // Series. Floor: min(first_observed_year) in dist/customer/need.csv, which

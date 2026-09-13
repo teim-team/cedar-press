@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""1072 - Cedar Native Entity Enterprise Dataset (NEED).
+"""1072 - Cedar Native Entity Enterprise Dataset (Cedar NEED).
 
     Enterprise ownership and affiliation across tribes, Alaska Native
     corporations, Native Hawaiian organizations, and state-recognized

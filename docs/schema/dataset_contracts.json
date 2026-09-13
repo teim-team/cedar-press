@@ -6233,7 +6233,7 @@
   },
   {
    "collection": "need",
-   "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+   "name": "Cedar Native Entity Enterprise Dataset (Cedar NEED)",
    "shelf": "pro",
    "rebuild_command": "py -3 code/build.py run need --execute",
    "n_tables": 3,

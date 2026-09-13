@@ -773,7 +773,7 @@
       ]
     },
     "need": {
-      "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+      "name": "Cedar Native Entity Enterprise Dataset (Cedar NEED)",
       "version": "v1",
       "updated": "2026-09-04",
       "cadence": "Updated as records arrive",

@@ -185,7 +185,7 @@ COLLECTIONS: list[dict] = [
     # native_owned_businesses runs down to `vendor_relationship`, which is no
     # ownership claim at all, and flattening it is what
     # docs/PUBLICATION_POLICY.md refuses.
-    {"id": "need", "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+    {"id": "need", "name": "Cedar Native Entity Enterprise Dataset (Cedar NEED)",
      "shelf": "pro", "prefixes": [],
      "tables": r"^need_"},
     # Added 2026-09-02 by code/1105_newsletter_corpus_ship.py. The 15th

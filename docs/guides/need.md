@@ -1,4 +1,4 @@
-# Cedar Native Entity Enterprise Dataset (NEED): a researcher's guide
+# Cedar Native Entity Enterprise Dataset (Cedar NEED): a researcher's guide
 
 Collection `need` · public file `need.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
@@ -114,7 +114,7 @@ Nothing beyond the grain and harmonization work named above.
 
 **Version:** v1. **Release date:** 2026-09-04.
 
-**Cite as:** Lumecon, "Cedar Native Entity Enterprise Dataset (NEED)" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Cedar Native Entity Enterprise Dataset (Cedar NEED)" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Two relations, declared per row and never conflated: a STRUCTURE is ownership — nation, holding company, operating company — and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees.
 
