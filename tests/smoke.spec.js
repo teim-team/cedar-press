@@ -73,6 +73,38 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
+  // The door shows the collections themselves: every storefront collection
+  // on its shelf, and a stage with real sample records of the one in hand.
+  // Twelve is the catalog's count; the records are the point, since a stage
+  // with a description and no rows is a brochure. The reader's shelf
+  // (#catalog) stays absent — asserted above — because the stage reads the
+  // public ten-row samples and nothing else.
+  test("the door lists every collection and stages real records", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await expect(page.locator(".cp-shelf__item")).toHaveCount(12);
+    await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
+    await page.getByRole("button", { name: /Prime Contracting/ }).click();
+    const stage = page.locator('[data-testid="collection-stage"][data-collection="contractors"]');
+    await expect(stage).toBeVisible();
+    await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
+    // The way in is named on the stage, never a route past the paywall.
+    await expect(stage.getByRole("link", { name: /at Tribal Business News/ })).toBeVisible();
+    await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
+    await expect(page.locator("#catalog")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  test("the door does not scroll sideways", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
+  });
+
   test("a wrong password is refused and says so", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("tab", { name: "Log in" }).click();

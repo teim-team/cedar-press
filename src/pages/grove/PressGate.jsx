@@ -2,9 +2,17 @@
 //
 // Cedar Press: the way in.
 //
-// The entrance to a professional intelligence service, not a SaaS login. Left
-// side answers "why should I trust this?"; right side does one thing, which is
-// get an authorized Tribal Business News member inside. Anything longer about
+// The entrance to a professional intelligence service, not a SaaS login. The
+// first screen is a split: the left side says what this is and why it can be
+// trusted, the right side does one thing, which is get an authorized Tribal
+// Business News member inside. Under the split, the whole width goes to the
+// collections themselves — every one on its shelf, and a stage showing six
+// real records of the one in hand (PressCollectionsStage). A visitor who
+// heard "Cedar Press" at a conference learns what is inside by looking at
+// it, not by reading adjectives about it; twelve names on the door were
+// replaced by twelve tables behind it. Nothing on the stage is confidential:
+// the ten-row samples ship in the public bundle by design (pressDemoGate.js),
+// and they are the whole of what the stage can reach. Anything longer about
 // method belongs on the methods page, and the one link out is the only route
 // to it from here.
 //
@@ -64,14 +72,20 @@ import {
   InsightsIcon,
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
-import { STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
+import { STOREFRONT_CATALOG, spellCount } from "../../features/grove/pressCatalog";
+import { coverageFrom } from "../../features/grove/pressAccess";
+import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
+import { LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
+import PressCollectionsStage from "./PressCollectionsStage";
 import { PressCedarFab } from "./PressCedarFab";
 
-// The Cedar Press shelves by name, for the door. Names only, from the
-// catalog itself so a new collection appears here the day it ships, and only
-// what the storefront sells: a different product's pitch does not belong on
-// this door. What the names mean is Cedar's job, one click away.
-const CATALOG_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short);
+// What the product is made of, in the catalog's and the release record's
+// own numbers, for the line under the promise. The earliest year is the
+// deepest single collection, so the line says "as far back as", never
+// "since": the rest start later and two of them are rosters with no start.
+const COLLECTION_STARTS = STOREFRONT_CATALOG.map((entry) => coverageFrom(entry)).filter(Boolean);
+const EARLIEST_YEAR = COLLECTION_STARTS.length ? Math.min(...COLLECTION_STARTS) : null;
+const capitalise = (word) => word[0].toUpperCase() + word.slice(1);
 
 
 // The four pillars, in the order the supporting sentence names them: what the
@@ -230,57 +244,53 @@ export default function PressGate({ user }) {
             Original collections built from fragmented records, connected through original
             research, and maintained as Indian Country changes.
           </p>
+          {/* What the product is made of, before the pillars say why to
+              trust it: the count, the rows, the deepest year and the latest
+              release, each read from the catalog or the release record. */}
+          <ul className="cp-facts cp-facts--hero cp-fade" aria-label="What Cedar Press holds">
+            <li><b>{STOREFRONT_CATALOG.length}</b> collections</li>
+            {LAUNCH_ROWS_TOTAL ? <li><b>{LAUNCH_ROWS_TOTAL.toLocaleString("en-US")}</b> records</li> : null}
+            {EARLIEST_YEAR ? <li>as far back as <b>{EARLIEST_YEAR}</b></li> : null}
+            {recentlyUpdated(1)[0] ? <li>latest release <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
+          </ul>
+          {/* The four pillars, as rows on rules rather than tiles: the
+              custom marks stand on their own beside the words, and nothing
+              swaps or lifts on hover. */}
           <ul className="cp-proof cp-fade">
             {PROOF_POINTS.map((point) => (
               <li className="cp-proof__item" key={point.id}>
-                {/* The title leads and holds the tile in both states; below
-                    it, only the icon and the paragraph trade places on
-                    hover. The swap is opacity, never display:none, so the
-                    paragraph stays in the accessibility tree, and hoverless
-                    devices show it outright. */}
+                <span className="cp-proof__ic" aria-hidden="true">{point.icon}</span>
                 <span className="cp-proof__label">{point.label}</span>
-                <span className="cp-proof__swap">
-                  <span className="cp-proof__ic" aria-hidden="true">{point.icon}</span>
-                  <span className="cp-proof__body">{point.body}</span>
-                </span>
+                <span className="cp-proof__body">{point.body}</span>
               </li>
             ))}
           </ul>
-          {/* The shelves, by name: a prospect who heard "Cedar Press" at a
-              conference should learn what is actually inside from the door,
-              and twelve specific collection names say more than any
-              adjective. Cedar is the way to ask what any of them means. */}
-          <div className="cp-cats cp-fade">
-            <p className="cp-cats__head">The intelligence inside</p>
-            <p className="cp-cats__names">
-              {CATALOG_NAMES.map((name, index) => (
-                <span key={name}>
-                  {index > 0 ? <span className="cp-cats__dot" aria-hidden="true"> · </span> : null}
-                  {name}
-                </span>
-              ))}
-            </p>
-            {/* The linkage sentence was removed from the gate 2026-09-04 at
-                the owner's instruction. `NATIVE_LINKAGE.door` still lives in
-                pressCatalog and still carries the Data page's copy - the
-                claim is not withdrawn, it is no longer made on the door. */}
-            <button
-              type="button"
-              className="cp-cats__cedar"
-              onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
-            >
-              Ask Cedar what Cedar Press can answer <span aria-hidden="true">&#8594;</span>
-            </button>
-          </div>
-          {/* The "Team experience" strip - the Federal Reserve and university
+          {/* The linkage sentence was removed from the gate 2026-09-04 at
+              the owner's instruction. `NATIVE_LINKAGE.door` still lives in
+              pressCatalog and still carries the Data page's copy - the
+              claim is not withdrawn, it is no longer made on the door.
+
+              The "Team experience" strip - the Federal Reserve and university
               names, and the endorsement disclaimer that had to travel with
               them - was removed from the gate 2026-09-04 at the owner's
               instruction. It remains on the Methods page, which is where a
               reader who wants the team's background goes looking; the gate no
               longer leads with affiliations that are not endorsements. */}
-          <Link className="cp-split__method cp-fade" to={PRESS_METHODS_PATH}>
-            How Cedar builds its collections <span aria-hidden="true">&#8594;</span>
-          </Link>
+          <p className="cp-hero2__acts cp-fade">
+            <a className="cp-split__method" href="#collections">
+              See the collections <span aria-hidden="true">&#8595;</span>
+            </a>
+            <Link className="cp-split__method" to={PRESS_METHODS_PATH}>
+              How Cedar builds them <span aria-hidden="true">&#8594;</span>
+            </Link>
+            <button
+              type="button"
+              className="cp-split__method cp-split__method--btn"
+              onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
+            >
+              Ask Cedar what Cedar Press can answer <span aria-hidden="true">&#8594;</span>
+            </button>
+          </p>
         </div>
       </aside>
 
@@ -554,6 +564,27 @@ export default function PressGate({ user }) {
           </div>
         </div>
       </div>
+
+      {/* The collections, under the split and across the whole width. The
+          list names every collection on its shelf; the stage shows the one
+          in hand with six of its real sample records. Not `#catalog`: that
+          id is the reader's shelf on /data, which the gate must never
+          render, and the smoke suite holds the door to its absence. */}
+      <section className="cp-gate__coll cp-fade" id="collections" aria-labelledby="cp-gate-coll-title">
+        <div className="cp-gate__collhead">
+          <span className="cp-sec__band">Inside Cedar Press</span>
+          <h2 className="cp-gate__colltitle" id="cp-gate-coll-title">
+            {capitalise(spellCount(STOREFRONT_CATALOG.length))} collections. This is what each one holds.
+          </h2>
+          <p className="cp-gate__collsub">
+            Every collection begins with public records, is resolved to the Native entities
+            behind them and is kept current as new material arrives. Choose one to see its
+            coverage, what Cedar adds and six of its records, drawn from the release itself.
+          </p>
+        </div>
+        <PressCollectionsStage visitor />
+      </section>
+
       {/* Cedar meets the visitor at the door. Everyone here is outside the
           product — signed out, or signed in on a membership without Cedar
           Press — so Cedar explains and converts rather than answering past
