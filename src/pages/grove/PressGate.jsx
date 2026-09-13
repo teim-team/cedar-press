@@ -111,31 +111,38 @@ const PUBLIC_SOURCES = [
   "ONRR",
 ];
 
-// The four pillars, in the order the supporting sentence names them: what the
-// data is, what is made from it, why it can be trusted, and Cedar.
+// The four pillars. Each names something a reader can check on this page or
+// on Methods, because "data-driven insights" and "credible research" are
+// adjectives a reader has no way to test. Rewritten 2026-09-13 on review.
+//
+// NOTE FOR THE OWNER: the second pillar names entity resolution. The long
+// linkage SENTENCE came off the door on 2026-09-04; this is a short
+// restatement of the same claim, added because a review found the door said
+// nothing about the one thing that distinguishes the collections. Revert this
+// pillar if that ruling was meant to cover the claim and not only the wording.
 const PROOF_POINTS = [
   {
     id: "collections",
-    label: "Original Collections",
-    body: "Built from fragmented records and sources that have never been assembled into a single collection anywhere else.",
+    label: "Documented source records",
+    body: "Federal systems, tribal publications and agency dockets, assembled into one collection for the first time.",
     icon: OriginalCollectionsIcon,
   },
   {
     id: "insights",
-    label: "Data-Driven Insights",
-    body: "Original analysis reveals the institutions, industries and decisions shaping Indian Country.",
+    label: "Resolved to Native entities",
+    body: "Every row carries the nation, corporation or organization behind it, tracked through name changes, subsidiaries and reorganizations.",
     icon: InsightsIcon,
   },
   {
     id: "credible",
-    label: "Credible Research",
-    body: "Built by Indigenous researchers with Federal Reserve experience, leading academic backgrounds and decades of work in Indian Country.",
+    label: "Published with its limits",
+    body: "Inclusion rules, known gaps and corrections ship with every collection, built by Indigenous researchers with Federal Reserve and university experience.",
     icon: CredibleResearchIcon,
   },
   {
     id: "cedar",
-    label: "Cedar, Your AI Economic Analyst",
-    body: "Ask questions across Cedar Press and explore the stories, sources, collections and trends behind the data.",
+    label: "Ask Cedar, and see the basis",
+    body: "Ask a question of any collection and get the answer with the record it came from. Where Cedar holds no published figure, it says so.",
     icon: CedarIcon,
   },
 ];
@@ -297,7 +304,7 @@ export default function PressGate({ user }) {
                 type="button"
                 id="cp-tab-plans"
                 role="tab"
-                className="cp-btn cp-btn--quiet"
+                className="cp-btn cp-btn--quiet cp-door__tab--plans"
                 aria-selected={panel === "plans"}
                 aria-controls="cp-panel-plans"
                 onClick={() => toggle("plans")}
@@ -557,7 +564,7 @@ export default function PressGate({ user }) {
             endorsement. */}
         <aside className="cp-hero3__proof cp-fade" aria-label="Public sources">
           <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
-            Every collection begins with public records
+            Every collection begins with documented source records
           </Link>
           <ul className="cp-hero3__prooflist">
             {PUBLIC_SOURCES.map((name) => <li key={name}>{name}</li>)}
@@ -572,7 +579,7 @@ export default function PressGate({ user }) {
             <div>
               <p className="cp-kicker cp-kicker--light cp-fade">Why Cedar Press</p>
               <h2 className="cp-why__title cp-fade" id="cp-why-title">
-                Original collections. Original research. And Cedar.
+                Records are only the beginning.
               </h2>
             </div>
             <ul className="cp-why__shelves cp-fade" aria-label="The shelves">

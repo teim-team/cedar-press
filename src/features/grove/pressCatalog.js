@@ -387,7 +387,7 @@ export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
     id: "need",
     short: "NEED",
-    name: "Cedar Native Entity Enterprise Dataset",
+    name: "Cedar Native Entity Enterprise Dataset (NEED)",
     shelf: "pro",
     // Series. Floor: min(first_observed_year) in dist/customer/need.csv, which
     // is the earliest year any source named an enterprise or a tie. The runs of

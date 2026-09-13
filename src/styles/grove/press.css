@@ -1305,7 +1305,10 @@
  * Deliberately not applied to headings, to mono chrome, to card deks or to
  * list items. A two-line block has one justified line, and one line stretched
  * to the full measure beside one that is not looks like a mistake rather than
- * like typesetting. */
+ */
+/* Ragged left, not justified. Justifying body copy at these measures opened
+ * inter-word rivers that read as machine typesetting rather than care — the
+ * one thing this stylesheet exists to avoid. Reviewed 2026-09-13. */
 .teim-rd .cp-ar__body p,
 .teim-rd .cp-hero p,
 .teim-rd .cp-link__body,
@@ -1315,9 +1318,10 @@
 .teim-rd .cp-gt__body,
 .teim-rd .cp-close__body,
 .teim-rd .cp-ar__dek {
-  text-align: justify;
-  hyphens: auto;
-  -webkit-hyphens: auto;
+  text-align: left;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+  text-wrap: pretty;
 }
 /* The pull quote and the figure lines keep their ragged edge: both are short,
  * and both are set to be read as an aside rather than as body. */
@@ -1895,6 +1899,20 @@
 .teim-rd .cp-pane__obs { color: var(--ink-2); min-width: 9rem; }
 .teim-rd .cp-pane__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .teim-rd .cp-pane__table th.cp-pane__amt, .teim-rd .cp-pane__table td.cp-pane__amt { text-align: right; font-family: var(--mono); font-size: 0.72rem; white-space: nowrap; }
+/* Said under the table, not in place of it: the pane is showing real rows
+ * from a supporting table because the main table's sample is not published
+ * on the site yet. */
+.teim-rd .cp-pane__note { margin: 0; padding: 0.6rem 1.4rem 0; font-size: 0.78rem; line-height: 1.5; color: var(--door-ink-3); }
+.teim-rd .cp-pane__tablecap em { font-style: normal; color: var(--door-ink-3); }
+/* Preview pending: a designed state, not a shrug. It says why there are no
+ * rows, what the release holds anyway, and what the collection is built
+ * from, so a visitor learns something instead of meeting a dead end. */
+.teim-rd .cp-pane__pending { flex: 1 1 auto; margin: 0; padding: 1.2rem 1.4rem 1.4rem; border-top: 1px solid var(--door-rule); background: var(--door-ground-bright); }
+.teim-rd .cp-pane__pendingcap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--door-ink-3); margin-bottom: 0.5rem; }
+.teim-rd .cp-pane__pending p { margin: 0; font-size: 0.88rem; line-height: 1.55; color: var(--ink-2); max-width: 66ch; }
+.teim-rd .cp-pane__pending b { font-weight: 700; color: var(--ink); }
+.teim-rd .cp-pane__sources { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--door-rule); font-size: 0.82rem; }
+.teim-rd .cp-pane__sourcecap { display: block; font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.25rem; }
 .teim-rd .cp-pane__empty { margin: 0; padding: 1.4rem; border-top: 1px solid var(--door-rule); font-size: 0.9rem; color: var(--door-ink-3); }
 .teim-rd .cp-pane__foot { margin-top: auto; padding: 0.5rem 1.4rem 0.6rem; border-top: 1px solid var(--door-rule); background: var(--door-ground-bright); }
 .teim-rd .cp-pane__acts { display: flex; flex-wrap: wrap; gap: 0 1.4rem; margin: 0; white-space: nowrap; }
@@ -1998,10 +2016,38 @@
   .teim-rd .cp-app__rows { display: none; }
   .teim-rd .cp-pane__head { padding: 1rem 1rem 0.8rem; grid-template-columns: minmax(0, 1fr); }
   .teim-rd .cp-pane__facts { grid-column: 1; grid-row: auto; justify-items: start; text-align: left; white-space: normal; }
-  .teim-rd .cp-pane__tablecap, .teim-rd .cp-pane__empty { padding-inline: 1rem; }
+  .teim-rd .cp-pane__tablecap, .teim-rd .cp-pane__empty, .teim-rd .cp-pane__pending { padding-inline: 1rem; }
   .teim-rd .cp-pane__table th:first-child, .teim-rd .cp-pane__table td:first-child { padding-left: 1rem; }
   .teim-rd .cp-pane__table th:last-child, .teim-rd .cp-pane__table td:last-child { padding-right: 1rem; }
   .teim-rd .cp-pane__ent { max-width: 10rem; }
+  /* The rail is the one thing that swipes, and the fade at its edge is what
+   * says so; the count in the chrome says how many there are to reach. */
+  .teim-rd .cp-app__rail {
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.2rem), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 2.2rem), transparent 100%);
+  }
+  /* The records become a list. Entity and amount lead, the observation and
+   * the date sit under them: the same four values, no sideways scroll. */
+  /* min-width: 0 as well as overflow: visible. The scroll box is a column
+   * flex item, so its default min-width: auto lets the table's intrinsic
+   * width (500px) win over the pane and the list scrolls anyway. */
+  .teim-rd .cp-pane__scroll { overflow-x: visible; min-width: 0; }
+  /* redesign.css sets `.teim-rd table { min-width: 500px }` for the app's
+   * data tables. As a record list there is no such floor, and leaving it
+   * meant the list was 500px wide in a 351px pane and simply clipped. */
+  .teim-rd .cp-pane__table, .teim-rd .cp-pane__table tbody { display: block; }
+  .teim-rd .cp-pane__table { min-width: 0; }
+  .teim-rd .cp-pane__table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .teim-rd .cp-pane__table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.9rem; padding: 0.7rem 1rem; border-bottom: 1px solid rgba(10, 28, 52, 0.07); }
+  .teim-rd .cp-pane__table td { display: block; border: 0; padding: 0; }
+  .teim-rd .cp-pane__table td:first-child, .teim-rd .cp-pane__table td:last-child { padding: 0; }
+  .teim-rd .cp-pane__ent { grid-column: 1; grid-row: 1; max-width: none; white-space: normal; }
+  .teim-rd .cp-pane__table td.cp-pane__amt { grid-column: 2; grid-row: 1; text-align: right; }
+  .teim-rd .cp-pane__obs { grid-column: 1; grid-row: 2; min-width: 0; font-size: 0.78rem; }
+  .teim-rd .cp-pane__date { grid-column: 2; grid-row: 2; text-align: right; align-self: end; }
+  /* The hero's View plans is the primary action; a second one in the bar
+   * competes with Log in for the same thumb. */
+  .teim-rd .cp-door__tab--plans { display: none; }
   .teim-rd .cp-pane__foot { grid-template-columns: minmax(0, 1fr); padding-inline: 1rem; }
   .teim-rd .cp-hero3__proof { justify-items: start; }
   .teim-rd .cp-why { padding-top: 2.6rem; }

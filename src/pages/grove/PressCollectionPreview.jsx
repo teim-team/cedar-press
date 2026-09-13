@@ -23,7 +23,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { WITHHELD_TEXT, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
+import { WITHHELD_TEXT, contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { freshnessLine } from "../../features/grove/pressReleases";
@@ -36,16 +36,38 @@ const PANE_ROWS = 6;
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 const ROWS_LABEL = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.rowsLabel]));
+const SOURCES = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.sources]));
 
 /**
- * The flagship sample for a collection: `{ status, table, parsed }` where
- * status is loading, ok, failed or none (no published sample). Every
- * sample fetched is kept, so moving back to a collection is instant.
+ * The sample this collection can show: `{ status, table, parsed }` where
+ * status is loading, ok, failed or none. Every sample fetched is kept, so
+ * moving back to a collection is instant.
+ *
+ * THE FLAGSHIP IS NOT ALWAYS PUBLISHED, AND THAT IS NOT AN EMPTY PAGE
+ * `samples.published.json` records which declared samples are absent from
+ * the repository; the Owned collection's flagship
+ * (native_owned_businesses.csv) is one of them today, reason "not in
+ * repository". The release still publishes a supporting table, so the pane
+ * shows that rather than an empty state, and says which it is. Falling back
+ * is honest because the caption names the table either way; what would not
+ * be honest is a pane implying the flagship is what a reader is seeing, so
+ * `table.flagship` travels with it and the caption reads off it.
  */
-function useFlagshipSample(collectionId) {
+function usePreviewSample(collectionId) {
   const [loaded, setLoaded] = useState(() => new Map());
   const pending = useRef(new Set());
-  const table = useMemo(() => exploreTables(collectionId).find((t) => t.flagship) ?? null, [collectionId]);
+  const table = useMemo(() => {
+    const tables = exploreTables(collectionId);
+    const flagship = tables.find((t) => t.flagship);
+    if (flagship) return flagship;
+    // A supporting table stands in only if its contract names the entity
+    // each row belongs to. The Owned collection's published supporting
+    // table declares no entity and no date, so standing it up here filled
+    // the door with six rows reading "not linked to an entity" — true of
+    // that table, and a lie about the collection. Better to say the
+    // preview is pending and show what the release holds.
+    return tables.find((t) => contractFor(t.key)?.entity_name || contractFor(t.key)?.entity_uid) ?? null;
+  }, [collectionId]);
   useEffect(() => {
     if (!table || loaded.has(table.path) || pending.current.has(table.path)) return;
     pending.current.add(table.path);
@@ -64,7 +86,7 @@ function useFlagshipSample(collectionId) {
 }
 
 export default function CollectionPreview({ entry, tier, register }) {
-  const { status, table, parsed } = useFlagshipSample(entry.id);
+  const { status, table, parsed } = usePreviewSample(entry.id);
   const items = useMemo(
     () => (parsed ? universalRows(table.key, parsed.rows, register).slice(0, PANE_ROWS) : []),
     [parsed, table, register],
@@ -90,7 +112,10 @@ export default function CollectionPreview({ entry, tier, register }) {
       {status === "ok" && items.length ? (
         <>
           <p className="cp-pane__tablecap">
-            <span>{table.table.replace(/_/g, " ")}</span>
+            <span>
+              {table.table.replace(/_/g, " ")}
+              {table.flagship ? null : <em> · supporting table</em>}
+            </span>
             <span>
               {items.length} of {parsed.rows.length} sample records
               {table.rows ? ` · ${table.rows.toLocaleString("en-US")} in the release` : ""}
@@ -129,13 +154,36 @@ export default function CollectionPreview({ entry, tier, register }) {
       ) : status === "loading" ? (
         <p className="cp-pane__empty" aria-busy="true">Reading the sample…</p>
       ) : (
-        <p className="cp-pane__empty">
-          {status === "none" ? "No preview is published for this collection yet." : "The sample could not be read."}
-        </p>
+        <div className="cp-pane__pending">
+          <span className="cp-pane__pendingcap">
+            {status === "none" ? "Preview pending" : "The sample could not be read"}
+          </span>
+          {status === "none" ? (
+            <p>
+              The ten-row sample of this collection&rsquo;s main table was produced with the
+              current release and is not on the site yet, so there is nothing here to show you
+              that would be real. The release itself ships {rowsLabel ? <b>{rowsLabel}</b> : "in full"}.
+            </p>
+          ) : (
+            <p>The sample file did not load. The release is unaffected.</p>
+          )}
+          {SOURCES[entry.id] ? (
+            <p className="cp-pane__sources">
+              <span className="cp-pane__sourcecap">Built from</span>
+              {SOURCES[entry.id]}
+            </p>
+          ) : null}
+        </div>
       )}
 
       {/* No linkage sentence here: the owner took the entity-linkage claim
           off the door on 2026-09-04, and it still lives on /data. */}
+      {status === "ok" && table && !table.flagship ? (
+        <p className="cp-pane__note">
+          This collection&rsquo;s main table ships with the release; its sample is not published
+          on the site yet, so the preview shows a supporting table from the same release.
+        </p>
+      ) : null}
       <div className="cp-pane__foot">
         <p className="cp-pane__acts">
           <a
