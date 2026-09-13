@@ -517,7 +517,7 @@
     {
       "id": "need",
       "short": "NEED",
-      "name": "Cedar Native Entity Enterprise Dataset",
+      "name": "Cedar Native Entity Enterprise Dataset (NEED)",
       "shelf": "pro",
       "coverage": {
         "kind": "series",
