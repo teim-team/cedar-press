@@ -277,7 +277,10 @@ export function IdentityPair() {
           <p className="cp-idp__note">{identifier.note}</p>
           {identifier.exception ? <p className="cp-idp__exc">{identifier.exception}</p> : null}
           {identifier.live ? null : (
-            <p className="cp-idp__pending">The business register is being minted. The form and its rules are settled.</p>
+            <p className="cp-idp__pending">
+              <span className="cp-idp__pendingtag">In progress</span>
+              <span>The register is being minted. The form and its rules are settled.</span>
+            </p>
           )}
           <p className="cp-idp__fields">
             {identifier.fields.map((field) => (

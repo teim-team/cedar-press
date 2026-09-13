@@ -991,10 +991,23 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // columns, then, on request, everything else. The download keeps the
   // table's own order and every column.
   const lead = contract ? [contract.entity_uid, contract.entity_name, contract.entity_type].filter((c) => c && tableColumns.includes(c)) : [];
-  // The columns a subscriber sees first: the codebook's, in its order;
-  // the contract's declared defaults where the codebook has none yet.
+  // THE COLUMNS A SUBSCRIBER SEES FIRST, and this had it backwards.
+  //
+  // It preferred the CODEBOOK and fell back to the contract's
+  // `default_columns`. The codebook is a dictionary of every column in the
+  // table, so `listed` was never empty and the contract's defaults were never
+  // read: Prime Contracting opened on 44 columns beginning with five raw ids,
+  // when the contract declares a seven-column view (canonical_name,
+  // action_date, awardee_name, funding_agency, award_base_description,
+  // total_obligations, owner_attribution_status) that is the owner's own
+  // selection, recorded in docs/PUBLIC_DATASET_SPEC_2026-09-05.md. Eleven
+  // flagships declare one and none of them was being used.
+  //
+  // The declared view wins. The codebook is the fallback for a table that has
+  // not declared one, and "Show all N columns" still reaches everything.
+  const declared = (contract?.default_columns ?? []).filter((c) => tableColumns.includes(c));
   const listed = table ? codebookColumns(table.key, tableColumns) : [];
-  const defaults = (listed.length ? listed : (contract?.default_columns ?? [])).filter((c) => tableColumns.includes(c));
+  const defaults = declared.length ? declared : listed;
   const allColumns = table ? [...new Set([...lead, ...tableColumns])] : [];
   const shownColumns = table ? (showAll || !defaults.length ? allColumns : [...new Set([...lead, ...defaults])]) : [];
   const yearBasis = table
@@ -1188,7 +1201,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             {view === "table" ? ` · ${shownColumns.length} of ${tableColumns.length} columns` : ""}
             {view === "table" && defaults.length && !narrow ? (
               <button type="button" className="cp-ex__clear" onClick={() => setShowAll((v) => !v)}>
-                {showAll ? "Show the main columns" : `Show all ${tableColumns.length} columns`}
+                {showAll ? `Show the ${defaults.length} main columns` : `Show all ${tableColumns.length} columns`}
               </button>
             ) : null}
             {isNarrowed(cut) || cut.history ? (

@@ -235,6 +235,39 @@ already did.
 
 ---
 
+## 5c. The declared column view was never read
+
+Not a Codex finding, and the oldest outstanding item from the owner's relayed
+design review: "the signed-in table should default to entity, date, agency,
+description, amount and status, with the raw ids in the expanded record."
+
+It turned out that view already exists in the workspace and the site was
+ignoring it. Eleven flagship contracts declare `default_columns`, 6 to 8
+columns each, chosen by the owner and recorded in
+`docs/PUBLIC_DATASET_SPEC_2026-09-05.md`. Prime Contracting declares exactly the
+reviewer's shape:
+
+```
+canonical_name, action_date, awardee_name, funding_agency,
+award_base_description, total_obligations, owner_attribution_status
+```
+
+`PressExplore.jsx` preferred the **codebook** and fell back to
+`default_columns`. The codebook is a dictionary of every column in the table, so
+the fallback was unreachable and the declared view was never used once. Prime
+Contracting opened on 44 columns beginning with five raw ids; the other ten
+flagships opened on 27 to 54.
+
+The declared view now wins, the codebook is the fallback for a table that has
+not declared one, and "Show all 72 columns" still reaches everything. A smoke
+test pins it.
+
+**Nothing in the workspace changed for this.** If a flagship should show
+different columns, edit its `default_columns` in the contract and the site
+follows.
+
+---
+
 ## 6. What the terminal owns after this
 
 1. Mint `CB-` per `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §8, then flip

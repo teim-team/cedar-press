@@ -455,6 +455,41 @@ test.describe("Explore the collections", () => {
   });
 });
 
+test.describe("the table's default columns", () => {
+  // Eleven flagships declare a 6-8 column view in their contract, chosen by
+  // the owner and recorded in docs/PUBLIC_DATASET_SPEC_2026-09-05.md. The
+  // viewer preferred the CODEBOOK, which is a dictionary of every column, so
+  // `listed` was never empty and the declared view was never read: Prime
+  // Contracting opened on 44 columns beginning with five raw ids.
+  test("a single collection opens on the declared view, not the whole dictionary", async ({ page }, testInfo) => {
+    // A phone gets the card list instead of a table, which carries the four
+    // things a thumb can read and is a different presentation of the same
+    // narrowing. The column choice is a desktop question.
+    test.skip(testInfo.project.name !== "desktop", "desktop renders the table; a phone renders cards");
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=contractors");
+    await page.locator(".cp-ex__table thead th").first().waitFor();
+    const heads = await page.locator(".cp-ex__table thead th").allInnerTexts();
+    // The declared seven, plus the pinned uid and the row opener.
+    expect(heads.length).toBeLessThanOrEqual(10);
+    const text = heads.join(" | ").toUpperCase();
+    for (const wanted of ["NATIVE ENTITY", "ACTION DATE", "AWARDEE", "FUNDING AGENCY", "DESCRIPTION", "AMOUNT"]) {
+      expect(text).toContain(wanted);
+    }
+    // The raw keys stay in the open record, where the reviewer asked for them.
+    for (const raw of ["TRANSACTION ID", "AWARDEE UEI", "PRODUCT OR SERVICE CODE", "RECIPIENT COUNTY FIPS"]) {
+      expect(text).not.toContain(raw);
+    }
+    // And everything is still one click away.
+    const all = page.getByRole("button", { name: /Show all \d+ columns/ });
+    await expect(all).toBeVisible();
+    await all.click();
+    expect((await page.locator(".cp-ex__table thead th").allInnerTexts()).length).toBeGreaterThan(30);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("Shape the research", () => {
   test("the priorities page lists both kinds, says the counting needs the service, and the profile carries the card", async ({ page }) => {
     // This build has no service, so no point is counted and no point can be

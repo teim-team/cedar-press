@@ -1131,7 +1131,12 @@
  * where an identifier is shown at the size a customer would transcribe it,
  * because the claim is that the id is an object they handle.
  */
-.teim-rd .cp-idp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; margin: 1.8rem 0 0; }
+/* align-items: start, so a card hugs its content. Stretched, the shorter
+ * card pushed its field chips to the bottom with `margin: auto 0 0` and
+ * left a hundred pixels of hole above them. Two cards of honest heights
+ * under a shared top rule read better than two equal boxes, one padded
+ * with nothing. */
+.teim-rd .cp-idp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; margin: 1.8rem 0 0; align-items: start; }
 .teim-rd .cp-idp__card { border: 1px solid var(--line); border-top: 2px solid var(--teal); border-radius: 2px; padding: 1.3rem 1.4rem 1.2rem; background: var(--bg); display: flex; flex-direction: column; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
 .teim-rd .cp-idp__card:hover { border-color: var(--teal-line); box-shadow: 0 10px 28px -22px rgba(10, 15, 38, 0.3); transform: translateY(-2px); }
 .teim-rd .cp-idp__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.4rem 1rem; }
@@ -1143,13 +1148,16 @@
 .teim-rd .cp-idp__survives li { font-size: 0.88rem; line-height: 1.45; color: var(--ink); padding-left: 1rem; position: relative; }
 .teim-rd .cp-idp__survives li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; background: var(--teal); }
 .teim-rd .cp-idp__note { font-size: 0.88rem; line-height: 1.55; color: var(--muted); margin: 0 0 1rem; }
-.teim-rd .cp-idp__fields { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: auto 0 0; padding-top: 0.9rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-idp__fields { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding-top: 0.9rem; border-top: 1px solid var(--line-soft); }
 .teim-rd .cp-idp__fields code { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; color: var(--ink-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 0.2rem 0.55rem; }
 @media (max-width: 760px) { .teim-rd .cp-idp { grid-template-columns: minmax(0, 1fr); } }
 
 .teim-rd .cp-idp__shape.is-pending { color: var(--muted); background: transparent; border-style: dashed; }
 .teim-rd .cp-idp__exc { font-size: 0.85rem; line-height: 1.55; color: var(--muted); margin: -0.4rem 0 1rem; padding-left: 0.85rem; border-left: 2px solid var(--line); }
-.teim-rd .cp-idp__pending { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); line-height: 1.6; margin: -0.5rem 0 1rem; }
+/* A whole sentence in uppercase mono is a shout. The state is the label;
+ * the sentence is a sentence. */
+.teim-rd .cp-idp__pending { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; font-size: 0.85rem; line-height: 1.55; color: var(--muted); margin: 0.2rem 0 1rem; }
+.teim-rd .cp-idp__pendingtag { flex: none; font-family: var(--mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); border: 1px solid var(--teal-line); border-radius: 999px; padding: 0.15rem 0.5rem; }
 
 /* Why both identifiers: two subjects and the edge between them.
  * Drawn rather than described, because "separate and connected" is a shape. */
