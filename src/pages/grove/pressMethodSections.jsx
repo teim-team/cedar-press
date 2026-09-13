@@ -257,7 +257,7 @@ export function IdentityPair() {
         <article className="cp-idp__card" key={identifier.id}>
           <header className="cp-idp__head">
             <h3 className="cp-idp__label">{identifier.label}</h3>
-            <code className="cp-idp__shape">{identifier.shape}</code>
+            {identifier.shape ? <code className="cp-idp__shape">{identifier.shape}</code> : null}
           </header>
           <p className="cp-idp__names">{identifier.names}</p>
           <p className="cp-idp__cap">Survives</p>

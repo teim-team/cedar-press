@@ -745,13 +745,22 @@ test.describe("the reveal", () => {
     expect(below.every((o) => o === 0)).toBe(true);
 
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
-    await page.waitForTimeout(900);
-    const shown = await page.evaluate(() =>
-      [...document.querySelectorAll(".cp-fade")]
-        .filter((el) => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; })
-        .map((el) => Number(getComputedStyle(el).opacity)));
-    expect(shown.length).toBeGreaterThan(0);
-    expect(shown.every((o) => o === 1)).toBe(true);
+    await page.waitForTimeout(1200);
+    // `is-in`, not a computed opacity: a section that entered the viewport a
+    // moment ago is mid-transition and reads as 0.4, which is the reveal
+    // working. The invariant is that nothing a reader can see stays unrevealed.
+    // The observer runs with rootMargin -6%, so something peeking in by a few
+    // pixels is deliberately not revealed yet. Ask the same question it does.
+    const hidden = await page.evaluate(() => {
+      const inset = window.innerHeight * 0.06;
+      return [...document.querySelectorAll(".cp-fade")]
+        .filter((el) => { const r = el.getBoundingClientRect(); return r.bottom > inset && r.top < window.innerHeight - inset; })
+        .filter((el) => !el.classList.contains("is-in"))
+        .map((el) => el.className);
+    });
+    expect(hidden).toEqual([]);
+    const revealed = await page.evaluate(() => document.querySelectorAll(".cp-fade.is-in").length);
+    expect(revealed).toBeGreaterThan(0);
   });
 });
 

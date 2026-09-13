@@ -67,8 +67,13 @@ test("the shapes shown on the page are shapes the standard permits", () => {
   // Crockford base32 with I, L, O and U removed: a sample uid that contained
   // one of those would be teaching a reader an impossible id.
   assert.match(entity.shape, /^CE-[0-9ABCDEFGHJKMNPQRSTVWXYZ]{5}-[0-9ABCDEFGHJKMNPQRSTVWXYZ]{2}$/);
+  // The business id shows no sample. Its customer-facing CB- form is decided
+  // (docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md) and nothing mints it yet,
+  // and the form that IS minted is a source-record key with a source code in
+  // it, which the decision's first rule forbids as an identity. A sample here
+  // again means CB- shipped; check that it did.
   const business = IDENTIFIERS.find((item) => item.id === "business");
-  assert.match(business.shape, /^[A-Z]+-\d+:[A-Za-z0-9-]+$/);
+  assert.equal(business.shape, null, "the business card shows a sample; is CB- minted?");
 });
 
 test("the prose keeps the brand lock", () => {
@@ -81,7 +86,12 @@ test("the prose keeps the brand lock", () => {
   for (const line of prose) {
     assert.ok(!line.includes("—"), `em dash in "${line}"`);
     assert.ok(!/\bnot just\b/i.test(line), `antithesis in "${line}"`);
-    assert.ok(!/,\s*(and\s+)?(it's|its|that's|this is)\b/i.test(line), `comma splice in "${line}"`);
+    // The tell the owner named: a sentence that ends on a comma and then a
+    // fragment ("this is only the beginning, new data every day"). Bare
+    // possessive "its" after a comma is an ordinary list item and was a false
+    // positive on "its resource revenue, its advocacy and its structure", and
+    // a subordinate ", which is why ..." is ordinary English, not the tell.
+    assert.ok(!/,\s*(and\s+)?(it's|that's|this is)\b/i.test(line), `comma splice in "${line}"`);
   }
 });
 

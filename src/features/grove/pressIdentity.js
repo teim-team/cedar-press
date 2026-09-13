@@ -78,7 +78,22 @@ export const IDENTIFIERS = Object.freeze([
   Object.freeze({
     id: "business",
     label: "Cedar business id",
-    shape: "TBD-030:4033",
+    // NO SAMPLE ON PURPOSE, and this is not an oversight.
+    //
+    // The entity card can show CE-1A7K3-MQ because that form is minted, in
+    // `data/spine/cedar_identity_register.csv`, and documented in
+    // docs/IDENTIFIER_STANDARD.md. The business id's customer-facing form is
+    // `CB-0000001`, decided by the owner on 2026-09-06 and recorded in
+    // docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md, and nothing in the
+    // workspace mints it yet. This card showed `TBD-030:4033` for a day,
+    // which is a `business_source_id`: real, but a source-record key with a
+    // source code inside it, and the decision's first rule is that the
+    // number means nothing. Showing it as the Cedar business id was showing
+    // the reader the wrong object.
+    //
+    // The concept ships today under the two field names below. The sample
+    // goes back the day CB- is minted, and not before.
+    shape: null,
     fields: Object.freeze(["business_source_id", "entity_id"]),
     names:
       "A firm, as one source named it, and then the resolved firm those sightings add up to.",
@@ -89,37 +104,80 @@ export const IDENTIFIERS = Object.freeze([
       "A nation acquires the firm and it becomes an enterprise",
     ]),
     note:
-      "An individually owned firm carries a business id and no entity id. Cedar tracks it anyway, from the first sighting, so that the record is continuous if a nation later buys it.",
+      "One per business, stable, never reused. It means nothing on purpose: ownership, state, trade and size all change, and an identifier that encodes any of them has to be rewritten the day it does. An individually owned firm carries a business id and no entity id, from the first sighting, so the record is continuous if a nation later buys it.",
   }),
 ]);
 
 /**
- * The class whose names the register withholds. A firm owned by a person
- * rather than by a government is tracked for continuity and is not published
- * as a directory of private businesses, and the published file is the proof:
- * every entity in this class ships with its uid and a null name.
+ * The class the PUBLIC LOOKUP withholds names for, and what that does and
+ * does not mean.
+ *
+ * The owner's challenge, 2026-09-13: "isn't that wrong that it doesn't publish
+ * what it resolves?" It would be, and Cedar does publish it. What is withheld
+ * is narrower than the earlier copy on this page implied, and the distinction
+ * is the whole judgement:
+ *
+ * - The storefront's Individually Owned Native Businesses collection publishes
+ *   these firms BY NAME, because a nation's own TERO or commerce office
+ *   published them and shared them under stated terms. The name is the
+ *   nation's to give and it gave it.
+ * - Where the only evidence is a federal award file, the firm's activity
+ *   publishes and the owner's name, address and UEI do not
+ *   (`INDIVIDUAL_NATIVE_WITHHELD_FIELDS` in `code/cedar_domain.py`). A person
+ *   who won a contract did not consent to being enumerated and ranked by
+ *   obligations, and their own website saying they are Native is evidence,
+ *   never permission. The rule is per field, defaults to withholding, and
+ *   suppresses any published cell resolving to fewer than three firms.
+ * - `register.json`, the entity lookup this whole site can read, withholds the
+ *   name for this class outright, because it is a lookup and not a release.
+ *
+ * `pressIdentity.test.js` pins the last of those three against the published
+ * file. The identifier is on the firm in all three cases, which is the point.
  */
 export const WITHHELD_CLASS = "Individually Native-owned business";
 
-/** What the identifiers make possible, which is the argument for the layer. */
+/** What Cedar publishes about a firm it will not name, said plainly. */
+export const WITHHELD_NOTE =
+  "A firm carries its business id whether or not its name is ever published. Where a nation's own commerce office published its certified businesses and shared them under stated terms, they are in the collection by name. Where the only evidence is a federal award file, the activity publishes and the owner's name and address do not, because a person who won a contract did not consent to being ranked by obligations. The identifier holds both cases in one series.";
+
+/**
+ * What the identifiers make possible, which is the argument for the layer.
+ *
+ * NO ONE DOMAIN CARRIES THIS. An earlier draft opened every example on a
+ * federal contract, which reads as a contracting product with four other
+ * datasets attached, and the owner said so. Contracting is one of twelve.
+ * Each move below names a different kind of record for that reason.
+ */
 export const LINKAGE_MOVES = Object.freeze([
   Object.freeze({
     id: "join",
     label: "Join records that were never meant to join",
     body:
-      "A federal contract, a Form 990, a lobbying disclosure, a royalty disbursement and a nation's own enterprise register share no key. Cedar puts the same identifier on all five.",
+      "A Form 990, a royalty disbursement, a lobbying registration, an ANCSA audited filing and a nation's own enterprise register share no key and never will. Cedar puts the same identifier on all five, so a question can cross them.",
   }),
   Object.freeze({
     id: "time",
     label: "Hold an organization still while it changes",
     body:
-      "Renames, acquisitions, new subsidiaries, closures and changes in legal status all break a name-matched time series. They do not break an id-keyed one.",
+      "Renames, acquisitions, new subsidiaries, closures and changes in legal status all break a name-matched time series. They do not break an id-keyed one, which is why a twenty-year view of one nation is possible at all.",
   }),
   Object.freeze({
     id: "lineage",
     label: "Read an old record with today's knowledge",
     body:
-      "A retired handle keeps resolving. A 2009 filing made under a former name still reaches the entity that filed it, and the answer says which name was current when.",
+      "A retired handle keeps resolving. A 2009 NAGPRA notice filed under a former name still reaches the entity that filed it, and the answer says which name was current when.",
+  }),
+  Object.freeze({
+    id: "deeper",
+    label: "Follow one answer into the next question",
+    body:
+      "A nonprofit's filings name a subsidiary. The identifier on that subsidiary reaches its resource revenue, its advocacy and its enterprise structure without a new search. The datasets stop being separate places to look.",
+  }),
+  Object.freeze({
+    id: "ask",
+    label: "Ask a question instead of running a search",
+    body:
+      "A keyword search returns rows whose text matched. A question asked against an identified collection returns an organization's whole footprint, which is what lets Cedar answer something specific and show every record the answer rests on.",
   }),
   Object.freeze({
     id: "operate",

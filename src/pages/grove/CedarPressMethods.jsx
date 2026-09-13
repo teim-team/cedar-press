@@ -28,6 +28,7 @@ import {
   METHOD_COMMITMENTS,
   expertiseSentence,
 } from "../../features/grove/pressMethod";
+import { WITHHELD_NOTE } from "../../features/grove/pressIdentity";
 import {
   EcosystemDiagram,
   FeedbackLoop,
@@ -67,20 +68,42 @@ export default function CedarPressMethods() {
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="methods" />
 
-        {/* The opening argument, given room. The claim under it is the one
-            sentence this page exists to earn, so it stands alone rather than
-            being followed straight into a paragraph. */}
+        {/* THE HEADLINE.
+            "Public records are only the beginning" was the owner's call to
+            cut, and he was right: it says the records are a starting point
+            and stops, which describes a gap rather than a product, and every
+            data company on earth could put it on a page. The argument is
+            narrower and much harder to copy. There is no shortage of records
+            about Indian Country. There is no key in any of them that says
+            which organization a row belongs to, so nothing can be added up.
+            Cedar mints that key and maintains it. Say that.
+
+            The mark fills the top right, which was empty from the masthead
+            down to the pull quote. */}
         <section className="cp-mh">
           <p className="cp-hero__access">How Cedar is built</p>
-          <h1 className="cp-mh__title">Public records are only the beginning.</h1>
-          <p className="cp-mh__sub">
-            Cedar collections are maintained research products, built from fragmented public
-            records, historical files, regulatory material and other sources that were never
-            designed to work together.
-          </p>
+          <h1 className="cp-mh__title">The records exist. Nothing in them agrees on who is who.</h1>
+          <div className="cp-mh__right">
+            <p className="cp-mh__sub">
+              Federal awards, tax filings, royalty statements, dockets, legislation and each
+              nation&rsquo;s own publications hold an enormous amount about Indian Country, and no two
+              of them identify an organization the same way. Cedar assigns a permanent identifier
+              to every Native government, enterprise and firm it can resolve, and maintains it
+              through renames, acquisitions and changes in legal status. That identifier is what
+              turns twelve datasets into one collection a question can be asked of.
+            </p>
+          </div>
         </section>
 
-        <p className="cp-mh__claim cp-fade">In many cases, the collection does not exist until Cedar builds it.</p>
+        {/* The mark rides the pull quote rather than the headline row. In the
+            headline row it either pushed the paragraph down, reopening the
+            gap under the headline, or sat on top of the paragraph's first two
+            lines. Here it fills the largest empty area on the page and
+            collides with nothing. */}
+        <div className="cp-mh__claimrow cp-fade">
+          <p className="cp-mh__claim">In many cases, the collection does not exist until Cedar builds it.</p>
+          <img className="cp-mh__mark" src="/brand/lumecon-logo-mark-teal.png" alt="" width="360" height="360" />
+        </div>
 
         <section className="cp-msec cp-fade" aria-label="The process">
           <span className="cp-sec__band">The process</span>
@@ -112,42 +135,56 @@ export default function CedarPressMethods() {
           <span className="cp-sec__band">Identity</span>
           <h2 className="cp-msec__title">Two identifiers, maintained by hand where it counts.</h2>
           <p className="cp-msec__lede">
-            No public system will tell you that a vendor in a federal contract is owned by a
-            nation, and none of the systems Cedar reads shares a key with any of the others.
-            Cedar assigns its own and keeps it current. A Cedar entity id names a government, an
-            agency, an NHO or an enterprise a nation owns. A Cedar business id names a firm as a
+            A 990 says who filed it. A royalty statement says who was paid. A docket says who
+            appeared. None of them says whether those three are the same nation, and no public
+            system will tell you. Cedar assigns the key none of them carries and keeps it
+            current. A Cedar entity id names a government, an agency, an NHO, a college, a
+            nonprofit or an enterprise a nation owns. A Cedar business id names a firm as a
             source named it, and then the resolved firm those sightings add up to. Most
             enterprises carry both.
           </p>
           <IdentityPair />
+          {/* The owner's challenge, 2026-09-13: is it wrong that Cedar does
+              not publish what it resolves? It would be. The earlier sentence
+              here said the names are withheld and stopped, which described a
+              product that resolves firms and then hides them. What is
+              actually withheld is much narrower, and the line between the
+              two cases is a judgement worth showing. WITHHELD_NOTE holds the
+              wording, with the rule it comes from cited beside it. */}
           <p className="cp-msec__close">
             A firm that is Native-owned without being owned by a nation gets the business id from
-            the first sighting. If a nation acquires it later, the history is already there. The
-            published register carries those firms by identifier with their names withheld, which
-            is how a private business can be tracked for continuity without being listed in a
-            directory.
+            the first sighting. If a nation acquires it later, the history is already there.
           </p>
+          <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
         </section>
 
         <section className="cp-msec cp-fade" aria-label="What the identifiers make possible">
           <span className="cp-sec__band">Linkage</span>
-          <h2 className="cp-msec__title">Start anywhere. The answer still holds together.</h2>
+          <h2 className="cp-msec__title">Twelve datasets stop behaving like twelve datasets.</h2>
           <p className="cp-msec__lede">
-            Any keyword, any agency, any year, any nation. What comes back is one
+            Start from any keyword, agency, year or nation. What comes back is one
             organization&rsquo;s whole footprint rather than the rows that happened to spell its
             name your way, because the identifier was already on every row before the question
-            was asked.
+            was asked. An answer in one collection is a key into the others, so a finding can be
+            followed rather than only reported.
           </p>
           <LinkageMoves />
+          <p className="cp-msec__close">
+            That is the difference between a shelf of files and a collection: the files hold
+            records, and the collection holds an organization.
+          </p>
         </section>
 
         <section className="cp-msec cp-fade" aria-label="How the collections improve">
           <span className="cp-sec__band">The loop</span>
-          <h2 className="cp-msec__title">It gets more accurate the longer it runs.</h2>
+          <h2 className="cp-msec__title">And the identifiers are what let Cedar answer you.</h2>
           <p className="cp-msec__lede">
-            Cedar builds and trains models on its own resolved records. A researcher rules on
-            every final output. The ruling goes back into the evidence the models read, so the
-            collection is the input to the next pass over it.
+            A model reading twelve unjoined files can retrieve text. A model reading an
+            identified collection can count, compare and trace, because the rows already agree on
+            who they are about. Cedar builds and trains its own models on its own resolved
+            records, a researcher rules on every final output, and the ruling goes back into the
+            evidence the models read. The collection is the input to the next pass over it, so
+            the specific questions it can answer get more specific over time.
           </p>
           <FeedbackLoop />
         </section>

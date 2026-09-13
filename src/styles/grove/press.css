@@ -915,6 +915,26 @@
 .teim-rd .cp-mh { padding: 3.4rem 0 1rem; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem 3.5rem; align-items: end; }
 .teim-rd .cp-mh .cp-hero__access { grid-column: 1 / -1; }
 @media (max-width: 900px) { .teim-rd .cp-mh { grid-template-columns: minmax(0, 1fr); align-items: start; } }
+/* The Methods hero carries the mark.
+ *
+ * The right column bottom-aligned one paragraph against a two-line headline,
+ * which left the whole top right of the page empty from the masthead down to
+ * the pull quote. The mark fills it: large, quiet, and the same geometry the
+ * wordmark and the assistant's avatar already use, so it reads as identity
+ * rather than as an illustration dropped in to plug a hole.
+ *
+ * It rides the pull quote's row, which is where the empty area actually was.
+ * In the headline row it either pushed the paragraph down, moving the gap
+ * under the headline, or overlapped the paragraph's first two lines. */
+.teim-rd .cp-mh__right { min-width: 0; }
+.teim-rd .cp-mh__right .cp-mh__sub { margin-top: 0.55rem; }
+.teim-rd .cp-mh__claimrow { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.teim-rd .cp-mh__claimrow .cp-mh__claim { margin-block: 2.6rem 3.4rem; }
+.teim-rd .cp-mh__mark { flex: none; width: clamp(104px, 12vw, 168px); height: auto; opacity: 0.4; user-select: none; pointer-events: none; margin-right: clamp(0rem, 4vw, 4rem); }
+@media (max-width: 900px) {
+  /* On a phone the quote uses the width and the headline is the identity. */
+  .teim-rd .cp-mh__mark { display: none; }
+}
 .teim-rd .cp-mh__title { font-family: var(--sans); font-size: clamp(2.1rem, 4.6vw, 3.4rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.04; color: var(--ink); margin: 0.4rem 0 0; }
 .teim-rd .cp-mh__sub { font-size: 1.08rem; line-height: 1.6; color: var(--ink-2); margin: 1rem 0 0.35rem; max-width: 58ch; }
 /* The sentence the page exists to earn. It stands alone rather than being
@@ -924,6 +944,7 @@
 .teim-rd .cp-msec { margin-top: 4rem; }
 .teim-rd .cp-msec__title { font-family: var(--sans); font-size: clamp(1.5rem, 2.8vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0 0 1.4rem; max-width: 26ch; }
 .teim-rd .cp-msec__lede { font-size: 1.02rem; line-height: 1.62; color: var(--ink-2); margin: 0 0 1.2rem; max-width: 68ch; }
+.teim-rd .cp-msec__aside { font-size: 0.92rem; line-height: 1.62; color: var(--muted); margin: 1rem 0 0; padding-left: 1.1rem; border-left: 2px solid var(--teal-line); max-width: 78ch; }
 .teim-rd .cp-msec__close { font-size: 1.02rem; line-height: 1.6; color: var(--ink); font-weight: 600; margin: 1.6rem 0 0; max-width: 60ch; }
 
 /* ── The process, as one run ────────────────────────────────────────────── */
