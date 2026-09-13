@@ -1169,6 +1169,8 @@
 .teim-rd .cp-wb__card { border: 1px solid var(--line); border-top: 2px solid var(--dteal); border-radius: 3px; padding: 1.2rem 1.3rem; background: var(--bg); transition: box-shadow 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
 .teim-rd .cp-wb__card:hover { box-shadow: 0 12px 30px -24px rgba(10, 15, 38, 0.36); transform: translateY(-2px); }
 .teim-rd .cp-wb__id { display: inline-block; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; color: var(--dteal); background: var(--teal-tint); border: 1px solid var(--teal-line); border-radius: 3px; padding: 0.2rem 0.5rem; }
+.teim-rd .cp-wb__id.is-pending { color: var(--muted); background: transparent; border-style: dashed; }
+.teim-rd .cp-wb__prov { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.7; color: var(--muted); margin: 0.7rem 0 0; }
 .teim-rd .cp-wb__name { font-family: var(--sans); font-size: 1.1rem; font-weight: 800; letter-spacing: -0.018em; color: var(--ink); margin: 0.7rem 0 0.35rem; }
 .teim-rd .cp-wb__role { font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); margin: 0; }
 /* Side by side the edge runs across; stacked it runs down. It was a column

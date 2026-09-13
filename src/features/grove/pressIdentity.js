@@ -215,6 +215,14 @@ export const WHY_BOTH = Object.freeze({
   }),
   business: Object.freeze({
     id: "CB-0000001",
+    // The entity side of this example is real and checked: CE-00134-BX is
+    // Cherokee Nation in the published register. The business side cannot be,
+    // because no CB- register exists, so CB-0000001 is the FORM and not this
+    // enterprise's identifier. Marked, so a reader does not transcribe it as
+    // one. This is the same error Codex caught on the entity side of PR #78,
+    // one card over, and the fix is to say which of the two is a real
+    // identifier rather than to print both as though they were.
+    pending: true,
     name: "Cherokee Nation Businesses",
     role: "A distinct operating enterprise, in the business register.",
   }),

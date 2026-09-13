@@ -128,6 +128,13 @@ test("the worked example uses the two shapes and keeps them apart", () => {
   assert.ok(WHY_BOTH.entity.id.startsWith("CE-"));
   assert.ok(WHY_BOTH.business.id.startsWith("CB-"));
   assert.equal(WHY_BOTH.questions.length, 2);
+  // The entity side is a real, checked identifier. The business side is the
+  // FORM, because no CB- register exists, and must be marked as such or a
+  // reader transcribes it as this enterprise's id. Same error Codex caught on
+  // the entity side; the flag has to track the card's liveness.
+  const business = IDENTIFIERS.find((item) => item.id === "business");
+  assert.equal(WHY_BOTH.business.pending, !business.live);
+  assert.ok(!WHY_BOTH.entity.pending, "the entity example is real and checked; it must not be marked provisional");
   // The rule the example exists to teach.
   assert.match(WHY_BOTH.close, /never goes in a business column/i);
 });

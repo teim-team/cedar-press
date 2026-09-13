@@ -479,9 +479,14 @@ export function WhyBoth() {
           <span className="cp-wb__edgeline" />
         </div>
         <article className="cp-wb__card">
-          <code className="cp-wb__id">{WHY_BOTH.business.id}</code>
+          <code className={`cp-wb__id${WHY_BOTH.business.pending ? " is-pending" : ""}`}>
+            {WHY_BOTH.business.id}
+          </code>
           <h3 className="cp-wb__name">{WHY_BOTH.business.name}</h3>
           <p className="cp-wb__role">{WHY_BOTH.business.role}</p>
+          {WHY_BOTH.business.pending ? (
+            <p className="cp-wb__prov">The form, not this enterprise&rsquo;s identifier. The business register is being minted.</p>
+          ) : null}
         </article>
       </div>
       {/* Screen readers get the edge as text; the line above is decoration. */}
