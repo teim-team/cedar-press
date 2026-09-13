@@ -2371,19 +2371,28 @@
  * teal-bordered composer with a circular send, and the standing disclaimer
  * under it. It diverged before; three surfaces reading three ways is how a
  * product stops feeling like one product. */
-.teim-rd .cp-dc { position: fixed; right: clamp(1rem, 2.4vw, 2rem); bottom: clamp(1rem, 2.4vw, 2rem); z-index: 120; display: flex; flex-direction: column; align-items: flex-end; gap: 0.7rem; }
+.teim-rd .cp-dc { position: fixed; right: calc(clamp(1rem, 2.4vw, 2rem) + env(safe-area-inset-right, 0px)); bottom: calc(clamp(1rem, 2.4vw, 2rem) + env(safe-area-inset-bottom, 0px)); z-index: 120; display: flex; flex-direction: column; align-items: flex-end; gap: 0.7rem; }
+/* Open, the launcher steps aside: the panel docks over the corner the launcher
+   sits in, and carries its own close button. lumecon.ai does the same
+   (`body.cedar-popped .cedar-fab { display: none }`). */
+.teim-rd .cp-dc.is-open .cp-dc__fab { display: none; }
 
 /* The launcher, in the app's own register. */
 .teim-rd .cp-dc__fab { display: inline-flex; align-items: center; gap: 0.7rem; padding: 0.72rem 1.15rem; border: 1px solid var(--teal-line); border-radius: 12px; background: var(--door-surface); color: var(--ink); cursor: pointer; text-align: left; box-shadow: 0 8px 24px rgba(10, 15, 38, 0.1); transition: border-color 0.2s var(--door-ease), box-shadow 0.2s var(--door-ease), transform 0.2s var(--door-ease); }
 .teim-rd .cp-dc__fab:hover { border-color: var(--dteal); transform: translateY(-2px); box-shadow: 0 14px 34px -18px rgba(10, 28, 52, 0.45); }
 .teim-rd .cp-dc__fab:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
-.teim-rd .cp-dc__fab.is-open { border-color: var(--dteal); }
 .teim-rd .cp-dc__fabid { display: flex; flex-direction: column; line-height: 1.2; }
 .teim-rd .cp-dc__fabid b { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; color: var(--ink); }
 .teim-rd .cp-dc__fabid small { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.06em; color: var(--door-ink-3); }
 .teim-rd .cp-dc__statusdot { flex: 0 0 auto; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--teal); }
 
-.teim-rd .cp-dc__panel { display: flex; flex-direction: column; width: min(25rem, calc(100vw - 2rem)); max-height: min(36rem, calc(100vh - 7rem)); border: 1px solid var(--door-rule); border-radius: 8px; background: var(--door-surface); box-shadow: 0 1px 2px rgba(14, 21, 48, 0.04), 0 14px 40px -16px rgba(14, 21, 48, 0.14); overflow: hidden; animation: cp-dc-in 0.22s var(--door-ease) both; }
+/* Docked, not floating. The panel is `fixed` in its own right rather than a
+   flex item above the launcher: pinned to the bottom edge, top corners only,
+   so it reads as a surface the viewport raised instead of a card hovering in
+   the lower corner with page showing beneath it. dvh, not vh, because mobile
+   Safari's vh is the tall viewport and would put the composer under the
+   address bar. */
+.teim-rd .cp-dc__panel { position: fixed; right: calc(clamp(1rem, 2.4vw, 2rem) + env(safe-area-inset-right, 0px)); bottom: env(safe-area-inset-bottom, 0px); display: flex; flex-direction: column; width: min(25rem, calc(100vw - 2rem)); max-height: min(36rem, calc(100dvh - 4rem)); border: 1px solid var(--door-rule); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--door-surface); box-shadow: 0 1px 2px rgba(14, 21, 48, 0.04), 0 24px 60px -16px rgba(14, 21, 48, 0.26); overflow: hidden; animation: cp-dc-in 0.22s var(--door-ease) both; }
 @keyframes cp-dc-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* The identity band. --dteal is the one teal that carries white text. */
@@ -2418,6 +2427,16 @@
 .teim-rd .cp-dc__chip:hover { background: #086960; transform: translateY(-1px); }
 .teim-rd .cp-dc__chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
+/* The next questions under an answer. Quieter than the starter stack and
+   left-aligned under the bubble they belong to, so three suggestions do not
+   read as the conversation starting over. The left pad clears the avatar
+   column, as `.cedar-followups` does on lumecon.ai. */
+.teim-rd .cp-dc__followups { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: -0.25rem 0 0.1rem; padding: 0 0 0.2rem calc(30px + 0.7rem); animation: cp-dc-follow 0.25s var(--door-ease) both; }
+@keyframes cp-dc-follow { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+.teim-rd .cp-dc__follow { padding: 0.34rem 0.7rem; border: 1px solid var(--teal-line); border-radius: 999px; background: var(--door-surface); font-family: var(--sans); font-size: 0.8rem; font-weight: 500; line-height: 1.2; color: var(--dteal); cursor: pointer; transition: background 0.15s var(--door-ease), color 0.15s var(--door-ease), transform 0.15s var(--door-ease); }
+.teim-rd .cp-dc__follow:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; transform: translateY(-1px); }
+.teim-rd .cp-dc__follow:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
 .teim-rd .cp-dc__form { flex: none; display: flex; align-items: stretch; gap: 0.55rem; padding: 0.9rem 1.2rem 0.5rem; border-top: 1px solid var(--door-rule); background: var(--door-surface); }
 .teim-rd .cp-dc__inputwrap { flex: 1; display: flex; min-width: 0; }
 .teim-rd .cp-dc__input { flex: 1; width: 100%; min-width: 0; padding: 0.55rem 0.9rem; border: 1px solid var(--dteal); border-radius: 6px; background: var(--door-surface); font-family: var(--sans); font-size: 16px; color: var(--ink); }
@@ -2429,15 +2448,27 @@
 .teim-rd .cp-dc__send:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
 .teim-rd .cp-dc__disclaimer { flex: none; margin: 0; padding: 0 1.2rem 0.7rem; background: var(--door-surface); font-size: 0.68rem; line-height: 1.45; color: var(--door-ink-3); text-align: center; }
 
+/* On a phone the dock becomes a full-width bottom sheet that rises from the
+   bottom edge, which is the gesture a panel this size owes a thumb. It is
+   also the only arrangement that fits: a 25rem card with 12rem of thread, a
+   composer and a disclaimer has nowhere to go on a 390px screen except
+   across the whole of it. */
 @media (max-width: 720px) {
-  .teim-rd .cp-dc { right: 0.75rem; bottom: 0.75rem; left: 0.75rem; align-items: stretch; }
-  .teim-rd .cp-dc__panel { width: auto; max-height: min(30rem, calc(100vh - 6rem)); }
-  .teim-rd .cp-dc__fab { align-self: flex-end; }
+  .teim-rd .cp-dc { right: calc(0.75rem + env(safe-area-inset-right, 0px)); bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)); }
+  .teim-rd .cp-dc__panel { right: 0; left: 0; bottom: 0; width: 100%; max-height: min(78dvh, 35rem); padding-bottom: env(safe-area-inset-bottom, 0px); border-right: 0; border-left: 0; border-radius: 14px 14px 0 0; animation-name: cp-dc-sheet; }
+  .teim-rd .cp-dc__thread { min-height: 0; padding: 1rem 1rem 0.9rem; }
+  .teim-rd .cp-dc__msg { max-width: 94%; }
+  .teim-rd .cp-dc__form { padding: 0.7rem 1rem 0.5rem; }
+  /* Smaller chips, but never under the 44px a thumb needs. Five starters at
+     the desktop size fill a phone's whole sheet and read as a menu. */
+  .teim-rd .cp-dc__chip { max-width: 94%; padding: 0.4rem 0.85rem; min-height: 44px; font-size: 0.84rem; }
+  .teim-rd .cp-dc__follow { min-height: 44px; padding-inline: 0.85rem; }
 }
+@keyframes cp-dc-sheet { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-dc__panel, .teim-rd .cp-dc__msg { animation: none; }
-  .teim-rd .cp-dc__fab, .teim-rd .cp-dc__chip, .teim-rd .cp-dc__close, .teim-rd .cp-dc__send { transition: none; }
-  .teim-rd .cp-dc__fab:hover, .teim-rd .cp-dc__chip:hover, .teim-rd .cp-dc__send:hover:not(:disabled) { transform: none; }
+  .teim-rd .cp-dc__panel, .teim-rd .cp-dc__msg, .teim-rd .cp-dc__followups { animation: none; }
+  .teim-rd .cp-dc__fab, .teim-rd .cp-dc__chip, .teim-rd .cp-dc__follow, .teim-rd .cp-dc__close, .teim-rd .cp-dc__send { transition: none; }
+  .teim-rd .cp-dc__fab:hover, .teim-rd .cp-dc__chip:hover, .teim-rd .cp-dc__follow:hover, .teim-rd .cp-dc__send:hover:not(:disabled) { transform: none; }
   .teim-rd .cp-dc__thread { scroll-behavior: auto; }
 }
 

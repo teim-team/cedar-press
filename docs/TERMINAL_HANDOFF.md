@@ -60,7 +60,7 @@ the workspace's own files and **fails its own build** when they move. Run
 
 | Test | Reads | Fails when |
 |---|---|---|
-| `src/features/grove/pressIdentity.test.js` | `public/data/cedar/register.json` | a register class the Methods page names disappears; the sample uid `CE-00001-6S` stops existing; the withheld class stops being withheld; the count of individually owned firms moves off 45 |
+| `src/features/grove/pressIdentity.test.js` | `public/data/cedar/register.json` | a register class the Methods page names disappears; the uid the page shows, `CE-00134-BX`, stops being Cherokee Nation; the withheld class stops being withheld; the count of individually owned firms moves off 45 |
 | `src/features/grove/pressIdentity.test.js` | `docs/LINKAGE_COVERAGE.md` | the headline total, the best figure or the worst figure moves by a digit |
 | `src/features/grove/pressIdentity.test.js` | `docs/IDENTIFIER_STANDARD.md` | it stops documenting `cedar_uid` |
 | `src/features/grove/pressSources.test.js` | `cedar_source_registry/sources.jsonl`, the collection descriptors | the door names a source kind the workspace no longer reads, or a declared program count moves |

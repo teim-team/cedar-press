@@ -125,6 +125,60 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
+  // The door's Cedar is a dock, not a float, and on a phone it is the sheet
+  // the whole window wide. The three things that were wrong on an iPhone: the
+  // panel hung in the middle of the screen with page showing under it, the
+  // launcher stayed on top of it, and every answer re-printed the whole
+  // starter stack underneath itself.
+  test("the door's Cedar docks to the bottom and the launcher steps aside", async ({ page }, testInfo) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    const launcher = page.locator(".cp-dc__fab");
+    await launcher.click();
+
+    const panel = page.locator(".cp-dc__panel");
+    await expect(panel).toBeVisible();
+    await expect(panel).toBeInViewport();
+    // The launcher is gone while the panel is up: the panel's own close is
+    // the way out, and a pill over the sheet's corner covers its last line.
+    await expect(launcher).toBeHidden();
+
+    // Flush to the bottom edge of the window, within the safe-area inset a
+    // headless browser reports as zero.
+    const box = await panel.boundingBox();
+    const viewport = page.viewportSize();
+    expect(viewport.height - (box.y + box.height)).toBeLessThanOrEqual(1);
+    expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
+    if (testInfo.project.name === "phone") {
+      // A phone gets the full width, and the sheet leaves the top of the
+      // window showing rather than covering the page it was opened from.
+      expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
+      expect(box.height).toBeLessThan(viewport.height * 0.85);
+    }
+
+    // The starter stack is an opening, not a toolbar: asking collapses it for
+    // good, and the answer carries at most three next questions instead.
+    const starters = await page.locator(".cp-dc__chip").count();
+    expect(starters).toBeGreaterThan(1);
+    await page.locator(".cp-dc__chip").first().click();
+    await expect(page.locator(".cp-dc__chip")).toHaveCount(0);
+    const followups = page.locator(".cp-dc__follow");
+    await expect(followups.first()).toBeVisible();
+    expect(await followups.count()).toBeLessThanOrEqual(3);
+
+    // A follow-up answers and is replaced by the next answer's own row, so
+    // the suggestions never pile up under the thread.
+    const first = await followups.first().textContent();
+    await followups.first().click();
+    await expect(page.locator(".cp-dc__msg--you").last()).toContainText(first.trim());
+    await expect(page.locator(".cp-dc__followups")).toHaveCount(1);
+
+    await page.locator(".cp-dc__close").click();
+    await expect(panel).toHaveCount(0);
+    await expect(launcher).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
   test("the collection pane hands its collection to Cedar", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector('[data-testid="stage-record"]');

@@ -323,6 +323,43 @@ tiles and the shelves, so it is not a thirteenth interaction to learn.
 
 ---
 
+## 5f. Cedar on the door, on a phone
+
+Reported from an iPhone: the panel hung in the middle of the screen with page
+showing under it, the launcher stayed on top of it, and the suggested questions
+came back in full under every answer. All three were real, and all three were
+places the door had drifted from `lumecon-website`'s FAB, which is the
+reference implementation for this surface.
+
+| Was | Is | The rule it now follows |
+|---|---|---|
+| The panel was a 36rem card, a flex item stacked above the launcher — on an 844px screen it floated mid-viewport | `position: fixed`, pinned to the bottom edge, top corners only; full width and `min(78dvh, 35rem)` tall under 720px, rising from the bottom | `.cedar-fab-panel` in `src/components/CedarFAB.astro` |
+| The launcher stayed visible over the panel's own corner | Hidden while the panel is open (`.cp-dc.is-open .cp-dc__fab`); the panel's close is the way out, and closing hands focus back to the launcher | `body.cedar-popped .cedar-fab { display: none }` |
+| Every answer re-printed the remaining starter chips beneath itself | The starter stack belongs to the empty panel and collapses for good on the first question; each answer carries at most three next questions in a quieter row | `collapseChips()` and `renderFollowUps()` in `src/lib/cedarChat.ts` |
+
+`dvh`, not `vh`: mobile Safari's `vh` is the tall viewport, so a sheet sized in
+`vh` puts its composer under the address bar. The launcher and the sheet both
+carry `env(safe-area-inset-*)` so a notched phone does not park either under
+the home indicator.
+
+The next questions come from a table in `src/features/grove/doorCedar.js`
+(`FOLLOW_UPS`, and one shared list for the twelve collections) rather than a
+score, because the door's bank is ten written answers and twelve collections —
+small enough to choose the pairs deliberately. `followUpsFor()` drops anything
+the conversation has already answered, so an exhausted thread shows no row
+rather than a repeat. `src/features/grove/doorCedar.test.js` holds the bank to
+it: every starter classifies back to its own intent, every follow-up is a real
+intent with a chip, and none offers the answer it is sitting under.
+
+A click outside the sheet closes it, as it does on the marketing site.
+
+The signed-in Cedar (`.cedar-widget__panel`) was already a bottom sheet and is
+unchanged. It keeps its launcher visible on purpose and pads its own bottom to
+clear it; that is a different surface with a different reason, written down
+where the rule lives.
+
+---
+
 ## 6. What the terminal owns after this
 
 1. Mint `CB-` per `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §8, then flip
