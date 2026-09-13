@@ -93,7 +93,7 @@ export default function CedarPress() {
             <p>
               Original intelligence collections, data-driven insights, transparent research and
               Cedar, your AI economic analyst, built to make Indian Country easier to understand.
-              Every collection begins with public records, is enhanced through original research
+              Every collection begins with documented source records, is enhanced through original research
               and entity resolution and stays current as new information becomes available.
             </p>
           </section>

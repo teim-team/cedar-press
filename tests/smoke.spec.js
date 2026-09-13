@@ -73,6 +73,69 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
+  // The door stages the product: the twelve collections down the frame's
+  // rail, one group a shelf, and the pane with real sample records of the
+  // one in hand. Twelve is the
+  // catalog's count; the records are the point, since a preview with a
+  // description and no rows is a brochure. The reader's shelf (#catalog)
+  // stays absent — asserted above — because the preview reads the public
+  // ten-row samples and nothing else.
+  test("the door lists every collection and stages real records", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await expect(page.locator(".cp-app__item")).toHaveCount(12);
+    await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
+    await page.getByRole("button", { name: /Prime Contracting/ }).click();
+    const stage = page.locator('[data-testid="collection-stage"][data-collection="contractors"]');
+    await expect(stage).toBeVisible();
+    await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
+    // The way in is named on the stage, never a route past the paywall.
+    await expect(stage.getByRole("link", { name: /^Get Cedar Press/ })).toBeVisible();
+    await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
+    await expect(page.locator("#catalog")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  // Cedar on the door answers from a prepared bank (doorCedar.js) and never
+  // reaches the network. The three things that matter: it answers, it says
+  // the answers are prepared, and it refuses what it does not have rather
+  // than guessing — a door assistant that improvises about a research
+  // product is worse than none.
+  test("Cedar on the door answers from the prepared bank", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await page.locator(".cp-dc__fab").click();
+    await expect(page.locator(".cp-dc__panel")).toBeVisible();
+    await expect(page.locator(".cp-dc__context")).toContainText("Cedar Press");
+    // The standing disclaimer is the one line the panel owes its reader.
+    await expect(page.locator(".cp-dc__disclaimer")).toContainText("Cedar can make mistakes");
+    await page.locator(".cp-dc__chip").first().click();
+    await expect(page.locator(".cp-dc__msg--bot").nth(1)).toBeVisible();
+    // A question it has nothing for is refused, not answered.
+    await page.locator(".cp-dc__input").fill("what is the weather in Oslo");
+    await page.locator(".cp-dc__send").click();
+    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText("do not have that one");
+    expect(errors).toEqual([]);
+  });
+
+  test("the collection pane hands its collection to Cedar", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector('[data-testid="stage-record"]');
+    await page.locator('[data-testid="collection-stage"]').getByRole("button", { name: /Ask Cedar/ }).click();
+    await expect(page.locator(".cp-dc__msg--you").last()).toContainText("Federal Funding");
+    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText("federal government");
+  });
+
+  test("the door does not scroll sideways", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
+  });
+
   test("a wrong password is refused and says so", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("tab", { name: "Log in" }).click();
@@ -542,7 +605,9 @@ test.describe("crawlers", () => {
   // the raw response, not the rendered page, because the rendered page looks
   // identical whether or not the prerender happened.
   for (const [path, heading] of [
-    ["/", "The data behind Indian Country"],
+    // "data" is emphasised inside the headline, so the string a crawler
+    // sees is split by a tag; the tail of the sentence is contiguous.
+    ["/", "behind Indian Country."],
     ["/tribal-data-request", "See what Cedar knows about your nation"],
     ["/research-access", "Need one or two Cedar collections for a defined project"],
   ]) {
