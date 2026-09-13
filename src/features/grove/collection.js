@@ -121,6 +121,15 @@ export const LAUNCH_COLLECTION = deepFreeze(
 const CEDAR = deepFreeze(
   Object.fromEntries(manifest.collections.map((entry) => [entry.id, entry.cedar])),
 );
+
+/**
+ * Every row the twelve releases hold, added up from the workspace's own
+ * count per collection, or null if any collection arrived without one: a
+ * total that quietly skipped a collection would read as the total.
+ */
+export const LAUNCH_ROWS_TOTAL = manifest.collections.every((entry) => Number.isInteger(entry.cedar?.n_rows))
+  ? manifest.collections.reduce((sum, entry) => sum + entry.cedar.n_rows, 0)
+  : null;
 /**
  * Sample files the manifest declares and this repository does not hold.
  *

@@ -891,13 +891,7 @@
  * page's own: transitions collapse rather than shorten, because a 1ms
  * animation is still an animation to a vestibular system. */
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-hub__tile,
-  .teim-rd .cp-hub__tile::after,
-  .teim-rd .cp-hub__mark,
-  .teim-rd .cp-hub__name,
   .teim-rd .cp-page { transition: none !important; animation: none !important; }
-  .teim-rd .cp-hub__tile:hover { transform: none; }
-  .teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: none; }
 }
 
 /* ── Page arrival ────────────────────────────────────────────────────────
@@ -939,48 +933,6 @@
 @media (max-width: 640px) {
   .teim-rd .cp-nav { gap: 0 1.3rem; }
   .teim-rd .cp-nav__item { white-space: nowrap; min-height: 40px; }
-}
-
-/* ── The section index ───────────────────────────────────────────────────
- * Squares in the collection tiles' own size, because those already proved
- * the size on both pointers: one row where it fits, 2x3 on a phone, so the
- * front page and the shelf read as one system. Each square states what the
- * section is and what it currently holds; the ? in its corner puts the
- * section's purpose in the line under the grid. */
-/* Explicit counts rather than auto-fit: six tiles into an auto-fit track
- * lands five across and one alone on a second row, which reads as a
- * mistake. Six, three, then two — every arrangement fills its rows. */
-.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.9rem; }
-@media (max-width: 1280px) { .teim-rd .cp-hub__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.teim-rd .cp-hub__grid > li { position: relative; display: block; }
-.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; min-height: 10.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1.1rem 0.7rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
-/* The teal rises from the floor of the tile on hover rather than washing
- * over it: the mark and the name stay on paper, which keeps their contrast
- * where it was measured. */
-.teim-rd .cp-hub__tile::after { content: ''; position: absolute; inset: auto 0 0 0; height: 3px; background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-.teim-rd .cp-hub__tile:hover::after, .teim-rd .cp-hub__tile:focus-visible::after { transform: scaleX(1); }
-.teim-rd .cp-hub__tile:hover { border-color: var(--teal); box-shadow: 0 14px 34px rgba(10, 15, 38, 0.13); transform: translateY(-4px); }
-.teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: translateY(-2px) scale(1.06); }
-.teim-rd .cp-hub__tile:hover .cp-hub__name { color: var(--dteal); }
-.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-.teim-rd .cp-hub__mark svg { width: 76px; height: 76px; }
-.teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.22rem; min-width: 0; }
-.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.2rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.18; transition: color 0.18s ease; }
-/* What the section holds right now, read from the catalog: a label alone
- * says where a tap goes, this says whether it is worth taking. */
-.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-/* The line under the grid, painted by pointing at a tile — the same
- * point-to-read language as the shelves, with no second control on the
- * tile. min-height holds two lines so the page never jumps. */
-.teim-rd .cp-hub__note { max-width: 68ch; min-height: 2.6em; margin: 1rem 0 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
-/* Phones: a strict 2x3, the squares scaling with the screen rather than
- * wrapping to a single column. */
-@media (max-width: 640px) {
-  .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; gap: 0.7rem; }
-  .teim-rd .cp-hub__tile { min-height: 9.5rem; }
-  .teim-rd .cp-hub__mark svg { width: 60px; height: 60px; }
-  .teim-rd .cp-hub__name { font-size: 1.05rem; }
-  .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
 }
 
 /* ── Settings ────────────────────────────────────────────────────────────
@@ -2004,79 +1956,153 @@
   .teim-rd .cp-trh__cta:hover { transform: none; }
 }
 
-/* ── The overview, screen by screen ──────────────────────────────────────
- * On a wide screen the overview is three things — what this is, where to go,
- * and what keeps it current — and running them together made each read as a
- * fragment of the one above it. Each takes the screen instead, and the
- * scroll settles on section edges.
- *
- * Proximity, not mandatory: mandatory fights a reader scrolling deliberately
- * past something, and traps anyone whose window is shorter than a section.
- * Gated on a pointer, a wide screen and real height, so a split window and
- * every phone keep the ordinary page.
- *
- * min-height rather than height, for the same reason: a section that outgrows
- * the window keeps growing instead of clipping its own last line.
- *
- * align-content, and not a flex column, is the whole trick. Giving each
- * section `display: flex` to centre it threw away the layout it already had:
- * the hero is a two-column grid, and flexing it stacked the intro under the
- * headline and left half the screen empty. align-content centres the rows a
- * section already has without telling it what kind of box to be. Where a
- * browser does not carry it on block containers the section simply sits at
- * its top, which is the layout as it was. */
-@media (min-width: 1024px) and (min-height: 700px) and (pointer: fine) {
-  .teim-rd .cp--screens { scroll-snap-type: y proximity; }
-  .teim-rd .cp--screens > .cp-screen {
-    /* Short of the full window on purpose: the masthead takes the top of the
-       first screen, and the few centimetres left over at the bottom of each
-       one show the edge of the next, which is what tells a reader there is
-       one. A section that fills the window exactly reads as the end. */
-    min-height: calc(100dvh - 9rem);
-    align-content: center;
-    scroll-snap-align: center;
-  }
-  /* Screen one: the statement, then the board it introduces. The statement
-     gets the size it was written for, and the tiles grow into whatever height
-     is left rather than to a figure picked in advance — a screen shared with
-     a headline has less to give than one that was empty. */
-  .teim-rd .cp-open .cp-hero { padding-block: 0 2.4rem; }
-  .teim-rd .cp-open .cp-hero h1 { font-size: clamp(2.4rem, 3.8vw, 3.4rem); }
-  .teim-rd .cp-open .cp-hero p { font-size: 1.08rem; }
-  .teim-rd .cp-open .cp-hub__tile { min-height: clamp(10.5rem, 22vh, 15rem); gap: 1.1rem; }
-  .teim-rd .cp-open .cp-hub__mark svg { width: 84px; height: 84px; }
-  .teim-rd .cp-open .cp-hub__name { font-size: 1.3rem; }
+/* ══ The front page ═══════════════════════════════════════════════════════
+ * Built around the collections, the way /data is, with the marketing
+ * site's lesson applied: one promise, then the real thing beside it. Here
+ * the real thing is rows, so the stage is a table of six real records
+ * rather than a screenshot. Hairlines and alignment carry the structure;
+ * the one bordered object on the page is the stage, because it is the one
+ * assembled product frame (radius-card, a neutral shadow), and the shelf
+ * beside it is a list on rules, not a grid of boxes. */
 
-  /* Screen two: the close and the footer are one ending, so the teal takes
-     whatever height is left and the footer sits on the bottom edge under it.
-     Centring this one would float the band with white above and below it,
-     and a full-bleed colour with a margin above it reads as a mistake. */
-  .teim-rd .cp--screens > .cp-end {
-    align-content: normal;
-    display: grid;
-    grid-template-rows: 1fr auto;
-  }
-  /* The close sits at the top of its band, not in the middle of it. Centred,
-     the statement floated with teal above and below and read as though it had
-     been dropped there; against the top edge it reads as the start of the
-     ending, and the teal below it is the page running out. */
-  .teim-rd .cp--screens > .cp-end > .cp-close { align-content: start; }
-  .teim-rd .cp--screens > .cp-end > .cp-close .cp-close__in { padding-top: 4.2rem; }
+/* ── The lead ────────────────────────────────────────────────────────────
+ * Headline left, the sentence and the two actions right, on one editorial
+ * axis; the facts line closes it on a rule. */
+.teim-rd .cp-lead { padding: 2.4rem 0 0; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 0.9rem 3.5rem; align-items: end; }
+.teim-rd .cp-lead__kicker { grid-column: 1 / -1; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin: 0; }
+.teim-rd .cp-lead h1 { font-family: var(--sans); font-size: clamp(2.3rem, 4.6vw, 3.7rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.02; color: var(--ink); margin: 0; max-width: 13ch; }
+.teim-rd .cp-lead__aside { display: flex; flex-direction: column; gap: 1.1rem; }
+.teim-rd .cp-lead__sub { font-size: 1.06rem; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 54ch; }
+.teim-rd .cp-lead__acts { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+/* The two controls. The primary is the flat teal the shelves already use;
+ * the quiet one is paper on a hairline. No pills: a control is a rectangle
+ * here, the way every other control on the service is. */
+.teim-rd .cp-btn { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 46px; padding: 0.6rem 1.25rem; border: 1px solid var(--dteal); background: var(--dteal); color: #fff; font-family: var(--sans); font-size: 0.95rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease; }
+.teim-rd .cp-btn:hover { background: var(--ink); border-color: var(--ink); }
+.teim-rd .cp-btn--quiet { background: var(--bg); border-color: var(--line); color: var(--ink); }
+.teim-rd .cp-btn--quiet:hover { background: var(--teal-tint); border-color: var(--dteal); color: var(--dteal); }
+.teim-rd .cp-btn:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
+/* What the product is made of, in the catalog's own numbers. */
+.teim-rd .cp-facts { grid-column: 1 / -1; list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.8rem; margin: 1.6rem 0 0; padding: 1rem 0 0; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-facts b { font-weight: 700; color: var(--ink); }
+@media (max-width: 900px) {
+  .teim-rd .cp-lead { grid-template-columns: minmax(0, 1fr); align-items: start; padding-top: 1.8rem; }
+  .teim-rd .cp-lead h1 { max-width: none; }
 }
-/* A reader who asked for less motion gets the ordinary page: snapping moves
- * the viewport out from under them, which is the thing that setting is for. */
+@media (max-width: 720px) {
+  .teim-rd .cp-lead__acts .cp-btn { flex: 1 1 100%; justify-content: center; }
+  .teim-rd .cp-facts { gap: 0.3rem 1.2rem; margin-top: 1.2rem; }
+}
+
+/* ── The shelf and the stage ─────────────────────────────────────────────
+ * Two columns: the collections as a list on hairlines, grouped by shelf,
+ * and beside them the stage, sticky so the records stay in view while the
+ * list is read. */
+.teim-rd .cp-shelves { margin-top: 2.2rem; display: grid; grid-template-columns: minmax(0, 23rem) minmax(0, 1fr); gap: 0 3rem; align-items: start; }
+.teim-rd .cp-shelf__tier + .cp-shelf__tier { margin-top: 1.6rem; }
+.teim-rd .cp-shelf__eyebrow { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-shelf__q { font-size: 0.92rem; font-weight: 700; color: var(--ink); margin: 0.2rem 0 0; }
+.teim-rd .cp-shelf__list { list-style: none; margin: 0.6rem 0 0; padding: 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-shelf__item { border-bottom: 1px solid var(--line-soft); }
+/* A row is one button: mark, name and its two facts, and a cue. The
+ * selected row carries a teal rule on its left edge and the tint; hover
+ * only colours the name, so pointing never looks like choosing. */
+.teim-rd .cp-shelf__pick { box-sizing: border-box; width: 100%; min-height: 54px; display: grid; grid-template-columns: 1.9rem minmax(0, 1fr) auto; align-items: center; gap: 0 0.85rem; padding: 0.5rem 0.6rem 0.5rem 0.4rem; border: 0; border-left: 3px solid transparent; background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; transition: background 0.16s ease, border-color 0.16s ease; }
+.teim-rd .cp-shelf__pick:hover .cp-shelf__name { color: var(--dteal); }
+.teim-rd .cp-shelf__pick:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: -2px; }
+.teim-rd .cp-shelf__item.is-on .cp-shelf__pick { border-left-color: var(--teal); background: var(--teal-tint); }
+.teim-rd .cp-shelf__item.is-on .cp-shelf__name { color: var(--dteal); }
+.teim-rd .cp-shelf__mark { display: flex; color: var(--dteal); }
+.teim-rd .cp-shelf__mark svg { width: 1.9rem; height: 1.9rem; display: block; }
+.teim-rd .cp-shelf__id { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.teim-rd .cp-shelf__name { font-family: var(--sans); font-size: 0.95rem; font-weight: 700; letter-spacing: -0.005em; line-height: 1.2; color: var(--ink); transition: color 0.16s ease; }
+.teim-rd .cp-shelf__meta { font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.teim-rd .cp-shelf__cue { font-family: var(--mono); font-size: 0.95rem; font-weight: 700; color: var(--muted); }
+.teim-rd .cp-shelf__item.is-locked .cp-shelf__mark { color: var(--muted); }
+
+/* The stage: the one product frame on the page. */
+.teim-rd .cp-shelves__stage { min-width: 0; position: sticky; top: 1rem; }
+.teim-rd .cp-stage { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); background: var(--bg); box-shadow: 0 18px 40px -28px rgba(10, 15, 38, 0.35); overflow: hidden; }
+.teim-rd .cp-stage__head { padding: 1.3rem 1.5rem 1.1rem; }
+.teim-rd .cp-stage__name { font-family: var(--sans); font-size: clamp(1.3rem, 2vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0.35rem 0 0; }
+.teim-rd .cp-stage__blurb { font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); margin: 0.6rem 0 0; max-width: 78ch; }
+.teim-rd .cp-stage__link { font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); margin: 0.8rem 0 0; padding-top: 0.7rem; border-top: 1px solid var(--line-soft); max-width: 78ch; }
+.teim-rd .cp-stage__facts { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.9rem 0 0; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+/* The caption says what the table is before the eye reaches the rows:
+ * which table, how many of how many, of how many in the release. */
+.teim-rd .cp-stage__cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.55rem 1.5rem; border-top: 1px solid var(--line); background: var(--teal-tint); font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-stage__scroll { overflow-x: auto; }
+.teim-rd .cp-stage__table { width: 100%; border-collapse: collapse; font-size: 0.84rem; line-height: 1.4; color: var(--ink); }
+.teim-rd .cp-stage__table th, .teim-rd .cp-stage__table td { padding: 0.55rem 0.9rem; border-top: 1px solid var(--line-soft); vertical-align: top; text-align: left; }
+.teim-rd .cp-stage__table th:first-child, .teim-rd .cp-stage__table td:first-child { padding-left: 1.5rem; }
+.teim-rd .cp-stage__table th:last-child, .teim-rd .cp-stage__table td:last-child { padding-right: 1.5rem; }
+.teim-rd .cp-stage__table th { border-top: 0; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-stage__ent { font-weight: 700; white-space: nowrap; max-width: 17rem; overflow: hidden; text-overflow: ellipsis; }
+.teim-rd .cp-stage__uid { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 400; color: var(--muted); }
+.teim-rd .cp-stage__unkeyed { color: var(--muted); font-weight: 400; }
+.teim-rd .cp-stage__date { font-family: var(--mono); font-size: 0.74rem; white-space: nowrap; }
+.teim-rd .cp-stage__obs { color: var(--ink-2); min-width: 16rem; }
+.teim-rd .cp-stage__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.teim-rd .cp-stage__table th.cp-stage__amt, .teim-rd .cp-stage__table td.cp-stage__amt { text-align: right; font-family: var(--mono); font-size: 0.76rem; white-space: nowrap; }
+.teim-rd .cp-stage__empty { margin: 0; padding: 1.4rem 1.5rem; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--muted); }
+.teim-rd .cp-stage__acts { display: flex; flex-wrap: wrap; gap: 0 2rem; margin: 0; padding: 0.4rem 1.5rem 0.7rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-stage__act { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease; }
+.teim-rd .cp-stage__act:hover, .teim-rd .cp-stage__act:focus-visible { border-bottom-color: currentColor; }
+.teim-rd .cp-stage__act--btn { border-top: 0; border-inline: 0; background: none; padding: 0; cursor: pointer; }
+@media (max-width: 1100px) {
+  .teim-rd .cp-shelves { grid-template-columns: minmax(0, 19rem) minmax(0, 1fr); gap: 0 2rem; }
+  .teim-rd .cp-shelf__meta { white-space: normal; }
+}
+/* Phones: one column, and the stage moves under the row that opened it. */
+@media (max-width: 720px) {
+  .teim-rd .cp-shelves { grid-template-columns: minmax(0, 1fr); margin-top: 1.8rem; }
+  .teim-rd .cp-shelf__pick { padding-right: 0.3rem; }
+  .teim-rd .cp-shelf__item .cp-stage { margin: 0.2rem 0 0.9rem; border-radius: 0; box-shadow: none; }
+  .teim-rd .cp-stage__head { padding: 1rem 1.1rem 0.9rem; }
+  .teim-rd .cp-stage__cap, .teim-rd .cp-stage__acts, .teim-rd .cp-stage__empty { padding-inline: 1.1rem; }
+  .teim-rd .cp-stage__table th:first-child, .teim-rd .cp-stage__table td:first-child { padding-left: 1.1rem; }
+  .teim-rd .cp-stage__table th:last-child, .teim-rd .cp-stage__table td:last-child { padding-right: 1.1rem; }
+  .teim-rd .cp-stage__ent { max-width: 11rem; }
+  .teim-rd .cp-stage__acts { flex-direction: column; gap: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp--screens { scroll-snap-type: none; }
+  .teim-rd .cp-btn, .teim-rd .cp-shelf__pick, .teim-rd .cp-shelf__name, .teim-rd .cp-stage__act { transition: none; }
 }
 
-/* ── Start here ──────────────────────────────────────────────────────────
- * The overview's verbs, between the hero and the section index: what a
- * signed-in reader can do right now, before the doors describe what
- * exists. Quiet pills, not a second hero. */
-.teim-rd .cp-start { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: center; margin: 1.2rem auto 0; max-width: 46rem; }
-.teim-rd .cp-start__act { display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); padding: 0.55rem 1rem; font-family: var(--sans); font-size: 0.88rem; font-weight: 600; color: var(--dteal); text-decoration: none; cursor: pointer; transition: border-color 0.16s ease, background 0.16s ease, transform 0.12s ease; }
-.teim-rd .cp-start__act:hover { border-color: var(--dteal); background: var(--teal-tint); transform: translateY(-1px); }
+/* ── The doors ───────────────────────────────────────────────────────────
+ * The other sections, as a ledger: a label column and a body column on a
+ * rule per row. What each holds right now sits in the body, so a row is
+ * worth reading before it is worth opening. */
+.teim-rd .cp-doors { margin-top: 3.6rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-doors__list { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-door { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 0.3rem 2.6rem; padding: 1.4rem 0; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-door:first-child { border-top: 0; padding-top: 0.4rem; }
+.teim-rd .cp-door__label { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); padding-top: 0.3rem; }
+.teim-rd .cp-door__body { min-width: 0; }
+.teim-rd .cp-door__title { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.25; color: var(--ink); margin: 0; max-width: 60ch; }
+.teim-rd .cp-door__body p { font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); margin: 0.45rem 0 0; max-width: 70ch; }
+.teim-rd .cp-door__body p a { color: var(--dteal); font-weight: 600; }
+.teim-rd .cp-door__list { list-style: none; margin: 0.5rem 0 0; padding: 0; max-width: 44rem; }
+.teim-rd .cp-door__list li { display: flex; align-items: baseline; gap: 0.7rem; padding: 0.3rem 0; font-size: 0.93rem; color: var(--ink); border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-door__list li:first-child { border-top: 0; }
+.teim-rd .cp-door__list li > :first-child { flex: 1 1 0; min-width: 0; font-weight: 600; }
+.teim-rd .cp-door__list a { color: var(--ink); text-decoration: none; }
+.teim-rd .cp-door__list a:hover { color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-door__list--ranked { counter-reset: rank; }
+.teim-rd .cp-door__list--ranked li::before { counter-increment: rank; content: counter(rank); flex: 0 0 1rem; font-family: var(--mono); font-size: 0.66rem; color: var(--muted); }
+.teim-rd .cp-door__date { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.teim-rd .cp-door__act { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; margin-top: 0.3rem; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease; }
+.teim-rd .cp-door__act:hover, .teim-rd .cp-door__act:focus-visible { border-bottom-color: currentColor; }
+@media (max-width: 720px) {
+  .teim-rd .cp-doors { margin-top: 2.6rem; }
+  .teim-rd .cp-door { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; padding: 1.1rem 0; }
+  .teim-rd .cp-door__list li { flex-wrap: wrap; }
+  .teim-rd .cp-door__date { flex-basis: 100%; }
+  .teim-rd .cp-door__list--ranked .cp-door__date { padding-left: 1.7rem; }
+}
 
+/* The close sits on the doors, not against them. */
+.teim-rd .cp-home .cp-close { margin-top: 3rem; }
 
 /* ── Touch targets ───────────────────────────────────────────────────────
  * Several controls on this service are typed as links inside running text —
@@ -2392,27 +2418,7 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-inf__reqtext { display: block; color: var(--ink); }
 .teim-rd .cp-inf__requests small { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-inf__foot { margin-top: 0.9rem; }
-/* The homepage block. */
-.teim-rd .cp-prib { margin-top: 2.2rem; }
-.teim-rd .cp-prib__in { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-card, 14px); background: var(--bg); }
-.teim-rd .cp-prib__in.is-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-/* A flex <li> drops its marker, so the rank is drawn by a counter. */
-.teim-rd .cp-prib__list { margin: 0.6rem 0 0.8rem; padding: 0; list-style: none; counter-reset: rank; max-width: 44rem; }
-.teim-rd .cp-prib__list li { display: flex; align-items: baseline; gap: 0.7rem; padding: 0.3rem 0; font-size: 0.95rem; border-top: 1px solid var(--line-soft); }
-.teim-rd .cp-prib__list li:first-child { border-top: 0; }
-.teim-rd .cp-prib__list li::before { counter-increment: rank; content: counter(rank); font-family: var(--mono); font-size: 0.68rem; color: var(--muted); min-width: 1rem; }
-.teim-rd .cp-prib__title { flex: 1 1 0; min-width: 0; }
-.teim-rd .cp-prib__title { font-weight: 700; color: var(--ink); }
-.teim-rd .cp-prib__points { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--dteal); white-space: nowrap; }
-.teim-rd .cp-prib__shipped p { font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); margin: 0.5rem 0 0; }
 @media (max-width: 900px) {
   .teim-rd .cp-pri__layout { grid-template-columns: 1fr; }
   .teim-rd .cp-pri__side { position: static; }
-  /* The published state's modifier is more specific than this rule, so it is named here too (Codex, PR #65). */
-  .teim-rd .cp-prib__in, .teim-rd .cp-prib__in.is-two { grid-template-columns: 1fr; }
-}
-@media (max-width: 720px) {
-  .teim-rd .cp-prib__in { padding: 1rem 1.1rem; }
-  .teim-rd .cp-prib__list li { flex-wrap: wrap; row-gap: 0.15rem; }
-  .teim-rd .cp-prib__points { flex-basis: 100%; padding-left: 1.7rem; }
 }
