@@ -74,7 +74,6 @@ import { saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-import { useNarrow } from "../../features/grove/useNarrow.js";
 import { TierName } from "./TierName";
 
 const REGISTER_PATH = "/data/cedar/register.json";
@@ -153,6 +152,19 @@ function useSampleRows(tables, register) {
   }, [wanted, loaded, register]);
 }
 
+/** Whether the viewport is a phone's: the table becomes a list of records. */
+function useNarrow() {
+  const query = "(max-width: 720px)";
+  const [narrow, setNarrow] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.(query).matches);
+  useEffect(() => {
+    const media = window.matchMedia?.(query);
+    if (!media) return undefined;
+    const onChange = () => setNarrow(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+  return narrow;
+}
 
 // ── Saved views, on this device ────────────────────────────────────────────
 

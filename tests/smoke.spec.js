@@ -125,21 +125,10 @@ test.describe("the subscriber's path", () => {
     const errors = watchConsole(page);
     await signIn(page);
 
-    // The front page is the collections: every storefront collection listed
-    // on its shelf, and a stage beside the list showing real records of the
-    // one in hand. Twelve is the catalog's count, and the records are the
-    // point — a stage with a description and no rows is the hub this
-    // replaced, wearing a table's clothes.
-    await expect(page.locator(".cp-shelf__item")).toHaveCount(12);
-    await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
-    await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
-    // Picking another collection moves the stage to it and loads its rows.
-    await page.getByRole("button", { name: /Prime Contracting/ }).click();
-    const stage = page.locator('[data-testid="collection-stage"][data-collection="contractors"]');
-    await expect(stage).toBeVisible();
-    await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
-    // The other sections are a ledger of four doors, each a real destination.
-    await expect(page.locator('[data-testid="door"]')).toHaveCount(4);
+    // Six tiles, each a real destination. The count is asserted because the
+    // layout is built on it: they wrapped as five and one once, orphaning
+    // Contact on a row of its own.
+    await expect(page.locator(".cp-hub__tile")).toHaveCount(6);
     await expect(page.locator(".cp-close__head")).toContainText("Nothing here is a snapshot");
 
     await page.getByRole("button", { name: "Sign out" }).click();
@@ -425,11 +414,8 @@ test.describe("Shape the research", () => {
     await expect(page.getByTestId("influence")).toContainText("Your research influence");
     await expect(page.getByTestId("influence")).toContainText("not connected");
     await page.goto("/");
-    // The front page carries the priorities as one of its doors, with the
-    // same honesty about the count: no service, no counting.
-    const door = page.locator('[data-testid="door"][data-door="priorities"]');
-    await expect(door).toContainText("Shape the research");
-    await expect(door).toContainText("not yet counted");
+    await expect(page.getByTestId("priorities-block")).toContainText("Subscriber research priorities");
+    await expect(page.getByTestId("priorities-block")).toContainText("not yet counted");
     expect(errors).toEqual([]);
   });
 });
@@ -605,19 +591,25 @@ test.describe("the stylesheet", () => {
     await expect(band).toHaveCSS("background-color", /^rgba?\((?!0, 0, 0, 0\)).+\)$/);
 
     if (testInfo.project.name !== "desktop") return;
-    // The shelf and the stage share a row: the list on the left, the stage
-    // beside it, neither as wide as the section. Unstyled, the two stack as
-    // full-width blocks, which is what the truncation gave, and what this
-    // is here to catch without naming a column width.
-    const shape = await page.locator(".cp-shelves").evaluate((section) => {
-      const list = section.querySelector(".cp-shelf").getBoundingClientRect();
-      const stage = section.querySelector(".cp-shelves__stage").getBoundingClientRect();
-      return { width: section.getBoundingClientRect().width, list, stage };
+    // The tiles are a grid. Stated without naming a column count, because
+    // that is six, three or two depending on the width and all three are
+    // correct: what is never correct is six full-width blocks stacked down
+    // the page, which is what a grid that has stopped being a grid gives
+    // you, and what the truncation gave. A tile narrower than half the row,
+    // and some tile sharing a row with another, are true at every
+    // breakpoint above a phone and false the moment the rules stop applying.
+    const shape = await page.locator(".cp-hub__grid").evaluate((grid) => {
+      const tiles = [...grid.querySelectorAll(".cp-hub__tile")];
+      return {
+        gridWidth: grid.getBoundingClientRect().width,
+        widest: Math.max(...tiles.map((tile) => tile.getBoundingClientRect().width)),
+        rows: new Set(tiles.map((tile) => Math.round(tile.getBoundingClientRect().top))).size,
+        count: tiles.length,
+      };
     });
-    expect(shape.list.width).toBeLessThan(shape.width / 2);
-    expect(shape.stage.width).toBeLessThan(shape.width);
-    expect(shape.stage.left).toBeGreaterThanOrEqual(shape.list.right);
-    expect(Math.abs(shape.stage.top - shape.list.top)).toBeLessThan(8);
+    expect(shape.count).toBe(6);
+    expect(shape.widest).toBeLessThan(shape.gridWidth / 2);
+    expect(shape.rows).toBeLessThan(shape.count);
   });
 });
 
