@@ -211,8 +211,12 @@ export default function CedarPressMethods() {
             records, and the collection holds an organization.
           </p>
           <p className="cp-msec__aside">
-            {LINKAGE_COVERAGE.note} Measured {LINKAGE_COVERAGE.measuredOn}, and re-measured with every
-            release.
+            {/* "re-measured with every release" was a process claim the site
+                cannot back: the figure comes from a generated file, and
+                nothing in the release path re-runs the generator. The date it
+                was measured is a fact, so that is what it says. */}
+            {LINKAGE_COVERAGE.note} Measured {LINKAGE_COVERAGE.measuredOn} against the built
+            collections.
           </p>
         </section>
 

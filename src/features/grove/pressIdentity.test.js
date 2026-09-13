@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+import { CONTRACTS } from "./explore.js";
 import {
   IDENTIFIERS,
   KEPT_OUTSIDE,
@@ -30,24 +31,44 @@ test("every class an identifier claims is a class the published register holds",
   }
 });
 
-test("the role-specific columns are the ones the standard names", () => {
-  // The specification of 2026-09-13 names these columns and says the role
-  // matters: a recipient column, an owner column and a parent column are not
-  // interchangeable, and neither identifier may sit in the other's column.
-  const entity = IDENTIFIERS.find((item) => item.id === "entity");
-  assert.deepEqual(entity.fields, [
+test("the live columns are columns the exports really carry", () => {
+  // Codex, PR #78: the card advertised the specification's role-specific
+  // names and not one of them appears in a published table, while `cedar_uid`
+  // (on 66 of them) was omitted. The previous version of this test asserted a
+  // hand-written list against itself, which is not evidence of anything.
+  const shipped = new Set();
+  for (const contract of Object.values(CONTRACTS)) {
+    if (contract.entity_uid) shipped.add(contract.entity_uid);
+    for (const role of contract.entity_roles ?? []) shipped.add(role.column);
+  }
+  for (const identifier of IDENTIFIERS) {
+    for (const field of identifier.fields) {
+      assert.ok(shipped.has(field), `${identifier.label} advertises "${field}", which no published contract carries`);
+    }
+  }
+  // The entity id must name the column that is actually on 66 tables.
+  assert.ok(IDENTIFIERS[0].fields.includes("cedar_uid"));
+  // And the business id has no live column, because nothing mints one.
+  assert.deepEqual(IDENTIFIERS[1].fields, []);
+});
+
+test("the renaming targets are the ones the specification names", () => {
+  const spec = readFileSync(new URL("../../../docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md", import.meta.url), "utf8");
+  const becoming = IDENTIFIERS.flatMap((item) => item.becoming ?? []);
+  assert.deepEqual(becoming, [
     "native_entity_uid",
     "recipient_native_entity_uid",
     "owner_cedar_uid",
     "parent_cedar_uid",
+    "business_uid",
   ]);
-  const business = IDENTIFIERS.find((item) => item.id === "business");
-  assert.deepEqual(business.fields, ["business_uid"]);
-  // The registry's own keys are external identifiers under the standard, not
-  // Cedar identities, so they must not be presented as either id's field.
-  const all = IDENTIFIERS.flatMap((item) => item.fields);
-  for (const foreign of ["business_source_id", "entity_id", "uei", "cage", "ein"]) {
-    assert.ok(!all.includes(foreign), `${foreign} is an external identifier, not a Cedar id`);
+  for (const field of becoming) {
+    assert.ok(spec.includes(field), `the specification does not name "${field}"`);
+  }
+  // A target that has shipped belongs in `fields`, not in `becoming`.
+  const shipped = new Set(Object.values(CONTRACTS).flatMap((c) => [c.entity_uid, ...(c.entity_roles ?? []).map((r) => r.column)]));
+  for (const field of becoming) {
+    assert.ok(!shipped.has(field), `"${field}" has shipped; move it from becoming to fields`);
   }
   const doc = readFileSync(new URL("../../../docs/IDENTIFIER_STANDARD.md", import.meta.url), "utf8");
   assert.match(doc, /cedar_uid/, "the identifier standard no longer documents cedar_uid");
@@ -75,10 +96,17 @@ test("the shapes are the standard's, and the entity sample is a real uid", () =>
   // those would be teaching a reader an impossible id.
   assert.match(entity.shape, /^CE-[0-9ABCDEFGHJKMNPQRSTVWXYZ]{5}-[0-9ABCDEFGHJKMNPQRSTVWXYZ]{2}$/);
   assert.equal(entity.live, true);
-  // And it is a uid the published register actually holds, so the page is
-  // never teaching a form by inventing an entity.
-  const uids = new Set(register.entities.map((row) => row[0]));
-  assert.ok(uids.has(entity.shape), `${entity.shape} is not in the published register`);
+  // Codex, PR #78: the previous version checked only that the uid EXISTS, and
+  // the page paired CE-00001-6S with Cherokee Nation while the register binds
+  // it to Asa'carsarmiut Tribe. A page arguing that an identifier resolves to
+  // one entity, printing one that resolves to another. Check the NAME.
+  const byUid = new Map(register.entities.map((row) => [row[0], row[1]]));
+  assert.ok(byUid.has(entity.shape), `${entity.shape} is not in the published register`);
+  assert.equal(
+    byUid.get(entity.shape),
+    WHY_BOTH.entity.name,
+    `${entity.shape} is not ${WHY_BOTH.entity.name} in the register`,
+  );
 
   const business = IDENTIFIERS.find((item) => item.id === "business");
   assert.match(business.shape, /^CB-\d{7}$/);
@@ -91,6 +119,12 @@ test("the shapes are the standard's, and the entity sample is a real uid", () =>
 test("the worked example uses the two shapes and keeps them apart", () => {
   assert.equal(WHY_BOTH.entity.id, IDENTIFIERS[0].shape);
   assert.equal(WHY_BOTH.business.id, IDENTIFIERS[1].shape);
+  // The worked example names a real nation by its real uid, checked both ways.
+  const byUid = new Map(register.entities.map((row) => [row[0], row[1]]));
+  assert.equal(byUid.get(WHY_BOTH.entity.id), WHY_BOTH.entity.name);
+  const byName = register.entities.filter((row) => row[1] === WHY_BOTH.entity.name);
+  assert.equal(byName.length, 1, `${WHY_BOTH.entity.name} is not unique in the register`);
+  assert.equal(byName[0][0], WHY_BOTH.entity.id);
   assert.ok(WHY_BOTH.entity.id.startsWith("CE-"));
   assert.ok(WHY_BOTH.business.id.startsWith("CB-"));
   assert.equal(WHY_BOTH.questions.length, 2);
@@ -118,6 +152,12 @@ test("the coverage figures are the generated file's, to the digit", () => {
   const num = (text) => Number(text.replace(/,/g, ""));
   assert.equal(LINKAGE_COVERAGE.linked, num(total[1]));
   assert.equal(LINKAGE_COVERAGE.rows, num(total[2]));
+  // Codex, PR #78: comparing two static things stays green while both go
+  // stale. The generated file states the date it was measured, so a
+  // regeneration moves that date, this fails, and the figures get re-read.
+  const measured = doc.match(/Measured (\d{4}-\d{2}-\d{2})/);
+  assert.ok(measured, "LINKAGE_COVERAGE.md no longer states when it was measured");
+  assert.equal(LINKAGE_COVERAGE.measuredOn, measured[1], "the file was re-measured; re-read its figures");
   // Both named extremes have to still be the extremes, or the page is holding
   // up a spread that has moved.
   const pcts = [...doc.matchAll(/^\| `[^`]+` \| `[^`]+` \|[^|]+\|[^|]+\| ([\d.]+)% \|/gm)].map((m) => Number(m[1]));
@@ -145,6 +185,15 @@ test("the business card states the exception rather than overclaiming", () => {
   assert.equal(count, 45, `the register holds ${count} of that class; the exception says forty-five`);
   assert.match(business.exception, /forty-five/i);
   assert.match(business.exception, /closed to new mints/i);
+  // Codex, PR #78: it said those firms HAVE equivalence rows and that every
+  // firm resolved from here CARRIES a business id only. Neither register
+  // exists. While `live` is false, nothing about a business id may be present
+  // tense.
+  if (!business.live) {
+    assert.match(business.exception, /when the business register is written/i);
+    assert.ok(!/\bgain an equivalence row to their business id\b/.test(business.exception));
+    assert.ok(!/\bcarries a business id only\b/.test(business.exception), "present tense about an unminted register");
+  }
 });
 
 test("the prose keeps the brand lock", () => {

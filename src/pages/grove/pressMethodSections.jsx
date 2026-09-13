@@ -282,11 +282,25 @@ export function IdentityPair() {
               <span>The register is being minted. The form and its rules are settled.</span>
             </p>
           )}
-          <p className="cp-idp__fields">
-            {identifier.fields.map((field) => (
-              <code key={field}>{field}</code>
-            ))}
-          </p>
+          {/* What ships, and what the standard renames it to. One row was
+              the specification's names alone, none of which is in a published
+              table: a customer following the page could not join an export. */}
+          {identifier.fields.length ? (
+            <p className="cp-idp__fields">
+              <span className="cp-idp__fieldcap">In the exports</span>
+              {identifier.fields.map((field) => (
+                <code key={field}>{field}</code>
+              ))}
+            </p>
+          ) : null}
+          {identifier.becoming?.length ? (
+            <p className="cp-idp__fields cp-idp__fields--soon">
+              <span className="cp-idp__fieldcap">Renaming to</span>
+              {identifier.becoming.map((field) => (
+                <code key={field}>{field}</code>
+              ))}
+            </p>
+          ) : null}
         </article>
       ))}
     </div>

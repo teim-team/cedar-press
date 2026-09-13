@@ -71,10 +71,25 @@ export const IDENTIFIERS = Object.freeze([
   Object.freeze({
     id: "entity",
     label: "Cedar entity id",
-    // Live, in data/spine/cedar_identity_register.csv, 1,916 published.
-    shape: "CE-00001-6S",
+    // Cherokee Nation's real uid, and the same one the worked example uses.
+    //
+    // Codex, PR #78: this was CE-00001-6S, which the published register binds
+    // to Asa'carsarmiut Tribe, and the worked example paired it with Cherokee
+    // Nation. A methods page whose whole argument is that identifiers resolve
+    // to one entity, printing an identifier that resolves to a different one.
+    // The test now checks the NAME the register gives the uid, not merely
+    // that the uid exists, which is the check that missed it.
+    shape: "CE-00134-BX",
     live: true,
-    fields: Object.freeze([
+    // Codex, PR #78: the card advertised the specification's role-specific
+    // names, and not one of them appears in a published table. `cedar_uid` is
+    // on 66. A customer following the page could not join a current export.
+    //
+    // Two rows now: what ships, and what the standard is renaming it to. The
+    // test holds `fields` against the real contracts and `becoming` against
+    // the specification, so neither half can drift into the other.
+    fields: Object.freeze(["cedar_uid"]),
+    becoming: Object.freeze([
       "native_entity_uid",
       "recipient_native_entity_uid",
       "owner_cedar_uid",
@@ -125,7 +140,9 @@ export const IDENTIFIERS = Object.freeze([
     // an identity.
     shape: "CB-0000001",
     live: false,
-    fields: Object.freeze(["business_uid"]),
+    // Nothing ships a business id yet, so there is no live column to name.
+    fields: Object.freeze([]),
+    becoming: Object.freeze(["business_uid"]),
     names:
       "One distinct business or enterprise. A tribal operating company, a subsidiary, a holding company, a vendor, a contractor, an acquisition target or a privately owned Native firm.",
     classes: Object.freeze(["Individually Native-owned business"]),
@@ -144,8 +161,13 @@ export const IDENTIFIERS = Object.freeze([
     // going forward and false about the firms that already exist. Said as
     // what it is: a rule with a dated exception, on the page, not in a
     // comment.
+    // Codex, PR #78: this said the 45 firms have equivalence rows and that
+    // every firm resolved from here carries a business id only. No CB- value
+    // and no equivalence row exists in data/spine, so both were present-tense
+    // claims about a register that has not been written. Future tense, which
+    // is also what the governing decision says.
     exception:
-      "Forty-five privately owned firms were minted into the entity register before this rule and keep their entity ids, with an equivalence row to their business id. The class is closed to new mints, so every firm resolved from here carries a business id only.",
+      "Forty-five privately owned firms were minted into the entity register before this rule and keep their entity ids. The class is closed to new mints: when the business register is written, those firms gain a business id with an equivalence row to their entity id, and every firm resolved after it carries a business id alone.",
   }),
 ]);
 
@@ -187,7 +209,7 @@ export const KEPT_OUTSIDE = Object.freeze([
  */
 export const WHY_BOTH = Object.freeze({
   entity: Object.freeze({
-    id: "CE-00001-6S",
+    id: "CE-00134-BX",
     name: "Cherokee Nation",
     role: "The Native government, in the entity register.",
   }),
@@ -257,6 +279,8 @@ export const WITHHELD_NOTE =
  * `pressIdentity.test.js` reads the file and fails if any figure drifts.
  */
 export const LINKAGE_COVERAGE = Object.freeze({
+  // The date the generated file states. A regeneration moves it, the test
+  // notices, and the figures above get updated with it.
   measuredOn: "2026-09-02",
   source: "docs/LINKAGE_COVERAGE.md",
   linked: 1485083,

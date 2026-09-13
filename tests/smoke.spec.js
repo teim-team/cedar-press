@@ -756,8 +756,14 @@ test.describe("Methods", () => {
     await expect(page.locator(".cp-idp__pending")).toContainText("being minted");
     // A nation and the company it owns are two subjects, and the page says so
     // with the ownership as a dated edge rather than a merged row.
-    await expect(page.locator(".cp-wb__id").first()).toHaveText(/^CE-/);
+    // The uid on the page must be the nation's real one. It was not: the
+    // example paired CE-00001-6S with Cherokee Nation, which the register
+    // binds to Asa'carsarmiut Tribe.
+    await expect(page.locator(".cp-wb__id").first()).toHaveText("CE-00134-BX");
+    await expect(page.locator(".cp-wb__card").first()).toContainText("Cherokee Nation");
     await expect(page.locator(".cp-wb__id").nth(1)).toHaveText(/^CB-/);
+    // The entity card advertises the column the exports actually carry.
+    await expect(page.locator(".cp-idp__card").first()).toContainText("cedar_uid");
     await expect(page.locator(".cp-wb__edgelabel")).toContainText(/effective dates/i);
     await expect(page.locator(".cp-wb__close")).toContainText("never goes in a business column");
     // Everything that can change is named as living outside the identifier.
