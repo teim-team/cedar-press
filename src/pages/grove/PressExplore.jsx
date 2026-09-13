@@ -747,18 +747,31 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return undefined;
+    // The fade lives on the wrapper and switches off at the right end, so a
+    // table that fits never wears a gradient suggesting more table.
+    const edge = () => {
+      const wrap = node.parentElement;
+      if (!wrap) return;
+      const done = node.scrollLeft + node.clientWidth >= node.scrollWidth - 2;
+      wrap.dataset.end = done ? "1" : "0";
+    };
     const measure = () => {
       node.style.setProperty("--vw", `${node.clientWidth}px`);
       const more = node.querySelector("th.cp-ex__more");
       const uid = node.querySelector("th.cp-ex__pin--uid");
       node.style.setProperty("--more-w", `${more ? more.getBoundingClientRect().width : 0}px`);
       node.style.setProperty("--uid-w", `${uid ? uid.getBoundingClientRect().width : 0}px`);
+      edge();
     };
     measure();
-    if (typeof ResizeObserver === "undefined") return undefined;
+    node.addEventListener("scroll", edge, { passive: true });
+    if (typeof ResizeObserver === "undefined") return () => node.removeEventListener("scroll", edge);
     const observer = new ResizeObserver(measure);
     observer.observe(node);
-    return () => observer.disconnect();
+    return () => {
+      node.removeEventListener("scroll", edge);
+      observer.disconnect();
+    };
   }, [columnsKey]);
   const universal = [
     ["entity", "Entity", true],
@@ -775,9 +788,14 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   const heads = view === "table" ? columns.map((c) => [c, labelFor(items[0]?.key, c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   const span = heads.length + 1;
   return (
-    // A scrollable region with no focusable child is unreachable by keyboard,
-    // and the fade on its right edge is what says it scrolls at all: the last
-    // column used to sit half-cut against the border and read as broken.
+    // The wrapper exists for the edge fade: every cell paints its own
+    // background, so a gradient on the scroller itself is painted over by
+    // the table. It sits outside the scroller, does not scroll, and is what
+    // says the table continues; without it the last column sat half-cut
+    // against a hard border and read as a rendering fault. The scroller
+    // takes keyboard focus, because a scrollable region with no focusable
+    // child cannot be reached without a mouse.
+    <div className="cp-ex__scrollwrap">
     <div className="cp-ex__scroll" ref={scrollRef} tabIndex={0} role="region" aria-label="Records, scroll sideways for more columns">
       <table className={`cp-ex__table cp-ex__table--${view}`}>
         <thead>
@@ -840,6 +858,7 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
           })}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

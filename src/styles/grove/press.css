@@ -2525,17 +2525,16 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 
 /* The table. Fixed to the card's width; the columns scroll inside it, and
  * the entity column stays put so a row never loses whose it is. */
-.teim-rd .cp-ex__scroll { overflow-x: auto; border-top: 1px solid var(--line); position: relative;
-  /* The fade is a background attached to the scroller, so it appears only
-     where there is more table to the right and vanishes when you reach the
-     end. A half-cut last column against a hard border reads as a rendering
-     bug rather than as "scroll me". */
-  background:
-    linear-gradient(to right, var(--bg) 30%, rgba(255, 255, 255, 0)) left center / 2.4rem 100% no-repeat,
-    linear-gradient(to left, var(--bg) 30%, rgba(255, 255, 255, 0)) right center / 2.4rem 100% no-repeat,
-    radial-gradient(farthest-side at 0 50%, rgba(10, 15, 38, 0.14), rgba(10, 15, 38, 0)) left center / 0.85rem 100% no-repeat,
-    radial-gradient(farthest-side at 100% 50%, rgba(10, 15, 38, 0.14), rgba(10, 15, 38, 0)) right center / 0.85rem 100% no-repeat;
-  background-attachment: local, local, scroll, scroll; }
+/* The scroller and the fade that says it scrolls.
+ *
+ * The fade cannot live on the scroller: every cell paints `background: var(--bg)`
+ * so a gradient underneath is covered by the table. It lives on a wrapper that
+ * does not scroll, is switched off when there is nothing more to the right
+ * (`data-end`), and never takes a pointer event. */
+.teim-rd .cp-ex__scrollwrap { position: relative; }
+.teim-rd .cp-ex__scrollwrap::after { content: ''; position: absolute; top: 0; bottom: 0; right: 0; width: 2.6rem; pointer-events: none; background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--bg) 78%); opacity: 1; transition: opacity 0.18s ease; }
+.teim-rd .cp-ex__scrollwrap[data-end="1"]::after { opacity: 0; }
+.teim-rd .cp-ex__scroll { overflow-x: auto; border-top: 1px solid var(--line); }
 .teim-rd .cp-ex__scroll:focus-visible { outline: 2px solid var(--dteal); outline-offset: -2px; }
 .teim-rd .cp-ex__table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.84rem; line-height: 1.4; color: var(--ink); }
 .teim-rd .cp-ex__table th, .teim-rd .cp-ex__table td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; text-align: left; white-space: nowrap; max-width: 24rem; overflow: hidden; text-overflow: ellipsis; background: var(--bg); }
