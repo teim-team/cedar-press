@@ -299,7 +299,12 @@
 
 
 /* The front page: the newest brief leads, the rest stack beside it. */
+/* .cp-art carries min-width: 300px for the snapping row it was written for.
+ * In this grid that floor is wider than the track on a 320px phone, so the
+ * card ran 23px past its own column and the body clipped the last characters
+ * of every line. In a grid the track does the sizing. */
 .teim-rd .cp-artgrid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 1.4rem; align-items: stretch; }
+.teim-rd .cp-artgrid > *, .teim-rd .cp-artstack > * { min-width: 0; }
 @media (max-width: 980px) { .teim-rd .cp-artgrid { grid-template-columns: 1fr; } }
 .teim-rd .cp-art--lead .cp-art__title { font-size: 1.62rem; line-height: 1.18; }
 .teim-rd .cp-art--lead .cp-art__dek { font-size: 1rem; }
@@ -647,7 +652,10 @@
 /* ── Settings ────────────────────────────────────────────────────────────
  * The account and the errands, in cards across the measure rather than a
  * column down the left. */
-.teim-rd .cp-set { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.1rem; margin-top: 2rem; align-items: start; }
+/* min() on the track floor: a bare minmax(19rem, 1fr) is a 19rem MINIMUM,
+ * so at 320px the card ran 20px past its own grid and the last characters
+ * of every line were clipped by the body. Same reason for .cp-art above. */
+.teim-rd .cp-set { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr)); gap: 1.1rem; margin-top: 2rem; align-items: start; }
 .teim-rd .cp-set__card { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.3rem 1.4rem; background: var(--bg); display: flex; flex-direction: column; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
 .teim-rd .cp-set__card:hover { border-color: var(--teal); box-shadow: 0 10px 26px rgba(10, 15, 38, 0.07); }
 .teim-rd .cp-set__cap { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.9rem; }
@@ -2373,6 +2381,7 @@
 .teim-rd .cp-ex__pickcue { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.8rem; }
 .teim-rd .cp-ex__pick[open] .cp-ex__pickbtn { border-color: var(--dteal); }
 .teim-rd .cp-ex__panel { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; width: min(28rem, 90vw); max-height: 24rem; overflow: auto; padding: 0.7rem; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 12px 30px rgba(10, 15, 38, 0.12); }
+.teim-rd .cp-ex__panel.is-right { left: auto; right: 0; }
 /* A selected tile stays lit while the viewer shows its collection. */
 .teim-rd .cp-badge.is-selected { box-shadow: 0 0 0 3px var(--teal); }
 .teim-rd .cp-band--fill .cp-badge.is-selected { box-shadow: 0 0 0 3px #fff; }

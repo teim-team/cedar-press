@@ -183,6 +183,30 @@ function writeSaved(list) {
  */
 function Picker({ label, value, children, testId }) {
   const ref = useRef(null);
+  // A panel anchored left: 0 under a control near the right of a wide filter
+  // bar runs off the screen. At 1280 the Entity type panel ended 178px past
+  // the viewport with nothing to scroll it back: the page does not scroll
+  // horizontally, so the reader simply could not see the right of it. Measured
+  // on open, because the bar reflows with the window and with the number of
+  // filters the collection has.
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    const place = () => {
+      const panel = node.querySelector(".cp-ex__panel");
+      if (!panel || !node.open) return;
+      panel.classList.remove("is-right");
+      const room = document.documentElement.clientWidth;
+      if (panel.getBoundingClientRect().right > room - 8) panel.classList.add("is-right");
+    };
+    const onToggle = () => place();
+    node.addEventListener("toggle", onToggle);
+    window.addEventListener("resize", place);
+    return () => {
+      node.removeEventListener("toggle", onToggle);
+      window.removeEventListener("resize", place);
+    };
+  }, []);
   useEffect(() => {
     const node = ref.current;
     if (!node) return undefined;
