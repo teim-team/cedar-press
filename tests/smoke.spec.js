@@ -107,13 +107,15 @@ test.describe("the gate", () => {
     await page.goto("/");
     await page.locator(".cp-dc__fab").click();
     await expect(page.locator(".cp-dc__panel")).toBeVisible();
-    await expect(page.locator(".cp-dc__id")).toContainText("Prepared answers");
+    await expect(page.locator(".cp-dc__context")).toContainText("Cedar Press");
+    // The standing disclaimer is the one line the panel owes its reader.
+    await expect(page.locator(".cp-dc__disclaimer")).toContainText("Cedar can make mistakes");
     await page.locator(".cp-dc__chip").first().click();
-    await expect(page.locator(".cp-dc__turn--cedar").nth(1)).toBeVisible();
+    await expect(page.locator(".cp-dc__msg--bot").nth(1)).toBeVisible();
     // A question it has nothing for is refused, not answered.
-    await page.locator(".cp-dc__field input").fill("what is the weather in Oslo");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
-    await expect(page.locator(".cp-dc__turn--cedar").last()).toContainText("do not have that one");
+    await page.locator(".cp-dc__input").fill("what is the weather in Oslo");
+    await page.locator(".cp-dc__send").click();
+    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText("do not have that one");
     expect(errors).toEqual([]);
   });
 
@@ -121,8 +123,8 @@ test.describe("the gate", () => {
     await page.goto("/");
     await page.waitForSelector('[data-testid="stage-record"]');
     await page.locator('[data-testid="collection-stage"]').getByRole("button", { name: /Ask Cedar/ }).click();
-    await expect(page.locator(".cp-dc__turn--you").last()).toContainText("Federal Funding");
-    await expect(page.locator(".cp-dc__turn--cedar").last()).toContainText("federal government");
+    await expect(page.locator(".cp-dc__msg--you").last()).toContainText("Federal Funding");
+    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText("federal government");
   });
 
   test("the door does not scroll sideways", async ({ page }) => {

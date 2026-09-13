@@ -20,12 +20,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
-import {
-  DOOR_CHIPS,
-  DOOR_INTENTS,
-  answer as answerFor,
-  intentForCollection,
-} from "../../features/grove/doorCedar.js";
+import { DOOR_CHIPS, answer as answerFor, intentForCollection } from "../../features/grove/doorCedar.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
@@ -112,15 +107,16 @@ export default function PressDoorCedar() {
     <div className="cp-dc">
       {open ? (
         <section className="cp-dc__panel" ref={panelRef} aria-label="Ask Cedar">
+          {/* The identity band the app and lumecon.ai both use: status dot,
+              uppercase title, context line, all white on the one teal that
+              carries white text. */}
           <header className="cp-dc__head">
-            <span className="cp-dc__id">
-              <img className="cp-dc__mark" src={MARK} alt="" aria-hidden="true" />
-              <span>
-                <b>Ask Cedar</b>
-                {/* Said plainly. A visitor should not have to work out
-                    whether a model is answering. */}
-                <small>Prepared answers about Cedar Press</small>
+            <span className="cp-dc__heading">
+              <span className="cp-dc__titlerow">
+                <span className="cp-dc__statusdot" aria-hidden="true" />
+                <span className="cp-dc__title">Ask Cedar</span>
               </span>
+              <span className="cp-dc__context">Cedar Press · Questions about the collections</span>
             </span>
             <button type="button" className="cp-dc__close" onClick={() => setOpen(false)} aria-label="Close Cedar">
               <span aria-hidden="true">&times;</span>
@@ -128,66 +124,87 @@ export default function PressDoorCedar() {
           </header>
 
           <div className="cp-dc__thread" role="log" aria-live="polite">
-            <div className="cp-dc__turn cp-dc__turn--cedar">
-              <p>
-                I can tell you what each of the collections holds, where the records come from, how they
-                are linked to nations, and how to get access. Pick a question or type your own.
-              </p>
+            <div className="cp-dc__msg cp-dc__msg--bot">
+              <span className="cp-dc__avatar" aria-hidden="true">
+                <img src={MARK} alt="" width="30" height="30" />
+              </span>
+              <div className="cp-dc__bubble">
+                <p>
+                  I can tell you what each collection holds, where the records come from, how they
+                  reach the right nation, and how to get access. Pick a question or type your own.
+                </p>
+              </div>
             </div>
             {thread.map((item) =>
               item.role === "you" ? (
-                <div className="cp-dc__turn cp-dc__turn--you" key={item.key}>
-                  <p>{item.text}</p>
+                <div className="cp-dc__msg cp-dc__msg--you" key={item.key}>
+                  <div className="cp-dc__bubble">
+                    <p>{item.text}</p>
+                  </div>
                 </div>
               ) : (
-                <div className="cp-dc__turn cp-dc__turn--cedar" key={item.key}>
-                  {item.text.split("\n\n").map((para, i) => <p key={i}>{para}</p>)}
-                  {item.intent?.links?.length ? (
-                    <p className="cp-dc__links">
-                      {item.intent.links.map((key) => {
-                        const link = LINKS[key];
-                        if (!link) return null;
-                        // An internal route stays inside the app; a full
-                        // reload here would throw the conversation away.
-                        return link.external ? (
-                          <a key={key} href={link.href} target="_blank" rel="noreferrer">{link.label} &#8594;</a>
-                        ) : (
-                          <Link key={key} to={link.to} onClick={() => setOpen(false)}>{link.label} &#8594;</Link>
-                        );
-                      })}
-                    </p>
-                  ) : null}
+                <div className="cp-dc__msg cp-dc__msg--bot" key={item.key}>
+                  <span className="cp-dc__avatar" aria-hidden="true">
+                    <img src={MARK} alt="" width="30" height="30" />
+                  </span>
+                  <div className="cp-dc__bubble">
+                    {item.text.split("\n\n").map((para, i) => <p key={i}>{para}</p>)}
+                    {item.intent?.links?.length ? (
+                      <p className="cp-dc__links">
+                        {item.intent.links.map((key) => {
+                          const link = LINKS[key];
+                          if (!link) return null;
+                          // An internal route stays inside the app; a full
+                          // reload would throw the conversation away.
+                          return link.external ? (
+                            <a key={key} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+                          ) : (
+                            <Link key={key} to={link.to} onClick={() => setOpen(false)}>{link.label}</Link>
+                          );
+                        })}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               ),
             )}
+            {chips.length ? (
+              <div className="cp-dc__quickreply">
+                {chips.slice(0, 5).map((intent) => (
+                  <button type="button" key={intent.id} className="cp-dc__chip" onClick={() => askChip(intent)}>
+                    {intent.chip}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <div ref={endRef} />
           </div>
 
-          {chips.length ? (
-            <div className="cp-dc__chips">
-              {chips.slice(0, 6).map((intent) => (
-                <button type="button" key={intent.id} className="cp-dc__chip" onClick={() => askChip(intent)}>
-                  {intent.chip}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
           <form className="cp-dc__form" onSubmit={submit} autoComplete="off">
-            <label className="cp-dc__field">
+            <label className="cp-dc__inputwrap">
               <span className="cp-badge__sr">Ask Cedar a question</span>
               <input
                 ref={inputRef}
+                className="cp-dc__input"
                 type="text"
                 value={asked}
-                placeholder="Ask about a collection…"
+                placeholder="Ask about a collection"
                 onChange={(event) => setAsked(event.target.value)}
               />
             </label>
-            <button type="submit" className="cp-btn cp-btn--primary" disabled={!asked.trim()}>
-              Ask
+            <button type="submit" className="cp-dc__send" disabled={!asked.trim()} aria-label="Send">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 12h15M13 6l6 6-6 6" />
+              </svg>
             </button>
           </form>
+          {/* The one line of expectation-setting the panel owes its reader,
+              in the same place and the same words the marketing site uses. */}
+          <p className="cp-dc__disclaimer">
+            Cedar can make mistakes. Verify anything important against the methods page or the
+            release it came from. This page answers from prepared material and does not query the
+            collections.
+          </p>
         </section>
       ) : null}
 
@@ -197,10 +214,10 @@ export default function PressDoorCedar() {
         onClick={() => setOpen((was) => !was)}
         aria-expanded={open}
       >
-        <span className="cp-dc__dot" aria-hidden="true" />
+        <span className="cp-dc__statusdot" aria-hidden="true" />
         <span className="cp-dc__fabid">
           <b>Ask Cedar</b>
-          <small>{DOOR_INTENTS.length} prepared answers</small>
+          <small>Cedar Press</small>
         </span>
       </button>
     </div>

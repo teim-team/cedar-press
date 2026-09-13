@@ -3,43 +3,51 @@
  *
  * The source systems the collections are built from, for the door.
  *
- * WHY THIS IS A LIST AND NOT A SENTENCE
- * Each collection's descriptor carries its sources as prose
- * (`data/cedar/collections.manifest.json`), which is the right shape for a
- * collection page and the wrong shape for a band that has to name every
- * system at once. This file is that prose broken into the systems it names,
- * with the collections each one serves.
+ * ONE ENTRY PER KIND OF SOURCE, NOT ONE PER SITE
+ * The Owned collection alone reads 174 source programs, most of them a
+ * single nation's own registry. Naming them individually would be a wall of
+ * 174 near-identical lines that says less than one line saying what kind of
+ * thing they are. So "Tribal newsletters and tribal press" is one entry, and
+ * so is "Member-owned business directories", and neither is split.
  *
- * NOTHING HERE MAY BE INVENTED
- * Every entry carries `match`: a string that must appear, case-insensitively,
- * in the `sources` prose of at least one collection it claims. `pressSources.test.js`
- * asserts that for every entry in both directions, so a system cannot be
- * displayed on the door unless a collection descriptor actually names it, and
- * a descriptor cannot quietly drop a system that the door still advertises.
- * When the workspace adds a source to a descriptor, add it here; when it
- * removes one, the test fails until this file follows.
+ * NOTHING HERE MAY BE INVENTED, AND THERE ARE TWO KINDS OF EVIDENCE
+ * - A `collections` entry is evidenced by the `sources` prose of a
+ *   collection descriptor (`data/cedar/collections.manifest.json`).
+ * - A `registry` entry is evidenced by the source registry itself
+ *   (`cedar_source_registry/sources.jsonl`), whose 174 programs carry a
+ *   `source_type`. These are the kinds of source the Owned collection reads
+ *   that no descriptor sentence enumerates: state certified-vendor
+ *   directories, regional chambers, artist directories and the rest.
  *
- * WHAT IS DELIBERATELY ABSENT
- * - Cedar's own federal contracting record, which the Deals descriptor cites
- *   as a source where a transaction is visible only there. It is real and it
- *   is not an outside system, and this band is about what the collections
- *   begin from.
- * - EDGAR and the NIGC. Both are genuinely behind Cedar work — EDGAR through
- *   the Deals release's SEC and EDGAR addition tables, the NIGC through
- *   Gaming Intelligence — but neither is named in a storefront collection's
- *   `sources` prose today, and the Gaming collection is not sold here at all
- *   (`EXCLUDED_COLLECTIONS`). They belong on this band the day the workspace
- *   names them in a descriptor, and not before.
+ * `pressSources.test.js` holds every entry to its evidence, and holds each
+ * registry entry's declared count to the registry's real one, so the door
+ * cannot advertise a source Cedar does not read and cannot quietly keep one
+ * the workspace has dropped.
+ *
+ * NO NEAR-DUPLICATES
+ * Three separate entries used to name the same ANCSA corporation filings,
+ * and three more split "enterprise registers" across two collections. One
+ * source, one line. The test refuses a repeated display name; the rest is
+ * judgement, and the rule is that if two lines would send a reader to the
+ * same place they are one line.
+ *
+ * STILL ABSENT, AND WHY
+ * EDGAR and the NIGC. Both are genuinely behind Cedar work — EDGAR through
+ * the Deals release's SEC and EDGAR addition tables, the NIGC through Gaming
+ * Intelligence — and neither is named in a storefront collection's `sources`
+ * prose or in the registry. They belong here the day the workspace names
+ * them, and not before.
  */
 
 import { LAUNCH_COLLECTION } from "./collection.js";
 
 /**
- * The source systems, grouped by the kind of record they hold. The grouping
- * is for the reader; the door renders one continuous run.
+ * The source kinds, grouped by the sort of record they hold. The grouping is
+ * for the reader; the door renders one continuous run.
  *
  * `name` is what the door shows. `match` is the evidence, defaulting to the
- * name where the prose already says it that way.
+ * name where the prose already says it that way. `registry` marks an entry
+ * evidenced by the source registry, with `programs` as its count there.
  */
 export const SOURCE_GROUPS = Object.freeze([
   Object.freeze({
@@ -69,18 +77,15 @@ export const SOURCE_GROUPS = Object.freeze([
     label: "Advocacy, consultation and dockets",
     sources: Object.freeze([
       { name: "Senate and House lobbying disclosure", collections: ["lobbying"] },
-      { name: "Federal Register consultation notices", match: "Federal Register consultation", collections: ["lobbying"] },
-      { name: "Ex parte notices", match: "ex parte notices", collections: ["lobbying"] },
-      { name: "FERC dockets", match: "FERC and NRC dockets", collections: ["lobbying"] },
-      { name: "NRC dockets", match: "FERC and NRC dockets", collections: ["lobbying"] },
-      { name: "IBIA appeals", match: "IBIA and IBLA appeals", collections: ["lobbying"] },
-      { name: "IBLA appeals", match: "IBIA and IBLA appeals", collections: ["lobbying"] },
+      { name: "Federal Register consultation and ex parte notices", collections: ["lobbying"] },
+      { name: "FERC and NRC dockets", collections: ["lobbying"] },
+      { name: "IBIA and IBLA appeals", collections: ["lobbying"] },
       { name: "regulations.gov", collections: ["lobbying"] },
     ]),
   }),
   Object.freeze({
     id: "filings",
-    label: "Nonprofit and tax filings",
+    label: "Tax and nonprofit filings",
     sources: Object.freeze([
       { name: "IRS Business Master File", collections: ["nonprofits"] },
       { name: "Form 990 e-file returns", collections: ["nonprofits"] },
@@ -97,7 +102,7 @@ export const SOURCE_GROUPS = Object.freeze([
       { name: "MMS American Indian collections", collections: ["natural-resources"] },
       { name: "OSMRE Abandoned Mine Land distributions", collections: ["natural-resources"] },
       { name: "State severance distributions", match: "state severance distributions", collections: ["natural-resources"] },
-      { name: "ANCSA 7(i) and 7(j) filings", match: "ANCSA section 7(i) and 7(j) filings", collections: ["natural-resources"] },
+      { name: "ANCSA section 7(i) and 7(j) filings", collections: ["natural-resources"] },
       { name: "Osage Minerals Council payment history", collections: ["natural-resources"] },
     ]),
   }),
@@ -105,17 +110,30 @@ export const SOURCE_GROUPS = Object.freeze([
     id: "published",
     label: "What nations and corporations publish",
     sources: Object.freeze([
-      { name: "Tribal TERO offices", collections: ["owned"] },
-      { name: "Business licensing departments", match: "business licensing departments", collections: ["owned"] },
-      { name: "Enterprise registers", match: "enterprise registers", collections: ["owned", "need"] },
-      { name: "Tribal newsletters and tribal press", collections: ["deals"] },
-      { name: "Trade and journalist coverage", match: "trade and journalist coverage", collections: ["deals"] },
-      { name: "ANCSA shareholder filings", collections: ["deals"] },
-      { name: "Alaska Division of Banking and Securities", collections: ["need"] },
-      { name: "ANCSA audited filings", collections: ["contractors"] },
-      { name: "Nations’ “Our Companies” registers", match: "Our Companies", collections: ["need"] },
+      { name: "Tribal TERO and licensing offices", match: "Tribal TERO offices", collections: ["owned"] },
+      { name: "Nation enterprise registers", match: "enterprise registers", collections: ["owned", "need"] },
       { name: "ANC and NHO subsidiary directories", collections: ["need"] },
       { name: "Parent-published subsidiary disclosures", match: "parent-published subsidiary disclosures", collections: ["contractors"] },
+      // One entry, not three: the Deals, Contractors and NEED descriptors
+      // all point at the same filings made under Alaska Statute 45.55.139.
+      { name: "ANCSA corporation filings", match: "Alaska Statute 45.55.139", collections: ["contractors", "need"] },
+      { name: "Tribal newsletters and tribal press", collections: ["deals"] },
+      { name: "Trade and journalist coverage", match: "trade and journalist coverage", collections: ["deals"] },
+    ]),
+  }),
+  Object.freeze({
+    id: "registry",
+    label: "The tribal business source registry",
+    sources: Object.freeze([
+      { name: "Member-owned business directories", match: "Member-owned directory", registry: true, programs: 22 },
+      { name: "Cross-tribal business directories", match: "Cross-tribal directory", registry: true, programs: 8 },
+      { name: "Alaska Native corporation shareholder directories", match: "Alaska Native corporation shareholder directory", registry: true, programs: 7 },
+      { name: "Regional chamber directories", match: "Regional chamber directory", registry: true, programs: 5 },
+      { name: "Native artist directories", match: "Artist directory", registry: true, programs: 4 },
+      { name: "Tribal enterprise pages", match: "Tribal enterprise page", registry: true, programs: 3 },
+      { name: "State certified-vendor directories", match: "State certified-vendor directory", registry: true, programs: 2 },
+      { name: "Chamber member directories", match: "Chamber member directory", registry: true, programs: 2 },
+      { name: "Tribe-linked CDFI directories", match: "Tribe-linked CDFI directory", registry: true, programs: 1 },
     ]),
   }),
 ]);
@@ -127,32 +145,39 @@ export const PRESS_SOURCES = Object.freeze(
   ),
 );
 
-/** How many source systems the door can name. Counted, never typed. */
+/** How many kinds of source the door can name. Counted, never typed. */
 export const SOURCE_COUNT = PRESS_SOURCES.length;
+
+/**
+ * Source programs in the registry behind the registry-evidenced kinds. The
+ * registry holds 174 in total; this counts the ones the door names a kind
+ * for, so the figure and the list can never disagree.
+ */
+export const REGISTRY_PROGRAMS = PRESS_SOURCES.reduce(
+  (sum, source) => sum + (source.registry ? source.programs : 0),
+  0,
+);
 
 /** A collection's `sources` prose, by id. The evidence the test reads. */
 export const SOURCE_PROSE = Object.freeze(
   Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.sources])),
 );
 
-/** The string that has to appear in a descriptor for this entry to ship. */
+/** The string that has to appear in the evidence for this entry to ship. */
 export function evidenceFor(source) {
   return (source.match ?? source.name).toLowerCase();
 }
 
+const fold = (text) =>
+  String(text ?? "").toLowerCase().replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+
 /**
  * Whether a collection descriptor names this source. Curly quotes are folded
- * to straight ones first: the NEED descriptor writes “Our Companies” with
- * typographic quotes and a list written by hand should not have to match the
- * glyph to be correct.
+ * to straight ones first: a descriptor written with typographic quotes should
+ * not force a hand-written list to match the glyph.
  */
 export function isEvidenced(source, prose = SOURCE_PROSE) {
-  const needle = evidenceFor(source).replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
-  return source.collections.some((id) =>
-    String(prose[id] ?? "")
-      .toLowerCase()
-      .replace(/[“”]/g, '"')
-      .replace(/[‘’]/g, "'")
-      .includes(needle),
-  );
+  if (source.registry) return true; // the test checks these against the registry
+  const needle = fold(evidenceFor(source));
+  return source.collections.some((id) => fold(prose[id]).includes(needle));
 }

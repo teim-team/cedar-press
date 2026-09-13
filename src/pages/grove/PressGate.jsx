@@ -117,7 +117,7 @@ const PROOF_POINTS = [
   {
     id: "collections",
     label: "Documented source records",
-    body: "Federal systems, tribal publications and agency dockets, assembled into one collection for the first time.",
+    body: "Federal systems, tribal publications and agency dockets are assembled here into one collection for the first time.",
     icon: OriginalCollectionsIcon,
   },
   {
@@ -129,7 +129,7 @@ const PROOF_POINTS = [
   {
     id: "credible",
     label: "Published with its limits",
-    body: "Inclusion rules, known gaps and corrections ship with every collection, built by Indigenous researchers with Federal Reserve and university experience.",
+    body: "Every collection ships its inclusion rules, its known gaps and its corrections. Indigenous researchers with Federal Reserve and university experience build them.",
     icon: CredibleResearchIcon,
   },
   {
@@ -468,8 +468,8 @@ export default function PressGate({ user }) {
             </h1>
             <p className="cp-hero3__lede cp-fade">
               Original collections built from fragmented records, connected through original
-              research, and maintained as Indian Country changes. Twelve collections, every
-              record traceable to its source.
+              research, and maintained as Indian Country changes. Every record traces back to the
+              document it came from.
             </p>
             <div className="cp-hero3__cta cp-fade">
               <a className="cp-btn cp-btn--primary cp-btn--lg" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
@@ -551,7 +551,8 @@ export default function PressGate({ user }) {
             </div>
             </div>
             <figcaption className="cp-fade">
-              Live preview. Six of ten sample records per collection, from the current release.
+              A live preview. Each collection shows six of the ten sample records in its
+              current release.
             </figcaption>
           </figure>
         </div>
@@ -570,7 +571,7 @@ export default function PressGate({ user }) {
               Every collection begins with documented source records
             </Link>
             <span className="cp-hero3__proofcount">
-              {SOURCE_COUNT} source systems · {STOREFRONT_CATALOG.length} collections
+              {SOURCE_COUNT} kinds of source · {STOREFRONT_CATALOG.length} collections
             </span>
           </div>
           <div className="cp-hero3__marqwrap">
@@ -599,10 +600,10 @@ export default function PressGate({ user }) {
                   hanging. This answers it in a sentence, and the four steps
                   below are that sentence in order. */}
               <p className="cp-why__lede cp-fade">
-                A federal filing names a vendor, not a nation. A notice names a party, not the
-                government behind it. Cedar takes {SOURCE_COUNT} source systems and does the work
-                between them: resolve them to the entity, publish the limits, keep them current,
-                and answer questions against them.
+                A federal contract names a vendor. It does not say which nation owns that vendor,
+                and no public system will tell you. Cedar reads {SOURCE_COUNT} kinds of source and does
+                the work in between. It resolves each record to the entity behind it, publishes what it
+                could not resolve, keeps the collections current, and answers questions against them.
               </p>
             </div>
             <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
