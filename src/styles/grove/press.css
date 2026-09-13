@@ -1126,6 +1126,69 @@
 /* ── What Cedar will not do ─────────────────────────────────────────────
  * Four commitments, each on its own rule: restraint set like the promises
  * it is, not folded into a paragraph. */
+/* ── The twelve collections, as a strip ──────────────────────────────────
+ * Between the section tiles and the priorities block on the overview, which
+ * was the page's one real gap. Point-to-read, same as the tiles above it and
+ * the shelves: the answer lands in the line under the grid and the selection
+ * is sticky, so it can be read at leisure.
+ */
+.teim-rd .cp-cstrip { max-width: 1560px; margin: 2.6rem auto 0; padding: 0 2.4rem; }
+.teim-rd .cp-cstrip__grid { list-style: none; margin: 0.9rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.6rem; }
+.teim-rd .cp-cstrip__tile { display: flex; align-items: center; gap: 0.6rem; min-height: 52px; padding: 0.6rem 0.7rem; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); text-decoration: none; transition: border-color 0.16s ease, background 0.16s ease, transform 0.18s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-cstrip__tile:hover, .teim-rd .cp-cstrip__tile.is-on { border-color: var(--dteal); background: var(--teal-tint); transform: translateY(-1px); }
+.teim-rd .cp-cstrip__tile:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-cstrip__mark { display: grid; place-items: center; width: 26px; height: 26px; flex: none; color: var(--dteal); }
+.teim-rd .cp-cstrip__mark svg { width: 20px; height: 20px; }
+.teim-rd .cp-cstrip__name { font-family: var(--sans); font-size: 0.76rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.008em; color: var(--ink); overflow-wrap: anywhere; }
+/* A collection this plan does not open still shows: knowing what exists is
+   the point. It is quieter, and the link still works, because the shelf page
+   is where the upgrade is explained. */
+.teim-rd .cp-cstrip__tile.is-locked { border-style: dashed; }
+.teim-rd .cp-cstrip__tile.is-locked .cp-cstrip__mark { color: var(--muted); }
+.teim-rd .cp-cstrip__tile.is-locked .cp-cstrip__name { color: var(--ink-2); }
+.teim-rd .cp-cstrip__note { font-size: 0.94rem; line-height: 1.6; color: var(--ink-2); margin: 0.9rem 0 0; min-height: 3.1em; max-width: 92ch; }
+.teim-rd .cp-cstrip__note b { color: var(--ink); }
+.teim-rd .cp-cstrip__meta { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+@media (max-width: 1080px) { .teim-rd .cp-cstrip__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 720px) {
+  .teim-rd .cp-cstrip { padding: 0 1.1rem; }
+  .teim-rd .cp-cstrip__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .teim-rd .cp-cstrip__note { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-cstrip__tile { transition: none; } .teim-rd .cp-cstrip__tile:hover { transform: none; } }
+
+/* ── The question mark ───────────────────────────────────────────────────
+ * One control, two behaviours, decided by the pointer: a mouse hovers, a
+ * thumb taps and it latches. Both take keyboard focus and both close on
+ * Escape. The panel is absolutely positioned, so nothing it annotates
+ * reflows when it opens.
+ */
+.teim-rd .cp-ex1 { position: relative; display: inline-flex; vertical-align: baseline; margin-left: 0.3rem; }
+.teim-rd .cp-ex1__btn { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--bg); color: var(--muted); font-family: var(--sans); font-size: 0.66rem; font-weight: 800; line-height: 1; cursor: help; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
+.teim-rd .cp-ex1__btn:hover, .teim-rd .cp-ex1__btn.is-open { color: #fff; border-color: var(--dteal); background: var(--dteal); }
+.teim-rd .cp-ex1__btn:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+/* 44px of thumb around a 17px circle, on touch, the way every other small
+   control on this service does it. */
+@media (hover: none) {
+  .teim-rd .cp-ex1__btn { cursor: pointer; }
+  .teim-rd .cp-ex1__btn::after { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+}
+.teim-rd .cp-ex1__panel { position: absolute; z-index: 40; top: calc(100% + 0.5rem); left: -0.4rem; width: max-content; max-width: min(30rem, calc(100vw - 2rem)); padding: 0.85rem 1rem; border: 1px solid var(--line); border-top: 2px solid var(--dteal); border-radius: 3px; background: var(--bg); box-shadow: 0 14px 36px -20px rgba(10, 15, 38, 0.4); font-family: var(--sans); font-size: 0.85rem; font-weight: 400; line-height: 1.55; letter-spacing: normal; text-transform: none; color: var(--ink-2); text-align: left; white-space: normal; }
+.teim-rd .cp-ex1__panel.is-flipped { left: auto; right: -0.4rem; }
+.teim-rd .cp-ex1__panel.is-open { animation: cp-ex1-in 0.16s ease-out both; }
+@keyframes cp-ex1-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-ex1__panel.is-open { animation: none; } }
+.teim-rd .cp-ex1__panel p { margin: 0 0 0.6rem; }
+.teim-rd .cp-ex1__panel p:last-child { margin-bottom: 0; }
+.teim-rd .cp-ex1__panel b { color: var(--ink); }
+.teim-rd .cp-ex1__cap { display: block; font-family: var(--mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.35rem; }
+/* On a phone the panel is pinned to the page gutters rather than to the
+   button, because a 30rem panel hanging off a word mid-paragraph has nowhere
+   to go on a 390px screen. */
+@media (max-width: 560px) {
+  .teim-rd .cp-ex1__panel, .teim-rd .cp-ex1__panel.is-flipped { position: fixed; left: 1rem; right: 1rem; top: auto; bottom: 1rem; width: auto; max-width: none; max-height: 55vh; overflow-y: auto; box-shadow: 0 -8px 40px -12px rgba(10, 15, 38, 0.45); }
+}
+
 /* ── The identity layer ───────────────────────────────────────────────────
  * The pair, the four linkage moves and the loop. The one place on the site
  * where an identifier is shown at the size a customer would transcribe it,
@@ -1189,6 +1252,18 @@
   .teim-rd .cp-wb__asks { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { .teim-rd .cp-wb__card { transition: none; } .teim-rd .cp-wb__card:hover { transform: none; } }
+
+/* Why a row can carry no entity. Two states are by design and one is work
+ * still to do, and the tag says which so a reader is not left to guess that
+ * a 6% figure is 94% failure. */
+.teim-rd .cp-ur { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
+.teim-rd .cp-ur__item { border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 3px; padding: 1rem 1.1rem; background: var(--bg); }
+.teim-rd .cp-ur__item.is-by-design { border-left-color: var(--teal); background: var(--teal-tint); }
+.teim-rd .cp-ur__tag { display: inline-block; font-family: var(--mono); font-size: 0.53rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-ur__item.is-by-design .cp-ur__tag { color: var(--dteal); }
+.teim-rd .cp-ur__label { font-family: var(--sans); font-size: 0.95rem; font-weight: 800; letter-spacing: -0.014em; color: var(--ink); margin: 0.4rem 0 0.4rem; }
+.teim-rd .cp-ur__body { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2); margin: 0; }
+@media (max-width: 860px) { .teim-rd .cp-ur { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; } }
 
 /* Kept outside the identifier. */
 .teim-rd .cp-ko { list-style: none; margin: 1.8rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6rem 2.4rem; }

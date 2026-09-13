@@ -76,6 +76,7 @@ import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
+import Explain from "./Explain";
 import { TierName } from "./TierName";
 
 const REGISTER_PATH = "/data/cedar/register.json";
@@ -522,6 +523,39 @@ function groupColumns(columns, key) {
   const main = listed.length ? listed : columns;
   const known = new Set(main);
   return { main, technical: columns.filter((c) => !known.has(c)) };
+}
+
+/**
+ * The technicalities behind a collection, in a question mark.
+ *
+ * Everything here is the launch descriptor's own prose: `method`, `sources`
+ * and `limits`, plus the catalog's `linkage`. The panel writes none of it, so
+ * it cannot say something the collection does not, and a descriptor change
+ * moves the panel with it.
+ */
+function CollectionExplain({ id, name }) {
+  const launch = LAUNCH_COLLECTION.find((entry) => entry.id === id);
+  const catalog = PRESS_CATALOG_BY_ID[id];
+  if (!launch && !catalog) return null;
+  // No `limits` field exists on a descriptor yet. When one does, it belongs
+  // in this list and nowhere else; the panel will pick it up unchanged.
+  const rows = [
+    ["How it is built", launch?.method],
+    ["What it reads", launch?.sources],
+    ["How a record reaches its entity", catalog?.linkage],
+    ["Coverage", catalog?.coverage],
+  ].filter(([, body]) => typeof body === "string" && body.trim());
+  if (!rows.length) return null;
+  return (
+    <Explain label={name}>
+      {rows.map(([cap, body]) => (
+        <p key={cap}>
+          <span className="cp-ex1__cap">{cap}</span>
+          {body}
+        </p>
+      ))}
+    </Explain>
+  );
 }
 
 function Human({ column, value, contract, item = null }) {
@@ -1162,6 +1196,12 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           {single ? (
             <p className="cp-ex__scope" data-testid="explore-scope">
               <b>{single.entry.name}.</b> {single.entry.blurb}
+              {/* Every collection has its own technicalities and the scope
+                  line can only carry the headline of them. The question mark
+                  holds the rest, from the launch descriptor: how it is built,
+                  what it reads, and what it does not cover. Declared prose,
+                  never written here. */}
+              <CollectionExplain id={single.entry.id} name={single.entry.name} />
               {contract?.entity_role ? <> The entity on each record is <em>{contract.entity_role}</em>.</> : null}
               {contract?.year_basis ? <> Years are the <em>{contract.year_basis}</em>.</> : <> This is a register, not a series of events: the year filter does not apply.</>}
               {contract?.amount ? <> Amounts are <em>{contract.amount_label ?? labelFor(table.key, contract.amount)}</em>.</> : null}
@@ -1197,6 +1237,22 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
           <p className="cp-ex__caption" data-testid="explore-caption">
             {caption}
+            {/* What a "sample record" is, which the caption counts and cannot
+                explain. The commonest wrong reading of this page is that an
+                entity absent from a result is absent from the collection. */}
+            <Explain label="what these sample records are">
+              <p>
+                <span className="cp-ex1__cap">This is a preview</span>
+                Each published table ships ten sample rows, and this viewer reads those. A search
+                that returns nothing may mean the collection holds nothing, or that the ten rows
+                sampled from a million-row table did not include it.
+              </p>
+              <p>
+                <span className="cp-ex1__cap">The release is the whole table</span>
+                Counts here are counts of sample records, never of the release. Every download
+                says so in its README, and the release itself carries the full table.
+              </p>
+            </Explain>
             {loading ? " · loading" : ""}
             {view === "table" ? ` · ${shownColumns.length} of ${tableColumns.length} columns` : ""}
             {view === "table" && defaults.length && !narrow ? (

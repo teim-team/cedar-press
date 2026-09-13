@@ -490,6 +490,71 @@ test.describe("the table's default columns", () => {
   });
 });
 
+test.describe("the question mark", () => {
+  // One control, two behaviours, decided by the pointer. Both projects run it,
+  // because the phone project is where the tap-latch lives and the desktop
+  // project is where hover does.
+  test("opens and closes the way this pointer expects", async ({ page }, testInfo) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=contractors");
+    const btn = page.locator(".cp-ex1__btn").first();
+    await btn.waitFor();
+    const panel = page.locator(".cp-ex1__panel").first();
+    await expect(panel).toBeHidden();
+
+    if (testInfo.project.name === "desktop") {
+      await btn.hover();
+      await expect(panel).toBeVisible();
+      await page.mouse.move(4, 4);
+      await expect(panel).toBeHidden();
+      // Keyboard reaches it, and Escape closes it.
+      await btn.focus();
+      await expect(panel).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(panel).toBeHidden();
+    } else {
+      // A tap latches. It used to open and then reopen on the second tap,
+      // because tapping also focuses and onFocus opened it again.
+      await btn.tap();
+      await expect(panel).toBeVisible();
+      await btn.tap();
+      await expect(panel).toBeHidden();
+    }
+
+    // Whatever the pointer, the panel carries the collection's own declared
+    // prose and stays inside the viewport. Opened the way this pointer opens
+    // it: a mouse click is deliberately inert, because hover governs a mouse.
+    if (testInfo.project.name === "desktop") await btn.hover(); else await btn.tap();
+    await expect(panel).toContainText("Awardees are matched to a Native entity");
+    const box = await panel.boundingBox();
+    const width = page.viewportSize().width;
+    expect(box.x).toBeGreaterThanOrEqual(-1);
+    expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the collection strip", () => {
+  test("the overview names all twelve and says what one holds", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/");
+    const tiles = page.locator(".cp-cstrip__tile");
+    await expect(tiles).toHaveCount(12);
+    const note = page.locator(".cp-cstrip__note");
+    await expect(note).toContainText(/collection for what it holds/i);
+    // Point at one and the line under the grid answers, the same way the
+    // section tiles and the shelves do.
+    await tiles.nth(3).hover();
+    await expect(note).not.toContainText(/collection for what it holds/i);
+    // And it is a link into Explore already narrowed to that collection.
+    const href = await tiles.nth(3).getAttribute("href");
+    expect(href).toMatch(/^\/data\?c=[a-z-]+$/);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("Shape the research", () => {
   test("the priorities page lists both kinds, says the counting needs the service, and the profile carries the card", async ({ page }) => {
     // This build has no service, so no point is counted and no point can be
@@ -769,6 +834,12 @@ test.describe("Methods", () => {
     // Everything that can change is named as living outside the identifier.
     await expect(page.locator(".cp-ko")).toContainText("UEI");
     await expect(page.locator(".cp-ko")).toContainText("NAICS");
+    // Coverage is published with its reasons, and two of the three are marked
+    // as intentional rather than left reading as 94% failure.
+    await expect(page.locator(".cp-ur__item")).toHaveCount(3);
+    await expect(page.locator(".cp-ur__item.is-by-design")).toHaveCount(2);
+    await expect(page.locator(".cp-ur")).toContainText("Never a failed match");
+    await expect(page.locator(".cp-ur")).toContainText("not by failure");
     // The loop says where the methods come from. It must not say the Federal
     // Reserve uses or endorses them: the workspace evidences affiliation and
     // nothing more, and that is the one claim here a reader could disprove.

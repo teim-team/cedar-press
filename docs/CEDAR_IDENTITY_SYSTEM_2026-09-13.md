@@ -179,12 +179,22 @@ specification says the working format is `CB-0000001` and "a check-character
 convention can be added later". The site shows `CB-0000001`. **If ADR-043's
 form is the real one, say so and the site changes in one line.**
 
-**7.2 Cherokee Nation Businesses.** The 2026-09-06 decision said CNB "may
-legitimately belong in the entity register because it is a canonical Native
-enterprise that anchors many datasets". §3 here uses CNB as the worked example
-of a `CB-`. These are reconcilable — an enterprise can be represented in both
-namespaces where there is a legitimate reason — but the *example* now teaches
-`CB-`, and the site uses it that way.
+**7.2 Cherokee Nation Businesses is a business. Corrected 2026-09-13.**
+
+This section previously claimed a disagreement here. There is none, and the
+claim was mine, not the owner's. `docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md`
+carries a long blockquote of **a reviewer's proposal**, and inside it the
+hedged line "Cherokee Nation Businesses *may* legitimately belong in the entity
+register". I wrote that up as though the owner had taken that position and then
+flagged it as conflicting with his own specification.
+
+The owner's ruling, stated directly: **Cherokee Nation Businesses is not an
+entity.** It is an operating enterprise, it takes a `CB-`, and the ownership
+between it and the Cherokee Nation (`CE-00134-BX`) is a dated relationship row.
+That is what §3 says and what the site teaches.
+
+Do not re-raise this from the 2026-09-06 blockquote. A hedged suggestion inside
+a quoted proposal is not a decision.
 
 **7.3 No tribal-enterprise class exists in the register.** The published
 register's eighteen classes contain no "tribal enterprise". An earlier draft of

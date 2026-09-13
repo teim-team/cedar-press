@@ -27,6 +27,30 @@ already held.
 
 ---
 
+## 1b. Two gates that stopped the deploy, and will again
+
+The live site did not move for two merges because both failed the Python step
+in `.github/workflows/deploy.yml`, which sits **before** the build and the
+Pages upload. Neither is a flake; both are gates working.
+
+1. **Change the catalog, re-run the dump.**
+   `node scripts/dump-press.mjs > server/cedar_press/_press_data.json`.
+   The API reads that snapshot and `test_collection` fails rather than skips
+   when it disagrees with the JavaScript.
+2. **Name a `src/…/grove` path in a document, re-measure the rename table.**
+   `docs/ARCHITECTURE.md` carries counts that `test_rename_plan` re-measures on
+   every run, and the failure prints the current values for you to paste.
+
+Run the whole thing before merging, because **CI runs nothing on a pull
+request**:
+
+```
+npm run lint && npm run test && npm run test:smoke
+ruff check server && (cd server && python -m unittest discover -s tests -t .)
+```
+
+---
+
 ## 2. How the site tells you it is out of date
 
 The site does not describe the workspace in prose that can go stale. It reads
