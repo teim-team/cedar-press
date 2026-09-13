@@ -73,8 +73,9 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
-  // The door is the collections: the twelve tiles, one row a shelf, and a
-  // preview with real sample records of the one in hand. Twelve is the
+  // The door stages the product: the twelve collections down the frame's
+  // rail, one group a shelf, and the pane with real sample records of the
+  // one in hand. Twelve is the
   // catalog's count; the records are the point, since a preview with a
   // description and no rows is a brochure. The reader's shelf (#catalog)
   // stays absent — asserted above — because the preview reads the public
@@ -82,7 +83,7 @@ test.describe("the gate", () => {
   test("the door lists every collection and stages real records", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await expect(page.locator(".cp-door__grid .cp-badge")).toHaveCount(12);
+    await expect(page.locator(".cp-app__item")).toHaveCount(12);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     await page.getByRole("button", { name: /Prime Contracting/ }).click();
@@ -90,7 +91,7 @@ test.describe("the gate", () => {
     await expect(stage).toBeVisible();
     await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // The way in is named on the stage, never a route past the paywall.
-    await expect(stage.getByRole("link", { name: /at Tribal Business News/ })).toBeVisible();
+    await expect(stage.getByRole("link", { name: /^Get Cedar Press/ })).toBeVisible();
     await expect(stage.getByRole("link", { name: /Browse the records/ })).toHaveCount(0);
     await expect(page.locator("#catalog")).toHaveCount(0);
     expect(errors).toEqual([]);
@@ -574,7 +575,9 @@ test.describe("crawlers", () => {
   // the raw response, not the rendered page, because the rendered page looks
   // identical whether or not the prerender happened.
   for (const [path, heading] of [
-    ["/", "The data behind Indian Country"],
+    // "data" is emphasised inside the headline, so the string a crawler
+    // sees is split by a tag; the tail of the sentence is contiguous.
+    ["/", "behind Indian Country."],
     ["/tribal-data-request", "See what Cedar knows about your nation"],
     ["/research-access", "Need one or two Cedar collections for a defined project"],
   ]) {

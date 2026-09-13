@@ -1752,195 +1752,267 @@
 .teim-rd .cp-start__act:hover { border-color: var(--dteal); background: var(--teal-tint); transform: translateY(-1px); }
 
 
-.teim-rd .cp-stage { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); background: var(--bg); box-shadow: 0 18px 40px -28px rgba(10, 15, 38, 0.35); overflow: hidden; }
-.teim-rd .cp-stage__head { padding: 1.3rem 1.5rem 1.1rem; }
-.teim-rd .cp-stage__name { font-family: var(--sans); font-size: clamp(1.3rem, 2vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0.35rem 0 0; }
-.teim-rd .cp-stage__blurb { font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); margin: 0.6rem 0 0; max-width: 78ch; }
-.teim-rd .cp-stage__link { font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); margin: 0.8rem 0 0; padding-top: 0.7rem; border-top: 1px solid var(--line-soft); max-width: 78ch; }
-.teim-rd .cp-stage__facts { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.9rem 0 0; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-/* The caption says what the table is before the eye reaches the rows:
- * which table, how many of how many, of how many in the release. */
-.teim-rd .cp-stage__cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.55rem 1.5rem; border-top: 1px solid var(--line); background: var(--teal-tint); font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
-.teim-rd .cp-stage__scroll { overflow-x: auto; }
-.teim-rd .cp-stage__table { width: 100%; border-collapse: collapse; font-size: 0.84rem; line-height: 1.4; color: var(--ink); }
-.teim-rd .cp-stage__table th, .teim-rd .cp-stage__table td { padding: 0.55rem 0.9rem; border-top: 1px solid var(--line-soft); vertical-align: top; text-align: left; }
-.teim-rd .cp-stage__table th:first-child, .teim-rd .cp-stage__table td:first-child { padding-left: 1.5rem; }
-.teim-rd .cp-stage__table th:last-child, .teim-rd .cp-stage__table td:last-child { padding-right: 1.5rem; }
-.teim-rd .cp-stage__table th { border-top: 0; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-stage__ent { font-weight: 700; white-space: nowrap; max-width: 17rem; overflow: hidden; text-overflow: ellipsis; }
-.teim-rd .cp-stage__uid { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 400; color: var(--muted); }
-.teim-rd .cp-stage__unkeyed { color: var(--muted); font-weight: 400; }
-.teim-rd .cp-stage__date { font-family: var(--mono); font-size: 0.74rem; white-space: nowrap; }
-.teim-rd .cp-stage__obs { color: var(--ink-2); min-width: 16rem; }
-.teim-rd .cp-stage__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.teim-rd .cp-stage__table th.cp-stage__amt, .teim-rd .cp-stage__table td.cp-stage__amt { text-align: right; font-family: var(--mono); font-size: 0.76rem; white-space: nowrap; }
-.teim-rd .cp-stage__empty { margin: 0; padding: 1.4rem 1.5rem; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--muted); }
-.teim-rd .cp-stage__acts { display: flex; flex-wrap: wrap; gap: 0 2rem; margin: 0; padding: 0.4rem 1.5rem 0.7rem; border-top: 1px solid var(--line); }
-.teim-rd .cp-stage__act { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease; }
-.teim-rd .cp-stage__act:hover, .teim-rd .cp-stage__act:focus-visible { border-bottom-color: currentColor; }
-.teim-rd .cp-stage__act--btn { border-top: 0; border-inline: 0; background: none; padding: 0; cursor: pointer; }
-/* Phones: the preview loses its side padding and its acts stack. */
-@media (max-width: 720px) {
-  .teim-rd .cp-stage__head { padding: 1rem 1.1rem 0.9rem; }
-  .teim-rd .cp-stage__cap, .teim-rd .cp-stage__acts, .teim-rd .cp-stage__empty { padding-inline: 1.1rem; }
-  .teim-rd .cp-stage__table th:first-child, .teim-rd .cp-stage__table td:first-child { padding-left: 1.1rem; }
-  .teim-rd .cp-stage__table th:last-child, .teim-rd .cp-stage__table td:last-child { padding-right: 1.1rem; }
-  .teim-rd .cp-stage__ent { max-width: 11rem; }
-  .teim-rd .cp-stage__acts { flex-direction: column; gap: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-stage__act { transition: none; }
-}
-
 /* ══ The door ═════════════════════════════════════════════════════════════
- * The pre-login page is the collections. One column on the site measure:
- * the bar with the way in on the right, a short statement, the twelve
- * tiles, the preview of the one in hand, the four pillars on a rule, and
- * the other ways in. White ground, hairlines; the tiles are the shelf's own
- * square badges and the preview is the one product frame. */
-.teim-rd .cp-door { --cp-measure: 1560px; box-sizing: border-box; max-width: var(--cp-measure); min-width: 0; width: 100%; min-height: 100dvh; margin: 0 auto; padding: 0 2.4rem 7rem; position: relative; background: var(--bg); }
+ * The pre-login page, built the way the marketing site's home is built.
+ * Ground and surface: a cool mineral page ground under pure-white working
+ * surfaces, so a frame reads as a made object without a heavy shadow. The
+ * page changes material once, to navy, for the passage that carries the
+ * photograph; the ways in return to white; the foot is a line. One accent,
+ * the teal; the primary control is a two-stop vertical gradient of it, dark
+ * enough at its lightest stop to hold white text. */
+.teim-rd .cp-door {
+  --door-ground: #f3f6f8;
+  --door-ground-bright: #fafcfd;
+  --door-surface: #ffffff;
+  --door-navy: #09132b;
+  --door-rule: rgba(10, 28, 52, 0.1);
+  --door-rule-strong: rgba(10, 28, 52, 0.2);
+  --door-ink-3: #647279;
+  --door-accent-light: #5fd9cc;
+  --door-action-top: #0d8f83;
+  --door-action-bottom: #086b62;
+  --door-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --door-shadow-control: 0 1px 2px rgba(10, 15, 38, 0.08);
+  --door-shadow-surface: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 1px 2px rgba(10, 28, 52, 0.06), 0 9px 24px -18px rgba(10, 28, 52, 0.2), 0 28px 64px -40px rgba(10, 28, 52, 0.28);
+  --door-shadow-high: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 2px 5px rgba(10, 28, 52, 0.07), 0 18px 42px -22px rgba(10, 28, 52, 0.24), 0 48px 96px -52px rgba(10, 28, 52, 0.34);
+  --door-max: 1400px;
+  --door-pad: clamp(1.15rem, 3vw, 2.6rem);
+  position: relative; min-width: 0; width: 100%; min-height: 100dvh; margin: 0; padding: 0 0 5.5rem;
+  background: var(--door-ground); color: var(--ink);
+}
+.teim-rd .cp-door a { color: inherit; }
+
+/* Shared type ─────────────────────────────────────────────────────────── */
+.teim-rd .cp-kicker { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); margin: 0; }
+.teim-rd .cp-kicker--light { color: var(--door-accent-light); }
+
+/* The controls. The primary is a two-stop vertical gradient of the teal,
+ * felt rather than seen, with a neutral near-flat shadow; the quiet one is
+ * paper on a hairline. Rectangles with the control radius, never pills. */
+.teim-rd .cp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; min-height: 42px; padding: 0.55rem 1.15rem; border: 1px solid transparent; border-radius: 8px; font-family: var(--sans); font-size: 0.92rem; font-weight: 600; letter-spacing: -0.005em; text-decoration: none; cursor: pointer; transition: background 0.2s var(--door-ease), border-color 0.2s var(--door-ease), box-shadow 0.2s var(--door-ease), color 0.2s var(--door-ease); }
+.teim-rd .cp-btn--primary { background: linear-gradient(180deg, var(--door-action-top) 0%, var(--door-action-bottom) 100%); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), var(--door-shadow-control); }
+.teim-rd .cp-btn--primary:hover { background: linear-gradient(180deg, #0f9b8e 0%, #0a766c 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 16px -12px rgba(10, 15, 38, 0.5); }
+.teim-rd .cp-btn--primary .cp-btn__arrow { color: var(--door-accent-light); }
+.teim-rd .cp-btn--quiet { background: var(--door-surface); color: var(--ink); border-color: var(--door-rule-strong); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), var(--door-shadow-control); }
+.teim-rd .cp-btn--quiet:hover { border-color: var(--ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 6px 16px -12px rgba(10, 15, 38, 0.42); }
+.teim-rd .cp-btn--lg { min-height: 48px; padding: 0.8rem 1.4rem; font-size: 1rem; }
+.teim-rd .cp-btn--wide { width: 100%; box-sizing: border-box; min-height: 46px; }
+.teim-rd .cp-btn[aria-selected="true"] { box-shadow: inset 0 0 0 2px rgba(10, 15, 38, 0.35), var(--door-shadow-control); }
+.teim-rd .cp-btn:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-btn__arrow { font-weight: 400; transition: transform 0.15s var(--door-ease); }
+.teim-rd .cp-btn:hover .cp-btn__arrow { transform: translateX(3px); }
+.teim-rd .cp-btn:disabled { opacity: 0.6; cursor: default; }
 
 /* ── The bar ─────────────────────────────────────────────────────────────
- * The lockup, who made it and who sells it, and the way in on the right. */
-.teim-rd .cp-door__bar { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem 1.4rem; padding: 1.3rem 0 1.1rem; border-bottom: 1px solid var(--line); }
+ * Sticky and translucent, the one place translucency is allowed: the way
+ * in stays reachable down a long page. */
+.teim-rd .cp-door__bar { position: sticky; top: 0; z-index: 40; background: rgba(255, 255, 255, 0.78); -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); border-bottom: 1px solid var(--door-rule); }
+.teim-rd .cp-door__barin { max-width: var(--door-max); margin: 0 auto; padding: 0.8rem var(--door-pad); display: flex; align-items: center; gap: 1.2rem; }
 .teim-rd .cp-door__lockup { display: inline-flex; align-items: center; gap: 0.6rem; }
-.teim-rd .cp-door__mark { width: 2.5rem; height: 2.5rem; object-fit: contain; flex: none; }
-.teim-rd .cp-door__word { font-family: var(--sans); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); }
-.teim-rd .cp-door__of { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-door__of a { color: var(--dteal); text-decoration: none; }
-.teim-rd .cp-door__of a:hover { text-decoration: underline; }
-.teim-rd .cp-door__tabs, .teim-rd .cp-door__user { margin-left: auto; display: inline-flex; align-items: center; gap: 0.6rem; }
-/* Two controls: plans as a quiet button, log in as the filled one, the
- * way every other primary action on the service is filled. Selected, a
- * control keeps its look and the panel under the bar says the rest. */
-.teim-rd .cp-door__tab { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0.5rem 1.1rem; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease; }
-.teim-rd .cp-door__tab:hover { border-color: var(--dteal); color: var(--dteal); }
-.teim-rd .cp-door__tab[aria-selected="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
-.teim-rd .cp-door__tab--in { border-color: var(--dteal); background: var(--dteal); color: #fff; }
-.teim-rd .cp-door__tab--in:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
-.teim-rd .cp-door__tab:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
-.teim-rd .cp-door__user { flex-wrap: wrap; }
-.teim-rd .cp-door__user .cp-gate__signedin { margin: 0; }
-/* The panel the bar opens: under the controls, right-aligned, the one
- * floating object on the page, so it needs the border and the shadow. */
-.teim-rd .cp-door__panel { position: absolute; z-index: 30; right: 2.4rem; top: 5.2rem; width: min(26rem, calc(100vw - 4.8rem)); box-sizing: border-box; padding: 1.2rem 1.3rem 1.3rem; border: 1px solid var(--line); border-radius: var(--radius-card, 14px); background: var(--bg); box-shadow: 0 24px 56px -24px rgba(10, 15, 38, 0.4); }
-.teim-rd .cp-door__panel .cp-split__upgrade { margin-top: 0; }
-.teim-rd .cp-door__panel .cp-gate__sub { margin-top: 0; }
+.teim-rd .cp-door__mark { width: 2.1rem; height: 2.1rem; object-fit: contain; flex: none; }
+.teim-rd .cp-door__word { font-family: var(--sans); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); }
+.teim-rd .cp-door__of { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); padding-left: 1.2rem; border-left: 1px solid var(--door-rule); }
+.teim-rd .cp-door__tabs, .teim-rd .cp-door__user { margin-left: auto; display: inline-flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
+.teim-rd .cp-door__who { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--door-ink-3); }
+/* The panel the bar opens: under the controls, right-aligned, a raised
+ * white surface on the page. */
+.teim-rd .cp-door__panel { position: absolute; z-index: 41; right: max(var(--door-pad), calc((100% - var(--door-max)) / 2 + var(--door-pad))); top: calc(100% + 0.6rem); width: min(24rem, calc(100vw - 2 * var(--door-pad))); box-sizing: border-box; padding: 1.3rem 1.4rem 1.4rem; border: 1px solid var(--door-rule); border-radius: 14px; background: var(--door-surface); box-shadow: var(--door-shadow-high); }
+.teim-rd .cp-door__panelp { margin: 0 0 1rem; font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); }
 .teim-rd .cp-door__panel .cp-gate__form { margin-bottom: 0; }
-.teim-rd .cp-door__panel .gv-btn--primary { width: 100%; box-sizing: border-box; min-height: 44px; padding: 0.7rem 1.2rem; font-size: 0.95rem; }
-
-/* The form pieces the panel carries, in the press register. */
-.teim-rd .cp-gate__sub { font-family: var(--sans); font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 0 0 0.7rem; }
-.teim-rd .cp-gate__fine { margin: 0.7rem 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--muted); }
-.teim-rd .cp-gate__aside { margin: 0.8rem 0 0; font-size: 0.9rem; color: var(--muted); }
+.teim-rd .cp-door__panel .cp-gate__form input { border-radius: 8px; padding: 0.7rem 0.9rem; }
+.teim-rd .cp-gate__sub { font-family: var(--sans); font-size: 1.02rem; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; color: var(--ink); margin: 0 0 0.8rem; }
+.teim-rd .cp-gate__fine { margin: 0.7rem 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--door-ink-3); }
+.teim-rd .cp-gate__aside { margin: 0.8rem 0 0; font-size: 0.9rem; color: var(--door-ink-3); }
 .teim-rd .cp-gate__aside a { color: var(--dteal); }
-/* The code came back good, so say so before asking for one more thing. */
-.teim-rd .cp-gate__ok { margin: 0 0 0.9rem; padding: 0.7rem 0.85rem; border: 1px solid var(--teal-line); background: var(--teal-tint); border-radius: 10px; font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); }
-/* The code is the entitlement, so it is typed like one: mono and tracked,
- * which also makes an O legible against a 0 while typing. */
+.teim-rd .cp-gate__ok { margin: 0 0 0.9rem; padding: 0.7rem 0.85rem; border: 1px solid var(--teal-line); background: var(--teal-tint); border-radius: 8px; font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); }
 .teim-rd .cp-code { font-family: var(--mono); letter-spacing: 0.16em; text-transform: uppercase; }
 .teim-rd .cp-code::placeholder { letter-spacing: 0.1em; text-transform: none; }
 .teim-rd .cp-split__linkbtn { border: 0; background: none; padding: 0; font: inherit; color: var(--dteal); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-/* The membership is the way in. A quiet box with the teal drawn all the
- * way around: it holds the one action a visitor without one has. */
-.teim-rd .cp-split__upgrade { margin: 1.2rem 0 0; padding: 1.15rem 1.25rem; background: var(--bg); border: 1px solid var(--teal); border-radius: 12px; }
-.teim-rd .cp-split__upgrade p { margin: 0 0 0.9rem; font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); }
-.teim-rd .cp-split__upgrade .gv-btn { min-height: 44px; }
-.teim-rd .cp-split__upgrade .gv-btn span,
-.teim-rd .cp-split__linkbtn span { margin-left: 0.4em; }
 
-/* ── The statement ───────────────────────────────────────────────────────
- * Headline left, the sentence and the facts right, on one axis. Short:
- * the tiles are the page, and the statement introduces them. */
-.teim-rd .cp-door__lead { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 0.6rem 3.5rem; align-items: end; padding: 2.2rem 0 1.8rem; }
-.teim-rd .cp-door__kicker { grid-column: 1 / -1; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin: 0; }
-.teim-rd .cp-door__title { font-family: var(--sans); font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.02; color: var(--ink); margin: 0; max-width: 14ch; }
-.teim-rd .cp-door__aside { min-width: 0; }
-.teim-rd .cp-door__lede { font-size: 1.06rem; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 54ch; }
-/* What the product is made of, in the catalog's own numbers. */
-.teim-rd .cp-facts { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.8rem; margin: 1rem 0 0; padding: 0; font-family: var(--mono); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-facts b { font-weight: 700; color: var(--ink); }
+/* ── The hero ────────────────────────────────────────────────────────────
+ * Copy on a strong left axis; the product frame staged to the right on a
+ * light plane, a little past the measure on wide screens so it reads as
+ * the object the page is about rather than another column. */
+.teim-rd .cp-hero3 { position: relative; padding: clamp(2.2rem, 5vw, 4.2rem) var(--door-pad) 0; overflow: clip; }
+.teim-rd .cp-hero3__in { max-width: var(--door-max); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.38fr) minmax(0, 0.62fr); gap: clamp(2rem, 4vw, 4rem); align-items: start; }
+.teim-rd .cp-hero3__copy { display: grid; gap: 1.1rem; padding-top: clamp(0.5rem, 2vw, 2rem); }
+.teim-rd .cp-hero3__title { font-family: var(--sans); font-size: clamp(2.5rem, 4.6vw, 4.1rem); font-weight: 750; letter-spacing: -0.035em; line-height: 1.0; color: var(--ink); margin: 0; text-wrap: balance; }
+.teim-rd .cp-hero3__title em { font-style: normal; color: var(--dteal); }
+.teim-rd .cp-hero3__lede { font-size: clamp(1.02rem, 1.25vw, 1.15rem); line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 40ch; text-wrap: pretty; }
+.teim-rd .cp-hero3__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.3rem; }
+.teim-rd .cp-hero3__facts { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem 1.2rem; margin: 1.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--door-rule); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--door-ink-3); }
+.teim-rd .cp-hero3__facts b { font-weight: 700; color: var(--ink); }
 
-/* ── The tiles ───────────────────────────────────────────────────────────
- * One row a shelf, six across, the shelf's own square badges, with the
- * shelf named in the margin above each row. The selected tile is lit the
- * way the shelf lights it; the preview under the rows is the answer. */
-.teim-rd .cp-door__shelves { border-top: 1px solid var(--line); padding-top: 1.4rem; }
-.teim-rd .cp-door__shelf + .cp-door__shelf { margin-top: 1.2rem; }
-.teim-rd .cp-door__shelfhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 1rem; margin-bottom: 0.7rem; }
-.teim-rd .cp-door__eyebrow { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
-.teim-rd .cp-door__q { font-size: 0.92rem; font-weight: 700; color: var(--ink); }
-.teim-rd .cp-door__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr)); gap: 0.7rem; }
-.teim-rd .cp-door__grid > li { display: block; min-width: 0; }
-/* Squares would stand taller than the row is wide once six share the
- * measure; the tile keeps the badge's face at a height that lets both rows
- * and the top of the preview share a screen. */
-.teim-rd .cp-door__grid .cp-badge { aspect-ratio: auto; min-height: 9.5rem; padding: 1rem 0.6rem 0.9rem; }
-.teim-rd .cp-door__grid .cp-badge__mark { width: 3.4rem; }
-.teim-rd .cp-door__grid .cp-badge__name { font-size: 0.92rem; }
-.teim-rd .cp-door__preview { margin-top: 1.6rem; }
-@media (max-width: 1100px) {
-  .teim-rd .cp-door__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-@media (max-width: 720px) {
-  .teim-rd .cp-door__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
-  .teim-rd .cp-door__grid .cp-badge { min-height: 7.4rem; padding: 0.7rem 0.4rem; }
-  .teim-rd .cp-door__grid .cp-badge__mark { width: 2.6rem; }
-  .teim-rd .cp-door__grid .cp-badge__name { font-size: 0.78rem; }
-  .teim-rd .cp-door__grid .cp-badge__cue { display: none; }
-}
-@media (max-width: 400px) {
-  .teim-rd .cp-door__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+/* The stage: a directional light plane behind the frame, and the frame. */
+.teim-rd .cp-hero3__stage { position: relative; min-width: 0; margin: 0; isolation: isolate; }
+.teim-rd .cp-hero3__stage::before { content: ''; position: absolute; z-index: -1; inset: 6% -8% 2% -6%; background: linear-gradient(145deg, rgba(15, 181, 165, 0.22), rgba(15, 181, 165, 0.05) 46%, rgba(196, 151, 68, 0.1) 78%, transparent); filter: blur(38px); transform: skewY(-3deg); pointer-events: none; }
+.teim-rd .cp-hero3__stage figcaption { margin: 0.8rem 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--door-ink-3); }
+@media (min-width: 1500px) { .teim-rd .cp-hero3__stage { margin-right: -3rem; } }
 
-/* ── The pillars ─────────────────────────────────────────────────────────
- * Four across on a rule, the marks beside the words. */
-.teim-rd .cp-door__why { margin-top: 3rem; border-top: 1px solid var(--line); padding-top: 1.6rem; }
-.teim-rd .cp-door__proof { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem 2.4rem; }
-.teim-rd .cp-door__proofitem { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); column-gap: 0.85rem; row-gap: 0.25rem; align-items: start; }
-.teim-rd .cp-door__proofic { grid-column: 1; grid-row: 1 / span 2; display: grid; place-items: center; color: var(--dteal); padding-top: 0.1rem; }
-.teim-rd .cp-door__proofic svg { width: 2.4rem; height: 2.4rem; }
-.teim-rd .cp-door__prooflabel { grid-column: 2; font-family: var(--sans); font-size: 0.95rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.24; color: var(--ink); }
-.teim-rd .cp-door__proofbody { grid-column: 2; font-size: 0.86rem; line-height: 1.5; color: var(--ink-2); }
-@media (max-width: 1100px) { .teim-rd .cp-door__proof { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .teim-rd .cp-door__proof { grid-template-columns: minmax(0, 1fr); } }
+/* The product frame. Chrome on top, the rail down the left on navy, the
+ * pane on white: the platform's own shape, live. */
+.teim-rd .cp-app { overflow: hidden; border: 1px solid rgba(10, 15, 38, 0.17); border-radius: 14px; background: var(--door-surface); box-shadow: var(--door-shadow-high); }
+.teim-rd .cp-app__chrome { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--door-navy); color: #fff; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.teim-rd .cp-app__chromeword { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--sans); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.teim-rd .cp-app__chromeword img { width: 1.3rem; height: 1.3rem; filter: brightness(0) invert(1); opacity: 0.9; }
+.teim-rd .cp-app__chromeat { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); padding-left: 1rem; border-left: 1px solid rgba(255, 255, 255, 0.16); }
+.teim-rd .cp-app__chromemeta { margin-left: auto; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
+.teim-rd .cp-app__body { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: 38rem; }
+.teim-rd .cp-app__rail { background: var(--door-navy); color: #fff; padding: 0.9rem 0.6rem 1rem; border-right: 1px solid rgba(255, 255, 255, 0.06); }
+.teim-rd .cp-app__group + .cp-app__group { margin-top: 0.9rem; }
+.teim-rd .cp-app__groupcap { display: block; padding: 0 0.7rem 0.4rem; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--door-accent-light); }
+.teim-rd .cp-app__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.teim-rd .cp-app__item { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); align-items: center; gap: 0.7rem; width: 100%; box-sizing: border-box; min-height: 44px; padding: 0.42rem 0.7rem; border: 0; border-radius: 8px; background: transparent; color: rgba(255, 255, 255, 0.8); font: inherit; text-align: left; cursor: pointer; transition: background 0.16s var(--door-ease), color 0.16s var(--door-ease); }
+.teim-rd .cp-app__item:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+.teim-rd .cp-app__item.is-on { background: rgba(15, 181, 165, 0.18); color: #fff; box-shadow: inset 2px 0 0 var(--door-accent-light); }
+.teim-rd .cp-app__item:focus-visible { outline: 2px solid var(--door-accent-light); outline-offset: -2px; }
+.teim-rd .cp-app__mark { display: flex; color: var(--door-accent-light); }
+.teim-rd .cp-app__mark svg { width: 1.7rem; height: 1.7rem; display: block; }
+.teim-rd .cp-app__label { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
+.teim-rd .cp-app__name { font-family: var(--sans); font-size: 0.86rem; font-weight: 600; letter-spacing: -0.005em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.teim-rd .cp-app__rows { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+.teim-rd .cp-app__item.is-on .cp-app__rows { color: rgba(255, 255, 255, 0.72); }
+.teim-rd .cp-app__pane { min-width: 0; background: var(--door-surface); display: flex; flex-direction: column; }
 
-/* ── The foot ────────────────────────────────────────────────────────────
- * The two ways in that need no subscription, as rows on rules, and the two
- * quiet lines: methods, and Cedar. */
-.teim-rd .cp-door__foot { margin-top: 3rem; border-top: 1px solid var(--line); padding-top: 1.4rem; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 1rem 3.5rem; align-items: start; }
-.teim-rd .cp-door__other { display: grid; gap: 0; }
-.teim-rd .cp-door__othercap { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding-bottom: 0.6rem; }
-.teim-rd .cp-door__otherlink { display: block; text-decoration: none; padding: 0.9rem 0; border-top: 1px solid var(--line-soft); }
-.teim-rd .cp-door__otherlink b { display: block; font-size: 0.96rem; font-weight: 700; color: var(--dteal); margin-bottom: 0.2rem; }
-.teim-rd .cp-door__otherlink:hover b { text-decoration: underline; text-underline-offset: 3px; }
-.teim-rd .cp-door__otherlink > span { display: block; font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); }
-.teim-rd .cp-door__otherlink b span { margin-left: 0.3em; }
-.teim-rd .cp-door__footacts { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; padding-top: 1.4rem; }
-.teim-rd .cp-door__footact { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; font-family: var(--sans); font-size: 0.95rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease; }
-.teim-rd .cp-door__footact:hover, .teim-rd .cp-door__footact:focus-visible { border-bottom-color: currentColor; }
-.teim-rd .cp-door__footact--btn { border-top: 0; border-inline: 0; background: none; padding: 0; cursor: pointer; }
+/* The pane: the collection in hand. */
+.teim-rd .cp-pane { display: flex; flex-direction: column; min-height: 100%; }
+.teim-rd .cp-pane__head { padding: 1.2rem 1.4rem 1rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem 1.5rem; align-items: start; }
+.teim-rd .cp-pane__cap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-pane__name { font-family: var(--sans); font-size: clamp(1.2rem, 1.7vw, 1.55rem); font-weight: 750; letter-spacing: -0.025em; line-height: 1.12; color: var(--ink); margin: 0.3rem 0 0; }
+.teim-rd .cp-pane__facts { grid-column: 2; grid-row: 1; display: grid; gap: 0.2rem; justify-items: end; margin: 0.15rem 0 0; font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); text-align: right; white-space: nowrap; }
+.teim-rd .cp-pane__blurb { grid-column: 1 / -1; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); margin: 0.2rem 0 0; max-width: 72ch; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.teim-rd .cp-pane__tablecap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.5rem 1.4rem; border-top: 1px solid var(--door-rule); border-bottom: 1px solid var(--door-rule); background: var(--door-ground-bright); font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-pane__scroll { overflow-x: auto; }
+.teim-rd .cp-pane__table { width: 100%; border-collapse: collapse; font-size: 0.8rem; line-height: 1.4; color: var(--ink); }
+.teim-rd .cp-pane__table th, .teim-rd .cp-pane__table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(10, 28, 52, 0.07); vertical-align: top; text-align: left; }
+.teim-rd .cp-pane__table th:first-child, .teim-rd .cp-pane__table td:first-child { padding-left: 1.4rem; }
+.teim-rd .cp-pane__table th:last-child, .teim-rd .cp-pane__table td:last-child { padding-right: 1.4rem; }
+.teim-rd .cp-pane__table th { font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--door-ink-3); }
+.teim-rd .cp-pane__ent { font-weight: 650; white-space: nowrap; max-width: 11.5rem; overflow: hidden; text-overflow: ellipsis; }
+.teim-rd .cp-pane__uid { display: block; font-family: var(--mono); font-size: 0.58rem; font-weight: 400; color: var(--door-ink-3); }
+.teim-rd .cp-pane__unkeyed { color: var(--door-ink-3); font-weight: 400; }
+.teim-rd .cp-pane__date { font-family: var(--mono); font-size: 0.7rem; white-space: nowrap; }
+.teim-rd .cp-pane__obs { color: var(--ink-2); min-width: 9rem; }
+.teim-rd .cp-pane__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.teim-rd .cp-pane__table th.cp-pane__amt, .teim-rd .cp-pane__table td.cp-pane__amt { text-align: right; font-family: var(--mono); font-size: 0.72rem; white-space: nowrap; }
+.teim-rd .cp-pane__empty { margin: 0; padding: 1.4rem; border-top: 1px solid var(--door-rule); font-size: 0.9rem; color: var(--door-ink-3); }
+.teim-rd .cp-pane__foot { margin-top: auto; padding: 0.5rem 1.4rem 0.6rem; border-top: 1px solid var(--door-rule); background: var(--door-ground-bright); }
+.teim-rd .cp-pane__acts { display: flex; flex-wrap: wrap; gap: 0 1.4rem; margin: 0; white-space: nowrap; }
+.teim-rd .cp-pane__act { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 40px; font-family: var(--sans); font-size: 0.88rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s var(--door-ease); }
+.teim-rd .cp-pane__act:hover, .teim-rd .cp-pane__act:focus-visible { border-bottom-color: currentColor; }
+.teim-rd .cp-pane__act--btn { border-top: 0; border-inline: 0; background: none; padding: 0; cursor: pointer; }
 
-/* Narrower than the three fit on one line, the distribution line drops
- * under the lockup and the controls rather than pushing them down. */
-@media (max-width: 1100px) {
-  .teim-rd .cp-door__of { flex-basis: 100%; order: 3; }
+/* The provenance line, closing the hero on a glass band. */
+.teim-rd .cp-hero3__proof { max-width: var(--door-max); margin: clamp(1.6rem, 3.5vh, 2.6rem) auto 0; padding: clamp(1rem, 2vw, 1.3rem) clamp(1.2rem, 2.4vw, 1.8rem); display: grid; gap: 0.6rem; border: 1px solid var(--door-rule); border-radius: 14px; background: rgba(255, 255, 255, 0.78); box-shadow: var(--door-shadow-surface); -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); }
+.teim-rd .cp-hero3__prooflabel { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--door-ink-3); text-decoration: none; }
+.teim-rd .cp-hero3__prooflabel:hover { color: var(--dteal); }
+.teim-rd .cp-hero3__prooflist { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem clamp(0.8rem, 1.8vw, 1.5rem); }
+.teim-rd .cp-hero3__prooflist li { font-size: 0.92rem; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+.teim-rd .cp-hero3__prooflist li + li { position: relative; padding-left: clamp(0.8rem, 1.8vw, 1.5rem); }
+.teim-rd .cp-hero3__prooflist li + li::before { content: ''; position: absolute; left: 0; top: 0.15em; bottom: 0.15em; width: 1px; background: var(--door-rule); }
+
+/* ── The passage ─────────────────────────────────────────────────────────
+ * Navy, full width: the photograph and the four pillars. The change of
+ * material carries the change of subject, from the product to the people
+ * and places it is for. */
+.teim-rd .cp-why { margin-top: clamp(3rem, 6vw, 5rem); background: var(--door-navy); color: #fff; padding: clamp(3.4rem, 6.5vw, 5.6rem) var(--door-pad) 1.4rem; }
+.teim-rd .cp-why__in { max-width: var(--door-max); margin: 0 auto; }
+.teim-rd .cp-why__head { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.95fr); align-items: end; gap: clamp(2rem, 5vw, 6rem); margin-bottom: clamp(1.8rem, 3.5vw, 2.8rem); }
+.teim-rd .cp-why__head > div { display: grid; gap: 0.8rem; }
+.teim-rd .cp-why__title { max-width: 18ch; margin: 0; color: #fff; font-family: var(--sans); font-size: clamp(2rem, 4vw, 3.6rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.02; text-wrap: balance; }
+.teim-rd .cp-why__shelves { list-style: none; margin: 0; padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, 0.22); display: grid; gap: 0.7rem; }
+.teim-rd .cp-why__shelves li { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 1rem; font-size: 0.92rem; line-height: 1.45; color: rgba(255, 255, 255, 0.78); }
+.teim-rd .cp-why__shelves b { color: #fff; font-weight: 700; }
+.teim-rd .cp-why__photo { position: relative; overflow: hidden; border-radius: 14px; background: #0a4750; min-height: clamp(16rem, 30vw, 24rem); box-shadow: 0 22px 58px -38px rgba(0, 0, 0, 0.8); }
+.teim-rd .cp-why__photo img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; }
+.teim-rd .cp-why__photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 14, 33, 0.02) 40%, rgba(5, 14, 33, 0.34) 100%); pointer-events: none; }
+.teim-rd .cp-why__photolabel { position: absolute; z-index: 2; right: 1.25rem; bottom: 1.15rem; margin: 0; padding: 0.46rem 0.62rem 0.46rem 0.82rem; border-left: 2px solid rgba(95, 217, 204, 0.9); background: rgba(6, 18, 40, 0.84); color: rgba(255, 255, 255, 0.94); font-family: var(--mono); font-size: 0.66rem; line-height: 1.55; letter-spacing: 0.1em; text-align: right; text-transform: uppercase; }
+.teim-rd .cp-why__photolabel span { display: block; color: #fff; font-weight: 700; }
+.teim-rd .cp-why__proof { list-style: none; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.4rem clamp(1.4rem, 3vw, 2.6rem); }
+.teim-rd .cp-why__item { display: grid; grid-template-rows: auto auto 1fr; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.teim-rd .cp-why__ic { display: flex; color: var(--door-accent-light); }
+.teim-rd .cp-why__ic svg { width: 2.4rem; height: 2.4rem; }
+.teim-rd .cp-why__label { font-family: var(--sans); font-size: 1rem; font-weight: 750; letter-spacing: -0.015em; line-height: 1.25; color: #fff; }
+.teim-rd .cp-why__body { font-size: 0.88rem; line-height: 1.55; color: rgba(255, 255, 255, 0.76); }
+.teim-rd .cp-why__note { margin: clamp(1.6rem, 3vw, 2.4rem) 0 0; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); }
+
+/* ── The ways in ─────────────────────────────────────────────────────────
+ * Back on the ground: the closing statement and controls, and the ledger
+ * of the three doors that are not the subscription. */
+.teim-rd .cp-ways { padding: clamp(3rem, 6vw, 5.5rem) var(--door-pad) 0; }
+.teim-rd .cp-ways__in { max-width: var(--door-max); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+.teim-rd .cp-ways__head { display: grid; gap: 1rem; }
+.teim-rd .cp-ways__title { font-family: var(--sans); font-size: clamp(1.8rem, 3.2vw, 2.7rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.06; color: var(--ink); margin: 0; text-wrap: balance; }
+.teim-rd .cp-ways__title span { color: var(--dteal); }
+.teim-rd .cp-ways__lede { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 42ch; }
+.teim-rd .cp-ways__ledger { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--door-rule); }
+.teim-rd .cp-ways__row { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.3rem 2rem; padding: 1.3rem 0; border-bottom: 1px solid var(--door-rule); }
+.teim-rd .cp-ways__label { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); padding-top: 0.3rem; }
+.teim-rd .cp-ways__row h3 { font-family: var(--sans); font-size: 1.08rem; font-weight: 700; letter-spacing: -0.015em; line-height: 1.3; color: var(--ink); margin: 0; max-width: 40ch; }
+.teim-rd .cp-ways__row p { font-size: 0.92rem; line-height: 1.55; color: var(--ink-2); margin: 0.35rem 0 0; max-width: 60ch; }
+.teim-rd .cp-ways__act { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 40px; margin-top: 0.25rem; font-family: var(--sans); font-size: 0.9rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s var(--door-ease); }
+.teim-rd .cp-ways__act:hover, .teim-rd .cp-ways__act:focus-visible { border-bottom-color: currentColor; }
+
+/* ── The foot ────────────────────────────────────────────────────────── */
+.teim-rd .cp-door__foot { max-width: var(--door-max); margin: clamp(2.4rem, 4vw, 3.6rem) auto 0; padding: 1rem var(--door-pad) 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); }
+.teim-rd .cp-door__foot::before { content: ''; display: block; flex-basis: 100%; height: 1px; background: var(--door-rule); margin-bottom: 0.3rem; }
+.teim-rd .cp-door__foot a { color: var(--dteal); text-decoration: none; }
+.teim-rd .cp-door__foot a:hover { text-decoration: underline; }
+.teim-rd .cp-door__foot .cp-split__linkbtn { font: inherit; text-decoration: none; color: var(--dteal); }
+.teim-rd .cp-door__foot .cp-split__linkbtn:hover { text-decoration: underline; }
+
+/* ── Widths ──────────────────────────────────────────────────────────── */
+@media (max-width: 1250px) {
+  .teim-rd .cp-hero3__in { grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); }
+  .teim-rd .cp-app__body { grid-template-columns: 13.5rem minmax(0, 1fr); }
+  .teim-rd .cp-why__proof { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 900px) {
-  .teim-rd .cp-door__lead, .teim-rd .cp-door__foot { grid-template-columns: minmax(0, 1fr); align-items: start; }
-  .teim-rd .cp-door__title { max-width: none; }
-  .teim-rd .cp-door__footacts { padding-top: 0.4rem; }
-}
-@media (max-width: 720px) {
-  .teim-rd .cp-door { padding: 0 1.15rem 6rem; }
-  .teim-rd .cp-door__bar { padding: 1rem 0 0.9rem; }
+@media (max-width: 1050px) {
+  .teim-rd .cp-hero3__in { grid-template-columns: minmax(0, 1fr); }
+  .teim-rd .cp-hero3__copy { padding-top: 0; max-width: 40rem; }
+  .teim-rd .cp-hero3__title { max-width: 14ch; }
+  .teim-rd .cp-why__head { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .teim-rd .cp-ways__in { grid-template-columns: minmax(0, 1fr); }
   .teim-rd .cp-door__of { display: none; }
-  .teim-rd .cp-door__panel { right: 1.15rem; top: 4.6rem; width: calc(100vw - 2.3rem); }
-  .teim-rd .cp-door__lead { padding: 1.6rem 0 1.4rem; }
-  .teim-rd .cp-door__why, .teim-rd .cp-door__foot { margin-top: 2.2rem; }
+}
+/* Phones: the rail becomes a strip across the top of the frame, the marks
+ * with their names, scrolling sideways inside the frame; the pane follows. */
+@media (max-width: 720px) {
+  .teim-rd .cp-door { padding-bottom: 5rem; }
+  .teim-rd .cp-door__barin { padding-block: 0.6rem; gap: 0.8rem; }
+  .teim-rd .cp-door__word { font-size: 0.92rem; }
+  .teim-rd .cp-btn { min-height: 40px; padding-inline: 0.9rem; font-size: 0.88rem; }
+  .teim-rd .cp-hero3 { padding-top: 1.8rem; }
+  .teim-rd .cp-hero3__stage::before { inset: 4% -10% 2% -10%; }
+  .teim-rd .cp-app__body { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .teim-rd .cp-app__chromeat { display: none; }
+  .teim-rd .cp-app__rail { display: flex; gap: 0.6rem; overflow-x: auto; padding: 0.7rem 0.7rem; border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); scrollbar-width: none; }
+  .teim-rd .cp-app__rail::-webkit-scrollbar { display: none; }
+  .teim-rd .cp-app__group { display: contents; }
+  .teim-rd .cp-app__groupcap { display: none; }
+  .teim-rd .cp-app__list { display: contents; }
+  .teim-rd .cp-app__item { grid-template-columns: auto; justify-items: center; gap: 0.3rem; width: 5.4rem; min-width: 5.4rem; min-height: 0; padding: 0.55rem 0.3rem 0.5rem; }
+  .teim-rd .cp-app__item.is-on { box-shadow: inset 0 -2px 0 var(--door-accent-light); }
+  .teim-rd .cp-app__label { align-items: center; }
+  .teim-rd .cp-app__name { font-size: 0.66rem; font-weight: 600; white-space: normal; text-align: center; line-height: 1.15; overflow: visible; }
+  .teim-rd .cp-app__rows { display: none; }
+  .teim-rd .cp-pane__head { padding: 1rem 1rem 0.8rem; grid-template-columns: minmax(0, 1fr); }
+  .teim-rd .cp-pane__facts { grid-column: 1; grid-row: auto; justify-items: start; text-align: left; white-space: normal; }
+  .teim-rd .cp-pane__tablecap, .teim-rd .cp-pane__empty { padding-inline: 1rem; }
+  .teim-rd .cp-pane__table th:first-child, .teim-rd .cp-pane__table td:first-child { padding-left: 1rem; }
+  .teim-rd .cp-pane__table th:last-child, .teim-rd .cp-pane__table td:last-child { padding-right: 1rem; }
+  .teim-rd .cp-pane__ent { max-width: 10rem; }
+  .teim-rd .cp-pane__foot { grid-template-columns: minmax(0, 1fr); padding-inline: 1rem; }
+  .teim-rd .cp-hero3__proof { justify-items: start; }
+  .teim-rd .cp-why { padding-top: 2.6rem; }
+  .teim-rd .cp-why__shelves li { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+  .teim-rd .cp-why__proof { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .teim-rd .cp-ways { padding-top: 2.6rem; }
+  .teim-rd .cp-ways__row { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; padding: 1rem 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-door__tab, .teim-rd .cp-door__footact { transition: none; }
+  .teim-rd .cp-btn, .teim-rd .cp-btn__arrow, .teim-rd .cp-app__item, .teim-rd .cp-pane__act, .teim-rd .cp-ways__act { transition: none; }
+  .teim-rd .cp-btn:hover .cp-btn__arrow { transform: none; }
 }
 
 /* ── Touch targets ───────────────────────────────────────────────────────
