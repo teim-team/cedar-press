@@ -46,6 +46,7 @@ import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
+import { PRESS_SOURCES, SOURCE_COUNT } from "../../features/grove/pressSources.js";
 import {
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
@@ -76,7 +77,7 @@ import {
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
 import CollectionPreview from "./PressCollectionPreview";
-import { PressCedarFab } from "./PressCedarFab";
+import PressDoorCedar from "./PressDoorCedar";
 import { TierName } from "./TierName";
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
@@ -97,19 +98,11 @@ const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
 }));
 const TIER_OF = Object.fromEntries(SHELVES.flatMap(({ tier, entries }) => entries.map((entry) => [entry.id, tier])));
 
-// The public systems the collections begin from, for the provenance line.
-// Each name appears verbatim in the catalog's own `sources` field
-// (data/cedar/collections.manifest.json); the line names systems, never
-// endorsements, which is why it is plain type and not a row of seals.
-const PUBLIC_SOURCES = [
-  "USAspending",
-  "Federal Register",
-  "Congress.gov",
-  "SAM",
-  "FPDS",
-  "IRS Business Master File",
-  "ONRR",
-];
+// The source systems are read from `pressSources.js`, which breaks each
+// collection descriptor's sources prose into the systems it names and is
+// held to them by a test. The door names every one of them rather than a
+// hand-picked seven: the breadth IS the argument, and a visitor who counts
+// six familiar federal systems concludes Cedar repackages open data.
 
 // The four pillars. Each names something a reader can check on this page or
 // on Methods, because "data-driven insights" and "credible research" are
@@ -145,14 +138,6 @@ const PROOF_POINTS = [
     body: "Ask a question of any collection and get the answer with the record it came from. Where Cedar holds no published figure, it says so.",
     icon: CedarIcon,
   },
-];
-
-// Questions the gate suggests to Cedar: enough to show what the product
-// answers, none requiring data the visitor is not yet entitled to see.
-const GATE_CEDAR_EXAMPLES = [
-  "What does Cedar Press cover?",
-  "Which collections track federal contracting?",
-  "What is in the Individually Owned Native Businesses collection?",
 ];
 
 function browserStorage() {
@@ -508,6 +493,15 @@ export default function PressGate({ user }) {
               their marks, one group a shelf; the pane is the one in hand.
               Not `#catalog`: that id is the reader's shelf on /data. */}
           <figure className="cp-hero3__stage cp-fade">
+            {/* The frame holds a real desktop window at real desktop size and
+                scales it to fit, the way a product screenshot does. Rendering
+                the app at the ~800px the column actually offers gave a narrow
+                window with cramped columns; rendering it at 1280x800 and
+                scaling gives the true desktop layout at 16:10. The scale is
+                container-query units, so it needs no JavaScript and no
+                resize listener. Below the stack point the app goes fluid
+                again — a 1280px window scaled onto a phone is unreadable. */}
+            <div className="cp-hero3__frame">
             <div className="cp-app" data-testid="press-frame">
               <div className="cp-app__chrome">
                 <span className="cp-app__chromeword">
@@ -518,6 +512,7 @@ export default function PressGate({ user }) {
                 <span className="cp-app__chromemeta">{STOREFRONT_CATALOG.length} collections</span>
               </div>
               <div className="cp-app__body">
+                <div className="cp-app__railwrap">
                 <nav className="cp-app__rail" aria-label="The collections">
                   {SHELVES.map(({ tier, entries }) => (
                     <div className="cp-app__group" key={tier.id}>
@@ -546,6 +541,7 @@ export default function PressGate({ user }) {
                     </div>
                   ))}
                 </nav>
+                </div>
                 <div className="cp-app__pane">
                   {selected ? (
                     <CollectionPreview key={selected.id} entry={selected} tier={TIER_OF[selected.id]} register={register} />
@@ -553,22 +549,40 @@ export default function PressGate({ user }) {
                 </div>
               </div>
             </div>
-            <figcaption>
+            </div>
+            <figcaption className="cp-fade">
               Live preview. Six of ten sample records per collection, from the current release.
             </figcaption>
           </figure>
         </div>
 
-        {/* The provenance line: the public systems the collections begin
-            from. Plain type, not seals: it states a fact and claims no
-            endorsement. */}
-        <aside className="cp-hero3__proof cp-fade" aria-label="Public sources">
-          <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
-            Every collection begins with documented source records
-          </Link>
-          <ul className="cp-hero3__prooflist">
-            {PUBLIC_SOURCES.map((name) => <li key={name}>{name}</li>)}
-          </ul>
+        {/* The provenance band: every source system the twelve collections
+            name, on a slow run so the breadth reads as breadth rather than
+            as a paragraph nobody finishes.
+
+            The run is duplicated and the track translated by half its width,
+            which is what makes the loop seamless; the copy is aria-hidden so
+            a screen reader hears the list once. Hover or focus stops it, and
+            prefers-reduced-motion turns it into a wrapped list (CSS). */}
+        <aside className="cp-hero3__proof cp-fade" aria-label="Source systems">
+          <div className="cp-hero3__proofhead">
+            <Link className="cp-hero3__prooflabel" to={PRESS_METHODS_PATH}>
+              Every collection begins with documented source records
+            </Link>
+            <span className="cp-hero3__proofcount">
+              {SOURCE_COUNT} source systems · {STOREFRONT_CATALOG.length} collections
+            </span>
+          </div>
+          <div className="cp-hero3__marqwrap">
+          <div className="cp-hero3__marquee" style={{ "--run-dur": `${SOURCE_COUNT * 2.4}s` }}>
+            <ul className="cp-hero3__run">
+              {PRESS_SOURCES.map((source) => <li key={source.name}>{source.name}</li>)}
+            </ul>
+            <ul className="cp-hero3__run" aria-hidden="true">
+              {PRESS_SOURCES.map((source) => <li key={`${source.name}-echo`}>{source.name}</li>)}
+            </ul>
+          </div>
+          </div>
         </aside>
       </section>
 
@@ -577,10 +591,19 @@ export default function PressGate({ user }) {
         <div className="cp-why__in">
           <header className="cp-why__head">
             <div>
-              <p className="cp-kicker cp-kicker--light cp-fade">Why Cedar Press</p>
+              <p className="cp-kicker cp-kicker--light cp-fade">What Cedar does with them</p>
               <h2 className="cp-why__title cp-fade" id="cp-why-title">
                 Records are only the beginning.
               </h2>
+              {/* The headline posed something and the section left it
+                  hanging. This answers it in a sentence, and the four steps
+                  below are that sentence in order. */}
+              <p className="cp-why__lede cp-fade">
+                A federal filing names a vendor, not a nation. A notice names a party, not the
+                government behind it. Cedar takes {SOURCE_COUNT} source systems and does the work
+                between them: resolve them to the entity, publish the limits, keep them current,
+                and answer questions against them.
+              </p>
             </div>
             <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
               {SHELVES.map(({ tier, entries }) => (
@@ -601,16 +624,17 @@ export default function PressGate({ user }) {
               Governments, enterprises, and the institutions around them
             </p>
           </div>
-          <ul className="cp-why__proof">
-            {PROOF_POINTS.map((point) => (
+          <ol className="cp-why__proof">
+            {PROOF_POINTS.map((point, i) => (
               <li className="cp-why__item cp-fade" key={point.id}>
+                <span className="cp-why__step" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                 <span className="cp-why__ic" aria-hidden="true">{point.icon}</span>
                 <span className="cp-why__label">{point.label}</span>
                 <span className="cp-why__body">{point.body}</span>
               </li>
             ))}
-          </ul>
-          <p className="cp-why__note">Photography is illustrative and does not identify Cedar Press customers.</p>
+          </ol>
+          <p className="cp-why__note cp-fade">Photography is illustrative and does not identify Cedar Press customers.</p>
         </div>
       </section>
 
@@ -639,8 +663,8 @@ export default function PressGate({ user }) {
           </header>
           {/* Governance before commerce: a nation's right to its own records
               leads, the project pathway follows, and the methods close. */}
-          <ol className="cp-ways__ledger cp-fade">
-            <li className="cp-ways__row">
+          <ol className="cp-ways__ledger">
+            <li className="cp-ways__row cp-fade">
               <span className="cp-ways__label">Tribal governments</span>
               <div>
                 <h3>Request and review the Cedar records associated with your nation.</h3>
@@ -648,7 +672,7 @@ export default function PressGate({ user }) {
                 <Link className="cp-ways__act" to={PRESS_REQUEST_PATH}>Tribal government data requests <span aria-hidden="true">&#8594;</span></Link>
               </div>
             </li>
-            <li className="cp-ways__row">
+            <li className="cp-ways__row cp-fade">
               <span className="cp-ways__label">Research</span>
               <div>
                 <h3>One or two collections for a defined project.</h3>
@@ -656,7 +680,7 @@ export default function PressGate({ user }) {
                 <Link className="cp-ways__act" to={PRESS_RESEARCH_PATH}>Research access <span aria-hidden="true">&#8594;</span></Link>
               </div>
             </li>
-            <li className="cp-ways__row">
+            <li className="cp-ways__row cp-fade">
               <span className="cp-ways__label">Methods</span>
               <div>
                 <h3>How a collection is built, and how it is kept current.</h3>
@@ -668,7 +692,7 @@ export default function PressGate({ user }) {
         </div>
       </section>
 
-      <footer className="cp-door__foot">
+      <footer className="cp-door__foot cp-fade">
         <span>
           Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
           exclusively through <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
@@ -683,10 +707,11 @@ export default function PressGate({ user }) {
       </footer>
 
       {/* Cedar meets the visitor at the door. Everyone here is outside the
-          product — signed out, or signed in on a membership without Cedar
-          Press — so Cedar explains and converts rather than answering past
-          the paywall, and the notice names the reader's actual next step. */}
-      <PressCedarFab gated={user ? "unentitled" : "signedout"} examples={GATE_CEDAR_EXAMPLES} />
+          product, so this Cedar answers from a prepared bank rather than
+          from the collections: it explains what is inside without opening
+          anything a subscriber pays for, and it never reaches the network.
+          See doorCedar.js. */}
+      <PressDoorCedar />
     </main>
   );
 }

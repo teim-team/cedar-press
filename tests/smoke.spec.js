@@ -97,6 +97,34 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
+  // Cedar on the door answers from a prepared bank (doorCedar.js) and never
+  // reaches the network. The three things that matter: it answers, it says
+  // the answers are prepared, and it refuses what it does not have rather
+  // than guessing — a door assistant that improvises about a research
+  // product is worse than none.
+  test("Cedar on the door answers from the prepared bank", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await page.locator(".cp-dc__fab").click();
+    await expect(page.locator(".cp-dc__panel")).toBeVisible();
+    await expect(page.locator(".cp-dc__id")).toContainText("Prepared answers");
+    await page.locator(".cp-dc__chip").first().click();
+    await expect(page.locator(".cp-dc__turn--cedar").nth(1)).toBeVisible();
+    // A question it has nothing for is refused, not answered.
+    await page.locator(".cp-dc__field input").fill("what is the weather in Oslo");
+    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await expect(page.locator(".cp-dc__turn--cedar").last()).toContainText("do not have that one");
+    expect(errors).toEqual([]);
+  });
+
+  test("the collection pane hands its collection to Cedar", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector('[data-testid="stage-record"]');
+    await page.locator('[data-testid="collection-stage"]').getByRole("button", { name: /Ask Cedar/ }).click();
+    await expect(page.locator(".cp-dc__turn--you").last()).toContainText("Federal Funding");
+    await expect(page.locator(".cp-dc__turn--cedar").last()).toContainText("federal government");
+  });
+
   test("the door does not scroll sideways", async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);

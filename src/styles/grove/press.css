@@ -1855,38 +1855,61 @@
 
 /* The product frame. Chrome on top, the rail down the left on navy, the
  * pane on white: the platform's own shape, live. */
-.teim-rd .cp-app { overflow: hidden; border: 1px solid rgba(10, 15, 38, 0.17); border-radius: 14px; background: var(--door-surface); box-shadow: var(--door-shadow-high); }
-.teim-rd .cp-app__chrome { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--door-navy); color: #fff; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+/* A window, not a card. The frame is 16:10 — the proportion of the screen
+ * this product is used on — and it holds a window rendered at genuine
+ * desktop size, scaled to fit, exactly as a screenshot would be. Rendering
+ * the app at the ~800px this column offers instead produced a narrow window
+ * whose columns truncated to "INDIAN…"; at 1280 the layout is the one a
+ * subscriber sees.
+ *
+ * `container-type: size` gives cqw a definite basis, so the scale is pure
+ * CSS. transform-origin is the top left corner because the frame's own box
+ * is what clips and rounds; the scaled child never paints outside it. */
+.teim-rd .cp-hero3__frame { position: relative; aspect-ratio: 16 / 10; container-type: size; overflow: hidden; border: 1px solid rgba(10, 15, 38, 0.17); border-radius: 14px; background: var(--door-surface); box-shadow: var(--door-shadow-high); }
+.teim-rd .cp-app { display: flex; flex-direction: column; width: 1280px; height: 800px; transform: scale(calc(100cqw / 1280px)); transform-origin: top left; background: var(--door-surface); }
+/* No container-query support: the window goes fluid and fills the frame,
+ * which is the layout that shipped before the scaling and still works. */
+@supports not (container-type: size) {
+  .teim-rd .cp-hero3__frame { container-type: normal; }
+  .teim-rd .cp-app { width: 100%; height: 100%; transform: none; }
+}
+.teim-rd .cp-app__chrome { flex: none; display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--door-navy); color: #fff; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 .teim-rd .cp-app__chromeword { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--sans); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 .teim-rd .cp-app__chromeword img { width: 1.3rem; height: 1.3rem; filter: brightness(0) invert(1); opacity: 0.9; }
 .teim-rd .cp-app__chromeat { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); padding-left: 1rem; border-left: 1px solid rgba(255, 255, 255, 0.16); }
 .teim-rd .cp-app__chromemeta { margin-left: auto; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
-.teim-rd .cp-app__body { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: 38rem; }
-.teim-rd .cp-app__rail { background: var(--door-navy); color: #fff; padding: 0.9rem 0.6rem 1rem; border-right: 1px solid rgba(255, 255, 255, 0.06); }
-.teim-rd .cp-app__group + .cp-app__group { margin-top: 0.9rem; }
-.teim-rd .cp-app__groupcap { display: block; padding: 0 0.7rem 0.4rem; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--door-accent-light); }
+.teim-rd .cp-app__body { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 17rem minmax(0, 1fr); }
+.teim-rd .cp-app__rail { position: relative; min-height: 0; overflow-y: auto; padding: 1rem 0.7rem 1.2rem; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent; background: var(--door-navy); color: #fff; padding: 0.9rem 0.6rem 1rem; border-right: 1px solid rgba(255, 255, 255, 0.06); }
+.teim-rd .cp-app__rail::-webkit-scrollbar { width: 6px; }
+.teim-rd .cp-app__rail::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); border-radius: 3px; }
+.teim-rd .cp-app__rail::-webkit-scrollbar-track { background: transparent; }
+/* The list runs past the foot of the window; the fade is what says so. */
+.teim-rd .cp-app__railwrap { position: relative; min-height: 0; display: grid; }
+.teim-rd .cp-app__railwrap::after { content: ''; position: absolute; z-index: 2; inset: auto 0 0 0; height: 3rem; pointer-events: none; background: linear-gradient(180deg, rgba(9, 19, 43, 0), var(--door-navy)); }
+.teim-rd .cp-app__group + .cp-app__group { margin-top: 1rem; }
+.teim-rd .cp-app__groupcap { display: block; padding: 0 0.6rem 0.25rem; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--door-accent-light); }
 .teim-rd .cp-app__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.teim-rd .cp-app__item { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); align-items: center; gap: 0.7rem; width: 100%; box-sizing: border-box; min-height: 44px; padding: 0.42rem 0.7rem; border: 0; border-radius: 8px; background: transparent; color: rgba(255, 255, 255, 0.8); font: inherit; text-align: left; cursor: pointer; transition: background 0.16s var(--door-ease), color 0.16s var(--door-ease); }
+.teim-rd .cp-app__item { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); align-items: center; gap: 0 0.75rem; width: 100%; box-sizing: border-box; min-height: 44px; padding: 0.45rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: rgba(255, 255, 255, 0.8); font: inherit; text-align: left; cursor: pointer; transition: background 0.16s var(--door-ease), color 0.16s var(--door-ease); }
 .teim-rd .cp-app__item:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
 .teim-rd .cp-app__item.is-on { background: rgba(15, 181, 165, 0.18); color: #fff; box-shadow: inset 2px 0 0 var(--door-accent-light); }
 .teim-rd .cp-app__item:focus-visible { outline: 2px solid var(--door-accent-light); outline-offset: -2px; }
 .teim-rd .cp-app__mark { display: flex; color: var(--door-accent-light); }
 .teim-rd .cp-app__mark svg { width: 1.7rem; height: 1.7rem; display: block; }
 .teim-rd .cp-app__label { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
-.teim-rd .cp-app__name { font-family: var(--sans); font-size: 0.86rem; font-weight: 600; letter-spacing: -0.005em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.teim-rd .cp-app__rows { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
-.teim-rd .cp-app__item.is-on .cp-app__rows { color: rgba(255, 255, 255, 0.72); }
-.teim-rd .cp-app__pane { min-width: 0; background: var(--door-surface); display: flex; flex-direction: column; }
+.teim-rd .cp-app__name { display: block; font-family: var(--sans); font-size: 0.92rem; font-weight: 600; letter-spacing: -0.005em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.teim-rd .cp-app__rows { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+.teim-rd .cp-app__item.is-on .cp-app__rows { color: rgba(255, 255, 255, 0.75); }
+.teim-rd .cp-app__pane { min-width: 0; min-height: 0; overflow: hidden; background: var(--door-surface); display: flex; flex-direction: column; }
 
 /* The pane: the collection in hand. */
-.teim-rd .cp-pane { display: flex; flex-direction: column; min-height: 100%; }
+.teim-rd .cp-pane { display: flex; flex-direction: column; min-height: 0; height: 100%; }
 .teim-rd .cp-pane__head { padding: 1.2rem 1.4rem 1rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem 1.5rem; align-items: start; }
 .teim-rd .cp-pane__cap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
 .teim-rd .cp-pane__name { font-family: var(--sans); font-size: clamp(1.2rem, 1.7vw, 1.55rem); font-weight: 750; letter-spacing: -0.025em; line-height: 1.12; color: var(--ink); margin: 0.3rem 0 0; }
 .teim-rd .cp-pane__facts { grid-column: 2; grid-row: 1; display: grid; gap: 0.2rem; justify-items: end; margin: 0.15rem 0 0; font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); text-align: right; white-space: nowrap; }
 .teim-rd .cp-pane__blurb { grid-column: 1 / -1; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); margin: 0.2rem 0 0; max-width: 72ch; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .teim-rd .cp-pane__tablecap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.5rem 1.4rem; border-top: 1px solid var(--door-rule); border-bottom: 1px solid var(--door-rule); background: var(--door-ground-bright); font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
-.teim-rd .cp-pane__scroll { overflow-x: auto; }
+.teim-rd .cp-pane__scroll { min-height: 0; overflow: auto; }
 .teim-rd .cp-pane__table { width: 100%; border-collapse: collapse; font-size: 0.8rem; line-height: 1.4; color: var(--ink); }
 .teim-rd .cp-pane__table th, .teim-rd .cp-pane__table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(10, 28, 52, 0.07); vertical-align: top; text-align: left; }
 .teim-rd .cp-pane__table th:first-child, .teim-rd .cp-pane__table td:first-child { padding-left: 1.4rem; }
@@ -1898,6 +1921,8 @@
 .teim-rd .cp-pane__date { font-family: var(--mono); font-size: 0.7rem; white-space: nowrap; }
 .teim-rd .cp-pane__obs { color: var(--ink-2); min-width: 9rem; }
 .teim-rd .cp-pane__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* The window renders at 1280x800, so the pane keeps its own measures and
+ * needs none of the cramped overrides an 800px window required. */
 .teim-rd .cp-pane__table th.cp-pane__amt, .teim-rd .cp-pane__table td.cp-pane__amt { text-align: right; font-family: var(--mono); font-size: 0.72rem; white-space: nowrap; }
 /* Said under the table, not in place of it: the pane is showing real rows
  * from a supporting table because the main table's sample is not published
@@ -1920,14 +1945,33 @@
 .teim-rd .cp-pane__act:hover, .teim-rd .cp-pane__act:focus-visible { border-bottom-color: currentColor; }
 .teim-rd .cp-pane__act--btn { border-top: 0; border-inline: 0; background: none; padding: 0; cursor: pointer; }
 
-/* The provenance line, closing the hero on a glass band. */
-.teim-rd .cp-hero3__proof { max-width: var(--door-max); margin: clamp(1.6rem, 3.5vh, 2.6rem) auto 0; padding: clamp(1rem, 2vw, 1.3rem) clamp(1.2rem, 2.4vw, 1.8rem); display: grid; gap: 0.6rem; border: 1px solid var(--door-rule); border-radius: 14px; background: rgba(255, 255, 255, 0.78); box-shadow: var(--door-shadow-surface); -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); }
-.teim-rd .cp-hero3__prooflabel { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--door-ink-3); text-decoration: none; }
-.teim-rd .cp-hero3__prooflabel:hover { color: var(--dteal); }
-.teim-rd .cp-hero3__prooflist { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem clamp(0.8rem, 1.8vw, 1.5rem); }
-.teim-rd .cp-hero3__prooflist li { font-size: 0.92rem; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
-.teim-rd .cp-hero3__prooflist li + li { position: relative; padding-left: clamp(0.8rem, 1.8vw, 1.5rem); }
-.teim-rd .cp-hero3__prooflist li + li::before { content: ''; position: absolute; left: 0; top: 0.15em; bottom: 0.15em; width: 1px; background: var(--door-rule); }
+/* The source band, closing the hero on a glass band: the head states the
+ * claim and the count, the run names every system. */
+.teim-rd .cp-hero3__proof { max-width: var(--door-max); margin: clamp(1.6rem, 3.5vh, 2.6rem) auto 0; padding: clamp(0.9rem, 1.8vw, 1.15rem) 0 clamp(0.8rem, 1.6vw, 1rem); border: 1px solid var(--door-rule); border-radius: 14px; background: rgba(255, 255, 255, 0.78); box-shadow: var(--door-shadow-surface); -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); overflow: hidden; }
+.teim-rd .cp-hero3__proofhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 1.5rem; padding: 0 clamp(1.2rem, 2.4vw, 1.8rem) 0.75rem; }
+.teim-rd .cp-hero3__prooflabel { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--door-ink-3); text-decoration: none; border-bottom: 1px solid transparent; transition: color 0.16s var(--door-ease), border-color 0.16s var(--door-ease); }
+.teim-rd .cp-hero3__prooflabel:hover, .teim-rd .cp-hero3__prooflabel:focus-visible { color: var(--dteal); border-bottom-color: currentColor; }
+.teim-rd .cp-hero3__proofcount { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+/* The run. Two identical lists side by side and a track translated by half
+ * its width: at -50% the second list sits exactly where the first began, so
+ * the reset is invisible. Duration scales with the number of systems so
+ * adding one does not speed the whole band up. */
+.teim-rd .cp-hero3__marqwrap { -webkit-mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent); mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent); }
+.teim-rd .cp-hero3__marquee { display: flex; width: max-content; animation: cp-run var(--run-dur, 90s) linear infinite; }
+.teim-rd .cp-hero3__marquee:hover, .teim-rd .cp-hero3__marquee:focus-within { animation-play-state: paused; }
+@keyframes cp-run { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+.teim-rd .cp-hero3__run { list-style: none; display: flex; align-items: baseline; margin: 0; padding: 0; }
+.teim-rd .cp-hero3__run li { position: relative; flex: none; padding: 0 clamp(0.8rem, 1.6vw, 1.4rem); font-size: 0.9rem; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+.teim-rd .cp-hero3__run li::before { content: ''; position: absolute; left: 0; top: 0.15em; bottom: 0.15em; width: 1px; background: var(--door-rule); }
+/* Motion off: the run becomes the wrapped list it always was underneath. */
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-hero3__marqwrap { -webkit-mask-image: none; mask-image: none; }
+  .teim-rd .cp-hero3__marquee { width: auto; animation: none; padding: 0 clamp(1.2rem, 2.4vw, 1.8rem); }
+  .teim-rd .cp-hero3__marquee [aria-hidden="true"] { display: none; }
+  .teim-rd .cp-hero3__run { flex-wrap: wrap; gap: 0.35rem 0; }
+  .teim-rd .cp-hero3__run li:first-child { padding-left: 0; }
+  .teim-rd .cp-hero3__run li:first-child::before { display: none; }
+}
 
 /* ── The passage ─────────────────────────────────────────────────────────
  * Navy, full width: the photograph and the four pillars. The change of
@@ -1938,6 +1982,7 @@
 .teim-rd .cp-why__head { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.95fr); align-items: end; gap: clamp(2rem, 5vw, 6rem); margin-bottom: clamp(1.8rem, 3.5vw, 2.8rem); }
 .teim-rd .cp-why__head > div { display: grid; gap: 0.8rem; }
 .teim-rd .cp-why__title { max-width: 18ch; margin: 0; color: #fff; font-family: var(--sans); font-size: clamp(2rem, 4vw, 3.6rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.02; text-wrap: balance; }
+.teim-rd .cp-why__lede { font-size: clamp(1rem, 1.2vw, 1.1rem); line-height: 1.6; color: rgba(255, 255, 255, 0.8); margin: 0; max-width: 54ch; text-wrap: pretty; }
 .teim-rd .cp-why__shelves { list-style: none; margin: 0; padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, 0.22); display: grid; gap: 0.7rem; }
 .teim-rd .cp-why__shelves li { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 1rem; font-size: 0.92rem; line-height: 1.45; color: rgba(255, 255, 255, 0.78); }
 .teim-rd .cp-why__shelves b { color: #fff; font-weight: 700; }
@@ -1946,8 +1991,14 @@
 .teim-rd .cp-why__photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 14, 33, 0.02) 40%, rgba(5, 14, 33, 0.34) 100%); pointer-events: none; }
 .teim-rd .cp-why__photolabel { position: absolute; z-index: 2; right: 1.25rem; bottom: 1.15rem; margin: 0; padding: 0.46rem 0.62rem 0.46rem 0.82rem; border-left: 2px solid rgba(95, 217, 204, 0.9); background: rgba(6, 18, 40, 0.84); color: rgba(255, 255, 255, 0.94); font-family: var(--mono); font-size: 0.66rem; line-height: 1.55; letter-spacing: 0.1em; text-align: right; text-transform: uppercase; }
 .teim-rd .cp-why__photolabel span { display: block; color: #fff; font-weight: 700; }
-.teim-rd .cp-why__proof { list-style: none; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.4rem clamp(1.4rem, 3vw, 2.6rem); }
-.teim-rd .cp-why__item { display: grid; grid-template-rows: auto auto 1fr; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.teim-rd .cp-why__proof { list-style: none; counter-reset: step; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.4rem clamp(1.4rem, 3vw, 2.6rem); }
+.teim-rd .cp-why__item { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.18); transition: border-color 0.2s var(--door-ease); }
+.teim-rd .cp-why__item:hover { border-top-color: var(--door-accent-light); }
+/* The step number is the thing that makes the four read as an order rather
+ * than as four unrelated virtues, which is what the headline needed. */
+.teim-rd .cp-why__step { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; color: var(--door-accent-light); }
+.teim-rd .cp-why__item:hover .cp-why__ic { transform: translateY(-2px); }
+.teim-rd .cp-why__ic { transition: transform 0.24s var(--door-ease); }
 .teim-rd .cp-why__ic { display: flex; color: var(--door-accent-light); }
 .teim-rd .cp-why__ic svg { width: 2.4rem; height: 2.4rem; }
 .teim-rd .cp-why__label { font-family: var(--sans); font-size: 1rem; font-weight: 750; letter-spacing: -0.015em; line-height: 1.25; color: #fff; }
@@ -1982,7 +2033,7 @@
 /* ── Widths ──────────────────────────────────────────────────────────── */
 @media (max-width: 1250px) {
   .teim-rd .cp-hero3__in { grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); }
-  .teim-rd .cp-app__body { grid-template-columns: 13.5rem minmax(0, 1fr); }
+  .teim-rd .cp-app__body { grid-template-columns: 15rem minmax(0, 1fr); }
   .teim-rd .cp-why__proof { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 1050px) {
@@ -2002,6 +2053,8 @@
   .teim-rd .cp-btn { min-height: 40px; padding-inline: 0.9rem; font-size: 0.88rem; }
   .teim-rd .cp-hero3 { padding-top: 1.8rem; }
   .teim-rd .cp-hero3__stage::before { inset: 4% -10% 2% -10%; }
+  .teim-rd .cp-hero3__frame { aspect-ratio: auto; container-type: normal; }
+  .teim-rd .cp-app { width: 100%; height: auto; transform: none; }
   .teim-rd .cp-app__body { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .teim-rd .cp-app__chromeat { display: none; }
   .teim-rd .cp-app__rail { display: flex; gap: 0.6rem; overflow-x: auto; padding: 0.7rem 0.7rem; border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); scrollbar-width: none; }
@@ -2059,6 +2112,90 @@
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cp-btn, .teim-rd .cp-btn__arrow, .teim-rd .cp-app__item, .teim-rd .cp-pane__act, .teim-rd .cp-ways__act { transition: none; }
   .teim-rd .cp-btn:hover .cp-btn__arrow { transform: none; }
+}
+
+/* ── Cedar on the door ───────────────────────────────────────────────────
+ * A floating control and a panel of prepared answers. Same material as the
+ * rest of the door: white surface, hairlines, one teal accent, rectangles
+ * with the control radius. The panel is the one thing on the page allowed
+ * to float, so it carries the high shadow. */
+.teim-rd .cp-dc { position: fixed; right: clamp(1rem, 2.4vw, 2rem); bottom: clamp(1rem, 2.4vw, 2rem); z-index: 120; display: flex; flex-direction: column; align-items: flex-end; gap: 0.7rem; }
+.teim-rd .cp-dc__fab { display: inline-flex; align-items: center; gap: 0.7rem; padding: 0.7rem 1.1rem; border: 1px solid var(--door-rule-strong); border-radius: 12px; background: var(--door-surface); color: var(--ink); cursor: pointer; text-align: left; box-shadow: var(--door-shadow-surface); transition: border-color 0.18s var(--door-ease), box-shadow 0.18s var(--door-ease), transform 0.18s var(--door-ease); }
+.teim-rd .cp-dc__fab:hover { border-color: var(--dteal); transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 14px 34px -20px rgba(10, 28, 52, 0.45); }
+.teim-rd .cp-dc__fab:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-dc__fab.is-open { border-color: var(--dteal); }
+.teim-rd .cp-dc__dot { flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 3px rgba(15, 181, 165, 0.18); }
+.teim-rd .cp-dc__fabid { display: flex; flex-direction: column; line-height: 1.2; }
+.teim-rd .cp-dc__fabid b { font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-dc__fabid small { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--door-ink-3); }
+
+.teim-rd .cp-dc__panel { display: flex; flex-direction: column; width: min(25rem, calc(100vw - 2rem)); max-height: min(34rem, calc(100vh - 8rem)); border: 1px solid var(--door-rule); border-radius: 14px; background: var(--door-surface); box-shadow: var(--door-shadow-high); overflow: hidden; animation: cp-dc-in 0.22s var(--door-ease) both; }
+@keyframes cp-dc-in { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-dc__panel { animation: none; } }
+.teim-rd .cp-dc__head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem 0.9rem 0.8rem 1rem; background: var(--door-navy); color: #fff; }
+.teim-rd .cp-dc__id { display: flex; align-items: center; gap: 0.6rem; }
+.teim-rd .cp-dc__mark { width: 1.7rem; height: 1.7rem; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.92; }
+.teim-rd .cp-dc__id b { display: block; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; line-height: 1.2; }
+.teim-rd .cp-dc__id small { display: block; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255, 255, 255, 0.62); }
+.teim-rd .cp-dc__close { flex: none; width: 1.9rem; height: 1.9rem; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: rgba(255, 255, 255, 0.72); font-size: 1.2rem; line-height: 1; cursor: pointer; transition: background 0.16s var(--door-ease), color 0.16s var(--door-ease); }
+.teim-rd .cp-dc__close:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+.teim-rd .cp-dc__thread { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.7rem; background: var(--door-ground); }
+.teim-rd .cp-dc__turn { max-width: 92%; padding: 0.7rem 0.85rem; border-radius: 12px; font-size: 0.88rem; line-height: 1.55; }
+.teim-rd .cp-dc__turn p { margin: 0; }
+.teim-rd .cp-dc__turn p + p { margin-top: 0.6rem; }
+.teim-rd .cp-dc__turn--cedar { align-self: flex-start; border: 1px solid var(--door-rule); background: var(--door-surface); color: var(--ink-2); }
+.teim-rd .cp-dc__turn--you { align-self: flex-end; background: var(--door-navy); color: rgba(255, 255, 255, 0.94); font-weight: 500; }
+.teim-rd .cp-dc__links { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.7rem; padding-top: 0.6rem; border-top: 1px solid var(--door-rule); }
+.teim-rd .cp-dc__links a { font-size: 0.84rem; font-weight: 700; color: var(--dteal); text-decoration: none; }
+.teim-rd .cp-dc__links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.teim-rd .cp-dc__chips { flex: none; display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0.7rem 1rem; border-top: 1px solid var(--door-rule); background: var(--door-ground-bright); }
+.teim-rd .cp-dc__chip { border: 1px solid var(--teal-line); border-radius: 8px; background: var(--door-surface); padding: 0.35rem 0.65rem; font-family: var(--sans); font-size: 0.78rem; font-weight: 600; line-height: 1.3; color: var(--dteal); text-align: left; cursor: pointer; transition: background 0.16s var(--door-ease), border-color 0.16s var(--door-ease), color 0.16s var(--door-ease); }
+.teim-rd .cp-dc__chip:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; }
+.teim-rd .cp-dc__chip:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+
+.teim-rd .cp-dc__form { flex: none; display: flex; gap: 0.5rem; padding: 0.7rem 1rem 0.9rem; border-top: 1px solid var(--door-rule); background: var(--door-surface); }
+.teim-rd .cp-dc__field { flex: 1 1 auto; min-width: 0; }
+.teim-rd .cp-dc__field input { width: 100%; box-sizing: border-box; min-height: 40px; padding: 0.5rem 0.7rem; border: 1px solid var(--door-rule-strong); border-radius: 8px; background: var(--door-surface); font: inherit; font-size: 0.88rem; color: var(--ink); }
+.teim-rd .cp-dc__field input:focus { outline: 2px solid var(--dteal); outline-offset: 1px; border-color: var(--dteal); }
+.teim-rd .cp-dc__form .cp-btn { flex: none; min-height: 40px; padding-inline: 1rem; }
+@media (max-width: 720px) {
+  .teim-rd .cp-dc { right: 0.75rem; bottom: 0.75rem; left: 0.75rem; align-items: stretch; }
+  .teim-rd .cp-dc__panel { width: auto; max-height: min(30rem, calc(100vh - 6rem)); }
+  .teim-rd .cp-dc__fab { align-self: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-dc__fab, .teim-rd .cp-dc__chip, .teim-rd .cp-dc__close { transition: none; }
+  .teim-rd .cp-dc__fab:hover { transform: none; }
+}
+
+/* ── Arrival and response on the door ────────────────────────────────────
+ * Every block arrives once as it is scrolled to (`.cp-fade`, revealed by
+ * useFadeIn), and the sets stagger so a row of four reads left to right
+ * rather than snapping in together. Nothing loops, nothing moves after it
+ * has arrived, and prefers-reduced-motion stills all of it. */
+.teim-rd .cp-door .cp-why__item:nth-child(1), .teim-rd .cp-door .cp-ways__row:nth-child(1) { transition-delay: 0ms; }
+.teim-rd .cp-door .cp-why__item:nth-child(2), .teim-rd .cp-door .cp-ways__row:nth-child(2) { transition-delay: 70ms; }
+.teim-rd .cp-door .cp-why__item:nth-child(3), .teim-rd .cp-door .cp-ways__row:nth-child(3) { transition-delay: 140ms; }
+.teim-rd .cp-door .cp-why__item:nth-child(4) { transition-delay: 210ms; }
+/* A source name answers the pointer, which is also what tells a reader the
+ * run can be stopped and read. */
+.teim-rd .cp-hero3__run li { transition: color 0.16s var(--door-ease); }
+.teim-rd .cp-hero3__run li:hover { color: var(--dteal); }
+/* The ways-in rows take the accent on their own rule. */
+.teim-rd .cp-ways__row { transition: border-color 0.2s var(--door-ease); }
+.teim-rd .cp-ways__row:hover { border-bottom-color: var(--dteal); }
+.teim-rd .cp-ways__row:hover .cp-ways__label { color: var(--ink); }
+.teim-rd .cp-ways__label { transition: color 0.2s var(--door-ease); }
+/* The window lifts a little when it is pointed at, the way the marketing
+ * site's product frame does. It is the page's one hoverable object. */
+.teim-rd .cp-hero3__frame { transition: transform 0.3s var(--door-ease), box-shadow 0.3s var(--door-ease); }
+.teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 4px 8px rgba(10, 28, 52, 0.08), 0 26px 54px -24px rgba(10, 28, 52, 0.3), 0 60px 110px -56px rgba(10, 28, 52, 0.38); }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-door .cp-why__item, .teim-rd .cp-door .cp-ways__row { transition-delay: 0ms; }
+  .teim-rd .cp-hero3__frame, .teim-rd .cp-hero3__run li, .teim-rd .cp-ways__row, .teim-rd .cp-ways__label { transition: none; }
+  .teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: none; }
 }
 
 /* ── Touch targets ───────────────────────────────────────────────────────
