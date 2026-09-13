@@ -19,11 +19,36 @@ how you will know it is done. Everything below §1 explains why.
 | 4 | **Decide the Federal Reserve claim.** The site says the linkage methods come out of the team's years inside the Federal Reserve system. It does not say the Fed uses or endorses them, because nothing here evidences that. | `docs/CEDAR_PRESS_SITE_2026-09-13.md` §3.2 | Either evidence of institutional use is recorded in this repo, or the current sentence is confirmed as the strongest defensible one. |
 | 5 | **Rename role-specific columns** in published datasets that do not already use them: `native_entity_uid`, `recipient_native_entity_uid`, `owner_cedar_uid`, `parent_cedar_uid`, `business_uid`. | `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §1, §4 | The site's column chips match the shipped columns. |
 | 6 | **Audit for the mixing rule** once both namespaces are populated: no `CE-…` in a business-id column, no `CB-…` in an entity-id column. | same, §3 | An audit script exists and passes. |
-| 7 | **Cluster free-text `use_case`** if the request tally matters. The Priorities form is free text now, so `server/cedar_press/priorities.py`'s exact-string tally will fragment. | `server/cedar_press/priorities.py` | Either a clustering step exists, or the tally is accepted as fragmenting. Do not reintroduce a menu; the owner ruled that out. |
+| 7 | **Name NEED "Cedar NEED" at source.** The site displays it that way now, from the storefront catalog's `short`. The workspace manifest still carries `short_name: "NEED"`, so an export, a codebook or anything else reading the descriptor still says the bare acronym. | `data/cedar/collections.manifest.json`, the `need` descriptor | `short_name` reads `Cedar NEED`. The site follows automatically; `collectionShort()` prefers the catalog and falls back to the descriptor, so the two agreeing is the end state. |
+| 8 | **Cluster free-text `use_case`** if the request tally matters. The Priorities form is free text now, so `server/cedar_press/priorities.py`'s exact-string tally will fragment. | `server/cedar_press/priorities.py` | Either a clustering step exists, or the tally is accepted as fragmenting. Do not reintroduce a menu; the owner ruled that out. |
 
 **Nothing else.** No dataset, schema, or publication rule changed in the site
 work of 2026-09-13. The site was brought into line with rules this workspace
 already held.
+
+---
+
+## 1b. Two gates that stopped the deploy, and will again
+
+The live site did not move for two merges because both failed the Python step
+in `.github/workflows/deploy.yml`, which sits **before** the build and the
+Pages upload. Neither is a flake; both are gates working.
+
+1. **Change the catalog, re-run the dump.**
+   `node scripts/dump-press.mjs > server/cedar_press/_press_data.json`.
+   The API reads that snapshot and `test_collection` fails rather than skips
+   when it disagrees with the JavaScript.
+2. **Name a `src/…/grove` path in a document, re-measure the rename table.**
+   `docs/ARCHITECTURE.md` carries counts that `test_rename_plan` re-measures on
+   every run, and the failure prints the current values for you to paste.
+
+Run the whole thing before merging, because **CI runs nothing on a pull
+request**:
+
+```
+npm run lint && npm run test && npm run test:smoke
+ruff check server && (cd server && python -m unittest discover -s tests -t .)
+```
 
 ---
 

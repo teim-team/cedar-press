@@ -6,6 +6,8 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
+import { LAUNCH_COLLECTION, collectionShort } from "./collection.js";
+
 import {
   GROVE_INCLUDES,
   PRESS_CATALOG,
@@ -102,4 +104,57 @@ test("the structured data and the sitemap are generated from the catalog and are
   const script = fileURLToPath(new URL("../../../scripts/seo-head.mjs", import.meta.url));
   const run = spawnSync(process.execPath, [script, "--check"], { encoding: "utf8" });
   assert.equal(run.status, 0, `${run.stdout}\n${run.stderr}\nrun: node scripts/seo-head.mjs`);
+});
+
+// ── The storefront's display name wins ─────────────────────────────────────
+//
+// A collection is named twice: the workspace descriptor says what it IS
+// (`short_name`), the storefront catalog says how it is NAMED to a reader
+// (`short`). Where they differ the catalog wins, and `collectionShort()` is
+// the one place that resolves it. `shelf.py` always did; the JavaScript and
+// `collections.py` both read the descriptor directly, so the two sides agreed
+// on the wrong answer and the cross-language parity test was satisfied by it.
+
+test("NEED is named Cedar NEED everywhere a short name is shown", () => {
+  // docs/NEED_RENAME_2026-09-10.md: the Minneapolis Fed publishes a dataset
+  // under close to this description, so a bare "Native Entity Enterprise
+  // Dataset" invites a reader to assume ours is theirs. The formal name was
+  // renamed to lead with Cedar for that reason. The short name is what every
+  // compact surface actually shows -- the door's strip, the frame's rail, the
+  // shelf, the collection picker, and the basis line under a figure -- and it
+  // was still bare.
+  const need = PRESS_CATALOG.find((entry) => entry.id === "need");
+  assert.equal(need.short, "Cedar NEED");
+  assert.match(need.name, /^Cedar /);
+
+  const dataset = LAUNCH_COLLECTION.find((entry) => entry.id === "need");
+  assert.equal(dataset.shortName, "NEED", "the descriptor is the workspace's; only the catalog is ours to name");
+  assert.equal(collectionShort(dataset), "Cedar NEED");
+});
+
+test("a short name shown to a reader is never a bare acronym of a Cedar name", () => {
+  // The general rule behind the case above: if the formal name leads with
+  // Cedar because the bare description is ambiguous, the short name may not
+  // then drop it. Catches the next collection named this way.
+  for (const entry of STOREFRONT_CATALOG) {
+    if (!entry.short || !entry.name.startsWith("Cedar ")) continue;
+    const acronym = entry.name.match(/\(([A-Z]{2,})\)$/)?.[1];
+    if (!acronym) continue;
+    assert.notEqual(
+      entry.short,
+      acronym,
+      `${entry.id}: the formal name leads with Cedar and the short name is the bare acronym "${acronym}"`,
+    );
+  }
+});
+
+test("collectionShort prefers the catalog and falls back to the descriptor", () => {
+  const byId = new Map(PRESS_CATALOG.map((entry) => [entry.id, entry]));
+  for (const dataset of LAUNCH_COLLECTION) {
+    const expected = byId.get(dataset.id)?.short ?? dataset.shortName;
+    assert.equal(collectionShort(dataset), expected, dataset.id);
+  }
+  assert.equal(collectionShort(null), null);
+  // A collection the storefront does not carry keeps the descriptor's name.
+  assert.equal(collectionShort({ id: "not-on-the-shelf", shortName: "X" }), "X");
 });

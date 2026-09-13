@@ -37,8 +37,10 @@ import {
   LinkageMoves,
   MethodsByCollection,
   ProcessRail,
+  UnlinkedReasons,
   WhyBoth,
 } from "./pressMethodSections";
+import Explain from "./Explain";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 
@@ -215,9 +217,19 @@ export default function CedarPressMethods() {
                 cannot back: the figure comes from a generated file, and
                 nothing in the release path re-runs the generator. The date it
                 was measured is a fact, so that is what it says. */}
-            {LINKAGE_COVERAGE.note} Measured {LINKAGE_COVERAGE.measuredOn} against the built
-            collections.
+            {LINKAGE_COVERAGE.note}
+            <Explain label="how the coverage figure is counted">
+              <p><span className="cp-ex1__cap">What the denominator is</span>{LINKAGE_COVERAGE.caveat}</p>
+              <p><span className="cp-ex1__cap">When it was measured</span>{LINKAGE_COVERAGE.measuredOn}, against the built collections, by <code>{LINKAGE_COVERAGE.source}</code>.</p>
+            </Explain>{" "}
+            Measured {LINKAGE_COVERAGE.measuredOn} against the built collections.
           </p>
+          {/* And why. Two of these three are intentional and stay intentional
+              however long Cedar runs: a notice addressed to every federally
+              recognized tribe names no organization, and an individually
+              owned firm's identity is withheld by policy. The third is work
+              still to do, and it says so. */}
+          <UnlinkedReasons />
         </section>
 
         <section className="cp-msec cp-fade" aria-label="How the collections improve">

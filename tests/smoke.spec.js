@@ -18,11 +18,15 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { EMAIL, HASH, PASSWORD } from "./demoAccount.js";
+// The twelve, read from the catalog rather than typed: a list typed here
+// would pass while the door advertised something else.
+import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 
 // The throwaway account playwright.config.js provisions into the build it
 // starts. It is not a credential and it opens nothing that is deployed
 // anywhere; see tests/demoAccount.js.
 const ACCOUNT = { email: EMAIL, password: PASSWORD };
+const STOREFRONT_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short || entry.name);
 
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
@@ -86,7 +90,9 @@ test.describe("the gate", () => {
     await expect(page.locator(".cp-app__item")).toHaveCount(12);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
-    await page.getByRole("button", { name: /Prime Contracting/ }).click();
+    // Scoped to the frame: the door now also carries a full-size strip of the
+    // same twelve below it, so an unscoped name matches two controls.
+    await page.getByTestId("press-frame").getByRole("button", { name: /Prime Contracting/ }).click();
     const stage = page.locator('[data-testid="collection-stage"][data-collection="contractors"]');
     await expect(stage).toBeVisible();
     await expect(stage.locator('[data-testid="stage-record"]').first()).toBeVisible();
@@ -490,6 +496,104 @@ test.describe("the table's default columns", () => {
   });
 });
 
+test.describe("the question mark", () => {
+  // One control, two behaviours, decided by the pointer. Both projects run it,
+  // because the phone project is where the tap-latch lives and the desktop
+  // project is where hover does.
+  test("opens and closes the way this pointer expects", async ({ page }, testInfo) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=contractors");
+    const btn = page.locator(".cp-ex1__btn").first();
+    await btn.waitFor();
+    const panel = page.locator(".cp-ex1__panel").first();
+    await expect(panel).toBeHidden();
+
+    if (testInfo.project.name === "desktop") {
+      await btn.hover();
+      await expect(panel).toBeVisible();
+      await page.mouse.move(4, 4);
+      await expect(panel).toBeHidden();
+      // Keyboard reaches it, and Escape closes it.
+      await btn.focus();
+      await expect(panel).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(panel).toBeHidden();
+    } else {
+      // A tap latches. It used to open and then reopen on the second tap,
+      // because tapping also focuses and onFocus opened it again.
+      await btn.tap();
+      await expect(panel).toBeVisible();
+      await btn.tap();
+      await expect(panel).toBeHidden();
+      // The sheet carries its own way out: the question mark that opened it
+      // has usually scrolled behind it by then.
+      await btn.tap();
+      await expect(panel).toBeVisible();
+      await panel.getByRole("button", { name: "Close" }).tap();
+      await expect(panel).toBeHidden();
+    }
+
+    // Whatever the pointer, the panel carries the collection's own declared
+    // prose and stays inside the viewport. Opened the way this pointer opens
+    // it: a mouse click is deliberately inert, because hover governs a mouse.
+    if (testInfo.project.name === "desktop") await btn.hover(); else await btn.tap();
+    await expect(panel).toContainText("Awardees are matched to a Native entity");
+    const box = await panel.boundingBox();
+    const width = page.viewportSize().width;
+    expect(box.x).toBeGreaterThanOrEqual(-1);
+    expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the door's twelve", () => {
+  // A visitor deciding whether to subscribe should be able to see what the
+  // twelve are and what each holds without signing in. The product frame's
+  // rail has always been clickable, but the frame renders at about 0.63
+  // scale: seventeen-pixel rows in six-point type.
+  test("the pre-login page previews all twelve and drives the frame", async ({ page }, testInfo) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    const tiles = page.locator(".cp-dcol__tile");
+    await tiles.first().waitFor();
+    await expect(tiles).toHaveCount(12);
+    // Grouped by the plan each comes with, which is the question a visitor has.
+    await expect(page.locator(".cp-dcol__tier")).toHaveCount(2);
+    await expect(page.locator(".cp-dcol__shelf").first()).toContainText("See what's happening");
+
+    const pane = page.locator(".cp-app__pane");
+    const before = await pane.innerText();
+    const target = tiles.nth(8);
+    if (testInfo.project.name === "desktop") await target.hover(); else await target.tap();
+    // The line under the strip answers whether or not the frame is on screen,
+    // and the frame above follows the same selection.
+    await expect(page.locator(".cp-dcol__note")).not.toContainText(/for what it holds|window above/);
+    await expect(pane).not.toHaveText(before);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the collection strip", () => {
+  test("the overview names all twelve and says what one holds", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/");
+    const tiles = page.locator(".cp-cstrip__tile");
+    await expect(tiles).toHaveCount(12);
+    const note = page.locator(".cp-cstrip__note");
+    await expect(note).toContainText(/collection for what it holds/i);
+    // Point at one and the line under the grid answers, the same way the
+    // section tiles and the shelves do.
+    await tiles.nth(3).hover();
+    await expect(note).not.toContainText(/collection for what it holds/i);
+    // And it is a link into Explore already narrowed to that collection.
+    const href = await tiles.nth(3).getAttribute("href");
+    expect(href).toMatch(/^\/data\?c=[a-z-]+$/);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("Shape the research", () => {
   test("the priorities page lists both kinds, says the counting needs the service, and the profile carries the card", async ({ page }) => {
     // This build has no service, so no point is counted and no point can be
@@ -666,6 +770,19 @@ test.describe("crawlers", () => {
     });
   }
 
+  test("the door names all twelve collections in the HTML a crawler fetches", async ({ request }) => {
+    // The strip is what a visitor uses to preview what they get, and it is
+    // also the only place the door spells the twelve out at readable size.
+    // Prerendered, so it is text in the document rather than something that
+    // appears after a script runs; a crawler and a reader with JS off both
+    // get the list.
+    const body = await (await request.get("/")).text();
+    const names = STOREFRONT_NAMES;
+    expect(names).toHaveLength(12);
+    for (const name of names) expect(body).toContain(name);
+    expect(body).toContain("Twelve collections");
+  });
+
   test("a page behind the gate is not offered to crawlers", async ({ request }) => {
     // Unknown and gated paths get the shell (404.html is the shell), whose
     // static head says nothing a crawler should rank; the app adds noindex
@@ -769,6 +886,12 @@ test.describe("Methods", () => {
     // Everything that can change is named as living outside the identifier.
     await expect(page.locator(".cp-ko")).toContainText("UEI");
     await expect(page.locator(".cp-ko")).toContainText("NAICS");
+    // Coverage is published with its reasons, and two of the three are marked
+    // as intentional rather than left reading as 94% failure.
+    await expect(page.locator(".cp-ur__item")).toHaveCount(3);
+    await expect(page.locator(".cp-ur__item.is-by-design")).toHaveCount(2);
+    await expect(page.locator(".cp-ur")).toContainText("Never a failed match");
+    await expect(page.locator(".cp-ur")).toContainText("not by failure");
     // The loop says where the methods come from. It must not say the Federal
     // Reserve uses or endorses them: the workspace evidences affiliation and
     // nothing more, and that is the one claim here a reader could disprove.

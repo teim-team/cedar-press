@@ -51,6 +51,8 @@
  * no sentence that ends in a comma and a fragment.
  */
 
+import { SCOPES } from "./explore.js";
+
 /** The published register the test reads, and the app already fetches. */
 export const REGISTER_SOURCE = "data/cedar/register.json";
 
@@ -296,9 +298,49 @@ export const LINKAGE_COVERAGE = Object.freeze({
   /** Named because an average hides them, and the spread is the honest fact. */
   best: Object.freeze({ label: "Cedar Native Entity Enterprise Dataset", pct: "100.00%" }),
   worst: Object.freeze({ label: "Natural Resource Revenues", pct: "6.24%" }),
+  // The caveat the generated file puts in bold, carried across verbatim in
+  // substance: a reader who takes 70.93% as a quality score has read it wrong.
+  caveat:
+    "The total sums thirteen tables whose rows are not the same kind of thing. A contract award and a NAGPRA notice each count as one, so the figure is a measure of scale and never of quality. The per-dataset rows are the ones to quote, and each collection publishes its own.",
   note:
-    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity. The spread is wide and deliberate: NEED is at 100% and Natural Resource Revenues at 6.24%, because a royalty line often names a lease and no organization at all. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure rather than an average that hides them.",
+    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity. The spread is wide and mostly deliberate: NEED is at 100% and Natural Resource Revenues at 6.24%. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure rather than an average that hides them.",
 });
+
+/**
+ * WHY A ROW CARRIES NO ENTITY, and why most of it is not a miss.
+ *
+ * The owner's note, 2026-09-13: some data will never get an entity tag,
+ * because it addresses all of Indian Country or because it is an individually
+ * owned business, and the page should make that sound intentional rather than
+ * like a hole. It is intentional, and the workspace already says so in its own
+ * vocabulary: `link_statuses` in `data/cedar/scopes.json` carries a definition
+ * for each state, two of which contain the phrases "Never a failed match" and
+ * "not by failure".
+ *
+ * So the page renders those definitions rather than a paraphrase of them, and
+ * the test holds each one to the file. The three states below are every state
+ * except `resolved`.
+ *
+ * `unresolved` is the honest one and it stays on the page: a party the register
+ * could not place is work still to do, and the collections are still being
+ * built. Publishing the count beside the two intentional states is the whole
+ * point of the door's "published with its limits" pillar.
+ */
+export const UNLINKED_REASONS = Object.freeze(
+  ["no_individual_named", "withheld", "unresolved"].map((id) =>
+    Object.freeze({
+      id,
+      label: {
+        no_individual_named: "It is about a population, not an organization",
+        withheld: "The identity is withheld by policy",
+        unresolved: "The register could not place the named party",
+      }[id],
+      intentional: id !== "unresolved",
+      // The workspace's own words, not a paraphrase of them.
+      body: SCOPES.link_statuses?.[id] ?? "",
+    }),
+  ),
+);
 
 /**
  * What the identifiers make possible, which is the argument for the layer.

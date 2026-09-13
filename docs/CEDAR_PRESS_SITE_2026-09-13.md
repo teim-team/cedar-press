@@ -107,11 +107,10 @@ The forty-two source kinds behind the door are proved the same way by
 
 Three, all recorded here rather than papered over.
 
-**3.1 `CB-` is specified and unminted.** §0. Four further disagreements
+**3.1 `CB-` is specified and unminted.** §0. Three further disagreements
 between the specification and earlier documents (check characters on `CB-`,
-Cherokee Nation Businesses as an entity or a business, the absent
-tribal-enterprise class, and whether the harmonized registry's own keys are
-Cedar ids) are listed in `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §7. The
+the absent tribal-enterprise class, and whether the harmonized registry's own
+keys are Cedar ids) are listed in `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §7. The
 terminal owns all of them.
 
 **3.2 The Federal Reserve claim is bounded to affiliation.** The owner's
@@ -163,6 +162,14 @@ now what the page says.
   federal contract now opens on a different record type: a 990, a royalty
   statement, a docket, a NAGPRA notice, an ANCSA audited filing, a nation's
   own enterprise register. Contracting is one of twelve.
+- **Unlinked rows are mostly intentional, and the page says which.** Two of
+  the three non-resolved states are by design and the workspace says so in its
+  own words (`link_statuses` in `data/cedar/scopes.json`, which contains the
+  phrases "Never a failed match" and "not by failure"): a record that addresses
+  a population names no organization, and an individually owned firm's identity
+  is withheld by policy. The third, `unresolved`, is work still to do and is
+  labelled that way. The site renders those definitions rather than a
+  paraphrase.
 - **Subscribers can write anything.** The Priorities page led with eleven
   preset cards and filed a request under a `<select>` of seven use cases. The
   free-text box leads the page now and the use case is a free field. The
@@ -265,6 +272,54 @@ test pins it.
 **Nothing in the workspace changed for this.** If a flagship should show
 different columns, edit its `default_columns` in the contract and the site
 follows.
+
+---
+
+## 5d. The deploy had been failing since #76
+
+**The live site did not move for two merges.** Both built, linted and passed
+every JavaScript check, then failed the Python step, and `npm run build:site`
+and the Pages upload are downstream of it, so they were skipped. Two gates,
+both doing their job:
+
+- `server/cedar_press/_press_data.json` is written by
+  `scripts/dump-press.mjs` and read by the API. The NEED rename changed the
+  catalog name and the dump was never re-run, so the API would have served the
+  old one. **If you change the catalog, re-run the dump in the same commit.**
+- `docs/ARCHITECTURE.md` carries a measured table of what the pending
+  `src/grove` rename would touch, and `test_rename_plan` re-measures it every
+  run. The documentation added this session cites source paths, which moved
+  four of its numbers. **Any document that names a `src/…/grove` path moves
+  this table.**
+
+The gate's own positive control was also pinned to a literal (`` `docs/` 6 ``)
+that the world is allowed to move, so it reported "has just injected nothing"
+while the gate underneath it worked. It derives its labels now, the way
+`_refs_row` in the same file already did for the headline count.
+
+---
+
+## 5e. Tooltips, and the twelve collections on the overview
+
+**`src/pages/grove/Explain.jsx`** is the question mark. One control, two
+behaviours decided by the pointer rather than the screen width: a mouse hovers,
+a thumb taps and it latches until dismissed. Keyboard focus opens it and Escape
+closes it; a mouse click is deliberately inert because hover already governs.
+The panel flips its own edge when it would leave the viewport and becomes a
+bottom sheet under 560px.
+
+It may only carry prose the product already declares. Three placements so far:
+
+| Where | What it holds | From |
+|---|---|---|
+| A single collection's scope line | how it is built, what it reads, how a record reaches its entity, coverage | the launch descriptor's `method` and `sources`, the catalog's `linkage` and `coverage` |
+| The Explore caption | what a sample record is, and that counts here are counts of samples | the preview's own contract |
+| The Methods coverage figure | the denominator, and that the total is a scale figure never a quality one | `docs/LINKAGE_COVERAGE.md` |
+
+**`src/pages/grove/PressCollectionStrip.jsx`** puts all twelve collections on
+the overview between the section tiles and the priorities block, each a link
+into Explore already narrowed to it. Same point-to-read language as the section
+tiles and the shelves, so it is not a thirteenth interaction to learn.
 
 ---
 

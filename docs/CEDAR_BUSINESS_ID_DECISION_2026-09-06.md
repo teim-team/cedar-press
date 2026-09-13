@@ -1,5 +1,15 @@
 # The Cedar Business ID: the owner's decision, 2026-09-06
 
+> **SUPERSEDED ON THE MODEL, 2026-09-13.** The owner issued a full identity
+> specification that day, recorded in
+> `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md`. Where the two disagree, that file
+> is later and wins. Two things in here are now known to be wrong or hedged:
+> the display form (see the note on check characters there, §7.1) and the
+> Cherokee Nation Businesses example in rule 3 below. This file stays as the
+> record of how the decision was reached; read the specification for what the
+> model IS.
+
+
 The owner adopted a reviewer's proposal on 2026-09-06 for a second permanent identifier, kept deliberately separate from the Cedar UID. This file records the decision, reconciles it with what the identity layer already holds, and lists what the terminal owns. It is written for the terminal; nothing in this repository mints, stores or validates a business id yet.
 
 Read with `docs/IDENTIFIER_STANDARD.md` (the uid contract, the hub model, the identifier ledger), `docs/ARCHITECTURE_DECISIONS.md` ADR-008 (registrations as legal persons, proposed and not implemented) and ADR-020 (the NEED register is a sub-hub, not a second entity space), and `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`.
@@ -69,7 +79,7 @@ These are the reviewer's rules restated as the contract the standard already use
 
 1. **The id encodes nothing and never changes.** Not on a name change, an ownership change, a move, a new NAICS, a certification, or a reclassification. One business, one `CB-` id, for as long as the records exist.
 2. **Never reused, never dropped.** A merged, dissolved or reclassified business keeps its row, with a status. A `CB-` id pointed at a different business raises, as `HandleReuse` does.
-3. **Impermeable to `cedar_uid`.** A `CB-` id may not appear in a `cedar_uid`, `cedar_uids` or any column the field map declares as entity identity, and a `CE-` uid may not appear in a business-identity column. An entity that is legitimately both (Cherokee Nation Businesses) holds two ids for two concepts, linked by an equivalence row that says why. No promotion without an adjudication record; no demotion by deletion.
+3. **Impermeable to `cedar_uid`.** A `CB-` id may not appear in a `cedar_uid`, `cedar_uids` or any column the field map declares as entity identity, and a `CE-` uid may not appear in a business-identity column. An entity that is legitimately both holds two ids for two concepts, linked by an equivalence row that says why. *(Corrected 2026-09-13: this rule named Cherokee Nation Businesses as the example of one. The owner has ruled that it is not an entity — it is an operating enterprise, it takes a `CB-`, and its relationship to the Cherokee Nation, `CE-00134-BX`, is a dated ownership row. The rule itself stands; the example was wrong, and it came from a hedged "may legitimately belong" in the quoted proposal above rather than from a ruling.)* No promotion without an adjudication record; no demotion by deletion.
 4. **Ownership is a dated relationship with a source and a confidence,** never part of the id and never inferred from a name. `native_ownership_status` and `native_ownership_basis` on the register row summarise the current state; the history table holds every interval.
 5. **Registrations are attributes, and each binding is dated.** UEI, CAGE, EIN, DUNS (internal only), state corporation numbers, TERO and tribal vendor numbers, SBA and PPP identifiers bind to the business in the identifier ledger with `valid_from`, `valid_to` and the evidence. None of them is the business's identity, a business with no external identifier is still a business, and a binding that overlaps another or carries no date stays unresolved rather than resolving to either business.
 6. **Aliases, not new ids, for name changes.** `business_alias` with `valid_from`, `valid_to`, `source` and `alias_type` (legal, trade, filing variant, source spelling). A genuine legal successor gets a new id and a `SUCCESSOR_OF` edge. In a merger the surviving business keeps its id and the absorbed one is marked merged with a `MERGED_INTO` edge; only a deal that creates a new legal entity mints one.

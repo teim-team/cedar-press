@@ -41,6 +41,7 @@ import {
   pressArticlePath,
 } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
+import PressCollectionStrip from "./PressCollectionStrip";
 import PressHub from "./PressHub";
 import PressPrioritiesBlock from "./PressPrioritiesBlock";
 
@@ -183,6 +184,11 @@ export default function CedarPress() {
             </Link>
           </nav>
           <PressHub user={entitled ? user : null} />
+          {/* The six tiles say "12 COLLECTIONS" and then make the reader open
+              a page to learn which twelve. These are the twelve, each a link
+              into Explore already narrowed to it, in the same point-to-read
+              language the tiles above and the shelves already use. */}
+          <PressCollectionStrip user={entitled ? user : null} />
           <PressPrioritiesBlock signedIn={entitled} />
         </div>
 

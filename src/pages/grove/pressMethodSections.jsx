@@ -25,6 +25,7 @@ import {
   LINKAGE_MOVES,
   LOOP_CLOSE,
   LOOP_STAGES,
+  UNLINKED_REASONS,
   WHY_BOTH,
 } from "../../features/grove/pressIdentity.js";
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog.js";
@@ -511,6 +512,29 @@ export function KeptOutside() {
         <li className="cp-ko__item" key={item.id}>
           <h3 className="cp-ko__label">{item.label}</h3>
           <p className="cp-ko__body">{item.body}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Why a row can carry no entity, and which of those is a miss.
+ *
+ * The owner's note, 2026-09-13: some data will never get an entity tag, and
+ * the page should make that sound intentional rather than like a hole. Two of
+ * the three states below are intentional and the workspace says so in its own
+ * words; the third is work still to do, and the collections are still being
+ * built. Publishing all three beside the coverage figure is the point.
+ */
+export function UnlinkedReasons() {
+  return (
+    <ul className="cp-ur">
+      {UNLINKED_REASONS.map((reason) => (
+        <li className={`cp-ur__item${reason.intentional ? " is-by-design" : ""}`} key={reason.id}>
+          <span className="cp-ur__tag">{reason.intentional ? "By design" : "Still to do"}</span>
+          <h3 className="cp-ur__label">{reason.label}</h3>
+          <p className="cp-ur__body">{reason.body}</p>
         </li>
       ))}
     </ul>

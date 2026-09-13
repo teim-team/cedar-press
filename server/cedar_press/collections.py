@@ -61,6 +61,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+# The storefront's own naming. `press_catalog` reads a committed snapshot and
+# imports nothing from this package, so it is a leaf and cannot close a cycle.
+from cedar_press import press_catalog
 from cedar_press.claims import CLAIM_CLASS
 
 __all__ = [
@@ -243,9 +246,33 @@ def sample_unavailable_reason(dataset_id: str) -> str | None:
     return sample.get("unavailable_because")
 
 
+def collection_short(dataset: Any) -> str | None:
+    """The label a citation or a version line shows for a collection.
+
+    The storefront catalog's ``short`` wins over the descriptor's
+    ``short_name`` where the two differ: the catalog is where the storefront
+    decides how a collection is NAMED to a reader, the descriptor is the
+    workspace's record of what it IS. ``shelf.py`` already resolved it in that
+    order; ``collections.py`` did not, and the JavaScript did not either, so
+    both sides agreed on the wrong answer and the parity test was satisfied.
+
+    It matters for one collection today. NEED's descriptor short name is a
+    bare "NEED", and ``docs/NEED_RENAME_2026-09-10.md`` renamed the formal
+    name to lead with Cedar precisely because a bare one reads as the
+    Minneapolis Fed's dataset. A basis line under a figure is where that
+    ambiguity does the most damage.
+    """
+    if dataset is None:
+        return None
+    for entry in press_catalog.CATALOG:
+        if entry["id"] == dataset.id and entry.get("short"):
+            return str(entry["short"])
+    return dataset.short_name
+
+
 def collection_context_line() -> str:
     """One line for the context strip: versions and the latest refresh date."""
-    versions = " · ".join(f"{d.short_name} {d.version}" for d in LAUNCH_COLLECTION)
+    versions = " · ".join(f"{collection_short(d)} {d.version}" for d in LAUNCH_COLLECTION)
     updated = sorted(d.updated for d in LAUNCH_COLLECTION)[-1]
     return f"{versions} · all current as of {updated}"
 
@@ -314,7 +341,7 @@ def collection_findings() -> CollectionFindings:
 
     def basis(dataset_id: str, detail: str) -> str:
         dataset = _dataset_for(dataset_id)
-        name = dataset.short_name if dataset else dataset_id
+        name = collection_short(dataset) if dataset else dataset_id
         version = dataset.version if dataset else "v0"
         return f"{name} {version}, {detail}"
 
@@ -455,7 +482,7 @@ class CollectionFigure:
 def _basis_for(dataset_id: str, fallback: str) -> str:
     """A figure's basis line, derived so it cannot name a stale version."""
     dataset = _dataset_for(dataset_id)
-    return f"{dataset.short_name} {dataset.version}" if dataset else fallback
+    return f"{collection_short(dataset)} {dataset.version}" if dataset else fallback
 
 
 COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
