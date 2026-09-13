@@ -2,50 +2,48 @@
 //
 // Cedar Press: the way in.
 //
-// The entrance to a professional intelligence service, not a SaaS login. The
-// first screen is a split: the left side says what this is and why it can be
-// trusted, the right side does one thing, which is get an authorized Tribal
-// Business News member inside. Under the split, the whole width goes to the
-// collections themselves — every one on its shelf, and a stage showing six
-// real records of the one in hand (PressCollectionsStage). A visitor who
-// heard "Cedar Press" at a conference learns what is inside by looking at
-// it, not by reading adjectives about it; twelve names on the door were
-// replaced by twelve tables behind it. Nothing on the stage is confidential:
-// the ten-row samples ship in the public bundle by design (pressDemoGate.js),
-// and they are the whole of what the stage can reach. Anything longer about
-// method belongs on the methods page, and the one link out is the only route
-// to it from here.
+// The door is the collections. One page, the site's own measure: the
+// wordmark and the way in along the top, a short statement, then the twelve
+// collection tiles — the same square badges the shelf on /data uses — and
+// under them the preview of whichever one is in hand: what it is, how far
+// back it goes, and six of its real records (PressCollectionPreview). A
+// visitor who heard "Cedar Press" at a conference learns what is inside by
+// looking at it. Nothing on the preview is confidential: the ten-row samples
+// ship in the public bundle by design (pressDemoGate.js), and they are the
+// whole of what the preview can reach. Anything longer about method belongs
+// on the methods page, and the one link out is the only route to it.
 //
-// Built on the app's own split (.auth-split / .auth-hero in redesign.css), so
-// a change to the platform sign-in carries here and the reader never feels
-// handed to a different company.
+// THE WAY IN IS A CONTROL, NOT A PANEL
+// "View plans" and "Log in" sit top right, where a visitor looks for them.
+// Each opens a small panel under the bar; the page underneath stays the
+// page. Tribal Business News owns payment, renewals, upgrades and code
+// issuance. There is deliberately no "create account" here: an account
+// exists because an entitlement does.
 //
 // Activation is two steps. Step one is the access code and an email address
 // and nothing else; a password is only worth choosing once the code has been
 // accepted. Which screen opens is what this browser did last time, so someone
 // who has already activated is not asked for a code they have spent.
 //
-// Tribal Business News owns payment, renewals, upgrades and code issuance.
-// There is deliberately no "create account" here: an account exists because an
-// entitlement does.
-//
 // THREE STATES, AND THE COPY HAS TO MATCH
 // Connected, this form posts to the platform and the session is a signed,
 // HTTP-only cookie. Standalone with a preview account configured, the check
-// runs in the reader's browser and the panel says so in as many words — a
-// demonstration gate that let someone believe it was access control would be
-// the dishonest version of this. Standalone with nothing configured, there is
+// runs in the reader's browser. Standalone with nothing configured, there is
 // no form at all, because a form that can only fail is worse than a sentence
 // explaining why there is none.
 
-import { useState } from "react";
-import { contactHref } from "../../features/grove/appLink.js";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
+import { contactHref } from "../../features/grove/appLink.js";
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
-import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
+import { coverageFrom } from "../../features/grove/pressAccess";
+import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
+import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import {
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
@@ -66,27 +64,35 @@ import {
   pressSignupError,
   rememberPressAccount,
 } from "../../features/grove/pressSignup";
+import { EVENT, track } from "../../features/grove/telemetry.js";
+import { useRegister } from "../../features/grove/useRegister.js";
+import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import {
   CedarIcon,
   CredibleResearchIcon,
   InsightsIcon,
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
-import { STOREFRONT_CATALOG, spellCount } from "../../features/grove/pressCatalog";
-import { coverageFrom } from "../../features/grove/pressAccess";
-import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { LAUNCH_ROWS_TOTAL } from "../../features/grove/collection";
-import PressCollectionsStage from "./PressCollectionsStage";
+import CollectionPreview from "./PressCollectionPreview";
 import { PressCedarFab } from "./PressCedarFab";
+import { TierName } from "./TierName";
+
+/** The brand mark, served from public/. The all-teal mark is the current one. */
+const MARK = "/brand/lumecon-logo-mark-teal.png";
 
 // What the product is made of, in the catalog's and the release record's
-// own numbers, for the line under the promise. The earliest year is the
+// own numbers, for the line under the statement. The earliest year is the
 // deepest single collection, so the line says "as far back as", never
 // "since": the rest start later and two of them are rosters with no start.
 const COLLECTION_STARTS = STOREFRONT_CATALOG.map((entry) => coverageFrom(entry)).filter(Boolean);
 const EARLIEST_YEAR = COLLECTION_STARTS.length ? Math.min(...COLLECTION_STARTS) : null;
-const capitalise = (word) => word[0].toUpperCase() + word.slice(1);
 
+// The shelves, each with its tiles, in the storefront's order.
+const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
+  tier,
+  entries: collectionsOnShelf(tier.shelf),
+}));
+const TIER_OF = Object.fromEntries(SHELVES.flatMap(({ tier, entries }) => entries.map((entry) => [entry.id, tier])));
 
 // The four pillars, in the order the supporting sentence names them: what the
 // data is, what is made from it, why it can be trusted, and Cedar.
@@ -138,22 +144,51 @@ function browserStorage() {
 
 export default function PressGate({ user }) {
   const { login, logout, refreshSession } = useAuth();
-  // The gate reads as one long scroll on a phone, so its sections arrive as
+  // The page reads as one long scroll on a phone, so its sections arrive as
   // they enter the viewport instead of standing there already.
   const fadeRoot = useFadeIn();
   const [step, setStep] = useState(() => initialPressStep(browserStorage()));
-  // Plans or sign-in, one at a time. Stacking both read as one long column
-  // of competing calls to action; the panel opens on the side of the hinge
-  // this browser is likely on (a remembered account lands on Log in, a new
-  // visitor sees the plans first).
-  const [panel, setPanel] = useState(() =>
-    hasPressAccount(browserStorage()) ? "signin" : "plans",
-  );
+  // Plans or sign-in, one at a time, or neither: the panel opens from the
+  // bar when asked for. A browser that has signed in before opens on Log
+  // in, because that visitor came back to get in.
+  const [panel, setPanel] = useState(() => (hasPressAccount(browserStorage()) ? "signin" : null));
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+
+  // The collection in hand: the first tile on arrival, never none.
+  const [selectedId, setSelectedId] = useState(() => SHELVES[0]?.entries[0]?.id ?? null);
+  const selected = STOREFRONT_CATALOG.find((entry) => entry.id === selectedId) ?? null;
+  const register = useRegister();
+  const previewRef = useRef(null);
+
+  const pickTile = (entry) => {
+    track(EVENT.collectionViewed, { collection: entry.id, shelf: entry.shelf, gated: true });
+    setSelectedId(entry.id);
+    // The preview sits under two rows of tiles; a pick on a phone or a
+    // short window would otherwise land off screen.
+    requestAnimationFrame(() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
+  };
+
+  // The panel closes on Escape and on a click outside it or its tabs.
+  const panelRef = useRef(null);
+  const tabsRef = useRef(null);
+  useEffect(() => {
+    if (!panel) return undefined;
+    const onKey = (event) => { if (event.key === "Escape") setPanel(null); };
+    const onDown = (event) => {
+      if (panelRef.current?.contains(event.target) || tabsRef.current?.contains(event.target)) return;
+      setPanel(null);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
+  }, [panel]);
 
   const go = (next) => {
     setStep(next);
@@ -212,180 +247,84 @@ export default function PressGate({ user }) {
     }
   };
 
+  const toggle = (which) => setPanel((current) => (current === which ? null : which));
+
   return (
-    <main className="empty-state auth-split cp-split" ref={fadeRoot}>
-      <aside className="auth-hero cp-hero2">
-        <span className="auth-hero__glow auth-hero__glow--a" aria-hidden="true" />
-        <span className="auth-hero__glow auth-hero__glow--b" aria-hidden="true" />
-        {/* One ripple, and it is ours. The panel used to carry two nested
-            contour rises that read as generic circles beside the mark; the
-            mark's own asymmetric rings are the ripple now, breathing on a
-            slow cycle so the panel is alive without anything sliding around.
-
-            The all-teal mark, which is the current one. */}
-        <img
-          className="auth-hero__mark cp-hero2__ripple"
-          src="/brand/lumecon-logo-mark-teal.png"
-          alt=""
-          aria-hidden="true"
-        />
-        <div className="auth-hero__inner cp-hero2__inner">
-          <span className="cp-split__brand">Cedar Press</span>
-          <p className="cp-hero2__tagline cp-fade">Trusted intelligence for Indian Country.</p>
-          {/* Two messages, on purpose: the door sells the asset ("this is
-              the data you should want access to"), the signed-in overview
-              keeps the editorial "Know what's shaping Indian Country."
-              ("here's what you can do with it"). Neither repeats the tier
-              lines: the shelves explain the ladder. */}
-          <h1 className="auth-hero__headline cp-hero2__headline cp-fade">
-            The data behind Indian Country.
-          </h1>
-          <p className="auth-hero__lede cp-hero2__lede cp-fade">
-            Original collections built from fragmented records, connected through original
-            research, and maintained as Indian Country changes.
-          </p>
-          {/* What the product is made of, before the pillars say why to
-              trust it: the count, the rows, the deepest year and the latest
-              release, each read from the catalog or the release record. */}
-          <ul className="cp-facts cp-facts--hero cp-fade" aria-label="What Cedar Press holds">
-            <li><b>{STOREFRONT_CATALOG.length}</b> collections</li>
-            {LAUNCH_ROWS_TOTAL ? <li><b>{LAUNCH_ROWS_TOTAL.toLocaleString("en-US")}</b> records</li> : null}
-            {EARLIEST_YEAR ? <li>as far back as <b>{EARLIEST_YEAR}</b></li> : null}
-            {recentlyUpdated(1)[0] ? <li>latest release <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
-          </ul>
-          {/* The four pillars, as rows on rules rather than tiles: the
-              custom marks stand on their own beside the words, and nothing
-              swaps or lifts on hover. */}
-          <ul className="cp-proof cp-fade">
-            {PROOF_POINTS.map((point) => (
-              <li className="cp-proof__item" key={point.id}>
-                <span className="cp-proof__ic" aria-hidden="true">{point.icon}</span>
-                <span className="cp-proof__label">{point.label}</span>
-                <span className="cp-proof__body">{point.body}</span>
-              </li>
-            ))}
-          </ul>
-          {/* The linkage sentence was removed from the gate 2026-09-04 at
-              the owner's instruction. `NATIVE_LINKAGE.door` still lives in
-              pressCatalog and still carries the Data page's copy - the
-              claim is not withdrawn, it is no longer made on the door.
-
-              The "Team experience" strip - the Federal Reserve and university
-              names, and the endorsement disclaimer that had to travel with
-              them - was removed from the gate 2026-09-04 at the owner's
-              instruction. It remains on the Methods page, which is where a
-              reader who wants the team's background goes looking; the gate no
-              longer leads with affiliations that are not endorsements. */}
-          <p className="cp-hero2__acts cp-fade">
-            <a className="cp-split__method" href="#collections">
-              See the collections <span aria-hidden="true">&#8595;</span>
+    // .cp-split is the name the smoke suite knows the door by; the layout
+    // is no longer a split.
+    <main className="cp-door cp-split" ref={fadeRoot}>
+      <header className="cp-door__bar">
+        <span className="cp-door__lockup">
+          <img className="cp-door__mark" src={MARK} alt="" aria-hidden="true" />
+          <span className="cp-door__word">Cedar Press</span>
+        </span>
+        {/* Who made it and who sells it, said plainly, once. */}
+        <span className="cp-door__of">
+          Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
+          exclusively through <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+        </span>
+        {user ? (
+          // Someone signed in on the wrong membership has one move,
+          // upgrading; the bar says who they are and offers the other account.
+          <span className="cp-door__user">
+            <span className="cp-gate__signedin">Signed in as {user.email} · no Cedar Press</span>
+            <a className="gv-btn gv-btn--primary" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
+              View Cedar Press plans <span aria-hidden="true">&#8594;</span>
             </a>
-            <Link className="cp-split__method" to={PRESS_METHODS_PATH}>
-              How Cedar builds them <span aria-hidden="true">&#8594;</span>
-            </Link>
+            <button type="button" className="cp-split__linkbtn" onClick={() => logout()}>
+              Use a different account
+            </button>
+          </span>
+        ) : (
+          // One question, two answers: get Cedar Press, or you already have
+          // it. Tabs, so the panel under the bar shows one at a time.
+          <div className="cp-door__tabs" role="tablist" aria-label="Get Cedar Press or log in" ref={tabsRef}>
             <button
               type="button"
-              className="cp-split__method cp-split__method--btn"
-              onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
+              id="cp-tab-plans"
+              role="tab"
+              className="cp-door__tab"
+              aria-selected={panel === "plans"}
+              aria-controls="cp-panel-plans"
+              onClick={() => toggle("plans")}
             >
-              Ask Cedar what Cedar Press can answer <span aria-hidden="true">&#8594;</span>
+              View plans
             </button>
-          </p>
-        </div>
-      </aside>
+            <button
+              type="button"
+              id="cp-tab-signin"
+              role="tab"
+              className="cp-door__tab cp-door__tab--in"
+              aria-selected={panel === "signin"}
+              aria-controls="cp-panel-signin"
+              onClick={() => toggle("signin")}
+            >
+              Log in
+            </button>
+          </div>
+        )}
+      </header>
 
-      <div className="auth-editorial">
-        <div className="cp-split__form">
-          {/* On phones the form panel leads the page (the hero follows), so
-              the wordmark opens it; on desktop the hero carries the brand and
-              this stays hidden. */}
-          <span className="cp-split__brand cp-split__brand--form" aria-hidden="true">
-            Cedar Press
-          </span>
-          {/* "Through", not "to subscribers": the first sounds like every
-              subscriber gets Cedar Press, and the upgrade line right below
-              says otherwise. The distribution relationship is the claim —
-              once. The "Built by Lumecon / available through TBN" eyebrow
-              that used to sit above this title said the same thing in the
-              same breath at every width, so the title carries it alone;
-              who built it is the hero's and the footer's line. */}
-          <h2 className="auth-editorial__title">
-            Cedar Press is available exclusively through Tribal Business News.
-          </h2>
-          {user ? (
-            <>
-              {/* Someone signed in on the wrong membership has one move,
-                  upgrading, so the box stands alone with no hinge. */}
-              <div className="cp-split__upgrade">
-                <p>Upgrade your Tribal Business News membership to access Cedar Press.</p>
-                <a className="gv-btn gv-btn--primary" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-                  View Cedar Press plans <span aria-hidden="true">&#8594;</span>
-                </a>
-              </div>
-              <p className="cp-gate__signedin">
-                Signed in as {user.email} · this membership does not include Cedar Press
-              </p>
-              <button type="button" className="gv-btn gv-btn--quiet" onClick={() => logout()}>
-                Use a different account
-              </button>
-            </>
-          ) : (
-            <>
-              {/* One question, two answers: get Cedar Press, or you already
-                  have it. A tab shows one at a time instead of stacking the
-                  plans button over the sign-in forms as competing calls. */}
-              <div className="cp-tabs" role="tablist" aria-label="Get Cedar Press or log in">
-                <button
-                  type="button"
-                  id="cp-tab-plans"
-                  role="tab"
-                  className="cp-tab"
-                  aria-selected={panel === "plans"}
-                  aria-controls="cp-panel-plans"
-                  onClick={() => setPanel("plans")}
-                >
-                  View plans
-                </button>
-                <button
-                  type="button"
-                  id="cp-tab-signin"
-                  role="tab"
-                  className="cp-tab"
-                  aria-selected={panel === "signin"}
-                  aria-controls="cp-panel-signin"
-                  onClick={() => setPanel("signin")}
-                >
-                  Log in
-                </button>
-              </div>
-              {panel === "plans" ? (
-                <div
-                  id="cp-panel-plans"
-                  role="tabpanel"
-                  aria-labelledby="cp-tab-plans"
-                  className="cp-tabpanel"
-                >
-                  <div className="cp-split__upgrade">
-                    <p>Upgrade your Tribal Business News membership to access Cedar Press.</p>
-                    <a className="gv-btn gv-btn--primary" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-                      View Cedar Press plans <span aria-hidden="true">&#8594;</span>
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  id="cp-panel-signin"
-                  role="tabpanel"
-                  aria-labelledby="cp-tab-signin"
-                  className="cp-tabpanel"
-                >
-                  {!PRESS_SIGN_IN_AVAILABLE ? (
+      {!user && panel === "plans" ? (
+        <div id="cp-panel-plans" role="tabpanel" aria-labelledby="cp-tab-plans" className="cp-door__panel" ref={panelRef}>
+          <div className="cp-split__upgrade">
+            <p>Upgrade your Tribal Business News membership to access Cedar Press.</p>
+            <a className="gv-btn gv-btn--primary" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
+              View Cedar Press plans <span aria-hidden="true">&#8594;</span>
+            </a>
+          </div>
+        </div>
+      ) : null}
+
+      {!user && panel === "signin" ? (
+        <div id="cp-panel-signin" role="tabpanel" aria-labelledby="cp-tab-signin" className="cp-door__panel" ref={panelRef}>
+          {!PRESS_SIGN_IN_AVAILABLE ? (
             // Standalone, provisioned with nothing. There is no account any
             // password could match, so there is no form to offer one to.
             <p className="cp-gate__fine" role="status">{PRESS_DEMO_UNCONFIGURED}</p>
           ) : step === PRESS_STEP.SIGN_IN || !PRESS_ACTIVATION_AVAILABLE ? (
             <>
-              <h3 className="cp-gate__sub">Log in with your email and password.</h3>
+              <h2 className="cp-gate__sub">Log in with your email and password.</h2>
               <form className="cp-gate__form" onSubmit={submitSignIn}>
                 <input
                   type="email"
@@ -420,11 +359,7 @@ export default function PressGate({ user }) {
               {PRESS_ACTIVATION_AVAILABLE ? (
                 <p className="cp-gate__aside">
                   Have an access code?{" "}
-                  <button
-                    type="button"
-                    className="cp-split__linkbtn"
-                    onClick={() => go(PRESS_STEP.ACTIVATE)}
-                  >
+                  <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.ACTIVATE)}>
                     Activate Cedar Press
                   </button>
                 </p>
@@ -434,23 +369,9 @@ export default function PressGate({ user }) {
                   subscription, and your login details arrive by email.
                 </p>
               )}
-              {/* The sign-in notice was removed 2026-09-02 at the owner's
-                  request: "you don't need the metatext on the website... it's
-                  kind of dumb, like, preview build." He briefs the reviewer
-                  himself, and copy explaining the build to a reader who was
-                  told already makes a real product read as a rehearsal.
-
-                  What it said is still TRUE and still recorded where it is
-                  load-bearing: `pressDemoGate.js`'s docstring, and SECURITY.md,
-                  which keeps this gate out of scope as a vulnerability while
-                  keeping "a record reachable through it that should not be
-                  public" firmly in scope. Nothing behind the gate is
-                  confidential — the bundle ships the catalog, the methods and
-                  sampled rows, never a collection.
-
-                  The article placeholder notice STAYS. That one is not about
-                  the build, it is about invented numbers, and a demonstration
-                  statistic that does not say so is a fabrication. */}
+              {/* No build meta-copy on the door (owner, 2026-09-02). What it
+                  said is still true and still recorded where it is
+                  load-bearing: pressDemoGate.js's docstring and SECURITY.md. */}
             </>
           ) : step === PRESS_STEP.SET_PASSWORD ? (
             <>
@@ -477,18 +398,14 @@ export default function PressGate({ user }) {
                 </button>
               </form>
               <p className="cp-gate__aside">
-                <button
-                  type="button"
-                  className="cp-split__linkbtn"
-                  onClick={() => go(PRESS_STEP.ACTIVATE)}
-                >
+                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.ACTIVATE)}>
                   Use a different code
                 </button>
               </p>
             </>
           ) : (
             <>
-              <h3 className="cp-gate__sub">Enter your access code to sign in.</h3>
+              <h2 className="cp-gate__sub">Enter your access code to sign in.</h2>
               <form className="cp-gate__form" onSubmit={submitCode}>
                 <input
                   type="text"
@@ -523,67 +440,130 @@ export default function PressGate({ user }) {
               </p>
               <p className="cp-gate__aside">
                 Already set a password?{" "}
-                <button
-                  type="button"
-                  className="cp-split__linkbtn"
-                  onClick={() => go(PRESS_STEP.SIGN_IN)}
-                >
+                <button type="button" className="cp-split__linkbtn" onClick={() => go(PRESS_STEP.SIGN_IN)}>
                   Log in <span aria-hidden="true">&#8594;</span>
                 </button>
               </p>
             </>
           )}
-                </div>
-              )}
-            </>
-          )}
-          {/* The gate is the public front door, not only a paywall. Three
-              relationships with Cedar Press exist — subscribing through TBN,
-              project-scoped research access, and a tribal government's right
-              to its own records — and the second two require no subscription,
-              so they are named here where a non-subscriber actually arrives.
-              Both pages are public. */}
-          <div className="cp-gate__other cp-fade">
-            <span className="cp-gate__othercap">Other ways to work with Cedar Press</span>
-            {/* Governance before commerce: a nation's right to its own
-                records leads, and the project pathway follows. */}
-            <Link className="cp-gate__otherlink" to={PRESS_REQUEST_PATH}>
-              <b>Tribal government data requests <span aria-hidden="true">&#8594;</span></b>
-              <span className="cp-gate__otherdesc">
-                Federally recognized tribal governments can request and review the Cedar records
-                associated with their nation. No subscription required.
-              </span>
-            </Link>
-            <Link className="cp-gate__otherlink" to={PRESS_RESEARCH_PATH}>
-              <b>Research access <span aria-hidden="true">&#8594;</span></b>
-              <span className="cp-gate__otherdesc">
-                For researchers, journalists, students, nonprofits and public-interest projects
-                needing one or two collections for a defined project.
-              </span>
-            </Link>
-          </div>
         </div>
-      </div>
+      ) : null}
 
-      {/* The collections, under the split and across the whole width. The
-          list names every collection on its shelf; the stage shows the one
-          in hand with six of its real sample records. Not `#catalog`: that
-          id is the reader's shelf on /data, which the gate must never
-          render, and the smoke suite holds the door to its absence. */}
-      <section className="cp-gate__coll cp-fade" id="collections" aria-labelledby="cp-gate-coll-title">
-        <div className="cp-gate__collhead">
-          <span className="cp-sec__band">Inside Cedar Press</span>
-          <h2 className="cp-gate__colltitle" id="cp-gate-coll-title">
-            {capitalise(spellCount(STOREFRONT_CATALOG.length))} collections. This is what each one holds.
-          </h2>
-          <p className="cp-gate__collsub">
-            Every collection begins with public records, is resolved to the Native entities
-            behind them and is kept current as new material arrives. Choose one to see its
-            coverage, what Cedar adds and six of its records, drawn from the release itself.
+      {/* The statement. Two messages, on purpose: the door sells the asset
+          ("this is the data you should want access to"), the signed-in
+          overview keeps the editorial "Know what's shaping Indian Country."
+          Neither repeats the tier lines: the tiles explain the ladder. */}
+      <section className="cp-door__lead cp-fade" aria-label="Cedar Press">
+        <p className="cp-door__kicker">Trusted intelligence for Indian Country</p>
+        <h1 className="cp-door__title">The data behind Indian Country.</h1>
+        <div className="cp-door__aside">
+          <p className="cp-door__lede">
+            Original collections built from fragmented records, connected through original
+            research, and maintained as Indian Country changes. Choose a collection to see what
+            it holds.
           </p>
+          <ul className="cp-facts" aria-label="What Cedar Press holds">
+            <li><b>{STOREFRONT_CATALOG.length}</b> collections</li>
+            {LAUNCH_ROWS_TOTAL ? <li><b>{LAUNCH_ROWS_TOTAL.toLocaleString("en-US")}</b> records</li> : null}
+            {EARLIEST_YEAR ? <li>as far back as <b>{EARLIEST_YEAR}</b></li> : null}
+            {recentlyUpdated(1)[0] ? <li>latest release <b>{formatUpdated(recentlyUpdated(1)[0].updated)}</b></li> : null}
+          </ul>
         </div>
-        <PressCollectionsStage visitor />
       </section>
+
+      {/* The twelve tiles, one row a shelf, and the preview of the one in
+          hand under them. Not `#catalog`: that id is the reader's shelf on
+          /data, which the door must never render, and the smoke suite holds
+          the door to its absence. */}
+      <section className="cp-door__shelves cp-fade" aria-label="The collections">
+        {SHELVES.map(({ tier, entries }) => (
+          <div className="cp-door__shelf" key={tier.id}>
+            <div className="cp-door__shelfhead">
+              <span className="cp-door__eyebrow"><TierName name={tier.name} /></span>
+              <span className="cp-door__q">{tier.question}</span>
+            </div>
+            <ul className="cp-door__grid" style={{ "--cols": Math.min(entries.length, 6) }}>
+              {entries.map((entry) => {
+                const on = entry.id === selectedId;
+                return (
+                  <li key={entry.id}>
+                    <button
+                      type="button"
+                      className={`cp-badge cp-badge--act${on ? " is-on is-selected" : ""}`}
+                      aria-pressed={on}
+                      onClick={() => pickTile(entry)}
+                    >
+                      <span className="cp-badge__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id]}</span>
+                      <span className="cp-badge__name"><TierName name={entry.short || entry.name} /></span>
+                      <span className="cp-badge__cue" aria-hidden="true">&#8595;</span>
+                      <span className="cp-badge__sr">Preview {entry.name}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+        <div className="cp-door__preview" ref={previewRef}>
+          {selected ? (
+            <CollectionPreview key={selected.id} entry={selected} tier={TIER_OF[selected.id]} register={register} />
+          ) : null}
+        </div>
+      </section>
+
+      {/* The four pillars, as a row on a rule: the custom marks beside the
+          words, nothing boxed. The linkage sentence and the team strip were
+          removed from the door 2026-09-04 at the owner's instruction; both
+          still live on Methods. */}
+      <section className="cp-door__why cp-fade" aria-label="Why Cedar Press">
+        <ul className="cp-door__proof">
+          {PROOF_POINTS.map((point) => (
+            <li className="cp-door__proofitem" key={point.id}>
+              <span className="cp-door__proofic" aria-hidden="true">{point.icon}</span>
+              <span className="cp-door__prooflabel">{point.label}</span>
+              <span className="cp-door__proofbody">{point.body}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* The door is the public front door, not only a paywall. Three
+          relationships with Cedar Press exist — subscribing through TBN,
+          project-scoped research access, and a tribal government's right
+          to its own records — and the second two require no subscription,
+          so they are named here where a non-subscriber actually arrives.
+          Governance before commerce. */}
+      <footer className="cp-door__foot cp-fade">
+        <div className="cp-door__other">
+          <span className="cp-door__othercap">Other ways to work with Cedar Press</span>
+          <Link className="cp-door__otherlink" to={PRESS_REQUEST_PATH}>
+            <b>Tribal government data requests <span aria-hidden="true">&#8594;</span></b>
+            <span>
+              Federally recognized tribal governments can request and review the Cedar records
+              associated with their nation. No subscription required.
+            </span>
+          </Link>
+          <Link className="cp-door__otherlink" to={PRESS_RESEARCH_PATH}>
+            <b>Research access <span aria-hidden="true">&#8594;</span></b>
+            <span>
+              For researchers, journalists, students, nonprofits and public-interest projects
+              needing one or two collections for a defined project.
+            </span>
+          </Link>
+        </div>
+        <div className="cp-door__footacts">
+          <Link className="cp-door__footact" to={PRESS_METHODS_PATH}>
+            How Cedar builds its collections <span aria-hidden="true">&#8594;</span>
+          </Link>
+          <button
+            type="button"
+            className="cp-door__footact cp-door__footact--btn"
+            onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
+          >
+            Ask Cedar what Cedar Press can answer <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+      </footer>
 
       {/* Cedar meets the visitor at the door. Everyone here is outside the
           product — signed out, or signed in on a membership without Cedar

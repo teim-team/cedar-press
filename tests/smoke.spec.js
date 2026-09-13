@@ -73,16 +73,16 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
-  // The door shows the collections themselves: every storefront collection
-  // on its shelf, and a stage with real sample records of the one in hand.
-  // Twelve is the catalog's count; the records are the point, since a stage
-  // with a description and no rows is a brochure. The reader's shelf
-  // (#catalog) stays absent — asserted above — because the stage reads the
-  // public ten-row samples and nothing else.
+  // The door is the collections: the twelve tiles, one row a shelf, and a
+  // preview with real sample records of the one in hand. Twelve is the
+  // catalog's count; the records are the point, since a preview with a
+  // description and no rows is a brochure. The reader's shelf (#catalog)
+  // stays absent — asserted above — because the preview reads the public
+  // ten-row samples and nothing else.
   test("the door lists every collection and stages real records", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await expect(page.locator(".cp-shelf__item")).toHaveCount(12);
+    await expect(page.locator(".cp-door__grid .cp-badge")).toHaveCount(12);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     await page.getByRole("button", { name: /Prime Contracting/ }).click();
