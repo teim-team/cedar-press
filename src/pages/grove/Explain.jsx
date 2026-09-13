@@ -58,6 +58,7 @@ function useHoverPointer() {
 export default function Explain({ label, children }) {
   const [open, setOpen] = useState(false);
   const [flip, setFlip] = useState(false);
+  const [shift, setShift] = useState(0);
   const hoverPointer = useHoverPointer();
   const id = useId();
   const wrapRef = useRef(null);
@@ -88,15 +89,61 @@ export default function Explain({ label, children }) {
 
   // Keep the panel on screen. Measured on open, because the button's position
   // depends on where the text it annotates wrapped.
-  useEffect(() => {
-    if (!open) return;
+  //
+  // Codex, PR #79: this checked only the RIGHT edge and then flipped blindly.
+  // Between the 560px bottom-sheet breakpoint and roughly 900px the panel can
+  // be 30rem wide with its trigger near the middle, so flipping it drove the
+  // left edge below zero and cut off the start of every line, which is worse
+  // than the overflow it was avoiding. Flip only when flipping actually helps,
+  // and clamp what is left over either way.
+  //
+  // Codex, PR #80: it also ran only when `open` changed, so a latched panel
+  // kept a stale nudge across a rotation or a crossing of the 560px
+  // breakpoint — and a negative nudge on the bottom sheet, which pins itself
+  // to the gutters, pushes its left edge off the screen. It re-measures on
+  // resize and rotation now, and the sheet refuses to be translated at all.
+  const place = useCallback(() => {
     const panel = panelRef.current;
-    if (!panel) return;
+    const anchor = wrapRef.current;
+    if (!panel || !anchor) return;
     setFlip(false);
+    setShift(0);
+    // Bottom-sheet layout pins itself to the page gutters; nothing to solve.
+    if (getComputedStyle(panel).position === "fixed") return;
+
     const room = document.documentElement.clientWidth;
-    const box = panel.getBoundingClientRect();
-    if (box.right > room - 8) setFlip(true);
-  }, [open]);
+    const edge = 8;
+    const width = panel.getBoundingClientRect().width;
+    const at = anchor.getBoundingClientRect();
+    // Where each candidate would put the panel, in viewport coordinates.
+    const asIs = { left: at.left - 6, right: at.left - 6 + width };
+    const flipped = { left: at.right + 6 - width, right: at.right + 6 };
+    const spill = (box) => Math.max(0, edge - box.left) + Math.max(0, box.right - (room - edge));
+
+    const useFlip = spill(flipped) < spill(asIs);
+    const chosen = useFlip ? flipped : asIs;
+    setFlip(useFlip);
+    // Whatever is still over an edge after choosing the better side gets
+    // nudged back. A panel wider than the viewport keeps its left edge, which
+    // is where the text starts.
+    let nudge = 0;
+    if (chosen.right > room - edge) nudge = room - edge - chosen.right;
+    if (chosen.left + nudge < edge) nudge = edge - chosen.left;
+    setShift(nudge);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    place();
+    // Both, because a rotation does not always surface as a resize and a
+    // breakpoint crossing does not always surface as a rotation.
+    window.addEventListener("resize", place);
+    window.addEventListener("orientationchange", place);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("orientationchange", place);
+    };
+  }, [open, place]);
 
   // `tapped` is read inside the handlers and never during render: a tap fires
   // pointerdown and then, on some browsers, a synthetic mouseenter, and
@@ -149,6 +196,7 @@ export default function Explain({ label, children }) {
         id={id}
         ref={panelRef}
         className={`cp-ex1__panel${open ? " is-open" : ""}${flip ? " is-flipped" : ""}`}
+        style={shift ? { translate: `${shift}px` } : undefined}
         hidden={!open}
       >
         {children}

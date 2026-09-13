@@ -248,6 +248,58 @@ export const DOOR_CHIPS = Object.freeze(
   DOOR_STARTERS.map((id) => DOOR_INTENTS.find((intent) => intent.id === id)).filter(Boolean),
 );
 
+/**
+ * What to offer after an answer, by the intent that was just answered.
+ *
+ * The door used to re-print the whole starter stack under every reply, which
+ * read as a toolbar that had not noticed the conversation. lumecon.ai offers
+ * at most three next questions under the answer instead (`followUpsFor` in
+ * src/lib/cedarChat.ts), chosen by what was just discussed. This is that
+ * table: deliberate pairs rather than a scored guess, because the door's bank
+ * is ten general answers and twelve collections, small enough to write out.
+ *
+ * The twelve collections share one list — after "what is in Federal Prime
+ * Contracting", the useful next questions are how it reaches a nation, what
+ * it is built from, and how to get it.
+ */
+const FOLLOW_UPS = Object.freeze({
+  what: ["collections", "entities", "plans"],
+  collections: ["sources", "entities", "plans"],
+  sources: ["current", "entities", "limits"],
+  entities: ["limits", "sources", "plans"],
+  current: ["sources", "collections", "plans"],
+  plans: ["tribal", "research", "collections"],
+  tribal: ["plans", "entities", "who"],
+  research: ["plans", "limits", "sources"],
+  who: ["entities", "limits", "plans"],
+  limits: ["entities", "sources", "plans"],
+});
+
+const COLLECTION_FOLLOW_UPS = Object.freeze(["entities", "sources", "plans"]);
+const FALLBACK_FOLLOW_UPS = Object.freeze(["what", "collections", "plans"]);
+
+/**
+ * Up to three next questions for an answer, minus anything already answered
+ * in this conversation. Returns intents, so the caller routes a click
+ * straight to the answer rather than re-classifying the label.
+ *
+ * `answered` is the set of intent ids the thread has already used. A
+ * conversation that has exhausted a list gets no row rather than a repeat.
+ */
+export function followUpsFor(intent, answered = new Set()) {
+  const wanted = intent?.collectionId
+    ? COLLECTION_FOLLOW_UPS
+    : (FOLLOW_UPS[intent?.id] ?? FALLBACK_FOLLOW_UPS);
+  const out = [];
+  for (const id of wanted) {
+    if (id === intent?.id || answered.has(id)) continue;
+    const next = DOOR_INTENTS.find((candidate) => candidate.id === id);
+    if (next && !out.includes(next)) out.push(next);
+    if (out.length === 3) break;
+  }
+  return out;
+}
+
 /** A collection's own intent, for the pane's "Ask Cedar about this one". */
 export function intentForCollection(id) {
   return DOOR_INTENTS.find((intent) => intent.collectionId === id) ?? null;

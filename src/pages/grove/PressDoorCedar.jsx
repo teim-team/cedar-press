@@ -16,11 +16,29 @@
 // The pane's "Ask Cedar" button dispatches `cedar:ask-collection` and the
 // hero's dispatches `cedar:open`; both are handled here, so the door's
 // buttons work without a prop threaded through three components.
+//
+// HOW IT BEHAVES, AND WHY IT MATCHES lumecon.ai
+// The marketing site's FAB (src/components/CedarFAB.astro) is the reference,
+// and three of its rules were missing here:
+//
+//   1. Open is a dock, not a float. The panel pins to the bottom edge of the
+//      viewport — a full-width sheet on a phone — instead of hovering as a
+//      card above the launcher, which on an 844px screen left it stranded
+//      mid-air with page showing underneath.
+//   2. The launcher steps aside while the panel is open. The panel carries
+//      its own close button; two close affordances and a FAB covering the
+//      sheet's own corner is the worse arrangement.
+//   3. Starter chips are an opening, not a toolbar. They collapse for good
+//      on the first question, and each answer carries at most three next
+//      questions under it (`followUpsFor`). Re-printing the whole stack under
+//      every reply read as a control panel that had not been listening.
+//
+// Clicking outside the sheet closes it, as it does there.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
-import { DOOR_CHIPS, answer as answerFor, intentForCollection } from "../../features/grove/doorCedar.js";
+import { DOOR_CHIPS, answer as answerFor, followUpsFor, intentForCollection } from "../../features/grove/doorCedar.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
@@ -44,11 +62,26 @@ export default function PressDoorCedar() {
   const [thread, setThread] = useState([]);
   const panelRef = useRef(null);
   const inputRef = useRef(null);
+  const fabRef = useRef(null);
   const endRef = useRef(null);
 
   const say = useCallback((question, intent) => {
     setThread((prev) => [...prev, turn("you", null, question), turn("cedar", intent, intent.answer)]);
     track(EVENT.cedarAsked, { length: question.length, gated: true, intent: intent.id });
+  }, []);
+
+  // The launcher is hidden while the panel is open, so an explicit close has
+  // to hand focus back to it once it is on the page again.
+  //
+  // `restoreFocus` is false for a click outside the sheet. Codex, PR #80: the
+  // browser is about to focus whatever was clicked, and the queued frame would
+  // then pull focus off it and onto the launcher — dismissing the sheet would
+  // eat the click that dismissed it, and the reader would have to click the
+  // field a second time. A dismissal leaves focus where the pointer put it.
+  const close = useCallback((restoreFocus = true) => {
+    const returning = restoreFocus && panelRef.current?.contains(document.activeElement);
+    setOpen(false);
+    if (returning) requestAnimationFrame(() => fabRef.current?.focus());
   }, []);
 
   // The hero and the pane both hand questions over.
@@ -69,17 +102,27 @@ export default function PressDoorCedar() {
     };
   }, [say]);
 
-  // Escape closes; the panel takes focus when it opens.
+  // Escape closes, a click outside closes, and the panel takes focus when it
+  // opens. The outside click is captured on pointerdown so a chip that
+  // re-renders the thread under the pointer cannot be mistaken for one.
   useEffect(() => {
     if (!open) return undefined;
-    const onKey = (event) => { if (event.key === "Escape") setOpen(false); };
+    const onKey = (event) => { if (event.key === "Escape") close(); };
+    const onOutside = (event) => {
+      const panel = panelRef.current;
+      if (!panel) return;
+      if (panel.contains(event.target) || fabRef.current?.contains(event.target)) return;
+      close(false);
+    };
     document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onOutside);
     const frame = requestAnimationFrame(() => inputRef.current?.focus());
     return () => {
       document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onOutside);
       cancelAnimationFrame(frame);
     };
-  }, [open]);
+  }, [open, close]);
 
   // A new turn scrolls into view inside the panel, never the page.
   useEffect(() => {
@@ -99,14 +142,19 @@ export default function PressDoorCedar() {
     say(intent.chip, intent);
   };
 
-  // Chips narrow as the conversation goes: the ones already asked drop out.
-  const used = new Set(thread.filter((t) => t.role === "cedar").map((t) => t.intent?.id));
-  const chips = DOOR_CHIPS.filter((intent) => !used.has(intent.id));
+  // Everything the conversation has already answered. It keeps a follow-up
+  // from offering a question that is already sitting in the thread.
+  const answered = new Set(thread.filter((t) => t.role === "cedar").map((t) => t.intent?.id));
+  // The starter stack belongs to the empty panel. Once a question has been
+  // asked it is gone, and the next questions ride under the last answer.
+  const starters = thread.length ? [] : DOOR_CHIPS.slice(0, 5);
+  const last = thread.length ? thread[thread.length - 1] : null;
+  const nextUp = last?.role === "cedar" ? followUpsFor(last.intent, answered) : [];
 
   return (
-    <div className="cp-dc">
+    <div className={`cp-dc${open ? " is-open" : ""}`}>
       {open ? (
-        <section className="cp-dc__panel" ref={panelRef} aria-label="Ask Cedar">
+        <section className="cp-dc__panel" ref={panelRef} role="dialog" aria-label="Ask Cedar">
           {/* The identity band the app and lumecon.ai both use: status dot,
               uppercase title, context line, all white on the one teal that
               carries white text. */}
@@ -118,7 +166,7 @@ export default function PressDoorCedar() {
               </span>
               <span className="cp-dc__context">Cedar Press · Questions about the collections</span>
             </span>
-            <button type="button" className="cp-dc__close" onClick={() => setOpen(false)} aria-label="Close Cedar">
+            <button type="button" className="cp-dc__close" onClick={() => close()} aria-label="Close Cedar">
               <span aria-hidden="true">&times;</span>
             </button>
           </header>
@@ -135,6 +183,15 @@ export default function PressDoorCedar() {
                 </p>
               </div>
             </div>
+            {starters.length ? (
+              <div className="cp-dc__quickreply">
+                {starters.map((intent) => (
+                  <button type="button" key={intent.id} className="cp-dc__chip" onClick={() => askChip(intent)}>
+                    {intent.chip}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             {thread.map((item) =>
               item.role === "you" ? (
                 <div className="cp-dc__msg cp-dc__msg--you" key={item.key}>
@@ -159,7 +216,7 @@ export default function PressDoorCedar() {
                           return link.external ? (
                             <a key={key} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
                           ) : (
-                            <Link key={key} to={link.to} onClick={() => setOpen(false)}>{link.label}</Link>
+                            <Link key={key} to={link.to} onClick={() => close(false)}>{link.label}</Link>
                           );
                         })}
                       </p>
@@ -168,10 +225,10 @@ export default function PressDoorCedar() {
                 </div>
               ),
             )}
-            {chips.length ? (
-              <div className="cp-dc__quickreply">
-                {chips.slice(0, 5).map((intent) => (
-                  <button type="button" key={intent.id} className="cp-dc__chip" onClick={() => askChip(intent)}>
+            {nextUp.length ? (
+              <div className="cp-dc__followups" role="group" aria-label="Suggested next questions">
+                {nextUp.map((intent) => (
+                  <button type="button" key={intent.id} className="cp-dc__follow" onClick={() => askChip(intent)}>
                     {intent.chip}
                   </button>
                 ))}
@@ -210,8 +267,9 @@ export default function PressDoorCedar() {
 
       <button
         type="button"
-        className={`cp-dc__fab${open ? " is-open" : ""}`}
-        onClick={() => setOpen((was) => !was)}
+        ref={fabRef}
+        className="cp-dc__fab"
+        onClick={() => (open ? close() : setOpen(true))}
         aria-expanded={open}
       >
         <span className="cp-dc__statusdot" aria-hidden="true" />

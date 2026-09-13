@@ -73,6 +73,7 @@ import { LAUNCH_COLLECTION, collectionCitation } from "../../features/grove/coll
 import { releaseFor } from "../../features/grove/pressReleases.js";
 import { saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
+import { coverageLabel } from "../../features/grove/pressAccess.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
@@ -537,13 +538,18 @@ function CollectionExplain({ id, name }) {
   const launch = LAUNCH_COLLECTION.find((entry) => entry.id === id);
   const catalog = PRESS_CATALOG_BY_ID[id];
   if (!launch && !catalog) return null;
+  // Codex, PR #79: `coverage` is an object (`{ kind: "series", from: 2000 }`),
+  // and the string filter below dropped it silently, so the advertised
+  // Coverage row never rendered for any of the twelve. `coverageLabel` is the
+  // formatter every other surface already uses for it.
+  //
   // No `limits` field exists on a descriptor yet. When one does, it belongs
   // in this list and nowhere else; the panel will pick it up unchanged.
   const rows = [
     ["How it is built", launch?.method],
     ["What it reads", launch?.sources],
     ["How a record reaches its entity", catalog?.linkage],
-    ["Coverage", catalog?.coverage],
+    ["Coverage", catalog ? coverageLabel(catalog) : null],
   ].filter(([, body]) => typeof body === "string" && body.trim());
   if (!rows.length) return null;
   return (
@@ -1243,9 +1249,10 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             <Explain label="what these sample records are">
               <p>
                 <span className="cp-ex1__cap">This is a preview</span>
-                Each published table ships ten sample rows, and this viewer reads those. A search
-                that returns nothing may mean the collection holds nothing, or that the ten rows
-                sampled from a million-row table did not include it.
+                Each published table ships up to ten sample rows, and this viewer reads those.
+                Some ship fewer. A search that returns nothing may mean the collection holds
+                nothing, or that the handful of rows sampled from a million-row table did not
+                include it.
               </p>
               <p>
                 <span className="cp-ex1__cap">The release is the whole table</span>

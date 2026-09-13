@@ -323,6 +323,89 @@ tiles and the shelves, so it is not a thirteenth interaction to learn.
 
 ---
 
+## 5f. Cedar on the door, on a phone
+
+Reported from an iPhone: the panel hung in the middle of the screen with page
+showing under it, the launcher stayed on top of it, and the suggested questions
+came back in full under every answer. All three were real, and all three were
+places the door had drifted from `lumecon-website`'s FAB, which is the
+reference implementation for this surface.
+
+| Was | Is | The rule it now follows |
+|---|---|---|
+| The panel was a 36rem card, a flex item stacked above the launcher — on an 844px screen it floated mid-viewport | `position: fixed`, pinned to the bottom edge, top corners only; full width and `min(78dvh, 35rem)` tall under 720px, rising from the bottom | `.cedar-fab-panel` in `src/components/CedarFAB.astro` |
+| The launcher stayed visible over the panel's own corner | Hidden while the panel is open (`.cp-dc.is-open .cp-dc__fab`); the panel's close is the way out, and closing hands focus back to the launcher | `body.cedar-popped .cedar-fab { display: none }` |
+| Every answer re-printed the remaining starter chips beneath itself | The starter stack belongs to the empty panel and collapses for good on the first question; each answer carries at most three next questions in a quieter row | `collapseChips()` and `renderFollowUps()` in `src/lib/cedarChat.ts` |
+
+`dvh`, not `vh`: mobile Safari's `vh` is the tall viewport, so a sheet sized in
+`vh` puts its composer under the address bar. The launcher and the sheet both
+carry `env(safe-area-inset-*)` so a notched phone does not park either under
+the home indicator.
+
+The next questions come from a table in `src/features/grove/doorCedar.js`
+(`FOLLOW_UPS`, and one shared list for the twelve collections) rather than a
+score, because the door's bank is ten written answers and twelve collections —
+small enough to choose the pairs deliberately. `followUpsFor()` drops anything
+the conversation has already answered, so an exhausted thread shows no row
+rather than a repeat. `src/features/grove/doorCedar.test.js` holds the bank to
+it: every starter classifies back to its own intent, every follow-up is a real
+intent with a chip, and none offers the answer it is sitting under.
+
+A click outside the sheet closes it, as it does on the marketing site.
+
+The signed-in Cedar (`.cedar-widget__panel`) was already a bottom sheet and is
+unchanged. It keeps its launcher visible on purpose and pads its own bottom to
+clear it; that is a different surface with a different reason, written down
+where the rule lives.
+
+---
+
+## 5g. Codex's three on #80, and the one that mattered
+
+**The unlinked split had a denominator nobody stated.** `docs/LINKAGE_COVERAGE.md`
+carries a third denominator — how many rows can name an entity at all — for
+**four** of the thirteen flagships. The other nine read `—`, and `—` means not
+measured, not zero. The #79 correction derived `unresolved` by subtracting the
+four flagships' structural count from *all* unlinked rows, which published nine
+flagships' unmeasured rows as work still to do. Same class of error as the one
+it was fixing, in a smaller place.
+
+Stated over the population it was measured on:
+
+| | rows |
+|---|---:|
+| unlinked, all thirteen | 608,537 |
+| measured, four flagships | 600,689 |
+| — cannot name an entity | 82,055 |
+| — could and does not | 518,634 |
+| not measured, nine flagships | 7,848 |
+
+**86.3% of the measured population is work still to do**, against the 86.5%
+the cross-product claimed. The conclusion survives being scoped honestly, which
+is the only reason it is worth printing at all. `pressIdentity.test.js` now
+asserts `structural + unresolved === measuredUnlinked` — the assertion that
+fails if anyone reintroduces the cross-product — and that the note prints every
+one of the five figures.
+
+The other two were interaction bugs, both real:
+
+- **A dismissal is not a close.** Clicking outside the door's Cedar sheet
+  handed focus back to the launcher one frame after the browser focused
+  whatever was clicked, so dismissing the sheet ate the click that dismissed
+  it. `close(restoreFocus)` — true for the close button and Escape, false for
+  an outside pointerdown.
+- **A latched tooltip kept a stale nudge.** `Explain.jsx` measured its
+  placement only when `open` changed, so a rotation or a crossing of the 560px
+  breakpoint left the desktop offset applied to a bottom sheet that pins itself
+  to the gutters. It re-measures on resize and rotation, and the sheet carries
+  `translate: none !important` so it cannot be nudged even for the frame in
+  between.
+
+Both are held by smoke tests verified against the bug: reverting either fix
+turns the test red on both projects.
+
+---
+
 ## 6. What the terminal owns after this
 
 1. Mint `CB-` per `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §8, then flip

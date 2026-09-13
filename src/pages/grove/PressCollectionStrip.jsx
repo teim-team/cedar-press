@@ -31,8 +31,15 @@ import { PRESS_DATA_PATH } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 
+// Codex, PR #79: on a coarse pointer there is no hover and the tile is a
+// link, so a tap navigated to the collection immediately and the reader never
+// saw the line this promised. Two honest options: make the first tap select
+// and the second open, or say what the tap actually does. A strip of twelve
+// links whose first tap does nothing visible is a worse trade on a phone than
+// a strip that opens what you touch, so the copy tells the truth and the
+// description stays a pointer affordance.
 const IDLE = COARSE
-  ? "Tap a collection for what it holds."
+  ? "Tap a collection to open it."
   : "Point at a collection for what it holds.";
 
 export default function PressCollectionStrip({ user }) {

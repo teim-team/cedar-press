@@ -298,12 +298,54 @@ export const LINKAGE_COVERAGE = Object.freeze({
   /** Named because an average hides them, and the spread is the honest fact. */
   best: Object.freeze({ label: "Cedar Native Entity Enterprise Dataset", pct: "100.00%" }),
   worst: Object.freeze({ label: "Natural Resource Revenues", pct: "6.24%" }),
+  /**
+   * THE UNLINKED ROWS, SPLIT BY WHETHER THEY COULD EVER CARRY AN ENTITY.
+   *
+   * Codex, PR #79: the page called the spread "mostly deliberate", which
+   * counted two of three STATUS LABELS as intentional and then let that stand
+   * for the rows. By row it is the other way round.
+   *
+   * Codex, PR #80, on the replacement: the fix overreached in the other
+   * direction. The generated table's last column - how many rows can name an
+   * entity at all - is present for FOUR flagships and `-` for the other nine,
+   * and `-` means NOT MEASURED, not zero. Deriving `unresolved` by subtracting
+   * the four flagships' structural count from ALL unlinked rows published the
+   * nine unmeasured flagships' rows as work still to do. That is the same
+   * error in a smaller place: a denominator nobody stated.
+   *
+   * So the split is stated over the population it was measured on, and the
+   * remainder is named rather than absorbed:
+   *
+   *   608,537 unlinked   600,689 measured (4 flagships)   82,055 cannot name
+   *                                                      518,634 could and does not
+   *                        7,848 not measured (9 flagships)
+   *
+   * 86.3% of the measured population is work still to do, and the conclusion
+   * survives being scoped honestly - which is the only reason it is worth
+   * printing. The nine account for 1.3% of unlinked rows; if their split ever
+   * gets measured these numbers move and the test says so.
+   *
+   * The per-collection split is the part actually worth showing, because it
+   * cuts both ways: Natural Resource Revenues' 6.24% is 97.6% structural, a
+   * royalty line naming a lease and no organization, exactly as intended.
+   * Prime Contracting's 65.02% is 84.8% rows that could be resolved and are
+   * not. One number, two completely different meanings.
+   */
+  unlinked: 608537,
+  /** The four flagships whose row carries a third denominator. */
+  measuredUnlinked: 600689,
+  structural: 82055,
+  unresolved: 518634,
+  /** Nine flagships, `-` in the third-denominator column. Not zero. */
+  unmeasured: 7848,
+  mostlyStructural: Object.freeze({ label: "Natural Resource Revenues", pct: "6.24%", share: "97.6%" }),
+  mostlyUnresolved: Object.freeze({ label: "Federal Prime Contracting", pct: "65.02%", share: "84.8%" }),
   // The caveat the generated file puts in bold, carried across verbatim in
   // substance: a reader who takes 70.93% as a quality score has read it wrong.
   caveat:
     "The total sums thirteen tables whose rows are not the same kind of thing. A contract award and a NAGPRA notice each count as one, so the figure is a measure of scale and never of quality. The per-dataset rows are the ones to quote, and each collection publishes its own.",
   note:
-    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity. The spread is wide and mostly deliberate: NEED is at 100% and Natural Resource Revenues at 6.24%. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure rather than an average that hides them.",
+    "Across the thirteen measured flagships, 1,485,083 of 2,093,620 rows carry a resolved Cedar entity, and the spread runs from 100% to 6.24%. What a low number means is not the same in two collections: 97.6% of what is unlinked in Natural Resource Revenues could never carry an entity, because a royalty line names a lease and no organization, while 84.8% of what is unlinked in Federal Prime Contracting could be resolved and is not yet. Of 608,537 unlinked rows across all thirteen, 600,689 sit in the four flagships that publish a third denominator, and there 82,055 could never name an entity while 518,634 could and do not. The remaining 7,848 sit in nine flagships where that split has not been measured, and they are not counted either way. A cut returns the rows Cedar can stand behind, and every collection publishes its own figure.",
 });
 
 /**
@@ -326,6 +368,19 @@ export const LINKAGE_COVERAGE = Object.freeze({
  * built. Publishing the count beside the two intentional states is the whole
  * point of the door's "published with its limits" pillar.
  */
+/**
+ * One `link_statuses` definition, or a loud failure.
+ *
+ * `scopes.json` is workspace data the site renders verbatim. If a key it names
+ * disappears, the honest outcomes are a failing test and a visible message,
+ * never a card with nothing in it.
+ */
+export function requireStatus(id) {
+  const body = SCOPES.link_statuses?.[id];
+  if (typeof body === "string" && body.trim()) return body;
+  return `Definition missing: data/cedar/scopes.json no longer defines link status "${id}".`;
+}
+
 export const UNLINKED_REASONS = Object.freeze(
   ["no_individual_named", "withheld", "unresolved"].map((id) =>
     Object.freeze({
@@ -337,7 +392,13 @@ export const UNLINKED_REASONS = Object.freeze(
       }[id],
       intentional: id !== "unresolved",
       // The workspace's own words, not a paraphrase of them.
-      body: SCOPES.link_statuses?.[id] ?? "",
+      //
+      // Codex, PR #79: this was `?? ""`, so renaming or dropping a key in
+      // scopes.json rendered an empty card and every assertion stayed green
+      // while the page claimed each definition was held to the file. An
+      // absent definition is a broken page, and a broken page should say so
+      // where someone can see it rather than render a blank.
+      body: requireStatus(id),
     }),
   ),
 );

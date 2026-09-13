@@ -125,6 +125,78 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
+  // The door's Cedar is a dock, not a float, and on a phone it is the sheet
+  // the whole window wide. The three things that were wrong on an iPhone: the
+  // panel hung in the middle of the screen with page showing under it, the
+  // launcher stayed on top of it, and every answer re-printed the whole
+  // starter stack underneath itself.
+  test("the door's Cedar docks to the bottom and the launcher steps aside", async ({ page }, testInfo) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    const launcher = page.locator(".cp-dc__fab");
+    await launcher.click();
+
+    const panel = page.locator(".cp-dc__panel");
+    await expect(panel).toBeVisible();
+    await expect(panel).toBeInViewport();
+    // The launcher is gone while the panel is up: the panel's own close is
+    // the way out, and a pill over the sheet's corner covers its last line.
+    await expect(launcher).toBeHidden();
+
+    // Flush to the bottom edge of the window, within the safe-area inset a
+    // headless browser reports as zero.
+    const box = await panel.boundingBox();
+    const viewport = page.viewportSize();
+    expect(viewport.height - (box.y + box.height)).toBeLessThanOrEqual(1);
+    expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
+    if (testInfo.project.name === "phone") {
+      // A phone gets the full width, and the sheet leaves the top of the
+      // window showing rather than covering the page it was opened from.
+      expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
+      expect(box.height).toBeLessThan(viewport.height * 0.85);
+    }
+
+    // The starter stack is an opening, not a toolbar: asking collapses it for
+    // good, and the answer carries at most three next questions instead.
+    const starters = await page.locator(".cp-dc__chip").count();
+    expect(starters).toBeGreaterThan(1);
+    await page.locator(".cp-dc__chip").first().click();
+    await expect(page.locator(".cp-dc__chip")).toHaveCount(0);
+    const followups = page.locator(".cp-dc__follow");
+    await expect(followups.first()).toBeVisible();
+    expect(await followups.count()).toBeLessThanOrEqual(3);
+
+    // A follow-up answers and is replaced by the next answer's own row, so
+    // the suggestions never pile up under the thread.
+    const first = await followups.first().textContent();
+    await followups.first().click();
+    await expect(page.locator(".cp-dc__msg--you").last()).toContainText(first.trim());
+    await expect(page.locator(".cp-dc__followups")).toHaveCount(1);
+
+    // An explicit close hands focus back, because the launcher was hidden and
+    // a keyboard user would otherwise be dropped at the top of the document.
+    await page.locator(".cp-dc__close").click();
+    await expect(panel).toHaveCount(0);
+    await expect(launcher).toBeVisible();
+    await expect(launcher).toBeFocused();
+
+    // Codex, PR #80: a dismissal is not a close. Clicking outside handed focus
+    // back to the launcher a frame after the browser focused what was clicked,
+    // so dismissing the sheet ate the click that dismissed it and the control
+    // had to be clicked twice. The sheet is not modal; the click belongs to
+    // the control. `#cp-tab-signin` sits in the header, which a sheet anchored
+    // to the bottom edge never covers at either viewport.
+    const behind = page.locator("#cp-tab-signin");
+    await expect(behind).toBeVisible();
+    await launcher.click();
+    await expect(panel).toBeVisible();
+    await page.locator(".cp-dc__input").click();
+    await behind.click();
+    await expect(panel).toHaveCount(0);
+    await expect(behind).toBeFocused();
+    expect(errors).toEqual([]);
+  });
+
   test("the collection pane hands its collection to Cedar", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector('[data-testid="stage-record"]');
@@ -539,10 +611,43 @@ test.describe("the question mark", () => {
     // it: a mouse click is deliberately inert, because hover governs a mouse.
     if (testInfo.project.name === "desktop") await btn.hover(); else await btn.tap();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
+    // Codex, PR #79: `coverage` is an object and the row was filtered out as a
+    // non-string, so the advertised Coverage line silently never rendered for
+    // any of the twelve. Silently is the problem; assert the caps.
+    expect(await panel.locator(".cp-ex1__cap").allTextContents()).toEqual([
+      "How it is built",
+      "What it reads",
+      "How a record reaches its entity",
+      "Coverage",
+    ]);
     const box = await panel.boundingBox();
     const width = page.viewportSize().width;
     expect(box.x).toBeGreaterThanOrEqual(-1);
     expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+
+    // Codex, PR #80: the placement ran only when `open` changed, so a panel
+    // left open across a rotation or a crossing of the 560px breakpoint kept
+    // the nudge measured for the old viewport — and on the bottom sheet, which
+    // pins itself to the gutters, a negative nudge takes its left edge off the
+    // screen. Resize it while it is open and it has to still be inside.
+    //
+    // Opened without the mouse resting on it, because a resize moves the
+    // pointer out of a hovered panel and closing on that is correct: it is the
+    // LATCHED panel that has to survive a viewport change. A phone taps; on
+    // desktop the keyboard latches the same way.
+    const before = page.viewportSize();
+    await page.mouse.move(4, 4);
+    await btn.blur();
+    await expect(panel).toBeHidden();
+    if (testInfo.project.name === "desktop") await btn.focus(); else await btn.tap();
+    await expect(panel).toBeVisible();
+    for (const next of [{ width: 640, height: 900 }, { width: 380, height: 820 }, before]) {
+      await page.setViewportSize(next);
+      await expect(panel).toBeVisible();
+      const now = await panel.boundingBox();
+      expect(now.x).toBeGreaterThanOrEqual(-1);
+      expect(now.x + now.width).toBeLessThanOrEqual(next.width + 1);
+    }
     expect(errors).toEqual([]);
   });
 });
@@ -575,21 +680,32 @@ test.describe("the door's twelve", () => {
 });
 
 test.describe("the collection strip", () => {
-  test("the overview names all twelve and says what one holds", async ({ page }) => {
+  test("the overview names all twelve and says what one holds", async ({ page }, testInfo) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/");
     const tiles = page.locator(".cp-cstrip__tile");
     await expect(tiles).toHaveCount(12);
     const note = page.locator(".cp-cstrip__note");
-    await expect(note).toContainText(/collection for what it holds/i);
-    // Point at one and the line under the grid answers, the same way the
-    // section tiles and the shelves do.
-    await tiles.nth(3).hover();
-    await expect(note).not.toContainText(/collection for what it holds/i);
-    // And it is a link into Explore already narrowed to that collection.
+    // Every tile is a link into Explore already narrowed to that collection.
     const href = await tiles.nth(3).getAttribute("href");
     expect(href).toMatch(/^\/data\?c=[a-z-]+$/);
+
+    if (testInfo.project.name === "desktop") {
+      // Point at one and the line under the grid answers, the same way the
+      // section tiles and the shelves do.
+      await expect(note).toContainText(/collection for what it holds/i);
+      await tiles.nth(3).hover();
+      await expect(note).not.toContainText(/collection for what it holds/i);
+    } else {
+      // Codex, PR #79: a coarse pointer has no hover and the tile is a link,
+      // so a tap opens the collection rather than describing it. The idle
+      // copy has to say what the tap does; promising a description the tap
+      // never produces was the defect.
+      await expect(note).toContainText(/Tap a collection to open it/i);
+      await tiles.nth(3).tap();
+      await page.waitForURL(/\/data\?c=/);
+    }
     expect(errors).toEqual([]);
   });
 });
@@ -892,6 +1008,14 @@ test.describe("Methods", () => {
     await expect(page.locator(".cp-ur__item.is-by-design")).toHaveCount(2);
     await expect(page.locator(".cp-ur")).toContainText("Never a failed match");
     await expect(page.locator(".cp-ur")).toContainText("not by failure");
+    // Codex, PR #79: the two phrases above come only from the intentional
+    // statuses, so an empty "Still to do" card passed. Every card must carry
+    // a real definition, and none may be the missing-definition fallback.
+    for (const body of await page.locator(".cp-ur__body").allInnerTexts()) {
+      expect(body.trim().length).toBeGreaterThan(20);
+      expect(body).not.toContain("Definition missing");
+    }
+    await expect(page.locator(".cp-ur__item:not(.is-by-design)")).toContainText("could not place");
     // The loop says where the methods come from. It must not say the Federal
     // Reserve uses or endorses them: the workspace evidences affiliation and
     // nothing more, and that is the one claim here a reader could disprove.
