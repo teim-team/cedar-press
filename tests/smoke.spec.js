@@ -714,8 +714,20 @@ test.describe("Methods", () => {
     await expect(cards).toHaveCount(2);
     await expect(cards.first()).toContainText("Cedar entity id");
     await expect(cards.nth(1)).toContainText("Cedar business id");
-    // The sample uid is one a reader could really transcribe.
+    // Both display forms, per the owner's specification of 2026-09-13.
     await expect(page.locator(".cp-idp__shape").first()).toHaveText(/^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
+    await expect(page.locator(".cp-idp__shape").nth(1)).toHaveText(/^CB-\d{7}$/);
+    // The business register is not claimed as live while nothing mints it.
+    await expect(page.locator(".cp-idp__pending")).toContainText("being minted");
+    // A nation and the company it owns are two subjects, and the page says so
+    // with the ownership as a dated edge rather than a merged row.
+    await expect(page.locator(".cp-wb__id").first()).toHaveText(/^CE-/);
+    await expect(page.locator(".cp-wb__id").nth(1)).toHaveText(/^CB-/);
+    await expect(page.locator(".cp-wb__edgelabel")).toContainText(/effective dates/i);
+    await expect(page.locator(".cp-wb__close")).toContainText("never goes in a business column");
+    // Everything that can change is named as living outside the identifier.
+    await expect(page.locator(".cp-ko")).toContainText("UEI");
+    await expect(page.locator(".cp-ko")).toContainText("NAICS");
     // The loop says where the methods come from. It must not say the Federal
     // Reserve uses or endorses them: the workspace evidences affiliation and
     // nothing more, and that is the one claim here a reader could disprove.

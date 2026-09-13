@@ -21,9 +21,11 @@ import {
 import { CONSTRUCTION_STEPS } from "../../features/grove/pressMethod.js";
 import {
   IDENTIFIERS,
+  KEPT_OUTSIDE,
   LINKAGE_MOVES,
   LOOP_CLOSE,
   LOOP_STAGES,
+  WHY_BOTH,
 } from "../../features/grove/pressIdentity.js";
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog.js";
 import { coverageLabel } from "../../features/grove/pressAccess.js";
@@ -257,7 +259,13 @@ export function IdentityPair() {
         <article className="cp-idp__card" key={identifier.id}>
           <header className="cp-idp__head">
             <h3 className="cp-idp__label">{identifier.label}</h3>
-            {identifier.shape ? <code className="cp-idp__shape">{identifier.shape}</code> : null}
+            {/* The chip says which register the form is already in. The
+                entity register is live; the business register is specified
+                and not yet minted, and a page that showed both the same way
+                would be claiming one that does not exist. */}
+            <code className={`cp-idp__shape${identifier.live ? "" : " is-pending"}`}>
+              {identifier.shape}
+            </code>
           </header>
           <p className="cp-idp__names">{identifier.names}</p>
           <p className="cp-idp__cap">Survives</p>
@@ -267,6 +275,9 @@ export function IdentityPair() {
             ))}
           </ul>
           <p className="cp-idp__note">{identifier.note}</p>
+          {identifier.live ? null : (
+            <p className="cp-idp__pending">The business register is being minted. The form and its rules are settled.</p>
+          )}
           <p className="cp-idp__fields">
             {identifier.fields.map((field) => (
               <code key={field}>{field}</code>
@@ -424,5 +435,61 @@ export function MethodsByCollection() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * Why two namespaces, drawn as the thing itself.
+ *
+ * The owner's worked example, and the clearest argument on the page: a nation
+ * and the enterprise it owns are two subjects, joined by a dated relationship
+ * rather than collapsed into one row. Drawn as two cards with the edge between
+ * them, because "these are separate and connected" is a shape, not a sentence.
+ */
+export function WhyBoth() {
+  return (
+    <div className="cp-wb">
+      <div className="cp-wb__pair">
+        <article className="cp-wb__card">
+          <code className="cp-wb__id">{WHY_BOTH.entity.id}</code>
+          <h3 className="cp-wb__name">{WHY_BOTH.entity.name}</h3>
+          <p className="cp-wb__role">{WHY_BOTH.entity.role}</p>
+        </article>
+        <div className="cp-wb__edge" aria-hidden="true">
+          <span className="cp-wb__edgeline" />
+          <span className="cp-wb__edgelabel">{WHY_BOTH.edge}</span>
+          <span className="cp-wb__edgeline" />
+        </div>
+        <article className="cp-wb__card">
+          <code className="cp-wb__id">{WHY_BOTH.business.id}</code>
+          <h3 className="cp-wb__name">{WHY_BOTH.business.name}</h3>
+          <p className="cp-wb__role">{WHY_BOTH.business.role}</p>
+        </article>
+      </div>
+      {/* Screen readers get the edge as text; the line above is decoration. */}
+      <p className="cp-badge__sr">
+        {WHY_BOTH.entity.name} {WHY_BOTH.edge} {WHY_BOTH.business.name}.
+      </p>
+      <ul className="cp-wb__asks">
+        {WHY_BOTH.questions.map((question) => (
+          <li key={question}>{question}</li>
+        ))}
+      </ul>
+      <p className="cp-wb__close">{WHY_BOTH.close}</p>
+    </div>
+  );
+}
+
+/** What the identifiers deliberately do not carry, and where it lives instead. */
+export function KeptOutside() {
+  return (
+    <ul className="cp-ko">
+      {KEPT_OUTSIDE.map((item) => (
+        <li className="cp-ko__item" key={item.id}>
+          <h3 className="cp-ko__label">{item.label}</h3>
+          <p className="cp-ko__body">{item.body}</p>
+        </li>
+      ))}
+    </ul>
   );
 }

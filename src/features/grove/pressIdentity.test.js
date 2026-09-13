@@ -8,16 +8,16 @@ import test from "node:test";
 
 import {
   IDENTIFIERS,
+  KEPT_OUTSIDE,
   LINKAGE_MOVES,
   LOOP_CLOSE,
   LOOP_STAGES,
+  WHY_BOTH,
   WITHHELD_CLASS,
 } from "./pressIdentity.js";
 
 const read = (relative) => JSON.parse(readFileSync(new URL(relative, import.meta.url), "utf8"));
 const register = read("../../../public/data/cedar/register.json");
-const entitySchema = read("../../../cedar_source_registry/schema/harmonized_entity.schema.json");
-const recordSchema = read("../../../cedar_source_registry/schema/source_record.schema.json");
 
 test("every class an identifier claims is a class the published register holds", () => {
   const codes = new Set(register.classes.map((entry) => entry.code));
@@ -29,18 +29,24 @@ test("every class an identifier claims is a class the published register holds",
   }
 });
 
-test("every field an identifier names is a real field", () => {
-  // cedar_uid is the spine's, documented in docs/IDENTIFIER_STANDARD.md; the
-  // other two are the registry schemas'.
-  const known = new Set([
-    "cedar_uid",
-    ...Object.keys(entitySchema.properties ?? {}),
-    ...Object.keys(recordSchema.properties ?? {}),
+test("the role-specific columns are the ones the standard names", () => {
+  // The specification of 2026-09-13 names these columns and says the role
+  // matters: a recipient column, an owner column and a parent column are not
+  // interchangeable, and neither identifier may sit in the other's column.
+  const entity = IDENTIFIERS.find((item) => item.id === "entity");
+  assert.deepEqual(entity.fields, [
+    "native_entity_uid",
+    "recipient_native_entity_uid",
+    "owner_cedar_uid",
+    "parent_cedar_uid",
   ]);
-  for (const identifier of IDENTIFIERS) {
-    for (const field of identifier.fields) {
-      assert.ok(known.has(field), `${identifier.label} names field "${field}", which no schema declares`);
-    }
+  const business = IDENTIFIERS.find((item) => item.id === "business");
+  assert.deepEqual(business.fields, ["business_uid"]);
+  // The registry's own keys are external identifiers under the standard, not
+  // Cedar identities, so they must not be presented as either id's field.
+  const all = IDENTIFIERS.flatMap((item) => item.fields);
+  for (const foreign of ["business_source_id", "entity_id", "uei", "cage", "ein"]) {
+    assert.ok(!all.includes(foreign), `${foreign} is an external identifier, not a Cedar id`);
   }
   const doc = readFileSync(new URL("../../../docs/IDENTIFIER_STANDARD.md", import.meta.url), "utf8");
   assert.match(doc, /cedar_uid/, "the identifier standard no longer documents cedar_uid");
@@ -62,24 +68,51 @@ test("the withheld class is really withheld in the published register", () => {
   );
 });
 
-test("the shapes shown on the page are shapes the standard permits", () => {
+test("the shapes are the standard's, and the entity sample is a real uid", () => {
   const entity = IDENTIFIERS.find((item) => item.id === "entity");
-  // Crockford base32 with I, L, O and U removed: a sample uid that contained
-  // one of those would be teaching a reader an impossible id.
+  // Crockford base32 with I, L, O and U removed: a sample carrying one of
+  // those would be teaching a reader an impossible id.
   assert.match(entity.shape, /^CE-[0-9ABCDEFGHJKMNPQRSTVWXYZ]{5}-[0-9ABCDEFGHJKMNPQRSTVWXYZ]{2}$/);
-  // The business id shows no sample. Its customer-facing CB- form is decided
-  // (docs/CEDAR_BUSINESS_ID_DECISION_2026-09-06.md) and nothing mints it yet,
-  // and the form that IS minted is a source-record key with a source code in
-  // it, which the decision's first rule forbids as an identity. A sample here
-  // again means CB- shipped; check that it did.
+  assert.equal(entity.live, true);
+  // And it is a uid the published register actually holds, so the page is
+  // never teaching a form by inventing an entity.
+  const uids = new Set(register.entities.map((row) => row[0]));
+  assert.ok(uids.has(entity.shape), `${entity.shape} is not in the published register`);
+
   const business = IDENTIFIERS.find((item) => item.id === "business");
-  assert.equal(business.shape, null, "the business card shows a sample; is CB- minted?");
+  assert.match(business.shape, /^CB-\d{7}$/);
+  // SPECIFIED, NOT MINTED. No CB- exists in data/spine, so the section says
+  // so in one line. When the terminal mints the register, flip `live` and
+  // this assertion with it.
+  assert.equal(business.live, false, "business ids are live; update the page's liveness line too");
+});
+
+test("the worked example uses the two shapes and keeps them apart", () => {
+  assert.equal(WHY_BOTH.entity.id, IDENTIFIERS[0].shape);
+  assert.equal(WHY_BOTH.business.id, IDENTIFIERS[1].shape);
+  assert.ok(WHY_BOTH.entity.id.startsWith("CE-"));
+  assert.ok(WHY_BOTH.business.id.startsWith("CB-"));
+  assert.equal(WHY_BOTH.questions.length, 2);
+  // The rule the example exists to teach.
+  assert.match(WHY_BOTH.close, /never goes in a business column/i);
+});
+
+test("what is kept outside the identifiers is named", () => {
+  const text = KEPT_OUTSIDE.map((item) => `${item.label} ${item.body}`).join(" ");
+  for (const external of ["UEI", "CAGE", "EIN", "NAICS"]) {
+    assert.ok(text.includes(external), `${external} is not named as an external identifier`);
+  }
+  assert.match(text, /effective dates/i, "relationships must carry dates");
+  assert.match(text, /source/i, "relationships must carry a source");
 });
 
 test("the prose keeps the brand lock", () => {
   const prose = [
     ...IDENTIFIERS.flatMap((item) => [item.names, item.note, ...item.survives]),
+    ...KEPT_OUTSIDE.flatMap((item) => [item.label, item.body]),
     ...LINKAGE_MOVES.flatMap((item) => [item.label, item.body]),
+    WHY_BOTH.close,
+    ...WHY_BOTH.questions,
     ...LOOP_STAGES.flatMap((item) => [item.label, item.body]),
     LOOP_CLOSE,
   ];

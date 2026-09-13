@@ -33,9 +33,11 @@ import {
   EcosystemDiagram,
   FeedbackLoop,
   IdentityPair,
+  KeptOutside,
   LinkageMoves,
   MethodsByCollection,
   ProcessRail,
+  WhyBoth,
 } from "./pressMethodSections";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -138,10 +140,10 @@ export default function CedarPressMethods() {
             A 990 says who filed it. A royalty statement says who was paid. A docket says who
             appeared. None of them says whether those three are the same nation, and no public
             system will tell you. Cedar assigns the key none of them carries and keeps it
-            current. A Cedar entity id names a government, an agency, an NHO, a college, a
-            nonprofit or an enterprise a nation owns. A Cedar business id names a firm as a
-            source named it, and then the resolved firm those sightings add up to. Most
-            enterprises carry both.
+            current, in two namespaces that never mix. A Cedar entity id names one canonical
+            Native entity. A Cedar business id names one distinct business or enterprise. The
+            ownership between them is a dated relationship carrying its source, which is what
+            keeps a nation and the company it owns from collapsing into one row.
           </p>
           <IdentityPair />
           {/* The owner's challenge, 2026-09-13: is it wrong that Cedar does
@@ -156,6 +158,35 @@ export default function CedarPressMethods() {
             the first sighting. If a nation acquires it later, the history is already there.
           </p>
           <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
+        </section>
+
+        {/* WHY TWO NAMESPACES. The owner's worked example, and the argument
+            the rest of the page rests on: one id space collapses an
+            enterprise into its tribal owner, and then "what has this nation
+            been involved in" and "what has this enterprise won" become the
+            same query with the same wrong answer. */}
+        <section className="cp-msec cp-fade" aria-label="Why both identifiers">
+          <span className="cp-sec__band">Two subjects</span>
+          <h2 className="cp-msec__title">A nation and the company it owns are not one thing.</h2>
+          <p className="cp-msec__lede">
+            A Native entity can own or operate a business. That does not make the business and
+            the entity the same subject, and a single identifier space is a decision to treat
+            them as one. Cedar keeps two, and puts the ownership between them where it can carry
+            dates and a source.
+          </p>
+          <WhyBoth />
+        </section>
+
+        <section className="cp-msec cp-fade" aria-label="What the identifiers do not carry">
+          <span className="cp-sec__band">Kept outside</span>
+          <h2 className="cp-msec__title">Anything that can change stays out of the identifier.</h2>
+          <p className="cp-msec__lede">
+            The reason a Cedar id is worth building a collection on is everything it refuses to
+            hold. An identifier that encodes ownership has to be rewritten when a firm is sold;
+            one that encodes a state has to be rewritten when the firm moves. Cedar&rsquo;s encode
+            nothing, so they never move.
+          </p>
+          <KeptOutside />
         </section>
 
         <section className="cp-msec cp-fade" aria-label="What the identifiers make possible">
