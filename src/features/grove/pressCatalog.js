@@ -386,7 +386,18 @@ export const PRESS_CATALOG = Object.freeze([
   }),
   Object.freeze({
     id: "need",
-    short: "NEED",
+    // "Cedar NEED", not "NEED", and for the reason the rename itself gives.
+    //
+    // docs/NEED_RENAME_2026-09-10.md: the Minneapolis Fed publishes a dataset
+    // under close to this description, so "a reader who meets a bare Native
+    // Entity Enterprise Dataset may assume ours is theirs", and the formal
+    // name therefore leads with Cedar, "the half a reader can attribute".
+    // The SHORT name never got that treatment, and the short name is what
+    // every compact surface shows: the door's strip, the frame's rail, the
+    // shelf, the collection picker, and the basis line under a figure. A
+    // citation reading "NEED v1" beside a Fed figure is the exact ambiguity
+    // the rename was for.
+    short: "Cedar NEED",
     name: "Cedar Native Entity Enterprise Dataset (NEED)",
     shelf: "pro",
     // Series. Floor: min(first_observed_year) in dist/customer/need.csv, which

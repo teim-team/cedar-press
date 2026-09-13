@@ -57,6 +57,9 @@ import manifest from "../../../data/cedar/collections.manifest.json" with { type
 import published from "../../../data/cedar/samples.published.json" with { type: "json" };
 
 import { CLAIM_CLASS } from "./claims.js";
+// The storefront's own naming. `pressCatalog.js` imports nothing, so this is
+// a leaf dependency and cannot close a cycle.
+import { PRESS_CATALOG } from "./pressCatalog.js";
 
 const deepFreeze = (value) => {
   if (Array.isArray(value)) return Object.freeze(value.map(deepFreeze));
@@ -217,9 +220,35 @@ export function sampleUnavailableReason(datasetId) {
   return SAMPLES[datasetId]?.unavailable_because ?? null;
 }
 
+/** The storefront's display short name, by collection id, where it sets one. */
+const STOREFRONT_SHORT = Object.freeze(
+  Object.fromEntries(PRESS_CATALOG.filter((entry) => entry.short).map((entry) => [entry.id, entry.short])),
+);
+
+/**
+ * The label a citation or a version line shows for a collection.
+ *
+ * The storefront catalog's `short` wins over the descriptor's `short_name`
+ * where the two differ, because the catalog is where the storefront decides
+ * how a collection is NAMED to a reader and the descriptor is the workspace's
+ * record of what it IS. `shelf.py` already resolves it in that order
+ * (`catalog.get("short") or dataset.short_name`); this is the same rule on
+ * this side, and it was missing.
+ *
+ * It matters for exactly one collection today. NEED's descriptor short name
+ * is a bare "NEED", and docs/NEED_RENAME_2026-09-10.md renamed the formal
+ * name to lead with Cedar precisely because a bare one reads as the
+ * Minneapolis Fed's dataset. A basis line saying "NEED v1" under a figure is
+ * where that ambiguity does the most damage, so it says "Cedar NEED v1".
+ */
+export function collectionShort(dataset) {
+  if (!dataset) return null;
+  return STOREFRONT_SHORT[dataset.id] ?? dataset.shortName;
+}
+
 /** One line for the context strip: versions and the latest refresh date. */
 export function collectionContextLine() {
-  const versions = LAUNCH_COLLECTION.map((d) => `${d.shortName} ${d.version}`).join(" · ");
+  const versions = LAUNCH_COLLECTION.map((d) => `${collectionShort(d)} ${d.version}`).join(" · ");
   const updated = LAUNCH_COLLECTION.map((d) => d.updated).sort().slice(-1)[0];
   return `${versions} · all current as of ${updated}`;
 }
@@ -244,7 +273,7 @@ export function collectionContextLine() {
 export function collectionFindings() {
   const basis = (datasetId, detail) => {
     const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-    return `${dataset?.shortName ?? datasetId} ${dataset?.version ?? "v0"}, ${detail}`;
+    return `${collectionShort(dataset) ?? datasetId} ${dataset?.version ?? "v0"}, ${detail}`;
   };
 
   const supported = [
@@ -340,7 +369,7 @@ export function collectionFindings() {
 /** A figure's basis line, derived so it cannot name a stale version. */
 function basisFor(datasetId, fallback) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === datasetId);
-  return dataset ? `${dataset.shortName} ${dataset.version}` : fallback;
+  return dataset ? `${collectionShort(dataset)} ${dataset.version}` : fallback;
 }
 
 /**
