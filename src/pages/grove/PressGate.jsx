@@ -593,17 +593,26 @@ export default function PressGate({ user }) {
           <header className="cp-why__head">
             <div>
               <p className="cp-kicker cp-kicker--light cp-fade">What Cedar does with them</p>
+              {/* "Records are only the beginning" was cut on the owner's
+                  ruling of 2026-09-13, here and on the Methods page. It names
+                  a starting point and stops, which describes a gap rather
+                  than a product and could sit on any data company's page. The
+                  claim underneath is narrower and much harder to copy: the
+                  records are abundant, the key that would let them be added
+                  up does not exist, and Cedar mints it and maintains it.
+                  The lede also opened on a federal contract, which made a
+                  twelve-collection product read as a contracting product with
+                  eleven extras. It names four kinds of record now. */}
               <h2 className="cp-why__title cp-fade" id="cp-why-title">
-                Records are only the beginning.
+                The hard part is knowing who a record is about.
               </h2>
-              {/* The headline posed something and the section left it
-                  hanging. This answers it in a sentence, and the four steps
-                  below are that sentence in order. */}
               <p className="cp-why__lede cp-fade">
-                A federal contract names a vendor. It does not say which nation owns that vendor,
-                and no public system will tell you. Cedar reads {SOURCE_COUNT} kinds of source and does
-                the work in between. It resolves each record to the entity behind it, publishes what it
-                could not resolve, keeps the collections current, and answers questions against them.
+                A contract names a vendor. A 990 names a filer. A royalty statement names a payee.
+                None of them says whether those are one nation or three, and no public system will
+                tell you. Cedar reads {SOURCE_COUNT} kinds of source, assigns every organization it
+                can resolve a permanent identifier, and maintains that identifier as they rename,
+                merge and change hands. That is what makes {LAUNCH_COLLECTION.length} datasets
+                answer as one collection.
               </p>
             </div>
             <ul className="cp-why__shelves cp-fade" aria-label="The shelves">

@@ -466,8 +466,18 @@ test.describe("Shape the research", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("What should Cedar research and build next?");
     await expect(page.getByTestId("priorities-research_question").getByTestId("priority").first()).toBeVisible();
     await expect(page.getByTestId("priorities-dataset").getByTestId("priority").first()).toBeVisible();
-    await expect(page.getByTestId("priorities-static")).toContainText("not connected");
-    await expect(page.getByTestId("priority-total").first()).toContainText("0 points · 0 subscribers");
+    // The influence card carries the "no service" sentence; the note under it
+    // says what the list is, given that. It used to repeat "not connected" a
+    // second time in the same column.
+    await expect(page.getByTestId("influence")).toContainText("not connected");
+    await expect(page.getByTestId("priorities-static")).toContainText("Support cannot be placed here");
+    // Eleven cards reading "0 points · 0 subscribers" is a product nobody
+    // uses; with no service those zeros are not measurements, so the row says
+    // who does the counting instead.
+    await expect(page.getByTestId("priority-total").first()).toContainText("Support is counted by the Cedar Press service");
+    // Writing anything is the point of the page, so the box leads it and the
+    // use case is a free field rather than a menu of seven guesses.
+    await expect(page.getByRole("textbox", { name: "What you would use it for" })).toBeVisible();
     // The request form reads the words against the list before sending.
     await page.getByLabel("Tell Cedar what you need").fill("I wish you had a dataset showing which tribal enterprises own which subsidiaries");
     await expect(page.getByTestId("request-match")).toContainText("Tribal enterprise ownership and subsidiary relationships");
@@ -675,6 +685,97 @@ test.describe("the stylesheet", () => {
     expect(shape.count).toBe(6);
     expect(shape.widest).toBeLessThan(shape.gridWidth / 2);
     expect(shape.rows).toBeLessThan(shape.count);
+  });
+});
+
+test.describe("Methods", () => {
+  test("the twelve marks index the collections, and one profile opens beneath", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/methods");
+    // The section was twelve stacked accordions; it is the twelve marks now,
+    // and the count is the catalog's, so a collection cannot go missing here
+    // without going missing from the shelf too.
+    const tiles = page.locator(".cp-mbc__tile");
+    await expect(tiles).toHaveCount(12);
+    await expect(page.locator("#mbc-panel")).toBeVisible();
+    const first = await page.locator(".cp-mbc__name").innerText();
+    await tiles.nth(5).click();
+    await expect(page.locator(".cp-mbc__name")).not.toHaveText(first);
+    // Arrow keys walk the index: twelve separate tab stops is not a tablist.
+    await tiles.nth(5).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(".cp-mbc__tile.is-on")).toHaveCount(1);
+    expect(errors).toEqual([]);
+  });
+
+  test("the identity section names both identifiers and does not claim an endorsement", async ({ page }) => {
+    await page.goto("/methods");
+    const cards = page.locator(".cp-idp__card");
+    await expect(cards).toHaveCount(2);
+    await expect(cards.first()).toContainText("Cedar entity id");
+    await expect(cards.nth(1)).toContainText("Cedar business id");
+    // The sample uid is one a reader could really transcribe.
+    await expect(page.locator(".cp-idp__shape").first()).toHaveText(/^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$/);
+    // The loop says where the methods come from. It must not say the Federal
+    // Reserve uses or endorses them: the workspace evidences affiliation and
+    // nothing more, and that is the one claim here a reader could disprove.
+    const loop = await page.locator(".cp-loop").innerText();
+    expect(loop).toContain("Federal Reserve");
+    expect(loop).not.toMatch(/Federal Reserve[^.]*\b(uses|endorses|relies on)\b/i);
+    // "Accuracy has a time dimension" came off the page with its timeline.
+    await expect(page.locator("body")).not.toContainText("Accuracy has a time dimension");
+    await expect(page.locator(".cp-tl")).toHaveCount(0);
+  });
+});
+
+test.describe("the reveal", () => {
+  // .cp-fade is opacity: 0 in CSS and revealed by JavaScript. The rules were
+  // deleted by accident once and nothing broke visibly, because a class with
+  // no rule does nothing: forty-odd marked sections simply stopped arriving.
+  // This is the assertion that would have caught it.
+  test("marked sections start hidden and arrive on scroll", async ({ page }) => {
+    await page.goto("/methods");
+    await page.locator(".cp-mbc__tile").first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const below = await page.evaluate(() =>
+      [...document.querySelectorAll(".cp-fade")]
+        .filter((el) => el.getBoundingClientRect().top > window.innerHeight * 1.2)
+        .map((el) => Number(getComputedStyle(el).opacity)));
+    expect(below.length).toBeGreaterThan(0);
+    expect(below.every((o) => o === 0)).toBe(true);
+
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
+    await page.waitForTimeout(1200);
+    // `is-in`, not a computed opacity: a section that entered the viewport a
+    // moment ago is mid-transition and reads as 0.4, which is the reveal
+    // working. The invariant is that nothing a reader can see stays unrevealed.
+    // The observer runs with rootMargin -6%, so something peeking in by a few
+    // pixels is deliberately not revealed yet. Ask the same question it does.
+    const hidden = await page.evaluate(() => {
+      const inset = window.innerHeight * 0.06;
+      return [...document.querySelectorAll(".cp-fade")]
+        .filter((el) => { const r = el.getBoundingClientRect(); return r.bottom > inset && r.top < window.innerHeight - inset; })
+        .filter((el) => !el.classList.contains("is-in"))
+        .map((el) => el.className);
+    });
+    expect(hidden).toEqual([]);
+    const revealed = await page.evaluate(() => document.querySelectorAll(".cp-fade.is-in").length);
+    expect(revealed).toBeGreaterThan(0);
+  });
+});
+
+test.describe("the overview", () => {
+  test("search runs against the collections and lands on a real cut", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/");
+    await page.fill("#cp-search-q", "Cherokee Nation");
+    await page.locator(".cp-search__go").click();
+    await page.waitForURL(/\/data\?q=/);
+    // The same q= the Explore box writes, so the two are one search.
+    await expect(page.getByTestId("explore-scope").or(page.locator(".cp-ex__caption")).first())
+      .toContainText(/Cherokee Nation/i);
+    expect(errors).toEqual([]);
   });
 });
 

@@ -69,7 +69,8 @@ import {
   sortRows,
   universalRows,
 } from "../../features/grove/explore.js";
-import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
+import { LAUNCH_COLLECTION, collectionCitation } from "../../features/grove/collection.js";
+import { releaseFor } from "../../features/grove/pressReleases.js";
 import { saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
@@ -182,6 +183,30 @@ function writeSaved(list) {
  */
 function Picker({ label, value, children, testId }) {
   const ref = useRef(null);
+  // A panel anchored left: 0 under a control near the right of a wide filter
+  // bar runs off the screen. At 1280 the Entity type panel ended 178px past
+  // the viewport with nothing to scroll it back: the page does not scroll
+  // horizontally, so the reader simply could not see the right of it. Measured
+  // on open, because the bar reflows with the window and with the number of
+  // filters the collection has.
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    const place = () => {
+      const panel = node.querySelector(".cp-ex__panel");
+      if (!panel || !node.open) return;
+      panel.classList.remove("is-right");
+      const room = document.documentElement.clientWidth;
+      if (panel.getBoundingClientRect().right > room - 8) panel.classList.add("is-right");
+    };
+    const onToggle = () => place();
+    node.addEventListener("toggle", onToggle);
+    window.addEventListener("resize", place);
+    return () => {
+      node.removeEventListener("toggle", onToggle);
+      window.removeEventListener("resize", place);
+    };
+  }, []);
   useEffect(() => {
     const node = ref.current;
     if (!node) return undefined;
@@ -586,7 +611,75 @@ function Record({ item, columns }) {
           <Fields columns={groups.technical} item={item} contract={contract} plain={false} />
         </details>
       ) : null}
-      <p className="cp-ex__fine">{short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"} · preview row</p>
+      <RecordProvenance item={item} contract={contract} />
+    </div>
+  );
+}
+
+/**
+ * The foot of an open record: where it came from and how to cite it.
+ *
+ * The review's point was that the expanded row is the thing worth paying for,
+ * and it was ending on a grey line of ids. A researcher opening a record wants
+ * four things and had to leave the page for three of them: the document behind
+ * the row, how the row reached the entity it is filed under, which release it
+ * belongs to, and a citation they can paste. All four are here now, and none
+ * of them is generated: the citation is `collectionCitation`, the same function
+ * the download embeds, and the resolution sentence is the collection's own
+ * `linkage` declaration.
+ */
+function RecordProvenance({ item, contract }) {
+  const [copied, setCopied] = useState(false);
+  const entry = PRESS_CATALOG_BY_ID[item.collection] ?? null;
+  const release = releaseFor(item.collection);
+  const citation = collectionCitation(item.collection, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
+  const copy = () => {
+    navigator.clipboard?.writeText(citation).then(
+      () => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); },
+      () => {},
+    );
+  };
+  return (
+    <div className="cp-ex__prov">
+      <div className="cp-ex__provgrid">
+        <div>
+          <span className="cp-ex__provcap">The document</span>
+          {item.source ? (
+            <a href={item.source} target="_blank" rel="noreferrer">Open the source record <span aria-hidden="true">&#8599;</span></a>
+          ) : (
+            <span className="cp-ex__fine">This row's table carries no per-record link. The collection's sources are on its methods entry.</span>
+          )}
+        </div>
+        <div>
+          <span className="cp-ex__provcap">How it reached the entity</span>
+          {/* The role is appended only when the linkage sentence does not
+              already say it; on Federal Funding the two were the same clause
+              twice in a row. */}
+          <span className="cp-ex__fine">
+            {entry?.linkage ?? "Resolved to the Cedar entity register."}
+            {contract?.entity_role && !(entry?.linkage ?? "").toLowerCase().includes(contract.entity_role.toLowerCase())
+              ? ` The entity on this row is ${contract.entity_role}.`
+              : ""}
+          </span>
+        </div>
+        <div>
+          <span className="cp-ex__provcap">Where it sits</span>
+          <span className="cp-ex__fine">
+            {short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"}
+            {release ? ` · release ${release.version}, ${release.cadence.toLowerCase()}` : ""}
+            {" · preview row"}
+          </span>
+        </div>
+      </div>
+      {citation ? (
+        <div className="cp-ex__cite">
+          <span className="cp-ex__provcap">Cite it</span>
+          <code>{citation}</code>
+          <button type="button" className="cp-ex__act cp-ex__citebtn" onClick={copy}>
+            {copied ? "Copied" : "Copy citation"}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -654,18 +747,31 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return undefined;
+    // The fade lives on the wrapper and switches off at the right end, so a
+    // table that fits never wears a gradient suggesting more table.
+    const edge = () => {
+      const wrap = node.parentElement;
+      if (!wrap) return;
+      const done = node.scrollLeft + node.clientWidth >= node.scrollWidth - 2;
+      wrap.dataset.end = done ? "1" : "0";
+    };
     const measure = () => {
       node.style.setProperty("--vw", `${node.clientWidth}px`);
       const more = node.querySelector("th.cp-ex__more");
       const uid = node.querySelector("th.cp-ex__pin--uid");
       node.style.setProperty("--more-w", `${more ? more.getBoundingClientRect().width : 0}px`);
       node.style.setProperty("--uid-w", `${uid ? uid.getBoundingClientRect().width : 0}px`);
+      edge();
     };
     measure();
-    if (typeof ResizeObserver === "undefined") return undefined;
+    node.addEventListener("scroll", edge, { passive: true });
+    if (typeof ResizeObserver === "undefined") return () => node.removeEventListener("scroll", edge);
     const observer = new ResizeObserver(measure);
     observer.observe(node);
-    return () => observer.disconnect();
+    return () => {
+      node.removeEventListener("scroll", edge);
+      observer.disconnect();
+    };
   }, [columnsKey]);
   const universal = [
     ["entity", "Entity", true],
@@ -682,7 +788,15 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   const heads = view === "table" ? columns.map((c) => [c, labelFor(items[0]?.key, c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
   const span = heads.length + 1;
   return (
-    <div className="cp-ex__scroll" ref={scrollRef}>
+    // The wrapper exists for the edge fade: every cell paints its own
+    // background, so a gradient on the scroller itself is painted over by
+    // the table. It sits outside the scroller, does not scroll, and is what
+    // says the table continues; without it the last column sat half-cut
+    // against a hard border and read as a rendering fault. The scroller
+    // takes keyboard focus, because a scrollable region with no focusable
+    // child cannot be reached without a mouse.
+    <div className="cp-ex__scrollwrap">
+    <div className="cp-ex__scroll" ref={scrollRef} tabIndex={0} role="region" aria-label="Records, scroll sideways for more columns">
       <table className={`cp-ex__table cp-ex__table--${view}`}>
         <thead>
           <tr>
@@ -744,6 +858,7 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
           })}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

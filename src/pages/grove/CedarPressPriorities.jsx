@@ -48,13 +48,27 @@ import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import { PressInfluence } from "./PressInfluence";
 
-const USE_CASES = ["credit analysis", "economic development", "vendor diligence", "academic research", "journalism", "policy", "other"];
+// The use case used to be a <select> of seven options. A subscriber writing
+// what they need and then being handed seven boxes to file it under is being
+// told the boxes are the real question, and the boxes were guesses. It is a
+// free field now, with an example rather than a menu; the service already
+// stores it as text and never validated it against a list.
+const USE_PLACEHOLDER = "Underwriting a loan to a tribal enterprise, and I need the parent";
 
-function Points({ priority, mine, canMove, onMove, busy }) {
+function Points({ priority, mine, canMove, onMove, busy, counted }) {
   return (
     <div className="cp-pri__points">
+      {/* A row of "0 points · 0 subscribers" across eleven cards reads as a
+          product nobody uses. In a build with no service those zeros are not
+          measurements at all, so the row says what it is instead. */}
       <span className="cp-pri__total" data-testid="priority-total">
-        <b>{pointsWord(priority.points)}</b> · {priority.subscribers} subscriber{priority.subscribers === 1 ? "" : "s"}
+        {counted ? (
+          <>
+            <b>{pointsWord(priority.points)}</b> · {priority.subscribers} subscriber{priority.subscribers === 1 ? "" : "s"}
+          </>
+        ) : (
+          <span className="cp-pri__uncounted">Support is counted by the Cedar Press service</span>
+        )}
       </span>
       {canMove ? (
         <span className="cp-pri__mine">
@@ -67,7 +81,7 @@ function Points({ priority, mine, canMove, onMove, busy }) {
   );
 }
 
-function Priority({ priority, mine, canMove, onMove, busy, evolvedFrom }) {
+function Priority({ priority, mine, canMove, onMove, busy, evolvedFrom, counted }) {
   return (
     <li className={`cp-pri ${priority.status === "published" ? "is-published" : ""}`} data-testid="priority">
       <div className="cp-pri__head">
@@ -82,7 +96,7 @@ function Priority({ priority, mine, canMove, onMove, busy, evolvedFrom }) {
       {priority.status === "published" && priority.published_output ? (
         <p className="cp-set__fine"><a href={priority.published_output}>See what was published <span aria-hidden="true">&#8594;</span></a></p>
       ) : null}
-      <Points priority={priority} mine={mine} canMove={canMove} onMove={onMove} busy={busy} />
+      <Points priority={priority} mine={mine} canMove={canMove} onMove={onMove} busy={busy} counted={counted} />
     </li>
   );
 }
@@ -147,11 +161,22 @@ function RequestForm({ priorities, connected, canMove, available, onDone }) {
         onChange={(e) => { setText(e.target.value); setServerMatches(null); setSent(null); }}
         placeholder="I wish you had a dataset showing which tribal enterprises own which subsidiaries…"
       />
-      <label className="cp-pri__label" htmlFor="pri-use">What you would use it for</label>
-      <select id="pri-use" className="cp-pri__select" value={useCase} onChange={(e) => setUseCase(e.target.value)}>
-        <option value="">Choose one</option>
-        {USE_CASES.map((u) => <option key={u} value={u}>{u}</option>)}
-      </select>
+      <p className="cp-pri__hint">
+        Anything. A question, a dataset, a field missing from one you already use, a year Cedar
+        does not reach yet, a nation whose records are thin. There is no list to choose from and
+        nothing is out of scope to ask for.
+      </p>
+      <label className="cp-pri__label" htmlFor="pri-use">
+        What you would use it for <span className="cp-pri__opt">optional</span>
+      </label>
+      <input
+        id="pri-use"
+        type="text"
+        className="cp-pri__use"
+        value={useCase}
+        onChange={(e) => setUseCase(e.target.value)}
+        placeholder={USE_PLACEHOLDER}
+      />
       {best ? (
         <div className="cp-pri__match" data-testid="request-match">
           <span className="cp-set__cap">This looks related to an existing {PRIORITY_TYPES[best.type]?.label.toLowerCase()}</span>
@@ -197,6 +222,8 @@ export default function CedarPressPriorities() {
 
   const mine = Object.fromEntries((influence?.allocations ?? []).map((a) => [a.priority_id, a.points]));
   const canMove = status === "ok";
+  // Whether a count on a card is a measurement rather than a placeholder.
+  const counted = status === "ok";
   const available = influence?.points_available ?? 0;
   const onMove = async (id, points) => {
     setBusy(true);
@@ -221,11 +248,17 @@ export default function CedarPressPriorities() {
         <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Shape the research</p>
           <h1 className="cp-mh__title">What should Cedar research and build next?</h1>
+          {/* The points used to open this paragraph, which made the page read
+              as a scoring system with a comment box attached. The owner's
+              ruling is that the writing is the product: a subscriber says what
+              they need, in their words, with no list to choose from. The
+              points are how that gets weighted, so they come second. */}
           <p className="cp-mh__sub">
-            Your subscription earns Cedar Points in each month you use Cedar Press. Put them on the
-            research questions and datasets that matter to you, and tell Cedar what you need in
-            your own words. Priorities are considered alongside feasibility, data quality, research
-            value and Cedar’s editorial judgment.
+            Tell Cedar what you need in your own words. There is no list of categories and nothing
+            is out of scope to ask for. Your subscription also earns Cedar Points in each month you
+            use Cedar Press, and you can put those behind your own request or behind anything
+            another subscriber has asked for. Priorities are considered alongside feasibility, data
+            quality, research value and Cedar’s editorial judgment.
           </p>
         </section>
 
@@ -233,10 +266,11 @@ export default function CedarPressPriorities() {
           <div className="cp-pri__side">
             <PressInfluence influence={influence} tier={tier} status={status} brief />
             {status === "static" ? (
+              // The influence card above already says this build has no
+              // service. This adds the one thing it does not: what the list
+              // below is, given that.
               <p className="cp-set__fine cp-pri__note" data-testid="priorities-static">
-                The list below is what Cedar has put forward. Points and subscriber counts are kept
-                by the Cedar Press service; this build is not connected to it, so none are shown
-                and none can be placed.
+                The priorities below are what Cedar has put forward. Support cannot be placed here.
               </p>
             ) : null}
             {status === "failed" ? <p className="cp-pri__error" role="alert">{error} <button type="button" className="cp-ex__clear" onClick={() => reload()}>Try again</button></p> : null}
@@ -259,6 +293,43 @@ export default function CedarPressPriorities() {
               </section>
             ) : null}
 
+            {/* THE ASK COMES FIRST.
+                This sat under eleven cards, which said, structurally, "pick
+                one of these". The owner's ruling is the opposite: a subscriber
+                writes whatever they want and the list is what other people
+                happened to write first. So the box leads and the list supports
+                it. */}
+            <section className="cp-pri__ask" aria-label="Ask for anything">
+              <div className="cp-head">
+                <span className="cp-sec__band">Ask for anything</span>
+              </div>
+              <p className="cp-pri__lede">
+                If it reads as something another subscriber has already asked for, Cedar offers to
+                put your point there and keeps your wording beside it, because the wording is the
+                part that says what you actually need.
+              </p>
+              <div className="cp-pri__askgrid">
+                <RequestForm priorities={priorities} connected={connected && entitled} canMove={canMove} available={available} onDone={() => reload()} />
+                <aside className="cp-pri__what" aria-label="What happens to a request">
+                  <span className="cp-set__cap">What happens to it</span>
+                  <ol className="cp-pri__steps">
+                    <li>
+                      <b>It is read.</b> Cedar checks it against everything subscribers have already
+                      asked for, so a request that has been made ten times is visibly ten requests.
+                    </li>
+                    <li>
+                      <b>It is kept whole.</b> Your wording is stored as written and shown to Cedar
+                      beside any priority it relates to. It is never reduced to a category.
+                    </li>
+                    <li>
+                      <b>It is answered or it is not.</b> Points inform the order of the work. They
+                      do not decide it, and Cedar says which priorities it took up in What&rsquo;s new.
+                    </li>
+                  </ol>
+                </aside>
+              </div>
+            </section>
+
             {["research_question", "dataset"].map((type) => (
               <section key={type} className="cp-pri__group" aria-label={PRIORITY_TYPES[type].plural} data-testid={`priorities-${type}`}>
                 <div className="cp-head">
@@ -275,22 +346,13 @@ export default function CedarPressPriorities() {
                       onMove={onMove}
                       busy={busy}
                       evolvedFrom={p.evolved_from ? byId[p.evolved_from] : null}
+                      counted={counted}
                     />
                   ))}
                 </ul>
               </section>
             ))}
 
-            <section className="cp-pri__group" aria-label="Request something">
-              <div className="cp-head">
-                <span className="cp-sec__band">Request something</span>
-              </div>
-              <p className="cp-pri__lede">
-                A question Cedar should answer, or a dataset it should build. If it reads as an
-                existing priority, you can support that priority and keep your request beside it.
-              </p>
-              <RequestForm priorities={priorities} connected={connected && entitled} canMove={canMove} available={available} onDone={() => reload()} />
-            </section>
           </div>
         </div>
 

@@ -11,7 +11,6 @@ import {
   ECOSYSTEM_EXAMPLES,
   EXPERTISE_DOMAINS,
   EXPERTISE_STRIP,
-  MAINTENANCE_TIMELINE,
   MAINTENANCE_TRACKED,
   REPLICATION_CALLOUTS,
   SOURCE_KINDS,
@@ -26,7 +25,6 @@ const ALL_STRINGS = [
   ...CONSTRUCTION_STEPS.flatMap((s) => [s.label, s.note]),
   ...DISCOVERY_MOVES,
   ...MAINTENANCE_TRACKED,
-  ...MAINTENANCE_TIMELINE.map((e) => e.event),
   ...ECOSYSTEM_EXAMPLES,
   ...REPLICATION_CALLOUTS,
   TRIBAL_REQUEST.policy,
@@ -60,12 +58,6 @@ test("the pipeline starts at discovery and ends at maintenance", () => {
   assert.equal(CONSTRUCTION_STEPS.at(-1).id, "maintain");
   assert.equal(new Set(CONSTRUCTION_STEPS.map((s) => s.id)).size, CONSTRUCTION_STEPS.length);
   for (const step of CONSTRUCTION_STEPS) assert.ok(step.label && step.note, step.id);
-});
-
-test("the timeline runs forward in time", () => {
-  const years = MAINTENANCE_TIMELINE.map((entry) => Number(entry.year));
-  assert.deepEqual(years, [...years].sort((a, b) => a - b));
-  assert.ok(years.every(Number.isInteger));
 });
 
 // The strip is a summary of the domain list, so it must not claim expertise

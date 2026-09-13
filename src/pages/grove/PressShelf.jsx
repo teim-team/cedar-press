@@ -58,8 +58,6 @@ import { EVENT, track } from "../../features/grove/telemetry.js";
 import { canOpenDataset, coverageFrom, coverageLabel } from "../../features/grove/pressAccess";
 import { downloadAll, downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import {
-  GROVE_CAPABILITIES,
-  GROVE_PUBLIC_DATA,
   PRESS_CATALOG_BY_ID,
   PRESS_TIERS,
   collectionsOnShelf,
@@ -401,65 +399,44 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
 }
 
 /**
- * Cedar Grove, teased rather than shelved.
+ * Cedar Grove, as a bridge rather than a second storefront.
  *
- * This used to lead with Gaming Intelligence as the Grove exclusive, with a
- * split of what Cedar Press showed and what Grove opened. That promise was
- * withdrawn on 2026-09-04: the collection is still being built, and a
- * storefront that previews it is selling a cadence and a scope nobody has
- * measured. What is left is the true case for Grove, which is not one
- * collection but what it does with all of them: the capabilities, and the
- * harmonized public data it carries beside them.
+ * This was a page-width band with a page-sized headline, its own six-item
+ * capability grid and a four-column list of the public data Grove harmonizes.
+ * Sitting under a reader's own collections it read as a second product's home
+ * page bolted to the foot of the first, and the owner's note was blunt: it had
+ * not been updated. It is one band now. Three lines of argument, the price,
+ * and a link. Everything cut from it is on Grove's own page, which is where a
+ * reader who wants it is going anyway.
+ *
+ * It carried Gaming Intelligence as a Grove exclusive until 2026-09-04, when
+ * that promise was withdrawn: the collection is still being built, and a
+ * storefront that previews it is selling a cadence nobody has measured.
  */
 function GroveTeaser({ tier }) {
   const [ref, seen, instant] = useReveal();
   return (
     // id="grove": the address of the Cedar Grove case. Article figures say
-    // "Built in Cedar Grove. Make your own" and land here, on the section
-    // that argues for it, rather than on the app route a Press reader
-    // cannot open.
+    // "Built in Cedar Grove. Make your own" and land here.
     <section ref={ref} id="grove" className={`cp-gt${seen ? " is-in" : ""}${instant ? " cp-reveal--now" : ""}`} aria-label="Cedar Grove">
-      <div className="cp-gt__head">
-        <div>
+      <div className="cp-gt__bar">
+        <div className="cp-gt__say">
           <span className="cp-sec__band">Cedar Grove</span>
-          <h3 className="cp-gt__title">Ready to analyze it and share it across your organization?</h3>
-          <p className="cp-gt__q">{tier.question}</p>
-        </div>
-        <div>
+          <h3 className="cp-gt__title">The same collections, in a workspace built to interrogate them.</h3>
           <p className="cp-gt__body">
-            Cedar Grove is the environment the collections were built for. Visualize and analyze
-            across all of them at once, put the results in front of everyone you work with and
-            get every dataset Lumecon builds from here as it lands.
+            Visualize and analyze across every collection at once, share the result with everyone
+            you work with, and get each new Lumecon dataset as it lands, beside harmonized Census,
+            BLS and BEA data on the same entities and geographies.
           </p>
-          {/* The price with the pitch, where deciding happens; it was a
-              footnote at the bottom of the section. */}
-          <p className="cp-gt__pricehead">
-            ${tier.price.toLocaleString("en-US")} a year · unlimited users in one organization
-          </p>
+        </div>
+        <div className="cp-gt__buy">
+          <p className="cp-gt__pricehead">${tier.price.toLocaleString("en-US")} a year</p>
+          <p className="cp-gt__fine">Unlimited users in one organization</p>
+          <a className="cp-band__cta" href={appUrl("/app/grove")} target="_blank" rel="noreferrer">
+            See Cedar Grove <span aria-hidden="true">&#8594;</span>
+          </a>
         </div>
       </div>
-
-      <ul className="cp-gt__caps">
-        {GROVE_CAPABILITIES.map((item) => <li key={item}>{item}</li>)}
-      </ul>
-
-      {/* The public data Grove harmonizes beside the collections, as one
-          line each. Listed rather than badged: infrastructure is part of
-          the case for Grove, not the headline of it. */}
-      <ul className="cp-gt__public" aria-label="Harmonized public data in Cedar Grove">
-        {GROVE_PUBLIC_DATA.map((entry) => (
-          <li key={entry.id}>
-            <span className="cp-gt__publicname">{entry.name}</span>
-            <span className="cp-gt__publicblurb">{entry.blurb}</span>
-          </li>
-        ))}
-      </ul>
-
-      <p className="cp-gt__act">
-        <a className="cp-band__cta" href={appUrl("/app/grove")} target="_blank" rel="noreferrer">
-          Explore Cedar Grove <span aria-hidden="true">&#8594;</span>
-        </a>
-      </p>
     </section>
   );
 }

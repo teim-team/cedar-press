@@ -366,7 +366,7 @@ export default function CedarPressArticle() {
 
         {/* The end of every hosted piece: the data it came from, resolved
             against what this reader can open. */}
-        <section className="cp-ar__data" aria-label="The data behind this article">
+        <section className="cp-ar__data cp-fade" aria-label="The data behind this article">
           <div className="cp-head">
             <span className="cp-sec__band">See the underlying data</span>
             <span className="cp-kind cp-kind--data">Collections you download</span>

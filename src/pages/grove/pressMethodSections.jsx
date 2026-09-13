@@ -1,6 +1,6 @@
 // REVIEW OWNER: Havala
 //
-// The three drawn arguments on the Methods page.
+// The drawn arguments on the Methods page.
 //
 // Each of these is a diagram rather than a list because the claim underneath
 // it is spatial: a process has an order, an ecosystem has a centre, a history
@@ -18,7 +18,18 @@ import {
   PROPER_NOUN,
   say,
 } from "../../features/grove/pressEcosystem.js";
-import { CONSTRUCTION_STEPS, MAINTENANCE_TIMELINE } from "../../features/grove/pressMethod.js";
+import { CONSTRUCTION_STEPS } from "../../features/grove/pressMethod.js";
+import {
+  IDENTIFIERS,
+  LINKAGE_MOVES,
+  LOOP_CLOSE,
+  LOOP_STAGES,
+} from "../../features/grove/pressIdentity.js";
+import { PRESS_CATALOG } from "../../features/grove/pressCatalog.js";
+import { coverageLabel } from "../../features/grove/pressAccess.js";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
+import { releaseFor } from "../../features/grove/pressReleases.js";
+import { COLLECTION_ICONS } from "./pressCollectionIcons.jsx";
 
 // The stages and the timeline are declared in pressMethod.js, where the
 // tests can hold them; this file used to carry its own copies of both, with
@@ -230,22 +241,188 @@ export function EcosystemDiagram() {
   );
 }
 
-/** One entity's life, which is the thing that has to be maintained. The
- *  label says the sequence is an example: these are the kinds of events the
- *  identity layer tracks, not the record of a particular enterprise, and a
- *  reader should not have to guess that. */
-export function EntityTimeline() {
+/**
+ * The two identifiers, side by side.
+ *
+ * A pair rather than a list, because the argument is the relationship between
+ * them: most enterprises carry both, and the interesting case is the firm that
+ * carries only one. The sample id sits in the card at the size a reader would
+ * actually transcribe it, since the thing being claimed is that the identifier
+ * is an object a customer handles.
+ */
+export function IdentityPair() {
   return (
-    <>
-      <p className="cp-tl__cap">Illustrative entity history</p>
-      <ol className="cp-tl">
-        {MAINTENANCE_TIMELINE.map((point) => (
-          <li className="cp-tl__point" key={point.year}>
-            <span className="cp-tl__year">{point.year}</span>
-            <span className="cp-tl__event">{point.event}</span>
+    <div className="cp-idp">
+      {IDENTIFIERS.map((identifier) => (
+        <article className="cp-idp__card" key={identifier.id}>
+          <header className="cp-idp__head">
+            <h3 className="cp-idp__label">{identifier.label}</h3>
+            {identifier.shape ? <code className="cp-idp__shape">{identifier.shape}</code> : null}
+          </header>
+          <p className="cp-idp__names">{identifier.names}</p>
+          <p className="cp-idp__cap">Survives</p>
+          <ul className="cp-idp__survives">
+            {identifier.survives.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <p className="cp-idp__note">{identifier.note}</p>
+          <p className="cp-idp__fields">
+            {identifier.fields.map((field) => (
+              <code key={field}>{field}</code>
+            ))}
+          </p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+/** What carrying the identifiers makes possible. Four moves, stated plainly. */
+export function LinkageMoves() {
+  return (
+    <ol className="cp-lnk">
+      {LINKAGE_MOVES.map((move, index) => (
+        <li className="cp-lnk__move" key={move.id}>
+          <span className="cp-lnk__n">{String(index + 1).padStart(2, "0")}</span>
+          <h3 className="cp-lnk__name">{move.label}</h3>
+          <p className="cp-lnk__body">{move.body}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/**
+ * The loop, drawn as a loop.
+ *
+ * Four stages on a ring rather than four stages in a row, because the claim is
+ * that the last one feeds the first. A row with an arrow bent back at the end
+ * is the infographic version of that and reads as decoration; a cycle with the
+ * stages on it reads as the mechanism. The arc is CSS, so it reflows to a
+ * vertical run on a phone without the geometry breaking.
+ */
+export function FeedbackLoop() {
+  return (
+    <div className="cp-loop">
+      <ol className="cp-loop__ring">
+        {LOOP_STAGES.map((stage, index) => (
+          <li className="cp-loop__stage" key={stage.id}>
+            <span className="cp-loop__n" aria-hidden="true">{index + 1}</span>
+            <div className="cp-loop__text">
+              <h3 className="cp-loop__name">{stage.label}</h3>
+              <p className="cp-loop__body">{stage.body}</p>
+            </div>
           </li>
         ))}
       </ol>
-    </>
+      <p className="cp-loop__close">{LOOP_CLOSE}</p>
+    </div>
+  );
+}
+
+/**
+ * The specifics, collection by collection, organised by the marks.
+ *
+ * This was twelve stacked accordions. Twelve rows of the same shape is a
+ * reference table, and a reader scanning for the one collection they care about
+ * had to read every name to find it. The marks are already the product's
+ * vocabulary on the shelf, the door and the hub, so the same twelve glyphs make
+ * the index and selecting one opens its profile underneath. One panel open at a
+ * time, which is also what makes the section short.
+ *
+ * Everything in the panel is assembled from the declarations the product runs
+ * on: the catalog, the launch descriptors and the release log. A panel cannot
+ * say something the collection does not.
+ */
+export function MethodsByCollection() {
+  const [open, setOpen] = useState(PRESS_CATALOG[0]?.id ?? null);
+  const entry = PRESS_CATALOG.find((item) => item.id === open) ?? null;
+  const launch = entry ? LAUNCH_COLLECTION.find((dataset) => dataset.id === entry.id) : null;
+  const release = entry ? releaseFor(entry.id) : null;
+
+  return (
+    <div className="cp-mbc">
+      <div className="cp-mbc__grid" role="tablist" aria-label="Cedar collections">
+        {PRESS_CATALOG.map((item) => {
+          const selected = item.id === open;
+          return (
+            <button
+              type="button"
+              key={item.id}
+              id={`mbc-tab-${item.id}`}
+              role="tab"
+              aria-selected={selected}
+              aria-controls="mbc-panel"
+              tabIndex={selected ? 0 : -1}
+              className={`cp-mbc__tile${selected ? " is-on" : ""}`}
+              onClick={() => setOpen(item.id)}
+              onKeyDown={(event) => {
+                // Arrow keys walk the index the way a tablist should; without
+                // this the grid is twelve separate tab stops.
+                const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+                if (!step) return;
+                event.preventDefault();
+                const at = PRESS_CATALOG.findIndex((c) => c.id === item.id);
+                const next = PRESS_CATALOG[(at + step + PRESS_CATALOG.length) % PRESS_CATALOG.length];
+                setOpen(next.id);
+                document.getElementById(`mbc-tab-${next.id}`)?.focus();
+              }}
+            >
+              <span className="cp-mbc__ic" aria-hidden="true">{COLLECTION_ICONS[item.id] ?? null}</span>
+              <span className="cp-mbc__tname">{item.name}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {entry ? (
+        <div className="cp-mbc__panel" id="mbc-panel" role="tabpanel" aria-labelledby={`mbc-tab-${entry.id}`}>
+          <header className="cp-mbc__phead">
+            <span className="cp-mbc__pic" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
+            <div>
+              <h3 className="cp-mbc__name">{entry.name}</h3>
+              <p className="cp-mbc__meta">
+                {release ? `${release.version} · ` : ""}
+                {coverageLabel(entry)}
+                {release ? ` · ${release.cadence}` : ""}
+              </p>
+            </div>
+          </header>
+          <p className="cp-mbc__blurb">{entry.blurb}</p>
+          <div className="cp-mbc__facts">
+            <div>
+              <span className="cp-mbc__cap">Entity resolution</span>
+              <p>{entry.linkage}</p>
+            </div>
+            {launch ? (
+              <div>
+                <span className="cp-mbc__cap">Method</span>
+                <p>{launch.method}</p>
+              </div>
+            ) : null}
+            {launch ? (
+              <div>
+                <span className="cp-mbc__cap">Sources</span>
+                <p>{launch.sources}</p>
+              </div>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            className="cp-read__cedar"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("cedar:ask-collection", {
+                  detail: { id: entry.id, name: entry.name },
+                }),
+              )
+            }
+          >
+            Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+      ) : null}
+    </div>
   );
 }
