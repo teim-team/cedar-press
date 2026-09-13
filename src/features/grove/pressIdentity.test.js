@@ -11,6 +11,8 @@ import {
   IDENTIFIERS,
   KEPT_OUTSIDE,
   LINKAGE_COVERAGE,
+  UNLINKED_REASONS,
+  requireStatus as requireStatusForTest,
   LINKAGE_MOVES,
   LOOP_CLOSE,
   LOOP_STAGES,
@@ -201,6 +203,73 @@ test("the business card states the exception rather than overclaiming", () => {
     assert.ok(!/\bgain an equivalence row to their business id\b/.test(business.exception));
     assert.ok(!/\bcarries a business id only\b/.test(business.exception), "present tense about an unminted register");
   }
+});
+
+test("every rendered link status is the workspace's own definition", () => {
+  // Codex, PR #79: the smoke test checked the card COUNT and two phrases that
+  // only the intentional statuses contribute, and the module read each body
+  // with `?? ""`. Renaming or dropping `unresolved` in scopes.json would have
+  // rendered an empty card with every assertion green.
+  const scopes = read("../../../data/cedar/scopes.json");
+  const defined = scopes.link_statuses ?? {};
+  for (const reason of UNLINKED_REASONS) {
+    assert.equal(
+      reason.body,
+      defined[reason.id],
+      `${reason.id} is not rendering the definition scopes.json holds for it`,
+    );
+    assert.ok(reason.body.trim().length > 20, `${reason.id} renders an empty or stub definition`);
+    assert.ok(reason.label.trim(), `${reason.id} has no label`);
+  }
+  // Every state except `resolved` is shown. A new one must be triaged as
+  // intentional or not, rather than quietly left off the page.
+  assert.deepEqual(
+    UNLINKED_REASONS.map((reason) => reason.id).sort(),
+    Object.keys(defined).filter((id) => id !== "resolved").sort(),
+  );
+  assert.deepEqual(
+    UNLINKED_REASONS.filter((reason) => reason.intentional).map((reason) => reason.id),
+    ["no_individual_named", "withheld"],
+  );
+});
+
+test("a missing definition is visible rather than blank", () => {
+  // The fixture Codex asked for: prove the fallback is a message, not "".
+  const missing = requireStatusForTest("this_status_does_not_exist");
+  assert.match(missing, /Definition missing/);
+  assert.match(missing, /this_status_does_not_exist/);
+  assert.ok(missing.length > 20);
+});
+
+test("the unlinked split is derived from the generated table, not asserted", () => {
+  // Codex, PR #79: the page said the spread was "mostly deliberate", which
+  // counted two of three STATUS LABELS and let that stand for the rows. By row
+  // it is the other way round, and this recomputes it from the file.
+  const doc = readFileSync(new URL("../../../docs/LINKAGE_COVERAGE.md", import.meta.url), "utf8");
+  const rows = [...doc.matchAll(/^\| `([a-z-]+)` \| `[^`]+` \| ([\d,]+) \| ([\d,]+) \| [\d.]+% \| ([\d,]+) \| (.+?) \|$/gm)];
+  assert.ok(rows.length >= 10, `expected the per-dataset table, found ${rows.length} rows`);
+  const num = (text) => Number(text.replace(/,/g, ""));
+  let unlinked = 0;
+  let structural = 0;
+  for (const [, , total, , unl, canCol] of rows) {
+    unlinked += num(unl);
+    // The last column names how many rows can carry an entity at all; the
+    // rest of the denominator structurally cannot.
+    const can = canCol.match(/of ([\d,]+)/);
+    if (can) structural += num(total) - num(can[1]);
+  }
+  assert.equal(LINKAGE_COVERAGE.unlinked, unlinked);
+  assert.equal(LINKAGE_COVERAGE.structural, structural);
+  assert.equal(LINKAGE_COVERAGE.unresolved, unlinked - structural);
+  // The claim the page must not make again: most unlinked rows are NOT
+  // intentional. If that ever reverses, this fails and the copy gets rewritten.
+  assert.ok(
+    LINKAGE_COVERAGE.unresolved > LINKAGE_COVERAGE.structural,
+    "most unlinked rows are now structural; the note says the opposite",
+  );
+  assert.ok(!/mostly deliberate|mostly intentional/i.test(LINKAGE_COVERAGE.note));
+  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyStructural.share));
+  assert.ok(LINKAGE_COVERAGE.note.includes(LINKAGE_COVERAGE.mostlyUnresolved.share));
 });
 
 test("the prose keeps the brand lock", () => {

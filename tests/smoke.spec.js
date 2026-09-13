@@ -539,6 +539,15 @@ test.describe("the question mark", () => {
     // it: a mouse click is deliberately inert, because hover governs a mouse.
     if (testInfo.project.name === "desktop") await btn.hover(); else await btn.tap();
     await expect(panel).toContainText("Awardees are matched to a Native entity");
+    // Codex, PR #79: `coverage` is an object and the row was filtered out as a
+    // non-string, so the advertised Coverage line silently never rendered for
+    // any of the twelve. Silently is the problem; assert the caps.
+    expect(await panel.locator(".cp-ex1__cap").allTextContents()).toEqual([
+      "How it is built",
+      "What it reads",
+      "How a record reaches its entity",
+      "Coverage",
+    ]);
     const box = await panel.boundingBox();
     const width = page.viewportSize().width;
     expect(box.x).toBeGreaterThanOrEqual(-1);
@@ -575,21 +584,32 @@ test.describe("the door's twelve", () => {
 });
 
 test.describe("the collection strip", () => {
-  test("the overview names all twelve and says what one holds", async ({ page }) => {
+  test("the overview names all twelve and says what one holds", async ({ page }, testInfo) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/");
     const tiles = page.locator(".cp-cstrip__tile");
     await expect(tiles).toHaveCount(12);
     const note = page.locator(".cp-cstrip__note");
-    await expect(note).toContainText(/collection for what it holds/i);
-    // Point at one and the line under the grid answers, the same way the
-    // section tiles and the shelves do.
-    await tiles.nth(3).hover();
-    await expect(note).not.toContainText(/collection for what it holds/i);
-    // And it is a link into Explore already narrowed to that collection.
+    // Every tile is a link into Explore already narrowed to that collection.
     const href = await tiles.nth(3).getAttribute("href");
     expect(href).toMatch(/^\/data\?c=[a-z-]+$/);
+
+    if (testInfo.project.name === "desktop") {
+      // Point at one and the line under the grid answers, the same way the
+      // section tiles and the shelves do.
+      await expect(note).toContainText(/collection for what it holds/i);
+      await tiles.nth(3).hover();
+      await expect(note).not.toContainText(/collection for what it holds/i);
+    } else {
+      // Codex, PR #79: a coarse pointer has no hover and the tile is a link,
+      // so a tap opens the collection rather than describing it. The idle
+      // copy has to say what the tap does; promising a description the tap
+      // never produces was the defect.
+      await expect(note).toContainText(/Tap a collection to open it/i);
+      await tiles.nth(3).tap();
+      await page.waitForURL(/\/data\?c=/);
+    }
     expect(errors).toEqual([]);
   });
 });
@@ -892,6 +912,14 @@ test.describe("Methods", () => {
     await expect(page.locator(".cp-ur__item.is-by-design")).toHaveCount(2);
     await expect(page.locator(".cp-ur")).toContainText("Never a failed match");
     await expect(page.locator(".cp-ur")).toContainText("not by failure");
+    // Codex, PR #79: the two phrases above come only from the intentional
+    // statuses, so an empty "Still to do" card passed. Every card must carry
+    // a real definition, and none may be the missing-definition fallback.
+    for (const body of await page.locator(".cp-ur__body").allInnerTexts()) {
+      expect(body.trim().length).toBeGreaterThan(20);
+      expect(body).not.toContain("Definition missing");
+    }
+    await expect(page.locator(".cp-ur__item:not(.is-by-design)")).toContainText("could not place");
     // The loop says where the methods come from. It must not say the Federal
     // Reserve uses or endorses them: the workspace evidences affiliation and
     // nothing more, and that is the one claim here a reader could disprove.
