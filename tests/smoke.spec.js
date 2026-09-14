@@ -444,14 +444,17 @@ test.describe("Explore the collections", () => {
       await page.getByRole("button", { name: /Show all \d+ columns/ }).click();
       await expect(page.getByTestId("explore-caption")).toContainText(/(\d+) of \1 columns/);
     }
-    // The record opens with a hierarchy: the main fields, then source and
-    // attribution, then the technical fields folded away, and a source URL
-    // that is a link.
-    await records.first().locator("button").first().click();
-    const record = page.locator(".cp-ex__inner").first();
-    await expect(record).toBeVisible();
-    await expect(record.locator("details.cp-ex__group").last()).toContainText("Technical fields");
-    await expect(record.locator("dd a[href^='http']").first()).toBeVisible();
+    // A row opens the record's own page, which carries the cut it came from.
+    // Covered end to end in "the record page" below; here the only claim is
+    // that the table's control leads there and comes back.
+    await page.goto("/data?c=lobbying");
+    await expect(records.first()).toBeVisible();
+    await records.first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    await expect(page.getByTestId("record-head")).toBeVisible();
+    await page.getByRole("link", { name: "Back to results" }).first().click();
+    await page.waitForURL(/\/data\?/);
+    await expect(page.getByTestId("explore-collection")).toHaveValue("lobbying");
 
     // An out-of-coverage year range is shown AS REQUESTED, said in words,
     // and the empty result says what it does not establish.
@@ -679,33 +682,76 @@ test.describe("the door's twelve", () => {
   });
 });
 
-test.describe("the collection strip", () => {
-  test("the overview names all twelve and says what one holds", async ({ page }, testInfo) => {
+test.describe("the record page", () => {
+  // The review that produced this page, 2026-09-14: the expanded row was a
+  // record page squeezed into a table, with no address and no way back to the
+  // result it was opened from. These are the four claims that replaced it.
+  test("a row opens a linkable record, walks its neighbours and returns to the exact result", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/");
-    const tiles = page.locator(".cp-cstrip__tile");
-    await expect(tiles).toHaveCount(12);
-    const note = page.locator(".cp-cstrip__note");
-    // Every tile is a link into Explore already narrowed to that collection.
-    const href = await tiles.nth(3).getAttribute("href");
-    expect(href).toMatch(/^\/data\?c=[a-z-]+$/);
+    await page.goto("/data?c=funding");
+    const records = page.getByTestId("explore-record");
+    await expect(records.first()).toBeVisible();
+    const openedId = await records.first().getAttribute("data-record-id");
 
-    if (testInfo.project.name === "desktop") {
-      // Point at one and the line under the grid answers, the same way the
-      // section tiles and the shelves do.
-      await expect(note).toContainText(/collection for what it holds/i);
-      await tiles.nth(3).hover();
-      await expect(note).not.toContainText(/collection for what it holds/i);
-    } else {
-      // Codex, PR #79: a coarse pointer has no hover and the tile is a link,
-      // so a tap opens the collection rather than describing it. The idle
-      // copy has to say what the tap does; promising a description the tap
-      // never produces was the defect.
-      await expect(note).toContainText(/Tap a collection to open it/i);
-      await tiles.nth(3).tap();
-      await page.waitForURL(/\/data\?c=/);
-    }
+    await records.first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    // The address carries the table, the record and the cut it came from, so
+    // the page can be sent to someone and still know where "back" is.
+    const url = new URL(page.url());
+    expect(url.searchParams.get("k")).toBe("funding/federal_funding_transactions");
+    expect(url.searchParams.get("r")).toBe(openedId);
+    expect(url.searchParams.get("from")).toContain("c=funding");
+
+    // The first screen answers the row: the entity, what it funded, the money.
+    const head = page.getByTestId("record-head");
+    await expect(head.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByTestId("record-summary")).toBeVisible();
+
+    // Definitions are a control, not a paragraph under every value.
+    const definitions = page.getByTestId("record-definitions");
+    await expect(page.locator(".cp-rec__mean")).toHaveCount(0);
+    await definitions.click();
+    await expect(page.locator(".cp-rec__mean").first()).toBeVisible();
+
+    // The rest of the record is folded until it is asked for.
+    await expect(page.locator(".cp-rec__tech")).toHaveCount(0);
+    await page.getByTestId("record-more").click();
+    await expect(page.locator(".cp-rec__tech")).toBeVisible();
+
+    // Next walks the reader's own ordering and stays on a record page.
+    await page.getByRole("link", { name: /^Next/ }).first().click();
+    await page.waitForURL(/\/record\?/);
+    await expect(page.getByTestId("record-head")).toBeVisible();
+    const second = new URL(page.url()).searchParams.get("r");
+    expect(second).not.toBe(openedId);
+
+    // And back is back: the same cut, reproduced.
+    await page.getByRole("link", { name: "Back to results" }).first().click();
+    await page.waitForURL(/\/data\?/);
+    await expect(page.getByTestId("explore-collection")).toHaveValue("funding");
+    expect(errors).toEqual([]);
+  });
+
+  test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/record?k=funding/federal_funding_transactions&r=not-a-real-record");
+    await expect(page.getByTestId("record-empty")).toContainText("not in this preview");
+  });
+
+  test("the entity name opens a profile that gathers the entity's records", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    const name = page.locator(".cp-rec__name a").first();
+    await expect(name).toBeVisible();
+    await name.click();
+    await page.waitForURL(/\/entity\/CE-/);
+    await expect(page.getByTestId("entity-head").getByRole("heading", { level: 1 })).toBeVisible();
+    // Counts on this page are counts of preview records, and it says so.
+    await expect(page.getByTestId("entity-head")).toContainText("published previews");
     expect(errors).toEqual([]);
   });
 });
@@ -1061,21 +1107,6 @@ test.describe("the reveal", () => {
     expect(hidden).toEqual([]);
     const revealed = await page.evaluate(() => document.querySelectorAll(".cp-fade.is-in").length);
     expect(revealed).toBeGreaterThan(0);
-  });
-});
-
-test.describe("the overview", () => {
-  test("search runs against the collections and lands on a real cut", async ({ page }) => {
-    const errors = watchConsole(page);
-    await signIn(page);
-    await page.goto("/");
-    await page.fill("#cp-search-q", "Cherokee Nation");
-    await page.locator(".cp-search__go").click();
-    await page.waitForURL(/\/data\?q=/);
-    // The same q= the Explore box writes, so the two are one search.
-    await expect(page.getByTestId("explore-scope").or(page.locator(".cp-ex__caption")).first())
-      .toContainText(/Cherokee Nation/i);
-    expect(errors).toEqual([]);
   });
 });
 

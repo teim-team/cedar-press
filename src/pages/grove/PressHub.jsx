@@ -10,11 +10,11 @@
 // sticky selection — so a reader gets more than the label before
 // committing a tap, without a second control on every tile.
 import { useState } from "react";
-import { contactHref } from "../../features/grove/appLink.js";
 import { COARSE } from "../../features/grove/pointer.js";
 import { Link } from "react-router";
 
 import { PRESS_ARTICLES, TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { SEED_PRIORITIES } from "../../features/grove/pressPriorities.js";
 import { canOpenDataset, coverageFrom } from "../../features/grove/pressAccess";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
@@ -23,18 +23,17 @@ import {
   PRESS_ARTICLES_PATH,
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
+  PRESS_PRIORITIES_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
 import {
   ArticlesIcon,
   DataIcon,
-  FeedbackIcon,
   MethodsIcon,
+  PrioritiesIcon,
   WantMoreIcon,
   WhatsNewIcon,
 } from "./pressHubIcons";
-
-const CONTACT_HREF = contactHref("Cedar Press");
 
 /** The collections THIS reader's plan opens: a Cedar Press subscriber has
  *  the standard shelf, not the whole catalog, and a tile that counts the
@@ -57,14 +56,6 @@ function sections(user) {
   const newest = recentlyUpdated(1)[0];
   return [
     {
-      id: "articles",
-      label: "Research Briefs",
-      to: PRESS_ARTICLES_PATH,
-      icon: ArticlesIcon,
-      meta: `${PRESS_ARTICLES.length} briefs`,
-      what: "Original research built from the collections, written for people who work in Indian Country's economy.",
-    },
-    {
       id: "data",
       label: "Collections",
       to: PRESS_DATA_PATH,
@@ -77,6 +68,26 @@ function sections(user) {
       what: `Coverage, method and the release for every collection${
         earliest.length ? `, reaching back as far as ${Math.min(...earliest)},` : ","
       } downloadable with your subscription.`,
+    },
+    {
+      id: "articles",
+      label: "Research Briefs",
+      to: PRESS_ARTICLES_PATH,
+      icon: ArticlesIcon,
+      meta: `${PRESS_ARTICLES.length} briefs`,
+      what: "Original research built from the collections, written for people who work in Indian Country's economy.",
+    },
+    {
+      // Shape the Research, third: a subscriber's standing question after
+      // "what is here" and "what have you written" is "what are you building
+      // next, and can I move it". Contact used to sit in this row; it is a
+      // mail link, which is a footer errand rather than one of six doors.
+      id: "priorities",
+      label: "Priorities",
+      to: PRESS_PRIORITIES_PATH,
+      icon: PrioritiesIcon,
+      meta: `${SEED_PRIORITIES.length} open`,
+      what: "The research questions and datasets subscribers are asking for next, and the place to put your own on the list.",
     },
     {
       id: "whats-new",
@@ -106,14 +117,6 @@ function sections(user) {
       what: hasPro
         ? "Your membership, managed through Tribal Business News. Cedar Grove is a separate product that carries these same collections, and more, in an environment built for analysis."
         : "What your subscription includes and what Cedar Press+ adds, managed and upgraded through Tribal Business News.",
-    },
-    {
-      id: "contact",
-      label: "Contact",
-      href: CONTACT_HREF,
-      icon: FeedbackIcon,
-      meta: "The research desk",
-      what: "Corrections, data requests and what the collections should cover next, read by the team that builds them.",
     },
   ];
 }

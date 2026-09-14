@@ -18,8 +18,7 @@
 //
 // Built from the design system's own tokens (index.css base, redesign.css
 // retheme, then press.css, imported once in main.jsx in that order).
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
@@ -41,65 +40,8 @@ import {
   pressArticlePath,
 } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
-import PressCollectionStrip from "./PressCollectionStrip";
 import PressHub from "./PressHub";
 import PressPrioritiesBlock from "./PressPrioritiesBlock";
-
-/**
- * Search, on the front page.
- *
- * It navigates to Explore with `q=`, which is the same parameter Explore's
- * own search box writes, so the result is a real cut with a shareable link
- * rather than a second search that behaves differently. The examples are
- * three concrete things a subscriber actually looks for and are searches,
- * not links: clicking one runs it.
- */
-function SearchStart() {
-  const navigate = useNavigate();
-  const [q, setQ] = useState("");
-  const run = (text) => {
-    const term = String(text ?? "").trim();
-    if (!term) return;
-    navigate(`${PRESS_DATA_PATH}?q=${encodeURIComponent(term)}`);
-  };
-  return (
-    <section className="cp-search cp-fade" aria-label="Search the collections">
-      <form
-        className="cp-search__form"
-        onSubmit={(event) => { event.preventDefault(); run(q); }}
-        role="search"
-      >
-        <label className="cp-badge__sr" htmlFor="cp-search-q">Search every collection you can open</label>
-        <input
-          id="cp-search-q"
-          type="search"
-          className="cp-search__q"
-          value={q}
-          onChange={(event) => setQ(event.target.value)}
-          placeholder="Search a nation, an enterprise, an agency, a program"
-        />
-        <button type="submit" className="cp-search__go" disabled={!q.trim()}>
-          Search <span aria-hidden="true">&#8594;</span>
-        </button>
-      </form>
-      {/* Codex, PR #77: this searches the ten-row release previews Explore
-          reads, not the full tables, so an entity that exists in a
-          million-row collection can return nothing because it was not in the
-          sample. A search box implies more reach than a browse table does, so
-          it says what it covers on its face rather than leaving the reader to
-          infer it from the badge further down the page. */}
-      <p className="cp-search__scope">Searches the ten-record preview of every collection your plan opens.</p>
-      <p className="cp-search__eg">
-        <span>For example</span>
-        {["Cherokee Nation", "housing block grant", "Alaska Native corporation"].map((example) => (
-          <button type="button" key={example} className="cp-search__chip" onClick={() => { setQ(example); run(example); }}>
-            {example}
-          </button>
-        ))}
-      </p>
-    </section>
-  );
-}
 
 export default function CedarPress() {
   // The door is the one page every visitor and every crawler reaches.
@@ -155,14 +97,6 @@ export default function CedarPress() {
               and entity resolution and stays current as new information becomes available.
             </p>
           </section>
-          {/* A signed-in reader's first screen was a headline, four links and
-              six tiles: an index of a product they had already bought. This
-              is the one thing on the page that produces records rather than
-              pointing at where they are, so it leads. It runs against every
-              collection the reader's plan opens, which is what the Explore
-              page does with the same q= parameter, so a search here and a
-              search there are the same search. */}
-          <SearchStart />
           <nav className="cp-start cp-fade" aria-label="Start here">
             <button
               type="button"
@@ -184,11 +118,6 @@ export default function CedarPress() {
             </Link>
           </nav>
           <PressHub user={entitled ? user : null} />
-          {/* The six tiles say "12 COLLECTIONS" and then make the reader open
-              a page to learn which twelve. These are the twelve, each a link
-              into Explore already narrowed to it, in the same point-to-read
-              language the tiles above and the shelves already use. */}
-          <PressCollectionStrip user={entitled ? user : null} />
           <PressPrioritiesBlock signedIn={entitled} />
         </div>
 

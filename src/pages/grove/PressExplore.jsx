@@ -37,7 +37,7 @@
 // function of static files and the reader's own entitlement.
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 import {
   CUT_VERSION,
@@ -48,7 +48,6 @@ import {
   broadHits,
   buildRegister,
   codebookColumns,
-  codebookFor,
   contractFor,
   cutCsv,
   cutReadme,
@@ -63,14 +62,13 @@ import {
   labelFor,
   meaningFor,
   pageOf,
-  parseCsv,
   questionFor,
   scopeName,
   sortRows,
-  universalRows,
 } from "../../features/grove/explore.js";
-import { LAUNCH_COLLECTION, collectionCitation } from "../../features/grove/collection.js";
-import { releaseFor } from "../../features/grove/pressReleases.js";
+import { useSampleRows } from "../../features/grove/useSamples.js";
+import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 import { coverageLabel } from "../../features/grove/pressAccess.js";
@@ -112,50 +110,6 @@ function useRegister() {
   const retry = () => setState((s) => ({ ...s, status: "loading", attempt: s.attempt + 1 }));
   return { ...state, retry };
 }
-
-/**
- * The samples for a set of tables. `loaded` maps a path to its parsed rows
- * or to null for one that could not be read; `pending` holds the promise
- * for a fetch in flight so a second effect run (React's strict-mode
- * rehearsal, or a fast change of selection) never starts it twice. A
- * result is kept whether or not the table is still wanted.
- */
-function useSampleRows(tables, register) {
-  const [loaded, setLoaded] = useState(() => new Map());
-  const pending = useRef(new Map());
-  const wanted = tables.map((t) => t.path).join("|");
-  useEffect(() => {
-    for (const t of tables) {
-      if (loaded.has(t.path) || pending.current.has(t.path)) continue;
-      const promise = fetch(t.path)
-        .then(async (r) => (r.ok ? parseCsv(await r.text()) : null))
-        .catch(() => null)
-        .then((parsed) => {
-          pending.current.delete(t.path);
-          setLoaded((prev) => (prev.has(t.path) ? prev : new Map(prev).set(t.path, parsed)));
-        });
-      pending.current.set(t.path, promise);
-    }
-    // `wanted` is the list of paths; `tables` is rebuilt each render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wanted, loaded]);
-  return useMemo(() => {
-    const rows = [];
-    const missing = [];
-    const columns = new Map();
-    let loading = false;
-    for (const t of tables) {
-      if (!loaded.has(t.path)) { loading = true; continue; }
-      const parsed = loaded.get(t.path);
-      if (!parsed) { missing.push(t.key); continue; }
-      columns.set(t.key, parsed.columns);
-      rows.push(...universalRows(t.key, parsed.rows, register));
-    }
-    return { rows, missing, columns, loading };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wanted, loaded, register]);
-}
-
 
 // ── Saved views, on this device ────────────────────────────────────────────
 
@@ -513,20 +467,6 @@ function CollectionSelect({ value, subset, collections, scope, onChange, onActiv
 // ── The record ─────────────────────────────────────────────────────────────
 
 /**
- * A record in two parts: the columns the codebook lists, in its order and
- * with its plain-English labels and meanings, and everything else folded
- * under Technical fields. Complete, but a subscriber meets the record in
- * their own words first. A table the codebook does not know yet shows its
- * columns as they are.
- */
-function groupColumns(columns, key) {
-  const listed = codebookColumns(key, columns);
-  const main = listed.length ? listed : columns;
-  const known = new Set(main);
-  return { main, technical: columns.filter((c) => !known.has(c)) };
-}
-
-/**
  * The technicalities behind a collection, in a question mark.
  *
  * Everything here is the launch descriptor's own prose: `method`, `sources`
@@ -595,143 +535,6 @@ function Human({ column, value, contract, item = null }) {
   return text;
 }
 
-function Fields({ columns, item, contract, plain }) {
-  return (
-    <dl className="cp-ex__record">
-      {columns.map((column) => {
-        const meaning = plain ? meaningFor(item.key, column) : null;
-        return (
-          <div key={column} className={item.row[column] === "" ? "is-blank" : ""}>
-            <dt title={meaning ?? undefined}>{plain ? labelFor(item.key, column) : column}</dt>
-            <dd><Human column={column} value={item.row[column]} contract={contract} item={item} /></dd>
-            {meaning ? <dd className="cp-ex__meaning">{meaning}</dd> : null}
-          </div>
-        );
-      })}
-    </dl>
-  );
-}
-
-/**
- * An entity's roles on a record, in words. An entity from the table's own
- * entity column carries the contract's role (NAGPRA's "culturally affiliated,
- * as the notice determines"); one that arrived through a further role column
- * carries only the role that column declares. A notice that names consulted
- * parties and no affiliated one therefore never labels them affiliated
- * (Codex, PR #66).
- */
-function roleOf(entity, contract) {
-  const own = entity.role ? [entity.role] : contract?.entity_role ? [contract.entity_role] : [];
-  const roles = [...own, ...(entity.roles ?? [])];
-  return roles.length ? roles.join(", ") : "";
-}
-
-function Record({ item, columns }) {
-  const contract = contractFor(item.key);
-  const codebook = codebookFor(item.key);
-  const groups = groupColumns(columns, item.key);
-  return (
-    <div className="cp-ex__inner">
-      {codebook ? <p className="cp-ex__fine"><b>One row is</b> {codebook.row}</p> : null}
-      {item.superseded ? (
-        <p className="cp-ex__superseded">
-          <b>Superseded.</b> A later version replaces this record
-          {item.replacement?.url ? <>: <a href={item.replacement.url} target="_blank" rel="noreferrer">{item.replacement.id}</a></> : item.replacement?.id ? <>: {item.replacement.id}</> : null}.
-        </p>
-      ) : null}
-      {item.entity.entities.length > 1 ? (
-        <p className="cp-ex__fine">Entities named: {item.entity.entities.map((e) => `${e.name ?? (e.withheld ? WITHHELD_TEXT : e.uid)}${roleOf(e, contract) ? ` (${roleOf(e, contract)})` : ""}`).join("; ")}</p>
-      ) : contract?.entity_role && item.entity.uid ? (
-        <p className="cp-ex__fine">Entity: {item.entity.name ?? WITHHELD_TEXT} ({item.entity.uid}) · {contract.entity_role}</p>
-      ) : null}
-      <Fields columns={groups.main} item={item} contract={contract} plain />
-      {groups.technical.length ? (
-        <details className="cp-ex__group">
-          <summary>Technical fields ({groups.technical.length}), as the file carries them</summary>
-          <Fields columns={groups.technical} item={item} contract={contract} plain={false} />
-        </details>
-      ) : null}
-      <RecordProvenance item={item} contract={contract} />
-    </div>
-  );
-}
-
-/**
- * The foot of an open record: where it came from and how to cite it.
- *
- * The review's point was that the expanded row is the thing worth paying for,
- * and it was ending on a grey line of ids. A researcher opening a record wants
- * four things and had to leave the page for three of them: the document behind
- * the row, how the row reached the entity it is filed under, which release it
- * belongs to, and a citation they can paste. All four are here now, and none
- * of them is generated: the citation is `collectionCitation`, the same function
- * the download embeds, and the resolution sentence is the collection's own
- * `linkage` declaration.
- */
-function RecordProvenance({ item, contract }) {
-  const [copied, setCopied] = useState(false);
-  const entry = PRESS_CATALOG_BY_ID[item.collection] ?? null;
-  const release = releaseFor(item.collection);
-  const citation = collectionCitation(item.collection, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
-  // Codex, PR #77: the Clipboard API is absent on a non-secure origin and
-  // rejected outright under some permission policies, and this handler did
-  // nothing in both cases, so the button gave the reader neither a citation
-  // nor an error. `copyLink` in this same file already had the right answer;
-  // this is the same answer.
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(citation);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      window.prompt("Copy this citation", citation);
-    }
-  };
-  return (
-    <div className="cp-ex__prov">
-      <div className="cp-ex__provgrid">
-        <div>
-          <span className="cp-ex__provcap">The document</span>
-          {item.source ? (
-            <a href={item.source} target="_blank" rel="noreferrer">Open the source record <span aria-hidden="true">&#8599;</span></a>
-          ) : (
-            <span className="cp-ex__fine">This row's table carries no per-record link. The collection's sources are on its methods entry.</span>
-          )}
-        </div>
-        <div>
-          <span className="cp-ex__provcap">How it reached the entity</span>
-          {/* The role is appended only when the linkage sentence does not
-              already say it; on Federal Funding the two were the same clause
-              twice in a row. */}
-          <span className="cp-ex__fine">
-            {entry?.linkage ?? "Resolved to the Cedar entity register."}
-            {contract?.entity_role && !(entry?.linkage ?? "").toLowerCase().includes(contract.entity_role.toLowerCase())
-              ? ` The entity on this row is ${contract.entity_role}.`
-              : ""}
-          </span>
-        </div>
-        <div>
-          <span className="cp-ex__provcap">Where it sits</span>
-          <span className="cp-ex__fine">
-            {short(item.collection)} · {item.key.split("/")[1]} · record {item.recordId ?? "(no id)"}
-            {release ? ` · release ${release.version}, ${release.cadence.toLowerCase()}` : ""}
-            {" · preview row"}
-          </span>
-        </div>
-      </div>
-      {citation ? (
-        <div className="cp-ex__cite">
-          <span className="cp-ex__provcap">Cite it</span>
-          <code>{citation}</code>
-          <button type="button" className="cp-ex__act cp-ex__citebtn" onClick={copy}>
-            {copied ? "Copied" : "Copy citation"}
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 /** A scope element in words: the population and the relationship. */
 function scopeLine(el) {
   const rel = { addressed: "addressed to", applies_to: "applies to", eligible_class: "eligible class:", aggregate_population: "describes collectively", general_subject: "concerns" }[el.relationship] ?? el.relationship;
@@ -783,8 +586,7 @@ function SortHead({ column, label, sort, onSort, pinned, className }) {
   );
 }
 
-function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAmount, entityColumn, contract }) {
-  const [openId, setOpenId] = useState(null);
+function Rows({ view, items, columns, sort, onSort, onActive, showAmount, entityColumn, contract, openRecord }) {
   // The scroll container's own width, as a CSS variable, so an expanded
   // record can pin itself to the visible part of a table wider than it.
   // And the pinned columns' own widths, so the name pins exactly where the
@@ -834,7 +636,6 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   ];
   const pinned = (c) => c === entityColumn || c === contract?.entity_uid;
   const heads = view === "table" ? columns.map((c) => [c, labelFor(items[0]?.key, c), pinned(c), c === contract?.entity_uid ? " cp-ex__pin--uid" : c === entityColumn && contract?.entity_uid && columns.includes(contract.entity_uid) ? " cp-ex__pin--name" : ""]) : universal;
-  const span = heads.length + 1;
   return (
     // The wrapper exists for the edge fade: every cell paints its own
     // background, so a gradient on the scroller itself is painted over by
@@ -856,14 +657,29 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
         </thead>
         <tbody>
           {items.map((item) => {
-            const isOpen = openId === item.id;
             return [
-              <tr key={item.id} data-testid="explore-record" data-record-id={item.recordId ?? ""} className={`${isOpen ? "is-open" : ""}${item.superseded ? " is-superseded" : ""}`}>
+              /* THE ROW IS A DOOR, NOT A DRAWER.
+                 A click anywhere that is not itself a control opens the
+                 record's own page; the first cell carries the explicit link a
+                 keyboard and a screen reader use, and the row handler stands
+                 down for a click that landed on a link, a button, or a
+                 selection the reader is making with the mouse. */
+              <tr
+                key={item.id}
+                data-testid="explore-record"
+                data-record-id={item.recordId ?? ""}
+                className={`cp-ex__row${item.superseded ? " is-superseded" : ""}`}
+                onClick={(event) => {
+                  if (event.target.closest("a, button, input, label, summary")) return;
+                  if (window.getSelection?.().toString()) return;
+                  openRecord(item);
+                }}
+              >
                 <td className="cp-ex__more">
-                  <button type="button" className="cp-ex__morebtn" aria-expanded={isOpen} onClick={() => setOpenId(isOpen ? null : item.id)}>
-                    <span aria-hidden="true">{isOpen ? "−" : "+"}</span>
-                    <span className="cp-badge__sr">{isOpen ? "Close" : "Open"} the full record</span>
-                  </button>
+                  <Link className="cp-ex__morebtn" to={openRecord.href(item)} onClick={() => openRecord.remember()}>
+                    <span aria-hidden="true">&#8594;</span>
+                    <span className="cp-badge__sr">Open the full record</span>
+                  </Link>
                 </td>
                 {view === "table"
                   ? columns.map((column) => (
@@ -897,11 +713,6 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
                     </>
                   )}
               </tr>,
-              isOpen ? (
-                <tr key={`${item.id}-x`} className="cp-ex__expanded">
-                  <td colSpan={span}><Record item={item} columns={allColumns.length ? allColumns : Object.keys(item.row)} /></td>
-                </tr>
-              ) : null,
             ];
           })}
         </tbody>
@@ -911,27 +722,27 @@ function Rows({ view, items, columns, allColumns, sort, onSort, onActive, showAm
   );
 }
 
-/** The same records as compact rows for a phone: who, where, when, what; tap for the record. */
-function Cards({ items, allColumns, onActive }) {
-  const [openId, setOpenId] = useState(null);
+/** The same records as compact rows for a phone: who, where, when, what; tap opens the record. */
+function Cards({ items, onActive, openRecord }) {
   return (
     <ul className="cp-ex__cards">
-      {items.map((item) => {
-        const isOpen = openId === item.id;
-        return (
-          <li key={item.id} data-testid="explore-record" data-record-id={item.recordId ?? ""} className={`${isOpen ? "is-open" : ""}${item.superseded ? " is-superseded" : ""}`}>
-            <button type="button" className="cp-ex__cardbtn" aria-expanded={isOpen} onClick={() => { setOpenId(isOpen ? null : item.id); onActive(item.collection); }}>
-              <span className="cp-ex__cardwho">
-                {item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
-                <EntityCell item={item} />
-              </span>
-              <span className="cp-ex__cardmeta">{short(item.collection)} · {item.date ?? "undated"}{item.amount != null ? ` · ${money.format(item.amount)}` : ""}</span>
-              <span className="cp-ex__cardobs cp-ex__clamp">{item.observation || "—"}</span>
-            </button>
-            {isOpen ? <Record item={item} columns={allColumns.length ? allColumns : Object.keys(item.row)} /> : null}
-          </li>
-        );
-      })}
+      {items.map((item) => (
+        <li key={item.id} data-testid="explore-record" data-record-id={item.recordId ?? ""} className={item.superseded ? "is-superseded" : ""}>
+          <Link
+            className="cp-ex__cardbtn"
+            to={openRecord.href(item)}
+            onClick={() => { openRecord.remember(); onActive(item.collection); }}
+          >
+            <span className="cp-ex__cardwho">
+              {item.superseded ? <span className="cp-ex__badge">Superseded</span> : null}
+              <EntityCell item={item} />
+            </span>
+            <span className="cp-ex__cardmeta">{short(item.collection)} · {item.date ?? "undated"}{item.amount != null ? ` · ${money.format(item.amount)}` : ""}</span>
+            <span className="cp-ex__cardobs cp-ex__clamp">{item.observation || "—"}</span>
+            <span className="cp-ex__cardgo" aria-hidden="true">&#8594;</span>
+          </Link>
+        </li>
+      ))}
     </ul>
   );
 }
@@ -940,6 +751,7 @@ function Cards({ items, allColumns, onActive }) {
 
 export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
   const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
   const cut = useMemo(() => decodeCut(params.toString()), [params]);
   const { register, status: registerStatus, retry: retryRegister } = useRegister();
   const collections = useMemo(() => explorableCollections(user), [user]);
@@ -1014,6 +826,28 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
     return () => { observer.disconnect(); document.body.removeAttribute("data-cp-explore-in-view"); };
   }, []);
 
+  // COMING BACK FROM A RECORD. `takeReturn` answers once, and only for the
+  // query it was written against, so a reader who changed the filters on the
+  // way back gets the top of the page rather than the scroll position of a
+  // result that no longer exists. Held until the rows are on screen, because
+  // the page is short until the samples land and a scroll into nothing is a
+  // scroll to the bottom.
+  //
+  // A ref rather than state: restoring a scroll position changes nothing
+  // React renders, and the answer is consumed exactly once. Read lazily, so
+  // the one-shot in session storage is taken on the first render and not
+  // again on every re-render of the viewer.
+  const returnTo = useRef(undefined);
+  if (returnTo.current === undefined) {
+    returnTo.current = typeof window === "undefined" ? null : takeReturn(window.location.search);
+  }
+  const settledRows = paged.rows.length;
+  useEffect(() => {
+    if (!returnTo.current || loading || !settledRows) return;
+    window.scrollTo(0, returnTo.current.y);
+    returnTo.current = null;
+  }, [loading, settledRows]);
+
   const [saved, setSaved] = useState(() => (typeof window === "undefined" ? [] : readSaved()));
   const [naming, setNaming] = useState(false);
   const [name, setName] = useState("");
@@ -1055,6 +889,25 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
     : tables.length === 1
       ? contractFor(tables[0].key)?.year_basis
       : tables.length > 1 ? "each collection's own basis" : null;
+
+  // OPENING A RECORD, AND COMING BACK.
+  //
+  // One object for both forms of the list: the href a record's page sits at,
+  // carrying the cut so "Back to results" returns to this exact result; the
+  // note of where the reader was, written as the link is followed; and the
+  // navigation for a click on the row itself. `pressRecord.js` owns the
+  // shape of all three.
+  const openRecord = (item) => {
+    openRecord.remember();
+    navigate(openRecord.href(item));
+  };
+  openRecord.href = (item) => recordHref({
+    key: item.key,
+    recordId: item.recordId,
+    index: item.index ?? null,
+    from: params.toString(),
+  });
+  openRecord.remember = () => rememberReturn({ search: params.toString(), y: window.scrollY });
 
   const onSort = (by) => {
     const dir = cut.sort?.by === by ? (cut.sort.dir === "asc" ? "desc" : "asc") : (by === "amount" || by === "date" || by === contract?.amount ? "desc" : "asc");
@@ -1279,13 +1132,13 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
           {paged.rows.length ? (
             narrow ? (
-              <Cards items={paged.rows} allColumns={allColumns} onActive={onActive} />
+              <Cards items={paged.rows} onActive={onActive} openRecord={openRecord} />
             ) : (
               <Rows
                 view={view}
                 items={paged.rows}
+                openRecord={openRecord}
                 columns={shownColumns}
-                allColumns={allColumns}
                 sort={cut.sort}
                 onSort={onSort}
                 onActive={onActive}

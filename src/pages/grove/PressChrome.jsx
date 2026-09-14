@@ -8,6 +8,7 @@
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
+import { contactHref } from "../../features/grove/appLink.js";
 
 /**
  * The reader's initials, from the address. Two letters where the address
@@ -40,12 +41,17 @@ import {
   PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
 
+// The order the owner set, 2026-09-14: the collections are the product, the
+// briefs are what Cedar wrote from them, and Priorities is where a subscriber
+// changes what comes next. What's new and Methods are reference, so they
+// follow. The same order runs in the hub tiles and the footer, because three
+// navigations in three orders is three different maps of one site.
 const NAV = [
-  { id: "articles", label: "Research Briefs", to: PRESS_ARTICLES_PATH },
   { id: "data", label: "Collections", to: PRESS_DATA_PATH },
+  { id: "articles", label: "Research Briefs", to: PRESS_ARTICLES_PATH },
+  { id: "priorities", label: "Priorities", to: PRESS_PRIORITIES_PATH },
   { id: "whats-new", label: "What’s new", to: PRESS_WHATS_NEW_PATH },
   { id: "methods", label: "Methods", to: PRESS_METHODS_PATH },
-  { id: "priorities", label: "Priorities", to: PRESS_PRIORITIES_PATH },
 ];
 
 /**
@@ -179,11 +185,16 @@ export function PressFoot({ flush = false, nav = true }) {
           <Link to={PRESS_PATH}>Cedar Press</Link>
           {nav ? (
             <>
-              <Link to={PRESS_ARTICLES_PATH}>Research Briefs</Link>
               <Link to={PRESS_DATA_PATH}>Collections</Link>
+              <Link to={PRESS_ARTICLES_PATH}>Research Briefs</Link>
+              <Link to={PRESS_PRIORITIES_PATH}>Priorities</Link>
               <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
               <Link to={PRESS_METHODS_PATH}>Methods</Link>
               <Link to={PRESS_SETTINGS_PATH}>Settings</Link>
+              {/* Contact came off the hub's six doors when Priorities took
+                  its place. It is a mail link rather than a section, and this
+                  is where a reader looks for one. */}
+              <a href={contactHref("Cedar Press")}>Contact</a>
             </>
           ) : null}
         </nav>

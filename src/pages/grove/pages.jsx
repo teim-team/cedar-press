@@ -33,6 +33,11 @@ export const CedarPressMethods = lazy(() => import("./CedarPressMethods.jsx"));
 export const CedarPressSettings = lazy(() => import("./CedarPressSettings.jsx"));
 export const CedarPressPriorities = lazy(() => import("./CedarPressPriorities.jsx"));
 export const CedarPressWhatsNew = lazy(() => import("./CedarPressWhatsNew.jsx"));
+// The record and the entity: both reached from inside the Collections page,
+// both reading the same samples the viewer does, and neither on the path to
+// the first paint.
+export const CedarPressRecord = lazy(() => import("./CedarPressRecord.jsx"));
+export const CedarPressEntity = lazy(() => import("./CedarPressEntity.jsx"));
 
 /**
  * What a reader sees for the moment a page's code is on its way: the paper
