@@ -18,8 +18,10 @@ import {
   CedarPressArticle,
   CedarPressArticles,
   CedarPressData,
+  CedarPressEntity,
   CedarPressMethods,
   CedarPressPriorities,
+  CedarPressRecord,
   CedarPressResearchAccess,
   CedarPressSettings,
   CedarPressTribalRequest,
@@ -31,8 +33,10 @@ import {
   PRESS_ARTICLES_PATH,
   PRESS_ARTICLE_PATH,
   PRESS_DATA_PATH,
+  PRESS_ENTITY_PATH,
   PRESS_METHODS_PATH,
   PRESS_PATH,
+  PRESS_RECORD_PATH,
   PRESS_REQUEST_PATH,
   PRESS_RESEARCH_PATH,
   PRESS_PRIORITIES_PATH,
@@ -64,6 +68,8 @@ createRoot(document.getElementById("root")).render(
           <Route path={PRESS_SETTINGS_PATH} element={<CedarPressSettings />} />
           <Route path={PRESS_PRIORITIES_PATH} element={<CedarPressPriorities />} />
           <Route path={PRESS_ARTICLE_PATH} element={<CedarPressArticle />} />
+          <Route path={PRESS_RECORD_PATH} element={<CedarPressRecord />} />
+          <Route path={PRESS_ENTITY_PATH} element={<CedarPressEntity />} />
           <Route path="*" element={<Navigate to={PRESS_PATH} replace />} />
         </Routes>
         </Suspense>

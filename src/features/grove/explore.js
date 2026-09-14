@@ -579,6 +579,10 @@ export function universalRows(key, rows, register = EMPTY_REGISTER) {
     return {
       id: recordId ? `${key}:${recordId}` : `${key}#${i}`,
       recordId,
+      // The row's position in this table's published sample. It is how the
+      // record page addresses a row whose table declares no id column, so it
+      // is the FILE's order and never a filtered or sorted one.
+      index: i,
       key,
       collection,
       entity,

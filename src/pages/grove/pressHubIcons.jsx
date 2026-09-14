@@ -79,3 +79,16 @@ export const FeedbackIcon = (
     <path d="M8.2 9h7.6M8.2 12h4.6" />
   </svg>
 );
+
+/**
+ * Support stacking up behind a question: three bars and the mark of one more
+ * being added. Shape the Research is the one door where a subscriber changes
+ * what gets built, so the glyph is an accumulation rather than a ballot.
+ */
+export const PrioritiesIcon = (
+  <svg {...glyph}>
+    <path d="M4 20h16" />
+    <path d="M6.5 20v-5.2M12 20V9.6M17.5 20v-7.8" />
+    <path d="M12 6.4V2.8M10.2 4.6 12 2.8l1.8 1.8" />
+  </svg>
+);
