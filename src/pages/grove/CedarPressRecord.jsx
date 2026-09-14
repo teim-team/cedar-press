@@ -331,6 +331,9 @@ export default function CedarPressRecord() {
   const topUp = listed.filter((c) => {
     if (!spoken(c) || declaredDetail.includes(c)) return false;
     if (/_flag$/.test(c)) return false;
+    // A normalized column beside the column it normalizes is the same fact
+    // twice; the first screen shows one of them and the groups keep both.
+    if (/_normalized$/.test(c) && columns.includes(c.replace(/_normalized$/, ""))) return false;
     const text = String(row[c] ?? "");
     return !(LONG_KEY.test(c) && text.length >= 20);
   });
