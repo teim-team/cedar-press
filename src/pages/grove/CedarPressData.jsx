@@ -6,12 +6,11 @@
 // headline — the argument is Methods's job, and repeating it here delayed
 // the collections a reader opened this page for.
 import { useEffect } from "react";
-import { Link, useLocation } from "react-router";
+import { useLocation } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
-import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { PressCedarFab } from "./PressCedarFab";
@@ -52,27 +51,19 @@ export default function CedarPressData() {
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
+        {/* COLLECTIONS, THEN THE COLLECTIONS.
+            Review, 2026-09-15: "the remaining introduction still consumes
+            almost the entire mobile screen. Replace 'Every collection, and
+            what it holds' with simply 'Collections'. Remove the paragraph
+            about records never being designed to work together. That belongs
+            in Methods. Move the entity-methodology link into collection
+            information or the footer. Understanding entity resolution should
+            not be a prerequisite for choosing Federal Funding."
+            All three. The methodology link is in the footer, which every page
+            carries, and in each collection's own panel, where a reader asking
+            how this collection was built is already looking. */}
         <section className="cp-mh cp-fade">
-          <p className="cp-hero__access">The collections</p>
-          <h1 className="cp-mh__title">Every collection, and what it holds.</h1>
-          <p className="cp-mh__sub">
-            Each collection is assembled from records that were never designed to work
-            together, resolved to the Native entities behind them and maintained as new
-            material arrives. Open one to see its coverage and method; the release comes
-            down with it.
-          </p>
-          {/* The differentiator used to be a full band here — a claim, a
-              paragraph, a hard line and four group chips — above the shelf
-              the reader came for. The owner's note, 2026-09-14: it is the
-              same argument Methods makes at length, and standing between the
-              headline and the collections it read as a second headline. It is
-              one link now, where a reader who wants the argument will look
-              for it. */}
-          <p className="cp-mh__act">
-            <Link className="cp-m__more" to={PRESS_METHODS_PATH}>
-              How Cedar resolves a record to a Native entity <span aria-hidden="true">&#8594;</span>
-            </Link>
-          </p>
+          <h1 className="cp-mh__title">Collections</h1>
         </section>
 
         <PressShelf user={user} />

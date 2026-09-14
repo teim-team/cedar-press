@@ -161,6 +161,12 @@
         }
       ],
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "attribution_method",
+        "owner_attribution_status",
+        "confidence_tier",
+        "award_attributes_basis"
+      ],
       "columns": 72
     },
     "contractors/prime_contracts_archive_backfill": {
@@ -572,6 +578,10 @@
       ],
       "_why": "One row per announced deal. reviewed 2026-09-05 from the sample header and its ten rows: the amount is what was announced (Value_Type says what the figure is), not a verified consideration. Native_Party_Type is the party's type as the source published it, not the register's class.",
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "native_party_attribution_tier",
+        "Confidence"
+      ],
       "columns": 40
     },
     "deals/deals_federal_awards_additions": {
@@ -1072,6 +1082,10 @@
       ],
       "_why": "One row per consultation event and participant. reviewed 2026-09-05 from the sample header and its ten rows: most rows name no single entity, and the card says so rather than hiding them.",
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "match_method",
+        "confidence"
+      ],
       "columns": 39
     },
     "federal-register/consultation_source_probe": {
@@ -2031,6 +2045,13 @@
       ],
       "_why": "One row per USAspending assistance transaction. reviewed 2026-09-05 from the sample header and its ten rows: the fiscal year is the federal one, so an October action sits in the next year; negative obligations are de-obligations, kept as recorded. The source link is built from the award key on USAspending, the same pattern the subawards table records in its own source_url.",
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "attribution_method",
+        "attribution_rule",
+        "attribution_status",
+        "confidence_tier",
+        "attribution_source_line"
+      ],
       "columns": 63
     },
     "funding/federal_funding_tribe_year_panel": {
@@ -3567,6 +3588,12 @@
       ],
       "_why": "One row per LDA filing. reviewed 2026-09-05 from the sample header and its ten rows: money is the registrant's reported income or expense (spend_basis says which); superseded filings stay as history and are hidden by default.",
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "attribution_method",
+        "match_confidence",
+        "attribution_withdrawn",
+        "attribution_withdrawn_reason"
+      ],
       "columns": 43
     },
     "lobbying/nonprofit_schedule_c_coverage": {
@@ -4228,6 +4255,11 @@
         }
       ],
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "entity_attribution_status",
+        "entity_attribution_basis",
+        "confidence"
+      ],
       "columns": 45
     },
     "natural-resources/tribal_bond_issuances": {
@@ -4362,6 +4394,10 @@
       ],
       "_why": "A register of enterprises, one row each, not events: no row date, so the year filter does not apply. reviewed 2026-09-05 from the sample header and its ten rows.",
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "hub_resolution_method",
+        "hub_resolution_note"
+      ],
       "columns": 65
     },
     "need/need_entity_dual_role": {
@@ -4698,6 +4734,10 @@
         "source_url"
       ],
       "default_columns_note": "The owner's default viewer selection (docs/PUBLIC_DATASET_SPEC_2026-09-05.md, addendum) mapped to the sample's current column names by data/cedar/field_map.json; a default whose column does not exist in the sample yet (the plural block, a combined or built column) appears when the export does.",
+      "attribution_columns": [
+        "entity_match_method",
+        "confidence_tier"
+      ],
       "columns": 67
     },
     "nonprofits/np_schedule_i_filers": {

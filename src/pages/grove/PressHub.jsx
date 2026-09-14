@@ -1,16 +1,15 @@
 // The front page's section index.
 //
-// Six squares, sized like the collection tiles because those already proved
-// the size on both pointers, and the same grid on desktop and phone so the
-// two navigations stay symmetric. Each square carries what the section is
-// and what it currently holds — counts read from the catalog rather than
-// written here, so the index cannot claim a section holds something it does
-// not. Pointing at a tile states the section's purpose in the line under
-// the grid — the same point-to-read language as the shelves, with the same
-// sticky selection — so a reader gets more than the label before
-// committing a tap, without a second control on every tile.
-import { useState } from "react";
-import { COARSE } from "../../features/grove/pointer.js";
+// Six cards: what the section is, what it currently holds, and what is in it.
+// The counts are read from the catalog rather than written here, so the index
+// cannot claim a section holds something it does not.
+//
+// THE SENTENCE IS ON THE CARD NOW. Review, 2026-09-15: "remove 'Point at a
+// section for what it holds'. Make the interaction discoverable through the
+// cards, including on touchscreens." It was a pointer affordance answering in
+// a line below the grid, which a finger never triggers and which asked a
+// reader to look somewhere else to learn what they were about to tap. Six
+// sentences on six cards is the same information with nothing to discover.
 import { Link } from "react-router";
 
 import { PRESS_ARTICLES, TBN_PLANS_URL } from "../../features/grove/pressArticles";
@@ -121,15 +120,10 @@ function sections(user) {
   ];
 }
 
-const IDLE_NOTE = COARSE ? "Tap a section for what it holds." : "Point at a section for what it holds.";
-
 export default function PressHub({ user }) {
-  const [help, setHelp] = useState(null);
   const all = sections(user);
-  const note = all.find((section) => section.id === help)?.what;
   return (
     <section className="cp-sec cp-hub cp-fade" aria-label="Sections">
-      <span className="cp-sec__band">Sections</span>
       <ul className="cp-hub__grid">
         {all.map((section) => {
           const inner = (
@@ -139,16 +133,10 @@ export default function PressHub({ user }) {
                 <span className="cp-hub__name">{section.label}</span>
                 <span className="cp-hub__meta">{section.meta}</span>
               </span>
+              <span className="cp-hub__what">{section.what}</span>
             </>
           );
-          // The selection is sticky, like the shelves: it changes when
-          // another tile is pointed at, never back to the idle hint, so the
-          // line below is readable at leisure.
-          const watch = {
-            onMouseEnter: () => setHelp(section.id),
-            onFocus: () => setHelp(section.id),
-            onClick: () => track(EVENT.sectionOpened, { section: section.id }),
-          };
+          const watch = { onClick: () => track(EVENT.sectionOpened, { section: section.id }) };
           return (
             <li key={section.id}>
               {section.href ? (
@@ -167,8 +155,6 @@ export default function PressHub({ user }) {
           );
         })}
       </ul>
-      {/* aria-live, so a screen reader hears the answer the pointer paints. */}
-      <p className="cp-hub__note" aria-live="polite">{note || IDLE_NOTE}</p>
     </section>
   );
 }

@@ -272,6 +272,9 @@ test.describe("the subscriber's path", () => {
     await expect(page.locator(".cp-hub__tile")).toHaveCount(6);
     await expect(page.locator(".cp-close__head")).toContainText("Nothing here is a snapshot");
 
+    // Signing out is inside the account menu now: the masthead is one row at
+    // every width, and an errand does not get a row of its own.
+    await page.locator(".cp-acct > summary").click();
     await page.getByRole("button", { name: "Sign out" }).click();
     await expect(page.locator(".cp-split")).toBeVisible();
     expect(errors).toEqual([]);
@@ -491,7 +494,7 @@ test.describe("Explore the collections", () => {
     await expect(caption).not.toContainText("loading");
     const shown = await records.count();
     const download = page.waitForEvent("download");
-    await card.getByRole("button", { name: /Download summary results/ }).click();
+    await card.getByRole("button", { name: /^Download$/ }).click();
     const file = await download;
     expect(file.suggestedFilename()).toMatch(/^cedar-press-summary-results-.*\.zip$/);
     const bytes = Buffer.concat((await (await file.createReadStream()).toArray()).map((c) => Buffer.from(c)));
@@ -609,20 +612,11 @@ test.describe("the question mark", () => {
       await expect(panel).toBeHidden();
     }
 
-    // Whatever the pointer, the panel carries the collection's own declared
-    // prose and stays inside the viewport. Opened the way this pointer opens
-    // it: a mouse click is deliberately inert, because hover governs a mouse.
+    // Whatever the pointer, the panel carries declared prose and stays inside
+    // the viewport. Opened the way this pointer opens it: a mouse click is
+    // deliberately inert, because hover governs a mouse.
     if (testInfo.project.name === "desktop") await btn.hover(); else await btn.tap();
-    await expect(panel).toContainText("Awardees are matched to a Native entity");
-    // Codex, PR #79: `coverage` is an object and the row was filtered out as a
-    // non-string, so the advertised Coverage line silently never rendered for
-    // any of the twelve. Silently is the problem; assert the caps.
-    expect(await panel.locator(".cp-ex1__cap").allTextContents()).toEqual([
-      "How it is built",
-      "What it reads",
-      "How a record reaches its entity",
-      "Coverage",
-    ]);
+    await expect(panel).toContainText("up to ten sample rows");
     const box = await panel.boundingBox();
     const width = page.viewportSize().width;
     expect(box.x).toBeGreaterThanOrEqual(-1);
@@ -651,6 +645,30 @@ test.describe("the question mark", () => {
       expect(now.x).toBeGreaterThanOrEqual(-1);
       expect(now.x + now.width).toBeLessThanOrEqual(next.width + 1);
     }
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("About this collection", () => {
+  // The paragraph that used to stand between the table's headline and its
+  // toolbar. Review, 2026-09-15: "keep collection coverage and methodology
+  // available through 'About this collection'." Declared prose, still: the
+  // coverage row rendered for none of the twelve once, because `coverage` is
+  // an object and a string filter dropped it silently.
+  test("holds the collection's declared coverage and method, and nothing is typed into it", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=contractors");
+    const about = page.getByTestId("explore-about");
+    await expect(about).toBeVisible();
+    await about.locator("summary").click();
+    await expect(about).toContainText("Awardees are matched to a Native entity");
+    expect(await about.locator("dt").allTextContents()).toEqual([
+      "Coverage",
+      "How it is built",
+      "What it reads",
+      "How a record reaches its entity",
+    ]);
     expect(errors).toEqual([]);
   });
 });
@@ -714,10 +732,15 @@ test.describe("the record page", () => {
     await definitions.click();
     await expect(page.locator(".cp-rec__mean").first()).toBeVisible();
 
-    // The rest of the record is folded until it is asked for.
-    await expect(page.locator(".cp-rec__tech")).toHaveCount(0);
+    // The rest of the record is folded until it is asked for, and it opens
+    // in groups rather than as one list of fifty-four fields.
+    await expect(page.locator(".cp-rec__group")).toHaveCount(0);
     await page.getByTestId("record-more").click();
-    await expect(page.locator(".cp-rec__tech")).toBeVisible();
+    const groups = page.locator(".cp-rec__group");
+    expect(await groups.count()).toBeGreaterThan(1);
+    await expect(groups.first().locator(".cp-rec__fields")).toBeHidden();
+    await groups.first().locator("summary").click();
+    await expect(groups.first().locator(".cp-rec__fields")).toBeVisible();
 
     // Next walks the reader's own ordering and stays on a record page.
     await page.getByRole("link", { name: /^Next/ }).first().click();
@@ -751,7 +774,9 @@ test.describe("the record page", () => {
     await page.waitForURL(/\/entity\/CE-/);
     await expect(page.getByTestId("entity-head").getByRole("heading", { level: 1 })).toBeVisible();
     // Counts on this page are counts of preview records, and it says so.
-    await expect(page.getByTestId("entity-head")).toContainText("published previews");
+    await expect(page.getByTestId("entity-head")).toContainText(/published previews/);
+    // And the way back is the record it was opened from.
+    await expect(page.getByRole("link", { name: "Back to the record" })).toBeVisible();
     expect(errors).toEqual([]);
   });
 });
@@ -1071,6 +1096,106 @@ test.describe("Methods", () => {
     // "Accuracy has a time dimension" came off the page with its timeline.
     await expect(page.locator("body")).not.toContainText("Accuracy has a time dimension");
     await expect(page.locator(".cp-tl")).toHaveCount(0);
+  });
+});
+
+test.describe("the first screen", () => {
+  // WHAT A READER SEES BEFORE SCROLLING, ASSERTED.
+  //
+  // The 2026-09-15 review found what a passing suite could not: "the
+  // Collections screenshot contains no collections, and the record screenshot
+  // never reaches the $500,000 amount", and asked that "the next review
+  // should explicitly check what users can see before scrolling, whether
+  // button labels wrap, and whether the main content arrives before its
+  // explanation. The reported tests do not establish those visual qualities."
+  //
+  // These are those checks. They run on the phone profile, where the failure
+  // shows first, and they measure the built page rather than describing it.
+  // The phone profile only: the first screen is where this fails first, and
+  // the desktop project renders a different layout for the same pages.
+  test.beforeEach(({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "the first screen is a phone question");
+    void page;
+  });
+
+  /** How far down the page the top of this element sits, in viewport heights. */
+  async function topOf(page, selector) {
+    return page.locator(selector).first().evaluate((node) => node.getBoundingClientRect().top);
+  }
+
+  test("the header is one row, and the section menu is a control rather than two rows of links", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data");
+    const header = await page.locator(".cp-mast").first().boundingBox();
+    const viewport = page.viewportSize().height;
+    // It was four rows: wordmark, avatar with a wrapped "Sign out", and two
+    // rows of section links.
+    expect(header.height).toBeLessThan(viewport * 0.16);
+    // Signing out is in the account menu, not loose in the header.
+    await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
+    await expect(page.locator(".cp-navm__btn")).toBeVisible();
+    await expect(page.locator(".cp-nav__item")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  test("Collections opens on collections", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data");
+    await page.locator(".cp-badge").first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize().height;
+    // A collection tile, on the first screen, with no scrolling.
+    expect(await topOf(page, ".cp-badge")).toBeLessThan(viewport);
+    expect(errors).toEqual([]);
+  });
+
+  test("a record opens on its amount", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().waitFor();
+    await page.getByTestId("explore-record").first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    await page.locator(".cp-rec__fig").waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize().height;
+    // The money the row is about, before any scrolling.
+    expect(await topOf(page, ".cp-rec__fig")).toBeLessThan(viewport);
+    // And the row's definition is no longer standing in front of it.
+    await expect(page.getByTestId("record-head")).not.toContainText("What one row is");
+    expect(errors).toEqual([]);
+  });
+
+  test("an entity profile opens on its records", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/entity/CE-001CC-8N");
+    await page.locator(".cp-ent__row").first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize().height;
+    expect(await topOf(page, ".cp-ent__row")).toBeLessThan(viewport);
+    expect(errors).toEqual([]);
+  });
+
+  test("no action label wraps past two lines", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().waitFor();
+    // "Download sample results" wrapped onto four lines beside two-line
+    // neighbours. A control is allowed two lines; four is a broken label.
+    const tall = await page.locator(".cp-ex__acts .cp-ex__act").evaluateAll((nodes) =>
+      nodes
+        .map((node) => {
+          const line = Number.parseFloat(getComputedStyle(node).lineHeight) || 16;
+          const box = node.getBoundingClientRect();
+          return { text: node.textContent.trim(), lines: Math.round((box.height - 16) / line) };
+        })
+        .filter((entry) => entry.lines > 2));
+    expect(tall).toEqual([]);
+    expect(errors).toEqual([]);
   });
 });
 

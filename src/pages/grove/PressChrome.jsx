@@ -5,10 +5,12 @@
 // three copies of a footer drift three ways — which is exactly what had
 // happened: every page carried its own two-link version, so where the footer
 // took you depended on where you already were.
+import { useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { contactHref } from "../../features/grove/appLink.js";
+import { useNarrow } from "../../features/grove/useNarrow.js";
 
 /**
  * The reader's initials, from the address. Two letters where the address
@@ -68,6 +70,103 @@ const NAV = [
  * all open onto a paywall reads as a broken site rather than a map. The
  * wordmark still leads home.
  */
+/**
+ * A disclosure that closes on Escape and on a click outside it.
+ *
+ * Both menus in the masthead are native `<details>`: they work with no state,
+ * a keyboard reaches them, and a screen reader announces them. What details
+ * does not do on its own is close when the reader looks elsewhere, which is
+ * what a menu in a header has to do.
+ */
+function useDismissable() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    const close = (refocus) => {
+      if (!node.open) return;
+      node.open = false;
+      if (refocus) node.querySelector("summary")?.focus();
+    };
+    const onKey = (event) => { if (event.key === "Escape") close(true); };
+    const onDown = (event) => { if (!node.contains(event.target)) close(false); };
+    node.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      node.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, []);
+  return ref;
+}
+
+/**
+ * Who is signed in, as one control on the masthead's own row.
+ *
+ * THE HEADER WAS FOUR ROWS ON A PHONE. Review, 2026-09-15: "the logo occupies
+ * one row, the avatar and Sign out another, and navigation another two rows.
+ * That creates a large header before the page itself begins. The standalone
+ * Sign out placement looks like an accidental wrap." It was exactly that — a
+ * flex row with `flex: 1 1 100%` on the user block under 640px, which is a
+ * wrap dressed up as a layout.
+ *
+ * So the avatar sits beside the wordmark at every width and everything it
+ * used to spell out — the address, the settings page, signing out — is inside
+ * it. A header is for saying where you are, not for carrying an errand.
+ */
+function AccountMenu({ user, onSignOut }) {
+  const ref = useDismissable();
+  return (
+    <details className="cp-acct" ref={ref}>
+      <summary className="cp-acct__btn" aria-label={`Account for ${user.email}`}>
+        <span className="cp-avatar" aria-hidden="true">{initialsOf(user.email)}</span>
+        <span className="cp-acct__cue" aria-hidden="true">&#9662;</span>
+      </summary>
+      <div className="cp-acct__menu">
+        <span className="cp-acct__who">{user.email}</span>
+        <Link className="cp-acct__item" to={PRESS_SETTINGS_PATH}>Account and settings</Link>
+        <button type="button" className="cp-acct__item cp-acct__out" onClick={onSignOut}>
+          Sign out
+        </button>
+      </div>
+    </details>
+  );
+}
+
+/**
+ * The sections, as one control on a phone.
+ *
+ * Five links spaced across two rows is a nav that costs a quarter of the
+ * screen to say what a reader already knows. The summary names the section
+ * they are in; the panel is the same five links, in the same order as the
+ * wide nav, because two navigations in two orders is two maps.
+ */
+function SectionMenu({ section }) {
+  const ref = useDismissable();
+  const here = section === "home" ? "Overview" : NAV.find((item) => item.id === section)?.label ?? "Overview";
+  return (
+    <details className="cp-navm" ref={ref}>
+      <summary className="cp-navm__btn">
+        <span className="cp-navm__here">{here}</span>
+        <span className="cp-navm__cue" aria-hidden="true">&#9662;</span>
+      </summary>
+      <nav className="cp-navm__menu" aria-label="Sections">
+        <NavLink className="cp-navm__item" to={PRESS_PATH} end>Overview</NavLink>
+        {NAV.map((item) => (
+          <NavLink
+            key={item.id}
+            className="cp-navm__item"
+            to={item.to}
+            aria-current={item.id === section ? "page" : undefined}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+    </details>
+  );
+}
+
 export function PressMast({ user, onSignOut, section = null, nav = true }) {
   const home = section === "home";
   // The distribution line is for visitors deciding what this is; a
@@ -75,6 +174,9 @@ export function PressMast({ user, onSignOut, section = null, nav = true }) {
   // re-introducing it on every page. Read from the session directly, since
   // not every page threads `user` into the masthead.
   const { user: signedIn } = useAuth();
+  // One nav or the other, never both: two copies of five links in the DOM
+  // make every "Collections" link ambiguous to anything that looks for one.
+  const narrow = useNarrow("(max-width: 760px)");
   return (
     <>
     {/* The first stop for a keyboard or a screen reader: the nav and the
@@ -112,19 +214,12 @@ export function PressMast({ user, onSignOut, section = null, nav = true }) {
             <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
           </span>
         )}
-        {user ? (
-          <span className="cp-mast__user">
-            <Link className="cp-avatar" to={PRESS_SETTINGS_PATH} title={user.email}>
-              <span aria-hidden="true">{initialsOf(user.email)}</span>
-              <span className="cp-avatar__sr">Account and settings for {user.email}</span>
-            </Link>
-            <button type="button" className="cp-split__linkbtn" onClick={onSignOut}>
-              Sign out
-            </button>
-          </span>
-        ) : null}
+        {/* The section menu rides the same row as the lockup on a phone, so
+            the whole header is one row rather than four. */}
+        {nav && narrow ? <SectionMenu section={section} /> : null}
+        {user ? <AccountMenu user={user} onSignOut={onSignOut} /> : null}
       </div>
-      {nav ? (
+      {nav && !narrow ? (
         <nav className="cp-nav" aria-label="Sections">
           <NavLink className="cp-nav__item" to={PRESS_PATH} end>
             Overview

@@ -33,12 +33,7 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressAd from "./PressAd";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { PRESS_ARTICLES } from "../../features/grove/pressArticles";
-import {
-  PRESS_DATA_PATH,
-  PRESS_WHATS_NEW_PATH,
-  pressArticlePath,
-} from "../../features/grove/pressRoutes";
+import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
 import PressHub from "./PressHub";
 import PressPrioritiesBlock from "./PressPrioritiesBlock";
@@ -62,9 +57,6 @@ export default function CedarPress() {
     );
   }
 
-  // Newest hosted brief: the strip is newest-first, and an external piece
-  // opens on TBN, which is not "read it here".
-  const latestBrief = PRESS_ARTICLES.find((article) => article.hosted);
   // Cedar's suggestions on the overview: one real question per level, each
   // already scoped to a collection so every suggestion is answerable today.
   const cedarExamples = [
@@ -88,35 +80,29 @@ export default function CedarPress() {
             product is for and lets the pages behind the doors explain the
             ladder themselves. The mission line lives at the close. */}
         <div className="cp-screen cp-open">
+          {/* ONE INTRODUCTION, ONE ACTION, THEN THE DOORS.
+              Review, 2026-09-15: "you have the top navigation, four central
+              action buttons, and six large section tiles. Several take users
+              to the same places." Three of the four buttons went to a tile
+              directly beneath them; the paragraph stacked original
+              intelligence, data-driven insights, transparent research, an AI
+              analyst, documented sources, original research again, entity
+              resolution and ongoing updates — an argument for buying a
+              product the reader has already bought. Ask Cedar stays, because
+              it is the one thing here that is not a door. */}
           <section className="cp-hero cp-fade">
             <h1>Know what&rsquo;s shaping Indian Country.</h1>
             <p>
-              Original intelligence collections, data-driven insights, transparent research and
-              Cedar, your AI economic analyst, built to make Indian Country easier to understand.
-              Every collection begins with documented source records, is enhanced through original research
-              and entity resolution and stays current as new information becomes available.
+              Browse the collections, read the research, and ask Cedar about any of it.
             </p>
-          </section>
-          <nav className="cp-start cp-fade" aria-label="Start here">
             <button
               type="button"
-              className="cp-start__act"
+              className="cp-hero__ask"
               onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
             >
               Ask Cedar <span aria-hidden="true">&#8594;</span>
             </button>
-            <Link className="cp-start__act" to={PRESS_DATA_PATH}>
-              Explore the collections <span aria-hidden="true">&#8594;</span>
-            </Link>
-            {latestBrief ? (
-              <Link className="cp-start__act" to={pressArticlePath(latestBrief.id)}>
-                Read the latest brief <span aria-hidden="true">&#8594;</span>
-              </Link>
-            ) : null}
-            <Link className="cp-start__act" to={PRESS_WHATS_NEW_PATH}>
-              See what changed <span aria-hidden="true">&#8594;</span>
-            </Link>
-          </nav>
+          </section>
           <PressHub user={entitled ? user : null} />
           <PressPrioritiesBlock signedIn={entitled} />
         </div>

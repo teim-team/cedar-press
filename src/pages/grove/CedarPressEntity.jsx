@@ -22,7 +22,7 @@
 // page says how many collections it could not look in.
 
 import { useMemo } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useSearchParams } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
@@ -48,6 +48,9 @@ export default function CedarPressEntity() {
   const { user, loading, logout } = useAuth();
   const entitled = canReadCedarPress(user);
   const { uid } = useParams();
+  const [params] = useSearchParams();
+  // Where this profile was opened from, when a record opened it.
+  const from = params.get("from") ?? null;
   const register = useRegister();
   useScrollToTop(uid);
   useDocumentTitle(register.byUid.get(uid)?.name ?? "Entity");
@@ -95,56 +98,51 @@ export default function CedarPressEntity() {
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
         <div className="cp-rec__bar">
-          <Link className="cp-rec__back" to={PRESS_DATA_PATH}>
-            <span aria-hidden="true">&#8592;</span> All collections
+          {/* Back to the record this profile was opened from, when it was:
+              a reader who arrived from one transaction is usually going back
+              to it. Otherwise, back to the collections. */}
+          {from ? (
+            <Link className="cp-rec__back" to={from}>
+              <span aria-hidden="true">&#8592;</span> Back to the record
+            </Link>
+          ) : (
+            <Link className="cp-rec__back" to={PRESS_DATA_PATH}>
+              <span aria-hidden="true">&#8592;</span> All collections
+            </Link>
+          )}
+          <Link className="cp-rec__walkbtn" to={`${PRESS_DATA_PATH}?e=${encodeURIComponent(uid)}`}>
+            View in table <span aria-hidden="true">&#8594;</span>
           </Link>
         </div>
 
-        <header className="cp-rec__head" data-testid="entity-head">
-          <span className="cp-rec__kind">Entity profile</span>
+        {/* IDENTITY, THEN RECORDS.
+            Review, 2026-09-15: "the profile's purpose is to get users to an
+            entity's related records. On mobile, none are visible in the
+            captured first screen. Keep the name, type, and ID compact,
+            followed by a short preview notice and the collection results."
+            The three-figure strip went with it: "Collections read" described
+            a loading operation rather than the entity, and two of the three
+            figures were one sentence between them. */}
+        <header className="cp-rec__head cp-ent__head" data-testid="entity-head">
           <h1 className="cp-rec__name">
             {name ?? (register.entities.length ? "No entity with that Cedar id" : "Opening the entity…")}
           </h1>
           <p className="cp-rec__ids">
-            <span className="cp-rec__uid">
-              <code>{uid}</code>
-            </span>
+            <span className="cp-rec__uid"><code>{uid}</code></span>
             {entity?.type ? <span className="cp-rec__type">{entity.type}</span> : null}
-            <Link className="cp-rec__profile" to={`${PRESS_DATA_PATH}?e=${encodeURIComponent(uid)}`}>
-              Open this entity in the viewer <span aria-hidden="true">&#8594;</span>
-            </Link>
           </p>
-          <p className="cp-rec__one">
-            One identifier, held across every collection. What follows is this entity&rsquo;s records in
-            the published previews — up to ten sample rows per table — and never a count of what a
-            release holds.
+          <p className="cp-rec__fine cp-ent__notice">
+            {samplesLoading
+              ? "Reading the published previews…"
+              : `${mine.length} record${mine.length === 1 ? "" : "s"} in ${groups.length} collection${groups.length === 1 ? "" : "s"}, from the published previews — up to ten sample rows per table, never a count of a release.`}
+            {locked ? ` ${locked} more collections open on Cedar Press+.` : ""}
           </p>
-        </header>
-
-        <section className="cp-ent__sum" aria-label="What the previews hold">
-          <dl className="cp-rec__key">
-            <div>
-              <dt>Preview records</dt>
-              <dd>{samplesLoading ? "…" : mine.length}</dd>
-            </div>
-            <div>
-              <dt>Collections they sit in</dt>
-              <dd>{samplesLoading ? "…" : groups.length}</dd>
-            </div>
-            <div>
-              <dt>Collections read</dt>
-              <dd>
-                {tables.length}
-                {locked ? <span className="cp-rec__basis">{locked} more on Cedar Press+</span> : null}
-              </dd>
-            </div>
-          </dl>
           {missing.length ? (
             <p className="cp-rec__fine">
               Not reachable right now: {missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.
             </p>
           ) : null}
-        </section>
+        </header>
 
         {samplesLoading && !groups.length ? (
           <p className="cp-rec__fine cp-ent__empty">Reading the published samples…</p>

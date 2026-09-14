@@ -68,7 +68,7 @@ import {
   recordHref,
   resultsHref,
 } from "../../features/grove/pressRecord.js";
-import { PRESS_METHODS_PATH, pressEntityPath } from "../../features/grove/pressRoutes.js";
+import { PRESS_METHODS_PATH, PRESS_RECORD_PATH, pressEntityPath } from "../../features/grove/pressRoutes.js";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useRegister } from "../../features/grove/useRegister.js";
 import { useSampleRows } from "../../features/grove/useSamples.js";
@@ -144,6 +144,36 @@ function Fields({ columns, item, contract, plain = true, definitions = false }) 
       })}
     </dl>
   );
+}
+
+/**
+ * The rest of a record, in groups a reader can choose between.
+ *
+ * Review, 2026-09-15: "'Show 54 more fields' risks recreating the original
+ * overwhelming panel in one click. Group those fields into identifiers,
+ * classifications, geography, and financial details so users can open the
+ * relevant group."
+ *
+ * The rules are by column name and are deliberately few, because a wrong
+ * group is a cosmetic mistake and a missing field is not: anything the rules
+ * do not recognise lands in "Other fields", which is shown like the rest.
+ * Order matters — a state FIPS code is geography before it is an identifier.
+ */
+const FIELD_GROUPS = [
+  { id: "geography", label: "Geography", test: /(^geo_|_fips$|state|city|county|place|zip|country|region|district)/i },
+  { id: "financial", label: "Financial details", test: /(usd|amount|obligat|loan|subsid|revenue|spend|deflator|dollar|price|value)/i },
+  { id: "identifiers", label: "Identifiers", test: /(_id$|_ids$|^id$|_key$|_uid$|uei|duns|\bein\b|^ein$|cage|fain|_number$|naics|cfda)/i },
+  { id: "classifications", label: "Classifications and status", test: /(type|class|category|status|flag|method|basis|tier|rule|description|stage|role|confidence)/i },
+];
+
+function groupFields(columns) {
+  const groups = FIELD_GROUPS.map((group) => ({ ...group, columns: [] }));
+  const other = { id: "other", label: "Other fields", columns: [] };
+  for (const column of columns) {
+    const group = groups.find((candidate) => candidate.test.test(column));
+    (group ?? other).columns.push(column);
+  }
+  return [...groups, other].filter((group) => group.columns.length);
 }
 
 /** Copy, with the prompt fallback for a browser that refuses the clipboard. */
@@ -255,11 +285,20 @@ export default function CedarPressRecord() {
   }
 
   const back = resultsHref(asked.from);
+  // The profile's "Back to the record" needs to know which record: this one,
+  // with the cut it was opened from, so the whole chain survives.
+  const hereHref = `${PRESS_RECORD_PATH}?${search}`;
+  const profileHref = (uid) => `${pressEntityPath(uid)}?from=${encodeURIComponent(hereHref)}`;
   const row = item?.row ?? {};
   const amount = item?.amount ?? null;
   const real = item && contract?.amount ? realDollars(row, contract.amount) : null;
   const shownInHead = new Set([contract?.entity_uid, contract?.entity_name, contract?.entity_type].filter(Boolean));
-  const shownInSummary = new Set([contract?.amount, contract?.date, ...(contract?.observation ?? [])].filter(Boolean));
+  // Shown once. Review, 2026-09-15: "fiscal year appears in the summary and
+  // again under details, as does the recorded recipient." The summary now
+  // carries the money, the date and the one-line observation; the identity
+  // line under it carries the recorded name; the details carry everything
+  // else the owner declared, including the fiscal year.
+  const shownInSummary = new Set([contract?.amount, contract?.date, contract?.subject, ...(contract?.observation ?? [])].filter(Boolean));
   const columns = item ? Object.keys(row) : [];
   // THE OWNER'S DECLARED VIEW IS THE FIRST SCREEN.
   // `default_columns` is the reviewed selection recorded in
@@ -269,12 +308,42 @@ export default function CedarPressRecord() {
   // table with no declared view falls back to the codebook's own order.
   const declared = (contract?.default_columns ?? []).filter((c) => columns.includes(c));
   const listed = asked.key ? codebookColumns(asked.key, columns) : [];
-  const detail = (declared.length ? declared : listed.slice(0, 8))
-    .filter((c) => !shownInHead.has(c) && !shownInSummary.has(c));
-  const detailSet = new Set([...detail, ...shownInHead, ...shownInSummary]);
+  // How THIS row reached its entity, from the table's own declaration
+  // (`attribution_columns` in data/cedar/explore.overrides.json). These are
+  // evidence, not fields to browse: they are shown in the evidence section
+  // and taken out of the details, which is also what takes a raw value like
+  // `cedar_neid` out of the first screen.
+  const attribution = (contract?.attribution_columns ?? [])
+    .filter((c) => columns.includes(c) && String(row[c] ?? "").trim());
+  const attributionSet = new Set(attribution);
+  const spoken = (c) => !shownInHead.has(c) && !shownInSummary.has(c) && !attributionSet.has(c);
+  const declaredDetail = (declared.length ? declared : listed.slice(0, 8)).filter(spoken);
+  // A DECLARED VIEW CAN BE THIN ONCE THE SUMMARY HAS TAKEN ITS SHARE.
+  //
+  // Federal Funding declares seven columns; the summary carries three of
+  // them, the identity line a fourth and the evidence section a fifth, which
+  // left "Record details" holding a fiscal year on its own. So the block is
+  // topped up from the codebook's own order, skipping two kinds of column:
+  // a long source key (the review: "long transaction and award IDs belong in
+  // the additional details") and a bare flag, which is a classification
+  // rather than a detail. Both are still one click away, in their groups.
+  const LONG_KEY = /(_key$|_id$|_uid$|unique)/i;
+  const topUp = listed.filter((c) => {
+    if (!spoken(c) || declaredDetail.includes(c)) return false;
+    if (/_flag$/.test(c)) return false;
+    const text = String(row[c] ?? "");
+    return !(LONG_KEY.test(c) && text.length >= 20);
+  });
+  const detail = declaredDetail.length >= 6
+    ? declaredDetail
+    : [...declaredDetail, ...topUp].slice(0, 6);
+  const detailSet = new Set([...detail, ...shownInHead, ...shownInSummary, ...attributionSet]);
   const rest = listed.filter((c) => !detailSet.has(c));
   const known = new Set([...detailSet, ...rest]);
   const technical = columns.filter((c) => !known.has(c));
+  // Everything that is not the declared view, in groups rather than one wall.
+  const groups = groupFields([...rest, ...technical]);
+  const moreCount = rest.length + technical.length;
 
   return (
     <div className="teim-rd teim-rd--paper">
@@ -312,6 +381,19 @@ export default function CedarPressRecord() {
           </section>
         ) : (
           <>
+            {/* THE TRANSACTION, THEN WHO IT BELONGS TO.
+                Review, 2026-09-15: "on mobile, users encounter the full
+                header, back button, previous/next controls, collection
+                label, entity name, recorded name, ID, entity type,
+                attribution explanation, entity-profile link, and 'What one
+                row is' explanation before reaching the amount. The $500,000,
+                program, and date should appear immediately beneath the entity
+                name. That is the transaction being reviewed."
+                So the summary sits directly under the name, and the
+                identifiers that used to stand between them are underneath it.
+                The codebook's definition of a row came off the opening view
+                entirely; it is in the evidence section, where a reader
+                checking what they are citing will look. */}
             <header className="cp-rec__head" data-testid="record-head">
               <span className="cp-rec__kind">
                 <span className="cp-rec__kindic" aria-hidden="true">{COLLECTION_ICONS[collectionId] ?? null}</span>
@@ -323,41 +405,13 @@ export default function CedarPressRecord() {
                   organization and one of the two is the one to cite. */}
               <h1 className="cp-rec__name">
                 {item.entity.uid && item.entity.name ? (
-                  <Link to={pressEntityPath(item.entity.uid)}>{item.entity.name}</Link>
+                  <Link to={profileHref(item.entity.uid)}>{item.entity.name}</Link>
                 ) : item.entity.withheld ? (
                   <em>{WITHHELD_TEXT}</em>
                 ) : (
                   item.entity.name ?? item.subject ?? "No entity named on this record"
                 )}
               </h1>
-              {item.subject ? <p className="cp-rec__as">Recorded as <b>{item.subject}</b></p> : null}
-              <p className="cp-rec__ids">
-                {item.entity.uid ? (
-                  <span className="cp-rec__uid">
-                    <code>{item.entity.uid}</code>
-                    <CopyButton text={item.entity.uid} label="Copy" />
-                  </span>
-                ) : (
-                  <span className="cp-rec__fine">Not linked to a Cedar entity on this row.</span>
-                )}
-                {item.entity.type ? <span className="cp-rec__type">{item.entity.type}</span> : null}
-                {contract?.entity_role ? <span className="cp-rec__role">{contract.entity_role}</span> : null}
-                {item.entity.uid ? (
-                  <Link className="cp-rec__profile" to={pressEntityPath(item.entity.uid)}>
-                    Everything Cedar holds on this entity <span aria-hidden="true">&#8594;</span>
-                  </Link>
-                ) : null}
-              </p>
-              {/* The codebook's own sentence, under a label rather than
-                  inside one: its text begins "One federal assistance
-                  transaction…", and "One row here is One federal…" was the
-                  label and the sentence colliding. */}
-              {codebook ? (
-                <p className="cp-rec__one">
-                  <span className="cp-rec__cap">What one row is</span>
-                  {codebook.row}
-                </p>
-              ) : null}
               {item.superseded ? (
                 <p className="cp-rec__superseded">
                   <b>Superseded.</b> A later version replaces this record
@@ -391,25 +445,36 @@ export default function CedarPressRecord() {
                       <dd><Value column={contract.date} value={row[contract.date]} contract={contract} item={item} /></dd>
                     </div>
                   ) : null}
-                  {contract?.year && row[contract.year] ? (
-                    <div>
-                      <dt>{labelFor(item.key, contract.year)}</dt>
-                      <dd>
-                        {row[contract.year]}
-                        {contract.year_basis ? <span className="cp-rec__basis">{contract.year_basis}</span> : null}
-                      </dd>
-                    </div>
-                  ) : null}
                   <div>
                     <dt>Collection</dt>
                     <dd>
                       <Link to={`/data?c=${collectionId}`}>{entry?.name ?? collectionId}</Link>
-                      {release ? <span className="cp-rec__basis">release {release.version}</span> : null}
                     </dd>
                   </div>
                 </dl>
               </div>
             </section>
+
+            {/* Who the transaction belongs to, under it: the name the source
+                spelled, the Cedar id it resolved to, and the way to that
+                entity's own page. */}
+            <p className="cp-rec__ids" data-testid="record-identity">
+              {item.subject ? <span className="cp-rec__as">Recorded as <b>{item.subject}</b></span> : null}
+              {item.entity.uid ? (
+                <span className="cp-rec__uid">
+                  <code>{item.entity.uid}</code>
+                  <CopyButton text={item.entity.uid} label="Copy" />
+                </span>
+              ) : (
+                <span className="cp-rec__fine">Not linked to a Cedar entity on this row.</span>
+              )}
+              {item.entity.type ? <span className="cp-rec__type">{item.entity.type}</span> : null}
+              {item.entity.uid ? (
+                <Link className="cp-rec__profile" to={profileHref(item.entity.uid)}>
+                  View entity profile <span aria-hidden="true">&#8594;</span>
+                </Link>
+              ) : null}
+            </p>
 
             <section className="cp-rec__block" aria-label="Record details">
               <div className="cp-rec__blockhead">
@@ -444,65 +509,95 @@ export default function CedarPressRecord() {
                     onClick={() => setShowRest((on) => !on)}
                     data-testid="record-more"
                   >
-                    {showRest ? "Hide" : `Show ${rest.length + technical.length} more fields`}
+                    {showRest ? "Hide" : `Show ${moreCount} more fields`}
                   </button>
                 </div>
                 {showRest ? (
-                  <>
-                    {rest.length ? (
-                      <Fields columns={rest} item={item} contract={contract} definitions={definitions} />
-                    ) : null}
-                    {technical.length ? (
-                      <details className="cp-rec__tech">
-                        <summary>Technical fields ({technical.length}), as the file carries them</summary>
-                        <Fields columns={technical} item={item} contract={contract} plain={false} />
+                  /* In groups, not one list of fifty-four: a reader opening
+                     this wants geography, or the identifiers, or the loan
+                     fields — not all of them at once. Each group opens on its
+                     own; the codebook's labels are used where it knows the
+                     column and the file's own name where it does not. */
+                  <div className="cp-rec__groups">
+                    {groups.map((group) => (
+                      <details className="cp-rec__group" key={group.id}>
+                        <summary>
+                          {group.label} <span className="cp-rec__groupn">{group.columns.length}</span>
+                        </summary>
+                        <Fields
+                          columns={group.columns}
+                          item={item}
+                          contract={contract}
+                          plain={group.id !== "other"}
+                          definitions={definitions}
+                        />
                       </details>
-                    ) : null}
-                  </>
+                    ))}
+                  </div>
                 ) : (
                   <p className="cp-rec__fine">
-                    Identifiers, source classifications, and every column the release carries for this row.
+                    {groups.map((group) => group.label.toLowerCase()).join(", ")} — every column the
+                    release carries for this row.
                   </p>
                 )}
               </section>
             ) : null}
 
-            {/* WHERE THE EVIDENCE IS. The four things a researcher had to
-                leave the page for: the document, how the row reached the
-                entity it is filed under, which release it belongs to, and a
-                citation to paste. */}
+            {/* WHERE THE EVIDENCE IS.
+                Review, 2026-09-15: "'How it reached the entity' contains a
+                generic paragraph about subsidiaries, housing authorities, and
+                consortia. That does not establish how this particular
+                recipient was linked to the Yakama Nation. Where supported,
+                show the specific attribution basis and its evidence. If that
+                information is unavailable, say so briefly. General matching
+                methodology can stay behind a link."
+                So the section is this record's own evidence: the document it
+                came from, the columns THIS row carries about how it was
+                attributed, and a citation. The collection's general rule is a
+                link, and the internal table name and transaction key moved
+                into the additional details with the other identifiers. */}
             <section className="cp-rec__block cp-rec__prov" aria-label="Source and methodology">
-              <div className="cp-rec__blockhead"><h2>Source and methodology</h2></div>
+              <div className="cp-rec__blockhead"><h2>Source and evidence</h2></div>
               <div className="cp-rec__provgrid">
                 <div>
                   <span className="cp-rec__cap">The document</span>
                   {item.source ? (
                     <a href={item.source} target="_blank" rel="noreferrer">Open the source record <span aria-hidden="true">&#8599;</span></a>
                   ) : (
-                    <span className="cp-rec__fine">This row&rsquo;s table carries no per-record link. The collection&rsquo;s sources are on its methods entry.</span>
+                    <span className="cp-rec__fine">This row&rsquo;s table carries no per-record link.</span>
                   )}
+                  <span className="cp-rec__fine">
+                    {entry?.short ?? collectionId}
+                    {/* `cadence` is already a sentence ("Updated monthly"). */}
+                    {release ? ` · release ${release.version} · ${release.cadence.toLowerCase()}` : ""}
+                  </span>
                 </div>
                 <div>
-                  <span className="cp-rec__cap">How it reached the entity</span>
-                  <span className="cp-rec__fine">
-                    {entry?.linkage ?? "Resolved to the Cedar entity register."}
-                    {contract?.entity_role && !(entry?.linkage ?? "").toLowerCase().includes(contract.entity_role.toLowerCase())
-                      ? ` The entity on this row is ${contract.entity_role}.`
-                      : ""}
-                  </span>
-                  <Link className="cp-rec__more" to={PRESS_METHODS_PATH}>
-                    How Cedar resolves records <span aria-hidden="true">&#8594;</span>
+                  <span className="cp-rec__cap">How this record was matched</span>
+                  {attribution.length ? (
+                    <dl className="cp-rec__match">
+                      {attribution.map((column) => (
+                        <div key={column}>
+                          <dt title={meaningFor(item.key, column) ?? undefined}>{labelFor(item.key, column)}</dt>
+                          <dd><Value column={column} value={row[column]} contract={contract} item={item} /></dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : (
+                    <span className="cp-rec__fine">
+                      This table does not record a per-row basis for its match.
+                    </span>
+                  )}
+                  <Link className="cp-rec__more" to={`${PRESS_METHODS_PATH}#m-linkage`}>
+                    How Cedar matches records <span aria-hidden="true">&#8594;</span>
                   </Link>
                 </div>
-                <div>
-                  <span className="cp-rec__cap">Where it sits</span>
-                  <span className="cp-rec__fine">
-                    {entry?.short ?? collectionId} · {asked.key.split("/")[1]} · record {item.recordId ?? `position ${item.index + 1} in the sample`}
-                    {release ? ` · release ${release.version}, ${release.cadence.toLowerCase()}` : ""}
-                    {" · preview row"}
-                  </span>
-                </div>
               </div>
+              {codebook ? (
+                <p className="cp-rec__fine cp-rec__rowis">
+                  <b>One row</b> {codebook.row}
+                </p>
+              ) : null}
               {citation ? (
                 <div className="cp-rec__cite">
                   <span className="cp-rec__cap">Cite it</span>
@@ -510,9 +605,9 @@ export default function CedarPressRecord() {
                   <CopyButton text={citation} label="Copy citation" className="cp-rec__citebtn" />
                 </div>
               ) : null}
+              {/* One notice, once. */}
               <p className="cp-rec__fine cp-rec__preview">
-                This is one of up to ten sample rows published for this table. The release carries the
-                whole table, and a count here is never a count of the release.
+                Preview: one of up to ten sample rows published for this table.
               </p>
             </section>
 

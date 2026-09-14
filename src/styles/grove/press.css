@@ -78,6 +78,11 @@
 .teim-rd .cp-hero__access { grid-column: 1 / -1; }
 .teim-rd .cp-hero h1 { font-size: clamp(2rem, 3.6vw, 3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.06; color: var(--ink); margin: 0; max-width: 16ch; }
 .teim-rd .cp-hero p { font-size: 1.04rem; line-height: 1.62; color: var(--ink-2); margin: 0; max-width: 58ch; }
+/* The one action on the overview that is not a door. The four buttons that
+ * used to float under the headline went where the tiles already go. */
+.teim-rd .cp-hero__ask { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; margin-top: 0.4rem; padding: 0.55rem 1.3rem; border: 1px solid var(--dteal); border-radius: 999px; background: var(--dteal); color: #fff; font: inherit; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: background 0.16s ease; }
+.teim-rd .cp-hero__ask:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+.teim-rd .cp-hero__ask:focus-visible { outline: 2px solid var(--dteal); outline-offset: 3px; }
 @media (max-width: 900px) {
   .teim-rd .cp-hero { grid-template-columns: 1fr; gap: 0.9rem; }
   .teim-rd .cp-hero h1 { max-width: none; }
@@ -340,7 +345,39 @@
 .teim-rd .cp-gate__path a:hover { text-decoration: underline; }
 
 /* Subscriber chrome: who is signed in, and what admission the page carries. */
-.teim-rd .cp-mast__user { margin-left: auto; display: inline-flex; align-items: center; gap: 0.7rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
+/* ── The masthead's one row ───────────────────────────────────────────────
+ *
+ * Review, 2026-09-15: on a phone the header was four rows — wordmark, then
+ * the avatar with a wrapped "Sign out" beside it, then two rows of section
+ * links — before the page began. It is one row now at every width: the
+ * lockup, the section menu on a phone, and the account. Signing out lives in
+ * the account menu, where an errand belongs.
+ */
+.teim-rd .cp-mast__top { align-items: center; }
+.teim-rd .cp-acct { position: relative; margin-left: auto; flex: none; }
+.teim-rd .cp-acct > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem; border-radius: 999px; }
+.teim-rd .cp-acct > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-acct > summary:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-acct__cue { font-size: 0.7rem; color: var(--muted); }
+.teim-rd .cp-acct__menu { position: absolute; top: calc(100% + 0.5rem); right: 0; z-index: 40; min-width: 15rem; display: flex; flex-direction: column; padding: 0.4rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 16px 40px rgba(10, 15, 38, 0.16); }
+.teim-rd .cp-acct__who { padding: 0.5rem 0.7rem 0.6rem; font-size: 0.78rem; color: var(--muted); border-bottom: 1px solid var(--line-soft); overflow-wrap: anywhere; }
+.teim-rd .cp-acct__item { display: flex; align-items: center; min-height: 42px; padding: 0.4rem 0.7rem; border: 0; border-radius: 6px; background: none; font: inherit; font-size: 0.92rem; color: var(--ink); text-align: left; text-decoration: none; cursor: pointer; }
+.teim-rd .cp-acct__item:hover { background: var(--teal-tint); color: var(--dteal); }
+.teim-rd .cp-acct__out { color: var(--ink-2); }
+
+/* The sections as one control, under 760px. */
+.teim-rd .cp-navm { position: relative; margin-left: auto; }
+.teim-rd .cp-mast__top .cp-acct + .cp-navm, .teim-rd .cp-navm + .cp-acct { margin-left: 0; }
+.teim-rd .cp-navm > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; min-height: 40px; padding: 0.3rem 0.8rem; border: 1px solid var(--line); border-radius: 999px; }
+.teim-rd .cp-navm > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-navm > summary:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-navm__here { font-family: var(--sans); font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-navm__cue { font-size: 0.7rem; color: var(--muted); }
+.teim-rd .cp-navm__menu { position: absolute; top: calc(100% + 0.5rem); left: 0; z-index: 40; min-width: 14rem; display: flex; flex-direction: column; padding: 0.4rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 16px 40px rgba(10, 15, 38, 0.16); }
+.teim-rd .cp-navm__item { display: flex; align-items: center; min-height: 44px; padding: 0.4rem 0.7rem; border-radius: 6px; font-size: 0.95rem; color: var(--ink); text-decoration: none; }
+.teim-rd .cp-navm__item:hover { background: var(--teal-tint); color: var(--dteal); }
+.teim-rd .cp-navm__item[aria-current="page"] { color: var(--dteal); font-weight: 700; }
+
 .teim-rd .cp-avatar { position: relative; display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; border: 1px solid var(--teal-line); background: var(--teal-tint); color: var(--dteal); font-family: var(--sans); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.02em; text-decoration: none; transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease; }
 .teim-rd .cp-avatar:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; transform: translateY(-1px); }
 .teim-rd .cp-avatar__sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -356,7 +393,7 @@
 .teim-rd .cp-band__head { grid-column: 1 / -1; grid-row: 1; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0.8rem 2rem; }
 .teim-rd .cp-band__head .cp-band__id { flex: 1 1 22rem; min-width: 0; }
 .teim-rd .cp-band__head .cp-kind { flex: 0 0 auto; }
-.teim-rd .cp-hero__access { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); margin: 0 0 0.8rem; }
+.teim-rd .cp-hero__access { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); margin: 0 0 0.55rem; }
 
 /* ── Every figure is traceable ────────────────────────────────────────────
  * The trust claim and the three ways to check it, on one rule directly under
@@ -429,7 +466,6 @@
   /* The band's inner gutter changes on the container's breakpoint, not its
      own, or band content steps off the masthead's left edge between them. */
   .teim-rd .cp-mast__top { row-gap: 0.35rem; }
-  .teim-rd .cp-mast__user { margin-left: 0; flex: 1 1 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 /* The one link out of a section, for a reader who wants the method behind a
@@ -498,10 +534,7 @@
 .teim-rd .cp-band--plain { background: var(--bg); }
 
 .teim-rd .cp-band__id { grid-column: 1; max-width: 62ch; }
-.teim-rd .cp-band__eyebrow { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-band__name { font-family: var(--sans); font-size: clamp(1.6rem, 2.8vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; color: var(--ink); margin: 0.25rem 0 0; }
-.teim-rd .cp-band__q { font-size: 1.06rem; font-weight: 700; color: var(--dteal); margin: 0.3rem 0 0; }
-.teim-rd .cp-band__promise { font-size: 0.98rem; line-height: 1.6; color: var(--ink-2); margin: 0.6rem 0 0; max-width: 68ch; }
 .teim-rd .cp-band__caps { list-style: none; margin: 0.7rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
 .teim-rd .cp-band__caps li { font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); padding-left: 0.95rem; position: relative; }
 .teim-rd .cp-band__caps li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; background: var(--teal); }
@@ -512,16 +545,16 @@
  * holds even where a parent's line box is unusual; line-height 0 keeps it
  * from inflating the line it sits on. */
 .teim-rd .cp-plus { display: inline-block; font-size: 0.58em; line-height: 0; position: relative; top: -0.55em; letter-spacing: 0; margin-left: 0.05em; }
-.teim-rd .cp-band__facts { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin: 0.9rem 0 0; }
+/* The shelf's coverage line reads as a sentence. Uppercase mono across a
+ * full line is the treatment this design keeps for two-word labels. */
+.teim-rd .cp-band__facts { font-family: var(--sans); font-size: 0.92rem; font-weight: 600; letter-spacing: 0; color: var(--ink-2); margin: 0.5rem 0 0; }
 /* The asterisk's footnote: each collection's own start date lives in the
  * read panel, and this line says so instead of letting one year speak for
  * the shelf. */
-.teim-rd .cp-band__vary { font-family: var(--mono); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); margin: 0.3rem 0 0; }
 /* 0.8 measured 3.72:1 against the band teal (#0A7F74) at 0.58rem, under the
  * 4.5:1 WCAG 1.4.3 minimum for text this size. 0.95 measures 4.57:1. The
  * quiet comes from the size and the mono face, not from the last 5% of
  * alpha, so nothing about the hierarchy changes. */
-.teim-rd .cp-band--fill .cp-band__vary { color: rgba(255, 255, 255, 0.95); }
 
 /* The price stands with the tier's name, in the band's own ink. */
 .teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }
@@ -616,10 +649,13 @@
 /* Explicit counts rather than auto-fit: six tiles into an auto-fit track
  * lands five across and one alone on a second row, which reads as a
  * mistake. Six, three, then two — every arrangement fills its rows. */
-.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.9rem; }
-@media (max-width: 1280px) { .teim-rd .cp-hub__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* THREE ACROSS, NOT SIX. A card carries its own sentence now, and six
+ * sentence-carrying cards across a page is six columns of two-word lines. */
+.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; }
+@media (max-width: 900px) { .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .teim-rd .cp-hub__grid { grid-template-columns: minmax(0, 1fr); } }
 .teim-rd .cp-hub__grid > li { position: relative; display: block; }
-.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; min-height: 10.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1.1rem 0.7rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
+.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 0.6rem; padding: 1.1rem 1.2rem 1.3rem; border: 1px solid var(--line); background: var(--bg); text-align: left; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
 /* The teal rises from the floor of the tile on hover rather than washing
  * over it: the mark and the name stay on paper, which keeps their contrast
  * where it was measured. */
@@ -629,16 +665,17 @@
 .teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: translateY(-2px) scale(1.06); }
 .teim-rd .cp-hub__tile:hover .cp-hub__name { color: var(--dteal); }
 .teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-.teim-rd .cp-hub__mark svg { width: 76px; height: 76px; }
-.teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.22rem; min-width: 0; }
-.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.2rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.18; transition: color 0.18s ease; }
+.teim-rd .cp-hub__mark svg { width: 30px; height: 30px; }
+.teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.18; transition: color 0.18s ease; }
+/* What is in the section, on the card. */
+.teim-rd .cp-hub__what { font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
 /* What the section holds right now, read from the catalog: a label alone
  * says where a tap goes, this says whether it is worth taking. */
-.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 /* The line under the grid, painted by pointing at a tile — the same
  * point-to-read language as the shelves, with no second control on the
  * tile. min-height holds two lines so the page never jumps. */
-.teim-rd .cp-hub__note { max-width: 68ch; min-height: 2.6em; margin: 1rem 0 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
 /* Phones: a strict 2x3, the squares scaling with the screen rather than
  * wrapping to a single column. */
 @media (max-width: 640px) {
@@ -756,9 +793,8 @@
 
 /* On the filled band everything inverts, and a downloadable square is solid
  * against translucent neighbours so it reads as the one you can take. */
-.teim-rd .cp-band--fill .cp-band__eyebrow, .teim-rd .cp-band--fill .cp-band__facts { color: #fff; }
-.teim-rd .cp-band--fill .cp-band__name, .teim-rd .cp-band--fill .cp-band__q { color: #fff; }
-.teim-rd .cp-band--fill .cp-band__promise { color: #fff; }
+.teim-rd .cp-band--fill .cp-band__facts { color: rgba(255,255,255,0.92); }
+.teim-rd .cp-band--fill .cp-band__name { color: #fff; }
 .teim-rd .cp-band--fill .cp-band__caps li { color: #fff; }
 .teim-rd .cp-band--fill .cp-band__caps li::before { background: #fff; }
 /* The pair inverts. On the teal band the tile is white with teal contents;
@@ -788,13 +824,15 @@
 .teim-rd .cp-read__cap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
 .teim-rd .cp-read__name { font-family: var(--sans); font-size: 1.1rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.25; color: var(--ink); margin: 0.45rem 0 0; }
 .teim-rd .cp-read__blurb { font-size: 0.92rem; line-height: 1.55; color: var(--ink-2); margin: 0.5rem 0 0; }
+.teim-rd .cp-read__method { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.7rem; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 1px solid var(--teal-line); }
+.teim-rd .cp-read__method:hover { border-color: var(--dteal); }
+.teim-rd .cp-band--fill .cp-read__method { color: #fff; border-color: rgba(255,255,255,0.5); }
 /* The join is the product, so the reader says it about every collection. */
 .teim-rd .cp-read__link { font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); margin: 0.7rem 0 0; padding-top: 0.7rem; border-top: 1px solid var(--line-soft); }
 .teim-rd .cp-read__linkcap { display: block; font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.3rem; }
 .teim-rd .cp-band--fill .cp-read__link { color: #fff; border-top-color: #fff; }
 .teim-rd .cp-band--fill .cp-read__linkcap { color: #fff; }
 .teim-rd .cp-read__foot { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0.8rem 0 0; }
-.teim-rd .cp-read__hint { font-size: 0.92rem; line-height: 1.55; color: var(--muted); margin: 0.5rem 0 0; }
 .teim-rd .cp-read .cp-band__cta { margin-top: auto; }
 .teim-rd .cp-band__cta { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; align-self: flex-start; padding: 0.55rem 1.1rem; background: var(--dteal); color: #fff; font-size: 0.92rem; font-weight: 700; text-decoration: none; }
 .teim-rd .cp-band__cta:hover { background: var(--ink); }
@@ -809,7 +847,7 @@
 .teim-rd .cp-band--fill .cp-read.is-pulse { box-shadow: 0 0 0 3px #fff; }
 .teim-rd .cp-band--fill .cp-read__cap { color: #fff; }
 .teim-rd .cp-band--fill .cp-read__name { color: #fff; }
-.teim-rd .cp-band--fill .cp-read__blurb, .teim-rd .cp-band--fill .cp-read__hint { color: #fff; }
+.teim-rd .cp-band--fill .cp-read__blurb { color: #fff; }
 .teim-rd .cp-band--fill .cp-read__foot { color: #fff; }
 /* The Ask Cedar link inherits the page's dark teal, which disappears into
  * the filled band's tinted panel; on that band it wears the panel's white. */
@@ -912,10 +950,10 @@
 /* Full width: the headline takes the page and the sub runs beside room to
  * breathe. A 62ch cap here left half the page empty above the fold, which
  * read as a mistake rather than restraint. */
-.teim-rd .cp-mh { padding: 3.4rem 0 1rem; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem 3.5rem; align-items: end; }
+.teim-rd .cp-mh { padding: 2rem 0 0.5rem; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem 3.5rem; align-items: end; }
 .teim-rd .cp-mh .cp-hero__access { grid-column: 1 / -1; }
 @media (max-width: 900px) { .teim-rd .cp-mh { grid-template-columns: minmax(0, 1fr); align-items: start; } }
-.teim-rd .cp-mh__title { font-family: var(--sans); font-size: clamp(2.1rem, 4.6vw, 3.4rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.04; color: var(--ink); margin: 0.4rem 0 0; }
+.teim-rd .cp-mh__title { font-family: var(--sans); font-size: clamp(2.1rem, 4.6vw, 3.4rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.04; color: var(--ink); margin: 0; }
 .teim-rd .cp-mh__sub { font-size: 1.08rem; line-height: 1.6; color: var(--ink-2); margin: 1rem 0 0.35rem; max-width: 58ch; }
 .teim-rd .cp-mh__act { margin: 0.9rem 0 0; }
 /* The sentence the page exists to earn. It stands alone rather than being
@@ -1922,9 +1960,9 @@
   .teim-rd .cp-open .cp-hero { padding-block: 0 2.4rem; }
   .teim-rd .cp-open .cp-hero h1 { font-size: clamp(2.4rem, 3.8vw, 3.4rem); }
   .teim-rd .cp-open .cp-hero p { font-size: 1.08rem; }
-  .teim-rd .cp-open .cp-hub__tile { min-height: clamp(10.5rem, 22vh, 15rem); gap: 1.1rem; }
-  .teim-rd .cp-open .cp-hub__mark svg { width: 84px; height: 84px; }
-  .teim-rd .cp-open .cp-hub__name { font-size: 1.3rem; }
+  .teim-rd .cp-open .cp-hub__tile { gap: 0.7rem; padding-block: 1.3rem 1.5rem; }
+  .teim-rd .cp-open .cp-hub__name { font-size: 1.24rem; }
+  .teim-rd .cp-open .cp-hub__what { font-size: 0.96rem; }
 
   /* Screen two: the close and the footer are one ending, so the teal takes
      whatever height is left and the footer sits on the bottom edge under it.
@@ -1948,13 +1986,6 @@
   .teim-rd .cp--screens { scroll-snap-type: none; }
 }
 
-/* ── Start here ──────────────────────────────────────────────────────────
- * The overview's verbs, between the hero and the section index: what a
- * signed-in reader can do right now, before the doors describe what
- * exists. Quiet pills, not a second hero. */
-.teim-rd .cp-start { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: center; margin: 1.2rem auto 0; max-width: 46rem; }
-.teim-rd .cp-start__act { display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); padding: 0.55rem 1rem; font-family: var(--sans); font-size: 0.88rem; font-weight: 600; color: var(--dteal); text-decoration: none; cursor: pointer; transition: border-color 0.16s ease, background 0.16s ease, transform 0.12s ease; }
-.teim-rd .cp-start__act:hover { border-color: var(--dteal); background: var(--teal-tint); transform: translateY(-1px); }
 
 
 /* ══ The door ═════════════════════════════════════════════════════════════
@@ -2542,9 +2573,24 @@
  * foot are one bordered thing, in the shelf's own language (hairlines, no
  * radius, mono caps for labels). The shelf above it is untouched. */
 .teim-rd .cp-ex { max-width: 1560px; margin: 3.2rem auto 0; padding: 0 2.4rem; }
-.teim-rd .cp-ex__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem 2rem; align-items: start; margin-bottom: 1.2rem; }
-.teim-rd .cp-ex__title { font-family: var(--sans); font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0.3rem 0 0; }
-.teim-rd .cp-ex__lede { font-size: 0.98rem; line-height: 1.6; color: var(--ink-2); margin: 0.6rem 0 0; max-width: 72ch; }
+/* The viewer's head: the name of what is on screen, the sample badge, and
+ * the disclosure holding what used to be a paragraph. One row, wrapping. */
+.teim-rd .cp-ex__head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin-bottom: 0.9rem; }
+.teim-rd .cp-ex__title { font-family: var(--sans); font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0; margin-right: auto; }
+/* About this collection. */
+.teim-rd .cp-ex__about { flex: 0 0 auto; }
+.teim-rd .cp-ex__aboutbtn { cursor: pointer; list-style: none; display: inline-flex; align-items: center; min-height: 38px; padding: 0.35rem 0.9rem; border: 1px solid var(--line); border-radius: 999px; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-ex__aboutbtn::-webkit-details-marker { display: none; }
+.teim-rd .cp-ex__aboutbtn:hover { border-color: var(--dteal); background: var(--teal-tint); }
+.teim-rd .cp-ex__about[open] .cp-ex__aboutbtn { border-color: var(--dteal); background: var(--teal-tint); }
+.teim-rd .cp-ex__aboutin { flex-basis: 100%; margin-top: 0.8rem; padding: 1rem 1.1rem; border: 1px solid var(--line); border-radius: 4px; background: var(--paper, var(--bg)); }
+.teim-rd .cp-ex__about[open] { flex-basis: 100%; }
+.teim-rd .cp-ex__aboutlede { font-size: 0.98rem; line-height: 1.6; color: var(--ink); margin: 0 0 0.9rem; max-width: 80ch; }
+.teim-rd .cp-ex__aboutrows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem 2.4rem; margin: 0; }
+.teim-rd .cp-ex__aboutrows dt { font-family: var(--sans); font-size: 0.82rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-ex__aboutrows dd { margin: 0.2rem 0 0; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); }
+.teim-rd .cp-ex__aboutmore { display: inline-block; margin-top: 0.9rem; font-size: 0.84rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 1px solid var(--teal-line); }
+@media (max-width: 720px) { .teim-rd .cp-ex__aboutrows { grid-template-columns: minmax(0, 1fr); } }
 .teim-rd .cp-ex__card { border: 1px solid var(--line); background: var(--bg); }
 .teim-rd .cp-ex__bar { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem; padding: 0.9rem 1rem; border-bottom: 1px solid var(--line); }
 .teim-rd .cp-ex__picklabel { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
@@ -2564,8 +2610,9 @@
 body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; }
 .teim-rd .cp-ex__collection { display: flex; flex-direction: column; gap: 0.15rem; min-width: 14rem; }
 .teim-rd .cp-ex__select { font: inherit; font-size: 0.92rem; font-weight: 700; min-height: 44px; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 0; background: var(--bg); color: var(--ink); max-width: 100%; }
-.teim-rd .cp-ex__scope { margin: 0; padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); }
-.teim-rd .cp-ex__scope em { font-style: normal; color: var(--dteal); font-weight: 600; }
+/* How to read the numbers, as fields beside the numbers. */
+.teim-rd .cp-ex__reads { display: flex; flex-wrap: wrap; gap: 0.3rem 1.8rem; margin: 0; padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); font-size: 0.86rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-ex__reads b { font-weight: 700; color: var(--ink); margin-right: 0.35rem; }
 /* The foot of an open record: the document, the resolution basis, the release
  * and a citation. The open row is the object a subscription buys, so it ends
  * on what a researcher would otherwise leave the page for. */
@@ -2659,7 +2706,10 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-ex__saved summary { cursor: pointer; font-weight: 700; color: var(--dteal); }
 .teim-rd .cp-ex__saved ul { list-style: none; margin: 0.4rem 0 0; padding: 0; }
 .teim-rd .cp-ex__saved li { padding: 0.3rem 0; border-top: 1px solid var(--line-soft); }
-.teim-rd .cp-ex__caption { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; margin: 0; padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+/* The caption is a sentence about the cut, so it is set as one. It was mono,
+ * uppercase and letter-spaced across a full line, which is the treatment this
+ * design reserves for a two-word label. */
+.teim-rd .cp-ex__caption { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.9rem; margin: 0; padding: 0.6rem 1rem; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; letter-spacing: 0; color: var(--ink-2); }
 .teim-rd .cp-ex__caption .cp-ex__clear { text-transform: none; letter-spacing: 0; font-family: var(--sans); }
 .teim-rd .cp-ex__note { margin: 0; padding: 0 1rem 0.5rem; }
 
@@ -3071,10 +3121,78 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 }
 @media (max-width: 720px) {
   .teim-rd .cp-rec__fields, .teim-rd .cp-rec__provgrid { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
-  .teim-rd .cp-rec__bar, .teim-rd .cp-rec__foot { flex-direction: column; align-items: stretch; }
-  .teim-rd .cp-rec__walk { justify-content: space-between; }
-  .teim-rd .cp-rec__back { justify-content: center; }
+  /* Two short controls share a row; the walk, which is three, takes its own.
+     Stacking everything cost a row of the first screen on the profile, where
+     the records are the point. */
+  .teim-rd .cp-rec__bar, .teim-rd .cp-rec__foot { flex-wrap: wrap; align-items: stretch; gap: 0.5rem; }
+  .teim-rd .cp-rec__bar > .cp-rec__back,
+  .teim-rd .cp-rec__bar > .cp-rec__walkbtn,
+  .teim-rd .cp-rec__foot > .cp-rec__back,
+  .teim-rd .cp-rec__foot > .cp-rec__linkbtn { flex: 1 1 8rem; justify-content: center; }
+  .teim-rd .cp-rec__walk { flex: 1 1 100%; justify-content: space-between; }
 }
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cp-rec__back, .teim-rd .cp-rec__walkbtn { transition: none; }
 }
+
+/* ── The record page, second pass (review 2026-09-15) ─────────────────────
+ * The summary sits directly under the name; the identifiers that used to
+ * stand between them are a quiet line under it; the extra fields open in
+ * groups; and the evidence section carries this row's own match. */
+.teim-rd .cp-rec__head { padding: 1.6rem 0 0.9rem; border-bottom: 0; }
+.teim-rd .cp-rec__sum { padding: 1.2rem 0 1.4rem; }
+.teim-rd .cp-rec__ids { padding-bottom: 1.2rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-rec__ids .cp-rec__as { margin: 0; }
+.teim-rd .cp-rec__groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem 2rem; }
+.teim-rd .cp-rec__group { border: 1px solid var(--line); border-radius: 4px; padding: 0 0.9rem; background: var(--bg); }
+.teim-rd .cp-rec__group summary { display: flex; align-items: center; gap: 0.5rem; min-height: 46px; cursor: pointer; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-rec__group summary:hover { color: var(--dteal); }
+.teim-rd .cp-rec__group[open] { grid-column: 1 / -1; }
+.teim-rd .cp-rec__groupn { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); }
+.teim-rd .cp-rec__group .cp-rec__fields { padding-bottom: 1rem; }
+.teim-rd .cp-rec__match { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; margin: 0; }
+.teim-rd .cp-rec__match dt { font-family: var(--sans); font-size: 0.78rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-rec__match dd { margin: 0.15rem 0 0; font-size: 0.9rem; color: var(--ink-2); overflow-wrap: anywhere; }
+.teim-rd .cp-rec__rowis { margin-top: 1.2rem; max-width: 80ch; }
+.teim-rd .cp-rec__rowis b { color: var(--ink); }
+@media (max-width: 720px) {
+  .teim-rd .cp-rec__groups { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* A chapter's own sub-heading, where two arguments belong to one topic
+ * (ownership carries what the identifier refuses to hold; linkage carries
+ * why a row can have no entity). Consolidating ten chapters into seven is
+ * what makes the index readable; this is what keeps the sections legible
+ * inside them. */
+.teim-rd .cp-ch__sub { font-family: var(--sans); font-size: 1.06rem; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); margin: 2.2rem 0 1rem; }
+/* The identifier cards' technical half, folded. */
+.teim-rd .cp-idp__tech { margin-top: 1rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-idp__tech summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-idp__tech[open] summary { margin-bottom: 0.4rem; }
+
+/* The masthead on a phone: one row, and the lockup sized so the row holds
+ * the wordmark, the section menu and the account without wrapping. The
+ * wordmark at its desktop size took 225px of a 354px line on its own, which
+ * is what pushed the menu onto a second row and made the header a fifth of
+ * the screen. */
+@media (max-width: 560px) {
+  .teim-rd .cp-mast { padding-top: 0.9rem; }
+  .teim-rd .cp-mast__top { padding-bottom: 0.7rem; gap: 0.5rem; flex-wrap: nowrap; }
+  .teim-rd .cp-mast__mark { width: 1.9rem; height: 1.9rem; }
+  .teim-rd .cp-mast__word { font-size: 0.95rem; letter-spacing: 0.1em; }
+  .teim-rd .cp-mast__lockup { gap: 0.45rem; min-width: 0; }
+  .teim-rd .cp-navm > summary { padding: 0.3rem 0.6rem; min-height: 38px; }
+  .teim-rd .cp-navm__here { font-size: 0.82rem; white-space: nowrap; }
+  .teim-rd .cp-avatar { width: 2rem; height: 2rem; font-size: 0.72rem; }
+}
+
+/* Nothing pointed at, nothing to say: the reader panel keeps its space in the
+ * grid so the tiles do not jump when a pointer arrives, and draws no frame. */
+.teim-rd .cp-read.is-empty { border-color: transparent; background: none; box-shadow: none; }
+
+/* The viewer's secondary actions, on a phone. */
+.teim-rd .cp-ex__more { position: relative; }
+.teim-rd .cp-ex__more > summary { list-style: none; }
+.teim-rd .cp-ex__more > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-ex__morein { position: absolute; top: calc(100% + 0.4rem); right: 0; z-index: 30; display: flex; flex-direction: column; gap: 0.3rem; padding: 0.4rem; min-width: 11rem; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 14px 34px rgba(10,15,38,0.16); }
+.teim-rd .cp-ex__morein .cp-ex__act { justify-content: center; }
