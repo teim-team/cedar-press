@@ -68,7 +68,7 @@
     "short_name": "Legislation",
     "tracks": "Federal bills affecting Indian Country and the recorded votes on them, with sponsors, cosponsors and subject classification.",
     "sources": "Congress.gov API; Voteview roll-call records; committee and hearing records.",
-    "method": "Most legislation affecting Indian Country names no single tribe, so records are scoped to Indian Country as a whole rather than forced onto an entity — an unattached row here is the correct representation, not a gap. Subject classification is recorded with the basis on which a bill was judged Native-relevant."
+    "method": "Most legislation affecting Indian Country names no single tribe. Records are therefore scoped to Indian Country as a whole, and a row with no entity attached is the correct representation of what the bill reaches. Subject classification is recorded with the basis on which a bill was judged Native-relevant."
   },
   "federal-register": {
     "name": "Federal Register — Indian Affairs",
