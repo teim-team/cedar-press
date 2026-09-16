@@ -1,0 +1,3 @@
+# Content-addressed R7 audit artifacts (code/1188). Bundle ids and pointer hashes
+# are computed over exact bytes, so git must never convert their line endings.
+docs/imports/r7_audit/** -text

@@ -1,0 +1,12 @@
+{
+  "activated_bundles": [
+    "5bfe75935203e605fed449cb",
+    "b1dbf9c7681d781dd7955c5d",
+    "5c21f711f2d6e81d03e1a095",
+    "e6708a8f8e608cd16df9c09c"
+  ],
+  "bundle_id": "e6708a8f8e608cd16df9c09c",
+  "manifest_sha256": "44c3c1ff427a1e53a23089d0cb25d77eb1b42ad906cfbbea6961778ecf7942ea",
+  "queue_generated_sha256": "f82c96a746aa13dd078cf2dc054a99821bfed3361c4dae6dc6b04d1bc6d7ddc2",
+  "schema": "cedar.r7.audit_current_pointer.v1"
+}
