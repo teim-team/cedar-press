@@ -13,6 +13,7 @@ import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
+import { CedarIcon } from "./pressGateIcons";
 
 // Questions every collection profile can answer; shown whenever Cedar is
 // scoped to a collection.
@@ -136,7 +137,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
   };
 
   return (
-    <div className="cedar-widget cedar-widget--launcher-only">
+    <div className={`cedar-widget cedar-widget--launcher-only${open ? " cedar-widget--open" : ""}`}>
       {open ? (
         <div className="cedar-widget__panel" role="dialog" aria-label="Ask Cedar">
           {/* A dialog header, not a floating glyph: the caption names the
@@ -264,7 +265,12 @@ export function PressCedarFab({ gated = null, examples = [] }) {
         {/* The platform's launcher, to the mark: status dot, then the name
             with the surface it is being asked about under it. Same markup as
             teim-app's CedarWidget so the control a subscriber meets here is
-            the control they meet inside Cedar Grove. */}
+            the control they meet inside Cedar Grove.
+            At rest the launcher is a circle and this mark is what is in it;
+            the dot and the name arrive with the pointer. A lone status dot in
+            a circle says nothing, and the mark is the one thing here a reader
+            has already met — it is the wordmark's own glyph. */}
+        <span className="cedar-widget__launcher-mark" aria-hidden="true">{CedarIcon}</span>
         <span className="cedar-widget__status-dot" aria-hidden="true" />
         <span className="cedar-widget__launcher-copy">
           <span className="cedar-widget__launcher-label">Ask Cedar</span>

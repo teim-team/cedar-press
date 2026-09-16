@@ -267,7 +267,21 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
   const from = starts.length ? Math.min(...starts) : null;
   // The reader follows the pointer; with nothing under it, it describes
   // the collection the viewer is showing.
-  const active = entries.find((entry) => entry.id === (hovered ?? selectedId)) || null;
+  // THE PANEL IS 26REM OF RESERVED COLUMN; AT REST IT HELD NOTHING.
+  // `.cp-band__in` lays each shelf out as tiles beside a 26rem panel, and the
+  // panel only had a collection in it once a pointer was on a tile — so the
+  // resting state of both shelves, which is the state anyone arriving sees,
+  // was six tiles across 40% of the page and 60% of empty beside them.
+  //
+  // The instruction box that used to stand there was removed for good reason
+  // (a caption on an empty frame). The answer is not to put the caption back
+  // or to collapse the column — collapsing makes the whole grid jump the
+  // first time a cursor crosses a tile. The panel was built to describe a
+  // collection, so it opens describing one: the first on the shelf. Nothing
+  // reserved, nothing empty, nothing that moves, and the shelf's first
+  // download is one click away instead of one hover plus one click.
+  const active =
+    entries.find((entry) => entry.id === (hovered ?? selectedId)) || entries[0] || null;
   const [ref, seen, instant] = useReveal();
 
   // A locked tile's click walks the reader to the answer: the panel that

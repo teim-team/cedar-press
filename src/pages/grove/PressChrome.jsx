@@ -207,7 +207,17 @@ export function PressMast({ user, onSignOut, section = null, nav = true }) {
         {/* Who made it and who sells it, said plainly — to visitors. "A ×
             partnership" left both questions open; a signed-in reader has
             already answered them. */}
-        {signedIn ? null : (
+        {signedIn ? (
+          // ONE LOCKUP, BOTH SIDES OF THE DOOR.
+          // The door's bar reads CEDAR PRESS | TRUSTED INTELLIGENCE FOR
+          // INDIAN COUNTRY; the reader's masthead read CEDAR PRESS alone, so
+          // the product dropped its own positioning line at the moment
+          // somebody became a customer. The attribution below is still
+          // withheld from a signed-in reader for the reason it always was —
+          // they have answered who made it and who sold it — but the standing
+          // line stays, the way a masthead's does.
+          <span className="cp-mast__of cp-mast__of--line">Trusted intelligence for Indian Country</span>
+        ) : (
           <span className="cp-mast__of">
             Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
             exclusively through{" "}

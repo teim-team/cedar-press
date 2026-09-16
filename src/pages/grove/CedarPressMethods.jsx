@@ -172,10 +172,19 @@ function Chapter({ id, title, claim, children }) {
   const chapter = CHAPTERS[at];
   return (
     <section className="cp-msec cp-ch cp-fade" id={anchorId(id)} aria-label={chapter.label}>
+      {/* THE MARK USED TO STAND BESIDE THE WHOLE HEAD, WHICH PUSHED THE
+          HEADING 60PX IN WHILE EVERY OTHER LINE IN THE SECTION -- the claim
+          under it, the stage diagram, the tables -- started at the page
+          gutter. A section whose own title does not share a left edge with
+          its own body reads as two columns that failed to line up. The mark
+          rides the numbered eyebrow instead, at eyebrow size, so the title
+          and the prose sit on the same edge as everything else. */}
       <header className="cp-ch__head">
-        <span className="cp-ch__mark" aria-hidden="true">{chapter.icon}</span>
         <div className="cp-ch__id">
-          <span className="cp-ch__n">{String(at + 1).padStart(2, "0")} — {chapter.label}</span>
+          <span className="cp-ch__n">
+            <span className="cp-ch__mark" aria-hidden="true">{chapter.icon}</span>
+            {String(at + 1).padStart(2, "0")} — {chapter.label}
+          </span>
           <h2 className="cp-msec__title">{title}</h2>
         </div>
       </header>

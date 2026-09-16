@@ -44,7 +44,7 @@ Collection `funding` · table `federal_funding_transactions` · 701,955 rows in 
 | 12 | `recipient_uei` | Recipient UEI | The recipient's federal Unique Entity ID. |
 | 13 | `business_types_code` (*combines into `recipient_type`*) | Business types code | One of three overlapping recipient-type fields, consolidated through the source-code dictionary with conflict checks. |
 | 14 | `business_types_description` (*combines into `recipient_type`*) | Recipient type as recorded | How USAspending classifies the recipient (for example, federally recognized tribal government). |
-| 15 | `business_types_description_normalized` (*combines into `recipient_type`*) | Business types description normalized | The normalized spelling, the third of the three. |
+| 15 | `business_types_description_normalized` (*combines into `recipient_type`*) | Recipient type | The normalized spelling, the third of the three. |
 | 16 | `assistance_type` (*rename to `assistance_type_code`*) | Assistance type code | The source's code for the assistance type (grant, loan, direct payment, insurance), defined in the dictionary; the readable type is beside it. |
 | 17 | `assistance_type_description` (*rename to `assistance_type`*) | Assistance type | What kind of assistance it is: formula grant, project grant, direct payment, loan, insurance. |
 | 18 | `cfda` (*rename to `program_code`*) | Program number | The Assistance Listing (CFDA) number of the federal program. |

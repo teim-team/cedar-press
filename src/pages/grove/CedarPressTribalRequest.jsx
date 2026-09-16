@@ -138,9 +138,18 @@ export default function CedarPressTribalRequest() {
         </section>
 
         <section className="cp-limits cp-two cp-fade" aria-label="What a request does not include">
-          <div>
+          {/* The action moved up here from the foot of the right column. The
+              left column held two lines of display type and then stopped, so
+              the last thing on the page was a heading with an empty half-page
+              under it; the right column carried the words AND the way out.
+              The statement and the action belong together, and the section
+              now ends on both columns rather than on one. */}
+          <div className="cp-limits__say">
             <span className="cp-sec__band">Not included</span>
             <h2 className="cp-two__title">What a request does not cover.</h2>
+            <a className="cp-trh__cta" href={REQUEST_HREF}>
+              Request your records <span aria-hidden="true">&#8594;</span>
+            </a>
           </div>
           <div>
           <p className="cp-limits__body">
@@ -158,9 +167,6 @@ export default function CedarPressTribalRequest() {
             organizations are covered only where a request is properly authorized by a federally
             recognized tribal government concerning an entity it owns or controls.
           </p>
-          <a className="cp-trh__cta" href={REQUEST_HREF}>
-            Request your records <span aria-hidden="true">&#8594;</span>
-          </a>
           </div>
         </section>
 

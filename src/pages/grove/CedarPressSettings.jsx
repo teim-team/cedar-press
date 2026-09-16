@@ -216,9 +216,15 @@ export default function CedarPressSettings() {
               record-level exploration, entity filters, full histories and Cedar across all of
               them at once.
             </p>
-            <a className="gv-btn gv-btn--quiet" href={LUMECON_URL} target="_blank" rel="noreferrer">
-              About Cedar Grove <span aria-hidden="true">&#8594;</span>
-            </a>
+            {/* In the actions row like every other card's action: a bare
+                button inside the card's flex column stretches to the card's
+                full width, which is why this one was a wide outlined bar
+                beside a pill that hugged its label. */}
+            <div className="cp-set__acts">
+              <a className="gv-btn gv-btn--quiet" href={LUMECON_URL} target="_blank" rel="noreferrer">
+                About Cedar Grove <span aria-hidden="true">&#8594;</span>
+              </a>
+            </div>
           </section>
         </div>
 

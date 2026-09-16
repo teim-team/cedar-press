@@ -92,7 +92,7 @@ Until the combined columns exist, the file carries their sources, each with its 
 
 - `business_types_code` (Business types code) combines into `recipient_type`: One of three overlapping recipient-type fields, consolidated through the source-code dictionary with conflict checks.
 - `business_types_description` (Recipient type as recorded) combines into `recipient_type`: How USAspending classifies the recipient (for example, federally recognized tribal government).
-- `business_types_description_normalized` (Business types description normalized) combines into `recipient_type`: The normalized spelling, the third of the three.
+- `business_types_description_normalized` (Recipient type) combines into `recipient_type`: The normalized spelling, the third of the three.
 
 ## Missing values
 

@@ -333,7 +333,18 @@ export default function CedarPressRecord() {
     if (/_flag$/.test(c)) return false;
     // A normalized column beside the column it normalizes is the same fact
     // twice; the first screen shows one of them and the groups keep both.
-    if (/_normalized$/.test(c) && columns.includes(c.replace(/_normalized$/, ""))) return false;
+    //
+    // IT SHOWED THE RAW ONE, WHICH IS THE ONE WITH THE DEFECT IN IT.
+    // Federal Funding's sample carries both `business_types_description`
+    // ("INDIAN/NATIVE AMERICANTRIBAL GOVERNMENT" — USAspending's own missing
+    // space) and `business_types_description_normalized`, which is Cedar
+    // having already fixed it, with `..._normalized_basis` saying how. The
+    // first screen was printing the broken string at body size on the page
+    // that exists to argue the data is right. Resolving a source is the
+    // product; the source as recorded is the evidence for it, and evidence
+    // belongs in the groups below, which is exactly where it still is.
+    if (/_normalized$/.test(c)) return true;
+    if (columns.includes(`${c}_normalized`)) return false;
     const text = String(row[c] ?? "");
     return !(LONG_KEY.test(c) && text.length >= 20);
   });
