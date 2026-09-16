@@ -76,9 +76,8 @@ public site and the reference for product vocabulary). Product names and
 their one-line definitions follow the website's `AGENTS.md`; the vocabulary
 rule that matters most here is that Cedar Grove is "the living evidence base
 for your organization's economy" (owner ruling 2026-09-13, replacing "the
-advanced data library"). This repository has not caught up everywhere:
-`src/workspaceTier.js` still describes Cedar Grove as a data library in the
-shared tier catalog, and that copy is customer-facing. Updating it is open.
+advanced data library"). The shared tier catalog in `src/workspaceTier.js`
+uses that definition.
 
 ## Security
 
