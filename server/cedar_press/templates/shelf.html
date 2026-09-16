@@ -49,7 +49,7 @@
 
   <section class="cp-sec">
     <span class="cp-sec__band">Showing the {{ view.reach }} shelf and below</span>
-    <p class="cp-band__promise">
+    <p class="cp-read__blurb">
       This page is served by <code>cedar_press.app</code> and composed by
       <code>cedar_press.shelf</code> from <code>collections.py</code>,
       <code>repository.py</code> and <code>press_catalog.py</code>. No
@@ -90,30 +90,22 @@
 
           <div class="cp-band__head">
             <div class="cp-band__id">
-              <span class="cp-band__eyebrow">{{ "Your shelf" if band.reached else "Locked" }}</span>
               {#- The shelf's own id, not a product name. The tier ladder's
                   copy -- Cedar Press, Cedar Press+, their prices, questions
                   and promises -- lives only in pressCatalog.js's PRESS_TIERS,
                   which dump-press.mjs does not dump, so Python does not have
                   it. It is named as missing rather than retyped. -#}
               <h3 class="cp-band__name">{{ band.shelf | capitalize }} shelf</h3>
-              <p class="cp-band__q">
-                {{ band.entries | length }} collection{{ "" if band.entries | length == 1 else "s" }},
-                {{ "yours to download" if band.reached else "not included in this plan" }}.
-              </p>
-              <p class="cp-band__promise">
+              <p class="cp-read__blurb">
                 The band's product name, price and promise are not shown: they
                 exist only in <code>pressCatalog.js</code>, and retyping them
                 into Python would add a mirror rather than remove one.
               </p>
               <p class="cp-band__facts">
                 {{ band.entries | length }} collections
-                {%- if band.earliest %} · records as far back as {{ band.earliest }}*{% endif %}
+                {%- if band.earliest %} · records as far back as {{ band.earliest }}{% endif %}
                 {%- if band.reached %} · yours to download{% endif %}
               </p>
-              {% if band.earliest %}
-                <p class="cp-band__vary">* Coverage varies by collection; each is dated in the panel.</p>
-              {% endif %}
             </div>
             <span class="cp-kind cp-kind--data">Collections you download</span>
           </div>
@@ -159,12 +151,6 @@
               script the honest substitute is all of them, in the same panel
               and the same classes. -#}
           <aside class="cp-read">
-            <div class="cp-read__idle">
-              <span class="cp-read__cap">{{ "Your collections" if band.reached else "Inside this shelf" }}</span>
-              <p class="cp-read__hint">
-                Every collection on this shelf, with what it holds and how far back it goes.
-              </p>
-            </div>
             {% for entry in band.entries %}
               <div class="cp-read__on">
                 <span class="cp-read__cap">Cedar collection</span>
@@ -198,7 +184,7 @@
   {% if view.excluded %}
     <section class="cp-sec">
       <span class="cp-sec__band">Measured, not sold</span>
-      <p class="cp-band__promise">
+      <p class="cp-read__blurb">
         Collections Cedar measures that the storefront does not carry. Held on
         the page rather than dropped: an absence nobody can see is an absence
         nobody can question.

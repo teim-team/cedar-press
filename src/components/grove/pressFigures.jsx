@@ -127,17 +127,55 @@ function LineFigure({ points, series }) {
   const { tip, move, hide } = useTip();
   const names = series ?? ["value"];
   const W = 460;
+  // TWO NUMBERS AND NO KEY IS NOT A CHART A READER CAN USE.
+  // This drew one label at the top of the axis and a 0 at the bottom, with
+  // nothing between them and no gridlines, so no point on either line could
+  // be read to better than "somewhere in the upper half". And with two
+  // series it drew a solid teal line and a dashed grey one and never said
+  // which was which — the only key was a footnote under the figure, in prose.
+  // A research product's figures are the evidence; they have to be legible
+  // on their own. Four gridlines to read a value against, labels on each,
+  // and a key in the figure using the same stroke the line is drawn with.
   const H = 190;
-  const pad = { l: 34, r: 8, t: 10, b: 26 };
+  const multi = names.length > 1;
+  const legendH = multi ? 16 : 0;
+  const pad = { l: 34, r: 8, t: 10 + legendH, b: 26 };
   const max = scaleMax(points.flatMap((p) => names.map((n) => p[n] ?? 0)));
   const x = (i) => pad.l + (i * (W - pad.l - pad.r)) / Math.max(1, points.length - 1);
   const y = (v) => H - pad.b - (v / max) * (H - pad.t - pad.b);
+  // Quarters of the scale: enough to read a point against, few enough that
+  // the lines stay behind the data rather than competing with it.
+  const levels = [0, 0.25, 0.5, 0.75, 1].map((f) => f * max);
+  const dashFor = (s) => (s === 0 ? undefined : s === 1 ? "4 3" : "1.5 2.5");
   return (
     <Frame tip={tip} values={valueSentences(points, names)}>
     <svg viewBox={`0 0 ${W} ${H}`} role="img" className="pf" aria-label="Line chart">
+      {/* Behind everything, and never over a mark. */}
+      {levels.slice(1).map((v) => (
+        <line key={`g${v}`} x1={pad.l} y1={y(v)} x2={W - pad.r} y2={y(v)} className="pf__grid" />
+      ))}
       <line x1={pad.l} y1={H - pad.b} x2={W - pad.r} y2={H - pad.b} className="pf__axis" />
-      <text x="0" y={pad.t + 8} className="pf__ylab">{money(max)}</text>
-      <text x="0" y={H - pad.b} className="pf__ylab">0</text>
+      {levels.map((v) => (
+        <text key={`y${v}`} x="0" y={y(v) + 3.5} className="pf__ylab">{money(Math.round(v))}</text>
+      ))}
+      {multi ? (
+        <g className="pf__key">
+          {names.map((name, s) => {
+            const at = pad.l + s * 132;
+            return (
+              <g key={`k-${name}`}>
+                <line
+                  x1={at} y1={10} x2={at + 18} y2={10}
+                  stroke={s === 0 ? TEAL : GREY}
+                  strokeWidth={s === 0 ? 2.4 : 1.8}
+                  strokeDasharray={dashFor(s)}
+                />
+                <text x={at + 24} y={13.5} className="pf__tick">{name}</text>
+              </g>
+            );
+          })}
+        </g>
+      ) : null}
       {names.map((name, s) => (
         <polyline
           key={name}
@@ -146,7 +184,7 @@ function LineFigure({ points, series }) {
           strokeWidth={s === 0 ? 2.4 : 1.8}
           // Distinct dash per comparison series: two grey lines with the same
           // dash cannot be told apart, and the vocabulary allows three series.
-          strokeDasharray={s === 0 ? undefined : s === 1 ? "4 3" : "1.5 2.5"}
+          strokeDasharray={dashFor(s)}
           points={points.map((p, i) => `${x(i)},${y(p[name] ?? 0)}`).join(" ")}
         />
       ))}

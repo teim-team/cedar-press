@@ -246,12 +246,27 @@ export default function CedarPressWhatsNew() {
 
         {visible.length ? (
           <ol className="cp-feed cp-fade">
-            {visible.map((entry) => {
+            {visible.map((entry, i) => {
               const { name, anchor } = entry;
               const method = entry.kind === RELEASE_KIND.METHOD;
+              // TWELVE COLLECTIONS SHIP ON ONE DAY, AND THE DATE SAID SO
+              // TWELVE TIMES. The feed is newest-first and a release day
+              // moves every collection at once, so the left column was the
+              // same date repeated down the page — which reads as a column of
+              // filler rather than as one day's work. A date that repeats the
+              // one above it is a run, not a new fact, so only the first
+              // entry of a run carries it. The date is still on every item
+              // for a screen reader and for anyone landing on a permalink,
+              // as the datetime the element announces.
+              const runStart = i === 0 || visible[i - 1].date !== entry.date;
               return (
                 <li className="cp-feed__item" id={anchor} key={anchor}>
-                  <span className="cp-feed__when">{formatUpdated(entry.date)}</span>
+                  <time
+                    className={`cp-feed__when${runStart ? "" : " cp-feed__when--same"}`}
+                    dateTime={entry.date}
+                  >
+                    {runStart ? formatUpdated(entry.date) : <span className="sr-only">{formatUpdated(entry.date)}</span>}
+                  </time>
                   <div className="cp-feed__what">
                     {/* The kind on every entry, not only in the filter: a
                         methodology release read cold must announce itself. */}
@@ -268,9 +283,31 @@ export default function CedarPressWhatsNew() {
                       </a>
                     </h2>
                     {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
-                    <ul className="cp-feed__list">
-                      {entry.changed.map((line) => <li key={line}>{line}</li>)}
-                    </ul>
+                    {/* WHAT CHANGED, THEN THE ARITHMETIC.
+                        Every release lists its table and row counts beside
+                        whatever actually changed, at the same weight, so a
+                        methodology correction and "14 tables, 3,646,750 rows"
+                        read as two equal facts. The counts are release
+                        metadata — true, worth keeping, and not the news. */}
+                    {(() => {
+                      const routine = (line) => /^Release:\s/.test(line);
+                      const news = entry.changed.filter((l) => !routine(l));
+                      const counts = entry.changed.filter(routine);
+                      return (
+                        <>
+                          {news.length ? (
+                            <ul className="cp-feed__list">
+                              {news.map((line) => <li key={line}>{line}</li>)}
+                            </ul>
+                          ) : null}
+                          {counts.length ? (
+                            <p className="cp-feed__counts">
+                              {counts.map((line) => line.replace(/^Release:\s/, "")).join(" · ")}
+                            </p>
+                          ) : null}
+                        </>
+                      );
+                    })()}
                     <p className="cp-feed__acts">
                       {/* A retired collection's release is history a reader
                           can still cite; there is no shelf to walk to. */}
@@ -313,10 +350,11 @@ export default function CedarPressWhatsNew() {
           <p className="cp-feed__none">No releases match that combination yet.</p>
         )}
 
-        {/* Sponsorship rule 5: never in a filtered view. The slot rides the
-            full feed only, and never an empty result. */}
-        {filtered ? null : <PressAd slot={AD_SLOT.FEED} />}
-
+        {/* The list and the control that continues it are one thing, so
+            nothing goes between them. The slot used to sit here, above "Show
+            8 more", which put an advertisement inside the feed's own
+            pagination — the reader reached the end of the releases, met an ad,
+            and then found the button that was supposed to follow the list. */}
         {rest > 0 ? (
           <p className="cp-feed__more">
             <button type="button" className="cp-band__allbtn" onClick={() => setShown((n) => n + PAGE)}>
@@ -325,6 +363,11 @@ export default function CedarPressWhatsNew() {
             <span className="cp-feed__left">{rest} older</span>
           </p>
         ) : null}
+
+        {/* Sponsorship rule 5: never in a filtered view. The slot rides the
+            full feed only, and never an empty result. It sits after the feed
+            and its control, which is where a page pauses. */}
+        {filtered ? null : <PressAd slot={AD_SLOT.FEED} />}
 
         <PressFoot />
         <PressCedarFab />

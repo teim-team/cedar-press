@@ -142,9 +142,18 @@ function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen
   const style = { "--i": index };
 
   // Every tile answers a click on both shelves, and the cue says what the
-  // answer is: an owned tile hands over the file (the down arrow is the
-  // download), a locked one walks you to what opens it. Only the symbol
-  // differs, so the two shelves keep one hover language.
+  // answer is. Three actions, three cues, and none of them borrows another's:
+  //
+  //   ⌄  this tile opens the viewer below      (an owned tile)
+  //   →  this walks you to what opens it       (a locked tile)
+  //   ↓  this hands over a file                (the panel's download)
+  //
+  // Codex's review, 2026-09-16: an owned tile drew ↓ while its handler was
+  // `onOpen` and its own accessible name said "Open … in the viewer below" —
+  // so the picture said download and the words said open, and the comment
+  // that used to sit here ("the down arrow is the download") described
+  // behaviour this component no longer had. The arrowhead is a reveal, which
+  // is what the click actually does; ↓ goes back to meaning a file.
   if (!open) {
     return (
       <li style={style}>
@@ -160,7 +169,7 @@ function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen
     <li style={style}>
       <button type="button" className={className} onClick={() => onOpen(entry)} aria-pressed={selected} {...watch}>
         {inner}
-        <span className="cp-badge__cue" aria-hidden="true">&#8595;</span>
+        <span className="cp-badge__cue" aria-hidden="true">&#8964;</span>
         <span className="cp-badge__sr">Open {entry.name} in the viewer below</span>
       </button>
     </li>
@@ -190,11 +199,15 @@ function Detail({ entry, owned }) {
       </span>
       <h4 className="cp-read__name"><TierName name={entry.name} /></h4>
       <p className="cp-read__blurb">{entry.blurb}</p>
+      {/* The linkage is how the collection reaches its entities — method, not
+          description, and the longest paragraph in the panel. It was setting
+          the height of the whole shelf, so a verbose collection stretched the
+          band and the tiles sat in a field of colour. It opens in place. */}
       {entry.linkage ? (
-        <p className="cp-read__link">
-          <span className="cp-read__linkcap">The link</span>
-          {entry.linkage}
-        </p>
+        <details className="cp-read__link">
+          <summary><span className="cp-read__linkcap">The link</span></summary>
+          <p>{entry.linkage}</p>
+        </details>
       ) : null}
       <p className="cp-read__foot">
         {coverageLabel(entry)}
@@ -267,7 +280,21 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
   const from = starts.length ? Math.min(...starts) : null;
   // The reader follows the pointer; with nothing under it, it describes
   // the collection the viewer is showing.
-  const active = entries.find((entry) => entry.id === (hovered ?? selectedId)) || null;
+  // THE PANEL IS 26REM OF RESERVED COLUMN; AT REST IT HELD NOTHING.
+  // `.cp-band__in` lays each shelf out as tiles beside a 26rem panel, and the
+  // panel only had a collection in it once a pointer was on a tile — so the
+  // resting state of both shelves, which is the state anyone arriving sees,
+  // was six tiles across 40% of the page and 60% of empty beside them.
+  //
+  // The instruction box that used to stand there was removed for good reason
+  // (a caption on an empty frame). The answer is not to put the caption back
+  // or to collapse the column — collapsing makes the whole grid jump the
+  // first time a cursor crosses a tile. The panel was built to describe a
+  // collection, so it opens describing one: the first on the shelf. Nothing
+  // reserved, nothing empty, nothing that moves, and the shelf's first
+  // download is one click away instead of one hover plus one click.
+  const active =
+    entries.find((entry) => entry.id === (hovered ?? selectedId)) || entries[0] || null;
   const [ref, seen, instant] = useReveal();
 
   // A locked tile's click walks the reader to the answer: the panel that
