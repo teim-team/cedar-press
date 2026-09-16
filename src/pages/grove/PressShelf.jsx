@@ -142,9 +142,18 @@ function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen
   const style = { "--i": index };
 
   // Every tile answers a click on both shelves, and the cue says what the
-  // answer is: an owned tile hands over the file (the down arrow is the
-  // download), a locked one walks you to what opens it. Only the symbol
-  // differs, so the two shelves keep one hover language.
+  // answer is. Three actions, three cues, and none of them borrows another's:
+  //
+  //   ⌄  this tile opens the viewer below      (an owned tile)
+  //   →  this walks you to what opens it       (a locked tile)
+  //   ↓  this hands over a file                (the panel's download)
+  //
+  // Codex's review, 2026-09-16: an owned tile drew ↓ while its handler was
+  // `onOpen` and its own accessible name said "Open … in the viewer below" —
+  // so the picture said download and the words said open, and the comment
+  // that used to sit here ("the down arrow is the download") described
+  // behaviour this component no longer had. The arrowhead is a reveal, which
+  // is what the click actually does; ↓ goes back to meaning a file.
   if (!open) {
     return (
       <li style={style}>
@@ -160,7 +169,7 @@ function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen
     <li style={style}>
       <button type="button" className={className} onClick={() => onOpen(entry)} aria-pressed={selected} {...watch}>
         {inner}
-        <span className="cp-badge__cue" aria-hidden="true">&#8595;</span>
+        <span className="cp-badge__cue" aria-hidden="true">&#8964;</span>
         <span className="cp-badge__sr">Open {entry.name} in the viewer below</span>
       </button>
     </li>

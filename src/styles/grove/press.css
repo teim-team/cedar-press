@@ -976,8 +976,16 @@
 .teim-rd .cp-reveal--now .cp-read { transition: none; }
 .teim-rd .cp-band__id, .teim-rd .cp-read { transition: opacity 0.5s ease, transform 0.5s ease; }
 .teim-rd .cp-band:not(.is-in) .cp-band__id, .teim-rd .cp-band:not(.is-in) .cp-read { opacity: 0; transform: translateY(10px); }
-.teim-rd .cp-badge.is-on, .teim-rd button.cp-badge--act:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; }
-.teim-rd .cp-badge.is-on .cp-badge__mark, .teim-rd .cp-badge.is-on .cp-badge__cue { color: #fff; }
+/* TWO STATES, TWO STRENGTHS. `is-on` is hover-or-selected and it painted the
+ * fill, so pointing at one tile while another was selected gave two identical
+ * dark blocks; the 3px ring was the only difference, on a dark tile inside a
+ * saturated band. Codex's review, 2026-09-16, and confirmed live: both
+ * computed to rgb(7,24,36) on background and border.
+ *
+ * Hover is a preview and gets an edge: the border and the mark take the
+ * accent, the tile stays on its own ground. Selection is a commitment and
+ * keeps the fill. `aria-pressed` already told assistive tech the truth; this
+ * makes the picture say the same thing. */
 .teim-rd .cp-badge:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cp-badge { transition: none; }
@@ -995,7 +1003,6 @@
  * the plain-band base above: the base repaints the badge dteal at the same
  * specificity, so before this existed, hovering a Cedar Press+ tile changed
  * nothing at all, dteal painted over dteal. */
-.teim-rd .cp-band--plain .cp-badge.is-on { background: var(--ink); border-color: var(--ink); }
 
 /* On the filled band everything inverts, and a downloadable square is solid
  * against translucent neighbours so it reads as the one you can take. */
@@ -1009,10 +1016,33 @@
 .teim-rd .cp-band--fill .cp-badge { background: #fff; border-color: #fff; color: var(--dteal); }
 .teim-rd .cp-band--fill .cp-badge__mark, .teim-rd .cp-band--fill .cp-badge__cue { color: var(--dteal); }
 .teim-rd .cp-band--fill .cp-badge__name { color: var(--dteal); }
-.teim-rd .cp-band--fill .cp-badge.is-on, .teim-rd .cp-band--fill button.cp-badge--act:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
-.teim-rd .cp-band--fill .cp-badge.is-on .cp-badge__mark, .teim-rd .cp-band--fill .cp-badge.is-on .cp-badge__cue, .teim-rd .cp-band--fill .cp-badge.is-on .cp-badge__name { color: #fff; }
-.teim-rd .cp-band--fill button.cp-badge--act:hover .cp-badge__mark, .teim-rd .cp-band--fill button.cp-badge--act:hover .cp-badge__cue, .teim-rd .cp-band--fill button.cp-badge--act:hover .cp-badge__name { color: #fff; }
 .teim-rd .cp-band--fill .cp-badge:focus-visible { outline-color: #fff; }
+
+/* ── A tile's two states, after both bands have had their say ─────────────
+ * TWO STATES, TWO STRENGTHS, AND THEY MUST NOT LOOK THE SAME.
+ * `is-on` is hover-or-selected and it used to paint the fill, so pointing at
+ * one tile while another was selected gave two identical dark blocks with
+ * only a 3px ring between them. Codex's review, 2026-09-16; confirmed live,
+ * both computed to rgb(7,24,36) on background and border.
+ *
+ * Hover is a preview, so it moves the EDGE and nothing else: each band keeps
+ * its own resting fill (white tile on the teal band, teal tile on the white
+ * one) and therefore its own contrast, with no per-band content colour to
+ * keep in step. Selection is a commitment, so it repaints — the same ink
+ * fill and white contents on both shelves, which is what makes "this is the
+ * one you are looking at" read the same way twice.
+ *
+ * These sit after `.cp-band--fill`/`--plain` deliberately. Both are one
+ * class deep on both sides, so source order decides, and two earlier
+ * attempts at this block lost to the band rules and blanked a tile —
+ * white contents on a tile that had just turned white, then teal contents
+ * over a fill that never applied. */
+.teim-rd .cp-band .cp-badge.is-on,
+.teim-rd .cp-band button.cp-badge--act:hover { border-color: var(--ink); }
+.teim-rd .cp-band .cp-badge.is-selected { background: var(--ink); border-color: var(--ink); }
+.teim-rd .cp-band .cp-badge.is-selected .cp-badge__mark,
+.teim-rd .cp-band .cp-badge.is-selected .cp-badge__cue,
+.teim-rd .cp-band .cp-badge.is-selected .cp-badge__name { color: #fff; }
 
 /* ── The reader ───────────────────────────────────────────────────────────
  * Spans both rows on the right, so it faces the squares rather than sitting
