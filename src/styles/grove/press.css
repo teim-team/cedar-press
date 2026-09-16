@@ -229,7 +229,12 @@
  * bottom 2rem. The launcher is a 3.25rem circle now, so most of that became
  * a band of empty navy about 120px deep under a single row of links --
  * present on every page, and reading as a footer that forgot to stop. */
-.teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 2.6rem; padding: 1.4rem 0 4rem; border-top: 3px solid var(--teal); background: var(--ink); color: rgba(255, 255, 255, 0.7); }
+/* The tail is clearance, so it is measured rather than chosen: the launcher
+ * is 3.25rem tall and floats 2rem above the viewport edge, so it reaches
+ * 5.25rem up and the footer has to reserve more than that. 4rem did not, and
+ * the launcher sat on the right-hand metadata by 6px at the foot of every
+ * page. Still well short of the 7rem this had before the launcher shrank. */
+.teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 2.6rem; padding: 1.4rem 0 6rem; border-top: 3px solid var(--teal); background: var(--ink); color: rgba(255, 255, 255, 0.7); }
 /* Continuing a navy band: no edge, no gap — the band and the footer are one
  * surface. */
 /* Flush removes the gap, never the seam: the footer owns its teal rule on
@@ -237,7 +242,7 @@
  * bands as well as white, so the same component means the same ending
  * everywhere. */
 .teim-rd .cp-foot--flush { margin-top: 0; }
-@media (max-width: 640px) { .teim-rd .cp-foot--deep { padding-bottom: 3.6rem; } }
+@media (max-width: 640px) { .teim-rd .cp-foot--deep { padding-bottom: 5rem; } }
 .teim-rd .cp-foot__in { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 2rem; }
 .teim-rd .cp-foot--deep .cp-foot__in { max-width: 1560px; margin: 0 auto; padding-inline: 2.4rem; }
 @media (max-width: 720px) { .teim-rd .cp-foot--deep .cp-foot__in { padding-inline: 1.15rem; } }
@@ -296,7 +301,7 @@
  * clipped by width, never removed, and `aria-label` was always carrying the
  * name anyway. Touch devices have no hover to expand with, so the circle is
  * simply what a phone gets, which is the convention there. */
-.teim-rd .cedar-widget__launcher { padding: 0; width: 3.25rem; height: 3.25rem; border-radius: 50%;
+.teim-rd .cedar-widget__launcher { padding: 0; width: 3.25rem; height: 3.25rem; min-height: 3.25rem; border-radius: 50%;
   justify-content: center; gap: 0; overflow: hidden; }
 .teim-rd .cedar-widget__launcher-copy { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
   transition: max-width 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease, margin-left 0.26s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -316,7 +321,8 @@
   .teim-rd .cedar-widget__launcher:hover,
   .teim-rd .cedar-widget__launcher:focus-visible,
   .teim-rd .cedar-widget--open .cedar-widget__launcher {
-    width: auto; border-radius: 12px; padding: 0.75rem 1.25rem; justify-content: flex-start;
+    width: auto; height: auto; overflow: visible;
+    border-radius: 12px; padding: 0.75rem 1.25rem; justify-content: flex-start;
   }
   .teim-rd .cedar-widget__launcher:hover .cedar-widget__launcher-copy,
   .teim-rd .cedar-widget__launcher:focus-visible .cedar-widget__launcher-copy,
@@ -328,7 +334,7 @@
   .teim-rd .cedar-widget--open .cedar-widget__status-dot { display: block; }
 }
 /* Keyboard users on a touch screen still get the name. */
-.teim-rd .cedar-widget__launcher:focus-visible { width: auto; border-radius: 12px; padding: 0.75rem 1.25rem; justify-content: flex-start; }
+.teim-rd .cedar-widget__launcher:focus-visible { width: auto; height: auto; overflow: visible; border-radius: 12px; padding: 0.75rem 1.25rem; justify-content: flex-start; }
 .teim-rd .cedar-widget__launcher:focus-visible .cedar-widget__launcher-copy { max-width: 12rem; opacity: 1; margin-left: 0.7rem; }
 .teim-rd .cedar-widget__launcher:focus-visible .cedar-widget__status-dot { display: block; }
 @media (prefers-reduced-motion: reduce) {
@@ -841,7 +847,12 @@
   .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; gap: 0.7rem; }
   .teim-rd .cp-hub__mark svg { width: 58px; height: 58px; }
   .teim-rd .cp-hub__name { font-size: 1.02rem; }
-  .teim-rd .cp-hub__what { display: none; }
+  /* Off the square, not out of the accessibility tree. `display: none`
+   * took the description away from a screen reader too, so a phone user
+   * heard only the section name and its count while a desktop user got the
+   * sentence as part of the same link. Clipped instead: the tile is a
+   * square and the link still reads in full. */
+  .teim-rd .cp-hub__what { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   /* The mark takes the space the description used to, so the square is a
      composition rather than a box with a gap at the bottom. */
   .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; min-height: 0;
@@ -2163,6 +2174,15 @@
 /* A permalink arrival lands mid-page; the tint says which release the link
  * meant. scroll-margin keeps it clear of the sticky filter. */
 .teim-rd .cp-feed__item:target { background: var(--teal-tint); }
+/* A release that is not the first of its day shows its date only to a
+ * screen reader, which is right in a run and wrong when that release IS the
+ * page: landing on #funding-v4-2 scrolls it under the bar with its run
+ * header offscreen, so a sighted reader sees a highlighted entry and no
+ * date at all. `:target` is exactly that case and nothing else. */
+.teim-rd .cp-feed__item:target .cp-feed__when--same > .sr-only {
+  position: static; width: auto; height: auto; margin: 0; overflow: visible;
+  clip: auto; clip-path: none; white-space: nowrap;
+}
 .teim-rd .cp-feed__counts { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0.45rem 0 0; }
 .teim-rd .cp-feed__when { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding-top: 0.25rem; }
 .teim-rd .cp-feed__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 0.5rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; }
@@ -2950,7 +2970,12 @@
  * viewer's own foot carries the Cedar action. The open panel is untouched. */
 body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; }
 .teim-rd .cp-ex__collection { display: flex; flex-direction: column; gap: 0.15rem; min-width: 14rem; }
-.teim-rd .cp-ex__select { font: inherit; font-size: 0.92rem; font-weight: 700; min-height: 44px; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 0; background: var(--bg); color: var(--ink); max-width: 100%; }
+/* `background-color`, not `background`: the shorthand resets
+ * `background-image`, which is where the chevron lives (it is set with
+ * `appearance: none` far above). This rule is later and one class deep, so
+ * the shorthand silently removed the arrow from the collection and table
+ * pickers — they rendered as bare boxes with no dropdown indicator. */
+.teim-rd .cp-ex__select { font: inherit; font-size: 0.92rem; font-weight: 700; min-height: 44px; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 0; background-color: var(--bg); color: var(--ink); max-width: 100%; }
 /* How to read the numbers, as fields beside the numbers. */
 .teim-rd .cp-ex__reads { display: flex; flex-wrap: wrap; gap: 0.3rem 1.8rem; margin: 0; padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); font-size: 0.86rem; line-height: 1.5; color: var(--ink-2); }
 .teim-rd .cp-ex__reads b { font-weight: 700; color: var(--ink); margin-right: 0.35rem; }
@@ -3011,7 +3036,7 @@ body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; 
 .teim-rd .cp-ex__lcount { font-family: var(--mono); font-size: 0.7rem; color: var(--dteal); min-width: 2ch; text-align: right; }
 .teim-rd .cp-ex__absent .cp-ex__lname { color: var(--muted); }
 .teim-rd .cp-ex__locked { opacity: 0.7; }
-.teim-rd .cp-ex__search, .teim-rd .cp-ex__q, .teim-rd .cp-ex__savebar input, .teim-rd .cp-ex__tablepick select, .teim-rd .cp-ex__year { font: inherit; font-size: 0.92rem; min-height: 44px; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 0; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-ex__search, .teim-rd .cp-ex__q, .teim-rd .cp-ex__savebar input, .teim-rd .cp-ex__tablepick select, .teim-rd .cp-ex__year { font: inherit; font-size: 0.92rem; min-height: 44px; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 0; background-color: var(--bg); color: var(--ink); }
 .teim-rd .cp-ex__search { width: 100%; box-sizing: border-box; }
 .teim-rd .cp-ex__q { flex: 1 1 14rem; min-width: 10rem; }
 .teim-rd .cp-ex__tablepick { display: flex; flex-direction: column; gap: 0.15rem; }
