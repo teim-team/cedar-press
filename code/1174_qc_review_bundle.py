@@ -14,7 +14,8 @@ Owner, 2026-09-04:
      anything"
 
 Five files. Every reviewable sheet leads with `YOUR_NOTES`, blank, so a note
-can be typed without scrolling. Silence means approved.
+can be typed without scrolling. A blank note means NOT REVIEWED, never approved
+(owner correction 2026-09-14): approval is recorded explicitly, row by row.
 
 UNIQUE OBSERVATIONS, NOT TRANSACTIONS - AND WHY THAT MATTERS
 -------------------------------------------------------------
@@ -534,7 +535,7 @@ def main():
     federal_awards()
     advocacy()
     print(f"\n  written to {OUT.relative_to(ROOT)}")
-    print("  every sheet leads with YOUR_NOTES. Silence means approved.")
+    print("  every sheet leads with YOUR_NOTES. Blank means not reviewed, never approved.")
 
 
 if __name__ == "__main__":
