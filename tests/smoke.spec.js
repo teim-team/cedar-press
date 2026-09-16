@@ -272,6 +272,9 @@ test.describe("the subscriber's path", () => {
     await expect(page.locator(".cp-hub__tile")).toHaveCount(6);
     await expect(page.locator(".cp-close__head")).toContainText("Nothing here is a snapshot");
 
+    // Signing out is inside the account menu now: the masthead is one row at
+    // every width, and an errand does not get a row of its own.
+    await page.locator(".cp-acct > summary").click();
     await page.getByRole("button", { name: "Sign out" }).click();
     await expect(page.locator(".cp-split")).toBeVisible();
     expect(errors).toEqual([]);
@@ -444,14 +447,17 @@ test.describe("Explore the collections", () => {
       await page.getByRole("button", { name: /Show all \d+ columns/ }).click();
       await expect(page.getByTestId("explore-caption")).toContainText(/(\d+) of \1 columns/);
     }
-    // The record opens with a hierarchy: the main fields, then source and
-    // attribution, then the technical fields folded away, and a source URL
-    // that is a link.
-    await records.first().locator("button").first().click();
-    const record = page.locator(".cp-ex__inner").first();
-    await expect(record).toBeVisible();
-    await expect(record.locator("details.cp-ex__group").last()).toContainText("Technical fields");
-    await expect(record.locator("dd a[href^='http']").first()).toBeVisible();
+    // A row opens the record's own page, which carries the cut it came from.
+    // Covered end to end in "the record page" below; here the only claim is
+    // that the table's control leads there and comes back.
+    await page.goto("/data?c=lobbying");
+    await expect(records.first()).toBeVisible();
+    await records.first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    await expect(page.getByTestId("record-head")).toBeVisible();
+    await page.getByRole("link", { name: "Back to results" }).first().click();
+    await page.waitForURL(/\/data\?/);
+    await expect(page.getByTestId("explore-collection")).toHaveValue("lobbying");
 
     // An out-of-coverage year range is shown AS REQUESTED, said in words,
     // and the empty result says what it does not establish.
@@ -488,7 +494,7 @@ test.describe("Explore the collections", () => {
     await expect(caption).not.toContainText("loading");
     const shown = await records.count();
     const download = page.waitForEvent("download");
-    await card.getByRole("button", { name: /Download summary results/ }).click();
+    await card.getByRole("button", { name: /^Download$/ }).click();
     const file = await download;
     expect(file.suggestedFilename()).toMatch(/^cedar-press-summary-results-.*\.zip$/);
     const bytes = Buffer.concat((await (await file.createReadStream()).toArray()).map((c) => Buffer.from(c)));
@@ -606,20 +612,11 @@ test.describe("the question mark", () => {
       await expect(panel).toBeHidden();
     }
 
-    // Whatever the pointer, the panel carries the collection's own declared
-    // prose and stays inside the viewport. Opened the way this pointer opens
-    // it: a mouse click is deliberately inert, because hover governs a mouse.
+    // Whatever the pointer, the panel carries declared prose and stays inside
+    // the viewport. Opened the way this pointer opens it: a mouse click is
+    // deliberately inert, because hover governs a mouse.
     if (testInfo.project.name === "desktop") await btn.hover(); else await btn.tap();
-    await expect(panel).toContainText("Awardees are matched to a Native entity");
-    // Codex, PR #79: `coverage` is an object and the row was filtered out as a
-    // non-string, so the advertised Coverage line silently never rendered for
-    // any of the twelve. Silently is the problem; assert the caps.
-    expect(await panel.locator(".cp-ex1__cap").allTextContents()).toEqual([
-      "How it is built",
-      "What it reads",
-      "How a record reaches its entity",
-      "Coverage",
-    ]);
+    await expect(panel).toContainText("up to ten sample rows");
     const box = await panel.boundingBox();
     const width = page.viewportSize().width;
     expect(box.x).toBeGreaterThanOrEqual(-1);
@@ -652,6 +649,30 @@ test.describe("the question mark", () => {
   });
 });
 
+test.describe("About this collection", () => {
+  // The paragraph that used to stand between the table's headline and its
+  // toolbar. Review, 2026-09-15: "keep collection coverage and methodology
+  // available through 'About this collection'." Declared prose, still: the
+  // coverage row rendered for none of the twelve once, because `coverage` is
+  // an object and a string filter dropped it silently.
+  test("holds the collection's declared coverage and method, and nothing is typed into it", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=contractors");
+    const about = page.getByTestId("explore-about");
+    await expect(about).toBeVisible();
+    await about.locator("summary").click();
+    await expect(about).toContainText("Awardees are matched to a Native entity");
+    expect(await about.locator("dt").allTextContents()).toEqual([
+      "Coverage",
+      "How it is built",
+      "What it reads",
+      "How a record reaches its entity",
+    ]);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("the door's twelve", () => {
   // A visitor deciding whether to subscribe should be able to see what the
   // twelve are and what each holds without signing in. The product frame's
@@ -679,33 +700,83 @@ test.describe("the door's twelve", () => {
   });
 });
 
-test.describe("the collection strip", () => {
-  test("the overview names all twelve and says what one holds", async ({ page }, testInfo) => {
+test.describe("the record page", () => {
+  // The review that produced this page, 2026-09-14: the expanded row was a
+  // record page squeezed into a table, with no address and no way back to the
+  // result it was opened from. These are the four claims that replaced it.
+  test("a row opens a linkable record, walks its neighbours and returns to the exact result", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
-    await page.goto("/");
-    const tiles = page.locator(".cp-cstrip__tile");
-    await expect(tiles).toHaveCount(12);
-    const note = page.locator(".cp-cstrip__note");
-    // Every tile is a link into Explore already narrowed to that collection.
-    const href = await tiles.nth(3).getAttribute("href");
-    expect(href).toMatch(/^\/data\?c=[a-z-]+$/);
+    await page.goto("/data?c=funding");
+    const records = page.getByTestId("explore-record");
+    await expect(records.first()).toBeVisible();
+    const openedId = await records.first().getAttribute("data-record-id");
 
-    if (testInfo.project.name === "desktop") {
-      // Point at one and the line under the grid answers, the same way the
-      // section tiles and the shelves do.
-      await expect(note).toContainText(/collection for what it holds/i);
-      await tiles.nth(3).hover();
-      await expect(note).not.toContainText(/collection for what it holds/i);
-    } else {
-      // Codex, PR #79: a coarse pointer has no hover and the tile is a link,
-      // so a tap opens the collection rather than describing it. The idle
-      // copy has to say what the tap does; promising a description the tap
-      // never produces was the defect.
-      await expect(note).toContainText(/Tap a collection to open it/i);
-      await tiles.nth(3).tap();
-      await page.waitForURL(/\/data\?c=/);
-    }
+    await records.first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    // The address carries the table, the record and the cut it came from, so
+    // the page can be sent to someone and still know where "back" is.
+    const url = new URL(page.url());
+    expect(url.searchParams.get("k")).toBe("funding/federal_funding_transactions");
+    expect(url.searchParams.get("r")).toBe(openedId);
+    expect(url.searchParams.get("from")).toContain("c=funding");
+
+    // The first screen answers the row: the entity, what it funded, the money.
+    const head = page.getByTestId("record-head");
+    await expect(head.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByTestId("record-summary")).toBeVisible();
+
+    // Definitions are a control, not a paragraph under every value.
+    const definitions = page.getByTestId("record-definitions");
+    await expect(page.locator(".cp-rec__mean")).toHaveCount(0);
+    await definitions.click();
+    await expect(page.locator(".cp-rec__mean").first()).toBeVisible();
+
+    // The rest of the record is folded until it is asked for, and it opens
+    // in groups rather than as one list of fifty-four fields.
+    await expect(page.locator(".cp-rec__group")).toHaveCount(0);
+    await page.getByTestId("record-more").click();
+    const groups = page.locator(".cp-rec__group");
+    expect(await groups.count()).toBeGreaterThan(1);
+    await expect(groups.first().locator(".cp-rec__fields")).toBeHidden();
+    await groups.first().locator("summary").click();
+    await expect(groups.first().locator(".cp-rec__fields")).toBeVisible();
+
+    // Next walks the reader's own ordering and stays on a record page.
+    await page.getByRole("link", { name: /^Next/ }).first().click();
+    await page.waitForURL(/\/record\?/);
+    await expect(page.getByTestId("record-head")).toBeVisible();
+    const second = new URL(page.url()).searchParams.get("r");
+    expect(second).not.toBe(openedId);
+
+    // And back is back: the same cut, reproduced.
+    await page.getByRole("link", { name: "Back to results" }).first().click();
+    await page.waitForURL(/\/data\?/);
+    await expect(page.getByTestId("explore-collection")).toHaveValue("funding");
+    expect(errors).toEqual([]);
+  });
+
+  test("a record that is not in the preview says so rather than showing a neighbour", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/record?k=funding/federal_funding_transactions&r=not-a-real-record");
+    await expect(page.getByTestId("record-empty")).toContainText("not in this preview");
+  });
+
+  test("the entity name opens a profile that gathers the entity's records", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    const name = page.locator(".cp-rec__name a").first();
+    await expect(name).toBeVisible();
+    await name.click();
+    await page.waitForURL(/\/entity\/CE-/);
+    await expect(page.getByTestId("entity-head").getByRole("heading", { level: 1 })).toBeVisible();
+    // Counts on this page are counts of preview records, and it says so.
+    await expect(page.getByTestId("entity-head")).toContainText(/published previews/);
+    // And the way back is the record it was opened from.
+    await expect(page.getByRole("link", { name: "Back to the record" })).toBeVisible();
     expect(errors).toEqual([]);
   });
 });
@@ -941,18 +1012,30 @@ test.describe("the stylesheet", () => {
     // you, and what the truncation gave. A tile narrower than half the row,
     // and some tile sharing a row with another, are true at every
     // breakpoint above a phone and false the moment the rules stop applying.
-    const shape = await page.locator(".cp-hub__grid").evaluate((grid) => {
-      const tiles = [...grid.querySelectorAll(".cp-hub__tile")];
-      return {
-        gridWidth: grid.getBoundingClientRect().width,
-        widest: Math.max(...tiles.map((tile) => tile.getBoundingClientRect().width)),
-        rows: new Set(tiles.map((tile) => Math.round(tile.getBoundingClientRect().top))).size,
-        count: tiles.length,
+    // The hub is two ranks now — two lead cards and four quieter ones — so
+    // the tiles live in two containers rather than one. The property this
+    // test exists for is unchanged: every rank is still laid out, and none of
+    // them has collapsed into full-width blocks stacked down the page.
+    const shape = await page.evaluate(() => {
+      const measure = (selector) => {
+        const box = document.querySelector(selector);
+        const tiles = [...box.querySelectorAll(".cp-hub__tile")];
+        return {
+          width: box.getBoundingClientRect().width,
+          widest: Math.max(...tiles.map((t) => t.getBoundingClientRect().width)),
+          rows: new Set(tiles.map((t) => Math.round(t.getBoundingClientRect().top))).size,
+          count: tiles.length,
+        };
       };
+      return { lead: measure(".cp-hub__lead"), rest: measure(".cp-hub__grid--rest") };
     });
-    expect(shape.count).toBe(6);
-    expect(shape.widest).toBeLessThan(shape.gridWidth / 2);
-    expect(shape.rows).toBeLessThan(shape.count);
+    // Six doors, same as before the split.
+    expect(shape.lead.count + shape.rest.count).toBe(6);
+    // Each rank is one row across, and no tile owns its whole row.
+    expect(shape.lead.rows).toBe(1);
+    expect(shape.lead.widest).toBeLessThan(shape.lead.width);
+    expect(shape.rest.rows).toBe(1);
+    expect(shape.rest.widest).toBeLessThan(shape.rest.width / 2);
   });
 });
 
@@ -1028,6 +1111,106 @@ test.describe("Methods", () => {
   });
 });
 
+test.describe("the first screen", () => {
+  // WHAT A READER SEES BEFORE SCROLLING, ASSERTED.
+  //
+  // The 2026-09-15 review found what a passing suite could not: "the
+  // Collections screenshot contains no collections, and the record screenshot
+  // never reaches the $500,000 amount", and asked that "the next review
+  // should explicitly check what users can see before scrolling, whether
+  // button labels wrap, and whether the main content arrives before its
+  // explanation. The reported tests do not establish those visual qualities."
+  //
+  // These are those checks. They run on the phone profile, where the failure
+  // shows first, and they measure the built page rather than describing it.
+  // The phone profile only: the first screen is where this fails first, and
+  // the desktop project renders a different layout for the same pages.
+  test.beforeEach(({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "the first screen is a phone question");
+    void page;
+  });
+
+  /** How far down the page the top of this element sits, in viewport heights. */
+  async function topOf(page, selector) {
+    return page.locator(selector).first().evaluate((node) => node.getBoundingClientRect().top);
+  }
+
+  test("the header is one row, and the section menu is a control rather than two rows of links", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data");
+    const header = await page.locator(".cp-mast").first().boundingBox();
+    const viewport = page.viewportSize().height;
+    // It was four rows: wordmark, avatar with a wrapped "Sign out", and two
+    // rows of section links.
+    expect(header.height).toBeLessThan(viewport * 0.16);
+    // Signing out is in the account menu, not loose in the header.
+    await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
+    await expect(page.locator(".cp-navm__btn")).toBeVisible();
+    await expect(page.locator(".cp-nav__item")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  test("Collections opens on collections", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data");
+    await page.locator(".cp-badge").first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize().height;
+    // A collection tile, on the first screen, with no scrolling.
+    expect(await topOf(page, ".cp-badge")).toBeLessThan(viewport);
+    expect(errors).toEqual([]);
+  });
+
+  test("a record opens on its amount", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().waitFor();
+    await page.getByTestId("explore-record").first().locator("a").first().click();
+    await page.waitForURL(/\/record\?/);
+    await page.locator(".cp-rec__fig").waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize().height;
+    // The money the row is about, before any scrolling.
+    expect(await topOf(page, ".cp-rec__fig")).toBeLessThan(viewport);
+    // And the row's definition is no longer standing in front of it.
+    await expect(page.getByTestId("record-head")).not.toContainText("What one row is");
+    expect(errors).toEqual([]);
+  });
+
+  test("an entity profile opens on its records", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/entity/CE-001CC-8N");
+    await page.locator(".cp-ent__row").first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize().height;
+    expect(await topOf(page, ".cp-ent__row")).toBeLessThan(viewport);
+    expect(errors).toEqual([]);
+  });
+
+  test("no action label wraps past two lines", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.getByTestId("explore-record").first().waitFor();
+    // "Download sample results" wrapped onto four lines beside two-line
+    // neighbours. A control is allowed two lines; four is a broken label.
+    const tall = await page.locator(".cp-ex__acts .cp-ex__act").evaluateAll((nodes) =>
+      nodes
+        .map((node) => {
+          const line = Number.parseFloat(getComputedStyle(node).lineHeight) || 16;
+          const box = node.getBoundingClientRect();
+          return { text: node.textContent.trim(), lines: Math.round((box.height - 16) / line) };
+        })
+        .filter((entry) => entry.lines > 2));
+    expect(tall).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("the reveal", () => {
   // .cp-fade is opacity: 0 in CSS and revealed by JavaScript. The rules were
   // deleted by accident once and nothing broke visibly, because a class with
@@ -1061,21 +1244,6 @@ test.describe("the reveal", () => {
     expect(hidden).toEqual([]);
     const revealed = await page.evaluate(() => document.querySelectorAll(".cp-fade.is-in").length);
     expect(revealed).toBeGreaterThan(0);
-  });
-});
-
-test.describe("the overview", () => {
-  test("search runs against the collections and lands on a real cut", async ({ page }) => {
-    const errors = watchConsole(page);
-    await signIn(page);
-    await page.goto("/");
-    await page.fill("#cp-search-q", "Cherokee Nation");
-    await page.locator(".cp-search__go").click();
-    await page.waitForURL(/\/data\?q=/);
-    // The same q= the Explore box writes, so the two are one search.
-    await expect(page.getByTestId("explore-scope").or(page.locator(".cp-ex__caption")).first())
-      .toContainText(/Cherokee Nation/i);
-    expect(errors).toEqual([]);
   });
 });
 

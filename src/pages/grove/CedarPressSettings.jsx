@@ -131,7 +131,14 @@ export default function CedarPressSettings() {
           </p>
         </section>
 
-        <div className="cp-set cp-fade">
+        {/* ACCOUNT FIRST, THEN PARTICIPATION.
+            Five cards in one undifferentiated grid gave billing, a profile
+            question, research influence, two public programmes and another
+            product the same standing, so the page read as a pile rather than
+            as an account. Two groups, each named: what this subscription IS,
+            then what it TAKES PART IN. Nothing moves off the page. */}
+        <h2 className="cp-set__group">Account</h2>
+        <div className="cp-set cp-set--account cp-fade">
           <section className="cp-set__card cp-fade" aria-label="Subscription">
             <span className="cp-set__cap">Subscription</span>
             <dl className="cp-set__rows">
@@ -165,12 +172,15 @@ export default function CedarPressSettings() {
             </div>
           </section>
 
+          <WorkCard />
+        </div>
+
+        <h2 className="cp-set__group">Research and support</h2>
+        <div className="cp-set cp-set--support cp-fade">
           {/* Where the account's influence lives: what this subscription has
               earned by using the product, where it put it, and what it asked
               for. The page is worth visiting for this, not only for billing. */}
           <PressInfluence influence={influence} tier={tierId} status={influenceStatus} />
-
-          <WorkCard />
 
           {/* Links out to public programs, not features of the account: both
               pages work with or without a subscription, and the gate and
@@ -216,9 +226,15 @@ export default function CedarPressSettings() {
               record-level exploration, entity filters, full histories and Cedar across all of
               them at once.
             </p>
-            <a className="gv-btn gv-btn--quiet" href={LUMECON_URL} target="_blank" rel="noreferrer">
-              About Cedar Grove <span aria-hidden="true">&#8594;</span>
-            </a>
+            {/* In the actions row like every other card's action: a bare
+                button inside the card's flex column stretches to the card's
+                full width, which is why this one was a wide outlined bar
+                beside a pill that hugged its label. */}
+            <div className="cp-set__acts">
+              <a className="gv-btn gv-btn--quiet" href={LUMECON_URL} target="_blank" rel="noreferrer">
+                About Cedar Grove <span aria-hidden="true">&#8594;</span>
+              </a>
+            </div>
           </section>
         </div>
 

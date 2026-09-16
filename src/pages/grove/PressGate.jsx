@@ -60,7 +60,6 @@ import {
   PRESS_ACTIVATION_AVAILABLE,
   PRESS_STEP,
   formatPressCode,
-  hasPressAccount,
   initialPressStep,
   isPlausiblePressCode,
   normalizePressCode,
@@ -158,10 +157,16 @@ export default function PressGate({ user }) {
   // they enter the viewport instead of standing there already.
   const fadeRoot = useFadeIn();
   const [step, setStep] = useState(() => initialPressStep(browserStorage()));
-  // Plans or sign-in, one at a time, or neither: the panel opens from the
-  // bar when asked for. A browser that has signed in before opens on Log
-  // in, because that visitor came back to get in.
-  const [panel, setPanel] = useState(() => (hasPressAccount(browserStorage()) ? "signin" : null));
+  // Plans or sign-in, one at a time, or NEITHER ON ARRIVAL.
+  //
+  // This opened on "signin" for any browser that had signed in before, on the
+  // theory that a returning visitor came back to get in. The owner's note,
+  // 2026-09-14: the panel is the first thing on the page every time and it
+  // covers what is behind it. A door that greets a returning reader with a
+  // form has decided for them what they came for, and the two tabs are
+  // already sitting in the bar where a visitor looks for them. Nothing opens
+  // until it is asked for.
+  const [panel, setPanel] = useState(null);
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

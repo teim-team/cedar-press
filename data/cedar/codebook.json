@@ -86,7 +86,7 @@
     },
     {
      "column": "business_types_description_normalized",
-     "label": "Business types description normalized",
+     "label": "Recipient type",
      "meaning": "The normalized spelling, the third of the three.",
      "combine_into": "recipient_type"
     },

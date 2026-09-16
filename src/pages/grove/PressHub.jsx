@@ -1,20 +1,19 @@
 // The front page's section index.
 //
-// Six squares, sized like the collection tiles because those already proved
-// the size on both pointers, and the same grid on desktop and phone so the
-// two navigations stay symmetric. Each square carries what the section is
-// and what it currently holds — counts read from the catalog rather than
-// written here, so the index cannot claim a section holds something it does
-// not. Pointing at a tile states the section's purpose in the line under
-// the grid — the same point-to-read language as the shelves, with the same
-// sticky selection — so a reader gets more than the label before
-// committing a tap, without a second control on every tile.
-import { useState } from "react";
-import { contactHref } from "../../features/grove/appLink.js";
-import { COARSE } from "../../features/grove/pointer.js";
+// Six cards: what the section is, what it currently holds, and what is in it.
+// The counts are read from the catalog rather than written here, so the index
+// cannot claim a section holds something it does not.
+//
+// THE SENTENCE IS ON THE CARD NOW. Review, 2026-09-15: "remove 'Point at a
+// section for what it holds'. Make the interaction discoverable through the
+// cards, including on touchscreens." It was a pointer affordance answering in
+// a line below the grid, which a finger never triggers and which asked a
+// reader to look somewhere else to learn what they were about to tap. Six
+// sentences on six cards is the same information with nothing to discover.
 import { Link } from "react-router";
 
 import { PRESS_ARTICLES, TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { SEED_PRIORITIES } from "../../features/grove/pressPriorities.js";
 import { canOpenDataset, coverageFrom } from "../../features/grove/pressAccess";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
@@ -23,18 +22,17 @@ import {
   PRESS_ARTICLES_PATH,
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
+  PRESS_PRIORITIES_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
 import {
   ArticlesIcon,
   DataIcon,
-  FeedbackIcon,
   MethodsIcon,
+  PrioritiesIcon,
   WantMoreIcon,
   WhatsNewIcon,
 } from "./pressHubIcons";
-
-const CONTACT_HREF = contactHref("Cedar Press");
 
 /** The collections THIS reader's plan opens: a Cedar Press subscriber has
  *  the standard shelf, not the whole catalog, and a tile that counts the
@@ -57,14 +55,6 @@ function sections(user) {
   const newest = recentlyUpdated(1)[0];
   return [
     {
-      id: "articles",
-      label: "Research Briefs",
-      to: PRESS_ARTICLES_PATH,
-      icon: ArticlesIcon,
-      meta: `${PRESS_ARTICLES.length} briefs`,
-      what: "Original research built from the collections, written for people who work in Indian Country's economy.",
-    },
-    {
       id: "data",
       label: "Collections",
       to: PRESS_DATA_PATH,
@@ -77,6 +67,26 @@ function sections(user) {
       what: `Coverage, method and the release for every collection${
         earliest.length ? `, reaching back as far as ${Math.min(...earliest)},` : ","
       } downloadable with your subscription.`,
+    },
+    {
+      id: "articles",
+      label: "Research Briefs",
+      to: PRESS_ARTICLES_PATH,
+      icon: ArticlesIcon,
+      meta: `${PRESS_ARTICLES.length} briefs`,
+      what: "Original research built from the collections, written for people who work in Indian Country's economy.",
+    },
+    {
+      // Shape the Research, third: a subscriber's standing question after
+      // "what is here" and "what have you written" is "what are you building
+      // next, and can I move it". Contact used to sit in this row; it is a
+      // mail link, which is a footer errand rather than one of six doors.
+      id: "priorities",
+      label: "Priorities",
+      to: PRESS_PRIORITIES_PATH,
+      icon: PrioritiesIcon,
+      meta: `${SEED_PRIORITIES.length} open`,
+      what: "The research questions and datasets subscribers are asking for next, and the place to put your own on the list.",
     },
     {
       id: "whats-new",
@@ -107,28 +117,25 @@ function sections(user) {
         ? "Your membership, managed through Tribal Business News. Cedar Grove is a separate product that carries these same collections, and more, in an environment built for analysis."
         : "What your subscription includes and what Cedar Press+ adds, managed and upgraded through Tribal Business News.",
     },
-    {
-      id: "contact",
-      label: "Contact",
-      href: CONTACT_HREF,
-      icon: FeedbackIcon,
-      meta: "The research desk",
-      what: "Corrections, data requests and what the collections should cover next, read by the team that builds them.",
-    },
   ];
 }
 
-const IDLE_NOTE = COARSE ? "Tap a section for what it holds." : "Point at a section for what it holds.";
-
 export default function PressHub({ user }) {
-  const [help, setHelp] = useState(null);
   const all = sections(user);
-  const note = all.find((section) => section.id === help)?.what;
+  // TWO OF THESE SIX CARRY THE PRODUCT. THE OTHER FOUR SUPPORT IT.
+  // Six equal squares gave Collections the same weight as Plans, and the
+  // masthead already repeats every one of them, so the front page asked for
+  // six navigation decisions before a subscriber saw anything they had paid
+  // for. Collections and Research Briefs lead the row at two-thirds and
+  // one-third; What's new, Priorities, Methods and Plans sit under them as a
+  // quieter rank. Nothing is removed and nothing moves off the page — the
+  // six destinations are the same six.
+  const lead = all.filter((s) => s.id === "data" || s.id === "articles");
+  const rest = all.filter((s) => !lead.includes(s));
   return (
     <section className="cp-sec cp-hub cp-fade" aria-label="Sections">
-      <span className="cp-sec__band">Sections</span>
-      <ul className="cp-hub__grid">
-        {all.map((section) => {
+      <ul className="cp-hub__lead">
+        {lead.map((section) => {
           const inner = (
             <>
               <span className="cp-hub__mark" aria-hidden="true">{section.icon}</span>
@@ -136,18 +143,36 @@ export default function PressHub({ user }) {
                 <span className="cp-hub__name">{section.label}</span>
                 <span className="cp-hub__meta">{section.meta}</span>
               </span>
+              <span className="cp-hub__what">{section.what}</span>
+              <span className="cp-hub__go" aria-hidden="true">
+                {section.id === "data" ? "Browse collections" : "Read the research"}
+                {" "}&#8594;
+              </span>
             </>
           );
-          // The selection is sticky, like the shelves: it changes when
-          // another tile is pointed at, never back to the idle hint, so the
-          // line below is readable at leisure.
-          const watch = {
-            onMouseEnter: () => setHelp(section.id),
-            onFocus: () => setHelp(section.id),
-            onClick: () => track(EVENT.sectionOpened, { section: section.id }),
-          };
+          const watch = { onClick: () => track(EVENT.sectionOpened, { section: section.id }) };
           return (
-            <li key={section.id}>
+            <li key={section.id} className={`cp-hub__leadcell cp-hub__leadcell--${section.id}`}>
+              <Link className="cp-hub__tile cp-hub__tile--lead" to={section.to} {...watch}>{inner}</Link>
+            </li>
+          );
+        })}
+      </ul>
+      <ul className="cp-hub__grid cp-hub__grid--rest">
+        {rest.map((section) => {
+          const inner = (
+            <>
+              <span className="cp-hub__mark" aria-hidden="true">{section.icon}</span>
+              <span className="cp-hub__id">
+                <span className="cp-hub__name">{section.label}</span>
+                <span className="cp-hub__meta">{section.meta}</span>
+              </span>
+              <span className="cp-hub__what">{section.what}</span>
+            </>
+          );
+          const watch = { onClick: () => track(EVENT.sectionOpened, { section: section.id }) };
+          return (
+            <li key={section.id} className="cp-hub__restcell">
               {section.href ? (
                 <a
                   className="cp-hub__tile"
@@ -164,8 +189,6 @@ export default function PressHub({ user }) {
           );
         })}
       </ul>
-      {/* aria-live, so a screen reader hears the answer the pointer paints. */}
-      <p className="cp-hub__note" aria-live="polite">{note || IDLE_NOTE}</p>
     </section>
   );
 }

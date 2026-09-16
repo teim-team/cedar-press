@@ -13,6 +13,7 @@ import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
+import { CedarIcon } from "./pressGateIcons";
 
 // Questions every collection profile can answer; shown whenever Cedar is
 // scoped to a collection.
@@ -136,7 +137,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
   };
 
   return (
-    <div className="cedar-widget cedar-widget--launcher-only">
+    <div className={`cedar-widget cedar-widget--launcher-only${open ? " cedar-widget--open" : ""}`}>
       {open ? (
         <div className="cedar-widget__panel" role="dialog" aria-label="Ask Cedar">
           {/* A dialog header, not a floating glyph: the caption names the
@@ -261,10 +262,26 @@ export function PressCedarFab({ gated = null, examples = [] }) {
         aria-label="Ask Cedar"
         onClick={() => setOpen((current) => !current)}
       >
-        {/* The platform's launcher, to the mark: status dot, then the name
-            with the surface it is being asked about under it. Same markup as
-            teim-app's CedarWidget so the control a subscriber meets here is
-            the control they meet inside Cedar Grove. */}
+        {/* THIS NO LONGER MATCHES teim-app's CedarWidget, AND THAT IS A
+            DECISION SOMEBODY HAS TO MAKE.
+            It used to be the platform's launcher to the mark — status dot,
+            then the name with the surface under it — and the point of that
+            was that the control a subscriber meets here is the control they
+            meet inside Cedar Grove. Collapsing it to a circle (because the
+            pill covered content on most surfaces) broke the parity, and the
+            mark below is a Press gate icon, not a Cedar brand asset: checked,
+            `teim-app/src/components/CedarWidget.jsx` has no icon in its
+            launcher at all, only the dot and the label.
+            So the two products' assistants now look different at rest. Either
+            Grove adopts the same collapse or Press keeps a launcher of its
+            own deliberately; that is the owner's call, not a thing to settle
+            inside a stylesheet. Flagged rather than quietly left as a comment
+            claiming a parity that no longer holds.
+            At rest the launcher is a circle and this mark is what is in it;
+            the dot and the name arrive with the pointer. A lone status dot in
+            a circle says nothing, and the mark is the one thing here a reader
+            has already met — it is the wordmark's own glyph. */}
+        <span className="cedar-widget__launcher-mark" aria-hidden="true">{CedarIcon}</span>
         <span className="cedar-widget__status-dot" aria-hidden="true" />
         <span className="cedar-widget__launcher-copy">
           <span className="cedar-widget__launcher-label">Ask Cedar</span>

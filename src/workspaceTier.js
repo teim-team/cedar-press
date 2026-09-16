@@ -70,7 +70,7 @@ export const WORKSPACE_TIERS = Object.freeze({
       "Priority setup",
     ]),
     setupFeatures: Object.freeze([
-      "Cedar Grove (organizational data library)",
+      "Cedar Grove, the living evidence base for your organization's economy",
       "Hands-on Cedar calibration",
       "Unlimited users in one organization",
     ]),
@@ -161,7 +161,7 @@ export const WORKSPACE_TIERS = Object.freeze({
     features: Object.freeze([
       "Everything in Sapling",
       "Unlimited users in one organization",
-      "Cedar Grove: the clean, harmonized data library, augmentable with your own data",
+      "Cedar Grove, the living evidence base for your organization's economy, augmentable with your own data",
       "Hands-on Cedar calibration",
       "Dedicated launch support",
     ]),

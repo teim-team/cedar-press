@@ -47,11 +47,8 @@
 // any of this.
 
 import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Link } from "react-router";
 
-// Whether this device points with a finger (pointer.js): no hover means the
-// point-to-read affordance below becomes tap-to-read, and a tile's download
-// moves one tap further so nobody takes a file before reading what it is.
-import { COARSE } from "../../features/grove/pointer.js";
 import { PageBoundary } from "./PageBoundary.jsx";
 import { appUrl } from "../../features/grove/appLink.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
@@ -71,6 +68,7 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons";
 // not before the gate can paint.
 const PressExplore = lazy(() => import("./PressExplore"));
 import { TierName } from "./TierName";
+import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
 
 /**
  * Cedar Grove is not a fourth shelf holding one collection. It carries
@@ -144,9 +142,18 @@ function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen
   const style = { "--i": index };
 
   // Every tile answers a click on both shelves, and the cue says what the
-  // answer is: an owned tile hands over the file (the down arrow is the
-  // download), a locked one walks you to what opens it. Only the symbol
-  // differs, so the two shelves keep one hover language.
+  // answer is. Three actions, three cues, and none of them borrows another's:
+  //
+  //   ⌄  this tile opens the viewer below      (an owned tile)
+  //   →  this walks you to what opens it       (a locked tile)
+  //   ↓  this hands over a file                (the panel's download)
+  //
+  // Codex's review, 2026-09-16: an owned tile drew ↓ while its handler was
+  // `onOpen` and its own accessible name said "Open … in the viewer below" —
+  // so the picture said download and the words said open, and the comment
+  // that used to sit here ("the down arrow is the download") described
+  // behaviour this component no longer had. The arrowhead is a reveal, which
+  // is what the click actually does; ↓ goes back to meaning a file.
   if (!open) {
     return (
       <li style={style}>
@@ -162,7 +169,7 @@ function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen
     <li style={style}>
       <button type="button" className={className} onClick={() => onOpen(entry)} aria-pressed={selected} {...watch}>
         {inner}
-        <span className="cp-badge__cue" aria-hidden="true">&#8595;</span>
+        <span className="cp-badge__cue" aria-hidden="true">&#8964;</span>
         <span className="cp-badge__sr">Open {entry.name} in the viewer below</span>
       </button>
     </li>
@@ -192,11 +199,15 @@ function Detail({ entry, owned }) {
       </span>
       <h4 className="cp-read__name"><TierName name={entry.name} /></h4>
       <p className="cp-read__blurb">{entry.blurb}</p>
+      {/* The linkage is how the collection reaches its entities — method, not
+          description, and the longest paragraph in the panel. It was setting
+          the height of the whole shelf, so a verbose collection stretched the
+          band and the tiles sat in a field of colour. It opens in place. */}
       {entry.linkage ? (
-        <p className="cp-read__link">
-          <span className="cp-read__linkcap">The link</span>
-          {entry.linkage}
-        </p>
+        <details className="cp-read__link">
+          <summary><span className="cp-read__linkcap">The link</span></summary>
+          <p>{entry.linkage}</p>
+        </details>
       ) : null}
       <p className="cp-read__foot">
         {coverageLabel(entry)}
@@ -243,6 +254,12 @@ function Detail({ entry, owned }) {
           Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
         </button>
       ) : null}
+      {/* Where the entity-methodology link went when it came off the top of
+          the page: a reader asking how this collection reaches its entities
+          is already reading about this collection. */}
+      <Link className="cp-read__method" to={`${PRESS_METHODS_PATH}#m-collections`}>
+        How this collection is built <span aria-hidden="true">&#8594;</span>
+      </Link>
     </div>
   );
 }
@@ -263,7 +280,21 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
   const from = starts.length ? Math.min(...starts) : null;
   // The reader follows the pointer; with nothing under it, it describes
   // the collection the viewer is showing.
-  const active = entries.find((entry) => entry.id === (hovered ?? selectedId)) || null;
+  // THE PANEL IS 26REM OF RESERVED COLUMN; AT REST IT HELD NOTHING.
+  // `.cp-band__in` lays each shelf out as tiles beside a 26rem panel, and the
+  // panel only had a collection in it once a pointer was on a tile — so the
+  // resting state of both shelves, which is the state anyone arriving sees,
+  // was six tiles across 40% of the page and 60% of empty beside them.
+  //
+  // The instruction box that used to stand there was removed for good reason
+  // (a caption on an empty frame). The answer is not to put the caption back
+  // or to collapse the column — collapsing makes the whole grid jump the
+  // first time a cursor crosses a tile. The panel was built to describe a
+  // collection, so it opens describing one: the first on the shelf. Nothing
+  // reserved, nothing empty, nothing that moves, and the shelf's first
+  // download is one click away instead of one hover plus one click.
+  const active =
+    entries.find((entry) => entry.id === (hovered ?? selectedId)) || entries[0] || null;
   const [ref, seen, instant] = useReveal();
 
   // A locked tile's click walks the reader to the answer: the panel that
@@ -297,11 +328,19 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
         {/* What this band is, top right, in the same line as the eyebrow. A
             reader scanning for the download should not have to infer it from
             a grid of squares. */}
+        {/* THE PLAN, ITS COVERAGE, AND THE TILES.
+            Review, 2026-09-15: "'Your shelf', 'Cedar Press', 'See what's
+            happening', a descriptive sentence, coverage metadata, a hover
+            instruction, and a separate instruction box are too many layers
+            around six choices. A plan name, concise coverage information, and
+            the collection tiles would be enough."
+            So the eyebrow, the question, the promise and the footnote are
+            gone. What a collection holds is in the panel the tile opens, and
+            each tile's own dates are in it, which is what the footnote was
+            pointing at. */}
         <div className="cp-band__head">
         <div className="cp-band__id">
-          <span className="cp-band__eyebrow">{owned ? "Your shelf" : "Locked"}</span>
           <h3 className="cp-band__name"><TierName name={tier.name} /></h3>
-          <p className="cp-band__q">{tier.question}</p>
           {/* No price here: Tribal Business News owns Press payment, renewal
               and upgrades, and a number embedded in this catalog goes stale
               the moment the seller changes theirs. The CTA below walks the
@@ -312,25 +351,18 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
           {owned || tier.id !== "grove" ? null : (
             <p className="cp-band__price">${tier.price.toLocaleString("en-US")} a year</p>
           )}
-          <p className="cp-band__promise">{tier.promise}</p>
-          {/* "As far back as" with an asterisk, not "back to": the year is
-              the deepest single collection, the shelf's collections reach
-              back different distances, and a line that promises the whole
-              shelf at that depth promises data the other collections do
-              not hold. The footnote sends the reader to the panel, which
-              gives each collection its own dates. */}
+          {/* "As far back as", not "back to": the year is the deepest single
+              collection and the rest reach back different distances, so the
+              line says the shelf's floor and each tile's panel gives its own
+              dates. */}
           <p className="cp-band__facts">
             {entries.length} collections
-            {from ? ` · records as far back as ${from}*` : ""}
+            {from ? ` · records as far back as ${from}` : ""}
             {owned ? " · yours to download" : ""}
           </p>
-          {from ? (
-            <p className="cp-band__vary">
-              * Coverage varies by collection; {COARSE ? "tap" : "point at"} a tile for its dates.
-            </p>
-          ) : null}
         </div>
-        <span className="cp-kind cp-kind--data">Collections you download</span>
+        {/* The chip said "Collections you download" beside a facts line that
+            ends "yours to download". One of the two was decoration. */}
         </div>
 
         <ul
@@ -362,22 +394,20 @@ function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
 
         {/* Live, so a screen reader hears what the cursor shows. Polite, so
             it never cuts in while someone is reading something else. */}
-        <aside ref={readRef} className={`cp-read${pulse ? " is-pulse" : ""}`} aria-live="polite">
-          {active ? (
-            <Detail key={active.id} entry={active} owned={owned} />
-          ) : (
-            <div className="cp-read__idle">
-              <span className="cp-read__cap">
-                {owned ? "Your collections" : <>Inside <TierName name={tier.name} /></>}
-              </span>
-              <p className="cp-read__hint">
-                {COARSE
-                  ? "Tap a collection to see what it holds."
-                  : "Point at a collection to see what it holds."}
-                {owned ? " Click it to browse its records below; its sample download is here." : ""}
-              </p>
-            </div>
-          )}
+        {/* The panel is not drawn when it has nothing to say: an empty
+            bordered rectangle beside the tiles was the instruction box's
+            frame outliving the instruction. A locked shelf keeps it, because
+            the way in lives in it. */}
+        <aside
+          ref={readRef}
+          className={`cp-read${pulse ? " is-pulse" : ""}${!active && owned ? " is-empty" : ""}`}
+          aria-live="polite"
+        >
+          {/* The panel describes the collection under the pointer, and
+              nothing when there is none: the instruction box that used to
+              stand here said what a tile does to a reader who had not
+              touched one yet, which is a caption on an empty frame. */}
+          {active ? <Detail key={active.id} entry={active} owned={owned} /> : null}
           {owned ? null : tier.id === "grove" ? (
             // Grove is Lumecon-sold, so its door is the app's plan page.
             <a className="cp-band__cta" href={appUrl("/app/settings?tab=plan")} target="_blank" rel="noreferrer">

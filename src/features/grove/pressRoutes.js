@@ -44,11 +44,37 @@ export const PRESS_WHATS_NEW_PATH = "/whats-new";
 // Shape the Research: the priorities subscribers put Cedar Points toward.
 export const PRESS_PRIORITIES_PATH = "/priorities";
 
+/**
+ * ONE RECORD, WITH AN ADDRESS.
+ *
+ * A record used to be a row that unfolded inside the table. That gave a
+ * researcher an entire record page squeezed into a cell, and no way to send
+ * anyone the record they were looking at. It is a page now:
+ *
+ *     /record?k=<table key>&r=<record id>&from=<the cut they came from>
+ *
+ * A query rather than a path because a record id is the source system's, not
+ * ours — USAspending transaction keys carry slashes and spaces — and because
+ * `from` is itself a query string. `features/grove/pressRecord.js` builds and
+ * reads it; nothing else may.
+ */
+export const PRESS_RECORD_PATH = "/record";
+
+/**
+ * An entity's own page: what Cedar holds about one organization, across the
+ * collections, rather than inside whichever one the reader happened to open.
+ * The uid is the address, because the name is the thing Cedar exists to stop
+ * addressing records by.
+ */
+export const PRESS_ENTITY_PATH = "/entity/:uid";
+export const pressEntityPath = (uid) => `/entity/${encodeURIComponent(uid)}`;
+
 /** A hosted article. Pieces that publish on Tribal Business News keep their
  *  own URL and never reach this route. */
-// There is no per-collection route. A tile is the download and What's New
-// is the one page that tracks changes; a detail page per dataset was more
-// product than the answer needed.
+// There is still no per-collection route. A tile is the download and What's
+// New is the one page that tracks changes; a detail page per dataset was more
+// product than the answer needed. A per-RECORD page is a different question,
+// and it is above.
 export const PRESS_ARTICLE_PATH = "/articles/:articleId";
 export const pressArticlePath = (id) => `/articles/${id}`;
 

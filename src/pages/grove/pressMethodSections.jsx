@@ -268,6 +268,14 @@ export function IdentityPair() {
               {identifier.shape}
             </code>
           </header>
+          {/* WHAT IT NAMES, AND WHEN IT SURVIVES. Review, 2026-09-15: "both
+              cards contain paragraphs, rules, exceptions, technical field
+              names, and implementation status. Initially show what each ID
+              identifies and when it persists or changes. Put detailed schema
+              rules and legacy exceptions in technical documentation."
+              Those two answers are the card; the rest is one disclosure
+              under it, so a reader joining an export can still find the
+              column name without reading the specification. */}
           <p className="cp-idp__names">{identifier.names}</p>
           <p className="cp-idp__cap">Survives</p>
           <ul className="cp-idp__survives">
@@ -275,33 +283,37 @@ export function IdentityPair() {
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <p className="cp-idp__note">{identifier.note}</p>
-          {identifier.exception ? <p className="cp-idp__exc">{identifier.exception}</p> : null}
           {identifier.live ? null : (
             <p className="cp-idp__pending">
               <span className="cp-idp__pendingtag">In progress</span>
               <span>The register is being minted. The form and its rules are settled.</span>
             </p>
           )}
-          {/* What ships, and what the standard renames it to. One row was
-              the specification's names alone, none of which is in a published
-              table: a customer following the page could not join an export. */}
-          {identifier.fields.length ? (
-            <p className="cp-idp__fields">
-              <span className="cp-idp__fieldcap">In the exports</span>
-              {identifier.fields.map((field) => (
-                <code key={field}>{field}</code>
-              ))}
-            </p>
-          ) : null}
-          {identifier.becoming?.length ? (
-            <p className="cp-idp__fields cp-idp__fields--soon">
-              <span className="cp-idp__fieldcap">Renaming to</span>
-              {identifier.becoming.map((field) => (
-                <code key={field}>{field}</code>
-              ))}
-            </p>
-          ) : null}
+          <details className="cp-idp__tech">
+            <summary>The rules, the columns and the exceptions</summary>
+            <p className="cp-idp__note">{identifier.note}</p>
+            {identifier.exception ? <p className="cp-idp__exc">{identifier.exception}</p> : null}
+            {/* What ships, and what the standard renames it to. One row was
+                the specification's names alone, none of which is in a
+                published table: a customer following the page could not join
+                an export. */}
+            {identifier.fields.length ? (
+              <p className="cp-idp__fields">
+                <span className="cp-idp__fieldcap">In the exports</span>
+                {identifier.fields.map((field) => (
+                  <code key={field}>{field}</code>
+                ))}
+              </p>
+            ) : null}
+            {identifier.becoming?.length ? (
+              <p className="cp-idp__fields cp-idp__fields--soon">
+                <span className="cp-idp__fieldcap">Renaming to</span>
+                {identifier.becoming.map((field) => (
+                  <code key={field}>{field}</code>
+                ))}
+              </p>
+            ) : null}
+          </details>
         </article>
       ))}
     </div>

@@ -7,7 +7,7 @@ subscriber-facing web client served at `cedarpress.ai`.
 ## Reporting a vulnerability
 
 Please report security vulnerabilities by email to **contact@lumecon.ai**
-with the subject line `Security: <brief title>`. We aim to respond within 5
+with the subject line `Security: <brief title>`. We aim to respond within five
 business days.
 
 When reporting, please include:
@@ -17,9 +17,18 @@ When reporting, please include:
 - The potential impact you observe.
 - Your name or handle if you would like attribution in the disclosure.
 
-We follow coordinated disclosure. Please do not publicly disclose an issue
-until we confirm a fix has shipped. We do not currently offer a paid bounty
-and will credit researchers at our discretion.
+We follow coordinated disclosure, on the same terms as Lumecon's canonical
+policy at <https://github.com/teim-team/lumecon-website/blob/main/SECURITY.md>
+(the `Policy:` target of `https://lumecon.ai/.well-known/security.txt`). We
+will acknowledge receipt within five business days, provide our assessment
+and expected fix timeline within ten business days, and credit you, if you
+wish, in a public disclosure note. Please do not disclose the issue publicly
+until we confirm that a fix has shipped or 90 days have passed from your
+report, whichever comes first. Lumecon does not currently offer a paid bounty
+and does not publish a PGP key; send a short message without sensitive
+details if plaintext email is unsuitable and we will arrange a secure
+channel. For the current product controls and security-program status, see
+<https://lumecon.ai/security>.
 
 ## Scope
 
