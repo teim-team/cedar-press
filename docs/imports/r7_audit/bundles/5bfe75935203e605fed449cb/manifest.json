@@ -1,0 +1,1171 @@
+{
+  "decisions": {
+    "counts": {
+      "current": 0,
+      "historical": 0,
+      "stale": 0,
+      "superseded": 0
+    },
+    "path": "docs/imports/R7_OWNER_DECISIONS.json",
+    "present": false,
+    "records": {},
+    "sha256": null
+  },
+  "files": {
+    "registries/Business_Entity_Equivalences.csv": {
+      "columns": [
+        "cedar_uid",
+        "business_uid",
+        "equivalence_scope",
+        "source_observation_ids",
+        "resolved_business_uid"
+      ],
+      "rows": 83,
+      "sha256": "8811aa9cd8895ddd4a1451bb5f97403a0b81686da3a6d7158233e0bb16e60b74",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Business_Entity_Equivalences.csv"
+    },
+    "registries/Business_ID_Lineage_R7.csv": {
+      "columns": [
+        "retired_business_uid",
+        "surviving_business_uid",
+        "reason",
+        "source_ids",
+        "kind",
+        "review_date"
+      ],
+      "rows": 3,
+      "sha256": "e9b38cc003378f33e1df618c6781158b6a91ae18dd95090b6f1ecfec972adc1b",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Business_ID_Lineage_R7.csv"
+    },
+    "registries/Business_Identifier_Assertions.csv": {
+      "columns": [
+        "identifier_assertion_id",
+        "business_uid",
+        "identifier_type",
+        "identifier_value",
+        "observation_id",
+        "source_urls",
+        "source_as_of",
+        "verification_basis",
+        "pair_id",
+        "resolved_business_uid",
+        "attribute_status_R7"
+      ],
+      "rows": 19080,
+      "sha256": "7a3638aa7d04f164101af172b7b13ec688a04d5707bc4261d6583296bdb2b865",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Business_Identifier_Assertions.csv"
+    },
+    "registries/Business_Native_Relationships.csv": {
+      "columns": [
+        "relationship_id",
+        "business_uid",
+        "cedar_uid",
+        "relationship_type",
+        "source_as_of",
+        "observation_id",
+        "source_urls",
+        "exact_ownership_percent",
+        "minimum_native_ownership_percent",
+        "claim_scope",
+        "resolved_business_uid",
+        "reviewed_at",
+        "effective_date",
+        "source_ids",
+        "review_round"
+      ],
+      "rows": 1084,
+      "sha256": "2498be0ce7c0e00e1f864c75ae77880c656f31a89e8d66523d39121a5b90f349",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Business_Native_Relationships.csv"
+    },
+    "registries/Business_Parent_Business_Relationships.csv": {
+      "columns": [
+        "child_business_uid",
+        "parent_business_uid",
+        "parent_business_name",
+        "relationship_type",
+        "source_urls",
+        "identity_status",
+        "ownership_percentage"
+      ],
+      "rows": 20,
+      "sha256": "1108173a7a8c219519571fa8bd97895ae750605cd9d1ad3625453c082ef82281",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Business_Parent_Business_Relationships.csv"
+    },
+    "registries/Business_Registration_Pairs.csv": {
+      "columns": [
+        "local_review_object_id",
+        "business_uid",
+        "legal_name",
+        "uei",
+        "cage_code",
+        "registration_geography",
+        "identifier_evidence",
+        "source_ids",
+        "source_urls",
+        "checked_date",
+        "pair_id",
+        "observation_id",
+        "pair_basis",
+        "resolved_business_uid"
+      ],
+      "rows": 8760,
+      "sha256": "c65683f1de4c138369ce63ec9b7a126ae4621c89d2ac427e8a9fa22af6d1f275",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Business_Registration_Pairs.csv"
+    },
+    "registries/Cedar_Business_Active_Register.csv": {
+      "columns": [
+        "cedar_uid",
+        "canonical_name",
+        "entity_type",
+        "business_uid",
+        "business_name",
+        "dataset_membership",
+        "owner_cedar_uid",
+        "affiliated_native_entity_uids",
+        "chartering_native_entity_uids",
+        "city",
+        "state",
+        "business_websites",
+        "name_aliases",
+        "inclusion_basis",
+        "ownership_relation_types",
+        "evidence_as_of",
+        "source_checked_dates",
+        "source_urls",
+        "evidence_count",
+        "record_status",
+        "identity_review_basis",
+        "fresh_web_check_R6",
+        "certification_claim",
+        "allocation_date",
+        "allocation_scope",
+        "native_entity_uid",
+        "cedar_entity_role",
+        "direct_parent_business_names",
+        "resolved_business_uid",
+        "active_record",
+        "record_status_R7",
+        "fresh_web_check_R7",
+        "evidence_count_R7",
+        "object_kind_R7",
+        "review_round",
+        "review_date",
+        "review_scope_R7",
+        "ownership_claim_limit_R7",
+        "exact_native_ownership_percent_R7",
+        "identifier_review_limit_R7",
+        "review_source_ids_R7"
+      ],
+      "rows": 17279,
+      "sha256": "222f26c6dfbad7ee590691720786664d23d8db28532816e7660ab939d2fb1352",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Cedar_Business_Active_Register.csv"
+    },
+    "registries/Cedar_Business_Register.csv": {
+      "columns": [
+        "cedar_uid",
+        "canonical_name",
+        "entity_type",
+        "business_uid",
+        "business_name",
+        "dataset_membership",
+        "owner_cedar_uid",
+        "affiliated_native_entity_uids",
+        "chartering_native_entity_uids",
+        "city",
+        "state",
+        "business_websites",
+        "name_aliases",
+        "inclusion_basis",
+        "ownership_relation_types",
+        "evidence_as_of",
+        "source_checked_dates",
+        "source_urls",
+        "evidence_count",
+        "record_status",
+        "identity_review_basis",
+        "fresh_web_check_R6",
+        "certification_claim",
+        "allocation_date",
+        "allocation_scope",
+        "native_entity_uid",
+        "cedar_entity_role",
+        "direct_parent_business_names",
+        "resolved_business_uid",
+        "active_record",
+        "record_status_R7",
+        "fresh_web_check_R7",
+        "evidence_count_R7",
+        "object_kind_R7",
+        "review_round",
+        "review_date",
+        "review_scope_R7",
+        "ownership_claim_limit_R7",
+        "exact_native_ownership_percent_R7",
+        "identifier_review_limit_R7",
+        "review_source_ids_R7"
+      ],
+      "rows": 17282,
+      "sha256": "2bd80a46ac8decc7bf3fdf89400ee2ecbdd3d9209936c193c575ce49e61c816e",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Cedar_Business_Register.csv"
+    },
+    "registries/Cedar_Entity_Register.csv": {
+      "columns": [
+        "cedar_uid",
+        "cedar_entity_id",
+        "canonical_name",
+        "entity_class",
+        "class_since_basis",
+        "former_names",
+        "minted",
+        "register_status",
+        "federal_register_legal_name",
+        "federal_register_legal_name_basis",
+        "federal_register_legal_name_url",
+        "state",
+        "minted_basis",
+        "source_urls_R7"
+      ],
+      "rows": 1918,
+      "sha256": "fb2c22967078857d0d8356b01adac5c6eebbbccf02aaf040e98c028d66dc64ec",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Cedar_Entity_Register.csv"
+    },
+    "registries/Institution_Observation_Links.csv": {
+      "columns": [
+        "observation_id",
+        "cedar_uid",
+        "canonical_name",
+        "entity_type",
+        "reported_name",
+        "source_urls",
+        "resolution_basis"
+      ],
+      "rows": 202,
+      "sha256": "b37bb15dd490310af0695ea5215b78e5d31c3efbf31f1c74374b80f8daedcb85",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Institution_Observation_Links.csv"
+    },
+    "registries/Legacy_Business_ID_Crosswalk.csv": {
+      "columns": [
+        "legacy_business_id",
+        "business_uid",
+        "observation_id",
+        "mapping_status",
+        "resolved_business_uid"
+      ],
+      "rows": 3350,
+      "sha256": "c7cd087fbe83aa33c1848496cab9afbe7669ea2efd2dadad6f973342c7621ff7",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Legacy_Business_ID_Crosswalk.csv"
+    },
+    "registries/Native_Entity_Identifier_Assertions.csv": {
+      "columns": [
+        "cedar_uid",
+        "identifier_type",
+        "identifier_value",
+        "source_urls",
+        "identity_evidence_basis",
+        "tax_status_review",
+        "source_review_round"
+      ],
+      "rows": 34,
+      "sha256": "5554af42d0070e9fe06de8d0df15f229882ba988fa12bdfe2f3bc97c6ec8bd5f",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Native_Entity_Identifier_Assertions.csv"
+    },
+    "registries/Native_Entity_Relationships_Append.csv": {
+      "columns": [
+        "parent_cedar_uid",
+        "child_cedar_uid",
+        "relationship_type",
+        "event_year",
+        "source_url",
+        "review_date",
+        "ownership_percentage",
+        "note"
+      ],
+      "rows": 1,
+      "sha256": "c8872f1a90cbbf91eb15f00eca8862561337fca8d290bbd98fcb5f678c605ed9",
+      "zip_member": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/registries/Native_Entity_Relationships_Append.csv"
+    }
+  },
+  "freeze_note": "freeze exit 0 means audit artifacts were written; it is not import approval",
+  "import_approval": {
+    "blocked_gates": {
+      "G03": "0 of 83 proposed equivalence pairs carry a CURRENT owner disposition; 83 UNRESOLVED (decisions: current 0, stale 0, superseded 0, historical 0)",
+      "G04": "owner: no decision recorded",
+      "G05": "owner: no decision recorded; live policy function may_publish_individual_native_field('canonical_name') = False (checks the function, not an export)",
+      "G06": "owner: no decision recorded"
+    },
+    "open_gates": [
+      "G00",
+      "G01",
+      "G02"
+    ],
+    "status": "NOT_APPROVED"
+  },
+  "integrity": {
+    "checks": {
+      "I01": true,
+      "I02": true,
+      "I03": true,
+      "I04": true,
+      "I05": true,
+      "I06": true,
+      "I07": true,
+      "I08": true,
+      "I09": true,
+      "I10": true,
+      "I11": true,
+      "I12": true
+    },
+    "status": "PASS"
+  },
+  "ledger_measurements": {
+    "attributed_to_other_entity": 33,
+    "attributed_to_paired_entity": 45,
+    "attribution_bindings": 78,
+    "attribution_method": {
+      "agent_research_one_leg": 20,
+      "agent_research_two_leg": 3,
+      "cluster_v3": 12,
+      "cross_dataset_propagation:contracting": 4,
+      "elijah_ruling_redirect": 3,
+      "need_v6": 33,
+      "unmatched": 3
+    },
+    "confidence_tier": {
+      "A": 3,
+      "B": 53,
+      "C": 20,
+      "X": 2
+    },
+    "evidence_url_class": {
+      "DOWNGRADED_BY_INTEGRITY_NOTE": 2,
+      "HOST_ROOT_ONLY": 38,
+      "INVALID": 1,
+      "MISSING": 36,
+      "VALID_RECORD_URL_NOT_RETRIEVED": 1
+    },
+    "excluded_rows": 1,
+    "generated_assessment": {
+      "ATTRIBUTION_REFUTED_OR_EXCLUDED": 1,
+      "CONFLICT_ATTRIBUTED_TO_OTHER_ENTITY": 2,
+      "IDENTIFIER_NOT_IN_LEDGER": 17,
+      "NO_IDENTIFIER_ON_BUSINESS": 3,
+      "WEAK_OR_INSUFFICIENT_EVIDENCE_ONLY": 60
+    },
+    "identifier_type": {
+      "CAGE": 42,
+      "UEI": 36
+    },
+    "ledger_rows": 78,
+    "method_quarantined": {
+      "N": 32,
+      "Y": 46
+    },
+    "proposed_pairs": 83,
+    "quarantine_disposition": {
+      "(blank)": 32,
+      "HOLD": 3,
+      "KEEP": 41,
+      "WITHDRAW": 2
+    },
+    "registrant_name_equals_paired_entity": 41,
+    "semantic_limitation": "ledger rows are identifier-to-owner attributions; no ledger field records a same-legal-object determination, so no row by itself establishes equivalence",
+    "tier_a_valid_record_url_registrant_name_match": 0
+  },
+  "ledger_provenance": {
+    "path": "data/clean/cedar_identifier_ledger_final.csv",
+    "sha256": "deb4bc1fa26f7ddcf01ef23a299b5c04fbccfbb71fbdacee3d552c756e476dee",
+    "subset_carried_in": "queue.csv column supporting_ledger_rows_json",
+    "subset_rows": 78,
+    "subset_sha256": "75782ef6411eae14f651faa9bc77763b88dcd3fe8f95344d155c8c7c631a39ce",
+    "tracked_by_git": false
+  },
+  "live_inputs": {
+    "identity_code": {
+      "path": "code/503_identity.py",
+      "sha256": "556bd19c176c67e06f1abb84689857bdb1485761be2a6af503f769b40c77930e"
+    },
+    "ledger": {
+      "columns": [
+        "identifier_type",
+        "identifier",
+        "tribe_id",
+        "canonical_name",
+        "legal_business_name",
+        "entity_class",
+        "attribution_method",
+        "confidence_tier",
+        "tier_rationale",
+        "is_authority",
+        "exclusion_id",
+        "exclusion_evidence",
+        "evidence_url",
+        "verified_date",
+        "state",
+        "prime_dollars_M",
+        "source_file",
+        "joint_ownership_flag",
+        "joint_ownership_note",
+        "evidence_source_file",
+        "evidence_url_integrity",
+        "cedar_uid",
+        "crossgov_name_collision_flag",
+        "crossgov_name_collision_proposed_entity_id",
+        "crossgov_name_collision_disposition",
+        "crossgov_name_collision_basis",
+        "method_quarantined",
+        "quarantine_disposition",
+        "quarantine_disposition_basis"
+      ],
+      "path": "data/clean/cedar_identifier_ledger_final.csv",
+      "rows": 20740,
+      "sha256": "deb4bc1fa26f7ddcf01ef23a299b5c04fbccfbb71fbdacee3d552c756e476dee"
+    },
+    "policy_code": {
+      "path": "code/cedar_domain.py",
+      "sha256": "0886a4de5db81e0070918ecc886c9682752418cb20290846d656d70b7ac8f0a4"
+    },
+    "register": {
+      "columns": [
+        "cedar_uid",
+        "cedar_entity_id",
+        "canonical_name",
+        "entity_class",
+        "class_since_basis",
+        "former_names",
+        "minted",
+        "register_status",
+        "federal_register_legal_name",
+        "federal_register_legal_name_basis",
+        "federal_register_legal_name_url",
+        "state",
+        "minted_basis"
+      ],
+      "path": "data/spine/cedar_identity_register.csv",
+      "rows": 1916,
+      "sha256": "7b91de259592c1c9a418377ed18fcfa4cc47f4227e9d66e48e5399a4123b1ad6"
+    },
+    "types": {
+      "columns": [
+        "type_code",
+        "label",
+        "row_count",
+        "definition",
+        "example_uid_1",
+        "example_name_1",
+        "example_uid_2",
+        "example_name_2",
+        "statutory_basis",
+        "evidence_citation",
+        "confidence"
+      ],
+      "path": "data/spine/cedar_entity_types.csv",
+      "rows": 18,
+      "sha256": "fb527372c0b66efe7da20294f91ab2017b5cbf43c6d9b3ba020ef8201f180424"
+    }
+  },
+  "package": {
+    "r7_member_prefix": "Cedar_Complete_Handoff_2026-09-14/Cedar_Tribal_Review_R7_2026-09-14/",
+    "zip": "Cedar_Complete_Data_and_Claude_Handoff_2026-09-14.zip",
+    "zip_sha256": "1e1b3a1d703ebbb15f5693729855c7e523b2b74676abb645e64da0ae94375870"
+  },
+  "queue": {
+    "columns": [
+      "pair_key",
+      "YOUR_NOTES",
+      "resolution_status",
+      "decision_status",
+      "decision_id",
+      "owner_disposition",
+      "owner_decided_by",
+      "owner_decided_on",
+      "evidence_fingerprint",
+      "generated_assessment",
+      "cedar_uid",
+      "entity_name",
+      "entity_class",
+      "business_uid",
+      "business_name",
+      "business_identifiers",
+      "relationship_meaning",
+      "evidence_urls",
+      "evidence_status",
+      "supporting_ledger_rows_json",
+      "verification_protocol"
+    ],
+    "file": "queue.csv",
+    "rendered_decisions": {
+      "CE-00076-76|CB-1008218": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-00078-KR|CB-1003942": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-00079-SH|CB-1014954": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007A-ZA|CB-1016143": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007B-53|CB-1010558": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007C-BW|CB-1002885": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007E-QE|CB-1016035": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007F-X7|CB-1016339": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007G-30|CB-1008628": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007H-9S|CB-1005812": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007J-FJ|CB-1000292": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007M-V4|CB-1006980": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007N-1X|CB-1013747": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007R-K8|CB-1004906": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007V-5K|CB-1004055": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007X-H5|CB-1008442": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0007Z-XQ|CB-1001005": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-00082-MJ|CB-1015069": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-00088-R8|CB-1005420": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-00089-Y1|CB-1005696": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0008C-GC|CB-1016276": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0008H-E9|CB-1005925": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0008R-RR|CB-1016725": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0008T-4A|CB-1014455": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0008W-GW|CB-1005661": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0008X-PN|CB-1000681": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0008Y-WE|CB-1001911": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-00093-ZV|CB-1008433": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-00095-BD|CB-1011137": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009B-F3|CB-1003541": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009E-1E|CB-1015211": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009G-D0|CB-1007153": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009H-KS|CB-1013594": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009J-SJ|CB-1009078": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009K-ZB|CB-1006612": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009N-BX|CB-1011478": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009R-X8|CB-1016044": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009T-9T|CB-1001852": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009X-V5|CB-1002730": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-0009Z-7Q|CB-1004872": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000A0-J0|CB-1017117": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000A4-A4|CB-1013105": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000A6-PP|CB-1007517": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000A7-WF|CB-1016099": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000A8-28|CB-1003437": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000A9-81|CB-1004943": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AA-ET|CB-1008100": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AC-TC|CB-1006055": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AK-4V|CB-1000344": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AM-AM|CB-1008838": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AN-GD|CB-1015148": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AP-P6|CB-1009403": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AR-2R|CB-1014823": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AS-8H|CB-1011646": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AT-EA|CB-1014896": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AX-0N|CB-1002196": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000AZ-C7|CB-1008345": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000B0-QG|CB-1007888": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000B5-ND|CB-1000329": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000B7-1Z|CB-1010191": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000B8-7R|CB-1011415": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000B9-DH|CB-1005204": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000BD-5N|CB-1013462": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000BH-XS|CB-1011676": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000BM-F4|CB-1010107": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000BV-SK|CB-1003324": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000BW-ZC|CB-1003468": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000BX-55|CB-1016544": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000C2-8J|CB-1012598": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000C3-EB|CB-1006867": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000C5-TX|CB-1007815": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000C8-C8|CB-1012396": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000C9-J1|CB-1008436": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CB-YK|CB-1006761": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CF-PQ|CB-1003247": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CJ-82|CB-1002258": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CK-EV|CB-1007562": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CN-TD|CB-1006206": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CS-JH|CB-1005094": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CW-4W|CB-1013070": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000CX-AN|CB-1001854": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000D2-D2|CB-1007125": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      },
+      "CE-000D3-KV|CB-1016762": {
+        "decision_id": "",
+        "decision_status": "",
+        "owner_decided_by": "",
+        "owner_decided_on": "",
+        "owner_disposition": "",
+        "resolution_status": "UNRESOLVED"
+      }
+    },
+    "rows": 83,
+    "sha256": "d450d8fa34d6dd3b215efc1d914a72345b71fe2d79c3b52827088ddbcb252cac"
+  },
+  "rules_version": "1188-rules-2026-09-14.r3",
+  "schema": "cedar.r7.audit_bundle_manifest.v2",
+  "tool": {
+    "path": "code/1188_import_chatgpt_r7_business_register.py",
+    "sha256": "7c49b2261a544304717554af0a3afcb7a8f6ad93eeed8ef2857d6f61748216d4"
+  }
+}

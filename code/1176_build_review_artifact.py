@@ -325,7 +325,7 @@ button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
   <p class="stamp">Cedar Press &middot; review bundle &middot; __DATE__</p>
   <h1>Five files to review</h1>
   <p class="sub">Every spreadsheet leads with a blank <strong>YOUR_NOTES</strong>
-  column. Add a note where something needs to change; silence means approved.
+  column. A blank note means the row has <strong>not been reviewed</strong>, never that it is approved; mark a row approved explicitly.
   Unique observations only &mdash; including the ones keyed confidently, because
   a review of only the uncertain rows can never find a confident mistake.</p>
 </header>
