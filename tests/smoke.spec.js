@@ -1012,18 +1012,30 @@ test.describe("the stylesheet", () => {
     // you, and what the truncation gave. A tile narrower than half the row,
     // and some tile sharing a row with another, are true at every
     // breakpoint above a phone and false the moment the rules stop applying.
-    const shape = await page.locator(".cp-hub__grid").evaluate((grid) => {
-      const tiles = [...grid.querySelectorAll(".cp-hub__tile")];
-      return {
-        gridWidth: grid.getBoundingClientRect().width,
-        widest: Math.max(...tiles.map((tile) => tile.getBoundingClientRect().width)),
-        rows: new Set(tiles.map((tile) => Math.round(tile.getBoundingClientRect().top))).size,
-        count: tiles.length,
+    // The hub is two ranks now — two lead cards and four quieter ones — so
+    // the tiles live in two containers rather than one. The property this
+    // test exists for is unchanged: every rank is still laid out, and none of
+    // them has collapsed into full-width blocks stacked down the page.
+    const shape = await page.evaluate(() => {
+      const measure = (selector) => {
+        const box = document.querySelector(selector);
+        const tiles = [...box.querySelectorAll(".cp-hub__tile")];
+        return {
+          width: box.getBoundingClientRect().width,
+          widest: Math.max(...tiles.map((t) => t.getBoundingClientRect().width)),
+          rows: new Set(tiles.map((t) => Math.round(t.getBoundingClientRect().top))).size,
+          count: tiles.length,
+        };
       };
+      return { lead: measure(".cp-hub__lead"), rest: measure(".cp-hub__grid--rest") };
     });
-    expect(shape.count).toBe(6);
-    expect(shape.widest).toBeLessThan(shape.gridWidth / 2);
-    expect(shape.rows).toBeLessThan(shape.count);
+    // Six doors, same as before the split.
+    expect(shape.lead.count + shape.rest.count).toBe(6);
+    // Each rank is one row across, and no tile owns its whole row.
+    expect(shape.lead.rows).toBe(1);
+    expect(shape.lead.widest).toBeLessThan(shape.lead.width);
+    expect(shape.rest.rows).toBe(1);
+    expect(shape.rest.widest).toBeLessThan(shape.rest.width / 2);
   });
 });
 

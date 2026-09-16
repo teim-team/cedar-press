@@ -199,11 +199,15 @@ function Detail({ entry, owned }) {
       </span>
       <h4 className="cp-read__name"><TierName name={entry.name} /></h4>
       <p className="cp-read__blurb">{entry.blurb}</p>
+      {/* The linkage is how the collection reaches its entities — method, not
+          description, and the longest paragraph in the panel. It was setting
+          the height of the whole shelf, so a verbose collection stretched the
+          band and the tiles sat in a field of colour. It opens in place. */}
       {entry.linkage ? (
-        <p className="cp-read__link">
-          <span className="cp-read__linkcap">The link</span>
-          {entry.linkage}
-        </p>
+        <details className="cp-read__link">
+          <summary><span className="cp-read__linkcap">The link</span></summary>
+          <p>{entry.linkage}</p>
+        </details>
       ) : null}
       <p className="cp-read__foot">
         {coverageLabel(entry)}

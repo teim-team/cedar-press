@@ -86,8 +86,14 @@ export default function CedarPressResearchAccess() {
           </div>
         </section>
 
-        <section className="cp-msec cp-fade" aria-label="What to include">
-          <span className="cp-sec__band">Include in the proposal</span>
+        {/* The seven proposal items are instructions for someone who has
+            already decided to apply; open by default they sat between the
+            fit examples and the action, so a reader deciding whether this is
+            for them had to scroll a checklist to reach the button. */}
+        <details className="cp-msec cp-prop__wrap cp-fade" aria-label="What to include">
+          <summary className="cp-prop__sum">
+            <span className="cp-sec__band">Include in the proposal</span>
+          </summary>
           <ol className="cp-prop">
             {PROPOSAL.map((item, i) => (
               <li key={item}>
@@ -104,7 +110,7 @@ export default function CedarPressResearchAccess() {
           <a className="cp-trh__cta" href={REQUEST_HREF}>
             Submit a research request <span aria-hidden="true">&#8594;</span>
           </a>
-        </section>
+        </details>
 
         <PressFoot nav={entitled} />
         <PressCedarFab />

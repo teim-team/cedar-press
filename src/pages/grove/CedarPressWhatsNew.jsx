@@ -283,9 +283,31 @@ export default function CedarPressWhatsNew() {
                       </a>
                     </h2>
                     {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
-                    <ul className="cp-feed__list">
-                      {entry.changed.map((line) => <li key={line}>{line}</li>)}
-                    </ul>
+                    {/* WHAT CHANGED, THEN THE ARITHMETIC.
+                        Every release lists its table and row counts beside
+                        whatever actually changed, at the same weight, so a
+                        methodology correction and "14 tables, 3,646,750 rows"
+                        read as two equal facts. The counts are release
+                        metadata — true, worth keeping, and not the news. */}
+                    {(() => {
+                      const routine = (line) => /^Release:\s/.test(line);
+                      const news = entry.changed.filter((l) => !routine(l));
+                      const counts = entry.changed.filter(routine);
+                      return (
+                        <>
+                          {news.length ? (
+                            <ul className="cp-feed__list">
+                              {news.map((line) => <li key={line}>{line}</li>)}
+                            </ul>
+                          ) : null}
+                          {counts.length ? (
+                            <p className="cp-feed__counts">
+                              {counts.map((line) => line.replace(/^Release:\s/, "")).join(" · ")}
+                            </p>
+                          ) : null}
+                        </>
+                      );
+                    })()}
                     <p className="cp-feed__acts">
                       {/* A retired collection's release is history a reader
                           can still cite; there is no shelf to walk to. */}

@@ -122,10 +122,44 @@ function sections(user) {
 
 export default function PressHub({ user }) {
   const all = sections(user);
+  // TWO OF THESE SIX CARRY THE PRODUCT. THE OTHER FOUR SUPPORT IT.
+  // Six equal squares gave Collections the same weight as Plans, and the
+  // masthead already repeats every one of them, so the front page asked for
+  // six navigation decisions before a subscriber saw anything they had paid
+  // for. Collections and Research Briefs lead the row at two-thirds and
+  // one-third; What's new, Priorities, Methods and Plans sit under them as a
+  // quieter rank. Nothing is removed and nothing moves off the page — the
+  // six destinations are the same six.
+  const lead = all.filter((s) => s.id === "data" || s.id === "articles");
+  const rest = all.filter((s) => !lead.includes(s));
   return (
     <section className="cp-sec cp-hub cp-fade" aria-label="Sections">
-      <ul className="cp-hub__grid">
-        {all.map((section) => {
+      <ul className="cp-hub__lead">
+        {lead.map((section) => {
+          const inner = (
+            <>
+              <span className="cp-hub__mark" aria-hidden="true">{section.icon}</span>
+              <span className="cp-hub__id">
+                <span className="cp-hub__name">{section.label}</span>
+                <span className="cp-hub__meta">{section.meta}</span>
+              </span>
+              <span className="cp-hub__what">{section.what}</span>
+              <span className="cp-hub__go" aria-hidden="true">
+                {section.id === "data" ? "Browse collections" : "Read the research"}
+                {" "}&#8594;
+              </span>
+            </>
+          );
+          const watch = { onClick: () => track(EVENT.sectionOpened, { section: section.id }) };
+          return (
+            <li key={section.id} className={`cp-hub__leadcell cp-hub__leadcell--${section.id}`}>
+              <Link className="cp-hub__tile cp-hub__tile--lead" to={section.to} {...watch}>{inner}</Link>
+            </li>
+          );
+        })}
+      </ul>
+      <ul className="cp-hub__grid cp-hub__grid--rest">
+        {rest.map((section) => {
           const inner = (
             <>
               <span className="cp-hub__mark" aria-hidden="true">{section.icon}</span>
@@ -138,7 +172,7 @@ export default function PressHub({ user }) {
           );
           const watch = { onClick: () => track(EVENT.sectionOpened, { section: section.id }) };
           return (
-            <li key={section.id}>
+            <li key={section.id} className="cp-hub__restcell">
               {section.href ? (
                 <a
                   className="cp-hub__tile"

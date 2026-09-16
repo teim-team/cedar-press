@@ -79,12 +79,12 @@ const BY_ID = Object.fromEntries(PRESS_ARTICLES.map((article) => [article.id, ar
  * Every chart here is built in Cedar Grove, and saying so beside an
  * invitation to build one is the strongest case Grove has.
  */
-function Figure({ block }) {
+function Figure({ block, lead = false }) {
   const entry = PRESS_CATALOG_BY_ID[block.source];
   const release = releaseFor(block.source);
   const Chart = PRESS_FIGURES[block.chart];
   return (
-    <figure className="cp-ar__fig">
+    <figure className={`cp-ar__fig${lead ? " cp-ar__fig--lead" : ""}`}>
       <figcaption className="cp-ar__figcap">{block.caption}</figcaption>
       {Chart ? (
         <div className="cp-ar__chart">
@@ -272,6 +272,13 @@ export default function CedarPressArticle() {
   // runs past the last paragraph and the grid row stretches to match it,
   // which leaves a hole where the article should have ended.
   const longEnough = article.body.length >= 12;
+  // The piece's principal figure, lifted out of the body to lead the page.
+  // Only the FIRST figure moves: the rest stay where the argument put them.
+  // A brief with no figure keeps its photograph at the top and `body` is the
+  // body unchanged.
+  const leadIndex = article.body.findIndex((b) => b.kind === BLOCK.FIGURE);
+  const lead = leadIndex >= 0 ? article.body[leadIndex] : null;
+  const body = lead ? article.body.filter((_, i) => i !== leadIndex) : article.body;
 
   return (
     <div className="teim-rd teim-rd--paper">
@@ -297,31 +304,51 @@ export default function CedarPressArticle() {
                 research replaces the piece. */}
           </header>
 
-          {/* The attribution goes under the picture, where a reader looks for
-              it. `credit` lands with the real photograph; until then the
-              caption carries the description on its own. */}
-          <figure className="cp-ar__figure">
-            {/* The lead picture is the piece's largest element and sits at
-                the top of the column, so it is fetched at high priority and
-                reserves its box: everything a reader is about to read is
-                below it. */}
-            <img
-              className="cp-ar__art"
-              src={article.image}
-              alt={article.imageAlt}
-              width={ARTICLE_IMAGE.width}
-              height={ARTICLE_IMAGE.height}
-              fetchPriority="high"
-            />
-            <figcaption className="cp-ar__cap">
-              {article.caption ?? article.imageAlt}
-              {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
-            </figcaption>
-          </figure>
+          {/* THE EVIDENCE COMES BEFORE THE STOCK PHOTOGRAPH.
+              The lead picture used to be the first thing under the headline —
+              on a data-led brief that means a reader passes a generic
+              meeting-room photograph to reach the one thing the piece is for.
+              If the article has a figure, the figure leads and the photograph
+              drops to where the prose reaches it; a piece with no figure
+              keeps the picture at the top, because then it is the only image
+              there is. Nothing is added or removed, only ordered. */}
+          {lead ? <Figure block={lead} lead /> : null}
+          {lead ? null : (
+            <figure className="cp-ar__figure">
+              <img
+                className="cp-ar__art"
+                src={article.image}
+                alt={article.imageAlt}
+                width={ARTICLE_IMAGE.width}
+                height={ARTICLE_IMAGE.height}
+                fetchPriority="high"
+              />
+              <figcaption className="cp-ar__cap">
+                {article.caption ?? article.imageAlt}
+                {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
+              </figcaption>
+            </figure>
+          )}
 
           <div className="cp-ar__grid">
             <div className="cp-ar__body">
-              {article.body.map((block, index) => {
+              {lead ? (
+                <figure className="cp-ar__figure cp-ar__figure--inline">
+                  <img
+                    className="cp-ar__art"
+                    src={article.image}
+                    alt={article.imageAlt}
+                    width={ARTICLE_IMAGE.width}
+                    height={ARTICLE_IMAGE.height}
+                    loading="lazy"
+                  />
+                  <figcaption className="cp-ar__cap">
+                    {article.caption ?? article.imageAlt}
+                    {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
+                  </figcaption>
+                </figure>
+              ) : null}
+              {body.map((block, index) => {
                 if (block.kind === BLOCK.H2) {
                   return <h2 key={index} className="cp-ar__h2">{block.text}</h2>;
                 }
