@@ -33,7 +33,7 @@ release it came from.
 Access follows the subscription. An eligible Tribal Business News membership
 issues an access code, the code establishes the entitlement, and the account
 follows: Cedar Press arrives with a membership, Cedar Press+ adds the deeper
-shelf, and [Cedar Grove](https://lumecon.ai) carries the same collections into
+shelf, and [Cedar Grove](https://lumecon.ai/cedar-grove) carries the same collections into
 the full analysis environment. Tribal Business News owns payment, renewals and
 issuance.
 
@@ -59,6 +59,23 @@ from the standalone build to a connected one.
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) covers how the code is
 organized, how the client and the API fit together, and how to run the API.
 [`.env.example`](.env.example) lists every configuration value.
+
+## Where this fits
+
+Cedar Press is one of Lumecon's Cedar products and is deliberately
+unannounced on [lumecon.ai](https://lumecon.ai): it reaches readers through
+Tribal Business News, and the site's own rules keep the name out of anything
+a visitor or crawler can reach. The sibling repositories are
+[`teim-app`](https://github.com/teim-team/teim-app) (the authenticated
+platform: Cedar Impact, Cedar Commons and Cedar Grove),
+[`teim-engine`](https://github.com/teim-team/teim-engine) (the model engine
+behind Cedar Impact), [`cedar`](https://github.com/teim-team/cedar) (Cedar,
+the AI economic analyst, as a service) and
+[`lumecon-website`](https://github.com/teim-team/lumecon-website) (the
+public site and the reference for product vocabulary). Product names and
+their one-line definitions follow the website's `AGENTS.md`; the vocabulary
+rule that matters most here is that Cedar Grove is "the living evidence base
+for your organization's economy", not a data library.
 
 ## Security
 
