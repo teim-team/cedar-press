@@ -73,11 +73,27 @@ behind Cedar Impact), [`cedar`](https://github.com/teim-team/cedar) (Cedar,
 the AI economic analyst, as a service) and
 [`lumecon-website`](https://github.com/teim-team/lumecon-website) (the
 public site and the reference for product vocabulary). Product names and
-their one-line definitions follow the website's `AGENTS.md`; the vocabulary
-rule that matters most here is that Cedar Grove is "the living evidence base
-for your organization's economy" (owner ruling 2026-09-13, replacing "the
-advanced data library"). The shared tier catalog in `src/workspaceTier.js`
-uses that definition.
+their one-line definitions follow the website's `AGENTS.md`, which is the
+North Star: where this repository and the website disagree about what
+something is called, the website wins. The vocabulary rule that matters most
+here is that Cedar Grove is "the living evidence base for your organization's
+economy" (owner ruling 2026-09-13, replacing "the advanced data library"). The
+shared tier catalog in `src/workspaceTier.js` uses that definition.
+
+The Lumecon copy rules apply to every string a reader can see in the client.
+The three that catch people out:
+
+- **No ampersands.** Write "and", never "&". This has leaked as `&amp;`, which
+  a grep for a bare `&` does not find; grep the entity too. It is worth
+  checking the visible label against its own `aria-label`, since the last
+  occurrence had "Requests and support" in the label and "Requests &amp;
+  support" on screen.
+- **No em dashes in prose a reader sees.** A `—` standing in for an empty
+  table cell is typography, not prose, and is fine.
+- **Cedar is the AI economic analyst**, never an "AI assistant".
+
+`.teim-rd` is a CSS class root inherited from the product's design system. It
+is a contract, not a label anyone reads; leave it alone.
 
 ## Security
 
