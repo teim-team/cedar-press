@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Cedar Press - 1187: Native Federal Advocacy & Engagement, 2025-2026.
+Cedar Press - 1187: Native Federal Advocacy and Engagement, 2025-2026.
 
     py -3 code/1187_native_federal_advocacy.py            # report
     py -3 code/1187_native_federal_advocacy.py build
@@ -486,7 +486,7 @@ def build(apply: bool = False) -> int:
         print("  refusing to build: an absent source is not a zero-row category")
         return 2
     keyed = sum(1 for r in rows if r["cedar_uid"])
-    print("  1187 Native Federal Advocacy & Engagement   %s"
+    print("  1187 Native Federal Advocacy and Engagement   %s"
           % ("BUILD" if apply else "REPORT (writes nothing)"))
     print("    rows (one per activity per entity): %d" % len(rows))
     for t in ACTIVITY_TYPES:

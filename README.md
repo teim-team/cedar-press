@@ -90,11 +90,14 @@ The three that catch people out:
   `&amp;|[A-Za-z0-9] & [A-Za-z0-9]`. Worth checking the visible label against
   its own `aria-label` too: one occurrence had "Requests and support" in the
   label and "Requests &amp; support" on screen.
-  One exception is **open and deliberate**: the collection named
-  `Native Federal Advocacy & Engagement` is embedded verbatim in the citation
-  written into every downloaded CSV, so renaming it changes how files
-  subscribers already hold cite themselves. It waits for a version bump on that
-  collection. See item 11 in [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md).
+  The one collection name that carried an ampersand, the lobbying collection,
+  was renamed to `Native Federal Advocacy and Engagement` on 2026-09-18. Its
+  name is embedded verbatim in the citation written into every downloaded CSV,
+  so six sources had to move together: the manifest, the storefront catalog, the
+  codebook, the descriptors, the release ledger and the prerendered HTML, with
+  `server/cedar_press/_press_data.json` regenerated from the catalog.
+  `pressReleases.test.js` fails if the ledger and the manifest disagree, which is
+  what catches a half-done rename.
 - **No em dashes in prose a reader sees.** A `—` standing in for an empty
   table cell is typography, not prose, and is fine.
 - **Cedar is the AI economic analyst**, never an "AI assistant".

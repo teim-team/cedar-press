@@ -9041,8 +9041,13 @@ regex in `1187._orgkey` and a comment in `1183`. `1136 verify` is 0 bytes
 across 1,053 files. `1169.neid_vocabulary` reads the tracked crosswalk first,
 so a fresh checkout can run its selftest at all.
 
-The site: the lobbying collection is `Native Federal Advocacy & Engagement`
-(short `Advocacy`, id unchanged). The ecosystem sources, method domains and
+The site: the lobbying collection is `Native Federal Advocacy and Engagement`
+(short `Advocacy`, id unchanged). It carried an ampersand until 2026-09-18,
+against the rule that a reader never sees one; renamed in the manifest, the
+storefront catalog, the codebook, the descriptors, the release ledger and the
+prerendered HTML, with `_press_data.json` regenerated. `pressReleases.test.js`
+asserts the ledger and the manifest agree on the current version's name, so the
+two move together or the suite fails. The ecosystem sources, method domains and
 examples, cadence (`ON_CHANGE`), the research-access example and the press
 dump follow the catalog. Nothing on the site says "lobbying dataset" any more.
 

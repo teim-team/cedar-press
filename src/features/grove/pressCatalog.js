@@ -278,7 +278,7 @@ export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
     id: "lobbying",
     short: "Advocacy",
-    name: "Native Federal Advocacy & Engagement",
+    name: "Native Federal Advocacy and Engagement",
     shelf: "standard",
     // Series. Floor: min(filing_year) in dist/customer/lobbying.csv. The old
     // catalog claimed 1998, the first year the LDA required filings; Cedar's
