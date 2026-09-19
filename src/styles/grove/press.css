@@ -383,7 +383,12 @@
 .teim-rd .cedar-widget__examples { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.55rem 0 0.7rem; }
 .teim-rd .cedar-widget__example { border: 1px solid var(--line); border-radius: 999px; background: var(--teal-tint); padding: 0.32rem 0.7rem; font-family: var(--sans); font-size: 0.78rem; line-height: 1.3; color: var(--dteal); cursor: pointer; text-align: left; transition: background 0.16s ease, border-color 0.16s ease; }
 .teim-rd .cedar-widget__example:hover { background: var(--bg); border-color: var(--dteal); }
-.teim-rd .cedar-widget__panel { position: fixed; right: 2rem; bottom: 6.4rem; width: min(24rem, calc(100vw - 4rem)); min-width: 0; max-width: none; height: auto; min-height: 0; max-height: min(30rem, calc(100vh - 10rem)); resize: none; display: block; overflow: hidden auto; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 0 1.2rem 1.1rem; box-shadow: 0 20px 52px rgba(10, 15, 38, 0.26); }
+/* The ceiling is `100dvh` with `100vh` under it, the same pair the marketing
+ * site's panel uses: on a short laptop window `100vh` is the whole window and
+ * the panel ran off the bottom of it, and on mobile Safari `100vh` counts the
+ * toolbar that is about to collapse. 5rem below the window leaves the
+ * launcher's corner clear. */
+.teim-rd .cedar-widget__panel { position: fixed; right: 2rem; bottom: 6.4rem; width: min(24rem, calc(100vw - 4rem)); min-width: 0; max-width: none; height: auto; min-height: 0; max-height: min(34rem, calc(100vh - 9rem)); max-height: min(34rem, calc(100dvh - 9rem)); resize: none; display: block; overflow: hidden auto; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 0 1.2rem 1.1rem; box-shadow: 0 20px 52px rgba(10, 15, 38, 0.26); }
 /* The panel's header: the caption names the dialog and the close sits at
  * its right end — the way out a phone needs when the browser toolbar sits
  * over the launcher. Sticky with its own background, so a scrolled answer
@@ -397,12 +402,69 @@
 @media (prefers-reduced-motion: no-preference) {
   .teim-rd .cedar-widget__panel { animation: cedar-rise 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
 }
-/* Phones: the panel is the width of the window sitting on its bottom edge,
- * which is where a sheet belongs on a phone. The launcher stays put on top of
- * it as the way back out, so the sheet keeps its bottom-right corner clear
- * rather than running its last line under the pill. */
+/* PHONES: THE PANEL TAKES THE SCREEN, WHICH IS WHAT THE MARKETING SITE DOES.
+ * ---------------------------------------------------------------------------
+ * It was a 70vh bottom sheet with 5.2rem of padding reserved at its foot so
+ * the sheet's last line would not run under the launcher. That cost twice: a
+ * strip of the page stayed visible above the sheet, and a third of what was
+ * left went to a gap held open for a button. Measured at 390x844 the ask
+ * form, the example chips and an answer did not fit together, so the reader
+ * scrolled a sheet inside a page.
+ *
+ * lumecon-website's Cedar (src/components/CedarFAB.astro, the `max-width:
+ * 600px` block) went full screen for exactly this reason, and its comment
+ * says so: "A question deserves the screen while it is being asked." This is
+ * that treatment, on the same breakpoint the press launcher already uses.
+ *
+ * `100dvh` with `100vh` underneath it, so the panel does not sit under
+ * Safari's collapsing toolbar and still has a height on engines without
+ * dynamic units. The dialog pads its own edges rather than a child's,
+ * because the bottom-most child is the basis note, not the form.
+ *
+ * The launcher goes away while the panel is open. It is a fixed circle in the
+ * corner of a dialog that now covers the screen, it is no longer the way out
+ * (the panel's own close is), and left up it sat on top of the answer. Same
+ * as the marketing site, which hides its FAB under `body.cedar-popped`. */
 @media (max-width: 640px) {
-  .teim-rd .cedar-widget__panel { right: 0; left: 0; bottom: 0; width: 100%; max-width: none; height: auto; max-height: 70vh; border-radius: 16px 16px 0 0; border-bottom: 0; padding: 1.2rem 1.15rem calc(5.2rem + env(safe-area-inset-bottom)); }
+  .teim-rd .cedar-widget--open .cedar-widget__launcher { display: none; }
+  .teim-rd .cedar-widget__panel {
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    /* Over the mast (z-index 100 in redesign.css) and anything it opens. A
+     * fixed header painting over a full-screen dialog hides the dialog's own
+     * title bar and its close button, which is the only way back. */
+    z-index: 200;
+    box-sizing: border-box;
+    padding:
+      env(safe-area-inset-top, 0px)
+      calc(1.15rem + env(safe-area-inset-right, 0px))
+      env(safe-area-inset-bottom, 0px)
+      calc(1.15rem + env(safe-area-inset-left, 0px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* A scroll that reaches the end of the dialog must not carry on into the
+     * page underneath it. */
+    overscroll-behavior: contain;
+  }
+  /* The head keeps its place and the body scrolls under it, rather than the
+   * whole dialog scrolling and carrying the way out off the top. */
+  .teim-rd .cedar-widget__panel > .cedar-widget__panelhead { position: static; flex: 0 0 auto; padding-top: 1rem; }
+  .teim-rd .cedar-widget__panel > .cedar-widget__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 1.2rem; }
+  /* A full-screen dialog's close control is the only way back to the page, so
+   * it gets a full touch target rather than the 1.9rem glyph that was enough
+   * beside a card. */
+  .teim-rd .cedar-widget__close { width: 2.75rem; height: 2.75rem; font-size: 1.5rem; }
+  /* With the screen to work with, the question field is worth more than three
+   * rows of it. */
+  .teim-rd .cedar-widget__ask textarea { min-height: 6.5rem; }
 }
 .teim-rd .cedar-widget__ask { display: flex; flex-direction: column; gap: 0.55rem; }
 .teim-rd .cedar-widget__label { font-family: var(--mono); font-size: 0.70rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); }
@@ -411,6 +473,21 @@
 .teim-rd .cedar-widget__answer { margin: 0.9rem 0 0; padding-top: 0.9rem; border-top: 1px solid var(--line-soft); font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); white-space: pre-wrap; }
 .teim-rd .cedar-widget__note { margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); }
 .teim-rd .cedar-widget__note a { color: var(--dteal); font-weight: 600; }
+/* WHAT IS UNDER THE ANSWER.
+ * A foot to the panel saying how the answer was produced: deterministic,
+ * read off the collection's own profile, cited to a release, refused when
+ * the profiles cannot answer, and addressed by identifier rather than by
+ * name. Quiet by construction -- it is standing evidence, not a pitch, and
+ * it must never compete with the answer above it. */
+.teim-rd .cedar-widget__basisnote { margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--line); }
+.teim-rd .cedar-widget__basiscap { display: block; margin-bottom: 0.45rem; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cedar-widget__basisnote p { margin: 0 0 0.5rem; font-size: 0.82rem; line-height: 1.55; color: var(--ink-2); }
+.teim-rd .cedar-widget__basisnote p:last-of-type { margin-bottom: 0.6rem; }
+/* The identifiers set in the face the register writes them in, so CE- and
+ * CB- read as codes in a sentence rather than as emphasis. */
+.teim-rd .cedar-widget__uid { font-family: var(--mono); font-size: 0.78em; letter-spacing: 0.04em; color: var(--dteal); }
+.teim-rd .cedar-widget__basislink { display: inline-block; font-family: var(--sans); font-size: 0.8rem; font-weight: 600; color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cedar-widget__basislink:hover { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cedar-widget__launcher { transition: none; }
   .teim-rd .cedar-widget__launcher:hover { transform: none; }
@@ -2788,8 +2865,9 @@
 /* On a phone the dock becomes a full-width bottom sheet that rises from the
    bottom edge, which is the gesture a panel this size owes a thumb. It is
    also the only arrangement that fits: a 25rem card with 12rem of thread, a
-   composer and a disclaimer has nowhere to go on a 390px screen except
-   across the whole of it. */
+   composer and a disclaimer has nowhere to go on a narrow screen except
+   across the whole of it. Below 600px it stops being a sheet and becomes
+   the screen -- see the block under this one. */
 @media (max-width: 720px) {
   .teim-rd .cp-dc { right: calc(0.75rem + env(safe-area-inset-right, 0px)); bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)); }
   .teim-rd .cp-dc__panel { right: 0; left: 0; bottom: 0; width: 100%; max-height: min(78dvh, 35rem); padding-bottom: env(safe-area-inset-bottom, 0px); border-right: 0; border-left: 0; border-radius: 14px 14px 0 0; animation-name: cp-dc-sheet; }
@@ -2800,6 +2878,63 @@
      the desktop size fill a phone's whole sheet and read as a menu. */
   .teim-rd .cp-dc__chip { max-width: 94%; padding: 0.4rem 0.85rem; min-height: 44px; font-size: 0.84rem; }
   .teim-rd .cp-dc__follow { min-height: 44px; padding-inline: 0.85rem; }
+}
+/* ON A PHONE THE PANEL IS THE SCREEN.
+   -------------------------------------------------------------------------
+   The sheet above is the arrangement lumecon.ai used to have, and it moved
+   off it. Its own comment records why (src/components/CedarFAB.astro, the
+   `max-width: 600px` block): "It used to be a 78dvh bottom sheet, which left
+   a strip of the page showing above it and gave the transcript about half a
+   screen: the prompt rail did not fit, so the last chip was cut off mid-word
+   and the conversation started in a letterbox. A question deserves the
+   screen while it is being asked."
+
+   The same 78dvh is what this file carried, and on cedarpress.ai it produced
+   exactly that: the panel's teal header lands across the middle of the hero
+   headline, which then reads as two half-sentences, one above the chat and
+   one behind it. Measured at 390x844 the header, the welcome bubble, five
+   starter chips at their 44px touch height, the composer and the three-line
+   disclaimer do not fit inside 78dvh, so the transcript opens already
+   scrolled away from its own first line.
+
+   600px rather than the 720px above, because that is where the reference
+   draws it. Three states, the same three: the screen below 600, the sheet
+   between 600 and 720, the corner card above.
+
+   `100dvh` with `100vh` under it -- `100vh` on mobile Safari counts a
+   toolbar that is about to collapse, and it is the fallback for engines
+   with no dynamic units.
+
+   The safe-area padding is inert here today: index.html does not set
+   `viewport-fit=cover`, so the insets resolve to 0 and the page is already
+   laid out inside the safe area. It is written the way it will have to be if
+   that meta is ever added, because an `inset: 0` dialog is the first thing
+   that breaks when it is -- the teal header goes under the status bar and
+   the disclaimer under the home indicator. */
+@media (max-width: 600px) {
+  .teim-rd .cp-dc__panel {
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+    padding:
+      env(safe-area-inset-top, 0px)
+      env(safe-area-inset-right, 0px)
+      env(safe-area-inset-bottom, 0px)
+      env(safe-area-inset-left, 0px);
+  }
+  /* The thread is the only part that grows. Everything else in the column
+     keeps its own height, or a long answer pushes the composer off the
+     bottom of a dialog that has no page to scroll into. */
+  .teim-rd .cp-dc__thread { flex: 1 1 auto; min-height: 0; }
+  /* A full-screen dialog's close control is the only way back to the page,
+     and at 1.8rem it was under the 44px a thumb is entitled to. */
+  .teim-rd .cp-dc__close { width: 2.75rem; height: 2.75rem; font-size: 1.5rem; }
 }
 @keyframes cp-dc-sheet { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {

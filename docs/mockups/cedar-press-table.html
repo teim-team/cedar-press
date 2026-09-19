@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cedar Press — the in-product table, now and proposed</title>
+<!--
+  A MOCKUP, NOT A BUILD. Nothing here is wired into the app.
+
+  Purpose: the door's collection pane (`.cp-pane`) and the product's Explore
+  table (`.cp-ex__table`) present the same kind of thing — Cedar records, held
+  by identifier — in two different visual languages. The door's is the one the
+  owner likes, and it is the one a visitor is sold on. This page puts them on
+  the same rows so the difference is a picture rather than an argument.
+
+  LEFT  — "now": the current Explore table, redrawn at the same type sizes,
+          column set and truncation rules as `src/styles/grove/press.css`
+          (`.cp-ex__table`, ~line 3095).
+  RIGHT — "proposed": the same rows in the door pane's language
+          (`.cp-pane__table`, ~line 2576), plus one addition: the collection
+          column carries the collection's own mark, so the icons that make the
+          door's rail legible do the same job inside a mixed-collection table.
+
+  THE ROWS ARE REAL. They were read out of the running app — the first twelve
+  rows of "All 12 open collections", from the repository's own ten-row samples
+  under public/data/cedar/samples — on 2026-09-19. Nothing is invented, including
+  the unlinked Federal Register rows, which are what the collection actually
+  holds.
+
+  The icons are the app's own, lifted from `pressCollectionIcons.jsx` as
+  rendered.
+-->
+<style>
+  /* The site's own faces, by the paths the dev server and the build both
+     serve them at. Opened straight off disk this falls back to the system
+     stack; open it through `npm run dev` to see it in Inter and JetBrains
+     Mono, which is how it was measured. */
+  @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/inter-400.woff2") format("woff2"); }
+  @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url("/fonts/inter-500.woff2") format("woff2"); }
+  @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/inter-600.woff2") format("woff2"); }
+  @font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/inter-700.woff2") format("woff2"); }
+  @font-face { font-family: 'Inter'; font-style: normal; font-weight: 800; font-display: swap; src: url("/fonts/inter-800.woff2") format("woff2"); }
+  @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+  @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/jetbrains-mono-700.woff2") format("woff2"); }
+</style>
+<style>
+  :root {
+    --ink: #071824; --ink-2: #33434a; --muted: #647279;
+    --line: rgba(7, 24, 36, 0.13); --line-soft: rgba(7, 24, 36, 0.07);
+    --teal: #0FB5A5; --teal-tint: #f2faf8; --dteal: #0A7F74;
+    --bg: #ffffff; --ground: #f3f6f8; --bright: #fafcfd;
+    --rule: rgba(10, 28, 52, 0.1);
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 2rem clamp(1rem, 3vw, 2.4rem) 3rem; }
+  .kick { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin: 0 0 0.5rem; }
+  h1 { font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 0.6rem; }
+  .lede { max-width: 76ch; margin: 0 0 1.6rem; font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); }
+  .lede b { color: var(--ink); }
+  /* Stacked, not side by side. Half a window each made both tables narrower
+     than either is in the product, and a table's whole problem is how it
+     behaves at the width it actually gets. */
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; align-items: start; }
+  .col > h2 { display: flex; align-items: baseline; gap: 0.6rem; margin: 0 0 0.7rem; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .col > h2 b { font-family: var(--sans); font-size: 1rem; letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
+  .tag { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.15rem 0.45rem; border-radius: 3px; }
+  .tag--now { background: rgba(199, 122, 24, 0.12); color: #8a5310; }
+  .tag--new { background: var(--teal-tint); color: var(--dteal); border: 1px solid rgba(15,181,165,0.35); }
+  .card { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+
+  /* ── NOW: the current Explore table, at its own measurements ─────────── */
+  .n-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; border-bottom: 1px solid var(--line); }
+  .n-ctl { font: inherit; font-size: 0.8rem; min-height: 38px; display: flex; align-items: center; padding: 0.3rem 0.6rem; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  .n-ctl--grow { flex: 1 1 10rem; color: var(--muted); }
+  .n-ctl--btn { color: var(--dteal); border-color: rgba(15,181,165,0.35); background: var(--teal-tint); }
+  .n-meta { padding: 0.55rem 0.8rem; font-size: 0.82rem; color: var(--ink); }
+  .n-meta small { display: block; color: var(--muted); font-size: 0.78rem; margin-top: 0.15rem; }
+  .n-scroll { overflow-x: hidden; }
+  .n-tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.84rem; line-height: 1.4; table-layout: fixed; }
+  .n-tbl th, .n-tbl td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .n-tbl th { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .n-tbl a { color: var(--dteal); font-weight: 600; }
+  .n-more { width: 2.2rem; color: var(--dteal); }
+  .n-pin { font-weight: 700; }
+  .n-nm { display: block; overflow: hidden; text-overflow: ellipsis; }
+  .n-uid, .n-alias { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 400; color: var(--muted); overflow: hidden; text-overflow: clip; }
+  .n-alias { font-size: 0.66rem; }
+  .n-date { font-family: var(--mono); font-size: 0.78rem; width: 6.6rem; }
+  .n-amt { font-family: var(--mono); font-size: 0.78rem; width: 8.5rem; }
+  .n-basis { display: block; font-size: 0.62rem; color: var(--muted); }
+  .n-foot { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0.8rem; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--line); }
+  .n-foot a { color: var(--dteal); font-weight: 600; }
+
+  /* ── PROPOSED: the door pane's language, plus the collection mark ────── */
+  .p-cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.55rem 1.1rem; border-bottom: 1px solid var(--rule); background: var(--bright); font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+  .p-cap em { font-style: normal; color: var(--muted); }
+  .p-tbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; line-height: 1.45; }
+  .p-tbl th, .p-tbl td { padding: 0.62rem 0.8rem; border-bottom: 1px solid rgba(10, 28, 52, 0.07); vertical-align: top; text-align: left; }
+  .p-tbl th { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .p-tbl th:first-child, .p-tbl td:first-child { padding-left: 1.1rem; }
+  .p-tbl th:last-child, .p-tbl td:last-child { padding-right: 1.1rem; }
+  .p-tbl tbody tr { cursor: pointer; }
+  .p-tbl tbody tr:hover { background: var(--teal-tint); }
+  .p-tbl tbody tr:hover .p-nm { text-decoration: underline; text-underline-offset: 3px; }
+  .p-ent { width: 24%; }
+  .p-nm { display: block; font-weight: 600; color: var(--ink); }
+  .p-unkeyed { font-weight: 400; font-style: italic; color: var(--muted); }
+  .p-uid { display: block; margin-top: 0.12rem; font-family: var(--mono); font-size: 0.66rem; color: var(--dteal); }
+  .p-uid em { font-style: normal; color: var(--muted); }
+  .p-uid em::before { content: " · "; }
+  .p-uid--none { color: var(--muted); font-size: 0.62rem; line-height: 1.35; }
+  .p-uid--none::before { content: none; }
+  .p-coll { width: 11.5rem; }
+  .p-coll span:last-child { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .p-coll { white-space: nowrap; }
+  .p-collmark { display: inline-grid; place-items: center; width: 1.15rem; height: 1.15rem; margin-right: 0.4rem; vertical-align: -0.25rem; color: var(--dteal); }
+  .m-ic { width: 100%; height: 100%; }
+  .p-date { width: 6.4rem; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-2); white-space: nowrap; }
+  .p-rec { color: var(--ink-2); }
+  .p-amt-b { max-width: 9.5rem; margin-left: auto; }
+  .p-src { color: var(--dteal); text-decoration: none; font-weight: 700; }
+  .p-amt { width: 10.5rem; text-align: right; }
+  .p-amt-n { display: block; font-family: var(--mono); font-size: 0.78rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .p-amt-b { display: block; margin-top: 0.1rem; font-family: var(--mono); font-size: 0.6rem; line-height: 1.35; color: var(--muted); }
+  .p-foot { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 1.1rem; border-top: 1px solid var(--rule); background: var(--bright); font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+
+  /* ── Phones ─────────────────────────────────────────────────────────── */
+  @media (max-width: 760px) {
+    /* NOW, as it stacks today: one flowing block per record. */
+    .n-tbl, .n-tbl tbody { display: block; }
+    .n-tbl thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .n-tbl tr { display: block; padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--line-soft); }
+    .n-tbl td { display: inline; border: 0; padding: 0; white-space: normal; }
+    .n-tbl .n-more { float: right; }
+    .n-pin .n-nm, .n-uid, .n-alias { display: inline; }
+    .n-tbl td + td::before { content: " "; }
+
+    /* PROPOSED, as the door pane stacks: the entity block reads down the
+       left, the money and the date sit right, and the mark keeps the
+       collection legible without a column of its own. */
+    .p-tbl, .p-tbl tbody { display: block; }
+    .p-tbl thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .p-tbl tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.1rem 0.9rem; padding: 0.8rem 1.1rem; border-bottom: 1px solid rgba(10, 28, 52, 0.07); }
+    .p-tbl td { display: block; padding: 0; border: 0; }
+    .p-ent { grid-column: 1; grid-row: 1; width: auto; }
+    .p-amt { grid-column: 2; grid-row: 1; width: auto; }
+    .p-coll { grid-column: 1; grid-row: 2; width: auto; margin-top: 0.35rem; }
+    .p-date { grid-column: 2; grid-row: 2; width: auto; margin-top: 0.35rem; text-align: right; }
+    .p-rec { grid-column: 1 / -1; grid-row: 3; margin-top: 0.3rem; font-size: 0.82rem; }
+  }
+
+  .notes { margin: 2rem 0 0; padding: 1.2rem 1.3rem; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
+  .notes h3 { margin: 0 0 0.7rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); }
+  .notes ol { margin: 0; padding-left: 1.1rem; }
+  .notes li { margin-bottom: 0.5rem; font-size: 0.88rem; line-height: 1.55; color: var(--ink-2); }
+  .notes li b { color: var(--ink); }
+  .fine { margin: 1.2rem 0 0; font-size: 0.76rem; line-height: 1.5; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kick">Mockup · not wired in</p>
+  <h1>The table inside Cedar Press, in the language of the one on the door.</h1>
+  <p class="lede">
+    Same twelve records on both sides, read out of the running app on 2026-09-19.
+    On the left, the Explore table as it renders today. On the right, the same
+    rows in the door pane&rsquo;s language &mdash; <b>the caption band, the mono column
+    heads, the identifier under the name, the right-aligned money</b> &mdash; with the
+    collection marks from the door&rsquo;s rail brought into the one column that
+    changes from row to row.
+  </p>
+
+  <div class="cols">
+    <section class="col">
+      <h2><span class="tag tag--now">Now</span> <b>Explore &mdash; all 12 open collections</b></h2>
+      <div class="card">
+        <div class="n-bar">
+          <span class="n-ctl">All 12 open collections (search acr&hellip;</span>
+          <span class="n-ctl n-ctl--grow">Search these records</span>
+          <span class="n-ctl">Entity: All</span>
+          <span class="n-ctl">Entity type: All 18</span>
+          <span class="n-ctl n-ctl--btn">Save view</span>
+          <span class="n-ctl n-ctl--btn">&darr; Download</span>
+          <span class="n-ctl n-ctl--btn">Copy link</span>
+        </div>
+        <p class="n-meta">all collections &middot; every record &middot; 102 of 110 sample records
+          <small>No preview yet for Native-Owned Businesses.</small></p>
+        <div class="n-scroll">
+          <table class="n-tbl">
+            <thead><tr><th></th><th>Entity</th><th>Entity type</th><th>Collection</th><th>Date</th><th>Observation</th><th>Amount</th><th>Source</th></tr></thead>
+            <tbody>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Confederated Tribes and Bands of the Yakama Nation</span><span class="n-uid">CE-001CC-8N</span><span class="n-alias">record names: YAKAMA NATION</span></td>
+        <td>Federally recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2007-12-05</td>
+        <td class="n-obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development</td>
+        <td class="n-amt">$500,000<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Curyung Tribal Council</span><span class="n-uid">CE-0001H-BS</span></td>
+        <td>Federally recognized Alaska Native Village</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2008-01-14</td>
+        <td class="n-obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development</td>
+        <td class="n-amt">$600,000<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">White Mountain Apache Tribe of the Fort Apache Reservation, Arizona</span><span class="n-uid">CE-001C7-AR</span><span class="n-alias">record names: WHITE MOUNTAIN APACHE TRIBE</span></td>
+        <td>Federally recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-09-08</td>
+        <td class="n-obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development</td>
+        <td class="n-amt">-$1<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Arctic Slope Regional Corporation</span><span class="n-uid">CE-00078-KR</span><span class="n-alias">record names: AVCP REGIONAL HOUSING AUTHORITY</span></td>
+        <td>Alaska Native Regional Corporation</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-09-03</td>
+        <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+        <td class="n-amt">$4,815,333<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">The Muscogee (Creek) Nation</span><span class="n-uid">CE-0017B-9C</span><span class="n-alias">record names: MUSCOGEE CREEK NATION</span></td>
+        <td>Federally recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-08-10</td>
+        <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+        <td class="n-amt">$16,237,676<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Bishop Paiute Tribe</span><span class="n-uid">CE-0012F-80</span><span class="n-alias">record names: BISHOP INDIAN TRIBAL COUNCIL</span></td>
+        <td>Federally recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-08-04</td>
+        <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+        <td class="n-amt">$1,933,596<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Quechan Tribe of the Fort Yuma Indian Reservation, California &amp; Arizona</span><span class="n-uid">CE-00191-QJ</span><span class="n-alias">record names: QUECHAN HOUSING AUTHORITY</span></td>
+        <td>Federally recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-08-04</td>
+        <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+        <td class="n-amt">$2,197,778<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Waccamaw Siouan Indians</span><span class="n-uid">CE-001EM-2X</span><span class="n-alias">record names: WACCAMAW SIOUAN INDIAN TRIBE, INC.</span></td>
+        <td>State-recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-08-04</td>
+        <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+        <td class="n-amt">$350,999<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)</span><span class="n-uid">CE-00170-7S</span><span class="n-alias">record names: LEECH LAKE BAND OF OJIBWE HOUSING AUTHORITY</span></td>
+        <td>Federally recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-06-21</td>
+        <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+        <td class="n-amt">-$4,163,330<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin</span><span class="n-uid">CE-00163-MM</span><span class="n-alias">record names: LAC COURTE OREILLES HOUSING AUTHORITY</span></td>
+        <td>Federally recognized tribe</td>
+        <td><a href="#">Federal Funding</a></td>
+        <td class="n-date">2010-05-04</td>
+        <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+        <td class="n-amt">$2,796,723<span class="n-basis">federal obligation on this transaction</span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">not linked to an entity</span></td>
+        <td>—</td>
+        <td><a href="#">Federal Register</a></td>
+        <td class="n-date">1994-09-08</td>
+        <td class="n-obs">Tribal Consultation on Indian Education Topics; Notice DEPARTMENT OF THE INTERIOR · consultation_session</td>
+        <td class="n-amt">–<span class="n-basis"></span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+      <tr>
+        <td class="n-more">→</td>
+        <td class="n-pin"><span class="n-nm">not linked to an entity</span></td>
+        <td>—</td>
+        <td><a href="#">Federal Register</a></td>
+        <td class="n-date">1999-11-02</td>
+        <td class="n-obs">Notice of Regional Meetings on Draft HUD Tribal Consultation Policy · Housing and Urban Development Department · consultation_notice</td>
+        <td class="n-amt">–<span class="n-basis"></span></td>
+        <td><a href="#">Source ↗</a></td>
+      </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="n-foot"><a href="#">Ask Cedar about this collection &rarr;</a><span>Page 1 of 5 &middot; 25 a page</span></p>
+      </div>
+    </section>
+
+    <section class="col">
+      <h2><span class="tag tag--new">Proposed</span> <b>The same rows, the door&rsquo;s table</b></h2>
+      <div class="card">
+        <p class="p-cap">
+          <span>All 12 open collections</span>
+          <span>102 of 110 sample records <em>&middot; page 1 of 5</em></span>
+        </p>
+        <table class="p-tbl">
+          <thead><tr><th>Entity</th><th>Collection</th><th>Date</th><th>Record</th><th class="p-amt">Amount</th></tr></thead>
+          <tbody>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Confederated Tribes and Bands of the Yakama Nation</span><span class="p-uid">CE-001CC-8N<em>Federally recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2007-12-05</td>
+        <td class="p-rec">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$500,000</span><span class="p-amt-b">federal obligation on this transaction</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Curyung Tribal Council</span><span class="p-uid">CE-0001H-BS<em>Federally recognized Alaska Native Village</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2008-01-14</td>
+        <td class="p-rec">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$600,000</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">White Mountain Apache Tribe of the Fort Apache Reservation, Arizona</span><span class="p-uid">CE-001C7-AR<em>Federally recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-09-08</td>
+        <td class="p-rec">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">-$1</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Arctic Slope Regional Corporation</span><span class="p-uid">CE-00078-KR<em>Alaska Native Regional Corporation</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-09-03</td>
+        <td class="p-rec">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$4,815,333</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">The Muscogee (Creek) Nation</span><span class="p-uid">CE-0017B-9C<em>Federally recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-08-10</td>
+        <td class="p-rec">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$16,237,676</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Bishop Paiute Tribe</span><span class="p-uid">CE-0012F-80<em>Federally recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-08-04</td>
+        <td class="p-rec">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$1,933,596</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Quechan Tribe of the Fort Yuma Indian Reservation, California &amp; Arizona</span><span class="p-uid">CE-00191-QJ<em>Federally recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-08-04</td>
+        <td class="p-rec">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$2,197,778</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Waccamaw Siouan Indians</span><span class="p-uid">CE-001EM-2X<em>State-recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-08-04</td>
+        <td class="p-rec">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$350,999</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)</span><span class="p-uid">CE-00170-7S<em>Federally recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-06-21</td>
+        <td class="p-rec">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">-$4,163,330</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm">Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin</span><span class="p-uid">CE-00163-MM<em>Federally recognized tribe</em></span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+        <td class="p-date">2010-05-04</td>
+        <td class="p-rec">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"><span class="p-amt-n">$2,796,723</span></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm p-unkeyed">not linked to an entity</span><span class="p-uid p-uid--none">no Cedar id — the record names no party the register could place</span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h10l6 6v15H6z"></path><path d="M16 3.5V10h6"></path><path d="M9.5 14h9M9.5 18h9M9.5 22h5"></path></svg></span><span>Federal Register</span></td>
+        <td class="p-date">1994-09-08</td>
+        <td class="p-rec">Tribal Consultation on Indian Education Topics; Notice DEPARTMENT OF THE INTERIOR · consultation_session&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"></td>
+      </tr>
+      <tr tabindex="0">
+        <td class="p-ent"><span class="p-nm p-unkeyed">not linked to an entity</span><span class="p-uid p-uid--none">no Cedar id — the record names no party the register could place</span></td>
+        <td class="p-coll"><span class="p-collmark"><svg class="m-ic" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h10l6 6v15H6z"></path><path d="M16 3.5V10h6"></path><path d="M9.5 14h9M9.5 18h9M9.5 22h5"></path></svg></span><span>Federal Register</span></td>
+        <td class="p-date">1999-11-02</td>
+        <td class="p-rec">Notice of Regional Meetings on Draft HUD Tribal Consultation Policy · Housing and Urban Development Department · consultation_notice&nbsp;<a class="p-src" href="#" aria-label="Source document">↗</a></td>
+        <td class="p-amt"></td>
+      </tr>
+          </tbody>
+        </table>
+        <p class="p-foot"><span>Ask Cedar about these records &rarr;</span><span>Next 25 &rarr;</span></p>
+      </div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <h3>What changed, and why</h3>
+    <ol>
+      <li><b>Seven columns become five.</b> The arrow column goes (the whole row
+        opens the record, which is what a reader tries first anyway), entity type
+        joins the identifier line under the name, and Source becomes the
+        &uarr;&#8599; at the end of the record it belongs to.</li>
+      <li><b>Nothing is clipped mid-word.</b> Today the entity name, the alias
+        line, the observation and the amount&rsquo;s basis all end in an ellipsis or
+        run off the right edge. Four truncations per row is the reason the table
+        reads as dense: the eye keeps stopping at words that do not finish.
+        Records wrap instead.</li>
+      <li><b>The collection carries its mark.</b> The door&rsquo;s rail is legible
+        because twelve marks are faster to tell apart than twelve teal links.
+        In a table that mixes collections in one view, the mark is doing more
+        work than it does on the door.</li>
+      <li><b>The identifier is the second line, in teal, always.</b> It is the
+        one thing on the row no other product has, and today it is a grey
+        sub-line indistinguishable from the alias beneath it. Where a record has
+        no identifier, the row says what that means rather than printing an
+        em dash in four columns.</li>
+      <li><b>A caption band, not a paragraph.</b> What is in view and how much of
+        it moves into the mono band the door already uses, so the toolbar is
+        controls and the band is state.</li>
+    </ol>
+  </div>
+
+  <p class="fine">
+    Rows: first twelve of &ldquo;All 12 open collections&rdquo;, from the ten-row samples in
+    <code>public/data/cedar/samples</code>, captured 2026-09-19. Marks:
+    <code>src/pages/grove/pressCollectionIcons.jsx</code>. Measurements on the left
+    are those of <code>.cp-ex__table</code> and on the right of
+    <code>.cp-pane__table</code>, both in <code>src/styles/grove/press.css</code>.
+  </p>
+</div>
+</body>
+</html>

@@ -54,6 +54,23 @@ function watchConsole(page) {
   return errors;
 }
 
+/**
+ * Wait until an element has finished animating, before measuring it.
+ *
+ * The panels here slide in (`cp-dc-sheet` rises from `translateY(100%)`,
+ * `cedar-rise` from 18px), and `toBeVisible()` is satisfied the moment the
+ * animation starts. A `boundingBox()` taken then is of a box in motion: a
+ * full-screen panel measured 0.18s in reported `y = 292` on a 664px window,
+ * which is not where it is and not where it lands. Assertions about geometry
+ * have to come after the motion, or they describe a frame.
+ */
+async function settled(locator) {
+  await locator.waitFor({ state: "visible" });
+  await locator.evaluate((el) =>
+    Promise.all(el.getAnimations().map((animation) => animation.finished.catch(() => {}))),
+  );
+}
+
 /** Sign in through the gate, the way a subscriber does. */
 async function signIn(page) {
   await page.goto("/");
@@ -139,6 +156,7 @@ test.describe("the gate", () => {
     const panel = page.locator(".cp-dc__panel");
     await expect(panel).toBeVisible();
     await expect(panel).toBeInViewport();
+    await settled(panel);
     // The launcher is gone while the panel is up: the panel's own close is
     // the way out, and a pill over the sheet's corner covers its last line.
     await expect(launcher).toBeHidden();
@@ -150,10 +168,17 @@ test.describe("the gate", () => {
     expect(viewport.height - (box.y + box.height)).toBeLessThanOrEqual(1);
     expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
     if (testInfo.project.name === "phone") {
-      // A phone gets the full width, and the sheet leaves the top of the
-      // window showing rather than covering the page it was opened from.
+      // A phone gets the whole screen, not a sheet across part of it. This
+      // assertion used to read `toBeLessThan(viewport.height * 0.85)` — the
+      // panel was capped at 78dvh and the rule under test was that it left
+      // the page showing above itself. lumecon.ai moved off exactly that
+      // arrangement (CedarFAB.astro, `max-width: 600px`), because the strip
+      // of page it leaves is not worth the half-screen it costs the
+      // transcript, and cedarpress.ai was landing its teal header across the
+      // middle of the hero headline. The rule now is the reference's rule.
       expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
-      expect(box.height).toBeLessThan(viewport.height * 0.85);
+      expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
+      expect(box.y).toBeLessThanOrEqual(1);
     }
 
     // The starter stack is an opening, not a toolbar: asking collapses it for
@@ -184,16 +209,39 @@ test.describe("the gate", () => {
     // back to the launcher a frame after the browser focused what was clicked,
     // so dismissing the sheet ate the click that dismissed it and the control
     // had to be clicked twice. The sheet is not modal; the click belongs to
-    // the control. `#cp-tab-signin` sits in the header, which a sheet anchored
-    // to the bottom edge never covers at either viewport.
+    // the control. `#cp-tab-signin` sits in the header, which the corner card
+    // never covers.
+    //
+    // That premise holds at a desktop width and no longer holds on a phone,
+    // where the panel is now the screen and there is no "outside" to click.
+    // Both contracts are checked, because both are real: the phone's way out
+    // is the close button, which is why it is 44px.
     const behind = page.locator("#cp-tab-signin");
-    await expect(behind).toBeVisible();
     await launcher.click();
     await expect(panel).toBeVisible();
-    await page.locator(".cp-dc__input").click();
-    await behind.click();
-    await expect(panel).toHaveCount(0);
-    await expect(behind).toBeFocused();
+    await settled(panel);
+    if (testInfo.project.name === "phone") {
+      // Covered, not hidden: the control is still in the layout and still
+      // `visible` to CSS, and the panel is simply painted over it. So the
+      // assertion is what is actually on top at its centre, which is the only
+      // thing that decides whether a tap can reach it.
+      const covered = await behind.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+        return Boolean(top?.closest(".cp-dc__panel"));
+      });
+      expect(covered).toBe(true);
+      await page.locator(".cp-dc__input").click();
+      await page.locator(".cp-dc__close").click();
+      await expect(panel).toHaveCount(0);
+      await expect(behind).toBeVisible();
+    } else {
+      await expect(behind).toBeVisible();
+      await page.locator(".cp-dc__input").click();
+      await behind.click();
+      await expect(panel).toHaveCount(0);
+      await expect(behind).toBeFocused();
+    }
     expect(errors).toEqual([]);
   });
 
@@ -831,6 +879,7 @@ test.describe("Ask Cedar", () => {
     const panel = page.getByRole("dialog", { name: /ask cedar/i });
     await expect(panel).toBeVisible();
     await expect(panel).toBeInViewport();
+    await settled(panel);
 
     // The panel is anchored to the window, not to the page box. It was laid
     // out inside the page's measure once, because a retained identity
@@ -842,10 +891,23 @@ test.describe("Ask Cedar", () => {
     const viewport = page.viewportSize();
     expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
     if (testInfo.project.name === "phone") {
+      // Full screen, the same rule the door's Cedar now follows and the same
+      // rule lumecon.ai's panel follows: a question gets the screen while it
+      // is being asked. It was a 70vh sheet holding 5.2rem of padding open at
+      // its foot to keep its last line clear of the launcher.
       expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
+      expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
     }
 
-    await launcher.click();
+    if (testInfo.project.name === "phone") {
+      // The launcher is hidden while a full-screen dialog is up — it would
+      // sit on top of the answer, and it is no longer the way out. The
+      // panel's own close is, so that is what a phone closes with.
+      await expect(launcher).toBeHidden();
+      await panel.getByRole("button", { name: /close ask cedar/i }).click();
+    } else {
+      await launcher.click();
+    }
     await expect(panel).toHaveCount(0);
     expect(errors).toEqual([]);
   });

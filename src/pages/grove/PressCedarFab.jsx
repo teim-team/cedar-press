@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { askCedar } from "../../api.js";
 import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
+import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 import { CedarIcon } from "./pressGateIcons";
@@ -22,6 +23,61 @@ const SCOPED_EXAMPLES = [
   "How was this collection constructed?",
   "What are its headline figures?",
 ];
+
+/**
+ * WHAT IS UNDER THE ANSWER, SAID IN THE PANEL.
+ *
+ * A box in the corner of a page that takes a question and returns prose is,
+ * to a reader, indistinguishable from a chat model wired to a search index.
+ * Cedar is not that, and nothing in this panel said so: the panel asked for a
+ * question and printed a sentence, which is exactly the shape of the thing it
+ * is not.
+ *
+ * Every sentence below is a fact about this service, checked against the code
+ * that produces the answers, not positioning:
+ *
+ *  - `server/cedar_press/collection_profiles.answer_from_profile` answers
+ *    from the collection's own profile fields and "never composes beyond
+ *    them". No prompt, no model, no memory. Its own module docstring opens
+ *    with it: "Cedar does not 'know' the collections because copy was stuffed
+ *    into a prompt."
+ *  - Every answer carries a `basis` naming the release it was read off
+ *    (`{collection} {version}`), which is why the answer above prints one.
+ *  - A question the profiles cannot answer returns `None` and the route
+ *    refuses, naming the research desk — `app.ask_cedar`. It does not
+ *    improvise.
+ *  - The identifiers are the register's, documented on Methods: a Cedar
+ *    entity id (CE-) names a Native entity, a Cedar business id (CB-) names a
+ *    distinct business, and they are maintained through renames, mergers and
+ *    reorganizations.
+ *
+ * It renders in both modes. Standalone, the panel cannot take a question at
+ * all, and a visitor reading that Cedar is "being wired in" should still
+ * learn what it is being wired to.
+ */
+function CedarBasis() {
+  return (
+    <div className="cedar-widget__basisnote">
+      <span className="cedar-widget__basiscap">How Cedar answers</span>
+      <p>
+        Cedar reads each collection&rsquo;s own profile &mdash; its sources, its method, its
+        release and its published figures &mdash; and names the release it answered from.
+        Nothing is generated from a model&rsquo;s memory, and a question the collections
+        cannot answer goes to the research desk rather than to a guess.
+      </p>
+      <p>
+        The records behind an answer are held by identifier, not by name: a Cedar entity
+        id (<span className="cedar-widget__uid">CE-</span>) for a Native government,
+        enterprise or nonprofit, a Cedar business id
+        (<span className="cedar-widget__uid">CB-</span>) for a distinct business, each
+        maintained through renames, acquisitions and reorganizations.
+      </p>
+      <a className="cedar-widget__basislink" href={PRESS_METHODS_PATH}>
+        How Cedar builds its collections <span aria-hidden="true">&#8594;</span>
+      </a>
+    </div>
+  );
+}
 
 // `gated` names why Cedar will not query the collections for this reader:
 // "signedout" (no session) or "unentitled" (a membership without Cedar
@@ -154,6 +210,10 @@ export function PressCedarFab({ gated = null, examples = [] }) {
               <span aria-hidden="true">&#215;</span>
             </button>
           </div>
+          {/* The body scrolls; the head above it and the dialog's own edges do
+              not. On a phone the panel is the screen, so a long answer must
+              not carry the close button off the top of it. */}
+          <div className="cedar-widget__scroll">
           {connected ? (
             <>
               <form className="cedar-widget__ask" onSubmit={ask}>
@@ -165,8 +225,13 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                       : "Ask about the collections"}
                 </label>
                 {scope ? (
+                  /* The label above already carries the collection's name, so
+                     this line says only that the scope is on and how to leave
+                     it. Both carrying the name put it twice inside one panel,
+                     which on a phone is two wrapped lines of the same
+                     twenty-eight characters. */
                   <p className="cedar-widget__scope">
-                    Scoped to {scope.name}{" "}
+                    Scoped{" · "}
                     <button
                       type="button"
                       className="cedar-widget__scopeclear"
@@ -253,6 +318,8 @@ export function PressCedarFab({ gated = null, examples = [] }) {
               <a href={appUrl("/app")} target="_blank" rel="noreferrer">open the platform</a>.
             </p>
           )}
+          <CedarBasis />
+          </div>
         </div>
       ) : null}
       <button
