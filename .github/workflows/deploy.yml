@@ -84,6 +84,15 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist-site
+      # cedarpress.ai is served from S3 behind CloudFront (docs/HOSTNAMES.md).
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::502309351676:role/cedarpress-site-deploy
+          aws-region: us-east-1
+      - run: |
+          aws s3 sync dist-site s3://cedarpress-ai-site-502309351676 --delete --exclude CNAME --exclude 'assets/*' --cache-control 'public, max-age=600'
+          aws s3 sync dist-site/assets s3://cedarpress-ai-site-502309351676/assets --delete --cache-control 'public, max-age=31536000, immutable'
+          aws cloudfront create-invalidation --distribution-id E3AEMUAUDGWNTQ --paths '/*'
 
   deploy:
     needs: build
