@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import threading
 import unittest
 from pathlib import Path
 
@@ -279,6 +280,54 @@ class TestTheRuleOnPostgres(_Earning, _Spending, _Influence, _Requests, unittest
         s = pr.Priorities(store=pr.PostgresStore())
         s.seed()
         return s
+
+    def test_two_seats_cannot_spend_the_same_point_twice(self) -> None:
+        """Codex, PR #92: READ COMMITTED let concurrent allocations overspend.
+
+        `SqliteStore` runs everything under one process-wide lock, so this
+        cannot happen there and the rule tests above could never have caught
+        it. On Postgres the balance check and the debit are two statements in
+        a transaction that other transactions can interleave with: eight
+        requests for one subscription all read the same two points, all find
+        them sufficient, and all append a debit. The ledger then sums below
+        zero, which is the one thing an append-only ledger is for.
+
+        Eight threads and two points. However the waiting falls out, exactly
+        two may succeed and the balance may never go negative.
+        """
+        s = self.store()
+        account = pr.Account("acct-race", "seat@bank.example", "press_pro")
+        self.assertEqual(s.accrue(account, "2026-09"), 2)
+        targets = [p["id"] for p in s.priorities()[:8]]
+        self.assertEqual(len(targets), 8)
+
+        spent, refused, other = [], [], []
+        barrier = threading.Barrier(len(targets))
+
+        def put(priority_id: str) -> None:
+            barrier.wait()
+            try:
+                s.allocate(account, priority_id, 1)
+                spent.append(priority_id)
+            except pr.PointsError:
+                refused.append(priority_id)
+            except Exception as exc:  # noqa: BLE001 - reported, not swallowed
+                other.append(exc)
+
+        threads = [threading.Thread(target=put, args=(t,)) for t in targets]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=30)
+        self.assertEqual(other, [], "an allocation failed for a reason that is not the rule")
+        self.assertFalse(any(t.is_alive() for t in threads), "an allocation never finished")
+
+        self.assertEqual(len(spent), 2, f"spent {len(spent)} of 2 points")
+        self.assertEqual(len(refused), 6)
+        self.assertEqual(s.balance("acct-race"), 0)
+        # And the ledger says the same thing the balance does.
+        card = s.influence(account, "2026-09")
+        self.assertEqual(sum(a["points"] for a in card["allocations"]), 2)
 
 
 class TestMonths(unittest.TestCase):

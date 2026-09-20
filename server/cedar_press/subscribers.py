@@ -42,6 +42,16 @@ from cedar_press import db
 TIERS = ("press", "press_pro")
 
 
+class AlreadySubscribed(Exception):
+    """This address already holds a subscription, so a code cannot make one.
+
+    Raised rather than returned, because it is a different answer from "that
+    code is not usable" and the reader is owed a different sentence. Letting
+    it fall through as `None` would tell somebody whose account already
+    exists that their code was already spent.
+    """
+
+
 @dataclass(frozen=True)
 class Subscriber:
     email: str
@@ -125,6 +135,12 @@ def hash_password(password: str, *, salt: bytes | None = None) -> str:
     salt = salt or os.urandom(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, _ROUNDS)
     return f"pbkdf2${_ROUNDS}${salt.hex()}${digest.hex()}"
+
+
+#: A hash of nothing anybody can sign in with, used to spend the same work on
+#: an unknown address as on a wrong password. Built at import, so a refusal
+#: costs one verification rather than a derivation and a verification.
+_DUMMY_HASH = hash_password(os.urandom(32).hex())
 
 
 def verify_password(password: str, stored: str | None) -> bool:
@@ -239,6 +255,15 @@ def authenticate(email: str, password: str) -> Subscriber | None:
     """
     found = find(email)
     if not found:
+        if db.configured():
+            # THE SAME 401 IS NOT THE SAME ANSWER IF ONE ARRIVES FASTER.
+            # A known address costs 240,000 PBKDF2 rounds to refuse and an
+            # unknown one used to cost a SELECT, which is a difference large
+            # enough and repeatable enough to read off a stopwatch. That turns
+            # the login form into a query for "is this person a Cedar Press
+            # subscriber" — answerable about anybody, without an account.
+            # The work is done and the result discarded.
+            verify_password(password, _DUMMY_HASH)
         return None
     if db.configured():
         return found if verify_password(password, found.password_hash) else None
@@ -352,9 +377,34 @@ def find_code(code: str) -> Code | None:
         key,
         str(raw.get("email", "")).strip().lower(),
         str(raw.get("tier", "press")),
-        dt.date.fromisoformat(str(expires)) if expires else None,
+        _expiry(expires),
         dt.datetime.now(dt.timezone.utc) if key in _spent else None,
     )
+
+
+#: The earliest date there is, which `has_expired` is always true for.
+_LONG_EXPIRED = dt.date.min
+
+
+def _expiry(raw: object) -> dt.date | None:
+    """An `expires` field as a date, and an unparseable one as long expired.
+
+    UNPARSEABLE MEANS EXPIRED, WHICH IS A RULE THIS ALMOST DROPPED.
+    `codes.py` has always said so in as many words: "An unparseable date is a
+    register we cannot trust. Treated as expired rather than as unlimited:
+    the failure that turns a typo into a code that never stops working is
+    worse than the one that turns it into a code that does not work." When
+    this lookup moved here, the parse became a bare `date.fromisoformat`, so
+    a typo in `CEDAR_PRESS_CODES` stopped being a refused code and became a
+    500 on `/press/activation/validate` — a reader told the service is broken
+    rather than told their code is not good.
+    """
+    if not raw:
+        return None
+    try:
+        return dt.date.fromisoformat(str(raw))
+    except ValueError:
+        return _LONG_EXPIRED
 
 
 def redeem(code: str, password: str) -> Subscriber | None:
@@ -377,8 +427,20 @@ def redeem(code: str, password: str) -> Subscriber | None:
         return None
 
     if not db.configured():
+        if exists(found.email):
+            raise AlreadySubscribed(found.email)
         _spent.add(key)
         return create(found.email, password, found.tier)
+
+    # BEFORE THE TRANSACTION, NOT INSIDE IT. `account_id_for` runs a query of
+    # its own, and a query inside the block below asks the pool for a SECOND
+    # connection while this one is still held. At `CEDAR_PRESS_DB_POOL=1`
+    # every activation then waits out the pool timeout; at the default eight,
+    # eight simultaneous activations hold all eight connections and each waits
+    # for a ninth that cannot come. The value does not change across the
+    # transaction — there is no subscriber row yet — so it is resolved here.
+    account = account_id_for(found.email)
+    hashed = hash_password(password)
 
     with db.pool().connection() as conn, conn.cursor() as cur:
         cur.execute(
@@ -390,15 +452,23 @@ def redeem(code: str, password: str) -> Subscriber | None:
             # Somebody redeemed it between the read above and this write.
             conn.rollback()
             return None
+        # DO NOTHING, NOT DO UPDATE, AND THE DIFFERENCE IS AN ACCOUNT.
+        # This used to overwrite `password_hash` and `tier` on conflict, so a
+        # second code issued to an address that already had a subscription
+        # would set a new password on it — without anybody proving they held
+        # the old one. The caller checks `exists` first; this is the half of
+        # it that also holds when two requests race, because the check and
+        # the insert are not the same instant.
         cur.execute(
             "INSERT INTO cedar_press_subscribers (email, account_id, tier, password_hash)"
-            " VALUES (%s, %s, %s, %s)"
-            " ON CONFLICT (email) DO UPDATE SET tier = EXCLUDED.tier,"
-            " password_hash = EXCLUDED.password_hash, updated_at = now()",
-            (found.email, account_id_for(found.email), found.tier, hash_password(password)),
+            " VALUES (%s, %s, %s, %s) ON CONFLICT (email) DO NOTHING",
+            (found.email, account, found.tier, hashed),
         )
+        if cur.rowcount == 0:
+            conn.rollback()
+            raise AlreadySubscribed(found.email)
         conn.commit()
-    return Subscriber(found.email, found.tier, account_id_for(found.email))
+    return Subscriber(found.email, found.tier, account)
 
 
 def issue_code(code: str, email: str, tier: str, expires_on: dt.date | None = None) -> None:

@@ -264,6 +264,10 @@ _SQLITE_TABLES = {
     "requests": "research_requests",
     "profiles": "reader_profiles",
 }
+#: The advisory-lock namespace for Cedar Points, so a key here cannot collide
+#: with one teim-app takes in the same database. Arbitrary but fixed.
+_LOCK_CLASS = 0x43505053  # "CPPS"
+
 _POSTGRES_TABLES = {
     "priorities": "cedar_press_priorities",
     "ledger": "cedar_press_ledger",
@@ -332,6 +336,9 @@ class SqliteStore:
                 self._local.cur = None
                 cur.close()
 
+    def hold(self, cur: Any, account_id: str) -> None:
+        """Nothing to do: `tx()` holds one lock for the whole connection."""
+
     def close(self) -> None:
         with self._lock:
             self._db.close()
@@ -340,7 +347,7 @@ class SqliteStore:
 class PostgresStore:
     """The platform's database, beside teim-app's own tables.
 
-    The schema is not created here: it is ``server/migrations/``, applied by
+    The schema is not created here: it is ``cedar_press/migrations/``, applied by
     ``db.migrate()``, because two app instances starting at once must agree
     about what has run and only the database can settle that.
     """
@@ -365,6 +372,28 @@ class PostgresStore:
                 yield cur
             finally:
                 self._local.cur = None
+
+    def hold(self, cur: Any, account_id: str) -> None:
+        """Take this subscription's lock until the transaction ends.
+
+        WHAT SQLITE GOT FOR FREE AND POSTGRES DOES NOT. `SqliteStore` runs
+        every statement under one process-wide `RLock`, so a read-then-write
+        is atomic by construction. Postgres serves this from a pool, and the
+        default READ COMMITTED isolation means two allocations for one
+        subscription can both read the same balance, both find it sufficient,
+        and both append a debit — spending points that were only there once
+        and leaving a ledger that sums below zero, which is exactly the thing
+        an append-only ledger exists to make impossible.
+
+        An advisory lock rather than SERIALIZABLE: a serialization failure is
+        an error the caller has to be written to retry, and a lock is a wait.
+        It is released with the transaction whether that commits or rolls
+        back, so a refusal cannot strand it. Keyed on the SUBSCRIPTION, so two
+        organizations never wait on each other.
+        """
+        cur.execute(
+            "SELECT pg_advisory_xact_lock(%s, hashtext(%s))", (_LOCK_CLASS, account_id)
+        )
 
     def close(self) -> None:
         """Nothing to close: the pool is the service's, not this store's."""
@@ -440,6 +469,7 @@ class Priorities:
         amount = POINTS_PER_ACTIVE_MONTH.get(account.tier, 0)
         credited = 0
         with self._sql.tx() as cur:
+            self._sql.hold(cur, account.account_id)
             if amount > 0:
                 cur.execute(
                     self._sql.q(
@@ -513,6 +543,9 @@ class Priorities:
         if not isinstance(points, int) or points == 0:
             raise PointsError("Choose how many points to move.")
         with self._sql.tx() as cur:
+            # Before the balance is read, because the read and the debit below
+            # are one decision and another seat must not get between them.
+            self._sql.hold(cur, account.account_id)
             cur.execute(self._sql.q("SELECT 1 FROM {priorities} WHERE id = ?"), (priority_id,))
             if cur.fetchone() is None:
                 raise PointsError("That priority does not exist.")

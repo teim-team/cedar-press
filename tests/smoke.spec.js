@@ -1213,12 +1213,17 @@ test.describe("house style", () => {
   // Two exemptions, and both were found by running this rather than by
   // reasoning about it:
   //
-  //   1. "Native Federal Advocacy & Engagement" is a COLLECTION NAME from
-  //      `data/cedar/collections.manifest.json` — the generated release
-  //      manifest, which is also what Cedar Grove's descriptors are built
-  //      from. Rewriting it here would make the product disagree with the
-  //      release it publishes, and with Grove, about the name of a thing
-  //      readers are invited to cite.
+  //   1. WITHDRAWN. "Native Federal Advocacy & Engagement" was exempted
+  //      here as a COLLECTION NAME out of the release manifest, on the
+  //      reasoning that rewriting it in the product would make the product
+  //      disagree with the release. The collection was then renamed at the
+  //      source — the manifest, the catalog, the descriptors and Grove all
+  //      say "and" now — so the exemption stopped protecting a name and
+  //      started hiding a straggler: `code/1176_build_review_artifact.py`
+  //      was still writing the ampersand into the downloadable review page,
+  //      and this test was told not to look. The lesson is that an exemption
+  //      for a generated value has to be withdrawn when the value changes,
+  //      or the rule quietly stops being a rule.
   //   2. "Quechan Tribe of the Fort Yuma Indian Reservation, California &
   //      Arizona" is a CANONICAL ENTITY NAME from the register — the tribe's
   //      name as the federal record states it. Editing a Nation's legal name
@@ -1242,7 +1247,6 @@ test.describe("house style", () => {
     ".cp-rec",
     ".cp-ent",
   ].join(", ");
-  const FROM_THE_MANIFEST = ["Native Federal Advocacy & Engagement"];
 
   for (const { name, path } of [
     { name: "the door", path: "/" },
@@ -1265,7 +1269,6 @@ test.describe("house style", () => {
         for (const node of body.querySelectorAll(quoted)) node.remove();
         return body.innerText;
       }, QUOTED);
-      for (const allowed of FROM_THE_MANIFEST) text = text.split(allowed).join("");
       const offending = text
         .split("\n")
         .map((line) => line.trim())

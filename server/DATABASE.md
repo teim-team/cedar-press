@@ -58,6 +58,14 @@ and a person can hold one, the other, both or neither. So the press tier is a
 row in `cedar_press_subscribers` rather than a column on `users`, and the two
 ladders never have to be collapsed into one.
 
+### A database of its own
+
+`users` is teim-app's table, not this service's, and pointing Cedar Press at
+a database that does not have it is supported: the migration adds the foreign
+key only when the table is there, and `link_platform_account` asks
+`to_regclass` and does nothing when it is not. A deployment that later puts
+teim-app in the same database gets the key on the next migration pass.
+
 `cedar_press_subscribers.user_id` is nullable on purpose. A Tribal Business
 News subscriber can arrive with an access code before they have ever opened
 the platform, and refusing them until a `users` row exists would make the

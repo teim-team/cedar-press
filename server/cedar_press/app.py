@@ -449,7 +449,14 @@ def activate(
     # submitting the same code at once, which the old order could not see.
     # Without a database it is the same two steps as before, because a dict
     # and a set have no transaction to share.
-    made = subscribers.redeem(issued.code, activation.password)
+    try:
+        made = subscribers.redeem(issued.code, activation.password)
+    except subscribers.AlreadySubscribed:
+        # The `account_exists` check above is a read, and a read is not a
+        # lock: two activations for one address can both pass it. The insert
+        # is where that is settled, and it refuses rather than resetting the
+        # password on an account somebody already has.
+        raise _refuse(codes.EMAIL_IN_USE) from None
     if made is None:
         # Somebody redeemed it between `check` above and this write.
         raise _refuse(codes.CODE_USED)
