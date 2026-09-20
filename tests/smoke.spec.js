@@ -116,6 +116,76 @@ test.describe("the gate", () => {
     await expect(notice).toHaveCount(0);
   });
 
+  test("every signed-in route wears the same masthead", async ({ page }) => {
+    // The collections page used to hide the standing line and shrink the
+    // wordmark and the mark to buy 86px for the records. Owner, 2026-09-20:
+    // "trusted intelligence for Indian Country looks like it's on a header
+    // on some pages and not others." A masthead is the one thing that must
+    // not change between routes, because it is what says this is still the
+    // same publication.
+    await signIn(page);
+    const seen = new Map();
+    // EVERY route, not the seven section pages. The three that were left out
+    // were the three that were wrong: the two public pages passed the reader
+    // to the masthead but no sign-out, so their Sign out button was wired to
+    // `undefined`, and an article id that is not hosted rendered a masthead
+    // with no reader at all and stood 12px shorter than the rest.
+    for (const path of [
+      "/", "/data", "/articles", "/whats-new", "/methods", "/priorities", "/settings",
+      "/research-access", "/tribal-data-request", "/record",
+      "/entity/CE-001CC-8N", "/articles/not-a-piece-we-host",
+    ]) {
+      await page.goto(path);
+      await page.locator(".cp-mast").waitFor();
+      await page.evaluate(() => document.fonts.ready);
+      const signature = await page.evaluate(() => {
+        const mast = document.querySelector(".cp-mast");
+        const line = document.querySelector(".cp-mast__of--line");
+        const word = document.querySelector(".cp-mast__word");
+        const mark = document.querySelector(".cp-mast__mark");
+        const shown = line && getComputedStyle(line).display !== "none";
+        return [
+          Math.round(mast.getBoundingClientRect().height),
+          shown ? "line" : "no-line",
+          word && getComputedStyle(word).fontSize,
+          mark && Math.round(mark.getBoundingClientRect().width),
+          document.querySelector(".cp-acct") ? "account" : "no-account",
+        ].join("|");
+      });
+      if (!seen.has(signature)) seen.set(signature, []);
+      seen.get(signature).push(path);
+    }
+    // One signature across every route. That is the invariant at both
+    // widths; what the signature IS differs between them, because a phone
+    // masthead genuinely has no room for the standing line and drops it at
+    // 760px. What it may not do is differ between two routes at one width.
+    // Keyed by signature so a failure names the routes that disagreed rather
+    // than only the count.
+    expect(Object.fromEntries(seen)).toEqual({ [[...seen.keys()][0]]: expect.any(Array) });
+    // And where there is room, the line is there, with the reader's menu.
+    const wide = (page.viewportSize().width ?? 0) > 760;
+    expect([...seen.keys()][0]).toContain(wide ? "|line|" : "|no-line|");
+    expect([...seen.keys()][0]).toContain("|account");
+  });
+
+  test("Sign out signs out, from whichever page offered it", async ({ page }) => {
+    // The research-access and tribal-data-request pages handed the masthead a
+    // reader and no way to sign one out, so the menu drew a Sign out wired to
+    // `undefined`. It looked exactly like the working one on every other page.
+    await signIn(page);
+    await page.goto("/research-access");
+    await page.locator(".cp-acct__btn").click();
+    await page.locator(".cp-acct__out").click();
+    // This page is public, so signing out leaves the reader on it rather than
+    // bouncing them to the door: the masthead loses the menu and the sections
+    // in place. The door is the proof the session actually ended.
+    await expect(page.locator(".cp-acct")).toHaveCount(0);
+    await expect(page.locator(".cp-nav")).toHaveCount(0);
+    await page.goto("/");
+    await expect(page.locator(".cp-split")).toBeVisible();
+    await expect(page.locator("#catalog")).toHaveCount(0);
+  });
+
   test("the preview note is the door's, and is not carried into the product", async ({ page }) => {
     // It used to render inside `PressMast`, which every signed-in page
     // mounts, so a subscriber met an explanation of how they got in on the

@@ -43,8 +43,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { contactHref } from "../../features/grove/appLink.js";
 
-import { useAuth } from "../../context/useAuth";
-import { canReadCedarPress } from "../../features/grove/pressAccess";
 
 import { PRESS_DATA_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
@@ -262,14 +260,6 @@ function Acts({ children }) {
 }
 
 export default function CedarPressMethods() {
-  // The masthead carries the reader's profile and Sign out. These two pages
-  // rendered `<PressMast section="..." />` with NO `user` and no
-  // `onSignOut`, so a signed-in reader who navigated here lost the avatar
-  // and the way out - the session was intact, the chrome just stopped
-  // saying so. Articles and Data always passed both; these did not.
-  const { user, logout } = useAuth();
-  const entitled = canReadCedarPress(user);
-
   useDocumentTitle("Methods");
   useScrollToTop();
   // Sitewide arrival language: each argument fades in as the reader
@@ -278,7 +268,7 @@ export default function CedarPressMethods() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp-meth" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="methods" />
+        <PressMast section="methods" />
 
         {/* THE OPENING IS TWO SENTENCES AND AN INDEX.
             Review, 2026-09-15: "the opening headline, paragraph, pull quote,

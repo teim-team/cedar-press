@@ -64,12 +64,12 @@ from cedar_press import (
     ratelimit,
     repository,
     shelf,
+    subscribers,
 )
 from cedar_press.session import (
     Session,
     account_exists,
     account_id_for,
-    create_account,
     current_session,
     issue,
     sign_in,
@@ -139,11 +139,11 @@ class ResearchRequest(BaseModel):
 
 
 #: Shape the Research: one store for the process, seeded from the owner's
-#: file on start. ``CEDAR_PRESS_DB`` names the SQLite file; unset, the store
-#: lives in memory and a restart forgets it, which is right for a test and
-#: wrong for a deployment, so the deployment sets it.
-_priorities = priorities.Priorities(os.environ.get("CEDAR_PRESS_DB", ":memory:"))
-_priorities.seed()
+#: file on start. ``DATABASE_URL`` puts it in the platform's own database
+#: beside teim-app's tables, and applies the migrations on the way; without
+#: it the store falls back to SQLite at ``CEDAR_PRESS_DB``, or to memory,
+#: which is right for a test and wrong for a deployment.
+_priorities = priorities.open_store()
 
 
 def _account(session: Session) -> priorities.Account:
@@ -332,6 +332,12 @@ def login(
                 ),
             },
         )
+    # The subscription and the platform account can appear in either order --
+    # a Tribal Business News reader may activate months before they open the
+    # platform, or never. Binding here means whichever came second finds the
+    # first, without a migration or a back-fill. A no-op where there is no
+    # database, no `users` table, or no account at that address.
+    subscribers.link_platform_account(session.email)
     return session.as_payload()
 
 
@@ -431,10 +437,25 @@ def activate(
             },
         )
 
-    session = create_account(issued.email, activation.password, issued.tier)
-    # Spent only once the account exists. The other order loses a subscriber
-    # their code if account creation fails.
+    # ONE TRANSACTION WHERE THERE IS A DATABASE TO HAVE ONE IN.
+    # This used to create the account and then mark the code spent, in that
+    # order and for a good reason: the other way round loses a subscriber
+    # their code if the account fails to save. But two writes are two writes,
+    # and the failure between them left a subscriber whose code was still
+    # redeemable — which on a restart meant a second account on one code.
+    # `redeem` claims the code with an `UPDATE ... WHERE spent_at IS NULL`
+    # and inserts the subscriber before the commit, so the two facts cannot
+    # disagree; the row count also settles the race between two people
+    # submitting the same code at once, which the old order could not see.
+    # Without a database it is the same two steps as before, because a dict
+    # and a set have no transaction to share.
+    made = subscribers.redeem(issued.code, activation.password)
+    if made is None:
+        # Somebody redeemed it between `check` above and this write.
+        raise _refuse(codes.CODE_USED)
+    session = Session(email=made.email, tier=made.tier)
     codes.spend(issued.code)
+    subscribers.link_platform_account(made.email)
     return issue(session, response).as_payload()
 
 

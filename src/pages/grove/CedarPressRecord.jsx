@@ -224,7 +224,7 @@ function Walk({ place, from, className }) {
 }
 
 export default function CedarPressRecord() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const entitled = canReadCedarPress(user);
   const [params] = useSearchParams();
   const search = params.toString();
@@ -362,7 +362,7 @@ export default function CedarPressRecord() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp-rec">
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
+        <PressMast section="data" />
 
         <div className="cp-rec__bar">
           <Link className="cp-rec__back" to={back}>
