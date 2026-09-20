@@ -221,7 +221,7 @@ function DrawnFrom({ id, user }) {
 
 export default function CedarPressArticle() {
   const { articleId } = useParams();
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   // Sitewide arrival language: the head fades in; the prose stays put.
   const fadeRoot = useFadeIn();
   const article = BY_ID[articleId];
@@ -293,7 +293,7 @@ export default function CedarPressArticle() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast user={user} onSignOut={() => logout()} section="articles" />
+        <PressMast section="articles" />
 
         {/* Back goes to the briefs, not the hub: a piece belongs to the
             articles page, and the footer carries the rest of the map. */}

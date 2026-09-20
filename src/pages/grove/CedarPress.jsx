@@ -41,7 +41,7 @@ import PressPrioritiesBlock from "./PressPrioritiesBlock";
 export default function CedarPress() {
   // The door is the one page every visitor and every crawler reaches.
   useDocumentTitle(undefined, { index: true });
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const entitled = canReadCedarPress(user);
   // Sections arrive as they enter the viewport, sitewide language.
   const fadeRoot = useFadeIn();
@@ -67,7 +67,7 @@ export default function CedarPress() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
+        <PressMast section="home" />
 
         {loading ? null : (
           <>
