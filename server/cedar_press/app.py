@@ -547,7 +547,11 @@ def collection_profile(
 
 
 def _answer_basis(
-    kind: str, profile: dict[str, object] | None, collection_id: str | None
+    kind: str,
+    profile: dict[str, object] | None,
+    collection_id: str | None,
+    *,
+    opened: bool = True,
 ) -> dict[str, object]:
     """The answer's basis, structured, for the label the panel shows above it.
 
@@ -575,6 +579,16 @@ def _answer_basis(
     ``cited_records`` is deliberately absent rather than ``0``. Cedar returns
     no record citations at all, and a zero would be read as "checked, found
     none" by every reader and every downstream renderer.
+
+    ``opened`` IS A SECOND AXIS AND NOT A FOURTH KIND.
+    ``kind`` says what produced the answer; ``opened`` says whether this
+    subscription reaches the records behind it. They are independent, and the
+    combination that proves it is the locked collection: its description is
+    read off the release and cited to it -- a true ``release`` -- while its
+    records stay shut. Folding that into ``kind`` as a "description" state
+    would lose the citation, and leaving it out entirely is what the panel
+    was doing: it rendered "View supporting records" under an answer whose
+    last sentence had just said those records open with another plan.
     """
     profile = profile or {}
     version = profile.get("version")
@@ -585,6 +599,7 @@ def _answer_basis(
         "collectionName": name,
         "version": version,
         "updated": profile.get("last_updated"),
+        "opened": opened,
     }
     if kind == "release":
         # Only a release-grounded answer may name the sources it came from:
@@ -621,7 +636,9 @@ def _not_included_answer(
     return {
         "answer": f"{description}\n\n{reach}" if description else reach,
         "basis": None,
-        "answerBasis": _answer_basis("release", profile, collection_id),
+        "answerBasis": _answer_basis(
+            "release", profile, collection_id, opened=False
+        ),
         "collectionId": collection_id,
         # The description came off the release, so the basis is a release and
         # says so. `source` names the answerer, and no answerer ran past the
@@ -632,6 +649,47 @@ def _not_included_answer(
             "plan": "Cedar Press+",
             "reason": "NOT_INCLUDED",
         },
+        "threadId": thread_id,
+    }
+
+
+def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
+    """One question back, for a question with no collection under it.
+
+    THE CASE THIS IS, AND THE CASE IT IS NOT.
+    Two very different situations used to end at the same ``NOT_ANSWERABLE``
+    paragraph. A reader who named a collection and asked something its
+    release does not state has been refused, correctly: they supplied the
+    context and the answer is genuinely not here. A reader who asked without
+    naming one has not been refused -- they have been *understood
+    incompletely*, and the single missing thing is the collection. Answering
+    both with "open a collection and ask from there. Anything past that needs
+    Cedar itself, which is not wired into this deployment; the research desk
+    ... answers those in person" is three instructions and an apology where
+    one question would do, and it reads as a system explaining its own
+    routing rather than as somebody trying to help.
+
+    So this asks the one thing that would let the next turn answer, and says
+    what naming it buys -- which is not a promise: ``answer_from_profile``
+    really does answer those three from the collection's own release. It is
+    not a list of filters and it does not ask anybody to phrase a query.
+
+    NO ``answerBasis``. The label above a bubble says what a claim rests on,
+    and this bubble makes no claim. A basis here would have to invent a kind
+    for "this is a question", and a reader would be shown a citation line
+    under a sentence citing nothing.
+    """
+    return {
+        "answer": (
+            "Which collection are you asking about? Name one and I can tell "
+            "you what it holds, where its records come from, and what its "
+            "latest release reports."
+        ),
+        "basis": None,
+        "answerBasis": None,
+        "collectionId": None,
+        # `source` names the answerer, and nothing answered: the route asked.
+        "source": None,
         "threadId": thread_id,
     }
 
@@ -674,10 +732,11 @@ def ask_cedar(
        ``cedar_service.py`` for why the hop happens here and not in the
        browser.
 
-    Past both, it still refuses and names the research desk. That was the
-    whole behaviour before Cedar was wired in, and it remains the floor: an
-    assistant that produces a plausible sentence it cannot support is worse
-    than one that hands the question to a person.
+    Past both, it either asks for the one thing that would let it answer or
+    refuses and names the research desk -- ``_ask_which_collection`` says
+    which case is which. Refusing remains the floor: an assistant that
+    produces a plausible sentence it cannot support is worse than one that
+    hands the question to a person.
     """
     profile = None
     collection_name = None
@@ -750,16 +809,20 @@ def ask_cedar(
             "unavailable": reply.unavailable,
         }
 
+    # Nobody named a collection, so the missing piece is one this reader can
+    # supply and the next turn can use. See `_ask_which_collection`.
+    if not question.collectionId:
+        return _ask_which_collection(question.threadId)
+
     raise HTTPException(
         status_code=501,
         detail={
             "code": "NOT_ANSWERABLE",
             "message": (
-                "Cedar can answer what a collection contains, how it was "
-                "constructed, and its headline figures \u2014 open a collection "
-                "and ask from there. Anything past that needs Cedar itself, "
-                "which is not wired into this deployment; the research desk "
-                "(contact@lumecon.ai) answers those in person."
+                "That is past what the current release of "
+                f"{collection_name or 'this collection'} states, and Cedar "
+                "itself is not wired into this deployment. The research desk "
+                "(contact@lumecon.ai) answers questions like it in person."
             ),
         },
     )

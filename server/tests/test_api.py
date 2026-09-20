@@ -224,8 +224,13 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("comparison", response.json()["answer"])
 
     def test_cedar_still_refuses_what_it_cannot_support(self) -> None:
-        response = client.post("/cedar/ask", json={"question": "what?"})
-        self.assertEqual(response.status_code, 501)
+        # An unscoped "what?" used to land here too, and it is a different
+        # situation: nothing was refused, the collection was simply never
+        # named. It is now answered with one question back and is covered by
+        # `TestCedarConversation`. What remains under test is the real
+        # refusal -- a named collection, a question its release does not
+        # state, and no Cedar wired in to compose one.
+        #
         # `contractors` is on the `pro` shelf, so this asks as Cedar Press+.
         # The subject is the refusal -- a question no profile can support and
         # no Cedar is wired in to compose -- and the reader has to be able to
@@ -525,6 +530,111 @@ class TestEntitlement(unittest.TestCase):
             )
         self.assertEqual(asked.call_count, 1)
         self.assertEqual(asked.call_args.kwargs["collection_id"], "lobbying")
+
+
+class TestCedarConversation(unittest.TestCase):
+    """That the panel can tell three kinds of reply apart, and says so.
+
+    A reader has to be able to distinguish an answer read off a release from a
+    description of a collection they cannot open from a question Cedar is
+    asking back. All three arrive as prose in the same bubble, so the
+    distinction cannot live in the wording -- it lives in fields, and these
+    are the fields.
+    """
+
+    def _ask(self, email: str, question: str, collection_id: str | None = None):
+        ratelimit.reset_for_tests()
+        sign_in(email)
+        body: dict[str, object] = {"question": question}
+        if collection_id is not None:
+            body["collectionId"] = collection_id
+        return client.post("/cedar/ask", json=body)
+
+    def test_an_answer_a_reader_can_open_says_its_records_are_reachable(self) -> None:
+        basis = self._ask(
+            "reader@example.org", "What does this collection cover?", "deals"
+        ).json()["answerBasis"]
+        self.assertEqual(basis["kind"], "release")
+        self.assertIs(basis["opened"], True)
+        self.assertEqual(basis["collectionId"], "deals")
+
+    def test_a_locked_description_is_cited_and_declares_its_records_shut(self) -> None:
+        # Two axes, and this is the pair that needs both. The description IS
+        # read off `need`'s release and is cited to it -- dropping the
+        # citation would be the overcorrection. What it must carry as well is
+        # that the records behind it are not this subscription's, because the
+        # panel decides from that field alone whether to offer them, and it
+        # used to offer them unconditionally: "View supporting records", one
+        # sentence under an answer that had just said they open with Cedar
+        # Press+.
+        basis = self._ask(
+            "reader@example.org", "What does this collection cover?", "need"
+        ).json()["answerBasis"]
+        self.assertEqual(basis["kind"], "release")
+        self.assertIs(basis["opened"], False)
+        self.assertEqual(basis["collectionId"], "need")
+        # And the same collection on a plan that includes it, so the field is
+        # tracking the entitlement and not the collection.
+        plus = self._ask(
+            "pro@example.org", "What does this collection cover?", "need"
+        ).json()["answerBasis"]
+        self.assertIs(plus["opened"], True)
+
+    def test_a_question_with_no_collection_gets_one_question_back(self) -> None:
+        response = self._ask("reader@example.org", "what?")
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        answer = body["answer"]
+        # One question, not a list of what to type and not an apology for the
+        # deployment. The count is the test: two question marks would mean it
+        # had started interviewing the reader.
+        self.assertEqual(answer.count("?"), 1)
+        self.assertTrue(answer.startswith("Which collection"))
+        # No basis: the bubble makes no claim, so there is nothing to cite,
+        # and a citation line under a question would be a label for an answer
+        # that is not there.
+        self.assertIsNone(body["answerBasis"])
+        self.assertIsNone(body["source"])
+        self.assertIsNone(body["collectionId"])
+
+    def test_the_follow_up_is_not_what_a_named_collection_gets(self) -> None:
+        # The failure this guards is the follow-up becoming the universal
+        # reply. A reader who named a collection has supplied the one thing
+        # it asks for, and asking again is the "please rephrase your query"
+        # shape the whole change exists to remove.
+        response = self._ask(
+            "reader@example.org",
+            "List every lobbying registrant by quarter.",
+            "lobbying",
+        )
+        self.assertEqual(response.status_code, 501)
+        message = response.json()["message"]
+        self.assertNotIn("Which collection", message)
+        # And it names the collection the reader actually asked about rather
+        # than restating the product's routing rules at them. Read from the
+        # profile rather than spelled out here: a display name written into
+        # an assertion is a second place for it to be renamed.
+        named = client.get("/press/collections/lobbying/profile").json()
+        self.assertIn(named["collection_name"], message)
+        self.assertIn("contact@lumecon.ai", message)
+
+    def test_the_follow_up_leads_somewhere(self) -> None:
+        # It promises three things by naming a collection. If any of them
+        # falls through to a refusal the follow-up is a dead end, which is
+        # worse than the refusal it replaced.
+        asked = self._ask("reader@example.org", "what?").json()["answer"]
+        self.assertIn("what it holds", asked)
+        self.assertIn("where its records come from", asked)
+        self.assertIn("latest release reports", asked)
+        for question in (
+            "What does this collection cover?",
+            "What sources are included?",
+            "What changed in the latest release?",
+        ):
+            with self.subTest(question=question):
+                response = self._ask("reader@example.org", question, "deals")
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(response.json()["source"], "profile")
 
 
 class TestErrorShape(unittest.TestCase):
