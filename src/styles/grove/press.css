@@ -3557,17 +3557,27 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-pri__main { display: flex; flex-direction: column; gap: 2rem; min-width: 0; }
 .teim-rd .cp-pri__group .cp-head { margin-bottom: 0.4rem; }
 .teim-rd .cp-pri__lede { font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); margin: 0 0 0.9rem; max-width: 92ch; }
-.teim-rd .cp-pri__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 0.9rem; }
-.teim-rd .cp-pri { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.1rem 1.2rem; background: var(--bg); display: flex; flex-direction: column; gap: 0.45rem; }
-.teim-rd .cp-pri.is-published { border-color: var(--teal); }
+/* ── PRIORITIES AS A LEDGER ───────────────────────────────────────────────
+ * Eleven equal cards in a three-across grid said that eleven things are
+ * equally live, which is the opposite of a priority list. One ledger: the
+ * ask and its reason lead, the status has a column, the support has a
+ * column a reader can scan down. */
+.teim-rd .cp-pri__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-pri { display: grid; grid-template-columns: minmax(0, 1fr) 10rem 13rem; align-items: start; gap: 0.6rem 1.6rem; padding: 0.9rem 0; border-bottom: 1px solid var(--line-soft); background: none; }
+.teim-rd .cp-pri__say { min-width: 0; }
+@media (max-width: 900px) {
+  .teim-rd .cp-pri { grid-template-columns: minmax(0, 1fr); gap: 0.5rem; }
+}
+.teim-rd .cp-pri.is-published { box-shadow: inset 2px 0 0 var(--teal); padding-left: 0.8rem; }
 .teim-rd .cp-pri__head { display: flex; justify-content: space-between; gap: 0.6rem; align-items: baseline; }
 .teim-rd .cp-pri__type { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-pri__status { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); padding: 0.1rem 0.45rem; border: 1px solid var(--teal-line); }
+.teim-rd .cp-pri__status { justify-self: start; white-space: nowrap; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); padding: 0.1rem 0.45rem; border: 1px solid var(--teal-line); }
 .teim-rd .cp-pri__status--published { background: var(--dteal); color: #fff; border-color: var(--dteal); }
 .teim-rd .cp-pri__status--interest { color: var(--muted); border-color: var(--line); }
-.teim-rd .cp-pri__title { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; color: var(--ink); margin: 0; }
-.teim-rd .cp-pri__desc { font-size: 0.9rem; line-height: 1.5; color: var(--ink-2); margin: 0; }
-.teim-rd .cp-pri__points { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.6rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-pri__title { font-family: var(--sans); font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; color: var(--ink); margin: 0; }
+.teim-rd .cp-pri__desc { font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); margin: 0.15rem 0 0; max-width: 72ch; }
+/* In its own column now, not a footer rule inside a card. */
+.teim-rd .cp-pri__points { display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; margin: 0; padding: 0; border-top: 0; }
 .teim-rd .cp-pri__total { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--ink-2); }
 .teim-rd .cp-pri__total b { color: var(--dteal); }
 .teim-rd .cp-pri__mine { display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -4375,3 +4385,24 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-hero--brief { padding-block: 1.6rem 0; }
 .teim-rd .cp-hero--brief h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); max-width: 20ch; }
 .teim-rd .cp-hero--brief + .cp-brief { margin-top: 1.8rem; }
+
+/* ══ THE METHODS PAGE'S FIRST SCREEN ══════════════════════════════════════
+ * A chain and four anchors, so the page answers what it is about before it
+ * explains it. Both are links into the chapters below; neither repeats
+ * them. */
+.teim-rd .cp-chain { list-style: none; counter-reset: chain; display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.9rem 1rem; margin: 1.8rem 0 0; padding: 1.2rem 0 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-chain li { position: relative; counter-increment: chain; padding-top: 0.9rem; border-top: 2px solid var(--teal-line); }
+.teim-rd .cp-chain li::before { content: ''; position: absolute; top: -5px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+/* The arrow between the links in the chain, on a row that has room for it. */
+.teim-rd .cp-chain li:not(:last-child)::after { content: '\2192'; position: absolute; top: -0.65rem; right: -0.7rem; font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+.teim-rd .cp-chain b { display: block; font-family: var(--sans); font-size: 0.98rem; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); }
+.teim-rd .cp-chain span { display: block; margin-top: 0.2rem; font-size: 0.86rem; line-height: 1.5; color: var(--ink-2); }
+@media (max-width: 760px) {
+  .teim-rd .cp-chain li:not(:last-child)::after { content: none; }
+}
+
+.teim-rd .cp-anchors { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.6rem 1.4rem; margin: 1.6rem 0 0; padding: 0; }
+.teim-rd .cp-anchors a { display: block; padding: 0.7rem 0.85rem; border: 1px solid var(--line); border-left: 2px solid var(--teal); background: var(--bg); text-decoration: none; }
+.teim-rd .cp-anchors a:hover { border-left-color: var(--dteal); }
+.teim-rd .cp-anchors b { display: block; font-family: var(--sans); font-size: 0.92rem; font-weight: 800; color: var(--ink); }
+.teim-rd .cp-anchors span { display: block; margin-top: 0.15rem; font-size: 0.82rem; line-height: 1.45; color: var(--ink-2); }
