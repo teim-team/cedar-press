@@ -35,7 +35,7 @@
 // explaining why there is none.
 
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { contactHref } from "../../features/grove/appLink.js";
 import { useAuth } from "../../context/useAuth";
@@ -175,13 +175,39 @@ export default function PressGate({ user }) {
   const [error, setError] = useState(null);
 
   // The collection in hand: the first on the rail on arrival, never none.
-  const [selectedId, setSelectedId] = useState(() => SHELVES[0]?.entries[0]?.id ?? null);
+  // THE COLLECTION IN HAND IS IN THE URL.
+  //
+  // It was local state, so the one thing a visitor might want to send
+  // somebody — "look at this collection" — had no address, and every link to
+  // the door landed on Federal Funding whatever the sender was looking at.
+  // `?collection=<id>` is read on arrival and written on every pick.
+  //
+  // Written with `replace`: choosing a collection is looking around, not
+  // navigating, and twelve picks should not put twelve entries between the
+  // visitor and the page they came from. An id nobody publishes falls back to
+  // the first collection rather than to an empty pane.
+  const [params, setParams] = useSearchParams();
+  const asked = params.get("collection");
+  const first = SHELVES[0]?.entries[0]?.id ?? null;
+  // Pointing at a collection describes it; choosing one is what the URL
+  // records. Both move the frame, and only the second is worth an address —
+  // a replace per hover would rewrite the URL a dozen times crossing a rail.
+  const [pointed, setPointed] = useState(null);
+  const addressed = STOREFRONT_CATALOG.some((entry) => entry.id === asked) ? asked : first;
+  const selectedId = pointed ?? addressed;
   const selected = STOREFRONT_CATALOG.find((entry) => entry.id === selectedId) ?? null;
   const register = useRegister();
 
+  const setSelectedId = (id) => setPointed(id);
+
   const pick = (entry) => {
     track(EVENT.collectionViewed, { collection: entry.id, shelf: entry.shelf, gated: true });
-    setSelectedId(entry.id);
+    setPointed(entry.id);
+    const next = new URLSearchParams(params);
+    next.set("collection", entry.id);
+    // Looking around, not navigating: twelve picks should not put twelve
+    // entries between the visitor and the page they arrived from.
+    setParams(next, { replace: true });
   };
 
   // The panel closes on Escape and on a click outside it or its tabs.
