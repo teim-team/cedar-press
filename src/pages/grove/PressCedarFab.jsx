@@ -102,143 +102,78 @@ const turn = (role, text, extra = {}) => ({ key: `t${(nextId += 1)}`, role, text
  * actually passed to the service" — forbids it. The field is in the contract
  * and renders the moment the service fills it.
  */
-const BASIS_LABEL = {
-  release: "Release-grounded",
-  synthesis: "Cedar synthesis",
-  review: "Needs review",
-};
-
 const releaseOf = (basis) => [basis?.collectionName, basis?.version].filter(Boolean).join(" ");
 
-/** The label, above the answer. What kind of claim is about to be read. */
-function AnswerBasisLabel({ basis }) {
-  if (!basis?.kind) return null;
-  const { kind, citedRecords } = basis;
-  const label = BASIS_LABEL[kind] ?? BASIS_LABEL.synthesis;
-  const release = releaseOf(basis);
-  return (
-    <div className={`cp-dc__basis cp-dc__basis--${kind}`}>
-      <p className="cp-dc__basisline">
-        <span className="cp-dc__basislabel">{label}</span>
-        {release ? <span className="cp-dc__basisrelease">{release}</span> : null}
-        {/* Rendered only when the service supplies it. Absent is absent; a
-            zero here would read as "checked, found none". */}
-        {typeof citedRecords === "number" ? (
-          <span className="cp-dc__basiscount">{citedRecords} cited records</span>
-        ) : null}
-      </p>
-      {kind === "synthesis" ? (
-        <p className="cp-dc__basisnote-inline">
-          Scoped to this collection. Not read from its records.
-        </p>
-      ) : null}
-    </div>
-  );
+/** "2026-09-04" as a person would say it. */
+function said(date) {
+  if (!date) return null;
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsed.valueOf())) return date;
+  return parsed.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 /**
- * The evidence, under the answer.
+ * WHERE AN ANSWER CAME FROM, SAID IN A SENTENCE.
  *
- * Under, not above — it was above for one build and the screenshot settled it:
- * an opened disclosure between the label and the prose pushes the answer off
- * the bottom of the panel, so expanding the evidence hides the thing the
- * evidence is for. The brief says "under each answer" and it is right.
+ * This was a badge and a disclosure: an uppercase RELEASE-GROUNDED chip, then
+ * an "Evidence used" toggle hiding a definition list of Release / Updated /
+ * Sources. It looked like a compliance widget bolted to a conversation, which
+ * is a strange thing to find inside a chat, and a reader has to work out what
+ * a chip means before they learn anything. A sentence does the same job and
+ * needs no key.
+ *
+ * The distinction it carries is the important one and has not changed: a
+ * reader has to be able to tell an answer read off a published release from
+ * one Cedar composed. That is now the difference between "Read from Native
+ * Federal Contractors v1" and "Cedar wrote this from what it knows about the
+ * collection, not from its records."
+ *
+ * Still deliberately not said: how many records an answer cites. Cedar returns
+ * none, so there is no number to print, and a "0 cited records" would read as
+ * a count somebody took.
  */
-function EvidenceUsed({ basis }) {
+function AnswerSource({ basis }) {
   if (!basis?.kind) return null;
-  const { updated, sources, collectionId } = basis;
   const release = releaseOf(basis);
-  if (!updated && !sources) return null;
+  const when = said(basis.updated);
+
+  if (basis.kind === "review") {
+    return (
+      <p className="cp-dc__src cp-dc__src--review">
+        This one needs a person. The identity or the scope is unclear, so Cedar has not
+        answered it.
+      </p>
+    );
+  }
+
+  if (basis.kind !== "release") {
+    return (
+      <p className="cp-dc__src">
+        Cedar wrote this from what it knows about {release || "the collections"}, not from the
+        records themselves.
+      </p>
+    );
+  }
+
   return (
-    <details className="cp-dc__evidence">
-      <summary>Evidence used</summary>
-      <dl>
-        {release ? (
-          <>
-            <dt>Release</dt>
-            <dd>{release}</dd>
-          </>
-        ) : null}
-        {updated ? (
-          <>
-            <dt>Updated</dt>
-            <dd>{updated}</dd>
-          </>
-        ) : null}
-        {sources ? (
-          <>
-            <dt>Sources</dt>
-            <dd>{sources}</dd>
-          </>
-        ) : null}
-      </dl>
-      {collectionId ? (
-        <Link className="cp-dc__evidencelink" to={`${PRESS_DATA_PATH}?c=${collectionId}`}>
-          View in table <span aria-hidden="true">&#8594;</span>
-        </Link>
+    <p className="cp-dc__src cp-dc__src--release">
+      Read from <b>{release}</b>
+      {when ? `, updated ${when}` : ""}.
+      {basis.sources ? ` Built from ${trimStop(basis.sources)}.` : ""}{" "}
+      {basis.collectionId ? (
+        <Link to={`${PRESS_DATA_PATH}?c=${basis.collectionId}`}>See the records</Link>
       ) : null}
-    </details>
+    </p>
   );
 }
 
-/**
- * WHAT IS UNDER THE ANSWER, SAID IN THE PANEL.
- *
- * A box in the corner of a page that takes a question and returns prose is,
- * to a reader, indistinguishable from a chat model wired to a search index.
- * Cedar is not that, and nothing in this panel said so.
- *
- * Every sentence below is a fact about this service, checked against the code
- * that produces the answers, not positioning:
- *
- *  - `server/cedar_press/collection_profiles.answer_from_profile` answers
- *    from the collection's own profile fields and "never composes beyond
- *    them", and the route tries it first. Every such answer carries a
- *    `basis` naming the release it was read off — which is why an answer
- *    above prints one, and why an answer without one is marked as Cedar's
- *    own rather than the release's.
- *  - Past the profiles the question goes to Cedar itself, on the contract
- *    teim-app uses, not to a second assistant.
- *  - A question neither can answer refuses and names the research desk. It
- *    does not improvise.
- *  - The identifiers are the register's, documented on Methods: a Cedar
- *    entity id (CE-) names a Native entity, a Cedar business id (CB-) names
- *    a distinct business, maintained through renames, mergers and
- *    reorganizations.
- *
- * It renders in both modes. Standalone, the panel cannot take a question at
- * all, and a visitor reading that Cedar is "being wired in" should still
- * learn what it is being wired to.
- */
-function CedarBasis() {
-  return (
-    /* Collapsed by default, and that is a measured decision rather than a
-       preference: expanded, this note is about two thirds of the panel's
-       36rem transcript, so the starter questions — the thing a reader
-       actually needs first — fell below the fold on a 900px window. The
-       claim still has to be on the face of the panel, so the summary line
-       stays visible and the evidence is one click under it. */
-    <details className="cedar-widget__basisnote">
-      <summary className="cedar-widget__basiscap">How Cedar answers</summary>
-      <p>
-        Cedar reads each collection&rsquo;s own profile &mdash; its sources, its method, its
-        release and its published figures &mdash; and names the release it answered from.
-        Nothing is generated from a model&rsquo;s memory, and a question the collections
-        cannot answer goes to the research desk rather than to a guess.
-      </p>
-      <p>
-        The records behind an answer are held by identifier, not by name: a Cedar entity
-        id (<span className="cedar-widget__uid">CE-</span>) for a Native government,
-        enterprise or nonprofit, a Cedar business id
-        (<span className="cedar-widget__uid">CB-</span>) for a distinct business, each
-        maintained through renames, acquisitions and reorganizations.
-      </p>
-      <Link className="cedar-widget__basislink" to={PRESS_METHODS_PATH}>
-        How Cedar builds its collections <span aria-hidden="true">&#8594;</span>
-      </Link>
-    </details>
-  );
-}
+/** The profile writes its source list with a full stop; the sentence adds one. */
+const trimStop = (text) => String(text).trim().replace(/\.$/, "");
 
 // `gated` names why Cedar will not query the collections for this reader:
 // "signedout" (no session) or "unentitled" (a membership without Cedar
@@ -397,8 +332,8 @@ export function PressCedarFab({ gated = null, examples = [] }) {
       );
 
   const openingLine = scope
-    ? `Ask me about ${scope.name} — what it holds, how it was built, or what its release reports. I answer from the release itself and name it.`
-    : "I can tell you what each collection holds, where the records come from, and how they reach the right nation. Open a collection to get an answer cited to its release.";
+    ? `Ask me about ${scope.name}: what it holds, how it was built, or what its latest release reports.`
+    : "I can tell you what each collection holds, where the records come from, and how they reach the right nation. Open a collection and I can answer from its release.";
 
   return (
     <div className={`cedar-widget cedar-widget--launcher-only${open ? " cedar-widget--open" : ""}`}>
@@ -436,7 +371,29 @@ export function PressCedarFab({ gated = null, examples = [] }) {
               </span>
               <div className="cp-dc__bubble">
                 <p>{connected ? openingLine : "Cedar is answering inside the platform while the press surface is being wired in."}</p>
-                {connected ? null : (
+                {/* WHAT CEDAR IS, SAID IN THE PANEL, IN THE WELCOME.
+                    This used to be a bordered box under the greeting with an
+                    uppercase HOW CEDAR ANSWERS cap on it, which is the shape
+                    of a disclaimer rather than of something worth reading. It
+                    is the same two facts, said the way the rest of the
+                    greeting is said, and it scrolls away once a conversation
+                    starts.
+
+                    Both are checked against the code that produces the
+                    answers, not positioning: the route reads the collection's
+                    own profile first and names the release it read
+                    (`collection_profiles.answer_from_profile`, which "never
+                    composes beyond" those fields), and the register holds
+                    records by CE- and CB- identifier so a rename or an
+                    acquisition does not break the thread. */}
+                {connected ? (
+                  <p>
+                    I read each collection&rsquo;s own release first, and I&rsquo;ll tell you which
+                    one an answer came from. The records behind it are held by identifier rather
+                    than by name, so a nation or a business stays findable through renames and
+                    reorganizations. <Link to={PRESS_METHODS_PATH}>How the collections are built</Link>
+                  </p>
+                ) : (
                   <p className="cp-dc__links">
                     <a href={contactHref("Cedar Press question")}>Send the question to the research desk</a>
                     <a href={appUrl("/app")} target="_blank" rel="noreferrer">Open the platform</a>
@@ -444,12 +401,6 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                 )}
               </div>
             </div>
-
-            {/* What is under an answer, said once, at the top of the
-                transcript where the welcome is — not pinned to the foot,
-                which on a phone would take the height the conversation
-                needs. It scrolls away as the conversation starts. */}
-            {thread.length ? null : <CedarBasis />}
 
             {scope ? (
               <p className="cp-dc__scope">
@@ -503,8 +454,6 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                     <img src={MARK} alt="" width="30" height="30" />
                   </span>
                   <div className="cp-dc__bubble">
-                    {/* The label above the answer; the evidence under it. */}
-                    {item.basis ? <AnswerBasisLabel basis={item.basis} /> : null}
                     {item.gate ? (
                       <p>
                         Cedar answers questions like this from the Cedar Press collections once
@@ -522,7 +471,8 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                     ) : (
                       (item.text || "").split("\n\n").map((para, i) => <p key={i}>{para}</p>)
                     )}
-                    {item.basis ? <EvidenceUsed basis={item.basis} /> : null}
+                    {/* Under the answer, where a citation goes. */}
+                    {item.basis ? <AnswerSource basis={item.basis} /> : null}
                   </div>
                 </div>
               ),
@@ -572,7 +522,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
               with the sentence that is true on this side of the paywall: an
               answer here is read off a release, or it is Cedar's and says so. */}
           <p className="cp-dc__disclaimer">
-            Cedar can make mistakes. Verify anything important against the methods page or the
+            Cedar can make mistakes. Check anything important against the methods page or the
             release it came from.
           </p>
         </section>

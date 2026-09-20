@@ -70,9 +70,14 @@ function WorkCard() {
   return (
     <section className="cp-set__card cp-fade" aria-label="What you work on">
       <span className="cp-set__cap">What you work on</span>
+      {/* "and whose requests carry weight" was the tail of this sentence.
+          Cut per the implementation brief: it reads as though access to the
+          research is bought with disclosure, which is not how the queue
+          works and is a strange thing to say to someone being asked for
+          their profession. */}
       <p className="cp-set__body">
-        Give us more detail and we curate the collections better: what you work on decides
-        which get extended, which get a brief, and whose requests carry weight.
+        Tell us a little about your work and we can aim the collections better: it helps us
+        see which ones to extend and what to write about next.
       </p>
       <form className="cp-set__form" onSubmit={submit}>
         <label className="cp-who__label" htmlFor="cp-work">
@@ -186,9 +191,14 @@ export default function CedarPressSettings() {
               pages work with or without a subscription, and the gate and
               footer name them to non-subscribers too. This card is the
               signed-in convenience. */}
-          <section className="cp-set__card cp-fade" aria-label="Requests and support">
-            <span className="cp-set__cap">Requests and support</span>
-            <ul className="cp-set__links">
+          {/* NOT A CARD, AND NOT THREE OF THEM.
+              These were two more bordered panels beside the influence one,
+              which put billing-adjacent links, a points ledger and a pitch
+              for another product at equal visual weight, and left the two
+              short ones holding a screenful of empty white. They are a list
+              of places to go, so they are a list. */}
+          <div className="cp-set__aside">
+            <ul className="cp-set__links cp-set__links--flat">
               <li>
                 <Link to={PRESS_REQUEST_PATH}>
                   <b>Tribal data request</b>
@@ -217,25 +227,18 @@ export default function CedarPressSettings() {
                 </a>
               </li>
             </ul>
-          </section>
-
-          <section className="cp-set__card cp-fade" aria-label="The platform">
-            <span className="cp-set__cap">Beyond Cedar Press</span>
-            <p className="cp-set__body">
+            {/* One line, after the list. Cedar Grove is the next product up,
+                not a fourth thing to manage on an account page. */}
+            <p className="cp-set__beyond">
               Cedar Grove carries the same collections into the environment they were built for:
-              record-level exploration, entity filters, full histories and Cedar across all of
-              them at once.
-            </p>
-            {/* In the actions row like every other card's action: a bare
-                button inside the card's flex column stretches to the card's
-                full width, which is why this one was a wide outlined bar
-                beside a pill that hugged its label. */}
-            <div className="cp-set__acts">
-              <a className="gv-btn gv-btn--quiet" href={LUMECON_URL} target="_blank" rel="noreferrer">
+              record-level exploration, entity filters, full histories and Cedar across all of them
+              at once.{" "}
+              <a href={LUMECON_URL} target="_blank" rel="noreferrer">
                 About Cedar Grove <span aria-hidden="true">&#8594;</span>
               </a>
-            </div>
-          </section>
+            </p>
+          </div>
+
         </div>
 
         <PressCedarFab />

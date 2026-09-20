@@ -406,21 +406,10 @@
 }
 .teim-rd .cedar-widget__note { margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); }
 .teim-rd .cedar-widget__note a { color: var(--dteal); font-weight: 600; }
-/* WHAT IS UNDER THE ANSWER.
- * A foot to the panel saying how the answer was produced: deterministic,
- * read off the collection's own profile, cited to a release, refused when
- * the profiles cannot answer, and addressed by identifier rather than by
- * name. Quiet by construction -- it is standing evidence, not a pitch, and
- * it must never compete with the answer above it. */
-.teim-rd .cedar-widget__basisnote { margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--line); }
-.teim-rd .cedar-widget__basiscap { display: block; margin-bottom: 0.45rem; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cedar-widget__basisnote p { margin: 0 0 0.5rem; font-size: 0.82rem; line-height: 1.55; color: var(--ink-2); }
-.teim-rd .cedar-widget__basisnote p:last-of-type { margin-bottom: 0.6rem; }
-/* The identifiers set in the face the register writes them in, so CE- and
- * CB- read as codes in a sentence rather than as emphasis. */
-.teim-rd .cedar-widget__uid { font-family: var(--mono); font-size: 0.78em; letter-spacing: 0.04em; color: var(--dteal); }
-.teim-rd .cedar-widget__basislink { display: inline-block; font-family: var(--sans); font-size: 0.8rem; font-weight: 600; color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
-.teim-rd .cedar-widget__basislink:hover { color: var(--ink); }
+/* The note that used to live here is gone with the box it was in: what Cedar
+   answers from is now two sentences in the panel's own welcome, in the voice
+   the rest of the greeting uses, rather than a bordered panel with an
+   uppercase cap on it. See PressCedarFab.jsx. */
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cedar-widget__launcher { transition: none; }
   .teim-rd .cedar-widget__launcher:hover { transform: none; }
@@ -929,6 +918,18 @@
  * how many cards there are. */
 .teim-rd .cp-set__group { font-family: var(--mono); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dteal); margin: 2.2rem 0 0; padding-bottom: 0.6rem; border-bottom: 1px solid var(--line); }
 .teim-rd .cp-set__group + .cp-set { margin-top: 1.1rem; }
+/* The support band is the influence panel and then a column beside it, not
+   three panels of equal weight. Two of the three used to be short lists in
+   tall cards, so the row carried a screenful of empty white under them. */
+.teim-rd .cp-set--support { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; }
+.teim-rd .cp-set__aside { display: flex; flex-direction: column; gap: 1rem; }
+.teim-rd .cp-set__links--flat { margin: 0; }
+.teim-rd .cp-set__links--flat > li { border-top: 1px solid var(--line); }
+.teim-rd .cp-set__links--flat > li:first-child { border-top: 0; }
+.teim-rd .cp-set__beyond { margin: 0; padding-top: 0.9rem; border-top: 1px solid var(--line); font-size: 0.88rem; line-height: 1.6; color: var(--ink-2); }
+.teim-rd .cp-set__beyond a { color: var(--dteal); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.teim-rd .cp-set__beyond a:hover { color: var(--ink); }
+@media (max-width: 900px) { .teim-rd .cp-set--support { grid-template-columns: minmax(0, 1fr); } }
 .teim-rd .cp-set { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; margin-top: 2rem; align-items: stretch; }
 .teim-rd .cp-set__card:last-child:nth-child(3n + 2) { grid-column: span 2; }
 @media (max-width: 1100px) {
@@ -2832,39 +2833,24 @@
    an answer Cedar composed are different kinds of claim, and a reader cannot
    tell them apart from the prose — so every bot bubble says which it is. It
    is deliberately quiet: this is provenance, not a headline. */
-/* THE ANSWER BASIS SITS ABOVE THE ANSWER, so it reads before the prose does.
-   It was a foot line, which told a reader what kind of claim they had just
-   read only once they had read it — and on a phone a long answer's foot can
-   be two screens down.
+/* WHERE AN ANSWER CAME FROM, UNDER THE ANSWER, AS A SENTENCE.
+   This was a badge and a toggle: an uppercase RELEASE-GROUNDED chip over the
+   answer and an "Evidence used" disclosure under it hiding a definition list.
+   Two pieces of chrome in a chat panel, and a reader had to learn what the
+   chip meant before it told them anything. The sentence says the same and
+   needs no key.
 
-   Teal is load-bearing here rather than decorative: a release-grounded answer
-   carries the accent because the accent means evidence, and a synthesis does
-   not carry it because there is none to point at. That is the whole
-   distinction, made in the one colour the product reserves for it. */
-.teim-rd .cp-dc__basis { margin: 0 0 0.6rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--door-rule); }
-.teim-rd .cp-dc__basisline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.5rem; margin: 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
-.teim-rd .cp-dc__basislabel { color: var(--muted); }
-.teim-rd .cp-dc__basis--release .cp-dc__basislabel { color: var(--dteal); }
-.teim-rd .cp-dc__basis--review .cp-dc__basislabel { color: #9a5b00; }
-.teim-rd .cp-dc__basisrelease,
-.teim-rd .cp-dc__basiscount { font-weight: 600; letter-spacing: 0.05em; color: var(--muted); text-transform: none; }
-.teim-rd .cp-dc__basisnote-inline { margin: 0.3rem 0 0; font-family: var(--sans); font-size: 0.74rem; line-height: 1.4; color: var(--door-ink-3); }
-
-/* "Evidence used": a disclosure, not a panel. Closed it is one line of the
-   transcript; open it is a short definition list of the fields the service
-   actually returned. Fields with no value are not rendered at all — a blank
-   row beside "Sources" reads as "none", which is a different claim from
-   "not supplied". */
-.teim-rd .cp-dc__evidence { margin-top: 0.7rem; padding-top: 0.55rem; border-top: 1px solid var(--door-rule); font-family: var(--sans); }
-.teim-rd .cp-dc__evidence > summary { display: inline-block; cursor: pointer; list-style: none; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dteal); }
-.teim-rd .cp-dc__evidence > summary::-webkit-details-marker { display: none; }
-.teim-rd .cp-dc__evidence > summary::after { content: " \203A"; display: inline-block; margin-left: 0.25rem; transition: transform 0.16s var(--door-ease); }
-.teim-rd .cp-dc__evidence[open] > summary::after { transform: rotate(90deg); }
-.teim-rd .cp-dc__evidence dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.2rem 0.6rem; margin: 0.45rem 0 0; }
-.teim-rd .cp-dc__evidence dt { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding-top: 0.12rem; }
-.teim-rd .cp-dc__evidence dd { margin: 0; font-size: 0.78rem; line-height: 1.45; color: var(--ink-2); overflow-wrap: anywhere; }
-.teim-rd .cp-dc__evidencelink { display: inline-block; margin-top: 0.5rem; font-size: 0.78rem; font-weight: 600; color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
-.teim-rd .cp-dc__evidencelink:hover { color: var(--ink); }
+   Quiet by construction. It is a citation, and a citation that competes with
+   the sentence it supports is doing the wrong job. The teal is the link only:
+   the surrounding line stays grey, so the accent still means "something to
+   act on" rather than "look at this". */
+.teim-rd .cp-dc__src { margin: 0.7rem 0 0 !important; padding-top: 0.55rem; border-top: 1px solid var(--door-rule); font-family: var(--sans); font-size: 0.78rem; line-height: 1.5; color: var(--door-ink-3); }
+.teim-rd .cp-dc__src b { font-weight: 600; color: var(--ink-2); }
+.teim-rd .cp-dc__src a { color: var(--dteal); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.teim-rd .cp-dc__src a:hover { color: var(--ink); }
+/* An answer waiting on a person is the one state worth a colour of its own,
+   because it is the one asking the reader to do something. */
+.teim-rd .cp-dc__src--review { color: #8a5200; }
 
 /* The scope line sits in the transcript rather than in the header, so
    clearing it is a thing you do to the conversation. The collection's name
@@ -2887,13 +2873,6 @@
 /* The "How Cedar answers" note rides inside the transcript now, so it has to
    sit on the transcript's ground rather than float over it, and it goes away
    the moment a conversation starts. */
-.teim-rd .cp-dc__thread .cedar-widget__basisnote { margin: 0; padding: 0.85rem 0.95rem; border: 1px solid var(--door-rule); border-radius: 6px; background: var(--door-surface); }
-.teim-rd .cp-dc__thread .cedar-widget__basisnote > summary { cursor: pointer; margin: 0; list-style: none; }
-.teim-rd .cp-dc__thread .cedar-widget__basisnote > summary::-webkit-details-marker { display: none; }
-.teim-rd .cp-dc__thread .cedar-widget__basisnote > summary::after { content: " \203A"; display: inline-block; margin-left: 0.3rem; transition: transform 0.16s var(--door-ease); }
-.teim-rd .cp-dc__thread .cedar-widget__basisnote[open] > summary { margin-bottom: 0.45rem; }
-.teim-rd .cp-dc__thread .cedar-widget__basisnote[open] > summary::after { transform: rotate(90deg); }
-.teim-rd .cp-dc__thread .cedar-widget__basisnote p { font-size: 0.8rem; line-height: 1.5; }
 .teim-rd .cp-dc__input:disabled { background: var(--door-ground); color: var(--door-ink-3); cursor: not-allowed; }
 
 /* On a phone the dock becomes a full-width bottom sheet that rises from the
