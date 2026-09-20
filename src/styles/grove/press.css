@@ -1190,7 +1190,7 @@
 .teim-rd .cp-link__claim { font-family: var(--sans); font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0; }
 .teim-rd .cp-link__body { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 0; }
 .teim-rd .cp-link__tiers { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 1rem 1.6rem; }
-.teim-rd .cp-link__tiers li { border-top: 2px solid var(--teal); padding-top: 0.6rem; }
+.teim-rd .cp-link__tiers li { border-top: 1px solid var(--line); padding-top: 0.7rem; }
 .teim-rd .cp-link__tiers b { display: block; font-size: 0.92rem; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
 .teim-rd .cp-link__tiers span { display: block; font-size: 0.86rem; line-height: 1.45; color: var(--muted); }
 @media (max-width: 900px) { .teim-rd .cp-link__in { grid-template-columns: 1fr; } }
@@ -1442,7 +1442,7 @@
 @media (max-width: 720px) { .teim-rd .cp-mbc__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; } .teim-rd .cp-mbc__tile { min-height: 92px; padding: 0.7rem 0.6rem; } .teim-rd .cp-mbc__ic { width: 30px; height: 30px; } .teim-rd .cp-mbc__ic svg { width: 18px; height: 18px; } .teim-rd .cp-mbc__tname { font-size: 0.76rem; } }
 @media (max-width: 420px) { .teim-rd .cp-mbc__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-.teim-rd .cp-mbc__panel { margin-top: 1.2rem; border: 1px solid var(--line); border-top: 2px solid var(--dteal); border-radius: 3px; padding: 1.4rem 1.5rem 1.3rem; background: var(--bg); animation: cp-mbc-in 0.28s cubic-bezier(0.2, 0, 0, 1) both; }
+.teim-rd .cp-mbc__panel { margin-top: 1.2rem; border: 1px solid var(--line); border-radius: 3px; padding: 1.4rem 1.5rem 1.3rem; background: var(--bg); animation: cp-mbc-in 0.28s cubic-bezier(0.2, 0, 0, 1) both; }
 @keyframes cp-mbc-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cp-mbc__panel { animation: none; }
@@ -1522,7 +1522,7 @@
   .teim-rd .cp-ex1__btn { cursor: pointer; }
   .teim-rd .cp-ex1__btn::after { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
 }
-.teim-rd .cp-ex1__panel { position: absolute; z-index: 40; top: calc(100% + 0.5rem); left: -0.4rem; width: max-content; max-width: min(30rem, calc(100vw - 2rem)); padding: 0.85rem 1rem; border: 1px solid var(--line); border-top: 2px solid var(--dteal); border-radius: 3px; background: var(--bg); box-shadow: 0 14px 36px -20px rgba(10, 15, 38, 0.4); font-family: var(--sans); font-size: 0.85rem; font-weight: 400; line-height: 1.55; letter-spacing: normal; text-transform: none; color: var(--ink-2); text-align: left; white-space: normal; }
+.teim-rd .cp-ex1__panel { position: absolute; z-index: 40; top: calc(100% + 0.5rem); left: -0.4rem; width: max-content; max-width: min(30rem, calc(100vw - 2rem)); padding: 0.85rem 1rem; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); box-shadow: 0 14px 36px -20px rgba(10, 15, 38, 0.4); font-family: var(--sans); font-size: 0.85rem; font-weight: 400; line-height: 1.55; letter-spacing: normal; text-transform: none; color: var(--ink-2); text-align: left; white-space: normal; }
 .teim-rd .cp-ex1__panel.is-flipped { left: auto; right: -0.4rem; }
 .teim-rd .cp-ex1__panel.is-open { animation: cp-ex1-in 0.16s ease-out both; }
 @keyframes cp-ex1-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
@@ -1557,7 +1557,7 @@
  * under a shared top rule read better than two equal boxes, one padded
  * with nothing. */
 .teim-rd .cp-idp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; margin: 1.8rem 0 0; align-items: start; }
-.teim-rd .cp-idp__card { border: 1px solid var(--line); border-top: 2px solid var(--teal); border-radius: 2px; padding: 1.3rem 1.4rem 1.2rem; background: var(--bg); display: flex; flex-direction: column; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-idp__card { border: 1px solid var(--line); border-radius: 2px; padding: 1.3rem 1.4rem 1.2rem; background: var(--bg); display: flex; flex-direction: column; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
 .teim-rd .cp-idp__card:hover { border-color: var(--teal-line); box-shadow: 0 10px 28px -22px rgba(10, 15, 38, 0.3); transform: translateY(-2px); }
 .teim-rd .cp-idp__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.4rem 1rem; }
 .teim-rd .cp-idp__label { font-family: var(--sans); font-size: 1.06rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0; }
@@ -1586,7 +1586,7 @@
  * Drawn rather than described, because "separate and connected" is a shape. */
 .teim-rd .cp-wb { margin-top: 1.8rem; }
 .teim-rd .cp-wb__pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0; align-items: stretch; }
-.teim-rd .cp-wb__card { border: 1px solid var(--line); border-top: 2px solid var(--dteal); border-radius: 3px; padding: 1.2rem 1.3rem; background: var(--bg); transition: box-shadow 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-wb__card { border: 1px solid var(--line); border-radius: 3px; padding: 1.2rem 1.3rem; background: var(--bg); transition: box-shadow 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
 .teim-rd .cp-wb__card:hover { box-shadow: 0 12px 30px -24px rgba(10, 15, 38, 0.36); transform: translateY(-2px); }
 .teim-rd .cp-wb__id { display: inline-block; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; color: var(--dteal); background: var(--teal-tint); border: 1px solid var(--teal-line); border-radius: 3px; padding: 0.2rem 0.5rem; }
 .teim-rd .cp-wb__id.is-pending { color: var(--muted); background: transparent; border-style: dashed; }
@@ -1653,7 +1653,7 @@
 .teim-rd .cp-loop__stage:hover .cp-loop__name { color: var(--dteal); }
 .teim-rd .cp-loop__name { font-family: var(--sans); font-size: 1rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0 0 0.4rem; transition: color 0.2s ease; }
 .teim-rd .cp-loop__body { font-size: 0.89rem; line-height: 1.55; color: var(--ink-2); margin: 0; }
-.teim-rd .cp-loop__close { font-size: 1.02rem; line-height: 1.6; font-weight: 600; color: var(--ink); margin: 2rem 0 0; padding-top: 1.2rem; border-top: 2px solid var(--teal); max-width: 92ch; }
+.teim-rd .cp-loop__close { font-size: 1.02rem; line-height: 1.6; font-weight: 600; color: var(--ink); margin: 2rem 0 0; padding-top: 1.3rem; border-top: 1px solid var(--line); max-width: 78ch; }
 @media (max-width: 900px) { .teim-rd .cp-loop__ring { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.8rem; } .teim-rd .cp-loop__ring::before { display: none; } }
 @media (max-width: 560px) { .teim-rd .cp-loop__ring { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) {
@@ -1662,7 +1662,7 @@
 }
 
 .teim-rd .cp-wont { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem 3rem; }
-.teim-rd .cp-wont li { font-size: 1rem; line-height: 1.6; color: var(--ink); border-top: 2px solid var(--teal); padding-top: 0.7rem; }
+.teim-rd .cp-wont li { font-size: 1rem; line-height: 1.6; color: var(--ink); border-top: 1px solid var(--line); padding-top: 0.8rem; }
 @media (max-width: 720px) { .teim-rd .cp-wont { grid-template-columns: 1fr; gap: 1rem; } }
 
 .teim-rd .cp-exp { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 3rem; align-items: start; }
@@ -1701,7 +1701,7 @@
 .teim-rd .cp-verify__hard { font-size: 0.96rem; line-height: 1.55; font-weight: 700; color: var(--ink); margin: 1.3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--teal-line); }
 
 .teim-rd .cp-flow { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.6rem; }
-.teim-rd .cp-flow__step { position: relative; padding: 1.1rem 1rem; border-top: 2px solid var(--teal); background: var(--surface, transparent); transition: background 0.18s ease, border-color 0.18s ease; }
+.teim-rd .cp-flow__step { position: relative; padding: 1.1rem 1rem; border-top: 1px solid var(--line); background: var(--surface, transparent); transition: background 0.18s ease, border-color 0.18s ease; }
 .teim-rd .cp-flow__step:hover { background: var(--teal-tint); border-top-color: var(--dteal); }
 .teim-rd .cp-flow__head { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.4rem; }
 .teim-rd .cp-flow__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; color: var(--dteal); }
@@ -1712,7 +1712,7 @@
  * down because the sentence is the step. Five compact rows instead of a
  * 2-2-1 grid of tiles. */
 @media (max-width: 640px) {
-  .teim-rd .cp-flow { grid-template-columns: 1fr; gap: 0; border-top: 2px solid var(--teal); }
+  .teim-rd .cp-flow { grid-template-columns: 1fr; gap: 0; }
   .teim-rd .cp-flow__step { display: grid; grid-template-columns: 2rem minmax(0, 1fr); column-gap: 0.7rem; align-items: baseline; padding: 0.7rem 0.15rem; border-top: 1px solid var(--line); background: none; }
   .teim-rd .cp-flow__step:first-child { border-top: 0; }
   .teim-rd .cp-flow__step:hover { background: none; }
@@ -3160,7 +3160,7 @@
 .teim-rd .cp-ex__bar > .cp-ex__acts { flex: 0 0 auto; margin-left: auto; }
 /* The filters open over the table rather than pushing it down: the whole
  * point of the row is that nothing between it and the records moves. */
-.teim-rd .cp-ex__bar > .cp-ex__filters[open] > .cp-ex__filtersin { position: absolute; z-index: 30; top: calc(100% + 0.45rem); left: auto; right: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0.65rem; width: min(24rem, 88vw); padding: 0.9rem 1rem; border: 1px solid var(--line); border-top: 2px solid var(--dteal); background: var(--bg); box-shadow: 0 16px 38px -20px rgba(10, 15, 38, 0.45); }
+.teim-rd .cp-ex__bar > .cp-ex__filters[open] > .cp-ex__filtersin { position: absolute; z-index: 30; top: calc(100% + 0.45rem); left: auto; right: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0.65rem; width: min(24rem, 88vw); padding: 0.9rem 1rem; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 16px 38px -20px rgba(10, 15, 38, 0.45); }
 /* Stacked: a panel of filters reads down, and the year range is twice the
  * width of the two pickers, so a row put them in three different places. */
 .teim-rd .cp-ex__bar > .cp-ex__filters[open] .cp-ex__pick,
@@ -3361,7 +3361,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__reads--fold { display: block; padding-block: 0.45rem; position: relative; }
 /* In the status bar the panel opens UPWARD, over the table: there is nothing
  * below it but the frame's edge. */
-.teim-rd .cp-ex__foot .cp-ex__reads--fold[open] > .cp-ex__readsin { position: absolute; z-index: 30; bottom: calc(100% + 0.5rem); left: 0; width: max-content; max-width: min(34rem, 80vw); padding: 0.8rem 1rem; border: 1px solid var(--line); border-bottom: 2px solid var(--dteal); background: var(--bg); box-shadow: 0 -12px 34px -18px rgba(10, 15, 38, 0.45); }
+.teim-rd .cp-ex__foot .cp-ex__reads--fold[open] > .cp-ex__readsin { position: absolute; z-index: 30; bottom: calc(100% + 0.5rem); left: 0; width: max-content; max-width: min(34rem, 80vw); padding: 0.8rem 1rem; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 -12px 34px -18px rgba(10, 15, 38, 0.45); }
 .teim-rd .cp-ex__reads--fold > summary { list-style: none; cursor: pointer; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); }
 .teim-rd .cp-ex__reads--fold > summary::-webkit-details-marker { display: none; }
 .teim-rd .cp-ex__reads--fold > summary::after { content: ' \203A'; display: inline-block; transform: rotate(90deg); }
@@ -3582,7 +3582,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-pri__shipped ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
 .teim-rd .cp-pri__form { display: flex; flex-direction: column; gap: 0.5rem; max-width: 40rem; }
 .teim-rd .cp-pri__askgrid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 1.6rem 2.4rem; align-items: start; }
-.teim-rd .cp-pri__what { border-left: 1px solid var(--teal-line); padding-left: 1.5rem; }
+.teim-rd .cp-pri__what { border-left: 1px solid var(--line); padding-left: 1.5rem; }
 .teim-rd .cp-pri__steps { list-style: none; counter-reset: pw; margin: 0.8rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
 .teim-rd .cp-pri__steps li { counter-increment: pw; position: relative; padding-left: 1.9rem; font-size: 0.88rem; line-height: 1.55; color: var(--ink-2); }
 .teim-rd .cp-pri__steps li::before { content: counter(pw, decimal-leading-zero); position: absolute; left: 0; top: 0.1em; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; color: var(--dteal); }
@@ -3592,7 +3592,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-pri__hint { font-size: 0.85rem; line-height: 1.55; color: var(--muted); margin: -0.2rem 0 0.3rem; max-width: 92ch; }
 .teim-rd .cp-pri__uncounted { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 /* The ask leads the page, so it gets the weight a lead has. */
-.teim-rd .cp-pri__ask { margin-bottom: 2.6rem; padding: 1.4rem 1.5rem 1.5rem; border: 1px solid var(--line); border-top: 2px solid var(--teal); border-radius: 3px; background: var(--teal-tint); }
+.teim-rd .cp-pri__ask { margin-bottom: 2.6rem; padding: 1.4rem 1.5rem 1.5rem; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); }
 .teim-rd .cp-pri__ask .cp-pri__text { min-height: 108px; background: var(--bg); }
 @media (max-width: 720px) { .teim-rd .cp-pri__ask { padding: 1.1rem 1rem 1.2rem; } }
 .teim-rd .cp-pri__label { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-top: 0.4rem; }

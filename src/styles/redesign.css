@@ -18,8 +18,8 @@
   /* Consolidated design tokens (see docs/design/DESIGN-SYSTEM.md). Canonical
      values for the recurring primitives so field cards, rails, chips and focus
      states stay consistent as the system grows. */
-  --radius-field: 12px;   /* dense boxed input (editor / basics / utility fields) */
-  --radius-card: 14px;    /* card / tile / table / panel surface (the app's de-facto radius) */
+  --radius-field: 4px;    /* dense boxed input (editor / basics / utility fields) */
+  --radius-card: 4px;     /* card / tile / table / panel surface (the app's de-facto radius) */
   --radius-pill: 999px;   /* chips, badges, pill inputs */
   --focus-ring: 0 0 0 4px rgba(15,181,165,0.08);
   --field-pad: 0.9rem 1.05rem;
