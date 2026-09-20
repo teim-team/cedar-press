@@ -26,8 +26,62 @@ import { PressFoot, PressMast } from "./PressChrome";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 
-const REQUEST_HREF =
-  contactHref("Cedar Tribal Data Request");
+/**
+ * FOUR TASKS, FOUR DRAFTS. The brief's "short branching form": reveal only
+ * what the chosen task needs, and do not open a proposal form to somebody
+ * who wants to correct one relationship.
+ *
+ * There is no form backend on this site and inventing one would be worse, so
+ * the branch is four prefilled mail drafts. Each opens on the Nation and the
+ * requester's authority — the two things every route needs — and then asks
+ * only what its own task needs.
+ */
+const AUTHORITY = [
+  "NATION OR TRIBAL GOVERNMENT",
+  "",
+  "",
+  "YOU — name, title, and your authority to act for the government",
+  "",
+  "",
+];
+
+const TASKS = [
+  {
+    id: "review",
+    label: "Review the records tied to my government",
+    blurb: "What Cedar Press holds about the government and its affiliated enterprises.",
+    ask: ["WHAT YOU WOULD LIKE TO SEE — all records, or a collection or period"],
+  },
+  {
+    id: "correct",
+    label: "Correct an identity or an enterprise relationship",
+    blurb: "A name, a classification, or a link between a government and a business.",
+    ask: [
+      "WHAT IS WRONG — the record, entity or relationship, and the Cedar id if you have it",
+      "WHAT IS CORRECT, and what supports it",
+    ],
+  },
+  {
+    id: "missing",
+    label: "Identify public records that are missing",
+    blurb: "Something in the public record that Cedar Press has not picked up.",
+    ask: ["WHAT IS MISSING — the source, the period, and where it is published"],
+  },
+  {
+    id: "partner",
+    label: "Discuss a data partnership",
+    blurb: "Working together on data the government holds or wants built.",
+    ask: ["WHAT YOU HAVE IN MIND", "TIMELINE AND WHO SHOULD BE INVOLVED"],
+  },
+];
+
+const draftFor = (task) =>
+  contactHref(
+    `Cedar Tribal Record Review — ${task.label}`,
+    [...AUTHORITY, ...task.ask.flatMap((line) => [line, "", ""])].join("\n"),
+  );
+
+const REQUEST_HREF = draftFor(TASKS[0]);
 
 // The policy this page renders is declared once, in pressMethod.js, where
 // its tests live. This file carried its own copies of every list until
@@ -165,9 +219,26 @@ export default function CedarPressTribalRequest() {
           <div className="cp-limits__say">
             <span className="cp-sec__band">Not included</span>
             <h2 className="cp-two__title">What a request does not cover.</h2>
-            <a className="cp-trh__cta" href={REQUEST_HREF}>
-              Request your records <span aria-hidden="true">&#8594;</span>
-            </a>
+            {/* The branch. Four tasks, and the draft each one opens asks only
+                what that task needs — a correction should not arrive on a
+                proposal form. */}
+            <div className="cp-task" aria-label="Start a request">
+              <span className="cp-task__cap">Start a request</span>
+              <ul className="cp-task__list">
+                {TASKS.map((task) => (
+                  <li key={task.id}>
+                    <a className="cp-task__act" href={draftFor(task)}>
+                      <b>{task.label}</b>
+                      <span>{task.blurb}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <p className="cp-task__fine">
+                Each opens a mail draft with that request&rsquo;s own questions. Nothing is sent
+                until you send it.
+              </p>
+            </div>
           </div>
           <div>
           <p className="cp-limits__body">

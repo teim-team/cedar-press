@@ -80,6 +80,7 @@ import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import PressCollectionRail from "./PressCollectionRail.jsx";
+import PressCollectionAbout from "./PressCollectionAbout.jsx";
 import Explain from "./Explain";
 import { TierName } from "./TierName";
 
@@ -446,34 +447,20 @@ function YearRange({ cut, bounds, basis, onChange }) {
  * Locked collections are listed and disabled, and the line under the
  * control says what opens them.
  */
-function AboutCollection({ entry }) {
-  const launch = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
-  const catalog = PRESS_CATALOG_BY_ID[entry.id] ?? entry;
-  const rows = [
-    ["Coverage", catalog ? coverageLabel(catalog) : null],
-    ["How it is built", launch?.method],
-    ["What it reads", launch?.sources],
-    ["How a record reaches its entity", catalog?.linkage],
-  ].filter(([, body]) => typeof body === "string" && body.trim());
-  if (!catalog?.blurb && !rows.length) return null;
+/**
+ * "About this collection" is a link into a profile now, not a disclosure.
+ *
+ * The old `<details>` held four lines of prose in the pane head, which is a
+ * tooltip: it could not be linked to, so a reader who wanted to send
+ * somebody the method behind a figure had nothing to send. The panel lives
+ * at `?about=1` beside the cut, so closing it returns them to the table they
+ * opened it from.
+ */
+function AboutCollectionLink({ onOpen }) {
   return (
-    <details className="cp-ex__about" data-testid="explore-about">
-      <summary className="cp-ex__aboutbtn">About this collection</summary>
-      <div className="cp-ex__aboutin">
-        {catalog?.blurb ? <p className="cp-ex__aboutlede">{catalog.blurb}</p> : null}
-        <dl className="cp-ex__aboutrows">
-          {rows.map(([cap, body]) => (
-            <div key={cap}>
-              <dt>{cap}</dt>
-              <dd>{body}</dd>
-            </div>
-          ))}
-        </dl>
-        <Link className="cp-ex__aboutmore" to={`${PRESS_METHODS_PATH}#m-collections`}>
-          How Cedar builds its data <span aria-hidden="true">&#8594;</span>
-        </Link>
-      </div>
-    </details>
+    <button type="button" className="cp-ex__aboutbtn" onClick={onOpen} data-testid="explore-about">
+      About this collection
+    </button>
   );
 }
 
@@ -743,7 +730,6 @@ function LockedCollection({ entry }) {
       <div className="cp-ex__head">
         <h3 className="cp-ex__title">{entry.name}</h3>
         <span className="cp-kind cp-kind--lock">{upgrade.name}</span>
-        <AboutCollection entry={entry} />
       </div>
       <div className="cp-ex__card">
         <p className="cp-lock__lede">{entry.blurb}</p>
@@ -1116,6 +1102,16 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           preview and the signed-in product are the same object in two modes
           rather than two tables that resemble each other today. The brief's
           Priority 0. */}
+      {/* The profile, over the table it belongs to. Rendered inside the
+          frame so the sheet's edge is the frame's edge on a wide screen and
+          the whole screen on a phone. */}
+      {cut.about && single ? (
+        <PressCollectionAbout
+          entry={single.entry}
+          flagship={single.flagship}
+          onClose={() => write({ about: false })}
+        />
+      ) : null}
       <div className="cp-ex__frame">
       <PressCollectionRail
         selectedId={single?.entry.id ?? lockedSingle?.entry.id ?? null}
@@ -1148,7 +1144,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             {single ? single.entry.name : `All ${scope.length} open collections`}
           </h3>
           <span className="cp-kind cp-kind--data">Preview · ten-record samples</span>
-          {single ? <AboutCollection entry={single.entry} /> : null}
+          {single ? <AboutCollectionLink onOpen={() => write({ about: true })} /> : null}
           {/* THE SAMPLE FILE, AND WHY IT IS HERE.
               It used to hang off the shelf's reader panel, which was deleted
               when the table became the Collections page. It is not the same

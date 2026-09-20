@@ -20,8 +20,37 @@ import { PressFoot, PressMast } from "./PressChrome";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 
-const REQUEST_HREF =
-  contactHref("Cedar Limited Research Data Request");
+/**
+ * The proposal, as a draft rather than as a checklist the reader retypes.
+ *
+ * The brief asks this page to begin with "What are you trying to answer?"
+ * and it now does, in the place it matters: the draft opens on the research
+ * question, and the background the old list started with (title,
+ * affiliation) comes after it. A request shaped this way can be read in one
+ * pass; the same request as a paragraph has to be taken apart first.
+ */
+const DRAFT = [
+  "WHAT ARE YOU TRYING TO ANSWER?",
+  "",
+  "",
+  "WHICH ONE OR TWO COLLECTIONS, AND WHY THOSE",
+  "",
+  "",
+  "SCOPE — dates, geography or entities",
+  "",
+  "",
+  "WHAT YOU INTEND TO PUBLISH",
+  "",
+  "",
+  "TIMELINE",
+  "",
+  "",
+  "YOU — name, affiliation, contact",
+  "",
+  "",
+].join("\n");
+
+const REQUEST_HREF = contactHref("Cedar Limited Research Data Request", DRAFT);
 
 const PROPOSAL = [
   "Project title",
@@ -93,7 +122,7 @@ export default function CedarPressResearchAccess() {
             already decided to apply; open by default they sat between the
             fit examples and the action, so a reader deciding whether this is
             for them had to scroll a checklist to reach the button. */}
-        <details className="cp-msec cp-prop__wrap cp-fade" aria-label="What to include">
+        <details className="cp-msec cp-prop__wrap cp-fade" aria-label="What to include" open>
           <summary className="cp-prop__sum">
             <span className="cp-sec__band">Include in the proposal</span>
           </summary>
@@ -110,9 +139,25 @@ export default function CedarPressResearchAccess() {
             redistributed. Projects requiring broad, repeated, exploratory or commercial access
             should use Cedar Press<span className="cp-plus">+</span> or Cedar Grove.
           </p>
+          {/* Said as its own list rather than left to be inferred from the
+              "not a fit" examples: the commonest way this route goes wrong
+              is a request that is really a subscription, and answering that
+              after a proposal has been written wastes both sides' time. */}
+          <div className="cp-prop__not">
+            <span className="cp-prop__notcap">What this route is not</span>
+            <ul>
+              <li>Access to every collection</li>
+              <li>Open-ended custom research</li>
+              <li>A channel for confidential or restricted data</li>
+              <li>A path to commercial repackaging</li>
+            </ul>
+          </div>
           <a className="cp-trh__cta" href={REQUEST_HREF}>
-            Submit a research request <span aria-hidden="true">&#8594;</span>
+            Start a research request <span aria-hidden="true">&#8594;</span>
           </a>
+          <p className="cp-prop__fine">
+            Opens a mail draft with these questions in order. Nothing is sent until you send it.
+          </p>
         </details>
 
         <PressFoot nav={entitled} />

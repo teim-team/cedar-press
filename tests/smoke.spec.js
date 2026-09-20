@@ -778,16 +778,31 @@ test.describe("About this collection", () => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data?c=contractors");
+    // It was a `<details>` in the pane head holding four lines. It is a
+    // deep-linkable profile now, so the test opens it the way a reader does
+    // and then checks the address it leaves behind — the whole point of
+    // making it a panel is that a method can be sent to somebody.
     const about = page.getByTestId("explore-about");
     await expect(about).toBeVisible();
-    await about.locator("summary").click();
-    await expect(about).toContainText("Awardees are matched to a Native entity");
-    expect(await about.locator("dt").allTextContents()).toEqual([
-      "Coverage",
-      "How it is built",
-      "What it reads",
-      "How a record reaches its entity",
-    ]);
+    await about.click();
+    await expect(page).toHaveURL(/about=1/);
+    const panel = page.locator(".cp-ab");
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText("Awardees are matched to a Native entity");
+    // The release facts a reader checks a figure against.
+    for (const field of ["Release", "Updated", "Coverage", "Records"]) {
+      await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
+    }
+    // The unit of observation, in the codebook's own words: the sentence
+    // anyone about to cite a count needs and the old disclosure never had.
+    await expect(panel).toContainText("One row is");
+    await expect(panel).toContainText("What is not in it");
+
+    // Closing returns the reader to the cut they opened it from.
+    await panel.getByRole("button", { name: /close the collection profile/i }).click();
+    await expect(panel).toHaveCount(0);
+    await expect(page).toHaveURL(/c=contractors/);
+    await expect(page).not.toHaveURL(/about=1/);
     expect(errors).toEqual([]);
   });
 });

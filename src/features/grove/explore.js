@@ -620,6 +620,8 @@ export const EMPTY_CUT = Object.freeze({
   sort: null,
   page: 1,
   history: false,
+  // Whether the collection profile is open over the table.
+  about: false,
 });
 
 const SEP = "|";
@@ -646,6 +648,10 @@ export function encodeCut(cut) {
   if (cut.sort) params.set("s", `${cut.sort.by}:${cut.sort.dir}`);
   if (cut.page && cut.page > 1) params.set("p", String(cut.page));
   if (cut.history) params.set("h", "1");
+  // The collection profile rides WITH the cut rather than on a route of its
+  // own, so closing it returns the reader to the exact table they opened it
+  // from, and a link to a method carries the filters it was read under.
+  if (cut.about) params.set("about", "1");
   return params.toString();
 }
 
@@ -687,6 +693,7 @@ export function decodeCut(search) {
   const page = Number.parseInt(params.get("p") ?? "1", 10);
   cut.page = Number.isFinite(page) && page > 1 ? page : 1;
   cut.history = params.get("h") === "1";
+  cut.about = params.get("about") === "1";
   return { ...cut, unknown, dropped };
 }
 
