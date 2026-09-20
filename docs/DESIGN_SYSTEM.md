@@ -13,6 +13,9 @@ system's named components to where each lives today.
 | SponsorshipUnit | `PressAd` + `AD_SLOT` (`pressAds.js`) | One component, shape variants per slot (banner on the overview, sidebar in articles). Same `SPONSORSHIP` cap, border, tint and CTA everywhere. Enquiries go to TBN's media kit (`AD_ENQUIRY_HREF`). |
 | AskCedarFAB | `PressCedarFab` | Identical launcher, offset and dimensions on every page; context arrives via props (`examples`, `gated`) and events (`cedar:open`, `cedar:ask-collection`), never via per-page styling. The PANEL is `.cp-dc__*`, shared with the door and with lumecon.ai's `CedarFAB.astro` — see "Cedar" below. |
 | CollectionRail | `PressCollectionRail` (`src/pages/grove/PressCollectionRail.jsx`) | The twelve collections, once. Two modes: `preview` on the door, `app` behind the paywall, where a collection the plan cannot open stays in the rail and is visibly locked. Never a second list of the same twelve. |
+| CollectionAtlas | `CollectionAtlas` (in `PressExplore`) | The catalogue, in the table: one row a collection, its coverage, size, release and what opens it, locked ones included. What "show me everything" means when nothing has been asked yet; the pooled records come back the moment a search or filter turns the question back into one about records. |
+| LockedCollection | `LockedCollection` (in `PressExplore`) | The same toolbar, the collection's own declared column headers, the same row density, the same status bar — with the values withheld by never being fetched. One line says what opens it. A blank page with an upsell box asks somebody to buy a thing they have not been shown. |
+| Briefing | `PressBriefing` | The overview: one lead, three signals, one collection, one question. Every line read from the release record and the article list, so it cannot go stale. It replaced six cards that restated the nav bar. |
 | CollectionExplorer | `PressExplore` | Rail, one toolbar row, the table, one status bar. Nothing between the toolbar and the first record: description lives under the records, controls live in the bar, and the collection's name is the h1 at toolbar size. The signed-in Collections page IS this component; the door mounts the same rail and the same table. |
 | RecordTable | `PressRecordTable` (`Rows`, `Cards`) + `recordColumns.js` (`columnPlan`) | The record table, once. The signed-in viewer and the signed-out door both mount it; the door mounts it `readOnly` (no sort control, no record link, since neither leads anywhere without a subscription). A second table that draws records is a bug. |
 | CollectionProfile | `PressCollectionAbout` | The deep-linkable profile at `?c=<id>&about=1`: a side sheet on a wide screen, the whole screen on a phone. Every field is read from the release (descriptor, codebook, ledger); nothing on it is written. |
@@ -106,3 +109,10 @@ type and teal rules above come from it. Two differences are intentional:
 - A link to a collection carries `?c=<id>`. `/data` flat opens on Federal
   Funding, so "View collection" from a NAGPRA release used to land a reader
   on the wrong one.
+- Two class names were doing two jobs each, and the app inherited the door's
+  navy in both cases: `.cp-why` was the door's passage band AND Methods'
+  reasoning disclosure; `.cp-rail` was the collection rail AND Methods'
+  seven-stage diagram. Renamed `.cp-reason` and `.cp-proc`. Methods halved.
+  Before adding a class, grep it.
+- Navy in the app is the rail, one high-stakes disclosure, the Cedar answer
+  state and the footer. Nothing else.
