@@ -9,9 +9,19 @@ transactional email, which lives in another repository, and one consequence of
 the certificate that touches the session design.*
 
 *Detailed notes on the OIDC failure, SES and the certificate were already posted
-for Kaylyn as a comment on `lumecon-website#345` by a parallel session. This file
-is the repository's copy of the parts that are cedar-press's own; it is not a
-second message to her and should not be reposted as one.*
+for Kaylyn on `lumecon-website#345` by a parallel session. **Read the correction,
+not the original**: the first comment
+([#issuecomment-5753295546](https://github.com/teim-team/lumecon-website/issues/345#issuecomment-5753295546),
+23:00Z) carried two errors, both retracted nine minutes later in
+[#issuecomment-5753349768](https://github.com/teim-team/lumecon-website/issues/345#issuecomment-5753349768).
+It had claimed the site posts `POST /auth/register` — it does not; `/signup`
+collects no password and posts to `/v1/contact`, and `submitSignup` is an unused
+export, so deploying teim-app cannot by itself turn on account creation. And it
+described a CORS failure as a login that appears to succeed leaving no session —
+`fetch` rejects, `api.ts` returns `{ok:false, reason:'network'}` and `/login`
+shows a failure; the silent-session symptom belongs to the SameSite case
+instead. This file is the repository's copy of the parts that are cedar-press's
+own; it is not a second message to her and should not be reposted as one.*
 
 ## 0. Two things the first draft of this file got wrong
 
@@ -28,12 +38,33 @@ wrong way.
    is worth renaming on its own account — it is what misled this document.
 2. **"The certificate takes the cheap cookie option off the table."** The
    opposite, and see §2.
+3. **The default sender string.** Read off a teim-app checkout sitting on an
+   unmerged branch rather than off `main`. Corrected in §1 — along with the
+   reason it was flagged, which was itself wrong: the two strings differ only in
+   the display name, and SES verifies an address or a domain, not a display
+   name.
 
 ## 1. Transactional email: the repository it helps is teim-app
 
 **teim-app is the only repository in the estate that sends email.**
 `server/mailer.js`, `@aws-sdk/client-sesv2`, two flows — verification and
-password reset — with a default sender of `Cedar Impact <contact@lumecon.ai>`.
+password reset.
+
+**The default sender, and why the string is less important than it looks.** On
+`main`, `mailer.js:14` reads `Tribal Economic Impact <contact@lumecon.ai>`. An
+earlier draft of this file said `Cedar Impact <contact@lumecon.ai>`, which is
+what `51d2a752` ("The product is Cedar Impact, from Lumecon") changes it to —
+that commit is **not on main**; it rides on the `cedar-grove/*` branches and
+teim-app#171, all unmerged. So today's deployed default is the first string and
+the second is pending.
+
+**What matters for SES is the address, not the display name.** Both strings
+carry the same address, `contact@lumecon.ai`, and an SES identity is a domain or
+an email address — the RFC 5322 display name in front of it is not part of the
+identity and is not verified. So verify `lumecon.ai` (or `contact@lumecon.ai`)
+and the rename cannot break delivery whichever way it lands. That is also the
+more robust instruction: verifying one exact *string* would appear to work and
+then need redoing.
 
 **cedar-press sends none.** No SES client, no SMTP, no mailer module; a grep
 across `server/`, `src/` and `scripts/` returns nothing. Activation and access
