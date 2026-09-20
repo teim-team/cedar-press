@@ -3254,8 +3254,22 @@
      which is the part a reader actually needs here. */
   .teim-rd .cp-rail__tier { display: none; }
   .teim-rd .cp-rail__list { flex-direction: row; gap: 0.4rem; }
-  .teim-rd .cp-rail__item { flex: 0 0 auto; width: auto; min-width: 9rem; max-width: 11rem; min-height: 44px; padding: 0.4rem 0.55rem; scroll-snap-align: start; }
-  .teim-rd .cp-rail__name { font-size: 0.78rem; }
+  /* WIDTH IS FREE HERE AND HEIGHT IS NOT, WHICH THE 11rem CAP HAD BACKWARDS.
+     A locked collection's chip carries a "Plus" or "Pending" badge beside the
+     name, and inside an 11rem box that badge leaves about 80px for the name —
+     which `overflow-wrap: anywhere` then shredded down the chip rather than
+     letting it widen. Measured at 390x664: the standard chips were 44px and
+     the Plus chips 136px, so the navy strip stood 158px tall with its first
+     six collections floating centred in it and 92px of empty navy around
+     them. A seventh of the screen, on the page whose whole argument is that
+     the table should fill it.
+     This is a horizontal scroller: it already scrolls sideways and snaps, so
+     a wide chip costs nothing a reader cannot swipe past, while a tall one is
+     charged to every collection in the strip at once. Names stay whole —
+     truncating them was the other way out and this rail exists to be read. */
+  .teim-rd .cp-rail__item { flex: 0 0 auto; width: auto; min-width: 9rem; max-width: none; min-height: 44px; padding: 0.4rem 0.55rem; scroll-snap-align: start; }
+  .teim-rd .cp-rail__name { font-size: 0.78rem; white-space: nowrap; }
+  .teim-rd .cp-rail__rows { white-space: nowrap; }
   /* Was two wrapped lines and a third of the strip, for the row a reader
      needs least often. */
   .teim-rd .cp-rail__item--all { flex: 0 0 auto; min-width: 0; max-width: none; margin: 0; }

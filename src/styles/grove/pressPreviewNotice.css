@@ -10,8 +10,13 @@
 .teim-rd .cp-preview__close { flex: none; min-height: 38px; border: 1px solid var(--line); border-radius: 999px; padding: 0.4rem 0.7rem; background: var(--bg); color: var(--ink); font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .teim-rd .cp-preview__close:hover { border-color: var(--dteal); color: var(--dteal); }
 .teim-rd .cp-preview__close:focus-visible { outline: 2px solid var(--dteal); outline-offset: 3px; }
+/* A phone gets what this is and how to get in; the invitation to give
+ * feedback waits for a screen with room for it. See `PressPreviewNotice` for
+ * the measurement that put it behind this query. */
 @media (max-width: 620px) {
   .teim-rd .cp-preview { width: calc(100% - 1.4rem); align-items: flex-start; gap: 0.65rem; padding: 0.7rem; }
   .teim-rd .cp-preview p { font-size: 0.82rem; }
+  .teim-rd .cp-preview__aside { display: none; }
+  .teim-rd .cp-preview__ask { display: block; margin-top: 0.3rem; }
   .teim-rd .cp-preview__close { min-height: 34px; padding: 0.32rem 0.55rem; font-size: 0.75rem; }
 }

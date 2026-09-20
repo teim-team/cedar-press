@@ -130,6 +130,53 @@ export default function CedarPressEntity() {
     ? "Reading the published previews…"
     : `Records Cedar Press has resolved to this entity, from the published previews — up to ten sample rows per table, never a count of a release. The name each source used stays visible.${locked ? ` ${locked} more collections open on Cedar Press+.` : ""}`;
   const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? null;
+
+  /**
+   * FOUR DERIVED FIGURES, AND WHERE THEY GO ON A PHONE.
+   *
+   * They are a summary OF the records, and on a 390x664 screen they stood
+   * 125px tall between the reader and the first one — two-column stacks of
+   * uppercase mono labels over single digits, with "Visible span" wrapping to
+   * two lines. Measured with the private-preview notice in place, the first
+   * record sat 177px below the fold.
+   *
+   * This page has already settled that argument once. The identity evidence
+   * moved below the ledger with the note "a phone settled it ... above the
+   * ledger it pushed the first record off the first screen, which is the one
+   * thing this page is for", and the same sentence is true of these figures.
+   * So they move the same way and on the same breakpoint, rather than being
+   * shrunk until nobody can read them: nothing is hidden and no word changes.
+   * They are simply not what a reader opened this page for.
+   */
+  const glance = groups.length ? (
+    <dl className="cp-ent__glance" data-testid="entity-glance">
+      <div>
+        <dt>In collections</dt>
+        <dd>{groups.length}</dd>
+      </div>
+      <div>
+        <dt>Preview records</dt>
+        <dd>{mine.length}</dd>
+      </div>
+      {dates.length ? (
+        <div>
+          <dt>Visible span</dt>
+          <dd>{dates[0] === dates[dates.length - 1] ? dates[0] : `${dates[0]} to ${dates[dates.length - 1]}`}</dd>
+        </div>
+      ) : null}
+      {/* Only where the rows carry money. A sum of what is on the screen,
+          labelled as that and nothing wider: the preview is ten rows a table,
+          so this is never a total for the entity and the label may not let
+          anybody read it as one. */}
+      {shown.total != null ? (
+        <div>
+          <dt>{shown.count === 1 ? "On this row" : `On these ${shown.count} rows`}</dt>
+          <dd>{money.format(shown.total)}</dd>
+        </div>
+      ) : null}
+    </dl>
+  ) : null;
+
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp-ent">
@@ -198,34 +245,10 @@ export default function CedarPressEntity() {
             ) : null}
           </div>
 
-          {groups.length ? (
-            <dl className="cp-ent__glance" data-testid="entity-glance">
-              <div>
-                <dt>In collections</dt>
-                <dd>{groups.length}</dd>
-              </div>
-              <div>
-                <dt>Preview records</dt>
-                <dd>{mine.length}</dd>
-              </div>
-              {dates.length ? (
-                <div>
-                  <dt>Visible span</dt>
-                  <dd>{dates[0] === dates[dates.length - 1] ? dates[0] : `${dates[0]} to ${dates[dates.length - 1]}`}</dd>
-                </div>
-              ) : null}
-              {/* Only where the rows carry money. A sum of what is on the
-                  screen, labelled as that and nothing wider: the preview is
-                  ten rows a table, so this is never a total for the entity
-                  and the label may not let anybody read it as one. */}
-              {shown.total != null ? (
-                <div>
-                  <dt>{shown.count === 1 ? "On this row" : `On these ${shown.count} rows`}</dt>
-                  <dd>{money.format(shown.total)}</dd>
-                </div>
-              ) : null}
-            </dl>
-          ) : null}
+          {/* On a wide screen the glance sits with the identity, where a
+              summary belongs. On a phone it is rendered after the ledger
+              instead — same block, same words, further down. See `glance`. */}
+          {narrow ? null : glance}
 
           {/* THE CAVEAT, AND WHAT A PHONE HAS ROOM FOR.
               It is a real caveat and it is not dropped: a reader must not
@@ -310,6 +333,11 @@ export default function CedarPressEntity() {
             reads those.
           </p>
         )}
+
+        {/* The glance, on a phone: after the ledger, for the reason above it
+            in `glance`. On a wide screen this renders nothing, because the
+            header already carried it. */}
+        {narrow ? glance : null}
 
         {/* WHY THESE RECORDS ARE CONNECTED — after them, not before.
             The brief's own order puts the records second and the identity

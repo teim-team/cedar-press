@@ -193,10 +193,33 @@ export function PressPreviewNotice() {
     <aside className="cp-preview" data-testid="press-preview-note" aria-label="Private preview">
       <div className="cp-preview__copy">
         <span className="cp-preview__label">Private preview</span>
+        {/* THE THREE SENTENCES ARE NOT EQUALLY LOAD-BEARING, AND A PHONE
+            CANNOT AFFORD ALL THREE.
+            Measured on the entity profile at 390x664: this notice stood 200px
+            tall — nearly a third of the screen — above the masthead on every
+            interior route, and pushed the first record 177px below the fold.
+            The smoke suite's own first-viewport check ("an entity profile
+            opens on its records") went red when the notice landed.
+            What a reader on a phone needs from it is what this is and how to
+            get in. The invitation to give feedback is real and is kept in
+            full wherever there is room for it; on a narrow screen it is the
+            sentence that costs a reader the thing they came for, so
+            `pressPreviewNotice.css` holds it back there rather than shrinking
+            the type until all three are unreadable. The marked-up spans are
+            what let the stylesheet make that distinction — the alternative
+            was a second copy of the notice under a media query, which is two
+            places to change one sentence. */}
         <p>
-          We&rsquo;ve shared Cedar Press with a small group while we prepare its launch. If you received this link,
-          we&rsquo;d value your feedback on what feels useful, unclear, or missing. The product is still evolving.
-          Need a login? <a href="mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access">elijah.moreno@lumecon.ai</a>
+          <span className="cp-preview__lede">
+            We&rsquo;ve shared Cedar Press with a small group while we prepare its launch.
+          </span>{" "}
+          <span className="cp-preview__aside">
+            If you received this link, we&rsquo;d value your feedback on what feels useful,
+            unclear, or missing. The product is still evolving.
+          </span>{" "}
+          <span className="cp-preview__ask">
+            Need a login? <a href="mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access">elijah.moreno@lumecon.ai</a>
+          </span>
         </p>
       </div>
       <button type="button" className="cp-preview__close" onClick={dismiss} aria-label="Dismiss private preview notice">
