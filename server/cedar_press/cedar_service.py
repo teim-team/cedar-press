@@ -41,9 +41,11 @@ a second spelling of a knob is how a deployment comes to set the wrong one.
 
 WHEN IT IS NOT CONFIGURED
 ``CEDAR_BASE_URL`` unset, no key, or ``CEDAR_ENABLED=false`` means Cedar is
-not wired into this deployment, and ``available()`` is False. The route then answers from the collection profiles
-alone and, past those, refuses and names the research desk. It does not
-apologise on Cedar's behalf for a service it was never pointed at.
+not wired into this deployment, and ``available()`` is False. The route then
+answers from the collection profiles alone; past those it asks which
+collection the question is about when none was named, and refuses and names
+the research desk when one was. It does not apologise on Cedar's behalf for a
+service it was never pointed at.
 """
 
 from __future__ import annotations

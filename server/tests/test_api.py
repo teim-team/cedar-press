@@ -45,6 +45,7 @@ os.environ["CEDAR_PRESS_CODES"] = json.dumps(
 from fastapi.testclient import TestClient  # noqa: E402
 
 from cedar_press import (
+    cedar_service,  # noqa: E402
     codes,  # noqa: E402
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
@@ -188,6 +189,13 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("demonstration", response.json()["answer"])
 
     def test_cedar_labels_real_statistics_with_their_source(self) -> None:
+        # As Cedar Press+, because `owned` is on the `pro` shelf and
+        # `/cedar/ask` now checks entitlement before either answerer sees the
+        # id. The subject here is how a real statistic is labelled, not who
+        # may read it; on a standard session the plan gate would answer first
+        # and this would stop testing its own subject.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         response = client.post(
             "/cedar/ask",
             json={"question": "What are the headline figures?", "collectionId": "owned"},
@@ -196,6 +204,8 @@ class TestCatalog(unittest.TestCase):
         answer = response.json()["answer"]
         self.assertNotIn("demonstration", answer)
         self.assertIn("Source:", answer)
+        ratelimit.reset_for_tests()
+        sign_in()
 
     def test_how_many_routes_to_statistics_not_construction(self) -> None:
         response = client.post(
@@ -214,8 +224,22 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("comparison", response.json()["answer"])
 
     def test_cedar_still_refuses_what_it_cannot_support(self) -> None:
-        response = client.post("/cedar/ask", json={"question": "what?"})
-        self.assertEqual(response.status_code, 501)
+        # An unscoped "what?" used to land here too, and it is a different
+        # situation: nothing was refused, the collection was simply never
+        # named. It is now answered with one question back and is covered by
+        # `TestCedarConversation`. What remains under test is the real
+        # refusal -- a named collection, a question its release does not
+        # state, and no Cedar wired in to compose one.
+        #
+        # `contractors` is on the `pro` shelf, so this asks as Cedar Press+.
+        # The subject is the refusal -- a question no profile can support and
+        # no Cedar is wired in to compose -- and the reader has to be able to
+        # reach the collection for the refusal to be the thing under test. On
+        # a standard session the plan gate answers first, which is correct and
+        # is covered by `TestEntitlement`; it would just mean this test passed
+        # without ever exercising `NOT_ANSWERABLE`.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         response = client.post(
             "/cedar/ask",
             json={
@@ -224,6 +248,8 @@ class TestCatalog(unittest.TestCase):
             },
         )
         self.assertEqual(response.status_code, 501)
+        ratelimit.reset_for_tests()
+        sign_in()
 
     def test_a_collection_profile_is_served(self) -> None:
         response = client.get("/press/collections/owned/profile")
@@ -407,6 +433,208 @@ class TestEntitlement(unittest.TestCase):
     def test_a_download_is_refused_without_a_session(self) -> None:
         client.cookies.clear()
         self.assertEqual(client.get("/press/collections/deals/download").status_code, 401)
+
+    # `/cedar/ask` took a `collectionId` from the browser and handed it to both
+    # answerers without asking whether the subscription reached it. The route's
+    # own first line said "scoped to what this subscription can open" and
+    # `cedar_service._payload` told Cedar "entitlement was already decided on
+    # this side of the hop"; neither was true. These four are the cases that
+    # distinguish a real gate from a sentence about one.
+
+    def _ask(self, email: str, collection_id: str, question: str | None = None):
+        ratelimit.reset_for_tests()
+        sign_in(email)
+        return client.post(
+            "/cedar/ask",
+            json={"question": question or "What does this collection cover?",
+                  "collectionId": collection_id},
+        )
+
+    def test_a_standard_reader_is_not_answered_over_a_plus_collection(self) -> None:
+        # `need` is on the `pro` shelf. A Press subscription does not reach it.
+        response = self._ask("reader@example.org", "need")
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        # The boundary is a field, not a tone: a panel renders it rather than
+        # reading it out of the prose.
+        self.assertEqual(body["access"]["opened"], False)
+        self.assertEqual(body["access"]["reason"], "NOT_INCLUDED")
+        self.assertEqual(body["access"]["plan"], "Cedar Press+")
+        # Description, yes -- `/press/collections/{id}/profile` already serves
+        # that to any signed-in reader on purpose. Retrieval, no.
+        self.assertEqual(body["source"], "profile")
+        self.assertIn("Cedar Press+", body["answer"])
+
+    def test_a_plus_reader_keeps_the_plus_collection(self) -> None:
+        response = self._ask("pro@example.org", "need")
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        # No access block at all: nothing was withheld, so nothing is declared.
+        self.assertIsNone(body.get("access"))
+        self.assertNotIn("Cedar Press+", body["answer"])
+
+    def test_a_standard_reader_keeps_every_standard_collection(self) -> None:
+        # The gate must bite on the `pro` shelf and nowhere else, or it is a
+        # regression wearing a security fix's name.
+        for collection_id in ("funding", "legislation", "deals", "nagpra",
+                              "lobbying", "federal-register"):
+            with self.subTest(collection=collection_id):
+                body = self._ask("reader@example.org", collection_id).json()
+                self.assertIsNone(body.get("access"), collection_id)
+
+    def test_the_consent_limited_collection_is_gated_like_any_other(self) -> None:
+        # `owned` is the consent/publication-limited one: White Earth listings
+        # enter entity rows only once the nation confirms publication terms, and
+        # it has no preview file at all. It is also on the `pro` shelf, so the
+        # entitlement answer must not depend on the preview being missing --
+        # those are two different reasons and only one of them is about a plan.
+        body = self._ask("reader@example.org", "owned").json()
+        self.assertEqual(body["access"]["reason"], "NOT_INCLUDED")
+        plus = self._ask("pro@example.org", "owned").json()
+        self.assertIsNone(plus.get("access"))
+
+    def test_an_unknown_collection_is_not_an_upgrade_prompt(self) -> None:
+        # `may_open` is False for an id the catalog has never heard of, so
+        # answering it with the locked reply would make "no such collection"
+        # the sound of every typo, and hide a routing bug behind a sales line.
+        response = self._ask("reader@example.org", "no-such-collection")
+        self.assertEqual(response.status_code, 404, response.text)
+
+    def test_a_locked_collection_never_reaches_cedar(self) -> None:
+        # The one that matters. The profile answer is a description and is
+        # allowed; the hop is retrieval and is not. If `cedar_service.ask` is
+        # ever called with a collection this plan cannot open, Cedar has been
+        # handed a scope under a contract that says entitlement was already
+        # checked.
+        with mock.patch.object(cedar_service, "available", return_value=True), \
+                mock.patch.object(cedar_service, "ask") as asked:
+            body = self._ask(
+                "reader@example.org", "need", "What should I conclude from this?"
+            ).json()
+        asked.assert_not_called()
+        self.assertEqual(body["access"]["opened"], False)
+
+        # And the same question on a collection the plan does reach still gets
+        # there, so the test above is not passing because the hop is dead.
+        with mock.patch.object(cedar_service, "available", return_value=True), \
+                mock.patch.object(cedar_service, "ask") as asked:
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            # A question the profile cannot answer, so the hop is the only
+            # thing left that could answer it. "What does this collection
+            # cover?" is answered off the release and never reaches Cedar,
+            # which would make this control pass for the wrong reason.
+            self._ask(
+                "reader@example.org", "lobbying", "What should I conclude from this?"
+            )
+        self.assertEqual(asked.call_count, 1)
+        self.assertEqual(asked.call_args.kwargs["collection_id"], "lobbying")
+
+
+class TestCedarConversation(unittest.TestCase):
+    """That the panel can tell three kinds of reply apart, and says so.
+
+    A reader has to be able to distinguish an answer read off a release from a
+    description of a collection they cannot open from a question Cedar is
+    asking back. All three arrive as prose in the same bubble, so the
+    distinction cannot live in the wording -- it lives in fields, and these
+    are the fields.
+    """
+
+    def _ask(self, email: str, question: str, collection_id: str | None = None):
+        ratelimit.reset_for_tests()
+        sign_in(email)
+        body: dict[str, object] = {"question": question}
+        if collection_id is not None:
+            body["collectionId"] = collection_id
+        return client.post("/cedar/ask", json=body)
+
+    def test_an_answer_a_reader_can_open_says_its_records_are_reachable(self) -> None:
+        basis = self._ask(
+            "reader@example.org", "What does this collection cover?", "deals"
+        ).json()["answerBasis"]
+        self.assertEqual(basis["kind"], "release")
+        self.assertIs(basis["opened"], True)
+        self.assertEqual(basis["collectionId"], "deals")
+
+    def test_a_locked_description_is_cited_and_declares_its_records_shut(self) -> None:
+        # Two axes, and this is the pair that needs both. The description IS
+        # read off `need`'s release and is cited to it -- dropping the
+        # citation would be the overcorrection. What it must carry as well is
+        # that the records behind it are not this subscription's, because the
+        # panel decides from that field alone whether to offer them, and it
+        # used to offer them unconditionally: "View supporting records", one
+        # sentence under an answer that had just said they open with Cedar
+        # Press+.
+        basis = self._ask(
+            "reader@example.org", "What does this collection cover?", "need"
+        ).json()["answerBasis"]
+        self.assertEqual(basis["kind"], "release")
+        self.assertIs(basis["opened"], False)
+        self.assertEqual(basis["collectionId"], "need")
+        # And the same collection on a plan that includes it, so the field is
+        # tracking the entitlement and not the collection.
+        plus = self._ask(
+            "pro@example.org", "What does this collection cover?", "need"
+        ).json()["answerBasis"]
+        self.assertIs(plus["opened"], True)
+
+    def test_a_question_with_no_collection_gets_one_question_back(self) -> None:
+        response = self._ask("reader@example.org", "what?")
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        answer = body["answer"]
+        # One question, not a list of what to type and not an apology for the
+        # deployment. The count is the test: two question marks would mean it
+        # had started interviewing the reader.
+        self.assertEqual(answer.count("?"), 1)
+        self.assertTrue(answer.startswith("Which collection"))
+        # No basis: the bubble makes no claim, so there is nothing to cite,
+        # and a citation line under a question would be a label for an answer
+        # that is not there.
+        self.assertIsNone(body["answerBasis"])
+        self.assertIsNone(body["source"])
+        self.assertIsNone(body["collectionId"])
+
+    def test_the_follow_up_is_not_what_a_named_collection_gets(self) -> None:
+        # The failure this guards is the follow-up becoming the universal
+        # reply. A reader who named a collection has supplied the one thing
+        # it asks for, and asking again is the "please rephrase your query"
+        # shape the whole change exists to remove.
+        response = self._ask(
+            "reader@example.org",
+            "List every lobbying registrant by quarter.",
+            "lobbying",
+        )
+        self.assertEqual(response.status_code, 501)
+        message = response.json()["message"]
+        self.assertNotIn("Which collection", message)
+        # And it names the collection the reader actually asked about rather
+        # than restating the product's routing rules at them. Read from the
+        # profile rather than spelled out here: a display name written into
+        # an assertion is a second place for it to be renamed.
+        named = client.get("/press/collections/lobbying/profile").json()
+        self.assertIn(named["collection_name"], message)
+        self.assertIn("contact@lumecon.ai", message)
+
+    def test_the_follow_up_leads_somewhere(self) -> None:
+        # It promises three things by naming a collection. If any of them
+        # falls through to a refusal the follow-up is a dead end, which is
+        # worse than the refusal it replaced.
+        asked = self._ask("reader@example.org", "what?").json()["answer"]
+        self.assertIn("what it holds", asked)
+        self.assertIn("where its records come from", asked)
+        self.assertIn("latest release reports", asked)
+        for question in (
+            "What does this collection cover?",
+            "What sources are included?",
+            "What changed in the latest release?",
+        ):
+            with self.subTest(question=question):
+                response = self._ask("reader@example.org", question, "deals")
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(response.json()["source"], "profile")
 
 
 class TestErrorShape(unittest.TestCase):

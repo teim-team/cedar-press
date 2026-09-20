@@ -547,7 +547,11 @@ def collection_profile(
 
 
 def _answer_basis(
-    kind: str, profile: dict[str, object] | None, collection_id: str | None
+    kind: str,
+    profile: dict[str, object] | None,
+    collection_id: str | None,
+    *,
+    opened: bool = True,
 ) -> dict[str, object]:
     """The answer's basis, structured, for the label the panel shows above it.
 
@@ -575,6 +579,16 @@ def _answer_basis(
     ``cited_records`` is deliberately absent rather than ``0``. Cedar returns
     no record citations at all, and a zero would be read as "checked, found
     none" by every reader and every downstream renderer.
+
+    ``opened`` IS A SECOND AXIS AND NOT A FOURTH KIND.
+    ``kind`` says what produced the answer; ``opened`` says whether this
+    subscription reaches the records behind it. They are independent, and the
+    combination that proves it is the locked collection: its description is
+    read off the release and cited to it -- a true ``release`` -- while its
+    records stay shut. Folding that into ``kind`` as a "description" state
+    would lose the citation, and leaving it out entirely is what the panel
+    was doing: it rendered "View supporting records" under an answer whose
+    last sentence had just said those records open with another plan.
     """
     profile = profile or {}
     version = profile.get("version")
@@ -585,6 +599,7 @@ def _answer_basis(
         "collectionName": name,
         "version": version,
         "updated": profile.get("last_updated"),
+        "opened": opened,
     }
     if kind == "release":
         # Only a release-grounded answer may name the sources it came from:
@@ -594,11 +609,113 @@ def _answer_basis(
     return basis
 
 
+def _not_included_answer(
+    profile: dict[str, object], collection_id: str, thread_id: str | None
+) -> dict[str, object]:
+    """The honest reply for a collection this subscription does not include.
+
+    Not a refusal, and not a sales page. The description of a collection is
+    not its records, and this service already decided that distinction the
+    other way round on ``/press/collections/{id}/profile``, which serves any
+    signed-in reader "because describing what a higher shelf holds is the
+    honest version of an upgrade prompt". A reader who asks about Cedar NEED
+    on a Press subscription gets what NEED is, read off its release, and is
+    told plainly where the records live.
+
+    What they do not get is retrieval. No hop to Cedar carrying this
+    collection, so nothing composes a sentence over records the subscription
+    does not open, and ``access.opened`` is a field rather than a tone so a
+    panel can render the boundary instead of inferring it from the prose.
+    """
+    description = profile.get("description")
+    name = profile.get("collection_name") or collection_id
+    reach = (
+        f"{name} is part of Cedar Press+. This is what the collection is, "
+        f"read off its current release; its records open with that plan."
+    )
+    return {
+        "answer": f"{description}\n\n{reach}" if description else reach,
+        "basis": None,
+        "answerBasis": _answer_basis(
+            "release", profile, collection_id, opened=False
+        ),
+        "collectionId": collection_id,
+        # The description came off the release, so the basis is a release and
+        # says so. `source` names the answerer, and no answerer ran past the
+        # profile: Cedar was never asked.
+        "source": "profile",
+        "access": {
+            "opened": False,
+            "plan": "Cedar Press+",
+            "reason": "NOT_INCLUDED",
+        },
+        "threadId": thread_id,
+    }
+
+
+def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
+    """One question back, for a question with no collection under it.
+
+    THE CASE THIS IS, AND THE CASE IT IS NOT.
+    Two very different situations used to end at the same ``NOT_ANSWERABLE``
+    paragraph. A reader who named a collection and asked something its
+    release does not state has been refused, correctly: they supplied the
+    context and the answer is genuinely not here. A reader who asked without
+    naming one has not been refused -- they have been *understood
+    incompletely*, and the single missing thing is the collection. Answering
+    both with "open a collection and ask from there. Anything past that needs
+    Cedar itself, which is not wired into this deployment; the research desk
+    ... answers those in person" is three instructions and an apology where
+    one question would do, and it reads as a system explaining its own
+    routing rather than as somebody trying to help.
+
+    So this asks the one thing that would let the next turn answer, and says
+    what naming it buys -- which is not a promise: ``answer_from_profile``
+    really does answer those three from the collection's own release. It is
+    not a list of filters and it does not ask anybody to phrase a query.
+
+    NO ``answerBasis``. The label above a bubble says what a claim rests on,
+    and this bubble makes no claim. A basis here would have to invent a kind
+    for "this is a question", and a reader would be shown a citation line
+    under a sentence citing nothing.
+    """
+    return {
+        "answer": (
+            "Which collection are you asking about? Name one and I can tell "
+            "you what it holds, where its records come from, and what its "
+            "latest release reports."
+        ),
+        "basis": None,
+        "answerBasis": None,
+        "collectionId": None,
+        # `source` names the answerer, and nothing answered: the route asked.
+        "source": None,
+        "threadId": thread_id,
+    }
+
+
 @app.post("/cedar/ask")
 def ask_cedar(
     question: Question, session: Session = Depends(require_session)
 ) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
+
+    THE ENTITLEMENT IS DECIDED HERE, BEFORE EITHER ANSWERER SEES THE ID.
+    It was not, and the first line of this docstring was the only place the
+    scoping existed. A `collectionId` arrived from the browser and went
+    straight to both answerers, so a Press reader naming a Cedar Press+
+    collection was answered from its profile and, past that, had the id
+    forwarded to Cedar -- which `cedar_service._payload` hands over under
+    "the service decides nothing about entitlement; it is told, because
+    entitlement was already decided on this side of the hop". That comment
+    described an arrangement this route had not implemented: Cedar was told
+    the reader may open a collection nobody had checked they could.
+
+    ``repository.may_open`` is the same rule the shelf and the download route
+    read, reused rather than restated, so a plan cannot reach a collection
+    through Cedar that it cannot reach through either of those. A hidden
+    control in the browser, an omitted sample request and a client-supplied
+    plan are all display decisions, and none of them is authorization.
 
     TWO ANSWERERS, IN THIS ORDER, AND THE ORDER IS THE POINT.
 
@@ -615,16 +732,30 @@ def ask_cedar(
        ``cedar_service.py`` for why the hop happens here and not in the
        browser.
 
-    Past both, it still refuses and names the research desk. That was the
-    whole behaviour before Cedar was wired in, and it remains the floor: an
-    assistant that produces a plausible sentence it cannot support is worse
-    than one that hands the question to a person.
+    Past both, it either asks for the one thing that would let it answer or
+    refuses and names the research desk -- ``_ask_which_collection`` says
+    which case is which. Refusing remains the floor: an assistant that
+    produces a plausible sentence it cannot support is worse than one that
+    hands the question to a person.
     """
     profile = None
     collection_name = None
     if question.collectionId:
         profile = repository.collection_profile(question.collectionId)
-        collection_name = (profile or {}).get("collection_name")
+        # An id nothing in the catalog knows is a different answer from one
+        # this plan does not reach, and `may_open` returns False for both.
+        # Telling them apart here keeps "no such collection" from becoming
+        # the sound of every locked collection, which is how a real routing
+        # bug hides behind an upgrade prompt.
+        if profile is None:
+            raise HTTPException(status_code=404, detail="No such collection.")
+        if repository.is_sold(question.collectionId) and not repository.may_open(
+            session.tier, question.collectionId
+        ):
+            return _not_included_answer(
+                profile, question.collectionId, question.threadId
+            )
+        collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
         if answered:
             return {
@@ -678,16 +809,20 @@ def ask_cedar(
             "unavailable": reply.unavailable,
         }
 
+    # Nobody named a collection, so the missing piece is one this reader can
+    # supply and the next turn can use. See `_ask_which_collection`.
+    if not question.collectionId:
+        return _ask_which_collection(question.threadId)
+
     raise HTTPException(
         status_code=501,
         detail={
             "code": "NOT_ANSWERABLE",
             "message": (
-                "Cedar can answer what a collection contains, how it was "
-                "constructed, and its headline figures \u2014 open a collection "
-                "and ask from there. Anything past that needs Cedar itself, "
-                "which is not wired into this deployment; the research desk "
-                "(contact@lumecon.ai) answers those in person."
+                "That is past what the current release of "
+                f"{collection_name or 'this collection'} states, and Cedar "
+                "itself is not wired into this deployment. The research desk "
+                "(contact@lumecon.ai) answers questions like it in person."
             ),
         },
     )

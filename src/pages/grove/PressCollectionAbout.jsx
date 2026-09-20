@@ -113,13 +113,17 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
           ) : null}
         </Block>
 
+        {launch.sources ? (
+          <p className="cp-ab__sources cp-ab__lead"><b>Sources.</b> {launch.sources}</p>
+        ) : null}
+
+        <details className="cp-ab__more">
+          <summary>Read the full collection notes</summary>
+          <div className="cp-ab__morein">
         <Block title="How it is built">
           {launch.method || launch.sources || catalog?.linkage ? (
             <>
               {launch.method ? <p>{launch.method}</p> : null}
-              {launch.sources ? (
-                <p className="cp-ab__sources"><b>Sources.</b> {launch.sources}</p>
-              ) : null}
               {catalog?.linkage ? (
                 <p className="cp-ab__sources"><b>How a record reaches its entity.</b> {catalog.linkage}</p>
               ) : null}
@@ -186,6 +190,8 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
             </>
           ) : null}
         </Block>
+          </div>
+        </details>
 
         {/* THE OTHER HALF OF THE LOOP.
             The article page names the collections a piece drew on and offers

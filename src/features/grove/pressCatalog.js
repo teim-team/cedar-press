@@ -444,7 +444,7 @@ export const PRESS_TAXONOMY = Object.freeze([
   Object.freeze({
     id: "industries",
     name: "Industries and Resources",
-    lede: "The sectors that carry the most economic weight.",
+    lede: "What the land and water pay out, and who receives it.",
     collections: Object.freeze(["natural-resources"]),
   }),
   Object.freeze({
@@ -456,7 +456,7 @@ export const PRESS_TAXONOMY = Object.freeze([
   Object.freeze({
     id: "institutions",
     name: "Institutions and Stewardship",
-    lede: "The organizations and obligations that hold it together.",
+    lede: "Native nonprofits, and the repatriation notices institutions publish.",
     collections: Object.freeze(["nonprofits", "nagpra"]),
   }),
 ]);

@@ -32,7 +32,7 @@ import { useState } from "react";
 import { canOpenDataset } from "../../features/grove/pressAccess";
 import { downloadAll } from "../../features/grove/pressDownload";
 import { PRESS_TIERS, STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
-import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { LAUNCH_COLLECTION, sampleUnavailableReason } from "../../features/grove/collection";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
@@ -99,8 +99,11 @@ export default function PressCollectionRail({
           <span className="cp-rail__name">{allLabel}</span>
         </button>
       ) : null}
-      {SHELVES.map(({ tier, entries }) => (
-        <div className="cp-rail__shelf" key={tier.id}>
+      {SHELVES.map(({ tier, entries }) => {
+        const sampleReady = entries.filter((entry) => canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id));
+        const upgradeable = entries.filter((entry) => !canOpenDataset(user, entry) && !sampleUnavailableReason(entry.id));
+        return (
+          <div className="cp-rail__shelf" key={tier.id}>
           <span className="cp-rail__tier">
             <TierName name={tier.name} />
             {/* The one thing the tier bands did that nothing else does. They
@@ -109,8 +112,8 @@ export default function PressCollectionRail({
                 the shelf rather than going with the band. Preview only on
                 the door, where there is no subscription to download
                 against. */}
-            {mode === "app" && entries.some((entry) => canOpenDataset(user, entry)) ? (
-              <ShelfDownload tier={tier} entries={entries.filter((e) => canOpenDataset(user, e))} />
+            {mode === "app" && sampleReady.length ? (
+              <ShelfDownload tier={tier} entries={sampleReady} />
             ) : null}
             {/* THE UPSELL BELONGS TO THE SHELF IT IS ABOUT.
                 It was a line inside the table pane — "6 more collections on
@@ -119,9 +122,9 @@ export default function PressCollectionRail({
                 beside the six rows it is describing, and costs the records
                 nothing. A reader on the full plan never sees it, because the
                 shelf has nothing locked on it. */}
-            {mode === "app" && entries.every((entry) => !canOpenDataset(user, entry)) ? (
+            {mode === "app" && upgradeable.length ? (
               <a className="cp-rail__get" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-                Get {entries.length} more <span aria-hidden="true">&#8594;</span>
+                Get {upgradeable.length} more <span aria-hidden="true">&#8594;</span>
               </a>
             ) : null}
           </span>
@@ -131,12 +134,13 @@ export default function PressCollectionRail({
               // In preview nothing is locked: there is no subscription to
               // measure against, and greying half the catalogue on the door
               // answers a question nobody asked yet.
-              const locked = mode === "app" && !canOpenDataset(user, entry);
+              const pending = mode === "app" && Boolean(sampleUnavailableReason(entry.id));
+              const locked = mode === "app" && !pending && !canOpenDataset(user, entry);
               return (
                 <li key={entry.id}>
                   <button
                     type="button"
-                    className={`cp-rail__item${on ? " is-on" : ""}${locked ? " is-locked" : ""}`}
+                    className={`cp-rail__item${on ? " is-on" : ""}${locked ? " is-locked" : ""}${pending ? " is-pending" : ""}`}
                     aria-pressed={on}
                     onClick={() => onSelect(entry)}
                     onMouseEnter={onPoint ? () => onPoint(entry.id) : undefined}
@@ -153,17 +157,19 @@ export default function PressCollectionRail({
                         <span className="cp-rail__rows">{ROWS_LABEL[entry.id]}</span>
                       ) : null}
                     </span>
-                    {/* Named, not a padlock glyph. A reader who cannot open
-                        something is owed the name of the thing that opens
-                        it, and "Plus" is shorter than the icon's tooltip. */}
+                    {/* A publication hold is distinct from a plan boundary:
+                        never promise an upgrade for a release that has no
+                        self-service preview. */}
+                    {pending ? <span className="cp-rail__lock">Pending</span> : null}
                     {locked ? <span className="cp-rail__lock">Plus</span> : null}
                   </button>
                 </li>
               );
             })}
           </ul>
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </nav>
   );
 }

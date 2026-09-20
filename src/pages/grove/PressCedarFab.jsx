@@ -41,6 +41,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { askCedar } from "../../api.js";
+import { answerSource } from "../../features/grove/cedarAnswer.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
@@ -105,34 +106,6 @@ const OPEN_EXAMPLES = [
 let nextId = 0;
 const turn = (role, text, extra = {}) => ({ key: `t${(nextId += 1)}`, role, text, ...extra });
 
-/**
- * THE ANSWER BASIS, ABOVE THE ANSWER.
- *
- * It used to sit under the bubble, which meant a reader learned what kind of
- * claim they had just read only after reading it. The brief is right that the
- * distinction has to be legible before the bottom of a long answer, and on a
- * phone a long answer's foot can be two screens down.
- *
- * Three states are declared; two can occur.
- *
- *   release    read off the collection's own release and cited to it.
- *   synthesis  Cedar composed it. The SCOPE is real — the question was asked
- *              against this collection — and nothing else is claimed.
- *   review     ambiguous identity, evidence or scope. No producer yet; see
- *              `_answer_basis` in the service for why it is declared anyway.
- *
- * WHAT THIS DELIBERATELY DOES NOT RENDER. The brief asks for a cited-record
- * count ("Cedar synthesis from 3 cited records") and an expandable evidence
- * trail of the records used. Cedar returns neither: there is no collections
- * tool and no retrieval, so a synthesis today is grounded in the model, not
- * in this collection's records. Printing a count would be inventing one, and
- * the brief's own scope rule — an answer "may not imply that it understands a
- * particular entity, record, or filtered table state unless that context is
- * actually passed to the service" — forbids it. The field is in the contract
- * and renders the moment the service fills it.
- */
-const releaseOf = (basis) => [basis?.collectionName, basis?.version].filter(Boolean).join(" ");
-
 /** "2026-09-04" as a person would say it. */
 function said(date) {
   if (!date) return null;
@@ -147,31 +120,53 @@ function said(date) {
 }
 
 /**
- * WHERE AN ANSWER CAME FROM, SAID IN A SENTENCE.
+ * THE ANSWER BASIS, ABOVE THE ANSWER.
  *
- * This was a badge and a disclosure: an uppercase RELEASE-GROUNDED chip, then
- * an "Evidence used" toggle hiding a definition list of Release / Updated /
- * Sources. It looked like a compliance widget bolted to a conversation, which
- * is a strange thing to find inside a chat, and a reader has to work out what
- * a chip means before they learn anything. A sentence does the same job and
- * needs no key.
+ * It sits above the bubble's foot rather than under it, because a reader who
+ * learns what kind of claim they have just read only after reading it has
+ * learned it too late, and on a phone a long answer's foot can be two
+ * screens down.
  *
- * The distinction it carries is the important one and has not changed: a
- * reader has to be able to tell an answer read off a published release from
- * one Cedar composed. That is now the difference between "Read from Native
- * Federal Contractors v1" and "Cedar wrote this from what it knows about the
- * collection, not from its records."
+ * It was once a badge and a disclosure: an uppercase RELEASE-GROUNDED chip,
+ * then an "Evidence used" toggle hiding a definition list of Release /
+ * Updated / Sources. That is the shape of a compliance widget bolted to a
+ * conversation, and a reader has to decode a chip before they learn
+ * anything. A sentence does the same job and needs no key.
  *
- * Still deliberately not said: how many records an answer cites. Cedar returns
- * none, so there is no number to print, and a "0 cited records" would read as
- * a count somebody took.
+ * FOUR LINES, FROM TWO AXES. `answerSource` decides which; see
+ * `features/grove/cedarAnswer.js` for why that decision is a function and
+ * not this component's business. What the four say:
+ *
+ *   release      read off the collection's release, cited to it, records
+ *                offered — the reader can open them.
+ *   description  read off the release and cited the same way, records NOT
+ *                offered: this subscription does not include the collection,
+ *                so there are no records to send them to.
+ *   synthesis    Cedar composed it. The SCOPE is real — the question was
+ *                asked against this collection — and nothing else is claimed.
+ *   review       ambiguous identity, evidence or scope. No producer yet; see
+ *                `_answer_basis` in the service for why it is declared anyway.
+ *
+ * WHAT THIS DELIBERATELY DOES NOT RENDER. The brief asks for a cited-record
+ * count ("Cedar synthesis from 3 cited records") and an expandable evidence
+ * trail of the records used. Cedar returns neither: there is no collections
+ * tool and no retrieval, so a synthesis today is grounded in the model, not
+ * in this collection's records. Printing a count would be inventing one, and
+ * the brief's own scope rule — an answer "may not imply that it understands a
+ * particular entity, record, or filtered table state unless that context is
+ * actually passed to the service" — forbids it. The field is in the contract
+ * and renders the moment the service fills it.
+ *
+ * Nor does it say how many records an answer cites, for the same reason: a
+ * "0 cited records" would read as a count somebody took.
  */
 function AnswerSource({ basis }) {
-  if (!basis?.kind) return null;
-  const release = releaseOf(basis);
-  const when = said(basis.updated);
+  const line = answerSource(basis);
+  if (!line) return null;
+  const { tone, release, updated, records } = line;
+  const when = said(updated);
 
-  if (basis.kind === "review") {
+  if (tone === "review") {
     return (
       <p className="cp-dc__src cp-dc__src--review">
         This one needs a person. The identity or the scope is unclear, so Cedar has not
@@ -183,8 +178,24 @@ function AnswerSource({ basis }) {
   // A general answer says so once, briefly, because the alternative is a
   // reader assuming it was read from the release. It does not offer a
   // records link: there are no supporting records to open.
-  if (basis.kind !== "release") {
+  if (tone === "synthesis") {
     return <p className="cp-dc__src">Not read from {release || "the collections"}.</p>;
+  }
+
+  // WHAT A LOCKED COLLECTION'S LINE SAYS, AND WHAT IT WITHHOLDS.
+  // The description was read off the release and is cited to it, so the
+  // sentence opens the same way. What it must not do is offer the records:
+  // the answer above it has just said they open with Cedar Press+, and a
+  // "View supporting records" link under that sentence contradicts it in the
+  // one place a reader is deciding whether to believe the product. The plan
+  // is named in the answer already and is not repeated here.
+  if (tone === "description") {
+    return (
+      <p className="cp-dc__src cp-dc__src--release">
+        Based on <b>{release}</b>
+        {when ? `, updated ${when}` : ""} &mdash; what the collection is, not its records.
+      </p>
+    );
   }
 
   // The source list lived here for one build and it was machinery. A reader
@@ -195,8 +206,8 @@ function AnswerSource({ basis }) {
     <p className="cp-dc__src cp-dc__src--release">
       Based on <b>{release}</b>
       {when ? `, updated ${when}` : ""}.{" "}
-      {basis.collectionId ? (
-        <Link to={`${PRESS_DATA_PATH}?c=${basis.collectionId}`}>View supporting records</Link>
+      {records ? (
+        <Link to={`${PRESS_DATA_PATH}?c=${records}`}>View supporting records</Link>
       ) : null}
     </p>
   );

@@ -126,7 +126,7 @@ export const CONSTRUCTION_STEPS = Object.freeze([
   Object.freeze({
     id: "discover",
     label: "Discover",
-    note: "Find APIs, archives, notices, regulatory records, filings, state reports and other relevant sources.",
+    note: "Find APIs, archives, public notices, regulatory dockets, filings and state reports.",
   }),
   Object.freeze({
     id: "extract",
@@ -136,12 +136,12 @@ export const CONSTRUCTION_STEPS = Object.freeze([
   Object.freeze({
     id: "normalize",
     label: "Normalize",
-    note: "Reconcile names, dates, identifiers, classifications, formats and geographies.",
+    note: "Reconcile names, dates, identifiers and geographies so records from different sources line up.",
   }),
   Object.freeze({
     id: "resolve",
     label: "Resolve",
-    note: "Connect tribal governments, enterprises, ANCs, NHOs, businesses, nonprofits, facilities and relevant counterparties.",
+    note: "Tie each record to the government, enterprise, ANC, NHO, nonprofit or facility behind it.",
   }),
   Object.freeze({
     id: "validate",

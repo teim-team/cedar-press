@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-import { EMAIL, HASH, PASSWORD } from "./demoAccount.js";
+import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 // The twelve, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
@@ -26,6 +26,7 @@ import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 // starts. It is not a credential and it opens nothing that is deployed
 // anywhere; see tests/demoAccount.js.
 const ACCOUNT = { email: EMAIL, password: PASSWORD };
+const PRESS_ACCOUNT = { email: PRESS_EMAIL, password: PASSWORD };
 const STOREFRONT_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short || entry.name);
 
 /** The pages behind the gate, by the route a reader reaches them at. */
@@ -72,11 +73,11 @@ async function settled(locator) {
 }
 
 /** Sign in through the gate, the way a subscriber does. */
-async function signIn(page) {
+async function signIn(page, account = ACCOUNT) {
   await page.goto("/");
   await page.getByRole("tab", { name: "Log in" }).click();
-  await page.getByLabel("Email address").fill(ACCOUNT.email);
-  await page.getByLabel("Password", { exact: true }).fill(ACCOUNT.password);
+  await page.getByLabel("Email address").fill(account.email);
+  await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Know what’s shaping Indian Country",
@@ -102,6 +103,32 @@ async function openDoorCedar(page) {
 }
 
 test.describe("the gate", () => {
+  test("the private preview note invites feedback and gives an access contact", async ({ page }) => {
+    await page.goto("/");
+    const notice = page.getByTestId("press-preview-note");
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText("small group");
+    await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
+      .toHaveAttribute("href", /mailto:elijah\.moreno@lumecon\.ai/);
+    // The way out is a close control, not a "Continue →" pill. A reader who
+    // does not want to continue anywhere still has to be able to shut it.
+    await notice.getByRole("button", { name: "Close this notice" }).click();
+    await expect(notice).toHaveCount(0);
+  });
+
+  test("the preview note is the door's, and is not carried into the product", async ({ page }) => {
+    // It used to render inside `PressMast`, which every signed-in page
+    // mounts, so a subscriber met an explanation of how they got in on the
+    // collections table, on an entity profile and on the methods page —
+    // above the product, addressed to somebody already inside it. Owner,
+    // 2026-09-20: it should only be on the landing page.
+    await signIn(page);
+    for (const path of ["/data", "/data?c=funding", "/entity/CE-001CC-8N", "/methods", "/whats-new"]) {
+      await page.goto(path);
+      await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+    }
+  });
+
   test("a signed-out visitor gets the gate, not the reader", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
@@ -495,14 +522,13 @@ test.describe("Explore the collections", () => {
     await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
     const caption = page.getByTestId("explore-caption");
     const records = page.getByTestId("explore-record");
-    // Every open collection contributes its dataset's preview; the caption
-    // counts sample records and says so, because ten rows is not the dataset.
-    await expect(caption).toContainText("sample records");
+    // Before a reader asks for a record, this is a collection catalog.
+    await expect(page.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
+    await expect(caption).toContainText("choose a collection to browse records");
     // "12 collections", not "all collections": an explicit all is an explicit
     // list now (the rail writes the ids), because clearing the parameter
     // means "unspecified" and resolves to the default collection.
     await expect(caption).toContainText(/\d+ collections/);
-    await expect(records.first()).toBeVisible();
 
     // Narrow to one entity from the picker; the URL now carries the cut.
     // `click` and an expectation rather than `check`: the box is controlled
@@ -516,6 +542,7 @@ test.describe("Explore the collections", () => {
     await first.click();
     await expect(first).toBeChecked();
     await expect(page).toHaveURL(/[?&]e=CE-/);
+    await expect(records.first()).toBeVisible();
     await expect(caption).not.toContainText("every record");
     // Escape closes the panel and the control keeps focus.
     await page.keyboard.press("Escape");
@@ -602,31 +629,34 @@ test.describe("Explore the collections", () => {
     await page.getByLabel("Search these records").fill(someId);
     await expect(records).toHaveCount(1);
 
-    // The download is the cut's records and nothing else, re-importable as
-    // such, with the citation and the cut in the README beside it. Taken
-    // over every collection, which is the rail's first row rather than the
-    // bare /data it used to be: the page opens on one collection now.
+    // With every collection selected, the table becomes the collection atlas.
+    // It is a catalog, not a pooled record set: select a collection before
+    // any record export is enabled.
     await page.goto("/data");
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
+    const atlasRows = page.getByTestId("atlas-row");
+    await expect(atlasRows).toHaveCount(STOREFRONT_CATALOG.length);
+    await expect(caption).toContainText("choose a collection to browse records");
+    await expect(card.getByRole("button", { name: /^Download$/ })).toBeDisabled();
+    await page.getByLabel("Find a collection").fill("Federal Funding");
+    await expect(atlasRows).toHaveCount(1);
+    await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
+    await page.getByLabel("Find a collection").fill("");
+    await atlasRows.getByRole("button", { name: "Federal Funding" }).click();
+    await expect(page).not.toHaveURL(/[?&]q=/);
     await expect(records.first()).toBeVisible();
-    await expect(caption).not.toContainText("loading");
-    const shown = await records.count();
     const download = page.waitForEvent("download");
     await card.getByRole("button", { name: /^Download$/ }).click();
     const file = await download;
-    expect(file.suggestedFilename()).toMatch(/^cedar-press-summary-results-.*\.zip$/);
+    expect(file.suggestedFilename()).toMatch(/^cedar-press-sample-results-.*\.zip$/);
     const bytes = Buffer.concat((await (await file.createReadStream()).toArray()).map((c) => Buffer.from(c)));
     const files = unzipStored(bytes);
     expect(Object.keys(files).sort()).toEqual(["README.txt", "records.csv"]);
     const lines = files["records.csv"].split("\n");
-    expect(lines[0].split(",")).toContain("record_id");
-    // Every matching record, not only the page shown: the caption's count
-    // is the file's count.
-    const said = (await caption.innerText()).match(/(\d+) of \d+ sample records/i);
-    expect(said).toBeTruthy();
-    expect(lines.length - 1).toBe(Number(said[1]));
-    expect(shown).toBeLessThanOrEqual(lines.length - 1);
+    expect(lines[0].split(",")).toContain("assistance_transaction_unique_key");
+    // Every listed preview record is in the export.
+    expect(lines.length - 1).toBe(await records.count());
     const width = lines[0].split(",").length;
     for (const line of lines) expect(line.split(",").length).toBeGreaterThanOrEqual(width);
     expect(files["records.csv"]).not.toContain("cite_as");
@@ -661,6 +691,86 @@ test.describe("Explore the collections", () => {
     await expect(page.locator(".cedar-widget__launcher")).toBeHidden();
     await page.getByTestId("explore").getByRole("button", { name: /Ask Cedar about this collection/ }).click();
     await expect(page.getByRole("dialog", { name: "Ask Cedar" })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("a Cedar Press reader sees the Plus boundary in the table", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the desktop table exposes its column headers");
+    const errors = watchConsole(page);
+    await signIn(page, PRESS_ACCOUNT);
+
+    const protectedRequests = [];
+    page.on("request", (request) => {
+      if (/\/contractors\//.test(new URL(request.url()).pathname)) protectedRequests.push(request.url());
+    });
+    await page.goto("/data?c=contractors");
+
+    const locked = page.getByTestId("explore-locked");
+    await expect(locked).toBeVisible();
+    await expect(locked.getByRole("heading", { name: "Federal Prime Contracting" })).toBeVisible();
+    const headings = await locked.locator("th").allInnerTexts();
+    expect(headings.join(" | ").toUpperCase()).toContain("ACTION DATE");
+    expect(headings.join(" | ").toUpperCase()).toContain("AMOUNT");
+    await expect(locked.locator(".cp-lock__row")).toHaveCount(22);
+    await expect(locked.locator(".cp-lock__bar").first()).toBeVisible();
+    await expect(locked.locator(".cp-lock__say")).toContainText("Available with Cedar Press+");
+    expect(protectedRequests).toEqual([]);
+
+    await locked.getByTestId("explore-about").click();
+    await expect(page.locator(".cp-ab")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  for (const { label, account } of [
+    { label: "Cedar Press", account: PRESS_ACCOUNT },
+    { label: "Cedar Press+", account: ACCOUNT },
+  ]) {
+    test(`${label} sees a deliberate no-preview state when publication is withheld`, async ({ page }) => {
+      const errors = watchConsole(page);
+      await signIn(page, account);
+      await page.goto("/data?c=owned");
+
+      const unavailable = page.getByTestId("explore-unavailable");
+      await expect(unavailable).toBeVisible();
+      await expect(unavailable.getByRole("heading", { name: "Preview unavailable" })).toBeVisible();
+      await expect(unavailable).toContainText("Not available for self-service browsing");
+      await expect(unavailable.locator(".cp-lock__row")).toHaveCount(0);
+      await expect(unavailable).not.toContainText("Available with Cedar Press+");
+      await unavailable.getByTestId("explore-about").click();
+      await expect(page.locator(".cp-ab")).toBeVisible();
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test("All collections is a catalog table with the Plus shelf in place", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the full catalog table is a desktop surface");
+    const errors = watchConsole(page);
+    await signIn(page, PRESS_ACCOUNT);
+    await page.goto("/data");
+    await page.locator(".cp-rail__item--all").click();
+
+    const atlas = page.locator(".cp-atlas");
+    await expect(atlas).toBeVisible();
+    await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
+    await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
+    );
+    await expect(atlas.locator(".cp-atlas__locked")).toHaveCount(
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned").length,
+    );
+    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(1);
+    await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
+
+    await atlas.getByRole("button", { name: "Federal Prime Contracting" }).click();
+    await expect(page.getByTestId("explore-locked")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("the Cedar Grove fragment reaches the compact workspace handoff", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data#grove");
+    await expect(page.locator("#grove")).toBeInViewport({ timeout: 10_000 });
     expect(errors).toEqual([]);
   });
 });
@@ -803,7 +913,10 @@ test.describe("About this collection", () => {
     // The unit of observation, in the codebook's own words: the sentence
     // anyone about to cite a count needs and the old disclosure never had.
     await expect(panel).toContainText("One row is");
-    await expect(panel).toContainText("What is not in it");
+    const notes = panel.locator(".cp-ab__more");
+    await expect(notes.getByText("Read the full collection notes")).toBeVisible();
+    await notes.getByText("Read the full collection notes").click();
+    await expect(panel.getByRole("heading", { name: "What is not in it" })).toBeVisible();
 
     // Closing returns the reader to the cut they opened it from.
     await panel.getByRole("button", { name: /close the collection profile/i }).click();

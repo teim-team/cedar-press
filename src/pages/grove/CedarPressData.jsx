@@ -1,10 +1,4 @@
-// Cedar Press: the data page.
-//
-// The shelves, behind their door on the hub: the headline, then the shelf
-// itself, with the Cedar Grove boundary at its foot. The "what Cedar adds"
-// band that used to stand between the two is now the single link under the
-// headline — the argument is Methods's job, and repeating it here delayed
-// the collections a reader opened this page for.
+// Cedar Press: the table-first collections page.
 import { useEffect } from "react";
 import { useLocation } from "react-router";
 
@@ -80,24 +74,50 @@ function useFrameFill() {
 export default function CedarPressData() {
   useDocumentTitle("Collections");
   const { user, loading, logout } = useAuth();
-  // Sitewide arrival language; the shelf bands keep their own reveal.
+  // Sitewide arrival language.
   const fadeRoot = useFadeIn();
   const { hash } = useLocation();
   const entitled = canReadCedarPress(user);
   useScrollToTop("data");
   useFrameFill();
 
-  // Arriving with a fragment (an article's "Make your own" lands on
-  // /data#grove) scrolls to that section once it exists. Client routing
-  // does not do this on its own, and the target is rendered by a child on a
-  // later frame than this one, hence the deferral.
+  // Preserve the article deep link to the compact Cedar Grove handoff below
+  // the lazy-loaded collection frame. The table can change height as its
+  // preview arrives, so retry briefly after the target mounts rather than
+  // scrolling once into an unfinished layout.
   useEffect(() => {
     if (!hash) return;
-    const frame = requestAnimationFrame(() => {
-      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [hash]);
+    let id = hash.slice(1);
+    try { id = decodeURIComponent(id); } catch { /* An invalid fragment simply has no target. */ }
+    let finished = false;
+    let fallback = 0;
+    const root = document.getElementById("cp-main");
+    const observer = new MutationObserver(() => { scrollToTarget(); });
+    const stop = () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
+    const scrollToTarget = (force = false) => {
+      if (finished) return true;
+      const target = document.getElementById(id);
+      if (!target) return false;
+      // `#grove` is mounted before the lazy collection frame has real
+      // height. Wait for its first useful content so the one anchor scroll
+      // lands on the handoff, then leave a reader in control of the page.
+      const ready = document.getElementById("cp-main")?.querySelector(".cp-ex__table tbody tr, .cp-ex__cardbtn, [data-testid='explore-unavailable']");
+      if (!ready && !force) return false;
+      target.scrollIntoView({ behavior: "auto", block: "start" });
+      finished = true;
+      stop();
+      return true;
+    };
+    observer.observe(root ?? document.body, { childList: true, subtree: true });
+    scrollToTarget();
+    if (!finished) fallback = window.setTimeout(() => { scrollToTarget(true); }, 2_000);
+    return () => {
+      stop();
+    };
+  }, [hash, loading, entitled]);
 
   if (!loading && !entitled) {
     return (
@@ -111,18 +131,6 @@ export default function CedarPressData() {
       <main id="cp-main" className="cp cp-page cp-page--table" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
-        {/* NO TITLE BAND. THE TABLE IS THE PAGE.
-            Owner, 2026-09-20: "the collection page we want the table to just
-            take up that screen in full... that is the main thing."
-
-            A band reading "Collections" above a screen-filling table of one
-            collection was a label for something already labelled: the rail
-            names the twelve, the pane names the one in hand, and between
-            them they had said it twice before the reader reached a record.
-            Its 65px went to the records.
-
-            The page still has a first-level heading — the collection's own
-            name, inside the pane, which is what this page is about. */}
         <PressShelf user={user} />
 
         <PressCedarFab />

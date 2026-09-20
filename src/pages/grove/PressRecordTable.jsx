@@ -29,6 +29,7 @@ import {
   scopeName,
 } from "../../features/grove/explore.js";
 import { money, short } from "../../features/grove/recordColumns.js";
+import { scrollEdges } from "../../features/grove/scrollEdges.js";
 
 export function Human({ column, value, contract, item = null }) {
   if (value === "" || value == null) return "—";
@@ -123,13 +124,18 @@ export function Rows({ view, items, columns, sort, onSort, onActive, showAmount,
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return undefined;
-    // The fade lives on the wrapper and switches off at the right end, so a
-    // table that fits never wears a gradient suggesting more table.
+    // BOTH edges, and only where there is something past them. The old
+    // version tracked the right edge alone and wrote `data-end="0"` when
+    // there was nothing more — which still matched `[data-end]`, so the one
+    // selector that could have switched the cue off never did. Presence is
+    // the state now, and `scrollEdges` is the single place that decides it;
+    // `scrollEdges.test.js` holds it to the last column.
     const edge = () => {
       const wrap = node.parentElement;
       if (!wrap) return;
-      const done = node.scrollLeft + node.clientWidth >= node.scrollWidth - 2;
-      wrap.dataset.end = done ? "1" : "0";
+      const { start, end } = scrollEdges(node);
+      wrap.toggleAttribute("data-start", start);
+      wrap.toggleAttribute("data-end", end);
     };
     const measure = () => {
       node.style.setProperty("--vw", `${node.clientWidth}px`);
