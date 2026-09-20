@@ -5,10 +5,19 @@ imported by the app.
 
 ## `cedar-press-table.html`
 
-The in-product Explore table (`.cp-ex__table`, `/data`) redrawn in the language
-of the door's collection pane (`.cp-pane__table`), which is the table the owner
-picked out. Both tables are shown on the same twelve records so the comparison
-is a picture rather than an argument.
+**Superseded, 2026-09-20 — kept as the record of the decision, not as a
+proposal.** It redrew the in-product Explore table in the language of the
+door's collection pane (`.cp-pane__table`), which was the table the owner
+picked out.
+
+It went the other way in the end. The door's pane was drawing four columns of
+its own naming while the product opened on the collection's own fields behind
+a pinned Cedar identity block, so a visitor was shown a picture of something
+they would not recognise on their first day. Rather than restyle the product
+as the marketing table, `Rows` and `Cards` moved into `PressRecordTable.jsx`
+and the door mounts them read-only. `.cp-pane__table` and its nine cell
+classes are deleted, so the left-hand column of the comparison below no longer
+describes anything that exists.
 
 The rows are real: the first twelve of "All 12 open collections", read out of
 the running app, from the ten-row samples in `public/data/cedar/samples`. The
@@ -58,8 +67,23 @@ Live, against this checkout, desktop 1440x900 and phone 390x844:
    desktop widths and arguably wrong for the full-screen one. A
    viewport-conditional ARIA property is a bigger change than this pass.
 
-## The review PDF
+## The screens PDF
 
-`build_pdf.py` (not tracked) assembles the screenshots into
-`cedar-press-mobile-desktop-review.pdf`. `.gitignore` excludes `*.pdf`, so the
-file is generated and handed over rather than committed.
+Every screen, desktop and phone, in one file:
+`cedar-press-screens.pdf`. It is captured against the running stack — the
+built site talking to the Cedar Press API, which talks to a contract-faithful
+stand-in for the Cedar service — at 1440x900 and 390x844, with any page taller
+than one screen cut into screen-sized slices in reading order rather than
+squashed onto one plate.
+
+Two things a capture script has to know, both learned the hard way:
+
+- `npx playwright test` rebuilds `dist-site` in standalone mode
+  (`VITE_API_URL: ""`), which un-wires the local API. Rebuild with the API URL
+  and patch the CSP's `connect-src` before capturing.
+- `.cp-fade` sections start at opacity 0 and arrive on scroll, so a full-page
+  screenshot of an unscrolled document is a page of white gaps. Walk the page
+  first.
+
+`.gitignore` excludes `*.pdf`, so the file is generated and handed over rather
+than committed.
