@@ -135,20 +135,33 @@ body,
     min-height: 100vh;
 }
 
+/* THE GROUND IS COOL, AND THERE IS ONLY ONE OF IT.
+   These three painted #f5f2ec, a warm cream, while the app shell painted
+   #f3f6f8 over the top of it — two different off-whites stacked, one warm and
+   one cool, so cream showed at the overscroll edge, behind a short page and
+   under the rubber-band on iOS. Two grounds is one more than a product has.
+
+   Cool, not warm, for the reason lumecon.ai settled on the same value: eyes
+   are calibrated to warm light, so a warm white is read immediately as a
+   colour — cream, eggshell, tan — rather than as white. #f3f6f8 is two cool
+   steps off pure white, which is enough for a white card to read as an object
+   lying on the page without asking the card to prove it with a heavy shadow.
+   That is what carries elevation here, and it is why the cards need nothing
+   but a hairline. */
 html {
-    background: var(--lume-paper, #f5f2ec);
+    background: var(--ground, #f3f6f8);
     color: var(--md-on-surface, #1c1c2e);
 }
 
 body {
     font-family: var(--font-family-sans);
     line-height: 1.5;
-    background: var(--lume-paper, #f5f2ec);
+    background: var(--ground, #f3f6f8);
     color: var(--md-on-surface, #1c1c2e);
 }
 
 #root {
-    background: var(--lume-paper, #f5f2ec);
+    background: var(--ground, #f3f6f8);
     color: var(--md-on-surface, #1c1c2e);
 }
 
