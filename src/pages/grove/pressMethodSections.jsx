@@ -47,12 +47,12 @@ import { COLLECTION_ICONS } from "./pressCollectionIcons.jsx";
  */
 export function ProcessRail() {
   return (
-    <ol className="cp-rail">
+    <ol className="cp-proc">
       {CONSTRUCTION_STEPS.map((stage, index) => (
-        <li className="cp-rail__stage" key={stage.id}>
-          <span className="cp-rail__n">{String(index + 1).padStart(2, "0")}</span>
-          <h3 className="cp-rail__name">{stage.label}</h3>
-          <p className="cp-rail__body">{stage.note}</p>
+        <li className="cp-proc__stage" key={stage.id}>
+          <span className="cp-proc__n">{String(index + 1).padStart(2, "0")}</span>
+          <h3 className="cp-proc__name">{stage.label}</h3>
+          <p className="cp-proc__body">{stage.note}</p>
         </li>
       ))}
     </ol>

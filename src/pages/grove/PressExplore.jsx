@@ -55,6 +55,7 @@ import {
   encodeCut,
   excludedBy,
   explorableCollections,
+  exploreTables,
   facets as facetsOf,
   filterRows,
   isNarrowed,
@@ -68,6 +69,7 @@ import { useSampleRows } from "../../features/grove/useSamples.js";
 import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
+import { formatUpdated } from "../../features/grove/pressReleases.js";
 import { downloadCsv, hasReleaseFile, saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
 
@@ -80,6 +82,7 @@ import { TBN_PLANS_URL, articleHref, articlesDrawingOn } from "../../features/gr
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import PressCollectionRail from "./PressCollectionRail.jsx";
+import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import PressCollectionAbout from "./PressCollectionAbout.jsx";
 import Explain from "./Explain";
 import { TierName } from "./TierName";
@@ -554,55 +557,171 @@ function AboutCollectionLink({ onOpen }) {
  * belongs on the plans page; a reader who clicked a collection wants to know
  * what it is.
  */
-function LockedCollection({ entry }) {
+/**
+ * THE CATALOGUE, WHEN NO ONE COLLECTION IS IN HAND.
+ *
+ * Owner, 2026-09-20: "The 'all open collections' empty state is too empty.
+ * It reads as if data failed to load. Either show a real cross-collection
+ * sample table by default or make the state a visual catalog atlas with
+ * visible collection rows, coverage, release date, and access tier."
+ *
+ * It was a pooled sample of sixty records belonging to no collection in
+ * particular — a real table, and the wrong answer to "show me everything",
+ * because the thing a reader is choosing between at that moment is
+ * COLLECTIONS, not rows. So the unnarrowed all-state is the catalogue, in
+ * the same table the records use: one row a collection, its coverage, its
+ * size, its release, and what opens it. Every row opens that collection.
+ *
+ * The pooled record table is not gone: the moment a reader searches or
+ * filters across collections, the question becomes about records again and
+ * the records come back. The atlas is what "no question yet" looks like.
+ */
+function CollectionAtlas({ collections, onOpen }) {
+  return (
+    <div className="cp-ex__scrollwrap" data-end="1">
+      <div className="cp-ex__scroll">
+        <table className="cp-ex__table cp-ex__table--table cp-atlas">
+          <thead>
+            <tr>
+              <th scope="col" className="cp-ex__c-text">Collection</th>
+              <th scope="col" className="cp-ex__c-text">Coverage</th>
+              <th scope="col" className="cp-ex__c-amount">Records</th>
+              <th scope="col" className="cp-ex__c-text">Release</th>
+              <th scope="col" className="cp-ex__c-text">Opens with</th>
+            </tr>
+          </thead>
+          <tbody>
+            {collections.map(({ entry, open }) => {
+              const release = LAUNCH_COLLECTION.find((c) => c.id === entry.id) ?? null;
+              const upgrade = upgradeFor(entry);
+              return (
+                <tr
+                  key={entry.id}
+                  className="cp-ex__row cp-atlas__row"
+                  data-testid="atlas-row"
+                  onClick={() => onOpen(entry)}
+                >
+                  <td className="cp-atlas__cell">
+                    <span className="cp-atlas__name">
+                      <span className="cp-atlas__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
+                      <button type="button" className="cp-atlas__open" onClick={() => onOpen(entry)}>
+                        {entry.name}
+                      </button>
+                    </span>
+                    <small className="cp-ex__uid">{entry.blurb}</small>
+                  </td>
+                  <td>{coverageLabel(entry)}</td>
+                  <td className="cp-ex__amount">{ROWS_BY_ID[entry.id] ?? "—"}</td>
+                  <td>
+                    {release?.version ?? "—"}
+                    {release?.updated ? <small className="cp-ex__uid">updated {formatUpdated(release.updated)}</small> : null}
+                  </td>
+                  <td>
+                    {open ? (
+                      <span className="cp-atlas__yours">On your plan</span>
+                    ) : (
+                      <span className="cp-atlas__locked"><TierName name={upgrade.name} /></span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function LockedCollection({ entry, onAbout }) {
   const upgrade = upgradeFor(entry);
   const rows = ROWS_BY_ID[entry.id];
+  const release = LAUNCH_COLLECTION.find((c) => c.id === entry.id) ?? null;
+  // The columns the collection DECLARES, read from its contract and its
+  // codebook. No sample is fetched and no value is invented: these are the
+  // field names the release publishes, which are public the way a table of
+  // contents is public.
+  const table = exploreTables(entry.id).find((t) => t.flagship) ?? exploreTables(entry.id)[0] ?? null;
+  const contract = table ? contractFor(table.key) : null;
+  const columns = table
+    ? columnPlan(table.key, contract, contract?.default_columns ?? []).defaults.slice(0, 6)
+    : [];
   return (
     <div className="cp-lock" data-testid="explore-locked">
-      <div className="cp-ex__head">
-        {/* Same reason as the open pane's: a locked collection is still what
-            this page is about. */}
+      {/* THE TABLE IS THE PROOF.
+          Owner, 2026-09-20: "A non-Plus user should see the same collection
+          rail, same column headers, same table density, same release
+          information, and restrained withheld rows. Then one small inline
+          message... Do not send them to a separate product explanation or
+          remove the table."
+
+          This was a blank pane with a navy upsell box in it — a page about a
+          product where a table should have been, which asks somebody to buy
+          a thing they have not been shown. Now it is the same surface as
+          every open collection: the same toolbar shape, the same declared
+          columns at the same density, the same status bar. What is withheld
+          is the VALUES, and they are withheld by never being fetched. */}
+      <div className="cp-ex__bar" role="group" aria-label="This collection">
         <h1 className="cp-ex__title">{entry.name}</h1>
-        <span className="cp-kind cp-kind--lock">{upgrade.name}</span>
+        <input
+          type="search"
+          className="cp-ex__q"
+          placeholder="Search these records"
+          aria-label="Search these records"
+          disabled
+        />
+        <span className="cp-ex__act is-off" aria-hidden="true">Filters</span>
+        {/* The profile opens. It is the collection's own public description
+            and withholding it would be withholding the thing that lets
+            somebody decide. */}
+        <AboutCollectionLink onOpen={onAbout} />
+        <div className="cp-ex__acts">
+          <span className="cp-ex__act is-off" aria-hidden="true">
+            <span aria-hidden="true">&#8595;</span> Download
+          </span>
+        </div>
       </div>
+
       <div className="cp-ex__card">
-        <p className="cp-lock__lede">{entry.blurb}</p>
-        <dl className="cp-lock__facts">
-          <div>
-            <dt>Coverage</dt>
-            <dd>{coverageLabel(entry)}</dd>
+        <div className="cp-ex__scrollwrap" data-end="1">
+          <div className="cp-ex__scroll">
+            <table className="cp-ex__table cp-ex__table--table cp-lock__table">
+              <thead>
+                <tr>
+                  {columns.map((column) => (
+                    <th key={column} scope="col" className="cp-ex__c-text">{labelFor(table.key, column)}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody aria-label={`Records withheld; ${upgrade.name} opens this collection`}>
+                {Array.from({ length: 14 }, (_, row) => (
+                  <tr key={row} className="cp-lock__row">
+                    {columns.map((column) => (
+                      <td key={column}><span className="cp-lock__bar" /></td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          {rows ? (
-            <div>
-              <dt>Records</dt>
-              <dd>{rows}</dd>
-            </div>
-          ) : null}
-          <div>
-            <dt>Opens with</dt>
-            <dd>
-              <TierName name={upgrade.name} />
-            </dd>
-          </div>
-        </dl>
-        {/* The one navy region on this surface, and it is the thing being
-            said. Not a modal, not a page, not a dimmed copy of the table. */}
-        <div className="cp-lock__inset">
-          <p className="cp-lock__insethead">
-            Available with <TierName name={upgrade.name} />
+        </div>
+
+        {/* One line, in the status bar, where the state of a result belongs
+            on every other collection. Not a panel, not a pitch. */}
+        <div className="cp-ex__foot">
+          <p className="cp-ex__caption">
+            {entry.name}
+            {rows ? ` · ${rows}` : ""}
+            {release?.version ? ` · ${release.version}` : ""}
+            {release?.updated ? ` · updated ${formatUpdated(release.updated)}` : ""}
           </p>
-          <p className="cp-lock__insetbody">
-            Explore {entry.name}, including records, filters, downloads and collection-scoped
-            Cedar.
+          <p className="cp-lock__say">
+            Available with <TierName name={upgrade.name} />. Includes {coverageLabel(entry).toLowerCase()} and
+            collection-level export.{" "}
+            <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
+              See <TierName name={upgrade.name} /> <span aria-hidden="true">&#8594;</span>
+            </a>
           </p>
-          <a
-            className="cp-lock__act"
-            href={TBN_PLANS_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            View <TierName name={upgrade.name} /> options <span aria-hidden="true">&#8594;</span>
-          </a>
         </div>
       </div>
     </div>
@@ -892,6 +1011,16 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   const chooseFromRail = (entry) => chooseCollection(entry ? entry.id : ALL);
   // The file is the cut's records: not until every selected preview and the
   // register have answered, and never silently short (Codex, PR #63).
+  // No one collection in hand and nothing asked: the reader is choosing
+  // between collections, so the surface answers with collections. `single`
+  // covers the one-collection case; `isNarrowed` covers a search or a
+  // filter, which turns the question back into one about records.
+  // EVERY collection, not merely more than one. A link naming two of them
+  // is a reader who has already chosen; the catalogue answers "show me
+  // everything", which is the rail's All row and nothing else.
+  const atlas =
+    !single && !lockedSingle && !isNarrowed(cut) && !cut.history
+    && selected.length > 0 && selected.length === scope.length;
   const settling = loading || registerStatus === "loading";
   const notes = [
     cut.unknown?.length ? `Not a collection here: ${cut.unknown.join(", ")}.` : "",
@@ -924,10 +1053,13 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
       {/* The profile, over the table it belongs to. Rendered inside the
           frame so the sheet's edge is the frame's edge on a wide screen and
           the whole screen on a phone. */}
-      {cut.about && single ? (
+      {/* The profile opens for a locked collection too. It is the
+          collection's own public description, and withholding it withholds
+          exactly what lets somebody decide whether the plan is worth it. */}
+      {cut.about && (single || lockedSingle) ? (
         <PressCollectionAbout
-          entry={single.entry}
-          flagship={single.flagship}
+          entry={(single ?? lockedSingle).entry}
+          flagship={(single ?? lockedSingle).flagship}
           onClose={() => write({ about: false })}
         />
       ) : null}
@@ -943,7 +1075,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
       />
       <div className="cp-ex__in">
         {lockedSingle ? (
-          <LockedCollection entry={lockedSingle.entry} />
+          <LockedCollection entry={lockedSingle.entry} onAbout={() => write({ about: true })} />
         ) : (
         <>
         {/* ONE BAR ABOVE THE RECORDS, AND NOTHING ELSE.
@@ -974,7 +1106,10 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               toolbar wants rather than the size a document wants. The page
               has no other h1 and a page without one cannot be summarised. */}
           <h1 className="cp-ex__title">
-            {single ? single.entry.name : `All ${scope.length} open collections`}
+            {/* The catalogue is every collection, not only the ones this
+                plan opens — the locked ones are on it, with what opens
+                them, because that is the question it answers. */}
+            {single ? single.entry.name : atlas ? "All collections" : `All ${scope.length} open collections`}
           </h1>
           <input
             type="search"
@@ -1041,7 +1176,14 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
           {notes.length ? <p className="cp-ex__fine cp-ex__note" data-testid="explore-notes">{notes.join(" ")}</p> : null}
 
-          {paged.rows.length ? (
+          {/* THE CATALOGUE, OR THE RECORDS.
+              With every collection selected and nothing asked of them, the
+              question is which collection — so the table is the catalogue.
+              The moment a reader searches or filters, the question is about
+              records again and the records come back. */}
+          {atlas ? (
+            <CollectionAtlas collections={collections} onOpen={(entry) => chooseCollection(entry.id)} />
+          ) : paged.rows.length ? (
             narrow ? (
               <Cards items={paged.rows} onActive={onActive} openRecord={openRecord} />
             ) : (
@@ -1080,7 +1222,16 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               is the wrong order on a page whose subject is the rows. */}
           <div className="cp-ex__foot">
             <p className="cp-ex__caption" data-testid="explore-caption">
-            {caption}
+            {/* The caption says what is on the screen. With the catalogue up
+                that is collections, not a count of pooled sample rows. */}
+            {/* The catalogue's own count, and then the records behind it.
+                Both, because Download still hands over the cut — every open
+                collection's preview — and a reader is owed the size of the
+                thing they are about to take even while they are looking at
+                the shelf rather than the rows. */}
+            {atlas
+              ? `${collections.length} collections · ${collections.filter((c) => c.open).length} on your plan · ${filtered.length} of ${rows.length} sample records`
+              : caption}
             {/* What a "sample record" is, which the caption counts and cannot
                 explain. The commonest wrong reading of this page is that an
                 entity absent from a result is absent from the collection. */}
@@ -1165,7 +1316,9 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               Ask Cedar <span aria-hidden="true">&#8594;</span>
             </button>
             {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} /> : null}
-            <span className="cp-ex__pages" title={`${PAGE_SIZE} records a page`}>
+            {/* The pager pages records. The catalogue is twelve rows and
+                has nowhere to go. */}
+            <span className="cp-ex__pages" hidden={atlas} title={`${PAGE_SIZE} records a page`}>
               <button type="button" className="cp-ex__clear" disabled={paged.page <= 1} onClick={() => write({ page: paged.page - 1 })} aria-label="Previous page">&#8249;</button>
               {/* Short, because this sits in a status bar that has to hold
                   five other things on one line. The labels on the arrows

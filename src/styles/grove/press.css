@@ -1290,36 +1290,42 @@
 .teim-rd .cp-msec__aside { font-size: 0.92rem; line-height: 1.62; color: var(--muted); margin: 1rem 0 0; padding-left: 1.1rem; border-left: 2px solid var(--teal-line); max-width: 92ch; }
 .teim-rd .cp-msec__close { font-size: 1.02rem; line-height: 1.6; color: var(--ink); font-weight: 600; margin: 1.6rem 0 0; max-width: 92ch; }
 
-/* ── The process, as one run ────────────────────────────────────────────── */
-.teim-rd .cp-rail { list-style: none; margin: 0; padding: 2.4rem 0 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0 1.6rem; position: relative; }
+/* ── The process, as one run ─
+ * RENAMED FROM `.cp-rail`, 2026-09-20. That is the navy collection rail's
+ * class, declared later in this file, so this seven-stage diagram was
+ * painting itself navy with white text inside the methodology page — the
+ * second of two class collisions behind what the review called "repeated
+ * navy information panels inside the app". Neither was a design decision.
+ *───────────────────────────────────────────── */
+.teim-rd .cp-proc { list-style: none; margin: 0; padding: 2.4rem 0 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0 1.6rem; position: relative; }
 /* One rule behind all seven, so the eye reads a single process rather than
  * seven separate things. */
-.teim-rd .cp-rail::before { content: ''; position: absolute; top: 2.4rem; left: 0; right: 0; height: 1px; background: var(--line); }
-.teim-rd .cp-rail__stage { position: relative; padding-top: 1.5rem; }
+.teim-rd .cp-proc::before { content: ''; position: absolute; top: 2.4rem; left: 0; right: 0; height: 1px; background: var(--line); }
+.teim-rd .cp-proc__stage { position: relative; padding-top: 1.5rem; }
 
 /* Hover on the process rail: the step under the pointer answers in teal
  * and the rest recede slightly, so a seven-step line can be read one step
  * at a time. */
-.teim-rd .cp-rail__stage { transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
-.teim-rd .cp-rail:hover .cp-rail__stage { opacity: 0.55; }
-.teim-rd .cp-rail:hover .cp-rail__stage:hover { opacity: 1; transform: translateY(-3px); }
-.teim-rd .cp-rail__stage:hover .cp-rail__name { color: var(--dteal); }
-.teim-rd .cp-rail__stage:hover::before { background: var(--dteal); width: 10px; height: 10px; }
-.teim-rd .cp-rail__name { transition: color 0.2s ease; }
+.teim-rd .cp-proc__stage { transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-proc:hover .cp-proc__stage { opacity: 0.55; }
+.teim-rd .cp-proc:hover .cp-proc__stage:hover { opacity: 1; transform: translateY(-3px); }
+.teim-rd .cp-proc__stage:hover .cp-proc__name { color: var(--dteal); }
+.teim-rd .cp-proc__stage:hover::before { background: var(--dteal); width: 10px; height: 10px; }
+.teim-rd .cp-proc__name { transition: color 0.2s ease; }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-rail__stage { transition: none; }
-  .teim-rd .cp-rail:hover .cp-rail__stage:hover { transform: none; }
+  .teim-rd .cp-proc__stage { transition: none; }
+  .teim-rd .cp-proc:hover .cp-proc__stage:hover { transform: none; }
 }
-.teim-rd .cp-rail__stage::before { content: ''; position: absolute; top: -3px; left: 0; width: 7px; height: 7px; background: var(--teal); }
-.teim-rd .cp-rail__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; color: var(--dteal); }
-.teim-rd .cp-rail__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.3rem 0 0.4rem; }
-.teim-rd .cp-rail__body { font-size: 0.85rem; line-height: 1.5; color: var(--muted); margin: 0; }
+.teim-rd .cp-proc__stage::before { content: ''; position: absolute; top: -3px; left: 0; width: 7px; height: 7px; background: var(--teal); }
+.teim-rd .cp-proc__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; color: var(--dteal); }
+.teim-rd .cp-proc__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.3rem 0 0.4rem; }
+.teim-rd .cp-proc__body { font-size: 0.85rem; line-height: 1.5; color: var(--muted); margin: 0; }
 @media (max-width: 1100px) {
-  .teim-rd .cp-rail { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.4rem; }
-  .teim-rd .cp-rail::before { display: none; }
-  .teim-rd .cp-rail__stage { border-top: 1px solid var(--line); }
+  .teim-rd .cp-proc { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.4rem; }
+  .teim-rd .cp-proc::before { display: none; }
+  .teim-rd .cp-proc__stage { border-top: 1px solid var(--line); }
 }
-@media (max-width: 640px) { .teim-rd .cp-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .teim-rd .cp-proc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ── Where reporting runs out: three stories, not three cards ──────────── */
 
@@ -3273,6 +3279,51 @@
  * Selected, framed, explained. Nothing protected is fetched, so there is
  * nothing here to blur; the inset says what opens it and stops. */
 .teim-rd .cp-kind--lock { background: var(--door-navy, #09132b); color: #fff; }
+/* ── THE CATALOGUE, IN THE TABLE ──────────────────────────────────────────
+ * One row a collection: what it covers, how big it is, which release, and
+ * what opens it. Same table, same density, same row behaviour as the
+ * records — it IS the table, showing the other kind of thing this page
+ * holds, so a reader never crosses into a differently designed surface to
+ * choose what to look at. */
+.teim-rd .cp-atlas__row { cursor: pointer; }
+.teim-rd .cp-atlas td { white-space: normal; vertical-align: top; }
+.teim-rd .cp-atlas__name { display: inline-flex; align-items: center; gap: 0.5rem; }
+.teim-rd .cp-atlas__mark { display: grid; place-items: center; width: 18px; height: 18px; color: var(--dteal); flex: 0 0 auto; }
+.teim-rd .cp-atlas__mark svg { width: 17px; height: 17px; }
+.teim-rd .cp-atlas__open { border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--ink); text-align: left; cursor: pointer; }
+.teim-rd .cp-atlas__row:hover .cp-atlas__open { color: var(--dteal); }
+.teim-rd .cp-atlas__cell { min-width: 22rem; }
+/* Two lines of the collection's own description. A blurb is four sentences
+ * for some collections and one for others, and a catalogue whose rows are
+ * four different heights is a list nobody can scan. */
+.teim-rd .cp-atlas .cp-ex__uid { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; max-width: 46ch; margin-top: 0.15rem; font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0; line-height: 1.45; }
+.teim-rd .cp-atlas__yours { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-atlas__locked { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+/* ── A COLLECTION THIS PLAN CANNOT OPEN ───────────────────────────────────
+ * The same surface as every other collection: the same toolbar shape, the
+ * same declared columns at the same density, the same status bar. What is
+ * withheld is the values, and the bars say so without pretending to be
+ * blurred data — a blurred row is a row somebody will try to read.
+ *
+ * The navy inset that used to sit here is gone. It was a pitch in place of
+ * a table, which asks a reader to buy something they have not been shown. */
+.teim-rd .cp-lock { display: flex; flex-direction: column; min-height: 0; }
+.teim-rd .cp-lock__table td { padding-block: 0.62rem; }
+.teim-rd .cp-lock__bar { display: block; height: 0.62rem; width: var(--w, 70%); border-radius: 2px; background: var(--line-soft, rgba(10, 28, 52, 0.08)); }
+.teim-rd .cp-lock__row:nth-child(2n) .cp-lock__bar { --w: 52%; }
+.teim-rd .cp-lock__row:nth-child(3n) .cp-lock__bar { --w: 84%; }
+.teim-rd .cp-lock__row:nth-child(5n) .cp-lock__bar { --w: 44%; }
+.teim-rd .cp-lock__row td:last-child .cp-lock__bar { --w: 38%; }
+/* One line in the status bar, in the status bar's own voice. */
+.teim-rd .cp-lock__say { flex: 1 1 auto; min-width: 0; margin: 0; margin-left: auto; text-align: right; font-size: 0.84rem; color: var(--ink-2); }
+.teim-rd .cp-lock__say a { color: var(--dteal); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--teal-line); }
+.teim-rd .cp-lock__say a:hover { border-bottom-color: var(--dteal); }
+/* A control that is present so the shape is the same, and does nothing. */
+.teim-rd .cp-ex__act.is-off { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.7rem; border: 1px solid var(--line); color: var(--muted); background: var(--bg); cursor: default; }
+@media (max-width: 720px) {
+  .teim-rd .cp-lock__say { margin-left: 0; text-align: left; }
+}
 .teim-rd .cp-lock__lede { margin: 0 0 1rem; font-size: 0.98rem; line-height: 1.6; color: var(--ink-2); max-width: 70ch; }
 .teim-rd .cp-lock__facts { display: flex; flex-wrap: wrap; gap: 1.6rem; margin: 0 0 1.2rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line); }
 .teim-rd .cp-lock__facts dt { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -3674,29 +3725,36 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ch__act--lead:hover { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
 
 /* The folded argument. Closed by default: the claim above it is the page's
- * answer, and this is the page showing its work to whoever asks. */
-.teim-rd .cp-why { margin: 1.6rem 0 0; border-top: 1px solid var(--line); }
-.teim-rd .cp-why__sum {
+ * answer, and this is the page showing its work to whoever asks.
+ *
+ * IT WAS CALLED `.cp-why` AND SO IS THE DOOR'S NAVY PASSAGE BAND. Two
+ * different components, one class name, and the band's rule sits earlier in
+ * this file — so every one of these disclosures on the methodology page was
+ * painting itself full-bleed navy with 5.6rem of padding. That is the
+ * "repeated navy information panel" the 2026-09-20 review found inside the
+ * app, and it was a collision rather than a decision. */
+.teim-rd .cp-reason { margin: 1.6rem 0 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-reason__sum {
   display: flex; align-items: center; gap: 0.55rem; cursor: pointer; list-style: none;
   padding: 0.75rem 0; min-height: 44px;
   font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--muted);
 }
-.teim-rd .cp-why__sum::-webkit-details-marker { display: none; }
-.teim-rd .cp-why__sum:hover { color: var(--dteal); }
-.teim-rd .cp-why__sum:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-reason__sum::-webkit-details-marker { display: none; }
+.teim-rd .cp-reason__sum:hover { color: var(--dteal); }
+.teim-rd .cp-reason__sum:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
 /* The cue is a plus that becomes a minus: a caret at this size reads as a
  * text glyph rather than a control. */
-.teim-rd .cp-why__cue { position: relative; width: 14px; height: 14px; flex: none; }
-.teim-rd .cp-why__cue::before,
-.teim-rd .cp-why__cue::after { content: ''; position: absolute; background: currentColor; transition: opacity 0.16s ease; }
-.teim-rd .cp-why__cue::before { top: 6px; left: 0; width: 14px; height: 2px; }
-.teim-rd .cp-why__cue::after { left: 6px; top: 0; width: 2px; height: 14px; }
-.teim-rd .cp-why[open] .cp-why__cue::after { opacity: 0; }
-.teim-rd .cp-why__in { padding: 0 0 0.9rem; }
-.teim-rd .cp-why__in > p { font-size: 1rem; line-height: 1.66; color: var(--ink-2); margin: 0 0 1rem; max-width: 92ch; }
-.teim-rd .cp-why__in > p:last-child { margin-bottom: 0; }
-.teim-rd .cp-why__in .cp-ur { margin-top: 0; }
+.teim-rd .cp-reason__cue { position: relative; width: 14px; height: 14px; flex: none; }
+.teim-rd .cp-reason__cue::before,
+.teim-rd .cp-reason__cue::after { content: ''; position: absolute; background: currentColor; transition: opacity 0.16s ease; }
+.teim-rd .cp-reason__cue::before { top: 6px; left: 0; width: 14px; height: 2px; }
+.teim-rd .cp-reason__cue::after { left: 6px; top: 0; width: 2px; height: 14px; }
+.teim-rd .cp-reason[open] .cp-reason__cue::after { opacity: 0; }
+.teim-rd .cp-reason__in { padding: 0 0 0.9rem; }
+.teim-rd .cp-reason__in > p { font-size: 1rem; line-height: 1.66; color: var(--ink-2); margin: 0 0 1rem; max-width: 92ch; }
+.teim-rd .cp-reason__in > p:last-child { margin-bottom: 0; }
+.teim-rd .cp-reason__in .cp-ur { margin-top: 0; }
 
 @media (max-width: 720px) {
   /* One line that opens, and it says where the reader is. */
@@ -3709,7 +3767,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-ch__act { width: 100%; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-mix__item, .teim-rd .cp-ch__act, .teim-rd .cp-why__cue::before, .teim-rd .cp-why__cue::after { transition: none; }
+  .teim-rd .cp-mix__item, .teim-rd .cp-ch__act, .teim-rd .cp-reason__cue::before, .teim-rd .cp-reason__cue::after { transition: none; }
 }
 
 /* ── A row is a door ──────────────────────────────────────────────────────
@@ -4094,6 +4152,10 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-page--table .cp-ex__frame > .cp-rail { position: static; height: 100%; overflow-y: auto; }
   .teim-rd .cp-page--table .cp-ex__frame > .cp-ex__in { height: 100%; min-height: 0; display: flex; flex-direction: column; }
   .teim-rd .cp-page--table .cp-ex__card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  /* A locked collection is the same surface, so it gets the same chain: the
+     withheld table fills the frame exactly as a real one does, or the page
+     stops half way down and the shape stops being the same. */
+  .teim-rd .cp-page--table .cp-ex__in > .cp-lock { flex: 1 1 auto; min-height: 0; }
   /* The toolbar, the legend and the foot keep their own height; only the
      records take what is left. */
   .teim-rd .cp-page--table .cp-ex__card > .cp-ex__bar,
@@ -4230,6 +4292,15 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ab__read:hover { background: var(--teal-wash, rgba(15, 181, 165, 0.06)); }
 .teim-rd .cp-ab__readtitle { font-family: var(--sans); font-size: 0.92rem; font-weight: 700; line-height: 1.35; color: var(--ink); }
 .teim-rd .cp-ab__readmeta { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+/* The one source note that stays on the first screen, and the disclosure
+ * that holds everything a reference document holds. */
+.teim-rd .cp-ab__lead { margin: 0.2rem 0 0; }
+.teim-rd .cp-ab__more { margin-top: 1.2rem; border-top: 1px solid var(--line); padding-top: 0.9rem; }
+.teim-rd .cp-ab__more > summary { list-style: none; cursor: pointer; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-ab__more > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-ab__more > summary::after { content: ' \203A'; display: inline-block; transform: rotate(90deg); }
+.teim-rd .cp-ab__more[open] > summary::after { transform: rotate(-90deg); }
+.teim-rd .cp-ab__morein { margin-top: 0.4rem; }
 .teim-rd .cp-ab__foot { margin: 1.6rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); }
 /* The trigger stops being a disclosure summary and becomes a control. */
 .teim-rd button.cp-ex__aboutbtn { border: 1px solid var(--line); border-radius: 999px; background: var(--bg); padding: 0.4rem 0.9rem; font: inherit; font-family: var(--sans); font-size: 0.82rem; font-weight: 700; color: var(--ink); cursor: pointer; }

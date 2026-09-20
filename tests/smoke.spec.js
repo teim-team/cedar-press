@@ -495,14 +495,18 @@ test.describe("Explore the collections", () => {
     await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
     const caption = page.getByTestId("explore-caption");
     const records = page.getByTestId("explore-record");
-    // Every open collection contributes its dataset's preview; the caption
-    // counts sample records and says so, because ten rows is not the dataset.
-    await expect(caption).toContainText("sample records");
-    // "12 collections", not "all collections": an explicit all is an explicit
-    // list now (the rail writes the ids), because clearing the parameter
-    // means "unspecified" and resolves to the default collection.
+    // WITH EVERY COLLECTION IN HAND AND NOTHING ASKED, THE TABLE IS THE
+    // CATALOGUE. It used to pool sixty sample records from six collections,
+    // which is a real table and the wrong answer to "show me everything" —
+    // the thing being chosen between at that moment is collections. Owner,
+    // 2026-09-20: "make the state a visual catalog atlas with visible
+    // collection rows, coverage, release date, and access tier."
     await expect(caption).toContainText(/\d+ collections/);
-    await expect(records.first()).toBeVisible();
+    await expect(page.getByTestId("atlas-row").first()).toBeVisible();
+    // Every collection, not only the ones this plan opens: the locked ones
+    // are on it with what opens them, which is the question it answers.
+    expect(await page.getByTestId("atlas-row").count()).toBeGreaterThan(6);
+    await expect(records).toHaveCount(0);
 
     // Narrow to one entity from the picker; the URL now carries the cut.
     // `click` and an expectation rather than `check`: the box is controlled

@@ -113,13 +113,73 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
           ) : null}
         </Block>
 
+        {/* ONE SOURCE NOTE, THEN THE REST BEHIND A DISCLOSURE.
+            Owner, 2026-09-20: "The collection profile drawer is useful, but
+            it is too essay-like. Its first viewport should be: what this
+            collection covers / release, years, record count / what a record
+            means / one source-method note / Read full collection notes."
+
+            It was seven expanded sections — how it is built, what is not in
+            it, every field, every table, the release ledger, the writing —
+            which is the reference document a reader wants ONCE, in front of
+            a reader who is deciding whether to open a table. The first
+            screen answers the deciding question; the reference is one click
+            away and loses nothing. */}
+        {launch.sources ? (
+          <p className="cp-ab__sources cp-ab__lead"><b>Sources.</b> {launch.sources}</p>
+        ) : null}
+
+        {/* THE OTHER HALF OF THE LOOP.
+            The article page names the collections a piece drew on and offers
+            their data. Read the other way, this is what a subscriber holding
+            the records wants next: what somebody already wrote from them.
+            Same `draws`, no second list to maintain.
+
+            It is NOT inside the folded notes with the rest of the reference
+            material, though the 2026-09-20 review put everything else there:
+            a list of two links is navigation rather than an essay, and the
+            table's "+N more" control opens this panel expecting to land on
+            it. A button that promises one more piece and delivers a closed
+            drawer is a broken promise. */}
+        {written.length ? (
+          <Block title="Research built from this collection">
+            <ul className="cp-ab__reads">
+              {written.map((article) => {
+                const away = !article.hosted;
+                const inner = (
+                  <>
+                    <span className="cp-ab__readtitle">{article.title}</span>
+                    <span className="cp-ab__readmeta">
+                      {article.date}
+                      {away ? " · Tribal Business News" : ""}
+                    </span>
+                  </>
+                );
+                return (
+                  <li key={article.id}>
+                    {away ? (
+                      <a className="cp-ab__read" href={articleHref(article)} target="_blank" rel="noreferrer">
+                        {inner}
+                      </a>
+                    ) : (
+                      <Link className="cp-ab__read" to={articleHref(article)}>
+                        {inner}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </Block>
+        ) : null}
+
+        <details className="cp-ab__more">
+          <summary>Read the full collection notes</summary>
+          <div className="cp-ab__morein">
         <Block title="How it is built">
           {launch.method || launch.sources || catalog?.linkage ? (
             <>
               {launch.method ? <p>{launch.method}</p> : null}
-              {launch.sources ? (
-                <p className="cp-ab__sources"><b>Sources.</b> {launch.sources}</p>
-              ) : null}
               {catalog?.linkage ? (
                 <p className="cp-ab__sources"><b>How a record reaches its entity.</b> {catalog.linkage}</p>
               ) : null}
@@ -187,42 +247,8 @@ export default function PressCollectionAbout({ entry, flagship, onClose }) {
           ) : null}
         </Block>
 
-        {/* THE OTHER HALF OF THE LOOP.
-            The article page names the collections a piece drew on and offers
-            their data. Read the other way, this is what a subscriber holding
-            the records wants next: what somebody already wrote from them.
-            Same `draws`, no second list to maintain. */}
-        {written.length ? (
-          <Block title="Research built from this collection">
-            <ul className="cp-ab__reads">
-              {written.map((article) => {
-                const away = !article.hosted;
-                const inner = (
-                  <>
-                    <span className="cp-ab__readtitle">{article.title}</span>
-                    <span className="cp-ab__readmeta">
-                      {article.date}
-                      {away ? " · Tribal Business News" : ""}
-                    </span>
-                  </>
-                );
-                return (
-                  <li key={article.id}>
-                    {away ? (
-                      <a className="cp-ab__read" href={articleHref(article)} target="_blank" rel="noreferrer">
-                        {inner}
-                      </a>
-                    ) : (
-                      <Link className="cp-ab__read" to={articleHref(article)}>
-                        {inner}
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </Block>
-        ) : null}
+          </div>
+        </details>
 
         <p className="cp-ab__foot">
           <Link className="cp-ab__link" to={PRESS_METHODS_PATH}>
