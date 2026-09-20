@@ -1,0 +1,17 @@
+/* A shared link is an intentional preview invitation, not an accidental
+ * unfinished page. This remains in the document flow so it never blocks a
+ * login, a collection, or Cedar on a small screen. */
+.teim-rd .cp-preview { width: min(calc(100% - 2rem), 68rem); margin: 0.85rem auto 0; display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0.9rem; border: 1px solid var(--line); border-left: 3px solid var(--dteal); border-radius: 8px; background: var(--bg); box-shadow: 0 8px 22px rgba(7, 24, 36, 0.06); }
+.teim-rd .cp-preview__copy { min-width: 0; }
+.teim-rd .cp-preview__label { display: block; margin-bottom: 0.18rem; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-preview p { margin: 0; max-width: 78ch; font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-preview a { color: var(--dteal); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.teim-rd .cp-preview a:hover { text-decoration: underline; }
+.teim-rd .cp-preview__close { flex: none; min-height: 38px; border: 1px solid var(--line); border-radius: 999px; padding: 0.4rem 0.7rem; background: var(--bg); color: var(--ink); font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.teim-rd .cp-preview__close:hover { border-color: var(--dteal); color: var(--dteal); }
+.teim-rd .cp-preview__close:focus-visible { outline: 2px solid var(--dteal); outline-offset: 3px; }
+@media (max-width: 620px) {
+  .teim-rd .cp-preview { width: calc(100% - 1.4rem); align-items: flex-start; gap: 0.65rem; padding: 0.7rem; }
+  .teim-rd .cp-preview p { font-size: 0.82rem; }
+  .teim-rd .cp-preview__close { min-height: 34px; padding: 0.32rem 0.55rem; font-size: 0.75rem; }
+}
