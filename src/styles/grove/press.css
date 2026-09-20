@@ -705,6 +705,11 @@
 /* A reader who has asked their system for less motion gets none of the
  * page's own: transitions collapse rather than shorten, because a 1ms
  * animation is still an animation to a vestibular system. */
+/* ── DEAD: the front page's hub tiles ─────────────────────────────────────
+ * `PressHub` was deleted on 2026-09-20 when the overview became a briefing.
+ * Its top-level rules went with it; what is left below lives inside media
+ * queries, where removing it by hand is how a stylesheet gets a stray brace.
+ * Nothing renders `.cp-hub__*` any more, so these match nothing. */
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cp-hub__tile,
   .teim-rd .cp-hub__tile::after,
@@ -771,17 +776,9 @@
  * Collections takes two-thirds of the lead row and Research Briefs one-third;
  * the four utility destinations sit beneath at a quieter weight. Same six
  * doors, three levels of emphasis instead of one. */
-.teim-rd .cp-hub__lead { list-style: none; margin: 0 0 0.9rem; padding: 0; display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 0.9rem; }
-.teim-rd .cp-hub__leadcell { display: block; min-width: 0; }
-.teim-rd .cp-hub__tile--lead { gap: 0.7rem; padding: 1.5rem 1.6rem 1.4rem; }
-.teim-rd .cp-hub__tile--lead .cp-hub__mark svg { width: 38px; height: 38px; }
-.teim-rd .cp-hub__tile--lead .cp-hub__name { font-size: 1.55rem; }
-.teim-rd .cp-hub__tile--lead .cp-hub__what { font-size: 1rem; max-width: 48ch; }
+
 /* The lead cards say what the click does; the quiet rank does not need to. */
-.teim-rd .cp-hub__go { margin-top: auto; padding-top: 0.9rem; font-family: var(--sans);
-  font-size: 0.92rem; font-weight: 700; color: var(--dteal); }
-.teim-rd .cp-hub__tile--lead:hover .cp-hub__go { color: var(--ink); }
+
 /* The quiet rank: four across, smaller mark, no description competing with
  * the two cards above. */
 @media (max-width: 900px) {
@@ -794,36 +791,23 @@
   .teim-rd .cp-hub__tile--lead .cp-hub__name { font-size: 1.3rem; }
   .teim-rd .cp-hub__tile--lead .cp-hub__mark svg { width: 34px; height: 34px; }
 }
-.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; }
-.teim-rd .cp-hub__grid--rest { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.teim-rd .cp-hub__grid--rest .cp-hub__mark svg { width: 22px; height: 22px; }
-.teim-rd .cp-hub__grid--rest .cp-hub__name { font-size: 1rem; }
-.teim-rd .cp-hub__grid--rest .cp-hub__what { font-size: 0.86rem; color: var(--muted); }
-.teim-rd .cp-hub__grid--rest .cp-hub__tile { padding: 1rem 1.1rem 1.15rem; gap: 0.45rem; }
 @media (max-width: 900px) { .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .teim-rd .cp-hub__grid { grid-template-columns: minmax(0, 1fr); } }
-.teim-rd .cp-hub__grid > li { position: relative; display: block; }
-.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 0.6rem; padding: 1.1rem 1.2rem 1.3rem; border: 1px solid var(--line); background: var(--bg); text-align: left; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
+
 /* The teal rises from the floor of the tile on hover rather than washing
  * over it: the mark and the name stay on paper, which keeps their contrast
  * where it was measured. */
-.teim-rd .cp-hub__tile::after { content: ''; position: absolute; inset: auto 0 0 0; height: 3px; background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-.teim-rd .cp-hub__tile:hover::after, .teim-rd .cp-hub__tile:focus-visible::after { transform: scaleX(1); }
+
 /* ONE SIGNAL. This lifted the card, dropped a 34px shadow under it, changed
  * the border, scaled the mark and grew an underline across the bottom — five
  * responses to one pointer, on six cards at once. The border and the rule are
  * the response; the card stays where it is. */
-.teim-rd .cp-hub__tile:hover { border-color: var(--teal); }
-.teim-rd .cp-hub__tile:hover .cp-hub__name { color: var(--dteal); }
-.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-.teim-rd .cp-hub__mark svg { width: 30px; height: 30px; }
-.teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
-.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.18; transition: color 0.18s ease; }
+
 /* What is in the section, on the card. */
-.teim-rd .cp-hub__what { font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
+
 /* What the section holds right now, read from the catalog: a label alone
  * says where a tap goes, this says whether it is worth taking. */
-.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
 /* The line under the grid, painted by pointing at a tile — the same
  * point-to-read language as the shelves, with no second control on the
  * tile. min-height holds two lines so the page never jumps. */
@@ -4351,3 +4335,43 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-prop__notcap { display: block; margin-bottom: 0.4rem; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-prop__not ul { margin: 0; padding-left: 1.1rem; }
 .teim-rd .cp-prop__not li { font-size: 0.85rem; line-height: 1.6; color: var(--ink-2); }
+
+/* ══ THE BRIEFING ═════════════════════════════════════════════════════════
+ * The reader's front page: one lead, three signals, one collection, one
+ * question. It replaced six navigation cards that restated the nav bar.
+ * Two columns on a wide screen, because a lead and its margin is how a
+ * briefing reads; one column below that, lead first. */
+.teim-rd .cp-brief { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 0.85fr); gap: 2rem 3.2rem; align-items: start; margin-top: 2.6rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-brief__cap { display: block; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.6rem; }
+.teim-rd .cp-brief__title { font-family: var(--sans); font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 800; letter-spacing: -0.022em; line-height: 1.14; margin: 0; text-wrap: balance; }
+.teim-rd .cp-brief__title a { color: var(--ink); text-decoration: none; }
+.teim-rd .cp-brief__title a:hover { color: var(--dteal); }
+.teim-rd .cp-brief__dek { font-size: 1.04rem; line-height: 1.6; color: var(--ink-2); margin: 0.7rem 0 0; max-width: 60ch; }
+.teim-rd .cp-brief__meta { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0.8rem 0 0; }
+.teim-rd .cp-brief__meta a { color: var(--dteal); text-decoration: none; }
+.teim-rd .cp-brief__meta a:hover { text-decoration: underline; }
+.teim-rd .cp-brief__side { display: grid; gap: 1.6rem; }
+.teim-rd .cp-brief__signals { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-brief__signals a { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--line-soft); text-decoration: none; }
+.teim-rd .cp-brief__signals a:hover .cp-brief__signame { color: var(--dteal); }
+.teim-rd .cp-brief__signame { font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-brief__sigwhen { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); }
+.teim-rd .cp-brief__more { display: inline-block; margin-top: 0.6rem; font-family: var(--sans); font-size: 0.82rem; font-weight: 700; color: var(--dteal); text-decoration: none; }
+.teim-rd .cp-brief__more:hover { text-decoration: underline; }
+.teim-rd .cp-brief__coll { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-left: 2px solid var(--teal); background: var(--bg); text-decoration: none; }
+.teim-rd .cp-brief__coll:hover { border-left-color: var(--dteal); }
+.teim-rd .cp-brief__coll b { display: block; font-family: var(--sans); font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-brief__coll small { display: block; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); }
+.teim-rd .cp-brief__collmark { display: grid; place-items: center; width: 22px; height: 22px; color: var(--dteal); flex: 0 0 auto; }
+.teim-rd .cp-brief__collmark svg { width: 21px; height: 21px; }
+.teim-rd .cp-brief__ask { display: inline-block; margin-top: 0.7rem; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.86rem; font-weight: 700; color: var(--dteal); text-align: left; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-brief__ask:hover { color: var(--ink); }
+@media (max-width: 900px) {
+  .teim-rd .cp-brief { grid-template-columns: minmax(0, 1fr); gap: 1.8rem; }
+}
+
+/* The overview's headline, sized for a page that answers it immediately
+ * below rather than for one that had nothing under it but doors. */
+.teim-rd .cp-hero--brief { padding-block: 1.6rem 0; }
+.teim-rd .cp-hero--brief h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); max-width: 20ch; }
+.teim-rd .cp-hero--brief + .cp-brief { margin-top: 1.8rem; }
