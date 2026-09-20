@@ -73,11 +73,37 @@ behind Cedar Impact), [`cedar`](https://github.com/teim-team/cedar) (Cedar,
 the AI economic analyst, as a service) and
 [`lumecon-website`](https://github.com/teim-team/lumecon-website) (the
 public site and the reference for product vocabulary). Product names and
-their one-line definitions follow the website's `AGENTS.md`; the vocabulary
-rule that matters most here is that Cedar Grove is "the living evidence base
-for your organization's economy" (owner ruling 2026-09-13, replacing "the
-advanced data library"). The shared tier catalog in `src/workspaceTier.js`
-uses that definition.
+their one-line definitions follow the website's `AGENTS.md`, which is the
+North Star: where this repository and the website disagree about what
+something is called, the website wins. The vocabulary rule that matters most
+here is that Cedar Grove is "the living evidence base for your organization's
+economy" (owner ruling 2026-09-13, replacing "the advanced data library"). The
+shared tier catalog in `src/workspaceTier.js` uses that definition.
+
+The Lumecon copy rules apply to every string a reader can see in the client.
+The three that catch people out:
+
+- **No ampersands.** Write "and", never "&". **Grep for both forms**, because
+  each misses the other: it has leaked as `&amp;` in JSX text, which a search
+  for a bare `&` does not match, and as a plain `&` inside a string literal,
+  which a search for the entity does not match. A regex that catches both:
+  `&amp;|[A-Za-z0-9] & [A-Za-z0-9]`. Worth checking the visible label against
+  its own `aria-label` too: one occurrence had "Requests and support" in the
+  label and "Requests &amp; support" on screen.
+  The one collection name that carried an ampersand, the lobbying collection,
+  was renamed to `Native Federal Advocacy and Engagement` on 2026-09-18. Its
+  name is embedded verbatim in the citation written into every downloaded CSV,
+  so six sources had to move together: the manifest, the storefront catalog, the
+  codebook, the descriptors, the release ledger and the prerendered HTML, with
+  `server/cedar_press/_press_data.json` regenerated from the catalog.
+  `pressReleases.test.js` fails if the ledger and the manifest disagree, which is
+  what catches a half-done rename.
+- **No em dashes in prose a reader sees.** A `—` standing in for an empty
+  table cell is typography, not prose, and is fine.
+- **Cedar is the AI economic analyst**, never an "AI assistant".
+
+`.teim-rd` is a CSS class root inherited from the product's design system. It
+is a contract, not a label anyone reads; leave it alone.
 
 ## Security
 

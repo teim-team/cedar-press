@@ -41,7 +41,13 @@ In scope:
 Out of scope:
 
 - Third-party destinations we link to (Tribal Business News, lumecon.ai).
-- The Lumecon platform itself, which has its own policy and repository.
+- The Lumecon platform and the services behind it, each of which has its own
+  repository and policy:
+  <https://github.com/teim-team/teim-app/blob/main/SECURITY.md>,
+  <https://github.com/teim-team/cedar/blob/main/SECURITY.md> and
+  <https://github.com/teim-team/teim-engine/blob/main/SECURITY.md>. Reports for
+  any of them still reach contact@lumecon.ai; naming the repository in the
+  subject line routes it faster.
 - Denial-of-service testing, social engineering, and physical attacks.
 - Missing security headers without a demonstrated exploitable consequence.
 - Reports generated solely by automated scanners without a working

@@ -81,21 +81,35 @@ function Points({ priority, mine, canMove, onMove, busy, counted }) {
   );
 }
 
+/**
+ * A PRIORITY IS A ROW, NOT A CARD.
+ *
+ * Owner, 2026-09-20: "The priorities page is useful internally, but visually
+ * it is still a grid of text cards. It should become a constrained decision
+ * workspace: what Cedar is being asked to improve, why it matters, what
+ * evidence is needed, and status. Fewer cards, more hierarchy."
+ *
+ * Eleven equal cards in a three-across grid say that eleven things are
+ * equally live, which is the opposite of a priority list. As rows in one
+ * ledger — the shape the rest of this product uses for anything ordered —
+ * the ask and the reason lead, the status sits in its own column, and the
+ * support reads as a column a reader can scan down. The controls are the
+ * same controls.
+ */
 function Priority({ priority, mine, canMove, onMove, busy, evolvedFrom, counted }) {
   return (
     <li className={`cp-pri ${priority.status === "published" ? "is-published" : ""}`} data-testid="priority">
-      <div className="cp-pri__head">
-        <span className="cp-pri__type">{PRIORITY_TYPES[priority.type]?.label ?? priority.type}</span>
-        <span className={`cp-pri__status cp-pri__status--${priority.status}`}>{statusLabel(priority.status)}</span>
+      <div className="cp-pri__say">
+        <h3 className="cp-pri__title">{priority.title}</h3>
+        <p className="cp-pri__desc">{priority.description}</p>
+        {evolvedFrom ? (
+          <p className="cp-set__fine">Began as the research question “{evolvedFrom.title}”: answering it needed this dataset.</p>
+        ) : null}
+        {priority.status === "published" && priority.published_output ? (
+          <p className="cp-set__fine"><a href={priority.published_output}>See what was published <span aria-hidden="true">&#8594;</span></a></p>
+        ) : null}
       </div>
-      <h3 className="cp-pri__title">{priority.title}</h3>
-      <p className="cp-pri__desc">{priority.description}</p>
-      {evolvedFrom ? (
-        <p className="cp-set__fine">Began as the research question “{evolvedFrom.title}”: answering it needed this dataset.</p>
-      ) : null}
-      {priority.status === "published" && priority.published_output ? (
-        <p className="cp-set__fine"><a href={priority.published_output}>See what was published <span aria-hidden="true">&#8594;</span></a></p>
-      ) : null}
+      <span className={`cp-pri__status cp-pri__status--${priority.status}`}>{statusLabel(priority.status)}</span>
       <Points priority={priority} mine={mine} canMove={canMove} onMove={onMove} busy={busy} counted={counted} />
     </li>
   );

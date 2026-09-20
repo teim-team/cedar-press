@@ -121,14 +121,18 @@ export default function CedarPressTribalRequest() {
             <h1 className="cp-trh__title">See what Cedar knows about your Nation.</h1>
           </div>
           <div className="cp-trh__side">
+            {/* THREE SENTENCES BECAME TWO.
+                Owner, 2026-09-20: "it needs less explanation above the
+                action... The dignity is right. The amount of copy is still
+                too high." What a Nation may request is the next section's
+                whole subject, listed there; saying it here first was the
+                page explaining itself before it did anything. What stays is
+                what a reader cannot learn from the section headings: that
+                this is a right, and that it costs nothing. */}
             <p className="cp-trh__sub">
-              Federally recognized tribal governments may request the Cedar records maintained
-              about their government and affiliated tribal enterprises, review those records and
-              submit corrections or supporting documentation.{" "}
-              {/* Said in the deck rather than three sections down. Without it
-                  the page reads as a sales route for an audience who happen
-                  to be Tribal, which is the one thing it is not. */}
-              <b>No subscription is required to make a records request.</b>
+              Request the records Cedar maintains about your government and its enterprises,
+              review them, and submit corrections.{" "}
+              <b>No subscription is required.</b>
             </p>
             <a className="cp-trh__cta" href={REQUEST_HREF}>
               Request your records <span aria-hidden="true">&#8594;</span>
@@ -162,24 +166,31 @@ export default function CedarPressTribalRequest() {
               Cedar releases tribe-specific records only after confirming that the requester is
               authorized by the federally recognized tribal government.
             </p>
-            <div className="cp-verify__cols">
-              <div>
-                <span className="cp-verify__cap">Who may request</span>
-                <ul>
-                  {REQUESTERS.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+            {/* Seven bullets across two columns, folded. Who counts as
+                authorized and what counts as confirmation are answers a
+                requester needs once they are writing the request — not
+                while they are deciding whether this route is theirs. */}
+            <details className="cp-verify__who">
+              <summary>Who may request, and what confirmation looks like</summary>
+              <div className="cp-verify__cols">
+                <div>
+                  <span className="cp-verify__cap">Who may request</span>
+                  <ul>
+                    {REQUESTERS.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <span className="cp-verify__cap">Confirmation may include</span>
+                  <ul>
+                    {VERIFICATION.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <div>
-                <span className="cp-verify__cap">Confirmation may include</span>
-                <ul>
-                  {VERIFICATION.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            </details>
             <p className="cp-verify__hard">
               Cedar does not release tribe-specific records solely because someone claims
               affiliation with the tribe.
@@ -204,9 +215,26 @@ export default function CedarPressTribalRequest() {
               </li>
             ))}
           </ol>
-          <p className="cp-msec__close">
-            Verified corrections can improve future Cedar releases.
-          </p>
+          {/* WHAT A CORRECTION CAN AND CANNOT DO.
+              Owner, 2026-09-20: show "what can be requested, what cannot be
+              changed casually, and why verification matters". The first and
+              the third were on the page; this is the second, and it is the
+              honest half — a records program that implies a government can
+              edit the archive on request would be promising something Cedar
+              cannot give and should not. */}
+          <div className="cp-tr3">
+            <p className="cp-tr3__can">
+              <b>A verified correction updates what Cedar publishes next.</b> It is carried into
+              the release and recorded in the change ledger, where anyone citing the old figure
+              can see what moved.
+            </p>
+            <p className="cp-tr3__cant">
+              <b>It does not alter the source record.</b> Cedar holds what an agency filed, and
+              the filing stays as it was filed; a correction changes what Cedar says about it,
+              beside the original. Published releases keep their addresses so a citation made
+              last year still resolves.
+            </p>
+          </div>
         </section>
 
         <section className="cp-limits cp-two cp-fade" aria-label="What a request does not include">
