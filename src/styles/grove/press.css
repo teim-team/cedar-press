@@ -3834,6 +3834,14 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-navm > summary { padding: 0.3rem 0.6rem; min-height: 38px; }
   .teim-rd .cp-navm__here { font-size: 0.82rem; white-space: nowrap; }
   .teim-rd .cp-avatar { width: 2rem; height: 2rem; font-size: 0.72rem; }
+  /* The wordmark is two words and one line. Allowed to wrap inside a box
+     sized for one, it overflowed under the attribution beside it and the
+     two read as one smeared line. */
+  .teim-rd .cp-mast__word { white-space: nowrap; }
+  /* Signed out there is no menu on this row, there is a sentence, and a
+     sentence gets its own line. */
+  .teim-rd .cp-mast--out .cp-mast__top { flex-wrap: wrap; }
+  .teim-rd .cp-mast--out .cp-mast__of { flex: 1 0 100%; font-size: 0.66rem; line-height: 1.55; }
 }
 
 /* Nothing pointed at, nothing to say: the reader panel keeps its space in the

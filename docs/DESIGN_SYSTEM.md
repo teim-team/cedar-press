@@ -14,6 +14,7 @@ system's named components to where each lives today.
 | AskCedarFAB | `PressCedarFab` | Identical launcher, offset and dimensions on every page; context arrives via props (`examples`, `gated`) and events (`cedar:open`, `cedar:ask-collection`), never via per-page styling. The PANEL is `.cp-dc__*`, shared with the door and with lumecon.ai's `CedarFAB.astro` — see "Cedar" below. |
 | CollectionRail | `PressCollectionRail` (`src/pages/grove/PressCollectionRail.jsx`) | The twelve collections, once. Two modes: `preview` on the door, `app` behind the paywall, where a collection the plan cannot open stays in the rail and is visibly locked. Never a second list of the same twelve. |
 | CollectionExplorer | `PressExplore` | Rail + selected-collection header + table/cards + release footer, as one object. The signed-in Collections page IS this component; the door mounts the same rail inside its hero frame. |
+| RecordTable | `PressRecordTable` (`Rows`, `Cards`) + `recordColumns.js` (`columnPlan`) | The record table, once. The signed-in viewer and the signed-out door both mount it; the door mounts it `readOnly` (no sort control, no record link, since neither leads anywhere without a subscription). A second table that draws records is a bug. |
 | CollectionProfile | `PressCollectionAbout` | The deep-linkable profile at `?c=<id>&about=1`: a side sheet on a wide screen, the whole screen on a phone. Every field is read from the release (descriptor, codebook, ledger); nothing on it is written. |
 | ReleaseSpecimen | `PressReleaseSpecimen` | The hero's release bookkeeping card. Facts from `collections.manifest.json` only, and never a delta — the manifest records the current release, not the one before it. |
 | SiteFooter | `PressFoot` (`PressChrome.jsx`) | One footer, navy, full-bleed, thin teal top edge, nav left / publisher domains right — on every page including articles. `flush` only where the preceding band is already navy (the overview's close). |
@@ -38,6 +39,12 @@ rather than only on `.cp-door`. That is not tidying: every `--door-*` the
 panel reads is declared on the signed-out page, and mounted inside the
 reader they resolve to nothing, so `background: var(--door-surface)` is
 dropped and the panel paints as a transparent hole.
+
+**The panel opens with something to ask.** `examples` defaults to four
+questions, each already scoped to a collection so the tap that asks also
+picks the release the answer comes from. Nine of the eleven mounts passed no
+examples and opened on a greeting and an empty box, which is the worst moment
+to ask a reader to think of a question.
 
 **What an answer rests on is a sentence, not a badge.** Under the answer:
 "Based on *Native Federal Contractors v1*, updated September 4, 2026. View
@@ -71,3 +78,15 @@ type and teal rules above come from it. Two differences are intentional:
 - Colour is stated on `.cp-rail__name`, not inherited: something upstream
   sets `--ink` on spans, and the rail rendered twelve row counts with no
   collection names attached.
+- Every box between `.cp-ex__frame` and the scroller carries `min-height: 0`.
+  A flex item's floor is its content, so without it the table refuses to be
+  shorter than its rows, the chain grows past the frame, and the height set
+  on the frame is silently ignored.
+- The collections page's frame height is measured in JavaScript
+  (`--cp-frame-h`, `CedarPressData`) rather than written as a `calc`. The
+  chrome above it is a masthead plus a title, two heights at two widths, and
+  the hardcoded `calc(100dvh - 12rem)` was wrong by 14px at 1440 and by more
+  on a phone.
+- A full-page screenshot of a page with revealed sections is a page of white
+  gaps: `.cp-fade` starts at opacity 0 and arrives on scroll. Anything
+  capturing the site has to walk the page first.

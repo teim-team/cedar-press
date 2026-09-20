@@ -41,6 +41,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { askCedar } from "../../api.js";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { PRESS_DATA_PATH, PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
@@ -72,6 +73,34 @@ const SCOPED_EXAMPLES = [
   "What sources are included?",
   "What changed in the latest release?",
 ];
+
+/**
+ * WHAT AN UNSCOPED PANEL OFFERS.
+ *
+ * Every page but the overview mounted this with no `examples`, so nine of
+ * the eleven places a reader can open Cedar opened on a greeting and an
+ * empty box. "Ask Cedar" is the product's own invitation and answering it
+ * with a blank prompt is the worst moment to ask somebody to think of a
+ * question.
+ *
+ * Each of these carries the collection it is about, so the tap scopes the
+ * panel and the question is answerable as shown — the same rule the
+ * overview's own set follows. They are collections rather than topics
+ * because an unscoped question has no release to be answered from, and an
+ * answer with no release behind it is the thing the basis line exists to
+ * mark.
+ */
+const OPEN_EXAMPLES = [
+  { q: "What does this collection cover?", at: 0 },
+  { q: "How was this collection built?", at: 1 },
+  { q: "What sources are included?", at: 2 },
+  { q: "What changed in the latest release?", at: 3 },
+]
+  .map(({ q, at }) => {
+    const entry = LAUNCH_COLLECTION[at];
+    return entry ? { q, scope: { id: entry.id, name: entry.name } } : null;
+  })
+  .filter(Boolean);
 
 let nextId = 0;
 const turn = (role, text, extra = {}) => ({ key: `t${(nextId += 1)}`, role, text, ...extra });
@@ -176,7 +205,7 @@ function AnswerSource({ basis }) {
 // `gated` names why Cedar will not query the collections for this reader:
 // "signedout" (no session) or "unentitled" (a membership without Cedar
 // Press). Falsy means fully entitled.
-export function PressCedarFab({ gated = null, examples = [] }) {
+export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
   const signedOut = Boolean(gated);
   const [open, setOpen] = useState(false);
   const [asked, setAsked] = useState("");
