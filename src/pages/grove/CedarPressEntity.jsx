@@ -202,9 +202,21 @@ export default function CedarPressEntity() {
           <div className="cp-ent__groups">
             {groups.map(({ entry, items }) => (
               <section className="cp-ent__group" key={entry.id} aria-label={entry.name}>
+                {/* THE COLLECTION'S NAME IS A WAY INTO IT.
+                    This profile reads up to ten sample rows per table; the
+                    collection holds the release. A reader who has just seen
+                    three of this entity's awards and wants the rest was
+                    being shown the collection's name as a label. It is a
+                    link now, carrying BOTH the collection and the entity, so
+                    it opens the table already narrowed to what this heading
+                    is about rather than on the collection's first page. */}
                 <header className="cp-ent__ghead">
                   <span className="cp-ent__gic" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
-                  <h2>{entry.name}</h2>
+                  <h2>
+                    <Link className="cp-ent__glink" to={`${PRESS_DATA_PATH}?c=${entry.id}&e=${encodeURIComponent(uid)}`}>
+                      {entry.name} <span aria-hidden="true">&#8594;</span>
+                    </Link>
+                  </h2>
                   <span className="cp-ent__gn">{items.length} preview record{items.length === 1 ? "" : "s"}</span>
                 </header>
                 <ul className="cp-ent__list">

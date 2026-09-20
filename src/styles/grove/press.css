@@ -3791,6 +3791,12 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ent__gic { display: grid; place-items: center; width: 26px; height: 26px; flex: none; color: var(--dteal); }
 .teim-rd .cp-ent__gic svg { width: 20px; height: 20px; }
 .teim-rd .cp-ent__ghead h2 { font-family: var(--sans); font-size: 0.98rem; font-weight: 800; color: var(--ink); margin: 0; flex: 1 1 auto; min-width: 0; }
+/* The group heading behaves as a link without announcing itself as one: a
+ * page of four teal headings reads as navigation rather than as an entity's
+ * record. The arrow and the hover say it. */
+.teim-rd .cp-ent__glink { color: inherit; text-decoration: none; }
+.teim-rd .cp-ent__glink:hover { color: var(--dteal); }
+.teim-rd .cp-ent__glink span { color: var(--dteal); }
 .teim-rd .cp-ent__gn { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .teim-rd .cp-ent__list { list-style: none; margin: 0; padding: 0; }
 .teim-rd .cp-ent__row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto 1.2rem; align-items: baseline; gap: 0.35rem 1rem; padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); }

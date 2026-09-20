@@ -1492,6 +1492,24 @@ test.describe("the loop between the records and the journalism", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Deals");
     expect(errors).toEqual([]);
   });
+
+  // The third way in: an entity's profile reads ten sample rows per table,
+  // and each collection heading on it opens the release itself — carrying
+  // BOTH the collection and the entity, so it lands narrowed to what the
+  // heading was about rather than on the collection's first page.
+  test("an entity's collection heading opens the table already narrowed to it", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/entity/CE-001CC-8N");
+    const heading = page.locator(".cp-ent__glink").first();
+    await heading.waitFor({ timeout: 20000 });
+    await heading.click();
+    await expect(page).toHaveURL(/\/data\?c=[a-z-]+&e=CE-001CC-8N/);
+    await page.locator(".cp-rail__item").first().waitFor();
+    // Narrowed, not just opened: the caption names the entity the cut is on.
+    await expect(page.getByTestId("explore-caption")).toContainText("Yakama");
+    expect(errors).toEqual([]);
+  });
 });
 
 test.describe("the reveal", () => {
