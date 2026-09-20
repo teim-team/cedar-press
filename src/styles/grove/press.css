@@ -282,7 +282,7 @@
  * bottom border), which read as a browser bar rather than as something you
  * can talk to. teim-app floats it clear at right/bottom 2rem, and so does
  * this. */
-.teim-rd .cedar-widget { position: fixed; right: 2rem; bottom: 2rem; z-index: 120; display: flex; flex-direction: column; align-items: flex-end; }
+.teim-rd .cedar-widget { position: fixed; right: calc(2rem + env(safe-area-inset-right, 0px)); bottom: calc(2rem + env(safe-area-inset-bottom, 0px)); z-index: 120; display: flex; flex-direction: column; align-items: flex-end; }
 .teim-rd .cedar-widget__launcher { display: inline-flex; align-items: center; justify-content: flex-start; gap: 0.75rem; padding: 0.75rem 1.25rem; border: 1px solid var(--teal-line); border-radius: 12px; background: var(--bg); color: var(--ink); box-shadow: 0 8px 24px rgba(10, 15, 38, 0.1); cursor: pointer; transition: all 0.2s cubic-bezier(0.2, 0, 0, 1); }
 /* Guarded, because a touch browser leaves :hover stuck on the last thing
  * tapped: unguarded, the pill stays lifted and tinted after one tap. */
@@ -295,63 +295,39 @@
 .teim-rd .cedar-widget__launcher-label { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; color: var(--ink); line-height: 1.2; }
 .teim-rd .cedar-widget__launcher-context { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--muted); line-height: 1.2; margin-top: 0.1rem; }
 
-/* A PILL THAT IS ALWAYS THERE IS ALWAYS ON TOP OF SOMETHING.
- * At 145x52 and opaque, fixed to the bottom right, this sat on the Advocacy
- * tile on the door, on "Maintain" at the end of the Methods diagram, on
- * "Show 43 more fields" on a record, and on the "What's new" tile on a
- * phone. A fixed launcher covers whatever is in that corner at every scroll
- * position; the only real lever is how much corner it takes.
+/* IT LOOKS THE SAME INSIDE THE APP AS IT LOOKS OUTSIDE IT.
+ * This used to rest as a mark in a circle and say its name only once a
+ * pointer arrived, which meant a phone — having no hover to expand with —
+ * never saw the name at all. It was also the only Cedar launcher in the
+ * product shaped that way. The door's own `.cp-dc__fab` further down this
+ * file, teim-app's `CedarWidget`, and lumecon.ai's `.cedar-fab` are each a
+ * pill that says "Ask Cedar" at rest. Three surfaces agreeing and one
+ * disagreeing is drift, not a considered exception, and a reader crossing
+ * from the door into the app met a different button for the same thing.
  *
- * So it rests as a mark in a circle and says its name when a pointer arrives
- * or focus lands. Same button, same label to a screen reader — the copy is
- * clipped by width, never removed, and `aria-label` was always carrying the
- * name anyway. Touch devices have no hover to expand with, so the circle is
- * simply what a phone gets, which is the convention there. */
-.teim-rd .cedar-widget__launcher { padding: 0; width: 3.25rem; height: 3.25rem; min-height: 3.25rem; border-radius: 50%;
-  justify-content: center; gap: 0; overflow: hidden; }
-.teim-rd .cedar-widget__launcher-copy { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
-  transition: max-width 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease, margin-left 0.26s cubic-bezier(0.22, 1, 0.36, 1); }
+ * The circle was there because a persistent pill covers whatever is in the
+ * corner — it sat on the Advocacy tile, on "Maintain" in the Methods
+ * diagram, on "Show 43 more fields", on "What's new" on a phone. That cost
+ * is real and it is paid a different way now: the launcher already steps
+ * aside for the explore viewer and while the panel is open, and those two
+ * rules buy the corner back without making the button anonymous.
+ *
+ * The leading icon went with the circle. It was a Press gate glyph rather
+ * than a Cedar brand asset, and neither of the two launchers this now
+ * matches carries one — both are the status dot and the name. */
 .teim-rd .cedar-widget__launcher-label,
 .teim-rd .cedar-widget__launcher-context { white-space: nowrap; }
-.teim-rd .cedar-widget__launcher-mark { display: grid; place-items: center; color: var(--dteal); flex: 0 0 auto; }
-.teim-rd .cedar-widget__launcher-mark svg { width: 22px; height: 22px; }
-/* The mark never moves: it is what the circle IS, and an element that
- * disappears from under the pointer that summoned it makes the button
- * re-lay-out mid-hover — which is how a click can land on nothing at all.
- * The status dot is the part that arrives, because status is something you
- * read while engaging rather than at rest. */
-.teim-rd .cedar-widget__status-dot { width: 0.5rem; height: 0.5rem; display: none; margin-left: 0.55rem; }
-/* The expanded shape, on pointers that can hover and on keyboard focus. The
- * width is a maximum the content never reaches, not a measured size. */
-@media (hover: hover) {
-  .teim-rd .cedar-widget__launcher:hover,
-  .teim-rd .cedar-widget__launcher:focus-visible,
-  .teim-rd .cedar-widget--open .cedar-widget__launcher {
-    width: auto; height: auto; overflow: visible;
-    border-radius: 12px; padding: 0.75rem 1.25rem; justify-content: flex-start;
-  }
-  .teim-rd .cedar-widget__launcher:hover .cedar-widget__launcher-copy,
-  .teim-rd .cedar-widget__launcher:focus-visible .cedar-widget__launcher-copy,
-  .teim-rd .cedar-widget--open .cedar-widget__launcher-copy {
-    max-width: 12rem; opacity: 1; margin-left: 0.7rem;
-  }
-  .teim-rd .cedar-widget__launcher:hover .cedar-widget__status-dot,
-  .teim-rd .cedar-widget__launcher:focus-visible .cedar-widget__status-dot,
-  .teim-rd .cedar-widget--open .cedar-widget__status-dot { display: block; }
-}
-/* Keyboard users on a touch screen still get the name. */
-.teim-rd .cedar-widget__launcher:focus-visible { width: auto; height: auto; overflow: visible; border-radius: 12px; padding: 0.75rem 1.25rem; justify-content: flex-start; }
-.teim-rd .cedar-widget__launcher:focus-visible .cedar-widget__launcher-copy { max-width: 12rem; opacity: 1; margin-left: 0.7rem; }
-.teim-rd .cedar-widget__launcher:focus-visible .cedar-widget__status-dot { display: block; }
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cedar-widget__launcher, .teim-rd .cedar-widget__launcher-copy { transition: none; }
 }
-/* Phones: tucked closer into the corner, and no context line if it ever
- * expands there. */
+/* Phones: tucked closer into the corner, and clear of iOS Safari's home
+ * indicator. Same shape and same words as every other width — saying the
+ * name is the whole point of the change above. */
 @media (max-width: 640px) {
-  .teim-rd .cedar-widget { right: 1rem; bottom: 1rem; }
-  .teim-rd .cedar-widget__launcher { width: 3rem; height: 3rem; }
-  .teim-rd .cedar-widget__launcher-context { display: none; }
+  .teim-rd .cedar-widget {
+    right: calc(1rem + env(safe-area-inset-right, 0px));
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* The panel rises from the bottom of the window, anchored to the edge rather
