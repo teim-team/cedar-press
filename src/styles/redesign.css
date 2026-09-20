@@ -547,9 +547,9 @@
 .teim-rd .cedar-note { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.84rem; line-height: 1.45; color: var(--ink-2); border-radius: 0 9px 9px 0; padding: 0.55rem 0.75rem; animation: rise 0.3s cubic-bezier(0.22,1,0.36,1); }
 .teim-rd .cedar-note__ico { flex: none; display: inline-flex; width: 14px; height: 14px; margin-top: 0.12rem; }
 .teim-rd .cedar-note__ico svg { width: 14px; height: 14px; }
-.teim-rd .cedar-note--warn { background: var(--teal-tint); border-left: 3px solid var(--teal); }
+.teim-rd .cedar-note--warn { color: var(--ink); }
 .teim-rd .cedar-note--warn .cedar-note__ico { color: var(--dteal); }
-.teim-rd .cedar-note--suggest { background: var(--teal-tint); border-left: 3px solid var(--teal-line); }
+.teim-rd .cedar-note--suggest { color: var(--ink-2); }
 .teim-rd .cedar-note--suggest .cedar-note__ico { color: var(--teal); }
 .teim-rd .cedar-note--affirm { color: var(--dteal); padding: 0.35rem 0.2rem; border-radius: 0; }
 .teim-rd .cedar-note--affirm .cedar-note__ico { color: var(--dteal); }
@@ -1159,11 +1159,8 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--teal);
-  background: var(--teal-tint);
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--line);
+  padding: 0.8rem 0 0;
   margin-bottom: 1.1rem;
 }
 .teim-rd .detail-warnings__icon { flex: none; width: 18px; height: 18px; color: var(--teal-dark); margin-top: 0.1rem; }
@@ -1202,7 +1199,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .respreview__wm span { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(10, 15, 38, 0.1); transform: rotate(-24deg); white-space: nowrap; }
 .teim-rd .respreview__wm span:nth-child(even) { align-self: flex-start; margin-left: 8%; }
 .teim-rd .respreview__wm span:nth-child(3n) { align-self: flex-end; margin-right: 8%; }
-.teim-rd .respreview__note { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; border: 1px solid var(--line); border-left: 3px solid var(--dteal, #0A7F74); border-radius: 10px; background: var(--bg, #fff); padding: 0.85rem 1.1rem; margin: 0 0 1.1rem; }
+.teim-rd .respreview__note { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.9rem 0; margin: 0 0 1.1rem; }
 .teim-rd .respreview__badge { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; color: var(--dteal, #0A7F74); border: 1px solid currentColor; border-radius: 999px; padding: 0.24rem 0.55rem 0.2rem; flex: none; }
 .teim-rd .respreview__text { margin: 0; flex: 1 1 22rem; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
 .teim-rd .respreview__cta { flex: none; }
@@ -4656,7 +4653,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .gv-context__lens { display: block; width: 100%; font-size: 0.82rem; color: var(--dteal); margin-top: 0.15rem; }
 
 /* Cedar's interpretation line is quieter than its observation. */
-.teim-rd .gv-noticebox__interp { margin: -0.5rem 0 1.2rem; font-size: 0.9rem; line-height: 1.55; color: var(--muted); border-left: 2px solid var(--teal-line); padding-left: 0.8rem; }
+.teim-rd .gv-noticebox__interp { margin: -0.3rem 0 1.2rem; font-size: 0.9rem; line-height: 1.55; color: var(--muted); max-width: 70ch; }
 
 /* Replace view: badges only where they help. */
 .teim-rd .gv-lib__badge { display: inline-block; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--dteal); border: 1px solid var(--teal-line); border-radius: var(--radius-pill); padding: 0.18rem 0.5rem; margin-top: 0.35rem; }

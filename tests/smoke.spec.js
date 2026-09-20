@@ -110,10 +110,23 @@ test.describe("the gate", () => {
     await expect(notice).toContainText("small group");
     await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
       .toHaveAttribute("href", /mailto:elijah\.moreno@lumecon\.ai/);
-    await notice.getByRole("button", { name: "Dismiss private preview notice" }).click();
+    // The way out is a close control, not a "Continue →" pill. A reader who
+    // does not want to continue anywhere still has to be able to shut it.
+    await notice.getByRole("button", { name: "Close this notice" }).click();
     await expect(notice).toHaveCount(0);
-    await page.goto("/data");
-    await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+  });
+
+  test("the preview note is the door's, and is not carried into the product", async ({ page }) => {
+    // It used to render inside `PressMast`, which every signed-in page
+    // mounts, so a subscriber met an explanation of how they got in on the
+    // collections table, on an entity profile and on the methods page —
+    // above the product, addressed to somebody already inside it. Owner,
+    // 2026-09-20: it should only be on the landing page.
+    await signIn(page);
+    for (const path of ["/data", "/data?c=funding", "/entity/CE-001CC-8N", "/methods", "/whats-new"]) {
+      await page.goto(path);
+      await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+    }
   });
 
   test("a signed-out visitor gets the gate, not the reader", async ({ page }) => {

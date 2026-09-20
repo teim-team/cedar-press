@@ -1,22 +1,56 @@
-/* A shared link is an intentional preview invitation, not an accidental
- * unfinished page. This remains in the document flow so it never blocks a
- * login, a collection, or Cedar on a small screen. */
-.teim-rd .cp-preview { width: min(calc(100% - 2rem), 68rem); margin: 0.85rem auto 0; display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0.9rem; border: 1px solid var(--line); border-left: 3px solid var(--dteal); border-radius: 8px; background: var(--bg); box-shadow: 0 8px 22px rgba(7, 24, 36, 0.06); }
-.teim-rd .cp-preview__copy { min-width: 0; }
-.teim-rd .cp-preview__label { display: block; margin-bottom: 0.18rem; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--dteal); }
-.teim-rd .cp-preview p { margin: 0; max-width: 78ch; font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); }
-.teim-rd .cp-preview a { color: var(--dteal); font-weight: 700; text-decoration: none; white-space: nowrap; }
-.teim-rd .cp-preview a:hover { text-decoration: underline; }
-.teim-rd .cp-preview__close { flex: none; min-height: 38px; border: 1px solid var(--line); border-radius: 999px; padding: 0.4rem 0.7rem; background: var(--bg); color: var(--ink); font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.teim-rd .cp-preview__close:hover { border-color: var(--dteal); color: var(--dteal); }
-.teim-rd .cp-preview__close:focus-visible { outline: 2px solid var(--dteal); outline-offset: 3px; }
-/* A phone gets what this is and how to get in; the invitation to give
- * feedback waits for a screen with room for it. See `PressPreviewNotice` for
- * the measurement that put it behind this query. */
+/* The private-preview note, on the door only.
+ *
+ * It was a tinted rounded card with a teal bar down its left edge and a drop
+ * shadow — the shape every generated interface reaches for when it has
+ * something to announce, and the reason it read as filler rather than as the
+ * publisher speaking. A notice at the top of a page is a line of type and a
+ * rule under it. That is all this is.
+ *
+ * It also no longer sets its own width or floats above the page: it sits in
+ * the document flow at the head of the door, so it can never cover a control
+ * or push the product down a screen. `PressGate` is the only thing that
+ * mounts it. */
+.teim-rd .cp-preview {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  width: min(calc(100% - 2rem), 68rem);
+  margin: 0 auto;
+  padding: 0.7rem 0 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.teim-rd .cp-preview__copy {
+  margin: 0;
+  min-width: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.teim-rd .cp-preview__copy b { color: var(--ink); font-weight: 700; }
+.teim-rd .cp-preview a { color: var(--dteal); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.teim-rd .cp-preview a:hover { text-decoration-thickness: 2px; }
+
+/* 44px of target around a 1rem glyph, with no box drawn around it until it
+ * is pointed at. */
+.teim-rd .cp-preview__close {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -0.5rem -0.6rem -0.5rem auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.teim-rd .cp-preview__close:hover { background: rgba(7, 24, 36, 0.06); color: var(--ink); }
+.teim-rd .cp-preview__close:focus-visible { outline: 2px solid var(--dteal); outline-offset: -4px; }
+
 @media (max-width: 620px) {
-  .teim-rd .cp-preview { width: calc(100% - 1.4rem); align-items: flex-start; gap: 0.65rem; padding: 0.7rem; }
-  .teim-rd .cp-preview p { font-size: 0.82rem; }
-  .teim-rd .cp-preview__aside { display: none; }
-  .teim-rd .cp-preview__ask { display: block; margin-top: 0.3rem; }
-  .teim-rd .cp-preview__close { min-height: 34px; padding: 0.32rem 0.55rem; font-size: 0.75rem; }
+  .teim-rd .cp-preview { width: calc(100% - 1.4rem); gap: 0.5rem; }
+  .teim-rd .cp-preview__copy { font-size: 0.82rem; }
 }

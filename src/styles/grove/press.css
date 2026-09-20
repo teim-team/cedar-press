@@ -534,7 +534,7 @@
 .teim-rd .cp-m__sub { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.6rem; }
 .teim-rd .cp-m__cap { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0.7rem 0 1.3rem; }
 /* The one line per section that is allowed to be a statement on its own. */
-.teim-rd .cp-m__pull { font-size: 1.18rem; font-weight: 600; line-height: 1.45; letter-spacing: -0.01em; color: var(--ink); margin: 1.4rem 0 0; padding-left: 1rem; border-left: 2px solid var(--teal); max-width: 52ch; }
+.teim-rd .cp-m__pull { font-size: 1.24rem; font-weight: 600; line-height: 1.45; letter-spacing: -0.014em; color: var(--ink); margin: 1.8rem 0 1.6rem; max-width: 52ch; text-wrap: balance; }
 .teim-rd .cp-m__split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem 2.2rem; align-items: start; }
 @media (max-width: 860px) { .teim-rd .cp-m__split { grid-template-columns: minmax(0, 1fr); } }
 
@@ -1276,12 +1276,12 @@
 .teim-rd .cp-mh__act { margin: 0.9rem 0 0; }
 /* The sentence the page exists to earn. It stands alone rather than being
  * followed straight into another paragraph. */
-.teim-rd .cp-mh__claim { font-family: var(--sans); font-size: clamp(1.5rem, 3.2vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--dteal); margin: 2.6rem 0 3.4rem; padding-left: 1.4rem; border-left: 3px solid var(--teal); max-width: 60ch; }
+.teim-rd .cp-mh__claim { font-family: var(--sans); font-size: clamp(1.5rem, 3.2vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--dteal); margin: 2.6rem 0 3.4rem; max-width: 60ch; text-wrap: balance; }
 
 .teim-rd .cp-msec { margin-top: 4rem; }
 .teim-rd .cp-msec__title { font-family: var(--sans); font-size: clamp(1.5rem, 2.8vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0 0 1.4rem; }
 .teim-rd .cp-msec__lede { font-size: 1.02rem; line-height: 1.62; color: var(--ink-2); margin: 0 0 1.2rem; max-width: 92ch; }
-.teim-rd .cp-msec__aside { font-size: 0.92rem; line-height: 1.62; color: var(--muted); margin: 1rem 0 0; padding-left: 1.1rem; border-left: 2px solid var(--teal-line); max-width: 92ch; }
+.teim-rd .cp-msec__aside { font-size: 0.92rem; line-height: 1.62; color: var(--muted); margin: 1rem 0 0; max-width: 78ch; }
 .teim-rd .cp-msec__close { font-size: 1.02rem; line-height: 1.6; color: var(--ink); font-weight: 600; margin: 1.6rem 0 0; max-width: 92ch; }
 
 /* ── The process, as one run ────────────────────────────────────────────── */
@@ -1406,7 +1406,8 @@
   .teim-rd .cp-eco__label, .teim-rd .cp-eco__spoke line, .teim-rd .cp-eco__spoke .cp-eco__dot { transition: none; }
 }
 
-.teim-rd .cp-eco__notes li { font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); padding-left: 1.1rem; border-left: 2px solid var(--teal); }
+.teim-rd .cp-eco__notes li { position: relative; font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); padding-left: 1.1rem; }
+.teim-rd .cp-eco__notes li::before { content: "\2014"; position: absolute; left: 0; top: 0; color: var(--teal-line, var(--line)); }
 @media (max-width: 900px) { .teim-rd .cp-eco { grid-template-columns: 1fr; } }
 
 /* ── An entity's life ──────────────────────────────────────────────────── */
@@ -1575,7 +1576,7 @@
 @media (max-width: 760px) { .teim-rd .cp-idp { grid-template-columns: minmax(0, 1fr); } }
 
 .teim-rd .cp-idp__shape.is-pending { color: var(--muted); background: transparent; border-style: dashed; }
-.teim-rd .cp-idp__exc { font-size: 0.85rem; line-height: 1.55; color: var(--muted); margin: -0.4rem 0 1rem; padding-left: 0.85rem; border-left: 2px solid var(--line); }
+.teim-rd .cp-idp__exc { font-size: 0.85rem; line-height: 1.55; color: var(--muted); margin: -0.4rem 0 1rem; max-width: 70ch; }
 /* A whole sentence in uppercase mono is a shout. The state is the label;
  * the sentence is a sentence. */
 .teim-rd .cp-idp__pending { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; font-size: 0.85rem; line-height: 1.55; color: var(--muted); margin: 0.2rem 0 1rem; }
@@ -1599,7 +1600,8 @@
 .teim-rd .cp-wb__edgeline { flex: 1 1 auto; height: 1px; min-width: 1.4rem; background: repeating-linear-gradient(to right, var(--teal-line) 0 5px, transparent 5px 10px); }
 .teim-rd .cp-wb__edgelabel { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: center; line-height: 1.6; }
 .teim-rd .cp-wb__asks { list-style: none; margin: 1.6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem 2rem; }
-.teim-rd .cp-wb__asks li { font-family: var(--sans); font-size: 1rem; font-weight: 700; letter-spacing: -0.012em; color: var(--ink); border-left: 2px solid var(--teal); padding-left: 0.9rem; }
+.teim-rd .cp-wb__asks li { position: relative; font-family: var(--sans); font-size: 1rem; font-weight: 700; letter-spacing: -0.012em; color: var(--ink); padding-left: 1.1rem; }
+.teim-rd .cp-wb__asks li::before { content: "\2014"; position: absolute; left: 0; top: 0; font-weight: 400; color: var(--teal-line, var(--line)); }
 .teim-rd .cp-wb__close { font-size: 0.95rem; line-height: 1.62; color: var(--ink-2); margin: 1.4rem 0 0; max-width: 92ch; }
 @media (max-width: 820px) {
   .teim-rd .cp-wb__pair { grid-template-columns: minmax(0, 1fr); }
@@ -1613,7 +1615,7 @@
  * still to do, and the tag says which so a reader is not left to guess that
  * a 6% figure is 94% failure. */
 .teim-rd .cp-ur { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
-.teim-rd .cp-ur__item { border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 3px; padding: 1rem 1.1rem; background: var(--bg); }
+.teim-rd .cp-ur__item { border: 1px solid var(--line); border-radius: 3px; padding: 1rem 1.1rem; background: var(--bg); }
 .teim-rd .cp-ur__item.is-by-design { border-left-color: var(--teal); background: var(--teal-tint); }
 .teim-rd .cp-ur__tag { display: inline-block; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-ur__item.is-by-design .cp-ur__tag { color: var(--dteal); }
@@ -1957,7 +1959,7 @@
 .teim-rd .cp-ar__figure--inline { margin: 0 0 1.6rem; }
 .teim-rd .cp-ar__body p { font-size: 1.06rem; line-height: 1.68; color: var(--ink-2); margin: 0 0 1.2rem; }
 .teim-rd .cp-ar__h2 { font-family: var(--sans); font-size: clamp(1.3rem, 2.2vw, 1.6rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: var(--ink); margin: 2.2rem 0 0.9rem; }
-.teim-rd .cp-ar__pull { font-family: var(--sans); font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 700; letter-spacing: -0.015em; line-height: 1.35; color: var(--ink); margin: 1.8rem 0; padding-left: 1.2rem; border-left: 3px solid var(--teal); }
+.teim-rd .cp-ar__pull { font-family: var(--sans); font-size: clamp(1.25rem, 2vw, 1.6rem); font-weight: 700; letter-spacing: -0.018em; line-height: 1.32; color: var(--ink); margin: 2.2rem 0; max-width: 46ch; text-wrap: balance; }
 .teim-rd .cp-ar__body .cp-ar__pull { color: var(--ink); }
 
 /* A figure is a chart, its assumptions and the line that says where it came
@@ -2155,7 +2157,7 @@
 /* The trailing month, on the right of the same line: a compact reading of
  * the log itself, so the maintenance effort is a set of checkable numbers
  * rather than a repeat of the feed's first row. */
-.teim-rd .cp-nh__pulse { display: flex; flex-direction: column; gap: 0.24rem; margin: 0; font-family: var(--mono); font-size: 0.70rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-left: 2px solid var(--teal); padding-left: 0.9rem; }
+.teim-rd .cp-nh__pulse { display: flex; flex-direction: column; gap: 0.24rem; margin: 0; font-family: var(--mono); font-size: 0.70rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-nh__pulse dt { font-size: 0.68rem; letter-spacing: 0.14em; }
 .teim-rd .cp-nh__pulse dd { margin: 0; }
 .teim-rd .cp-nh__pulselead { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
@@ -2638,7 +2640,7 @@
 .teim-rd .cp-why__photo { position: relative; overflow: hidden; border-radius: 14px; background: #0a4750; min-height: clamp(16rem, 30vw, 24rem); box-shadow: 0 22px 58px -38px rgba(0, 0, 0, 0.8); }
 .teim-rd .cp-why__photo img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; }
 .teim-rd .cp-why__photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 14, 33, 0.02) 40%, rgba(5, 14, 33, 0.34) 100%); pointer-events: none; }
-.teim-rd .cp-why__photolabel { position: absolute; z-index: 2; right: 1.25rem; bottom: 1.15rem; margin: 0; padding: 0.46rem 0.62rem 0.46rem 0.82rem; border-left: 2px solid rgba(95, 217, 204, 0.9); background: rgba(6, 18, 40, 0.84); color: rgba(255, 255, 255, 0.94); font-family: var(--mono); font-size: 0.66rem; line-height: 1.55; letter-spacing: 0.1em; text-align: right; text-transform: uppercase; }
+.teim-rd .cp-why__photolabel { position: absolute; z-index: 2; right: 1.25rem; bottom: 1.15rem; margin: 0; padding: 0.46rem 0.7rem; background: rgba(6, 18, 40, 0.84); color: rgba(255, 255, 255, 0.94); font-family: var(--mono); font-size: 0.66rem; line-height: 1.55; letter-spacing: 0.1em; text-align: right; text-transform: uppercase; }
 .teim-rd .cp-why__photolabel span { display: block; color: #fff; font-weight: 700; }
 .teim-rd .cp-why__proof { list-style: none; counter-reset: step; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.4rem clamp(1.4rem, 3vw, 2.6rem); }
 .teim-rd .cp-why__item { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.18); transition: border-color 0.2s var(--door-ease); }
@@ -3827,7 +3829,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-rec__profile:hover { border-color: var(--dteal); }
 .teim-rd .cp-rec__one { font-size: 0.92rem; line-height: 1.6; color: var(--muted); margin: 0.9rem 0 0; max-width: 92ch; }
 .teim-rd .cp-rec__one .cp-rec__cap { display: block; margin-bottom: 0.3rem; }
-.teim-rd .cp-rec__superseded { font-size: 0.92rem; color: var(--ink-2); margin: 0.8rem 0 0; padding-left: 0.9rem; border-left: 3px solid var(--teal); }
+.teim-rd .cp-rec__superseded { font-size: 0.92rem; color: var(--ink-2); margin: 0.8rem 0 0; max-width: 70ch; }
 
 /* The answer. */
 .teim-rd .cp-rec__sum { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr); gap: 1.6rem 3rem; align-items: start; padding: 1.8rem 0; border-bottom: 1px solid var(--line); }
@@ -4021,7 +4023,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * One object instead of five stacked paragraphs and a loose strip of
  * figures: who this is on the left, what is known on the right, the
  * collections they appear in underneath. */
-.teim-rd .cp-ent__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem 2.4rem; align-items: start; padding: 1.4rem 1.6rem; border: 1px solid var(--line); border-left: 3px solid var(--teal); background: var(--bg); }
+.teim-rd .cp-ent__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem 2.4rem; align-items: start; padding: 1.4rem 1.6rem; border: 1px solid var(--line); background: var(--bg); }
 .teim-rd .cp-ent__who { min-width: 0; }
 .teim-rd .cp-ent__notice { grid-column: 1 / -1; margin: 0; max-width: 78ch; }
 /* The collections this entity turns up in, as marks a reader can point at,
@@ -4256,7 +4258,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ab__h { margin: 0 0 0.5rem; font-family: var(--sans); font-size: 0.95rem; font-weight: 800; letter-spacing: -0.014em; color: var(--ink); }
 .teim-rd .cp-ab__block p { margin: 0 0 0.6rem; font-size: 0.88rem; line-height: 1.6; color: var(--ink-2); }
 .teim-rd .cp-ab__block p:last-child { margin-bottom: 0; }
-.teim-rd .cp-ab__unit { padding: 0.65rem 0.8rem; border-left: 2px solid var(--dteal); background: var(--teal-tint); }
+.teim-rd .cp-ab__unit { padding: 0.7rem 0; border-top: 1px solid var(--line); }
 .teim-rd .cp-ab__sources b, .teim-rd .cp-ab__unit b { color: var(--ink); }
 .teim-rd .cp-ab__lead { margin: 0.2rem 0 0; }
 .teim-rd .cp-ab__more { margin-top: 1.2rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
@@ -4285,7 +4287,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * artwork here would make the journalism compete with the collection's own
  * facts for the reader's attention. */
 .teim-rd .cp-ab__reads { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-.teim-rd .cp-ab__read { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.55rem 0.7rem; border: 1px solid var(--line); border-left: 2px solid var(--teal); text-decoration: none; }
+.teim-rd .cp-ab__read { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.55rem 0.7rem; border: 1px solid var(--line); text-decoration: none; }
 .teim-rd .cp-ab__read:hover { background: var(--teal-wash, rgba(15, 181, 165, 0.06)); }
 .teim-rd .cp-ab__readtitle { font-family: var(--sans); font-size: 0.92rem; font-weight: 700; line-height: 1.35; color: var(--ink); }
 .teim-rd .cp-ab__readmeta { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -4310,7 +4312,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-task__act:hover b { color: var(--dteal); }
 .teim-rd .cp-task__act span { display: block; margin-top: 0.15rem; font-size: 0.82rem; line-height: 1.5; color: var(--ink-2); }
 .teim-rd .cp-task__fine, .teim-rd .cp-prop__fine { margin: 0.8rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--muted); }
-.teim-rd .cp-prop__not { margin: 1.4rem 0 0; padding: 0.9rem 1rem; border-left: 2px solid var(--line-strong, var(--line)); background: var(--bg-2, rgba(10, 28, 52, 0.03)); }
+.teim-rd .cp-prop__not { margin: 1.6rem 0 0; padding: 0.9rem 0 0; border-top: 1px solid var(--line); }
 .teim-rd .cp-prop__notcap { display: block; margin-bottom: 0.4rem; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-prop__not ul { margin: 0; padding-left: 1.1rem; }
 .teim-rd .cp-prop__not li { font-size: 0.85rem; line-height: 1.6; color: var(--ink-2); }
