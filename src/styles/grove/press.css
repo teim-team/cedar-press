@@ -4196,12 +4196,19 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * reader of a table does not need: the standing line, which says what Cedar
  * Press is to somebody who is already inside it, and the breathing room a
  * document's header wants. ~86px, and the rest went to the records. */
-.teim-rd .cp-page--table > .cp-mast { padding-inline: 2.4rem; padding-top: 0.55rem; }
-.teim-rd .cp-page--table > .cp-mast .cp-mast__top { padding-bottom: 0.35rem; }
-.teim-rd .cp-page--table > .cp-mast .cp-mast__of--line { display: none; }
-.teim-rd .cp-page--table > .cp-mast .cp-nav { padding-block: 0.2rem; }
-.teim-rd .cp-page--table > .cp-mast .cp-mast__word { font-size: 1.05rem; }
-.teim-rd .cp-page--table > .cp-mast .cp-mast__mark { width: 1.7rem; height: 1.7rem; }
+/* ONE MASTHEAD, ON EVERY PAGE.
+   This page used to wear a different one: the standing line hidden, the
+   wordmark at 1.05rem instead of 1.25, the mark at 1.7rem, the nav and the
+   top row squeezed. Owner, 2026-09-20: "trusted intelligence for Indian
+   Country looks like it's on a header on some pages and not others."
+   It was, and it is the kind of difference a reader feels without being
+   able to name — the masthead is the one thing that must not change between
+   routes, because it is what says this is still the same publication.
+   The 86px it bought went to the records, which was a real gain and the
+   wrong place to take it from. The only thing kept is the horizontal
+   gutter, which is not the masthead's identity: it is the page's, and this
+   page's frame runs to the edges. */
+.teim-rd .cp-page--table > .cp-mast { padding-inline: 2.4rem; }
 .teim-rd .cp-page--table .cp-ex { margin-top: 0; padding-inline: 0; max-width: none; }
 .teim-rd .cp-page--table .cp-ex__frame { border-radius: 0; border-inline: 0; min-height: calc(100dvh - 12rem); }
 /* The rail runs the frame's full height rather than stopping under its last

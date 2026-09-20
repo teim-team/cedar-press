@@ -116,6 +116,43 @@ test.describe("the gate", () => {
     await expect(notice).toHaveCount(0);
   });
 
+  test("every signed-in route wears the same masthead", async ({ page }) => {
+    // The collections page used to hide the standing line and shrink the
+    // wordmark and the mark to buy 86px for the records. Owner, 2026-09-20:
+    // "trusted intelligence for Indian Country looks like it's on a header
+    // on some pages and not others." A masthead is the one thing that must
+    // not change between routes, because it is what says this is still the
+    // same publication.
+    await signIn(page);
+    const seen = new Set();
+    for (const path of ["/", "/data", "/articles", "/whats-new", "/methods", "/priorities", "/settings"]) {
+      await page.goto(path);
+      await page.locator(".cp-mast").waitFor();
+      await page.evaluate(() => document.fonts.ready);
+      seen.add(await page.evaluate(() => {
+        const mast = document.querySelector(".cp-mast");
+        const line = document.querySelector(".cp-mast__of--line");
+        const word = document.querySelector(".cp-mast__word");
+        const mark = document.querySelector(".cp-mast__mark");
+        const shown = line && getComputedStyle(line).display !== "none";
+        return [
+          Math.round(mast.getBoundingClientRect().height),
+          shown ? "line" : "no-line",
+          word && getComputedStyle(word).fontSize,
+          mark && Math.round(mark.getBoundingClientRect().width),
+        ].join("|");
+      }));
+    }
+    // One signature across every route. That is the invariant at both
+    // widths; what the signature IS differs between them, because a phone
+    // masthead genuinely has no room for the standing line and drops it at
+    // 760px. What it may not do is differ between two routes at one width.
+    expect([...seen]).toHaveLength(1);
+    // And where there is room, the line is there.
+    const wide = (page.viewportSize().width ?? 0) > 760;
+    expect([...seen][0]).toContain(wide ? "|line|" : "|no-line|");
+  });
+
   test("the preview note is the door's, and is not carried into the product", async ({ page }) => {
     // It used to render inside `PressMast`, which every signed-in page
     // mounts, so a subscriber met an explanation of how they got in on the
