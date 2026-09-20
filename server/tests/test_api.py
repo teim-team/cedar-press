@@ -45,6 +45,7 @@ os.environ["CEDAR_PRESS_CODES"] = json.dumps(
 from fastapi.testclient import TestClient  # noqa: E402
 
 from cedar_press import (
+    cedar_service,  # noqa: E402
     codes,  # noqa: E402
     press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
@@ -188,6 +189,13 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("demonstration", response.json()["answer"])
 
     def test_cedar_labels_real_statistics_with_their_source(self) -> None:
+        # As Cedar Press+, because `owned` is on the `pro` shelf and
+        # `/cedar/ask` now checks entitlement before either answerer sees the
+        # id. The subject here is how a real statistic is labelled, not who
+        # may read it; on a standard session the plan gate would answer first
+        # and this would stop testing its own subject.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         response = client.post(
             "/cedar/ask",
             json={"question": "What are the headline figures?", "collectionId": "owned"},
@@ -196,6 +204,8 @@ class TestCatalog(unittest.TestCase):
         answer = response.json()["answer"]
         self.assertNotIn("demonstration", answer)
         self.assertIn("Source:", answer)
+        ratelimit.reset_for_tests()
+        sign_in()
 
     def test_how_many_routes_to_statistics_not_construction(self) -> None:
         response = client.post(
@@ -216,6 +226,15 @@ class TestCatalog(unittest.TestCase):
     def test_cedar_still_refuses_what_it_cannot_support(self) -> None:
         response = client.post("/cedar/ask", json={"question": "what?"})
         self.assertEqual(response.status_code, 501)
+        # `contractors` is on the `pro` shelf, so this asks as Cedar Press+.
+        # The subject is the refusal -- a question no profile can support and
+        # no Cedar is wired in to compose -- and the reader has to be able to
+        # reach the collection for the refusal to be the thing under test. On
+        # a standard session the plan gate answers first, which is correct and
+        # is covered by `TestEntitlement`; it would just mean this test passed
+        # without ever exercising `NOT_ANSWERABLE`.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
         response = client.post(
             "/cedar/ask",
             json={
@@ -224,6 +243,8 @@ class TestCatalog(unittest.TestCase):
             },
         )
         self.assertEqual(response.status_code, 501)
+        ratelimit.reset_for_tests()
+        sign_in()
 
     def test_a_collection_profile_is_served(self) -> None:
         response = client.get("/press/collections/owned/profile")
@@ -407,6 +428,103 @@ class TestEntitlement(unittest.TestCase):
     def test_a_download_is_refused_without_a_session(self) -> None:
         client.cookies.clear()
         self.assertEqual(client.get("/press/collections/deals/download").status_code, 401)
+
+    # `/cedar/ask` took a `collectionId` from the browser and handed it to both
+    # answerers without asking whether the subscription reached it. The route's
+    # own first line said "scoped to what this subscription can open" and
+    # `cedar_service._payload` told Cedar "entitlement was already decided on
+    # this side of the hop"; neither was true. These four are the cases that
+    # distinguish a real gate from a sentence about one.
+
+    def _ask(self, email: str, collection_id: str, question: str | None = None):
+        ratelimit.reset_for_tests()
+        sign_in(email)
+        return client.post(
+            "/cedar/ask",
+            json={"question": question or "What does this collection cover?",
+                  "collectionId": collection_id},
+        )
+
+    def test_a_standard_reader_is_not_answered_over_a_plus_collection(self) -> None:
+        # `need` is on the `pro` shelf. A Press subscription does not reach it.
+        response = self._ask("reader@example.org", "need")
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        # The boundary is a field, not a tone: a panel renders it rather than
+        # reading it out of the prose.
+        self.assertEqual(body["access"]["opened"], False)
+        self.assertEqual(body["access"]["reason"], "NOT_INCLUDED")
+        self.assertEqual(body["access"]["plan"], "Cedar Press+")
+        # Description, yes -- `/press/collections/{id}/profile` already serves
+        # that to any signed-in reader on purpose. Retrieval, no.
+        self.assertEqual(body["source"], "profile")
+        self.assertIn("Cedar Press+", body["answer"])
+
+    def test_a_plus_reader_keeps_the_plus_collection(self) -> None:
+        response = self._ask("pro@example.org", "need")
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        # No access block at all: nothing was withheld, so nothing is declared.
+        self.assertIsNone(body.get("access"))
+        self.assertNotIn("Cedar Press+", body["answer"])
+
+    def test_a_standard_reader_keeps_every_standard_collection(self) -> None:
+        # The gate must bite on the `pro` shelf and nowhere else, or it is a
+        # regression wearing a security fix's name.
+        for collection_id in ("funding", "legislation", "deals", "nagpra",
+                              "lobbying", "federal-register"):
+            with self.subTest(collection=collection_id):
+                body = self._ask("reader@example.org", collection_id).json()
+                self.assertIsNone(body.get("access"), collection_id)
+
+    def test_the_consent_limited_collection_is_gated_like_any_other(self) -> None:
+        # `owned` is the consent/publication-limited one: White Earth listings
+        # enter entity rows only once the nation confirms publication terms, and
+        # it has no preview file at all. It is also on the `pro` shelf, so the
+        # entitlement answer must not depend on the preview being missing --
+        # those are two different reasons and only one of them is about a plan.
+        body = self._ask("reader@example.org", "owned").json()
+        self.assertEqual(body["access"]["reason"], "NOT_INCLUDED")
+        plus = self._ask("pro@example.org", "owned").json()
+        self.assertIsNone(plus.get("access"))
+
+    def test_an_unknown_collection_is_not_an_upgrade_prompt(self) -> None:
+        # `may_open` is False for an id the catalog has never heard of, so
+        # answering it with the locked reply would make "no such collection"
+        # the sound of every typo, and hide a routing bug behind a sales line.
+        response = self._ask("reader@example.org", "no-such-collection")
+        self.assertEqual(response.status_code, 404, response.text)
+
+    def test_a_locked_collection_never_reaches_cedar(self) -> None:
+        # The one that matters. The profile answer is a description and is
+        # allowed; the hop is retrieval and is not. If `cedar_service.ask` is
+        # ever called with a collection this plan cannot open, Cedar has been
+        # handed a scope under a contract that says entitlement was already
+        # checked.
+        with mock.patch.object(cedar_service, "available", return_value=True), \
+                mock.patch.object(cedar_service, "ask") as asked:
+            body = self._ask(
+                "reader@example.org", "need", "What should I conclude from this?"
+            ).json()
+        asked.assert_not_called()
+        self.assertEqual(body["access"]["opened"], False)
+
+        # And the same question on a collection the plan does reach still gets
+        # there, so the test above is not passing because the hop is dead.
+        with mock.patch.object(cedar_service, "available", return_value=True), \
+                mock.patch.object(cedar_service, "ask") as asked:
+            asked.return_value = cedar_service.CedarReply(
+                answer="composed", thread_id="t-1", unavailable=False
+            )
+            # A question the profile cannot answer, so the hop is the only
+            # thing left that could answer it. "What does this collection
+            # cover?" is answered off the release and never reaches Cedar,
+            # which would make this control pass for the wrong reason.
+            self._ask(
+                "reader@example.org", "lobbying", "What should I conclude from this?"
+            )
+        self.assertEqual(asked.call_count, 1)
+        self.assertEqual(asked.call_args.kwargs["collection_id"], "lobbying")
 
 
 class TestErrorShape(unittest.TestCase):

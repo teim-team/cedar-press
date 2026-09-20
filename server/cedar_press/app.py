@@ -594,11 +594,70 @@ def _answer_basis(
     return basis
 
 
+def _not_included_answer(
+    profile: dict[str, object], collection_id: str, thread_id: str | None
+) -> dict[str, object]:
+    """The honest reply for a collection this subscription does not include.
+
+    Not a refusal, and not a sales page. The description of a collection is
+    not its records, and this service already decided that distinction the
+    other way round on ``/press/collections/{id}/profile``, which serves any
+    signed-in reader "because describing what a higher shelf holds is the
+    honest version of an upgrade prompt". A reader who asks about Cedar NEED
+    on a Press subscription gets what NEED is, read off its release, and is
+    told plainly where the records live.
+
+    What they do not get is retrieval. No hop to Cedar carrying this
+    collection, so nothing composes a sentence over records the subscription
+    does not open, and ``access.opened`` is a field rather than a tone so a
+    panel can render the boundary instead of inferring it from the prose.
+    """
+    description = profile.get("description")
+    name = profile.get("collection_name") or collection_id
+    reach = (
+        f"{name} is part of Cedar Press+. This is what the collection is, "
+        f"read off its current release; its records open with that plan."
+    )
+    return {
+        "answer": f"{description}\n\n{reach}" if description else reach,
+        "basis": None,
+        "answerBasis": _answer_basis("release", profile, collection_id),
+        "collectionId": collection_id,
+        # The description came off the release, so the basis is a release and
+        # says so. `source` names the answerer, and no answerer ran past the
+        # profile: Cedar was never asked.
+        "source": "profile",
+        "access": {
+            "opened": False,
+            "plan": "Cedar Press+",
+            "reason": "NOT_INCLUDED",
+        },
+        "threadId": thread_id,
+    }
+
+
 @app.post("/cedar/ask")
 def ask_cedar(
     question: Question, session: Session = Depends(require_session)
 ) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
+
+    THE ENTITLEMENT IS DECIDED HERE, BEFORE EITHER ANSWERER SEES THE ID.
+    It was not, and the first line of this docstring was the only place the
+    scoping existed. A `collectionId` arrived from the browser and went
+    straight to both answerers, so a Press reader naming a Cedar Press+
+    collection was answered from its profile and, past that, had the id
+    forwarded to Cedar -- which `cedar_service._payload` hands over under
+    "the service decides nothing about entitlement; it is told, because
+    entitlement was already decided on this side of the hop". That comment
+    described an arrangement this route had not implemented: Cedar was told
+    the reader may open a collection nobody had checked they could.
+
+    ``repository.may_open`` is the same rule the shelf and the download route
+    read, reused rather than restated, so a plan cannot reach a collection
+    through Cedar that it cannot reach through either of those. A hidden
+    control in the browser, an omitted sample request and a client-supplied
+    plan are all display decisions, and none of them is authorization.
 
     TWO ANSWERERS, IN THIS ORDER, AND THE ORDER IS THE POINT.
 
@@ -624,7 +683,20 @@ def ask_cedar(
     collection_name = None
     if question.collectionId:
         profile = repository.collection_profile(question.collectionId)
-        collection_name = (profile or {}).get("collection_name")
+        # An id nothing in the catalog knows is a different answer from one
+        # this plan does not reach, and `may_open` returns False for both.
+        # Telling them apart here keeps "no such collection" from becoming
+        # the sound of every locked collection, which is how a real routing
+        # bug hides behind an upgrade prompt.
+        if profile is None:
+            raise HTTPException(status_code=404, detail="No such collection.")
+        if repository.is_sold(question.collectionId) and not repository.may_open(
+            session.tier, question.collectionId
+        ):
+            return _not_included_answer(
+                profile, question.collectionId, question.threadId
+            )
+        collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
         if answered:
             return {
