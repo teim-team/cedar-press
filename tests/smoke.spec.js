@@ -393,10 +393,19 @@ test.describe("the subscriber's path", () => {
     const errors = watchConsole(page);
     await signIn(page);
 
-    // Six tiles, each a real destination. The count is asserted because the
-    // layout is built on it: they wrapped as five and one once, orphaning
-    // Contact on a row of its own.
-    await expect(page.locator(".cp-hub__tile")).toHaveCount(6);
+    // THE OVERVIEW IS A BRIEFING NOW, NOT SIX DOORS.
+    // It asserted six hub tiles — Collections, Research Briefs, Priorities,
+    // What's new, Methods, Plans — which is the masthead's own nav bar
+    // restated underneath itself. Owner, 2026-09-20: "Make it feel more like
+    // a briefing: one lead development, three signals worth watching, one
+    // collection or research brief to explore, one Cedar question worth
+    // asking." Those four are what is asserted, because those four are what
+    // the page is for; every one of them is read from the release record or
+    // the article list, so none of it can go stale in place.
+    await expect(page.locator(".cp-brief__lead")).toBeVisible();
+    await expect(page.locator(".cp-brief__signals a")).toHaveCount(3);
+    await expect(page.locator(".cp-brief__coll")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Ask Cedar what changed/ })).toBeVisible();
     await expect(page.locator(".cp-close__head")).toContainText("Nothing here is a snapshot");
 
     // Signing out is inside the account menu now: the masthead is one row at
@@ -529,6 +538,9 @@ test.describe("Explore the collections", () => {
     // list now (the rail writes the ids), because clearing the parameter
     // means "unspecified" and resolves to the default collection.
     await expect(caption).toContainText(/\d+ collections/);
+    // And no record rows behind it: the catalogue replaces the pooled
+    // sample rather than sitting above them.
+    await expect(records).toHaveCount(0);
 
     // Narrow to one entity from the picker; the URL now carries the cut.
     // `click` and an expectation rather than `check`: the box is controlled
@@ -1347,37 +1359,25 @@ test.describe("the stylesheet", () => {
     await expect(band).toHaveCSS("background-color", /^rgba?\((?!0, 0, 0, 0\)).+\)$/);
 
     if (testInfo.project.name !== "desktop") return;
-    // The tiles are a grid. Stated without naming a column count, because
-    // that is six, three or two depending on the width and all three are
-    // correct: what is never correct is six full-width blocks stacked down
-    // the page, which is what a grid that has stopped being a grid gives
-    // you, and what the truncation gave. A tile narrower than half the row,
-    // and some tile sharing a row with another, are true at every
-    // breakpoint above a phone and false the moment the rules stop applying.
-    // The hub is two ranks now — two lead cards and four quieter ones — so
-    // the tiles live in two containers rather than one. The property this
-    // test exists for is unchanged: every rank is still laid out, and none of
-    // them has collapsed into full-width blocks stacked down the page.
+    // THE HUB GRID IS GONE WITH THE HUB. This measured that six tiles stayed
+    // laid out as a grid rather than collapsing into full-width blocks —
+    // the failure a truncated stylesheet produces. The briefing has the same
+    // exposure and the same tell: it is two columns on a wide screen, and a
+    // stylesheet that did not survive gives one column of stacked blocks.
     const shape = await page.evaluate(() => {
-      const measure = (selector) => {
-        const box = document.querySelector(selector);
-        const tiles = [...box.querySelectorAll(".cp-hub__tile")];
-        return {
-          width: box.getBoundingClientRect().width,
-          widest: Math.max(...tiles.map((t) => t.getBoundingClientRect().width)),
-          rows: new Set(tiles.map((t) => Math.round(t.getBoundingClientRect().top))).size,
-          count: tiles.length,
-        };
+      const brief = document.querySelector(".cp-brief");
+      const lead = document.querySelector(".cp-brief__lead");
+      const side = document.querySelector(".cp-brief__side");
+      return {
+        width: brief.getBoundingClientRect().width,
+        leadWidth: lead.getBoundingClientRect().width,
+        sameRow:
+          Math.abs(lead.getBoundingClientRect().top - side.getBoundingClientRect().top) < 8,
       };
-      return { lead: measure(".cp-hub__lead"), rest: measure(".cp-hub__grid--rest") };
     });
-    // Six doors, same as before the split.
-    expect(shape.lead.count + shape.rest.count).toBe(6);
-    // Each rank is one row across, and no tile owns its whole row.
-    expect(shape.lead.rows).toBe(1);
-    expect(shape.lead.widest).toBeLessThan(shape.lead.width);
-    expect(shape.rest.rows).toBe(1);
-    expect(shape.rest.widest).toBeLessThan(shape.rest.width / 2);
+    // The lead and its margin share a row, and neither owns the whole of it.
+    expect(shape.sameRow).toBe(true);
+    expect(shape.leadWidth).toBeLessThan(shape.width);
   });
 });
 

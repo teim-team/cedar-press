@@ -103,7 +103,14 @@ export default function CedarPressResearchAccess() {
           </div>
         </section>
 
-        <p className="cp-mh__claim">Two-page proposal maximum.</p>
+        {/* "TWO-PAGE PROPOSAL MAXIMUM." WAS A BILLBOARD.
+            Owner, 2026-09-20: this route "should feel like a concise
+            project-intake route: one clear request, one explanation of what
+            happens next, one compact scope checklist." A page-wide teal
+            claim announcing a length limit is not any of those three — it is
+            a rule about the form, at the size of a headline. It is a line in
+            the checklist's own heading now, where somebody writing the thing
+            will read it. */}
 
         {/* Fit, as one comparison rather than a page of criteria. The two
             examples do more work than a policy paragraph would. */}
@@ -125,6 +132,7 @@ export default function CedarPressResearchAccess() {
         <details className="cp-msec cp-prop__wrap cp-fade" aria-label="What to include" open>
           <summary className="cp-prop__sum">
             <span className="cp-sec__band">Include in the proposal</span>
+            <span className="cp-prop__max">Two pages maximum</span>
           </summary>
           <ol className="cp-prop">
             {PROPOSAL.map((item, i) => (
@@ -139,19 +147,18 @@ export default function CedarPressResearchAccess() {
             redistributed. Projects requiring broad, repeated, exploratory or commercial access
             should use Cedar Press<span className="cp-plus">+</span> or Cedar Grove.
           </p>
-          {/* Said as its own list rather than left to be inferred from the
-              "not a fit" examples: the commonest way this route goes wrong
-              is a request that is really a subscription, and answering that
-              after a proposal has been written wastes both sides' time. */}
-          <div className="cp-prop__not">
-            <span className="cp-prop__notcap">What this route is not</span>
-            <ul>
-              <li>Access to every collection</li>
-              <li>Open-ended custom research</li>
-              <li>A channel for confidential or restricted data</li>
-              <li>A path to commercial repackaging</li>
-            </ul>
-          </div>
+          {/* "WHAT THIS ROUTE IS NOT" IS GONE, AND SAID TWICE BEFORE IT.
+              Four bullets — every collection, open-ended research,
+              confidential data, commercial repackaging — each of which the
+              "not a fit" example above and the discretionary sentence beside
+              it already carry. The review's word for this page was that it
+              "repeats the same pitch"; this was the repetition. */}
+          {/* WHAT HAPPENS NEXT, which the page never said. */}
+          <ol className="cp-next">
+            <li><b>A person reads it.</b> Requests go to the research desk, not to a queue.</li>
+            <li><b>A fit gets the named collections, for the named project.</b> Nothing wider.</li>
+            <li><b>A miss gets an answer anyway</b> — which route fits, if one does.</li>
+          </ol>
           <a className="cp-trh__cta" href={REQUEST_HREF}>
             Start a research request <span aria-hidden="true">&#8594;</span>
           </a>

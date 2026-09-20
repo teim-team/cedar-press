@@ -369,7 +369,7 @@ def _coverage_sentence(profile: dict[str, Any]) -> str | None:
     # A catalog-only profile has no release, so no vintage to date it by.
     dated = profile.get("vintage") and profile.get("last_updated")
     tail = (
-        f" Current vintage {profile['vintage']}, last updated {profile['last_updated']}."
+        f" The current release is {profile['vintage']}, updated {profile['last_updated']}."
         if dated
         else ""
     )
@@ -385,7 +385,33 @@ def _coverage_sentence(profile: dict[str, Any]) -> str | None:
     coverage_from = profile.get("coverage_from")
     if not coverage_from:
         return None
-    return f"Coverage from {coverage_from} to present.{tail}"
+    return f"It runs from {coverage_from} to the present.{tail}"
+
+
+def _lower_first(text: str) -> str:
+    """Lower-case the first letter only, so a fragment can join a sentence.
+
+    `text.lower()` would flatten USAspending and NAGPRA, which are the names
+    of the things being described.
+    """
+    stripped = text.strip()
+    if not stripped or stripped[:2].isupper():
+        return stripped
+    return stripped[0].lower() + stripped[1:]
+
+
+def _sentence(text: str) -> str:
+    """One sentence, ending once.
+
+    The profile's fields are written inconsistently — some end in a full
+    stop, some do not — and joining them produced "...pre-2008 record.." in
+    the panel, which is the kind of detail that makes an answer read as
+    assembled rather than written.
+    """
+    stripped = (text or "").strip()
+    if not stripped:
+        return ""
+    return stripped if stripped[-1] in ".?!" else f"{stripped}."
 
 
 def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None:
@@ -452,24 +478,39 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             "basis": basis,
         }
     if any(word in asked for word in _CONSTRUCT_WORDS):
+        # Same reason as the content branch below: the last of these was
+        # prefixed "Known limitations:", which is a field name rather than
+        # something anybody says.
         parts = [
-            profile.get("entity_resolution_method"),
-            profile.get("inclusion_rules"),
-            f"Known limitations: {profile['known_limitations']}"
+            _sentence(profile.get("entity_resolution_method") or ""),
+            _sentence(profile.get("inclusion_rules") or ""),
+            _sentence(f"What it does not do: {_lower_first(profile['known_limitations'])}")
             if profile.get("known_limitations")
-            else None,
+            else "",
         ]
         answer = " ".join(p for p in parts if p)
         if answer:
             return {"answer": answer, "basis": basis}
     if any(word in asked for word in _CONTENT_WORDS):
-        parts = [
-            profile["description"],
-            f"Unit of observation: {profile['unit_of_observation']}"
-            if profile.get("unit_of_observation")
-            else None,
-            _coverage_sentence(profile),
-            f"Sources: {profile['primary_sources']}." if profile.get("primary_sources") else None,
-        ]
-        return {"answer": " ".join(p for p in parts if p), "basis": basis}
+        # PROSE, NOT A FIELD DUMP.
+        #
+        # Owner review, 2026-09-20: "Keep answers direct and human. Do not
+        # make Cedar lead with system language." This used to read
+        # "... Unit of observation: One federal assistance award (grant,
+        # loan, ...). Coverage from 2007 to present. Sources: USAspending
+        # ..." — the profile's own column headings, read aloud. The facts
+        # are the same facts; they are said the way a person would say them,
+        # and the release the answer came from is already printed under it
+        # by the panel, so the sources line does not have to carry it.
+        parts = [_sentence(profile["description"])]
+        unit = profile.get("unit_of_observation")
+        if unit:
+            parts.append(_sentence(f"Each record is {_lower_first(unit)}"))
+        coverage = _coverage_sentence(profile)
+        if coverage:
+            parts.append(coverage)
+        sources = profile.get("primary_sources")
+        if sources:
+            parts.append(_sentence(f"It is built from {_lower_first(sources)}"))
+        return {"answer": " ".join(parts), "basis": basis}
     return None

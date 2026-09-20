@@ -300,6 +300,66 @@ export default function CedarPressMethods() {
             government, enterprise and firm it can resolve, and maintains it through renames,
             acquisitions and changes in legal status.
           </p>
+
+          {/* THE CHAIN, IN ONE LINE.
+              Owner, 2026-09-20: the page needs "one simple diagram showing
+              collection → canonical entity → record → source/release". The
+              seven-stage rail further down is a different diagram — it is
+              how a collection is BUILT. This is how the four things a reader
+              meets in the product relate to each other, which is the
+              question the page's title asks and which nothing on it
+              answered in one glance. */}
+          <ol className="cp-chain" aria-label="How the pieces relate">
+            <li>
+              <b>Collection</b>
+              <span>A published table with a release and a coverage span.</span>
+            </li>
+            <li>
+              <b>Entity</b>
+              <span>The nation, enterprise or firm a record is about, held by a permanent Cedar id.</span>
+            </li>
+            <li>
+              <b>Record</b>
+              <span>One award, filing, notice or transaction, resolved to that entity.</span>
+            </li>
+            <li>
+              <b>Source</b>
+              <span>The document it came from, named on the record and in the download.</span>
+            </li>
+          </ol>
+
+          {/* FOUR ANCHORS. What a reader is actually deciding when they open
+              a methodology page is whether to trust a figure, and the four
+              things that decide it are: the release it came from, the
+              identity it is attached to, the document behind it, and what
+              happens when any of those turn out to be wrong. Each is a
+              chapter below; this is the page answering before it explains. */}
+          <ul className="cp-anchors" aria-label="What this page answers">
+            <li>
+              <a href={`#${anchorId("updates")}`}>
+                <b>Releases</b>
+                <span>Every version keeps its address, so a citation stays reproducible.</span>
+              </a>
+            </li>
+            <li>
+              <a href={`#${anchorId("ids")}`}>
+                <b>Identities</b>
+                <span>One permanent id a nation keeps through renames and reorganizations.</span>
+              </a>
+            </li>
+            <li>
+              <a href={`#${anchorId("sources")}`}>
+                <b>Source records</b>
+                <span>Every collection begins with a document, not an estimate.</span>
+              </a>
+            </li>
+            <li>
+              <a href={`#${anchorId("updates")}`}>
+                <b>Corrections</b>
+                <span>What changes, what does not, and where the change is logged.</span>
+              </a>
+            </li>
+          </ul>
         </section>
 
         <MethodsIndex />
