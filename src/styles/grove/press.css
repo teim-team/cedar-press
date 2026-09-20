@@ -1285,10 +1285,20 @@
 .teim-rd .cp-msec__close { font-size: 1.02rem; line-height: 1.6; color: var(--ink); font-weight: 600; margin: 1.6rem 0 0; max-width: 66ch; }
 
 /* ── The process, as one run ────────────────────────────────────────────── */
-.teim-rd .cp-proc { list-style: none; margin: 0; padding: 2.4rem 0 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0 1.6rem; position: relative; }
-/* One rule behind all seven, so the eye reads a single process rather than
- * seven separate things. */
-.teim-rd .cp-proc::before { content: ''; position: absolute; top: 2.4rem; left: 0; right: 0; height: 1px; background: var(--line); }
+/* FOUR ACROSS, NOT SEVEN. The one-rule-behind-all-seven timeline was the
+ * right idea and the wrong arithmetic: seven columns in a 940px measure is
+ * 112px each, which set the stage notes at about fourteen characters a line.
+ * "Find APIs, / archives, public / notices, / regulatory / dockets, filings /
+ * and state reports." — six lines of two-word fragments, with the column
+ * heights running from four lines to nine so the row ended in a ragged
+ * edge. Widening the page does not rescue it: at 1440px it is still 172px
+ * and twenty-four characters.
+ * Four columns give about 220px and thirty characters, which is three
+ * comfortable lines. The sequence still reads as one process — the rule runs
+ * across each row and the numbers carry the order — and the stages that made
+ * the page feel cramped now have room to be read. */
+.teim-rd .cp-proc { list-style: none; margin: 0; padding: 1.6rem 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.6rem; position: relative; }
+.teim-rd .cp-proc__stage { border-top: 1px solid var(--line); }
 .teim-rd .cp-proc__stage { position: relative; padding-top: 1.5rem; }
 
 /* Hover on the process rail: the step under the pointer answers in teal
@@ -1308,11 +1318,7 @@
 .teim-rd .cp-proc__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.11em; color: var(--dteal); }
 .teim-rd .cp-proc__name { font-family: var(--sans); font-size: 1.02rem; font-weight: var(--weight-display); letter-spacing: var(--track-sub); color: var(--ink); margin: 0.3rem 0 0.4rem; text-wrap: balance;}
 .teim-rd .cp-proc__body { font-size: 0.85rem; line-height: 1.5; color: var(--muted); margin: 0; }
-@media (max-width: 1100px) {
-  .teim-rd .cp-proc { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.4rem; }
-  .teim-rd .cp-proc::before { display: none; }
-  .teim-rd .cp-proc__stage { border-top: 1px solid var(--line); }
-}
+@media (max-width: 900px) { .teim-rd .cp-proc { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6rem 1.4rem; } }
 @media (max-width: 640px) { .teim-rd .cp-proc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ── Where reporting runs out: three stories, not three cards ──────────── */
