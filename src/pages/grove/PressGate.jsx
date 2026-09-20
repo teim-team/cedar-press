@@ -79,6 +79,7 @@ import CollectionPreview from "./PressCollectionPreview";
 import PressDoorCedar from "./PressDoorCedar";
 import PressDoorCollections from "./PressDoorCollections";
 import { TierName } from "./TierName";
+import PressReleaseSpecimen from "./PressReleaseSpecimen";
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
 const MARK = "/brand/lumecon-logo-mark-teal.png";
@@ -528,6 +529,11 @@ export default function PressGate({ user }) {
               their marks, one group a shelf; the pane is the one in hand.
               Not `#catalog`: that id is the reader's shelf on /data. */}
           <figure className="cp-hero3__stage cp-fade" ref={previewRef}>
+            {/* The specimen sits over the frame's top-right corner rather
+                than beside it, which is what makes the hero a layered
+                object instead of a headline next to a screenshot. It is the
+                SELECTED collection's, so the rail below drives both. */}
+            <PressReleaseSpecimen entry={selected} />
             {/* The frame holds a real desktop window at real desktop size and
                 scales it to fit, the way a product screenshot does. Rendering
                 the app at the ~800px the column actually offers gave a narrow

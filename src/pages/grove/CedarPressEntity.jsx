@@ -70,6 +70,29 @@ export default function CedarPressEntity() {
     () => rows.filter((item) => item.entity.entities.some((e) => e.uid === uid)),
     [rows, uid],
   );
+  // THE SPAN OF WHAT IS VISIBLE, and the names the sources used.
+  //
+  // Both are derived from rows the page already had. The second is the point
+  // of the whole identity layer and the page was throwing it away: a record
+  // carries its own subject — the name the SOURCE used — and `explore.js`
+  // keeps it only when it differs from the canonical name. So this list is
+  // exactly "the other names this entity is filed under", which is what a
+  // Cedar id is for, shown rather than asserted.
+  const dates = useMemo(
+    () => mine.map((item) => item.date).filter(Boolean).sort(),
+    [mine],
+  );
+  const sourceNames = useMemo(() => {
+    const seen = new Map();
+    for (const item of mine) {
+      if (!item.subject) continue;
+      const key = item.subject.toUpperCase();
+      if (!seen.has(key)) seen.set(key, { name: item.subject, collections: new Set() });
+      seen.get(key).collections.add(item.collection);
+    }
+    return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+  }, [mine]);
+
   // Grouped by collection, in the catalog's order, so the profile reads as
   // the shelf does.
   const groups = useMemo(() => {
@@ -124,12 +147,17 @@ export default function CedarPressEntity() {
             a loading operation rather than the entity, and two of the three
             figures were one sentence between them. */}
         <header className="cp-rec__head cp-ent__head" data-testid="entity-head">
+          <p className="cp-ent__eyebrow">Cedar entity profile</p>
           <h1 className="cp-rec__name">
             {name ?? (register.entities.length ? "No entity with that Cedar id" : "Opening the entity…")}
           </h1>
           <p className="cp-rec__ids">
             <span className="cp-rec__uid"><code>{uid}</code></span>
             {entity?.type ? <span className="cp-rec__type">{entity.type}</span> : null}
+          </p>
+          <p className="cp-ent__deck">
+            This profile brings together the records Cedar Press has resolved to this entity. The
+            name each source used stays visible.
           </p>
           <p className="cp-rec__fine cp-ent__notice">
             {samplesLoading
@@ -143,6 +171,30 @@ export default function CedarPressEntity() {
             </p>
           ) : null}
         </header>
+
+        {/* AT A GLANCE, and then the thing this page exists to prove.
+            The brief asks for "no decorative metrics that cannot be
+            maintained with the real serving layer" — so these three are the
+            ones derived from the rows on screen, and each says what it is
+            counting. */}
+        {groups.length ? (
+          <dl className="cp-ent__glance" data-testid="entity-glance">
+            <div>
+              <dt>In collections</dt>
+              <dd>{groups.length}</dd>
+            </div>
+            <div>
+              <dt>Preview records</dt>
+              <dd>{mine.length}</dd>
+            </div>
+            {dates.length ? (
+              <div>
+                <dt>Visible span</dt>
+                <dd>{dates[0] === dates[dates.length - 1] ? dates[0] : `${dates[0]} to ${dates[dates.length - 1]}`}</dd>
+              </div>
+            ) : null}
+          </dl>
+        ) : null}
 
         {samplesLoading && !groups.length ? (
           <p className="cp-rec__fine cp-ent__empty">Reading the published samples…</p>
@@ -158,12 +210,18 @@ export default function CedarPressEntity() {
                 <ul className="cp-ent__list">
                   {items.map((item) => (
                     <li key={item.id}>
+                      {/* A ledger row, not a card: date, what, amount, in
+                          the same columns down the page, so a reader can
+                          read an entity's activity by scanning one edge. */}
                       <Link className="cp-ent__row" to={recordHref({ key: item.key, recordId: item.recordId, index: item.index })}>
-                        <span className="cp-ent__rowwhat">{item.observation || "—"}</span>
-                        <span className="cp-ent__rowmeta">
-                          {item.date ?? "undated"}
-                          {item.amount != null ? ` · ${money.format(item.amount)}` : ""}
+                        <span className="cp-ent__rowdate">{item.date ?? "undated"}</span>
+                        <span className="cp-ent__rowwhat">
+                          {item.observation || "—"}
+                          {/* The source's own name for this entity, on the
+                              record that used it. */}
+                          {item.subject ? <small className="cp-ent__rowsrc">named {item.subject}</small> : null}
                         </span>
+                        <span className="cp-ent__rowamt">{item.amount != null ? money.format(item.amount) : ""}</span>
                         <span className="cp-ent__rowgo" aria-hidden="true">&#8594;</span>
                       </Link>
                     </li>
@@ -179,6 +237,39 @@ export default function CedarPressEntity() {
             reads those.
           </p>
         )}
+
+        {/* WHY THESE RECORDS ARE CONNECTED — after them, not before.
+            The brief's own order puts the records second and the identity
+            evidence fourth, and a phone settled it: the block is six lines
+            of navy, and above the ledger it pushed the first record off the
+            first screen, which is the one thing this page is for.
+            A Cedar id is a claim that several source names are one
+            organization, and until now the page made that claim silently.
+            Every name here came off a record in the previews above; none is
+            written. When the sources all used the canonical name there is
+            nothing to show, and the block does not render — an empty
+            "aliases" panel would imply a check nobody ran. */}
+        {sourceNames.length ? (
+          <section className="cp-ent__ident" aria-label="Names in the sources" data-testid="entity-names">
+            <h2 className="cp-ent__identhead">Filed under these names</h2>
+            <p className="cp-rec__fine">
+              Each of these is a name a source used for this entity in the records below. Cedar
+              resolves them to <b>{name}</b> and keeps the source&rsquo;s own wording on the record.
+            </p>
+            <ul className="cp-ent__names">
+              {sourceNames.map((item) => (
+                <li key={item.name}>
+                  <span className="cp-ent__namesrc">{item.name}</span>
+                  <span className="cp-ent__namein">
+                    {[...item.collections]
+                      .map((id) => PRESS_CATALOG_BY_ID[id]?.short ?? id)
+                      .join(", ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <p className="cp-rec__fine cp-ent__foot">
           <Link className="cp-m__more" to={PRESS_METHODS_PATH}>

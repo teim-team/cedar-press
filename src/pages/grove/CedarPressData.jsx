@@ -48,7 +48,7 @@ export default function CedarPressData() {
   }
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
+      <main id="cp-main" className="cp cp-page cp-page--table" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
         {/* COLLECTIONS, THEN THE COLLECTIONS.
