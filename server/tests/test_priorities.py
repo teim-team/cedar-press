@@ -9,12 +9,14 @@ for two years, a request that reads as an existing priority.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from cedar_press import db  # noqa: E402
 from cedar_press import priorities as pr  # noqa: E402
 
 _REPO = Path(__file__).resolve().parents[2]
@@ -23,15 +25,23 @@ PRO = pr.Account(account_id="acct-bank", user_id="analyst@bank.example", tier="p
 SEAT_2 = pr.Account(account_id="acct-bank", user_id="second@bank.example", tier="press_pro")
 
 
-def store() -> pr.Priorities:
-    s = pr.Priorities(":memory:")
-    s.seed()
-    return s
+#: The Postgres half of every rule below runs only where there is a Postgres
+#: to run it against. Unset, those cases are skipped rather than silently
+#: passing on SQLite and leaving the deployment's real store unproven.
+TEST_DATABASE_URL = os.environ.get("CEDAR_PRESS_TEST_DATABASE_URL", "").strip()
+
+_POINTS_TABLES = (
+    "cedar_press_ledger",
+    "cedar_press_allocations",
+    "cedar_press_requests",
+    "cedar_press_reader_profiles",
+    "cedar_press_priorities",
+)
 
 
-class TestEarning(unittest.TestCase):
+class _Earning:
     def test_a_month_credits_once_however_many_sign_ins(self) -> None:
-        s = store()
+        s = self.store()
         self.assertEqual(s.accrue(PRESS, "2026-09"), 1)
         for _ in range(40):
             self.assertEqual(s.accrue(PRESS, "2026-09"), 0)
@@ -41,19 +51,19 @@ class TestEarning(unittest.TestCase):
         self.assertEqual(s.balance(PRESS.account_id), 2)
 
     def test_press_earns_one_and_plus_earns_two(self) -> None:
-        s = store()
+        s = self.store()
         self.assertEqual(s.accrue(PRESS, "2026-09"), 1)
         self.assertEqual(s.accrue(PRO, "2026-09"), 2)
         self.assertEqual(s.accrue(pr.Account("acct-x", "x", "grove"), "2026-09"), 0)
 
     def test_an_organization_earns_per_subscription_not_per_seat(self) -> None:
-        s = store()
+        s = self.store()
         self.assertEqual(s.accrue(PRO, "2026-09"), 2)
         self.assertEqual(s.accrue(SEAT_2, "2026-09"), 0)
         self.assertEqual(s.balance("acct-bank"), 2)
 
     def test_points_expire_twelve_months_on_oldest_first(self) -> None:
-        s = store()
+        s = self.store()
         s.accrue(PRO, "2024-06")  # 2
         s.accrue(PRO, "2024-07")  # 2
         s.allocate(PRO, "ds-enterprise-ownership", 3)  # spends the June 2 and one of July
@@ -73,9 +83,9 @@ class TestEarning(unittest.TestCase):
         self.assertEqual(s.balance("acct-tribe"), 1)
 
 
-class TestSpending(unittest.TestCase):
+class _Spending:
     def test_points_go_where_the_subscriber_puts_them_and_come_back(self) -> None:
-        s = store()
+        s = self.store()
         s.accrue(PRO, "2026-08")
         s.accrue(PRO, "2026-09")
         self.assertEqual(s.balance("acct-bank"), 4)
@@ -99,7 +109,7 @@ class TestSpending(unittest.TestCase):
         )
 
     def test_a_priority_shows_points_and_how_many_subscriptions_put_them_there(self) -> None:
-        s = store()
+        s = self.store()
         s.accrue(PRO, "2026-09")
         s.accrue(PRESS, "2026-09")
         s.allocate(PRO, "ds-enterprise-ownership", 2)
@@ -113,7 +123,7 @@ class TestSpending(unittest.TestCase):
         self.assertEqual((p["points"], p["subscribers"]), (4, 2))
 
     def test_the_ledger_explains_every_point(self) -> None:
-        s = store()
+        s = self.store()
         s.accrue(PRO, "2026-08")
         s.allocate(PRO, "ds-historical-lobbying", 1)
         s.allocate(PRO, "ds-historical-lobbying", -1)
@@ -122,9 +132,9 @@ class TestSpending(unittest.TestCase):
         self.assertTrue(set(reasons) <= set(pr.REASONS))
 
 
-class TestInfluence(unittest.TestCase):
+class _Influence:
     def test_the_profile_card_reads_from_the_ledger(self) -> None:
-        s = store()
+        s = self.store()
         card = s.influence(PRO, "2026-09")
         self.assertEqual(card["points_available"], 0)
         self.assertFalse(card["credited_this_month"])
@@ -146,9 +156,9 @@ class TestInfluence(unittest.TestCase):
         self.assertEqual(card["expiry_months"], 12)
 
 
-class TestRequests(unittest.TestCase):
+class _Requests:
     def test_a_request_reads_as_the_priority_it_is_about(self) -> None:
-        s = store()
+        s = self.store()
         text = "I wish you had a dataset showing which tribal enterprises own which subsidiaries"
         hits = pr.related(text, s.priorities())
         self.assertEqual(hits[0]["id"], "ds-enterprise-ownership")
@@ -156,7 +166,7 @@ class TestRequests(unittest.TestCase):
         self.assertEqual(pr.related("", s.priorities()), [])
 
     def test_a_request_becomes_evidence_behind_the_priority(self) -> None:
-        s = store()
+        s = self.store()
         s.accrue(PRO, "2026-09")
         s.accrue(PRESS, "2026-09")
         s.submit_request(
@@ -188,7 +198,7 @@ class TestRequests(unittest.TestCase):
         self.assertEqual(ev["common_needs"], ["credit analysis", "economic development"])
 
     def test_the_seed_is_editorial_and_idempotent(self) -> None:
-        s = store()
+        s = self.store()
         n = s.seed()
         self.assertGreaterEqual(n, 11)
         s.accrue(PRO, "2026-09")
@@ -225,6 +235,50 @@ class TestRequests(unittest.TestCase):
             self.assertTrue(p["title"] and p["description"])
         self.assertTrue(any(p["type"] == "research_question" for p in seed["priorities"]))
         self.assertTrue(any(p["type"] == "dataset" for p in seed["priorities"]))
+
+
+class TestTheRuleOnSqlite(_Earning, _Spending, _Influence, _Requests, unittest.TestCase):
+    """The rule, over the store a preview or a test runs on."""
+
+    def store(self) -> pr.Priorities:
+        s = pr.Priorities(":memory:")
+        s.seed()
+        return s
+
+
+@unittest.skipUnless(
+    TEST_DATABASE_URL, "set CEDAR_PRESS_TEST_DATABASE_URL to prove the rule against Postgres"
+)
+class TestTheRuleOnPostgres(_Earning, _Spending, _Influence, _Requests, unittest.TestCase):
+    """The same rule, word for word, over the store a deployment runs on.
+
+    Every assertion in the four mixins is made twice. That is the point: the
+    module holds one copy of the expiry arithmetic and the allocation rule,
+    and this is what proves the two backends do not quietly disagree about
+    what that one copy means — a unique index that does not fire, an
+    ``ON CONFLICT`` clause the other dialect reads differently, a timestamp
+    that comes back as a datetime where the contract says string.
+    """
+
+    def setUp(self) -> None:
+        self._was = os.environ.get("DATABASE_URL")
+        os.environ["DATABASE_URL"] = TEST_DATABASE_URL
+        db.reset_for_tests()
+        db.migrate()
+        # Between tests, not after: a failure leaves its rows behind to look at.
+        db.execute("TRUNCATE " + ", ".join(_POINTS_TABLES))
+
+    def tearDown(self) -> None:
+        db.reset_for_tests()
+        if self._was is None:
+            os.environ.pop("DATABASE_URL", None)
+        else:
+            os.environ["DATABASE_URL"] = self._was
+
+    def store(self) -> pr.Priorities:
+        s = pr.Priorities(store=pr.PostgresStore())
+        s.seed()
+        return s
 
 
 class TestMonths(unittest.TestCase):

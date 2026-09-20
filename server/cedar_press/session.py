@@ -28,6 +28,8 @@ from hashlib import sha256
 
 from fastapi import Cookie, Response
 
+from cedar_press import subscribers
+
 COOKIE = "cedar_press_session"
 MAX_AGE = 60 * 60 * 24 * 14
 
@@ -123,31 +125,32 @@ def create_account(email: str, password: str, tier: str) -> Session:
     No entitlement decision is made here: the code carried the tier, and this
     records it. Doing it the other way round — letting a caller name a tier —
     is how an activation route becomes an escalation route.
+
+    The row goes wherever `subscribers` keeps them: a table when this
+    deployment has a `DATABASE_URL`, and the process-local dict below when it
+    does not. That dict is why this module used to say it held "the one
+    behaviour here that must not survive into production".
     """
-    key = email.strip().lower()
-    _activated[key] = (password, tier)
-    return Session(email=key, tier=tier)
+    made = subscribers.create(email, password, tier)
+    return Session(email=made.email, tier=made.tier)
 
 
 def forget_activated_for_tests() -> None:
     """Drop accounts created by activation. Tests only."""
     _activated.clear()
+    subscribers.forget_activated_for_tests()
 
 
 def _lookup(email: str, password: str) -> Session | None:
-    """Verify a subscriber. The seam the subscriber table replaces.
+    """Verify a subscriber. The seam the subscriber table now fills.
 
-    Compared with ``compare_digest`` so the answer does not leak through how
-    long it took.
+    This is the sentence that used to read "the seam the subscriber table
+    replaces", written when there was no table. There is one; `subscribers`
+    owns it, and both of its backends compare in constant time so the answer
+    does not leak through how long it took.
     """
-    key = email.strip().lower()
-    record = _activated.get(key) or _accounts().get(key)
-    if record is None:
-        return None
-    expected, tier = record
-    if not hmac.compare_digest(expected, password):
-        return None
-    return Session(email=key, tier=tier)
+    found = subscribers.authenticate(email, password)
+    return Session(email=found.email, tier=found.tier) if found else None
 
 
 def _sign(payload: bytes) -> str:
