@@ -2204,7 +2204,7 @@
 /* Under the filter the feed is the answer to it, so it sits close rather than
  * across the standing section gap. */
 .teim-rd .cp-filter + .cp-feed { margin-top: 1.4rem; }
-.teim-rd .cp-feed__item { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: 0.4rem 2.5rem; padding: 1.4rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.6rem; transition: border-color 0.18s ease; }
+.teim-rd .cp-feed__item { display: grid; grid-template-columns: minmax(0, 8rem) minmax(0, 1fr); gap: 0.3rem 2rem; padding: 0.85rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.6rem; transition: border-color 0.18s ease; }
 .teim-rd .cp-feed__item:hover { border-top-color: var(--teal); }
 /* A permalink arrival lands mid-page; the tint says which release the link
  * meant. scroll-margin keeps it clear of the sticky filter. */
@@ -2220,7 +2220,7 @@
 }
 .teim-rd .cp-feed__counts { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0.45rem 0 0; }
 .teim-rd .cp-feed__when { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding-top: 0.25rem; }
-.teim-rd .cp-feed__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 0.5rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; }
+.teim-rd .cp-feed__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.015em; margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.7rem; }
 .teim-rd .cp-feed__name a { color: var(--ink); text-decoration: none; }
 .teim-rd .cp-feed__name a:hover { color: var(--dteal); text-decoration: underline; }
 /* The version doubles as the release's permalink, so it stays quiet until
@@ -2230,15 +2230,15 @@
 .teim-rd .cp-feed__name a.cp-feed__ver:hover { color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
 /* The kind, on every entry: the filter knows the difference between a data
  * update and a methodology release, and the entries themselves must too. */
-.teim-rd .cp-feed__kind { display: inline-block; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+.teim-rd .cp-feed__kind { display: inline-block; flex: 0 0 auto; order: -1; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0; }
 .teim-rd .cp-feed__kind--method { color: var(--dteal); background: var(--teal-tint); padding: 0.18rem 0.45rem; }
-.teim-rd .cp-feed__note { font-size: 0.94rem; line-height: 1.55; color: var(--ink); border-top: 1px solid var(--line); padding: 0.6rem 0 0; margin: 0 0 0.7rem; max-width: 92ch; }
+.teim-rd .cp-feed__note { font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); padding: 0; margin: 0.3rem 0 0; max-width: 92ch; }
 .teim-rd .cp-feed__list { list-style: none; margin: 0; padding: 0; max-width: 92ch; }
 .teim-rd .cp-feed__list li { font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); padding: 0.22rem 0 0.22rem 1.1rem; position: relative; }
 .teim-rd .cp-feed__list li::before { content: ''; position: absolute; left: 0; top: 0.92em; width: 7px; height: 1px; background: var(--teal); }
 /* The release's own actions: the collection it describes, and Cedar with the
  * question already phrased. Same underlined voice as the shelf's Ask Cedar. */
-.teim-rd .cp-feed__acts { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.7rem 0 0; }
+.teim-rd .cp-feed__acts { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; margin: 0.4rem 0 0; }
 .teim-rd .cp-feed__act { display: inline-block; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 /* A retired collection's entry has nowhere to walk to; the line says so, unlinked. */
 .teim-rd .cp-feed__act--still { color: var(--muted); text-decoration: none; border-bottom: 0; cursor: default; }

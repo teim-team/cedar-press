@@ -268,10 +268,17 @@ export default function CedarPressWhatsNew() {
                   <div className="cp-feed__what">
                     {/* The kind on every entry, not only in the filter: a
                         methodology release read cold must announce itself. */}
-                    <span className={`cp-feed__kind${method ? " cp-feed__kind--method" : ""}`}>
-                      {method ? "Methodology" : "Data update"}
-                    </span>
+                    {/* One line, not three. The kind, the collection and the
+                        version were stacked, so a release with a one-line
+                        note took 120px and a day that moved twelve
+                        collections was a page and a half of mostly air. They
+                        are one row now; the note and the change list keep
+                        their own lines because those are what a reader came
+                        for. */}
                     <h2 className="cp-feed__name">
+                      <span className={`cp-feed__kind${method ? " cp-feed__kind--method" : ""}`}>
+                        {method ? "Methodology" : "Data update"}
+                      </span>
                       <span>{name}</span>
                       {/* The version is the release's permalink: a citation
                           names one, and #funding-v4-2 gives the name a stable
@@ -325,7 +332,12 @@ export default function CedarPressWhatsNew() {
                           No longer on the shelf; kept for citation
                         </span>
                       ) : (
-                        <Link className="cp-feed__act" to={PRESS_DATA_PATH}>
+                        /* THIS collection, not the collections page.
+                           It linked to /data flat, so a reader who came to
+                           see what changed in NAGPRA landed on Federal
+                           Funding and had to find NAGPRA again. The page
+                           opens on whichever collection a link names. */
+                        <Link className="cp-feed__act" to={`${PRESS_DATA_PATH}?c=${entry.id}`}>
                           View collection <span aria-hidden="true">&#8594;</span>
                         </Link>
                       )}

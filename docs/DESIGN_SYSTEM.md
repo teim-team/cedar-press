@@ -13,7 +13,7 @@ system's named components to where each lives today.
 | SponsorshipUnit | `PressAd` + `AD_SLOT` (`pressAds.js`) | One component, shape variants per slot (banner on the overview, sidebar in articles). Same `SPONSORSHIP` cap, border, tint and CTA everywhere. Enquiries go to TBN's media kit (`AD_ENQUIRY_HREF`). |
 | AskCedarFAB | `PressCedarFab` | Identical launcher, offset and dimensions on every page; context arrives via props (`examples`, `gated`) and events (`cedar:open`, `cedar:ask-collection`), never via per-page styling. The PANEL is `.cp-dc__*`, shared with the door and with lumecon.ai's `CedarFAB.astro` — see "Cedar" below. |
 | CollectionRail | `PressCollectionRail` (`src/pages/grove/PressCollectionRail.jsx`) | The twelve collections, once. Two modes: `preview` on the door, `app` behind the paywall, where a collection the plan cannot open stays in the rail and is visibly locked. Never a second list of the same twelve. |
-| CollectionExplorer | `PressExplore` | Rail + selected-collection header + table/cards + release footer, as one object. The signed-in Collections page IS this component; the door mounts the same rail inside its hero frame. |
+| CollectionExplorer | `PressExplore` | Rail, one toolbar row, the table, one status bar. Nothing between the toolbar and the first record: description lives under the records, controls live in the bar, and the collection's name is the h1 at toolbar size. The signed-in Collections page IS this component; the door mounts the same rail and the same table. |
 | RecordTable | `PressRecordTable` (`Rows`, `Cards`) + `recordColumns.js` (`columnPlan`) | The record table, once. The signed-in viewer and the signed-out door both mount it; the door mounts it `readOnly` (no sort control, no record link, since neither leads anywhere without a subscription). A second table that draws records is a bug. |
 | CollectionProfile | `PressCollectionAbout` | The deep-linkable profile at `?c=<id>&about=1`: a side sheet on a wide screen, the whole screen on a phone. Every field is read from the release (descriptor, codebook, ledger); nothing on it is written. |
 | CollectionReads | `articlesDrawingOn` (`pressArticles.js`) | The loop between the records and the journalism, from the `draws` an article already declares. The collection's foot names the newest piece; its profile lists them all; the article's rail and its data cards link back into the table; an entity profile's collection headings open the table carrying both the collection and the entity. One relationship, read both ways, never a second list. |
@@ -98,3 +98,11 @@ type and teal rules above come from it. Two differences are intentional:
 - `/data` has no page title. The collection's own name is the `h1`, inside
   the pane. A band above a screen-filling table of one collection said a
   second time what the rail and that line already said.
+- Nothing goes above the records on `/data` that is not a control. The
+  legend, the state caption and the Cedar Press+ line each cost every screen
+  in the product some of its rows; they are in the status bar and the rail
+  now. A short label there carries the full sentence as its `aria-label`, so
+  "8/63 columns" still announces itself as "Show all 63 columns".
+- A link to a collection carries `?c=<id>`. `/data` flat opens on Federal
+  Funding, so "View collection" from a NAGPRA release used to land a reader
+  on the wrong one.
