@@ -253,12 +253,17 @@ export default function CedarPressPriorities() {
               ruling is that the writing is the product: a subscriber says what
               they need, in their words, with no list to choose from. The
               points are how that gets weighted, so they come second. */}
+          {/* TWO SENTENCES, BECAUSE THE OTHER THREE WERE ALREADY ON THE PAGE.
+              This deck ran five sentences and ten lines at phone width, and
+              two of them were said again within one screen: `earningLine`
+              in the influence card explains earning and allocating points,
+              and the weighing criteria belong with "What happens to it",
+              which is where a reader goes to find out what happens to it.
+              A deck should say what only it can say — what this page is for
+              — and then stop. */}
           <p className="cp-mh__sub">
             Tell Cedar what you need in your own words. There is no list of categories and nothing
-            is out of scope to ask for. Your subscription also earns Cedar Points in each month you
-            use Cedar Press, and you can put those behind your own request or behind anything
-            another subscriber has asked for. Priorities are considered alongside feasibility, data
-            quality, research value and Cedar’s editorial judgment.
+            is out of scope to ask for.
           </p>
         </section>
 
@@ -323,7 +328,9 @@ export default function CedarPressPriorities() {
                     </li>
                     <li>
                       <b>It is answered or it is not.</b> Points inform the order of the work. They
-                      do not decide it, and Cedar says which priorities it took up in What&rsquo;s new.
+                      do not decide it: feasibility, data quality, research value and Cedar&rsquo;s
+                      editorial judgment weigh alongside them, and Cedar says which priorities it
+                      took up in What&rsquo;s new.
                     </li>
                   </ol>
                 </aside>
