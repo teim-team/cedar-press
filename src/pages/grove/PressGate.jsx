@@ -594,8 +594,8 @@ export default function PressGate({ user }) {
             </div>
             </div>
             <figcaption className="cp-fade">
-              A live preview. Each collection shows six of the ten sample records in its
-              current release.
+              A live preview: the real viewer, reading the sample records published with
+              each collection&rsquo;s current release.
             </figcaption>
           </figure>
 

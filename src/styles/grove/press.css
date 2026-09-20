@@ -2543,22 +2543,21 @@
 .teim-rd .cp-pane__name { font-family: var(--sans); font-size: clamp(1.2rem, 1.7vw, 1.55rem); font-weight: 750; letter-spacing: -0.025em; line-height: 1.12; color: var(--ink); margin: 0.3rem 0 0; }
 .teim-rd .cp-pane__facts { grid-column: 2; grid-row: 1; display: grid; gap: 0.2rem; justify-items: end; margin: 0.15rem 0 0; font-family: var(--mono); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); text-align: right; white-space: nowrap; }
 .teim-rd .cp-pane__blurb { grid-column: 1 / -1; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); margin: 0.2rem 0 0; max-width: 72ch; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* THE PANE HOLDS THE PRODUCT'S TABLE NOW.
+ * `.cp-pane__table` and its nine cell classes are gone with the bespoke
+ * four-column table they styled: the pane renders `Rows`, so the cells are
+ * `.cp-ex__*` and inherit the viewer's own rules. What is left here is the
+ * box the table sits in — the door's frame is a fixed-height window, so the
+ * records take what the head and the foot leave and scroll inside it. */
+.teim-rd .cp-pane__records { min-height: 0; display: flex; overflow: hidden; }
+.teim-rd .cp-pane__records > .cp-ex__scrollwrap { flex: 1 1 auto; min-width: 0; }
+.teim-rd .cp-pane__records .cp-ex__scroll { height: 100%; overflow: auto; border-top: 0; }
+.teim-rd .cp-pane__records .cp-ex__table th:first-child,
+.teim-rd .cp-pane__records .cp-ex__table td:first-child { padding-left: 1.4rem; }
+.teim-rd .cp-pane__records .cp-ex__cards { margin: 0; }
 .teim-rd .cp-pane__tablecap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.5rem 1.4rem; border-top: 1px solid var(--door-rule); border-bottom: 1px solid var(--door-rule); background: var(--door-ground-bright); font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
-.teim-rd .cp-pane__scroll { min-height: 0; overflow: auto; }
-.teim-rd .cp-pane__table { width: 100%; border-collapse: collapse; font-size: 0.8rem; line-height: 1.4; color: var(--ink); }
-.teim-rd .cp-pane__table th, .teim-rd .cp-pane__table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(10, 28, 52, 0.07); vertical-align: top; text-align: left; }
-.teim-rd .cp-pane__table th:first-child, .teim-rd .cp-pane__table td:first-child { padding-left: 1.4rem; }
-.teim-rd .cp-pane__table th:last-child, .teim-rd .cp-pane__table td:last-child { padding-right: 1.4rem; }
-.teim-rd .cp-pane__table th { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--door-ink-3); }
-.teim-rd .cp-pane__ent { font-weight: 650; white-space: nowrap; max-width: 11.5rem; overflow: hidden; text-overflow: ellipsis; }
-.teim-rd .cp-pane__uid { display: block; font-family: var(--mono); font-size: 0.66rem; font-weight: 400; color: var(--door-ink-3); }
-.teim-rd .cp-pane__unkeyed { color: var(--door-ink-3); font-weight: 400; }
-.teim-rd .cp-pane__date { font-family: var(--mono); font-size: 0.7rem; white-space: nowrap; }
-.teim-rd .cp-pane__obs { color: var(--ink-2); min-width: 9rem; }
-.teim-rd .cp-pane__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 /* The window renders at 1280x800, so the pane keeps its own measures and
  * needs none of the cramped overrides an 800px window required. */
-.teim-rd .cp-pane__table th.cp-pane__amt, .teim-rd .cp-pane__table td.cp-pane__amt { text-align: right; font-family: var(--mono); font-size: 0.72rem; white-space: nowrap; }
 /* Said under the table, not in place of it: the pane is showing real rows
  * from a supporting table because the main table's sample is not published
  * on the site yet. */
@@ -2705,9 +2704,6 @@
   .teim-rd .cp-pane__head { padding: 1rem 1rem 0.8rem; grid-template-columns: minmax(0, 1fr); }
   .teim-rd .cp-pane__facts { grid-column: 1; grid-row: auto; justify-items: start; text-align: left; white-space: normal; }
   .teim-rd .cp-pane__tablecap, .teim-rd .cp-pane__empty, .teim-rd .cp-pane__pending { padding-inline: 1rem; }
-  .teim-rd .cp-pane__table th:first-child, .teim-rd .cp-pane__table td:first-child { padding-left: 1rem; }
-  .teim-rd .cp-pane__table th:last-child, .teim-rd .cp-pane__table td:last-child { padding-right: 1rem; }
-  .teim-rd .cp-pane__ent { max-width: 10rem; }
   /* The rail is the one thing that swipes, and the fade at its edge is what
    * says so; the count in the chrome says how many there are to reach. */
   .teim-rd .cp-app__rail {
@@ -2719,20 +2715,9 @@
   /* min-width: 0 as well as overflow: visible. The scroll box is a column
    * flex item, so its default min-width: auto lets the table's intrinsic
    * width (500px) win over the pane and the list scrolls anyway. */
-  .teim-rd .cp-pane__scroll { overflow-x: visible; min-width: 0; }
   /* redesign.css sets `.teim-rd table { min-width: 500px }` for the app's
    * data tables. As a record list there is no such floor, and leaving it
    * meant the list was 500px wide in a 351px pane and simply clipped. */
-  .teim-rd .cp-pane__table, .teim-rd .cp-pane__table tbody { display: block; }
-  .teim-rd .cp-pane__table { min-width: 0; }
-  .teim-rd .cp-pane__table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .teim-rd .cp-pane__table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.9rem; padding: 0.7rem 1rem; border-bottom: 1px solid rgba(10, 28, 52, 0.07); }
-  .teim-rd .cp-pane__table td { display: block; border: 0; padding: 0; }
-  .teim-rd .cp-pane__table td:first-child, .teim-rd .cp-pane__table td:last-child { padding: 0; }
-  .teim-rd .cp-pane__ent { grid-column: 1; grid-row: 1; max-width: none; white-space: normal; }
-  .teim-rd .cp-pane__table td.cp-pane__amt { grid-column: 2; grid-row: 1; text-align: right; }
-  .teim-rd .cp-pane__obs { grid-column: 1; grid-row: 2; min-width: 0; font-size: 0.78rem; }
-  .teim-rd .cp-pane__date { grid-column: 2; grid-row: 2; text-align: right; align-self: end; }
   /* The hero's View plans is the primary action; a second one in the bar
    * competes with Log in for the same thumb. */
   .teim-rd .cp-door__tab--plans { display: none; }
@@ -3930,8 +3915,76 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 /* The rail runs the frame's full height rather than stopping under its last
    collection, which left a navy column two thirds tall beside a full table. */
 .teim-rd .cp-page--table .cp-ex__frame > .cp-rail { align-self: stretch; max-height: none; }
+
+/* ── THE FRAME ENDS WHERE THE WINDOW ENDS ────────────────────────────────
+ * Owner, 2026-09-20: on the collections page the table should take up the
+ * screen in full. Above 1100px the frame is exactly the window minus the
+ * chrome above it (`--cp-frame-h`, measured in `CedarPressData`), and the
+ * scrolling moves INSIDE it: the rail scrolls its own twelve rows, the
+ * records scroll under a heading that stays, and the page itself does not
+ * move until a reader goes past the frame to the Cedar Grove case.
+ *
+ * Every box between the frame and the scroller needs `min-height: 0`. A flex
+ * item's default floor is its content, so without it the table refuses to be
+ * shorter than its rows, the chain grows past the frame, and the height set
+ * above is silently ignored — which is what "overflow does nothing" usually
+ * turns out to be. */
 @media (min-width: 1100px) {
-  .teim-rd .cp-page--table .cp-ex__frame > .cp-rail { position: sticky; top: 0; align-self: start; height: calc(100dvh - 12rem); }
+  .teim-rd .cp-page--table .cp-ex__frame {
+    height: var(--cp-frame-h, calc(100dvh - 12rem));
+    min-height: 30rem;
+    align-items: stretch;
+  }
+  .teim-rd .cp-page--table .cp-ex__frame > .cp-rail { position: static; height: 100%; overflow-y: auto; }
+  .teim-rd .cp-page--table .cp-ex__frame > .cp-ex__in { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+  .teim-rd .cp-page--table .cp-ex__card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  /* The toolbar, the legend and the foot keep their own height; only the
+     records take what is left. */
+  .teim-rd .cp-page--table .cp-ex__card > .cp-ex__bar,
+  .teim-rd .cp-page--table .cp-ex__card > .cp-ex__legend,
+  .teim-rd .cp-page--table .cp-ex__card > .cp-ex__count,
+  .teim-rd .cp-page--table .cp-ex__card > .cp-ex__foot { flex: 0 0 auto; }
+  .teim-rd .cp-page--table .cp-ex__scrollwrap { flex: 1 1 auto; min-height: 0; display: flex; }
+  .teim-rd .cp-page--table .cp-ex__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; }
+
+  /* ── WHAT THE RECORDS GET ──────────────────────────────────────────────
+   * Filling the window is only half of it. Measured at 1440x900 the chrome
+   * above the first record came to 429px — the title, a two-row toolbar, the
+   * legend and the caption — leaving 147px of records, four rows, which is a
+   * worse reading of the collection than the old scrolling page gave. So on
+   * this page, and only here, the chrome is compressed: the toolbar holds one
+   * row, the heading holds one line, and the legend and caption give back
+   * their padding. That is ~185px, and the records roughly double.
+   *
+   * Every part of this is scoped to the full-screen page. The same explorer
+   * renders inside the door's hero, where there is no window to fill and the
+   * controls have room to breathe. */
+  .teim-rd .cp-page--table .cp-ex__frame > .cp-ex__in { padding: 0.9rem 1rem 0; }
+  /* One line: the collection's name takes what is left after the badge, the
+     About link and the sample download, and truncates rather than wrapping
+     the whole row onto a second line. */
+  .teim-rd .cp-page--table .cp-ex__head { flex-wrap: nowrap; margin-bottom: 0.55rem; }
+  .teim-rd .cp-page--table .cp-ex__head > * { flex: 0 0 auto; }
+  .teim-rd .cp-page--table .cp-ex__title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(1.2rem, 1.8vw, 1.55rem); }
+  /* The search field stops growing so the year range and the actions fit
+     beside it instead of claiming a second row of their own. */
+  .teim-rd .cp-page--table .cp-ex__bar { padding: 0.55rem 1rem; gap: 0.45rem; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__q { flex: 0 1 15rem; }
+  /* The year range gave up a whole row to its own label. On this page the
+     label sits in the first column beside the fields, and the note about the
+     preview's real span keeps its line under them. */
+  .teim-rd .cp-page--table .cp-ex__years { grid-template-columns: auto 4.8rem minmax(7rem, 1fr) 4.8rem auto; min-width: 20rem; padding-block: 0.2rem; }
+  .teim-rd .cp-page--table .cp-ex__years .cp-ex__picklabel { grid-column: 1; }
+  .teim-rd .cp-page--table .cp-ex__yearsnote { grid-column: 1 / -1; }
+  .teim-rd .cp-page--table .cp-ex__reads,
+  .teim-rd .cp-page--table .cp-ex__caption { padding-block: 0.35rem; }
+  .teim-rd .cp-page--table .cp-ex__foot { padding-block: 0.5rem; flex-wrap: nowrap; }
+  .teim-rd .cp-page--table .cp-ex__foot .cp-ex__fine { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .teim-rd .cp-page--table .cp-ex__foot .cp-ex__pages { flex: 0 0 auto; margin-left: auto; }
+  .teim-rd .cp-page--table .cp-ex__foot .cp-read__cedar { flex: 0 0 auto; white-space: nowrap; }
+  .teim-rd .cp-page--table .cp-ex__samplefor { display: none; }
+  /* The table head was already `position: sticky` and it never once stuck,
+     because nothing here scrolled vertically until now. It does from here. */
 }
 /* The Cedar Grove case at the foot gets the page's gutters back: it is a
    piece of the document, not part of the working surface. */
