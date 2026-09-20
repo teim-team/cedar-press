@@ -270,7 +270,7 @@ Collection `nagpra` · table `nagpra_notices` · 6,792 rows in the full table ·
 | 51 | `pdf_url` | PDF | The notice as published, in PDF. |
 | 52 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
-### Native Federal Advocacy & Engagement
+### Native Federal Advocacy and Engagement
 
 Collection `lobbying` · table `native_entity_lobbying_disclosures` · 27,825 rows in the full table · Cedar Press shelf
 

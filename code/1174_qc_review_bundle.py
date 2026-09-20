@@ -500,7 +500,7 @@ def federal_awards():
 
 
 def advocacy():
-    """Native Federal Advocacy & Engagement - replaces the 222-client summary.
+    """Native Federal Advocacy and Engagement - replaces the 222-client summary.
 
     Reviewer, 2026-09-04: "'Lobbying' alone would be misleading because formal
     tribal consultations, public comments and official tribal-government
