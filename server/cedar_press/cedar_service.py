@@ -30,9 +30,18 @@ here on a session cookie, is checked against the subscription, and is then
 re-issued to Cedar over the internal contract. Entitlement is decided on this
 side of that hop, which is the arrangement ``teim-app`` already uses.
 
+THE SAME ENVIRONMENT SURFACE AS teim-app
+Deliberately not a new set of names. ``CEDAR_BASE_URL``,
+``CEDAR_INTERNAL_API_KEY`` (falling back to ``CEDAR_API_KEY``),
+``CEDAR_API_PATH``, ``CEDAR_TIMEOUT_MS`` and ``CEDAR_ENABLED`` are read here
+exactly as ``teim-app/server/cedar/client.js`` reads them, down to
+``CEDAR_ENABLED`` treating only the literal ``"false"`` as off. Two products
+talking to one service should be configurable from one set of variables, and
+a second spelling of a knob is how a deployment comes to set the wrong one.
+
 WHEN IT IS NOT CONFIGURED
-``CEDAR_BASE_URL`` unset means Cedar is not wired into this deployment, and
-``available()`` is False. The route then answers from the collection profiles
+``CEDAR_BASE_URL`` unset, no key, or ``CEDAR_ENABLED=false`` means Cedar is
+not wired into this deployment, and ``available()`` is False. The route then answers from the collection profiles
 alone and, past those, refuses and names the research desk. It does not
 apologise on Cedar's behalf for a service it was never pointed at.
 """
@@ -55,14 +64,52 @@ CONTRACT_VERSION = "1.0.0"
 
 #: Where the messages endpoint lives, under whatever base URL is configured.
 #: ``api/v1/router.py`` mounts ``/v1`` and ``/messages`` under it, and the app
-#: mounts that under ``/api`` — so the path is the same one ``teim-app`` names
-#: in ``DEFAULT_CHAT_PATH``.
-CHAT_PATH = "/api/v1/messages"
+#: mounts that under ``/api`` — so the default is the same one ``teim-app``
+#: names in ``DEFAULT_CHAT_PATH``, and ``CEDAR_API_PATH`` overrides it there
+#: and here alike.
+DEFAULT_CHAT_PATH = "/api/v1/messages"
 
 #: Cedar reasons about a question before it answers, so this is a patience
-#: limit rather than a liveness one. ``teim-app`` allows 120s; a reader
-#: watching a panel will not, so this is shorter and the panel says so.
-TIMEOUT_SECONDS = float(os.environ.get("CEDAR_TIMEOUT_SECONDS", "45"))
+#: limit rather than a liveness one. ``teim-app``'s default is 120s; a reader
+#: watching a panel will not wait that long, so Press's default is shorter and
+#: the panel says so. Same variable and same units as teim-app, because two
+#: names for one knob is how a deployment ends up setting the wrong one.
+DEFAULT_TIMEOUT_MS = 45_000
+
+
+def _truthy_enabled(value: str | None) -> bool:
+    """``CEDAR_ENABLED``, read exactly as ``teim-app`` reads it.
+
+    Its ``parseEnabled`` treats *unset* as enabled and only the literal
+    string ``"false"`` as off. Copied rather than improved: a deployment that
+    sets one variable for both services must get the same answer from both,
+    and "Press interpreted the kill switch differently" is not a failure
+    anyone would look for.
+    """
+    return value is None or value != "false"
+
+
+def chat_path() -> str:
+    path = os.environ.get("CEDAR_API_PATH", "").strip() or DEFAULT_CHAT_PATH
+    return path if path.startswith("/") else f"/{path}"
+
+
+def timeout_seconds() -> float:
+    try:
+        milliseconds = float(os.environ.get("CEDAR_TIMEOUT_MS", DEFAULT_TIMEOUT_MS))
+    except ValueError:
+        milliseconds = DEFAULT_TIMEOUT_MS
+    if not (milliseconds > 0):
+        milliseconds = DEFAULT_TIMEOUT_MS
+    return milliseconds / 1000.0
+
+
+def api_key() -> str:
+    """``CEDAR_INTERNAL_API_KEY``, then ``CEDAR_API_KEY``, as teim-app does."""
+    return (
+        os.environ.get("CEDAR_INTERNAL_API_KEY", "").strip()
+        or os.environ.get("CEDAR_API_KEY", "").strip()
+    )
 
 
 class CedarUnavailable(Exception):
@@ -88,11 +135,16 @@ def base_url() -> str:
 def available() -> bool:
     """Whether this deployment has been pointed at Cedar at all.
 
-    Both halves are required: a base URL with no key gets a 401 from every
-    call, which is a misconfiguration worth reporting as "not wired" rather
-    than as an outage.
+    Three conditions, in teim-app's own terms: the kill switch is not off, a
+    base URL is set, and there is a key. A base URL with no key gets a 401
+    from every call, which is a misconfiguration worth reporting as "not
+    wired" rather than as an outage.
     """
-    return bool(base_url()) and bool(os.environ.get("CEDAR_INTERNAL_API_KEY", "").strip())
+    return (
+        _truthy_enabled(os.environ.get("CEDAR_ENABLED"))
+        and bool(base_url())
+        and bool(api_key())
+    )
 
 
 def _payload(
@@ -175,16 +227,16 @@ def ask(
         )
     ).encode("utf-8")
     request = urllib.request.Request(
-        f"{base_url()}{CHAT_PATH}",
+        f"{base_url()}{chat_path()}",
         data=body,
         method="POST",
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {os.environ['CEDAR_INTERNAL_API_KEY'].strip()}",
+            "Authorization": f"Bearer {api_key()}",
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+        with urllib.request.urlopen(request, timeout=timeout_seconds()) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:  # a status, which is worth logging
         detail = exc.read().decode("utf-8", "replace")[:400]

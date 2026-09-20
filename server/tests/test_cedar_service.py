@@ -68,6 +68,62 @@ class TestTheContractFields(unittest.TestCase):
         self.assertEqual(self.payload(thread_id="t-7")["threadId"], "t-7")
 
 
+class TestTheEnvironmentSurfaceMatchesTeimApp(unittest.TestCase):
+    """One service, two callers, one set of variables.
+
+    Every name and every default here is read off
+    ``teim-app/server/cedar/client.js``. The tests are here because a
+    divergence is silent: a deployment sets ``CEDAR_ENABLED=false`` expecting
+    both products to go quiet, and one of them does not.
+    """
+
+    def test_cedar_enabled_is_off_only_for_the_literal_false(self):
+        """teim-app's ``parseEnabled``: unset is ON, and only "false" is off."""
+        wired = {"CEDAR_BASE_URL": "https://cedar.internal", "CEDAR_INTERNAL_API_KEY": "k"}
+        for value, expected in [
+            (None, True),
+            ("false", False),
+            ("true", True),
+            ("", True),
+            ("0", True),
+            ("FALSE", True),
+        ]:
+            env = dict(wired)
+            if value is not None:
+                env["CEDAR_ENABLED"] = value
+            with self.subTest(value=value), mock.patch.dict(os.environ, env, clear=False):
+                if value is None:
+                    os.environ.pop("CEDAR_ENABLED", None)
+                self.assertEqual(cedar_service.available(), expected)
+
+    def test_the_key_falls_back_to_cedar_api_key(self):
+        with mock.patch.dict(
+            os.environ, {"CEDAR_INTERNAL_API_KEY": "", "CEDAR_API_KEY": "fallback"}
+        ):
+            self.assertEqual(cedar_service.api_key(), "fallback")
+        with mock.patch.dict(
+            os.environ, {"CEDAR_INTERNAL_API_KEY": "internal", "CEDAR_API_KEY": "fallback"}
+        ):
+            self.assertEqual(cedar_service.api_key(), "internal")
+
+    def test_the_path_is_overridable_and_always_rooted(self):
+        with mock.patch.dict(os.environ, {"CEDAR_API_PATH": ""}):
+            self.assertEqual(cedar_service.chat_path(), "/api/v1/messages")
+        with mock.patch.dict(os.environ, {"CEDAR_API_PATH": "/v2/messages"}):
+            self.assertEqual(cedar_service.chat_path(), "/v2/messages")
+        # A path without its leading slash would concatenate into the host.
+        with mock.patch.dict(os.environ, {"CEDAR_API_PATH": "v2/messages"}):
+            self.assertEqual(cedar_service.chat_path(), "/v2/messages")
+
+    def test_the_timeout_is_milliseconds_and_survives_nonsense(self):
+        """Milliseconds, because that is the unit teim-app's variable carries."""
+        with mock.patch.dict(os.environ, {"CEDAR_TIMEOUT_MS": "9000"}):
+            self.assertEqual(cedar_service.timeout_seconds(), 9.0)
+        for bad in ("", "soon", "-1", "0"):
+            with self.subTest(bad=bad), mock.patch.dict(os.environ, {"CEDAR_TIMEOUT_MS": bad}):
+                self.assertEqual(cedar_service.timeout_seconds(), 45.0)
+
+
 class TestWhenItIsNotWiredUp(unittest.TestCase):
     def test_a_base_url_without_a_key_is_not_available(self):
         """A key-less call gets a 401 from every request. That is a

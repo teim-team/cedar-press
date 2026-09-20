@@ -211,11 +211,17 @@ so a panel is one conversation.
 Unset `CEDAR_BASE_URL` (or no `CEDAR_INTERNAL_API_KEY`) means Cedar is not
 wired into this deployment; the profiles still answer and the rest refuses.
 
+The variables are teim-app's, not a second spelling of them — same names,
+same defaults, same `CEDAR_ENABLED` semantics, so one service with two
+callers is configurable from one set. Pinned by `test_cedar_service.py`.
+
 | Variable | Purpose |
 | --- | --- |
 | `CEDAR_BASE_URL` | Where the Cedar service is. Unset disables the second answerer. |
-| `CEDAR_INTERNAL_API_KEY` | The bearer token `cedar/api/deps.require_internal_key` checks. |
-| `CEDAR_TIMEOUT_SECONDS` | How long a reader waits. Default 45. |
+| `CEDAR_INTERNAL_API_KEY` | The bearer token `cedar/api/deps.require_internal_key` checks. `CEDAR_API_KEY` is read as a fallback. |
+| `CEDAR_ENABLED` | Off only for the literal `"false"`; unset is on. |
+| `CEDAR_API_PATH` | Endpoint override. Default `/api/v1/messages`. |
+| `CEDAR_TIMEOUT_MS` | How long a reader waits. Default `45000` — shorter than teim-app's `120000`, because a reader is watching this panel. |
 
 The client side is `src/pages/grove/PressCedarFab.jsx`, which renders the
 same `.cp-dc__*` conversation as `PressDoorCedar.jsx` and as lumecon.ai's
