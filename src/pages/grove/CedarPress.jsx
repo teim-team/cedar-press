@@ -90,18 +90,26 @@ export default function CedarPress() {
               resolution and ongoing updates — an argument for buying a
               product the reader has already bought. Ask Cedar stays, because
               it is the one thing here that is not a door. */}
+          {/* THE SENTENCE AND ITS BUTTON ARE ONE CELL.
+              They were two grid children in the same column, which put them
+              in two grid ROWS — and row one is as tall as the headline, so a
+              73px hole opened between "…ask Cedar about any of it." and the
+              button that does it, and the hero stood 253px tall to hold
+              103px of headline. One wrapper, one cell, no hole. */}
           <section className="cp-hero cp-fade">
             <h1>Know what&rsquo;s shaping Indian Country.</h1>
-            <p>
-              Browse the collections, read the research, and ask Cedar about any of it.
-            </p>
-            <button
-              type="button"
-              className="cp-hero__ask"
-              onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
-            >
-              Ask Cedar <span aria-hidden="true">&#8594;</span>
-            </button>
+            <div className="cp-hero__say">
+              <p>
+                Browse the collections, read the research, and ask Cedar about any of it.
+              </p>
+              <button
+                type="button"
+                className="cp-hero__ask"
+                onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
+              >
+                Ask Cedar <span aria-hidden="true">&#8594;</span>
+              </button>
+            </div>
           </section>
           <PressHub user={entitled ? user : null} />
           <PressPrioritiesBlock signedIn={entitled} />

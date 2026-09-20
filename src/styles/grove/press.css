@@ -120,8 +120,18 @@
  * same place. Set on a common BASELINE they read as one line of thought
  * across the page, and the air that is left is above them, under the nav,
  * where air is supposed to be. */
-.teim-rd .cp-hero { padding: 2.2rem 0 1.1rem; display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 0.6rem 3rem; align-items: end; }
+/* The third header built on `align-items: end`, and the one a subscriber
+   lands on every day. Bottom-aligning the columns left 108px of nothing
+   under the headline and pushed the first card to 435px, so the page opened
+   on a masthead and a hole. Top-aligned, like the other two. */
+.teim-rd .cp-hero { padding: 2.2rem 0 1.1rem; display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 0.6rem 3rem; align-items: start; }
 .teim-rd .cp-hero__access { grid-column: 1 / -1; }
+/* THE BUTTON BELONGS TO THE SENTENCE THAT ARGUES FOR IT.
+   It spanned both columns on a row of its own, which put "Ask Cedar" under
+   the headline and two columns away from "…and ask Cedar about any of it."
+   It also added a whole grid row, so the hero stood 253px tall to hold 103px
+   of headline. Under the lede now, in the lede's column. */
+.teim-rd .cp-hero__say { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; min-width: 0; }
 .teim-rd .cp-hero h1 { font-size: clamp(2rem, 3.6vw, 3rem); font-weight: var(--weight-hero); letter-spacing: var(--track-display); line-height: 1.06; color: var(--ink); margin: 0; max-width: 16ch; text-wrap: balance;}
 .teim-rd .cp-hero p { font-size: 1.04rem; line-height: 1.62; color: var(--ink-2); margin: 0; max-width: 58ch; }
 /* The one action on the overview that is not a door. The four buttons that
@@ -129,8 +139,8 @@
 /* On the overview the action belongs to the sentence that invites it, so it
  * sits under the intro in the second column rather than spanning both and
  * leaving that column one line tall. Everywhere else the hero has no ask. */
-.teim-rd .cp-open .cp-hero__ask { grid-column: 2; margin-top: 1rem; }
-.teim-rd .cp-hero__ask { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; margin-top: 0.4rem; padding: 0.55rem 1.3rem; border: 1px solid var(--dteal); border-radius: 999px; background: var(--dteal); color: #fff; font: inherit; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: background 0.16s ease; }
+
+.teim-rd .cp-hero__ask { grid-column: 2; justify-self: start; display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; margin-top: 0.4rem; padding: 0.55rem 1.3rem; border: 1px solid var(--dteal); border-radius: 999px; background: var(--dteal); color: #fff; font: inherit; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: background 0.16s ease; }
 .teim-rd .cp-hero__ask:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
 .teim-rd .cp-hero__ask:focus-visible { outline: 2px solid var(--dteal); outline-offset: 3px; }
 @media (max-width: 900px) {
@@ -138,7 +148,7 @@
   .teim-rd .cp-hero h1 { max-width: none; }
   /* One column: everything is back in the flow, including the action, which
      the wide layout moves into the second column. */
-  .teim-rd .cp-open .cp-hero__ask { grid-column: 1; }
+  
 }
 
 /* ── On this page ─────────────────────────────────────────────────────────
@@ -4331,7 +4341,12 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ab__unit { padding: 0.7rem 0; border-top: 1px solid var(--line); }
 .teim-rd .cp-ab__sources b, .teim-rd .cp-ab__unit b { color: var(--ink); }
 .teim-rd .cp-ab__lead { margin: 0.2rem 0 0; }
-.teim-rd .cp-ab__more { margin-top: 1.2rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+/* The disclosure sat 22px above the next section's heading and 14px below
+   the rule that opens it, so "Read the full collection notes" read as a
+   heading FOR "Research built from this collection" rather than as a way
+   into the methodology. A disclosure closes a section; it needs more room
+   after it than inside it. */
+.teim-rd .cp-ab__more { margin: 1.2rem 0 1.9rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
 .teim-rd .cp-ab__more > summary { cursor: pointer; list-style: none; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--dteal); }
 .teim-rd .cp-ab__more > summary::-webkit-details-marker { display: none; }
 .teim-rd .cp-ab__more > summary::after { content: " \203A"; display: inline-block; transform: rotate(90deg); }
