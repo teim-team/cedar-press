@@ -65,60 +65,97 @@ these numbers copied. It wants them fetched the same way.
 as a versioned contract in the engine's PR #19. This is the one surface already safe to
 consume, and it is per-project, not per-place.
 
-## The join key does not exist, in either direction
+## Two geography questions, and only one of them is open
 
-This is the decisive finding, and it is measurable in one line each way.
+*This section was rewritten on the day it was written. The first version said
+Cedar Press "carries no geography below the state, and no FIPS at all." That
+was measured against the identity spine only, and generalising it to the
+collections was wrong — they carry county FIPS and have since ADR-015. The
+correction changes what the first piece of work is, so it is recorded rather
+than quietly edited.*
 
-**Cedar Press carries no geography below the state, and no FIPS at all.** The identity
-register (`data/spine/cedar_identity_register.csv`, 1,916 entities) has columns
-`cedar_uid, cedar_entity_id, canonical_name, entity_class, class_since_basis,
-former_names, minted, register_status, federal_register_legal_name,
-federal_register_legal_name_basis, federal_register_legal_name_url, state, minted_basis`.
-`state` is a two-letter postal abbreviation (`AK`). A case-insensitive grep for `fips`
-across the file returns **zero**. `cedar_source_registry/nations.jsonl` carries `states`
-as a list of the same abbreviations.
+**Transaction geography — built.** `docs/ARCHITECTURE_DECISIONS.md` ADR-015
+(accepted 2026-09-02) decided that Cedar Press carries a joinable geographic
+key on every row that can carry one and no charting code at all, and that Cedar
+Grove renders the picture. That is done. The published samples carry
+`geo_recipient_county_fips`, `geo_pop_county_fips` and their state-FIPS pairs,
+populated in 10 of 10 rows in both `contractors/prime_contracts` and
+`funding/federal_funding_transactions`, with recipient and place-of-performance
+kept apart exactly as ADR-015 rule 1 requires. `natural-resources/resource_assets`
+carries `fips_code`. This supersedes ADR-015's own 2026-09-02 measurement of
+1,070 joinable rows out of 7.5 million; the gapfill it named as "the unlock
+already on disk" has evidently been applied.
 
-**The engine is keyed on FIPS and holds no postal crosswalk.** Every geography argument in
-`data/` is a 5-digit county FIPS or a 2-digit state FIPS, and the only state mapping in the
-repository, `_FIPS_TO_STATE` in `data/io_tables.py:161`, maps FIPS to a state *name*
-(`"40": "Oklahoma"`). Postal `AK` to FIPS `02` is a crosswalk neither repository has.
+**Entity geography — open, and it is the one TEIM needs.** The identity
+register (`data/spine/cedar_identity_register.csv`, 1,916 entities) carries
+`state` as a two-letter postal abbreviation and no FIPS at all: a
+case-insensitive grep for `fips` across the file returns **zero**.
+`cedar_source_registry/nations.jsonl` carries `states` as a list of the same
+abbreviations. So Cedar Press can say which county a dollar landed in. It
+cannot say which counties constitute a nation's economy.
 
-**And the engine cannot resolve a tribe to a place either.** `fetch_tribal_population`
-(`data/employment_data.py:46`) takes `(tribe_name, county_fips, year)`, and its own
-docstring states that the name "is used only for the cache key". The value returned is the
-county's total AIAN population, whatever the affiliation. The engine's decision log
-records what that cost in practice: a validation region was built from the wrong county
-for weeks, and the county's Native residents were attributed to the tribe under study
-regardless of affiliation, because nothing in the pipeline could tell the difference.
+That distinction is the whole of the gap, because TEIM's unit of analysis is a
+**region**, not a transaction. Every geography argument in the engine's `data/`
+is a 5-digit county FIPS or a 2-digit state FIPS, and a run is defined by a
+`county_fips_list`. A per-transaction county tells the engine nothing about
+which counties to build a region from.
 
-So the gap is symmetric. Cedar Press knows which nation and cannot say where; the engine
-knows which county and cannot say whose. That is the same missing table seen from two
-sides, and it is the first thing to build.
+**The engine cannot close it from its side either.** `fetch_tribal_population`
+(`data/employment_data.py:46`) takes `(tribe_name, county_fips, year)`, and its
+own docstring states that the name "is used only for the cache key". The value
+returned is the county's total AIAN population, whatever the affiliation. The
+engine's decision log records what that cost: a validation region was built
+from the wrong county for weeks, and that county's Native residents were
+attributed to the tribe under study regardless of affiliation, because nothing
+in the pipeline could tell the difference.
+
+**ADR-015 rule 2 is already a warning about TEIM, and neither side has read it
+as one.** "A county is not a reservation: reservations span counties and
+counties contain fractions of reservations. A county-level difference is an
+approximation and must be published saying so. AIANNH is the better key where
+it can be had." TEIM's regionalization is county-keyed *by construction* — a
+tribal region is a set of whole counties, and its location quotients,
+apportionment weights and RAS row targets are all built from whole-county
+totals. So every TEIM tribal result is precisely the approximation that rule
+requires to be labelled, and the wrong-county episode above is what it looks
+like when it goes wrong. The same objection, reached independently from two
+repositories. It belongs in both.
 
 ## The seam, in the order it has to be built
 
-1. **A nation → county FIPS crosswalk, with its basis recorded per row.** This is the
-   join, and it is the proprietary data. It belongs in Cedar's spine, because that is
-   where entity identity already lives and where `cedar_uid` is minted; the engine should
-   consume it, not own it. Each row needs the same evidentiary treatment the rest of the
-   register gets — a basis and a citation — because "which counties are this nation's
-   service area" is a contested question with several defensible federal answers (the BIA
-   jurisdictional area, the Census AIANNH tract, the tribe's own statement) that do not
-   agree, and the engine's regionalization reads the answer as fact.
-2. **A postal → state FIPS column** on the register. Trivial, mechanical, and it unblocks
-   every state-level engine call without waiting for (1).
-3. **Only then, a read surface on the engine.** A reference-data route keyed by geography
-   and year, answering from the fetchers rather than from `data_snapshot`, so a cache miss
-   fetches instead of returning silence. The cache stays what it is: an implementation
-   detail of a run, not a public dataset.
-4. **A client in cedar-press**, alongside the existing FastAPI service in `server/`,
-   following the arrangement already in place for the platform — a base URL, a bearer key,
-   a feature flag, and a degraded answer rather than an error when the engine is not
-   configured.
+1. **A nation → county FIPS crosswalk, with its basis recorded per row.** This
+   is the join, and it is the one piece neither side has. It belongs in Cedar's
+   spine, because that is where entity identity already lives and where
+   `cedar_uid` is minted; the engine should consume it, not own it. Each row
+   needs the evidentiary treatment the rest of the register gets — a basis and
+   a citation — because "which counties are this nation's service area" is a
+   contested question with several defensible federal answers (the BIA
+   jurisdictional area, the Census AIANNH tract, the nation's own statement)
+   that do not agree, and the engine's regionalization reads whichever answer
+   it gets as fact. Per ADR-015 rule 2, carry AIANNH where it can be had and
+   record the county set as the approximation it is, rather than as the truth.
+2. **A postal → state FIPS column** on the register. Trivial, mechanical, and
+   it unblocks every state-level engine call without waiting for (1).
+3. **Only then, a read surface on the engine.** A reference-data route keyed by
+   geography and year, answering from the fetchers rather than from
+   `data_snapshot`, so a cache miss fetches instead of returning silence. The
+   cache stays what it is: an implementation detail of a run, not a public
+   dataset.
+4. **A client in cedar-press**, alongside the existing FastAPI service in
+   `server/`, following the arrangement already in place for the platform — a
+   base URL, a bearer key, a feature flag, and a degraded answer rather than an
+   error when the engine is not configured.
 
-Steps 1 and 2 are Cedar Press work and need nothing from the engine. Step 3 is engine work
-and should not start before step 1 exists, because until there is a join the route has no
-caller and its shape would be guessed.
+Steps 1 and 2 are Cedar Press work and need nothing from the engine. Step 3 is
+engine work and should not start before step 1 exists, because until there is a
+join the route has no caller and its shape would be guessed.
+
+**What the built transaction geography already buys, separately.** County FIPS
+on the money rows is a join against the engine's *own* geography today, with no
+crosswalk needed — federal obligations landing in a county, beside that
+county's earnings, employment and industry structure. That is a Cedar Grove
+picture rather than a TEIM input, it needs none of steps 1–4, and it is
+probably the cheapest real thing this seam can produce first.
 
 ## Putting Cedar's proprietary data into the engine
 

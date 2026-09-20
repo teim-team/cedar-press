@@ -3821,3 +3821,74 @@ business` entity class closes to new mints: its 45 entities keep their uids
 and gain business ids with an equivalence row, and every future privately
 owned Native firm is a `CB-` only.
 <!-- END ADR-043-CEDAR-BUSINESS-ID -->
+
+<!-- BEGIN ADR-044-PLATFORM-HUB -->
+
+## ADR-044 — teim-app is the hub; the engine holds the fetching, not the product data (2026-09-20)
+
+**Status:** accepted for the hub, open on the storage. Owner's framing:
+
+> *"Cedar Press has 12 collections that we're making and adding. So we have to
+> add more code to the database eventually. That code I think will probably
+> live in Team Engine. And then the data we get from federal resources like
+> census or whatever is also in Team Engine, which feeds into Cedar Grove. But
+> the data we're creating for Cedar Press also feeds into Cedar Grove, which is
+> why I think Team App as a hub makes sense."*
+
+**The hub is not a proposal; it is what is already built.** teim-app holds the
+users, sessions, tiers, organizations, S3 document path and the only mailer in
+the estate, and it is already an outbound client of both engines —
+`TEIM_ENGINE_BASE_URL` for the economic model and `CEDAR_BASE_URL` for the
+analyst service, each feature-flagged and each degrading to an `unavailable`
+reply rather than an error. Cedar Grove lives there. This repository's own
+`.env.example` already names `VITE_API_URL=https://api.lumecon.ai` as the
+setting that makes "the database behind it the source of truth." Cedar Press is
+the only product not wired to the hub, and the wiring is one repository
+variable plus the press routes, the cookie question and the error envelope
+(`docs/PLATFORM_INTEGRATION_2026-09-06.md`, `docs/INFRA_NOTES_FOR_KAYLYN_2026-09-20.md` §4).
+
+**Where the collection-building code goes: the engine, with one condition.**
+The argument for teim-engine is stronger than convenience. Its genuine asset is
+not its stored data but its *fetching discipline* — BEA's `(D)` disclosure flag,
+which sits in a field separate from the value and was read as a true zero until
+it was caught; the CAINC5N LineCode crosswalk confirmed against BEA's own
+parameter endpoint rather than its documentation; CBP's structural exclusion of
+agricultural, non-employer and government establishments; content-hashed,
+superseding snapshots. Twelve collections pulling from federal APIs need exactly
+that discipline, and it exists nowhere else in the estate. Rebuilding it here
+would be rebuilding the mistakes too.
+
+**The condition, and it is not a detail.** The engine has two stores and they
+are not interchangeable:
+
+| | `data_snapshot` | `reference_dataset` |
+| --- | --- | --- |
+| what it is | an opportunistic cache of API pulls | a versioned, checksummed dataset vintage |
+| coverage | whatever has been run | complete, on disk |
+| freshness | 30-day window in `read_cache` | pinned per run |
+| when the DB is unreachable | reads miss, writes are skipped, the engine runs anyway | — |
+
+That last row is the condition. `data/cache.py` degrades gracefully **by
+design**, and that is correct for a model input: a missed cache costs a refetch.
+It is wrong for a dataset a subscriber pays for, where an unreachable database
+must be an error and not a quieter answer. It is also indistinguishable from
+absence — a county nobody has run is simply not there. So the collections go in
+under the `reference_dataset` treatment, not the cache, and nothing outside the
+engine should ever read `data_snapshot`.
+
+**The second consideration, offered not decided.** teim-engine's own operating
+spec scopes it as the IO + SAM economic model, and its release cadence answers
+to validation against IMPLAN. Hosting twelve saleable collections promotes an
+internal capability into a shared platform service, which is probably the right
+move and is a change in what the repository is *for*. It should be a stated
+decision with its own entry in that repo's log, rather than something that
+happens gradually — otherwise the model's release cadence and the product's
+start pulling against each other with nobody having agreed which wins.
+
+**What this does not settle.** The nation → county crosswalk
+(`docs/TEIM_ENGINE_SEAM_2026-09-20.md`) is unaffected and still the first piece
+of work: it is Cedar Press's to build wherever the fetchers live, because it is
+entity identity, and identity is this repository's spine. ADR-015's transaction
+geography is already built and needs none of it.
+
+<!-- END ADR-044-PLATFORM-HUB -->
