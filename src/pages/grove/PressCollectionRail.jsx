@@ -33,6 +33,7 @@ import { canOpenDataset } from "../../features/grove/pressAccess";
 import { downloadAll } from "../../features/grove/pressDownload";
 import { PRESS_TIERS, STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
 
@@ -110,6 +111,18 @@ export default function PressCollectionRail({
                 against. */}
             {mode === "app" && entries.some((entry) => canOpenDataset(user, entry)) ? (
               <ShelfDownload tier={tier} entries={entries.filter((e) => canOpenDataset(user, e))} />
+            ) : null}
+            {/* THE UPSELL BELONGS TO THE SHELF IT IS ABOUT.
+                It was a line inside the table pane — "6 more collections on
+                Cedar Press+" — above the records, on every screen, whichever
+                collection was open. Here it sits on the locked shelf itself,
+                beside the six rows it is describing, and costs the records
+                nothing. A reader on the full plan never sees it, because the
+                shelf has nothing locked on it. */}
+            {mode === "app" && entries.every((entry) => !canOpenDataset(user, entry)) ? (
+              <a className="cp-rail__get" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
+                Get {entries.length} more <span aria-hidden="true">&#8594;</span>
+              </a>
             ) : null}
           </span>
           <ul className="cp-rail__list">

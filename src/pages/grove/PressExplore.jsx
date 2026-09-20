@@ -510,15 +510,19 @@ function WrittenFrom({ collectionId, onMore }) {
   );
 }
 
-/** The three declarations beside the table: a line on a desktop, a shut
- *  disclosure on a phone. Same content, same test id, both ways. */
-function Legend({ narrow, children }) {
-  if (!narrow) {
-    return <p className="cp-ex__reads" data-testid="explore-scope">{children}</p>;
-  }
+/**
+ * The three declarations the collection makes about its own numbers, shut.
+ *
+ * They were a line above the table, then a line on a desktop and a
+ * disclosure on a phone. They are a disclosure at every width now and they
+ * live in the status bar: a reader needs them at the moment they are reading
+ * a figure, not before every result, and above the table they were 33px of
+ * the records' height on every screen in the product.
+ */
+function Legend({ children }) {
   return (
     <details className="cp-ex__reads cp-ex__reads--fold" data-testid="explore-scope">
-      <summary>How to read these numbers</summary>
+      <summary>How to read this</summary>
       <div className="cp-ex__readsin">{children}</div>
     </details>
   );
@@ -527,7 +531,10 @@ function Legend({ narrow, children }) {
 function AboutCollectionLink({ onOpen }) {
   return (
     <button type="button" className="cp-ex__aboutbtn" onClick={onOpen} data-testid="explore-about">
-      About this collection
+      {/* "About" alone on a phone, where this shares a row with two actions
+          across 358px and the words "this collection" name what the whole
+          screen is already about. */}
+      About<span className="cp-ex__aboutlong"> this collection</span>
     </button>
   );
 }
@@ -886,7 +893,6 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // The file is the cut's records: not until every selected preview and the
   // register have answered, and never silently short (Codex, PR #63).
   const settling = loading || registerStatus === "loading";
-  const lockedCount = collections.filter((c) => !c.open).length;
   const notes = [
     cut.unknown?.length ? `Not a collection here: ${cut.unknown.join(", ")}.` : "",
     cut.dropped?.length ? `Not understood in the link: ${cut.dropped.join(", ")}.` : "",
@@ -940,123 +946,76 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           <LockedCollection entry={lockedSingle.entry} />
         ) : (
         <>
-        {/* THE TABLE'S HEAD IS A HEAD, NOT A LESSON.
-            Review, 2026-09-15: "above the records, there is a headline
-            telling users to choose and browse, a paragraph explaining the
-            controls, a preview badge, the controls themselves, and another
-            paragraph explaining Federal Funding. Compress this to the
-            collection title, one sample-status label, the toolbar, and the
-            results."
-            So: the name of what is on screen, the one badge that says these
-            are samples, and a disclosure holding the coverage and method that
-            used to be a paragraph. What a reader must know to read the
-            numbers — what the amounts are and what a year means here — stays
-            beside the table, as fields rather than as prose. */}
-        <div className="cp-ex__head">
-          {/* THE COLLECTION'S NAME IS THE PAGE'S HEADING.
-              The page dropped its "Collections" band — a label above a
-              screen-filling table of one collection, saying a second time
-              what the rail and this line already say. So this is the h1: the
-              page is about this collection, and a page with no first-level
-              heading is a page a screen reader cannot summarise. */}
+        {/* ONE BAR ABOVE THE RECORDS, AND NOTHING ELSE.
+            Owner, 2026-09-20: "if there's text above the table that says
+            collections and other stuff, then you're not really showing the
+            full page as the table."
+
+            Measured before this: a display heading, a badge, two buttons, a
+            two-row toolbar, an upsell line, a legend and a state caption —
+            293px of a 900px window spent before the first record, on a page
+            whose entire subject is records.
+
+            Now one row. The collection's name sits IN the toolbar at reading
+            size rather than above it at display size; the filters live behind
+            one control at every width, the way the phone already had them;
+            the secondary actions are a menu. Everything that was description
+            rather than control moved below the table, where a reader looks
+            once they have seen the rows:
+              the legend        -> the status bar, as a disclosure
+              the state caption -> the status bar, beside the pager
+              the upsell        -> the rail, under the shelf it is about
+              the sample file   -> the actions menu, with the other downloads
+
+            What did NOT move: every control and every fact is still on this
+            screen. A structural pass may not lose a capability. */}
+        <div className="cp-ex__bar" role="group" aria-label="This collection">
+          {/* THE COLLECTION'S NAME IS THE PAGE'S HEADING, at the size a
+              toolbar wants rather than the size a document wants. The page
+              has no other h1 and a page without one cannot be summarised. */}
           <h1 className="cp-ex__title">
             {single ? single.entry.name : `All ${scope.length} open collections`}
           </h1>
-          <span className="cp-kind cp-kind--data">Preview · ten-record samples</span>
+          <input
+            type="search"
+            className="cp-ex__q"
+            placeholder="Search these records"
+            aria-label="Search these records"
+            value={cut.q}
+            onChange={(e) => narrowTo({ q: e.target.value })}
+          />
+          {/* One control at every width. The entity, type and year pickers
+              were three controls wide enough to need their own row; behind a
+              disclosure they cost one button, and the button says when they
+              are doing something. */}
+          <details className="cp-ex__filters">
+            <summary className="cp-ex__act">Filters{isNarrowed(cut) ? " \u00b7 on" : ""}</summary>
+            <div className="cp-ex__filtersin">{filters}</div>
+          </details>
           {single ? <AboutCollectionLink onOpen={() => write({ about: true })} /> : null}
-          {/* THE SAMPLE FILE, AND WHY IT IS HERE.
-              It used to hang off the shelf's reader panel, which was deleted
-              when the table became the Collections page. It is not the same
-              file as the toolbar's Download: that one hands over the current
-              CUT as a ZIP with its README, and this is the collection's own
-              ten-row sample CSV carrying `cite_as` in the rows. Losing it
-              would have been a capability lost to a layout change, which is
-              the one thing the brief says a structural pass may not do. */}
-          {single ? <SampleDownload entry={single.entry} /> : null}
+          <div className="cp-ex__acts">
+            <button type="button" className="cp-ex__act" onClick={download} disabled={!filtered.length || settling} title={settling ? "Waiting for every selected preview to load" : `Download the ${filtered.length} records listed`}>
+              <span aria-hidden="true">&#8595;</span> Download
+            </button>
+            {/* THE SAMPLE FILE IS STILL HERE.
+                It used to be a button of its own beside the heading. It is
+                not the same file as Download — that one hands over the
+                current CUT as a ZIP with its README, and this is the
+                collection's own ten-row sample CSV carrying `cite_as` in the
+                rows — so it keeps its own entry, in the menu where the other
+                downloads are. */}
+            <details className="cp-ex__more">
+              <summary className="cp-ex__act" aria-label="More actions">More</summary>
+              <div className="cp-ex__morein">
+                {single ? <SampleDownload entry={single.entry} /> : null}
+                <button type="button" className="cp-ex__act" onClick={() => setNaming((v) => !v)} aria-expanded={naming}>Save view</button>
+                <button type="button" className="cp-ex__act" onClick={copyLink}>{copied ? "Link copied" : "Copy link"}</button>
+              </div>
+            </details>
+          </div>
         </div>
 
         <div className="cp-ex__card">
-          <div className="cp-ex__bar" role="group" aria-label="Filters">
-            {/* The collection picker was here. It is the rail now: one
-                control for one choice, rather than a dropdown and a rail
-                agreeing with each other. A cut that names several
-                collections has no rail row to light, so the caption says how
-                many and "Clear filters" resets — the state is still visible,
-                it is just not a second selector. */}
-            <input
-              type="search"
-              className="cp-ex__q"
-              placeholder="Search these records"
-              aria-label="Search these records"
-              value={cut.q}
-              onChange={(e) => narrowTo({ q: e.target.value })}
-            />
-            {narrow ? (
-              <details className="cp-ex__filters">
-                <summary className="cp-ex__act">Filters{isNarrowed(cut) ? " · on" : ""}</summary>
-                <div className="cp-ex__filtersin">{filters}</div>
-              </details>
-            ) : filters}
-            {/* THE ACTIONS, AND WHAT A PHONE HAS ROOM FOR.
-                "Download sample results" wrapped onto four lines beside two
-                two-line neighbours. Short labels fixed the words; three
-                controls across 350px still leaves each of them stacked, so
-                on a phone the one a reader came for stays a button and the
-                other two are a menu, which is what the review asked for. */}
-            <div className="cp-ex__acts">
-              {narrow ? null : (
-                <button type="button" className="cp-ex__act" onClick={() => setNaming((v) => !v)} aria-expanded={naming}>Save view</button>
-              )}
-              <button type="button" className="cp-ex__act" onClick={download} disabled={!filtered.length || settling} title={settling ? "Waiting for every selected preview to load" : `Download the ${filtered.length} records listed`}>
-                <span aria-hidden="true">&#8595;</span> Download
-              </button>
-              {narrow ? (
-                <details className="cp-ex__more">
-                  <summary className="cp-ex__act">More</summary>
-                  <div className="cp-ex__morein">
-                    <button type="button" className="cp-ex__act" onClick={() => setNaming((v) => !v)} aria-expanded={naming}>Save view</button>
-                    <button type="button" className="cp-ex__act" onClick={copyLink}>{copied ? "Link copied" : "Copy link"}</button>
-                  </div>
-                </details>
-              ) : (
-                <button type="button" className="cp-ex__act" onClick={copyLink}>{copied ? "Link copied" : "Copy link"}</button>
-              )}
-            </div>
-          </div>
-          {lockedCount ? (
-            <p className="cp-ex__fine cp-ex__note">
-              {lockedCount} more collection{lockedCount === 1 ? "" : "s"} on <TierName name="Cedar Press+" />.{" "}
-              <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">Get <TierName name="Cedar Press+" /> at Tribal Business News <span aria-hidden="true">&#8594;</span></a>
-            </p>
-          ) : null}
-          {/* How to read the numbers, beside the numbers. Three declared
-              facts, as labelled fields rather than a paragraph about the
-              collection: what the amounts are, what a year means in this
-              table, and what the entity on a row is to the record. */}
-          {single ? (
-            /* WHAT THE NUMBERS MEAN, WITHOUT SPENDING A PHONE SCREEN ON IT.
-               On a wide screen these three declarations fit on one line
-               beside the table, which is where they belong: a reader should
-               not have to ask what "amount" means. On a phone they wrap to
-               four lines and push the first record below the fold, on a page
-               whose whole point is the records — so there they are a
-               disclosure, shut, one line tall, in the same place. */
-            <Legend narrow={narrow}>
-              {contract?.amount ? (
-                <span><b>Amounts</b> {contract.amount_label ?? labelFor(table.key, contract.amount)}</span>
-              ) : null}
-              <span>
-                <b>Years</b>{" "}
-                {contract?.year_basis ?? "not a series of events; the year filter does not apply"}
-              </span>
-              {contract?.entity_role ? <span><b>Entity</b> {contract.entity_role}</span> : null}
-              {/* A filing appears once, as its current version. The earlier
-                  versions are history, reachable by link (h=1) and not a
-                  thing a subscriber browses. */}
-              {contract?.superseded ? <span><b>Versions</b> superseded ones are not shown</span> : null}
-            </Legend>
-          ) : null}
-
           {naming ? (
             <form className="cp-ex__savebar" onSubmit={save}>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={caption} aria-label="Name for this view" />
@@ -1080,40 +1039,6 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             </details>
           ) : null}
 
-          <p className="cp-ex__caption" data-testid="explore-caption">
-            {caption}
-            {/* What a "sample record" is, which the caption counts and cannot
-                explain. The commonest wrong reading of this page is that an
-                entity absent from a result is absent from the collection. */}
-            <Explain label="what these sample records are">
-              <p>
-                <span className="cp-ex1__cap">This is a preview</span>
-                Each published table ships up to ten sample rows, and this viewer reads those.
-                Some ship fewer. A search that returns nothing may mean the collection holds
-                nothing, or that the handful of rows sampled from a million-row table did not
-                include it.
-              </p>
-              <p>
-                <span className="cp-ex1__cap">The release is the whole table</span>
-                Counts here are counts of sample records, never of the release. Every download
-                says so in its README, and the release itself carries the full table.
-              </p>
-            </Explain>
-            {loading ? " · loading" : ""}
-            {view === "table" ? ` · ${shownColumns.length} of ${tableColumns.length} columns` : ""}
-            {view === "table" && defaults.length && !narrow ? (
-              <button type="button" className="cp-ex__clear" onClick={() => setShowAll((v) => !v)}>
-                {showAll ? `Show the ${defaults.length} main columns` : `Show all ${tableColumns.length} columns`}
-              </button>
-            ) : null}
-            {isNarrowed(cut) || cut.history ? (
-              <button type="button" className="cp-ex__clear" onClick={() => write({ entities: [], scopes: [], broad: false, types: null, years: null, q: "", sort: null, history: false })}>Clear filters</button>
-            ) : null}
-            {cut.history ? (
-              <button type="button" className="cp-ex__clear" onClick={() => write({ history: false })}>Hide superseded versions</button>
-            ) : null}
-            {registerStatus === "failed" ? <button type="button" className="cp-ex__clear" onClick={retryRegister}>Retry the register</button> : null}
-          </p>
           {notes.length ? <p className="cp-ex__fine cp-ex__note" data-testid="explore-notes">{notes.join(" ")}</p> : null}
 
           {paged.rows.length ? (
@@ -1143,29 +1068,109 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             </p>
           )}
 
+          {/* THE STATUS BAR.
+              Everything that used to sit between the toolbar and the first
+              record is here: what this result is and how many records it
+              holds, what the numbers mean, what was written from this
+              collection, the way to ask Cedar about it, and the pager.
+
+              It is below the table for the same reason a spreadsheet's is:
+              the state of a result is something a reader checks once they
+              have looked at it, and description above the thing described
+              is the wrong order on a page whose subject is the rows. */}
           <div className="cp-ex__foot">
+            <p className="cp-ex__caption" data-testid="explore-caption">
+            {caption}
+            {/* What a "sample record" is, which the caption counts and cannot
+                explain. The commonest wrong reading of this page is that an
+                entity absent from a result is absent from the collection. */}
+            <Explain label="what these sample records are">
+              <p>
+                <span className="cp-ex1__cap">This is a preview</span>
+                Each published table ships up to ten sample rows, and this viewer reads those.
+                Some ship fewer. A search that returns nothing may mean the collection holds
+                nothing, or that the handful of rows sampled from a million-row table did not
+                include it.
+                </p>
+              <p>
+                <span className="cp-ex1__cap">The release is the whole table</span>
+                Counts here are counts of sample records, never of the release. Every download
+                says so in its README, and the release itself carries the full table.
+                </p>
+            </Explain>
+            {loading ? " · loading" : ""}
+            {/* ONE CONTROL, NOT A COUNT AND A CONTROL. It read
+                "· 8 of 63 columns   Show all 63 columns", which says the
+                same number twice and cost a third of the status bar. The
+                count IS the button now, and the title says which way it
+                goes. */}
+            {view === "table" ? (
+              defaults.length && !narrow ? (
+                <button
+                  type="button"
+                  className="cp-ex__clear"
+                  onClick={() => setShowAll((v) => !v)}
+                  /* The label is short because the status bar is one line;
+                     the NAME is the whole sentence, so a screen reader and a
+                     keyboard user are told what the control does rather than
+                     being read two numbers and a noun. */
+                  aria-label={showAll ? `Show the ${defaults.length} main columns` : `Show all ${tableColumns.length} columns`}
+                  title={showAll ? `Show the ${defaults.length} main columns` : `Show all ${tableColumns.length} columns`}
+                >
+                  {shownColumns.length}/{tableColumns.length} columns
+                </button>
+              ) : (
+                ` · ${shownColumns.length} of ${tableColumns.length} columns`
+              )
+            ) : null}
+            {isNarrowed(cut) || cut.history ? (
+              <button type="button" className="cp-ex__clear" onClick={() => write({ entities: [], scopes: [], broad: false, types: null, years: null, q: "", sort: null, history: false })}>Clear filters</button>
+            ) : null}
+            {cut.history ? (
+              <button type="button" className="cp-ex__clear" onClick={() => write({ history: false })}>Hide superseded versions</button>
+            ) : null}
+            {registerStatus === "failed" ? <button type="button" className="cp-ex__clear" onClick={retryRegister}>Retry the register</button> : null}
+            </p>
+            {/* HOW TO READ THE NUMBERS.
+                Three declarations the collection itself makes — what an
+                amount is, what a year means here, what the entity on a row
+                is to the record. They were a line above the table at every
+                width; shut, in the status bar, they cost one control and a
+                reader who needs them is a click away at any moment rather
+                than reading them before every result. */}
+            {single ? (
+              <Legend>
+                {contract?.amount ? (
+                  <span><b>Amounts</b> {contract.amount_label ?? labelFor(table.key, contract.amount)}</span>
+                ) : null}
+                <span>
+                  <b>Years</b>{" "}
+                  {contract?.year_basis ?? "not a series of events; the year filter does not apply"}
+                </span>
+                {contract?.entity_role ? <span><b>Entity</b> {contract.entity_role}</span> : null}
+                {/* A filing appears once, as its current version. The earlier
+                    versions are history, reachable by link (h=1) and not a
+                    thing a subscriber browses. */}
+                {contract?.superseded ? <span><b>Versions</b> superseded ones are not shown</span> : null}
+              </Legend>
+            ) : null}
             <button
               type="button"
               className="cp-read__cedar"
               onClick={askCedar}
               disabled={!single}
-              title={single ? undefined : "Cedar answers one collection at a time for now; choose one collection."}
+              aria-label="Ask Cedar about this collection"
+              title={single ? `About ${single.entry.short}: its coverage, fields and method. Cedar does not yet answer from the filtered records.` : "Cedar answers one collection at a time for now; choose one collection."}
             >
-              Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
+              Ask Cedar <span aria-hidden="true">&#8594;</span>
             </button>
-            {/* The loop out to the journalism sits here rather than in the
-                caption row above it. In the caption it pushed that row onto a
-                second line, and on a page whose whole point is the records, a
-                recommendation taking height from the thing recommended is the
-                wrong trade. Here it is beside the other thing a reader does
-                when they are done reading rows. */}
             {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} /> : null}
-            <span className="cp-ex__fine">
-              {single ? `About ${single.entry.short}: its coverage, fields and method. Cedar does not yet answer from the filtered records.` : "Choose one collection to ask Cedar about it."}
-            </span>
-            <span className="cp-ex__pages">
+            <span className="cp-ex__pages" title={`${PAGE_SIZE} records a page`}>
               <button type="button" className="cp-ex__clear" disabled={paged.page <= 1} onClick={() => write({ page: paged.page - 1 })} aria-label="Previous page">&#8249;</button>
-              Page {paged.page} of {paged.pages} · {PAGE_SIZE} a page
+              {/* Short, because this sits in a status bar that has to hold
+                  five other things on one line. The labels on the arrows
+                  carry the meaning for a screen reader. */}
+              <span className="cp-badge__sr">Page </span>{paged.page} / {paged.pages}
               <button type="button" className="cp-ex__clear" disabled={paged.page >= paged.pages} onClick={() => write({ page: paged.page + 1 })} aria-label="Next page">&#8250;</button>
             </span>
           </div>

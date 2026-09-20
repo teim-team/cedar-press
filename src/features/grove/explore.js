@@ -966,9 +966,13 @@ export function describeCut(cut, { register = EMPTY_REGISTER, shown = null, tota
   if (cut.years) parts.push(cut.years[0] === cut.years[1] ? String(cut.years[0]) : `${cut.years[0]}–${cut.years[1]}`);
   if (cut.q) parts.push(`“${cut.q}”`);
   if (cut.history) parts.push("including superseded versions");
-  const filter = parts.length ? parts.join(" · ") : "every record";
-  const count = shown == null || total == null ? "" : ` · ${shown} of ${total} sample records`;
-  return `${scopeOf(cut)} · ${filter}${count}`;
+  const count = shown == null || total == null ? "" : `${shown} of ${total} sample records`;
+  // "every record" is the unfiltered state said in words. Beside a count it
+  // says the same thing twice — "every record · 10 of 10 sample records" —
+  // and the status bar it sits in has a finite line. It stays wherever there
+  // is no count to carry the meaning, which is every other caller.
+  const filter = parts.length ? parts.join(" · ") : count ? "" : "every record";
+  return [scopeOf(cut), filter, count].filter(Boolean).join(" · ");
 }
 
 /**

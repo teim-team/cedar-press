@@ -3124,7 +3124,10 @@
 /* The viewer's head: the name of what is on screen, the sample badge, and
  * the disclosure holding what used to be a paragraph. One row, wrapping. */
 .teim-rd .cp-ex__head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin-bottom: 0.9rem; }
-.teim-rd .cp-ex__title { font-family: var(--sans); font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); margin: 0; margin-right: auto; }
+/* The page's h1, at toolbar size. It was a display heading on its own row;
+ * the page is one collection's records and the name of that collection is a
+ * label on the working surface, not a masthead for a document. */
+.teim-rd .cp-ex__title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; color: var(--ink); margin: 0 0.4rem 0 0; }
 /* About this collection. */
 .teim-rd .cp-ex__about { flex: 0 0 auto; }
 .teim-rd .cp-ex__aboutbtn { cursor: pointer; list-style: none; display: inline-flex; align-items: center; min-height: 38px; padding: 0.35rem 0.9rem; border: 1px solid var(--line); border-radius: 999px; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); }
@@ -3146,7 +3149,30 @@
  * different heights with nothing sharing an edge. The controls already carry
  * their own 44px minimum; what they need is a common BOTTOM, because some of
  * them have a label above and some do not. */
-.teim-rd .cp-ex__bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.6rem; padding: 0.9rem 1rem; border-bottom: 1px solid var(--line); }
+/* ONE TOOLBAR. It holds the collection's name, the search, one filter
+ * control, the profile and the actions — and it is the only thing between
+ * the top of the pane and the first record. `align-items: center` because a
+ * heading and a set of controls share this row now; it was `flex-end` when
+ * the row held nothing but controls of one height. */
+.teim-rd .cp-ex__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; border-bottom: 1px solid var(--line); }
+/* Every control holds its own width; the search takes what is left, within
+ * reason — a search field four hundred pixels wide beside a heading is a
+ * form, not a toolbar. The filter disclosure is `inline-flex` because a
+ * <summary> is block-level by default and a block in a flex row claims the
+ * whole line, which is exactly what it did. */
+.teim-rd .cp-ex__bar > .cp-ex__q { flex: 1 1 12rem; min-width: 7rem; max-width: 22rem; min-height: 38px; }
+.teim-rd .cp-ex__bar > .cp-ex__filters { flex: 0 0 auto; position: relative; }
+.teim-rd .cp-ex__bar > .cp-ex__filters > summary { display: inline-flex; align-items: center; width: auto; }
+.teim-rd .cp-ex__bar > .cp-ex__aboutbtn { flex: 0 0 auto; }
+.teim-rd .cp-ex__bar > .cp-ex__acts { flex: 0 0 auto; margin-left: auto; }
+/* The filters open over the table rather than pushing it down: the whole
+ * point of the row is that nothing between it and the records moves. */
+.teim-rd .cp-ex__bar > .cp-ex__filters[open] > .cp-ex__filtersin { position: absolute; z-index: 30; top: calc(100% + 0.45rem); left: auto; right: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0.65rem; width: min(24rem, 88vw); padding: 0.9rem 1rem; border: 1px solid var(--line); border-top: 2px solid var(--dteal); background: var(--bg); box-shadow: 0 16px 38px -20px rgba(10, 15, 38, 0.45); }
+/* Stacked: a panel of filters reads down, and the year range is twice the
+ * width of the two pickers, so a row put them in three different places. */
+.teim-rd .cp-ex__bar > .cp-ex__filters[open] .cp-ex__pick,
+.teim-rd .cp-ex__bar > .cp-ex__filters[open] .cp-ex__pickbtn,
+.teim-rd .cp-ex__bar > .cp-ex__filters[open] .cp-ex__years { width: 100%; min-width: 0; box-sizing: border-box; }
 .teim-rd .cp-ex__picklabel { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-ex__pick { position: relative; }
 .teim-rd .cp-ex__pickbtn { list-style: none; display: flex; flex-direction: column; gap: 0.15rem; min-width: 11rem; min-height: 44px; padding: 0.4rem 2rem 0.4rem 0.7rem; border: 1px solid var(--line); background: var(--bg); cursor: pointer; position: relative; }
@@ -3181,6 +3207,11 @@
 .teim-rd .cp-rail { display: flex; flex-direction: column; gap: 0.9rem; padding: 1rem 0.75rem 1.4rem; background: var(--door-navy, #09132b); position: sticky; top: 0; align-self: start; max-height: 100dvh; overflow-y: auto; }
 .teim-rd .cp-rail__shelf { display: flex; flex-direction: column; gap: 0.3rem; }
 .teim-rd .cp-rail__tier { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; padding: 0 0.5rem; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+/* The way onto a locked shelf, on the shelf. Mono and small, like the
+ * shelf's own caption, because it is a label on a group rather than a
+ * button competing with the twelve collections under it. */
+.teim-rd .cp-rail__get { margin-left: auto; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-accent-light, #5fd9cc); text-decoration: none; white-space: nowrap; }
+.teim-rd .cp-rail__get:hover { color: #fff; text-decoration: underline; }
 .teim-rd .cp-rail__all { flex: none; padding: 0; border: 0; background: none; font: inherit; letter-spacing: 0.06em; text-transform: none; color: var(--door-accent-light, #5fd9cc); cursor: pointer; white-space: nowrap; }
 .teim-rd .cp-rail__all:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
 .teim-rd .cp-rail__all:disabled { opacity: 0.6; cursor: default; }
@@ -3271,7 +3302,10 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__reads b { font-weight: 700; color: var(--ink); margin-right: 0.35rem; }
 /* The same three declarations, shut, on a phone. `display: block` because a
  * <details> cannot be a flex row and still hide its own contents. */
-.teim-rd .cp-ex__reads--fold { display: block; padding-block: 0.45rem; }
+.teim-rd .cp-ex__reads--fold { display: block; padding-block: 0.45rem; position: relative; }
+/* In the status bar the panel opens UPWARD, over the table: there is nothing
+ * below it but the frame's edge. */
+.teim-rd .cp-ex__foot .cp-ex__reads--fold[open] > .cp-ex__readsin { position: absolute; z-index: 30; bottom: calc(100% + 0.5rem); left: 0; width: max-content; max-width: min(34rem, 80vw); padding: 0.8rem 1rem; border: 1px solid var(--line); border-bottom: 2px solid var(--dteal); background: var(--bg); box-shadow: 0 -12px 34px -18px rgba(10, 15, 38, 0.45); }
 .teim-rd .cp-ex__reads--fold > summary { list-style: none; cursor: pointer; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); }
 .teim-rd .cp-ex__reads--fold > summary::-webkit-details-marker { display: none; }
 .teim-rd .cp-ex__reads--fold > summary::after { content: ' \203A'; display: inline-block; transform: rotate(90deg); }
@@ -3423,7 +3457,24 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__amount, .teim-rd th.cp-ex__c-amount { text-align: right; font-family: var(--mono); font-size: 0.76rem; }
 .teim-rd .cp-ex__table a { color: var(--dteal); font-weight: 600; }
 .teim-rd .cp-ex__empty { margin: 0; padding: 1.4rem 1rem; font-size: 0.92rem; color: var(--muted); border-top: 1px solid var(--line); }
-.teim-rd .cp-ex__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 0.7rem 1rem; border-top: 1px solid var(--line); }
+/* THE STATUS BAR. What this result is, how to read it, what was written
+ * from it, and how to page through it — under the records, in one line, the
+ * way a spreadsheet's is. Everything here was above the table until
+ * 2026-09-20, which put description before the thing described on a page
+ * whose subject is the rows. */
+.teim-rd .cp-ex__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.9rem; padding: 0.5rem 1rem; border-top: 1px solid var(--line); background: var(--ground, #f3f6f8); font-size: 0.84rem; }
+/* The caption takes what the controls beside it do not want. It was boxed
+ * to its content and wrapped onto two lines with 400px of the row empty. */
+/* Content width, not a share of the row: the caption is a sentence and a
+ * control, and a flex basis made it wrap inside a box with the rest of the
+ * row still empty. The pager holds the right edge. */
+.teim-rd .cp-ex__foot .cp-ex__caption { flex: 0 1 auto; min-width: 0; padding: 0; gap: 0.3rem 0.6rem; }
+.teim-rd .cp-ex__foot .cp-ex__pages { margin-left: auto; }
+.teim-rd .cp-ex__foot .cp-ex__reads--fold { flex: 0 0 auto; padding: 0; border: 0; }
+/* The headline gives way first: in the status bar it is the one item whose
+ * meaning survives being cut, because "Read:" plus half a title still says
+ * what the link is and the profile carries the whole list. */
+.teim-rd .cp-ex__foot .cp-ex__wrote { max-width: 24ch; }
 .teim-rd .cp-ex__foot .cp-read__cedar { margin-top: 0; }
 .teim-rd .cp-ex__foot .cp-read__cedar:disabled { color: var(--muted); cursor: default; text-decoration: none; }
 .teim-rd .cp-ex__pages { margin-left: auto; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -3786,8 +3837,14 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * collection matched, which is the common case in a ten-row preview, the
  * second column was empty. The ledger reads down. */
 .teim-rd .cp-ent__groups { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem; padding: 1.6rem 0; }
-.teim-rd .cp-ent__group { border: 1px solid var(--line); border-radius: 4px; padding: 1rem 1.1rem 0.6rem; background: var(--bg); }
-.teim-rd .cp-ent__ghead { display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--line-soft); }
+/* A card a reader can see the edges of. It was a bordered box with the
+ * heading inside it and nothing marking where the collection's name stopped
+ * and its records began; the head sits on its own tinted band now, and the
+ * card ends in its own way out rather than in a dead edge. */
+.teim-rd .cp-ent__group { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 6px; overflow: clip; background: var(--bg); }
+.teim-rd .cp-ent__gmore { align-self: flex-start; margin: 0; padding: 0.6rem 1.1rem 0.8rem; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); text-decoration: none; }
+.teim-rd .cp-ent__gmore:hover { text-decoration: underline; }
+.teim-rd .cp-ent__ghead { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--ground, #f3f6f8); }
 .teim-rd .cp-ent__gic { display: grid; place-items: center; width: 26px; height: 26px; flex: none; color: var(--dteal); }
 .teim-rd .cp-ent__gic svg { width: 20px; height: 20px; }
 .teim-rd .cp-ent__ghead h2 { font-family: var(--sans); font-size: 0.98rem; font-weight: 800; color: var(--ink); margin: 0; flex: 1 1 auto; min-width: 0; }
@@ -3799,7 +3856,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ent__glink span { color: var(--dteal); }
 .teim-rd .cp-ent__gn { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .teim-rd .cp-ent__list { list-style: none; margin: 0; padding: 0; }
-.teim-rd .cp-ent__row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto 1.2rem; align-items: baseline; gap: 0.35rem 1rem; padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); }
+.teim-rd .cp-ent__row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto 1.2rem; align-items: baseline; gap: 0.35rem 1rem; padding: 0.7rem 1.1rem; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); }
 .teim-rd .cp-ent__row:hover { background: var(--teal-tint); }
 .teim-rd .cp-ent__list li:last-child .cp-ent__row { border-bottom: 0; }
 .teim-rd .cp-ent__row:hover { color: var(--dteal); }
@@ -3906,7 +3963,40 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ent__deck { margin: 0.7rem 0 0; max-width: 62ch; font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); }
 /* Three figures, each saying what it counts. Hairlines between them rather
  * than three boxes: they are one reading, not three cards. */
-.teim-rd .cp-ent__glance { display: flex; flex-wrap: wrap; gap: 0 2.2rem; margin: 1.4rem 0 0; padding: 0.9rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+/* ── THE IDENTITY PANEL ───────────────────────────────────────────────────
+ * One object instead of five stacked paragraphs and a loose strip of
+ * figures: who this is on the left, what is known on the right, the
+ * collections they appear in underneath. */
+.teim-rd .cp-ent__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem 2.4rem; align-items: start; padding: 1.4rem 1.6rem; border: 1px solid var(--line); border-left: 3px solid var(--teal); background: var(--bg); }
+.teim-rd .cp-ent__who { min-width: 0; }
+.teim-rd .cp-ent__notice { grid-column: 1 / -1; margin: 0; max-width: 78ch; }
+/* The collections this entity turns up in, as marks a reader can point at,
+ * each one a way into that collection narrowed to this entity. */
+.teim-rd .cp-ent__marks { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.9rem 0 0; padding: 0; }
+.teim-rd .cp-ent__marks a { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); border-radius: 999px; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); text-decoration: none; }
+.teim-rd .cp-ent__marks a:hover { border-color: var(--dteal); color: var(--dteal); }
+.teim-rd .cp-ent__markic { display: grid; place-items: center; width: 15px; height: 15px; color: var(--dteal); }
+.teim-rd .cp-ent__markic svg { width: 15px; height: 15px; }
+@media (max-width: 880px) {
+  .teim-rd .cp-ent__head { grid-template-columns: minmax(0, 1fr); padding: 1.1rem 1rem; gap: 0.7rem; }
+}
+@media (max-width: 720px) {
+  /* The name is the page's h1 and it is often four words long; at display
+     size it took three lines and a third of the screen before a record. */
+  .teim-rd .cp-ent__head .cp-rec__name { font-size: clamp(1.3rem, 6vw, 1.6rem); }
+  .teim-rd .cp-ent__notice--fold { padding: 0; }
+  .teim-rd .cp-ent__notice--fold > summary { list-style: none; cursor: pointer; font-family: var(--sans); font-size: 0.84rem; font-weight: 700; color: var(--dteal); }
+  .teim-rd .cp-ent__notice--fold > summary::-webkit-details-marker { display: none; }
+  .teim-rd .cp-ent__notice--fold > summary::after { content: ' \203A'; display: inline-block; transform: rotate(90deg); }
+  .teim-rd .cp-ent__notice--fold[open] > summary::after { transform: rotate(-90deg); }
+  .teim-rd .cp-ent__notice--fold > p { margin: 0.4rem 0 0; }
+}
+/* Inside the panel now, not a strip under it: a column of figures beside
+ * the name, which is how a profile of anything reads. */
+.teim-rd .cp-ent__glance { display: grid; grid-template-columns: repeat(2, minmax(0, auto)); gap: 0.7rem 2rem; margin: 0; padding: 0; }
+@media (max-width: 880px) {
+  .teim-rd .cp-ent__glance { grid-template-columns: repeat(auto-fit, minmax(7rem, auto)); padding-top: 0.6rem; border-top: 1px solid var(--line); }
+}
 .teim-rd .cp-ent__glance dt { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-ent__glance dd { margin: 0.2rem 0 0; font-family: var(--sans); font-size: 1.15rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); }
 
@@ -3934,7 +4024,6 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
      glance strip is three figures and does not need a display size to be
      three figures. */
   .teim-rd .cp-ent__deck { display: none; }
-  .teim-rd .cp-ent__glance { gap: 0 1.4rem; margin-top: 0.9rem; padding: 0.6rem 0; }
   .teim-rd .cp-ent__glance dd { font-size: 0.95rem; }
   .teim-rd .cp-ent__groups { padding-top: 1rem; }
 }
@@ -3965,7 +4054,18 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * scrolling sideways is 77px the records could have had. The masthead keeps
  * its gutters, because it is the same masthead as every other page. */
 .teim-rd .cp-page--table { padding-bottom: 0; padding-inline: 0; }
-.teim-rd .cp-page--table > .cp-mast { padding-inline: 2.4rem; }
+/* THE MASTHEAD, ON A PAGE THAT IS A WORKING SURFACE.
+ * 141px of a 900px window before the frame even started. It keeps its
+ * gutters (it is the same masthead as every other page) and loses what a
+ * reader of a table does not need: the standing line, which says what Cedar
+ * Press is to somebody who is already inside it, and the breathing room a
+ * document's header wants. ~86px, and the rest went to the records. */
+.teim-rd .cp-page--table > .cp-mast { padding-inline: 2.4rem; padding-top: 0.55rem; }
+.teim-rd .cp-page--table > .cp-mast .cp-mast__top { padding-bottom: 0.35rem; }
+.teim-rd .cp-page--table > .cp-mast .cp-mast__of--line { display: none; }
+.teim-rd .cp-page--table > .cp-mast .cp-nav { padding-block: 0.2rem; }
+.teim-rd .cp-page--table > .cp-mast .cp-mast__word { font-size: 1.05rem; }
+.teim-rd .cp-page--table > .cp-mast .cp-mast__mark { width: 1.7rem; height: 1.7rem; }
 .teim-rd .cp-page--table .cp-ex { margin-top: 0; padding-inline: 0; max-width: none; }
 .teim-rd .cp-page--table .cp-ex__frame { border-radius: 0; border-inline: 0; min-height: calc(100dvh - 12rem); }
 /* The rail runs the frame's full height rather than stopping under its last
@@ -4060,18 +4160,25 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 @media (max-width: 720px) {
   .teim-rd .cp-page--table .cp-ex__frame { min-height: calc(100dvh - 9rem); }
   .teim-rd .cp-page--table > .cp-mast { padding-inline: 1.15rem; }
-  .teim-rd .cp-page--table .cp-ex__head { gap: 0.5rem; margin-bottom: 0.6rem; }
-  .teim-rd .cp-page--table .cp-ex__head .cp-kind--data { display: none; }
   .teim-rd .cp-page--table .cp-ex__samplefor { display: none; }
-  .teim-rd .cp-page--table .cp-ex__head .cp-ex__aboutbtn,
-  .teim-rd .cp-page--table .cp-ex__head .cp-ex__sample { flex: 1 1 0; min-width: 0; justify-content: center; text-align: center; }
   .teim-rd .cp-page--table .cp-ex__reads--fold { padding-block: 0.4rem; }
-  /* The toolbar was three stacked rows: search, Filters, then the actions.
-     Filters and the actions share one. */
-  .teim-rd .cp-page--table .cp-ex__bar { padding-block: 0.6rem; gap: 0.45rem; }
-  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__filters { flex: 1 1 7rem; min-width: 0; }
-  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__filters > summary { width: 100%; box-sizing: border-box; text-align: center; }
-  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__acts { flex: 2 1 12rem; width: auto; }
+  /* Three rows on a phone: the collection's name, then the search with the
+     filter control, then the profile and the actions. Four rows before this,
+     because the actions were pushed to their own line by the `margin-left:
+     auto` that holds the right edge on a desktop. */
+  .teim-rd .cp-page--table .cp-ex__bar { padding-block: 0.55rem; gap: 0.4rem; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__title { flex: 1 1 100%; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__q { flex: 1 1 8rem; max-width: none; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__filters { flex: 0 0 auto; }
+  .teim-rd .cp-page--table .cp-ex__aboutlong { display: none; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__aboutbtn { flex: 0 1 auto; justify-content: center; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__acts { flex: 1 1 auto; margin-left: 0; }
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__acts > * { flex: 1 1 0; justify-content: center; }
+  /* The filters panel is the width of the screen here, not of a control. */
+  .teim-rd .cp-page--table .cp-ex__bar > .cp-ex__filters[open] > .cp-ex__filtersin { width: min(20rem, calc(100vw - 2rem)); }
+  /* The status bar wraps rather than truncating: below the records there is
+     nothing to protect, and a phone cannot hold six things on one line. */
+  .teim-rd .cp-page--table .cp-ex__foot { flex-wrap: wrap; }
 }
 
 /* ══ THE COLLECTION PROFILE ═══════════════════════════════════════════════

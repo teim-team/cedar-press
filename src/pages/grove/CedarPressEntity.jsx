@@ -35,6 +35,7 @@ import { recordHref } from "../../features/grove/pressRecord.js";
 import { PRESS_DATA_PATH, PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useRegister } from "../../features/grove/useRegister.js";
+import { useNarrow } from "../../features/grove/useNarrow.js";
 import { useSampleRows } from "../../features/grove/useSamples.js";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
@@ -46,6 +47,7 @@ const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD
 
 export default function CedarPressEntity() {
   const { user, loading, logout } = useAuth();
+  const narrow = useNarrow();
   const entitled = canReadCedarPress(user);
   const { uid } = useParams();
   const [params] = useSearchParams();
@@ -95,6 +97,16 @@ export default function CedarPressEntity() {
 
   // Grouped by collection, in the catalog's order, so the profile reads as
   // the shelf does.
+  // What the rows on this screen add up to, where they carry money at all.
+  // `count` travels with it so the label can never be read as a total for
+  // the entity: it is a sum of a preview, and the preview is ten rows a
+  // table.
+  const shown = useMemo(() => {
+    const amounts = mine.filter((item) => typeof item.amount === "number");
+    return amounts.length
+      ? { total: amounts.reduce((sum, item) => sum + item.amount, 0), count: amounts.length }
+      : { total: null, count: 0 };
+  }, [mine]);
   const groups = useMemo(() => {
     const byCollection = new Map();
     for (const item of mine) {
@@ -114,6 +126,9 @@ export default function CedarPressEntity() {
     );
   }
 
+  const notice = samplesLoading
+    ? "Reading the published previews…"
+    : `Records Cedar Press has resolved to this entity, from the published previews — up to ten sample rows per table, never a count of a release. The name each source used stays visible.${locked ? ` ${locked} more collections open on Cedar Press+.` : ""}`;
   const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? null;
   return (
     <div className="teim-rd teim-rd--paper">
@@ -146,55 +161,94 @@ export default function CedarPressEntity() {
             The three-figure strip went with it: "Collections read" described
             a loading operation rather than the entity, and two of the three
             figures were one sentence between them. */}
+        {/* THE IDENTITY PANEL.
+            Owner, 2026-09-20: "the profile page from Native Entity just
+            looks like text. Like at least you can put cards or make it have
+            more intentionality behind it."
+
+            It was five stacked paragraphs — eyebrow, name, ids, a sentence
+            about what the page is, a sentence about what the counts mean —
+            and then a separate strip of three figures. One panel now: who
+            this is on the left, what is known about them on the right, and
+            the marks of the collections they appear in underneath, so the
+            shape of an entity's footprint is visible before a single row is
+            read. Nothing is invented: every figure is derived from the rows
+            on this screen and says what it counts. */}
         <header className="cp-rec__head cp-ent__head" data-testid="entity-head">
-          <p className="cp-ent__eyebrow">Cedar entity profile</p>
-          <h1 className="cp-rec__name">
-            {name ?? (register.entities.length ? "No entity with that Cedar id" : "Opening the entity…")}
-          </h1>
-          <p className="cp-rec__ids">
-            <span className="cp-rec__uid"><code>{uid}</code></span>
-            {entity?.type ? <span className="cp-rec__type">{entity.type}</span> : null}
-          </p>
-          <p className="cp-ent__deck">
-            This profile brings together the records Cedar Press has resolved to this entity. The
-            name each source used stays visible.
-          </p>
-          <p className="cp-rec__fine cp-ent__notice">
-            {samplesLoading
-              ? "Reading the published previews…"
-              : `${mine.length} record${mine.length === 1 ? "" : "s"} in ${groups.length} collection${groups.length === 1 ? "" : "s"}, from the published previews — up to ten sample rows per table, never a count of a release.`}
-            {locked ? ` ${locked} more collections open on Cedar Press+.` : ""}
-          </p>
+          <div className="cp-ent__who">
+            <p className="cp-ent__eyebrow">Cedar entity profile</p>
+            <h1 className="cp-rec__name">
+              {name ?? (register.entities.length ? "No entity with that Cedar id" : "Opening the entity…")}
+            </h1>
+            <p className="cp-rec__ids">
+              <span className="cp-rec__uid"><code>{uid}</code></span>
+              {entity?.type ? <span className="cp-rec__type">{entity.type}</span> : null}
+            </p>
+            {groups.length ? (
+              <ul className="cp-ent__marks" aria-label="Collections this entity appears in">
+                {groups.map(({ entry }) => (
+                  <li key={entry.id}>
+                    <Link to={`${PRESS_DATA_PATH}?c=${entry.id}&e=${encodeURIComponent(uid)}`} title={entry.name}>
+                      <span className="cp-ent__markic" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
+                      {entry.short || entry.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          {groups.length ? (
+            <dl className="cp-ent__glance" data-testid="entity-glance">
+              <div>
+                <dt>In collections</dt>
+                <dd>{groups.length}</dd>
+              </div>
+              <div>
+                <dt>Preview records</dt>
+                <dd>{mine.length}</dd>
+              </div>
+              {dates.length ? (
+                <div>
+                  <dt>Visible span</dt>
+                  <dd>{dates[0] === dates[dates.length - 1] ? dates[0] : `${dates[0]} to ${dates[dates.length - 1]}`}</dd>
+                </div>
+              ) : null}
+              {/* Only where the rows carry money. A sum of what is on the
+                  screen, labelled as that and nothing wider: the preview is
+                  ten rows a table, so this is never a total for the entity
+                  and the label may not let anybody read it as one. */}
+              {shown.total != null ? (
+                <div>
+                  <dt>{shown.count === 1 ? "On this row" : `On these ${shown.count} rows`}</dt>
+                  <dd>{money.format(shown.total)}</dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : null}
+
+          {/* THE CAVEAT, AND WHAT A PHONE HAS ROOM FOR.
+              It is a real caveat and it is not dropped: a reader must not
+              take "2 preview records" for this entity's whole footprint. But
+              five lines of it above the first record, on a page whose
+              purpose the 2026-09-15 review already stated is "to get users
+              to an entity's related records", is the caveat winning. On a
+              phone it is a disclosure; the figures above it carry the word
+              "preview" either way. */}
+          {narrow ? (
+            <details className="cp-rec__fine cp-ent__notice cp-ent__notice--fold">
+              <summary>What these records are</summary>
+              <p>{notice}</p>
+            </details>
+          ) : (
+            <p className="cp-rec__fine cp-ent__notice">{notice}</p>
+          )}
           {missing.length ? (
             <p className="cp-rec__fine">
               Not reachable right now: {missing.map((key) => PRESS_CATALOG_BY_ID[key.split("/")[0]]?.short ?? key).join(", ")}.
             </p>
           ) : null}
         </header>
-
-        {/* AT A GLANCE, and then the thing this page exists to prove.
-            The brief asks for "no decorative metrics that cannot be
-            maintained with the real serving layer" — so these three are the
-            ones derived from the rows on screen, and each says what it is
-            counting. */}
-        {groups.length ? (
-          <dl className="cp-ent__glance" data-testid="entity-glance">
-            <div>
-              <dt>In collections</dt>
-              <dd>{groups.length}</dd>
-            </div>
-            <div>
-              <dt>Preview records</dt>
-              <dd>{mine.length}</dd>
-            </div>
-            {dates.length ? (
-              <div>
-                <dt>Visible span</dt>
-                <dd>{dates[0] === dates[dates.length - 1] ? dates[0] : `${dates[0]} to ${dates[dates.length - 1]}`}</dd>
-              </div>
-            ) : null}
-          </dl>
-        ) : null}
 
         {samplesLoading && !groups.length ? (
           <p className="cp-rec__fine cp-ent__empty">Reading the published samples…</p>
@@ -239,6 +293,13 @@ export default function CedarPressEntity() {
                     </li>
                   ))}
                 </ul>
+                {/* The card's own way out. The heading is a link too, but a
+                    reader who has just finished the rows is at the bottom of
+                    the card, and a card that ends in a dead edge ends the
+                    page as far as they are concerned. */}
+                <Link className="cp-ent__gmore" to={`${PRESS_DATA_PATH}?c=${entry.id}&e=${encodeURIComponent(uid)}`}>
+                  All of this entity&rsquo;s {entry.short || entry.name} records <span aria-hidden="true">&#8594;</span>
+                </Link>
               </section>
             ))}
           </div>

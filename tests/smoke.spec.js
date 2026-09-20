@@ -412,6 +412,10 @@ test.describe("the subscriber's path", () => {
     // the table became the Collections page, and the action moved into the
     // pane head rather than going with them.
     await expect(page.locator(".cp-rail__item").first()).toBeVisible();
+    // In the actions menu since 2026-09-20: the toolbar collapsed to one row
+    // so the table could have the screen, and the secondary downloads went
+    // behind "More" together. Still one click from the records.
+    await page.locator(".cp-ex__bar .cp-ex__more > summary").click();
     const panelAction = page.locator(".cp-ex__sample").first();
     await expect(panelAction).toBeVisible();
     const download = page.waitForEvent("download");
@@ -553,7 +557,7 @@ test.describe("Explore the collections", () => {
       await expect(page.locator(".cp-ex__table--table")).toBeVisible();
       await expect(page.locator(".cp-ex__table--table thead th").first()).toBeVisible();
       await page.getByRole("button", { name: /Show all \d+ columns/ }).click();
-      await expect(page.getByTestId("explore-caption")).toContainText(/(\d+) of \1 columns/);
+      await expect(page.getByTestId("explore-caption")).toContainText(/(\d+)\/\1 columns/);
     }
     // A row opens the record's own page, which carries the cut it came from.
     // Covered end to end in "the record page" below; here the only claim is
