@@ -72,12 +72,16 @@ import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
 import { saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
-import { coverageLabel } from "../../features/grove/pressAccess.js";
+import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
+import PressCollectionRail from "./PressCollectionRail.jsx";
 import Explain from "./Explain";
 import { TierName } from "./TierName";
+
+/** Row counts as the launch descriptors state them, keyed by collection. */
+const ROWS_BY_ID = Object.fromEntries(LAUNCH_COLLECTION.map((e) => [e.id, e.rowsLabel]));
 
 const REGISTER_PATH = "/data/cedar/register.json";
 const SAVED_KEY = "cp.explore.saved";
@@ -755,6 +759,73 @@ function Cards({ items, onActive, openRecord }) {
 
 // ── The viewer ─────────────────────────────────────────────────────────────
 
+/**
+ * A collection this subscription cannot open, shown rather than hidden.
+ *
+ * The brief's Priority 1, and the part of it that is easy to get wrong: the
+ * reader keeps the frame and the collection's real public facts, and what is
+ * withheld is withheld by never being fetched. There are no protected values
+ * on this page to blur, and a blur would not be access control if there were
+ * — `pressAccess` and the server decide, this only explains.
+ *
+ * Deliberately one sentence and one action. A comparison grid or a price
+ * belongs on the plans page; a reader who clicked a collection wants to know
+ * what it is.
+ */
+function LockedCollection({ entry }) {
+  const upgrade = upgradeFor(entry);
+  const rows = ROWS_BY_ID[entry.id];
+  return (
+    <div className="cp-lock" data-testid="explore-locked">
+      <div className="cp-ex__head">
+        <h3 className="cp-ex__title">{entry.name}</h3>
+        <span className="cp-kind cp-kind--lock">{upgrade.name}</span>
+        <AboutCollection entry={entry} />
+      </div>
+      <div className="cp-ex__card">
+        <p className="cp-lock__lede">{entry.blurb}</p>
+        <dl className="cp-lock__facts">
+          <div>
+            <dt>Coverage</dt>
+            <dd>{coverageLabel(entry)}</dd>
+          </div>
+          {rows ? (
+            <div>
+              <dt>Records</dt>
+              <dd>{rows}</dd>
+            </div>
+          ) : null}
+          <div>
+            <dt>Opens with</dt>
+            <dd>
+              <TierName name={upgrade.name} />
+            </dd>
+          </div>
+        </dl>
+        {/* The one navy region on this surface, and it is the thing being
+            said. Not a modal, not a page, not a dimmed copy of the table. */}
+        <div className="cp-lock__inset">
+          <p className="cp-lock__insethead">
+            Available with <TierName name={upgrade.name} />
+          </p>
+          <p className="cp-lock__insetbody">
+            Explore {entry.name}, including records, filters, downloads and collection-scoped
+            Cedar.
+          </p>
+          <a
+            className="cp-lock__act"
+            href={TBN_PLANS_URL}
+            target="_blank"
+            rel="noreferrer"
+          >
+            View <TierName name={upgrade.name} /> options <span aria-hidden="true">&#8594;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -774,6 +845,16 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   const lockedOut = requested.filter((id) => !scope.includes(id));
   const selected = requested.filter((id) => scope.includes(id));
   const single = selected.length === 1 ? collections.find((c) => c.entry.id === selected[0]) : null;
+  // ONE LOCKED COLLECTION IS A STATE, NOT AN EMPTY RESULT.
+  // Asking for a Plus collection on a Cedar Press subscription used to leave
+  // `selected` empty and produce "no collection is selected", which is both
+  // untrue and useless: the reader picked one, and the product answered as
+  // though they had not. Per the brief's Priority 1 the collection stays
+  // selected, the frame stays, and what opens it is said in place.
+  const lockedSingle =
+    requested.length === 1 && lockedOut.length === 1
+      ? collections.find((c) => c.entry.id === lockedOut[0]) ?? null
+      : null;
   // One collection is one dataset: its flagship, unless a link names one of
   // the release's supporting tables.
   const table = single
@@ -991,6 +1072,10 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
     if (value === ALL) write({ collections: null, table: null });
     else write({ collections: [value], table: null });
   };
+  // The rail hands back a catalog entry, or null for "all of them". Locked
+  // collections come through here too: selecting one is how a reader asks
+  // what it is, and refusing the click answers nothing.
+  const chooseFromRail = (entry) => chooseCollection(entry ? entry.id : ALL);
   const subset = cut.collections !== null && selected.length > 1 ? selected : null;
   const selectValue = cut.collections === null ? ALL : single ? single.entry.id : subset ? SUBSET : "";
   // The file is the cut's records: not until every selected preview and the
@@ -1020,7 +1105,24 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
   return (
     <section className="cp-ex" id="explore" aria-label="Explore the collections" data-testid="explore" ref={sectionRef}>
+      {/* THE RAIL, AND THE TABLE BESIDE IT.
+          One component with the door (`PressCollectionRail`), so the landing
+          preview and the signed-in product are the same object in two modes
+          rather than two tables that resemble each other today. The brief's
+          Priority 0. */}
+      <div className="cp-ex__frame">
+      <PressCollectionRail
+        selectedId={single?.entry.id ?? lockedSingle?.entry.id ?? null}
+        onSelect={chooseFromRail}
+        user={user}
+        mode="app"
+        allLabel={`All ${scope.length} open collections`}
+      />
       <div className="cp-ex__in">
+        {lockedSingle ? (
+          <LockedCollection entry={lockedSingle.entry} />
+        ) : (
+        <>
         {/* THE TABLE'S HEAD IS A HEAD, NOT A LESSON.
             Review, 2026-09-15: "above the records, there is a headline
             telling users to choose and browse, a paragraph explaining the
@@ -1217,6 +1319,9 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             </span>
           </div>
         </div>
+        </>
+        )}
+      </div>
       </div>
     </section>
   );

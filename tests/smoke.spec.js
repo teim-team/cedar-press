@@ -1336,15 +1336,29 @@ test.describe("the first screen", () => {
     expect(errors).toEqual([]);
   });
 
-  test("Collections opens on collections", async ({ page }) => {
+  // "No full-screen catalog sits between /data and a first useful record."
+  //
+  // This used to assert that a shelf TILE was on the first screen, which was
+  // the right intent measured against the old arrangement: the tier bands ran
+  // above the viewer, so a tile was the first collection-shaped thing a
+  // reader met. The explorer carries its own rail now and is mounted first,
+  // so the catalogue and the records arrive together, and the bands were
+  // asking the reader to choose twice. Asserting the tile now would be
+  // asserting the arrangement that was removed.
+  test("Collections opens on the records, with the rail beside them", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data");
-    await page.locator(".cp-badge").first().waitFor();
+    await page.locator(".cp-rail__item").first().waitFor();
     await page.evaluate(() => document.fonts.ready);
     const viewport = page.viewportSize().height;
-    // A collection tile, on the first screen, with no scrolling.
-    expect(await topOf(page, ".cp-badge")).toBeLessThan(viewport);
+    // The catalogue, as the rail.
+    expect(await topOf(page, ".cp-rail__item")).toBeLessThan(viewport);
+    // And a record with it, not a screen of chooser first. The phone lays the
+    // rail down as a strip above the records, so both fit either way.
+    const record = page.locator(".cp-ex__table tbody tr, .cp-ex__cardbtn").first();
+    await record.waitFor();
+    expect(await topOf(page, ".cp-ex__table tbody tr, .cp-ex__cardbtn")).toBeLessThan(viewport * 2);
     expect(errors).toEqual([]);
   });
 

@@ -3116,6 +3116,71 @@
 .teim-rd .cp-band--fill .cp-badge.is-selected { box-shadow: 0 0 0 3px #fff; }
 /* While the viewer is on screen Cedar's floating launcher steps aside; the
  * viewer's own foot carries the Cedar action. The open panel is untouched. */
+/* ══ THE RAIL ═════════════════════════════════════════════════════════════
+ * One rail, two surfaces. The door draws it inside a scaled product frame
+ * and the app draws it at full size beside the table; both get it from
+ * PressCollectionRail, so they cannot drift into two designs of one list.
+ *
+ * Navy, because it is the product's one structural material and this is the
+ * product's spine. Teal marks the selected row and nothing else. */
+.teim-rd .cp-ex__frame { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); align-items: stretch; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--bg); }
+.teim-rd .cp-rail { display: flex; flex-direction: column; gap: 0.9rem; padding: 1rem 0.75rem 1.4rem; background: var(--door-navy, #09132b); overflow-y: auto; }
+.teim-rd .cp-rail__shelf { display: flex; flex-direction: column; gap: 0.3rem; }
+.teim-rd .cp-rail__tier { padding: 0 0.5rem; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+.teim-rd .cp-rail__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.teim-rd .cp-rail__item { display: flex; align-items: center; gap: 0.55rem; width: 100%; padding: 0.45rem 0.5rem; border: 0; border-radius: 8px; background: transparent; color: rgba(255, 255, 255, 0.82); font: inherit; text-align: left; cursor: pointer; transition: background 0.15s var(--door-ease), color 0.15s var(--door-ease); }
+.teim-rd .cp-rail__item:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+.teim-rd .cp-rail__item:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+.teim-rd .cp-rail__item.is-on { background: rgba(15, 181, 165, 0.16); color: #fff; box-shadow: inset 2px 0 0 var(--teal); }
+.teim-rd .cp-rail__item--all { margin-bottom: 0.2rem; padding-block: 0.55rem; font-weight: 600; }
+.teim-rd .cp-rail__mark { flex: 0 0 auto; display: grid; place-items: center; width: 20px; height: 20px; color: var(--door-accent-light, #5fd9cc); }
+.teim-rd .cp-rail__mark svg { width: 17px; height: 17px; }
+.teim-rd .cp-rail__text { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
+/* Colour stated rather than inherited: something upstream in the bands
+ * sets --ink on spans, so the name rendered navy-on-navy and the rail
+ * showed twelve row counts with no collections attached to them.
+ * Found by reading the computed style, not by looking at it. */
+.teim-rd .cp-rail__name { font-family: var(--sans); font-size: 0.82rem; font-weight: 600; line-height: 1.25; letter-spacing: -0.008em; overflow-wrap: anywhere; color: rgba(255, 255, 255, 0.86); }
+.teim-rd .cp-rail__item:hover .cp-rail__name,
+.teim-rd .cp-rail__item.is-on .cp-rail__name { color: #fff; }
+.teim-rd .cp-rail__item.is-locked .cp-rail__name { color: rgba(255, 255, 255, 0.6); }
+.teim-rd .cp-rail__rows { font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); }
+/* Subordinate, not removed, and named rather than padlocked: a reader who
+ * cannot open something is owed the name of the thing that opens it. */
+.teim-rd .cp-rail__item.is-locked { color: rgba(255, 255, 255, 0.58); }
+.teim-rd .cp-rail__item.is-locked .cp-rail__mark { color: rgba(255, 255, 255, 0.4); }
+.teim-rd .cp-rail__lock { margin-left: auto; padding: 0.1rem 0.34rem; border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 4px; font-family: var(--mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); }
+.teim-rd .cp-ex__frame > .cp-ex__in { padding: 1.2rem 1.3rem 1.4rem; min-width: 0; }
+
+/* A PHONE GETS A STRIP, NOT A COLUMN. The brief is explicit that mobile is
+ * its own composition: the rail lies down, keeps its labels (icon-only is a
+ * guessing game), and the selected collection's table follows under it. */
+@media (max-width: 900px) {
+  .teim-rd .cp-ex__frame { grid-template-columns: minmax(0, 1fr); }
+  .teim-rd .cp-rail { flex-direction: row; gap: 1rem; padding: 0.7rem 0.8rem; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; }
+  .teim-rd .cp-rail__shelf { flex-direction: row; align-items: center; gap: 0.5rem; }
+  .teim-rd .cp-rail__tier { writing-mode: vertical-rl; transform: rotate(180deg); padding: 0; font-size: 0.52rem; }
+  .teim-rd .cp-rail__list { flex-direction: row; gap: 0.4rem; }
+  .teim-rd .cp-rail__item { width: auto; min-width: 8.5rem; min-height: 44px; scroll-snap-align: start; }
+  .teim-rd .cp-rail__item--all { min-width: 7rem; margin: 0; }
+  .teim-rd .cp-ex__frame > .cp-ex__in { padding: 1rem; }
+}
+
+/* ══ A LOCKED COLLECTION ══════════════════════════════════════════════════
+ * Selected, framed, explained. Nothing protected is fetched, so there is
+ * nothing here to blur; the inset says what opens it and stops. */
+.teim-rd .cp-kind--lock { background: var(--door-navy, #09132b); color: #fff; }
+.teim-rd .cp-lock__lede { margin: 0 0 1rem; font-size: 0.98rem; line-height: 1.6; color: var(--ink-2); max-width: 70ch; }
+.teim-rd .cp-lock__facts { display: flex; flex-wrap: wrap; gap: 1.6rem; margin: 0 0 1.2rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-lock__facts dt { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-lock__facts dd { margin: 0.2rem 0 0; font-family: var(--sans); font-size: 0.92rem; font-weight: 600; color: var(--ink); }
+.teim-rd .cp-lock__inset { padding: 1.1rem 1.2rem; border-radius: 10px; background: var(--door-navy, #09132b); color: #fff; max-width: 46rem; }
+.teim-rd .cp-lock__insethead { margin: 0; font-family: var(--sans); font-size: 1rem; font-weight: 700; letter-spacing: -0.012em; }
+.teim-rd .cp-lock__insetbody { margin: 0.35rem 0 0.9rem; font-size: 0.9rem; line-height: 1.55; color: rgba(255, 255, 255, 0.8); }
+.teim-rd .cp-lock__act { display: inline-block; font-family: var(--sans); font-size: 0.88rem; font-weight: 600; color: var(--door-accent-light, #5fd9cc); text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-lock__act:hover { color: #fff; }
+@media (max-width: 640px) { .teim-rd .cp-lock__facts { gap: 1rem 1.6rem; } }
+
 body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; }
 /* And the same for the door's preview: while the proof object is on screen,
    the door's own launcher steps aside rather than sitting on the collection

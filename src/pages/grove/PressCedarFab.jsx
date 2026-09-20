@@ -151,29 +151,27 @@ function AnswerSource({ basis }) {
     );
   }
 
+  // A general answer says so once, briefly, because the alternative is a
+  // reader assuming it was read from the release. It does not offer a
+  // records link: there are no supporting records to open.
   if (basis.kind !== "release") {
-    return (
-      <p className="cp-dc__src">
-        Cedar wrote this from what it knows about {release || "the collections"}, not from the
-        records themselves.
-      </p>
-    );
+    return <p className="cp-dc__src">Not read from {release || "the collections"}.</p>;
   }
 
+  // The source list lived here for one build and it was machinery. A reader
+  // trusting an answer wants to know it came from a published release and
+  // when; the seven source families behind that release are the collection's
+  // business, and the collection's own page says them properly.
   return (
     <p className="cp-dc__src cp-dc__src--release">
-      Read from <b>{release}</b>
-      {when ? `, updated ${when}` : ""}.
-      {basis.sources ? ` Built from ${trimStop(basis.sources)}.` : ""}{" "}
+      Based on <b>{release}</b>
+      {when ? `, updated ${when}` : ""}.{" "}
       {basis.collectionId ? (
-        <Link to={`${PRESS_DATA_PATH}?c=${basis.collectionId}`}>See the records</Link>
+        <Link to={`${PRESS_DATA_PATH}?c=${basis.collectionId}`}>View supporting records</Link>
       ) : null}
     </p>
   );
 }
-
-/** The profile writes its source list with a full stop; the sentence adds one. */
-const trimStop = (text) => String(text).trim().replace(/\.$/, "");
 
 // `gated` names why Cedar will not query the collections for this reader:
 // "signedout" (no session) or "unentitled" (a membership without Cedar
