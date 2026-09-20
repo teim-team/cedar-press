@@ -57,14 +57,24 @@ export default function CedarPressTribalRequest() {
 
         <section className="cp-trh cp-fade">
           <div>
-            <p className="cp-hero__access">For federally recognized tribal governments</p>
-            <h1 className="cp-trh__title">See what Cedar knows about your nation.</h1>
+            {/* "Record review", not "data request": the page is about a
+                government's right to see and correct what is held about it,
+                and the old eyebrow named the audience while the new one
+                names the job. And "Nation", capitalised — it is the proper
+                noun for a sovereign government, and lowercase here read as
+                a generic. */}
+            <p className="cp-hero__access">Tribal government record review</p>
+            <h1 className="cp-trh__title">See what Cedar knows about your Nation.</h1>
           </div>
           <div className="cp-trh__side">
             <p className="cp-trh__sub">
               Federally recognized tribal governments may request the Cedar records maintained
               about their government and affiliated tribal enterprises, review those records and
-              submit corrections or supporting documentation.
+              submit corrections or supporting documentation.{" "}
+              {/* Said in the deck rather than three sections down. Without it
+                  the page reads as a sales route for an audience who happen
+                  to be Tribal, which is the one thing it is not. */}
+              <b>No subscription is required to make a records request.</b>
             </p>
             <a className="cp-trh__cta" href={REQUEST_HREF}>
               Request your records <span aria-hidden="true">&#8594;</span>
@@ -85,7 +95,15 @@ export default function CedarPressTribalRequest() {
               makes the program safe to run, so it gets the emphasis rather
               than being a fourth column of bullets. */}
           <aside className="cp-verify">
-            <h2 className="cp-verify__title">Every request is verified with the tribal government.</h2>
+            {/* A NATION IS AUTHORITATIVE ABOUT ITSELF.
+                This read "Every request is verified with the tribal
+                government", which puts Cedar in the position of checking a
+                government rather than checking a requester. The thing
+                actually verified is that whoever is asking is authorized to
+                receive the government's records, which is what the body
+                below has always described — the title was the part that
+                said it wrong. */}
+            <h2 className="cp-verify__title">Authorized-requester confirmation.</h2>
             <p className="cp-verify__body">
               Cedar releases tribe-specific records only after confirming that the requester is
               authorized by the federally recognized tribal government.
@@ -100,7 +118,7 @@ export default function CedarPressTribalRequest() {
                 </ul>
               </div>
               <div>
-                <span className="cp-verify__cap">Verification may include</span>
+                <span className="cp-verify__cap">Confirmation may include</span>
                 <ul>
                   {VERIFICATION.map((item) => (
                     <li key={item}>{item}</li>

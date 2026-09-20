@@ -1151,7 +1151,7 @@ test.describe("crawlers", () => {
     // "data" is emphasised inside the headline, so the string a crawler
     // sees is split by a tag; the tail of the sentence is contiguous.
     ["/", "behind Indian Country."],
-    ["/tribal-data-request", "See what Cedar knows about your nation"],
+    ["/tribal-data-request", "See what Cedar knows about your Nation"],
     ["/research-access", "Need one or two Cedar collections for a defined project"],
   ]) {
     test(`${path} is served with its text in the HTML, before any script runs`, async ({ request }) => {

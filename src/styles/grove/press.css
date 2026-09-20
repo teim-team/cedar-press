@@ -3540,27 +3540,38 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 
 /* The index. Sticky, so it is the one piece of the page that follows the
  * reader; quiet, so it never competes with the chapter it is pointing at. */
-.teim-rd .cp-mix {
-  position: sticky; top: 0; z-index: 6;
-  margin: 1.8rem 0 0; padding: 0.7rem 0 0.6rem;
-  background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-}
-.teim-rd .cp-mix__cap { display: block; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.45rem; }
-.teim-rd .cp-mix__list { list-style: none; margin: 0; padding: 0 0 0.15rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.teim-rd .cp-mix__item {
-  display: inline-flex; align-items: center; gap: 0.45rem;
-  padding: 0.38rem 0.7rem; border: 1px solid var(--line); border-radius: 999px;
-  background: var(--bg); text-decoration: none; min-height: 34px;
-  transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
-}
-.teim-rd .cp-mix__item:hover { border-color: var(--teal); background: var(--teal-tint); }
+/* THE CHAPTER INDEX: A RAIL, NOT A ROW OF PILLS.
+ * It was a sticky horizontal strip of ten rounded chips above the first
+ * chapter, which is the shape of a filter bar: a reader met ten controls
+ * before a sentence. It is a column beside the chapters now, and on a phone
+ * one line that opens.
+ *
+ * `float` rather than a grid, deliberately: the chapters are ten sibling
+ * sections spread down `.cp-meth`, and wrapping them to make a grid column
+ * would mean restructuring the page to move a menu. A float takes the
+ * column, the sections flow beside it, and `position: sticky` inside the
+ * float follows the reader down. */
+.teim-rd .cp-mix { display: block; margin: 1.8rem 0 0; }
+.teim-rd .cp-mix__cap { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-mix__at { display: none; }
+.teim-rd .cp-mix__list { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.teim-rd .cp-mix__item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; border-radius: 6px; text-decoration: none; min-height: 34px; transition: background 0.16s ease, color 0.16s ease; }
+.teim-rd .cp-mix__item:hover { background: var(--teal-tint); }
 .teim-rd .cp-mix__item:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
-.teim-rd .cp-mix__item.is-on { border-color: var(--dteal); background: var(--teal-tint); }
+.teim-rd .cp-mix__item.is-on { background: var(--teal-tint); box-shadow: inset 2px 0 0 var(--dteal); }
 .teim-rd .cp-mix__ic { display: grid; place-items: center; width: 18px; height: 18px; flex: none; color: var(--dteal); }
-.teim-rd .cp-mix__ic svg { width: 16px; height: 16px; }
-.teim-rd .cp-mix__n { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); }
-.teim-rd .cp-mix__name { font-family: var(--sans); font-size: 0.78rem; font-weight: 700; letter-spacing: -0.006em; color: var(--ink); white-space: nowrap; }
-.teim-rd .cp-mix__item.is-on .cp-mix__name { color: var(--dteal); }
+.teim-rd .cp-mix__ic svg { width: 15px; height: 15px; }
+.teim-rd .cp-mix__n { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); }
+.teim-rd .cp-mix__name { font-family: var(--sans); font-size: 0.78rem; font-weight: 600; letter-spacing: -0.006em; color: var(--ink-2); line-height: 1.25; }
+.teim-rd .cp-mix__item.is-on .cp-mix__name { color: var(--dteal); font-weight: 700; }
+@media (min-width: 1100px) {
+  .teim-rd .cp-mix { float: left; width: 14rem; margin: 2rem 2.5rem 1.5rem 0; position: sticky; top: 1.5rem; }
+  /* The `open` attribute is set from JS at this same breakpoint; the cap is
+     inert here because the rail is not a control on a wide screen. */
+  .teim-rd .cp-mix__cap { pointer-events: none; }
+  .teim-rd .cp-mix__cap::marker, .teim-rd .cp-mix__cap::-webkit-details-marker { display: none; }
+  .teim-rd .cp-meth .cp-ch { clear: none; }
+}
 
 /* A chapter: its number and mark on the left of the headline, the claim
  * under it at reading size, then whatever the chapter draws. */
@@ -3614,10 +3625,11 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-why__in .cp-ur { margin-top: 0; }
 
 @media (max-width: 720px) {
-  .teim-rd .cp-mix { padding-top: 0.55rem; }
-  .teim-rd .cp-mix__list { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  .teim-rd .cp-mix__list::-webkit-scrollbar { display: none; }
-  .teim-rd .cp-mix__item { flex: none; }
+  /* One line that opens, and it says where the reader is. */
+  .teim-rd .cp-mix { padding: 0.7rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .teim-rd .cp-mix__cap { display: flex; align-items: baseline; gap: 0.5rem; cursor: pointer; list-style: none; min-height: 34px; }
+  .teim-rd .cp-mix__cap::-webkit-details-marker { display: none; }
+  .teim-rd .cp-mix__at { display: inline; font-family: var(--sans); font-size: 0.8rem; font-weight: 700; letter-spacing: -0.006em; text-transform: none; color: var(--ink); }
   .teim-rd .cp-ch__mark { width: 22px; height: 22px; border-radius: 7px; margin-right: 0.45rem; }
   .teim-rd .cp-ch__mark svg { width: 13px; height: 13px; }
   .teim-rd .cp-ch__act { width: 100%; justify-content: center; }
@@ -3889,3 +3901,12 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-ent__glance dd { font-size: 0.95rem; }
   .teim-rd .cp-ent__groups { padding-top: 1rem; }
 }
+
+/* The change ledger's disclosure. Quiet: on a release day twelve of these
+   sit under one date, and twelve open lists is a wall rather than a ledger. */
+.teim-rd .cp-feed__detail { margin-top: 0.55rem; }
+.teim-rd .cp-feed__detail > summary { display: inline-block; cursor: pointer; list-style: none; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-feed__detail > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-feed__detail > summary::after { content: " \203A"; display: inline-block; margin-left: 0.25rem; transition: transform 0.16s ease; }
+.teim-rd .cp-feed__detail[open] > summary::after { transform: rotate(90deg); }
+.teim-rd .cp-feed__detail[open] > summary { margin-bottom: 0.4rem; }

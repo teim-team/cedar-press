@@ -54,7 +54,10 @@ export default function CedarPressResearchAccess() {
 
         <section className="cp-trh cp-fade">
           <div>
-            <p className="cp-hero__access">Limited research access</p>
+            {/* "Project-specific" rather than "limited": the limit is the
+                point of the route, and naming it as a restriction invites
+                the reading that this is a lesser subscription. */}
+            <p className="cp-hero__access">Project-specific research access</p>
             <h1 className="cp-trh__title">
               Need one or two Cedar collections for a defined project?
             </h1>
