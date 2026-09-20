@@ -54,6 +54,23 @@ function watchConsole(page) {
   return errors;
 }
 
+/**
+ * Wait until an element has finished animating, before measuring it.
+ *
+ * The panels here slide in (`cp-dc-sheet` rises from `translateY(100%)`,
+ * `cedar-rise` from 18px), and `toBeVisible()` is satisfied the moment the
+ * animation starts. A `boundingBox()` taken then is of a box in motion: a
+ * full-screen panel measured 0.18s in reported `y = 292` on a 664px window,
+ * which is not where it is and not where it lands. Assertions about geometry
+ * have to come after the motion, or they describe a frame.
+ */
+async function settled(locator) {
+  await locator.waitFor({ state: "visible" });
+  await locator.evaluate((el) =>
+    Promise.all(el.getAnimations().map((animation) => animation.finished.catch(() => {}))),
+  );
+}
+
 /** Sign in through the gate, the way a subscriber does. */
 async function signIn(page) {
   await page.goto("/");
@@ -64,6 +81,24 @@ async function signIn(page) {
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Know what’s shaping Indian Country",
   );
+}
+
+/**
+ * Open the door's Cedar, the way a reader on that scroll position actually can.
+ *
+ * The floating pill steps aside while the hero's preview object is on screen
+ * (implementation brief §2.2: it sat on the collection strip, which is part of
+ * the thing the object exists to demonstrate). Cedar is not unreachable there
+ * — the preview's own foot carries "Ask Cedar", which dispatches
+ * `cedar:ask-collection` — so this uses whichever control is actually offered.
+ */
+async function openDoorCedar(page) {
+  const fab = page.locator(".cp-dc__fab");
+  if (await fab.isVisible()) {
+    await fab.click();
+    return;
+  }
+  await page.locator(".cp-pane__act--btn").first().click();
 }
 
 test.describe("the gate", () => {
@@ -111,12 +146,16 @@ test.describe("the gate", () => {
   test("Cedar on the door answers from the prepared bank", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await page.locator(".cp-dc__fab").click();
+    await openDoorCedar(page);
     await expect(page.locator(".cp-dc__panel")).toBeVisible();
     await expect(page.locator(".cp-dc__context")).toContainText("Cedar Press");
     // The standing disclaimer is the one line the panel owes its reader.
     await expect(page.locator(".cp-dc__disclaimer")).toContainText("Cedar can make mistakes");
-    await page.locator(".cp-dc__chip").first().click();
+    // Opened from the preview the panel arrives with that collection's answer
+    // already in it, which is the point of that control; opened from the pill
+    // it arrives empty with starters. Either way there is a bot turn to read.
+    const chip = page.locator(".cp-dc__chip").first();
+    if (await chip.count()) await chip.click();
     await expect(page.locator(".cp-dc__msg--bot").nth(1)).toBeVisible();
     // A question it has nothing for is refused, not answered.
     await page.locator(".cp-dc__input").fill("what is the weather in Oslo");
@@ -130,15 +169,43 @@ test.describe("the gate", () => {
   // panel hung in the middle of the screen with page showing under it, the
   // launcher stayed on top of it, and every answer re-printed the whole
   // starter stack underneath itself.
+
+  // THE PROOF OBJECT IS NOT SOMETHING TO PUT A BUTTON ON TOP OF.
+  // Measured at 1440x900 the pill sat over the Advocacy tile in the preview's
+  // collection strip. It steps aside while the object is on screen and comes
+  // back once the reader scrolls past it; the preview's own foot carries the
+  // Cedar action in the meantime, so nothing is lost.
+  test("the launcher does not sit on the hero's preview", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the preview fills the hero on desktop only");
+    await page.goto("/");
+    const fab = page.locator(".cp-dc__fab");
+    await expect(fab).toBeHidden();
+    // The object's own Cedar action is the way in while it is on screen.
+    await expect(page.locator(".cp-pane__act--btn").first()).toBeVisible();
+    // Past the hero, the pill is back.
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await expect(fab).toBeVisible();
+  });
+
   test("the door's Cedar docks to the bottom and the launcher steps aside", async ({ page }, testInfo) => {
     const errors = watchConsole(page);
     await page.goto("/");
     const launcher = page.locator(".cp-dc__fab");
+    // The pill, deliberately, and not the preview's own action: this test is
+    // about the EMPTY panel — how it docks and how its starter stack behaves —
+    // and opening from the preview arrives with a collection answer already
+    // in the thread, so there are no starters to collapse. Scroll past the
+    // preview first, which is where the pill is offered.
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await expect(launcher).toBeVisible();
     await launcher.click();
 
     const panel = page.locator(".cp-dc__panel");
     await expect(panel).toBeVisible();
     await expect(panel).toBeInViewport();
+    await settled(panel);
     // The launcher is gone while the panel is up: the panel's own close is
     // the way out, and a pill over the sheet's corner covers its last line.
     await expect(launcher).toBeHidden();
@@ -150,10 +217,17 @@ test.describe("the gate", () => {
     expect(viewport.height - (box.y + box.height)).toBeLessThanOrEqual(1);
     expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
     if (testInfo.project.name === "phone") {
-      // A phone gets the full width, and the sheet leaves the top of the
-      // window showing rather than covering the page it was opened from.
+      // A phone gets the whole screen, not a sheet across part of it. This
+      // assertion used to read `toBeLessThan(viewport.height * 0.85)` — the
+      // panel was capped at 78dvh and the rule under test was that it left
+      // the page showing above itself. lumecon.ai moved off exactly that
+      // arrangement (CedarFAB.astro, `max-width: 600px`), because the strip
+      // of page it leaves is not worth the half-screen it costs the
+      // transcript, and cedarpress.ai was landing its teal header across the
+      // middle of the hero headline. The rule now is the reference's rule.
       expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
-      expect(box.height).toBeLessThan(viewport.height * 0.85);
+      expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
+      expect(box.y).toBeLessThanOrEqual(1);
     }
 
     // The starter stack is an opening, not a toolbar: asking collapses it for
@@ -184,16 +258,39 @@ test.describe("the gate", () => {
     // back to the launcher a frame after the browser focused what was clicked,
     // so dismissing the sheet ate the click that dismissed it and the control
     // had to be clicked twice. The sheet is not modal; the click belongs to
-    // the control. `#cp-tab-signin` sits in the header, which a sheet anchored
-    // to the bottom edge never covers at either viewport.
+    // the control. `#cp-tab-signin` sits in the header, which the corner card
+    // never covers.
+    //
+    // That premise holds at a desktop width and no longer holds on a phone,
+    // where the panel is now the screen and there is no "outside" to click.
+    // Both contracts are checked, because both are real: the phone's way out
+    // is the close button, which is why it is 44px.
     const behind = page.locator("#cp-tab-signin");
-    await expect(behind).toBeVisible();
     await launcher.click();
     await expect(panel).toBeVisible();
-    await page.locator(".cp-dc__input").click();
-    await behind.click();
-    await expect(panel).toHaveCount(0);
-    await expect(behind).toBeFocused();
+    await settled(panel);
+    if (testInfo.project.name === "phone") {
+      // Covered, not hidden: the control is still in the layout and still
+      // `visible` to CSS, and the panel is simply painted over it. So the
+      // assertion is what is actually on top at its centre, which is the only
+      // thing that decides whether a tap can reach it.
+      const covered = await behind.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+        return Boolean(top?.closest(".cp-dc__panel"));
+      });
+      expect(covered).toBe(true);
+      await page.locator(".cp-dc__input").click();
+      await page.locator(".cp-dc__close").click();
+      await expect(panel).toHaveCount(0);
+      await expect(behind).toBeVisible();
+    } else {
+      await expect(behind).toBeVisible();
+      await page.locator(".cp-dc__input").click();
+      await behind.click();
+      await expect(panel).toHaveCount(0);
+      await expect(behind).toBeFocused();
+    }
     expect(errors).toEqual([]);
   });
 
@@ -831,6 +928,7 @@ test.describe("Ask Cedar", () => {
     const panel = page.getByRole("dialog", { name: /ask cedar/i });
     await expect(panel).toBeVisible();
     await expect(panel).toBeInViewport();
+    await settled(panel);
 
     // The panel is anchored to the window, not to the page box. It was laid
     // out inside the page's measure once, because a retained identity
@@ -842,13 +940,100 @@ test.describe("Ask Cedar", () => {
     const viewport = page.viewportSize();
     expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
     if (testInfo.project.name === "phone") {
+      // Full screen, the same rule the door's Cedar now follows and the same
+      // rule lumecon.ai's panel follows: a question gets the screen while it
+      // is being asked. It was a 70vh sheet holding 5.2rem of padding open at
+      // its foot to keep its last line clear of the launcher.
       expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
+      expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
     }
 
-    await launcher.click();
+    if (testInfo.project.name === "phone") {
+      // The launcher is hidden while a full-screen dialog is up — it would
+      // sit on top of the answer, and it is no longer the way out. The
+      // panel's own close is, so that is what a phone closes with.
+      await expect(launcher).toBeHidden();
+      await panel.getByRole("button", { name: /close ask cedar/i }).click();
+    } else {
+      await launcher.click();
+    }
     await expect(panel).toHaveCount(0);
     expect(errors).toEqual([]);
   });
+});
+
+test.describe("house style", () => {
+  // "No visible copy uses an ampersand" — implementation brief, acceptance
+  // criteria. Asserted against RENDERED TEXT rather than by grepping source,
+  // because the rule is about what a reader sees: `&amp;` in JSX and `&` in a
+  // string are the same character on the page and a grep for one misses the
+  // other.
+  //
+  // THE RULE IS ABOUT AUTHORED COPY, NOT ABOUT QUOTED NAMES.
+  //
+  // Two exemptions, and both were found by running this rather than by
+  // reasoning about it:
+  //
+  //   1. "Native Federal Advocacy & Engagement" is a COLLECTION NAME from
+  //      `data/cedar/collections.manifest.json` — the generated release
+  //      manifest, which is also what Cedar Grove's descriptors are built
+  //      from. Rewriting it here would make the product disagree with the
+  //      release it publishes, and with Grove, about the name of a thing
+  //      readers are invited to cite.
+  //   2. "Quechan Tribe of the Fort Yuma Indian Reservation, California &
+  //      Arizona" is a CANONICAL ENTITY NAME from the register — the tribe's
+  //      name as the federal record states it. Editing a Nation's legal name
+  //      to satisfy a house style is not a copy fix; it is the product
+  //      asserting something the source does not say, which is the one thing
+  //      the whole identity layer exists to prevent.
+  //
+  // So the table and the register's name cells are excluded by selector,
+  // which keeps the rule enforceable as new names arrive rather than needing
+  // a string added here every time one does.
+  // `.cp-ex__cards` is the phone's record surface — the same rows the desktop
+  // draws as a table. Missing it was the whole reason this test failed on the
+  // phone project and passed on desktop, which is a useful reminder that
+  // "visible copy" is per-composition, not per-page.
+  const QUOTED = [
+    ".cp-ex__table",
+    ".cp-ex__cards",
+    ".cp-pane__table",
+    ".cp-ex__lname",
+    ".cp-ex__uid",
+    ".cp-rec",
+    ".cp-ent",
+  ].join(", ");
+  const FROM_THE_MANIFEST = ["Native Federal Advocacy & Engagement"];
+
+  for (const { name, path } of [
+    { name: "the door", path: "/" },
+    { name: "the overview", path: "/" },
+    { name: "Collections", path: "/data" },
+    { name: "Methods", path: "/methods" },
+    { name: "What's new", path: "/whats-new" },
+    { name: "Settings", path: "/settings" },
+    { name: "Research access", path: "/research-access" },
+    { name: "Tribal data request", path: "/tribal-data-request" },
+  ]) {
+    test(`${name} uses no ampersand in visible copy`, async ({ page }) => {
+      if (path !== "/" || name !== "the door") await signIn(page);
+      await page.goto(path);
+      await page.locator("main, .cp-door").first().waitFor();
+      let text = await page.evaluate((quoted) => {
+        // A detached clone, so removing the quoted subtrees to read the rest
+        // does not change the page the next assertion sees.
+        const body = document.body.cloneNode(true);
+        for (const node of body.querySelectorAll(quoted)) node.remove();
+        return body.innerText;
+      }, QUOTED);
+      for (const allowed of FROM_THE_MANIFEST) text = text.split(allowed).join("");
+      const offending = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.includes("&"));
+      expect(offending, `ampersand in visible copy on ${path}`).toEqual([]);
+    });
+  }
 });
 
 test.describe("sponsorship", () => {
@@ -1151,15 +1336,29 @@ test.describe("the first screen", () => {
     expect(errors).toEqual([]);
   });
 
-  test("Collections opens on collections", async ({ page }) => {
+  // "No full-screen catalog sits between /data and a first useful record."
+  //
+  // This used to assert that a shelf TILE was on the first screen, which was
+  // the right intent measured against the old arrangement: the tier bands ran
+  // above the viewer, so a tile was the first collection-shaped thing a
+  // reader met. The explorer carries its own rail now and is mounted first,
+  // so the catalogue and the records arrive together, and the bands were
+  // asking the reader to choose twice. Asserting the tile now would be
+  // asserting the arrangement that was removed.
+  test("Collections opens on the records, with the rail beside them", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data");
-    await page.locator(".cp-badge").first().waitFor();
+    await page.locator(".cp-rail__item").first().waitFor();
     await page.evaluate(() => document.fonts.ready);
     const viewport = page.viewportSize().height;
-    // A collection tile, on the first screen, with no scrolling.
-    expect(await topOf(page, ".cp-badge")).toBeLessThan(viewport);
+    // The catalogue, as the rail.
+    expect(await topOf(page, ".cp-rail__item")).toBeLessThan(viewport);
+    // And a record with it, not a screen of chooser first. The phone lays the
+    // rail down as a strip above the records, so both fit either way.
+    const record = page.locator(".cp-ex__table tbody tr, .cp-ex__cardbtn").first();
+    await record.waitFor();
+    expect(await topOf(page, ".cp-ex__table tbody tr, .cp-ex__cardbtn")).toBeLessThan(viewport * 2);
     expect(errors).toEqual([]);
   });
 

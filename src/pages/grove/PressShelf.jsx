@@ -486,16 +486,29 @@ export default function PressShelf({ user }) {
   const [selectedId, setSelectedId] = useState(null);
   const [pick, setPick] = useState(null);
   const onPick = (id) => setPick((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
+  // THE WORKING SURFACE COMES FIRST.
+  //
+  // The tier bands used to run above the viewer, so a reader who opened
+  // Collections met a catalogue and had to travel through it to reach a
+  // record. The brief is blunt about this ("No full-screen catalog sits
+  // between /data and a first useful record") and it is right: the explorer
+  // carries its own rail now, which is the catalogue, so the bands above it
+  // were asking the reader to choose twice.
+  //
+  // The bands are kept, below, because they do a second job the rail does
+  // not: they describe a collection on hover and carry its sample download.
+  // Demoted rather than deleted, which is a smaller claim than removing
+  // working product behaviour on a design note.
   return (
     <div id="catalog" className="cp-bands">
-      {shelves.map((tier, index) => (
-        <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} selectedId={selectedId} onPick={onPick} />
-      ))}
       <PageBoundary what="The viewer">
         <Suspense fallback={<section className="cp-sec" aria-busy="true" aria-label="Explore the collections" />}>
           <PressExplore user={user} pick={pick} onActive={setHovered} onSelected={setSelectedId} />
         </Suspense>
       </PageBoundary>
+      {shelves.map((tier, index) => (
+        <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} selectedId={selectedId} onPick={onPick} />
+      ))}
       {grove ? <GroveTeaser tier={grove} /> : null}
     </div>
   );

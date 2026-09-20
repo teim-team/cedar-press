@@ -169,7 +169,7 @@ carrying `code` — the shape `pressSignup.pressSignupError` already reads.
 | `GET /press/articles` | Published briefs |
 | `GET /press/collections/:id/download` | A release file, served as a blob |
 | `GET /press/collections/:id/profile` | The collection's data dictionary |
-| `POST /cedar/ask` | Cedar, scoped to this surface |
+| `POST /cedar/ask` | Cedar, scoped to this surface (see **Cedar** below) |
 | `GET`, `PATCH /press/profile` | The reader's declared work, per seat |
 | `GET /press/priorities`, `/press/priorities/related`, `/press/influence`; `POST /press/priorities/:id/points`, `/press/requests` | Shape the Research |
 
@@ -183,6 +183,50 @@ envelope) is measured in `docs/PLATFORM_INTEGRATION_2026-09-06.md`. `/press/prof
 store as the Cedar Points ledger, validated against the vocabulary
 `readerWork.js` offers (dumped into `_press_data.json` so the two cannot
 drift).
+
+### Cedar
+
+One Cedar, one contract, three surfaces. `POST /cedar/ask` has two answerers
+and tries them in this order:
+
+1. **The collection's own release.** `collection_profiles.answer_from_profile`
+   reads the profile's fields and never composes past them. The reply carries
+   `source: "profile"` and a `basis` naming the release, which the panel
+   prints under the answer.
+2. **Cedar.** Anything the profiles cannot answer goes to the service in the
+   `cedar` repository — `POST {CEDAR_BASE_URL}/api/v1/messages`, bearer
+   `CEDAR_INTERNAL_API_KEY`, contract `1.0.0`, the same contract
+   `teim-app/server/cedar/client.js` speaks. `server/cedar_press/cedar_service.py`
+   is that client; `server/tests/test_cedar_service.py` validates the body
+   against `cedar/schemas/chat.py` itself when that checkout is present.
+
+Past both it refuses (`501 NOT_ANSWERABLE`) and names the research desk, and
+an unreachable Cedar is `503 CEDAR_UNAVAILABLE` rather than a made-up answer.
+
+The hop happens on this side because the key is an internal one a browser
+cannot hold: the reader arrives on a session cookie, entitlement is decided
+here, and the request is re-issued to Cedar. `threadId` rides back and forth
+so a panel is one conversation.
+
+Unset `CEDAR_BASE_URL` (or no `CEDAR_INTERNAL_API_KEY`) means Cedar is not
+wired into this deployment; the profiles still answer and the rest refuses.
+
+The variables are teim-app's, not a second spelling of them — same names,
+same defaults, same `CEDAR_ENABLED` semantics, so one service with two
+callers is configurable from one set. Pinned by `test_cedar_service.py`.
+
+| Variable | Purpose |
+| --- | --- |
+| `CEDAR_BASE_URL` | Where the Cedar service is. Unset disables the second answerer. |
+| `CEDAR_INTERNAL_API_KEY` | The bearer token `cedar/api/deps.require_internal_key` checks. `CEDAR_API_KEY` is read as a fallback. |
+| `CEDAR_ENABLED` | Off only for the literal `"false"`; unset is on. |
+| `CEDAR_API_PATH` | Endpoint override. Default `/api/v1/messages`. |
+| `CEDAR_TIMEOUT_MS` | How long a reader waits. Default `45000` — shorter than teim-app's `120000`, because a reader is watching this panel. |
+
+The client side is `src/pages/grove/PressCedarFab.jsx`, which renders the
+same `.cp-dc__*` conversation as `PressDoorCedar.jsx` and as lumecon.ai's
+`CedarFAB.astro`. The door is the exception and stays one: it sits in front
+of the paywall and answers from `doorCedar.js` without touching the network.
 
 Two client behaviours change with the switch and nothing else does:
 `downloadCsv` asks `GET /press/collections/:id/download` (the service

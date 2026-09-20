@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The table inside Cedar Press</title>
+<!--
+  A MOCKUP. Nothing here is wired in.
+
+  THE ASK: what the table inside the Cedar Press app would look like if it used
+  the style of the table on the Cedar Press landing page -- the one that
+  combines the collection icons with the table viewer in a single frame.
+
+  ONE SCREEN, TWO STATES. The switch at the top swaps the same twelve records
+  between the Explore card as /data renders it today and the landing page's
+  frame. It is the same surface either way.
+
+  NOTHING IS DRAWN FOR THE PAGE. The rows are the first twelve of "All 12 open
+  collections", read out of the running app on 2026-09-20, from the ten-row
+  samples in public/data/cedar/samples. The marks are the app's own, lifted
+  from src/pages/grove/pressCollectionIcons.jsx as rendered. The row counts and
+  shelves come from data/cedar/collections.manifest.json.
+
+  THE CSS IS THE REAL CSS. The proposed side uses the class names and the
+  measured values of `.cp-app__*` and `.cp-pane__*` from
+  src/styles/grove/press.css (~lines 2540-2610) -- the frame, the navy rail,
+  the caption band and the record table that the door already ships. The "now"
+  side is at the values of `.cp-ex__*` from the same file (~line 3095). Both
+  are in this repository today; the proposal is which one the in-app table
+  uses, not a new stylesheet.
+-->
+<style>
+  :root {
+    --ink: #071824; --ink-2: #33434a; --muted: #647279;
+    --line: rgba(7,24,36,0.13); --line-soft: rgba(7,24,36,0.07);
+    --teal: #0FB5A5; --teal-tint: #f2faf8; --teal-line: rgba(15,181,165,0.35);
+    --dteal: #0A7F74; --bg: #ffffff; --ground: #f3f6f8;
+    --door-navy: #09132b; --door-accent-light: #4fd8c9;
+    --door-rule: rgba(10,28,52,0.1); --door-rule-strong: rgba(10,28,52,0.2);
+    --door-ground-bright: #fafcfd; --door-surface: #ffffff; --door-ink-3: #647279;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @font-face { font-family: 'Inter'; font-weight: 400; font-display: swap; src: url("/fonts/inter-400.woff2") format("woff2"); }
+  @font-face { font-family: 'Inter'; font-weight: 600; font-display: swap; src: url("/fonts/inter-600.woff2") format("woff2"); }
+  @font-face { font-family: 'Inter'; font-weight: 700; font-display: swap; src: url("/fonts/inter-700.woff2") format("woff2"); }
+  @font-face { font-family: 'Inter'; font-weight: 800; font-display: swap; src: url("/fonts/inter-800.woff2") format("woff2"); }
+  @font-face { font-family: 'JetBrains Mono'; font-weight: 400; font-display: swap; src: url("/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+  @font-face { font-family: 'JetBrains Mono'; font-weight: 700; font-display: swap; src: url("/fonts/jetbrains-mono-700.woff2") format("woff2"); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 1.8rem clamp(1rem,3vw,2rem) 3rem; }
+  .kick { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin: 0 0 0.45rem; }
+  h1 { font-size: clamp(1.35rem,2.6vw,1.9rem); line-height: 1.14; letter-spacing: -0.025em; margin: 0 0 0.5rem; }
+  .lede { max-width: 76ch; margin: 0 0 1.3rem; font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); }
+  .switch { display: inline-flex; padding: 0.22rem; border: 1px solid var(--door-rule-strong); border-radius: 999px; background: var(--bg); margin-bottom: 1.3rem; }
+  .switch button { appearance: none; border: 0; background: none; cursor: pointer; font: inherit; font-size: 0.88rem; font-weight: 600; color: var(--muted); padding: 0.45rem 1.1rem; border-radius: 999px; }
+  .switch button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  [hidden] { display: none !important; }
+
+  /* ============ NOW: the Explore card as /data renders it ============ */
+  .n-card { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .n-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem; border-bottom: 1px solid var(--line); }
+  .n-ctl { font: inherit; font-size: 0.8rem; min-height: 38px; display: flex; align-items: center; padding: 0.3rem 0.6rem; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  .n-ctl--grow { flex: 1 1 10rem; color: var(--muted); }
+  .n-ctl--btn { color: var(--dteal); border-color: var(--teal-line); background: var(--teal-tint); }
+  .n-meta { padding: 0.55rem 0.8rem; font-size: 0.82rem; }
+  .n-meta small { display: block; color: var(--muted); font-size: 0.78rem; margin-top: 0.15rem; }
+  .n-tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.84rem; line-height: 1.4; table-layout: fixed; }
+  .n-tbl th, .n-tbl td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .n-tbl th { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .n-tbl a { color: var(--dteal); font-weight: 600; }
+  .n-more { width: 2.2rem; color: var(--dteal); }
+  .n-pin { font-weight: 700; }
+  .n-nm { display: block; overflow: hidden; text-overflow: ellipsis; }
+  .n-uid, .n-alias { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 400; color: var(--muted); overflow: hidden; }
+  .n-alias { font-size: 0.66rem; }
+  .n-date { font-family: var(--mono); font-size: 0.78rem; width: 6.6rem; }
+  .n-amt { font-family: var(--mono); font-size: 0.78rem; width: 8.5rem; }
+  .n-basis { display: block; font-size: 0.62rem; color: var(--muted); }
+  .n-foot { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0.8rem; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--line); }
+  .n-foot a { color: var(--dteal); font-weight: 600; }
+
+  /* ====== PROPOSED: the landing page's frame, .cp-app__* / .cp-pane__* ====== */
+  .cp-app { display: flex; flex-direction: column; height: 40rem; border: 1px solid var(--door-rule); border-radius: 6px; overflow: hidden; box-shadow: 0 18px 44px -24px rgba(10,28,52,0.45); background: var(--door-surface); }
+  .cp-app__chrome { flex: none; display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--door-navy); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .cp-app__chromeword { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+  .cp-app__chromeat { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.6); padding-left: 1rem; border-left: 1px solid rgba(255,255,255,0.16); }
+  .cp-app__chromemeta { margin-left: auto; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+  .cp-app__body { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 17rem minmax(0,1fr); }
+  .cp-app__rail { min-height: 0; overflow-y: auto; background: var(--door-navy); color: #fff; padding: 0.9rem 0.6rem 1rem; border-right: 1px solid rgba(255,255,255,0.06); }
+  .cp-app__group + .cp-app__group { margin-top: 1rem; }
+  .cp-app__groupcap { display: block; padding: 0 0.6rem 0.25rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--door-accent-light); }
+  .cp-app__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .cp-app__item { display: grid; grid-template-columns: 1.7rem minmax(0,1fr); align-items: center; gap: 0 0.75rem; width: 100%; min-height: 44px; padding: 0.45rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.8); font: inherit; text-align: left; cursor: pointer; }
+  .cp-app__item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .cp-app__item.is-on { background: rgba(15,181,165,0.18); color: #fff; box-shadow: inset 2px 0 0 var(--door-accent-light); }
+  .cp-app__mark { display: flex; color: var(--door-accent-light); }
+  .cp-app__mark svg { width: 1.7rem; height: 1.7rem; display: block; }
+  .cp-app__label { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
+  .cp-app__name { font-size: 0.92rem; font-weight: 600; letter-spacing: -0.005em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cp-app__rows { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+  .cp-app__item.is-on .cp-app__rows { color: rgba(255,255,255,0.75); }
+  .cp-app__pane { min-width: 0; min-height: 0; overflow: hidden; background: var(--door-surface); display: flex; flex-direction: column; }
+
+  .cp-pane__head { padding: 1.1rem 1.4rem 0.9rem; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 0.4rem 1.5rem; align-items: start; }
+  .cp-pane__cap { display: block; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); }
+  .cp-pane__name { font-size: clamp(1.2rem,1.7vw,1.5rem); font-weight: 750; letter-spacing: -0.025em; line-height: 1.12; margin: 0.3rem 0 0; }
+  .cp-pane__facts { grid-column: 2; grid-row: 1; display: grid; gap: 0.2rem; justify-items: end; font-family: var(--mono); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--door-ink-3); text-align: right; white-space: nowrap; }
+  .cp-pane__search { grid-column: 1 / -1; margin: 0.55rem 0 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .cp-pane__search span { font: inherit; font-size: 0.84rem; min-height: 36px; display: flex; align-items: center; padding: 0.3rem 0.65rem; border: 1px solid var(--door-rule); border-radius: 4px; color: var(--muted); }
+  .cp-pane__search span:first-child { flex: 1 1 14rem; }
+  .cp-pane__tablecap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; margin: 0; padding: 0.5rem 1.4rem; border-top: 1px solid var(--door-rule); border-bottom: 1px solid var(--door-rule); background: var(--door-ground-bright); font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+  .cp-pane__tablecap em { font-style: normal; color: var(--door-ink-3); }
+  .cp-pane__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+  .cp-pane__table { width: 100%; border-collapse: collapse; font-size: 0.82rem; line-height: 1.45; color: var(--ink); }
+  .cp-pane__table th, .cp-pane__table td { padding: 0.52rem 0.8rem; border-bottom: 1px solid rgba(10,28,52,0.07); vertical-align: top; text-align: left; }
+  .cp-pane__table th { position: sticky; top: 0; z-index: 1; background: var(--door-surface); font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--door-ink-3); }
+  .cp-pane__table th:first-child, .cp-pane__table td:first-child { padding-left: 1.4rem; }
+  .cp-pane__table th:last-child, .cp-pane__table td:last-child { padding-right: 1.4rem; }
+  .cp-pane__table tbody tr { cursor: pointer; }
+  .cp-pane__table tbody tr:hover { background: var(--teal-tint); }
+  .cp-pane__table tbody tr:hover .cp-pane__ent-nm { text-decoration: underline; text-underline-offset: 3px; }
+  .cp-pane__ent { width: 24%; }
+  .cp-pane__ent-nm { display: block; font-weight: 600; }
+  .cp-pane__unkeyed { display: block; font-style: italic; color: var(--door-ink-3); }
+  .cp-pane__uid { display: block; margin-top: 0.1rem; font-family: var(--mono); font-size: 0.66rem; font-weight: 400; color: var(--dteal); }
+  .cp-pane__uid em { font-style: normal; color: var(--door-ink-3); }
+  .cp-pane__uid em::before { content: " \00b7 "; }
+  .cp-pane__uid--none { color: var(--door-ink-3); font-size: 0.62rem; line-height: 1.35; }
+  .cp-pane__coll { width: 11.5rem; white-space: nowrap; }
+  .cp-pane__coll span:last-child { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .cp-pane__mark { display: inline-grid; place-items: center; width: 1.1rem; height: 1.1rem; margin-right: 0.4rem; vertical-align: -0.22rem; color: var(--dteal); }
+  .cp-pane__mark svg { width: 100%; height: 100%; }
+  .cp-pane__date { width: 6.4rem; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-2); white-space: nowrap; }
+  .cp-pane__obs { color: var(--ink-2); }
+  .cp-pane__src { color: var(--dteal); text-decoration: none; font-weight: 700; }
+  .cp-pane__amt { width: 10.5rem; text-align: right; }
+  .cp-pane__amt-n { display: block; font-family: var(--mono); font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+  .cp-pane__amt-b { display: block; max-width: 9.5rem; margin: 0.1rem 0 0 auto; font-family: var(--mono); font-size: 0.6rem; line-height: 1.35; color: var(--door-ink-3); }
+  .cp-pane__foot { flex: none; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1rem; padding: 0.55rem 1.4rem; border-top: 1px solid var(--door-rule); background: var(--door-ground-bright); font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dteal); }
+
+  /* ---- phones: the rail becomes a strip of marks, as it does on the door ---- */
+  @media (max-width: 760px) {
+    .cp-app { height: auto; }
+    .cp-app__body { grid-template-columns: minmax(0,1fr); }
+    .cp-app__rail { display: flex; gap: 0.4rem; overflow-x: auto; padding: 0.7rem; border-right: 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .cp-app__group { display: flex; gap: 0.4rem; }
+    .cp-app__group + .cp-app__group { margin-top: 0; }
+    .cp-app__groupcap { display: none; }
+    .cp-app__list { display: flex; gap: 0.4rem; }
+    .cp-app__item { grid-template-columns: minmax(0,1fr); justify-items: center; gap: 0.25rem; min-width: 5.4rem; padding: 0.5rem 0.4rem; text-align: center; }
+    .cp-app__label { align-items: center; }
+    /* Two lines rather than an ellipsis: "All 12 collections" and
+       "Native-Owned Businesses" both run past a 5.4rem tile, and clipping the
+       label on the control that picks the collection is the fault this frame
+       is replacing. */
+    .cp-app__name { font-size: 0.72rem; white-space: normal; line-height: 1.15; }
+    .cp-app__item { align-content: start; }
+    .cp-app__rows { display: none; }
+    .cp-pane__scroll { overflow: visible; }
+    .cp-pane__table, .cp-pane__table tbody { display: block; }
+    .cp-pane__table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .cp-pane__table tr { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 0.1rem 0.9rem; padding: 0.8rem 1.1rem; border-bottom: 1px solid rgba(10,28,52,0.07); }
+    .cp-pane__table td { display: block; padding: 0; border: 0; }
+    .cp-pane__ent { grid-column: 1; grid-row: 1; width: auto; }
+    .cp-pane__amt { grid-column: 2; grid-row: 1; width: auto; }
+    .cp-pane__coll { grid-column: 1; grid-row: 2; width: auto; margin-top: 0.35rem; }
+    .cp-pane__date { grid-column: 2; grid-row: 2; width: auto; margin-top: 0.35rem; text-align: right; }
+    .cp-pane__obs { grid-column: 1 / -1; grid-row: 3; margin-top: 0.3rem; }
+    .n-tbl { table-layout: auto; }
+  }
+
+  .notes { margin-top: 1.5rem; padding: 1.1rem 1.2rem; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
+  .notes h2 { margin: 0 0 0.6rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); }
+  .notes ol { margin: 0; padding-left: 1.1rem; }
+  .notes li { margin-bottom: 0.45rem; font-size: 0.88rem; line-height: 1.55; color: var(--ink-2); }
+  .notes li b { color: var(--ink); }
+  .fine { margin: 1rem 0 0; font-size: 0.76rem; line-height: 1.55; color: var(--muted); }
+  .fine code { font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kick">Mockup &middot; not wired in</p>
+  <h1>The table inside Cedar Press, in the landing page&rsquo;s frame.</h1>
+  <p class="lede">
+    The same twelve records, one screen, two states. Flip the switch. The proposed
+    side is the door&rsquo;s own frame &mdash; the navy rail of collection marks beside
+    the table viewer, as one object &mdash; with the in-app records in it, and the
+    collection picker that is a clipped dropdown today.
+  </p>
+
+  <div class="switch" role="group" aria-label="Which treatment">
+    <button type="button" id="b-now" aria-pressed="true">What we have now</button>
+    <button type="button" id="b-new" aria-pressed="false">The landing page&rsquo;s frame</button>
+  </div>
+
+  <!-- ========================= NOW ========================= -->
+  <section id="s-now" aria-label="Explore as /data renders it today">
+    <div class="n-card">
+      <div class="n-bar">
+        <span class="n-ctl">All 12 open collections (search acr&hellip;</span>
+        <span class="n-ctl n-ctl--grow">Search these records</span>
+        <span class="n-ctl">Entity: All</span>
+        <span class="n-ctl">Entity type: All 18</span>
+        <span class="n-ctl n-ctl--btn">Save view</span>
+        <span class="n-ctl n-ctl--btn">&darr; Download</span>
+        <span class="n-ctl n-ctl--btn">Copy link</span>
+      </div>
+      <p class="n-meta">all collections &middot; every record &middot; 102 of 110 sample records
+        <small>No preview yet for Native-Owned Businesses.</small></p>
+      <table class="n-tbl">
+        <thead><tr><th></th><th>Entity</th><th>Entity type</th><th>Collection</th><th>Date</th><th>Observation</th><th>Amount</th><th>Source</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Confederated Tribes and Bands of the Yakama Nation</span><span class="n-uid">CE-001CC-8N</span><span class="n-alias">record names: YAKAMA NATION</span></td>
+          <td>Federally recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2007-12-05</td>
+          <td class="n-obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development</td>
+          <td class="n-amt">$500,000<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Curyung Tribal Council</span><span class="n-uid">CE-0001H-BS</span></td>
+          <td>Federally recognized Alaska Native Village</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2008-01-14</td>
+          <td class="n-obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development</td>
+          <td class="n-amt">$600,000<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">White Mountain Apache Tribe of the Fort Apache Reservation, Arizona</span><span class="n-uid">CE-001C7-AR</span><span class="n-alias">record names: WHITE MOUNTAIN APACHE TRIBE</span></td>
+          <td>Federally recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-09-08</td>
+          <td class="n-obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development</td>
+          <td class="n-amt">-$1<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Arctic Slope Regional Corporation</span><span class="n-uid">CE-00078-KR</span><span class="n-alias">record names: AVCP REGIONAL HOUSING AUTHORITY</span></td>
+          <td>Alaska Native Regional Corporation</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-09-03</td>
+          <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+          <td class="n-amt">$4,815,333<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">The Muscogee (Creek) Nation</span><span class="n-uid">CE-0017B-9C</span><span class="n-alias">record names: MUSCOGEE CREEK NATION</span></td>
+          <td>Federally recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-08-10</td>
+          <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+          <td class="n-amt">$16,237,676<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Bishop Paiute Tribe</span><span class="n-uid">CE-0012F-80</span><span class="n-alias">record names: BISHOP INDIAN TRIBAL COUNCIL</span></td>
+          <td>Federally recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-08-04</td>
+          <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+          <td class="n-amt">$1,933,596<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Quechan Tribe of the Fort Yuma Indian Reservation, California &amp; Arizona</span><span class="n-uid">CE-00191-QJ</span><span class="n-alias">record names: QUECHAN HOUSING AUTHORITY</span></td>
+          <td>Federally recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-08-04</td>
+          <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+          <td class="n-amt">$2,197,778<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Waccamaw Siouan Indians</span><span class="n-uid">CE-001EM-2X</span><span class="n-alias">record names: WACCAMAW SIOUAN INDIAN TRIBE, INC.</span></td>
+          <td>State-recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-08-04</td>
+          <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+          <td class="n-amt">$350,999<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)</span><span class="n-uid">CE-00170-7S</span><span class="n-alias">record names: LEECH LAKE BAND OF OJIBWE HOUSING AUTHORITY</span></td>
+          <td>Federally recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-06-21</td>
+          <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+          <td class="n-amt">-$4,163,330<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin</span><span class="n-uid">CE-00163-MM</span><span class="n-alias">record names: LAC COURTE OREILLES HOUSING AUTHORITY</span></td>
+          <td>Federally recognized tribe</td>
+          <td><a href="#">Federal Funding</a></td>
+          <td class="n-date">2010-05-04</td>
+          <td class="n-obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development</td>
+          <td class="n-amt">$2,796,723<span class="n-basis">federal obligation on this transaction</span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">not linked to an entity</span></td>
+          <td>—</td>
+          <td><a href="#">Federal Register</a></td>
+          <td class="n-date">1994-09-08</td>
+          <td class="n-obs">Tribal Consultation on Indian Education Topics; Notice DEPARTMENT OF THE INTERIOR · consultation_session</td>
+          <td class="n-amt">–<span class="n-basis"></span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        <tr>
+          <td class="n-more">&rarr;</td>
+          <td class="n-pin"><span class="n-nm">not linked to an entity</span></td>
+          <td>—</td>
+          <td><a href="#">Federal Register</a></td>
+          <td class="n-date">1999-11-02</td>
+          <td class="n-obs">Notice of Regional Meetings on Draft HUD Tribal Consultation Policy · Housing and Urban Development Department · consultation_notice</td>
+          <td class="n-amt">–<span class="n-basis"></span></td>
+          <td><a href="#">Source &#8599;</a></td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="n-foot"><a href="#">Ask Cedar about this collection &rarr;</a><span>Page 1 of 5 &middot; 25 a page</span></p>
+    </div>
+  </section>
+
+  <!-- ======================= PROPOSED ======================= -->
+  <section id="s-new" hidden aria-label="The landing page's frame">
+    <div class="cp-app">
+      <div class="cp-app__chrome">
+        <span class="cp-app__chromeword">Cedar Press</span>
+        <span class="cp-app__chromeat">Collections</span>
+        <span class="cp-app__chromemeta">12 collections &middot; 8,595,567 records</span>
+      </div>
+      <div class="cp-app__body">
+        <nav class="cp-app__rail" aria-label="Collections">
+        <div class="cp-app__group">
+          <ul class="cp-app__list">
+            <li><button type="button" class="cp-app__item is-on">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8.5" height="8.5" rx="1.2"/><rect x="15.5" y="4" width="8.5" height="8.5" rx="1.2"/><rect x="4" y="15.5" width="8.5" height="8.5" rx="1.2"/><rect x="15.5" y="15.5" width="8.5" height="8.5" rx="1.2"/></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">All 12 collections</span><span class="cp-app__rows">8,595,567 rows</span></span>
+            </button></li>
+          </ul>
+        </div>
+        <div class="cp-app__group">
+          <span class="cp-app__groupcap">Cedar Press</span>
+          <ul class="cp-app__list">
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Federal Funding</span><span class="cp-app__rows">3,646,750 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h10l6 6v15H6z"></path><path d="M16 3.5V10h6"></path><path d="M9.5 14h9M9.5 18h9M9.5 22h5"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Fed Register</span><span class="cp-app__rows">502,483 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3.5h12v11H8z"></path><path d="M11 7.5h6M11 11h4"></path><path d="M3.5 17h21v7.5h-21z"></path><path d="M11 17v2.5h6V17"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Legislation</span><span class="cp-app__rows">206,354 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9h18M17 4.5 21.5 9 17 13.5"></path><path d="M24.5 19h-18M11 14.5 6.5 19l4.5 4.5"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Deals</span><span class="cp-app__rows">2,662 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 10h9l1.5 9a4 4 0 0 1-4 4.5h-4A4 4 0 0 1 8 19z"></path><path d="M8.5 15h11"></path><path d="M9 6.5a5.5 5.5 0 0 1 10 0M9 6.5 6.5 4M9 6.5l-2.8 1.6"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">NAGPRA</span><span class="cp-app__rows">100,786 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11.5v5h4l8 5.5V6l-8 5.5z"></path><path d="M20 9.5a6.5 6.5 0 0 1 0 9.5"></path><path d="M24 6a12 12 0 0 1 0 16.5"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Advocacy</span><span class="cp-app__rows">264,478 rows</span></span>
+            </button></li>
+          </ul>
+        </div>
+        <div class="cp-app__group">
+          <span class="cp-app__groupcap">Cedar Press+</span>
+          <ul class="cp-app__list">
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 14 4.5 25 11"></path><path d="M6.5 11v10M11.5 11v10M16.5 11v10M21.5 11v10"></path><path d="M3 24.5h22"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Prime Contracting</span><span class="cp-app__rows">3,345,971 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5h8v6h-8z"></path><path d="M14 9.5v4M5 22v-4.5h18V22M5 17.5h18"></path><path d="M2.5 22h5M11.5 22h5M20.5 22h5"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Subcontracting</span><span class="cp-app__rows">90,479 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 10.5 7 4.5h14l1.5 6"></path><path d="M6 13v10.5h16V13"></path><path d="M5.5 10.5c0 1.6 1.3 2.8 2.8 2.8s2.7-1.2 2.7-2.8c0 1.6 1.2 2.8 2.7 2.8h.6c1.5 0 2.7-1.2 2.7-2.8 0 1.6 1.2 2.8 2.7 2.8s2.8-1.2 2.8-2.8"></path><path d="M11.5 23.5v-6.5h5v6.5"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Native-Owned Businesses</span><span class="cp-app__rows">5,930 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="7" r="3.6"></circle><circle cx="6.5" cy="21" r="3.1"></circle><circle cx="21.5" cy="21" r="3.1"></circle><path d="M12.3 10.2 8 18.2M15.7 10.2 20 18.2M9.6 21h8.8"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Cedar NEED</span><span class="cp-app__rows">14,868 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 24.5 9.5 12l4.5 6 3-4 7 10.5z"></path><path d="M9.5 12 7 3.5M20 6.5a2.5 2.5 0 1 0 0-.1"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Natural Resources</span><span class="cp-app__rows">283,716 rows</span></span>
+            </button></li>
+            <li><button type="button" class="cp-app__item">
+              <span class="cp-app__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 24s-8.5-5.2-8.5-11.2A4.7 4.7 0 0 1 14 9.4a4.7 4.7 0 0 1 8.5 3.4C22.5 18.8 14 24 14 24z"></path><path d="M14 12.5v5M11.5 15h5"></path></svg></span>
+              <span class="cp-app__label"><span class="cp-app__name">Native Nonprofits</span><span class="cp-app__rows">131,090 rows</span></span>
+            </button></li>
+          </ul>
+        </div>
+        </nav>
+        <div class="cp-app__pane">
+          <div class="cp-pane__head">
+            <div>
+              <span class="cp-pane__cap">Open to you</span>
+              <h2 class="cp-pane__name">All 12 collections</h2>
+            </div>
+            <p class="cp-pane__facts"><span>1973 to present</span><span>8,595,567 rows</span><span>Updated Sept. 4</span></p>
+            <p class="cp-pane__search">
+              <span>Search these records</span><span>Entity: All</span><span>&darr; Download</span>
+            </p>
+          </div>
+          <p class="cp-pane__tablecap">
+            <span>Every record</span>
+            <span>102 of 110 sample records <em>&middot; page 1 of 5</em></span>
+          </p>
+          <div class="cp-pane__scroll">
+            <table class="cp-pane__table">
+              <thead><tr><th>Entity</th><th>Collection</th><th>Date</th><th>Record</th><th class="cp-pane__amt">Amount</th></tr></thead>
+              <tbody>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Confederated Tribes and Bands of the Yakama Nation</span><small class="cp-pane__uid">CE-001CC-8N<em>Federally recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2007-12-05</td>
+              <td class="cp-pane__obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$500,000</span><span class="cp-pane__amt-b">federal obligation on this transaction</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Curyung Tribal Council</span><small class="cp-pane__uid">CE-0001H-BS<em>Federally recognized Alaska Native Village</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2008-01-14</td>
+              <td class="cp-pane__obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$600,000</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">White Mountain Apache Tribe of the Fort Apache Reservation, Arizona</span><small class="cp-pane__uid">CE-001C7-AR<em>Federally recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-09-08</td>
+              <td class="cp-pane__obs">INDIAN COMMUNITY DEVELOPMENT BLOCK GRANT PROGRAM · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">-$1</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Arctic Slope Regional Corporation</span><small class="cp-pane__uid">CE-00078-KR<em>Alaska Native Regional Corporation</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-09-03</td>
+              <td class="cp-pane__obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$4,815,333</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">The Muscogee (Creek) Nation</span><small class="cp-pane__uid">CE-0017B-9C<em>Federally recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-08-10</td>
+              <td class="cp-pane__obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$16,237,676</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Bishop Paiute Tribe</span><small class="cp-pane__uid">CE-0012F-80<em>Federally recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-08-04</td>
+              <td class="cp-pane__obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$1,933,596</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Quechan Tribe of the Fort Yuma Indian Reservation, California &amp; Arizona</span><small class="cp-pane__uid">CE-00191-QJ<em>Federally recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-08-04</td>
+              <td class="cp-pane__obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$2,197,778</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Waccamaw Siouan Indians</span><small class="cp-pane__uid">CE-001EM-2X<em>State-recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-08-04</td>
+              <td class="cp-pane__obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$350,999</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)</span><small class="cp-pane__uid">CE-00170-7S<em>Federally recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-06-21</td>
+              <td class="cp-pane__obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">-$4,163,330</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__ent-nm">Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin</span><small class="cp-pane__uid">CE-00163-MM<em>Federally recognized tribe</em></small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="M11 6.6v8.8"></path><path d="M13 8.3H9.9a1.35 1.35 0 0 0 0 2.7h2.2a1.35 1.35 0 0 1 0 2.7H9"></path><path d="m16.4 16.4 7.1 7.1"></path></svg></span><span>Federal Funding</span></td>
+              <td class="cp-pane__date">2010-05-04</td>
+              <td class="cp-pane__obs">INDIAN HOUSING BLOCK GRANTS · Department of Housing and Urban Development&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"><span class="cp-pane__amt-n">$2,796,723</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__unkeyed">not linked to an entity</span><small class="cp-pane__uid cp-pane__uid--none">no Cedar id &mdash; the record names no party the register could place</small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h10l6 6v15H6z"></path><path d="M16 3.5V10h6"></path><path d="M9.5 14h9M9.5 18h9M9.5 22h5"></path></svg></span><span>Federal Register</span></td>
+              <td class="cp-pane__date">1994-09-08</td>
+              <td class="cp-pane__obs">Tribal Consultation on Indian Education Topics; Notice DEPARTMENT OF THE INTERIOR · consultation_session&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="cp-pane__ent"><span class="cp-pane__unkeyed">not linked to an entity</span><small class="cp-pane__uid cp-pane__uid--none">no Cedar id &mdash; the record names no party the register could place</small></td>
+              <td class="cp-pane__coll"><span class="cp-pane__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5h10l6 6v15H6z"></path><path d="M16 3.5V10h6"></path><path d="M9.5 14h9M9.5 18h9M9.5 22h5"></path></svg></span><span>Federal Register</span></td>
+              <td class="cp-pane__date">1999-11-02</td>
+              <td class="cp-pane__obs">Notice of Regional Meetings on Draft HUD Tribal Consultation Policy · Housing and Urban Development Department · consultation_notice&nbsp;<a class="cp-pane__src" href="#" aria-label="Source document">&#8599;</a></td>
+              <td class="cp-pane__amt"></td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="cp-pane__foot"><span>Ask Cedar about these records &rarr;</span><span>Next 25 &rarr;</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="notes">
+    <h2>What changes</h2>
+    <ol>
+      <li><b>The dropdown becomes the rail.</b> Picking a collection is a
+        <code>&lt;select&gt;</code> today whose own label is clipped behind its
+        chevron (&ldquo;All 12 open collections (search acr&hellip;&rdquo;). The
+        door picks the same twelve with twelve marks, which is the thing this
+        page was built to show.</li>
+      <li><b>Eight columns become five.</b> The arrow column goes (the row opens
+        the record), entity type joins the identifier line, and Source becomes
+        the arrow at the end of the record it belongs to.</li>
+      <li><b>Nothing is clipped mid-word.</b> Today the entity name, the alias
+        line, the observation and the amount&rsquo;s basis all end in an ellipsis
+        or run off the right edge &mdash; four truncations a row.</li>
+      <li><b>The Cedar id is teal and always the second line</b>, the way the
+        door sets it. It is the one field on the row no other product has, and
+        today it is grey and indistinguishable from the alias beneath it.</li>
+      <li><b>The toolbar becomes a head and a caption band.</b> Controls sit in
+        the pane head; what is in view and how much of it moves into the mono
+        band the door already uses.</li>
+      <li><b>On a phone the rail is a strip of marks</b> across the top and the
+        rows stack, which is what the door does at 390px. Today this table
+        scrolls sideways.</li>
+    </ol>
+    <p class="fine">
+      Rows: first twelve of &ldquo;All 12 open collections&rdquo;, read from the running
+      app 2026-09-20. Marks: <code>src/pages/grove/pressCollectionIcons.jsx</code>.
+      Row counts and shelves: <code>data/cedar/collections.manifest.json</code>.
+      The proposed side uses the real <code>.cp-app__*</code> and
+      <code>.cp-pane__*</code> rules from <code>src/styles/grove/press.css</code>;
+      the &ldquo;now&rdquo; side the real <code>.cp-ex__*</code> ones. Both ship in this
+      repository today.
+    </p>
+  </div>
+</div>
+<script>
+  const now = document.getElementById('s-now'), proposed = document.getElementById('s-new');
+  const bNow = document.getElementById('b-now'), bNew = document.getElementById('b-new');
+  function show(isNow) {
+    now.hidden = !isNow; proposed.hidden = isNow;
+    bNow.setAttribute('aria-pressed', String(isNow));
+    bNew.setAttribute('aria-pressed', String(!isNow));
+  }
+  bNow.addEventListener('click', () => show(true));
+  bNew.addEventListener('click', () => show(false));
+</script>
+</body>
+</html>
