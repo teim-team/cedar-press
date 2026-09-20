@@ -18,9 +18,27 @@
   /* Consolidated design tokens (see docs/design/DESIGN-SYSTEM.md). Canonical
      values for the recurring primitives so field cards, rails, chips and focus
      states stay consistent as the system grows. */
-  --radius-field: 12px;   /* dense boxed input (editor / basics / utility fields) */
-  --radius-card: 14px;    /* card / tile / table / panel surface (the app's de-facto radius) */
+  --radius-field: 4px;    /* dense boxed input (editor / basics / utility fields) */
+  --radius-card: 4px;     /* card / tile / table / panel surface (the app's de-facto radius) */
   --radius-pill: 999px;   /* chips, badges, pill inputs */
+
+  /* ---- Display scale ----
+     A wall of 700 reads as loud, not confident, and this product had 224
+     rules at 700 and 48 at 800 — the same weight on a 3.7rem hero and a
+     1.02rem card title, so nothing was louder than anything else because
+     everything was.
+
+     lumecon.ai settled this already and these are its values, not new ones:
+     display weight 600, the hero alone at 675, and tracking that tightens as
+     size grows. Tightening with size is what makes large type look drawn
+     rather than stretched — letterforms need less air between them the
+     bigger they get, and a single letter-spacing across a 2.7x size range
+     cannot be right at both ends. */
+  --weight-display: 600;
+  --weight-hero: 675;
+  --track-display: -0.032em; /* hero h1 */
+  --track-title: -0.024em;   /* section h2 */
+  --track-sub: -0.015em;     /* card and row h3 */
   --focus-ring: 0 0 0 4px rgba(15,181,165,0.08);
   --field-pad: 0.9rem 1.05rem;
   --band-size: 0.62rem;   /* mono section-band label */
@@ -43,7 +61,16 @@
    not keyboard-reachable (tabindex -1), so suppress the default focus outline
    that otherwise draws a hard box around the whole content area. */
 .teim-rd #main-content:focus { outline: none; }
-.teim-rd { background: var(--bg); color: var(--ink); font-family: var(--body); min-height: 100vh; display: flex; flex-direction: column; }
+/* OPTICAL SIZING, WHICH IS THE POINT OF THE VARIABLE BUILD.
+   Inter's `opsz` axis carries the optical size its letterforms were drawn
+   for. `auto` lets the browser read that off the rendered size, so a 2.4rem
+   heading is drawn with display cuts — about 6% narrower, finer joins,
+   tighter apertures — while 0.8rem helper text is drawn with the open,
+   generously spaced text cut. With the five static weights this product
+   shipped before, every size of a weight was one drawing scaled, and large
+   type was body text enlarged. Inheriting from the root means it reaches
+   every surface without a single rule naming a size. */
+.teim-rd { background: var(--bg); color: var(--ink); font-family: var(--body); font-optical-sizing: auto; min-height: 100vh; display: flex; flex-direction: column; }
 .teim-rd button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 /* Hidden state carries no shadow: parked just above the viewport, a shadow
    would bleed back down as a dark smudge over the rail's top edge. */
@@ -547,9 +574,9 @@
 .teim-rd .cedar-note { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.84rem; line-height: 1.45; color: var(--ink-2); border-radius: 0 9px 9px 0; padding: 0.55rem 0.75rem; animation: rise 0.3s cubic-bezier(0.22,1,0.36,1); }
 .teim-rd .cedar-note__ico { flex: none; display: inline-flex; width: 14px; height: 14px; margin-top: 0.12rem; }
 .teim-rd .cedar-note__ico svg { width: 14px; height: 14px; }
-.teim-rd .cedar-note--warn { background: var(--teal-tint); border-left: 3px solid var(--teal); }
+.teim-rd .cedar-note--warn { color: var(--ink); }
 .teim-rd .cedar-note--warn .cedar-note__ico { color: var(--dteal); }
-.teim-rd .cedar-note--suggest { background: var(--teal-tint); border-left: 3px solid var(--teal-line); }
+.teim-rd .cedar-note--suggest { color: var(--ink-2); }
 .teim-rd .cedar-note--suggest .cedar-note__ico { color: var(--teal); }
 .teim-rd .cedar-note--affirm { color: var(--dteal); padding: 0.35rem 0.2rem; border-radius: 0; }
 .teim-rd .cedar-note--affirm .cedar-note__ico { color: var(--dteal); }
@@ -848,7 +875,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .backbtn:hover { color: var(--ink); }
 .teim-rd .btn { font-family: var(--sans); font-weight: 600; font-size: 1.05rem; border-radius: 9px; padding: 0.9rem 2.4rem;
   background: var(--teal); color: #fff; display: inline-block; text-align: center; transition: background 0.18s, transform 0.12s, box-shadow 0.18s; }
-.teim-rd .btn:hover { background: var(--teal-dark); box-shadow: 0 6px 18px rgba(15,181,165,0.36); transform: translateY(-1px); }
+.teim-rd .btn:hover { background: var(--teal-dark); box-shadow: 0 6px 18px rgba(7, 24, 36, 0.18); transform: translateY(-1px); }
 .teim-rd .btn:active { transform: scale(0.98); }
 .teim-rd .btn.ghost { background: transparent; color: var(--teal-dark); border: 1.5px solid var(--teal-line); }
 .teim-rd .btn.ghost:hover { background: var(--teal-tint); box-shadow: none; }
@@ -1064,7 +1091,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 
 .teim-rd .btn--primary:hover {
   background: var(--teal-dark);
-  box-shadow: 0 4px 14px rgba(15,181,165,0.3);
+  box-shadow: 0 4px 14px rgba(7, 24, 36, 0.16);
 }
 
 .teim-rd .btn--secondary {
@@ -1159,11 +1186,8 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--teal);
-  background: var(--teal-tint);
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--line);
+  padding: 0.8rem 0 0;
   margin-bottom: 1.1rem;
 }
 .teim-rd .detail-warnings__icon { flex: none; width: 18px; height: 18px; color: var(--teal-dark); margin-top: 0.1rem; }
@@ -1202,7 +1226,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .respreview__wm span { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(10, 15, 38, 0.1); transform: rotate(-24deg); white-space: nowrap; }
 .teim-rd .respreview__wm span:nth-child(even) { align-self: flex-start; margin-left: 8%; }
 .teim-rd .respreview__wm span:nth-child(3n) { align-self: flex-end; margin-right: 8%; }
-.teim-rd .respreview__note { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; border: 1px solid var(--line); border-left: 3px solid var(--dteal, #0A7F74); border-radius: 10px; background: var(--bg, #fff); padding: 0.85rem 1.1rem; margin: 0 0 1.1rem; }
+.teim-rd .respreview__note { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.9rem 0; margin: 0 0 1.1rem; }
 .teim-rd .respreview__badge { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; color: var(--dteal, #0A7F74); border: 1px solid currentColor; border-radius: 999px; padding: 0.24rem 0.55rem 0.2rem; flex: none; }
 .teim-rd .respreview__text { margin: 0; flex: 1 1 22rem; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
 .teim-rd .respreview__cta { flex: none; }
@@ -2290,7 +2314,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .auth-editorial__btn-primary:hover::after { transform: translateX(130%); transition: transform 0.75s ease; }
 .teim-rd .auth-editorial__btn-primary:hover {
   background: var(--teal-dark);
-  box-shadow: 0 6px 18px rgba(15, 181, 165, 0.35);
+  box-shadow: 0 6px 18px rgba(7, 24, 36, 0.18);
 }
 .teim-rd .auth-editorial__btn-primary:active {
   transform: scale(0.98);
@@ -2629,7 +2653,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 /* The active anchor glows softly so the eye lands on it: this is the geography
    the map is currently focused on. */
 .teim-rd .geo-full__geo--active { border-color: var(--teal-line); background: var(--teal-tint);
-  box-shadow: 0 0 0 3px var(--teal-tint), 0 8px 20px rgba(15,181,165,0.16); }
+  box-shadow: 0 0 0 3px var(--teal-tint), 0 8px 20px rgba(7, 24, 36, 0.12); }
 .teim-rd .geo-full__geo-main { display: flex; flex-direction: column; gap: 0.12rem; min-width: 0; }
 .teim-rd .geo-full__geo-name { font-family: var(--sans); font-weight: 600; font-size: 0.96rem; color: var(--ink); }
 .teim-rd .geo-full__geo-type { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); }
@@ -4656,7 +4680,7 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
 .teim-rd .gv-context__lens { display: block; width: 100%; font-size: 0.82rem; color: var(--dteal); margin-top: 0.15rem; }
 
 /* Cedar's interpretation line is quieter than its observation. */
-.teim-rd .gv-noticebox__interp { margin: -0.5rem 0 1.2rem; font-size: 0.9rem; line-height: 1.55; color: var(--muted); border-left: 2px solid var(--teal-line); padding-left: 0.8rem; }
+.teim-rd .gv-noticebox__interp { margin: -0.3rem 0 1.2rem; font-size: 0.9rem; line-height: 1.55; color: var(--muted); max-width: 70ch; }
 
 /* Replace view: badges only where they help. */
 .teim-rd .gv-lib__badge { display: inline-block; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--dteal); border: 1px solid var(--teal-line); border-radius: var(--radius-pill); padding: 0.18rem 0.5rem; margin-top: 0.35rem; }

@@ -43,8 +43,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { contactHref } from "../../features/grove/appLink.js";
 
-import { useAuth } from "../../context/useAuth";
-import { canReadCedarPress } from "../../features/grove/pressAccess";
 
 import { PRESS_DATA_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
@@ -138,12 +136,50 @@ function useCurrentChapter() {
   return current;
 }
 
-/** The index: ten marks, one per chapter, that follow the reader down. */
+/**
+ * The index: ten marks, one per chapter, that follow the reader down.
+ *
+ * A RAIL, NOT A ROW OF PILLS. It was a sticky horizontal strip of ten
+ * rounded chips above the first chapter, which is the shape of a filter bar
+ * and read as one: a reader met ten controls before a sentence. The brief is
+ * specific — "a compact left index on desktop and a single 'On this page'
+ * disclosure on mobile. Use a rail/list treatment, not seven rounded pills."
+ *
+ * So on a wide screen it is a column beside the chapters, sticky, with the
+ * current chapter marked; on a phone it collapses into one line that opens.
+ * Same markup, same `aria-current`, same anchors: the difference is layout
+ * and a `<details>` wrapper that only does anything under the breakpoint.
+ */
+function useWide(query = "(min-width: 1100px)") {
+  const [wide, setWide] = useState(() =>
+    typeof window === "undefined" ? true : window.matchMedia(query).matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setWide(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, [query]);
+  return wide;
+}
+
 function MethodsIndex() {
   const current = useCurrentChapter();
+  const here = CHAPTERS.find((chapter) => chapter.id === current);
+  // A closed `<details>` hides its children through the UA's own mechanism,
+  // not through `display`, so no media query can open one. The breakpoint
+  // has to be read in JavaScript and written to the attribute: on a wide
+  // screen the rail is simply open and its cap is inert.
+  const wide = useWide();
   return (
-    <nav className="cp-mix" aria-label="On this page">
-      <span className="cp-mix__cap">On this page</span>
+    <details className="cp-mix" aria-label="On this page" open={wide}>
+      <summary className="cp-mix__cap">
+        On this page
+        {/* Named on a phone, where the list is closed: "On this page" alone
+            says nothing about where the reader currently is. */}
+        {here ? <span className="cp-mix__at">{here.label}</span> : null}
+      </summary>
       <ul className="cp-mix__list">
         {CHAPTERS.map((chapter, index) => (
           <li key={chapter.id}>
@@ -159,7 +195,7 @@ function MethodsIndex() {
           </li>
         ))}
       </ul>
-    </nav>
+    </details>
   );
 }
 
@@ -208,12 +244,12 @@ function Chapter({ id, title, claim, children }) {
 // nameless control.
 function Reasoning({ label = "Why this is built this way", children }) {
   return (
-    <details className="cp-why">
-      <summary className="cp-why__sum">
-        <span className="cp-why__cue" aria-hidden="true" />
+    <details className="cp-reason">
+      <summary className="cp-reason__sum">
+        <span className="cp-reason__cue" aria-hidden="true" />
         {label}
       </summary>
-      <div className="cp-why__in">{children}</div>
+      <div className="cp-reason__in">{children}</div>
     </details>
   );
 }
@@ -224,14 +260,6 @@ function Acts({ children }) {
 }
 
 export default function CedarPressMethods() {
-  // The masthead carries the reader's profile and Sign out. These two pages
-  // rendered `<PressMast section="..." />` with NO `user` and no
-  // `onSignOut`, so a signed-in reader who navigated here lost the avatar
-  // and the way out - the session was intact, the chrome just stopped
-  // saying so. Articles and Data always passed both; these did not.
-  const { user, logout } = useAuth();
-  const entitled = canReadCedarPress(user);
-
   useDocumentTitle("Methods");
   useScrollToTop();
   // Sitewide arrival language: each argument fades in as the reader
@@ -240,7 +268,7 @@ export default function CedarPressMethods() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp-meth" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="methods" />
+        <PressMast section="methods" />
 
         {/* THE OPENING IS TWO SENTENCES AND AN INDEX.
             Review, 2026-09-15: "the opening headline, paragraph, pull quote,
@@ -262,6 +290,66 @@ export default function CedarPressMethods() {
             government, enterprise and firm it can resolve, and maintains it through renames,
             acquisitions and changes in legal status.
           </p>
+
+          {/* THE CHAIN, IN ONE LINE.
+              Owner, 2026-09-20: the page needs "one simple diagram showing
+              collection → canonical entity → record → source/release". The
+              seven-stage rail further down is a different diagram — it is
+              how a collection is BUILT. This is how the four things a reader
+              meets in the product relate to each other, which is the
+              question the page's title asks and which nothing on it
+              answered in one glance. */}
+          <ol className="cp-chain" aria-label="How the pieces relate">
+            <li>
+              <b>Collection</b>
+              <span>A published table with a release and a coverage span.</span>
+            </li>
+            <li>
+              <b>Entity</b>
+              <span>The nation, enterprise or firm a record is about, held by a permanent Cedar id.</span>
+            </li>
+            <li>
+              <b>Record</b>
+              <span>One award, filing, notice or transaction, resolved to that entity.</span>
+            </li>
+            <li>
+              <b>Source</b>
+              <span>The document it came from, named on the record and in the download.</span>
+            </li>
+          </ol>
+
+          {/* FOUR ANCHORS. What a reader is actually deciding when they open
+              a methodology page is whether to trust a figure, and the four
+              things that decide it are: the release it came from, the
+              identity it is attached to, the document behind it, and what
+              happens when any of those turn out to be wrong. Each is a
+              chapter below; this is the page answering before it explains. */}
+          <ul className="cp-anchors" aria-label="What this page answers">
+            <li>
+              <a href={`#${anchorId("updates")}`}>
+                <b>Releases</b>
+                <span>Every version keeps its address, so a citation stays reproducible.</span>
+              </a>
+            </li>
+            <li>
+              <a href={`#${anchorId("ids")}`}>
+                <b>Identities</b>
+                <span>One permanent id a nation keeps through renames and reorganizations.</span>
+              </a>
+            </li>
+            <li>
+              <a href={`#${anchorId("sources")}`}>
+                <b>Source records</b>
+                <span>Every collection begins with a document, not an estimate.</span>
+              </a>
+            </li>
+            <li>
+              <a href={`#${anchorId("updates")}`}>
+                <b>Corrections</b>
+                <span>What changes, what does not, and where the change is logged.</span>
+              </a>
+            </li>
+          </ul>
         </section>
 
         <MethodsIndex />

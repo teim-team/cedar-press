@@ -23,6 +23,17 @@ export function appUrl(path = "") {
  */
 export const CONTACT_EMAIL = "contact@lumecon.ai";
 
-export function contactHref(subject) {
-  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
+export function contactHref(subject, body = null) {
+  const query = `subject=${encodeURIComponent(subject)}`;
+  // A PREFILLED BODY IS THE INTAKE.
+  //
+  // The request pages ask for a specific set of things and then hand the
+  // reader an empty mail window, which is where the specificity goes to die:
+  // a request that arrives as one paragraph has to be taken apart by a
+  // person before it can be answered. There is no form backend to post to,
+  // and pretending otherwise would be worse, so the mail draft carries the
+  // questions in order and the reader fills them in.
+  return body
+    ? `mailto:${CONTACT_EMAIL}?${query}&body=${encodeURIComponent(body)}`
+    : `mailto:${CONTACT_EMAIL}?${query}`;
 }

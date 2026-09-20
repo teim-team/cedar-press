@@ -81,21 +81,35 @@ function Points({ priority, mine, canMove, onMove, busy, counted }) {
   );
 }
 
+/**
+ * A PRIORITY IS A ROW, NOT A CARD.
+ *
+ * Owner, 2026-09-20: "The priorities page is useful internally, but visually
+ * it is still a grid of text cards. It should become a constrained decision
+ * workspace: what Cedar is being asked to improve, why it matters, what
+ * evidence is needed, and status. Fewer cards, more hierarchy."
+ *
+ * Eleven equal cards in a three-across grid say that eleven things are
+ * equally live, which is the opposite of a priority list. As rows in one
+ * ledger — the shape the rest of this product uses for anything ordered —
+ * the ask and the reason lead, the status sits in its own column, and the
+ * support reads as a column a reader can scan down. The controls are the
+ * same controls.
+ */
 function Priority({ priority, mine, canMove, onMove, busy, evolvedFrom, counted }) {
   return (
     <li className={`cp-pri ${priority.status === "published" ? "is-published" : ""}`} data-testid="priority">
-      <div className="cp-pri__head">
-        <span className="cp-pri__type">{PRIORITY_TYPES[priority.type]?.label ?? priority.type}</span>
-        <span className={`cp-pri__status cp-pri__status--${priority.status}`}>{statusLabel(priority.status)}</span>
+      <div className="cp-pri__say">
+        <h3 className="cp-pri__title">{priority.title}</h3>
+        <p className="cp-pri__desc">{priority.description}</p>
+        {evolvedFrom ? (
+          <p className="cp-set__fine">Began as the research question “{evolvedFrom.title}”: answering it needed this dataset.</p>
+        ) : null}
+        {priority.status === "published" && priority.published_output ? (
+          <p className="cp-set__fine"><a href={priority.published_output}>See what was published <span aria-hidden="true">&#8594;</span></a></p>
+        ) : null}
       </div>
-      <h3 className="cp-pri__title">{priority.title}</h3>
-      <p className="cp-pri__desc">{priority.description}</p>
-      {evolvedFrom ? (
-        <p className="cp-set__fine">Began as the research question “{evolvedFrom.title}”: answering it needed this dataset.</p>
-      ) : null}
-      {priority.status === "published" && priority.published_output ? (
-        <p className="cp-set__fine"><a href={priority.published_output}>See what was published <span aria-hidden="true">&#8594;</span></a></p>
-      ) : null}
+      <span className={`cp-pri__status cp-pri__status--${priority.status}`}>{statusLabel(priority.status)}</span>
       <Points priority={priority} mine={mine} canMove={canMove} onMove={onMove} busy={busy} counted={counted} />
     </li>
   );
@@ -203,7 +217,7 @@ function RequestForm({ priorities, connected, canMove, available, onDone }) {
 
 export default function CedarPressPriorities() {
   useDocumentTitle("Shape the research");
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const entitled = canReadCedarPress(user);
   const fadeRoot = useFadeIn();
   useScrollToTop("priorities");
@@ -243,7 +257,7 @@ export default function CedarPressPriorities() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="priorities" />
+        <PressMast section="priorities" />
 
         <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Shape the research</p>
@@ -253,12 +267,17 @@ export default function CedarPressPriorities() {
               ruling is that the writing is the product: a subscriber says what
               they need, in their words, with no list to choose from. The
               points are how that gets weighted, so they come second. */}
+          {/* TWO SENTENCES, BECAUSE THE OTHER THREE WERE ALREADY ON THE PAGE.
+              This deck ran five sentences and ten lines at phone width, and
+              two of them were said again within one screen: `earningLine`
+              in the influence card explains earning and allocating points,
+              and the weighing criteria belong with "What happens to it",
+              which is where a reader goes to find out what happens to it.
+              A deck should say what only it can say — what this page is for
+              — and then stop. */}
           <p className="cp-mh__sub">
             Tell Cedar what you need in your own words. There is no list of categories and nothing
-            is out of scope to ask for. Your subscription also earns Cedar Points in each month you
-            use Cedar Press, and you can put those behind your own request or behind anything
-            another subscriber has asked for. Priorities are considered alongside feasibility, data
-            quality, research value and Cedar’s editorial judgment.
+            is out of scope to ask for.
           </p>
         </section>
 
@@ -323,7 +342,9 @@ export default function CedarPressPriorities() {
                     </li>
                     <li>
                       <b>It is answered or it is not.</b> Points inform the order of the work. They
-                      do not decide it, and Cedar says which priorities it took up in What&rsquo;s new.
+                      do not decide it: feasibility, data quality, research value and Cedar&rsquo;s
+                      editorial judgment weigh alongside them, and Cedar says which priorities it
+                      took up in What&rsquo;s new.
                     </li>
                   </ol>
                 </aside>

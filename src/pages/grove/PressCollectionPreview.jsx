@@ -23,17 +23,25 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { WITHHELD_TEXT, contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
+import { contractFor, exploreTables, parseCsv, universalRows } from "../../features/grove/explore.js";
+import { columnPlan } from "../../features/grove/recordColumns.js";
+import { Cards, Rows } from "./PressRecordTable.jsx";
+import { useNarrow } from "../../features/grove/useNarrow.js";
 import { coverageLabel } from "../../features/grove/pressAccess";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { freshnessLine } from "../../features/grove/pressReleases";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { TierName } from "./TierName";
 
-/** How many of the ten sample records the pane shows. */
-const PANE_ROWS = 6;
-
-const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+/**
+ * How many of the ten sample records the pane shows.
+ *
+ * Six, until the pane started rendering the product's own table: its rows
+ * are denser than the four-column one this replaced, and six of them left a
+ * third of the window empty under them. Ten is every row the sample file
+ * holds, so the caption's "N of N" is the whole of what is public.
+ */
+const PANE_ROWS = 10;
 
 const ROWS_LABEL = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.rowsLabel]));
 const SOURCES = Object.fromEntries(LAUNCH_COLLECTION.map((entry) => [entry.id, entry.sources]));
@@ -87,11 +95,21 @@ function usePreviewSample(collectionId) {
 
 export default function CollectionPreview({ entry, tier, register }) {
   const { status, table, parsed } = usePreviewSample(entry.id);
+  // A phone gets the same list the product gives a phone, not a table of
+  // the collection's own columns squeezed into 320px.
+  const narrow = useNarrow();
   const items = useMemo(
     () => (parsed ? universalRows(table.key, parsed.rows, register).slice(0, PANE_ROWS) : []),
     [parsed, table, register],
   );
   const showAmount = items.some((item) => item.amount != null);
+  // The columns the product would open this collection on, off the same
+  // contract and the same plan. The sample file's own header is the column
+  // universe here, exactly as the release's is on /data.
+  const contract = table ? contractFor(table.key) : null;
+  const entityColumn = contract ? (contract.entity_name ?? contract.entity_uid ?? null) : null;
+  const { defaults, all } = columnPlan(table?.key ?? null, contract, parsed?.columns ?? []);
+  const shownColumns = defaults.length ? defaults : all;
   const rowsLabel = ROWS_LABEL[entry.id];
   const fresh = freshnessLine(entry.id);
   return (
@@ -121,34 +139,31 @@ export default function CollectionPreview({ entry, tier, register }) {
               {table.rows ? ` · ${table.rows.toLocaleString("en-US")} in the release` : ""}
             </span>
           </p>
-          <div className="cp-pane__scroll">
-            <table className="cp-pane__table">
-              <thead>
-                <tr>
-                  <th scope="col">Entity</th>
-                  <th scope="col">Date</th>
-                  <th scope="col">Record</th>
-                  {showAmount ? <th scope="col" className="cp-pane__amt">Amount</th> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.id} data-testid="stage-record">
-                    <td className="cp-pane__ent">
-                      {item.entity.withheld ? <em>{WITHHELD_TEXT}</em> : item.entity.name ?? <span className="cp-pane__unkeyed">not linked to an entity</span>}
-                      {item.entity.uid ? <small className="cp-pane__uid">{item.entity.uid}</small> : null}
-                    </td>
-                    <td className="cp-pane__date">{item.date ?? "—"}</td>
-                    <td className="cp-pane__obs"><span className="cp-pane__clamp">{item.observation || item.subject || "—"}</span></td>
-                    {showAmount ? (
-                      <td className="cp-pane__amt">
-                        {item.amount == null ? "—" : money.format(item.amount)}
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* THE SAME TABLE, NOT A TABLE THAT LOOKS LIKE IT.
+              This pane drew four columns of its own naming — Entity, Date,
+              Record, Amount — while the product opened on the collection's
+              own fields behind a pinned Cedar identity block. A visitor was
+              being shown a picture of a product they would not recognise on
+              the first day. It renders `Rows` now: the same component, the
+              same `columnPlan`, the same cell rules, read-only. */}
+          <div className="cp-pane__records">
+            {narrow ? (
+              <Cards readOnly items={items} onActive={() => {}} openRecord={null} />
+            ) : (
+            <Rows
+              readOnly
+              view="table"
+              items={items}
+              columns={shownColumns}
+              sort={null}
+              onSort={() => {}}
+              onActive={() => {}}
+              showAmount={showAmount}
+              entityColumn={entityColumn}
+              contract={contract}
+              openRecord={null}
+            />
+            )}
           </div>
         </>
       ) : status === "loading" ? (

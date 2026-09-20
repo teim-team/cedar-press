@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-import { EMAIL, HASH, PASSWORD } from "./demoAccount.js";
+import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 // The twelve, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
@@ -26,6 +26,7 @@ import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 // starts. It is not a credential and it opens nothing that is deployed
 // anywhere; see tests/demoAccount.js.
 const ACCOUNT = { email: EMAIL, password: PASSWORD };
+const PRESS_ACCOUNT = { email: PRESS_EMAIL, password: PASSWORD };
 const STOREFRONT_NAMES = STOREFRONT_CATALOG.map((entry) => entry.short || entry.name);
 
 /** The pages behind the gate, by the route a reader reaches them at. */
@@ -54,19 +55,150 @@ function watchConsole(page) {
   return errors;
 }
 
+/**
+ * Wait until an element has finished animating, before measuring it.
+ *
+ * The panels here slide in (`cp-dc-sheet` rises from `translateY(100%)`,
+ * `cedar-rise` from 18px), and `toBeVisible()` is satisfied the moment the
+ * animation starts. A `boundingBox()` taken then is of a box in motion: a
+ * full-screen panel measured 0.18s in reported `y = 292` on a 664px window,
+ * which is not where it is and not where it lands. Assertions about geometry
+ * have to come after the motion, or they describe a frame.
+ */
+async function settled(locator) {
+  await locator.waitFor({ state: "visible" });
+  await locator.evaluate((el) =>
+    Promise.all(el.getAnimations().map((animation) => animation.finished.catch(() => {}))),
+  );
+}
+
 /** Sign in through the gate, the way a subscriber does. */
-async function signIn(page) {
+async function signIn(page, account = ACCOUNT) {
   await page.goto("/");
   await page.getByRole("tab", { name: "Log in" }).click();
-  await page.getByLabel("Email address").fill(ACCOUNT.email);
-  await page.getByLabel("Password", { exact: true }).fill(ACCOUNT.password);
+  await page.getByLabel("Email address").fill(account.email);
+  await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Know what’s shaping Indian Country",
   );
 }
 
+/**
+ * Open the door's Cedar, the way a reader on that scroll position actually can.
+ *
+ * The floating pill steps aside while the hero's preview object is on screen
+ * (implementation brief §2.2: it sat on the collection strip, which is part of
+ * the thing the object exists to demonstrate). Cedar is not unreachable there
+ * — the preview's own foot carries "Ask Cedar", which dispatches
+ * `cedar:ask-collection` — so this uses whichever control is actually offered.
+ */
+async function openDoorCedar(page) {
+  const fab = page.locator(".cp-dc__fab");
+  if (await fab.isVisible()) {
+    await fab.click();
+    return;
+  }
+  await page.locator(".cp-pane__act--btn").first().click();
+}
+
 test.describe("the gate", () => {
+  test("the private preview note invites feedback and gives an access contact", async ({ page }) => {
+    await page.goto("/");
+    const notice = page.getByTestId("press-preview-note");
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText("small group");
+    await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
+      .toHaveAttribute("href", /mailto:elijah\.moreno@lumecon\.ai/);
+    // The way out is a close control, not a "Continue →" pill. A reader who
+    // does not want to continue anywhere still has to be able to shut it.
+    await notice.getByRole("button", { name: "Close this notice" }).click();
+    await expect(notice).toHaveCount(0);
+  });
+
+  test("every signed-in route wears the same masthead", async ({ page }) => {
+    // The collections page used to hide the standing line and shrink the
+    // wordmark and the mark to buy 86px for the records. Owner, 2026-09-20:
+    // "trusted intelligence for Indian Country looks like it's on a header
+    // on some pages and not others." A masthead is the one thing that must
+    // not change between routes, because it is what says this is still the
+    // same publication.
+    await signIn(page);
+    const seen = new Map();
+    // EVERY route, not the seven section pages. The three that were left out
+    // were the three that were wrong: the two public pages passed the reader
+    // to the masthead but no sign-out, so their Sign out button was wired to
+    // `undefined`, and an article id that is not hosted rendered a masthead
+    // with no reader at all and stood 12px shorter than the rest.
+    for (const path of [
+      "/", "/data", "/articles", "/whats-new", "/methods", "/priorities", "/settings",
+      "/research-access", "/tribal-data-request", "/record",
+      "/entity/CE-001CC-8N", "/articles/not-a-piece-we-host",
+    ]) {
+      await page.goto(path);
+      await page.locator(".cp-mast").waitFor();
+      await page.evaluate(() => document.fonts.ready);
+      const signature = await page.evaluate(() => {
+        const mast = document.querySelector(".cp-mast");
+        const line = document.querySelector(".cp-mast__of--line");
+        const word = document.querySelector(".cp-mast__word");
+        const mark = document.querySelector(".cp-mast__mark");
+        const shown = line && getComputedStyle(line).display !== "none";
+        return [
+          Math.round(mast.getBoundingClientRect().height),
+          shown ? "line" : "no-line",
+          word && getComputedStyle(word).fontSize,
+          mark && Math.round(mark.getBoundingClientRect().width),
+          document.querySelector(".cp-acct") ? "account" : "no-account",
+        ].join("|");
+      });
+      if (!seen.has(signature)) seen.set(signature, []);
+      seen.get(signature).push(path);
+    }
+    // One signature across every route. That is the invariant at both
+    // widths; what the signature IS differs between them, because a phone
+    // masthead genuinely has no room for the standing line and drops it at
+    // 760px. What it may not do is differ between two routes at one width.
+    // Keyed by signature so a failure names the routes that disagreed rather
+    // than only the count.
+    expect(Object.fromEntries(seen)).toEqual({ [[...seen.keys()][0]]: expect.any(Array) });
+    // And where there is room, the line is there, with the reader's menu.
+    const wide = (page.viewportSize().width ?? 0) > 760;
+    expect([...seen.keys()][0]).toContain(wide ? "|line|" : "|no-line|");
+    expect([...seen.keys()][0]).toContain("|account");
+  });
+
+  test("Sign out signs out, from whichever page offered it", async ({ page }) => {
+    // The research-access and tribal-data-request pages handed the masthead a
+    // reader and no way to sign one out, so the menu drew a Sign out wired to
+    // `undefined`. It looked exactly like the working one on every other page.
+    await signIn(page);
+    await page.goto("/research-access");
+    await page.locator(".cp-acct__btn").click();
+    await page.locator(".cp-acct__out").click();
+    // This page is public, so signing out leaves the reader on it rather than
+    // bouncing them to the door: the masthead loses the menu and the sections
+    // in place. The door is the proof the session actually ended.
+    await expect(page.locator(".cp-acct")).toHaveCount(0);
+    await expect(page.locator(".cp-nav")).toHaveCount(0);
+    await page.goto("/");
+    await expect(page.locator(".cp-split")).toBeVisible();
+    await expect(page.locator("#catalog")).toHaveCount(0);
+  });
+
+  test("the preview note is the door's, and is not carried into the product", async ({ page }) => {
+    // It used to render inside `PressMast`, which every signed-in page
+    // mounts, so a subscriber met an explanation of how they got in on the
+    // collections table, on an entity profile and on the methods page —
+    // above the product, addressed to somebody already inside it. Owner,
+    // 2026-09-20: it should only be on the landing page.
+    await signIn(page);
+    for (const path of ["/data", "/data?c=funding", "/entity/CE-001CC-8N", "/methods", "/whats-new"]) {
+      await page.goto(path);
+      await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+    }
+  });
+
   test("a signed-out visitor gets the gate, not the reader", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
@@ -87,7 +219,10 @@ test.describe("the gate", () => {
   test("the door lists every collection and stages real records", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await expect(page.locator(".cp-app__item")).toHaveCount(12);
+    // `.cp-rail__item` rather than `.cp-app__item`: the frame drew its own
+    // navy list until the door started mounting the shared rail. Scoped to
+    // the frame, since the strip below it is the same twelve again.
+    await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(12);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // Scoped to the frame: the door now also carries a full-size strip of the
@@ -111,12 +246,16 @@ test.describe("the gate", () => {
   test("Cedar on the door answers from the prepared bank", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await page.locator(".cp-dc__fab").click();
+    await openDoorCedar(page);
     await expect(page.locator(".cp-dc__panel")).toBeVisible();
     await expect(page.locator(".cp-dc__context")).toContainText("Cedar Press");
     // The standing disclaimer is the one line the panel owes its reader.
     await expect(page.locator(".cp-dc__disclaimer")).toContainText("Cedar can make mistakes");
-    await page.locator(".cp-dc__chip").first().click();
+    // Opened from the preview the panel arrives with that collection's answer
+    // already in it, which is the point of that control; opened from the pill
+    // it arrives empty with starters. Either way there is a bot turn to read.
+    const chip = page.locator(".cp-dc__chip").first();
+    if (await chip.count()) await chip.click();
     await expect(page.locator(".cp-dc__msg--bot").nth(1)).toBeVisible();
     // A question it has nothing for is refused, not answered.
     await page.locator(".cp-dc__input").fill("what is the weather in Oslo");
@@ -130,15 +269,43 @@ test.describe("the gate", () => {
   // panel hung in the middle of the screen with page showing under it, the
   // launcher stayed on top of it, and every answer re-printed the whole
   // starter stack underneath itself.
+
+  // THE PROOF OBJECT IS NOT SOMETHING TO PUT A BUTTON ON TOP OF.
+  // Measured at 1440x900 the pill sat over the Advocacy tile in the preview's
+  // collection strip. It steps aside while the object is on screen and comes
+  // back once the reader scrolls past it; the preview's own foot carries the
+  // Cedar action in the meantime, so nothing is lost.
+  test("the launcher does not sit on the hero's preview", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the preview fills the hero on desktop only");
+    await page.goto("/");
+    const fab = page.locator(".cp-dc__fab");
+    await expect(fab).toBeHidden();
+    // The object's own Cedar action is the way in while it is on screen.
+    await expect(page.locator(".cp-pane__act--btn").first()).toBeVisible();
+    // Past the hero, the pill is back.
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await expect(fab).toBeVisible();
+  });
+
   test("the door's Cedar docks to the bottom and the launcher steps aside", async ({ page }, testInfo) => {
     const errors = watchConsole(page);
     await page.goto("/");
     const launcher = page.locator(".cp-dc__fab");
+    // The pill, deliberately, and not the preview's own action: this test is
+    // about the EMPTY panel — how it docks and how its starter stack behaves —
+    // and opening from the preview arrives with a collection answer already
+    // in the thread, so there are no starters to collapse. Scroll past the
+    // preview first, which is where the pill is offered.
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await expect(launcher).toBeVisible();
     await launcher.click();
 
     const panel = page.locator(".cp-dc__panel");
     await expect(panel).toBeVisible();
     await expect(panel).toBeInViewport();
+    await settled(panel);
     // The launcher is gone while the panel is up: the panel's own close is
     // the way out, and a pill over the sheet's corner covers its last line.
     await expect(launcher).toBeHidden();
@@ -150,10 +317,17 @@ test.describe("the gate", () => {
     expect(viewport.height - (box.y + box.height)).toBeLessThanOrEqual(1);
     expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
     if (testInfo.project.name === "phone") {
-      // A phone gets the full width, and the sheet leaves the top of the
-      // window showing rather than covering the page it was opened from.
+      // A phone gets the whole screen, not a sheet across part of it. This
+      // assertion used to read `toBeLessThan(viewport.height * 0.85)` — the
+      // panel was capped at 78dvh and the rule under test was that it left
+      // the page showing above itself. lumecon.ai moved off exactly that
+      // arrangement (CedarFAB.astro, `max-width: 600px`), because the strip
+      // of page it leaves is not worth the half-screen it costs the
+      // transcript, and cedarpress.ai was landing its teal header across the
+      // middle of the hero headline. The rule now is the reference's rule.
       expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
-      expect(box.height).toBeLessThan(viewport.height * 0.85);
+      expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
+      expect(box.y).toBeLessThanOrEqual(1);
     }
 
     // The starter stack is an opening, not a toolbar: asking collapses it for
@@ -184,16 +358,39 @@ test.describe("the gate", () => {
     // back to the launcher a frame after the browser focused what was clicked,
     // so dismissing the sheet ate the click that dismissed it and the control
     // had to be clicked twice. The sheet is not modal; the click belongs to
-    // the control. `#cp-tab-signin` sits in the header, which a sheet anchored
-    // to the bottom edge never covers at either viewport.
+    // the control. `#cp-tab-signin` sits in the header, which the corner card
+    // never covers.
+    //
+    // That premise holds at a desktop width and no longer holds on a phone,
+    // where the panel is now the screen and there is no "outside" to click.
+    // Both contracts are checked, because both are real: the phone's way out
+    // is the close button, which is why it is 44px.
     const behind = page.locator("#cp-tab-signin");
-    await expect(behind).toBeVisible();
     await launcher.click();
     await expect(panel).toBeVisible();
-    await page.locator(".cp-dc__input").click();
-    await behind.click();
-    await expect(panel).toHaveCount(0);
-    await expect(behind).toBeFocused();
+    await settled(panel);
+    if (testInfo.project.name === "phone") {
+      // Covered, not hidden: the control is still in the layout and still
+      // `visible` to CSS, and the panel is simply painted over it. So the
+      // assertion is what is actually on top at its centre, which is the only
+      // thing that decides whether a tap can reach it.
+      const covered = await behind.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+        return Boolean(top?.closest(".cp-dc__panel"));
+      });
+      expect(covered).toBe(true);
+      await page.locator(".cp-dc__input").click();
+      await page.locator(".cp-dc__close").click();
+      await expect(panel).toHaveCount(0);
+      await expect(behind).toBeVisible();
+    } else {
+      await expect(behind).toBeVisible();
+      await page.locator(".cp-dc__input").click();
+      await behind.click();
+      await expect(panel).toHaveCount(0);
+      await expect(behind).toBeFocused();
+    }
     expect(errors).toEqual([]);
   });
 
@@ -266,10 +463,19 @@ test.describe("the subscriber's path", () => {
     const errors = watchConsole(page);
     await signIn(page);
 
-    // Six tiles, each a real destination. The count is asserted because the
-    // layout is built on it: they wrapped as five and one once, orphaning
-    // Contact on a row of its own.
-    await expect(page.locator(".cp-hub__tile")).toHaveCount(6);
+    // THE OVERVIEW IS A BRIEFING NOW, NOT SIX DOORS.
+    // It asserted six hub tiles — Collections, Research Briefs, Priorities,
+    // What's new, Methods, Plans — which is the masthead's own nav bar
+    // restated underneath itself. Owner, 2026-09-20: "Make it feel more like
+    // a briefing: one lead development, three signals worth watching, one
+    // collection or research brief to explore, one Cedar question worth
+    // asking." Those four are what is asserted, because those four are what
+    // the page is for; every one of them is read from the release record or
+    // the article list, so none of it can go stale in place.
+    await expect(page.locator(".cp-brief__lead")).toBeVisible();
+    await expect(page.locator(".cp-brief__signals a")).toHaveCount(3);
+    await expect(page.locator(".cp-brief__coll")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Ask Cedar what changed/ })).toBeVisible();
     await expect(page.locator(".cp-close__head")).toContainText("Nothing here is a snapshot");
 
     // Signing out is inside the account menu now: the masthead is one row at
@@ -305,17 +511,18 @@ test.describe("the subscriber's path", () => {
     await signIn(page);
     await page.goto("/data");
 
-    // One collection, from a tile in the shelf grid — not the shelf's
-    // "download all", which hands over a ZIP and would not exercise the
-    // citation the CSV carries. The tile opens the collection in the viewer
-    // and the reader panel beside the grid carries the sample download.
-    const tile = page.locator(".cp-band__grid .cp-badge--act").first();
-    await expect(tile).toBeVisible();
-    await tile.click();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByTestId("explore-scope")).toBeVisible();
-
-    const panelAction = page.locator(".cp-read__act").first();
+    // One collection's own sample, not the toolbar's Download: that one
+    // hands over the current CUT as a ZIP with its README, and it is the
+    // per-collection CSV that carries `cite_as` in the rows. This used to
+    // live on the shelf's reader panel; the shelf's tiles were deleted when
+    // the table became the Collections page, and the action moved into the
+    // pane head rather than going with them.
+    await expect(page.locator(".cp-rail__item").first()).toBeVisible();
+    // In the actions menu since 2026-09-20: the toolbar collapsed to one row
+    // so the table could have the screen, and the secondary downloads went
+    // behind "More" together. Still one click from the records.
+    await page.locator(".cp-ex__bar .cp-ex__more > summary").click();
+    const panelAction = page.locator(".cp-ex__sample").first();
     await expect(panelAction).toBeVisible();
     const download = page.waitForEvent("download");
     await panelAction.click();
@@ -384,13 +591,26 @@ test.describe("Explore the collections", () => {
 
     const card = page.getByTestId("explore");
     await expect(card).toBeVisible();
+    // Collections opens on one collection now (Federal Funding), so the
+    // all-collections view this test walks is reached the way a reader
+    // reaches it: the rail's first row.
+    // Scrolled to the top first: the rail is sticky, so Playwright's
+    // scroll-into-view can chase an element that never moves relative to the
+    // viewport. A reader clicking the rail is at the top of the page anyway.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
     const caption = page.getByTestId("explore-caption");
     const records = page.getByTestId("explore-record");
-    // Every open collection contributes its dataset's preview; the caption
-    // counts sample records and says so, because ten rows is not the dataset.
-    await expect(caption).toContainText("sample records");
-    await expect(caption).toContainText("all collections");
-    await expect(records.first()).toBeVisible();
+    // Before a reader asks for a record, this is a collection catalog.
+    await expect(page.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
+    await expect(caption).toContainText("choose a collection to browse records");
+    // "12 collections", not "all collections": an explicit all is an explicit
+    // list now (the rail writes the ids), because clearing the parameter
+    // means "unspecified" and resolves to the default collection.
+    await expect(caption).toContainText(/\d+ collections/);
+    // And no record rows behind it: the catalogue replaces the pooled
+    // sample rather than sitting above them.
+    await expect(records).toHaveCount(0);
 
     // Narrow to one entity from the picker; the URL now carries the cut.
     // `click` and an expectation rather than `check`: the box is controlled
@@ -404,6 +624,7 @@ test.describe("Explore the collections", () => {
     await first.click();
     await expect(first).toBeChecked();
     await expect(page).toHaveURL(/[?&]e=CE-/);
+    await expect(records.first()).toBeVisible();
     await expect(caption).not.toContainText("every record");
     // Escape closes the panel and the control keeps focus.
     await page.keyboard.press("Escape");
@@ -437,7 +658,7 @@ test.describe("Explore the collections", () => {
     // ten-record preview to nothing, which is its own case below.
     await page.goto("/data");
     await expect(records.first()).toBeVisible();
-    await page.getByTestId("explore-collection").selectOption("lobbying");
+    await page.locator(".cp-rail__item").filter({ hasText: "Advocacy" }).first().click();
     await expect(page).toHaveURL(/[?&]c=lobbying/);
     await expect(page.getByTestId("explore-caption")).toContainText("columns");
     await expect(page.getByTestId("explore-scope")).toContainText("filing year");
@@ -445,7 +666,7 @@ test.describe("Explore the collections", () => {
       await expect(page.locator(".cp-ex__table--table")).toBeVisible();
       await expect(page.locator(".cp-ex__table--table thead th").first()).toBeVisible();
       await page.getByRole("button", { name: /Show all \d+ columns/ }).click();
-      await expect(page.getByTestId("explore-caption")).toContainText(/(\d+) of \1 columns/);
+      await expect(page.getByTestId("explore-caption")).toContainText(/(\d+)\/\1 columns/);
     }
     // A row opens the record's own page, which carries the cut it came from.
     // Covered end to end in "the record page" below; here the only claim is
@@ -457,7 +678,8 @@ test.describe("Explore the collections", () => {
     await expect(page.getByTestId("record-head")).toBeVisible();
     await page.getByRole("link", { name: "Back to results" }).first().click();
     await page.waitForURL(/\/data\?/);
-    await expect(page.getByTestId("explore-collection")).toHaveValue("lobbying");
+    // Coming back from a record restores the cut, which the rail shows.
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Advocacy");
 
     // An out-of-coverage year range is shown AS REQUESTED, said in words,
     // and the empty result says what it does not establish.
@@ -474,7 +696,9 @@ test.describe("Explore the collections", () => {
     await expect(page.getByTestId("explore-type")).toContainText("None");
     // A link naming two collections says two, not "all".
     await page.goto("/data?c=funding%7Cdeals");
-    await expect(page.getByTestId("explore-collection")).toContainText("2 collections from this link");
+    // The picker that used to say "2 collections from this link" is gone —
+    // the rail replaced it, and a two-collection cut has no single row to
+    // light. The caption is where that state lives now.
     await expect(caption).toContainText("2 collections");
     // A link to a collection this catalog does not have is not widened.
     await page.goto("/data?c=gaming");
@@ -487,27 +711,34 @@ test.describe("Explore the collections", () => {
     await page.getByLabel("Search these records").fill(someId);
     await expect(records).toHaveCount(1);
 
-    // The download is the cut's records and nothing else, re-importable as
-    // such, with the citation and the cut in the README beside it.
+    // With every collection selected, the table becomes the collection atlas.
+    // It is a catalog, not a pooled record set: select a collection before
+    // any record export is enabled.
     await page.goto("/data");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
+    const atlasRows = page.getByTestId("atlas-row");
+    await expect(atlasRows).toHaveCount(STOREFRONT_CATALOG.length);
+    await expect(caption).toContainText("choose a collection to browse records");
+    await expect(card.getByRole("button", { name: /^Download$/ })).toBeDisabled();
+    await page.getByLabel("Find a collection").fill("Federal Funding");
+    await expect(atlasRows).toHaveCount(1);
+    await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
+    await page.getByLabel("Find a collection").fill("");
+    await atlasRows.getByRole("button", { name: "Federal Funding" }).click();
+    await expect(page).not.toHaveURL(/[?&]q=/);
     await expect(records.first()).toBeVisible();
-    await expect(caption).not.toContainText("loading");
-    const shown = await records.count();
     const download = page.waitForEvent("download");
     await card.getByRole("button", { name: /^Download$/ }).click();
     const file = await download;
-    expect(file.suggestedFilename()).toMatch(/^cedar-press-summary-results-.*\.zip$/);
+    expect(file.suggestedFilename()).toMatch(/^cedar-press-sample-results-.*\.zip$/);
     const bytes = Buffer.concat((await (await file.createReadStream()).toArray()).map((c) => Buffer.from(c)));
     const files = unzipStored(bytes);
     expect(Object.keys(files).sort()).toEqual(["README.txt", "records.csv"]);
     const lines = files["records.csv"].split("\n");
-    expect(lines[0].split(",")).toContain("record_id");
-    // Every matching record, not only the page shown: the caption's count
-    // is the file's count.
-    const said = (await caption.innerText()).match(/(\d+) of \d+ sample records/i);
-    expect(said).toBeTruthy();
-    expect(lines.length - 1).toBe(Number(said[1]));
-    expect(shown).toBeLessThanOrEqual(lines.length - 1);
+    expect(lines[0].split(",")).toContain("assistance_transaction_unique_key");
+    // Every listed preview record is in the export.
+    expect(lines.length - 1).toBe(await records.count());
     const width = lines[0].split(",").length;
     for (const line of lines) expect(line.split(",").length).toBeGreaterThanOrEqual(width);
     expect(files["records.csv"]).not.toContain("cite_as");
@@ -516,25 +747,112 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  test("a tile on the shelf opens its collection in the viewer, and the viewer lights the tile", async ({ page }) => {
+  // This was "a tile on the shelf opens its collection in the viewer, and
+  // the viewer lights the tile" — two controls for one choice, kept in sync.
+  // There is one control now. The tiles were the catalogue a reader had to
+  // browse before reaching a table, and the rail is the catalogue.
+  test("the rail selects a collection, and the pane and the URL follow", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data");
-    const tile = page.locator(".cp-band__grid .cp-badge--act").nth(1);
-    await tile.click();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    await expect(page).toHaveURL(/[?&]c=/);
-    await expect(page.getByTestId("explore-scope")).toBeVisible();
-    // Choosing another collection in the viewer moves the light.
-    await page.getByTestId("explore-collection").selectOption("deals");
-    await expect(tile).toHaveAttribute("aria-pressed", "false");
-    await expect(page.locator(".cp-badge.is-selected")).toHaveCount(1);
+
+    // It opens on a collection, not on twelve searched at once.
+    await expect(page.getByTestId("explore-caption")).toContainText("Federal Funding");
+
+    const row = page.locator(".cp-rail__item").filter({ hasText: "Deals" }).first();
+    await row.click();
+    await expect(row).toHaveAttribute("aria-pressed", "true");
+    await expect(page).toHaveURL(/[?&]c=deals/);
+    await expect(page.getByTestId("explore")).toContainText("Deals");
+    // One row lit, never two.
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toHaveCount(1);
+
     // Cedar's launcher steps aside while the viewer is on screen; the
     // viewer's own action opens the panel.
     await page.getByTestId("explore").scrollIntoViewIfNeeded();
     await expect(page.locator(".cedar-widget__launcher")).toBeHidden();
     await page.getByTestId("explore").getByRole("button", { name: /Ask Cedar about this collection/ }).click();
     await expect(page.getByRole("dialog", { name: "Ask Cedar" })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("a Cedar Press reader sees the Plus boundary in the table", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the desktop table exposes its column headers");
+    const errors = watchConsole(page);
+    await signIn(page, PRESS_ACCOUNT);
+
+    const protectedRequests = [];
+    page.on("request", (request) => {
+      if (/\/contractors\//.test(new URL(request.url()).pathname)) protectedRequests.push(request.url());
+    });
+    await page.goto("/data?c=contractors");
+
+    const locked = page.getByTestId("explore-locked");
+    await expect(locked).toBeVisible();
+    await expect(locked.getByRole("heading", { name: "Federal Prime Contracting" })).toBeVisible();
+    const headings = await locked.locator("th").allInnerTexts();
+    expect(headings.join(" | ").toUpperCase()).toContain("ACTION DATE");
+    expect(headings.join(" | ").toUpperCase()).toContain("AMOUNT");
+    await expect(locked.locator(".cp-lock__row")).toHaveCount(22);
+    await expect(locked.locator(".cp-lock__bar").first()).toBeVisible();
+    await expect(locked.locator(".cp-lock__say")).toContainText("Available with Cedar Press+");
+    expect(protectedRequests).toEqual([]);
+
+    await locked.getByTestId("explore-about").click();
+    await expect(page.locator(".cp-ab")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  for (const { label, account } of [
+    { label: "Cedar Press", account: PRESS_ACCOUNT },
+    { label: "Cedar Press+", account: ACCOUNT },
+  ]) {
+    test(`${label} sees a deliberate no-preview state when publication is withheld`, async ({ page }) => {
+      const errors = watchConsole(page);
+      await signIn(page, account);
+      await page.goto("/data?c=owned");
+
+      const unavailable = page.getByTestId("explore-unavailable");
+      await expect(unavailable).toBeVisible();
+      await expect(unavailable.getByRole("heading", { name: "Preview unavailable" })).toBeVisible();
+      await expect(unavailable).toContainText("Not available for self-service browsing");
+      await expect(unavailable.locator(".cp-lock__row")).toHaveCount(0);
+      await expect(unavailable).not.toContainText("Available with Cedar Press+");
+      await unavailable.getByTestId("explore-about").click();
+      await expect(page.locator(".cp-ab")).toBeVisible();
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test("All collections is a catalog table with the Plus shelf in place", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the full catalog table is a desktop surface");
+    const errors = watchConsole(page);
+    await signIn(page, PRESS_ACCOUNT);
+    await page.goto("/data");
+    await page.locator(".cp-rail__item--all").click();
+
+    const atlas = page.locator(".cp-atlas");
+    await expect(atlas).toBeVisible();
+    await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
+    await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
+    );
+    await expect(atlas.locator(".cp-atlas__locked")).toHaveCount(
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned").length,
+    );
+    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(1);
+    await expect(page.locator(".cp-ex__pages")).toHaveCount(0);
+
+    await atlas.getByRole("button", { name: "Federal Prime Contracting" }).click();
+    await expect(page.getByTestId("explore-locked")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("the Cedar Grove fragment reaches the compact workspace handoff", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data#grove");
+    await expect(page.locator("#grove")).toBeInViewport({ timeout: 10_000 });
     expect(errors).toEqual([]);
   });
 });
@@ -659,16 +977,34 @@ test.describe("About this collection", () => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data?c=contractors");
+    // It was a `<details>` in the pane head holding four lines. It is a
+    // deep-linkable profile now, so the test opens it the way a reader does
+    // and then checks the address it leaves behind — the whole point of
+    // making it a panel is that a method can be sent to somebody.
     const about = page.getByTestId("explore-about");
     await expect(about).toBeVisible();
-    await about.locator("summary").click();
-    await expect(about).toContainText("Awardees are matched to a Native entity");
-    expect(await about.locator("dt").allTextContents()).toEqual([
-      "Coverage",
-      "How it is built",
-      "What it reads",
-      "How a record reaches its entity",
-    ]);
+    await about.click();
+    await expect(page).toHaveURL(/about=1/);
+    const panel = page.locator(".cp-ab");
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText("Awardees are matched to a Native entity");
+    // The release facts a reader checks a figure against.
+    for (const field of ["Release", "Updated", "Coverage", "Records"]) {
+      await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
+    }
+    // The unit of observation, in the codebook's own words: the sentence
+    // anyone about to cite a count needs and the old disclosure never had.
+    await expect(panel).toContainText("One row is");
+    const notes = panel.locator(".cp-ab__more");
+    await expect(notes.getByText("Read the full collection notes")).toBeVisible();
+    await notes.getByText("Read the full collection notes").click();
+    await expect(panel.getByRole("heading", { name: "What is not in it" })).toBeVisible();
+
+    // Closing returns the reader to the cut they opened it from.
+    await panel.getByRole("button", { name: /close the collection profile/i }).click();
+    await expect(panel).toHaveCount(0);
+    await expect(page).toHaveURL(/c=contractors/);
+    await expect(page).not.toHaveURL(/about=1/);
     expect(errors).toEqual([]);
   });
 });
@@ -752,7 +1088,7 @@ test.describe("the record page", () => {
     // And back is back: the same cut, reproduced.
     await page.getByRole("link", { name: "Back to results" }).first().click();
     await page.waitForURL(/\/data\?/);
-    await expect(page.getByTestId("explore-collection")).toHaveValue("funding");
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Federal Funding");
     expect(errors).toEqual([]);
   });
 
@@ -831,6 +1167,7 @@ test.describe("Ask Cedar", () => {
     const panel = page.getByRole("dialog", { name: /ask cedar/i });
     await expect(panel).toBeVisible();
     await expect(panel).toBeInViewport();
+    await settled(panel);
 
     // The panel is anchored to the window, not to the page box. It was laid
     // out inside the page's measure once, because a retained identity
@@ -842,13 +1179,103 @@ test.describe("Ask Cedar", () => {
     const viewport = page.viewportSize();
     expect(box.width).toBeLessThanOrEqual(viewport.width + 1);
     if (testInfo.project.name === "phone") {
+      // Full screen, the same rule the door's Cedar now follows and the same
+      // rule lumecon.ai's panel follows: a question gets the screen while it
+      // is being asked. It was a 70vh sheet holding 5.2rem of padding open at
+      // its foot to keep its last line clear of the launcher.
       expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
+      expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
     }
 
-    await launcher.click();
+    if (testInfo.project.name === "phone") {
+      // The launcher is hidden while a full-screen dialog is up — it would
+      // sit on top of the answer, and it is no longer the way out. The
+      // panel's own close is, so that is what a phone closes with.
+      await expect(launcher).toBeHidden();
+      await panel.getByRole("button", { name: /close ask cedar/i }).click();
+    } else {
+      await launcher.click();
+    }
     await expect(panel).toHaveCount(0);
     expect(errors).toEqual([]);
   });
+});
+
+test.describe("house style", () => {
+  // "No visible copy uses an ampersand" — implementation brief, acceptance
+  // criteria. Asserted against RENDERED TEXT rather than by grepping source,
+  // because the rule is about what a reader sees: `&amp;` in JSX and `&` in a
+  // string are the same character on the page and a grep for one misses the
+  // other.
+  //
+  // THE RULE IS ABOUT AUTHORED COPY, NOT ABOUT QUOTED NAMES.
+  //
+  // Two exemptions, and both were found by running this rather than by
+  // reasoning about it:
+  //
+  //   1. WITHDRAWN. "Native Federal Advocacy & Engagement" was exempted
+  //      here as a COLLECTION NAME out of the release manifest, on the
+  //      reasoning that rewriting it in the product would make the product
+  //      disagree with the release. The collection was then renamed at the
+  //      source — the manifest, the catalog, the descriptors and Grove all
+  //      say "and" now — so the exemption stopped protecting a name and
+  //      started hiding a straggler: `code/1176_build_review_artifact.py`
+  //      was still writing the ampersand into the downloadable review page,
+  //      and this test was told not to look. The lesson is that an exemption
+  //      for a generated value has to be withdrawn when the value changes,
+  //      or the rule quietly stops being a rule.
+  //   2. "Quechan Tribe of the Fort Yuma Indian Reservation, California &
+  //      Arizona" is a CANONICAL ENTITY NAME from the register — the tribe's
+  //      name as the federal record states it. Editing a Nation's legal name
+  //      to satisfy a house style is not a copy fix; it is the product
+  //      asserting something the source does not say, which is the one thing
+  //      the whole identity layer exists to prevent.
+  //
+  // So the table and the register's name cells are excluded by selector,
+  // which keeps the rule enforceable as new names arrive rather than needing
+  // a string added here every time one does.
+  // `.cp-ex__cards` is the phone's record surface — the same rows the desktop
+  // draws as a table. Missing it was the whole reason this test failed on the
+  // phone project and passed on desktop, which is a useful reminder that
+  // "visible copy" is per-composition, not per-page.
+  const QUOTED = [
+    ".cp-ex__table",
+    ".cp-ex__cards",
+    ".cp-pane__table",
+    ".cp-ex__lname",
+    ".cp-ex__uid",
+    ".cp-rec",
+    ".cp-ent",
+  ].join(", ");
+
+  for (const { name, path } of [
+    { name: "the door", path: "/" },
+    { name: "the overview", path: "/" },
+    { name: "Collections", path: "/data" },
+    { name: "Methods", path: "/methods" },
+    { name: "What's new", path: "/whats-new" },
+    { name: "Settings", path: "/settings" },
+    { name: "Research access", path: "/research-access" },
+    { name: "Tribal data request", path: "/tribal-data-request" },
+  ]) {
+    test(`${name} uses no ampersand in visible copy`, async ({ page }) => {
+      if (path !== "/" || name !== "the door") await signIn(page);
+      await page.goto(path);
+      await page.locator("main, .cp-door").first().waitFor();
+      let text = await page.evaluate((quoted) => {
+        // A detached clone, so removing the quoted subtrees to read the rest
+        // does not change the page the next assertion sees.
+        const body = document.body.cloneNode(true);
+        for (const node of body.querySelectorAll(quoted)) node.remove();
+        return body.innerText;
+      }, QUOTED);
+      const offending = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.includes("&"));
+      expect(offending, `ampersand in visible copy on ${path}`).toEqual([]);
+    });
+  }
 });
 
 test.describe("sponsorship", () => {
@@ -944,7 +1371,7 @@ test.describe("crawlers", () => {
     // "data" is emphasised inside the headline, so the string a crawler
     // sees is split by a tag; the tail of the sentence is contiguous.
     ["/", "behind Indian Country."],
-    ["/tribal-data-request", "See what Cedar knows about your nation"],
+    ["/tribal-data-request", "See what Cedar knows about your Nation"],
     ["/research-access", "Need one or two Cedar collections for a defined project"],
   ]) {
     test(`${path} is served with its text in the HTML, before any script runs`, async ({ request }) => {
@@ -1005,37 +1432,25 @@ test.describe("the stylesheet", () => {
     await expect(band).toHaveCSS("background-color", /^rgba?\((?!0, 0, 0, 0\)).+\)$/);
 
     if (testInfo.project.name !== "desktop") return;
-    // The tiles are a grid. Stated without naming a column count, because
-    // that is six, three or two depending on the width and all three are
-    // correct: what is never correct is six full-width blocks stacked down
-    // the page, which is what a grid that has stopped being a grid gives
-    // you, and what the truncation gave. A tile narrower than half the row,
-    // and some tile sharing a row with another, are true at every
-    // breakpoint above a phone and false the moment the rules stop applying.
-    // The hub is two ranks now — two lead cards and four quieter ones — so
-    // the tiles live in two containers rather than one. The property this
-    // test exists for is unchanged: every rank is still laid out, and none of
-    // them has collapsed into full-width blocks stacked down the page.
+    // THE HUB GRID IS GONE WITH THE HUB. This measured that six tiles stayed
+    // laid out as a grid rather than collapsing into full-width blocks —
+    // the failure a truncated stylesheet produces. The briefing has the same
+    // exposure and the same tell: it is two columns on a wide screen, and a
+    // stylesheet that did not survive gives one column of stacked blocks.
     const shape = await page.evaluate(() => {
-      const measure = (selector) => {
-        const box = document.querySelector(selector);
-        const tiles = [...box.querySelectorAll(".cp-hub__tile")];
-        return {
-          width: box.getBoundingClientRect().width,
-          widest: Math.max(...tiles.map((t) => t.getBoundingClientRect().width)),
-          rows: new Set(tiles.map((t) => Math.round(t.getBoundingClientRect().top))).size,
-          count: tiles.length,
-        };
+      const brief = document.querySelector(".cp-brief");
+      const lead = document.querySelector(".cp-brief__lead");
+      const side = document.querySelector(".cp-brief__side");
+      return {
+        width: brief.getBoundingClientRect().width,
+        leadWidth: lead.getBoundingClientRect().width,
+        sameRow:
+          Math.abs(lead.getBoundingClientRect().top - side.getBoundingClientRect().top) < 8,
       };
-      return { lead: measure(".cp-hub__lead"), rest: measure(".cp-hub__grid--rest") };
     });
-    // Six doors, same as before the split.
-    expect(shape.lead.count + shape.rest.count).toBe(6);
-    // Each rank is one row across, and no tile owns its whole row.
-    expect(shape.lead.rows).toBe(1);
-    expect(shape.lead.widest).toBeLessThan(shape.lead.width);
-    expect(shape.rest.rows).toBe(1);
-    expect(shape.rest.widest).toBeLessThan(shape.rest.width / 2);
+    // The lead and its margin share a row, and neither owns the whole of it.
+    expect(shape.sameRow).toBe(true);
+    expect(shape.leadWidth).toBeLessThan(shape.width);
   });
 });
 
@@ -1151,17 +1566,37 @@ test.describe("the first screen", () => {
     expect(errors).toEqual([]);
   });
 
-  test("Collections opens on collections", async ({ page }) => {
+  // "No full-screen catalog sits between /data and a first useful record."
+  //
+  // This used to assert that a shelf TILE was on the first screen, which was
+  // the right intent measured against the old arrangement: the tier bands ran
+  // above the viewer, so a tile was the first collection-shaped thing a
+  // reader met. The explorer carries its own rail now and is mounted first,
+  // so the catalogue and the records arrive together, and the bands were
+  // asking the reader to choose twice. Asserting the tile now would be
+  // asserting the arrangement that was removed.
+  test("Collections opens on the records, with the rail beside them", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data");
-    await page.locator(".cp-badge").first().waitFor();
+    await page.locator(".cp-rail__item").first().waitFor();
     await page.evaluate(() => document.fonts.ready);
     const viewport = page.viewportSize().height;
-    // A collection tile, on the first screen, with no scrolling.
-    expect(await topOf(page, ".cp-badge")).toBeLessThan(viewport);
+    // The catalogue, as the rail.
+    expect(await topOf(page, ".cp-rail__item")).toBeLessThan(viewport);
+    // And a record with it, not a screen of chooser first. The phone lays the
+    // rail down as a strip above the records, so both fit either way.
+    const record = page.locator(".cp-ex__table tbody tr, .cp-ex__cardbtn").first();
+    await record.waitFor();
+    // ONE SCREEN, NOT TWO. This allowed `viewport * 2` while the page still
+    // carried a title band above the frame and the toolbar ran to three rows
+    // on a phone. Owner, 2026-09-20: "the collection page we want the table
+    // to just take up that screen in full." A record on the first screen is
+    // what that means, and it is the assertion that keeps it true.
+    expect(await topOf(page, ".cp-ex__table tbody tr, .cp-ex__cardbtn")).toBeLessThan(viewport);
     expect(errors).toEqual([]);
   });
+
 
   test("a record opens on its amount", async ({ page }) => {
     const errors = watchConsole(page);
@@ -1207,6 +1642,62 @@ test.describe("the first screen", () => {
         })
         .filter((entry) => entry.lines > 2));
     expect(tall).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the loop between the records and the journalism", () => {
+  // THE LOOP BETWEEN THE RECORDS AND THE JOURNALISM.
+  //
+  // Owner, 2026-09-20: "maybe articles that have used those data sets get
+  // populated... because we have links to the data sets on the article page.
+  // But that feedback loop seems helpful."
+  //
+  // One relationship, `draws`, read both ways. The risk a test is worth here
+  // is not that the link renders — it is that the two ends drift apart, so
+  // both directions are asserted against the same collection.
+  test("a collection names what was written from it, and the writing links back", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.locator(".cp-rail__item").first().waitFor();
+    // Out: the collection's records to a piece built on them.
+    const read = page.locator(".cp-ex__wrote").first();
+    await expect(read).toBeVisible();
+    await expect(read).toContainText("Read:");
+    // Federal Funding has two, and the second is not crammed into the row:
+    // it opens the collection's profile, where every one is listed.
+    await page.locator(".cp-ex__wrotemore").click();
+    await expect(page.getByRole("heading", { name: "Research built from this collection" })).toBeVisible();
+    expect(await page.locator(".cp-ab__read").count()).toBeGreaterThan(1);
+
+    // Back: a piece to the collection, open in the table rather than only as
+    // a ten-row file.
+    await page.goto("/articles/brief-deals");
+    const open = page.getByRole("link", { name: /Open it in the table/ }).first();
+    await expect(open).toBeVisible();
+    await open.click();
+    await expect(page).toHaveURL(/\/data\?c=deals/);
+    await page.locator(".cp-rail__item").first().waitFor();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Deals");
+    expect(errors).toEqual([]);
+  });
+
+  // The third way in: an entity's profile reads ten sample rows per table,
+  // and each collection heading on it opens the release itself — carrying
+  // BOTH the collection and the entity, so it lands narrowed to what the
+  // heading was about rather than on the collection's first page.
+  test("an entity's collection heading opens the table already narrowed to it", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/entity/CE-001CC-8N");
+    const heading = page.locator(".cp-ent__glink").first();
+    await heading.waitFor({ timeout: 20000 });
+    await heading.click();
+    await expect(page).toHaveURL(/\/data\?c=[a-z-]+&e=CE-001CC-8N/);
+    await page.locator(".cp-rail__item").first().waitFor();
+    // Narrowed, not just opened: the caption names the entity the cut is on.
+    await expect(page.getByTestId("explore-caption")).toContainText("Yakama");
     expect(errors).toEqual([]);
   });
 });

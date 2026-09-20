@@ -32,6 +32,8 @@ import re
 from dataclasses import dataclass
 from datetime import date
 
+from cedar_press import subscribers
+
 #: Error codes the client already has copy for. See
 #: ``src/features/grove/pressSignup.js::pressSignupError`` — adding one here
 #: without adding it there gets the reader a generic "that did not work".
@@ -146,10 +148,25 @@ def check(
     if not is_plausible(code):
         return None, CODE_INVALID
 
-    issued = _register().get(code)
-    if issued is None:
+    # Through `subscribers`, so a deployment with a `DATABASE_URL` reads the
+    # codes Tribal Business News actually issued rather than a list pasted
+    # into an environment variable — and so "already used" is a column, not
+    # a set this process happens to remember.
+    found = subscribers.find_code(code)
+    if found is None:
         return None, CODE_INVALID
-    if code in _spent:
+    # `Issued.expires` is the ISO string this module has always carried and
+    # parses defensively; `subscribers` hands back a real `date` (a DATE
+    # column, or a parsed one from the environment register). Rendering it
+    # back to ISO here keeps `has_expired`'s unparseable-means-expired rule
+    # intact rather than quietly bypassing it.
+    issued = Issued(
+        code=found.code,
+        email=found.email,
+        tier=found.tier,
+        expires=found.expires_on.isoformat() if found.expires_on else None,
+    )
+    if found.spent or code in _spent:
         return None, CODE_USED
     if issued.has_expired(today or date.today()):
         return None, CODE_EXPIRED

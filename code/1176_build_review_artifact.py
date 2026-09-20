@@ -84,7 +84,7 @@ FILES = [
      "state conflict worth $2.60B. It ships here so the rebuild can be checked "
      "against it, not because it is fit to use."),
     ("9_native_federal_advocacy_2025_2026.csv",
-     "Native Federal Advocacy &amp; Engagement",
+     "Native Federal Advocacy and Engagement",
      "REBUILT and RENAMED. One flat table, one row per documented activity per "
      "entity, with <code>activity_type</code> carrying the distinction: "
      "registered lobbying, tribal consultations, agency meetings, regulatory "

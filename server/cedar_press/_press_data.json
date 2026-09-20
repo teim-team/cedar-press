@@ -445,7 +445,7 @@
     {
       "id": "lobbying",
       "short": "Advocacy",
-      "name": "Native Federal Advocacy & Engagement",
+      "name": "Native Federal Advocacy and Engagement",
       "shelf": "standard",
       "coverage": {
         "kind": "series",
@@ -664,7 +664,7 @@
       ]
     },
     "lobbying": {
-      "name": "Native Federal Advocacy & Engagement",
+      "name": "Native Federal Advocacy and Engagement",
       "version": "v1",
       "updated": "2026-09-04",
       "cadence": "Updated as records arrive",

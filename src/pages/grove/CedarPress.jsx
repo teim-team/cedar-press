@@ -7,14 +7,14 @@
 // together: the gate is a full-bleed split screen with no masthead, because a
 // sign-in that inherits the page chrome reads as a page with a form on it.
 //
-// THE HUB SHAPE
-// The reader used to be one long page carrying everything; it curated well
-// on a wide screen and read as a quarter hour of thumb on a phone. Now the
-// front page states what the product is (the hero and the traceability
-// claim), opens four doors (articles, data, what's new, methods — see
-// PressHub), and closes on the maintenance promise. The articles and the
-// shelves live behind their doors, on pages of their own, identical on
-// desktop and phone.
+// THE BRIEFING SHAPE
+// The reader used to be one long page carrying everything; then it was six
+// tiles opening six doors, which is the masthead's nav bar restated
+// underneath itself. It is a briefing now (`PressBriefing`): the newest
+// research, the three newest releases, the collection that just moved and
+// one question about it, then the subscriber priorities and the maintenance
+// promise. Every line of it is read from the release record and the article
+// list rather than written, so it cannot fall out of step with the product.
 //
 // Built from the design system's own tokens (index.css base, redesign.css
 // retheme, then press.css, imported once in main.jsx in that order).
@@ -35,13 +35,13 @@ import PressAd from "./PressAd";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
-import PressHub from "./PressHub";
+import PressBriefing from "./PressBriefing";
 import PressPrioritiesBlock from "./PressPrioritiesBlock";
 
 export default function CedarPress() {
   // The door is the one page every visitor and every crawler reaches.
   useDocumentTitle(undefined, { index: true });
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const entitled = canReadCedarPress(user);
   // Sections arrive as they enter the viewport, sitewide language.
   const fadeRoot = useFadeIn();
@@ -67,7 +67,7 @@ export default function CedarPress() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
+        <PressMast section="home" />
 
         {loading ? null : (
           <>
@@ -90,20 +90,25 @@ export default function CedarPress() {
               resolution and ongoing updates — an argument for buying a
               product the reader has already bought. Ask Cedar stays, because
               it is the one thing here that is not a door. */}
-          <section className="cp-hero cp-fade">
+          {/* THE HEADLINE, AND THEN THE BRIEFING THAT ANSWERS IT.
+              The deck under it read "Browse the collections, read the
+              research, and ask Cedar about any of it" — a description of the
+              navigation bar, three inches under the navigation bar. The Ask
+              Cedar button went with it: the briefing's own question is
+              scoped to a collection and therefore answerable, and the
+              launcher is on every page regardless. What is left is the
+              premise, at the size of a premise rather than of a poster. */}
+          <section className="cp-hero cp-hero--brief cp-fade">
             <h1>Know what&rsquo;s shaping Indian Country.</h1>
-            <p>
-              Browse the collections, read the research, and ask Cedar about any of it.
-            </p>
-            <button
-              type="button"
-              className="cp-hero__ask"
-              onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
-            >
-              Ask Cedar <span aria-hidden="true">&#8594;</span>
-            </button>
           </section>
-          <PressHub user={entitled ? user : null} />
+          {/* THE BRIEFING, WHERE THE NAVIGATION USED TO BE REPEATED.
+              `PressHub` drew six cards — Collections, Research Briefs,
+              Priorities, What's new, Methods, Plans — which is the masthead's
+              nav bar restated underneath itself as tiles. A reader who has
+              signed in has already chosen this product; what they do not
+              know is what moved. Every line of the briefing is read from the
+              release record and the article list, so it cannot go stale. */}
+          <PressBriefing />
           <PressPrioritiesBlock signedIn={entitled} />
         </div>
 

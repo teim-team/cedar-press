@@ -1081,7 +1081,7 @@
   },
   "lobbying/native_entity_lobbying_disclosures": {
    "collection": "lobbying",
-   "dataset": "Native Federal Advocacy & Engagement",
+   "dataset": "Native Federal Advocacy and Engagement",
    "row": "One federal lobbying filing under the Lobbying Disclosure Act in which the client is a Native entity, one row per filing (amended filings appear once, as the current version).",
    "where": "workspace dist/customer/lobbying.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/lobbying/native_entity_lobbying_disclosures.csv; built from the Senate LDA filings database.",
    "fields": [

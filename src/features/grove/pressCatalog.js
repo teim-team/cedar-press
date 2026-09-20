@@ -278,7 +278,7 @@ export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
     id: "lobbying",
     short: "Advocacy",
-    name: "Native Federal Advocacy & Engagement",
+    name: "Native Federal Advocacy and Engagement",
     shelf: "standard",
     // Series. Floor: min(filing_year) in dist/customer/lobbying.csv. The old
     // catalog claimed 1998, the first year the LDA required filings; Cedar's
@@ -444,7 +444,7 @@ export const PRESS_TAXONOMY = Object.freeze([
   Object.freeze({
     id: "industries",
     name: "Industries and Resources",
-    lede: "The sectors that carry the most economic weight.",
+    lede: "What the land and water pay out, and who receives it.",
     collections: Object.freeze(["natural-resources"]),
   }),
   Object.freeze({
@@ -456,7 +456,7 @@ export const PRESS_TAXONOMY = Object.freeze([
   Object.freeze({
     id: "institutions",
     name: "Institutions and Stewardship",
-    lede: "The organizations and obligations that hold it together.",
+    lede: "Native nonprofits, and the repatriation notices institutions publish.",
     collections: Object.freeze(["nonprofits", "nagpra"]),
   }),
 ]);

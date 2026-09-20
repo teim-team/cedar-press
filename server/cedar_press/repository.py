@@ -137,6 +137,25 @@ def may_open(tier: str, collection_id: str) -> bool:
     )
 
 
+def is_sold(collection_id: str) -> bool:
+    """Whether the storefront sells this collection to anybody at all.
+
+    ``may_open`` answers False for two situations that are not the same thing,
+    and a caller that treats them alike says something false about one of
+    them. A ``pro``-shelf collection is refused to a Press plan *and named*:
+    it is sold, and Cedar Press+ opens it. A collection that is not in
+    ``LAUNCH_COLLECTION`` -- one catalogued ahead of its descriptor, or
+    ``gaming``, which ships through Cedar Grove and reaches this repository in
+    the manifest's ``excluded`` -- is refused to *every* plan, including Grove
+    and Tree. Telling a reader that one of those "comes with Cedar Press+"
+    would be an upgrade prompt for something the upgrade does not include.
+
+    So the plan gate asks this first, and only a collection the storefront
+    actually sells can be withheld on the grounds of a plan.
+    """
+    return any(dataset.id == collection_id for dataset in launch.LAUNCH_COLLECTION)
+
+
 def collection_csv(collection_id: str) -> str | None:
     """The preview file's rows, citation included.
 

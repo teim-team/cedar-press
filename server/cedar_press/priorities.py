@@ -33,13 +33,20 @@ here. A research question that turns out to need a dataset is marked
 ``evolved_from`` on the dataset, which is the public record of why it is
 being built.
 
-The store is SQLite through the standard library: one file, no service to
-run, and the same code answers from ``:memory:`` in the tests. When the
-subscriber table arrives the account id here is its key.
+TWO STORES, ONE RULE. With ``DATABASE_URL`` set the rows live in the
+platform's own Postgres database, beside teim-app's ``users``, and
+``account_id`` here is ``cedar_press_subscribers.account_id`` there.
+Without it they live in SQLite through the standard library — one file,
+no service to run, and ``:memory:`` in the tests. The two differ in where
+the rows are and how a parameter is spelled, and in nothing else: the
+expiry arithmetic and the allocation rule are written once, because two
+implementations of "oldest spent first, twelve months" would drift and
+the drift would surface as a balance nobody could explain.
 """
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import datetime as dt
 import json
@@ -50,6 +57,8 @@ import sqlite3
 import threading
 from pathlib import Path
 from typing import Any
+
+from cedar_press import db
 
 _REPO = Path(__file__).resolve().parents[2]
 SEED_PATH = _REPO / "data" / "cedar" / "priorities.json"
@@ -235,8 +244,7 @@ CREATE TABLE IF NOT EXISTS research_requests (
 -- What a reader says they work on (the client's readerWork.js): one
 -- optional answer per seat, never per subscription, because two seats of one
 -- organization can do different work. Kept beside the ledger because it is
--- the other thing the service remembers about a reader, and a deployment
--- that names CEDAR_PRESS_DB keeps both across restarts.
+-- the other thing the service remembers about a reader.
 CREATE TABLE IF NOT EXISTS reader_profiles (
   email TEXT PRIMARY KEY,
   work TEXT,
@@ -244,26 +252,165 @@ CREATE TABLE IF NOT EXISTS reader_profiles (
 );
 """
 
-_EDITORIAL = ("type", "title", "description", "status", "published_output", "evolved_from")
+#: The five tables, under whichever names the backend gave them. Every
+#: statement below is written once with ``{ledger}``-style names and a ``?``
+#: placeholder; the backend substitutes. See ``002_cedar_press_points.sql``
+#: for why the COLUMN names are identical on both sides — the expiry
+#: arithmetic and the allocation rule are the part that must not exist twice.
+_SQLITE_TABLES = {
+    "priorities": "priorities",
+    "ledger": "research_points_ledger",
+    "allocations": "priority_allocations",
+    "requests": "research_requests",
+    "profiles": "reader_profiles",
+}
+#: The advisory-lock namespace for Cedar Points, so a key here cannot collide
+#: with one teim-app takes in the same database. Arbitrary but fixed.
+_LOCK_CLASS = 0x43505053  # "CPPS"
+
+_POSTGRES_TABLES = {
+    "priorities": "cedar_press_priorities",
+    "ledger": "cedar_press_ledger",
+    "allocations": "cedar_press_allocations",
+    "requests": "cedar_press_requests",
+    "profiles": "cedar_press_reader_profiles",
+}
 
 
 def _now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
 
 
-class Priorities:
-    """The store and the rule, over one SQLite file (or ``:memory:``)."""
+def _iso(value: Any) -> str | None:
+    """A timestamp as a string, whichever store it came out of.
+
+    SQLite keeps these as the ISO text ``_now()`` wrote; Postgres keeps them
+    as ``timestamptz`` and hands back a ``datetime``. The API contract is a
+    string either way, so the difference is absorbed here rather than in
+    every caller.
+    """
+    if value is None or isinstance(value, str):
+        return value
+    return value.isoformat(timespec="seconds")
+
+
+class SqliteStore:
+    """One file (or ``:memory:``), one connection, one lock."""
+
+    tables = _SQLITE_TABLES
 
     def __init__(self, path: str | os.PathLike[str] = ":memory:") -> None:
-        self._path = str(path)
-        if self._path != ":memory:":
-            Path(self._path).parent.mkdir(parents=True, exist_ok=True)
-        self._db = sqlite3.connect(self._path, check_same_thread=False)
+        self.path = str(path)
+        if self.path != ":memory:":
+            Path(self.path).parent.mkdir(parents=True, exist_ok=True)
+        self._db = sqlite3.connect(self.path, check_same_thread=False)
         self._db.row_factory = sqlite3.Row
         self._lock = threading.RLock()
+        self._local = threading.local()
         with self._lock:
             self._db.executescript(_SCHEMA)
             self._db.commit()
+
+    def q(self, sql: str) -> str:
+        return sql.format(**self.tables)
+
+    @contextlib.contextmanager
+    def tx(self) -> Any:
+        with self._lock:
+            open_cursor = getattr(self._local, "cur", None)
+            if open_cursor is not None:
+                # A nested call — ``allocate`` asking ``balance``. The
+                # outermost block owns the commit, so the inner one must not
+                # take a second connection or end the transaction early.
+                yield open_cursor
+                return
+            cur = self._db.cursor()
+            self._local.cur = cur
+            try:
+                yield cur
+                self._db.commit()
+            except BaseException:
+                self._db.rollback()
+                raise
+            finally:
+                self._local.cur = None
+                cur.close()
+
+    def hold(self, cur: Any, account_id: str) -> None:
+        """Nothing to do: `tx()` holds one lock for the whole connection."""
+
+    def close(self) -> None:
+        with self._lock:
+            self._db.close()
+
+
+class PostgresStore:
+    """The platform's database, beside teim-app's own tables.
+
+    The schema is not created here: it is ``cedar_press/migrations/``, applied by
+    ``db.migrate()``, because two app instances starting at once must agree
+    about what has run and only the database can settle that.
+    """
+
+    tables = _POSTGRES_TABLES
+
+    def __init__(self) -> None:
+        self._local = threading.local()
+
+    def q(self, sql: str) -> str:
+        return sql.format(**self.tables).replace("?", "%s")
+
+    @contextlib.contextmanager
+    def tx(self) -> Any:
+        open_cursor = getattr(self._local, "cur", None)
+        if open_cursor is not None:
+            yield open_cursor
+            return
+        with db.pool().connection() as conn, conn.cursor() as cur:
+            self._local.cur = cur
+            try:
+                yield cur
+            finally:
+                self._local.cur = None
+
+    def hold(self, cur: Any, account_id: str) -> None:
+        """Take this subscription's lock until the transaction ends.
+
+        WHAT SQLITE GOT FOR FREE AND POSTGRES DOES NOT. `SqliteStore` runs
+        every statement under one process-wide `RLock`, so a read-then-write
+        is atomic by construction. Postgres serves this from a pool, and the
+        default READ COMMITTED isolation means two allocations for one
+        subscription can both read the same balance, both find it sufficient,
+        and both append a debit — spending points that were only there once
+        and leaving a ledger that sums below zero, which is exactly the thing
+        an append-only ledger exists to make impossible.
+
+        An advisory lock rather than SERIALIZABLE: a serialization failure is
+        an error the caller has to be written to retry, and a lock is a wait.
+        It is released with the transaction whether that commits or rolls
+        back, so a refusal cannot strand it. Keyed on the SUBSCRIPTION, so two
+        organizations never wait on each other.
+        """
+        cur.execute(
+            "SELECT pg_advisory_xact_lock(%s, hashtext(%s))", (_LOCK_CLASS, account_id)
+        )
+
+    def close(self) -> None:
+        """Nothing to close: the pool is the service's, not this store's."""
+
+
+class Priorities:
+    """The store and the rule, over SQLite or Postgres.
+
+    The rule lives here once. The two stores differ in where the rows are
+    and how a parameter is spelled, and in nothing else — which is the whole
+    reason the Postgres columns were named after the SQLite ones.
+    """
+
+    def __init__(
+        self, path: str | os.PathLike[str] = ":memory:", *, store: Any | None = None
+    ) -> None:
+        self._sql = store if store is not None else SqliteStore(path)
 
     # ── seed ──
 
@@ -275,20 +422,23 @@ class Priorities:
             else source
         )
         rows = data.get("priorities", [])
-        with self._lock:
+        with self._sql.tx() as cur:
             for row in rows:
                 if row.get("type") not in TYPES:
                     raise ValueError(f"priority {row.get('id')}: type must be one of {TYPES}")
                 if row.get("status", "interest") not in STATUSES:
                     raise ValueError(f"priority {row.get('id')}: status must be one of {STATUSES}")
-                self._db.execute(
-                    "INSERT INTO priorities (id, type, title, description, status, "
-                    "created_by, published_output, evolved_from, created_at) "
-                    "VALUES (?, ?, ?, ?, ?, 'cedar', ?, ?, ?) "
-                    "ON CONFLICT(id) DO UPDATE SET type=excluded.type, title=excluded.title, "
-                    "description=excluded.description, "
-                    "status=excluded.status, published_output=excluded.published_output, "
-                    "evolved_from=excluded.evolved_from",
+                cur.execute(
+                    self._sql.q(
+                        "INSERT INTO {priorities} (id, type, title, description, status, "
+                        "created_by, published_output, evolved_from, created_at) "
+                        "VALUES (?, ?, ?, ?, ?, 'cedar', ?, ?, ?) "
+                        "ON CONFLICT(id) DO UPDATE SET type=excluded.type, "
+                        "title=excluded.title, description=excluded.description, "
+                        "status=excluded.status, "
+                        "published_output=excluded.published_output, "
+                        "evolved_from=excluded.evolved_from"
+                    ),
                     (
                         row["id"],
                         row["type"],
@@ -300,7 +450,6 @@ class Priorities:
                         _now(),
                     ),
                 )
-            self._db.commit()
         return len(rows)
 
     # ── earning ──
@@ -308,30 +457,34 @@ class Priorities:
     def accrue(self, account: Account, month: str | None = None) -> int:
         """Credit the month's points once per subscription; expire what is twelve months old.
 
-        Idempotent: the unique index refuses a second monthly credit for the
-        same account and month, so a refresh, a sign-out and back, or forty
-        sessions in a day credit nothing more. Returns what was credited.
+        Idempotent, and by the database rather than by a read-then-write: the
+        unique index refuses a second monthly credit for the same account and
+        month, so a refresh, a sign-out and back, or two seats signing in at
+        the same instant credit nothing more. ``ON CONFLICT DO NOTHING`` turns
+        that refusal into a row count instead of an exception, which is the
+        one thing the two drivers would otherwise spell differently.
+        Returns what was credited.
         """
         month = month or month_of()
         amount = POINTS_PER_ACTIVE_MONTH.get(account.tier, 0)
         credited = 0
-        with self._lock:
+        with self._sql.tx() as cur:
+            self._sql.hold(cur, account.account_id)
             if amount > 0:
-                try:
-                    self._db.execute(
-                        "INSERT INTO research_points_ledger (account_id, user_id, amount, "
-                        "reason, priority_id, month, created_at) "
-                        "VALUES (?, ?, ?, 'monthly_activity', NULL, ?, ?)",
-                        (account.account_id, account.user_id, amount, month, _now()),
-                    )
-                    credited = amount
-                except sqlite3.IntegrityError:
-                    credited = 0
-            self._expire(account.account_id, month)
-            self._db.commit()
+                cur.execute(
+                    self._sql.q(
+                        "INSERT INTO {ledger} (account_id, user_id, amount, reason, "
+                        "priority_id, month, created_at) "
+                        "VALUES (?, ?, ?, 'monthly_activity', NULL, ?, ?) "
+                        "ON CONFLICT DO NOTHING"
+                    ),
+                    (account.account_id, account.user_id, amount, month, _now()),
+                )
+                credited = amount if cur.rowcount > 0 else 0
+            self._expire(cur, account.account_id, month)
         return credited
 
-    def _expire(self, account_id: str, month: str) -> int:
+    def _expire(self, cur: Any, account_id: str, month: str) -> int:
         """Write off credits older than the expiry window that were never spent.
 
         Spending consumes the oldest credits first, so what can expire is the
@@ -341,39 +494,47 @@ class Priorities:
         """
         cutoff = months_before(month, EXPIRY_MONTHS)
         old_credits = self._sum(
-            "SELECT COALESCE(SUM(amount), 0) FROM research_points_ledger WHERE account_id = ? "
+            cur,
+            "SELECT COALESCE(SUM(amount), 0) AS total FROM {ledger} WHERE account_id = ? "
             "AND reason = 'monthly_activity' AND month <= ?",
             (account_id, cutoff),
         )
         spent = -self._sum(
-            "SELECT COALESCE(SUM(amount), 0) FROM research_points_ledger WHERE account_id = ? "
+            cur,
+            "SELECT COALESCE(SUM(amount), 0) AS total FROM {ledger} WHERE account_id = ? "
             "AND reason IN ('allocation', 'refund')",
             (account_id,),
         )
         expired = -self._sum(
-            "SELECT COALESCE(SUM(amount), 0) FROM research_points_ledger WHERE account_id = ? "
+            cur,
+            "SELECT COALESCE(SUM(amount), 0) AS total FROM {ledger} WHERE account_id = ? "
             "AND reason = 'expiration'",
             (account_id,),
         )
         expirable = old_credits - spent - expired
         if expirable <= 0:
             return 0
-        self._db.execute(
-            "INSERT INTO research_points_ledger (account_id, user_id, amount, reason, "
-            "priority_id, month, created_at) "
-            "VALUES (?, NULL, ?, 'expiration', NULL, ?, ?)",
+        cur.execute(
+            self._sql.q(
+                "INSERT INTO {ledger} (account_id, user_id, amount, reason, "
+                "priority_id, month, created_at) "
+                "VALUES (?, NULL, ?, 'expiration', NULL, ?, ?)"
+            ),
             (account_id, -expirable, month, _now()),
         )
         return expirable
 
-    def _sum(self, sql: str, params: tuple) -> int:
-        return int(self._db.execute(sql, params).fetchone()[0])
+    def _sum(self, cur: Any, sql: str, params: tuple) -> int:
+        cur.execute(self._sql.q(sql), params)
+        return int(cur.fetchone()["total"])
 
     def balance(self, account_id: str) -> int:
-        return self._sum(
-            "SELECT COALESCE(SUM(amount), 0) FROM research_points_ledger WHERE account_id = ?",
-            (account_id,),
-        )
+        with self._sql.tx() as cur:
+            return self._sum(
+                cur,
+                "SELECT COALESCE(SUM(amount), 0) AS total FROM {ledger} WHERE account_id = ?",
+                (account_id,),
+            )
 
     # ── spending ──
 
@@ -381,26 +542,31 @@ class Priorities:
         """Put points on a priority (positive) or take them back (negative)."""
         if not isinstance(points, int) or points == 0:
             raise PointsError("Choose how many points to move.")
-        with self._lock:
-            if (
-                self._db.execute("SELECT 1 FROM priorities WHERE id = ?", (priority_id,)).fetchone()
-                is None
-            ):
+        with self._sql.tx() as cur:
+            # Before the balance is read, because the read and the debit below
+            # are one decision and another seat must not get between them.
+            self._sql.hold(cur, account.account_id)
+            cur.execute(self._sql.q("SELECT 1 FROM {priorities} WHERE id = ?"), (priority_id,))
+            if cur.fetchone() is None:
                 raise PointsError("That priority does not exist.")
-            row = self._db.execute(
-                "SELECT points FROM priority_allocations WHERE account_id = ? AND priority_id = ?",
+            cur.execute(
+                self._sql.q(
+                    "SELECT points FROM {allocations} WHERE account_id = ? AND priority_id = ?"
+                ),
                 (account.account_id, priority_id),
-            ).fetchone()
+            )
+            row = cur.fetchone()
             held = int(row["points"]) if row else 0
             if points > 0 and points > self.balance(account.account_id):
                 raise PointsError("Not enough points available.")
             if points < 0 and -points > held:
                 raise PointsError("You have fewer points on this priority than that.")
             reason = "allocation" if points > 0 else "refund"
-            self._db.execute(
-                "INSERT INTO research_points_ledger (account_id, user_id, amount, reason, "
-                "priority_id, month, created_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            cur.execute(
+                self._sql.q(
+                    "INSERT INTO {ledger} (account_id, user_id, amount, reason, "
+                    "priority_id, month, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                ),
                 (
                     account.account_id,
                     account.user_id,
@@ -412,15 +578,17 @@ class Priorities:
                 ),
             )
             now = _now()
-            self._db.execute(
-                "INSERT INTO priority_allocations (account_id, priority_id, points, "
-                "created_at, updated_at) VALUES (?, ?, ?, ?, ?) "
-                "ON CONFLICT(account_id, priority_id) DO UPDATE SET points = points + "
-                "excluded.points, updated_at = excluded.updated_at",
+            cur.execute(
+                self._sql.q(
+                    "INSERT INTO {allocations} (account_id, priority_id, points, "
+                    "created_at, updated_at) VALUES (?, ?, ?, ?, ?) "
+                    "ON CONFLICT(account_id, priority_id) DO UPDATE SET "
+                    "points = {allocations}.points + excluded.points, "
+                    "updated_at = excluded.updated_at"
+                ),
                 (account.account_id, priority_id, points, now, now),
             )
-            self._db.execute("DELETE FROM priority_allocations WHERE points <= 0")
-            self._db.commit()
+            cur.execute(self._sql.q("DELETE FROM {allocations} WHERE points <= 0"))
             return {
                 "priority": self.priority(priority_id),
                 "points_available": self.balance(account.account_id),
@@ -429,18 +597,20 @@ class Priorities:
 
     # ── reading ──
 
-    def _totals(self) -> dict[str, dict[str, int]]:
-        rows = self._db.execute(
-            "SELECT priority_id, COALESCE(SUM(points), 0) AS points, COUNT(DISTINCT "
-            "account_id) AS subscribers "
-            "FROM priority_allocations WHERE points > 0 GROUP BY priority_id"
-        ).fetchall()
+    def _totals(self, cur: Any) -> dict[str, dict[str, int]]:
+        cur.execute(
+            self._sql.q(
+                "SELECT priority_id, COALESCE(SUM(points), 0) AS points, "
+                "COUNT(DISTINCT account_id) AS subscribers "
+                "FROM {allocations} WHERE points > 0 GROUP BY priority_id"
+            )
+        )
         return {
             r["priority_id"]: {"points": int(r["points"]), "subscribers": int(r["subscribers"])}
-            for r in rows
+            for r in cur.fetchall()
         }
 
-    def _shape(self, row: sqlite3.Row, totals: dict[str, dict[str, int]]) -> dict[str, Any]:
+    def _shape(self, row: Any, totals: dict[str, dict[str, int]]) -> dict[str, Any]:
         t = totals.get(row["id"], {"points": 0, "subscribers": 0})
         return {
             "id": row["id"],
@@ -455,34 +625,39 @@ class Priorities:
         }
 
     def priority(self, priority_id: str) -> dict[str, Any] | None:
-        with self._lock:
-            row = self._db.execute(
-                "SELECT * FROM priorities WHERE id = ?", (priority_id,)
-            ).fetchone()
-            return self._shape(row, self._totals()) if row else None
+        with self._sql.tx() as cur:
+            cur.execute(self._sql.q("SELECT * FROM {priorities} WHERE id = ?"), (priority_id,))
+            row = cur.fetchone()
+            return self._shape(row, self._totals(cur)) if row else None
 
     def priorities(self) -> list[dict[str, Any]]:
         """Every priority with its points and subscriber count, most supported first."""
-        with self._lock:
-            totals = self._totals()
-            rows = [
-                self._shape(r, totals)
-                for r in self._db.execute("SELECT * FROM priorities").fetchall()
-            ]
+        with self._sql.tx() as cur:
+            totals = self._totals(cur)
+            cur.execute(self._sql.q("SELECT * FROM {priorities}"))
+            rows = [self._shape(r, totals) for r in cur.fetchall()]
         rows.sort(key=lambda p: (-p["points"], -p["subscribers"], p["title"]))
         return rows
 
     def influence(self, account: Account, month: str | None = None) -> dict[str, Any]:
         """What this subscription has and has done: the profile's card."""
         month = month or month_of()
-        with self._lock:
-            credited = (
-                self._db.execute(
-                    "SELECT 1 FROM research_points_ledger WHERE account_id = ? AND month = ? "
-                    "AND reason = 'monthly_activity'",
-                    (account.account_id, month),
-                ).fetchone()
-                is not None
+        with self._sql.tx() as cur:
+            cur.execute(
+                self._sql.q(
+                    "SELECT 1 FROM {ledger} WHERE account_id = ? AND month = ? "
+                    "AND reason = 'monthly_activity'"
+                ),
+                (account.account_id, month),
+            )
+            credited = cur.fetchone() is not None
+            cur.execute(
+                self._sql.q(
+                    "SELECT a.priority_id, a.points, p.title, p.type, p.status "
+                    "FROM {allocations} a JOIN {priorities} p ON p.id = a.priority_id "
+                    "WHERE a.account_id = ? AND a.points > 0 ORDER BY a.points DESC, p.title"
+                ),
+                (account.account_id,),
             )
             allocations = [
                 {
@@ -492,14 +667,16 @@ class Priorities:
                     "status": r["status"],
                     "points": int(r["points"]),
                 }
-                for r in self._db.execute(
-                    "SELECT a.priority_id, a.points, p.title, p.type, p.status FROM "
-                    "priority_allocations a "
-                    "JOIN priorities p ON p.id = a.priority_id WHERE a.account_id = ? AND "
-                    "a.points > 0 ORDER BY a.points DESC, p.title",
-                    (account.account_id,),
-                ).fetchall()
+                for r in cur.fetchall()
             ]
+            cur.execute(
+                self._sql.q(
+                    "SELECT l.amount, l.reason, l.priority_id, l.month, l.created_at, p.title "
+                    "FROM {ledger} l LEFT JOIN {priorities} p ON p.id = l.priority_id "
+                    "WHERE l.account_id = ? ORDER BY l.id DESC LIMIT 24"
+                ),
+                (account.account_id,),
+            )
             activity = [
                 {
                     "amount": int(r["amount"]),
@@ -507,32 +684,29 @@ class Priorities:
                     "priority_id": r["priority_id"],
                     "title": r["title"],
                     "month": r["month"],
-                    "at": r["created_at"],
+                    "at": _iso(r["created_at"]),
                 }
-                for r in self._db.execute(
-                    "SELECT l.amount, l.reason, l.priority_id, l.month, l.created_at, p.title "
-                    "FROM research_points_ledger l "
-                    "LEFT JOIN priorities p ON p.id = l.priority_id WHERE l.account_id = ? "
-                    "ORDER BY l.id DESC LIMIT 24",
-                    (account.account_id,),
-                ).fetchall()
+                for r in cur.fetchall()
             ]
+            cur.execute(
+                self._sql.q(
+                    "SELECT r.id, r.text, r.use_case, r.status, r.created_at, r.priority_id, "
+                    "p.title FROM {requests} r LEFT JOIN {priorities} p ON p.id = r.priority_id "
+                    "WHERE r.account_id = ? ORDER BY r.id DESC"
+                ),
+                (account.account_id,),
+            )
             requests = [
                 {
                     "id": int(r["id"]),
                     "text": r["text"],
                     "use_case": r["use_case"],
                     "status": r["status"],
-                    "at": r["created_at"],
+                    "at": _iso(r["created_at"]),
                     "priority_id": r["priority_id"],
                     "title": r["title"],
                 }
-                for r in self._db.execute(
-                    "SELECT r.*, p.title FROM research_requests r LEFT JOIN priorities p ON "
-                    "p.id = r.priority_id "
-                    "WHERE r.account_id = ? ORDER BY r.id DESC",
-                    (account.account_id,),
-                ).fetchall()
+                for r in cur.fetchall()
             ]
             available = self.balance(account.account_id)
         rate = POINTS_PER_ACTIVE_MONTH.get(account.tier, 0)
@@ -563,19 +737,17 @@ class Priorities:
         text = (text or "").strip()
         if len(text) < 12:
             raise PointsError("Say a little more about what you need.")
-        with self._lock:
-            if (
-                priority_id
-                and self._db.execute(
-                    "SELECT 1 FROM priorities WHERE id = ?", (priority_id,)
-                ).fetchone()
-                is None
-            ):
-                raise PointsError("That priority does not exist.")
+        with self._sql.tx() as cur:
+            if priority_id:
+                cur.execute(self._sql.q("SELECT 1 FROM {priorities} WHERE id = ?"), (priority_id,))
+                if cur.fetchone() is None:
+                    raise PointsError("That priority does not exist.")
             status = "associated" if priority_id else "received"
-            cursor = self._db.execute(
-                "INSERT INTO research_requests (account_id, user_id, text, priority_id, "
-                "use_case, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            cur.execute(
+                self._sql.q(
+                    "INSERT INTO {requests} (account_id, user_id, text, priority_id, "
+                    "use_case, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id"
+                ),
                 (
                     account.account_id,
                     account.user_id,
@@ -586,23 +758,26 @@ class Priorities:
                     _now(),
                 ),
             )
-            self._db.commit()
-            return {"id": int(cursor.lastrowid), "status": status, "priority_id": priority_id}
+            new_id = int(cur.fetchone()["id"])
+            return {"id": new_id, "status": status, "priority_id": priority_id}
 
     def evidence(self, priority_id: str) -> dict[str, Any]:
         """What sits behind a priority, for Cedar's own reading.
 
         Points, subscriptions, and the requests in subscribers' own words.
         """
-        with self._lock:
+        with self._sql.tx() as cur:
             p = self.priority(priority_id)
             if p is None:
                 raise PointsError("That priority does not exist.")
-            reqs = self._db.execute(
-                "SELECT text, use_case, account_id, created_at FROM research_requests WHERE "
-                "priority_id = ? ORDER BY id",
+            cur.execute(
+                self._sql.q(
+                    "SELECT text, use_case, account_id, created_at FROM {requests} "
+                    "WHERE priority_id = ? ORDER BY id"
+                ),
                 (priority_id,),
-            ).fetchall()
+            )
+            reqs = cur.fetchall()
         uses: dict[str, int] = {}
         for r in reqs:
             if r["use_case"]:
@@ -618,29 +793,52 @@ class Priorities:
 
     def profile(self, email: str) -> dict[str, Any]:
         """What this seat declared, or ``{"work": None}`` when it never answered."""
-        with self._lock:
-            row = self._db.execute(
-                "SELECT work, updated_at FROM reader_profiles WHERE email = ?", (email,)
-            ).fetchone()
+        with self._sql.tx() as cur:
+            cur.execute(
+                self._sql.q("SELECT work, updated_at FROM {profiles} WHERE email = ?"), (email,)
+            )
+            row = cur.fetchone()
         if row is None:
             return {"work": None, "updated_at": None}
-        return {"work": row["work"], "updated_at": row["updated_at"]}
+        return {"work": row["work"], "updated_at": _iso(row["updated_at"])}
 
     def set_profile(self, email: str, work: str | None) -> dict[str, Any]:
         """Record the answer; ``None`` withdraws it. The caller validates the vocabulary."""
-        with self._lock:
+        with self._sql.tx() as cur:
             if work is None:
-                self._db.execute("DELETE FROM reader_profiles WHERE email = ?", (email,))
+                cur.execute(self._sql.q("DELETE FROM {profiles} WHERE email = ?"), (email,))
             else:
-                self._db.execute(
-                    "INSERT INTO reader_profiles (email, work, updated_at) VALUES (?, ?, ?) "
-                    "ON CONFLICT(email) DO UPDATE SET work=excluded.work, "
-                    "updated_at=excluded.updated_at",
+                cur.execute(
+                    self._sql.q(
+                        "INSERT INTO {profiles} (email, work, updated_at) VALUES (?, ?, ?) "
+                        "ON CONFLICT(email) DO UPDATE SET work=excluded.work, "
+                        "updated_at=excluded.updated_at"
+                    ),
                     (email, work, _now()),
                 )
-            self._db.commit()
         return self.profile(email)
 
     def close(self) -> None:
-        with self._lock:
-            self._db.close()
+        self._sql.close()
+
+
+def open_store() -> Priorities:
+    """The store this deployment has, seeded and ready.
+
+    ``DATABASE_URL`` set: Postgres, in the platform's own database, and the
+    migrations are applied first so that setting one variable is the whole
+    of the installation. ``db.migrate()`` is idempotent and takes an advisory
+    lock, so several instances booting at once take turns rather than racing;
+    operators who would rather run it themselves still have
+    ``python -m cedar_press.migrate``.
+
+    Unset: SQLite at ``CEDAR_PRESS_DB``, or in memory — which is right for a
+    test and wrong for a deployment, and is why ``DATABASE_URL`` exists.
+    """
+    if db.configured():
+        db.migrate()
+        store = Priorities(store=PostgresStore())
+    else:
+        store = Priorities(os.environ.get("CEDAR_PRESS_DB", ":memory:"))
+    store.seed()
+    return store

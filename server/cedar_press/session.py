@@ -28,6 +28,8 @@ from hashlib import sha256
 
 from fastapi import Cookie, Response
 
+from cedar_press import subscribers
+
 COOKIE = "cedar_press_session"
 MAX_AGE = 60 * 60 * 24 * 14
 
@@ -79,42 +81,35 @@ def _accounts() -> dict[str, tuple[str, str]]:
     return accounts
 
 
-#: Accounts created by activation in this process, layered over the ones the
-#: environment provisions. In-memory, so they are forgotten on restart — the
-#: one behaviour here that must not survive into production, where this is
-#: the subscriber table and a row is written in the same transaction that
-#: spends the access code.
-_activated: dict[str, tuple[str, str]] = {}
-
-
 def account_id_for(email: str) -> str:
     """The SUBSCRIPTION an address belongs to, for Shape the Research.
 
-    From the same ``CEDAR_PRESS_ACCOUNTS`` record, an optional ``account``::
+    Two seats naming one account share one ledger: the organization earns its
+    points once a month, not once per seat, and the priorities page counts
+    subscriptions rather than people.
 
-        {"one@bank.example": {"password": "...", "tier": "press_pro", "account": "acct-bank"},
-         "two@bank.example": {"password": "...", "tier": "press_pro", "account": "acct-bank"}}
+    THIS READ THE ENVIRONMENT AND ONLY THE ENVIRONMENT, AND THAT WAS A BUG
+    WITH A DATABASE UNDER IT. `subscribers` learned to answer from
+    `cedar_press_subscribers.account_id`; this did not, so on a Postgres
+    deployment every seat of an organization came back as its own email.
+    Every points route builds its `Account` from this, so two seats of one
+    subscription earned two monthly credits, spent from two ledgers, and were
+    counted as two organizations behind a priority — which is the one thing
+    the page's own copy promises it does not do.
 
-    Two seats naming one account share one ledger: the organization earns
-    its points once a month, not once per seat. An address without one is
-    its own subscription, which is every activated account today.
+    One function, one answer: `subscribers.account_id_for` knows both
+    backends and this is the name the rest of the service already calls.
     """
-    key = email.strip().lower()
-    raw = os.environ.get("CEDAR_PRESS_ACCOUNTS", "").strip()
-    if raw:
-        try:
-            record = json.loads(raw).get(key)
-        except json.JSONDecodeError:
-            record = None
-        if isinstance(record, dict) and record.get("account"):
-            return str(record["account"]).strip()
-    return key
+    return subscribers.account_id_for(email)
 
 
 def account_exists(email: str) -> bool:
-    """Whether an address already has an account, provisioned or activated."""
-    key = email.strip().lower()
-    return key in _accounts() or key in _activated
+    """Whether an address already has an account, provisioned or activated.
+
+    Delegated for the same reason as above: this decided whether activation
+    may proceed, and it could not see a `cedar_press_subscribers` row at all.
+    """
+    return subscribers.exists(email)
 
 
 def create_account(email: str, password: str, tier: str) -> Session:
@@ -123,31 +118,31 @@ def create_account(email: str, password: str, tier: str) -> Session:
     No entitlement decision is made here: the code carried the tier, and this
     records it. Doing it the other way round — letting a caller name a tier —
     is how an activation route becomes an escalation route.
+
+    The row goes wherever `subscribers` keeps them: a table when this
+    deployment has a `DATABASE_URL`, and the process-local dict below when it
+    does not. That dict is why this module used to say it held "the one
+    behaviour here that must not survive into production".
     """
-    key = email.strip().lower()
-    _activated[key] = (password, tier)
-    return Session(email=key, tier=tier)
+    made = subscribers.create(email, password, tier)
+    return Session(email=made.email, tier=made.tier)
 
 
 def forget_activated_for_tests() -> None:
     """Drop accounts created by activation. Tests only."""
-    _activated.clear()
+    subscribers.forget_activated_for_tests()
 
 
 def _lookup(email: str, password: str) -> Session | None:
-    """Verify a subscriber. The seam the subscriber table replaces.
+    """Verify a subscriber. The seam the subscriber table now fills.
 
-    Compared with ``compare_digest`` so the answer does not leak through how
-    long it took.
+    This is the sentence that used to read "the seam the subscriber table
+    replaces", written when there was no table. There is one; `subscribers`
+    owns it, and both of its backends compare in constant time so the answer
+    does not leak through how long it took.
     """
-    key = email.strip().lower()
-    record = _activated.get(key) or _accounts().get(key)
-    if record is None:
-        return None
-    expected, tier = record
-    if not hmac.compare_digest(expected, password):
-        return None
-    return Session(email=key, tier=tier)
+    found = subscribers.authenticate(email, password)
+    return Session(email=found.email, tier=found.tier) if found else None
 
 
 def _sign(payload: bytes) -> str:

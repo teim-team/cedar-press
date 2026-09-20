@@ -325,6 +325,9 @@ test("a cut round-trips through the URL, and a permalink of nothing is empty", (
     sort: { by: "amount", dir: "desc" },
     page: 3,
     history: true,
+    // The collection profile is part of the cut: a link to a collection with
+    // its profile open has to come back with the profile open.
+    about: false,
   };
   const back = decodeCut(encodeCut(cut));
   assert.deepEqual(back, { ...cut, unknown: [], dropped: [] });

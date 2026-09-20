@@ -24,6 +24,7 @@ import { hashPressDemoPassword } from "../src/features/grove/pressDemoGate.js";
 
 /** Unmistakably a fixture: `.invalid` can never be a real address (RFC 2606). */
 export const EMAIL = "smoke@cedar-press.invalid";
+export const PRESS_EMAIL = "press-smoke@cedar-press.invalid";
 export const PASSWORD = "smoke-fixture-not-a-credential";
 
 const SALT = "smoke-fixture-salt";
@@ -36,4 +37,5 @@ export const HASH = await hashPressDemoPassword(SALT, PASSWORD);
 
 export const ACCOUNTS_JSON = JSON.stringify({
   [EMAIL]: { salt: SALT, hash: HASH, tier: TIER },
+  [PRESS_EMAIL]: { salt: SALT, hash: HASH, tier: "press" },
 });

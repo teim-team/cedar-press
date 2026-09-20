@@ -46,19 +46,18 @@
          are fetched in CORS mode, and a preload without it is a second,
          wasted download rather than a warm cache.
 
-         Only the faces the first screen uses. Inter 500 and Spectral are
-         deliberately absent — neither is requested on a first paint (Spectral
-         sets one italicised word), and preloading them would spend bandwidth
-         the paint needs. If a page starts using one above the fold it should
-         be added here, and if a face stops being used it should be removed:
-         an unused preload is pure cost, and the browser will say so in the
-         console. -->
-    <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/inter-700.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/inter-800.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin />
+         Two files now, not six. Inter and JetBrains Mono are variable builds
+         carrying every weight in one face, so the four separate Inter cuts
+         and two mono cuts that used to be listed here are one request each.
+         Both are the latin subsets; latin-ext, the italic and Spectral are
+         deliberately absent, because none of them is requested on a first
+         paint — latin-ext is 133kB and loads only if a page needs a character
+         in it, and Spectral sets one italicised word. If a page starts using
+         one above the fold it should be added here, and if a face stops being
+         used it should be removed: an unused preload is pure cost, and the
+         browser will say so in the console. -->
+    <link rel="preload" href="/fonts/inter-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- How the service appears when a subscriber sends a link to a colleague,
          which is how a citation travels. Absolute URLs, because the crawlers
@@ -381,7 +380,7 @@
           {
             "@type": "Dataset",
             "@id": "https://cedarpress.ai/#dataset-lobbying",
-            "name": "Native Federal Advocacy & Engagement",
+            "name": "Native Federal Advocacy and Engagement",
             "alternateName": "Advocacy",
             "description": "Documented federal advocacy and engagement involving Native nations and organizations, including registered lobbying, agency meetings, tribal consultations, regulatory comments, congressional testimony and nonprofit lobbying disclosures. Each row represents one entity-linked activity or source record. Each activity, from a lobbying registration to a consultation, a docket filing or testimony, resolved to the tribe or Native organization behind it where the record supports the link; a row the record cannot place keeps its printed party name and a blank key rather than a guess.",
             "url": "https://cedarpress.ai/",
@@ -397,7 +396,7 @@
             "temporalCoverage": "1999 to present",
             "spatialCoverage": "United States",
             "keywords": [
-              "Native Federal Advocacy & Engagement",
+              "Native Federal Advocacy and Engagement",
               "Advocacy",
               "Indian Country data",
               "tribal data",

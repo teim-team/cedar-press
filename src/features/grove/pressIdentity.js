@@ -492,4 +492,4 @@ export const LOOP_STAGES = Object.freeze([
 
 /** The closing line of the loop section, kept here so a test can read it. */
 export const LOOP_CLOSE =
-  "None of that is a feature that can be added later. It is an accumulation of decisions about records that contradict each other, and the decisions are the asset.";
+  "None of that can be added later. It accumulates one decision at a time, from records that contradict each other, and every decision has to be kept.";

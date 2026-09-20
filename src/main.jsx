@@ -10,6 +10,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import "./index.css";
 import "./styles/redesign.css";
 import "./styles/grove/press.css";
+import "./styles/grove/pressPreviewNotice.css";
 
 import { AuthProvider } from "./context/AuthProvider.jsx";
 import { startTelemetry } from "./features/grove/telemetry.js";

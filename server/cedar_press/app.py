@@ -56,12 +56,20 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from cedar_press import codes, press_catalog, priorities, ratelimit, repository, shelf
+from cedar_press import (
+    cedar_service,
+    codes,
+    press_catalog,
+    priorities,
+    ratelimit,
+    repository,
+    shelf,
+    subscribers,
+)
 from cedar_press.session import (
     Session,
     account_exists,
     account_id_for,
-    create_account,
     current_session,
     issue,
     sign_in,
@@ -131,11 +139,11 @@ class ResearchRequest(BaseModel):
 
 
 #: Shape the Research: one store for the process, seeded from the owner's
-#: file on start. ``CEDAR_PRESS_DB`` names the SQLite file; unset, the store
-#: lives in memory and a restart forgets it, which is right for a test and
-#: wrong for a deployment, so the deployment sets it.
-_priorities = priorities.Priorities(os.environ.get("CEDAR_PRESS_DB", ":memory:"))
-_priorities.seed()
+#: file on start. ``DATABASE_URL`` puts it in the platform's own database
+#: beside teim-app's tables, and applies the migrations on the way; without
+#: it the store falls back to SQLite at ``CEDAR_PRESS_DB``, or to memory,
+#: which is right for a test and wrong for a deployment.
+_priorities = priorities.open_store()
 
 
 def _account(session: Session) -> priorities.Account:
@@ -154,6 +162,15 @@ class Question(BaseModel):
     question: str
     surface: str = "cedar-press"
     collectionId: str | None = None
+    #: Cedar's own conversation id. Absent on the first turn -- Cedar mints
+    #: one and returns it -- and echoed back on every turn after, which is
+    #: what makes the panel a conversation rather than a sequence of
+    #: unrelated questions.
+    threadId: str | None = None
+    #: Where in the product the question was asked. Passed through to Cedar
+    #: as request context; it is the difference between answering a reader
+    #: standing in front of a table and one reading a brief.
+    pathname: str | None = None
 
 
 def require_session(session: Session | None = Depends(current_session)) -> Session:
@@ -315,6 +332,12 @@ def login(
                 ),
             },
         )
+    # The subscription and the platform account can appear in either order --
+    # a Tribal Business News reader may activate months before they open the
+    # platform, or never. Binding here means whichever came second finds the
+    # first, without a migration or a back-fill. A no-op where there is no
+    # database, no `users` table, or no account at that address.
+    subscribers.link_platform_account(session.email)
     return session.as_payload()
 
 
@@ -414,10 +437,32 @@ def activate(
             },
         )
 
-    session = create_account(issued.email, activation.password, issued.tier)
-    # Spent only once the account exists. The other order loses a subscriber
-    # their code if account creation fails.
+    # ONE TRANSACTION WHERE THERE IS A DATABASE TO HAVE ONE IN.
+    # This used to create the account and then mark the code spent, in that
+    # order and for a good reason: the other way round loses a subscriber
+    # their code if the account fails to save. But two writes are two writes,
+    # and the failure between them left a subscriber whose code was still
+    # redeemable — which on a restart meant a second account on one code.
+    # `redeem` claims the code with an `UPDATE ... WHERE spent_at IS NULL`
+    # and inserts the subscriber before the commit, so the two facts cannot
+    # disagree; the row count also settles the race between two people
+    # submitting the same code at once, which the old order could not see.
+    # Without a database it is the same two steps as before, because a dict
+    # and a set have no transaction to share.
+    try:
+        made = subscribers.redeem(issued.code, activation.password)
+    except subscribers.AlreadySubscribed:
+        # The `account_exists` check above is a read, and a read is not a
+        # lock: two activations for one address can both pass it. The insert
+        # is where that is settled, and it refuses rather than resetting the
+        # password on an account somebody already has.
+        raise _refuse(codes.EMAIL_IN_USE) from None
+    if made is None:
+        # Somebody redeemed it between `check` above and this write.
+        raise _refuse(codes.CODE_USED)
+    session = Session(email=made.email, tier=made.tier)
     codes.spend(issued.code)
+    subscribers.link_platform_account(made.email)
     return issue(session, response).as_payload()
 
 
@@ -529,39 +574,283 @@ def collection_profile(
     return profile
 
 
+def _answer_basis(
+    kind: str,
+    profile: dict[str, object] | None,
+    collection_id: str | None,
+    *,
+    opened: bool = True,
+) -> dict[str, object]:
+    """The answer's basis, structured, for the label the panel shows above it.
+
+    THE POINT OF THIS BEING AN OBJECT AND NOT A SENTENCE.
+    A reader cannot tell a reading of a release from a composed reply by
+    looking at the prose — that is the whole difficulty, and it is why the
+    basis has to be stated rather than inferred. A string could be shown, but
+    only an object can be *checked*: the panel renders the release, the date
+    and the source families because they are fields, and renders nothing
+    where there is no field rather than a plausible blank.
+
+    ``kind`` is one of:
+
+    ``release``     read off the collection's own release, cited to it
+    ``synthesis``   Cedar composed it; scope is real, the records are not cited
+    ``review``      the identity, evidence or scope is ambiguous
+
+    ``review`` HAS NO PRODUCER TODAY and is here as a declared state rather
+    than a promise. Nothing in this service can currently detect an ambiguous
+    identity — the profiles either answer or return ``None``, and the Cedar
+    service returns prose. It will have one when Cedar can retrieve from the
+    register, and the shape is here so that arriving is a change of one value
+    rather than a change of the contract.
+
+    ``cited_records`` is deliberately absent rather than ``0``. Cedar returns
+    no record citations at all, and a zero would be read as "checked, found
+    none" by every reader and every downstream renderer.
+
+    ``opened`` IS A SECOND AXIS AND NOT A FOURTH KIND.
+    ``kind`` says what produced the answer; ``opened`` says whether this
+    subscription reaches the records behind it. They are independent, and the
+    combination that proves it is the locked collection: its description is
+    read off the release and cited to it -- a true ``release`` -- while its
+    records stay shut. Folding that into ``kind`` as a "description" state
+    would lose the citation, and leaving it out entirely is what the panel
+    was doing: it rendered "View supporting records" under an answer whose
+    last sentence had just said those records open with another plan.
+    """
+    profile = profile or {}
+    version = profile.get("version")
+    name = profile.get("collection_name")
+    basis: dict[str, object] = {
+        "kind": kind,
+        "collectionId": collection_id,
+        "collectionName": name,
+        "version": version,
+        "updated": profile.get("last_updated"),
+        "opened": opened,
+    }
+    if kind == "release":
+        # Only a release-grounded answer may name the sources it came from:
+        # these are the profile's own, and the answer was read off that
+        # profile. A synthesis did not read them, so it does not cite them.
+        basis["sources"] = profile.get("primary_sources")
+    return basis
+
+
+def _not_included_answer(
+    profile: dict[str, object], collection_id: str, thread_id: str | None
+) -> dict[str, object]:
+    """The honest reply for a collection this subscription does not include.
+
+    Not a refusal, and not a sales page. The description of a collection is
+    not its records, and this service already decided that distinction the
+    other way round on ``/press/collections/{id}/profile``, which serves any
+    signed-in reader "because describing what a higher shelf holds is the
+    honest version of an upgrade prompt". A reader who asks about Cedar NEED
+    on a Press subscription gets what NEED is, read off its release, and is
+    told plainly where the records live.
+
+    What they do not get is retrieval. No hop to Cedar carrying this
+    collection, so nothing composes a sentence over records the subscription
+    does not open, and ``access.opened`` is a field rather than a tone so a
+    panel can render the boundary instead of inferring it from the prose.
+    """
+    description = profile.get("description")
+    name = profile.get("collection_name") or collection_id
+    reach = (
+        f"{name} is part of Cedar Press+. This is what the collection is, "
+        f"read off its current release; its records open with that plan."
+    )
+    return {
+        "answer": f"{description}\n\n{reach}" if description else reach,
+        "basis": None,
+        "answerBasis": _answer_basis(
+            "release", profile, collection_id, opened=False
+        ),
+        "collectionId": collection_id,
+        # The description came off the release, so the basis is a release and
+        # says so. `source` names the answerer, and no answerer ran past the
+        # profile: Cedar was never asked.
+        "source": "profile",
+        "access": {
+            "opened": False,
+            "plan": "Cedar Press+",
+            "reason": "NOT_INCLUDED",
+        },
+        "threadId": thread_id,
+    }
+
+
+def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
+    """One question back, for a question with no collection under it.
+
+    THE CASE THIS IS, AND THE CASE IT IS NOT.
+    Two very different situations used to end at the same ``NOT_ANSWERABLE``
+    paragraph. A reader who named a collection and asked something its
+    release does not state has been refused, correctly: they supplied the
+    context and the answer is genuinely not here. A reader who asked without
+    naming one has not been refused -- they have been *understood
+    incompletely*, and the single missing thing is the collection. Answering
+    both with "open a collection and ask from there. Anything past that needs
+    Cedar itself, which is not wired into this deployment; the research desk
+    ... answers those in person" is three instructions and an apology where
+    one question would do, and it reads as a system explaining its own
+    routing rather than as somebody trying to help.
+
+    So this asks the one thing that would let the next turn answer, and says
+    what naming it buys -- which is not a promise: ``answer_from_profile``
+    really does answer those three from the collection's own release. It is
+    not a list of filters and it does not ask anybody to phrase a query.
+
+    NO ``answerBasis``. The label above a bubble says what a claim rests on,
+    and this bubble makes no claim. A basis here would have to invent a kind
+    for "this is a question", and a reader would be shown a citation line
+    under a sentence citing nothing.
+    """
+    return {
+        "answer": (
+            "Which collection are you asking about? Name one and I can tell "
+            "you what it holds, where its records come from, and what its "
+            "latest release reports."
+        ),
+        "basis": None,
+        "answerBasis": None,
+        "collectionId": None,
+        # `source` names the answerer, and nothing answered: the route asked.
+        "source": None,
+        "threadId": thread_id,
+    }
+
+
 @app.post("/cedar/ask")
 def ask_cedar(
     question: Question, session: Session = Depends(require_session)
 ) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
 
-    First real increment: profile-grounded answers. Scoped to a collection,
-    Cedar answers what the collection contains, how it was constructed, and
-    its headline figures — from the collection's own profile
-    (``collection_profiles.py``), never from a prompt's memory of it.
+    THE ENTITLEMENT IS DECIDED HERE, BEFORE EITHER ANSWERER SEES THE ID.
+    It was not, and the first line of this docstring was the only place the
+    scoping existed. A `collectionId` arrived from the browser and went
+    straight to both answerers, so a Press reader naming a Cedar Press+
+    collection was answered from its profile and, past that, had the id
+    forwarded to Cedar -- which `cedar_service._payload` hands over under
+    "the service decides nothing about entitlement; it is told, because
+    entitlement was already decided on this side of the hop". That comment
+    described an arrangement this route had not implemented: Cedar was told
+    the reader may open a collection nobody had checked they could.
 
-    Everything beyond the profile still refuses rather than improvising: a
-    plausible sentence Cedar cannot support is worse than an honest refusal,
-    because only the refusal is obviously not the product.
+    ``repository.may_open`` is the same rule the shelf and the download route
+    read, reused rather than restated, so a plan cannot reach a collection
+    through Cedar that it cannot reach through either of those. A hidden
+    control in the browser, an omitted sample request and a client-supplied
+    plan are all display decisions, and none of them is authorization.
+
+    TWO ANSWERERS, IN THIS ORDER, AND THE ORDER IS THE POINT.
+
+    1. **The collection's own profile.** Scoped to a collection, what it
+       contains, how it was constructed and its headline figures are read
+       straight off ``collection_profiles.py`` and returned with a ``basis``
+       naming the release they came from. No model is consulted, because no
+       model is needed to read a fact the release already states, and an
+       answer that cites its release is a better answer than one that
+       paraphrases it.
+    2. **Cedar.** Everything the profiles cannot answer goes to the service
+       in the ``cedar`` repository over contract 1.0.0 -- the same Cedar
+       ``teim-app`` talks to, not a second assistant wearing the name. See
+       ``cedar_service.py`` for why the hop happens here and not in the
+       browser.
+
+    Past both, it either asks for the one thing that would let it answer or
+    refuses and names the research desk -- ``_ask_which_collection`` says
+    which case is which. Refusing remains the floor: an assistant that
+    produces a plausible sentence it cannot support is worse than one that
+    hands the question to a person.
     """
+    profile = None
+    collection_name = None
     if question.collectionId:
+        profile = repository.collection_profile(question.collectionId)
+        # An id nothing in the catalog knows is a different answer from one
+        # this plan does not reach, and `may_open` returns False for both.
+        # Telling them apart here keeps "no such collection" from becoming
+        # the sound of every locked collection, which is how a real routing
+        # bug hides behind an upgrade prompt.
+        if profile is None:
+            raise HTTPException(status_code=404, detail="No such collection.")
+        if repository.is_sold(question.collectionId) and not repository.may_open(
+            session.tier, question.collectionId
+        ):
+            return _not_included_answer(
+                profile, question.collectionId, question.threadId
+            )
+        collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
         if answered:
             return {
                 "answer": answered["answer"],
+                # The sentence form stays for any caller already reading it;
+                # `answerBasis` is the one the panel renders from.
                 "basis": answered["basis"],
+                "answerBasis": _answer_basis("release", profile, question.collectionId),
                 "collectionId": question.collectionId,
+                # Named so the panel can say which of the two answered, and
+                # so a reader can tell a cited reading of a release from a
+                # composed reply.
+                "source": "profile",
+                "threadId": question.threadId,
             }
+
+    if cedar_service.available():
+        try:
+            reply = cedar_service.ask(
+                question=question.question,
+                email=session.email,
+                tier=session.tier,
+                thread_id=question.threadId,
+                collection_id=question.collectionId,
+                collection_name=collection_name,
+                pathname=question.pathname,
+            )
+        except cedar_service.CedarUnavailable:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "CEDAR_UNAVAILABLE",
+                    "message": (
+                        "Cedar could not be reached just now. The collection "
+                        "profiles still answer what a collection holds, how it "
+                        "was built and its published figures."
+                    ),
+                },
+            ) from None
+        return {
+            "answer": reply.answer,
+            # Only the profile path can cite a release. Cedar's own answers
+            # carry no basis sentence rather than a fabricated one — but they
+            # do carry a scope, which is a real fact about the question and
+            # is what `synthesis` states.
+            "basis": None,
+            "answerBasis": _answer_basis("synthesis", profile, question.collectionId),
+            "collectionId": question.collectionId,
+            "source": "cedar",
+            "threadId": reply.thread_id or question.threadId,
+            "unavailable": reply.unavailable,
+        }
+
+    # Nobody named a collection, so the missing piece is one this reader can
+    # supply and the next turn can use. See `_ask_which_collection`.
+    if not question.collectionId:
+        return _ask_which_collection(question.threadId)
+
     raise HTTPException(
         status_code=501,
         detail={
             "code": "NOT_ANSWERABLE",
             "message": (
-                "Cedar can answer what a collection contains, how it was "
-                "constructed, and its headline figures — open a collection and "
-                "ask from there. Analysis of the records themselves is not "
-                "wired yet; the research desk (contact@lumecon.ai) answers "
-                "those in person."
+                "That is past what the current release of "
+                f"{collection_name or 'this collection'} states, and Cedar "
+                "itself is not wired into this deployment. The research desk "
+                "(contact@lumecon.ai) answers questions like it in person."
             ),
         },
     )
