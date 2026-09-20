@@ -1,0 +1,68 @@
+# The gates, on a pull request.
+#
+# WHY THIS EXISTS. `deploy.yml` runs this same list and then ships the result,
+# but it is triggered by `push` to `main` — so until this file, the first time
+# anybody learned a change had broken a gate was after it had already merged,
+# and only if they happened to open the Actions tab. On 2026-09-20 that cost a
+# day: a stale measurement in `docs/ARCHITECTURE.md` failed the Python suite,
+# the build and both publish steps were skipped behind it, and seven merged
+# pull requests sat on `main` having never reached the site. Nothing was red
+# where anybody was looking, because nothing ran where anybody was looking.
+#
+# The gates belong before the merge. The deploy keeps running them too: this
+# is a second place they run, not a move, because a green pull request that
+# merges into a `main` somebody else moved underneath it is still a deploy
+# that has to check for itself.
+#
+# WHAT IT DELIBERATELY DOES NOT DO. It does not build the deployed site and it
+# holds no credentials: no `pages: write`, no `id-token: write`, no AWS role.
+# A pull request can come from anywhere, and the whole value of the deploy's
+# permissions is that only `refs/heads/main` can reach them.
+name: Checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per pull request. A second push supersedes the first rather than
+# queueing behind it, because the only answer anybody wants is about the head
+# commit.
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+      # Smoke tests run a browser over the built site. Chromium only: these
+      # are the critical paths, not a compatibility matrix, and the phone
+      # project runs the mobile profile on the same engine.
+      #
+      # This step BUILDS as well as tests: playwright.config.js starts the
+      # server with `npm run build`, configured with a throwaway demo account
+      # of its own. That is why the deployed build is the last step in this
+      # job and not this one — a build placed before the smoke run would be
+      # overwritten by it, and the site would ship the test fixture as its
+      # sign-in.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:smoke
+      # The API ships with the client, so its checks gate the same pipeline.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e server[dev] httpx
+      - run: ruff check server
+      - working-directory: server
+        run: python -m unittest discover -s tests -t .
