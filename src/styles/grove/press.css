@@ -1708,6 +1708,20 @@
 .teim-rd .cp-verify__cap { display: block; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.5rem; }
 .teim-rd .cp-verify__cols ul { list-style: none; margin: 0; padding: 0; }
 .teim-rd .cp-verify__cols li { font-size: 0.92rem; line-height: 1.45; color: var(--ink-2); padding: 0.22rem 0; }
+/* The folded half of the verification panel. */
+.teim-rd .cp-verify__who { margin: 0.9rem 0 0; }
+.teim-rd .cp-verify__who > summary { list-style: none; cursor: pointer; font-family: var(--sans); font-size: 0.88rem; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-verify__who > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-verify__who > summary::after { content: ' \203A'; display: inline-block; transform: rotate(90deg); }
+.teim-rd .cp-verify__who[open] > summary::after { transform: rotate(-90deg); }
+.teim-rd .cp-verify__who .cp-verify__cols { margin-top: 0.7rem; }
+/* What a correction can and cannot do: two claims, side by side, so the
+ * limit is read at the same weight as the promise rather than as a caveat
+ * underneath it. */
+.teim-rd .cp-tr3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem 2.2rem; margin: 1.6rem 0 0; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-tr3 p { margin: 0; font-size: 0.96rem; line-height: 1.6; color: var(--ink-2); max-width: 52ch; }
+.teim-rd .cp-tr3 b { color: var(--ink); }
+.teim-rd .cp-tr3__cant { padding-left: 1rem; border-left: 2px solid var(--line); }
 .teim-rd .cp-verify__hard { font-size: 0.96rem; line-height: 1.55; font-weight: 700; color: var(--ink); margin: 1.3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--teal-line); }
 
 .teim-rd .cp-flow { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.6rem; }
@@ -2818,7 +2832,11 @@
    the lower corner with page showing beneath it. dvh, not vh, because mobile
    Safari's vh is the tall viewport and would put the composer under the
    address bar. */
-.teim-rd .cp-dc__panel { position: fixed; right: calc(clamp(1rem, 2.4vw, 2rem) + env(safe-area-inset-right, 0px)); bottom: env(safe-area-inset-bottom, 0px); display: flex; flex-direction: column; width: min(25rem, calc(100vw - 2rem)); max-height: min(36rem, calc(100dvh - 4rem)); border: 1px solid var(--door-rule); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--door-surface); box-shadow: 0 1px 2px rgba(14, 21, 48, 0.04), 0 24px 60px -16px rgba(14, 21, 48, 0.26); overflow: hidden; animation: cp-dc-in 0.22s var(--door-ease) both; }
+/* A LITTLE WIDER, AND TALLER. Owner, 2026-09-20: do not "show a long
+ * technical answer in a narrow right panel". A real answer about a release
+ * is three or four sentences, and at 25rem those were eleven lines of
+ * forty characters — a column, not a conversation. */
+.teim-rd .cp-dc__panel { position: fixed; right: calc(clamp(1rem, 2.4vw, 2rem) + env(safe-area-inset-right, 0px)); bottom: env(safe-area-inset-bottom, 0px); display: flex; flex-direction: column; width: min(29rem, calc(100vw - 2rem)); max-height: min(40rem, calc(100dvh - 4rem)); border: 1px solid var(--door-rule); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--door-surface); box-shadow: 0 1px 2px rgba(14, 21, 48, 0.04), 0 24px 60px -16px rgba(14, 21, 48, 0.26); overflow: hidden; animation: cp-dc-in 0.22s var(--door-ease) both; }
 @keyframes cp-dc-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* The identity band. --dteal is the one teal that carries white text. */
@@ -4321,7 +4339,14 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-task__act b { display: block; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; letter-spacing: -0.012em; color: var(--ink); }
 .teim-rd .cp-task__act:hover b { color: var(--dteal); }
 .teim-rd .cp-task__act span { display: block; margin-top: 0.15rem; font-size: 0.82rem; line-height: 1.5; color: var(--ink-2); }
-.teim-rd .cp-task__fine, .teim-rd .cp-prop__fine { margin: 0.8rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--muted); }
+.teim-rd .cp-task__fine, /* The length limit, beside the heading of the thing it limits. */
+.teim-rd .cp-prop__max { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+/* What happens next: three lines, numbered, because it is a sequence. */
+.teim-rd .cp-next { list-style: none; counter-reset: next; margin: 1.4rem 0 1.2rem; padding: 1rem 0 0; border-top: 1px solid var(--line); display: grid; gap: 0.5rem; max-width: 76ch; }
+.teim-rd .cp-next li { counter-increment: next; position: relative; padding-left: 2rem; font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); }
+.teim-rd .cp-next li::before { content: counter(next, decimal-leading-zero); position: absolute; left: 0; top: 0.1em; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-next b { color: var(--ink); }
+.teim-rd .cp-prop__fine { margin: 0.8rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--muted); }
 .teim-rd .cp-prop__not { margin: 1.4rem 0 0; padding: 0.9rem 1rem; border-left: 2px solid var(--line-strong, var(--line)); background: var(--bg-2, rgba(10, 28, 52, 0.03)); }
 .teim-rd .cp-prop__notcap { display: block; margin-bottom: 0.4rem; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-prop__not ul { margin: 0; padding-left: 1.1rem; }

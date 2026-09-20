@@ -613,9 +613,11 @@ test.describe("Explore the collections", () => {
     await page.goto("/data");
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
-    await expect(records.first()).toBeVisible();
+    // The catalogue is what is listed here, and Download still hands over
+    // the cut behind it — every open collection's preview. The status bar
+    // carries that count, which is what the file is checked against below.
+    await expect(page.getByTestId("atlas-row").first()).toBeVisible();
     await expect(caption).not.toContainText("loading");
-    const shown = await records.count();
     const download = page.waitForEvent("download");
     await card.getByRole("button", { name: /^Download$/ }).click();
     const file = await download;
@@ -630,7 +632,6 @@ test.describe("Explore the collections", () => {
     const said = (await caption.innerText()).match(/(\d+) of \d+ sample records/i);
     expect(said).toBeTruthy();
     expect(lines.length - 1).toBe(Number(said[1]));
-    expect(shown).toBeLessThanOrEqual(lines.length - 1);
     const width = lines[0].split(",").length;
     for (const line of lines) expect(line.split(",").length).toBeGreaterThanOrEqual(width);
     expect(files["records.csv"]).not.toContain("cite_as");

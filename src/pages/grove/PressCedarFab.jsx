@@ -358,9 +358,16 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
           : { label: example.q, scope: example.scope ?? null },
       );
 
-  const openingLine = scope
-    ? `Ask me about ${scope.name}: what it holds, how it was built, or what its latest release reports.`
-    : "I can tell you what each collection holds, where the records come from, and how they reach the right nation. Open a collection and I can answer from its release.";
+  // ONE LINE, AND IT IS NOT A CAPABILITY LIST.
+  //
+  // Owner, 2026-09-20: "Do not make Cedar lead with system language, explain
+  // its capabilities repeatedly, or show a long technical answer in a narrow
+  // right panel." This greeting was a sentence listing three things Cedar can
+  // be asked, followed by a second paragraph explaining how it answers and a
+  // link to the methodology — an interface introducing itself twice before
+  // anybody had said anything. The four suggestions directly below already
+  // show what can be asked, better than a list of it can.
+  const openingLine = scope ? `Ask me about ${scope.name}.` : "Ask me about any of the collections.";
 
   return (
     <div className={`cedar-widget cedar-widget--launcher-only${open ? " cedar-widget--open" : ""}`}>
@@ -397,30 +404,8 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
                 <img src={MARK} alt="" width="30" height="30" />
               </span>
               <div className="cp-dc__bubble">
-                <p>{connected ? openingLine : "Cedar is answering inside the platform while the press surface is being wired in."}</p>
-                {/* WHAT CEDAR IS, SAID IN THE PANEL, IN THE WELCOME.
-                    This used to be a bordered box under the greeting with an
-                    uppercase HOW CEDAR ANSWERS cap on it, which is the shape
-                    of a disclaimer rather than of something worth reading. It
-                    is the same two facts, said the way the rest of the
-                    greeting is said, and it scrolls away once a conversation
-                    starts.
-
-                    Both are checked against the code that produces the
-                    answers, not positioning: the route reads the collection's
-                    own profile first and names the release it read
-                    (`collection_profiles.answer_from_profile`, which "never
-                    composes beyond" those fields), and the register holds
-                    records by CE- and CB- identifier so a rename or an
-                    acquisition does not break the thread. */}
-                {connected ? (
-                  <p>
-                    I read each collection&rsquo;s own release first, and I&rsquo;ll tell you which
-                    one an answer came from. The records behind it are held by identifier rather
-                    than by name, so a nation or a business stays findable through renames and
-                    reorganizations. <Link to={PRESS_METHODS_PATH}>How the collections are built</Link>
-                  </p>
-                ) : (
+                <p>{connected ? openingLine : "I can't reach the collections from here yet."}</p>
+                {connected ? null : (
                   <p className="cp-dc__links">
                     <a href={contactHref("Cedar Press question")}>Send the question to the research desk</a>
                     <a href={appUrl("/app")} target="_blank" rel="noreferrer">Open the platform</a>
@@ -431,8 +416,9 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
 
             {scope ? (
               <p className="cp-dc__scope">
-                Scoped to {scope.name}
-                {" · "}
+                {/* The header's context line already says which collection
+                    this is scoped to. This row repeated it in caps and then
+                    offered the way out; only the way out is news. */}
                 <button
                   type="button"
                   className="cp-dc__scopeclear"
@@ -442,7 +428,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
                     setPending(false);
                   }}
                 >
-                  All collections
+                  Ask about all collections instead
                 </button>
               </p>
             ) : null}
@@ -549,8 +535,10 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
               with the sentence that is true on this side of the paywall: an
               answer here is read off a release, or it is Cedar's and says so. */}
           <p className="cp-dc__disclaimer">
-            Cedar can make mistakes. Check anything important against the methods page or the
-            release it came from.
+            {/* Two lines became one. The sentence after it told a reader to
+                check an answer against the release it came from — which the
+                basis line under every answer already names and links. */}
+            Cedar can make mistakes. Check anything important against the release.
           </p>
         </section>
       ) : null}
