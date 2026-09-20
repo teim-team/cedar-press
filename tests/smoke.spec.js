@@ -83,6 +83,24 @@ async function signIn(page) {
   );
 }
 
+/**
+ * Open the door's Cedar, the way a reader on that scroll position actually can.
+ *
+ * The floating pill steps aside while the hero's preview object is on screen
+ * (implementation brief §2.2: it sat on the collection strip, which is part of
+ * the thing the object exists to demonstrate). Cedar is not unreachable there
+ * — the preview's own foot carries "Ask Cedar", which dispatches
+ * `cedar:ask-collection` — so this uses whichever control is actually offered.
+ */
+async function openDoorCedar(page) {
+  const fab = page.locator(".cp-dc__fab");
+  if (await fab.isVisible()) {
+    await fab.click();
+    return;
+  }
+  await page.locator(".cp-pane__act--btn").first().click();
+}
+
 test.describe("the gate", () => {
   test("a signed-out visitor gets the gate, not the reader", async ({ page }) => {
     const errors = watchConsole(page);
@@ -128,12 +146,16 @@ test.describe("the gate", () => {
   test("Cedar on the door answers from the prepared bank", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await page.locator(".cp-dc__fab").click();
+    await openDoorCedar(page);
     await expect(page.locator(".cp-dc__panel")).toBeVisible();
     await expect(page.locator(".cp-dc__context")).toContainText("Cedar Press");
     // The standing disclaimer is the one line the panel owes its reader.
     await expect(page.locator(".cp-dc__disclaimer")).toContainText("Cedar can make mistakes");
-    await page.locator(".cp-dc__chip").first().click();
+    // Opened from the preview the panel arrives with that collection's answer
+    // already in it, which is the point of that control; opened from the pill
+    // it arrives empty with starters. Either way there is a bot turn to read.
+    const chip = page.locator(".cp-dc__chip").first();
+    if (await chip.count()) await chip.click();
     await expect(page.locator(".cp-dc__msg--bot").nth(1)).toBeVisible();
     // A question it has nothing for is refused, not answered.
     await page.locator(".cp-dc__input").fill("what is the weather in Oslo");
@@ -147,10 +169,37 @@ test.describe("the gate", () => {
   // panel hung in the middle of the screen with page showing under it, the
   // launcher stayed on top of it, and every answer re-printed the whole
   // starter stack underneath itself.
+
+  // THE PROOF OBJECT IS NOT SOMETHING TO PUT A BUTTON ON TOP OF.
+  // Measured at 1440x900 the pill sat over the Advocacy tile in the preview's
+  // collection strip. It steps aside while the object is on screen and comes
+  // back once the reader scrolls past it; the preview's own foot carries the
+  // Cedar action in the meantime, so nothing is lost.
+  test("the launcher does not sit on the hero's preview", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the preview fills the hero on desktop only");
+    await page.goto("/");
+    const fab = page.locator(".cp-dc__fab");
+    await expect(fab).toBeHidden();
+    // The object's own Cedar action is the way in while it is on screen.
+    await expect(page.locator(".cp-pane__act--btn").first()).toBeVisible();
+    // Past the hero, the pill is back.
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await expect(fab).toBeVisible();
+  });
+
   test("the door's Cedar docks to the bottom and the launcher steps aside", async ({ page }, testInfo) => {
     const errors = watchConsole(page);
     await page.goto("/");
     const launcher = page.locator(".cp-dc__fab");
+    // The pill, deliberately, and not the preview's own action: this test is
+    // about the EMPTY panel — how it docks and how its starter stack behaves —
+    // and opening from the preview arrives with a collection answer already
+    // in the thread, so there are no starters to collapse. Scroll past the
+    // preview first, which is where the pill is offered.
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await expect(launcher).toBeVisible();
     await launcher.click();
 
     const panel = page.locator(".cp-dc__panel");
@@ -911,6 +960,80 @@ test.describe("Ask Cedar", () => {
     await expect(panel).toHaveCount(0);
     expect(errors).toEqual([]);
   });
+});
+
+test.describe("house style", () => {
+  // "No visible copy uses an ampersand" — implementation brief, acceptance
+  // criteria. Asserted against RENDERED TEXT rather than by grepping source,
+  // because the rule is about what a reader sees: `&amp;` in JSX and `&` in a
+  // string are the same character on the page and a grep for one misses the
+  // other.
+  //
+  // THE RULE IS ABOUT AUTHORED COPY, NOT ABOUT QUOTED NAMES.
+  //
+  // Two exemptions, and both were found by running this rather than by
+  // reasoning about it:
+  //
+  //   1. "Native Federal Advocacy & Engagement" is a COLLECTION NAME from
+  //      `data/cedar/collections.manifest.json` — the generated release
+  //      manifest, which is also what Cedar Grove's descriptors are built
+  //      from. Rewriting it here would make the product disagree with the
+  //      release it publishes, and with Grove, about the name of a thing
+  //      readers are invited to cite.
+  //   2. "Quechan Tribe of the Fort Yuma Indian Reservation, California &
+  //      Arizona" is a CANONICAL ENTITY NAME from the register — the tribe's
+  //      name as the federal record states it. Editing a Nation's legal name
+  //      to satisfy a house style is not a copy fix; it is the product
+  //      asserting something the source does not say, which is the one thing
+  //      the whole identity layer exists to prevent.
+  //
+  // So the table and the register's name cells are excluded by selector,
+  // which keeps the rule enforceable as new names arrive rather than needing
+  // a string added here every time one does.
+  // `.cp-ex__cards` is the phone's record surface — the same rows the desktop
+  // draws as a table. Missing it was the whole reason this test failed on the
+  // phone project and passed on desktop, which is a useful reminder that
+  // "visible copy" is per-composition, not per-page.
+  const QUOTED = [
+    ".cp-ex__table",
+    ".cp-ex__cards",
+    ".cp-pane__table",
+    ".cp-ex__lname",
+    ".cp-ex__uid",
+    ".cp-rec",
+    ".cp-ent",
+  ].join(", ");
+  const FROM_THE_MANIFEST = ["Native Federal Advocacy & Engagement"];
+
+  for (const { name, path } of [
+    { name: "the door", path: "/" },
+    { name: "the overview", path: "/" },
+    { name: "Collections", path: "/data" },
+    { name: "Methods", path: "/methods" },
+    { name: "What's new", path: "/whats-new" },
+    { name: "Settings", path: "/settings" },
+    { name: "Research access", path: "/research-access" },
+    { name: "Tribal data request", path: "/tribal-data-request" },
+  ]) {
+    test(`${name} uses no ampersand in visible copy`, async ({ page }) => {
+      if (path !== "/" || name !== "the door") await signIn(page);
+      await page.goto(path);
+      await page.locator("main, .cp-door").first().waitFor();
+      let text = await page.evaluate((quoted) => {
+        // A detached clone, so removing the quoted subtrees to read the rest
+        // does not change the page the next assertion sees.
+        const body = document.body.cloneNode(true);
+        for (const node of body.querySelectorAll(quoted)) node.remove();
+        return body.innerText;
+      }, QUOTED);
+      for (const allowed of FROM_THE_MANIFEST) text = text.split(allowed).join("");
+      const offending = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.includes("&"));
+      expect(offending, `ampersand in visible copy on ${path}`).toEqual([]);
+    });
+  }
 });
 
 test.describe("sponsorship", () => {

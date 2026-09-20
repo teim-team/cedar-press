@@ -2832,7 +2832,39 @@
    an answer Cedar composed are different kinds of claim, and a reader cannot
    tell them apart from the prose — so every bot bubble says which it is. It
    is deliberately quiet: this is provenance, not a headline. */
-.teim-rd .cp-dc__basis { margin-top: 0.6rem !important; padding-top: 0.5rem; border-top: 1px solid var(--door-rule); font-family: var(--mono); font-size: 0.64rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+/* THE ANSWER BASIS SITS ABOVE THE ANSWER, so it reads before the prose does.
+   It was a foot line, which told a reader what kind of claim they had just
+   read only once they had read it — and on a phone a long answer's foot can
+   be two screens down.
+
+   Teal is load-bearing here rather than decorative: a release-grounded answer
+   carries the accent because the accent means evidence, and a synthesis does
+   not carry it because there is none to point at. That is the whole
+   distinction, made in the one colour the product reserves for it. */
+.teim-rd .cp-dc__basis { margin: 0 0 0.6rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--door-rule); }
+.teim-rd .cp-dc__basisline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.5rem; margin: 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+.teim-rd .cp-dc__basislabel { color: var(--muted); }
+.teim-rd .cp-dc__basis--release .cp-dc__basislabel { color: var(--dteal); }
+.teim-rd .cp-dc__basis--review .cp-dc__basislabel { color: #9a5b00; }
+.teim-rd .cp-dc__basisrelease,
+.teim-rd .cp-dc__basiscount { font-weight: 600; letter-spacing: 0.05em; color: var(--muted); text-transform: none; }
+.teim-rd .cp-dc__basisnote-inline { margin: 0.3rem 0 0; font-family: var(--sans); font-size: 0.74rem; line-height: 1.4; color: var(--door-ink-3); }
+
+/* "Evidence used": a disclosure, not a panel. Closed it is one line of the
+   transcript; open it is a short definition list of the fields the service
+   actually returned. Fields with no value are not rendered at all — a blank
+   row beside "Sources" reads as "none", which is a different claim from
+   "not supplied". */
+.teim-rd .cp-dc__evidence { margin-top: 0.7rem; padding-top: 0.55rem; border-top: 1px solid var(--door-rule); font-family: var(--sans); }
+.teim-rd .cp-dc__evidence > summary { display: inline-block; cursor: pointer; list-style: none; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-dc__evidence > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-dc__evidence > summary::after { content: " \203A"; display: inline-block; margin-left: 0.25rem; transition: transform 0.16s var(--door-ease); }
+.teim-rd .cp-dc__evidence[open] > summary::after { transform: rotate(90deg); }
+.teim-rd .cp-dc__evidence dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.2rem 0.6rem; margin: 0.45rem 0 0; }
+.teim-rd .cp-dc__evidence dt { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding-top: 0.12rem; }
+.teim-rd .cp-dc__evidence dd { margin: 0; font-size: 0.78rem; line-height: 1.45; color: var(--ink-2); overflow-wrap: anywhere; }
+.teim-rd .cp-dc__evidencelink { display: inline-block; margin-top: 0.5rem; font-size: 0.78rem; font-weight: 600; color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-dc__evidencelink:hover { color: var(--ink); }
 
 /* The scope line sits in the transcript rather than in the header, so
    clearing it is a thing you do to the conversation. The collection's name
@@ -3106,6 +3138,11 @@
 /* While the viewer is on screen Cedar's floating launcher steps aside; the
  * viewer's own foot carries the Cedar action. The open panel is untouched. */
 body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; }
+/* And the same for the door's preview: while the proof object is on screen,
+   the door's own launcher steps aside rather than sitting on the collection
+   strip it is meant to be showing off. The hero carries its own Cedar action,
+   so nothing is lost. */
+body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__collection { display: flex; flex-direction: column; gap: 0.15rem; min-width: 14rem; }
 /* `background-color`, not `background`: the shorthand resets
  * `background-image`, which is where the chevron lives (it is set with

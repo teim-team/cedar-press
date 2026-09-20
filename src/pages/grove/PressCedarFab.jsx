@@ -43,24 +43,143 @@ import { Link } from "react-router";
 import { askCedar } from "../../api.js";
 import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
-import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
+import { PRESS_DATA_PATH, PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 import { CedarIcon } from "./pressGateIcons";
 
 const MARK = "/brand/lumecon-logo-mark-teal.png";
 
-// Questions every collection profile can answer; shown whenever Cedar is
-// scoped to a collection. They are the profile-grounded three, so every
-// starter offered is one that comes back cited.
+// The collection-scoped prompt set, from the implementation brief §3, minus
+// one.
+//
+// Every starter here was run against `answer_from_profile` before it was
+// offered, because a starter that falls through to Cedar is a starter that
+// comes back uncited — and the point of offering them is that they come back
+// read off the release.
+//
+// THE ONE THAT IS NOT HERE. The brief also lists "Why is this record
+// connected to this entity?", and that question does not fall through: it
+// returns the collection's ROW COUNT. `_STATS_WORDS` in
+// `collection_profiles.py` contains `"record"`, so any question carrying that
+// word routes to headline figures — an identity question answered with
+// "3,345,971 rows", confidently and in the release's name. That is the exact
+// failure the answer-basis work exists to prevent, so the prompt is withheld
+// until the router is fixed rather than shipped as a demonstration of it.
 const SCOPED_EXAMPLES = [
   "What does this collection cover?",
-  "How was this collection constructed?",
-  "What are its headline figures?",
+  "How are entities resolved?",
+  "What sources are included?",
+  "What changed in the latest release?",
 ];
 
 let nextId = 0;
 const turn = (role, text, extra = {}) => ({ key: `t${(nextId += 1)}`, role, text, ...extra });
+
+/**
+ * THE ANSWER BASIS, ABOVE THE ANSWER.
+ *
+ * It used to sit under the bubble, which meant a reader learned what kind of
+ * claim they had just read only after reading it. The brief is right that the
+ * distinction has to be legible before the bottom of a long answer, and on a
+ * phone a long answer's foot can be two screens down.
+ *
+ * Three states are declared; two can occur.
+ *
+ *   release    read off the collection's own release and cited to it.
+ *   synthesis  Cedar composed it. The SCOPE is real — the question was asked
+ *              against this collection — and nothing else is claimed.
+ *   review     ambiguous identity, evidence or scope. No producer yet; see
+ *              `_answer_basis` in the service for why it is declared anyway.
+ *
+ * WHAT THIS DELIBERATELY DOES NOT RENDER. The brief asks for a cited-record
+ * count ("Cedar synthesis from 3 cited records") and an expandable evidence
+ * trail of the records used. Cedar returns neither: there is no collections
+ * tool and no retrieval, so a synthesis today is grounded in the model, not
+ * in this collection's records. Printing a count would be inventing one, and
+ * the brief's own scope rule — an answer "may not imply that it understands a
+ * particular entity, record, or filtered table state unless that context is
+ * actually passed to the service" — forbids it. The field is in the contract
+ * and renders the moment the service fills it.
+ */
+const BASIS_LABEL = {
+  release: "Release-grounded",
+  synthesis: "Cedar synthesis",
+  review: "Needs review",
+};
+
+const releaseOf = (basis) => [basis?.collectionName, basis?.version].filter(Boolean).join(" ");
+
+/** The label, above the answer. What kind of claim is about to be read. */
+function AnswerBasisLabel({ basis }) {
+  if (!basis?.kind) return null;
+  const { kind, citedRecords } = basis;
+  const label = BASIS_LABEL[kind] ?? BASIS_LABEL.synthesis;
+  const release = releaseOf(basis);
+  return (
+    <div className={`cp-dc__basis cp-dc__basis--${kind}`}>
+      <p className="cp-dc__basisline">
+        <span className="cp-dc__basislabel">{label}</span>
+        {release ? <span className="cp-dc__basisrelease">{release}</span> : null}
+        {/* Rendered only when the service supplies it. Absent is absent; a
+            zero here would read as "checked, found none". */}
+        {typeof citedRecords === "number" ? (
+          <span className="cp-dc__basiscount">{citedRecords} cited records</span>
+        ) : null}
+      </p>
+      {kind === "synthesis" ? (
+        <p className="cp-dc__basisnote-inline">
+          Scoped to this collection. Not read from its records.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * The evidence, under the answer.
+ *
+ * Under, not above — it was above for one build and the screenshot settled it:
+ * an opened disclosure between the label and the prose pushes the answer off
+ * the bottom of the panel, so expanding the evidence hides the thing the
+ * evidence is for. The brief says "under each answer" and it is right.
+ */
+function EvidenceUsed({ basis }) {
+  if (!basis?.kind) return null;
+  const { updated, sources, collectionId } = basis;
+  const release = releaseOf(basis);
+  if (!updated && !sources) return null;
+  return (
+    <details className="cp-dc__evidence">
+      <summary>Evidence used</summary>
+      <dl>
+        {release ? (
+          <>
+            <dt>Release</dt>
+            <dd>{release}</dd>
+          </>
+        ) : null}
+        {updated ? (
+          <>
+            <dt>Updated</dt>
+            <dd>{updated}</dd>
+          </>
+        ) : null}
+        {sources ? (
+          <>
+            <dt>Sources</dt>
+            <dd>{sources}</dd>
+          </>
+        ) : null}
+      </dl>
+      {collectionId ? (
+        <Link className="cp-dc__evidencelink" to={`${PRESS_DATA_PATH}?c=${collectionId}`}>
+          View in table <span aria-hidden="true">&#8594;</span>
+        </Link>
+      ) : null}
+    </details>
+  );
+}
 
 /**
  * WHAT IS UNDER THE ANSWER, SAID IN THE PANEL.
@@ -240,7 +359,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
         if (controller.signal.aborted) return;
         if (result?.threadId) threadRef.current = result.threadId;
         say("cedar", result?.answer ?? result?.text ?? "", {
-          basis: result?.basis ?? null,
+          basis: result?.answerBasis ?? null,
           source: result?.source ?? null,
         });
         track(EVENT.cedarAsked, { length: question.length, collectionId: scope?.id ?? null });
@@ -384,6 +503,8 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                     <img src={MARK} alt="" width="30" height="30" />
                   </span>
                   <div className="cp-dc__bubble">
+                    {/* The label above the answer; the evidence under it. */}
+                    {item.basis ? <AnswerBasisLabel basis={item.basis} /> : null}
                     {item.gate ? (
                       <p>
                         Cedar answers questions like this from the Cedar Press collections once
@@ -401,14 +522,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                     ) : (
                       (item.text || "").split("\n\n").map((para, i) => <p key={i}>{para}</p>)
                     )}
-                    {/* The release an answer was read off, printed under it.
-                        An answer Cedar composed carries no basis line rather
-                        than a fabricated one, and says so. */}
-                    {item.basis ? (
-                      <p className="cp-dc__basis">Read from {item.basis}</p>
-                    ) : item.source === "cedar" ? (
-                      <p className="cp-dc__basis">Cedar&rsquo;s own answer — not read off a release</p>
-                    ) : null}
+                    {item.basis ? <EvidenceUsed basis={item.basis} /> : null}
                   </div>
                 </div>
               ),
@@ -459,7 +573,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
               answer here is read off a release, or it is Cedar's and says so. */}
           <p className="cp-dc__disclaimer">
             Cedar can make mistakes. Verify anything important against the methods page or the
-            release it came from. Answers cited to a release are read from that release.
+            release it came from.
           </p>
         </section>
       ) : null}

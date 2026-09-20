@@ -186,6 +186,35 @@ export default function PressGate({ user }) {
   // The panel closes on Escape and on a click outside it or its tabs.
   const panelRef = useRef(null);
   const tabsRef = useRef(null);
+  // CEDAR'S LAUNCHER STEPS ASIDE FOR THE PROOF OBJECT.
+  //
+  // The preview is the page's one proof surface, and a fixed pill in the
+  // bottom-right corner sat on top of it — measured at 1440x900, over the
+  // Advocacy tile in the collection strip, which is part of the thing the
+  // object exists to demonstrate. A launcher that covers the evidence makes
+  // an otherwise finished surface look accidental.
+  //
+  // Same mechanism `PressExplore` already uses for the signed-in viewer
+  // (`data-cp-explore-in-view`), so there is one way this is done rather than
+  // two. The OPEN panel is untouched: a reader who has asked a question is no
+  // longer looking at the preview.
+  const previewRef = useRef(null);
+  useEffect(() => {
+    const stage = previewRef.current;
+    if (!stage || typeof IntersectionObserver !== "function") return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => document.body.toggleAttribute("data-cp-preview-in-view", entry.isIntersecting),
+      // A sliver of the frame showing at the very bottom is not the reader
+      // looking at it, and toggling on that sliver makes the launcher flicker
+      // on every scroll through the hero.
+      { threshold: 0.35 },
+    );
+    observer.observe(stage);
+    return () => {
+      observer.disconnect();
+      document.body.removeAttribute("data-cp-preview-in-view");
+    };
+  }, []);
   useEffect(() => {
     if (!panel) return undefined;
     const onKey = (event) => { if (event.key === "Escape") setPanel(null); };
@@ -498,7 +527,7 @@ export default function PressGate({ user }) {
           {/* The product frame. The rail is the twelve collections with
               their marks, one group a shelf; the pane is the one in hand.
               Not `#catalog`: that id is the reader's shelf on /data. */}
-          <figure className="cp-hero3__stage cp-fade">
+          <figure className="cp-hero3__stage cp-fade" ref={previewRef}>
             {/* The frame holds a real desktop window at real desktop size and
                 scales it to fit, the way a product screenshot does. Rendering
                 the app at the ~800px the column actually offers gave a narrow

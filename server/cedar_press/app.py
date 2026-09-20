@@ -546,6 +546,54 @@ def collection_profile(
     return profile
 
 
+def _answer_basis(
+    kind: str, profile: dict[str, object] | None, collection_id: str | None
+) -> dict[str, object]:
+    """The answer's basis, structured, for the label the panel shows above it.
+
+    THE POINT OF THIS BEING AN OBJECT AND NOT A SENTENCE.
+    A reader cannot tell a reading of a release from a composed reply by
+    looking at the prose — that is the whole difficulty, and it is why the
+    basis has to be stated rather than inferred. A string could be shown, but
+    only an object can be *checked*: the panel renders the release, the date
+    and the source families because they are fields, and renders nothing
+    where there is no field rather than a plausible blank.
+
+    ``kind`` is one of:
+
+    ``release``     read off the collection's own release, cited to it
+    ``synthesis``   Cedar composed it; scope is real, the records are not cited
+    ``review``      the identity, evidence or scope is ambiguous
+
+    ``review`` HAS NO PRODUCER TODAY and is here as a declared state rather
+    than a promise. Nothing in this service can currently detect an ambiguous
+    identity — the profiles either answer or return ``None``, and the Cedar
+    service returns prose. It will have one when Cedar can retrieve from the
+    register, and the shape is here so that arriving is a change of one value
+    rather than a change of the contract.
+
+    ``cited_records`` is deliberately absent rather than ``0``. Cedar returns
+    no record citations at all, and a zero would be read as "checked, found
+    none" by every reader and every downstream renderer.
+    """
+    profile = profile or {}
+    version = profile.get("version")
+    name = profile.get("collection_name")
+    basis: dict[str, object] = {
+        "kind": kind,
+        "collectionId": collection_id,
+        "collectionName": name,
+        "version": version,
+        "updated": profile.get("last_updated"),
+    }
+    if kind == "release":
+        # Only a release-grounded answer may name the sources it came from:
+        # these are the profile's own, and the answer was read off that
+        # profile. A synthesis did not read them, so it does not cite them.
+        basis["sources"] = profile.get("primary_sources")
+    return basis
+
+
 @app.post("/cedar/ask")
 def ask_cedar(
     question: Question, session: Session = Depends(require_session)
@@ -572,6 +620,7 @@ def ask_cedar(
     assistant that produces a plausible sentence it cannot support is worse
     than one that hands the question to a person.
     """
+    profile = None
     collection_name = None
     if question.collectionId:
         profile = repository.collection_profile(question.collectionId)
@@ -580,7 +629,10 @@ def ask_cedar(
         if answered:
             return {
                 "answer": answered["answer"],
+                # The sentence form stays for any caller already reading it;
+                # `answerBasis` is the one the panel renders from.
                 "basis": answered["basis"],
+                "answerBasis": _answer_basis("release", profile, question.collectionId),
                 "collectionId": question.collectionId,
                 # Named so the panel can say which of the two answered, and
                 # so a reader can tell a cited reading of a release from a
@@ -615,8 +667,11 @@ def ask_cedar(
         return {
             "answer": reply.answer,
             # Only the profile path can cite a release. Cedar's own answers
-            # carry no basis line rather than a fabricated one.
+            # carry no basis sentence rather than a fabricated one — but they
+            # do carry a scope, which is a real fact about the question and
+            # is what `synthesis` states.
             "basis": None,
+            "answerBasis": _answer_basis("synthesis", profile, question.collectionId),
             "collectionId": question.collectionId,
             "source": "cedar",
             "threadId": reply.thread_id or question.threadId,

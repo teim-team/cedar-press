@@ -187,7 +187,7 @@ export default function CedarPressSettings() {
               footer name them to non-subscribers too. This card is the
               signed-in convenience. */}
           <section className="cp-set__card cp-fade" aria-label="Requests and support">
-            <span className="cp-set__cap">Requests &amp; support</span>
+            <span className="cp-set__cap">Requests and support</span>
             <ul className="cp-set__links">
               <li>
                 <Link to={PRESS_REQUEST_PATH}>
