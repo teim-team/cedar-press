@@ -14,6 +14,7 @@
 // to reach into a build-time constant to change it.
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -168,4 +169,32 @@ test("a hash is accepted whatever case it was pasted in", async () => {
 test("the notice says what the gate is and is not", () => {
   assert.match(PRESS_DEMO_UNCONFIGURED, /not available/i);
   assert.equal(PRESS_DEMO_ACCOUNTS_VAR, "VITE_PRESS_DEMO_ACCOUNTS");
+});
+
+// THE REVIEWER'S LOGIN IS A REPOSITORY SECRET AND ONE LINE OF YAML.
+//
+// The named reviewer at Indian Country Media signs in to the standalone
+// preview with an account that exists only in `secrets.VITE_PRESS_DEMO_ACCOUNTS`
+// — deliberately, because a credential is not committed here. The whole of
+// what connects that secret to the running site is the env line below in the
+// deploy workflow. Drop it and the build is configured with nothing, and the
+// gate does exactly what it promises: it signs NOBODY in. The site still
+// deploys, every test here still passes, and the only symptom is a reviewer
+// who cannot get in and no reason on screen for why.
+//
+// So the line is asserted rather than trusted. Owner, 2026-09-20: "that one
+// I don't want to be changed. That should still be there."
+test("the deploy still hands the preview account to the build", () => {
+  const workflow = readFileSync(new URL("../../../.github/workflows/deploy.yml", import.meta.url), "utf8");
+  assert.match(
+    workflow,
+    /VITE_PRESS_DEMO_ACCOUNTS:\s*\$\{\{\s*secrets\.VITE_PRESS_DEMO_ACCOUNTS\s*\}\}/,
+    "deploy.yml must pass secrets.VITE_PRESS_DEMO_ACCOUNTS into the site build",
+  );
+  // And into the step that builds the site, not some other job's env.
+  const build = workflow.slice(workflow.indexOf("run: npm run build:site"));
+  assert.ok(
+    build.indexOf("VITE_PRESS_DEMO_ACCOUNTS") >= 0 && build.indexOf("VITE_PRESS_DEMO_ACCOUNTS") < 400,
+    "the variable must be on the build:site step's own env",
+  );
 });

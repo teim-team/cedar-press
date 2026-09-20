@@ -324,8 +324,17 @@ class TestCatalog(unittest.TestCase):
         # And it says one year, not a window and a depth. The year is the
         # catalog's measured one rather than a literal here, so re-measuring
         # a collection does not have to be re-typed into a test.
+        #
+        # The sentence itself changed with "Cedar answers in sentences": it
+        # read "Coverage from 1999 to present.", which is a field label with a
+        # value after it. What is asserted is unchanged — one year, the
+        # measured one, the same for every tier — because that was always the
+        # rule, and the wording was never the rule.
         entry = next(c for c in press_catalog.CATALOG if c["id"] == "lobbying")
-        self.assertIn(f"Coverage from {entry['coverage']['from']} to present.", answer)
+        self.assertIn(f"It runs from {entry['coverage']['from']} to the present.", answer)
+        # No field names read out loud, on either tier.
+        for label in ("Coverage from", "Unit of observation:", "Sources:", "Known limitations:"):
+            self.assertNotIn(label, answer)
         self.assertNotIn("Cedar Press+ opens", answer)
         self.assertNotIn("full reconstructed archive", answer)
         ratelimit.reset_for_tests()
