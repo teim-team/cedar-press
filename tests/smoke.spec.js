@@ -402,17 +402,14 @@ test.describe("the subscriber's path", () => {
     await signIn(page);
     await page.goto("/data");
 
-    // One collection, from a tile in the shelf grid — not the shelf's
-    // "download all", which hands over a ZIP and would not exercise the
-    // citation the CSV carries. The tile opens the collection in the viewer
-    // and the reader panel beside the grid carries the sample download.
-    const tile = page.locator(".cp-band__grid .cp-badge--act").first();
-    await expect(tile).toBeVisible();
-    await tile.click();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByTestId("explore-scope")).toBeVisible();
-
-    const panelAction = page.locator(".cp-read__act").first();
+    // One collection's own sample, not the toolbar's Download: that one
+    // hands over the current CUT as a ZIP with its README, and it is the
+    // per-collection CSV that carries `cite_as` in the rows. This used to
+    // live on the shelf's reader panel; the shelf's tiles were deleted when
+    // the table became the Collections page, and the action moved into the
+    // pane head rather than going with them.
+    await expect(page.locator(".cp-rail__item").first()).toBeVisible();
+    const panelAction = page.locator(".cp-ex__sample").first();
     await expect(panelAction).toBeVisible();
     const download = page.waitForEvent("download");
     await panelAction.click();
@@ -481,12 +478,23 @@ test.describe("Explore the collections", () => {
 
     const card = page.getByTestId("explore");
     await expect(card).toBeVisible();
+    // Collections opens on one collection now (Federal Funding), so the
+    // all-collections view this test walks is reached the way a reader
+    // reaches it: the rail's first row.
+    // Scrolled to the top first: the rail is sticky, so Playwright's
+    // scroll-into-view can chase an element that never moves relative to the
+    // viewport. A reader clicking the rail is at the top of the page anyway.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
     const caption = page.getByTestId("explore-caption");
     const records = page.getByTestId("explore-record");
     // Every open collection contributes its dataset's preview; the caption
     // counts sample records and says so, because ten rows is not the dataset.
     await expect(caption).toContainText("sample records");
-    await expect(caption).toContainText("all collections");
+    // "12 collections", not "all collections": an explicit all is an explicit
+    // list now (the rail writes the ids), because clearing the parameter
+    // means "unspecified" and resolves to the default collection.
+    await expect(caption).toContainText(/\d+ collections/);
     await expect(records.first()).toBeVisible();
 
     // Narrow to one entity from the picker; the URL now carries the cut.
@@ -534,7 +542,7 @@ test.describe("Explore the collections", () => {
     // ten-record preview to nothing, which is its own case below.
     await page.goto("/data");
     await expect(records.first()).toBeVisible();
-    await page.getByTestId("explore-collection").selectOption("lobbying");
+    await page.locator(".cp-rail__item").filter({ hasText: "Advocacy" }).first().click();
     await expect(page).toHaveURL(/[?&]c=lobbying/);
     await expect(page.getByTestId("explore-caption")).toContainText("columns");
     await expect(page.getByTestId("explore-scope")).toContainText("filing year");
@@ -554,7 +562,8 @@ test.describe("Explore the collections", () => {
     await expect(page.getByTestId("record-head")).toBeVisible();
     await page.getByRole("link", { name: "Back to results" }).first().click();
     await page.waitForURL(/\/data\?/);
-    await expect(page.getByTestId("explore-collection")).toHaveValue("lobbying");
+    // Coming back from a record restores the cut, which the rail shows.
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Advocacy");
 
     // An out-of-coverage year range is shown AS REQUESTED, said in words,
     // and the empty result says what it does not establish.
@@ -571,7 +580,9 @@ test.describe("Explore the collections", () => {
     await expect(page.getByTestId("explore-type")).toContainText("None");
     // A link naming two collections says two, not "all".
     await page.goto("/data?c=funding%7Cdeals");
-    await expect(page.getByTestId("explore-collection")).toContainText("2 collections from this link");
+    // The picker that used to say "2 collections from this link" is gone —
+    // the rail replaced it, and a two-collection cut has no single row to
+    // light. The caption is where that state lives now.
     await expect(caption).toContainText("2 collections");
     // A link to a collection this catalog does not have is not widened.
     await page.goto("/data?c=gaming");
@@ -585,8 +596,12 @@ test.describe("Explore the collections", () => {
     await expect(records).toHaveCount(1);
 
     // The download is the cut's records and nothing else, re-importable as
-    // such, with the citation and the cut in the README beside it.
+    // such, with the citation and the cut in the README beside it. Taken
+    // over every collection, which is the rail's first row rather than the
+    // bare /data it used to be: the page opens on one collection now.
     await page.goto("/data");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
     await expect(records.first()).toBeVisible();
     await expect(caption).not.toContainText("loading");
     const shown = await records.count();
@@ -613,19 +628,26 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  test("a tile on the shelf opens its collection in the viewer, and the viewer lights the tile", async ({ page }) => {
+  // This was "a tile on the shelf opens its collection in the viewer, and
+  // the viewer lights the tile" — two controls for one choice, kept in sync.
+  // There is one control now. The tiles were the catalogue a reader had to
+  // browse before reaching a table, and the rail is the catalogue.
+  test("the rail selects a collection, and the pane and the URL follow", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data");
-    const tile = page.locator(".cp-band__grid .cp-badge--act").nth(1);
-    await tile.click();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    await expect(page).toHaveURL(/[?&]c=/);
-    await expect(page.getByTestId("explore-scope")).toBeVisible();
-    // Choosing another collection in the viewer moves the light.
-    await page.getByTestId("explore-collection").selectOption("deals");
-    await expect(tile).toHaveAttribute("aria-pressed", "false");
-    await expect(page.locator(".cp-badge.is-selected")).toHaveCount(1);
+
+    // It opens on a collection, not on twelve searched at once.
+    await expect(page.getByTestId("explore-caption")).toContainText("Federal Funding");
+
+    const row = page.locator(".cp-rail__item").filter({ hasText: "Deals" }).first();
+    await row.click();
+    await expect(row).toHaveAttribute("aria-pressed", "true");
+    await expect(page).toHaveURL(/[?&]c=deals/);
+    await expect(page.getByTestId("explore")).toContainText("Deals");
+    // One row lit, never two.
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toHaveCount(1);
+
     // Cedar's launcher steps aside while the viewer is on screen; the
     // viewer's own action opens the panel.
     await page.getByTestId("explore").scrollIntoViewIfNeeded();
@@ -849,7 +871,7 @@ test.describe("the record page", () => {
     // And back is back: the same cut, reproduced.
     await page.getByRole("link", { name: "Back to results" }).first().click();
     await page.waitForURL(/\/data\?/);
-    await expect(page.getByTestId("explore-collection")).toHaveValue("funding");
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Federal Funding");
     expect(errors).toEqual([]);
   });
 

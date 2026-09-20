@@ -51,24 +51,14 @@ import { Link } from "react-router";
 
 import { PageBoundary } from "./PageBoundary.jsx";
 import { appUrl } from "../../features/grove/appLink.js";
-import { EVENT, track } from "../../features/grove/telemetry.js";
-import { canOpenDataset, coverageFrom, coverageLabel } from "../../features/grove/pressAccess";
-import { downloadAll, downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
-import {
-  PRESS_CATALOG_BY_ID,
-  PRESS_TIERS,
-  collectionsOnShelf,
-} from "../../features/grove/pressCatalog";
-import { freshnessLine } from "../../features/grove/pressReleases";
+import { EVENT } from "../../features/grove/telemetry.js";
+import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
-import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { COLLECTION_ICONS } from "./pressCollectionIcons";
 // The viewer is the largest thing on the site (its own module, the contracts
-// and the codebook), and it is below the shelves: fetched when the page is,
-// not before the gate can paint.
+// and the codebook), and it IS this page now, so it is fetched as the page
+// is rather than after a shelf the reader had to scroll past first.
 const PressExplore = lazy(() => import("./PressExplore"));
 import { TierName } from "./TierName";
-import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
 
 /**
  * Cedar Grove is not a fourth shelf holding one collection. It carries
@@ -123,310 +113,6 @@ function useReveal() {
   return [ref, seen, instant];
 }
 
-function Badge({ entry, open, onEnter, active, selected, index, onLocked, onOpen }) {
-  const className = `cp-badge${active || selected ? " is-on" : ""}${selected ? " is-selected" : ""}${open ? " cp-badge--act" : " cp-badge--locked"}`;
-  // The selection is sticky on every pointer, not only touch: the read panel
-  // carries its own actions (Ask Cedar, the touch download), and clearing on
-  // mouse-leave or blur unmounted those buttons under the very pointer
-  // traveling to click them. The panel changes when another tile is pointed
-  // at, never back to the idle hint.
-  const watch = { onMouseEnter: onEnter, onFocus: onEnter };
-  const inner = (
-    <>
-      <span className="cp-badge__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id]}</span>
-      <span className="cp-badge__name"><TierName name={entry.short || entry.name} /></span>
-    </>
-  );
-  // The badges arrive in sequence rather than all at once, which is what
-  // makes a grid read as a shelf filling up instead of a page repainting.
-  const style = { "--i": index };
-
-  // Every tile answers a click on both shelves, and the cue says what the
-  // answer is. Three actions, three cues, and none of them borrows another's:
-  //
-  //   ⌄  this tile opens the viewer below      (an owned tile)
-  //   →  this walks you to what opens it       (a locked tile)
-  //   ↓  this hands over a file                (the panel's download)
-  //
-  // Codex's review, 2026-09-16: an owned tile drew ↓ while its handler was
-  // `onOpen` and its own accessible name said "Open … in the viewer below" —
-  // so the picture said download and the words said open, and the comment
-  // that used to sit here ("the down arrow is the download") described
-  // behaviour this component no longer had. The arrowhead is a reveal, which
-  // is what the click actually does; ↓ goes back to meaning a file.
-  if (!open) {
-    return (
-      <li style={style}>
-        <button type="button" className={className} onClick={onLocked} {...watch}>
-          {inner}
-          <span className="cp-badge__cue" aria-hidden="true">&#8594;</span>
-          <span className="cp-badge__sr">See what opens {entry.name}</span>
-        </button>
-      </li>
-    );
-  }
-  return (
-    <li style={style}>
-      <button type="button" className={className} onClick={() => onOpen(entry)} aria-pressed={selected} {...watch}>
-        {inner}
-        <span className="cp-badge__cue" aria-hidden="true">&#8964;</span>
-        <span className="cp-badge__sr">Open {entry.name} in the viewer below</span>
-      </button>
-    </li>
-  );
-}
-
-/** Whether Cedar has a profile to answer from for this collection. Every
- *  catalog collection has one now: the launch four answer from their releases
- *  and the rest from their catalog entries (collection_profiles.py), so only
- *  an entry outside the catalog — the harmonized public data — goes without
- *  the button. */
-function hasCedarProfile(id) {
-  return Boolean(PRESS_CATALOG_BY_ID[id]) || LAUNCH_COLLECTION.some((d) => d.id === id);
-}
-
-/** What the reader says about the collection under the cursor. */
-function Detail({ entry, owned }) {
-  // What the service said when it refused the file, connected; nothing
-  // otherwise. A button that silently does nothing is the failure this
-  // replaces. Keyed by the collection where it is rendered, so a refusal
-  // never outlives the collection it was about.
-  const [refusal, setRefusal] = useState(null);
-  return (
-    <div className="cp-read__on">
-      <span className="cp-read__cap">
-        {entry.kind === "public" ? "Harmonized public data" : "Cedar collection"}
-      </span>
-      <h4 className="cp-read__name"><TierName name={entry.name} /></h4>
-      <p className="cp-read__blurb">{entry.blurb}</p>
-      {/* The linkage is how the collection reaches its entities — method, not
-          description, and the longest paragraph in the panel. It was setting
-          the height of the whole shelf, so a verbose collection stretched the
-          band and the tiles sat in a field of colour. It opens in place. */}
-      {entry.linkage ? (
-        <details className="cp-read__link">
-          <summary><span className="cp-read__linkcap">The link</span></summary>
-          <p>{entry.linkage}</p>
-        </details>
-      ) : null}
-      <p className="cp-read__foot">
-        {coverageLabel(entry)}
-        {" · "}
-        {freshnessLine(entry.id) || (owned ? "Opens in the viewer below" : "Locked")}
-      </p>
-      {/* The download lives here, on every pointer: the panel says what the
-          file is before the finger or the cursor takes it. "Sample", not
-          the collection's name alone: what downloads is ten real rows of the
-          collection's flagship table, not the collection. */}
-      {owned ? (
-        <button
-          type="button"
-          className="cp-read__act"
-          onClick={() => {
-            track(EVENT.collectionDownloaded, { collection: entry.id, shelf: entry.shelf });
-            setRefusal(null);
-            downloadCsv(entry).catch((error) => setRefusal(error?.message || "The download did not go through."));
-          }}
-        >
-          <span aria-hidden="true">&#8595;</span>{" "}
-          {hasReleaseFile(entry)
-            ? `Download a ten-row sample of ${entry.short || entry.name}`
-            : "Download the collection description (sample pending)"}
-        </button>
-      ) : null}
-      {refusal ? <p className="cp-read__foot" role="alert">{refusal}</p> : null}
-      {/* Cedar, already scoped: the reader looking at this description is
-          one click from asking how the collection was built or what its
-          headline figures are, without restating which collection. The
-          event reaches the floating control without a prop path. */}
-      {hasCedarProfile(entry.id) ? (
-        <button
-          type="button"
-          className="cp-read__cedar"
-          onClick={() =>
-            window.dispatchEvent(
-              new CustomEvent("cedar:ask-collection", {
-                detail: { id: entry.id, name: entry.name },
-              }),
-            )
-          }
-        >
-          Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
-        </button>
-      ) : null}
-      {/* Where the entity-methodology link went when it came off the top of
-          the page: a reader asking how this collection reaches its entities
-          is already reading about this collection. */}
-      <Link className="cp-read__method" to={`${PRESS_METHODS_PATH}#m-collections`}>
-        How this collection is built <span aria-hidden="true">&#8594;</span>
-      </Link>
-    </div>
-  );
-}
-
-
-function Band({ tier, user, index, hovered, setHovered, selectedId, onPick }) {
-  const entries = collectionsOnShelf(tier.shelf);
-
-  // Off the tier's own shelf, never off its first entry: Grove's band leads
-  // with the collections Cedar Press also carries, so asking about entry
-  // zero told a Cedar Press reader that Cedar Grove was their shelf.
-  const owned = canOpenDataset(user, { shelf: tier.shelf });
-  // The same years whether or not the reader owns the shelf: a locked band
-  // shows what is inside it, and what is inside it does not shrink when it
-  // opens. Rosters contribute nothing here — `coverageFrom` returns null for
-  // them, and a shelf's earliest year must not be a harvest date.
-  const starts = entries.map((entry) => coverageFrom(entry)).filter(Boolean);
-  const from = starts.length ? Math.min(...starts) : null;
-  // The reader follows the pointer; with nothing under it, it describes
-  // the collection the viewer is showing.
-  // THE PANEL IS 26REM OF RESERVED COLUMN; AT REST IT HELD NOTHING.
-  // `.cp-band__in` lays each shelf out as tiles beside a 26rem panel, and the
-  // panel only had a collection in it once a pointer was on a tile — so the
-  // resting state of both shelves, which is the state anyone arriving sees,
-  // was six tiles across 40% of the page and 60% of empty beside them.
-  //
-  // The instruction box that used to stand there was removed for good reason
-  // (a caption on an empty frame). The answer is not to put the caption back
-  // or to collapse the column — collapsing makes the whole grid jump the
-  // first time a cursor crosses a tile. The panel was built to describe a
-  // collection, so it opens describing one: the first on the shelf. Nothing
-  // reserved, nothing empty, nothing that moves, and the shelf's first
-  // download is one click away instead of one hover plus one click.
-  const active =
-    entries.find((entry) => entry.id === (hovered ?? selectedId)) || entries[0] || null;
-  const [ref, seen, instant] = useReveal();
-
-  // A locked tile's click walks the reader to the answer: the panel that
-  // says what the collection is and carries the way in. The ring is so the
-  // eye lands there even when the panel was already on screen.
-  const readRef = useRef(null);
-  const [pulse, setPulse] = useState(false);
-  const pointAtUpgrade = () => {
-    track(EVENT.lockedCollectionTapped, { shelf: tier.shelf });
-    readRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    setPulse(true);
-    window.setTimeout(() => setPulse(false), 900);
-  };
-
-  // A tile selects its collection in the viewer below and lights; the
-  // reader keeps describing it, with the download, until the pointer moves
-  // to another tile.
-  const openTile = (entry) => {
-    track(EVENT.collectionViewed, { collection: entry.id, shelf: tier.shelf });
-    setHovered(entry.id);
-    onPick(entry.id);
-  };
-
-  return (
-    <section
-      ref={ref}
-      className={`cp-band cp-band--${index % 2 === 0 ? "fill" : "plain"}${seen ? " is-in" : ""}${instant ? " cp-reveal--now" : ""}`}
-      aria-label={tier.name}
-    >
-      <div className="cp-band__in">
-        {/* What this band is, top right, in the same line as the eyebrow. A
-            reader scanning for the download should not have to infer it from
-            a grid of squares. */}
-        {/* THE PLAN, ITS COVERAGE, AND THE TILES.
-            Review, 2026-09-15: "'Your shelf', 'Cedar Press', 'See what's
-            happening', a descriptive sentence, coverage metadata, a hover
-            instruction, and a separate instruction box are too many layers
-            around six choices. A plan name, concise coverage information, and
-            the collection tiles would be enough."
-            So the eyebrow, the question, the promise and the footnote are
-            gone. What a collection holds is in the panel the tile opens, and
-            each tile's own dates are in it, which is what the footnote was
-            pointing at. */}
-        <div className="cp-band__head">
-        <div className="cp-band__id">
-          <h3 className="cp-band__name"><TierName name={tier.name} /></h3>
-          {/* No price here: Tribal Business News owns Press payment, renewal
-              and upgrades, and a number embedded in this catalog goes stale
-              the moment the seller changes theirs. The CTA below walks the
-              reader to the canonical price. */}
-          {owned || tier.id === "grove" ? null : (
-            <p className="cp-band__price">Sold through Tribal Business News</p>
-          )}
-          {owned || tier.id !== "grove" ? null : (
-            <p className="cp-band__price">${tier.price.toLocaleString("en-US")} a year</p>
-          )}
-          {/* "As far back as", not "back to": the year is the deepest single
-              collection and the rest reach back different distances, so the
-              line says the shelf's floor and each tile's panel gives its own
-              dates. */}
-          <p className="cp-band__facts">
-            {entries.length} collections
-            {from ? ` · records as far back as ${from}` : ""}
-            {owned ? " · yours to download" : ""}
-          </p>
-        </div>
-        {/* The chip said "Collections you download" beside a facts line that
-            ends "yours to download". One of the two was decoration. */}
-        </div>
-
-        <ul
-          className="cp-band__grid"
-          style={{ "--cols": Math.min(entries.length, 6) }}
-        >
-          {entries.map((entry, position) => (
-            <Badge
-              key={entry.id}
-              index={position}
-              entry={entry}
-              open={owned}
-              active={active?.id === entry.id}
-              selected={selectedId === entry.id}
-              onEnter={() => setHovered(entry.id)}
-              onLocked={pointAtUpgrade}
-              onOpen={openTile}
-            />
-          ))}
-        </ul>
-
-        {owned ? (
-          <p className="cp-band__all">
-            <button type="button" className="cp-band__allbtn" onClick={() => { track(EVENT.shelfDownloadedAll, { shelf: tier.shelf, count: entries.length }); downloadAll(entries); }}>
-              <span aria-hidden="true">&#8595;</span> Download all {entries.length} samples
-            </button>
-          </p>
-        ) : null}
-
-        {/* Live, so a screen reader hears what the cursor shows. Polite, so
-            it never cuts in while someone is reading something else. */}
-        {/* The panel is not drawn when it has nothing to say: an empty
-            bordered rectangle beside the tiles was the instruction box's
-            frame outliving the instruction. A locked shelf keeps it, because
-            the way in lives in it. */}
-        <aside
-          ref={readRef}
-          className={`cp-read${pulse ? " is-pulse" : ""}${!active && owned ? " is-empty" : ""}`}
-          aria-live="polite"
-        >
-          {/* The panel describes the collection under the pointer, and
-              nothing when there is none: the instruction box that used to
-              stand here said what a tile does to a reader who had not
-              touched one yet, which is a caption on an empty frame. */}
-          {active ? <Detail key={active.id} entry={active} owned={owned} /> : null}
-          {owned ? null : tier.id === "grove" ? (
-            // Grove is Lumecon-sold, so its door is the app's plan page.
-            <a className="cp-band__cta" href={appUrl("/app/settings?tab=plan")} target="_blank" rel="noreferrer">
-              Get <TierName name={tier.name} /> <span aria-hidden="true">&#8594;</span>
-            </a>
-          ) : (
-            // Press tiers are sold by Tribal Business News; /app cannot
-            // perform this upgrade, so the click goes to the plans page
-            // where the action actually lives.
-            <a className="cp-band__cta" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
-              Get <TierName name={tier.name} /> at Tribal Business News{" "}
-              <span aria-hidden="true">&#8594;</span>
-            </a>
-          )}
-        </aside>
-      </div>
-    </section>
-  );
-}
 
 /**
  * Cedar Grove, as a bridge rather than a second storefront.
@@ -472,43 +158,38 @@ function GroveTeaser({ tier }) {
 }
 
 /**
- * Filtered to Data, this is a reader's own shelf and nothing else: no locked
- * band, no Cedar Grove. Somebody who asked to see the collections asked for
- * the ones they can open, and answering with an upsell is answering a
- * different question.
+ * THE COLLECTIONS PAGE IS THE TABLE.
+ *
+ * Owner, 2026-09-20: "In the app, the table should be the Collections page,
+ * not something placed after a shelf page. The shelf still has a role, but
+ * only as the catalog/selection mechanism integrated into the rail. Do not
+ * make people browse tiles, scroll, then arrive at a second table
+ * experience."
+ *
+ * So the tier bands are gone from this page. They were a catalogue, and the
+ * explorer's rail is now the catalogue — keeping both asked a reader to
+ * choose a collection twice, in two different grammars, before reaching a
+ * record.
+ *
+ * WHAT THE BANDS DID THAT THE RAIL MUST KEEP DOING. Two things, and both
+ * moved rather than vanished: a collection's description, which is the
+ * pane's own header and its "About this collection" disclosure, and the
+ * per-shelf "download all samples", which is now an action inside the rail's
+ * shelf heading. `Band` and its reader panel are deleted with this change
+ * rather than left unrendered.
+ *
+ * The Cedar Grove case stays at the foot, and keeps `id="grove"`: articles
+ * link to /data#grove and that address has to keep resolving.
  */
 export default function PressShelf({ user }) {
-  const shelves = PRESS_TIERS.filter((tier) => tier.storefront);
   const grove = PRESS_TIERS.find((tier) => !tier.storefront);
-  const [hovered, setHovered] = useState(null);
-  // What the viewer shows (its tile stays lit), and the latest tile click,
-  // numbered so clicking the same tile twice scrolls to the viewer twice.
-  const [selectedId, setSelectedId] = useState(null);
-  const [pick, setPick] = useState(null);
-  const onPick = (id) => setPick((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
-  // THE WORKING SURFACE COMES FIRST.
-  //
-  // The tier bands used to run above the viewer, so a reader who opened
-  // Collections met a catalogue and had to travel through it to reach a
-  // record. The brief is blunt about this ("No full-screen catalog sits
-  // between /data and a first useful record") and it is right: the explorer
-  // carries its own rail now, which is the catalogue, so the bands above it
-  // were asking the reader to choose twice.
-  //
-  // The bands are kept, below, because they do a second job the rail does
-  // not: they describe a collection on hover and carry its sample download.
-  // Demoted rather than deleted, which is a smaller claim than removing
-  // working product behaviour on a design note.
   return (
-    <div id="catalog" className="cp-bands">
+    <div id="catalog" className="cp-bands cp-bands--table">
       <PageBoundary what="The viewer">
         <Suspense fallback={<section className="cp-sec" aria-busy="true" aria-label="Explore the collections" />}>
-          <PressExplore user={user} pick={pick} onActive={setHovered} onSelected={setSelectedId} />
+          <PressExplore user={user} />
         </Suspense>
       </PageBoundary>
-      {shelves.map((tier, index) => (
-        <Band key={tier.id} tier={tier} user={user} index={index} hovered={hovered} setHovered={setHovered} selectedId={selectedId} onPick={onPick} />
-      ))}
       {grove ? <GroveTeaser tier={grove} /> : null}
     </div>
   );

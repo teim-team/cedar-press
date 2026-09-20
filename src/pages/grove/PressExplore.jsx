@@ -70,8 +70,11 @@ import { useSampleRows } from "../../features/grove/useSamples.js";
 import { recordHref, rememberReturn, takeReturn } from "../../features/grove/pressRecord.js";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection.js";
-import { saveZip } from "../../features/grove/pressDownload.js";
+import { downloadCsv, hasReleaseFile, saveZip } from "../../features/grove/pressDownload.js";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog.js";
+
+/** What Collections opens on when the URL does not say. */
+const DEFAULT_COLLECTION = "funding";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
@@ -443,46 +446,6 @@ function YearRange({ cut, bounds, basis, onChange }) {
  * Locked collections are listed and disabled, and the line under the
  * control says what opens them.
  */
-function CollectionSelect({ value, subset, collections, scope, onChange, onActive }) {
-  return (
-    <label className="cp-ex__collection">
-      <span className="cp-ex__picklabel">Collection</span>
-      <select
-        className="cp-ex__select"
-        aria-label="Collection"
-        data-testid="explore-collection"
-        value={value}
-        onChange={(e) => { onChange(e.target.value); if (e.target.value !== ALL) onActive(e.target.value); }}
-      >
-        <option value={ALL}>All {scope.length} open collections (search across)</option>
-        {/* A link can name several collections; the control says so rather
-            than calling a subset "all" (Codex, PR #63). Choosing anything
-            else replaces it. */}
-        {subset ? <option value={SUBSET}>{subset.length} collections from this link: {subset.map(short).join(", ")}</option> : null}
-        {collections.map(({ entry, open, previewUnavailable }) => (
-          <option key={entry.id} value={entry.id} disabled={!open}>
-            {entry.short}{open ? (previewUnavailable ? " · no preview yet" : "") : " · Cedar Press+ · locked"}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-// ── The record ─────────────────────────────────────────────────────────────
-
-/**
- * What this collection is, on request.
- *
- * The paragraph that used to sit above the table — the collection's blurb,
- * its coverage, how it is built and what it reads — is here, behind one
- * control. Review, 2026-09-15: "keep collection coverage and methodology
- * available through 'About this collection'."
- *
- * Everything in it is the launch descriptor's own prose (`method`, `sources`)
- * plus the catalog's `blurb`, `linkage` and coverage, so the panel cannot say
- * something the collection does not, and a descriptor change moves it.
- */
 function AboutCollection({ entry }) {
   const launch = LAUNCH_COLLECTION.find((item) => item.id === entry.id);
   const catalog = PRESS_CATALOG_BY_ID[entry.id] ?? entry;
@@ -826,6 +789,32 @@ function LockedCollection({ entry }) {
   );
 }
 
+/** The selected collection's ten-row sample, with its citation in the file. */
+function SampleDownload({ entry }) {
+  const [refusal, setRefusal] = useState(null);
+  return (
+    <>
+      <button
+        type="button"
+        className="cp-read__act cp-ex__sample"
+        onClick={() => {
+          track(EVENT.collectionDownloaded, { collection: entry.id, shelf: entry.shelf });
+          setRefusal(null);
+          downloadCsv(entry).catch((error) =>
+            setRefusal(error?.message || "The download did not go through."),
+          );
+        }}
+      >
+        <span aria-hidden="true">&#8595;</span>{" "}
+        {hasReleaseFile(entry)
+          ? `Ten-row sample of ${entry.short || entry.name}`
+          : "Collection description (sample pending)"}
+      </button>
+      {refusal ? <span className="cp-ex__fine" role="alert">{refusal}</span> : null}
+    </>
+  );
+}
+
 export default function PressExplore({ user, pick = null, onActive = () => {}, onSelected = () => {} }) {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -841,7 +830,24 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
   // link asks for that this reader cannot open, one nobody can open, one
   // with no preview yet. A narrow request that cannot be met is not
   // widened into everything.
-  const requested = cut.collections === null ? scope : cut.collections;
+  // THE PAGE OPENS ON A COLLECTION, NOT ON ALL OF THEM.
+  //
+  // Owner, 2026-09-20: "The page should open directly on a default
+  // collection, likely Federal Funding, with the user immediately able to
+  // switch collections." Twelve collections searched at once is a real view
+  // and the rail's first row still reaches it; it is just a poor first
+  // impression, because the one thing every row then has in common is that
+  // it came from somewhere else.
+  //
+  // `null` still means "the URL did not say", so an explicit all is an
+  // explicit list — which is why the rail's All row writes `scope` rather
+  // than clearing the parameter. A reader who asks for everything gets a
+  // long URL that says everything, and a link they send opens on what they
+  // were looking at.
+  const requested =
+    cut.collections === null
+      ? (scope.includes(DEFAULT_COLLECTION) ? [DEFAULT_COLLECTION] : scope.slice(0, 1))
+      : cut.collections;
   const lockedOut = requested.filter((id) => !scope.includes(id));
   const selected = requested.filter((id) => scope.includes(id));
   const single = selected.length === 1 ? collections.find((c) => c.entry.id === selected[0]) : null;
@@ -1069,15 +1075,15 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
 
   const chooseCollection = (value) => {
     if (value === SUBSET) return;
-    if (value === ALL) write({ collections: null, table: null });
+    // Explicit, for the reason in the `requested` note above: clearing the
+    // parameter now means "unspecified", which resolves to the default.
+    if (value === ALL) write({ collections: scope, table: null });
     else write({ collections: [value], table: null });
   };
   // The rail hands back a catalog entry, or null for "all of them". Locked
   // collections come through here too: selecting one is how a reader asks
   // what it is, and refusing the click answers nothing.
   const chooseFromRail = (entry) => chooseCollection(entry ? entry.id : ALL);
-  const subset = cut.collections !== null && selected.length > 1 ? selected : null;
-  const selectValue = cut.collections === null ? ALL : single ? single.entry.id : subset ? SUBSET : "";
   // The file is the cut's records: not until every selected preview and the
   // register have answered, and never silently short (Codex, PR #63).
   const settling = loading || registerStatus === "loading";
@@ -1116,7 +1122,9 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
         onSelect={chooseFromRail}
         user={user}
         mode="app"
-        allLabel={`All ${scope.length} open collections`}
+        // Short on a phone strip, where it sits beside twelve names and is
+        // the row a reader reaches for least.
+        allLabel={narrow ? `All ${scope.length}` : `All ${scope.length} open collections`}
       />
       <div className="cp-ex__in">
         {lockedSingle ? (
@@ -1141,11 +1149,25 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           </h3>
           <span className="cp-kind cp-kind--data">Preview · ten-record samples</span>
           {single ? <AboutCollection entry={single.entry} /> : null}
+          {/* THE SAMPLE FILE, AND WHY IT IS HERE.
+              It used to hang off the shelf's reader panel, which was deleted
+              when the table became the Collections page. It is not the same
+              file as the toolbar's Download: that one hands over the current
+              CUT as a ZIP with its README, and this is the collection's own
+              ten-row sample CSV carrying `cite_as` in the rows. Losing it
+              would have been a capability lost to a layout change, which is
+              the one thing the brief says a structural pass may not do. */}
+          {single ? <SampleDownload entry={single.entry} /> : null}
         </div>
 
         <div className="cp-ex__card">
           <div className="cp-ex__bar" role="group" aria-label="Filters">
-            <CollectionSelect value={selectValue} subset={subset} collections={collections} scope={scope} onChange={chooseCollection} onActive={onActive} />
+            {/* The collection picker was here. It is the rail now: one
+                control for one choice, rather than a dropdown and a rail
+                agreeing with each other. A cut that names several
+                collections has no rail row to light, so the caption says how
+                many and "Clear filters" resets — the state is still visible,
+                it is just not a second selector. */}
             <input
               type="search"
               className="cp-ex__q"
