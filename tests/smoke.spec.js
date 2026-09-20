@@ -103,6 +103,19 @@ async function openDoorCedar(page) {
 }
 
 test.describe("the gate", () => {
+  test("the private preview note invites feedback and gives an access contact", async ({ page }) => {
+    await page.goto("/");
+    const notice = page.getByTestId("press-preview-note");
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText("small group");
+    await expect(notice.getByRole("link", { name: "elijah.moreno@lumecon.ai" }))
+      .toHaveAttribute("href", /mailto:elijah\.moreno@lumecon\.ai/);
+    await notice.getByRole("button", { name: "Dismiss private preview notice" }).click();
+    await expect(notice).toHaveCount(0);
+    await page.goto("/data");
+    await expect(page.getByTestId("press-preview-note")).toHaveCount(0);
+  });
+
   test("a signed-out visitor gets the gate, not the reader", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");

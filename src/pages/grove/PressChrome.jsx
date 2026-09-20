@@ -5,7 +5,7 @@
 // three copies of a footer drift three ways — which is exactly what had
 // happened: every page carried its own two-link version, so where the footer
 // took you depended on where you already were.
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
@@ -167,6 +167,45 @@ function SectionMenu({ section }) {
   );
 }
 
+const PREVIEW_NOTICE_KEY = "cedar-press-private-preview-notice";
+
+function previewNoticeIsDismissed() {
+  try {
+    return window.sessionStorage.getItem(PREVIEW_NOTICE_KEY) === "dismissed";
+  } catch {
+    // Storage can be unavailable in a private or embedded browser. The
+    // notice is still useful there; it simply returns on the next route.
+    return false;
+  }
+}
+
+/** A small, honest arrival note for the limited pre-launch circulation. */
+export function PressPreviewNotice() {
+  const [visible, setVisible] = useState(() => !previewNoticeIsDismissed());
+
+  const dismiss = () => {
+    try { window.sessionStorage.setItem(PREVIEW_NOTICE_KEY, "dismissed"); } catch { /* Keep the current view dismissed. */ }
+    setVisible(false);
+  };
+
+  if (!visible) return null;
+  return (
+    <aside className="cp-preview" data-testid="press-preview-note" aria-label="Private preview">
+      <div className="cp-preview__copy">
+        <span className="cp-preview__label">Private preview</span>
+        <p>
+          We&rsquo;ve shared Cedar Press with a small group while we prepare its launch. If you received this link,
+          we&rsquo;d value your feedback on what feels useful, unclear, or missing. The product is still evolving.
+          Need a login? <a href="mailto:elijah.moreno@lumecon.ai?subject=Cedar%20Press%20preview%20access">elijah.moreno@lumecon.ai</a>
+        </p>
+      </div>
+      <button type="button" className="cp-preview__close" onClick={dismiss} aria-label="Dismiss private preview notice">
+        Continue <span aria-hidden="true">&#8594;</span>
+      </button>
+    </aside>
+  );
+}
+
 export function PressMast({ user, onSignOut, section = null, nav = true }) {
   const home = section === "home";
   // The distribution line is for visitors deciding what this is; a
@@ -253,6 +292,7 @@ export function PressMast({ user, onSignOut, section = null, nav = true }) {
         </nav>
       ) : null}
     </header>
+    <PressPreviewNotice />
     </>
   );
 }

@@ -79,6 +79,7 @@ import CollectionPreview from "./PressCollectionPreview";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
 import PressDoorCollections from "./PressDoorCollections";
+import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
 
@@ -517,6 +518,7 @@ export default function PressGate({ user }) {
           </div>
         ) : null}
       </header>
+      <PressPreviewNotice />
 
       {/* ── The hero: the promise, and beside it the product ─────────── */}
       <section className="cp-hero3" aria-label="Cedar Press">
