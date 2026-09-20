@@ -149,10 +149,21 @@
 
           {#- The React shelf shows one collection at a time, on hover. With no
               script the honest substitute is all of them, in the same panel
-              and the same classes. -#}
+              and the same classes.
+
+              The wrapper carries no class. It used to be `cp-read__on`, the
+              name of the shown half of the client's on/idle pair, kept so the
+              two implementations read alike. The client's shelf was rebuilt
+              and has neither state any more, so the name stopped describing
+              anything on either side — and `test_the_page_invents_no_class_of_its_own`
+              is precisely the test for a class that is neither styled here
+              nor written there. It never carried a rule of its own, so
+              dropping it changes nothing but the name: the children are what
+              press.css styles, and the div is still the flex item that keeps
+              one collection's lines together. -#}
           <aside class="cp-read">
             {% for entry in band.entries %}
-              <div class="cp-read__on">
+              <div>
                 <span class="cp-read__cap">Cedar collection</span>
                 <h4 class="cp-read__name">{{ entry.name }}</h4>
                 <p class="cp-read__blurb">{{ entry.blurb }}</p>
