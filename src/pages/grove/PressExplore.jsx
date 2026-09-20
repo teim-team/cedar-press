@@ -534,7 +534,7 @@ function AboutCollectionLink({ onOpen }) {
       {/* "About" alone on a phone, where this shares a row with two actions
           across 358px and the words "this collection" name what the whole
           screen is already about. */}
-      About<span className="cp-ex__aboutlong"> this collection</span>
+      About<span className="cp-ex__aboutlong">&nbsp;this collection</span>
     </button>
   );
 }
