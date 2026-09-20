@@ -675,7 +675,6 @@
 /* The price stands with the tier's name, in the band's own ink. */
 .teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }
 .teim-rd .cp-band--fill .cp-band__price { color: #fff; }
-.teim-rd .cp-gt__pricehead { font-family: var(--sans); font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
 /* ── Accessibility ───────────────────────────────────────────────────────
  * The parts that are not a rule to satisfy but the difference between
  * reading a page and traversing it. */
@@ -699,8 +698,7 @@
  * ring nobody can see. */
 .teim-rd .cp-band--fill a:focus-visible,
 .teim-rd .cp-band--fill button:focus-visible,
-.teim-rd .cp-close a:focus-visible,
-.teim-rd .cp-gt a:focus-visible { outline-color: #fff; }
+.teim-rd .cp-close a:focus-visible { outline-color: #fff; }
 
 /* A reader who has asked their system for less motion gets none of the
  * page's own: transitions collapse rather than shorten, because a 1ms
@@ -1217,18 +1215,14 @@
 /* ── Cedar Grove, teased ───────────────────────────────────────────────── */
 /* A hairline between the last Cedar Press shelf and Cedar Grove, which is a
  * different product rather than a further rung. */
-/* Cedar Grove, as one band. It was a page-sized block with its own headline,
- * capability grid and public-data list; under a reader's own collections that
- * read as a second product's home page. Three lines and a price now. */
-.teim-rd .cp-gt { max-width: 1560px; margin: 3.2rem auto 0; padding: 2.4rem 2.4rem 0; border-top: 1px solid var(--line); }
-.teim-rd .cp-gt__bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1.4rem 3rem; align-items: center; padding: 1.7rem 1.9rem; border: 1px solid var(--line); border-left: 3px solid var(--teal); border-radius: 3px; background: var(--teal-tint); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-.teim-rd .cp-gt__bar:hover { box-shadow: 0 14px 34px -28px rgba(10, 15, 38, 0.4); }
-.teim-rd .cp-gt__say { min-width: 0; }
-.teim-rd .cp-gt__title { font-family: var(--sans); font-size: clamp(1.2rem, 2vw, 1.55rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.16; color: var(--ink); margin: 0.35rem 0 0.5rem; max-width: 52ch; }
-.teim-rd .cp-gt__body { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 92ch; }
-.teim-rd .cp-gt__buy { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; flex: none; }
-.teim-rd .cp-gt__fine { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.9rem; }
-@media (max-width: 860px) { .teim-rd .cp-gt { padding: 2rem 1.1rem 0; } .teim-rd .cp-gt__bar { grid-template-columns: minmax(0, 1fr); padding: 1.3rem 1.2rem; } }
+/* The collections surface ends as a working surface. The Grove route keeps a
+ * compact deep-link target for articles without turning this page into a
+ * second product pitch. */
+.teim-rd .cp-grove-exit { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; align-items: baseline; max-width: 1560px; margin: 0 auto; padding: 0.85rem 2.4rem; border-top: 1px solid var(--line); font-size: 0.88rem; line-height: 1.5; color: var(--muted); }
+.teim-rd .cp-grove-exit strong { color: var(--ink); }
+.teim-rd .cp-grove-exit a { margin-left: auto; color: var(--dteal); font-weight: 700; text-decoration: none; }
+.teim-rd .cp-grove-exit a:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 860px) { .teim-rd .cp-grove-exit { padding-inline: 1.1rem; } .teim-rd .cp-grove-exit a { margin-left: 0; } }
 /* ── The end of the page ──────────────────────────────────────────────────
  * Two teal cards on white, shut until asked. Both used to be open columns of
  * prose, which is a wall of text at the end of a page nobody came here to
@@ -1291,35 +1285,35 @@
 .teim-rd .cp-msec__close { font-size: 1.02rem; line-height: 1.6; color: var(--ink); font-weight: 600; margin: 1.6rem 0 0; max-width: 92ch; }
 
 /* ── The process, as one run ────────────────────────────────────────────── */
-.teim-rd .cp-rail { list-style: none; margin: 0; padding: 2.4rem 0 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0 1.6rem; position: relative; }
+.teim-rd .cp-proc { list-style: none; margin: 0; padding: 2.4rem 0 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0 1.6rem; position: relative; }
 /* One rule behind all seven, so the eye reads a single process rather than
  * seven separate things. */
-.teim-rd .cp-rail::before { content: ''; position: absolute; top: 2.4rem; left: 0; right: 0; height: 1px; background: var(--line); }
-.teim-rd .cp-rail__stage { position: relative; padding-top: 1.5rem; }
+.teim-rd .cp-proc::before { content: ''; position: absolute; top: 2.4rem; left: 0; right: 0; height: 1px; background: var(--line); }
+.teim-rd .cp-proc__stage { position: relative; padding-top: 1.5rem; }
 
 /* Hover on the process rail: the step under the pointer answers in teal
  * and the rest recede slightly, so a seven-step line can be read one step
  * at a time. */
-.teim-rd .cp-rail__stage { transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
-.teim-rd .cp-rail:hover .cp-rail__stage { opacity: 0.55; }
-.teim-rd .cp-rail:hover .cp-rail__stage:hover { opacity: 1; transform: translateY(-3px); }
-.teim-rd .cp-rail__stage:hover .cp-rail__name { color: var(--dteal); }
-.teim-rd .cp-rail__stage:hover::before { background: var(--dteal); width: 10px; height: 10px; }
-.teim-rd .cp-rail__name { transition: color 0.2s ease; }
+.teim-rd .cp-proc__stage { transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-proc:hover .cp-proc__stage { opacity: 0.55; }
+.teim-rd .cp-proc:hover .cp-proc__stage:hover { opacity: 1; transform: translateY(-3px); }
+.teim-rd .cp-proc__stage:hover .cp-proc__name { color: var(--dteal); }
+.teim-rd .cp-proc__stage:hover::before { background: var(--dteal); width: 10px; height: 10px; }
+.teim-rd .cp-proc__name { transition: color 0.2s ease; }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-rail__stage { transition: none; }
-  .teim-rd .cp-rail:hover .cp-rail__stage:hover { transform: none; }
+  .teim-rd .cp-proc__stage { transition: none; }
+  .teim-rd .cp-proc:hover .cp-proc__stage:hover { transform: none; }
 }
-.teim-rd .cp-rail__stage::before { content: ''; position: absolute; top: -3px; left: 0; width: 7px; height: 7px; background: var(--teal); }
-.teim-rd .cp-rail__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; color: var(--dteal); }
-.teim-rd .cp-rail__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.3rem 0 0.4rem; }
-.teim-rd .cp-rail__body { font-size: 0.85rem; line-height: 1.5; color: var(--muted); margin: 0; }
+.teim-rd .cp-proc__stage::before { content: ''; position: absolute; top: -3px; left: 0; width: 7px; height: 7px; background: var(--teal); }
+.teim-rd .cp-proc__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; color: var(--dteal); }
+.teim-rd .cp-proc__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.3rem 0 0.4rem; }
+.teim-rd .cp-proc__body { font-size: 0.85rem; line-height: 1.5; color: var(--muted); margin: 0; }
 @media (max-width: 1100px) {
-  .teim-rd .cp-rail { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.4rem; }
-  .teim-rd .cp-rail::before { display: none; }
-  .teim-rd .cp-rail__stage { border-top: 1px solid var(--line); }
+  .teim-rd .cp-proc { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.4rem; }
+  .teim-rd .cp-proc::before { display: none; }
+  .teim-rd .cp-proc__stage { border-top: 1px solid var(--line); }
 }
-@media (max-width: 640px) { .teim-rd .cp-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .teim-rd .cp-proc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ── Where reporting runs out: three stories, not three cards ──────────── */
 
@@ -1905,7 +1899,6 @@
 .teim-rd .cp-msec__lede,
 .teim-rd .cp-mh__sub,
 .teim-rd .cp-nh__sub,
-.teim-rd .cp-gt__body,
 .teim-rd .cp-close__body,
 .teim-rd .cp-ar__dek {
   text-align: left;
@@ -1927,7 +1920,6 @@
   .teim-rd .cp-msec__lede,
   .teim-rd .cp-mh__sub,
   .teim-rd .cp-nh__sub,
-  .teim-rd .cp-gt__body,
   .teim-rd .cp-close__body,
   .teim-rd .cp-ar__dek { text-align: left; }
 }
@@ -3117,9 +3109,8 @@
 }
 
 /* ── Explore the data ────────────────────────────────────────────────────
- * One card under the shelves: the toolbar, the caption, the table and the
- * foot are one bordered thing, in the shelf's own language (hairlines, no
- * radius, mono caps for labels). The shelf above it is untouched. */
+ * The rail and table are one working surface: hairlines, plain paper, and
+ * compact labels leave the data as the dominant visual object. */
 .teim-rd .cp-ex { max-width: 1560px; margin: 3.2rem auto 0; padding: 0 2.4rem; }
 /* The viewer's head: the name of what is on screen, the sample badge, and
  * the disclosure holding what used to be a paragraph. One row, wrapping. */
@@ -3242,6 +3233,9 @@
  * cannot open something is owed the name of the thing that opens it. */
 .teim-rd .cp-rail__item.is-locked { color: rgba(255, 255, 255, 0.58); }
 .teim-rd .cp-rail__item.is-locked .cp-rail__mark { color: rgba(255, 255, 255, 0.4); }
+.teim-rd .cp-rail__item.is-pending { color: rgba(255, 255, 255, 0.58); }
+.teim-rd .cp-rail__item.is-pending .cp-rail__name { color: rgba(255, 255, 255, 0.6); }
+.teim-rd .cp-rail__item.is-pending .cp-rail__mark { color: rgba(255, 255, 255, 0.4); }
 .teim-rd .cp-rail__lock { margin-left: auto; padding: 0.1rem 0.34rem; border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 4px; font-family: var(--mono); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); }
 .teim-rd .cp-ex__frame > .cp-ex__in { padding: 1.2rem 1.3rem 1.4rem; min-width: 0; }
 
@@ -3269,20 +3263,66 @@
   .teim-rd .cp-ex__frame > .cp-ex__in { padding: 1rem; }
 }
 
-/* ══ A LOCKED COLLECTION ══════════════════════════════════════════════════
- * Selected, framed, explained. Nothing protected is fetched, so there is
- * nothing here to blur; the inset says what opens it and stops. */
-.teim-rd .cp-kind--lock { background: var(--door-navy, #09132b); color: #fff; }
-.teim-rd .cp-lock__lede { margin: 0 0 1rem; font-size: 0.98rem; line-height: 1.6; color: var(--ink-2); max-width: 70ch; }
-.teim-rd .cp-lock__facts { display: flex; flex-wrap: wrap; gap: 1.6rem; margin: 0 0 1.2rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line); }
-.teim-rd .cp-lock__facts dt { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-lock__facts dd { margin: 0.2rem 0 0; font-family: var(--sans); font-size: 0.92rem; font-weight: 600; color: var(--ink); }
-.teim-rd .cp-lock__inset { padding: 1.1rem 1.2rem; border-radius: 10px; background: var(--door-navy, #09132b); color: #fff; max-width: 46rem; }
-.teim-rd .cp-lock__insethead { margin: 0; font-family: var(--sans); font-size: 1rem; font-weight: 700; letter-spacing: -0.012em; }
-.teim-rd .cp-lock__insetbody { margin: 0.35rem 0 0.9rem; font-size: 0.9rem; line-height: 1.55; color: rgba(255, 255, 255, 0.8); }
-.teim-rd .cp-lock__act { display: inline-block; font-family: var(--sans); font-size: 0.88rem; font-weight: 600; color: var(--door-accent-light, #5fd9cc); text-decoration: underline; text-underline-offset: 3px; }
-.teim-rd .cp-lock__act:hover { color: #fff; }
-@media (max-width: 640px) { .teim-rd .cp-lock__facts { gap: 1rem 1.6rem; } }
+/* The all-collections view remains a table: the rows are collections until
+ * a reader narrows to records. */
+.teim-rd .cp-atlas td { vertical-align: top; white-space: normal; }
+.teim-rd .cp-atlas__cell { min-width: 20rem; }
+.teim-rd .cp-atlas__open { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.teim-rd .cp-atlas__open:hover { color: var(--dteal); }
+.teim-rd .cp-atlas__mark { display: grid; place-items: center; width: 18px; height: 18px; color: var(--dteal); flex: 0 0 auto; }
+.teim-rd .cp-atlas__mark svg { width: 17px; height: 17px; }
+.teim-rd .cp-atlas .cp-ex__uid { display: -webkit-box; max-width: 46ch; margin-top: 0.2rem; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0; line-height: 1.45; }
+.teim-rd .cp-atlas__mobilemeta { display: none; }
+.teim-rd .cp-atlas__mobileaccess.is-included { color: var(--dteal); }
+.teim-rd .cp-atlas__mobileaccess.is-locked,
+.teim-rd .cp-atlas__mobileaccess.is-pending { color: var(--muted); }
+.teim-rd .cp-atlas__included,
+.teim-rd .cp-atlas__locked,
+.teim-rd .cp-atlas__pending { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.teim-rd .cp-atlas__included { color: var(--dteal); }
+.teim-rd .cp-atlas__locked,
+.teim-rd .cp-atlas__pending { color: var(--muted); }
+.teim-rd .cp-atlas__row:hover td { background: var(--teal-tint); }
+.teim-rd .cp-atlas__open:focus-visible { outline: 2px solid var(--dteal); outline-offset: 3px; }
+.teim-rd .cp-atlas__row.is-locked .cp-atlas__open,
+.teim-rd .cp-atlas__row.is-locked .cp-atlas__mark,
+.teim-rd .cp-atlas__row.is-locked .cp-ex__uid,
+.teim-rd .cp-atlas__row.is-pending .cp-atlas__open,
+.teim-rd .cp-atlas__row.is-pending .cp-atlas__mark,
+.teim-rd .cp-atlas__row.is-pending .cp-ex__uid { color: var(--muted); }
+
+/* A locked collection keeps the same toolbar, headers, and table density as
+ * an available collection. This state renders declared metadata only; it
+ * does not fetch the collection sample. */
+.teim-rd .cp-lock { display: flex; flex-direction: column; min-height: 0; }
+.teim-rd .cp-lock__table td { padding-block: 0.62rem; }
+.teim-rd .cp-lock__bar { display: block; width: var(--lock-width, 70%); height: 0.62rem; border-radius: 2px; background: var(--line-soft, rgba(10, 28, 52, 0.08)); }
+.teim-rd .cp-lock__row:nth-child(2n) .cp-lock__bar { --lock-width: 52%; }
+.teim-rd .cp-lock__row:nth-child(3n) .cp-lock__bar { --lock-width: 84%; }
+.teim-rd .cp-lock__row:nth-child(5n) .cp-lock__bar { --lock-width: 44%; }
+.teim-rd .cp-lock__row td:last-child .cp-lock__bar { --lock-width: 38%; }
+.teim-rd .cp-lock__say { flex: 1 1 auto; min-width: 0; max-width: 42rem; margin: 0 0 0 auto; font-size: 0.84rem; color: var(--ink-2); text-align: right; }
+.teim-rd .cp-lock__say a { white-space: nowrap; color: var(--dteal); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--teal-line); }
+.teim-rd .cp-lock__say a:hover { border-bottom-color: var(--dteal); }
+.teim-rd .cp-lock__unavailable { display: grid; align-content: center; gap: 1rem; flex: 1 1 auto; min-height: 16rem; padding: clamp(1.4rem, 4vw, 3rem); border-bottom: 1px solid var(--line); background: linear-gradient(135deg, var(--teal-tint), var(--bg) 48%); }
+.teim-rd .cp-lock__unavailable h2 { margin: 0; font-family: var(--sans); font-size: clamp(1.25rem, 2vw, 1.65rem); letter-spacing: -0.025em; color: var(--ink); }
+.teim-rd .cp-lock__unavailable > p:last-child { max-width: 62ch; margin: 0; color: var(--ink-2); font-size: 0.94rem; line-height: 1.55; }
+.teim-rd .cp-lock__eyebrow { margin: 0; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-lock__status { display: flex; flex-wrap: wrap; gap: 0.8rem 2rem; margin: 0; }
+.teim-rd .cp-lock__status > div { display: grid; gap: 0.15rem; }
+.teim-rd .cp-lock__status dt { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-lock__status dd { margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-ex__act.is-off { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.7rem; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: default; }
+@media (max-width: 720px) {
+  .teim-rd .cp-lock__say { margin-left: 0; text-align: left; }
+  .teim-rd .cp-lock__row:nth-child(n + 15) { display: none; }
+  .teim-rd .cp-atlas__cell { min-width: 0; }
+  .teim-rd .cp-atlas th:not(:first-child),
+  .teim-rd .cp-atlas td:not(:first-child) { display: none; }
+  .teim-rd .cp-atlas .cp-ex__uid { -webkit-line-clamp: 1; line-clamp: 1; }
+  .teim-rd .cp-atlas__mobilemeta { display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; margin-top: 0.45rem; color: var(--muted); font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .teim-rd .cp-atlas__mobilemeta > span + span::before { content: "·"; margin-right: 0.5rem; color: var(--line); }
+}
 
 body[data-cp-explore-in-view] .teim-rd .cedar-widget__launcher { display: none; }
 /* And the same for the door's preview: while the proof object is on screen,
@@ -3673,30 +3713,30 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ch__act--lead { border-color: var(--dteal); background: var(--dteal); color: #fff; }
 .teim-rd .cp-ch__act--lead:hover { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
 
-/* The folded argument. Closed by default: the claim above it is the page's
- * answer, and this is the page showing its work to whoever asks. */
-.teim-rd .cp-why { margin: 1.6rem 0 0; border-top: 1px solid var(--line); }
-.teim-rd .cp-why__sum {
+/* The folded argument is deliberately distinct from the landing-page passage
+ * band, which also uses the word “why.” */
+.teim-rd .cp-reason { margin: 1.6rem 0 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-reason__sum {
   display: flex; align-items: center; gap: 0.55rem; cursor: pointer; list-style: none;
   padding: 0.75rem 0; min-height: 44px;
   font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--muted);
 }
-.teim-rd .cp-why__sum::-webkit-details-marker { display: none; }
-.teim-rd .cp-why__sum:hover { color: var(--dteal); }
-.teim-rd .cp-why__sum:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-reason__sum::-webkit-details-marker { display: none; }
+.teim-rd .cp-reason__sum:hover { color: var(--dteal); }
+.teim-rd .cp-reason__sum:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
 /* The cue is a plus that becomes a minus: a caret at this size reads as a
  * text glyph rather than a control. */
-.teim-rd .cp-why__cue { position: relative; width: 14px; height: 14px; flex: none; }
-.teim-rd .cp-why__cue::before,
-.teim-rd .cp-why__cue::after { content: ''; position: absolute; background: currentColor; transition: opacity 0.16s ease; }
-.teim-rd .cp-why__cue::before { top: 6px; left: 0; width: 14px; height: 2px; }
-.teim-rd .cp-why__cue::after { left: 6px; top: 0; width: 2px; height: 14px; }
-.teim-rd .cp-why[open] .cp-why__cue::after { opacity: 0; }
-.teim-rd .cp-why__in { padding: 0 0 0.9rem; }
-.teim-rd .cp-why__in > p { font-size: 1rem; line-height: 1.66; color: var(--ink-2); margin: 0 0 1rem; max-width: 92ch; }
-.teim-rd .cp-why__in > p:last-child { margin-bottom: 0; }
-.teim-rd .cp-why__in .cp-ur { margin-top: 0; }
+.teim-rd .cp-reason__cue { position: relative; width: 14px; height: 14px; flex: none; }
+.teim-rd .cp-reason__cue::before,
+.teim-rd .cp-reason__cue::after { content: ''; position: absolute; background: currentColor; transition: opacity 0.16s ease; }
+.teim-rd .cp-reason__cue::before { top: 6px; left: 0; width: 14px; height: 2px; }
+.teim-rd .cp-reason__cue::after { left: 6px; top: 0; width: 2px; height: 14px; }
+.teim-rd .cp-reason[open] .cp-reason__cue::after { opacity: 0; }
+.teim-rd .cp-reason__in { padding: 0 0 0.9rem; }
+.teim-rd .cp-reason__in > p { font-size: 1rem; line-height: 1.66; color: var(--ink-2); margin: 0 0 1rem; max-width: 92ch; }
+.teim-rd .cp-reason__in > p:last-child { margin-bottom: 0; }
+.teim-rd .cp-reason__in .cp-ur { margin-top: 0; }
 
 @media (max-width: 720px) {
   /* One line that opens, and it says where the reader is. */
@@ -3709,7 +3749,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   .teim-rd .cp-ch__act { width: 100%; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-mix__item, .teim-rd .cp-ch__act, .teim-rd .cp-why__cue::before, .teim-rd .cp-why__cue::after { transition: none; }
+  .teim-rd .cp-mix__item, .teim-rd .cp-ch__act, .teim-rd .cp-reason__cue::before, .teim-rd .cp-reason__cue::after { transition: none; }
 }
 
 /* ── A row is a door ──────────────────────────────────────────────────────
@@ -4078,7 +4118,7 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * chrome above it (`--cp-frame-h`, measured in `CedarPressData`), and the
  * scrolling moves INSIDE it: the rail scrolls its own twelve rows, the
  * records scroll under a heading that stays, and the page itself does not
- * move until a reader goes past the frame to the Cedar Grove case.
+ * move until a reader goes past the frame to the compact Cedar Grove exit.
  *
  * Every box between the frame and the scroller needs `min-height: 0`. A flex
  * item's default floor is its content, so without it the table refuses to be
@@ -4093,7 +4133,9 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   }
   .teim-rd .cp-page--table .cp-ex__frame > .cp-rail { position: static; height: 100%; overflow-y: auto; }
   .teim-rd .cp-page--table .cp-ex__frame > .cp-ex__in { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+  .teim-rd .cp-page--table .cp-lock > .cp-ex__card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
   .teim-rd .cp-page--table .cp-ex__card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .teim-rd .cp-page--table .cp-ex__in > .cp-lock { flex: 1 1 auto; min-height: 0; }
   /* The toolbar, the legend and the foot keep their own height; only the
      records take what is left. */
   .teim-rd .cp-page--table .cp-ex__card > .cp-ex__bar,
@@ -4142,10 +4184,6 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
   /* The table head was already `position: sticky` and it never once stuck,
      because nothing here scrolled vertically until now. It does from here. */
 }
-/* The Cedar Grove case at the foot gets the page's gutters back: it is a
-   piece of the document, not part of the working surface. It sits below the
-   screen the table fills, which is where `/data#grove` still lands. */
-.teim-rd .cp-page--table .cp-gt { margin-top: 0; }
 /* ── THE SAME ASK, ON A PHONE ────────────────────────────────────────────
  * The table is the page here too, and here it is harder: 390px of width and
  * a stacked toolbar put the first record below the fold. Three things go,
@@ -4206,6 +4244,13 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ab__block p:last-child { margin-bottom: 0; }
 .teim-rd .cp-ab__unit { padding: 0.65rem 0.8rem; border-left: 2px solid var(--dteal); background: var(--teal-tint); }
 .teim-rd .cp-ab__sources b, .teim-rd .cp-ab__unit b { color: var(--ink); }
+.teim-rd .cp-ab__lead { margin: 0.2rem 0 0; }
+.teim-rd .cp-ab__more { margin-top: 1.2rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+.teim-rd .cp-ab__more > summary { cursor: pointer; list-style: none; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--dteal); }
+.teim-rd .cp-ab__more > summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-ab__more > summary::after { content: " \203A"; display: inline-block; transform: rotate(90deg); }
+.teim-rd .cp-ab__more[open] > summary::after { transform: rotate(-90deg); }
+.teim-rd .cp-ab__morein { margin-top: 0.4rem; }
 .teim-rd .cp-ab__tables { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; }
 .teim-rd .cp-ab__tables > li { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-2); overflow-wrap: anywhere; }
 /* The dictionary is long by nature; it opens rather than pushing everything

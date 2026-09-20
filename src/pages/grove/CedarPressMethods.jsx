@@ -246,12 +246,12 @@ function Chapter({ id, title, claim, children }) {
 // nameless control.
 function Reasoning({ label = "Why this is built this way", children }) {
   return (
-    <details className="cp-why">
-      <summary className="cp-why__sum">
-        <span className="cp-why__cue" aria-hidden="true" />
+    <details className="cp-reason">
+      <summary className="cp-reason__sum">
+        <span className="cp-reason__cue" aria-hidden="true" />
         {label}
       </summary>
-      <div className="cp-why__in">{children}</div>
+      <div className="cp-reason__in">{children}</div>
     </details>
   );
 }
