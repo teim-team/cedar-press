@@ -111,21 +111,18 @@ export default function CedarPressData() {
       <main id="cp-main" className="cp cp-page cp-page--table" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
-        {/* COLLECTIONS, THEN THE COLLECTIONS.
-            Review, 2026-09-15: "the remaining introduction still consumes
-            almost the entire mobile screen. Replace 'Every collection, and
-            what it holds' with simply 'Collections'. Remove the paragraph
-            about records never being designed to work together. That belongs
-            in Methods. Move the entity-methodology link into collection
-            information or the footer. Understanding entity resolution should
-            not be a prerequisite for choosing Federal Funding."
-            All three. The methodology link is in the footer, which every page
-            carries, and in each collection's own panel, where a reader asking
-            how this collection was built is already looking. */}
-        <section className="cp-mh cp-fade">
-          <h1 className="cp-mh__title">Collections</h1>
-        </section>
+        {/* NO TITLE BAND. THE TABLE IS THE PAGE.
+            Owner, 2026-09-20: "the collection page we want the table to just
+            take up that screen in full... that is the main thing."
 
+            A band reading "Collections" above a screen-filling table of one
+            collection was a label for something already labelled: the rail
+            names the twelve, the pane names the one in hand, and between
+            them they had said it twice before the reader reached a record.
+            Its 65px went to the records.
+
+            The page still has a first-level heading — the collection's own
+            name, inside the pane, which is what this page is about. */}
         <PressShelf user={user} />
 
         <PressCedarFab />

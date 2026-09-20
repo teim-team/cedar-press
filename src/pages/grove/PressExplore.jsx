@@ -76,7 +76,7 @@ const DEFAULT_COLLECTION = "funding";
 import { Cards, Human, Rows } from "./PressRecordTable.jsx";
 import { columnPlan, short } from "../../features/grove/recordColumns.js";
 import { coverageLabel, upgradeFor } from "../../features/grove/pressAccess.js";
-import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
+import { TBN_PLANS_URL, articleHref, articlesDrawingOn } from "../../features/grove/pressArticles.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
 import PressCollectionRail from "./PressCollectionRail.jsx";
@@ -451,6 +451,79 @@ function YearRange({ cut, bounds, basis, onChange }) {
  * at `?about=1` beside the cut, so closing it returns them to the table they
  * opened it from.
  */
+/**
+ * WHAT WAS WRITTEN FROM THIS COLLECTION.
+ *
+ * Owner, 2026-09-20: "maybe articles that have used those data sets get
+ * populated... because we have links to the data sets on the article page.
+ * But that feedback loop seems helpful."
+ *
+ * It is the same `draws` the article page already reads, followed the other
+ * way (`articlesDrawingOn`). Until now the product pointed one way only: a
+ * brief offered its data, and the data said nothing about the brief written
+ * from it — which is the half of the loop that brings a subscriber who came
+ * for records back to the journalism.
+ *
+ * It sits in the caption row rather than in a band of its own, so the loop
+ * costs the records no height on a page whose whole point is the records. A
+ * piece that runs on Tribal Business News opens there and says so; one
+ * hosted here opens here.
+ */
+function WrittenFrom({ collectionId, onMore }) {
+  const pieces = articlesDrawingOn(collectionId);
+  if (!pieces.length) return null;
+  // ONE, NOT ALL OF THEM. Two headlines in this row pushed it onto a second
+  // line, which on a page whose whole point is the records is a row of
+  // recommendations taking space from the thing being recommended. The rest
+  // are listed in the collection's own profile, where a reader asking what
+  // has been written from this collection is already looking.
+  const [lead] = pieces;
+  const rest = pieces.length - 1;
+  const away = !lead.hosted;
+  // The title truncates; the arrow does not. Both inside one ellipsis box and
+  // the arrow is the first thing to disappear, which reads as a broken link
+  // rather than a shortened headline.
+  const label = (
+    <>
+      <span className="cp-ex__wrotetitle">Read: {lead.title}</span>
+      <span aria-hidden="true">{away ? "\u2197" : "\u2192"}</span>
+    </>
+  );
+  const note = () => track(EVENT.articleOpened, { article: lead.id, dataset: collectionId });
+  return (
+    <>
+      {away ? (
+        <a className="cp-ex__wrote" href={articleHref(lead)} target="_blank" rel="noreferrer" onClick={note}>
+          {label}
+        </a>
+      ) : (
+        <Link className="cp-ex__wrote" to={articleHref(lead)} onClick={note}>
+          {label}
+        </Link>
+      )}
+      {rest ? (
+        <button type="button" className="cp-ex__clear cp-ex__wrotemore" onClick={onMore} title={`${rest} more piece${rest === 1 ? "" : "s"} built from this collection`}>
+          +{rest} more
+        </button>
+      ) : null}
+    </>
+  );
+}
+
+/** The three declarations beside the table: a line on a desktop, a shut
+ *  disclosure on a phone. Same content, same test id, both ways. */
+function Legend({ narrow, children }) {
+  if (!narrow) {
+    return <p className="cp-ex__reads" data-testid="explore-scope">{children}</p>;
+  }
+  return (
+    <details className="cp-ex__reads cp-ex__reads--fold" data-testid="explore-scope">
+      <summary>How to read these numbers</summary>
+      <div className="cp-ex__readsin">{children}</div>
+    </details>
+  );
+}
+
 function AboutCollectionLink({ onOpen }) {
   return (
     <button type="button" className="cp-ex__aboutbtn" onClick={onOpen} data-testid="explore-about">
@@ -480,7 +553,9 @@ function LockedCollection({ entry }) {
   return (
     <div className="cp-lock" data-testid="explore-locked">
       <div className="cp-ex__head">
-        <h3 className="cp-ex__title">{entry.name}</h3>
+        {/* Same reason as the open pane's: a locked collection is still what
+            this page is about. */}
+        <h1 className="cp-ex__title">{entry.name}</h1>
         <span className="cp-kind cp-kind--lock">{upgrade.name}</span>
       </div>
       <div className="cp-ex__card">
@@ -878,9 +953,15 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             numbers — what the amounts are and what a year means here — stays
             beside the table, as fields rather than as prose. */}
         <div className="cp-ex__head">
-          <h3 className="cp-ex__title">
+          {/* THE COLLECTION'S NAME IS THE PAGE'S HEADING.
+              The page dropped its "Collections" band — a label above a
+              screen-filling table of one collection, saying a second time
+              what the rail and this line already say. So this is the h1: the
+              page is about this collection, and a page with no first-level
+              heading is a page a screen reader cannot summarise. */}
+          <h1 className="cp-ex__title">
             {single ? single.entry.name : `All ${scope.length} open collections`}
-          </h3>
+          </h1>
           <span className="cp-kind cp-kind--data">Preview · ten-record samples</span>
           {single ? <AboutCollectionLink onOpen={() => write({ about: true })} /> : null}
           {/* THE SAMPLE FILE, AND WHY IT IS HERE.
@@ -953,7 +1034,14 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
               collection: what the amounts are, what a year means in this
               table, and what the entity on a row is to the record. */}
           {single ? (
-            <p className="cp-ex__reads" data-testid="explore-scope">
+            /* WHAT THE NUMBERS MEAN, WITHOUT SPENDING A PHONE SCREEN ON IT.
+               On a wide screen these three declarations fit on one line
+               beside the table, which is where they belong: a reader should
+               not have to ask what "amount" means. On a phone they wrap to
+               four lines and push the first record below the fold, on a page
+               whose whole point is the records — so there they are a
+               disclosure, shut, one line tall, in the same place. */
+            <Legend narrow={narrow}>
               {contract?.amount ? (
                 <span><b>Amounts</b> {contract.amount_label ?? labelFor(table.key, contract.amount)}</span>
               ) : null}
@@ -966,7 +1054,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
                   versions are history, reachable by link (h=1) and not a
                   thing a subscriber browses. */}
               {contract?.superseded ? <span><b>Versions</b> superseded ones are not shown</span> : null}
-            </p>
+            </Legend>
           ) : null}
 
           {naming ? (
@@ -1065,6 +1153,13 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
             >
               Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
             </button>
+            {/* The loop out to the journalism sits here rather than in the
+                caption row above it. In the caption it pushed that row onto a
+                second line, and on a page whose whole point is the records, a
+                recommendation taking height from the thing recommended is the
+                wrong trade. Here it is beside the other thing a reader does
+                when they are done reading rows. */}
+            {single ? <WrittenFrom collectionId={single.entry.id} onMore={() => write({ about: true })} /> : null}
             <span className="cp-ex__fine">
               {single ? `About ${single.entry.short}: its coverage, fields and method. Cedar does not yet answer from the filtered records.` : "Choose one collection to ask Cedar about it."}
             </span>

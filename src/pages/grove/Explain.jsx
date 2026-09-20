@@ -59,6 +59,8 @@ export default function Explain({ label, children }) {
   const [open, setOpen] = useState(false);
   const [flip, setFlip] = useState(false);
   const [shift, setShift] = useState(0);
+  // Which edge the phone's bottom sheet docks to. See `place()`.
+  const [top, setTop] = useState(false);
   const hoverPointer = useHoverPointer();
   const id = useId();
   const wrapRef = useRef(null);
@@ -108,8 +110,27 @@ export default function Explain({ label, children }) {
     if (!panel || !anchor) return;
     setFlip(false);
     setShift(0);
-    // Bottom-sheet layout pins itself to the page gutters; nothing to solve.
-    if (getComputedStyle(panel).position === "fixed") return;
+    // THE SHEET MAY NOT COVER THE THING THAT OPENED IT.
+    //
+    // On a phone the panel is a bottom sheet pinned to the gutters, so there
+    // is no horizontal placement to solve — but there is a vertical one, and
+    // it was not being solved at all. A question mark low on the page sits
+    // inside the sheet's own band once the sheet is up, so the tap that
+    // should close it lands on the sheet instead and the control appears
+    // stuck open. Found by a test, on the collections page, after the
+    // toolbar above it was compressed and the caption row moved down into
+    // the band; it was reachable before that, just harder to hit.
+    //
+    // So the sheet docks to whichever edge is not the trigger's: bottom when
+    // the trigger is above the sheet, top when it is not.
+    if (getComputedStyle(panel).position === "fixed") {
+      const at = anchor.getBoundingClientRect();
+      const sheet = panel.getBoundingClientRect().height;
+      const gap = 16;
+      setTop(at.bottom > window.innerHeight - sheet - gap * 2);
+      return;
+    }
+    setTop(false);
 
     const room = document.documentElement.clientWidth;
     const edge = 8;
@@ -195,7 +216,7 @@ export default function Explain({ label, children }) {
       <span
         id={id}
         ref={panelRef}
-        className={`cp-ex1__panel${open ? " is-open" : ""}${flip ? " is-flipped" : ""}`}
+        className={`cp-ex1__panel${open ? " is-open" : ""}${flip ? " is-flipped" : ""}${top ? " is-top" : ""}`}
         style={shift ? { translate: `${shift}px` } : undefined}
         hidden={!open}
       >

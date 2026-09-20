@@ -1398,9 +1398,15 @@ test.describe("the first screen", () => {
     // rail down as a strip above the records, so both fit either way.
     const record = page.locator(".cp-ex__table tbody tr, .cp-ex__cardbtn").first();
     await record.waitFor();
-    expect(await topOf(page, ".cp-ex__table tbody tr, .cp-ex__cardbtn")).toBeLessThan(viewport * 2);
+    // ONE SCREEN, NOT TWO. This allowed `viewport * 2` while the page still
+    // carried a title band above the frame and the toolbar ran to three rows
+    // on a phone. Owner, 2026-09-20: "the collection page we want the table
+    // to just take up that screen in full." A record on the first screen is
+    // what that means, and it is the assertion that keeps it true.
+    expect(await topOf(page, ".cp-ex__table tbody tr, .cp-ex__cardbtn")).toBeLessThan(viewport);
     expect(errors).toEqual([]);
   });
+
 
   test("a record opens on its amount", async ({ page }) => {
     const errors = watchConsole(page);
@@ -1446,6 +1452,44 @@ test.describe("the first screen", () => {
         })
         .filter((entry) => entry.lines > 2));
     expect(tall).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the loop between the records and the journalism", () => {
+  // THE LOOP BETWEEN THE RECORDS AND THE JOURNALISM.
+  //
+  // Owner, 2026-09-20: "maybe articles that have used those data sets get
+  // populated... because we have links to the data sets on the article page.
+  // But that feedback loop seems helpful."
+  //
+  // One relationship, `draws`, read both ways. The risk a test is worth here
+  // is not that the link renders — it is that the two ends drift apart, so
+  // both directions are asserted against the same collection.
+  test("a collection names what was written from it, and the writing links back", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.locator(".cp-rail__item").first().waitFor();
+    // Out: the collection's records to a piece built on them.
+    const read = page.locator(".cp-ex__wrote").first();
+    await expect(read).toBeVisible();
+    await expect(read).toContainText("Read:");
+    // Federal Funding has two, and the second is not crammed into the row:
+    // it opens the collection's profile, where every one is listed.
+    await page.locator(".cp-ex__wrotemore").click();
+    await expect(page.getByRole("heading", { name: "Research built from this collection" })).toBeVisible();
+    expect(await page.locator(".cp-ab__read").count()).toBeGreaterThan(1);
+
+    // Back: a piece to the collection, open in the table rather than only as
+    // a ten-row file.
+    await page.goto("/articles/brief-deals");
+    const open = page.getByRole("link", { name: /Open it in the table/ }).first();
+    await expect(open).toBeVisible();
+    await open.click();
+    await expect(page).toHaveURL(/\/data\?c=deals/);
+    await page.locator(".cp-rail__item").first().waitFor();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Deals");
     expect(errors).toEqual([]);
   });
 });
