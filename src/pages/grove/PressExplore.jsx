@@ -650,7 +650,7 @@ function LockedCollection({ collection, onAbout }) {
       <InactiveCollectionToolbar entry={entry} onAbout={onAbout} />
 
       <div className="cp-ex__card">
-        <div className="cp-ex__scrollwrap" data-end="1">
+        <div className="cp-ex__scrollwrap">
           <div className="cp-ex__scroll">
             <table className="cp-ex__table cp-ex__table--table cp-lock__table" aria-hidden="true">
               <caption className="cp-badge__sr">
