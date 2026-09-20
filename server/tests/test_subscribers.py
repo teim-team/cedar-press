@@ -13,13 +13,14 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
+import pathlib
 import sys
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from cedar_press import db, subscribers  # noqa: E402
+from cedar_press import codes, db, session, subscribers  # noqa: E402
 
 PG = os.environ.get("CEDAR_PRESS_TEST_DATABASE_URL", "").strip()
 
@@ -225,6 +226,199 @@ class TestPostgresBackend(_Backend, unittest.TestCase):
         # Tidied here rather than in a cleanup, which would run after tearDown
         # has already put `DATABASE_URL` back and closed the pool.
         db.execute("DELETE FROM users WHERE email = %s", ("pro@example.org",))
+
+    def test_the_subscription_is_read_from_the_row_not_the_environment(self) -> None:
+        """Codex, PR #92: two seats of one organization got two ledgers.
+
+        `subscribers.account_id_for` learned to read `account_id` off the row;
+        `session.account_id_for` did not, and every points route builds its
+        `Account` from that one. So on a Postgres deployment each seat came
+        back as its own address: two monthly credits for one subscription,
+        two ledgers, and one organization counted twice behind a priority.
+        """
+        self.assertEqual(subscribers.account_id_for("one@bank.example"), "acct-bank")
+        self.assertEqual(subscribers.account_id_for("two@bank.example"), "acct-bank")
+        # The name the service actually calls, which is the one that was wrong.
+        self.assertEqual(session.account_id_for("one@bank.example"), "acct-bank")
+        self.assertEqual(session.account_id_for("two@bank.example"), "acct-bank")
+        self.assertEqual(
+            session.account_id_for("ONE@Bank.example "), session.account_id_for("two@bank.example")
+        )
+        # And the existence check, for the same reason: it gated activation
+        # and could not see a subscriber row at all.
+        self.assertTrue(session.account_exists("reader@example.org"))
+        self.assertFalse(session.account_exists("nobody@example.org"))
+
+    def test_a_code_cannot_reset_the_password_on_an_account_that_exists(self) -> None:
+        """Codex, PR #92, and this one is the account-takeover shape.
+
+        `redeem` upserted with `DO UPDATE SET password_hash`, so a second code
+        issued to an address that already had a subscription would set a new
+        password on it without anybody proving they held the old one.
+        """
+        before = subscribers.find("reader@example.org")
+        self.assertIsNotNone(before)
+        subscribers.issue_code("TBN9-DUPE-0001", "reader@example.org", "press_pro")
+        with self.assertRaises(subscribers.AlreadySubscribed):
+            subscribers.redeem("TBN9-DUPE-0001", "a-password-they-do-not-hold")
+        after = subscribers.find("reader@example.org")
+        self.assertEqual(after.password_hash, before.password_hash)
+        self.assertEqual(after.tier, before.tier)
+        # And the old password still signs them in.
+        self.assertIsNotNone(subscribers.authenticate("reader@example.org", "correct-horse"))
+        # The code is not consumed by the refusal, so it can still be voided
+        # or reissued deliberately rather than being silently burnt.
+        code = db.one(
+            "SELECT spent_at FROM cedar_press_codes WHERE code = %s",
+            (subscribers.canonical("TBN9-DUPE-0001"),),
+        )
+        self.assertIsNone(code["spent_at"])
+
+    def test_redemption_needs_one_connection_not_two(self) -> None:
+        """Codex, PR #92: `account_id_for` ran inside `redeem`'s transaction.
+
+        It performs a query of its own, so it asked the pool for a second
+        connection while the first was still held. A pool of one is the
+        smallest case that shows it, and it is a real configuration —
+        `CEDAR_PRESS_DB_POOL=1`. At the default of eight, eight simultaneous
+        activations hold all eight and each waits for a ninth.
+        """
+        was = os.environ.get("CEDAR_PRESS_DB_POOL")
+        os.environ["CEDAR_PRESS_DB_POOL"] = "1"
+        db.reset_for_tests()
+        try:
+            subscribers.issue_code("TBN9-ONE-CONN", "solo@example.org", "press")
+            made = subscribers.redeem("TBN9-ONE-CONN", "correct-horse-battery")
+            self.assertIsNotNone(made)
+            self.assertEqual(made.email, "solo@example.org")
+        finally:
+            if was is None:
+                os.environ.pop("CEDAR_PRESS_DB_POOL", None)
+            else:
+                os.environ["CEDAR_PRESS_DB_POOL"] = was
+            db.reset_for_tests()
+
+
+class TestExpiryIsFailClosed(unittest.TestCase):
+    """Codex, PR #92: a typo in `CEDAR_PRESS_CODES` became a 500.
+
+    `codes.py` has always promised the opposite, in as many words: "An
+    unparseable date is a register we cannot trust. Treated as expired rather
+    than as unlimited." When the lookup moved into `subscribers`, the parse
+    became a bare `date.fromisoformat`, so an operator's typo stopped
+    refusing the code and started telling the reader the service was broken.
+    """
+
+    def setUp(self) -> None:
+        self._was = os.environ.get("CEDAR_PRESS_CODES")
+        os.environ.pop("DATABASE_URL", None)
+        db.reset_for_tests()
+        subscribers.forget_activated_for_tests()
+        os.environ["CEDAR_PRESS_CODES"] = json.dumps(
+            {
+                "TBN4-BAD0-DATE": {"email": "typo@example.org", "tier": "press", "expires": "soon"},
+                "TBN4-GOOD-DATE": {
+                    "email": "fine@example.org", "tier": "press", "expires": "2999-01-01"
+                },
+            }
+        )
+
+    def tearDown(self) -> None:
+        if self._was is None:
+            os.environ.pop("CEDAR_PRESS_CODES", None)
+        else:
+            os.environ["CEDAR_PRESS_CODES"] = self._was
+
+    def test_an_unparseable_expiry_is_expired_and_not_an_error(self) -> None:
+        found = subscribers.find_code("TBN4-BAD0-DATE")
+        self.assertIsNotNone(found)
+        self.assertTrue(found.has_expired(dt.date.today()))
+        # And through the route's own gate, which is where the 500 surfaced.
+        issued, error = codes.check("TBN4-BAD0-DATE", "typo@example.org")
+        self.assertEqual(error, codes.CODE_EXPIRED)
+        self.assertIsNone(issued)
+
+    def test_a_good_expiry_still_works(self) -> None:
+        issued, error = codes.check("TBN4-GOOD-DATE", "fine@example.org")
+        self.assertIsNone(error)
+        self.assertEqual(issued.tier, "press")
+
+
+class TestMigrationsTravelWithThePackage(unittest.TestCase):
+    """Codex, PR #92: the SQL files were a sibling of the package, not in it.
+
+    Hatch's wheel target ships `cedar_press/` and nothing else, so an
+    editable install found the migrations and a real one found nothing.
+    `migrate()` then reported nothing to apply and `open_store()` went on to
+    seed a table that had never been created. There is no test that can build
+    a wheel cheaply, so what is asserted is the property that made the wheel
+    wrong: the directory has to be INSIDE the package.
+    """
+
+    def test_the_directory_is_inside_the_package(self) -> None:
+        package = pathlib.Path(db.__file__).resolve().parent
+        self.assertEqual(db._MIGRATIONS.parent, package)
+        self.assertTrue(sorted(db._MIGRATIONS.glob("*.sql")), "no migrations found")
+
+
+@unittest.skipUnless(PG, "set CEDAR_PRESS_TEST_DATABASE_URL")
+class TestAStandaloneDatabase(unittest.TestCase):
+    """Codex, PR #92: the migration required teim-app's `users` table.
+
+    `link_platform_account` asks `to_regclass` and treats a missing `users`
+    as a supported deployment — Cedar Press pointed at a database of its own.
+    Migration 001 contradicted that by declaring the foreign key inline, so
+    that deployment failed at `relation "users" does not exist`, and since the
+    service migrates when it opens its store, it did not start at all.
+    """
+
+    @staticmethod
+    def _ddl(statement: str) -> None:
+        """CREATE/DROP DATABASE, which cannot run inside a transaction.
+
+        Straight through psycopg rather than the service's pool, because the
+        pool hands out connections that have already begun one.
+        """
+        import psycopg
+
+        with psycopg.connect(PG, autocommit=True) as conn:
+            conn.execute(statement)
+
+    def setUp(self) -> None:
+        self._was = os.environ.get("DATABASE_URL")
+        self.name = f"cedar_press_standalone_{os.getpid()}"
+        db.reset_for_tests()
+        self._ddl(f'DROP DATABASE IF EXISTS "{self.name}"')
+        self._ddl(f'CREATE DATABASE "{self.name}"')
+
+    def tearDown(self) -> None:
+        db.reset_for_tests()
+        self._ddl(f'DROP DATABASE IF EXISTS "{self.name}"')
+        if self._was is None:
+            os.environ.pop("DATABASE_URL", None)
+        else:
+            os.environ["DATABASE_URL"] = self._was
+
+    def test_it_migrates_and_runs_without_the_platform_users_table(self) -> None:
+        os.environ["DATABASE_URL"] = PG.rsplit("/", 1)[0] + "/" + self.name
+        db.reset_for_tests()
+        self.assertIsNone(db.one("SELECT to_regclass('public.users') AS t")["t"])
+        applied = db.migrate()
+        self.assertIn("001_cedar_press_subscribers.sql", applied)
+        # The table is there and carries no foreign key it cannot satisfy.
+        self.assertIsNotNone(db.one("SELECT to_regclass('cedar_press_subscribers') AS t")["t"])
+        keys = db.query(
+            "SELECT conname FROM pg_constraint WHERE conrelid ="
+            " 'cedar_press_subscribers'::regclass AND contype = 'f'"
+        )
+        self.assertEqual(keys, [])
+        # And the service works: a code, an activation, a sign-in.
+        subscribers.issue_code("TBN5-SOLO-0001", "alone@example.org", "press_pro")
+        made = subscribers.redeem("TBN5-SOLO-0001", "correct-horse-battery")
+        self.assertEqual(made.tier, "press_pro")
+        self.assertIsNotNone(subscribers.authenticate("alone@example.org", "correct-horse-battery"))
+        # Binding is the no-op it always promised to be, not a crash.
+        self.assertFalse(subscribers.link_platform_account("alone@example.org"))
 
 
 if __name__ == "__main__":

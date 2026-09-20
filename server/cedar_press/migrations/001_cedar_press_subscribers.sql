@@ -32,7 +32,9 @@ CREATE TABLE IF NOT EXISTS cedar_press_subscribers (
   account_id    TEXT NOT NULL,
   tier          TEXT NOT NULL CHECK (tier IN ('press', 'press_pro')),
   password_hash TEXT,
-  user_id       UUID REFERENCES users(id) ON DELETE SET NULL,
+  -- The platform account, when there is one. The foreign key is added
+  -- below rather than here; see the note under the indexes.
+  user_id       UUID,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -41,6 +43,30 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_cedar_press_subscribers_user
   ON cedar_press_subscribers (user_id) WHERE user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_cedar_press_subscribers_account
   ON cedar_press_subscribers (account_id);
+
+-- THE FOREIGN KEY IS CONDITIONAL, BECAUSE `users` IS NOT THIS SERVICE'S.
+-- It is teim-app's, and Cedar Press pointed at a database of its own is a
+-- supported arrangement -- `subscribers.link_platform_account` says so in as
+-- many words and asks `to_regclass` rather than catching an error. Declaring
+-- the reference inline contradicted that: the migration failed outright with
+-- `relation "users" does not exist`, and because the service migrates when it
+-- opens its store, the service did not start at all.
+--
+-- So the constraint is added when the table is there and skipped when it is
+-- not, and `link_platform_account` is a no-op in the second case, which is
+-- what it already promised. Re-running is safe: a deployment that later adds
+-- teim-app to the same database gets the key on the next migration pass,
+-- because this block is idempotent and checks for the constraint by name.
+DO $$
+BEGIN
+  IF to_regclass('public.users') IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'cedar_press_subscribers_user_fk'
+  ) THEN
+    ALTER TABLE cedar_press_subscribers
+      ADD CONSTRAINT cedar_press_subscribers_user_fk
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 -- Access codes, issued by Tribal Business News and spent once.
 --

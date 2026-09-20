@@ -38,7 +38,14 @@ import threading
 from pathlib import Path
 from typing import Any
 
-_MIGRATIONS = Path(__file__).resolve().parents[1] / "migrations"
+#: INSIDE THE PACKAGE, NOT BESIDE IT. This pointed at `server/migrations/`,
+#: a sibling of the package, and Hatch's wheel target ships `cedar_press/`
+#: only — so an editable install found the files and a real one found an
+#: empty directory. `migrate()` then reported nothing to apply, `open_store()`
+#: went straight on to seed a `cedar_press_priorities` table that had never
+#: been created, and the service failed to start with a missing-relation
+#: error that said nothing about packaging.
+_MIGRATIONS = Path(__file__).resolve().parent / "migrations"
 
 _pool: Any = None
 _lock = threading.Lock()
