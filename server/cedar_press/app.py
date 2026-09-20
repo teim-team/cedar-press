@@ -56,7 +56,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from cedar_press import codes, press_catalog, priorities, ratelimit, repository, shelf
+from cedar_press import (
+    cedar_service,
+    codes,
+    press_catalog,
+    priorities,
+    ratelimit,
+    repository,
+    shelf,
+)
 from cedar_press.session import (
     Session,
     account_exists,
@@ -154,6 +162,15 @@ class Question(BaseModel):
     question: str
     surface: str = "cedar-press"
     collectionId: str | None = None
+    #: Cedar's own conversation id. Absent on the first turn -- Cedar mints
+    #: one and returns it -- and echoed back on every turn after, which is
+    #: what makes the panel a conversation rather than a sequence of
+    #: unrelated questions.
+    threadId: str | None = None
+    #: Where in the product the question was asked. Passed through to Cedar
+    #: as request context; it is the difference between answering a reader
+    #: standing in front of a table and one reading a brief.
+    pathname: str | None = None
 
 
 def require_session(session: Session | None = Depends(current_session)) -> Session:
@@ -535,33 +552,87 @@ def ask_cedar(
 ) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
 
-    First real increment: profile-grounded answers. Scoped to a collection,
-    Cedar answers what the collection contains, how it was constructed, and
-    its headline figures — from the collection's own profile
-    (``collection_profiles.py``), never from a prompt's memory of it.
+    TWO ANSWERERS, IN THIS ORDER, AND THE ORDER IS THE POINT.
 
-    Everything beyond the profile still refuses rather than improvising: a
-    plausible sentence Cedar cannot support is worse than an honest refusal,
-    because only the refusal is obviously not the product.
+    1. **The collection's own profile.** Scoped to a collection, what it
+       contains, how it was constructed and its headline figures are read
+       straight off ``collection_profiles.py`` and returned with a ``basis``
+       naming the release they came from. No model is consulted, because no
+       model is needed to read a fact the release already states, and an
+       answer that cites its release is a better answer than one that
+       paraphrases it.
+    2. **Cedar.** Everything the profiles cannot answer goes to the service
+       in the ``cedar`` repository over contract 1.0.0 -- the same Cedar
+       ``teim-app`` talks to, not a second assistant wearing the name. See
+       ``cedar_service.py`` for why the hop happens here and not in the
+       browser.
+
+    Past both, it still refuses and names the research desk. That was the
+    whole behaviour before Cedar was wired in, and it remains the floor: an
+    assistant that produces a plausible sentence it cannot support is worse
+    than one that hands the question to a person.
     """
+    collection_name = None
     if question.collectionId:
+        profile = repository.collection_profile(question.collectionId)
+        collection_name = (profile or {}).get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
         if answered:
             return {
                 "answer": answered["answer"],
                 "basis": answered["basis"],
                 "collectionId": question.collectionId,
+                # Named so the panel can say which of the two answered, and
+                # so a reader can tell a cited reading of a release from a
+                # composed reply.
+                "source": "profile",
+                "threadId": question.threadId,
             }
+
+    if cedar_service.available():
+        try:
+            reply = cedar_service.ask(
+                question=question.question,
+                email=session.email,
+                tier=session.tier,
+                thread_id=question.threadId,
+                collection_id=question.collectionId,
+                collection_name=collection_name,
+                pathname=question.pathname,
+            )
+        except cedar_service.CedarUnavailable:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "CEDAR_UNAVAILABLE",
+                    "message": (
+                        "Cedar could not be reached just now. The collection "
+                        "profiles still answer what a collection holds, how it "
+                        "was built and its published figures."
+                    ),
+                },
+            ) from None
+        return {
+            "answer": reply.answer,
+            # Only the profile path can cite a release. Cedar's own answers
+            # carry no basis line rather than a fabricated one.
+            "basis": None,
+            "collectionId": question.collectionId,
+            "source": "cedar",
+            "threadId": reply.thread_id or question.threadId,
+            "unavailable": reply.unavailable,
+        }
+
     raise HTTPException(
         status_code=501,
         detail={
             "code": "NOT_ANSWERABLE",
             "message": (
                 "Cedar can answer what a collection contains, how it was "
-                "constructed, and its headline figures — open a collection and "
-                "ask from there. Analysis of the records themselves is not "
-                "wired yet; the research desk (contact@lumecon.ai) answers "
-                "those in person."
+                "constructed, and its headline figures \u2014 open a collection "
+                "and ask from there. Anything past that needs Cedar itself, "
+                "which is not wired into this deployment; the research desk "
+                "(contact@lumecon.ai) answers those in person."
             ),
         },
     )

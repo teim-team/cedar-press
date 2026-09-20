@@ -161,14 +161,26 @@ export async function downloadCollection(id) {
 /* ── Cedar ───────────────────────────────────────────────────────────── */
 
 /**
- * Ask Cedar a question about the collections. `surface` tells the platform
- * which product the question came from, so an answer can cite what this
- * reader can actually open rather than the whole warehouse.
+ * One turn of a conversation with Cedar.
+ *
+ * `surface` tells the platform which product the question came from, so an
+ * answer can cite what this reader can actually open rather than the whole
+ * warehouse.
+ *
+ * `threadId` is Cedar's own conversation id, and it is what separates a
+ * conversation from a row of unrelated questions: absent on the first turn,
+ * returned by the service, and sent back on every turn after. The panel owns
+ * it for as long as it is open. `pathname` says where in the product the
+ * question was asked.
+ *
+ * Returns `{ answer, basis, source, threadId }`. `source` is "profile" when
+ * the collection's own release answered — then `basis` names that release —
+ * or "cedar" when the service did.
  */
-export async function askCedar({ question, collectionId, signal } = {}) {
+export async function askCedar({ question, collectionId, threadId, pathname, signal } = {}) {
   return request("/cedar/ask", {
     method: "POST",
-    body: { question, surface: "cedar-press", collectionId },
+    body: { question, surface: "cedar-press", collectionId, threadId, pathname },
     signal,
   });
 }
