@@ -76,6 +76,7 @@ import {
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
 import CollectionPreview from "./PressCollectionPreview";
+import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
 import PressDoorCollections from "./PressDoorCollections";
 import { TierName } from "./TierName";
@@ -580,36 +581,19 @@ export default function PressGate({ user }) {
               </div>
               <div className="cp-app__body">
                 <div className="cp-app__railwrap">
-                <nav className="cp-app__rail" aria-label="The collections">
-                  {SHELVES.map(({ tier, entries }) => (
-                    <div className="cp-app__group" key={tier.id}>
-                      <span className="cp-app__groupcap"><TierName name={tier.name} /></span>
-                      <ul className="cp-app__list">
-                        {entries.map((entry) => {
-                          const on = entry.id === selectedId;
-                          return (
-                            <li key={entry.id}>
-                              <button
-                                type="button"
-                                className={`cp-app__item${on ? " is-on" : ""}`}
-                                aria-pressed={on}
-                                onClick={() => pick(entry)}
-                                onMouseEnter={() => setSelectedId(entry.id)}
-                                onFocus={() => setSelectedId(entry.id)}
-                              >
-                                <span className="cp-app__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id]}</span>
-                                <span className="cp-app__label">
-                                  <span className="cp-app__name"><TierName name={entry.short || entry.name} /></span>
-                                  {ROWS_LABEL[entry.id] ? <span className="cp-app__rows">{ROWS_LABEL[entry.id]}</span> : null}
-                                </span>
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ))}
-                </nav>
+                {/* THE RAIL IS THE RAIL.
+                    This drew its own navy list of the twelve — the third
+                    separately authored way of showing one catalogue, and the
+                    reason `PressCollectionRail` was written. It mounts that
+                    component in `preview` mode now: nothing is locked, since
+                    nobody is signed in and the question a visitor has is what
+                    exists, not what their plan reaches. */}
+                <PressCollectionRail
+                  selectedId={selectedId}
+                  onSelect={(entry) => (entry ? pick(entry) : null)}
+                  onPoint={setSelectedId}
+                  mode="preview"
+                />
                 </div>
                 <div className="cp-app__pane">
                   {selected ? (

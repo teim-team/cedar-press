@@ -122,7 +122,10 @@ test.describe("the gate", () => {
   test("the door lists every collection and stages real records", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await expect(page.locator(".cp-app__item")).toHaveCount(12);
+    // `.cp-rail__item` rather than `.cp-app__item`: the frame drew its own
+    // navy list until the door started mounting the shared rail. Scoped to
+    // the frame, since the strip below it is the same twelve again.
+    await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(12);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // Scoped to the frame: the door now also carries a full-size strip of the
