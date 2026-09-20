@@ -3840,12 +3840,17 @@ users, sessions, tiers, organizations, S3 document path and the only mailer in
 the estate, and it is already an outbound client of both engines —
 `TEIM_ENGINE_BASE_URL` for the economic model and `CEDAR_BASE_URL` for the
 analyst service, each feature-flagged and each degrading to an `unavailable`
-reply rather than an error. Cedar Grove lives there. This repository's own
-`.env.example` already names `VITE_API_URL=https://api.lumecon.ai` as the
-setting that makes "the database behind it the source of truth." Cedar Press is
-the only product not wired to the hub, and the wiring is one repository
-variable plus the press routes, the cookie question and the error envelope
-(`docs/PLATFORM_INTEGRATION_2026-09-06.md`, `docs/INFRA_NOTES_FOR_KAYLYN_2026-09-20.md` §4).
+reply rather than an error. Cedar Grove lives there.
+
+**And Cedar Press is further into the hub than it looks from the client.**
+`server/cedar_press/db.py` reads `DATABASE_URL` — *the same variable teim-app
+reads*. Migrations self-apply under a `pg_advisory_lock`, are tracked in
+`cedar_press_migrations`, and the foreign key to `public.users` is declared
+conditionally through `to_regclass`, so deployment order does not matter. This
+supersedes `docs/PLATFORM_INTEGRATION_2026-09-06.md`'s "the two databases are
+never joined", which was accurate when measured and has been overtaken. What
+remains unwired is the *client* (`vars.VITE_API_URL`), a host for the subscriber
+API, and the error envelope — not the store.
 
 **Where the collection-building code goes: the engine, with one condition.**
 The argument for teim-engine is stronger than convenience. Its genuine asset is
