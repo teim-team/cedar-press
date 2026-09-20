@@ -78,6 +78,7 @@ export const BLOCK = Object.freeze({
 });
 
 import { CHART } from "./pressCharts.js";
+import { pressArticlePath } from "./pressRoutes.js";
 
 export const TBN_URL = "https://tribalbusinessnews.com";
 /** The one page where Cedar Press plans are bought, upgraded and managed.
@@ -422,3 +423,33 @@ export const PRESS_ARTICLES = Object.freeze([
     date: "May 2026",
   }),
 ]);
+
+/**
+ * THE LOOP BACK FROM A COLLECTION TO WHAT WAS WRITTEN FROM IT.
+ *
+ * Every article already names the collections behind it (`draws`, falling
+ * back to the single `datasetId` an older entry carries), and the article
+ * page uses that to offer the data. Nothing read it the other way, so a
+ * reader looking at Federal Funding's records had no way to know a brief had
+ * been written from exactly those records — the two halves of the product
+ * pointed one way only.
+ *
+ * Newest first, matching the order of the list itself, so a collection with
+ * several briefs leads with the current one.
+ */
+export function articlesDrawingOn(collectionId) {
+  if (!collectionId) return [];
+  return PRESS_ARTICLES.filter((article) =>
+    (article.draws ?? (article.datasetId ? [article.datasetId] : [])).includes(collectionId),
+  );
+}
+
+/**
+ * Where an article reads: its own page here, or its home on TBN.
+ *
+ * The path is spelled once in `pressRoutes.js` and read from there, so a
+ * route that moves does not leave a dead link behind in this module.
+ */
+export function articleHref(article) {
+  return article.hosted ? pressArticlePath(article.id) : article.href;
+}

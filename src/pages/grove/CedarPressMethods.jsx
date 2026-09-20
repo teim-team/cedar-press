@@ -138,12 +138,50 @@ function useCurrentChapter() {
   return current;
 }
 
-/** The index: ten marks, one per chapter, that follow the reader down. */
+/**
+ * The index: ten marks, one per chapter, that follow the reader down.
+ *
+ * A RAIL, NOT A ROW OF PILLS. It was a sticky horizontal strip of ten
+ * rounded chips above the first chapter, which is the shape of a filter bar
+ * and read as one: a reader met ten controls before a sentence. The brief is
+ * specific — "a compact left index on desktop and a single 'On this page'
+ * disclosure on mobile. Use a rail/list treatment, not seven rounded pills."
+ *
+ * So on a wide screen it is a column beside the chapters, sticky, with the
+ * current chapter marked; on a phone it collapses into one line that opens.
+ * Same markup, same `aria-current`, same anchors: the difference is layout
+ * and a `<details>` wrapper that only does anything under the breakpoint.
+ */
+function useWide(query = "(min-width: 1100px)") {
+  const [wide, setWide] = useState(() =>
+    typeof window === "undefined" ? true : window.matchMedia(query).matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setWide(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, [query]);
+  return wide;
+}
+
 function MethodsIndex() {
   const current = useCurrentChapter();
+  const here = CHAPTERS.find((chapter) => chapter.id === current);
+  // A closed `<details>` hides its children through the UA's own mechanism,
+  // not through `display`, so no media query can open one. The breakpoint
+  // has to be read in JavaScript and written to the attribute: on a wide
+  // screen the rail is simply open and its cap is inert.
+  const wide = useWide();
   return (
-    <nav className="cp-mix" aria-label="On this page">
-      <span className="cp-mix__cap">On this page</span>
+    <details className="cp-mix" aria-label="On this page" open={wide}>
+      <summary className="cp-mix__cap">
+        On this page
+        {/* Named on a phone, where the list is closed: "On this page" alone
+            says nothing about where the reader currently is. */}
+        {here ? <span className="cp-mix__at">{here.label}</span> : null}
+      </summary>
       <ul className="cp-mix__list">
         {CHAPTERS.map((chapter, index) => (
           <li key={chapter.id}>
@@ -159,7 +197,7 @@ function MethodsIndex() {
           </li>
         ))}
       </ul>
-    </nav>
+    </details>
   );
 }
 

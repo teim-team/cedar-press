@@ -183,7 +183,13 @@ export function PressMast({ user, onSignOut, section = null, nav = true }) {
         masthead are the same on every page, and skipping them is the
         difference between reading a page and traversing it. */}
     <a className="cp-skip" href="#cp-main">Skip to content</a>
-    <header className="cp-mast">
+    {/* The signed-out masthead carries a sentence where the signed-in one
+        carries a section menu, and at phone width that sentence has to take
+        its own line: laid beside the lockup on a 390px screen it overlapped
+        the wordmark, which was wrapping to two lines inside a box sized for
+        one. The state is a class rather than a `:has()` so the rule does not
+        depend on selector support. */}
+    <header className={`cp-mast${signedIn ? "" : " cp-mast--out"}`}>
       <div className="cp-mast__top">
         {/* The mark and the wordmark as one lockup. Cedar Press is built by
             Lumecon and carries Lumecon's mark, the same way the platform

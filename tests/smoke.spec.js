@@ -122,7 +122,10 @@ test.describe("the gate", () => {
   test("the door lists every collection and stages real records", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    await expect(page.locator(".cp-app__item")).toHaveCount(12);
+    // `.cp-rail__item` rather than `.cp-app__item`: the frame drew its own
+    // navy list until the door started mounting the shared rail. Scoped to
+    // the frame, since the strip below it is the same twelve again.
+    await expect(page.getByTestId("press-frame").locator(".cp-rail__item")).toHaveCount(12);
     await expect(page.locator('[data-testid="collection-stage"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="stage-record"]').first()).toBeVisible();
     // Scoped to the frame: the door now also carries a full-size strip of the
@@ -402,17 +405,18 @@ test.describe("the subscriber's path", () => {
     await signIn(page);
     await page.goto("/data");
 
-    // One collection, from a tile in the shelf grid — not the shelf's
-    // "download all", which hands over a ZIP and would not exercise the
-    // citation the CSV carries. The tile opens the collection in the viewer
-    // and the reader panel beside the grid carries the sample download.
-    const tile = page.locator(".cp-band__grid .cp-badge--act").first();
-    await expect(tile).toBeVisible();
-    await tile.click();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByTestId("explore-scope")).toBeVisible();
-
-    const panelAction = page.locator(".cp-read__act").first();
+    // One collection's own sample, not the toolbar's Download: that one
+    // hands over the current CUT as a ZIP with its README, and it is the
+    // per-collection CSV that carries `cite_as` in the rows. This used to
+    // live on the shelf's reader panel; the shelf's tiles were deleted when
+    // the table became the Collections page, and the action moved into the
+    // pane head rather than going with them.
+    await expect(page.locator(".cp-rail__item").first()).toBeVisible();
+    // In the actions menu since 2026-09-20: the toolbar collapsed to one row
+    // so the table could have the screen, and the secondary downloads went
+    // behind "More" together. Still one click from the records.
+    await page.locator(".cp-ex__bar .cp-ex__more > summary").click();
+    const panelAction = page.locator(".cp-ex__sample").first();
     await expect(panelAction).toBeVisible();
     const download = page.waitForEvent("download");
     await panelAction.click();
@@ -481,12 +485,23 @@ test.describe("Explore the collections", () => {
 
     const card = page.getByTestId("explore");
     await expect(card).toBeVisible();
+    // Collections opens on one collection now (Federal Funding), so the
+    // all-collections view this test walks is reached the way a reader
+    // reaches it: the rail's first row.
+    // Scrolled to the top first: the rail is sticky, so Playwright's
+    // scroll-into-view can chase an element that never moves relative to the
+    // viewport. A reader clicking the rail is at the top of the page anyway.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
     const caption = page.getByTestId("explore-caption");
     const records = page.getByTestId("explore-record");
     // Every open collection contributes its dataset's preview; the caption
     // counts sample records and says so, because ten rows is not the dataset.
     await expect(caption).toContainText("sample records");
-    await expect(caption).toContainText("all collections");
+    // "12 collections", not "all collections": an explicit all is an explicit
+    // list now (the rail writes the ids), because clearing the parameter
+    // means "unspecified" and resolves to the default collection.
+    await expect(caption).toContainText(/\d+ collections/);
     await expect(records.first()).toBeVisible();
 
     // Narrow to one entity from the picker; the URL now carries the cut.
@@ -534,7 +549,7 @@ test.describe("Explore the collections", () => {
     // ten-record preview to nothing, which is its own case below.
     await page.goto("/data");
     await expect(records.first()).toBeVisible();
-    await page.getByTestId("explore-collection").selectOption("lobbying");
+    await page.locator(".cp-rail__item").filter({ hasText: "Advocacy" }).first().click();
     await expect(page).toHaveURL(/[?&]c=lobbying/);
     await expect(page.getByTestId("explore-caption")).toContainText("columns");
     await expect(page.getByTestId("explore-scope")).toContainText("filing year");
@@ -542,7 +557,7 @@ test.describe("Explore the collections", () => {
       await expect(page.locator(".cp-ex__table--table")).toBeVisible();
       await expect(page.locator(".cp-ex__table--table thead th").first()).toBeVisible();
       await page.getByRole("button", { name: /Show all \d+ columns/ }).click();
-      await expect(page.getByTestId("explore-caption")).toContainText(/(\d+) of \1 columns/);
+      await expect(page.getByTestId("explore-caption")).toContainText(/(\d+)\/\1 columns/);
     }
     // A row opens the record's own page, which carries the cut it came from.
     // Covered end to end in "the record page" below; here the only claim is
@@ -554,7 +569,8 @@ test.describe("Explore the collections", () => {
     await expect(page.getByTestId("record-head")).toBeVisible();
     await page.getByRole("link", { name: "Back to results" }).first().click();
     await page.waitForURL(/\/data\?/);
-    await expect(page.getByTestId("explore-collection")).toHaveValue("lobbying");
+    // Coming back from a record restores the cut, which the rail shows.
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Advocacy");
 
     // An out-of-coverage year range is shown AS REQUESTED, said in words,
     // and the empty result says what it does not establish.
@@ -571,7 +587,9 @@ test.describe("Explore the collections", () => {
     await expect(page.getByTestId("explore-type")).toContainText("None");
     // A link naming two collections says two, not "all".
     await page.goto("/data?c=funding%7Cdeals");
-    await expect(page.getByTestId("explore-collection")).toContainText("2 collections from this link");
+    // The picker that used to say "2 collections from this link" is gone —
+    // the rail replaced it, and a two-collection cut has no single row to
+    // light. The caption is where that state lives now.
     await expect(caption).toContainText("2 collections");
     // A link to a collection this catalog does not have is not widened.
     await page.goto("/data?c=gaming");
@@ -585,8 +603,12 @@ test.describe("Explore the collections", () => {
     await expect(records).toHaveCount(1);
 
     // The download is the cut's records and nothing else, re-importable as
-    // such, with the citation and the cut in the README beside it.
+    // such, with the citation and the cut in the README beside it. Taken
+    // over every collection, which is the rail's first row rather than the
+    // bare /data it used to be: the page opens on one collection now.
     await page.goto("/data");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator(".cp-rail__item--all").click({ timeout: 10000 });
     await expect(records.first()).toBeVisible();
     await expect(caption).not.toContainText("loading");
     const shown = await records.count();
@@ -613,19 +635,26 @@ test.describe("Explore the collections", () => {
     expect(errors).toEqual([]);
   });
 
-  test("a tile on the shelf opens its collection in the viewer, and the viewer lights the tile", async ({ page }) => {
+  // This was "a tile on the shelf opens its collection in the viewer, and
+  // the viewer lights the tile" — two controls for one choice, kept in sync.
+  // There is one control now. The tiles were the catalogue a reader had to
+  // browse before reaching a table, and the rail is the catalogue.
+  test("the rail selects a collection, and the pane and the URL follow", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data");
-    const tile = page.locator(".cp-band__grid .cp-badge--act").nth(1);
-    await tile.click();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    await expect(page).toHaveURL(/[?&]c=/);
-    await expect(page.getByTestId("explore-scope")).toBeVisible();
-    // Choosing another collection in the viewer moves the light.
-    await page.getByTestId("explore-collection").selectOption("deals");
-    await expect(tile).toHaveAttribute("aria-pressed", "false");
-    await expect(page.locator(".cp-badge.is-selected")).toHaveCount(1);
+
+    // It opens on a collection, not on twelve searched at once.
+    await expect(page.getByTestId("explore-caption")).toContainText("Federal Funding");
+
+    const row = page.locator(".cp-rail__item").filter({ hasText: "Deals" }).first();
+    await row.click();
+    await expect(row).toHaveAttribute("aria-pressed", "true");
+    await expect(page).toHaveURL(/[?&]c=deals/);
+    await expect(page.getByTestId("explore")).toContainText("Deals");
+    // One row lit, never two.
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toHaveCount(1);
+
     // Cedar's launcher steps aside while the viewer is on screen; the
     // viewer's own action opens the panel.
     await page.getByTestId("explore").scrollIntoViewIfNeeded();
@@ -756,16 +785,31 @@ test.describe("About this collection", () => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/data?c=contractors");
+    // It was a `<details>` in the pane head holding four lines. It is a
+    // deep-linkable profile now, so the test opens it the way a reader does
+    // and then checks the address it leaves behind — the whole point of
+    // making it a panel is that a method can be sent to somebody.
     const about = page.getByTestId("explore-about");
     await expect(about).toBeVisible();
-    await about.locator("summary").click();
-    await expect(about).toContainText("Awardees are matched to a Native entity");
-    expect(await about.locator("dt").allTextContents()).toEqual([
-      "Coverage",
-      "How it is built",
-      "What it reads",
-      "How a record reaches its entity",
-    ]);
+    await about.click();
+    await expect(page).toHaveURL(/about=1/);
+    const panel = page.locator(".cp-ab");
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText("Awardees are matched to a Native entity");
+    // The release facts a reader checks a figure against.
+    for (const field of ["Release", "Updated", "Coverage", "Records"]) {
+      await expect(panel.locator("dt", { hasText: new RegExp(`^${field}$`) }).first()).toBeVisible();
+    }
+    // The unit of observation, in the codebook's own words: the sentence
+    // anyone about to cite a count needs and the old disclosure never had.
+    await expect(panel).toContainText("One row is");
+    await expect(panel).toContainText("What is not in it");
+
+    // Closing returns the reader to the cut they opened it from.
+    await panel.getByRole("button", { name: /close the collection profile/i }).click();
+    await expect(panel).toHaveCount(0);
+    await expect(page).toHaveURL(/c=contractors/);
+    await expect(page).not.toHaveURL(/about=1/);
     expect(errors).toEqual([]);
   });
 });
@@ -849,7 +893,7 @@ test.describe("the record page", () => {
     // And back is back: the same cut, reproduced.
     await page.getByRole("link", { name: "Back to results" }).first().click();
     await page.waitForURL(/\/data\?/);
-    await expect(page.getByTestId("explore-collection")).toHaveValue("funding");
+    await expect(page.locator(".cp-rail__item[aria-pressed='true']")).toContainText("Federal Funding");
     expect(errors).toEqual([]);
   });
 
@@ -1129,7 +1173,7 @@ test.describe("crawlers", () => {
     // "data" is emphasised inside the headline, so the string a crawler
     // sees is split by a tag; the tail of the sentence is contiguous.
     ["/", "behind Indian Country."],
-    ["/tribal-data-request", "See what Cedar knows about your nation"],
+    ["/tribal-data-request", "See what Cedar knows about your Nation"],
     ["/research-access", "Need one or two Cedar collections for a defined project"],
   ]) {
     test(`${path} is served with its text in the HTML, before any script runs`, async ({ request }) => {
@@ -1358,9 +1402,15 @@ test.describe("the first screen", () => {
     // rail down as a strip above the records, so both fit either way.
     const record = page.locator(".cp-ex__table tbody tr, .cp-ex__cardbtn").first();
     await record.waitFor();
-    expect(await topOf(page, ".cp-ex__table tbody tr, .cp-ex__cardbtn")).toBeLessThan(viewport * 2);
+    // ONE SCREEN, NOT TWO. This allowed `viewport * 2` while the page still
+    // carried a title band above the frame and the toolbar ran to three rows
+    // on a phone. Owner, 2026-09-20: "the collection page we want the table
+    // to just take up that screen in full." A record on the first screen is
+    // what that means, and it is the assertion that keeps it true.
+    expect(await topOf(page, ".cp-ex__table tbody tr, .cp-ex__cardbtn")).toBeLessThan(viewport);
     expect(errors).toEqual([]);
   });
+
 
   test("a record opens on its amount", async ({ page }) => {
     const errors = watchConsole(page);
@@ -1406,6 +1456,62 @@ test.describe("the first screen", () => {
         })
         .filter((entry) => entry.lines > 2));
     expect(tall).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the loop between the records and the journalism", () => {
+  // THE LOOP BETWEEN THE RECORDS AND THE JOURNALISM.
+  //
+  // Owner, 2026-09-20: "maybe articles that have used those data sets get
+  // populated... because we have links to the data sets on the article page.
+  // But that feedback loop seems helpful."
+  //
+  // One relationship, `draws`, read both ways. The risk a test is worth here
+  // is not that the link renders — it is that the two ends drift apart, so
+  // both directions are asserted against the same collection.
+  test("a collection names what was written from it, and the writing links back", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/data?c=funding");
+    await page.locator(".cp-rail__item").first().waitFor();
+    // Out: the collection's records to a piece built on them.
+    const read = page.locator(".cp-ex__wrote").first();
+    await expect(read).toBeVisible();
+    await expect(read).toContainText("Read:");
+    // Federal Funding has two, and the second is not crammed into the row:
+    // it opens the collection's profile, where every one is listed.
+    await page.locator(".cp-ex__wrotemore").click();
+    await expect(page.getByRole("heading", { name: "Research built from this collection" })).toBeVisible();
+    expect(await page.locator(".cp-ab__read").count()).toBeGreaterThan(1);
+
+    // Back: a piece to the collection, open in the table rather than only as
+    // a ten-row file.
+    await page.goto("/articles/brief-deals");
+    const open = page.getByRole("link", { name: /Open it in the table/ }).first();
+    await expect(open).toBeVisible();
+    await open.click();
+    await expect(page).toHaveURL(/\/data\?c=deals/);
+    await page.locator(".cp-rail__item").first().waitFor();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Deals");
+    expect(errors).toEqual([]);
+  });
+
+  // The third way in: an entity's profile reads ten sample rows per table,
+  // and each collection heading on it opens the release itself — carrying
+  // BOTH the collection and the entity, so it lands narrowed to what the
+  // heading was about rather than on the collection's first page.
+  test("an entity's collection heading opens the table already narrowed to it", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/entity/CE-001CC-8N");
+    const heading = page.locator(".cp-ent__glink").first();
+    await heading.waitFor({ timeout: 20000 });
+    await heading.click();
+    await expect(page).toHaveURL(/\/data\?c=[a-z-]+&e=CE-001CC-8N/);
+    await page.locator(".cp-rail__item").first().waitFor();
+    // Narrowed, not just opened: the caption names the entity the cut is on.
+    await expect(page.getByTestId("explore-caption")).toContainText("Yakama");
     expect(errors).toEqual([]);
   });
 });

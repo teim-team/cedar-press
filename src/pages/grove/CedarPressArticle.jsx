@@ -193,6 +193,16 @@ function DrawnFrom({ id, user }) {
           <span aria-hidden="true">&#8595;</span>
         </button>
         {refusal ? <p className="cp-ar__drawblurb" role="alert">{refusal}</p> : null}
+        {/* THE WAY BACK IN, NOT JUST THE WAY OUT.
+            This block offered a file and nothing else, so a reader who
+            finished the piece and wanted to look at the records had to go to
+            Collections and find the collection again — in a product where
+            the collection page now opens on whichever one the link names.
+            The table is the better of the two for most readers: the file is
+            ten rows, this is the release in the viewer. */}
+        <Link className="cp-ar__open" to={`${PRESS_DATA_PATH}?c=${entry.id}`}>
+          Open it in the table <span aria-hidden="true">&#8594;</span>
+        </Link>
         </>
       ) : (
         <p className="cp-ar__locked">
@@ -374,9 +384,19 @@ export default function CedarPressArticle() {
               <PressAd slot={AD_SLOT.ARTICLE_RAIL} />
               <div className="cp-ar__railbox">
                 <span className="cp-ar__railcap">Behind this piece</span>
+                {/* Named AND reachable. This rail listed the collections as
+                    plain text beside a reader who was, by definition,
+                    interested in them; the collection page opens on whichever
+                    one a link names, so there is no reason to make somebody
+                    go and find it. A collection their plan cannot open still
+                    resolves — the page says what opens it, in place. */}
                 <ul className="cp-ar__raillist">
                   {drawn.map((id) => (
-                    <li key={id}>{PRESS_CATALOG_BY_ID[id]?.name ?? id}</li>
+                    <li key={id}>
+                      <Link to={`${PRESS_DATA_PATH}?c=${id}`}>
+                        {PRESS_CATALOG_BY_ID[id]?.name ?? id}
+                      </Link>
+                    </li>
                   ))}
                 </ul>
                 <Link className="cp-m__more" to={PRESS_METHODS_PATH}>

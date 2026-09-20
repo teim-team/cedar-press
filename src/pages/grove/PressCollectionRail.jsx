@@ -27,9 +27,13 @@
 // The lock here is an affordance and nothing else. `pressAccess` says so in
 // its own header and it is worth repeating: the server has to refuse the
 // same request, and a client that dims a row has not protected anything.
+import { useState } from "react";
+
 import { canOpenDataset } from "../../features/grove/pressAccess";
+import { downloadAll } from "../../features/grove/pressDownload";
 import { PRESS_TIERS, STOREFRONT_CATALOG } from "../../features/grove/pressCatalog";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
 
@@ -40,6 +44,32 @@ const SHELVES = PRESS_TIERS.filter((tier) => tier.storefront).map((tier) => ({
   tier,
   entries: STOREFRONT_CATALOG.filter((entry) => entry.shelf === tier.shelf),
 }));
+
+/** "Download all N samples", per shelf, from inside the rail. */
+function ShelfDownload({ tier, entries }) {
+  const [state, setState] = useState("idle");
+  return (
+    <button
+      type="button"
+      className="cp-rail__all"
+      disabled={state === "busy"}
+      onClick={async () => {
+        setState("busy");
+        try {
+          await downloadAll(entries, `cedar-press-${tier.id}-samples.zip`);
+          setState("idle");
+        } catch {
+          // Said, not swallowed: a download that quietly does nothing is
+          // indistinguishable from a click that missed.
+          setState("failed");
+        }
+      }}
+    >
+      {state === "busy" ? "Preparing" : state === "failed" ? "Try again" : `All ${entries.length} samples`}
+      <span aria-hidden="true"> &#8595;</span>
+    </button>
+  );
+}
 
 /**
  * @param selectedId  the collection the surface beside this is showing
@@ -73,6 +103,27 @@ export default function PressCollectionRail({
         <div className="cp-rail__shelf" key={tier.id}>
           <span className="cp-rail__tier">
             <TierName name={tier.name} />
+            {/* The one thing the tier bands did that nothing else does. They
+                were deleted when the table became the Collections page, and
+                a shelf's samples are a real feature, so the action came with
+                the shelf rather than going with the band. Preview only on
+                the door, where there is no subscription to download
+                against. */}
+            {mode === "app" && entries.some((entry) => canOpenDataset(user, entry)) ? (
+              <ShelfDownload tier={tier} entries={entries.filter((e) => canOpenDataset(user, e))} />
+            ) : null}
+            {/* THE UPSELL BELONGS TO THE SHELF IT IS ABOUT.
+                It was a line inside the table pane — "6 more collections on
+                Cedar Press+" — above the records, on every screen, whichever
+                collection was open. Here it sits on the locked shelf itself,
+                beside the six rows it is describing, and costs the records
+                nothing. A reader on the full plan never sees it, because the
+                shelf has nothing locked on it. */}
+            {mode === "app" && entries.every((entry) => !canOpenDataset(user, entry)) ? (
+              <a className="cp-rail__get" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
+                Get {entries.length} more <span aria-hidden="true">&#8594;</span>
+              </a>
+            ) : null}
           </span>
           <ul className="cp-rail__list">
             {entries.map((entry) => {

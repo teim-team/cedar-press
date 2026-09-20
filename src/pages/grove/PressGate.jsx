@@ -35,7 +35,7 @@
 // explaining why there is none.
 
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { contactHref } from "../../features/grove/appLink.js";
 import { useAuth } from "../../context/useAuth";
@@ -76,9 +76,11 @@ import {
   OriginalCollectionsIcon,
 } from "./pressGateIcons";
 import CollectionPreview from "./PressCollectionPreview";
+import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
 import PressDoorCollections from "./PressDoorCollections";
 import { TierName } from "./TierName";
+import PressReleaseSpecimen from "./PressReleaseSpecimen";
 
 /** The brand mark, served from public/. The all-teal mark is the current one. */
 const MARK = "/brand/lumecon-logo-mark-teal.png";
@@ -174,13 +176,39 @@ export default function PressGate({ user }) {
   const [error, setError] = useState(null);
 
   // The collection in hand: the first on the rail on arrival, never none.
-  const [selectedId, setSelectedId] = useState(() => SHELVES[0]?.entries[0]?.id ?? null);
+  // THE COLLECTION IN HAND IS IN THE URL.
+  //
+  // It was local state, so the one thing a visitor might want to send
+  // somebody — "look at this collection" — had no address, and every link to
+  // the door landed on Federal Funding whatever the sender was looking at.
+  // `?collection=<id>` is read on arrival and written on every pick.
+  //
+  // Written with `replace`: choosing a collection is looking around, not
+  // navigating, and twelve picks should not put twelve entries between the
+  // visitor and the page they came from. An id nobody publishes falls back to
+  // the first collection rather than to an empty pane.
+  const [params, setParams] = useSearchParams();
+  const asked = params.get("collection");
+  const first = SHELVES[0]?.entries[0]?.id ?? null;
+  // Pointing at a collection describes it; choosing one is what the URL
+  // records. Both move the frame, and only the second is worth an address —
+  // a replace per hover would rewrite the URL a dozen times crossing a rail.
+  const [pointed, setPointed] = useState(null);
+  const addressed = STOREFRONT_CATALOG.some((entry) => entry.id === asked) ? asked : first;
+  const selectedId = pointed ?? addressed;
   const selected = STOREFRONT_CATALOG.find((entry) => entry.id === selectedId) ?? null;
   const register = useRegister();
 
+  const setSelectedId = (id) => setPointed(id);
+
   const pick = (entry) => {
     track(EVENT.collectionViewed, { collection: entry.id, shelf: entry.shelf, gated: true });
-    setSelectedId(entry.id);
+    setPointed(entry.id);
+    const next = new URLSearchParams(params);
+    next.set("collection", entry.id);
+    // Looking around, not navigating: twelve picks should not put twelve
+    // entries between the visitor and the page they arrived from.
+    setParams(next, { replace: true });
   };
 
   // The panel closes on Escape and on a click outside it or its tabs.
@@ -528,6 +556,11 @@ export default function PressGate({ user }) {
               their marks, one group a shelf; the pane is the one in hand.
               Not `#catalog`: that id is the reader's shelf on /data. */}
           <figure className="cp-hero3__stage cp-fade" ref={previewRef}>
+            {/* The specimen sits over the frame's top-right corner rather
+                than beside it, which is what makes the hero a layered
+                object instead of a headline next to a screenshot. It is the
+                SELECTED collection's, so the rail below drives both. */}
+            <PressReleaseSpecimen entry={selected} />
             {/* The frame holds a real desktop window at real desktop size and
                 scales it to fit, the way a product screenshot does. Rendering
                 the app at the ~800px the column actually offers gave a narrow
@@ -548,36 +581,19 @@ export default function PressGate({ user }) {
               </div>
               <div className="cp-app__body">
                 <div className="cp-app__railwrap">
-                <nav className="cp-app__rail" aria-label="The collections">
-                  {SHELVES.map(({ tier, entries }) => (
-                    <div className="cp-app__group" key={tier.id}>
-                      <span className="cp-app__groupcap"><TierName name={tier.name} /></span>
-                      <ul className="cp-app__list">
-                        {entries.map((entry) => {
-                          const on = entry.id === selectedId;
-                          return (
-                            <li key={entry.id}>
-                              <button
-                                type="button"
-                                className={`cp-app__item${on ? " is-on" : ""}`}
-                                aria-pressed={on}
-                                onClick={() => pick(entry)}
-                                onMouseEnter={() => setSelectedId(entry.id)}
-                                onFocus={() => setSelectedId(entry.id)}
-                              >
-                                <span className="cp-app__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id]}</span>
-                                <span className="cp-app__label">
-                                  <span className="cp-app__name"><TierName name={entry.short || entry.name} /></span>
-                                  {ROWS_LABEL[entry.id] ? <span className="cp-app__rows">{ROWS_LABEL[entry.id]}</span> : null}
-                                </span>
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ))}
-                </nav>
+                {/* THE RAIL IS THE RAIL.
+                    This drew its own navy list of the twelve — the third
+                    separately authored way of showing one catalogue, and the
+                    reason `PressCollectionRail` was written. It mounts that
+                    component in `preview` mode now: nothing is locked, since
+                    nobody is signed in and the question a visitor has is what
+                    exists, not what their plan reaches. */}
+                <PressCollectionRail
+                  selectedId={selectedId}
+                  onSelect={(entry) => (entry ? pick(entry) : null)}
+                  onPoint={setSelectedId}
+                  mode="preview"
+                />
                 </div>
                 <div className="cp-app__pane">
                   {selected ? (
@@ -588,8 +604,8 @@ export default function PressGate({ user }) {
             </div>
             </div>
             <figcaption className="cp-fade">
-              A live preview. Each collection shows six of the ten sample records in its
-              current release.
+              A live preview: the real viewer, reading the sample records published with
+              each collection&rsquo;s current release.
             </figcaption>
           </figure>
 

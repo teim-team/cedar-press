@@ -156,19 +156,17 @@ export default function CedarPressWhatsNew() {
         <section className="cp-nh cp-fade">
           <p className="cp-hero__access">Collection updates</p>
           <h1 className="cp-nh__title">Everything that changed, newest first.</h1>
-          <div>
-            <p className="cp-nh__sub">
-              Cedar collections are maintained as new records, ownership changes, corrections and
-              historical evidence arrive. Methodology releases are marked, because they can affect
-              figures somebody has already published.
-            </p>
-            {/* The principle this page exists for, said where it applies: the
-                changelog is the provenance layer. */}
-            <p className="cp-nh__why">
-              Release history is preserved so a figure can be traced to the exact version of the
-              collection it was published from.
-            </p>
-          </div>
+          {/* ONE LINE, NOT TWO PARAGRAPHS.
+              The ledger below is the page, and this was 60 words of preamble
+              above it saying what a changelog is. What survives is the part a
+              reader cannot infer from the rows: that methodology releases can
+              move figures somebody has already published, and that old
+              versions stay addressable. */}
+          <p className="cp-nh__sub">
+            Methodology releases are marked, because they can move figures somebody has already
+            published. Every version keeps its address, so a citation can name the release it
+            came from.
+          </p>
           <dl className="cp-nh__pulse">
             <dt>Last {activity.days} days</dt>
             <dd className="cp-nh__pulselead">
@@ -270,10 +268,17 @@ export default function CedarPressWhatsNew() {
                   <div className="cp-feed__what">
                     {/* The kind on every entry, not only in the filter: a
                         methodology release read cold must announce itself. */}
-                    <span className={`cp-feed__kind${method ? " cp-feed__kind--method" : ""}`}>
-                      {method ? "Methodology" : "Data update"}
-                    </span>
+                    {/* One line, not three. The kind, the collection and the
+                        version were stacked, so a release with a one-line
+                        note took 120px and a day that moved twelve
+                        collections was a page and a half of mostly air. They
+                        are one row now; the note and the change list keep
+                        their own lines because those are what a reader came
+                        for. */}
                     <h2 className="cp-feed__name">
+                      <span className={`cp-feed__kind${method ? " cp-feed__kind--method" : ""}`}>
+                        {method ? "Methodology" : "Data update"}
+                      </span>
                       <span>{name}</span>
                       {/* The version is the release's permalink: a citation
                           names one, and #funding-v4-2 gives the name a stable
@@ -293,8 +298,19 @@ export default function CedarPressWhatsNew() {
                       const routine = (line) => /^Release:\s/.test(line);
                       const news = entry.changed.filter((l) => !routine(l));
                       const counts = entry.changed.filter(routine);
+                      // The exact change list is a disclosure now. A release
+                      // day moves twelve collections and each one listed its
+                      // changes in full, so the ledger became a wall and the
+                      // dates it is ordered by were pages apart. The note
+                      // above stays visible as the summary; this is the
+                      // detail a reader opens when a particular release is
+                      // the one they care about.
+                      if (!news.length && !counts.length) return null;
                       return (
-                        <>
+                        <details className="cp-feed__detail">
+                          <summary>
+                            What changed{news.length ? ` · ${news.length} ${news.length === 1 ? "note" : "notes"}` : ""}
+                          </summary>
                           {news.length ? (
                             <ul className="cp-feed__list">
                               {news.map((line) => <li key={line}>{line}</li>)}
@@ -305,7 +321,7 @@ export default function CedarPressWhatsNew() {
                               {counts.map((line) => line.replace(/^Release:\s/, "")).join(" · ")}
                             </p>
                           ) : null}
-                        </>
+                        </details>
                       );
                     })()}
                     <p className="cp-feed__acts">
@@ -316,7 +332,12 @@ export default function CedarPressWhatsNew() {
                           No longer on the shelf; kept for citation
                         </span>
                       ) : (
-                        <Link className="cp-feed__act" to={PRESS_DATA_PATH}>
+                        /* THIS collection, not the collections page.
+                           It linked to /data flat, so a reader who came to
+                           see what changed in NAGPRA landed on Federal
+                           Funding and had to find NAGPRA again. The page
+                           opens on whichever collection a link names. */
+                        <Link className="cp-feed__act" to={`${PRESS_DATA_PATH}?c=${entry.id}`}>
                           View collection <span aria-hidden="true">&#8594;</span>
                         </Link>
                       )}
