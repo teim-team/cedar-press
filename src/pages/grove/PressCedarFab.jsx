@@ -48,7 +48,6 @@ import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { PRESS_DATA_PATH, PRESS_METHODS_PATH } from "../../features/grove/pressRoutes.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
-import { CedarIcon } from "./pressGateIcons";
 
 const MARK = "/brand/lumecon-logo-mark-teal.png";
 
@@ -560,21 +559,15 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
         aria-label="Ask Cedar"
         onClick={() => setOpen((current) => !current)}
       >
-        {/* THIS NO LONGER MATCHES teim-app's CedarWidget, AND THAT IS A
-            DECISION SOMEBODY HAS TO MAKE.
-            It used to be the platform's launcher to the mark — status dot,
-            then the name with the surface under it — and the point of that
-            was that the control a subscriber meets here is the control they
-            meet inside Cedar Grove. Collapsing it to a circle (because the
-            pill covered content on most surfaces) broke the parity, and the
-            mark below is a Press gate icon, not a Cedar brand asset: checked,
-            `teim-app/src/components/CedarWidget.jsx` has no icon in its
-            launcher at all, only the dot and the label.
-            The PANEL is now the platform's, class for class. The launcher is
-            the one part still diverging, and whether Grove adopts this
-            collapse or Press keeps a launcher of its own is the owner's call,
-            not a thing to settle inside a stylesheet. */}
-        <span className="cedar-widget__launcher-mark" aria-hidden="true">{CedarIcon}</span>
+        {/* THE OWNER MADE THE CALL: this matches teim-app's CedarWidget again.
+            The note that used to sit here said the divergence was the owner's
+            to settle and not a thing to decide inside a stylesheet. It has
+            been settled — one launcher across the product — so the collapse
+            to a circle is gone and so is the icon that went with it.
+            The icon was a Press gate glyph rather than a Cedar brand asset,
+            and `teim-app/src/components/CedarWidget.jsx` carries none: its
+            launcher is the dot and the label, which is also what the door's
+            own `.cp-dc__fab` shows. Three surfaces, one control. */}
         <span className="cedar-widget__status-dot" aria-hidden="true" />
         <span className="cedar-widget__launcher-copy">
           <span className="cedar-widget__launcher-label">Ask Cedar</span>
