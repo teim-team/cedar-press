@@ -124,7 +124,7 @@ export default function CedarPressSettings() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} />
+        <PressMast />
 
         <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Settings</p>

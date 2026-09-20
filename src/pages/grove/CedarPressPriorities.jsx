@@ -217,7 +217,7 @@ function RequestForm({ priorities, connected, canMove, available, onDone }) {
 
 export default function CedarPressPriorities() {
   useDocumentTitle("Shape the research");
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const entitled = canReadCedarPress(user);
   const fadeRoot = useFadeIn();
   useScrollToTop("priorities");
@@ -257,7 +257,7 @@ export default function CedarPressPriorities() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="priorities" />
+        <PressMast section="priorities" />
 
         <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Shape the research</p>

@@ -79,7 +79,7 @@ export default function CedarPressResearchAccess() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast nav={entitled} user={entitled ? user : null} />
+        <PressMast />
 
         <section className="cp-trh cp-fade">
           <div>

@@ -11,6 +11,7 @@ import { Link, NavLink } from "react-router";
 import { useAuth } from "../../context/useAuth";
 import { contactHref } from "../../features/grove/appLink.js";
 import { useNarrow } from "../../features/grove/useNarrow.js";
+import { canReadCedarPress } from "../../features/grove/pressAccess";
 
 /**
  * The reader's initials, from the address. Two letters where the address
@@ -231,13 +232,36 @@ export function PressPreviewNotice() {
   );
 }
 
-export function PressMast({ user, onSignOut, section = null, nav = true }) {
+/**
+ * The masthead, which is the same on every page because it is not assembled
+ * on every page.
+ *
+ * It used to take `user` and `onSignOut` as props, and twelve call sites got
+ * to decide. Two of them — the research-access and tribal-data-request pages
+ * — passed the reader but no sign-out, so the menu rendered a Sign out button
+ * wired to `undefined`: a control that looked like it worked and did nothing.
+ * A thirteenth, the "that piece is not here" branch of an article, passed no
+ * reader at all, so that one route's masthead stood 12px shorter than every
+ * other. Neither is the kind of thing a call site should be able to get
+ * wrong, so neither is a call site's to decide any more: who is signed in,
+ * whether they can read Cedar Press, and how to sign them out all come from
+ * the session. `section` stays a prop, because which section a page is in is
+ * genuinely the page's own answer.
+ */
+export function PressMast({ section = null }) {
   const home = section === "home";
   // The distribution line is for visitors deciding what this is; a
   // subscriber already inside the product does not need the masthead
-  // re-introducing it on every page. Read from the session directly, since
-  // not every page threads `user` into the masthead.
-  const { user: signedIn } = useAuth();
+  // re-introducing it on every page.
+  const { user: signedIn, logout } = useAuth();
+  // The two public pages are reachable without a subscription, so the nav and
+  // the account menu follow entitlement rather than merely being signed in —
+  // which is the rule every call site was already spelling out by hand as
+  // `user={entitled ? user : null}`.
+  const entitled = canReadCedarPress(signedIn);
+  const user = entitled ? signedIn : null;
+  const nav = entitled;
+  const onSignOut = () => logout();
   // One nav or the other, never both: two copies of five links in the DOM
   // make every "Collections" link ambiguous to anything that looks for one.
   const narrow = useNarrow("(max-width: 760px)");

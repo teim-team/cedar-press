@@ -73,7 +73,7 @@ function useFrameFill() {
 
 export default function CedarPressData() {
   useDocumentTitle("Collections");
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
   const { hash } = useLocation();
@@ -129,7 +129,7 @@ export default function CedarPressData() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp-page--table" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
+        <PressMast section="data" />
 
         <PressShelf user={user} />
 

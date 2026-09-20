@@ -88,7 +88,7 @@ function ArticleCard({ article, compact = false }) {
 
 export default function CedarPressArticles() {
   useDocumentTitle("Research Briefs");
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   // Sitewide arrival language.
   const fadeRoot = useFadeIn();
   const entitled = canReadCedarPress(user);
@@ -103,7 +103,7 @@ export default function CedarPressArticles() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="articles" />
+        <PressMast section="articles" />
 
         {/* The page says what it is: standing alone, it cannot borrow the
             reader's hero for context the way it did as a section. */}

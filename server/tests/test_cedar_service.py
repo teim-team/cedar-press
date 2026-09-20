@@ -147,9 +147,11 @@ class TestWhenItIsNotWiredUp(unittest.TestCase):
             self.assertEqual(cedar_service.base_url(), "https://cedar.internal")
 
     def test_asking_an_unconfigured_cedar_raises_rather_than_inventing(self):
-        with mock.patch.dict(os.environ, {"CEDAR_BASE_URL": "", "CEDAR_INTERNAL_API_KEY": ""}):
-            with self.assertRaises(cedar_service.CedarUnavailable):
-                cedar_service.ask(question="anything", email="a@b.c", tier="press")
+        with (
+            mock.patch.dict(os.environ, {"CEDAR_BASE_URL": "", "CEDAR_INTERNAL_API_KEY": ""}),
+            self.assertRaises(cedar_service.CedarUnavailable),
+        ):
+            cedar_service.ask(question="anything", email="a@b.c", tier="press")
 
 
 class TestReadingTheReply(unittest.TestCase):

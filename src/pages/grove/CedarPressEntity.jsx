@@ -46,7 +46,7 @@ import PressGate from "./PressGate";
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 export default function CedarPressEntity() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const narrow = useNarrow();
   const entitled = canReadCedarPress(user);
   const { uid } = useParams();
@@ -180,7 +180,7 @@ export default function CedarPressEntity() {
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp-ent">
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
+        <PressMast section="data" />
 
         <div className="cp-rec__bar">
           {/* Back to the record this profile was opened from, when it was:
