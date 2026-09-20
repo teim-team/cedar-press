@@ -706,7 +706,7 @@ export default function PressGate({ user }) {
             </picture>
             <p className="cp-why__photolabel">
               <span>Tribal economies</span>
-              Governments, enterprises, and the institutions around them
+              Governments, enterprises, ANCs, NHOs and nonprofits
             </p>
           </div>
           <ol className="cp-why__proof">
