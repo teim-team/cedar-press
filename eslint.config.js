@@ -57,4 +57,20 @@ export default defineConfig([
     files: ["playwright.config.js", "tests/**/*.spec.js"],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
+  {
+    // vite.config.js runs in node at build time, not in the browser, so it
+    // reads `process.env` to let CI override the stamped commit.
+    files: ["vite.config.js"],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    // The two constants vite's `define` replaces at build time. Declared
+    // readonly so a typo is still an error and nobody can assign to them:
+    // they are compile-time substitutions, and writing to one would compile
+    // to writing to a literal.
+    files: ["src/features/grove/buildStamp.js"],
+    languageOptions: {
+      globals: { __PRESS_BUILD_SHA__: "readonly", __PRESS_BUILD_TIME__: "readonly" },
+    },
+  },
 ]);

@@ -473,6 +473,17 @@ test.describe("the subscriber's path", () => {
     // the page is for; every one of them is read from the release record or
     // the article list, so none of it can go stale in place.
     await expect(page.locator(".cp-brief__lead")).toBeVisible();
+    // The lead's PICTURE, in the DOM and decoded -- not its JSX. The unit
+    // test beside this one reads the source, and source can be commented out
+    // or put behind a condition that never fires while every regex over it
+    // still matches. `naturalWidth` is the only assertion that distinguishes
+    // "the element rendered" from "the file actually arrived", and the page
+    // was measurably the thinnest in the product for want of exactly this.
+    const leadImage = page.locator(".cp-brief__img");
+    await expect(leadImage).toBeVisible();
+    await expect
+      .poll(() => leadImage.evaluate((el) => el.naturalWidth), { timeout: 5000 })
+      .toBeGreaterThan(0);
     await expect(page.locator(".cp-brief__signals a")).toHaveCount(3);
     await expect(page.locator(".cp-brief__coll")).toBeVisible();
     await expect(page.getByRole("button", { name: /Ask Cedar what changed/ })).toBeVisible();
