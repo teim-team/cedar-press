@@ -233,6 +233,28 @@ fall — 62 allows a decline only on that exact arithmetic, deliberately.
 
 ---
 
+## DATA EXTRACTION AND HARMONIZATION MOVE TO A SEPARATE REPO (decided 2026-09-21, repo not yet created)
+
+Team meeting decision, relayed by Elijah. Today `teim-engine` both downloads
+public data and runs the deterministic model. It is to become the model only,
+run through `teim-app`, and a **new data repo** will own extraction and
+harmonization and feed three consumers: `teim-engine`, Cedar Press (this
+repo) and Cedar Grove (in `teim-app`). Cedar (`cedar`) stays its own service.
+
+What this means here, until that repo exists:
+
+- Nothing moves yet. The pipeline in `code/`, the gate and the ledgers stay
+  exactly as they are, and every rule in this file still applies.
+- The collections this repo publishes are one of the feeds Cedar Grove reads
+  (`teim-app` `src/features/grove/collectionEvidence.js` lists them as
+  ledger rows). When the data repo exists, harmonized public data for Grove
+  comes from it, and Cedar Press keeps owning the curated collections. Do not
+  start building a public-data harmonization layer in this repo on the
+  assumption it will stay here.
+- The repo has no name and no location. Do not invent one in code, docs or
+  README links; write "the data repo (not yet created)" and grep for that
+  phrase when it lands.
+
 ## CURRENT STATE (2026-08-06) — superseded by the section above, kept as history
 
 Much of this file was written 2026-07-31 and describes an xlsx-centred project. **The build is now a script pipeline in `code/`, numbered in run order, writing to `data/clean/`.** Where a 07-31 statement conflicts with this section, this section wins. The older sections are retained because their *findings* remain true; their *counts and queues* do not.
