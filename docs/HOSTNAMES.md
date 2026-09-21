@@ -17,15 +17,59 @@
 
 ## Publishing
 
-`deploy.yml` builds, then syncs `dist-site/` to the bucket and invalidates the distribution, assuming IAM role `cedarpress-site-deploy` through GitHub OIDC. The role trusts only `refs/heads/main` of this repository and can write to the bucket and create invalidations on this distribution. GitHub Pages still receives the same artifact.
+`deploy.yml` — *Publish cedarpress.ai* — runs its gates, builds `dist-site/`
+once, and publishes that one build to two destinations in **two independent
+jobs**:
+
+| Job | Destination | Needs |
+| --- | --- | --- |
+| `build` | Gates, then `dist-site/` as two artifacts | — |
+| `pages` | GitHub Pages, via `deploy-pages` | `build` |
+| `s3` | The bucket, then a CloudFront invalidation | `build` |
+
+`s3` assumes IAM role `cedarpress-site-deploy` through GitHub OIDC. The role
+trusts only `refs/heads/main` of this repository and can write to the bucket
+and create invalidations on this distribution.
+
+The two publishes were one job until 2026-09-21, and the coupling is what made
+the OIDC failure below total rather than partial: the AWS steps ran last inside
+`build`, so their failure failed `build`, and the Pages job — `needs: build` —
+was skipped along with it. Eleven consecutive runs published to neither
+destination and said so as a single red X on a job whose every gate had passed.
+`deployGates.test.js` now fails if the two are folded back together, or if
+either publish is made to wait on the other.
+
+### Publishing by hand
+
+The workflow is the only automated path, and while the trust below is broken
+there is no automated path at all. With credentials for `teim-prod`, current
+`main` goes out in one paste:
+
+```
+npm ci && npm run build:site
+aws s3 sync dist-site s3://cedarpress-ai-site-502309351676 --delete \
+  --exclude CNAME --exclude 'assets/*' --cache-control 'public, max-age=600'
+aws s3 sync dist-site/assets s3://cedarpress-ai-site-502309351676/assets --delete \
+  --cache-control 'public, max-age=31536000, immutable'
+aws cloudfront create-invalidation --distribution-id E3AEMUAUDGWNTQ --paths '/*'
+```
+
+**`VITE_PRESS_DEMO_ACCOUNTS` has to be in the environment for that build.** It
+is a repository secret, so a local build without it is a site that signs nobody
+in — the standalone preview account is how the only people outside the team who
+have seen Cedar Press get through the door. Confirm afterwards against the build
+stamp in Settings, which carries the commit the running bundle was built from.
 
 ### The S3 publish has never run
 
-Measured 2026-09-20 against the workflow's own run history. The two AWS steps
-arrived with #87 (run 103, 20 September 04:19). Runs 103-108 all failed earlier
-in the job — 103 at `ruff check server`, the rest at the Python gates — so the
-steps were skipped, not attempted. Run 109 is the first run in which they were
-reached, and it failed:
+Re-measured 2026-09-21 against the workflow's own run history, through run 113.
+The two AWS steps arrived with #87 (run 103, 20 September 04:19). Runs 103-108
+all failed earlier in the job — 103 at `ruff check server`, the rest at the
+Python gates — so the steps were skipped, not attempted. Run 109 is the first
+run in which they were reached. It failed, and so has **every run since**:
+109, 110, 111, 112, 113, with 113 (the #102 merge, 21 September 06:31) passing
+all fourteen preceding steps — lint, 267 node tests, 143 smoke tests, ruff, 265
+Python tests, `build:site`, artifact uploaded — before the same error:
 
 ```
 Run aws-actions/configure-aws-credentials@v4
@@ -40,7 +84,8 @@ So `aws s3 sync` has not executed once. Whatever `cedarpress.ai` serves today wa
 put in the bucket by some other means, and every merge since 19 September has
 changed `main` without changing the site. The GitHub Pages job is no substitute:
 `public/CNAME` claims `cedarpress.ai`, but the apex now resolves to CloudFront,
-so the Pages copy is published where nobody reaches it.
+so the Pages copy is published where nobody reaches it — and until the job split
+above, it was not even being published, because the failure below skipped it.
 
 This is an AWS-side fix; nothing in this repository can make it pass. STS refuses
 the exchange before the role's permissions are consulted, which narrows it to two

@@ -1,22 +1,27 @@
-name: Deploy to GitHub Pages
+# cedarpress.ai is served from S3 behind CloudFront, NOT from GitHub Pages
+# (docs/HOSTNAMES.md). This workflow was called "Deploy to GitHub Pages" for
+# its first hundred runs and the name outlived the truth by two months: it
+# sent two separate readers to diagnose a dead site by looking at Pages, which
+# is the one destination nobody reaches. The name is the first thing anyone
+# reads on a red run, so it names the thing that matters.
+name: Publish cedarpress.ai
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
+  # Gates, then the build that both destinations publish. No credentials: this
+  # job holds none and needs none, so a failure here is always about the code.
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -84,22 +89,75 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist-site
-      # cedarpress.ai is served from S3 behind CloudFront (docs/HOSTNAMES.md).
-      - uses: aws-actions/configure-aws-credentials@v4
+      # The same build again, as an ordinary artifact, because the Pages
+      # artifact is a tarball in a format only `deploy-pages` reads. Publishing
+      # the identical bytes to both destinations is the point: rebuilding in
+      # the S3 job would let the two drift, and a drift between what Pages
+      # serves and what CloudFront serves is invisible until it matters.
+      - uses: actions/upload-artifact@v4
         with:
-          role-to-assume: arn:aws:iam::502309351676:role/cedarpress-site-deploy
-          aws-region: us-east-1
-      - run: |
-          aws s3 sync dist-site s3://cedarpress-ai-site-502309351676 --delete --exclude CNAME --exclude 'assets/*' --cache-control 'public, max-age=600'
-          aws s3 sync dist-site/assets s3://cedarpress-ai-site-502309351676/assets --delete --cache-control 'public, max-age=31536000, immutable'
-          aws cloudfront create-invalidation --distribution-id E3AEMUAUDGWNTQ --paths '/*'
+          name: site
+          path: dist-site
+          retention-days: 1
 
-  deploy:
+  # ── Two destinations, two jobs, two independent verdicts ──────────────────
+  #
+  # These were one job until 2026-09-21, with the S3 publish as the last steps
+  # of `build`. That coupling cost real time: the IAM trust for
+  # `cedarpress-site-deploy` has never accepted this repository's OIDC token,
+  # so `configure-aws-credentials` failed at the end of every run, failed the
+  # whole `build` job with it, and the Pages job — `needs: build` — was SKIPPED
+  # eleven runs in a row. One broken trust policy took down both destinations
+  # and reported it as a single red X on a job whose every gate had passed.
+  #
+  # Apart now. Each destination reports its own verdict, `needs: build` alone,
+  # and neither can skip the other. What one of them failing means is legible
+  # from the job name without opening a log.
+
+  pages:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+  s3:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: dist-site
+      # Assumes IAM role `cedarpress-site-deploy` in account 502309351676
+      # through GitHub OIDC. If this step fails with
+      #
+      #   Could not assume role with OIDC:
+      #   Not authorized to perform sts:AssumeRoleWithWebIdentity
+      #
+      # the fault is in AWS and nothing in this repository can make it pass:
+      # STS refuses the exchange before the role's permissions are consulted.
+      # docs/HOSTNAMES.md carries the two commands that say which of the two
+      # causes it is, and a paste-ready trust policy.
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::502309351676:role/cedarpress-site-deploy
+          aws-region: us-east-1
+      # Two syncs, because the two halves want opposite cache lives: the
+      # entry documents must be re-fetched (10 minutes) while the hashed
+      # assets they point at never change under their own names (a year,
+      # immutable). CNAME is excluded — it belongs to the Pages copy and
+      # CloudFront has no use for it.
+      - run: |
+          aws s3 sync dist-site s3://cedarpress-ai-site-502309351676 --delete --exclude CNAME --exclude 'assets/*' --cache-control 'public, max-age=600'
+          aws s3 sync dist-site/assets s3://cedarpress-ai-site-502309351676/assets --delete --cache-control 'public, max-age=31536000, immutable'
+          aws cloudfront create-invalidation --distribution-id E3AEMUAUDGWNTQ --paths '/*'
