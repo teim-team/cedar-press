@@ -94,8 +94,26 @@ it is caught, logged as `send_failed`, and **the request still returns 200**. So
 permission errors are quiet too. One smoke send to a real inbox after
 provisioning is worth more than a green deploy.
 
-Note the DNS side is already prepared: HOSTNAMES.md records a `_dmarc` record in
-the Route 53 zone.
+**Correction — the DNS side is not prepared, and an earlier draft of this note
+said it was.** HOSTNAMES.md records a `_dmarc` record in the `cedarpress.ai`
+zone, and DMARC is a *policy* record. It neither verifies a domain as an SES
+identity nor installs the SES-issued DKIM CNAMEs that make mail authenticate in
+alignment. Treating it as completion is worse than treating it as absent: a
+published DMARC policy with unaligned mail means messages that do send get
+**rejected or quarantined by the recipient**, on the domain's own instruction.
+
+Three records are needed, and none of them is the one that exists:
+
+- the SES **domain-identity verification** record,
+- the three **DKIM** CNAMEs SES issues for that identity,
+- SPF, if the policy requires an SPF pass rather than DKIM alignment alone.
+
+And check *which* domain. The mailer's default sender is
+`Tribal Economic Impact <contact@lumecon.ai>` (teim-app `server/mailer.js`), so
+the identity to verify is **`lumecon.ai`** — a different Route 53 zone from the
+`cedarpress.ai` one this note has been describing. The `_dmarc` record that
+prompted the original sentence is in the wrong zone for the mail this section is
+about.
 
 ## 2. `app.cedarpress.ai` is in the certificate, and that is the interesting part
 
@@ -111,9 +129,27 @@ That sentence is a session-design decision already made, and it is the good one.
 same-site option appeared to require moving Press under `lumecon.ai`.
 
 The certificate points the other way: put the subscriber API on
-`app.cedarpress.ai` and the client and its API are **the same site**, so a
-host-only cookie on the apex is simply sent, with no bridge, no `SameSite=None`,
-and no relaxation of anything. The cross-site problem then applies only where it
+`app.cedarpress.ai` and the client and its API are **the same site**, so
+`SameSite=Lax` stops being the obstacle — no bridge, no `SameSite=None`, no
+relaxation of anything.
+
+**But same-site is not the same as same-host, and an earlier draft of this
+paragraph conflated them.** A host-only cookie set for `cedarpress.ai` is *not*
+sent to `app.cedarpress.ai`; host matching is a separate rule from the SameSite
+check, and being same-site relaxes only the latter. Written as "a host-only
+cookie on the apex is simply sent", this sentence would have sent someone to
+build a session that never arrives, with the certificate and the CORS
+configuration both looking correct.
+
+What actually works, and the choice has to be made deliberately:
+
+- **The API sets the cookie itself, responding from `app.cedarpress.ai`.** It is
+  then host-only *for that host*, sent on every subsequent call to the API, and
+  same-site means `Lax` does not block it. This is the one to pick — no
+  `Domain` attribute, narrowest possible scope.
+- **Or an explicit `Domain=cedarpress.ai`**, which widens the cookie to the apex
+  and every subdomain. It works, and it hands the cookie to any host that is
+  ever added to the zone. Only worth it if the apex itself must read it. The cross-site problem then applies only where it
 genuinely must — a reader crossing to the *platform* at `lumecon.ai` — rather
 than to every call the Press client makes.
 
@@ -135,10 +171,63 @@ KMS-encrypted and reviewed. Worth reading before designing a second.
 
 Not an AWS item, and the thing most likely to be misjudged from the outside.
 Cedar Press does **not** need a database of its own: `server/cedar_press/db.py`
-reads `DATABASE_URL`, *the same variable teim-app reads*. Migrations self-apply
-under a `pg_advisory_lock`, are tracked in `cedar_press_migrations`, and the
-foreign key to `public.users` is declared conditionally through `to_regclass`,
-so deployment order does not matter and neither side has to wait for the other.
+reads `DATABASE_URL`, *the same variable name teim-app reads*. Migrations
+self-apply under a `pg_advisory_lock` and are tracked in
+`cedar_press_migrations`.
+
+Two corrections to an earlier draft of this paragraph, both of them the kind
+that make a deployment look done when it is not.
+
+**The same variable name is not the same database.** Two separately deployed
+services each reading `DATABASE_URL` share a store only if deployment points
+both of them at the same Postgres *instance and schema*. Give the Cedar Press
+API its own `DATABASE_URL` and these migrations run happily against an
+independent subscriber store containing no platform users — the tables exist,
+the service starts, nothing errors, and the seam this section describes is not
+there. So "set `DATABASE_URL`" is not the instruction. **Point both services at
+the same database and schema, and confirm it** — the cheapest check is that
+`cedar_press_migrations` and teim-app's `users` are visible from one connection.
+
+**Deployment order does matter, in one direction.** The foreign key to
+`public.users` is declared conditionally, which is right — Cedar Press does not
+own that table:
+
+```sql
+-- 001_cedar_press_subscribers.sql
+IF to_regclass('public.users') IS NOT NULL AND NOT EXISTS (
+  SELECT 1 FROM pg_constraint WHERE conname = 'cedar_press_subscribers_user_fk'
+) THEN ... ADD CONSTRAINT ... REFERENCES users(id) ON DELETE SET NULL;
+```
+
+But `db.migrate()` records `001_cedar_press_subscribers.sql` in
+`cedar_press_migrations` whether or not the constraint was created, and then
+skips **every filename already recorded**, forever. So in the order where Cedar
+Press initialises the shared database first:
+
+1. `users` is absent, the `IF` is false, the constraint is skipped;
+2. `001` is recorded as applied;
+3. teim-app starts later and creates `users`;
+4. `001` never runs again, and `cedar_press_subscribers_user_fk` **never
+   exists**.
+
+The account links then carry no referential integrity and no `ON DELETE SET
+NULL` — deleting a platform user silently leaves a subscriber row pointing at a
+`user_id` that is gone. Nothing reports this; the only symptom is an absent
+constraint nobody thought to look for.
+
+Two remedies, and the choice is real. Either **bring teim-app up first** so
+`users` exists when `001` runs — operationally simple, and a standing
+dependency somebody will eventually forget — or add a **later migration** that
+re-attempts the constraint, which runs because its own filename has not been
+recorded yet, and is idempotent because the `NOT EXISTS` guard is already there.
+The second is the durable one. **This is a code change in this repository, not
+a deployment step, and it is not in this pull request** — it is recorded here
+so that whoever does the deployment knows the constraint may be missing and how
+to check:
+
+```sql
+SELECT conname FROM pg_constraint WHERE conname = 'cedar_press_subscribers_user_fk';
+```
 
 So "get the site on the database" is two independent switches, not one:
 

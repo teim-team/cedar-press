@@ -3877,9 +3877,26 @@ That last row is the condition. `data/cache.py` degrades gracefully **by
 design**, and that is correct for a model input: a missed cache costs a refetch.
 It is wrong for a dataset a subscriber pays for, where an unreachable database
 must be an error and not a quieter answer. It is also indistinguishable from
-absence — a county nobody has run is simply not there. So the collections go in
-under the `reference_dataset` treatment, not the cache, and nothing outside the
-engine should ever read `data_snapshot`.
+absence — a county nobody has run is simply not there.
+
+**What this condition does and does not decide.** An earlier draft ended "so the
+collections go in under the `reference_dataset` treatment, not the cache" — which
+places them in the engine, and this ADR's status says the storage question is
+*open* while its title says the engine holds the fetching and not the product
+data. An implementer reading the condition and an implementer reading the title
+would put the twelve collections in two different repositories.
+
+So the condition states guarantees, not a location. **Wherever the collections
+live, they require the `reference_dataset` treatment and not cache semantics:**
+a pinned vintage per read, a checksum, an explicit versioned update path, and an
+unreachable store that raises rather than answering more quietly. If they land
+in the engine, that means its `reference_dataset` store and never
+`data_snapshot`. If they stay with the hub, the hub owes the same four
+guarantees — the point is that a published collection must not be able to expire
+or drift on its own, which a 30-day freshness window lets it do.
+
+Independently of where they live: nothing outside the engine should ever read
+`data_snapshot`.
 
 **The second consideration, offered not decided.** teim-engine's own operating
 spec scopes it as the IO + SAM economic model, and its release cadence answers

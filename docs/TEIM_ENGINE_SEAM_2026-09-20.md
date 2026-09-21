@@ -124,7 +124,27 @@ repositories. It belongs in both.
 ## The seam, in the order it has to be built
 
 1. **A nation → county FIPS crosswalk, with its basis recorded per row.** This
-   is the join, and it is the one piece neither side has. It belongs in Cedar's
+   is the join, and **neither side has it whole — but this repository is not
+   starting from nothing, and an earlier draft of this line read as though it
+   were.** Three artifacts already exist and the next implementation should
+   extend them rather than compete with them:
+
+   | Artifact | What it is |
+   | --- | --- |
+   | `data/raw/external/compacts/prior_extractions/tribe_aiannh_crosswalk_master.csv` | 303 rows, tribe → AIANNH **name** match, gaming-compact tribes only |
+   | `code/873_build_aiannh_crosswalk.py` | The generator, with build / verify / selftest modes |
+   | `data/clean/geo_aiannh_county_observed.csv` | **374** (AIANNH, county) pairs across **261** areas, per `docs/GEO_AIANNH_STATS.json` |
+
+   Read what 873 says about its own output before treating 374 pairs as a head
+   start. It is explicit that a complete county ↔ AIANNH overlap table *cannot*
+   be built from what is on disk, because TIGER county polygons are not there,
+   and that the observed file is **"a floor, never a census … Read it as
+   evidence, never as coverage."** Two further limits it does not state in those
+   words: 261 of 864 AIANNH areas are covered, and **2,876 of its 2,895 points
+   come from three gaming files** — so the shape of that evidence is the shape
+   of where casinos are, which is not the shape of the collections. The
+   remaining work is to add county polygons and widen the point sources, in 873,
+   under its verify mode. That is extension, not a second crosswalk. It belongs in Cedar's
    spine, because that is where entity identity already lives and where
    `cedar_uid` is minted; the engine should consume it, not own it. Each row
    needs the evidentiary treatment the rest of the register gets — a basis and
@@ -134,13 +154,43 @@ repositories. It belongs in both.
    that do not agree, and the engine's regionalization reads whichever answer
    it gets as fact. Per ADR-015 rule 2, carry AIANNH where it can be had and
    record the county set as the approximation it is, rather than as the truth.
-2. **A postal → state FIPS column** on the register. Trivial, mechanical, and
-   it unblocks every state-level engine call without waiting for (1).
-3. **Only then, a read surface on the engine.** A reference-data route keyed by
-   geography and year, answering from the fetchers rather than from
-   `data_snapshot`, so a cache miss fetches instead of returning silence. The
-   cache stays what it is: an implementation detail of a run, not a public
-   dataset.
+2. **Postal → state FIPS, preserving the one-to-many that already exists.**
+   Mechanical, and it unblocks state-level engine calls without waiting for (1)
+   — but **not as a single column.** `cedar_source_registry/nations.jsonl`
+   carries `states` as a *list*, and 15 of its 584 nations have more than one:
+
+   ```
+   AZ,NM,UT   Navajo Nation, Arizona, New Mexico, & Utah
+   ND,SD      Standing Rock Sioux Tribe of North & South Dakota
+   CO,NM,UT   Ute Mountain Ute Tribe
+   AZ,CA,NV   Fort Mojave Indian Tribe of Arizona, California & Nevada
+   ...        (11 more)
+   ```
+
+   A single postal-to-FIPS column keeps one of them and discards the rest, and
+   the engine's region is a county set — so the result is not an error, it is a
+   **regional input that is quietly short two states for the largest nation in
+   the country.** Nothing downstream can detect that, because a smaller region
+   is a valid region. Carry the existing `states` list through, or give the
+   register a nation → state relation; do not flatten it to fit a column.
+3. **Only then, a read surface on the engine — and it resolves a vintage, it
+   does not refetch.** An earlier draft of this step said a route keyed by
+   geography and year should answer "from the fetchers rather than from
+   `data_snapshot`, so a cache miss fetches instead of returning silence."
+   **That is cache semantics wearing a different name, and it contradicts
+   ADR-044 in this same change.** Keyed only by geography and year, with a live
+   fetch on a miss, the same request returns revised federal values later with
+   no Cedar release, no pinned vintage, no checksum and no semantic diff — which
+   is exactly the `data_snapshot` behaviour ADR-044 rules out for anything a
+   subscriber pays for.
+
+   A read resolves **a specified vintage** and says which one it answered from.
+   A miss is an honest miss — the vintage is not published — not an invitation
+   to go and get whatever the federal source says today. Refreshes happen
+   through an explicit versioned update path that mints a new vintage, and the
+   two operations never share a code path. `data_snapshot` stays what it is: an
+   implementation detail of a run, not a public dataset, and nothing outside the
+   engine reads it.
 4. **A client in cedar-press**, alongside the existing FastAPI service in
    `server/`, following the arrangement already in place for the platform — a
    base URL, a bearer key, a feature flag, and a degraded answer rather than an
