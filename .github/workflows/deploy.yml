@@ -86,14 +86,21 @@ jobs:
       # `dist-site`, not `dist`: the data workspace tracks 295 files under
       # `dist/` and vite empties its output directory before every build. The
       # two must move together with `build.outDir` in vite.config.js.
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist-site
-      # The same build again, as an ordinary artifact, because the Pages
-      # artifact is a tarball in a format only `deploy-pages` reads. Publishing
-      # the identical bytes to both destinations is the point: rebuilding in
-      # the S3 job would let the two drift, and a drift between what Pages
-      # serves and what CloudFront serves is invisible until it matters.
+      #
+      # ONE artifact, in a format neither destination is special about. Both
+      # publishing jobs download this exact tree, so the two serve identical
+      # bytes — rebuilding in each would let them drift, and a drift between
+      # what CloudFront serves and what Pages serves is invisible until it
+      # matters.
+      #
+      # Codex, on this pull request: the FIRST version of this split left
+      # `upload-pages-artifact` here. That put Pages-specific packaging back
+      # inside the shared job, so a failure peculiar to Pages would fail
+      # `build` and skip the S3 publish — the coupling this whole change exists
+      # to remove, moved one step earlier and out of view of the guard that was
+      # written to catch it. Destination-specific work now lives only in the
+      # destination's own job. What remains here is shared by construction, and
+      # its failure means there is nothing to publish anywhere.
       - uses: actions/upload-artifact@v4
         with:
           name: site
@@ -106,9 +113,17 @@ jobs:
   # of `build`. That coupling cost real time: the IAM trust for
   # `cedarpress-site-deploy` has never accepted this repository's OIDC token,
   # so `configure-aws-credentials` failed at the end of every run, failed the
-  # whole `build` job with it, and the Pages job — `needs: build` — was SKIPPED
-  # eleven runs in a row. One broken trust policy took down both destinations
-  # and reported it as a single red X on a job whose every gate had passed.
+  # whole `build` job with it, and the Pages job — `needs: build` — was
+  # SKIPPED with it.
+  #
+  # Two numbers, and they are not the same number. ELEVEN runs (103-113)
+  # published to neither destination; only FIVE of them (109-113) were stopped
+  # by OIDC. Runs 103-108 never reached the AWS steps at all — 103 failed at
+  # `ruff check server`, the rest at the Python gates. Anyone reading this
+  # during a later outage should not attribute an earlier gate failure to AWS.
+  # The point stands on the five: one broken trust policy took down both
+  # destinations and reported it as a single red X on a job whose every gate
+  # had passed.
   #
   # Apart now. Each destination reports its own verdict, `needs: build` alone,
   # and neither can skip the other. What one of them failing means is legible
@@ -124,6 +139,16 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: dist-site
+      # The Pages tarball is built HERE, not in `build`: it is a format only
+      # `deploy-pages` reads, so packaging it is Pages' own business and its
+      # failure is Pages' own failure.
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist-site
       - id: deployment
         uses: actions/deploy-pages@v5
 

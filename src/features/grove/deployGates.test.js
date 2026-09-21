@@ -281,11 +281,27 @@ export function jobsOf(source) {
   return found;
 }
 
+/**
+ * Which destination a job does work for.
+ *
+ * Codex, on this pull request: the first version matched only `deploy-pages`
+ * and `aws s3 sync` — the steps that *publish*. But a destination's failure
+ * modes start earlier than its publish. `upload-pages-artifact` packages a
+ * tarball only `deploy-pages` reads, and `configure-aws-credentials` exchanges
+ * a token only the S3 sync needs; either failing is a failure of one
+ * destination. Left in a shared job, they take the other destination down
+ * through `needs:` and this guard sees nothing, because the job it is in
+ * publishes to neither. That is exactly the shape the split exists to remove,
+ * so the preparation steps count as the destination too.
+ */
+const PAGES = [/deploy-pages/, /upload-pages-artifact/];
+const S3 = [/aws s3 sync/, /configure-aws-credentials/];
+
 const publisher = (job) => {
   const text = job.steps.join("\n");
   return {
-    pages: /deploy-pages/.test(text),
-    s3: /aws s3 sync/.test(text),
+    pages: PAGES.some((pattern) => pattern.test(text)),
+    s3: S3.some((pattern) => pattern.test(text)),
   };
 };
 
@@ -345,4 +361,49 @@ test("the reader sees the shape this test exists to reject", () => {
   // skip that cost eleven runs.
   assert.ok(publisher(jobs[0]).s3 && publisher(jobs[1]).pages);
   assert.ok(jobs[1].needs.includes("build"));
+});
+
+test("the unaffected destination stays runnable when the other's prep fails", () => {
+  // The shape Codex found: `build` shared, but carrying Pages' packaging. Both
+  // publishing jobs `needs: build`, so a Pages-only packaging failure fails
+  // `build` and skips S3 — a destination killed by work it does not use.
+  const prepInShared = `jobs:
+  build:
+    steps:
+      - run: npm run build:site
+      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-artifact@v4
+  pages:
+    needs: build
+    steps:
+      - uses: actions/deploy-pages@v5
+  s3:
+    needs: build
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+      - run: aws s3 sync dist-site s3://bucket --delete
+`;
+  const shared = jobsOf(prepInShared).find((job) => job.name === "build");
+  assert.deepEqual(
+    publisher(shared),
+    { pages: true, s3: false },
+    "the shared job is doing Pages-only work that every destination waits on",
+  );
+
+  // And the same tree with the packaging moved into `pages`: the shared job is
+  // shared by construction, and each destination owns its own preparation.
+  const isolated = prepInShared
+    .replace("      - uses: actions/upload-pages-artifact@v5\n", "")
+    .replace(
+      "    steps:\n      - uses: actions/deploy-pages@v5",
+      "    steps:\n      - uses: actions/upload-pages-artifact@v5\n      - uses: actions/deploy-pages@v5",
+    );
+  for (const job of jobsOf(isolated)) {
+    const { pages, s3 } = publisher(job);
+    if (job.name === "build") {
+      assert.deepEqual({ pages, s3 }, { pages: false, s3: false }, "build is neutral");
+    } else {
+      assert.ok(pages !== s3, `"${job.name}" serves exactly one destination`);
+    }
+  }
 });
