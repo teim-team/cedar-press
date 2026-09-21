@@ -21,7 +21,7 @@
 import { Link } from "react-router";
 
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
-import { PRESS_ARTICLES, articleHref } from "../../features/grove/pressArticles";
+import { ARTICLE_IMAGE, PRESS_ARTICLES, articleHref } from "../../features/grove/pressArticles";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { anchorOf, formatUpdated, latestRelease, recentlyUpdated } from "../../features/grove/pressReleases";
 import { PRESS_DATA_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
@@ -50,6 +50,31 @@ export default function PressBriefing() {
       {lead ? (
         <article className="cp-brief__lead">
           <span className="cp-brief__cap">The latest research</span>
+          {/* THE LEAD HAS A PICTURE ON /articles AND HAD NONE HERE.
+              The briefing brief is "one lead development", which is about how
+              MANY things the page carries, not about stripping the one it
+              carries down to text. Every article in the corpus ships an
+              `image`, `imageAlt` and intrinsic dimensions, and the articles
+              index renders them; this page was the only surface that dropped
+              them, which is why it read as the emptiest page in the product
+              while being its front page.
+              Same source, same constant for the intrinsic size, so the two
+              renderings cannot drift into different aspect ratios. Eager and
+              high priority: on this page it is the largest thing on the first
+              screen, exactly as the lead card is on /articles. */}
+          {lead.image ? (
+            <div className="cp-brief__art">
+              <img
+                className="cp-brief__img"
+                src={lead.image}
+                alt={lead.imageAlt}
+                width={ARTICLE_IMAGE.width}
+                height={ARTICLE_IMAGE.height}
+                loading="eager"
+                fetchPriority="high"
+              />
+            </div>
+          ) : null}
           <h2 className="cp-brief__title">
             {away ? (
               <a href={articleHref(lead)} target="_blank" rel="noreferrer">
