@@ -28,6 +28,7 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import { TierName } from "./TierName";
+import { buildLine } from "../../features/grove/buildStamp.js";
 
 /**
  * The one question. Optional, remembered, and stated as the trade it is:
@@ -240,6 +241,18 @@ export default function CedarPressSettings() {
           </div>
 
         </div>
+
+        {/* WHICH BUILD IS THIS. The page is served from S3 behind CloudFront,
+            so "it hasn't updated" has three possible causes — the browser
+            cached it, CloudFront cached it, or the publish never ran. For a
+            month it was the third and nothing on the page said so. This line
+            is the difference between guessing and knowing, and it is readable
+            on a phone without developer tools. Quote it in any report that
+            something is or is not live. */}
+        <p className="cp-set__build">
+          <span>Build</span>
+          <code data-testid="press-build">{buildLine()}</code>
+        </p>
 
         <PressCedarFab />
         <PressFoot />

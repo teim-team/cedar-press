@@ -1,5 +1,31 @@
+import { execSync } from "node:child_process";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+
+// THE ONE QUESTION NOBODY COULD ANSWER FROM A PHONE: is what I am looking at
+// the build that was just pushed, or the one from a week ago?
+//
+// cedarpress.ai is served from S3 behind CloudFront, so a stale page can be a
+// browser cache, a CloudFront cache, or a publish that never ran -- and for a
+// month it was the third one, silently. Nothing in the page said which build
+// it was, so "it hasn't updated" and "it updated and looks the same" were
+// indistinguishable to the person looking at it.
+//
+// The commit is stamped into the bundle here and shown on /settings. Reading
+// it takes five seconds on a phone and settles the question outright.
+//
+// `git` is absent in some build sandboxes and the tree can be dirty locally,
+// so this never throws: it degrades to "unknown", which the test below treats
+// as a local build rather than a failure.
+function gitSha() {
+  try {
+    return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+  } catch {
+    return "unknown";
+  }
+}
 
 // Served at the domain root (cedarpress.ai), so base stays "/".
 //
@@ -19,4 +45,8 @@ export default defineConfig({
   plugins: [react()],
   base: "/",
   build: { outDir: "dist-site" },
+  define: {
+    __PRESS_BUILD_SHA__: JSON.stringify(process.env.PRESS_BUILD_SHA || gitSha()),
+    __PRESS_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
 });
