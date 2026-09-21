@@ -901,6 +901,49 @@ test.describe("the table's default columns", () => {
     expect((await page.locator(".cp-ex__table thead th").allInnerTexts()).length).toBeGreaterThan(30);
     expect(errors).toEqual([]);
   });
+
+  // A CARD ON THE DOOR IS STILL A CARD.
+  //
+  // `Cards` renders the signed-in variant as a `Link` and the signed-out one
+  // as a `div`, because a card on the door is the record rather than a way
+  // to a page behind the paywall. The one rule that gave a card its layout
+  // was written `a.cp-ex__cardbtn`, so the div matched nothing: it stayed
+  // `display: block`, its three children are spans, and the entity, the
+  // meta line and the observation ran together into one unpadded paragraph.
+  // Reported from a phone against the live site.
+  //
+  // This asserts the READING, not the rule. `display: flex` would pass on a
+  // row direction, which is the same illegible result; what a person needs
+  // is the meta line starting below the name rather than inside it. Both
+  // projects run it: desktop draws `Rows` instead, so it skips there, and
+  // the skip is what records that the desktop pass could never have caught
+  // this.
+  test("a record card on the door stacks rather than running together", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "the card list is the phone's record surface; desktop renders the table");
+    const errors = watchConsole(page);
+    await page.goto("/");
+    const card = page.locator('[data-testid="stage-record"]').first();
+    await card.waitFor();
+    const who = card.locator(".cp-ex__cardwho");
+    const meta = card.locator(".cp-ex__cardmeta");
+    await expect(who).toBeVisible();
+    await expect(meta).toBeVisible();
+    const [whoBox, metaBox] = [await who.boundingBox(), await meta.boundingBox()];
+    expect(whoBox, "the entity block has a box").not.toBeNull();
+    expect(metaBox, "the meta line has a box").not.toBeNull();
+    // Stacked: the meta line begins at or below where the name block ends.
+    // A 1px tolerance for sub-pixel layout, not enough to hide a shared line.
+    expect(
+      metaBox.y,
+      `meta line at y=${metaBox.y} should start below the name block ending at y=${whoBox.y + whoBox.height}`,
+    ).toBeGreaterThanOrEqual(whoBox.y + whoBox.height - 1);
+    // And the card is padded, which went with the layout when it was lost.
+    const padding = await card.locator(".cp-ex__cardbtn").evaluate(
+      (node) => getComputedStyle(node).paddingLeft,
+    );
+    expect(parseFloat(padding)).toBeGreaterThan(0);
+    expect(errors).toEqual([]);
+  });
 });
 
 test.describe("the question mark", () => {

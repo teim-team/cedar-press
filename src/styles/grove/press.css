@@ -3761,7 +3761,19 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__row:hover td { background: var(--teal-tint); }
 .teim-rd a.cp-ex__morebtn { display: grid; place-items: center; width: 1.4rem; height: 1.4rem; border: 1px solid var(--line); background: var(--bg); color: var(--dteal); font-weight: 700; line-height: 1; text-decoration: none; }
 .teim-rd a.cp-ex__morebtn:hover { border-color: var(--dteal); background: var(--teal-tint); }
-.teim-rd a.cp-ex__cardbtn { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; padding: 0.7rem 1rem; color: var(--ink); text-decoration: none; position: relative; }
+/* CLASS, NOT ELEMENT. This was `a.cp-ex__cardbtn`, and the door renders the
+ * read-only card as a `div` (`Cards` in PressRecordTable.jsx: a card on the
+ * signed-out door is the record, not a link to a page behind the paywall).
+ * So the one rule that gives a card its layout matched only the signed-in
+ * variant. On the public site the div stayed `display: block`, its three
+ * children are spans, and who / meta / observation ran together into one
+ * unpadded paragraph — "Jena Band of Choctaw Indians CE-0015H-32LEGISLATION
+ * · 1993-06-10". Reported from a phone on cedarpress.ai.
+ *
+ * It survived because the two projects that would have caught it each miss
+ * it by one step: desktop renders `Rows`, not cards, and the phone tests
+ * asserted the card was visible, which it was — visible and unreadable. */
+.teim-rd .cp-ex__cardbtn { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; padding: 0.7rem 1rem; color: var(--ink); text-decoration: none; position: relative; }
 .teim-rd .cp-ex__cardgo { position: absolute; top: 0.7rem; right: 1rem; color: var(--dteal); font-weight: 700; }
 
 /* ── The record page ──────────────────────────────────────────────────────
