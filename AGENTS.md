@@ -245,12 +245,14 @@ What this means here, until that repo exists:
 
 - Nothing moves yet. The pipeline in `code/`, the gate and the ledgers stay
   exactly as they are, and every rule in this file still applies.
-- The collections this repo publishes are one of the feeds Cedar Grove reads
-  (`teim-app` `src/features/grove/collectionEvidence.js` lists them as
-  ledger rows). When the data repo exists, harmonized public data for Grove
-  comes from it, and Cedar Press keeps owning the curated collections. Do not
-  start building a public-data harmonization layer in this repo on the
-  assumption it will stay here.
+- **All data ends up in that repo** (owner ruling, 2026-09-21): the
+  curated collections, the deal ledger, the entity universe, the outcomes
+  panel and the harmonized public data alike. Cedar Press becomes the
+  reader-facing product over that repo, the way Cedar Grove reads it in
+  `teim-app` (`src/features/grove/collectionEvidence.js` lists the
+  collections as ledger rows). So do not start a public-data harmonization
+  layer here, and do not build anything in `code/` on the assumption that the
+  pipeline stays in this repo for good; write it so it can be lifted out.
 - The repo has no name and no location. Do not invent one in code, docs or
   README links; write "the data repo (not yet created)" and grep for that
   phrase when it lands.
