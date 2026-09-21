@@ -942,6 +942,33 @@ test.describe("the table's default columns", () => {
       (node) => getComputedStyle(node).paddingLeft,
     );
     expect(parseFloat(padding)).toBeGreaterThan(0);
+
+    // THE IDENTITY BLOCK STACKS TOO, and it is its own regression: fixing the
+    // card's layout left this one live, because `.cp-ex__uid` is a block
+    // everywhere except inside a card, where a rule pulled it back inline to
+    // save a line. A short council name survives that. A Nation's full legal
+    // name does not — the name wrapped, the uid ran on from it, and the uid
+    // broke at its own hyphen across two lines ("CE-001C7-" / "AR record
+    // names: …"), which is a Nation's name running into its own identifier.
+    const idLines = card.locator(".cp-ex__cardwho .cp-ex__uid");
+    const idCount = await idLines.count();
+    expect(idCount, "the identity block names at least the uid").toBeGreaterThan(0);
+    const idBoxes = [];
+    for (let i = 0; i < idCount; i += 1) idBoxes.push(await idLines.nth(i).boundingBox());
+    // Each line is a line: below the one before it, and below where the name
+    // block starts rather than trailing off the end of it.
+    expect(idBoxes[0].y).toBeGreaterThan(whoBox.y);
+    for (let i = 1; i < idBoxes.length; i += 1) {
+      expect(
+        idBoxes[i].y,
+        `identity line ${i} at y=${idBoxes[i].y} should sit below line ${i - 1} ending at y=${idBoxes[i - 1].y + idBoxes[i - 1].height}`,
+      ).toBeGreaterThanOrEqual(idBoxes[i - 1].y + idBoxes[i - 1].height - 1);
+    }
+    // A block line spans the card; an inline one is only as wide as its text.
+    // This is what separates "stacked" from "happened to wrap onto its own
+    // line because the name above filled the previous one".
+    const cardBox = await card.locator(".cp-ex__cardbtn").boundingBox();
+    expect(idBoxes[0].width).toBeGreaterThan(cardBox.width * 0.5);
     expect(errors).toEqual([]);
   });
 });
