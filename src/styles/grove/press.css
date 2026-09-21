@@ -4335,6 +4335,11 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * Two columns on a wide screen, because a lead and its margin is how a
  * briefing reads; one column below that, lead first. */
 .teim-rd .cp-brief { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 0.85fr); gap: 2rem 3.2rem; align-items: start; margin-top: 2.6rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+/* The lead's picture, at the same aspect ratio /articles uses. `aspect-ratio`
+ * rather than a fixed height so the box is reserved before the file arrives
+ * and the headline under it does not jump when it does. */
+.teim-rd .cp-brief__art { margin: 0 0 1rem; overflow: hidden; border: 1px solid var(--line); background: var(--bg); }
+.teim-rd .cp-brief__img { display: block; width: 100%; height: auto; aspect-ratio: 1500 / 600; object-fit: cover; }
 .teim-rd .cp-brief__cap { display: block; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.6rem; }
 .teim-rd .cp-brief__title { font-family: var(--sans); font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 800; letter-spacing: -0.022em; line-height: 1.14; margin: 0; text-wrap: balance; }
 .teim-rd .cp-brief__title a { color: var(--ink); text-decoration: none; }
