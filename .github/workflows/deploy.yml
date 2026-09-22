@@ -30,6 +30,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # Every tracked generated file, re-rendered and compared with its
+      # source: the codebook and field-map documents, the researcher guides,
+      # the explore contracts, the sample record, the release ledger, the
+      # structured data and the sitemap. Fails naming the file and the
+      # command that rewrites it. The Makefile lists the seven scripts, and
+      # the three data-workspace checks deliberately left out.
+      - run: make check-generated
       - run: npm run test
       # Smoke tests run a browser over the built site. Chromium only: these
       # are the critical paths, not a compatibility matrix, and the phone

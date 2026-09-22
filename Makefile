@@ -1,4 +1,4 @@
-.PHONY: lint test test-node test-python audit audit-node audit-python hooks check
+.PHONY: lint test test-node test-python audit audit-node audit-python hooks check check-generated
 
 # One place that names each gate, so the command a contributor runs and the
 # command CI runs cannot drift apart. `deploy.yml` runs the same list before
@@ -59,4 +59,41 @@ audit-python:
 hooks:
 	pre-commit install
 
-check: lint test
+# Every generated file the repository tracks, re-rendered from its source
+# and compared with the tracked copy. Each script's `--check` exits 1 on a
+# difference and names the command that rewrites the file, so a red run
+# says which artifact drifted, not which test happened to notice. The node
+# suite spawns each of these inside a test too; this is the gate that names
+# them, runs in seconds, and does not wait on a coverage run to say so.
+#
+#   codebook-markdown   docs/DATASET_CODEBOOK.md            from data/cedar/codebook.json
+#   derive-explore      data/cedar/explore.json             from the published samples
+#   field-map-markdown  docs/FIELD_MAP_2026-09-05.md and
+#                       docs/IDENTIFIER_RETIREMENT_2026-09-05.md from data/cedar/field_map.json
+#   guides-markdown     docs/guides/<collection>.md         from four data/cedar JSON files
+#   measure-samples     data/cedar/samples.published.json   from the git index
+#   record-release      data/cedar/releases.json            from the manifest
+#   seo-head            index.html's JSON-LD block and public/sitemap.xml from the catalog
+#
+# Deliberately absent (2026-09-22): the data workspace's three drift checks,
+# `code/500_build_architecture_map.py --check`,
+# `code/374_build_cedar_taxonomy_export.py --check` and
+# `code/512_build_dataset_contracts.py verify`. Each measures data/clean,
+# data/spine or dist/ tables that git does not track (the workspace is
+# 38 GB), so a CI checkout and the owner's tree can never agree on their
+# output: 374 aborts on the missing spine, 512 reports every collection as
+# claiming zero tables, and 500 -- current today only because the tracked
+# map was itself rendered from a data-less checkout -- would go red the first
+# time it was regenerated beside real data. They run by hand, on the machine
+# that holds the data. `code/1050_preflight.py` is not a check at all: it
+# claims a script number as a side effect of running.
+check-generated:
+	node scripts/codebook-markdown.mjs --check
+	node scripts/derive-explore.mjs --check
+	node scripts/field-map-markdown.mjs --check
+	node scripts/guides-markdown.mjs --check
+	node scripts/measure-samples.mjs --check
+	node scripts/record-release.mjs --check
+	node scripts/seo-head.mjs --check
+
+check: lint check-generated test

@@ -45,6 +45,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # Every tracked generated file, re-rendered and compared with its
+      # source: the codebook and field-map documents, the researcher guides,
+      # the explore contracts, the sample record, the release ledger, the
+      # structured data and the sitemap. Fails naming the file and the
+      # command that rewrites it. The Makefile lists the seven scripts, and
+      # the three data-workspace checks deliberately left out.
+      - run: make check-generated
       - run: npm run test
       # Smoke tests run a browser over the built site. Chromium only: these
       # are the critical paths, not a compatibility matrix, and the phone
@@ -87,3 +94,12 @@ jobs:
 # files today. That is a real cleanup with its own review, not something to
 # slip into a CI pass -- and adopting the gate while it is red teaches people
 # to ignore it.
+#
+# Not a step either (2026-09-22): the data workspace's own drift checks,
+# `code/500_build_architecture_map.py --check`,
+# `code/374_build_cedar_taxonomy_export.py --check` and
+# `code/512_build_dataset_contracts.py verify`. They measure data/clean,
+# data/spine and dist/ tables that git does not track, so a checkout here
+# cannot agree with the owner's tree; the Makefile's `check-generated`
+# target carries the detail. Nor `code/1050_preflight.py`, which claims a
+# script number as a side effect of running.

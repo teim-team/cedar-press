@@ -106,16 +106,19 @@ npm install
 pip install -e 'server[dev]' httpx
 ```
 
-The four checks CI runs, in order:
+The checks CI runs, in order (the Makefile is the full list, and
+`deployGates.test.js` holds `ci.yml` and `deploy.yml` to the same one):
 
 ```bash
 npm run lint
+make check-generated      # every tracked generated file matches its generator
 npm run test
 ruff check server
 cd server && python -m unittest discover -s tests -t .
 ```
 
-**Verified 2026-09-22:** `npm run lint` exits `0` · `npm run test` reports
+**Verified 2026-09-22:** `npm run lint` exits `0` · `make check-generated`
+reports all seven files current · `npm run test` reports
 `271 pass, 0 fail` · `ruff check server` reports `All checks passed!` · the
 server suite reports `Ran 265 tests … OK (skipped=30)`. `npm run build` also
 completes (`✓ built in 3.18s`); its chunk-size warning is pre-existing.
