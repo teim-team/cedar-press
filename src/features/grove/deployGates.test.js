@@ -223,3 +223,187 @@ jobs:
     for (const entries of blocks) assert.deepEqual(entries, ["contents: read"]);
   });
 });
+
+// ── The two publishes must stay in separate jobs ────────────────────────────
+//
+// `deploy.yml` publishes to two destinations: GitHub Pages, and the S3 bucket
+// behind CloudFront that actually serves cedarpress.ai. Until 2026-09-21 both
+// lived in one job, the S3 steps last. The IAM trust for the deploy role has
+// never accepted this repository's token, so `configure-aws-credentials`
+// failed at the end of every run, took the whole job down with it, and the
+// Pages job — `needs:` that job — was SKIPPED. Eleven consecutive runs
+// published nothing to either destination, reported as one red X on a job
+// whose every gate had passed.
+//
+// The coupling is what made a single AWS fault total, so the coupling is what
+// this pins. Splitting them back together passes every test above: they only
+// ask that the three publishing steps exist somewhere after the build.
+
+/**
+ * Each job's name, its `needs:`, and its steps.
+ *
+ * Built on `steps()` rather than beside it, so the two readers cannot
+ * disagree about what a step is — the fixtures above pin that shape once.
+ */
+export function jobsOf(source) {
+  const lines = source.split("\n");
+  const start = lines.findIndex((line) => /^jobs:\s*$/.test(line));
+  if (start === -1) return [];
+  const found = [];
+  let current = null;
+  const close = () => {
+    if (current) {
+      current.steps = steps(current.body.join("\n"));
+      current.needs = current.body
+        .filter((line) => /^\s+needs:\s/.test(line))
+        .flatMap((line) => line.replace(/^\s+needs:\s*/, "").replace(/[[\]]/g, "").split(","))
+        .map((name) => name.trim())
+        .filter(Boolean);
+      delete current.body;
+      found.push(current);
+    }
+    current = null;
+  };
+  for (const raw of lines.slice(start + 1)) {
+    const line = raw.replace(/\s+$/, "");
+    if (!line.trim() || /^\s*#/.test(line)) continue;
+    // Dedented out of `jobs:` entirely.
+    if (/^\S/.test(line)) break;
+    const opener = line.match(/^ {2}([A-Za-z0-9_-]+):\s*$/);
+    if (opener) {
+      close();
+      current = { name: opener[1], body: [] };
+      continue;
+    }
+    if (current) current.body.push(line);
+  }
+  close();
+  return found;
+}
+
+/**
+ * Which destination a job does work for.
+ *
+ * Codex, on this pull request: the first version matched only `deploy-pages`
+ * and `aws s3 sync` — the steps that *publish*. But a destination's failure
+ * modes start earlier than its publish. `upload-pages-artifact` packages a
+ * tarball only `deploy-pages` reads, and `configure-aws-credentials` exchanges
+ * a token only the S3 sync needs; either failing is a failure of one
+ * destination. Left in a shared job, they take the other destination down
+ * through `needs:` and this guard sees nothing, because the job it is in
+ * publishes to neither. That is exactly the shape the split exists to remove,
+ * so the preparation steps count as the destination too.
+ */
+const PAGES = [/deploy-pages/, /upload-pages-artifact/];
+const S3 = [/aws s3 sync/, /configure-aws-credentials/];
+
+const publisher = (job) => {
+  const text = job.steps.join("\n");
+  return {
+    pages: PAGES.some((pattern) => pattern.test(text)),
+    s3: S3.some((pattern) => pattern.test(text)),
+  };
+};
+
+test("no single job publishes to both destinations", () => {
+  for (const job of jobsOf(workflow("deploy.yml"))) {
+    const { pages, s3 } = publisher(job);
+    assert.ok(
+      !(pages && s3),
+      `job "${job.name}" publishes to Pages and to S3; one failing would skip the other`,
+    );
+  }
+});
+
+test("neither publish waits on the other", () => {
+  const jobs = jobsOf(workflow("deploy.yml"));
+  const publishers = jobs.filter((job) => {
+    const { pages, s3 } = publisher(job);
+    return pages || s3;
+  });
+  assert.equal(publishers.length, 2, "expected exactly two publishing jobs");
+  const names = new Set(publishers.map((job) => job.name));
+  for (const job of publishers) {
+    for (const need of job.needs) {
+      assert.ok(
+        !names.has(need),
+        `"${job.name}" needs "${need}", so a failure there would skip this publish`,
+      );
+    }
+    assert.ok(job.needs.length > 0, `"${job.name}" publishes without waiting for the gates`);
+  }
+});
+
+test("the reader sees the shape this test exists to reject", () => {
+  // The bug, as it was actually written: one job, gates and both publishes,
+  // the AWS steps last. If `jobsOf` cannot see this as a single job holding
+  // both, it cannot see the regression either.
+  const coupled = `jobs:
+  build:
+    steps:
+      - run: npm run build:site
+      - uses: actions/upload-pages-artifact@v5
+      - uses: aws-actions/configure-aws-credentials@v4
+      - run: |
+          aws s3 sync dist-site s3://bucket --delete
+  deploy:
+    needs: build
+    steps:
+      - uses: actions/deploy-pages@v5
+`;
+  const jobs = jobsOf(coupled);
+  assert.deepEqual(
+    jobs.map((job) => job.name),
+    ["build", "deploy"],
+  );
+  assert.deepEqual(jobs[1].needs, ["build"]);
+  // Pages is downstream of the job that carries the S3 publish: exactly the
+  // skip that cost eleven runs.
+  assert.ok(publisher(jobs[0]).s3 && publisher(jobs[1]).pages);
+  assert.ok(jobs[1].needs.includes("build"));
+});
+
+test("the unaffected destination stays runnable when the other's prep fails", () => {
+  // The shape Codex found: `build` shared, but carrying Pages' packaging. Both
+  // publishing jobs `needs: build`, so a Pages-only packaging failure fails
+  // `build` and skips S3 — a destination killed by work it does not use.
+  const prepInShared = `jobs:
+  build:
+    steps:
+      - run: npm run build:site
+      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-artifact@v4
+  pages:
+    needs: build
+    steps:
+      - uses: actions/deploy-pages@v5
+  s3:
+    needs: build
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+      - run: aws s3 sync dist-site s3://bucket --delete
+`;
+  const shared = jobsOf(prepInShared).find((job) => job.name === "build");
+  assert.deepEqual(
+    publisher(shared),
+    { pages: true, s3: false },
+    "the shared job is doing Pages-only work that every destination waits on",
+  );
+
+  // And the same tree with the packaging moved into `pages`: the shared job is
+  // shared by construction, and each destination owns its own preparation.
+  const isolated = prepInShared
+    .replace("      - uses: actions/upload-pages-artifact@v5\n", "")
+    .replace(
+      "    steps:\n      - uses: actions/deploy-pages@v5",
+      "    steps:\n      - uses: actions/upload-pages-artifact@v5\n      - uses: actions/deploy-pages@v5",
+    );
+  for (const job of jobsOf(isolated)) {
+    const { pages, s3 } = publisher(job);
+    if (job.name === "build") {
+      assert.deepEqual({ pages, s3 }, { pages: false, s3: false }, "build is neutral");
+    } else {
+      assert.ok(pages !== s3, `"${job.name}" serves exactly one destination`);
+    }
+  }
+});

@@ -901,6 +901,76 @@ test.describe("the table's default columns", () => {
     expect((await page.locator(".cp-ex__table thead th").allInnerTexts()).length).toBeGreaterThan(30);
     expect(errors).toEqual([]);
   });
+
+  // A CARD ON THE DOOR IS STILL A CARD.
+  //
+  // `Cards` renders the signed-in variant as a `Link` and the signed-out one
+  // as a `div`, because a card on the door is the record rather than a way
+  // to a page behind the paywall. The one rule that gave a card its layout
+  // was written `a.cp-ex__cardbtn`, so the div matched nothing: it stayed
+  // `display: block`, its three children are spans, and the entity, the
+  // meta line and the observation ran together into one unpadded paragraph.
+  // Reported from a phone against the live site.
+  //
+  // This asserts the READING, not the rule. `display: flex` would pass on a
+  // row direction, which is the same illegible result; what a person needs
+  // is the meta line starting below the name rather than inside it. Both
+  // projects run it: desktop draws `Rows` instead, so it skips there, and
+  // the skip is what records that the desktop pass could never have caught
+  // this.
+  test("a record card on the door stacks rather than running together", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "phone", "the card list is the phone's record surface; desktop renders the table");
+    const errors = watchConsole(page);
+    await page.goto("/");
+    const card = page.locator('[data-testid="stage-record"]').first();
+    await card.waitFor();
+    const who = card.locator(".cp-ex__cardwho");
+    const meta = card.locator(".cp-ex__cardmeta");
+    await expect(who).toBeVisible();
+    await expect(meta).toBeVisible();
+    const [whoBox, metaBox] = [await who.boundingBox(), await meta.boundingBox()];
+    expect(whoBox, "the entity block has a box").not.toBeNull();
+    expect(metaBox, "the meta line has a box").not.toBeNull();
+    // Stacked: the meta line begins at or below where the name block ends.
+    // A 1px tolerance for sub-pixel layout, not enough to hide a shared line.
+    expect(
+      metaBox.y,
+      `meta line at y=${metaBox.y} should start below the name block ending at y=${whoBox.y + whoBox.height}`,
+    ).toBeGreaterThanOrEqual(whoBox.y + whoBox.height - 1);
+    // And the card is padded, which went with the layout when it was lost.
+    const padding = await card.locator(".cp-ex__cardbtn").evaluate(
+      (node) => getComputedStyle(node).paddingLeft,
+    );
+    expect(parseFloat(padding)).toBeGreaterThan(0);
+
+    // THE IDENTITY BLOCK STACKS TOO, and it is its own regression: fixing the
+    // card's layout left this one live, because `.cp-ex__uid` is a block
+    // everywhere except inside a card, where a rule pulled it back inline to
+    // save a line. A short council name survives that. A Nation's full legal
+    // name does not — the name wrapped, the uid ran on from it, and the uid
+    // broke at its own hyphen across two lines ("CE-001C7-" / "AR record
+    // names: …"), which is a Nation's name running into its own identifier.
+    const idLines = card.locator(".cp-ex__cardwho .cp-ex__uid");
+    const idCount = await idLines.count();
+    expect(idCount, "the identity block names at least the uid").toBeGreaterThan(0);
+    const idBoxes = [];
+    for (let i = 0; i < idCount; i += 1) idBoxes.push(await idLines.nth(i).boundingBox());
+    // Each line is a line: below the one before it, and below where the name
+    // block starts rather than trailing off the end of it.
+    expect(idBoxes[0].y).toBeGreaterThan(whoBox.y);
+    for (let i = 1; i < idBoxes.length; i += 1) {
+      expect(
+        idBoxes[i].y,
+        `identity line ${i} at y=${idBoxes[i].y} should sit below line ${i - 1} ending at y=${idBoxes[i - 1].y + idBoxes[i - 1].height}`,
+      ).toBeGreaterThanOrEqual(idBoxes[i - 1].y + idBoxes[i - 1].height - 1);
+    }
+    // A block line spans the card; an inline one is only as wide as its text.
+    // This is what separates "stacked" from "happened to wrap onto its own
+    // line because the name above filled the previous one".
+    const cardBox = await card.locator(".cp-ex__cardbtn").boundingBox();
+    expect(idBoxes[0].width).toBeGreaterThan(cardBox.width * 0.5);
+    expect(errors).toEqual([]);
+  });
 });
 
 test.describe("the question mark", () => {

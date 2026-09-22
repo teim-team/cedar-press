@@ -133,6 +133,10 @@
    of headline. Under the lede now, in the lede's column. */
 .teim-rd .cp-hero h1 { font-size: clamp(2rem, 3.6vw, 3rem); font-weight: var(--weight-hero); letter-spacing: var(--track-display); line-height: 1.06; color: var(--ink); margin: 0; max-width: 16ch; text-wrap: balance;}
 .teim-rd .cp-hero p { font-size: 1.04rem; line-height: 1.62; color: var(--ink-2); margin: 0; max-width: 58ch; }
+/* `.cp-hero--brief` is governed further down, beside its other rules — see
+ * the overview block near the end of this file. Putting its overrides here
+ * would have been a third rule setting `max-width` on the same heading, and
+ * a later one already owns it. */
 /* The one action on the overview that is not a door. The four buttons that
  * used to float under the headline went where the tiles already go. */
 /* On the overview the action belongs to the sentence that invites it, so it
@@ -715,7 +719,19 @@
  * going home first. Text, not icons — this is a professional intelligence
  * service, and a row of glyphs reads as a phone launcher. */
 .teim-rd .cp-mast { display: block; padding: 1.4rem 0 0; }
-.teim-rd .cp-mast__top { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; padding-bottom: 1rem; }
+/* `center`, not `baseline`, and this line is why the header looked off.
+ * The rule at the phone-header block above already set `center` — the 2026-09-15
+ * review's fix — and this one, written later for the section nav, set
+ * `baseline` at the same specificity and silently won.
+ *
+ * Baseline is wrong for this row because its three items do not have
+ * comparable baselines. `.cp-mast__lockup` is an inline-flex whose baseline
+ * comes from the mark image, i.e. the bottom edge of the logo; the standing
+ * line is 0.74rem mono text; and the right-hand control is a padded button
+ * whose baseline is its label's. Aligning the bottom of a logo to small mono
+ * text to a button's label is what made CEDAR PRESS sit out of line with both
+ * the sentence beside it and the sign-in on the right. */
+.teim-rd .cp-mast__top { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding-bottom: 1rem; }
 .teim-rd .cp-nav { display: flex; flex-wrap: wrap; gap: 0 1.8rem; border-top: 1px solid var(--line-soft); }
 .teim-rd .cp-nav__item { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--mono); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease, border-color 0.15s ease; }
 .teim-rd .cp-nav__item:hover { color: var(--ink); }
@@ -2366,7 +2382,22 @@
  * Sticky and translucent, the one place translucency is allowed: the way
  * in stays reachable down a long page. */
 .teim-rd .cp-door__bar { position: sticky; top: 0; z-index: 40; background: rgba(255, 255, 255, 0.78); -webkit-backdrop-filter: blur(18px) saturate(120%); backdrop-filter: blur(18px) saturate(120%); border-bottom: 1px solid var(--door-rule); }
-.teim-rd .cp-door__barin { max-width: var(--door-max); margin: 0 auto; padding: 0.8rem var(--door-pad); display: flex; align-items: center; gap: 1.2rem; }
+/* The bar's content edge has to be the PAGE's content edge, and it was not.
+ * Every other band on the door pads the outer element and caps the inner one
+ * (`.cp-hero3` pads, `.cp-hero3__in` caps), which puts content at the pad.
+ * This bar did the opposite — capped `__barin` at --door-max, centred it, and
+ * then padded INSIDE the cap — so at 1440px the cap took 20px a side first
+ * and the padding added 41.6 on top of that: CEDAR PRESS began at x=62 while
+ * the headline below it began at x=42.
+ *
+ * Twenty pixels is small enough to read as "something is off" rather than as
+ * a fault, which is why it survived: the wordmark did not line up with the
+ * standing line's column or with anything underneath it. Padding outside,
+ * cap inside, same as the rest of the door — content now starts at 42 on
+ * both. The bar itself stays full-bleed, so the sticky blur still spans the
+ * viewport; padding lives inside the background box. */
+.teim-rd .cp-door__bar { padding-inline: var(--door-pad); }
+.teim-rd .cp-door__barin { max-width: var(--door-max); margin: 0 auto; padding: 0.8rem 0; display: flex; align-items: center; gap: 1.2rem; }
 .teim-rd .cp-door__lockup { display: inline-flex; align-items: center; gap: 0.6rem; }
 .teim-rd .cp-door__mark { width: 2.1rem; height: 2.1rem; object-fit: contain; flex: none; }
 .teim-rd .cp-door__word { font-family: var(--sans); font-weight: var(--weight-display); font-size: 1.05rem; letter-spacing: var(--track-sub); text-transform: uppercase; color: var(--ink); text-wrap: balance;}
@@ -2431,7 +2462,15 @@
  * screenshots said so: inside the top-right it covered the amount
  * column (annotating a release by hiding it), and above the frame it ran
  * off the top of the hero under the masthead. */
-.teim-rd .cp-spec { position: absolute; z-index: 3; bottom: -2.2rem; right: -1rem; width: 16.5rem; padding: 0.9rem 1rem 1rem; border: 1px solid var(--door-rule); border-top: 3px solid var(--door-navy); border-radius: 10px; background: var(--door-ground-bright, #fafcfd); box-shadow: var(--door-shadow-high); }
+/* OFF on desktop (owner, this session). As a corner object it overhung the
+ * preview's lower right, covered the caption that says what the preview is,
+ * and read as a card stuck on a screenshot rather than as part of it. The
+ * dead zone it was built to fill is real and is now empty again — worth a
+ * look, but an empty corner beats a box that hides the caption.
+ *
+ * It stays below 1100px, where it is already a strip ABOVE the preview
+ * rather than over it, and reads fine. */
+.teim-rd .cp-spec { display: none; position: absolute; z-index: 3; bottom: -2.2rem; right: -1rem; width: 16.5rem; padding: 0.9rem 1rem 1rem; border: 1px solid var(--door-rule); border-top: 3px solid var(--door-navy); border-radius: 10px; background: var(--door-ground-bright, #fafcfd); box-shadow: var(--door-shadow-high); }
 .teim-rd .cp-spec__cap { margin: 0 0 0.5rem; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-spec__name { display: flex; align-items: flex-start; gap: 0.45rem; margin: 0; font-family: var(--sans); font-size: 0.92rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.014em; color: var(--ink); }
 .teim-rd .cp-spec__mark { flex: 0 0 auto; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; color: var(--dteal); }
@@ -2445,7 +2484,7 @@
    preview, because a card pinned over a scaled frame on a 390px screen
    covers the thing it is annotating. */
 @media (max-width: 1100px) {
-  .teim-rd .cp-spec { position: static; width: auto; margin: 0 0 0.9rem; border-top-width: 2px; box-shadow: var(--door-shadow-surface); }
+  .teim-rd .cp-spec { display: block; position: static; width: auto; margin: 0 0 0.9rem; border-top-width: 2px; box-shadow: var(--door-shadow-surface); }
   .teim-rd .cp-spec__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
@@ -3345,7 +3384,22 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
  * inside the list. */
 .teim-rd .cp-ex__cards li { border-bottom: 1px solid var(--line-soft); }
 .teim-rd .cp-ex__cardwho { font-weight: 700; font-size: 0.92rem; }
-.teim-rd .cp-ex__cardwho .cp-ex__uid { display: inline; margin-left: 0.4rem; }
+/* The identity block stacks too. `.cp-ex__uid` is `display: block`
+ * everywhere else; this rule pulled it back inline to save a line, which
+ * works for "Curyung Tribal Council CE-0001H-BS" and fails for every long
+ * legal name — the register is full of them. At 390px the name wrapped,
+ * the uid followed on the same line, "record names: …" followed that, and
+ * the uid itself broke at its hyphen across two lines:
+ *
+ *     White Mountain Apache Tribe of the Fort
+ *     Apache Reservation, Arizona CE-001C7-
+ *     AR record names: WHITE MOUNTAIN APACHE TRIBE
+ *
+ * A Nation's name running into its own identifier is the thing the identity
+ * layer exists to keep legible, so it gets the line. `keep-all` on the uid
+ * stops the hyphen being read as a break opportunity if one ever does share
+ * a line. */
+.teim-rd .cp-ex__cardwho .cp-ex__uid { display: block; margin-top: 0.15rem; word-break: keep-all; }
 .teim-rd .cp-ex__cardmeta { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dteal); }
 .teim-rd .cp-ex__cardobs { font-size: 0.86rem; line-height: 1.4; color: var(--ink-2); }
 .teim-rd .cp-ex__panelhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
@@ -3761,7 +3815,19 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-ex__row:hover td { background: var(--teal-tint); }
 .teim-rd a.cp-ex__morebtn { display: grid; place-items: center; width: 1.4rem; height: 1.4rem; border: 1px solid var(--line); background: var(--bg); color: var(--dteal); font-weight: 700; line-height: 1; text-decoration: none; }
 .teim-rd a.cp-ex__morebtn:hover { border-color: var(--dteal); background: var(--teal-tint); }
-.teim-rd a.cp-ex__cardbtn { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; padding: 0.7rem 1rem; color: var(--ink); text-decoration: none; position: relative; }
+/* CLASS, NOT ELEMENT. This was `a.cp-ex__cardbtn`, and the door renders the
+ * read-only card as a `div` (`Cards` in PressRecordTable.jsx: a card on the
+ * signed-out door is the record, not a link to a page behind the paywall).
+ * So the one rule that gives a card its layout matched only the signed-in
+ * variant. On the public site the div stayed `display: block`, its three
+ * children are spans, and who / meta / observation ran together into one
+ * unpadded paragraph — "Jena Band of Choctaw Indians CE-0015H-32LEGISLATION
+ * · 1993-06-10". Reported from a phone on cedarpress.ai.
+ *
+ * It survived because the two projects that would have caught it each miss
+ * it by one step: desktop renders `Rows`, not cards, and the phone tests
+ * asserted the card was visible, which it was — visible and unreadable. */
+.teim-rd .cp-ex__cardbtn { display: flex; flex-direction: column; gap: 0.2rem; width: 100%; padding: 0.7rem 1rem; color: var(--ink); text-decoration: none; position: relative; }
 .teim-rd .cp-ex__cardgo { position: absolute; top: 0.7rem; right: 1rem; color: var(--dteal); font-weight: 700; }
 
 /* ── The record page ──────────────────────────────────────────────────────
@@ -4370,8 +4436,16 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 
 /* The overview's headline, sized for a page that answers it immediately
  * below rather than for one that had nothing under it but doors. */
-.teim-rd .cp-hero--brief { padding-block: 1.6rem 0; }
-.teim-rd .cp-hero--brief h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); max-width: 20ch; }
+/* The overview's hero is a heading and nothing else. The sentence that used
+ * to sit beside it was cut — it described the nav bar three inches under the
+ * nav bar — but the two-column grid and the measure outlived it, so a lone
+ * premise was held in the left half of the page with the right half empty,
+ * and "Know what's shaping / Indian Country." broke across two lines for no
+ * reason at all. One column, full measure: a premise at the width of the
+ * page. Scoped to this variant, so the door's headline-beside-preview hero
+ * keeps its two columns. */
+.teim-rd .cp-hero--brief { padding-block: 1.6rem 0; grid-template-columns: 1fr; }
+.teim-rd .cp-hero--brief h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); max-width: none; }
 .teim-rd .cp-hero--brief + .cp-brief { margin-top: 1.8rem; }
 
 /* ══ THE METHODS PAGE'S FIRST SCREEN ══════════════════════════════════════
