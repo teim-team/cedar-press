@@ -216,3 +216,6 @@ _profile_cache.json
 .claude/worktrees/
 # Shape the Research: the service's SQLite ledger, when CEDAR_PRESS_DB points here.
 server/var/
+
+# `make audit-python` resolves the server dependencies here before auditing.
+.audit-requirements.txt

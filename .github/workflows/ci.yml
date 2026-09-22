@@ -38,8 +38,8 @@ jobs:
   gates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 22
           cache: npm
@@ -59,10 +59,35 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:smoke
       # The API ships with the client, so its checks gate the same pipeline.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
-      - run: pip install -e server[dev] httpx
+      - run: pip install -e server[dev] httpx coverage pip-audit
+      # `make audit-python` resolves the server's dependencies with uv before
+      # auditing them, rather than auditing this job's environment -- which
+      # also holds httpx, coverage and pip-audit itself, none of which the
+      # server depends on.
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
       - run: ruff check server
-      - working-directory: server
-        run: python -m unittest discover -s tests -t .
+      # Through the Makefile, so these are character-for-character the
+      # commands a contributor runs. `make test-python` carries warnings-as-
+      # errors and the coverage floor in .coveragerc; `make test-node` (run
+      # above as `npm run test`) carries the frontend floor.
+      - run: make test-python
+      # The one audit that is a gate rather than a note: the server's
+      # resolved dependencies reported no known vulnerabilities on
+      # 2026-09-22, so this is enforced from a clean state rather than
+      # adopted with a backlog already inside it. `make audit-node` is not
+      # here -- see the note at the foot of this file.
+      - run: make audit-python
+
+# Not a step: `make audit-node`. As of 2026-09-22 `npm audit --audit-level=high`
+# exits non-zero on one high advisory (js-yaml 4.0.0-4.3.1,
+# GHSA-2883-xcg3-v3hh), so adding it here would land a red required check.
+# The bump is a reviewed dependency change of its own; until then
+# `npm run audit` exists and the finding is one command away.
+#
+# Also not a step: `ruff format --check server`. It would reformat 18 of 30
+# files today. That is a real cleanup with its own review, not something to
+# slip into a CI pass -- and adopting the gate while it is red teaches people
+# to ignore it.

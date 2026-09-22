@@ -1,0 +1,52 @@
+# Dependency updates arrive as reviewable pull requests rather than as a
+# surprise inside someone else's change.
+#
+# Three ecosystems, because three different things go stale here:
+#
+#   npm "/"        the Vite client, the Playwright smoke suite and the build
+#                  tooling.
+#   pip "/server"  the FastAPI package behind cedarpress.ai. It has its own
+#                  pyproject.toml and is installed separately
+#                  (`pip install -e server[dev]`), so a root-only entry
+#                  would watch half the tree.
+#   github-actions the third-party Actions that run with access to this
+#                  repository and, in `deploy.yml`, to GitHub Pages and an
+#                  AWS role. They are pinned to commit SHAs, which is the
+#                  safe way to depend on someone else's workflow and also the
+#                  way that rots silently -- a pinned SHA never updates
+#                  itself, and nothing warns you that the tag it once matched
+#                  has moved on. This is what watches it.
+#
+# No docker entry: this repository has no Dockerfile. It deploys as a static
+# site plus a Python package, not as an image.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        dependency-type: "development"
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "pip"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "server"]
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "ci"]
+    commit-message:
+      prefix: "ci"
