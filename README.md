@@ -72,7 +72,11 @@ platform: Cedar Impact, Cedar Commons and Cedar Grove),
 behind Cedar Impact), [`cedar`](https://github.com/teim-team/cedar) (Cedar,
 the AI economic analyst, as a service) and
 [`lumecon-website`](https://github.com/teim-team/lumecon-website) (the
-public site and the reference for product vocabulary). Product names and
+public site and the reference for product vocabulary). A further sibling is
+planned and not yet created: a data repository for extraction and
+harmonization that will feed `teim-engine`, Cedar Press and Cedar Grove,
+leaving `teim-engine` as the deterministic model alone (team decision,
+2026-09-21). Product names and
 their one-line definitions follow the website's `AGENTS.md`, which is the
 North Star: where this repository and the website disagree about what
 something is called, the website wins. The vocabulary rule that matters most

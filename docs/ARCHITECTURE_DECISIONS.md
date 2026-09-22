@@ -3821,3 +3821,96 @@ business` entity class closes to new mints: its 45 entities keep their uids
 and gain business ids with an equivalence row, and every future privately
 owned Native firm is a `CB-` only.
 <!-- END ADR-043-CEDAR-BUSINESS-ID -->
+
+<!-- BEGIN ADR-044-PLATFORM-HUB -->
+
+## ADR-044 — teim-app is the hub; the engine holds the fetching, not the product data (2026-09-20)
+
+**Status:** accepted for the hub, open on the storage. Owner's framing:
+
+> *"Cedar Press has 12 collections that we're making and adding. So we have to
+> add more code to the database eventually. That code I think will probably
+> live in Team Engine. And then the data we get from federal resources like
+> census or whatever is also in Team Engine, which feeds into Cedar Grove. But
+> the data we're creating for Cedar Press also feeds into Cedar Grove, which is
+> why I think Team App as a hub makes sense."*
+
+**The hub is not a proposal; it is what is already built.** teim-app holds the
+users, sessions, tiers, organizations, S3 document path and the only mailer in
+the estate, and it is already an outbound client of both engines —
+`TEIM_ENGINE_BASE_URL` for the economic model and `CEDAR_BASE_URL` for the
+analyst service, each feature-flagged and each degrading to an `unavailable`
+reply rather than an error. Cedar Grove lives there.
+
+**And Cedar Press is further into the hub than it looks from the client.**
+`server/cedar_press/db.py` reads `DATABASE_URL` — *the same variable teim-app
+reads*. Migrations self-apply under a `pg_advisory_lock`, are tracked in
+`cedar_press_migrations`, and the foreign key to `public.users` is declared
+conditionally through `to_regclass`, so deployment order does not matter. This
+supersedes `docs/PLATFORM_INTEGRATION_2026-09-06.md`'s "the two databases are
+never joined", which was accurate when measured and has been overtaken. What
+remains unwired is the *client* (`vars.VITE_API_URL`), a host for the subscriber
+API, and the error envelope — not the store.
+
+**Where the collection-building code goes: the engine, with one condition.**
+The argument for teim-engine is stronger than convenience. Its genuine asset is
+not its stored data but its *fetching discipline* — BEA's `(D)` disclosure flag,
+which sits in a field separate from the value and was read as a true zero until
+it was caught; the CAINC5N LineCode crosswalk confirmed against BEA's own
+parameter endpoint rather than its documentation; CBP's structural exclusion of
+agricultural, non-employer and government establishments; content-hashed,
+superseding snapshots. Twelve collections pulling from federal APIs need exactly
+that discipline, and it exists nowhere else in the estate. Rebuilding it here
+would be rebuilding the mistakes too.
+
+**The condition, and it is not a detail.** The engine has two stores and they
+are not interchangeable:
+
+| | `data_snapshot` | `reference_dataset` |
+| --- | --- | --- |
+| what it is | an opportunistic cache of API pulls | a versioned, checksummed dataset vintage |
+| coverage | whatever has been run | complete, on disk |
+| freshness | 30-day window in `read_cache` | pinned per run |
+| when the DB is unreachable | reads miss, writes are skipped, the engine runs anyway | — |
+
+That last row is the condition. `data/cache.py` degrades gracefully **by
+design**, and that is correct for a model input: a missed cache costs a refetch.
+It is wrong for a dataset a subscriber pays for, where an unreachable database
+must be an error and not a quieter answer. It is also indistinguishable from
+absence — a county nobody has run is simply not there.
+
+**What this condition does and does not decide.** An earlier draft ended "so the
+collections go in under the `reference_dataset` treatment, not the cache" — which
+places them in the engine, and this ADR's status says the storage question is
+*open* while its title says the engine holds the fetching and not the product
+data. An implementer reading the condition and an implementer reading the title
+would put the twelve collections in two different repositories.
+
+So the condition states guarantees, not a location. **Wherever the collections
+live, they require the `reference_dataset` treatment and not cache semantics:**
+a pinned vintage per read, a checksum, an explicit versioned update path, and an
+unreachable store that raises rather than answering more quietly. If they land
+in the engine, that means its `reference_dataset` store and never
+`data_snapshot`. If they stay with the hub, the hub owes the same four
+guarantees — the point is that a published collection must not be able to expire
+or drift on its own, which a 30-day freshness window lets it do.
+
+Independently of where they live: nothing outside the engine should ever read
+`data_snapshot`.
+
+**The second consideration, offered not decided.** teim-engine's own operating
+spec scopes it as the IO + SAM economic model, and its release cadence answers
+to validation against IMPLAN. Hosting twelve saleable collections promotes an
+internal capability into a shared platform service, which is probably the right
+move and is a change in what the repository is *for*. It should be a stated
+decision with its own entry in that repo's log, rather than something that
+happens gradually — otherwise the model's release cadence and the product's
+start pulling against each other with nobody having agreed which wins.
+
+**What this does not settle.** The nation → county crosswalk
+(`docs/TEIM_ENGINE_SEAM_2026-09-20.md`) is unaffected and still the first piece
+of work: it is Cedar Press's to build wherever the fetchers live, because it is
+entity identity, and identity is this repository's spine. ADR-015's transaction
+geography is already built and needs none of it.
+
+<!-- END ADR-044-PLATFORM-HUB -->
