@@ -111,6 +111,10 @@ graveyard/
 *.sqlite3
 
 # --- never-commit noise ---
+# `python -m pytest --cov` writes .coverage at the repo root.
+.coverage
+.coverage.*
+htmlcov/
 __pycache__/
 *.py[cod]
 *.bak_*
