@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["ruff>=0.8", "httpx>=0.27"]
+dev = ["ruff>=0.8", "httpx2>=2.12"]
 # The database, which is optional the way a roof is optional on a shed: the
 # preview deployment and the test suite run without it, and anything a
 # subscriber pays for does not. See `cedar_press/db.py` and `DATABASE.md`.

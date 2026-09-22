@@ -103,7 +103,7 @@ a contract, not a label anyone reads; leave it alone.
 
 ```bash
 npm install
-pip install -e 'server[dev]' httpx
+pip install -e 'server[dev]' httpx2
 ```
 
 The checks CI runs, in order (the Makefile is the full list, and
