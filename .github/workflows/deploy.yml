@@ -62,6 +62,7 @@ jobs:
       # plan's gate counts every tracked mention of the old grove paths.)
       - run: make test-python
       - run: make audit-python
+      - run: make audit-node
       # The build that is actually deployed, and the only place this
       # repository's two settings are read.
       #

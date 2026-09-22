@@ -35,18 +35,16 @@ test-python:
 
 audit: audit-node audit-python
 
-# NOT wired into a CI job. As of 2026-09-22 this exits non-zero on one high
-# advisory (js-yaml 4.0.0-4.3.1, GHSA-2883-xcg3-v3hh), so enabling it as a
-# required check would land red. The bump is a reviewed dependency change of
-# its own; this target is here so the finding is one command away rather than
-# invisible.
+# A CI gate -- see ci.yml, which runs it alongside `audit-python`. It reported
+# one high advisory on 2026-09-22 (js-yaml 4.0.0-4.3.1, GHSA-2883-xcg3-v3hh),
+# transitively under eslint; bumping the resolved js-yaml to 4.3.2 cleared it,
+# and the gate went in from that clean state rather than with a backlog
+# already inside it, which is the only way a gate like this stays meaningful.
 audit-node:
 	npm audit --audit-level=high
 
-# This one IS a CI gate -- see ci.yml. It reported no known vulnerabilities on
-# 2026-09-22, so it is enforced from a clean state rather than adopted with a
-# backlog already inside it, which is the only way a gate like this stays
-# meaningful.
+# Also a CI gate -- see ci.yml. It reported no known vulnerabilities on
+# 2026-09-22, so it too is enforced from a clean state.
 #
 # Audits a resolved dependency set rather than the installed environment:
 # resolving is what a fresh `pip install -e server[dev]` actually does, and

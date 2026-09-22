@@ -74,20 +74,16 @@ jobs:
       # errors and the coverage floor in .coveragerc; `make test-node` (run
       # above as `npm run test`) carries the frontend floor.
       - run: make test-python
-      # The one audit that is a gate rather than a note: the server's
-      # resolved dependencies reported no known vulnerabilities on
-      # 2026-09-22, so this is enforced from a clean state rather than
-      # adopted with a backlog already inside it. `make audit-node` is not
-      # here -- see the note at the foot of this file.
+      # Both audits are gates rather than notes. Each was adopted from a
+      # clean state rather than with a backlog already inside it, which is
+      # the only way a gate like this stays meaningful: the server's resolved
+      # dependencies reported no known vulnerabilities on 2026-09-22, and the
+      # node tree reached the same state when js-yaml was bumped past
+      # GHSA-2883-xcg3-v3hh.
       - run: make audit-python
+      - run: make audit-node
 
-# Not a step: `make audit-node`. As of 2026-09-22 `npm audit --audit-level=high`
-# exits non-zero on one high advisory (js-yaml 4.0.0-4.3.1,
-# GHSA-2883-xcg3-v3hh), so adding it here would land a red required check.
-# The bump is a reviewed dependency change of its own; until then
-# `npm run audit` exists and the finding is one command away.
-#
-# Also not a step: `ruff format --check server`. It would reformat 18 of 30
+# Not a step: `ruff format --check server`. It would reformat 18 of 30
 # files today. That is a real cleanup with its own review, not something to
 # slip into a CI pass -- and adopting the gate while it is red teaches people
 # to ignore it.
