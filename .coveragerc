@@ -1,0 +1,22 @@
+# At the repository root rather than in server/pyproject.toml, because
+# coverage reads its configuration from the directory it is run in and every
+# gate here runs from the root.
+[run]
+branch = True
+# The API package, not the tests themselves -- a suite that covers its own
+# test files reports a number that means nothing.
+source = server/cedar_press
+
+[report]
+# Measured at 78.65% with branch coverage on, over 265 passing tests
+# (2026-09-22). Set at 77 rather than 78: that measurement was taken on
+# Python 3.11 and CI runs 3.12, and a floor that lands red on a version
+# difference teaches people to lower floors. The floor is a ratchet against
+# regression, not a target: raise it when real coverage rises (and when it
+# has been measured on the version CI actually uses), never lower it to make
+# a red run green.
+fail_under = 77
+show_missing = True
+exclude_also =
+    if TYPE_CHECKING:
+    raise NotImplementedError

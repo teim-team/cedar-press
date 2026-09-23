@@ -38,13 +38,20 @@ jobs:
   gates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # Every tracked generated file, re-rendered and compared with its
+      # source: the codebook and field-map documents, the researcher guides,
+      # the explore contracts, the sample record, the release ledger, the
+      # structured data and the sitemap. Fails naming the file and the
+      # command that rewrites it. The Makefile lists the seven scripts, and
+      # the three data-workspace checks deliberately left out.
+      - run: make check-generated
       - run: npm run test
       # Smoke tests run a browser over the built site. Chromium only: these
       # are the critical paths, not a compatibility matrix, and the phone
@@ -59,10 +66,40 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:smoke
       # The API ships with the client, so its checks gate the same pipeline.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
-      - run: pip install -e server[dev] httpx
+      - run: pip install -e server[dev] httpx2 coverage pip-audit
+      # `make audit-python` resolves the server's dependencies with uv before
+      # auditing them, rather than auditing this job's environment -- which
+      # also holds httpx2, coverage and pip-audit itself, none of which the
+      # server depends on.
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
       - run: ruff check server
-      - working-directory: server
-        run: python -m unittest discover -s tests -t .
+      # Through the Makefile, so these are character-for-character the
+      # commands a contributor runs. `make test-python` carries warnings-as-
+      # errors and the coverage floor in .coveragerc; `make test-node` (run
+      # above as `npm run test`) carries the frontend floor.
+      - run: make test-python
+      # Both audits are gates rather than notes. Each was adopted from a
+      # clean state rather than with a backlog already inside it, which is
+      # the only way a gate like this stays meaningful: the server's resolved
+      # dependencies reported no known vulnerabilities on 2026-09-22, and the
+      # node tree reached the same state when js-yaml was bumped past
+      # GHSA-2883-xcg3-v3hh.
+      - run: make audit-python
+      - run: make audit-node
+
+# Not a step: `ruff format --check server`. It would reformat 18 of 30
+# files today. That is a real cleanup with its own review, not something to
+# slip into a CI pass -- and adopting the gate while it is red teaches people
+# to ignore it.
+#
+# Not a step either (2026-09-22): the data workspace's own drift checks,
+# `code/500_build_architecture_map.py --check`,
+# `code/374_build_cedar_taxonomy_export.py --check` and
+# `code/512_build_dataset_contracts.py verify`. They measure data/clean,
+# data/spine and dist/ tables that git does not track, so a checkout here
+# cannot agree with the owner's tree; the Makefile's `check-generated`
+# target carries the detail. Nor `code/1050_preflight.py`, which claims a
+# script number as a side effect of running.

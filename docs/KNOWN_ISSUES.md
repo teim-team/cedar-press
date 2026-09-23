@@ -2571,3 +2571,24 @@ reads and re-check anything surprising before writing it down. `1168` stamps
 `bytes` and `mtime` into every JSON it emits, for exactly this reason.
 
 <!-- END HARMONIZATION-AUDIT-1168 -->
+
+<!-- BEGIN ISSUE-SWEEP-2026-09-22 -->
+# Re-verified 2026-09-22 at `e7d2628` — by reading the code, not by running the pipeline
+
+`data/clean` is not present on the machine that did this pass, so nothing that
+needs a table was re-measured. Only the items a `grep` can settle were checked.
+
+| Item | State | Evidence |
+|---|---|---|
+| B1 · `517` counts `RESOLVED` as a definite owner | **still open** | `code/517_export_safety.py:276` `definite_ok = {"RESOLVED"}` |
+| B5 · `516` loses a script's directory (debt D7) | **still open** | `code/516_release_manifest.py:541-542` still tests `HERE / s` against flat `code/` |
+| `62_no_regression_check.py` `NameError: ROOT` (section above, 2026-09-02) | **resolved the same day** in `0a193c8` ("I crashed gate 62 with ROOT instead of CEDAR, and the shell reported exit 0"); that section was never updated to say so | `grep -n ROOT code/62_no_regression_check.py` finds only the comment at line 142 explaining why `ROOT` is not used |
+| `62` does not parse below Python 3.12 | **new, S3, owner: the integrator (owns 62)** | line 1954 is a multi-line f-string (PEP 701). `python3.11 -m py_compile` → `SyntaxError: unterminated string literal (detected at line 1954)`; `python3.12` parses. `server/pyproject.toml`'s `requires-python = ">=3.10"` covers `server/` only; nothing states the interpreter floor for `code/`. On 3.10/3.11 the gate is dark in a new way, and the failure reads as a bug in the gate rather than a version mismatch. One line in `AGENTS.md` naming 3.12 as the floor for `code/`, or rewriting that one f-string, closes it. |
+
+Run here: `python3.12 code/62_no_regression_check.py` → `no baseline on file -
+run with --baseline first`, every count 0, exit 1. That is the expected result
+with no `data/clean`, not a regression measurement, and is recorded so the next
+reader does not mistake it for one. C1–C8 and the later OPEN sections (L1–L6,
+M1, M2, M4, NP-2, NP-3, QA-STATUS-VOCAB) all need the workspace and were not
+re-measured; their owners are as written.
+<!-- END ISSUE-SWEEP-2026-09-22 -->

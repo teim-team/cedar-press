@@ -105,8 +105,15 @@ export function PressInfluence({ influence, tier, status, brief = false }) {
 
       <p className="cp-set__fine cp-inf__foot">
         Subscriber priorities are considered alongside feasibility, data quality, research value and
-        Cedar’s editorial judgment.{" "}
-        <Link to={PRESS_PRIORITIES_PATH}>Shape the research <span aria-hidden="true">&#8594;</span></Link>
+        Cedar’s editorial judgment.
+        {/* The brief card sits on the Priorities page itself, where a link
+            to that page goes nowhere. */}
+        {brief ? null : (
+          <>
+            {" "}
+            <Link to={PRESS_PRIORITIES_PATH}>Shape the research <span aria-hidden="true">&#8594;</span></Link>
+          </>
+        )}
       </p>
     </section>
   );

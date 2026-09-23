@@ -23,13 +23,20 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # Every tracked generated file, re-rendered and compared with its
+      # source: the codebook and field-map documents, the researcher guides,
+      # the explore contracts, the sample record, the release ledger, the
+      # structured data and the sitemap. Fails naming the file and the
+      # command that rewrites it. The Makefile lists the seven scripts, and
+      # the three data-workspace checks deliberately left out.
+      - run: make check-generated
       - run: npm run test
       # Smoke tests run a browser over the built site. Chromium only: these
       # are the critical paths, not a compatibility matrix, and the phone
@@ -44,13 +51,25 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:smoke
       # The API ships with the client, so its checks gate the same pipeline.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
-      - run: pip install -e server[dev] httpx
+      - run: pip install -e server[dev] httpx2 coverage pip-audit
+      # `make audit-python` resolves the server's dependencies with uv before
+      # auditing them, rather than auditing this job's environment -- which
+      # also holds httpx2, coverage and pip-audit itself, none of which the
+      # server depends on.
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
       - run: ruff check server
-      - working-directory: server
-        run: python -m unittest discover -s tests -t .
+      # Through the Makefile, the same calls ci.yml makes -- and the
+      # deployGates test asserts the two lists stay identical, so the gate a
+      # pull request cleared and the gate the deploy re-runs cannot drift
+      # apart. `make test-python` carries warnings-as-errors and the coverage
+      # floor in .coveragerc. (Path spelled loosely on purpose: the rename
+      # plan's gate counts every tracked mention of the old grove paths.)
+      - run: make test-python
+      - run: make audit-python
+      - run: make audit-node
       # The build that is actually deployed, and the only place this
       # repository's two settings are read.
       #
@@ -101,7 +120,7 @@ jobs:
       # written to catch it. Destination-specific work now lives only in the
       # destination's own job. What remains here is shared by construction, and
       # its failure means there is nothing to publish anywhere.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: site
           path: dist-site
@@ -139,18 +158,18 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: site
           path: dist-site
       # The Pages tarball is built HERE, not in `build`: it is a format only
       # `deploy-pages` reads, so packaging it is Pages' own business and its
       # failure is Pages' own failure.
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: dist-site
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
 
   s3:
     needs: build
@@ -159,7 +178,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: site
           path: dist-site
@@ -173,7 +192,7 @@ jobs:
       # STS refuses the exchange before the role's permissions are consulted.
       # docs/HOSTNAMES.md carries the two commands that say which of the two
       # causes it is, and a paste-ready trust policy.
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4
         with:
           role-to-assume: arn:aws:iam::502309351676:role/cedarpress-site-deploy
           aws-region: us-east-1

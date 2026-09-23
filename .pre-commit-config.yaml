@@ -1,0 +1,50 @@
+# The same gates CI runs, on the machine where a mistake is cheapest to fix.
+#
+#   npm ci && pip install -e server[dev]
+#   make hooks
+#
+# Every hook is `local` and runs this repository's own installed tools, so it
+# executes the exact eslint in package-lock.json and the exact ruff in
+# server[dev] -- the same ones CI resolves. A third-party hook repository
+# would carry its own `rev` pin, which is a second, independently drifting
+# copy of a version those already decide once, and an unverified third-party
+# ref executing on every commit.
+#
+# Deliberately absent:
+#
+#   the test suites -- the Playwright smoke run builds the site and the
+#   unittest suite takes about fifteen seconds. A hook slow enough to be
+#   bypassed teaches contributors to reach for --no-verify, which costs more
+#   than it saves. CI runs both, with the coverage floors attached.
+#
+#   `ruff format` -- it would reformat 18 of the server's 30 files today.
+#   That is a real cleanup with its own review, and a hook that rewrites
+#   files nobody asked it to touch is how people learn to distrust hooks.
+#
+#   a bulk-data guard -- this repository tracks its own datasets on purpose
+#   (data/spine/, docs/schema/, dist/preview/), several of them megabytes.
+#   A size limit here would fire on the content, not on a mistake.
+repos:
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint (changed files)
+        entry: npx --no-install eslint --fix
+        language: system
+        files: \.(js|jsx|mjs|cjs)$
+        exclude: ^(dist/|dist-site/|node_modules/|test-results/)
+        require_serial: true
+
+      - id: ruff-check
+        name: ruff (changed API files)
+        entry: ruff check --fix --force-exclude
+        language: system
+        files: ^server/.*\.pyi?$
+        require_serial: true
+
+      - id: no-secrets-committed
+        name: no .env or credentials file staged
+        # The patterns and the reasons live in the script, which
+        # secretsHook.test.js (in the node suite) runs against staged names.
+        entry: scripts/no-secrets-staged.sh
+        language: script
