@@ -1,9 +1,11 @@
 // The ecosystem diagram's geometry, held to account. The solver in
-// pressEcosystem.js promises that every source gets its own ray, that no
-// ray crosses any collection's label, that no source name lands on another
-// label or a sibling, and that the whole figure fits its canvas. Copy edits
-// to RING or SOURCES re-run the solver; this file makes sure the promises
-// survive them.
+// pressEcosystem.js promises that every collection is on the ring with a
+// point for every record it is built from, that those points sit inside the
+// ring and clear the entity layer in the middle, that no two collection
+// labels land on each other, and that the whole resting figure fits a canvas
+// the ring takes at least half of, which is what makes it readable at a
+// third of the page. Copy edits to RING or SOURCES re-run the solver; this
+// file makes sure the promises survive them.
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -14,8 +16,8 @@ import {
   FEEDS,
   LAYOUT,
   labelBoxFor,
-  srcBoxFor,
-  clears,
+  labelLines,
+  nearestToCentre,
   overlaps,
 } from "./pressEcosystem.js";
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
@@ -71,10 +73,10 @@ test("every collection is on the ring with a fan", () => {
   for (const name of RING) {
     assert.ok(SOURCES[name]?.length, `${name} has sources`);
     assert.ok(FEEDS[name]?.feeds?.length, `${name} has feeds`);
-    assert.equal(
-      LAYOUT.fans[name].length,
-      SOURCES[name].length,
-      `${name}: every source placed on its own ray`,
+    assert.deepEqual(
+      LAYOUT.fans[name].map((p) => p.source),
+      SOURCES[name],
+      `${name}: every source placed, in the order it is declared`,
     );
     for (const feed of FEEDS[name].feeds) {
       assert.ok(RING.includes(feed), `${name} feed ${feed} is a collection`);
@@ -82,38 +84,66 @@ test("every collection is on the ring with a fan", () => {
   }
 });
 
-test("no fan ray crosses any collection label", () => {
+// The records a collection is built from sit inside the ring, between the
+// collection's own point and the entity layer: that is the direction they
+// travel, and it is the only region twelve readable labels leave free.
+test("every source point sits inside the ring and its ray clears the entity layer", () => {
   for (const node of nodes) {
     for (const p of LAYOUT.fans[node.name].map(centered)) {
-      for (const box of labelBoxes) {
-        assert.ok(
-          clears(node.dx - 0, node.dy - 0, p.x, p.y, box),
-          `${node.name}/${p.source} ray clears every label`,
-        );
-      }
+      const radius = Math.hypot(p.x, p.y);
+      assert.ok(radius < LAYOUT.dotR - 8, `${node.name}/${p.source} inside the ring`);
+      assert.ok(radius > LAYOUT.coreR + 8, `${node.name}/${p.source} clear of the core`);
+      assert.ok(
+        nearestToCentre(node.dx, node.dy, p.x, p.y) > LAYOUT.coreR + 4,
+        `${node.name}/${p.source} ray clears the core`,
+      );
     }
   }
 });
 
-test("no source name lands on a label or a sibling source", () => {
+test("sibling sources are distinct points, spread about their collection's spoke", () => {
   for (const node of nodes) {
     const placed = LAYOUT.fans[node.name].map(centered);
     placed.forEach((p, i) => {
-      const sb = srcBoxFor(p.x, p.y, p.source);
-      for (const box of labelBoxes) {
-        assert.ok(!overlaps(sb, box), `${node.name}/${p.source} clear of labels`);
-      }
       placed.slice(i + 1).forEach((q) => {
-        assert.ok(
-          !overlaps(sb, srcBoxFor(q.x, q.y, q.source)),
-          `${node.name}: ${p.source} clear of ${q.source}`,
-        );
+        assert.ok(Math.hypot(p.x - q.x, p.y - q.y) >= 14, `${node.name}: ${p.source} apart from ${q.source}`);
       });
     });
+    // Balanced about the spoke, so a fan reads as belonging to its collection.
+    // A circular mean (of unit vectors), because a fan that straddles the
+    // angle where atan2 wraps would otherwise average to the far side.
+    const sumX = placed.reduce((sum, p) => sum + p.x / Math.hypot(p.x, p.y), 0);
+    const sumY = placed.reduce((sum, p) => sum + p.y / Math.hypot(p.x, p.y), 0);
+    const mean = Math.atan2(sumY, sumX);
+    const spoke = Math.atan2(node.dy, node.dx);
+    const wrapped = Math.atan2(Math.sin(mean - spoke), Math.cos(mean - spoke));
+    assert.ok(Math.abs(wrapped) < 0.01, `${node.name}: fan centred on its spoke`);
   }
 });
 
-test("everything fits inside the canvas", () => {
+// Two-line labels are what let the ring be small: a long name breaks at the
+// space nearest its middle, and a single word or a short name stays whole.
+test("long names break onto two balanced lines and short ones stay whole", () => {
+  assert.deepEqual(labelLines("Deals"), ["Deals"]);
+  assert.deepEqual(labelLines("Subcontracting"), ["Subcontracting"]);
+  assert.deepEqual(labelLines("Native-Owned Businesses"), ["Native-Owned", "Businesses"]);
+  assert.deepEqual(labelLines("Prime Contracting"), ["Prime", "Contracting"]);
+  for (const name of RING) {
+    const lines = labelLines(name);
+    assert.ok(lines.length <= 2, `${name} is at most two lines`);
+    assert.equal(lines.join(" "), name, `${name} keeps every word`);
+  }
+});
+
+test("no two collection labels land on each other", () => {
+  labelBoxes.forEach((a, i) => {
+    labelBoxes.slice(i + 1).forEach((b, j) => {
+      assert.ok(!overlaps(a, b), `${nodes[i].name} clear of ${nodes[i + 1 + j].name}`);
+    });
+  });
+});
+
+test("everything fits inside the canvas, and the ring takes at least half of it", () => {
   const inside = (box, what) => {
     assert.ok(box.l >= 0 && box.r <= LAYOUT.w, `${what} inside horizontally`);
     assert.ok(box.t >= 0 && box.b <= LAYOUT.h, `${what} inside vertically`);
@@ -127,14 +157,12 @@ test("everything fits inside the canvas", () => {
   }
   for (const [name, placed] of Object.entries(LAYOUT.fans)) {
     for (const p of placed) {
-      const c = centered(p);
-      const sb = srcBoxFor(c.x, c.y, p.source);
-      inside(
-        { l: sb.l + LAYOUT.cx, r: sb.r + LAYOUT.cx, t: sb.t + LAYOUT.cy, b: sb.b + LAYOUT.cy },
-        `source ${name}/${p.source}`,
-      );
+      inside({ l: p.x - 4, r: p.x + 4, t: p.y - 4, b: p.y + 4 }, `source ${name}/${p.source}`);
     }
   }
+  // Readable at a third of the page: the ring, not the margins, is the figure.
+  assert.ok((2 * LAYOUT.r) / LAYOUT.w >= 0.5, `ring is ${((2 * LAYOUT.r) / LAYOUT.w).toFixed(2)} of the canvas width`);
+  assert.ok(LAYOUT.w <= 800, `canvas ${LAYOUT.w} wide would scale 22px labels below 12px at a third of the page`);
 });
 
 test("the core and the ring sit inside the canvas", () => {

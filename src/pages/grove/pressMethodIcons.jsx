@@ -102,6 +102,17 @@ export const CommitmentsIcon = (
   </svg>
 );
 
+/** A quotation mark on a rule: how to cite. */
+export const CiteIcon = (
+  <svg {...glyph}>
+    <path d="M4 18.5h16" />
+    <path d="M6.5 13.2V9.4a3 3 0 0 1 3-3" />
+    <path d="M6.5 13.2h3.2V10H6.5" />
+    <path d="M14 13.2V9.4a3 3 0 0 1 3-3" />
+    <path d="M14 13.2h3.2V10H14" />
+  </svg>
+);
+
 /** The people behind it. */
 export const ExpertiseIcon = (
   <svg {...glyph}>

@@ -1231,9 +1231,12 @@
 /* One centred figure, given the room a centrepiece deserves: near the
  * full content width on desktop. Everything inside the svg is in viewBox
  * units, so the ring, the labels and the fans all scale together. */
-.teim-rd .cp-eco { margin: 1.6rem auto 0; max-width: 76rem; }
+/* Sized for a third of the page now (see pressEcosystem.js): the canvas is
+ * 752 units across with 22px labels, so at 440px on screen the type is 13px
+ * around a 220px ring. No max-width; the column it sits in is the width. */
+.teim-rd .cp-eco { margin: 0; max-width: none; }
 .teim-rd .cp-eco__figure { min-width: 0; }
-.teim-rd .cp-eco__svg { width: 100%; height: auto; display: block; }
+.teim-rd .cp-eco__svg { width: 100%; height: auto; display: block; overflow: visible; }
 .teim-rd .cp-eco__spoke line { stroke: var(--line); stroke-width: 1; }
 .teim-rd .cp-eco__dot { fill: var(--teal); }
 /* The collection's own point on the ring: every line ends here. */
@@ -1254,17 +1257,18 @@
   50% { transform: translateY(-9px); }
 }
 .teim-rd .cp-eco__core2 { fill: #fff; stroke: var(--dteal); stroke-width: 1.5; }
-.teim-rd .cp-eco__ringcap { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.22em; fill: var(--dteal); }
+.teim-rd .cp-eco__ringcap { font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.2em; fill: var(--dteal); }
 /* The fan of real sources while a collection is pinned. */
 @keyframes cp-src-in { from { opacity: 0; } }
 .teim-rd .cp-eco__src { animation: cp-src-in 0.3s ease backwards; }
-.teim-rd .cp-eco__src line { stroke: var(--dteal); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.teim-rd .cp-eco__src line { stroke: var(--dteal); stroke-width: 1.4; stroke-dasharray: 3 3; }
 .teim-rd .cp-eco__src circle { fill: var(--dteal); }
-.teim-rd .cp-eco__src text { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; fill: var(--ink-2); }
 .teim-rd .cp-eco__label.is-pinned { fill: var(--dteal); }
 @media (prefers-reduced-motion: reduce) { .teim-rd .cp-eco__src { animation: none; } }
-.teim-rd .cp-eco__corecap { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; fill: var(--dteal); }
-.teim-rd .cp-eco__label { font-family: var(--sans); font-size: 15.5px; font-weight: 700; fill: var(--ink); cursor: pointer; transition: fill 0.2s ease, opacity 0.2s ease; outline: none; }
+.teim-rd .cp-eco__corecap { font-family: var(--mono); font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; fill: var(--dteal); }
+/* 22px in canvas units: the geometry's label boxes are measured for this
+ * size, so changing it here means changing LABEL_CHAR and LINE_H there. */
+.teim-rd .cp-eco__label { font-family: var(--sans); font-size: 22px; font-weight: 700; fill: var(--ink); cursor: pointer; transition: fill 0.2s ease, opacity 0.2s ease; outline: none; }
 /* The hover: the named collection and its feeds light teal, the chords draw
  * through the middle and everything else steps back. */
 .teim-rd .cp-eco__spoke line, .teim-rd .cp-eco__spoke .cp-eco__dot { transition: stroke 0.2s ease, fill 0.2s ease, opacity 0.2s ease; }
@@ -1278,25 +1282,25 @@
 /* The fan arrives: lines grow out and labels follow, one beat. */
 @keyframes cp-fan-line { from { opacity: 0; } }
 .teim-rd .cp-eco__src line { animation: cp-fan-line 0.25s ease backwards; }
-.teim-rd .cp-eco__src text, .teim-rd .cp-eco__src circle { animation: cp-fan-line 0.3s ease 0.08s backwards; }
-@media (prefers-reduced-motion: reduce) { .teim-rd .cp-eco__src line, .teim-rd .cp-eco__src text, .teim-rd .cp-eco__src circle { animation: none; } }
+.teim-rd .cp-eco__src circle { animation: cp-fan-line 0.3s ease 0.08s backwards; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-eco__src line, .teim-rd .cp-eco__src circle { animation: none; } }
 /* Centred and readable at a glance: this sentence IS the figure's note. */
-.teim-rd .cp-eco__say { min-height: 2.9em; margin: 0.4rem auto 0; max-width: 66ch; font-size: 1.08rem; line-height: 1.55; text-align: center; color: var(--ink-2); }
+.teim-rd .cp-eco__say { min-height: 4.6em; margin: 0.6rem auto 0; max-width: 66ch; font-size: 0.9rem; line-height: 1.55; text-align: center; color: var(--ink-2); }
 .teim-rd .cp-eco:not(.is-lit) .cp-eco__say { color: var(--muted); }
 /* The key under the sentence: what a dashed branch and a lit dot mean. */
-.teim-rd .cp-eco__key { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem 2.2rem; margin: 0.7rem 0 0; font-family: var(--mono); font-size: 0.70rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-eco__key { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin: 0.6rem 0 0; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-eco__keyitem { display: inline-flex; align-items: center; gap: 0.5rem; }
 .teim-rd .cp-eco__keyitem svg { width: 30px; height: 10px; overflow: visible; }
 .teim-rd .cp-eco__keyitem svg:first-child { flex: none; }
 .teim-rd .cp-eco__keydash { stroke: var(--dteal); stroke-width: 1.2; stroke-dasharray: 3 3; }
 .teim-rd .cp-eco__keydot { fill: var(--dteal); }
-/* On a phone the ring becomes a list: same facts, one disclosure per
- * collection, instead of a diagram shrunk past legibility. The stylesheet
- * decides which form shows, so the component carries no breakpoint logic. */
+/* On a phone the ring stays, above the text, and the same facts follow it
+ * as a list, one disclosure per collection: a tap on a phone has no hover
+ * to reveal a fan, and the list is the form that needs none. The stylesheet
+ * decides, so the component carries no breakpoint logic. */
 .teim-rd .cp-eco__cards { display: none; }
 @media (max-width: 720px) {
-  .teim-rd .cp-eco__figure { display: none; }
-  .teim-rd .cp-eco__cards { display: block; border-top: 1px solid var(--ink); }
+  .teim-rd .cp-eco__cards { display: block; margin-top: 1rem; border-top: 1px solid var(--ink); }
   .teim-rd .cp-eco__card { border-bottom: 1px solid var(--line); }
   .teim-rd .cp-eco__card summary { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0.2rem; font-family: var(--sans); font-size: 1rem; font-weight: 700; color: var(--ink); cursor: pointer; list-style: none; min-height: 44px; }
   .teim-rd .cp-eco__card summary::-webkit-details-marker { display: none; }
@@ -1314,7 +1318,7 @@
 
 .teim-rd .cp-eco__notes li { position: relative; font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); padding-left: 1.1rem; }
 .teim-rd .cp-eco__notes li::before { content: "\2014"; position: absolute; left: 0; top: 0; color: var(--teal-line, var(--line)); }
-@media (max-width: 900px) { .teim-rd .cp-eco { grid-template-columns: 1fr; } }
+
 
 /* ── An entity's life ──────────────────────────────────────────────────── */
 /* The sequence is an example of what the identity layer tracks, and the
@@ -3726,14 +3730,41 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-mix__n { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); }
 .teim-rd .cp-mix__name { font-family: var(--sans); font-size: 0.78rem; font-weight: 600; letter-spacing: -0.006em; color: var(--ink-2); line-height: 1.25; }
 .teim-rd .cp-mix__item.is-on .cp-mix__name { color: var(--dteal); font-weight: 700; }
+/* THE INDEX AND THE CHAPTERS ARE TWO COLUMNS OF ONE GRID. The rail was a
+ * float with `position: sticky` inside it, and a sticky float is the one
+ * arrangement that overlaps its own page: the chapters were laid out around
+ * the float's original box, and then the rail slid down the page over the
+ * text that had wrapped beside it. In a grid the rail has a column that is
+ * its own for the whole height of the chapters, and `sticky` follows the
+ * reader inside it. */
+.teim-rd .cp-meth__grid { display: block; }
+.teim-rd .cp-meth__body { min-width: 0; }
 @media (min-width: 1100px) {
-  .teim-rd .cp-mix { float: left; width: 14rem; margin: 2rem 2.5rem 1.5rem 0; position: sticky; top: 1.5rem; }
+  .teim-rd .cp-meth__grid { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 0 2.5rem; align-items: start; }
+  .teim-rd .cp-mix { position: sticky; top: 1.5rem; margin: 2rem 0 1.5rem; }
   /* The `open` attribute is set from JS at this same breakpoint; the cap is
      inert here because the rail is not a control on a wide screen. */
   .teim-rd .cp-mix__cap { pointer-events: none; }
   .teim-rd .cp-mix__cap::marker, .teim-rd .cp-mix__cap::-webkit-details-marker { display: none; }
-  .teim-rd .cp-meth .cp-ch { clear: none; }
 }
+/* The first chapter's lead: text beside the ring, the ring about a third of
+ * the page on desktop and above the text on a phone, where it stacks first
+ * because the drawing is the shortest way into the chapter. */
+.teim-rd .cp-meth__lead { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.6rem; align-items: start; }
+.teim-rd .cp-meth__lead .cp-eco { order: -1; }
+.teim-rd .cp-meth__leadtext p { font-size: 1.02rem; line-height: 1.66; color: var(--ink-2); margin: 0 0 1rem; max-width: 66ch; }
+.teim-rd .cp-meth__leadtext p:last-child { margin-bottom: 0; }
+@media (min-width: 900px) {
+  /* Two fifths of the body column, which beside the 14rem index is about a
+   * third of the page: 450px at 1440, where 22px canvas labels read at 13px. */
+  .teim-rd .cp-meth__lead { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.2rem 3rem; }
+  .teim-rd .cp-meth__lead .cp-eco { order: 0; }
+}
+/* How to cite: the line a reader copies, at the size they would transcribe it. */
+.teim-rd .cp-cite { margin: 1.6rem 0 0; display: grid; gap: 0.6rem; }
+.teim-rd .cp-cite__cap { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-cite__line { display: block; padding: 0.85rem 1rem; border: 1px solid var(--line); border-left: 2px solid var(--teal); background: var(--bg); font-family: var(--mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); overflow-wrap: anywhere; user-select: all; }
+.teim-rd .cp-cite__note { margin: 0.2rem 0 0; font-size: 0.96rem; line-height: 1.62; color: var(--ink-2); max-width: 66ch; }
 
 /* A chapter: its number and mark on the left of the headline, the claim
  * under it at reading size, then whatever the chapter draws. */
@@ -4462,12 +4493,6 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 @media (max-width: 760px) {
   .teim-rd .cp-chain li:not(:last-child)::after { content: none; }
 }
-
-.teim-rd .cp-anchors { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.6rem 1.4rem; margin: 1.6rem 0 0; padding: 0; }
-.teim-rd .cp-anchors a { display: block; padding: 0.7rem 0.85rem; border: 1px solid var(--line); border-left: 2px solid var(--teal); background: var(--bg); text-decoration: none; }
-.teim-rd .cp-anchors a:hover { border-left-color: var(--dteal); }
-.teim-rd .cp-anchors b { display: block; font-family: var(--sans); font-size: 0.92rem; font-weight: 800; color: var(--ink); }
-.teim-rd .cp-anchors span { display: block; margin-top: 0.15rem; font-size: 0.82rem; line-height: 1.45; color: var(--ink-2); }
 
 /* The build stamp on /settings. Quiet by default — it is a diagnostic, not a
  * feature — but selectable, because the first thing anyone does with it is

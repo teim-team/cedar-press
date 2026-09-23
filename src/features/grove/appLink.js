@@ -17,6 +17,18 @@ export function appUrl(path = "") {
 }
 
 /**
+ * Where "Cedar Grove" goes from Press: the product's page on lumecon.ai.
+ *
+ * Not into the app. Press and Grove share the data and nothing else a reader
+ * can use: a Press subscriber has no Grove account to land in, and the
+ * articles the reader came for are here. The marketing page says what Grove
+ * is and how to ask for it, which is the only thing a link from Press can
+ * honestly offer. The platform links ("Open the platform") stay on `appUrl`,
+ * because those do lead to an account the reader holds.
+ */
+export const GROVE_MARKETING_URL = "https://lumecon.ai/cedar-grove";
+
+/**
  * The research desk's address, with the subject line that says which page the
  * message came from. One spelling of the address for the ten places that
  * write to it; a typo in one of them was a message nobody received.

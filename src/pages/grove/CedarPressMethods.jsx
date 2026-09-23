@@ -36,6 +36,31 @@
 // descriptors, the release log), so a chapter cannot say something the
 // product does not.
 //
+// ============================================================================
+// CUT DOWN AGAIN 2026-09-23, on the owner's reading: "we can cut a lot of
+// what is on the method page", and "bring back the cool circle with the
+// spokes".
+// ============================================================================
+//
+// Seven chapters became five, in the order a reader deciding whether to
+// trust a figure actually asks: what the collections are, how a record is
+// built and checked, what the limits are, how to cite, who builds it. The
+// drawings stay; the paragraphs between them are folded into named
+// disclosures or gone, and nothing a test pins has moved out of the page.
+//
+// THE RING LEADS. The ecosystem diagram sat inside a closed disclosure
+// under the first chapter, where nobody opened it, drawn for the full
+// content width it never got. It is the first chapter's figure now, beside
+// the text at a third of the page on desktop and above it on a phone, and
+// its geometry was resized to read at that width (pressEcosystem.js).
+//
+// THE INDEX IS A COLUMN, NOT A FLOAT. It was a floated, sticky block the
+// chapters flowed beside, and a sticky float is laid out once and then
+// moves: as the page scrolled, the rail slid down over the chapter text
+// that had wrapped around its original position. That was the overlap on
+// desktop. The index and the chapters are two columns of one grid now, so
+// the rail follows the reader in a column that is its own.
+//
 // Public on purpose: someone deciding whether to pay should be able to read
 // exactly how the work is done first.
 
@@ -44,7 +69,10 @@ import { Link } from "react-router";
 import { contactHref } from "../../features/grove/appLink.js";
 
 
-import { PRESS_DATA_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
+import { PRESS_DATA_PATH, PRESS_REQUEST_PATH, PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
+import { collectionCitation } from "../../features/grove/collection";
+import { REPORT_CITATION_HREF } from "../../features/grove/pressCitations";
+import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
@@ -68,12 +96,10 @@ import {
 } from "./pressMethodSections";
 import {
   ByCollectionIcon,
+  CiteIcon,
   ExpertiseIcon,
-  IdentityIcon,
   LinkageIcon,
-  LoopIcon,
   ProcessIcon,
-  SubjectsIcon,
 } from "./pressMethodIcons";
 import Explain from "./Explain";
 import { PressCedarFab } from "./PressCedarFab";
@@ -94,14 +120,27 @@ const TRUST_ROW = [
  * own headline: an index of ten full sentences is a second page to read.
  */
 const CHAPTERS = [
-  { id: "sources", label: "Sources and matching", icon: ProcessIcon },
-  { id: "ids", label: "Entity and business IDs", icon: IdentityIcon },
-  { id: "ownership", label: "Ownership and relationships", icon: SubjectsIcon },
-  { id: "linkage", label: "What is linked, and what is not", icon: LinkageIcon },
-  { id: "updates", label: "Updates and corrections", icon: LoopIcon },
-  { id: "collections", label: "By collection", icon: ByCollectionIcon },
+  { id: "collections", label: "What the collections are", icon: ByCollectionIcon },
+  { id: "records", label: "How records are built and checked", icon: ProcessIcon },
+  { id: "limits", label: "What the limits are", icon: LinkageIcon },
+  { id: "cite", label: "How to cite", icon: CiteIcon },
   { id: "team", label: "Who builds it", icon: ExpertiseIcon },
 ];
+
+/**
+ * The citation a reader copies, in the form every record page prints and
+ * every download carries: the first collection on the shelf stands in as
+ * the example, with its real version. The date is the reader's, so the
+ * example says what a real citation says.
+ */
+function citationExample() {
+  const accessed = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  for (const entry of PRESS_CATALOG) {
+    const citation = collectionCitation(entry.id, accessed);
+    if (citation) return { name: entry.name, citation };
+  }
+  return null;
+}
 
 const anchorId = (id) => `m-${id}`;
 
@@ -297,8 +336,7 @@ export default function CedarPressMethods() {
               seven-stage rail further down is a different diagram — it is
               how a collection is BUILT. This is how the four things a reader
               meets in the product relate to each other, which is the
-              question the page's title asks and which nothing on it
-              answered in one glance. */}
+              question the page's title asks. */}
           <ol className="cp-chain" aria-label="How the pieces relate">
             <li>
               <b>Collection</b>
@@ -317,228 +355,225 @@ export default function CedarPressMethods() {
               <span>The document it came from, named on the record and in the download.</span>
             </li>
           </ol>
-
-          {/* FOUR ANCHORS. What a reader is actually deciding when they open
-              a methodology page is whether to trust a figure, and the four
-              things that decide it are: the release it came from, the
-              identity it is attached to, the document behind it, and what
-              happens when any of those turn out to be wrong. Each is a
-              chapter below; this is the page answering before it explains. */}
-          <ul className="cp-anchors" aria-label="What this page answers">
-            <li>
-              <a href={`#${anchorId("updates")}`}>
-                <b>Releases</b>
-                <span>Every version keeps its address, so a citation stays reproducible.</span>
-              </a>
-            </li>
-            <li>
-              <a href={`#${anchorId("ids")}`}>
-                <b>Identities</b>
-                <span>One permanent id a nation keeps through renames and reorganizations.</span>
-              </a>
-            </li>
-            <li>
-              <a href={`#${anchorId("sources")}`}>
-                <b>Source records</b>
-                <span>Every collection begins with a document, not an estimate.</span>
-              </a>
-            </li>
-            <li>
-              <a href={`#${anchorId("updates")}`}>
-                <b>Corrections</b>
-                <span>What changes, what does not, and where the change is logged.</span>
-              </a>
-            </li>
-          </ul>
         </section>
 
-        <MethodsIndex />
-
-        <Chapter
-          id="sources"
-          title="Every collection runs the same seven stages."
-          claim="Sources are gathered, normalized, resolved to entities and checked against each other; ambiguous matches go to a researcher rather than to a score."
-        >
-          <ProcessRail />
-          <Reasoning label="Why the collections are built together rather than one at a time">
-            <p>
-              A contract award, a lobbying registration and a 990 are three records about one
-              organization, and they only behave that way if the organization is identified before
-              the question is asked. Selecting a collection below shows the records it is built
-              from and the collections that reinforce it.
-            </p>
-            <EcosystemDiagram />
-          </Reasoning>
-          <Acts>
-            <Link className="cp-ch__act" to={PRESS_DATA_PATH}>
-              See what each collection holds <span aria-hidden="true">&#8594;</span>
-            </Link>
-          </Acts>
-        </Chapter>
-
-        {/* THE ARGUMENT THIS PAGE EXISTS FOR. The two identifiers are
-            load-bearing, so they are named, shown at transcription size and
-            checked against the published register by `pressIdentity.test.js`. */}
-        <Chapter
-          id="ids"
-          title="Two identifiers: one names an entity, one names a business."
-          claim="A Cedar entity id names one canonical Native entity. A Cedar business id names one distinct business or enterprise. The two namespaces never mix."
-        >
-          <IdentityPair />
-          <Reasoning label="Why an identifier has to be minted at all">
-            <p>
-              A 990 says who filed it. A royalty statement says who was paid. A docket says who
-              appeared. None of them says whether those three are the same nation, and no public
-              system will tell you. Cedar assigns the key none of them carries and keeps it
-              current. The ownership between the two namespaces is a dated relationship carrying
-              its source, which is what keeps a nation and the company it owns from collapsing
-              into one row.
-            </p>
-            <p>
-              A firm that is Native-owned without being owned by a nation gets the business id
-              from the first sighting. If a nation acquires it later, the history is already
-              there.
-            </p>
-            {/* The owner's challenge, 2026-09-13: is it wrong that Cedar does
-                not publish what it resolves? It would be. What is actually
-                withheld is much narrower, and WITHHELD_NOTE holds the wording
-                with the rule it comes from cited beside it. */}
-            <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
-          </Reasoning>
-        </Chapter>
-
-        {/* WHY TWO NAMESPACES. The owner's worked example: one id space
-            collapses an enterprise into its tribal owner, and then "what has
-            this nation been involved in" and "what has this enterprise won"
-            become the same query with the same wrong answer. */}
-        <Chapter
-          id="ownership"
-          title="A nation and the company it owns are two subjects."
-          claim="The ownership between them is a dated relationship carrying its source, and the identifiers themselves carry nothing that can change."
-        >
-          <WhyBoth />
-          <h3 className="cp-ch__sub">What the identifiers deliberately do not carry</h3>
-          <KeptOutside />
-          <Reasoning label="What a single identifier space would cost">
-            <p>
-              A Native entity can own or operate a business. That does not make the business and
-              the entity the same subject, and a single identifier space is a decision to treat
-              them as one. An identifier that encodes ownership also has to be rewritten when a
-              firm is sold, and every rewrite breaks every citation that used the old one.
-            </p>
-          </Reasoning>
-        </Chapter>
-
-        <Chapter
-          id="linkage"
-          title="What carrying an identifier makes possible, and where it stops."
-          claim="Start from any keyword, agency, year or nation, and what comes back is the rows Cedar can attribute to that organization rather than the rows that happened to spell its name your way."
-        >
-          <LinkageMoves />
-          {/* Codex, PR #77: this said the identifier "was already on every row"
-              and promised the "whole footprint". LINKAGE_COVERAGE.md measures
-              70.93% across the flagships and 6.24% on Natural Resource
-              Revenues, so the measured figure sits under the claim, and stays
-              out of the disclosure: a coverage number a reader has to open
-              something to find is a number being kept quiet. */}
-          <p className="cp-msec__aside">
-            {LINKAGE_COVERAGE.note}
-            <Explain label="how the coverage figure is counted">
-              <p><span className="cp-ex1__cap">What the denominator is</span>{LINKAGE_COVERAGE.caveat}</p>
-              <p><span className="cp-ex1__cap">When it was measured</span>{LINKAGE_COVERAGE.measuredOn}, against the built collections, by <code>{LINKAGE_COVERAGE.source}</code>.</p>
-            </Explain>{" "}
-            Measured {LINKAGE_COVERAGE.measuredOn} against the built collections.
-          </p>
-          {/* Two of these three are intentional and stay intentional however
-              long Cedar runs: a notice addressed to every federally
-              recognized tribe names no organization, and an individually
-              owned firm's identity is withheld by policy. The third is work
-              still to do, and it says so. Published beside the figure rather
-              than behind a disclosure. */}
-          <h3 className="cp-ch__sub">Why a record can carry no entity</h3>
-          <UnlinkedReasons />
-        </Chapter>
-
-        <Chapter
-          id="updates"
-          title="Corrections go back into the evidence, and some things stay undone."
-          claim="A researcher rules on every final output, and the ruling goes back into the evidence the models read."
-        >
-          <FeedbackLoop />
-          <h3 className="cp-ch__sub">What Cedar will not do</h3>
-          <ul className="cp-wont">
-            {METHOD_COMMITMENTS.map((item) => (
-              <li key={item.id}>{item.text}</li>
-            ))}
-          </ul>
-          <Reasoning label="Why an identified collection answers differently">
-            <p>
-              A model reading twelve unjoined files can retrieve text. A model reading an
-              identified collection can count, compare and trace, because the rows already agree
-              on who they are about. Cedar builds and trains its own models on its own resolved
-              records. The collection is the input to the next pass over it, so the specific
-              questions it can answer get more specific over time.
-            </p>
-          </Reasoning>
-          <Acts>
-            <a className="cp-ch__act" href={contactHref("Cedar correction")}>
-              Send a correction <span aria-hidden="true">&#8594;</span>
-            </a>
-          </Acts>
-        </Chapter>
-
-        {/* The philosophy above; the specifics here. A researcher's next
-            question after "how does Cedar work" is "how was THIS collection
-            built", and the answer is assembled from the same declarations the
-            product runs on. */}
-        <Chapter
-          id="collections"
-          title="The specifics, collection by collection."
-          claim="Choose a mark for that collection's sources, method and entity resolution."
-        >
-          <MethodsByCollection />
-        </Chapter>
-
-        <Chapter
-          id="team"
-          title="Built by people who know the systems."
-          claim="Cedar is built by Indigenous researchers and a team with experience at the Federal Reserve Board and the Federal Reserve Banks of Minneapolis and Philadelphia, and academic backgrounds spanning MIT, Oxford, Cornell, Brown, Dartmouth and Yale."
-        >
-          <div className="cp-exp">
-            <div>
-              {/* The domains are read from the strip rather than typed: this
-                  sentence named gaming for a week after the shelf stopped
-                  selling it, because nothing held the two together. */}
-              <p className="cp-exp__body">
-                {expertiseSentence()} each have different definitions, reporting systems and
-                historical quirks. Reliable data requires knowing how to process the records
-                and what those records mean.
-              </p>
-            </div>
-            <div className="cp-exp__strip">
-              {CREDIBILITY_STRIP.map((group) => (
-                <div key={group.id}>
-                  <span className="cp-exp__cap">{group.label}</span>
-                  <span className="cp-exp__names">{group.names.join(" · ")}</span>
+        <div className="cp-meth__grid">
+          <MethodsIndex />
+          <div className="cp-meth__body">
+            <Chapter
+              id="collections"
+              title="Twelve collections, one register of who is who."
+              claim="Each collection is a published table built from named source documents and resolved to the same entity register, so a nation, an enterprise or a firm is the same subject in every one of them."
+            >
+              {/* The figure beside the text, a third of the page on desktop,
+                  above it on a phone. It is the argument of this chapter
+                  drawn: everything meets in the middle. */}
+              <div className="cp-meth__lead">
+                <div className="cp-meth__leadtext">
+                  <p>
+                    A contract award, a lobbying registration and a 990 are three records about
+                    one organization, and they only behave that way if the organization is
+                    identified before the question is asked. Every collection begins with a
+                    document rather than an estimate, and every record in it carries the entity
+                    it resolves to, the source it came from and the release it belongs to.
+                  </p>
+                  <p>
+                    Select a collection in the figure to see how many records it is built from
+                    and which collections reinforce it. Choose a mark below it for that
+                    collection&rsquo;s sources, method and entity resolution.
+                  </p>
                 </div>
-              ))}
-              <p className="cp-exp__note">{CREDIBILITY_DISCLAIMER}</p>
-            </div>
+                <EcosystemDiagram />
+              </div>
+              <MethodsByCollection />
+              <Acts>
+                <Link className="cp-ch__act" to={PRESS_DATA_PATH}>
+                  See what each collection holds <span aria-hidden="true">&#8594;</span>
+                </Link>
+              </Acts>
+            </Chapter>
+
+            <Chapter
+              id="records"
+              title="Every record is built the same way and checked against the others."
+              claim="Sources are gathered, normalized, resolved to entities and checked against each other; ambiguous matches go to a researcher rather than to a score, and every ruling goes back into the evidence."
+            >
+              <ProcessRail />
+
+              {/* THE ARGUMENT THIS PAGE EXISTS FOR. The two identifiers are
+                  load-bearing, so they are named, shown at transcription size
+                  and checked against the published register by
+                  `pressIdentity.test.js`. */}
+              <h3 className="cp-ch__sub">Two identifiers: one names an entity, one names a business</h3>
+              <IdentityPair />
+
+              {/* WHY TWO NAMESPACES. The owner's worked example: one id space
+                  collapses an enterprise into its tribal owner, and then "what
+                  has this nation been involved in" and "what has this
+                  enterprise won" become the same query with the same wrong
+                  answer. */}
+              <h3 className="cp-ch__sub">A nation and the company it owns are two subjects</h3>
+              <WhyBoth />
+              <h3 className="cp-ch__sub">What the identifiers deliberately do not carry</h3>
+              <KeptOutside />
+
+              <h3 className="cp-ch__sub">Corrections go back into the evidence</h3>
+              <FeedbackLoop />
+
+              {/* The paragraphs that used to stand between the drawings, each
+                  behind a summary that says what it holds. Nothing is deleted;
+                  a reader who wants the argument opens it, and a reader
+                  checking a fact never has to. */}
+              <Reasoning label="Why an identifier has to be minted, and what one identifier space would cost">
+                <p>
+                  A 990 says who filed it. A royalty statement says who was paid. A docket says
+                  who appeared. None of them says whether those three are the same nation, and no
+                  public system will tell you. Cedar assigns the key none of them carries and
+                  keeps it current. The ownership between the two namespaces is a dated
+                  relationship carrying its source, which is what keeps a nation and the company
+                  it owns from collapsing into one row.
+                </p>
+                <p>
+                  A firm that is Native-owned without being owned by a nation gets the business
+                  id from the first sighting. If a nation acquires it later, the history is
+                  already there. A single identifier space would be a decision to treat the two
+                  as one subject; an identifier that encodes ownership has to be rewritten when a
+                  firm is sold, and every rewrite breaks every citation that used the old one.
+                </p>
+              </Reasoning>
+              <Reasoning label="What carrying an identifier makes possible">
+                <p>
+                  Start from any keyword, agency, year or nation, and what comes back is the rows
+                  Cedar can attribute to that organization rather than the rows that happened to
+                  spell its name your way.
+                </p>
+                <LinkageMoves />
+              </Reasoning>
+              <Reasoning label="Why an identified collection answers differently">
+                <p>
+                  A model reading twelve unjoined files can retrieve text. A model reading an
+                  identified collection can count, compare and trace, because the rows already
+                  agree on who they are about. Cedar builds and trains its own models on its own
+                  resolved records. The collection is the input to the next pass over it, so the
+                  specific questions it can answer get more specific over time.
+                </p>
+              </Reasoning>
+              <Acts>
+                <a className="cp-ch__act" href={contactHref("Cedar correction")}>
+                  Send a correction <span aria-hidden="true">&#8594;</span>
+                </a>
+              </Acts>
+            </Chapter>
+
+            <Chapter
+              id="limits"
+              title="What the collections cannot tell you."
+              claim="Coverage is measured and published with its reasons, a record can carry no entity by design, and Cedar does not infer what a nation has not said about its own."
+            >
+              {/* Codex, PR #77: the linkage claim once promised the "whole
+                  footprint". LINKAGE_COVERAGE.md measures 70.93% across the
+                  flagships and 6.24% on Natural Resource Revenues, so the
+                  measured figure sits beside the claim, in the open. */}
+              <p className="cp-msec__aside">
+                {LINKAGE_COVERAGE.note}
+                <Explain label="how the coverage figure is counted">
+                  <p><span className="cp-ex1__cap">What the denominator is</span>{LINKAGE_COVERAGE.caveat}</p>
+                  <p><span className="cp-ex1__cap">When it was measured</span>{LINKAGE_COVERAGE.measuredOn}, against the built collections, by <code>{LINKAGE_COVERAGE.source}</code>.</p>
+                </Explain>{" "}
+                Measured {LINKAGE_COVERAGE.measuredOn} against the built collections.
+              </p>
+              {/* Two of these three are intentional and stay intentional however
+                  long Cedar runs: a notice addressed to every federally
+                  recognized tribe names no organization, and an individually
+                  owned firm's identity is withheld by policy. The third is work
+                  still to do, and it says so. */}
+              <h3 className="cp-ch__sub">Why a record can carry no entity</h3>
+              <UnlinkedReasons />
+              <h3 className="cp-ch__sub">What Cedar will not do</h3>
+              <ul className="cp-wont">
+                {METHOD_COMMITMENTS.map((item) => (
+                  <li key={item.id}>{item.text}</li>
+                ))}
+              </ul>
+              {/* The owner's challenge, 2026-09-13: is it wrong that Cedar does
+                  not publish what it resolves? It would be. What is actually
+                  withheld is much narrower, and WITHHELD_NOTE holds the wording
+                  with the rule it comes from cited beside it. */}
+              <p className="cp-msec__aside">{WITHHELD_NOTE}</p>
+            </Chapter>
+
+            <Chapter
+              id="cite"
+              title="Cite the release you read."
+              claim="Every collection carries a version and every version keeps its address, so a citation names both and a figure can be checked against the release it came from after the collection has moved on."
+            >
+              {(() => {
+                const example = citationExample();
+                return example ? (
+                  <div className="cp-cite">
+                    <span className="cp-cite__cap">The form, with {example.name} as the example</span>
+                    <code className="cp-cite__line">{example.citation}</code>
+                    <p className="cp-cite__note">
+                      Every record page prints the same line under &ldquo;Cite it&rdquo;, and every
+                      download carries it as its final row, with the version the rows came from.
+                      A correction to a release is logged against that version, so a citation
+                      stays checkable after the collection has moved on.
+                    </p>
+                  </div>
+                ) : null;
+              })()}
+              <Acts>
+                <Link className="cp-ch__act" to={PRESS_WHATS_NEW_PATH}>
+                  See every release <span aria-hidden="true">&#8594;</span>
+                </Link>
+                <a className="cp-ch__act" href={REPORT_CITATION_HREF}>
+                  Report a citation <span aria-hidden="true">&#8594;</span>
+                </a>
+              </Acts>
+            </Chapter>
+
+            <Chapter
+              id="team"
+              title="Built by people who know the systems."
+              claim="Cedar is built by Indigenous researchers and a team with experience at the Federal Reserve Board and the Federal Reserve Banks of Minneapolis and Philadelphia, and academic backgrounds spanning MIT, Oxford, Cornell, Brown, Dartmouth and Yale."
+            >
+              <div className="cp-exp">
+                <div>
+                  {/* The domains are read from the strip rather than typed: this
+                      sentence named gaming for a week after the shelf stopped
+                      selling it, because nothing held the two together. */}
+                  <p className="cp-exp__body">
+                    {expertiseSentence()} each have different definitions, reporting systems and
+                    historical quirks. Reliable data requires knowing how to process the records
+                    and what those records mean.
+                  </p>
+                </div>
+                <div className="cp-exp__strip">
+                  {CREDIBILITY_STRIP.map((group) => (
+                    <div key={group.id}>
+                      <span className="cp-exp__cap">{group.label}</span>
+                      <span className="cp-exp__names">{group.names.join(" · ")}</span>
+                    </div>
+                  ))}
+                  <p className="cp-exp__note">{CREDIBILITY_DISCLAIMER}</p>
+                </div>
+              </div>
+              <ul className="cp-trust">
+                {TRUST_ROW.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <Acts>
+                <Link className="cp-ch__act cp-ch__act--lead" to={PRESS_DATA_PATH}>
+                  See the collections <span aria-hidden="true">&#8594;</span>
+                </Link>
+                <Link className="cp-ch__act" to={PRESS_REQUEST_PATH}>
+                  For tribal governments: request your records <span aria-hidden="true">&#8594;</span>
+                </Link>
+              </Acts>
+            </Chapter>
           </div>
-          <ul className="cp-trust">
-            {TRUST_ROW.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <Acts>
-            <Link className="cp-ch__act cp-ch__act--lead" to={PRESS_DATA_PATH}>
-              See the collections <span aria-hidden="true">&#8594;</span>
-            </Link>
-            <Link className="cp-ch__act" to={PRESS_REQUEST_PATH}>
-              For tribal governments: request your records <span aria-hidden="true">&#8594;</span>
-            </Link>
-          </Acts>
-        </Chapter>
+        </div>
 
         <PressFoot />
         <PressCedarFab />
