@@ -1,5 +1,8 @@
-/* eslint-disable react-refresh/only-export-components -- the PRESS_FIGURES map
-   is the module's point: the article picks a renderer by mark kind. */
+// The PRESS_FIGURES map is the module's point: the article picks a renderer
+// by mark kind. eslint-plugin-react-refresh 0.5.7's vite preset treats a map
+// whose every value is a component as a compound component, so the
+// react-refresh/only-export-components disable this file carried until
+// 2026-09-23 became an unused directive and eslint 10 reported it as one.
 // REVIEW OWNER: Havala
 //
 // Cedar Press figures: one renderer per mark.
