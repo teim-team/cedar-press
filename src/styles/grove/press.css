@@ -3755,10 +3755,23 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
 .teim-rd .cp-meth__leadtext p { font-size: 1.02rem; line-height: 1.66; color: var(--ink-2); margin: 0 0 1rem; max-width: 66ch; }
 .teim-rd .cp-meth__leadtext p:last-child { margin-bottom: 0; }
 @media (min-width: 900px) {
-  /* Two fifths of the body column, which beside the 14rem index is about a
-   * third of the page: 450px at 1440, where 22px canvas labels read at 13px. */
-  .teim-rd .cp-meth__lead { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.2rem 3rem; }
-  .teim-rd .cp-meth__lead .cp-eco { order: 0; }
+  /* THE RING SITS LEFT, AND NEVER NARROWER THAN 25REM.
+   *
+   * Left, because the Ask Cedar launcher is fixed to the lower right of the
+   * viewport and sat directly over the ring's right-hand nodes on first
+   * paint at 1280 to 1440, and the ring is the first thing this page shows.
+   * The launcher is the shared Cedar surface and stays where it is; the
+   * ring takes the column the launcher cannot reach, the text takes the
+   * right, which is also the order a phone stacks them in.
+   *
+   * Never narrower than 25rem, because the canvas is 752 units wide with
+   * 22px labels, so a 310px column (a 900px viewport, or 1100px once the
+   * index column appears) rendered the names at nine pixels. At 25rem the
+   * labels are 11.7px; the text column gives up the difference, which at
+   * 900px still leaves it about forty characters wide.
+   * `tests/smoke.spec.js` measures both the nodes against the launcher and
+   * the labels' rendered size at 900, 1100, 1280, 1440 and 1920. */
+  .teim-rd .cp-meth__lead { grid-template-columns: minmax(25rem, 1fr) minmax(0, 1.2fr); gap: 1.2rem 3rem; }
 }
 /* How to cite: the line a reader copies, at the size they would transcribe it. */
 .teim-rd .cp-cite { margin: 1.6rem 0 0; display: grid; gap: 0.6rem; }

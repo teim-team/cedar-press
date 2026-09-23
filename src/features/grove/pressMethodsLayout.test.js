@@ -7,7 +7,7 @@
 // read the page and the stylesheet, so the fixes cannot drift back quietly.
 
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 
 const PAGE = readFileSync(new URL("../../pages/grove/CedarPressMethods.jsx", import.meta.url), "utf8");
@@ -43,11 +43,19 @@ test("the ring is the first chapter's figure, beside the text and outside any di
   assert.ok(lead > 0 && lead < figure, "the ring is not in the chapter's lead");
   const chapter = PAGE.indexOf('id="collections"');
   assert.ok(chapter > 0 && chapter < figure, "the ring is not in the first chapter");
-  // A third of the page on desktop, first on a phone.
-  const lead2 = rulesFor("cp-meth__lead").find((block) => /grid-template-columns\s*:\s*minmax\(0, 1\.5fr\) minmax\(0, 1fr\)/.test(block.body));
-  assert.ok(lead2, "the lead does not give the ring a third of the width");
+  // Left of the text on desktop, where the fixed Ask Cedar launcher (lower
+  // right) cannot reach it, and never narrower than 25rem, where its 22px
+  // canvas labels still render above 11px. First on a phone too.
+  const lead2 = rulesFor("cp-meth__lead").find((block) => /grid-template-columns\s*:\s*minmax\(25rem, 1fr\) minmax\(0, 1\.2fr\)/.test(block.body));
+  assert.ok(lead2, "the lead does not give the ring the left column with a 25rem floor");
   const stacked = rulesFor("cp-eco").find((block) => /order\s*:\s*-1/.test(block.body));
-  assert.ok(stacked, "the ring does not stack first on a phone");
+  assert.ok(stacked, "the ring does not come first");
+  for (const block of rulesFor("cp-eco")) {
+    assert.doesNotMatch(block.body, /order\s*:\s*0\b/, `${block.selector} moves the ring after the text`);
+  }
+  for (const block of rulesFor("cp-meth__lead")) {
+    assert.doesNotMatch(block.body, /padding-right/, `${block.selector} reserves dead space instead of moving the ring`);
+  }
   // Drawn on every width: the phone form no longer hides the figure.
   for (const block of rulesFor("cp-eco__figure")) {
     assert.doesNotMatch(block.body, /display\s*:\s*none/, `${block.selector} hides the ring`);
@@ -65,4 +73,26 @@ test("the citation chapter prints the form every record page and download use", 
   assert.match(PAGE, /collectionCitation\(entry\.id, accessed\)/);
   assert.match(PAGE, /href=\{REPORT_CITATION_HREF\}/);
   assert.match(PAGE, /to=\{PRESS_WHATS_NEW_PATH\}/);
+});
+
+// Every link into the Methods page names a chapter that exists. The chapters
+// were renumbered and renamed in this rebuild, and the record page's "How
+// Cedar matches records" still pointed at the old `m-linkage`, which landed
+// a reader at the top of the page with no sign of what they had asked for.
+test("every /methods# anchor referenced from a page is a chapter on the Methods page", () => {
+  const chapters = [...PAGE.matchAll(/\{ id: "([a-z]+)", label: "[^"]+", icon: \w+ \}/g)].map((m) => `m-${m[1]}`);
+  assert.ok(chapters.length >= 5);
+  const pages = new URL("../../pages/grove/", import.meta.url);
+  const referenced = [];
+  for (const name of readdirSync(pages)) {
+    if (!/\.jsx?$/.test(name) || /\.test\./.test(name)) continue;
+    const source = readFileSync(new URL(name, pages), "utf8");
+    for (const match of source.matchAll(/(?:PRESS_METHODS_PATH\}|\/methods)#([a-z-]+)/g)) {
+      referenced.push({ name, anchor: match[1] });
+    }
+  }
+  assert.ok(referenced.some((ref) => ref.name === "CedarPressRecord.jsx"), "the record page links into Methods");
+  for (const ref of referenced) {
+    assert.ok(chapters.includes(ref.anchor), `${ref.name} links to #${ref.anchor}, which is not a chapter (${chapters.join(", ")})`);
+  }
 });

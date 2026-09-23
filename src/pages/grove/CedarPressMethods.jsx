@@ -374,12 +374,14 @@ export default function CedarPressMethods() {
                     A contract award, a lobbying registration and a 990 are three records about
                     one organization, and they only behave that way if the organization is
                     identified before the question is asked. Every collection begins with a
-                    document rather than an estimate, and every record in it carries the entity
-                    it resolves to, the source it came from and the release it belongs to.
+                    document rather than an estimate, and every record in it carries the source
+                    it came from, the release it belongs to and its resolution status: the
+                    entity it resolves to when the register can place it, and a stated reason
+                    when it cannot.
                   </p>
                   <p>
-                    Select a collection in the figure to see how many records it is built from
-                    and which collections reinforce it. Choose a mark below it for that
+                    Select a collection in the figure to see which sources it is built from and
+                    which collections reinforce it. Choose a mark below it for that
                     collection&rsquo;s sources, method and entity resolution.
                   </p>
                 </div>

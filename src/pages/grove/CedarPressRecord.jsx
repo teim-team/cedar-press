@@ -599,7 +599,11 @@ export default function CedarPressRecord() {
                       This table does not record a per-row basis for its match.
                     </span>
                   )}
-                  <Link className="cp-rec__more" to={`${PRESS_METHODS_PATH}#m-linkage`}>
+                  {/* The chapter on how a record is built, resolved and
+                      checked. It was `m-linkage`, a chapter the Methods page
+                      no longer has; pressMethodsLayout.test.js holds every
+                      anchor here to a chapter that exists. */}
+                  <Link className="cp-rec__more" to={`${PRESS_METHODS_PATH}#m-records`}>
                     How Cedar matches records <span aria-hidden="true">&#8594;</span>
                   </Link>
                 </div>

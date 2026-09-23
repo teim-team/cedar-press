@@ -94,7 +94,7 @@ export function EcosystemDiagram() {
     `${name} is built from ${say((SOURCES[name] ?? []).map(inSentence))}, resolved in the entity resolution layer in the middle and reinforced by ${say(FEEDS[name]?.feeds ?? [])}.`;
   const sentence = focus
     ? describe(focus)
-    : "Select a collection to see the records it is built from and what reinforces it.";
+    : "Select a collection to see the sources it is built from and what reinforces it.";
 
   return (
     <div className={`cp-eco${focus ? " is-lit" : ""}`}>
@@ -143,11 +143,13 @@ export function EcosystemDiagram() {
             </text>
           </g>
 
-          {/* The records the named collection is built from, one point each,
-              between the collection and the entity layer they resolve in:
-              hover fans them, a click keeps them fanned. The names are in
-              the sentence under the figure and on each point's title; the
-              drawing says how many and where they go. */}
+          {/* The sources the named collection is built from, one point each
+              (USAspending, FPDS, a nation's own register), between the
+              collection and the entity layer their records resolve in: hover
+              fans them, a click keeps them fanned. The names are in the
+              sentence under the figure and on each point's title. A point is
+              a source, not a record: a record is one award, filing, notice
+              or transaction, and a source holds many. */}
           {focus && fans[focus].map(({ source, x, y }) => {
             const node = nodes.find((n) => n.name === focus);
             return (
@@ -220,7 +222,7 @@ export function EcosystemDiagram() {
               <line x1="1" y1="5" x2="21" y2="5" className="cp-eco__keydash" />
               <circle cx="26" cy="5" r="2.8" className="cp-eco__keydot" />
             </svg>
-            The records it is built from
+            The sources it is built from
           </span>
           <span className="cp-eco__keyitem">
             <svg viewBox="0 0 12 10" aria-hidden="true">

@@ -1536,6 +1536,83 @@ test.describe("the stylesheet", () => {
 });
 
 test.describe("Methods", () => {
+  // THE RING IS NEVER UNDER THE LAUNCHER, AND ITS NAMES STAY READABLE.
+  //
+  // The Ask Cedar launcher is fixed to the lower right of the viewport, and
+  // the ring is the first figure on the page: at 1280 to 1440 it sat
+  // directly over the Advocacy and NAGPRA nodes on first paint. The launcher
+  // is the shared Cedar surface and does not move; the ring takes the left
+  // column instead, and this measures both against each other rather than
+  // trusting the CSS. The launcher is measured once it is fixed: the widget
+  // mounts in flow and takes its corner when the script runs, and a box read
+  // before that is a box at the foot of the page, which clears everything.
+  //
+  // The names: the canvas is 752 units wide with 22px labels, so a narrow
+  // column renders them small. At 900, where the ring first sits beside the
+  // text, and at 1100, where the index column takes 14rem from it, the
+  // labels rendered around nine pixels. The ring's column has a floor now,
+  // and this reads the rendered size at every width the layout changes at.
+  for (const width of [900, 1100, 1280, 1440, 1920]) {
+    test(`at ${width} wide the ecosystem ring clears the Ask Cedar launcher and its labels read above 11px`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "desktop", "a desktop layout question");
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/methods");
+      await page.locator(".cp-eco__svg").waitFor();
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForFunction(
+        () => getComputedStyle(document.querySelector(".cedar-widget")).position === "fixed",
+      );
+      const boxes = await page.evaluate(() => {
+        const box = (el) => {
+          const b = el.getBoundingClientRect();
+          return { left: b.left, top: b.top, right: b.right, bottom: b.bottom };
+        };
+        const svg = document.querySelector(".cp-eco__svg");
+        const [, , viewWidth] = svg.getAttribute("viewBox").split(" ").map(Number);
+        const labelPx = parseFloat(getComputedStyle(document.querySelector(".cp-eco__label")).fontSize);
+        return {
+          launcher: box(document.querySelector(".cedar-widget__launcher")),
+          svg: box(svg),
+          lead: box(document.querySelector(".cp-meth__lead")),
+          text: box(document.querySelector(".cp-meth__leadtext")),
+          // The size a label renders at: its canvas size scaled by the
+          // canvas's rendered width over its viewBox width.
+          renderedLabelPx: (labelPx * svg.getBoundingClientRect().width) / viewWidth,
+          nodes: [...document.querySelectorAll(".cp-eco__hit")].map((node) => ({
+            name: node.textContent.trim(),
+            ...box(node),
+          })),
+        };
+      });
+      expect(boxes.nodes.length).toBe(12);
+      const GAP = 8;
+      for (const node of boxes.nodes) {
+        const apart =
+          node.right + GAP <= boxes.launcher.left ||
+          node.left >= boxes.launcher.right + GAP ||
+          node.bottom + GAP <= boxes.launcher.top ||
+          node.top >= boxes.launcher.bottom + GAP;
+        expect(apart, `${node.name} at ${width}: ${JSON.stringify(node)} meets the launcher ${JSON.stringify(boxes.launcher)}`).toBe(true);
+      }
+      // Beside the text, and to its left, at every one of these widths.
+      expect(boxes.svg.right, `ring left of the text at ${width}`).toBeLessThanOrEqual(boxes.text.left);
+      expect(boxes.renderedLabelPx, `label size at ${width}`).toBeGreaterThanOrEqual(11);
+    });
+  }
+
+  test("under 900 wide the ring stacks above the text at the lead's full width", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a desktop layout question");
+    await page.setViewportSize({ width: 800, height: 900 });
+    await page.goto("/methods");
+    await page.locator(".cp-eco__svg").waitFor();
+    const boxes = await page.evaluate(() => {
+      const box = (el) => el.getBoundingClientRect();
+      return { svg: box(document.querySelector(".cp-eco__svg")), lead: box(document.querySelector(".cp-meth__lead")), text: box(document.querySelector(".cp-meth__leadtext")) };
+    });
+    expect(Math.abs(boxes.svg.width - boxes.lead.width)).toBeLessThan(2);
+    expect(boxes.svg.bottom).toBeLessThanOrEqual(boxes.text.top);
+  });
+
   test("the twelve marks index the collections, and one profile opens beneath", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/methods");
