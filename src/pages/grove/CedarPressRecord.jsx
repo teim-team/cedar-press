@@ -389,9 +389,6 @@ export default function CedarPressRecord() {
                       ? "Reading the published sample."
                       : "Each published table ships up to ten sample rows, and this viewer reads those. A record that is in the release may not be in the sample."}
             </p>
-            <p>
-              <Link className="cp-m__more" to={back}>Back to results <span aria-hidden="true">&#8594;</span></Link>
-            </p>
           </section>
         ) : (
           <>

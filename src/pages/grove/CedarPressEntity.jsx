@@ -68,6 +68,9 @@ export default function CedarPressEntity() {
   const { rows, missing, loading: samplesLoading } = useSampleRows(tables, register);
 
   const entity = register.byUid.get(uid) ?? null;
+  // The register has loaded and this id is not in it. The page then has no
+  // entity to describe records for, and no table to open narrowed to it.
+  const unknown = !entity && register.entities.length > 0;
   const mine = useMemo(
     () => rows.filter((item) => item.entity.entities.some((e) => e.uid === uid)),
     [rows, uid],
@@ -195,9 +198,11 @@ export default function CedarPressEntity() {
               <span aria-hidden="true">&#8592;</span> All collections
             </Link>
           )}
-          <Link className="cp-rec__walkbtn" to={`${PRESS_DATA_PATH}?e=${encodeURIComponent(uid)}`}>
-            View in table <span aria-hidden="true">&#8594;</span>
-          </Link>
+          {unknown ? null : (
+            <Link className="cp-rec__walkbtn" to={`${PRESS_DATA_PATH}?e=${encodeURIComponent(uid)}`}>
+              View in table <span aria-hidden="true">&#8594;</span>
+            </Link>
+          )}
         </div>
 
         {/* IDENTITY, THEN RECORDS.
@@ -258,7 +263,7 @@ export default function CedarPressEntity() {
               to an entity's related records", is the caveat winning. On a
               phone it is a disclosure; the figures above it carry the word
               "preview" either way. */}
-          {narrow ? (
+          {unknown ? null : narrow ? (
             <details className="cp-rec__fine cp-ent__notice cp-ent__notice--fold">
               <summary>What these records are</summary>
               <p>{notice}</p>

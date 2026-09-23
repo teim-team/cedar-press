@@ -1835,3 +1835,36 @@ test.describe("layout", () => {
     });
   }
 });
+
+test.describe("dead ends", () => {
+  // Each of these was a control that led nowhere, or a sentence that
+  // described something the page did not have (walkthrough, 2026-09-23).
+  test("the Priorities page does not link to itself from its own card", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/priorities");
+    const card = page.getByTestId("influence");
+    await expect(card).toBeVisible();
+    await expect(card.getByRole("link", { name: /Shape the research/ })).toHaveCount(0);
+  });
+
+  test("Settings still links from the card to the Priorities page", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/settings");
+    await expect(page.getByTestId("influence").getByRole("link", { name: /Shape the research/ })).toHaveCount(1);
+  });
+
+  test("a record that is not in the preview offers one way back, not two", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/record");
+    await expect(page.getByTestId("record-empty")).toContainText("not in this preview");
+    await expect(page.getByRole("link", { name: /Back to results/ })).toHaveCount(1);
+  });
+
+  test("an unknown Cedar id neither describes its records nor offers its table", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/entity/not-a-cedar-id");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("No entity with that Cedar id");
+    await expect(page.getByRole("link", { name: /View in table/ })).toHaveCount(0);
+    await expect(page.getByText("Records Cedar Press has resolved to this entity")).toHaveCount(0);
+  });
+});

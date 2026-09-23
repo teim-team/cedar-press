@@ -622,7 +622,7 @@ function InactiveCollectionToolbar({ entry, onAbout }) {
       <input
         type="search"
         className="cp-ex__q"
-        placeholder="Search these records"
+        placeholder="Search records"
         aria-label="Search these records"
         disabled
       />
@@ -1120,7 +1120,7 @@ export default function PressExplore({ user, pick = null, onActive = () => {}, o
           <input
             type="search"
             className="cp-ex__q"
-            placeholder={atlas ? "Find a collection" : "Search these records"}
+            placeholder={atlas ? "Find a collection" : "Search records"}
             aria-label={atlas ? "Find a collection" : "Search these records"}
             value={atlas ? catalogQuery : cut.q}
             onChange={(e) => (atlas ? setCatalogQuery(e.target.value) : narrowTo({ q: e.target.value }))}
