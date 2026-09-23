@@ -111,7 +111,7 @@ export function rememberReturn({ search, y } = {}) {
 export function takeReturn(search) {
   const store = sessionStore();
   if (!store) return null;
-  let raw = null;
+  let raw;
   try {
     raw = store.getItem(RETURN_KEY);
     store.removeItem(RETURN_KEY);
