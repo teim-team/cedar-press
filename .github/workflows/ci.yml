@@ -74,7 +74,7 @@ jobs:
       # auditing them, rather than auditing this job's environment -- which
       # also holds httpx2, coverage and pip-audit itself, none of which the
       # server depends on.
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
       - run: ruff check server
       # Through the Makefile, so these are character-for-character the
       # commands a contributor runs. `make test-python` carries warnings-as-
