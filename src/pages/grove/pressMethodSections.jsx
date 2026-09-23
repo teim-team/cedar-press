@@ -16,6 +16,7 @@ import {
   FEEDS,
   LAYOUT,
   PROPER_NOUN,
+  labelLines,
   say,
 } from "../../features/grove/pressEcosystem.js";
 import { CONSTRUCTION_STEPS } from "../../features/grove/pressMethod.js";
@@ -65,8 +66,10 @@ export function ProcessRail() {
  * Laid out on a real ring with drawn connectors rather than a grid with
  * arrows implied, because the argument is that everything meets in the
  * middle. The geometry itself lives in pressEcosystem.js, solved and
- * tested: the canvas hugs the figure, every source has its own ray and no
- * ray or name crosses a label.
+ * tested: the canvas hugs the ring and its labels, every record a
+ * collection is built from has its own point inside the ring, and the ring
+ * takes at least half the canvas, which is what keeps the names readable
+ * when the figure is drawn at a third of the page.
  */
 export function EcosystemDiagram() {
   // Select a collection and the whole answer appears at once: the
@@ -87,9 +90,11 @@ export function EcosystemDiagram() {
   const litSet = new Set(focus ? [focus, ...(feeds?.feeds ?? [])] : []);
 
   const inSentence = (t) => (PROPER_NOUN.test(t) ? t : t[0].toLowerCase() + t.slice(1));
+  const describe = (name) =>
+    `${name} is built from ${say((SOURCES[name] ?? []).map(inSentence))}, resolved in the entity resolution layer in the middle and reinforced by ${say(FEEDS[name]?.feeds ?? [])}.`;
   const sentence = focus
-    ? `${focus} is built from ${say((SOURCES[focus] ?? []).map(inSentence))}, resolved in the entity resolution layer in the middle and reinforced by ${say(feeds?.feeds ?? [])}.`
-    : "Select a collection to see the records it is built from and what reinforces it.";
+    ? describe(focus)
+    : "Select a collection to see the sources it is built from and what reinforces it.";
 
   return (
     <div className={`cp-eco${focus ? " is-lit" : ""}`}>
@@ -138,22 +143,21 @@ export function EcosystemDiagram() {
             </text>
           </g>
 
-          {/* The fan of real sources, for whichever collection is named:
-              hover fans it, a click keeps it fanned. */}
+          {/* The sources the named collection is built from, one point each
+              (USAspending, FPDS, a nation's own register), between the
+              collection and the entity layer their records resolve in: hover
+              fans them, a click keeps them fanned. The names are in the
+              sentence under the figure and on each point's title. A point is
+              a source, not a record: a record is one award, filing, notice
+              or transaction, and a source holds many. */}
           {focus && fans[focus].map(({ source, x, y }) => {
             const node = nodes.find((n) => n.name === focus);
-            const nearTop = Math.abs(x - cx) < 60;
             return (
               <g key={source} className="cp-eco__src">
                 <line x1={node.dx} y1={node.dy} x2={x} y2={y} />
-                <circle cx={x} cy={y} r="3" />
-                <text
-                  x={x + (nearTop ? 0 : x > cx ? 8 : -8)}
-                  y={y + (nearTop ? (y < cy ? -10 : 16) : 4)}
-                  textAnchor={nearTop ? "middle" : x > cx ? "start" : "end"}
-                >
-                  {source}
-                </text>
+                <circle cx={x} cy={y} r="3.4">
+                  <title>{source}</title>
+                </circle>
               </g>
             );
           })}
@@ -162,12 +166,15 @@ export function EcosystemDiagram() {
             const on = litSet.has(node.name);
             const state = `${on ? " is-on" : ""}${focus && !on ? " is-dim" : ""}${pinned === node.name ? " is-pinned" : ""}`;
             const nearPole = Math.abs(node.x - cx) < 30;
+            const lines = labelLines(node.name);
+            const labelX = node.x + (nearPole ? 0 : node.x > cx ? 12 : -12);
             return (
               <g
                 key={node.name}
                 className={`cp-eco__hit${state}`}
                 tabIndex={0}
                 role="button"
+                aria-label={describe(node.name)}
                 aria-pressed={pinned === node.name}
                 onMouseEnter={() => setLit(node.name)}
                 onMouseLeave={() => setLit(null)}
@@ -182,15 +189,23 @@ export function EcosystemDiagram() {
                   if (event.key === "Escape") setPinned(null);
                 }}
               >
-                <circle cx={node.dx} cy={node.dy} r={on ? 5 : 3.4} className="cp-eco__node" />
+                <circle cx={node.dx} cy={node.dy} r={on ? 6 : 4.2} className="cp-eco__node" />
+                {/* A long name is two lines, centred on the point's height,
+                    so the ring can stay small enough to read at a third of
+                    the page. `labelLines` decides the break; the geometry
+                    reserved the same box. */}
                 <text
-                  x={node.x + (nearPole ? 0 : node.x > cx ? 12 : -12)}
-                  y={node.y}
+                  x={labelX}
+                  y={node.y - ((lines.length - 1) * 25) / 2}
                   className={`cp-eco__label${state}`}
                   textAnchor={nearPole ? "middle" : node.x > cx ? "start" : "end"}
                   dominantBaseline="middle"
                 >
-                  {node.name}
+                  {lines.map((line, i) => (
+                    <tspan key={line} x={labelX} dy={i === 0 ? 0 : 25}>
+                      {line}
+                    </tspan>
+                  ))}
                 </text>
               </g>
             );
@@ -207,7 +222,7 @@ export function EcosystemDiagram() {
               <line x1="1" y1="5" x2="21" y2="5" className="cp-eco__keydash" />
               <circle cx="26" cy="5" r="2.8" className="cp-eco__keydot" />
             </svg>
-            The records it is built from
+            The sources it is built from
           </span>
           <span className="cp-eco__keyitem">
             <svg viewBox="0 0 12 10" aria-hidden="true">
