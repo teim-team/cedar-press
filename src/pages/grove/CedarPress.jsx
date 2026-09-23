@@ -22,7 +22,7 @@ import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { useFadeIn } from "../../features/grove/useFadeIn";
-import { appUrl, contactHref } from "../../features/grove/appLink.js";
+import { GROVE_MARKETING_URL, contactHref } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
@@ -170,7 +170,7 @@ export default function CedarPress() {
               >
                 Send feedback <span aria-hidden="true">&#8594;</span>
               </a>
-              <a className="cp-close__act" href={appUrl("/app/grove")} target="_blank" rel="noreferrer">
+              <a className="cp-close__act" href={GROVE_MARKETING_URL} target="_blank" rel="noreferrer">
                 Explore Cedar Grove <span aria-hidden="true">&#8594;</span>
               </a>
             </div>

@@ -132,50 +132,76 @@ export const say = (items) =>
     : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 
 // ── Geometry ────────────────────────────────────────────────────────────
+//
+// SIZED FOR A THIRD OF THE PAGE. The ring used to be drawn near the full
+// content width, folded inside a disclosure nobody opened, with 15.5px
+// labels in a 1236px canvas. Shown at a third of the page, as the figure the
+// Methods page leads with, that canvas scaled its type to seven pixels. So
+// the ring is smaller, the type is larger in canvas units, and a long
+// collection name breaks onto two lines instead of pushing the canvas wide:
+// 752 units across with 22px labels, which at 440px on screen is 13px type
+// around a 220px ring.
+//
+// THE FAN POINTS INWARD. The sources used to fan out past the labels, each
+// with its name on a ray, and the solver hunted for angles at which a ray
+// cleared every label. With labels large enough to read at a third of the
+// page there are no such angles: twelve two-line names tile the outside of
+// the ring. So the records a collection is built from now sit inside the
+// ring, between the collection's own point and the entity layer in the
+// middle, which is also the direction the records travel. The names are in
+// the sentence under the figure and on each point's title; the drawing
+// shows how many, and where they go.
 
-const R = 300; // collection labels sit on this ring: twelve of them need the room
-const DOT_INSET = 26; // the dataset IS the dot, just inside its label
-const FAN = 100; // source points sit this far beyond the ring
-const CORE = 110; // Cedar + human review
-const PAD = 12; // breathing room between the extents and the viewBox edge
+const R = 190; // collection labels sit on this ring: twelve of them need the room
+const DOT_INSET = 22; // the dataset IS the dot, just inside its label
+const CORE = 76; // Cedar + human review
+const FAN_R = 118; // source points sit on this inner radius, inside the ring
+const FAN_STEP = 0.21; // radians between sibling sources
+const PAD = 10; // breathing room between the extents and the viewBox edge
 
-// Estimated text boxes, matched to the stylesheet: labels are 15.5px sans
-// bold (~9px a character), sources are 12px mono (~7.2px a character).
-const LABEL_CHAR = 9;
-const LABEL_H = 24;
-const SRC_CHAR = 7.2;
+// Estimated text boxes, matched to the stylesheet: labels are 22px sans
+// bold (~12.8px a character), 25px a line.
+const LABEL_CHAR = 12.8;
+const LINE_H = 25;
+
+/**
+ * A collection's name as the ring draws it: one line up to twelve characters,
+ * two lines beyond that, broken at the space nearest the middle. A single
+ * long word ("Subcontracting") stays on one line, because there is nowhere
+ * honest to break it.
+ */
+export const labelLines = (name) => {
+  if (name.length <= 12 || !name.includes(" ")) return [name];
+  const words = name.split(" ");
+  let best = null;
+  for (let i = 1; i < words.length; i += 1) {
+    const head = words.slice(0, i).join(" ");
+    const tail = words.slice(i).join(" ");
+    const width = Math.max(head.length, tail.length);
+    if (!best || width < best.width) best = { width, lines: [head, tail] };
+  }
+  return best.lines;
+};
 
 export const labelBoxFor = (node) => {
-  const w = node.name.length * LABEL_CHAR + 10;
+  const lines = labelLines(node.name);
+  const w = Math.max(...lines.map((line) => line.length)) * LABEL_CHAR + 10;
+  const h = lines.length * LINE_H;
   const nearPole = Math.abs(node.x) < 30;
   const l = nearPole ? node.x - w / 2 : node.x > 0 ? node.x + 12 : node.x - 12 - w;
-  return { l, r: l + w, t: node.y - LABEL_H / 2, b: node.y + LABEL_H / 2 };
-};
-
-export const srcBoxFor = (x, y, text) => {
-  const w = text.length * SRC_CHAR;
-  const nearTop = Math.abs(x) < 60;
-  const tx = x + (nearTop ? 0 : x > 0 ? 8 : -8);
-  const ty = y + (nearTop ? (y < 0 ? -10 : 16) : 4);
-  const l = nearTop ? tx - w / 2 : x > 0 ? tx : tx - w;
-  return { l, r: l + w, t: ty - 11, b: ty + 3 };
-};
-
-export const clears = (x1, y1, x2, y2, box) => {
-  for (let t = 0.04; t < 1; t += 0.02) {
-    const x = x1 + (x2 - x1) * t;
-    const y = y1 + (y2 - y1) * t;
-    if (x > box.l && x < box.r && y > box.t && y < box.b) return false;
-  }
-  return true;
+  return { l, r: l + w, t: node.y - h / 2, b: node.y + h / 2 };
 };
 
 export const overlaps = (a, b) => a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
 
-// Candidate ray angles, nearest the spoke first, alternating sides.
-const CANDIDATES = [];
-for (let k = 0.3; k <= 1.35; k += 0.05) CANDIDATES.push(k, -k);
-CANDIDATES.sort((a, b) => Math.abs(a) - Math.abs(b));
+/** The shortest distance from the centre to the segment (x1,y1)-(x2,y2). */
+export const nearestToCentre = (x1, y1, x2, y2) => {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = dx * dx + dy * dy;
+  const t = len === 0 ? 0 : Math.max(0, Math.min(1, -(x1 * dx + y1 * dy) / len));
+  return Math.hypot(x1 + t * dx, y1 + t * dy);
+};
 
 const solve = () => {
   const nodes = RING.map((name, i) => {
@@ -191,56 +217,30 @@ const solve = () => {
   });
   const labelBoxes = nodes.map(labelBoxFor);
 
-  // Each source gets the ray nearest its collection's spoke whose whole
-  // segment clears EVERY label and whose name lands clear of every label
-  // and of its siblings. Longest names place first, so the tight slots go
-  // to the hard texts. Angle tables kept failing one orientation or
-  // another (a horizontal label on a diagonal ray is wide exactly where
-  // the ray goes), so the geometry is solved rather than guessed.
+  // Each collection's sources, spread evenly about its spoke on the inner
+  // radius, in the order the record declares them.
   const fans = {};
   for (const node of nodes) {
-    const order = [...(SOURCES[node.name] ?? [])].sort((a, b) => b.length - a.length);
-    const placed = [];
-    for (const source of order) {
-      for (const offset of CANDIDATES) {
-        if (placed.some((p) => Math.abs(p.offset - offset) < 0.28)) continue;
-        const angle = node.angle + offset;
-        const x = Math.cos(angle) * (R + FAN);
-        const y = Math.sin(angle) * (R + FAN);
-        if (!labelBoxes.every((b) => clears(node.dx, node.dy, x, y, b))) continue;
-        const sb = srcBoxFor(x, y, source);
-        if (labelBoxes.some((b) => overlaps(sb, b))) continue;
-        if (placed.some((p) => overlaps(sb, p.sb))) continue;
-        placed.push({ source, offset, x, y, sb });
-        break;
-      }
-    }
-    placed.sort((a, b) => a.offset - b.offset);
-    fans[node.name] = placed.map(({ source, x, y }) => ({ source, x, y }));
+    const sources = SOURCES[node.name] ?? [];
+    fans[node.name] = sources.map((source, i) => {
+      const angle = node.angle + (i - (sources.length - 1) / 2) * FAN_STEP;
+      return { source, x: Math.cos(angle) * FAN_R, y: Math.sin(angle) * FAN_R };
+    });
   }
 
-  // The canvas hugs the figure: measure everything that can ever render,
-  // pad, and translate so the extents become the viewBox.
+  // The canvas hugs the resting figure: the ring and every label, padded,
+  // translated so the extents become the viewBox. Symmetric about the ring's
+  // centre, sized by the wider side, so the figure sits centred on the page.
   let minX = 0;
   let maxX = 0;
   let minY = 0;
   let maxY = 0;
-  const grow = (b) => {
+  for (const b of labelBoxes) {
     minX = Math.min(minX, b.l);
     maxX = Math.max(maxX, b.r);
     minY = Math.min(minY, b.t);
     maxY = Math.max(maxY, b.b);
-  };
-  labelBoxes.forEach(grow);
-  for (const placed of Object.values(fans)) {
-    for (const p of placed) {
-      grow(srcBoxFor(p.x, p.y, p.source));
-      grow({ l: p.x - 3, r: p.x + 3, t: p.y - 3, b: p.y + 3 });
-    }
   }
-  // Symmetric about the ring's centre, sized by the wider side: the figure
-  // must sit centred on the page at rest, not only while a long source name
-  // happens to be fanned out.
   const cx = Math.round(Math.max(-minX, maxX) + PAD);
   const cy = Math.round(Math.max(-minY, maxY) + PAD);
   const shift = (p) => ({ ...p, x: p.x + cx, y: p.y + cy });
@@ -252,6 +252,7 @@ const solve = () => {
     r: R,
     dotR: R - DOT_INSET,
     coreR: CORE,
+    fanR: FAN_R,
     nodes: nodes.map((n) => ({ ...shift(n), dx: n.dx + cx, dy: n.dy + cy })),
     fans: Object.fromEntries(
       Object.entries(fans).map(([name, placed]) => [name, placed.map(shift)]),
