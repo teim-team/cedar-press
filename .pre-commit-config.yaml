@@ -44,17 +44,7 @@ repos:
 
       - id: no-secrets-committed
         name: no .env or credentials file staged
-        # .env.example is the tracked template. A real .env holds the
-        # DATABASE_URL and the subscriber session secret, and Git history is
-        # the one place a mistake cannot simply be deleted later.
-        entry: >-
-          bash -c 'bad=0;
-          for f in "$@"; do
-            case "$f" in
-              .env|.env.*|*/.env|*/.env.*)
-                [ "${f##*/}" = ".env.example" ] || { echo "$f holds secrets; it belongs outside Git"; bad=1; };;
-              *.pem|*.key|*credentials*.json)
-                echo "$f looks like a credential; it belongs outside Git"; bad=1;;
-            esac;
-          done; exit $bad' --
-        language: system
+        # The patterns and the reasons live in the script, which
+        # secretsHook.test.js (in the node suite) runs against staged names.
+        entry: scripts/no-secrets-staged.sh
+        language: script

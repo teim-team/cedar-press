@@ -7,7 +7,7 @@
     "dev": "vite",
     "lint": "eslint .",
     "test": "npm run test:coverage",
-    "test:coverage": "node --experimental-test-coverage --test-coverage-lines=95 --test-coverage-branches=87 --test-coverage-functions=93 --test \"src/features/grove/*.test.js\"",
+    "test:coverage": "node scripts/coverage-gate.mjs",
     "build": "vite build && cp dist-site/index.html dist-site/404.html",
     "preview": "vite preview",
     "test:smoke": "playwright test",

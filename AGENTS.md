@@ -101,32 +101,56 @@ a contract, not a label anyone reads; leave it alone.
 
 ## 3. Setup and checks
 
+Node 22 and Python 3.12, the versions CI uses. Two tools CI gets from
+elsewhere have to be installed by hand: `uv`, which `make audit-python` uses
+to resolve the server's dependencies (CI takes it from
+`astral-sh/setup-uv`), and `pre-commit`, which only `make hooks` needs:
+
+<!-- gate:setup -->
 ```bash
-npm install
-pip install -e 'server[dev]' httpx2
+pip install uv pre-commit
 ```
 
-The checks CI runs, in order (the Makefile is the full list, and
-`deployGates.test.js` holds `ci.yml` and `deploy.yml` to the same one):
+The checks CI runs, in order. This block is every `run:` step of `ci.yml`,
+step for step, installs included, so it can be pasted into a fresh checkout
+and run as it stands; `gateCopies.test.js` fails if it and the workflow
+differ, and `deployGates.test.js` holds `deploy.yml` to `ci.yml`:
 
+<!-- gate:ci-steps -->
 ```bash
+npm ci
 npm run lint
-make check-generated      # every tracked generated file matches its generator
+make check-generated
 npm run test
+npx playwright install --with-deps chromium
+npm run test:smoke
+pip install -e server[dev] httpx2 coverage pip-audit
 ruff check server
-cd server && python -m unittest discover -s tests -t .
+make test-python
+make audit-python
+make audit-node
 ```
 
-**Verified 2026-09-22:** `npm run lint` exits `0` · `make check-generated`
-reports all seven files current · `npm run test` reports
-`271 pass, 0 fail` · `ruff check server` reports `All checks passed!` · the
-server suite reports `Ran 265 tests … OK (skipped=30)`. `npm run build` also
-completes (`✓ built in 3.18s`); its chunk-size warning is pre-existing.
+`make check` runs all of it bar the Playwright pair (lint, the generated
+files, both suites with their coverage floors, both audits); the audits need
+the network. `npm run test` is the node suite under
+`scripts/coverage-gate.mjs`, whose floor counts every production module,
+including the ones no test imports. `make test-python` runs the API suite
+with warnings as errors and the `.coveragerc` floor, from the repository
+root: its `-s server/tests -t server` is why a bare
+`python -m unittest discover` from the root fails with `Start directory is not
+importable` (`tests/` at the root is the Playwright smoke directory, not a
+Python package).
 
-Note the last command's `working-directory` is **`server`**, not the repository
-root. Run from the root it fails with `Start directory is not importable`,
-because `tests/` at the root is the Playwright smoke directory, not a Python
-package.
+**Verified 2026-09-23**, in the order above: `npm run lint` exits `0` ·
+`make check-generated` reports all seven files current · `npm run test`
+reports `305 pass, 0 fail` and a coverage floor met at 83.89 lines /
+82.76 branches / 89.16 functions · `ruff check server` reports
+`All checks passed!` · `make test-python` reports `Ran 265 tests … OK
+(skipped=30)` and its floor met · `make audit-python` and `make audit-node`
+report no known vulnerabilities. Not run here: the Playwright pair (see
+below). `npm run build` also completes; its chunk-size warning is
+pre-existing.
 
 **`py -3` is the Windows Python launcher.** The workspace's ~1,000 documented
 commands are written with it, because that is where they were written. On Linux
@@ -169,14 +193,26 @@ from prose that goes stale, and gives you `ondisk <term>`.
   `claude/<slug>-<id>` or `codex/<slug>`; human work uses `feat/` or `fix/`.
 - Never reset or force-push a shared branch. If the branch already exists on the
   remote, check it out and build on it.
-- Every commit ends with exactly this trailer, and no model identifier appears
-  anywhere else in the message, in a PR title or body, or in a code comment:
+- **An attribution trailer is a claim, so it is only ever true.** It records
+  who produced a commit; it is not a house style every commit wears.
+  - A commit **made in a Claude Code session** ends with exactly the two
+    trailer lines that session gives you, and no other trailer of that kind:
 
-  ```
-  Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-  Claude-Session: https://claude.ai/code/session_<id>
-  ```
+    ```
+    Co-Authored-By: Claude <model name, as the session reports it> <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_<id>
+    ```
 
+    Copy both lines from the session rather than from here: the model name
+    and the session id are the session's facts, which is why this file names
+    neither.
+  - A commit **not** made in a Claude session carries neither line. Human
+    commits need no AI trailer at all; a Codex branch uses whatever
+    attribution Codex itself records, and never a Claude line. Nobody names a
+    co-author who did not take part or writes a session URL that does not
+    exist.
+  - Whoever made the commit, no model identifier appears in a PR title or
+    body or in a code comment.
 - Push with `git push -u origin <branch>`. Do not open or merge pull requests
   unless you were asked to.
 

@@ -10,11 +10,10 @@ lint:
 
 test: test-node test-python
 
-# The frontend suite, with a coverage floor. Measured 95.36 lines /
-# 87.77 branches / 93.83 functions on 2026-09-22 over 271 passing tests; the
-# floor sits at or just below each. It is a ratchet against regression, not a
-# target: raise it when real coverage rises, never lower it to make a red run
-# green.
+# The frontend suite, with a coverage floor over every production module --
+# including the ones no test imports, which node's own report leaves out
+# rather than counting as 0% (Codex, PR #105). scripts/coverage-gate.mjs
+# holds the floor and the measurement behind it; `npm run test` runs it.
 test-node:
 	npm run test:coverage
 
@@ -47,12 +46,19 @@ audit-node:
 # 2026-09-22, so it too is enforced from a clean state.
 #
 # Audits a resolved dependency set rather than the installed environment:
-# resolving is what a fresh `pip install -e server[dev]` actually does, and
 # auditing the environment trips over this project's own unpublished,
 # editable package. --strict fails on a dependency that could not be audited,
 # so a silent skip is not a pass.
+#
+# --all-extras, not `--extra dev`: that flag resolves the named group alone,
+# so the `postgres` group -- psycopg and psycopg_pool, the stack everything a
+# subscriber pays for runs on -- was never audited (Codex, PR #105). Checked
+# 2026-09-23 by pinning a vulnerable urllib3 into `postgres`: `--extra dev`
+# reported no known vulnerabilities, `--all-extras` failed on five. A new
+# extra is covered the day it is added, and gateCopies.test.js fails if this
+# recipe goes back to naming groups one at a time.
 audit-python:
-	uv pip compile server/pyproject.toml --extra dev -o .audit-requirements.txt --quiet
+	uv pip compile server/pyproject.toml --all-extras -o .audit-requirements.txt --quiet
 	pip-audit --strict --disable-pip --no-deps -r .audit-requirements.txt
 	@rm -f .audit-requirements.txt
 
@@ -96,4 +102,10 @@ check-generated:
 	node scripts/record-release.mjs --check
 	node scripts/seo-head.mjs --check
 
-check: lint check-generated test
+# Every gate CI runs, bar the Playwright smoke suite (it needs a browser
+# installed once: `npx playwright install --with-deps chromium`, then
+# `npm run test:smoke`). The audits are in it (Codex, PR #105): without them a
+# vulnerable dependency passed `make check` and failed only in CI. They need
+# the network. gateCopies.test.js fails if a `make` target a workflow runs is
+# not reachable from here.
+check: lint check-generated test audit
