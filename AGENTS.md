@@ -13,15 +13,18 @@ defect post-mortems, and hard-won findings, written as they happened. That journ
 the most valuable thing in the repo and it should keep growing. It is also, read
 linearly, roughly 90,000 tokens of context an agent spends before writing a line.
 
-**Read this file in three parts:**
+**Read this file in four parts:**
 
 0. **Sections 1-8 immediately below** — the operating block shared by every
    `teim-team` repository: what this repo owns, the stack, the exact commands to
    run checks, branch/commit/review conventions, the invariants, and the
-   cross-repo picture. ~200 lines, and unlike the rest of this file they are
-   edited in place to stay true.
-1. **The two sections after that** — the Prime Directive and
-   `CURRENT STATE (2026-08-30)`. These are current and load-bearing. ~130 lines.
+   cross-repo picture. Unlike the rest of this file they are edited in place
+   to stay true.
+1. **The sections after that, down to `CURRENT STATE (2026-08-06)`** — the
+   Prime Directive, `CURRENT STATE (2026-08-30)` and the 2026-09-21 decision
+   to move data extraction and harmonization to a separate repository (that
+   repository now exists as `Lumecon-data`; see the dated note under its
+   heading). These are current and load-bearing.
 2. **`docs/AGENT_FIELD_GUIDE.md`** — ~200 lines. The traps distilled: why a green
    check here is often measuring something else, why four of five duplicate
    allegations were phantom, why `ls code/<n>_*` cannot stop a script-number
@@ -32,7 +35,7 @@ linearly, roughly 90,000 tokens of context an agent spends before writing a line
 **And before you write anything:**
 
 ```
-py -3 code/1050_preflight.py
+python3 code/1050_preflight.py     # py -3 code/1050_preflight.py on Windows
 ```
 
 It claims a script number **atomically** (`O_CREAT|O_EXCL` — the OS refuses the
@@ -60,8 +63,10 @@ collided. Know which tree you are in before you start.
 **The subscriber-facing service.** Cedar Press at cedarpress.ai: a Vite + React
 static client with a FastAPI service alongside it, serving Overview, Articles,
 Data, What's new and Methods, plus `/tribal-data-request` and `/research-access`
-on their own URLs. Built by Lumecon, available exclusively through Tribal
-Business News, which owns payment, renewals and issuance.
+on their own URLs. Cedar Press is a Lumecon research publication, partnered
+with Tribal Business News: built by Lumecon and available exclusively through
+Tribal Business News, which handles subscriber plans (payment, renewals and
+issuance). There is no year gating: every subscriber gets full coverage.
 
 **The Cedar data workspace.** The collections themselves — the deal ledger, the
 entity universe and the outcomes panel — and the pipeline that builds them,
@@ -70,8 +75,12 @@ mostly about.
 
 **Does not own:**
 
-- Payment, renewals and access-code issuance. Those belong to Tribal Business
-  News.
+- Subscriber plans: payment, renewals and access-code issuance. Those belong
+  to Tribal Business News, whose involvement is with Cedar Press only.
+- The shared data foundation. That is
+  [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the separate
+  data repository decided on 2026-09-21. It exists as of 2026-09-23; the
+  pipeline in `code/` has not moved to it yet.
 - The economic model. That is `teim-engine`, whose reference data this workspace
   reads under ADR-044 `reference_dataset` treatment — pinned, checksummed,
   versioned, never `data_snapshot`.
@@ -148,8 +157,10 @@ reports `305 pass, 0 fail` and a coverage floor met at 83.89 lines /
 82.76 branches / 89.16 functions · `ruff check server` reports
 `All checks passed!` · `make test-python` reports `Ran 265 tests … OK
 (skipped=30)` and its floor met · `make audit-python` and `make audit-node`
-report no known vulnerabilities. Not run here: the Playwright pair (see
-below). `npm run build` also completes; its chunk-size warning is
+report no known vulnerabilities. The Playwright pair, re-run the same day
+(`npx playwright install --with-deps chromium`, then `npm run test:smoke`),
+reports `152 passed`, `10 skipped`. `npm run build`, `npm run build:site`
+and `npm run seo:check` also complete; the build's chunk-size warning is
 pre-existing.
 
 **`py -3` is the Windows Python launcher.** The workspace's ~1,000 documented
@@ -178,21 +189,23 @@ from prose that goes stale, and gives you `ondisk <term>`.
   so running it to test it would consume one. It compiles cleanly
   (`python -m py_compile`); the behaviour above is as documented, not as
   observed here.
-- `npm run test:smoke` — Playwright browsers are not installed here. It needs
-  `npx playwright install --with-deps chromium` once. Note it **builds as well
-  as tests**: `playwright.config.js` starts the server with `npm run build`
-  configured with a throwaway demo account, which is why the deployed build is
-  the last step of the CI job and not this one.
-- `npm run build:site`, `npm run seo:check`, and the pipeline scripts under
-  `code/` — the pipeline reaches live sources and rebuilds committed
-  deliverables.
+- `npm run test:smoke` needs Playwright's browsers, which
+  `npx playwright install --with-deps chromium` installs once (it ran on
+  2026-09-23; see above). Note it **builds as well as tests**:
+  `playwright.config.js` starts the server with `npm run build` configured
+  with a throwaway demo account, which is why the deployed build is the last
+  step of the CI job and not this one.
+- The pipeline scripts under `code/` — the pipeline reaches live sources and
+  rebuilds committed deliverables. They need Python 3.12 or later: under 3.11
+  some fail to compile.
 
 ## 4. Branch, commit and review conventions
 
 - **Branch from `main`** (this repo's default). Agent work goes on
   `claude/<slug>-<id>` or `codex/<slug>`; human work uses `feat/` or `fix/`.
-- Never reset or force-push a shared branch. If the branch already exists on the
-  remote, check it out and build on it.
+- Never reset, rebase or force-push a shared or pushed branch. If the branch
+  already exists on the remote, check it out and build on it; to take in the
+  base, merge it in.
 - **An attribution trailer is a claim, so it is only ever true.** It records
   who produced a commit; it is not a house style every commit wears.
   - A commit **made in a Claude Code session** ends with exactly the two
@@ -213,8 +226,8 @@ from prose that goes stale, and gives you `ondisk <term>`.
     exist.
   - Whoever made the commit, no model identifier appears in a PR title or
     body or in a code comment.
-- Push with `git push -u origin <branch>`. Do not open or merge pull requests
-  unless you were asked to.
+- Push with `git push -u origin <branch>`. Do not open a pull request unless
+  you were asked to. Agents never merge.
 
 > **The data workspace has its own, stricter rule, and it is unresolved against
 > the above.** `START_HERE.md` says "Do not commit", and the *Parallel agents*
@@ -231,13 +244,13 @@ from prose that goes stale, and gives you `ondisk <term>`.
 
 ## 5. Who reviews what
 
-| Area | Reviewer |
+| Area | Owner |
 |---|---|
-| teim-engine, and the Cedar service | Francesca Agnes (@mafranagn) |
+| teim-engine, the Cedar service, data methods | Francesca Agnes (@mafranagn) |
 | Frontend | Isabella Agnes (@magnes1) |
-| Identity, entitlement, billing | Brian Kim (@bkim28964) |
-| Product behaviour | Kaylyn Lee (@kaylynhl) |
-| **Cedar Grove and Cedar Press** | Havala Hanson (@Havala-Hanson) |
+| Identity, entitlement, billing, infra | Brian Kim (@bkim28964) |
+| Product behaviour and customer-facing copy | Kaylyn Lee (@kaylynhl) |
+| **Cedar Grove and Cedar Press, including their data** | Havala Hanson (@Havala-Hanson) |
 
 This repository is Havala's. The web client is still frontend, so a substantial
 change to it also goes to Isabella; a change to the entitlement or access path
@@ -270,6 +283,11 @@ list, all of which this project has paid for:
   (grep both forms: `&amp;|[A-Za-z0-9] & [A-Za-z0-9]`); no em dashes in prose a
   reader sees, though a `—` standing in for an empty table cell is typography and
   is fine; and **Cedar is the AI economic analyst**, never an "AI assistant".
+- **No year gating.** Every subscriber gets full coverage; no plan changes how
+  far back a collection goes. Subscriber plans are handled on the Tribal
+  Business News side. The year cap that once separated the tiers was retired
+  on the owner's ruling of 2026-09-02 (see the `ONE AXIS` note in
+  `pressCatalog.js`).
 - **A collection name is a data contract.** It is embedded verbatim in the
   citation written into every downloaded CSV, so renaming one changes how files
   subscribers already hold cite themselves. The lobbying collection's rename to
@@ -299,14 +317,15 @@ editing when several agents run at once.
 
 ## 8. Cross-repo links and status
 
-*Section current as of 2026-09-22.*
+*Section current as of 2026-09-23.*
 
 | Repo | What it is | Relationship to this one |
 |---|---|---|
 | [`teim-app`](https://github.com/teim-team/teim-app) | The authenticated platform — Cedar Impact, Cedar Commons and Cedar Grove | Cedar Grove carries these collections into the full analysis environment |
-| [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact | This workspace reads its reference data as `reference_dataset` per ADR-044 |
+| [`teim-engine`](https://github.com/teim-team/teim-engine) | The model engine behind Cedar Impact (internal) | This workspace reads its reference data as `reference_dataset` per ADR-044 |
 | [`cedar`](https://github.com/teim-team/cedar) | Cedar, the AI economic analyst, as a service | No runtime dependency in either direction |
 | [`lumecon-website`](https://github.com/teim-team/lumecon-website) | The public site, and the **North Star** for product vocabulary | Product names and their one-line definitions follow its `AGENTS.md` |
+| [`Lumecon-data`](https://github.com/teim-team/Lumecon-data) | The shared Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact | The separate data repository decided on 2026-09-21; data extraction and harmonization are to move there. The pipeline in `code/` is still here |
 
 **Naming**, per the North Star: the impact product is **Cedar Impact**; "TEIM"
 survives as a repository, database and resource name only; "tribal economic
@@ -520,6 +539,12 @@ fall — 62 allows a decline only on that exact arithmetic, deliberately.
 ---
 
 ## DATA EXTRACTION AND HARMONIZATION MOVE TO A SEPARATE REPO (decided 2026-09-21, repo not yet created)
+
+> **Note, 2026-09-23:** the repository now exists:
+> <https://github.com/teim-team/Lumecon-data>, the shared Python data
+> foundation behind Cedar Press, Cedar Grove, Cedar and Cedar Impact. The
+> entry below is kept as written; where it says the repo "has no name and no
+> location" or to write "the data repo (not yet created)", read `Lumecon-data`.
 
 Team meeting decision, relayed by Elijah. Today `teim-engine` both downloads
 public data and runs the deterministic model. It is to become the model only,

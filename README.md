@@ -1,7 +1,8 @@
 # Cedar Press
 
-**Trusted intelligence for Indian Country.** Cedar Press is a subscriber
-intelligence service: original economic collections, data-driven research and
+**Trusted intelligence for Indian Country.** Cedar Press is a Lumecon research
+publication, partnered with Tribal Business News: original economic
+collections, data-driven research and
 transparent method, covering the money, policy, transactions, institutions and
 public actions that shape Indian Country's economy.
 
@@ -30,12 +31,15 @@ release it came from.
 
 ## Access
 
-Access follows the subscription. An eligible Tribal Business News membership
-issues an access code, the code establishes the entitlement, and the account
-follows: Cedar Press arrives with a membership, Cedar Press+ adds the deeper
-shelf, and [Cedar Grove](https://lumecon.ai/cedar-grove) carries the same collections into
-the full analysis environment. Tribal Business News owns payment, renewals and
-issuance.
+Subscriber plans are handled on the Tribal Business News side. An eligible
+membership issues an access code, and the code establishes the entitlement and
+the account; Tribal Business News owns payment, renewals and issuance. Cedar
+Press has no year gating: every subscriber gets full coverage, and no plan
+changes how far back a collection goes.
+
+Separately, [Cedar Grove](https://lumecon.ai/cedar-grove), which Lumecon runs
+in `teim-app`, carries the same collections into the full analysis
+environment.
 
 ## Working on it
 
@@ -51,6 +55,13 @@ npm run build      # production build
 npm run build:site # the build, then the three public pages prerendered to HTML
 npm run seo:check  # the structured data and sitemap are current with the catalog
 ```
+
+Checked 2026-09-23: `npm run test` (305 pass, 0 fail, coverage floor met),
+`npm run test:smoke` (152 passed, 10 skipped, after
+`npx playwright install --with-deps chromium`), `npm run build`,
+`npm run build:site` and `npm run seo:check` all succeed, and `npm run dev`
+starts on port 5173. The full list of checks CI runs, with how to run the API
+suite, is [`AGENTS.md`](AGENTS.md) §3.
 
 The API is a FastAPI service in [`server/`](server/README.md); it serves every
 route the client calls, and pointing `VITE_API_URL` at it is the whole switch
@@ -69,14 +80,15 @@ a visitor or crawler can reach. The sibling repositories are
 [`teim-app`](https://github.com/teim-team/teim-app) (the authenticated
 platform: Cedar Impact, Cedar Commons and Cedar Grove),
 [`teim-engine`](https://github.com/teim-team/teim-engine) (the model engine
-behind Cedar Impact), [`cedar`](https://github.com/teim-team/cedar) (Cedar,
-the AI economic analyst, as a service) and
+behind Cedar Impact, internal), [`cedar`](https://github.com/teim-team/cedar)
+(Cedar, Lumecon's AI economic analyst, as a service),
 [`lumecon-website`](https://github.com/teim-team/lumecon-website) (the
-public site and the reference for product vocabulary). A further sibling is
-planned and not yet created: a data repository for extraction and
-harmonization that will feed `teim-engine`, Cedar Press and Cedar Grove,
-leaving `teim-engine` as the deterministic model alone (team decision,
-2026-09-21). Product names and
+public site and the reference for product vocabulary) and
+[`Lumecon-data`](https://github.com/teim-team/Lumecon-data) (the shared
+Python data foundation behind Cedar Press, Cedar Grove, Cedar and Cedar
+Impact). `Lumecon-data` is the separate data repository the team decided on
+2026-09-21 for extraction and harmonization; it exists as of 2026-09-23, and
+the pipeline in `code/` is still here. Product names and
 their one-line definitions follow the website's `AGENTS.md`, which is the
 North Star: where this repository and the website disagree about what
 something is called, the website wins. The vocabulary rule that matters most
@@ -127,13 +139,17 @@ It has its own entry points and its own conventions:
 | **What the site needs from the workspace** | [`docs/TERMINAL_HANDOFF.md`](docs/TERMINAL_HANDOFF.md) — read this after every pull. One table of open items, and the tests that fail when the workspace moves under a published claim. |
 | Start here | [`START_HERE.md`](START_HERE.md) |
 | Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
-| Current state of the datasets | [`docs/DATASET_READINESS.md`](docs/DATASET_READINESS.md) (regenerate: `py -3 code/518_dataset_readiness.py`) and [`docs/TWELVE_DATASET_PLAN.md`](docs/TWELVE_DATASET_PLAN.md) |
+| Current state of the datasets | [`docs/DATASET_READINESS.md`](docs/DATASET_READINESS.md) (regenerate: `py -3 code/518_dataset_readiness.py`; not run 2026-09-23, since it rewrites a tracked file) and [`docs/TWELVE_DATASET_PLAN.md`](docs/TWELVE_DATASET_PLAN.md) |
 | Past handoffs, kept as records | [`docs/handoffs/`](docs/handoffs/); each carries a banner saying what superseded it |
 | The dataset plans and the v2 spec | [`docs/plans/`](docs/plans/) |
 | Measured map of the collections | [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) |
 | The thirteen built datasets | `dist/customer/` (CSV + codebook + notes) |
-| Rebuild the deliverables | `py -3 code/1137_customer_dataset_combine.py build` |
-| Audit | `py -3 code/846_session_audit.py` |
+| Rebuild the deliverables | `py -3 code/1137_customer_dataset_combine.py build` (not run 2026-09-23: it rebuilds the committed deliverables) |
+| Audit | `py -3 code/846_session_audit.py` (run 2026-09-23 with Python 3.12: 18 of 32 claims pass, 14 fail, 4 of them critical, in the identity layer; it also rewrites `docs/SESSION_AUDIT.json`) |
+
+`py -3` is the Windows launcher; on Linux and macOS use `python3`, which
+must be 3.12 or later (some scripts, `code/1137_customer_dataset_combine.py`
+among them, use 3.12 f-string syntax and do not compile under 3.11).
 
 The two trees were developed independently and share no history; the merge that
 brought them together is a deliberate `--allow-unrelated-histories` join, and

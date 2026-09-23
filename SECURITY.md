@@ -1,57 +1,101 @@
 # Security Policy
 
-Cedar Press is a Lumecon service. This document covers how to report a
-vulnerability and what falls inside the scope of this repository, the
-subscriber-facing web client served at `cedarpress.ai`.
+Cedar Press is a Lumecon research publication, partnered with Tribal Business
+News. This document covers how to report a vulnerability and what falls
+inside the scope of this repository, the subscriber-facing web client served
+at `cedarpress.ai` and the API alongside it.
 
 ## Reporting a vulnerability
 
-Please report security vulnerabilities by email to **contact@lumecon.ai**
-with the subject line `Security: <brief title>`. We aim to respond within five
-business days.
+Please report security vulnerabilities to **contact@lumecon.ai** with the
+subject line `Security: <brief title>`, and name the repository in the
+subject. For Lumecon's current product controls and security-program status,
+see <https://lumecon.ai/security>.
 
-When reporting, please include:
+Include a description of the issue, a clear path to reproduce it, the
+potential impact and your name or handle if you would like attribution.
 
-- A description of the issue and where it appears (URL, page, or component).
-- A clear path to reproduce.
-- The potential impact you observe.
-- Your name or handle if you would like attribution in the disclosure.
+We will acknowledge receipt within five business days, provide our assessment
+and expected fix timeline within ten business days and credit you, if you
+wish, in a public disclosure note.
 
-We follow coordinated disclosure, on the same terms as Lumecon's canonical
-policy at <https://github.com/teim-team/lumecon-website/blob/main/SECURITY.md>
-(the `Policy:` target of `https://lumecon.ai/.well-known/security.txt`). We
-will acknowledge receipt within five business days, provide our assessment
-and expected fix timeline within ten business days, and credit you, if you
-wish, in a public disclosure note. Please do not disclose the issue publicly
-until we confirm that a fix has shipped or 90 days have passed from your
-report, whichever comes first. Lumecon does not currently offer a paid bounty
-and does not publish a PGP key; send a short message without sensitive
-details if plaintext email is unsuitable and we will arrange a secure
-channel. For the current product controls and security-program status, see
-<https://lumecon.ai/security>.
+Please do not disclose the issue publicly until we confirm that a fix has
+shipped or 90 days have passed from your report, whichever comes first. If a
+fix requires longer, we will explain why and ask to agree on an extension.
+
+### Safe harbor
+
+If you make a good-faith effort to follow this policy, we will treat your
+research as authorized. We will not initiate or support legal action against
+you. If a third party brings action concerning research conducted under this
+policy, we will make it known that the work was authorized.
+
+Good faith means:
+
+- Stop as soon as you have demonstrated the issue.
+- Do not access, modify, delete or retain data belonging to anyone else. If
+  you encounter personal data, stop immediately, do not save a copy and tell
+  us what you saw.
+- Do not degrade the service for others through denial-of-service testing,
+  high-volume automated scanning, spam or social engineering.
+- Give us a reasonable opportunity to fix the issue before disclosure.
+
+This authorization covers only systems we operate. It cannot authorize
+testing against third parties, including hosting and payment providers.
+
+### Confidential reporting
+
+Lumecon does not currently publish a PGP key. Send a short message without
+sensitive details if plaintext email is unsuitable, and we will arrange a
+secure channel before you provide the report.
+
+### Bounty and language
+
+Lumecon does not currently offer a paid bounty program. We will credit
+researchers who wish to be credited. We read and respond in English.
+
+### Out of scope in every Lumecon repository
+
+- Denial-of-service testing and brute-force attacks.
+- Social engineering.
+- Reports about a missing security header without an exploitable consequence.
+- Reports generated solely by automated scanners without a working
+  reproduction.
 
 ## Scope
 
 In scope:
 
 - `cedarpress.ai` and the static client in this repository.
+- The API in `server/`.
 - The subscriber gate and session handling.
 - Collection downloads and the citation metadata they carry.
 
 Out of scope:
 
-- Third-party destinations we link to (Tribal Business News, lumecon.ai).
-- The Lumecon platform and the services behind it, each of which has its own
-  repository and policy:
-  <https://github.com/teim-team/teim-app/blob/main/SECURITY.md>,
-  <https://github.com/teim-team/cedar/blob/main/SECURITY.md> and
-  <https://github.com/teim-team/teim-engine/blob/main/SECURITY.md>. Reports for
-  any of them still reach contact@lumecon.ai; naming the repository in the
-  subject line routes it faster.
-- Denial-of-service testing, social engineering, and physical attacks.
-- Missing security headers without a demonstrated exploitable consequence.
-- Reports generated solely by automated scanners without a working
-  reproduction.
+- Third-party destinations we link to, including Tribal Business News, the
+  partner that handles Cedar Press subscriber plans.
+- The sibling Lumecon repositories, each separate scope with its own policy
+  (*as of 2026-09-23*):
+  - `teim-app`, the Lumecon platform (Cedar Impact, Cedar Commons and Cedar
+    Grove): <https://github.com/teim-team/teim-app/blob/main/SECURITY.md>.
+  - `cedar`, Cedar, Lumecon's AI economic analyst:
+    <https://github.com/teim-team/cedar/blob/develop/SECURITY.md> (`develop`
+    is that repository's default branch).
+  - `teim-engine`, the internal model engine:
+    <https://github.com/teim-team/teim-engine/blob/main/SECURITY.md>. That
+    file is not on `main` yet; it lands with
+    [teim-engine #20](https://github.com/teim-team/teim-engine/pull/20).
+  - `lumecon-website`, the public site `lumecon.ai`, which holds Lumecon's
+    canonical policy:
+    <https://github.com/teim-team/lumecon-website/blob/main/SECURITY.md>.
+  - [`Lumecon-data`](https://github.com/teim-team/Lumecon-data), the shared
+    data foundation. It has no root `SECURITY.md` on `main` yet.
+
+  Reports for any of them still reach contact@lumecon.ai; naming the
+  repository in the subject line routes it faster.
+- Everything under *Out of scope in every Lumecon repository* above, and
+  physical attacks.
 - **The standalone sign-in.** A build with no API configured checks its
   password in the browser, against a salted digest that ships in the bundle.
   That it can be bypassed from devtools is its documented character, not a
