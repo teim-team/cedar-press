@@ -1552,6 +1552,20 @@ test.describe("Methods", () => {
   // text, and at 1100, where the index column takes 14rem from it, the
   // labels rendered around nine pixels. The ring's column has a floor now,
   // and this reads the rendered size at every width the layout changes at.
+  //
+  // WHEN THE LAUNCHER CAN BE MEASURED. `.cedar-widget` is `position: fixed`
+  // from its first frame, but it is a child of `main.cp-page`, and that main
+  // enters with the `cp-page-in` animation, a transform. A transformed
+  // ancestor is the containing block of its fixed descendants, so for the
+  // animation's 340ms the launcher's box is at the foot of the document,
+  // thousands of pixels below the viewport and clear of everything. A read
+  // taken then passes whatever the page does once it settles. The launcher
+  // is settled when its box is inside the viewport.
+  const launcherSettled = (page) =>
+    page.waitForFunction(() => {
+      const box = document.querySelector(".cedar-widget__launcher")?.getBoundingClientRect();
+      return Boolean(box) && box.bottom <= innerHeight && box.top >= 0;
+    });
   for (const width of [900, 1100, 1280, 1440, 1920]) {
     test(`at ${width} wide the ecosystem ring clears the Ask Cedar launcher and its labels read above 11px`, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== "desktop", "a desktop layout question");
@@ -1559,9 +1573,7 @@ test.describe("Methods", () => {
       await page.goto("/methods");
       await page.locator(".cp-eco__svg").waitFor();
       await page.evaluate(() => document.fonts.ready);
-      await page.waitForFunction(
-        () => getComputedStyle(document.querySelector(".cedar-widget")).position === "fixed",
-      );
+      await launcherSettled(page);
       const boxes = await page.evaluate(() => {
         const box = (el) => {
           const b = el.getBoundingClientRect();
@@ -1597,6 +1609,62 @@ test.describe("Methods", () => {
       // Beside the text, and to its left, at every one of these widths.
       expect(boxes.svg.right, `ring left of the text at ${width}`).toBeLessThanOrEqual(boxes.text.left);
       expect(boxes.renderedLabelPx, `label size at ${width}`).toBeGreaterThanOrEqual(11);
+    });
+  }
+
+  // THE TEXT IS NEVER UNDER THE LAUNCHER EITHER.
+  //
+  // Clearing the nodes moved the lead paragraph into the corner the ring had
+  // left, and at 1440 the pill sat on the ends of its lines at first paint:
+  // "its res", "an", cut off under a floating button, which is the desktop
+  // overlap the page was reported for. The launcher stays where it is; the
+  // Methods page keeps a right gutter the size of its footprint from 1280 up,
+  // and this walks every text node of the lead and the chapter body with a
+  // Range and holds each of its line boxes apart from the launcher's box.
+  // Line boxes rather than element boxes, because a paragraph's box reaches
+  // under the pill whenever its column does, and what matters is whether a
+  // line of text does. Three widths: the bottom of the band, the width it was
+  // seen at, and the top the page is centred from. At 1920 the page's own
+  // centring gutter is wider than the pill and the rule no longer adds
+  // anything.
+  for (const width of [1280, 1440, 1600]) {
+    test(`at ${width} wide no line of the Methods text sits under the Ask Cedar launcher at first paint`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "desktop", "a desktop layout question");
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/methods");
+      await page.locator(".cp-eco__svg").waitFor();
+      await page.evaluate(() => document.fonts.ready);
+      await launcherSettled(page);
+      const { launcher, lines, under } = await page.evaluate(() => {
+        const rect = (b) => ({ left: b.left, top: b.top, right: b.right, bottom: b.bottom });
+        const launcher = rect(document.querySelector(".cedar-widget__launcher").getBoundingClientRect());
+        const roots = [document.querySelector(".cp-meth__lead"), document.querySelector(".cp-meth__body")];
+        const lines = [];
+        for (const root of roots) {
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+          let node;
+          while ((node = walker.nextNode())) {
+            if (!node.textContent.trim()) continue;
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            for (const box of range.getClientRects()) {
+              if (box.width === 0 || box.height === 0) continue;
+              // Only what is on screen at first paint: a line below the fold
+              // is not under anything.
+              if (box.top >= innerHeight || box.bottom <= 0) continue;
+              lines.push({ text: node.textContent.trim().slice(0, 40), ...rect(box) });
+            }
+          }
+        }
+        const under = lines.filter(
+          (line) =>
+            !(line.right <= launcher.left || line.left >= launcher.right || line.bottom <= launcher.top || line.top >= launcher.bottom),
+        );
+        return { launcher, lines, under };
+      });
+      // The lead is on screen at this height, so the walk saw text.
+      expect(lines.length, `text lines on screen at ${width}`).toBeGreaterThan(20);
+      expect(under, `lines under the launcher ${JSON.stringify(launcher)} at ${width}`).toEqual([]);
     });
   }
 

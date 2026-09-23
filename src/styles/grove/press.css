@@ -3773,6 +3773,30 @@ body[data-cp-preview-in-view] .teim-rd .cp-dc__fab { display: none; }
    * the labels' rendered size at 900, 1100, 1280, 1440 and 1920. */
   .teim-rd .cp-meth__lead { grid-template-columns: minmax(25rem, 1fr) minmax(0, 1.2fr); gap: 1.2rem 3rem; }
 }
+/* THE TEXT KEEPS OUT OF THE LAUNCHER'S CORNER, FROM 1280 UP.
+ *
+ * Moving the ring left (above) cleared its nodes, and put the lead paragraph
+ * where the ring had been: under the Ask Cedar pill, which is fixed to the
+ * lower right of the viewport and covers the last words of a line the moment
+ * the page settles. The pill does not move and does not shrink, it is the
+ * one launcher the product agreed on, see the note at `.cedar-widget__launcher`
+ * so the page gives up the corner instead. `--cp-launcher-clear` is the
+ * pill's footprint measured from the right edge of the viewport (146px wide
+ * at 2rem in, 178px in all) plus a margin. The page is centred at
+ * `--cp-measure`, so the clearance it already has grows with the viewport;
+ * this pads only the difference, and by about 1900px the ordinary 2.4rem
+ * gutter is enough on its own. Scoped to the Methods page, whose lead is the
+ * text that sat under the pill, and to 1280 and up: below that the index
+ * column, the ring's floor and this gutter together would leave the lead
+ * about twenty characters wide. `tests/smoke.spec.js` walks every text node
+ * of the lead and the chapter body against the launcher's box at 1280, 1440
+ * and 1600. */
+@media (min-width: 1280px) {
+  .teim-rd .cp-meth {
+    --cp-launcher-clear: 12.5rem;
+    padding-right: max(2.4rem, calc(var(--cp-launcher-clear) - max(0px, (100vw - var(--cp-measure)) / 2)));
+  }
+}
 /* How to cite: the line a reader copies, at the size they would transcribe it. */
 .teim-rd .cp-cite { margin: 1.6rem 0 0; display: grid; gap: 0.6rem; }
 .teim-rd .cp-cite__cap { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
