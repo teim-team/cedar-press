@@ -91,3 +91,135 @@ test("an exhausted conversation gets no row rather than a repeat", () => {
   const answered = new Set(DOOR_INTENTS.map((intent) => intent.id));
   assert.deepEqual(followUpsFor(DOOR_INTENTS[0], answered), []);
 });
+
+// ── The conversation around the bank ──────────────────────────────────────
+// The door used to answer without memory: "tell me more" was refused, the
+// same question twice printed the same paragraph, and every miss was one
+// fixed sentence. These pin the behaviours the shared runtime gives it.
+
+import { beginTurn, detectAudience, freshThread, settleTurn } from "./cedarConversation.js";
+import {
+  DOOR_AUDIENCES,
+  NON_TOPIC_IDS,
+  OUT_OF_SCOPE_TRIGGERS,
+  doorFollowUps,
+  doorMatcher,
+  missAnswer,
+  resolveDoor,
+} from "./doorCedar.js";
+
+function door() {
+  let thread = freshThread();
+  return {
+    get memory() {
+      return thread.memory;
+    },
+    say(question, options = {}) {
+      const resolution = resolveDoor(thread.memory, question, options);
+      thread = settleTurn(beginTurn(thread, question), resolution, {
+        nonTopicIds: NON_TOPIC_IDS,
+        audience: detectAudience(DOOR_AUDIENCES, question),
+        followUpsFor: doorFollowUps,
+      });
+      return { ...resolution, chips: thread.followUps.map((c) => c.label) };
+    },
+  };
+}
+
+test("every topic has a deeper answer for tell me more, and none of it breaks the house style", () => {
+  for (const intent of DOOR_INTENTS) {
+    if (intent.chip) assert.ok(intent.expanded?.length > 80, `${intent.id} has no deeper answer`);
+    for (const text of [intent.answer, intent.expanded ?? "", intent.chip ?? "", ...(intent.variants ?? [])]) {
+      assert.ok(!text.includes("—"), `em dash in ${intent.id}`);
+      assert.ok(!/&amp;|[A-Za-z0-9] & [A-Za-z0-9]/.test(text), `ampersand in ${intent.id}`);
+      assert.ok(!/prepared (set|material|answers)/i.test(text), `${intent.id} announces its machinery`);
+    }
+  }
+});
+
+test("tell me more after a collection goes deeper on that collection", () => {
+  const c = door();
+  const first = c.say("what is in the deals collection");
+  assert.equal(first.intent.id, "collection:deals");
+  assert.equal(first.chips[0], "Tell me more");
+  const more = c.say("tell me more");
+  assert.equal(more.kind, "drilldown");
+  assert.equal(more.intent.id, "collection:deals");
+  assert.match(more.text, /^Going deeper on how Deals is built/);
+  assert.ok(!more.chips.includes("Tell me more"));
+});
+
+test("the same question twice is answered deeper, then acknowledged, never verbatim", () => {
+  const c = door();
+  const first = c.say("How current is it?");
+  const second = c.say("How current is it?");
+  const third = c.say("How current is it?");
+  assert.equal(second.kind, "repeat");
+  assert.match(second.text, /^We touched on this earlier/);
+  assert.notEqual(second.text, first.text);
+  assert.notEqual(third.text, second.text);
+  assert.ok(third.text.endsWith(first.text), "the restatement still carries the answer");
+});
+
+test("a question naming two topics answers one and offers the other first", () => {
+  const c = door();
+  const r = c.say("how much does it cost and how current is it");
+  assert.equal(r.intent.id, "plans");
+  assert.equal(r.secondary?.id, "current");
+  assert.equal(r.chips[0], "How current is it?");
+  const two = door().say("deals or funding");
+  assert.equal(two.intent.id, "collection:funding");
+  assert.equal(two.chips[0], "Deals");
+});
+
+test("a typo still reaches the collection", () => {
+  assert.equal(door().say("legislaton").intent.id, "collection:legislation");
+  assert.equal(answer("repatriaton").id, "collection:nagpra");
+});
+
+test("a miss says so, offers the closest topics, and after a second miss names the research desk", () => {
+  const c = door();
+  const first = c.say("what is the weather in Oslo");
+  assert.equal(first.kind, "miss");
+  assert.match(first.text, /I do not have that one here on the front page/);
+  assert.match(first.text, /closest things I can speak to/);
+  assert.doesNotMatch(first.text, /contact@lumecon\.ai/);
+  assert.ok(first.chips.length >= 1 && first.chips.length <= 3);
+  const second = c.say("banana bread");
+  assert.match(second.text, /research desk answers in person: contact@lumecon\.ai/);
+  assert.equal(c.memory.misses, 2);
+  assert.equal(missAnswer("x", [], false), missAnswer("x"));
+});
+
+test("who is the president is a miss, not a match on the word who", () => {
+  assert.equal(door().say("who is the president of mexico").kind, "miss");
+  assert.ok(OUT_OF_SCOPE_TRIGGERS.includes("who is the president"));
+});
+
+test("a reader who says who they are gets their own route in as a quick reply", () => {
+  const c = door();
+  const r = c.say("for my story, what is in the legislation collection");
+  assert.equal(r.intent.id, "collection:legislation");
+  assert.equal(c.memory.audience, "research");
+  assert.ok(c.say("federal funding").chips.includes("I'm a researcher or journalist"));
+});
+
+test("filler is never the last topic, and greetings do not repeat verbatim", () => {
+  const c = door();
+  c.say("what is nagpra");
+  const hello = c.say("hi");
+  const again = c.say("hi");
+  assert.notEqual(hello.text, again.text);
+  assert.equal(c.memory.priorTopicId, "collection:nagpra");
+  assert.equal(c.say("yes").kind, "drilldown");
+});
+
+test("every collection is reachable by its chip, its id and its extra words", () => {
+  for (const entry of STOREFRONT_CATALOG) {
+    const intent = intentForCollection(entry.id);
+    assert.equal(doorMatcher.classify(entry.id.replace(/-/g, " "))?.id, intent.id, entry.id);
+    assert.equal(doorMatcher.classify(`what is in ${entry.short || entry.name}`)?.id, intent.id, entry.id);
+  }
+  assert.equal(doorMatcher.classify("do you track royalties")?.id, "collection:natural-resources");
+  assert.equal(doorMatcher.classify("form 990 filings")?.id, "collection:nonprofits");
+});

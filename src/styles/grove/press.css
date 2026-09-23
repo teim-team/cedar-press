@@ -2788,11 +2788,35 @@
    the lower corner with page showing beneath it. dvh, not vh, because mobile
    Safari's vh is the tall viewport and would put the composer under the
    address bar. */
-/* A LITTLE WIDER, AND TALLER. Owner, 2026-09-20: do not "show a long
- * technical answer in a narrow right panel". A real answer about a release
- * is three or four sentences, and at 25rem those were eleven lines of
- * forty characters — a column, not a conversation. */
-.teim-rd .cp-dc__panel { position: fixed; right: calc(clamp(1rem, 2.4vw, 2rem) + env(safe-area-inset-right, 0px)); bottom: env(safe-area-inset-bottom, 0px); display: flex; flex-direction: column; width: min(29rem, calc(100vw - 2rem)); max-height: min(40rem, calc(100dvh - 4rem)); border: 1px solid var(--door-rule); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--door-surface); box-shadow: 0 1px 2px rgba(14, 21, 48, 0.04), 0 24px 60px -16px rgba(14, 21, 48, 0.26); overflow: hidden; animation: cp-dc-in 0.22s var(--door-ease) both; }
+/* THE SITE'S PANEL, TO THE PIXEL.
+ * -------------------------------------------------------------------------
+ * This was 29rem wide and up to 40rem tall, widened on 2026-09-20 so a long
+ * answer was not a column. The owner then put the two side by side: "the
+ * website chat we have for cedar is better and not as wide as it is for
+ * cedar press". So the panel is now lumecon.ai's panel, measured off its
+ * built page rather than read off its stylesheet (`CedarFAB.astro`,
+ * `.cedar-fab-panel`, and `cedar-chat.css`, `.cedar-chat__transcript`):
+ *
+ *   width      380px, or the window less 1.8rem      (min(380px, ...))
+ *   right      clamp(0.9rem, 2.2vw, 1.5rem)          24px from 1280 up
+ *   bottom     flush with the window's bottom edge
+ *   ceiling    the window less 5rem
+ *   transcript min(400px, 52vh) tall                  400px at 900 high
+ *   header     66.77px, composer 67.39px, one three-line note 42.72px
+ *
+ * Measured at 1280, 1440 and 1920 by 900: 380 x 577.88, right gap 24; at
+ * 720 high, 380 x 552.27. The site's transcript grows to its 400px cap on
+ * the first exchange (its welcome and five starters already fill it), so
+ * this one opens at the cap rather than growing on the first answer, and
+ * the two panels measure the same before and after a question. The smoke
+ * suite holds both Press panels to those numbers within 2px.
+ *
+ * The header, composer and note are the site's own paddings and type sizes
+ * class for class, so the height is the same arithmetic on both sides; the
+ * one thing that can move it is the note wrapping to a different number of
+ * lines, which is why `EXPECTATION_LINE` is written to three lines at this
+ * width and the layout test would name it if it stopped. */
+.teim-rd .cp-dc__panel { position: fixed; right: calc(clamp(0.9rem, 2.2vw, 1.5rem) + env(safe-area-inset-right, 0px)); bottom: env(safe-area-inset-bottom, 0px); display: flex; flex-direction: column; width: min(380px, calc(100vw - 1.8rem)); max-height: calc(100dvh - 5rem); border: 1px solid var(--door-rule); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--door-surface); box-shadow: 0 1px 2px rgba(14, 21, 48, 0.04), 0 24px 60px -16px rgba(14, 21, 48, 0.26); overflow: hidden; animation: cp-dc-in 0.22s var(--door-ease) both; }
 @keyframes cp-dc-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* The identity band. --dteal is the one teal that carries white text. */
@@ -2805,13 +2829,17 @@
 .teim-rd .cp-dc__close { flex: none; width: 1.8rem; height: 1.8rem; display: grid; place-items: center; border: 0; border-radius: 6px; background: transparent; color: rgba(255, 255, 255, 0.8); font-size: 1.2rem; line-height: 1; cursor: pointer; transition: background 0.16s var(--door-ease), color 0.16s var(--door-ease); }
 .teim-rd .cp-dc__close:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
 
-.teim-rd .cp-dc__thread { flex: 1 1 auto; min-height: 12rem; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 0.9rem; padding: 1.3rem 1.3rem 1rem; background: var(--door-ground); scroll-behavior: smooth; }
-.teim-rd .cp-dc__msg { display: flex; gap: 0.7rem; align-items: flex-start; max-width: 88%; animation: cp-dc-msg 0.25s var(--door-ease) both; }
+/* The transcript's height is the site's transcript cap, `min(400px, 52vh)`
+   (cedar-chat.css). A height rather than a max-height: see the panel note
+   above. It is still a flex item that shrinks, so a short window's ceiling
+   on the panel takes it down with it. */
+.teim-rd .cp-dc__thread { flex: 1 1 auto; height: min(400px, 52vh); min-height: 180px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 0.9rem; padding: 1.3rem 1.3rem 1rem; background: var(--door-ground); scroll-behavior: smooth; }
+.teim-rd .cp-dc__msg { display: flex; gap: 0.7rem; align-items: flex-start; max-width: 86%; animation: cp-dc-msg 0.25s var(--door-ease) both; }
 @keyframes cp-dc-msg { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .teim-rd .cp-dc__msg--you { align-self: flex-end; flex-direction: row-reverse; }
 .teim-rd .cp-dc__avatar { flex: none; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--door-surface); box-shadow: 0 1px 3px rgba(10, 15, 38, 0.14); overflow: hidden; }
 .teim-rd .cp-dc__avatar img { width: 30px; height: 30px; object-fit: contain; display: block; }
-.teim-rd .cp-dc__bubble { padding: 0.75rem 0.95rem; border: 1px solid var(--door-rule); border-radius: 6px; background: var(--door-surface); font-family: var(--sans); font-size: 0.92rem; line-height: 1.55; color: var(--ink-2); }
+.teim-rd .cp-dc__bubble { padding: 0.75rem 0.95rem; border: 1px solid var(--door-rule); border-radius: 6px; background: var(--door-surface); font-family: var(--sans); font-size: 0.94rem; line-height: 1.5; color: var(--ink-2); }
 .teim-rd .cp-dc__msg--bot .cp-dc__bubble { border-top-left-radius: 4px; }
 .teim-rd .cp-dc__msg--you .cp-dc__bubble { background: var(--dteal); border-color: var(--dteal); border-top-right-radius: 4px; color: #fff; }
 .teim-rd .cp-dc__bubble p { margin: 0; }
@@ -2823,7 +2851,7 @@
 /* Quick replies sit in the transcript, right-aligned, as the reader's own
    next turn rather than as a toolbar. */
 .teim-rd .cp-dc__quickreply { display: flex; flex-direction: column; align-items: flex-end; gap: 0.45rem; margin: 0; }
-.teim-rd .cp-dc__chip { max-width: 92%; padding: 0.6rem 1rem; border: 0; border-radius: 8px; border-top-right-radius: 4px; background: var(--dteal); font-family: var(--sans); font-size: 0.88rem; font-weight: 500; line-height: 1.35; letter-spacing: -0.005em; color: #fff; text-align: right; cursor: pointer; transition: background 0.15s var(--door-ease), transform 0.15s var(--door-ease); }
+.teim-rd .cp-dc__chip { max-width: 92%; padding: 0.6rem 1rem; border: 0; border-radius: 8px; border-top-right-radius: 4px; background: var(--dteal); font-family: var(--sans); font-size: 0.9rem; font-weight: 500; line-height: 1.35; letter-spacing: -0.005em; color: #fff; text-align: right; cursor: pointer; transition: background 0.15s var(--door-ease), transform 0.15s var(--door-ease); }
 .teim-rd .cp-dc__chip:hover { background: #086960; transform: translateY(-1px); }
 .teim-rd .cp-dc__chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 

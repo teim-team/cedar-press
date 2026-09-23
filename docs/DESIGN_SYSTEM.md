@@ -38,6 +38,25 @@ a status dot, a transcript of bubbles with the mark beside Cedar's, quick
 replies inside the transcript, a one-line composer, one line of
 expectation-setting under it. Full screen on a phone.
 
+**The size is the site's, measured.** The owner put the two side by side and
+the Press panel was wider. `.cp-dc__panel` is now `min(380px, 100vw - 1.8rem)`
+wide with the site's right offset (`clamp(0.9rem, 2.2vw, 1.5rem)`) and
+ceiling (`100dvh - 5rem`), and its transcript is the site's transcript cap,
+`min(400px, 52vh)`, as a height. Measured off lumecon.ai's built page at 1280,
+1440 and 1920 by 900: 380 x 577.88, 24px from the right edge. The smoke suite
+holds both Press panels to those numbers within 2px, and
+`cedarPanelParity.test.js` holds the rules to what the suite assumes.
+
+**It is one conversation, not one look.** Both surfaces run
+`cedarConversation.js` through `useCedarThread`: "tell me more" goes deeper
+on the last topic, the same question twice is answered deeper or acknowledged
+rather than replayed, a question naming two topics gets the second as the
+first quick reply, and a miss offers the closest topics. The door's bank is
+`doorCedar.js`; the reader's answers are the service's. The line under the
+composer is the site's expectation line (`EXPECTATION_LINE`), not a
+description of the machinery: the old "answers from prepared material" read
+as a menu of preset answers, and it is gone.
+
 The **panel's own tokens** are declared on `.cp-dc` and `.cedar-widget`
 rather than only on `.cp-door`. That is not tidying: every `--door-*` the
 panel reads is declared on the signed-out page, and mounted inside the

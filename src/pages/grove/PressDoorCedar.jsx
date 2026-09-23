@@ -1,49 +1,65 @@
 // REVIEW OWNER: Havala
 //
-// Cedar on the door: a floating control and a panel of prepared answers.
+// Cedar on the door: a floating control and a conversation.
 //
 // It never reaches the network. `doorCedar.js` says why, and says where the
 // twelve dataset answers come from (the catalog, at module load, so they
-// cannot drift from the collections they describe).
+// cannot drift from the collections they describe). The conversation around
+// that bank (memory, drill-downs, repeats, quick replies, the graceful miss)
+// is `cedarConversation.js`, shared with the reader's panel through
+// `useCedarThread`, and the panel itself is `CedarPanel`, shared the same way.
 //
 // WHAT IT MAY NOT DO
 // Answer past the paywall. Everything it says is either a position about the
-// product or a fact the catalog already publishes on this page — coverage,
-// row counts, sources, release dates. It holds no records, so it cannot leak
-// one, and the panel says "prepared answers" on its face rather than
-// implying a model is thinking.
+// product or a fact the catalog already publishes on this page: coverage, row
+// counts, sources, release dates. It holds no records, so it cannot leak one.
+//
+// WHY IT NO LONGER SAYS "PREPARED MATERIAL"
+// The panel used to end with "This page answers from prepared material and
+// does not query the collections." The owner read it as a menu of preset
+// answers, which is what a panel that announces its mechanism and forgets
+// the last question is. It now keeps the thread: "tell me more" goes deeper
+// on the last topic, the same question twice gets a deeper or acknowledged
+// answer rather than the same paragraph, a question naming two topics gets
+// the second as the first quick reply, and a miss offers the closest topics
+// it has rather than one fixed refusal. The line under the composer sets the
+// same expectation lumecon.ai's does.
 //
 // The pane's "Ask Cedar" button dispatches `cedar:ask-collection` and the
 // hero's dispatches `cedar:open`; both are handled here, so the door's
 // buttons work without a prop threaded through three components.
 //
 // HOW IT BEHAVES, AND WHY IT MATCHES lumecon.ai
-// The marketing site's FAB (src/components/CedarFAB.astro) is the reference,
-// and three of its rules were missing here:
+// The marketing site's FAB (src/components/CedarFAB.astro) is the reference:
 //
 //   1. Open is a dock, not a float. The panel pins to the bottom edge of the
-//      viewport — a full-width sheet on a phone — instead of hovering as a
-//      card above the launcher, which on an 844px screen left it stranded
-//      mid-air with page showing underneath.
+//      viewport, the site's 380px wide and its measured height, and a full
+//      screen on a phone.
 //   2. The launcher steps aside while the panel is open. The panel carries
-//      its own close button; two close affordances and a FAB covering the
-//      sheet's own corner is the worse arrangement.
+//      its own close button.
 //   3. Starter chips are an opening, not a toolbar. They collapse for good
 //      on the first question, and each answer carries at most three next
-//      questions under it (`followUpsFor`). Re-printing the whole stack under
-//      every reply read as a control panel that had not been listening.
+//      questions under it.
 //
 // Clicking outside the sheet closes it, as it does there.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
-import { DOOR_CHIPS, answer as answerFor, followUpsFor, intentForCollection } from "../../features/grove/doorCedar.js";
+import { detectAudience } from "../../features/grove/cedarConversation.js";
+import {
+  DOOR_AUDIENCES,
+  DOOR_CHIPS,
+  NON_TOPIC_IDS,
+  doorFollowUps,
+  intentForCollection,
+  resolveDoor,
+} from "../../features/grove/doorCedar.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-
-const MARK = "/brand/lumecon-logo-mark-teal.png";
+import { useCedarThread } from "../../features/grove/useCedarThread.js";
+import { CedarPanel, Paragraphs } from "./CedarPanel";
 
 /** The routes an answer can offer, by the key an intent names. */
 const LINKS = {
@@ -53,31 +69,44 @@ const LINKS = {
   methods: { label: "Read the methods", to: PRESS_METHODS_PATH },
 };
 
-let nextId = 0;
-const turn = (role, intent, text) => ({ key: `t${(nextId += 1)}`, role, intent, text });
+const audienceOf = (question) => detectAudience(DOOR_AUDIENCES, question);
 
 export default function PressDoorCedar() {
   const [open, setOpen] = useState(false);
   const [asked, setAsked] = useState("");
-  const [thread, setThread] = useState([]);
   const panelRef = useRef(null);
   const inputRef = useRef(null);
   const fabRef = useRef(null);
-  const endRef = useRef(null);
 
-  const say = useCallback((question, intent) => {
-    setThread((prev) => [...prev, turn("you", null, question), turn("cedar", intent, intent.answer)]);
-    track(EVENT.cedarAsked, { length: question.length, gated: true, intent: intent.id });
+  // The door's resolver is the local bank against the thread's memory. It
+  // is synchronous underneath; the hook's pause is what lets a reply read
+  // as composed rather than looked up.
+  const resolve = useCallback(async (question, { memory, forced }) => {
+    const resolution = resolveDoor(memory, question, { forced });
+    track(EVENT.cedarAsked, {
+      length: question.length,
+      gated: true,
+      intent: resolution.intent?.id ?? null,
+      kind: resolution.kind,
+    });
+    return resolution;
   }, []);
+
+  const { thread, pending, ask } = useCedarThread({
+    resolve,
+    followUpsFor: doorFollowUps,
+    nonTopicIds: NON_TOPIC_IDS,
+    detectAudience: audienceOf,
+  });
 
   // The launcher is hidden while the panel is open, so an explicit close has
   // to hand focus back to it once it is on the page again.
   //
   // `restoreFocus` is false for a click outside the sheet. Codex, PR #80: the
   // browser is about to focus whatever was clicked, and the queued frame would
-  // then pull focus off it and onto the launcher — dismissing the sheet would
-  // eat the click that dismissed it, and the reader would have to click the
-  // field a second time. A dismissal leaves focus where the pointer put it.
+  // then pull focus off it and onto the launcher, so dismissing the sheet
+  // would eat the click that dismissed it, and the reader would have to click
+  // the field a second time. A dismissal leaves focus where the pointer put it.
   const close = useCallback((restoreFocus = true) => {
     const returning = restoreFocus && panelRef.current?.contains(document.activeElement);
     setOpen(false);
@@ -92,7 +121,7 @@ export default function PressDoorCedar() {
       if (!detail?.id) return;
       const intent = intentForCollection(detail.id);
       setOpen(true);
-      if (intent) say(`What is in ${detail.name ?? intent.chip}?`, intent);
+      if (intent) void ask(`What is in ${detail.name ?? intent.chip}?`, { forced: intent });
     };
     window.addEventListener("cedar:open", onOpen);
     window.addEventListener("cedar:ask-collection", onCollection);
@@ -100,7 +129,7 @@ export default function PressDoorCedar() {
       window.removeEventListener("cedar:open", onOpen);
       window.removeEventListener("cedar:ask-collection", onCollection);
     };
-  }, [say]);
+  }, [ask]);
 
   // Escape closes, a click outside closes, and the panel takes focus when it
   // opens. The outside click is captured on pointerdown so a chip that
@@ -124,145 +153,74 @@ export default function PressDoorCedar() {
     };
   }, [open, close]);
 
-  // A new turn scrolls into view inside the panel, never the page.
-  useEffect(() => {
-    if (thread.length) endRef.current?.scrollIntoView({ block: "nearest" });
-  }, [thread]);
-
-  const submit = (event) => {
-    event.preventDefault();
-    const question = asked.trim();
-    if (!question) return;
+  const submit = (question) => {
     setAsked("");
-    say(question, answerFor(question));
+    void ask(question);
   };
 
+  // A chip is an explicit choice of intent: it routes straight to that
+  // answer rather than re-classifying its own label.
   const askChip = (intent) => {
     setAsked("");
-    say(intent.chip, intent);
+    void ask(intent.chip, { forced: intent });
   };
 
-  // Everything the conversation has already answered. It keeps a follow-up
-  // from offering a question that is already sitting in the thread.
-  const answered = new Set(thread.filter((t) => t.role === "cedar").map((t) => t.intent?.id));
-  // The starter stack belongs to the empty panel. Once a question has been
-  // asked it is gone, and the next questions ride under the last answer.
-  const starters = thread.length ? [] : DOOR_CHIPS.slice(0, 5);
-  const last = thread.length ? thread[thread.length - 1] : null;
-  const nextUp = last?.role === "cedar" ? followUpsFor(last.intent, answered) : [];
+  const starters = DOOR_CHIPS.slice(0, 5).map((intent) => ({ label: intent.chip, onSelect: () => askChip(intent) }));
+  const followUps = thread.followUps.map((next) => ({
+    label: next.label,
+    onSelect: () => {
+      setAsked("");
+      // The transcript shows the chip's own words; the bank sees its text.
+      void ask(next.text, { echo: next.label, forced: next.intent ?? null });
+    },
+  }));
+
+  // A bot turn: its paragraphs, and under an answer that has somewhere to
+  // send the reader, the route. An internal route stays inside the app; a
+  // full reload would throw the conversation away.
+  const renderTurn = (item) => (
+    <>
+      <Paragraphs text={item.text} />
+      {item.kind !== "drilldown" && item.intent?.links?.length ? (
+        <p className="cp-dc__links">
+          {item.intent.links.map((key) => {
+            const link = LINKS[key];
+            if (!link) return null;
+            return link.external ? (
+              <a key={key} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+            ) : (
+              <Link key={key} to={link.to} onClick={() => close(false)}>{link.label}</Link>
+            );
+          })}
+        </p>
+      ) : null}
+    </>
+  );
 
   return (
     <div className={`cp-dc${open ? " is-open" : ""}`}>
       {open ? (
-        <section className="cp-dc__panel" ref={panelRef} role="dialog" aria-label="Ask Cedar">
-          {/* The identity band the app and lumecon.ai both use: status dot,
-              uppercase title, context line, all white on the one teal that
-              carries white text. */}
-          <header className="cp-dc__head">
-            <span className="cp-dc__heading">
-              <span className="cp-dc__titlerow">
-                <span className="cp-dc__statusdot" aria-hidden="true" />
-                <span className="cp-dc__title">Ask Cedar</span>
-              </span>
-              <span className="cp-dc__context">Cedar Press · Questions about the collections</span>
-            </span>
-            <button type="button" className="cp-dc__close" onClick={() => close()} aria-label="Close Cedar">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </header>
-
-          <div className="cp-dc__thread" role="log" aria-live="polite">
-            <div className="cp-dc__msg cp-dc__msg--bot">
-              <span className="cp-dc__avatar" aria-hidden="true">
-                <img src={MARK} alt="" width="30" height="30" />
-              </span>
-              <div className="cp-dc__bubble">
-                <p>
-                  I can tell you what each collection holds, where the records come from, how they
-                  reach the right nation, and how to get access. Pick a question or type your own.
-                </p>
-              </div>
-            </div>
-            {starters.length ? (
-              <div className="cp-dc__quickreply">
-                {starters.map((intent) => (
-                  <button type="button" key={intent.id} className="cp-dc__chip" onClick={() => askChip(intent)}>
-                    {intent.chip}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-            {thread.map((item) =>
-              item.role === "you" ? (
-                <div className="cp-dc__msg cp-dc__msg--you" key={item.key}>
-                  <div className="cp-dc__bubble">
-                    <p>{item.text}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="cp-dc__msg cp-dc__msg--bot" key={item.key}>
-                  <span className="cp-dc__avatar" aria-hidden="true">
-                    <img src={MARK} alt="" width="30" height="30" />
-                  </span>
-                  <div className="cp-dc__bubble">
-                    {item.text.split("\n\n").map((para, i) => <p key={i}>{para}</p>)}
-                    {item.intent?.links?.length ? (
-                      <p className="cp-dc__links">
-                        {item.intent.links.map((key) => {
-                          const link = LINKS[key];
-                          if (!link) return null;
-                          // An internal route stays inside the app; a full
-                          // reload would throw the conversation away.
-                          return link.external ? (
-                            <a key={key} href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
-                          ) : (
-                            <Link key={key} to={link.to} onClick={() => close(false)}>{link.label}</Link>
-                          );
-                        })}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              ),
-            )}
-            {nextUp.length ? (
-              <div className="cp-dc__followups" role="group" aria-label="Suggested next questions">
-                {nextUp.map((intent) => (
-                  <button type="button" key={intent.id} className="cp-dc__follow" onClick={() => askChip(intent)}>
-                    {intent.chip}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-            <div ref={endRef} />
-          </div>
-
-          <form className="cp-dc__form" onSubmit={submit} autoComplete="off">
-            <label className="cp-dc__inputwrap">
-              <span className="cp-badge__sr">Ask Cedar a question</span>
-              <input
-                ref={inputRef}
-                className="cp-dc__input"
-                type="text"
-                value={asked}
-                placeholder="Ask about a collection"
-                onChange={(event) => setAsked(event.target.value)}
-              />
-            </label>
-            <button type="submit" className="cp-dc__send" disabled={!asked.trim()} aria-label="Send">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4 12h15M13 6l6 6-6 6" />
-              </svg>
-            </button>
-          </form>
-          {/* The one line of expectation-setting the panel owes its reader,
-              in the same place and the same words the marketing site uses. */}
-          <p className="cp-dc__disclaimer">
-            Cedar can make mistakes. Verify anything important against the methods page or the
-            release it came from. This page answers from prepared material and does not query the
-            collections.
-          </p>
-        </section>
+        <CedarPanel
+          contextLine="Cedar Press · Questions about the collections"
+          welcome={
+            <p>
+              Hi, I'm Cedar. Ask me what any collection holds, where the records come from, how they
+              reach the right nation, or how to get access. Pick a question or type your own.
+            </p>
+          }
+          starters={starters}
+          thread={thread}
+          pending={pending}
+          followUps={followUps}
+          renderTurn={renderTurn}
+          asked={asked}
+          onAsked={setAsked}
+          onSubmit={submit}
+          placeholder="Ask about a collection"
+          onClose={() => close()}
+          panelRef={panelRef}
+          inputRef={inputRef}
+        />
       ) : null}
 
       <button
