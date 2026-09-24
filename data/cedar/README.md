@@ -11,7 +11,9 @@ This does not authorize production publication or certify ancillary tables. Reus
 the existing runner, manifest, catalog and download adapter.
 
 1. **Pin evidence and gates.** Run `python code/build.py plan <collection>`, then
-   inspect its stages' inputs. Record source, register and decision hashes; source
+   inspect its stages' inputs. Missing workspace data can leave this acquisition
+   plan incomplete; a snapshot pilot does not certify that acquisition rebuilt.
+   Record source, register and decision hashes; source
    dates, rights, grain, primary key and publication holds. Preserve rows and issued
    IDs. Resolve owed fields through `data/cedar/field_map.json` and existing owner
    decisions; never discard qualifications or rematch identities to pass.

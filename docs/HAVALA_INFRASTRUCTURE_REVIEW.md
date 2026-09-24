@@ -12,7 +12,7 @@ frontend delivery remain incomplete. NEED adjudication is supporting evidence.
 |---|---|
 | Review branches | Cedar [draft PR #122](https://github.com/teim-team/cedar-press/pull/122), `codex/legislation-release-consumer`; Lumecon [draft PR #8](https://github.com/teim-team/Lumecon-data/pull/8), `codex/legislation-storage-safety` |
 | Real release proof | Legislation: 3,069 bill IDs/30 fields. Natural Resources: 11,305 source-observation record IDs/38 fields, 705 existing CE references/17 distinct IDs, qualifications preserved. Both: exact JSONL, real login, 401/403/200, redacted audit and immutable rollback |
-| CI foundation | Cedar `c0263d8`: application and disposable-Postgres workflows pass, including 77 database-backed checks with no skips and stale-account denial. Lumecon `2ce2f9a`: 460 Ubuntu tests on Python3.12/3.13, 90.8% coverage, real symlink checks; exact receipts below |
+| CI foundation | Cedar `c0263d8`: application and disposable-Postgres workflows pass, including 77 database-backed checks with no skips and stale-account denial. Lumecon `505a42d`: 464 Ubuntu tests on Python3.12/3.13, 90.8% coverage, real symlink checks; exact receipts below |
 | Current batch | Cedar baseline `1c2d1d9`; two frozen-runtime proofs pass with catalog-bound manifest digests, 16 registration/provenance checks and exact source-byte projection. Runtime changes are committed and pushed; no real candidate data is in Git |
 | Product boundary | Full API download is exact JSONL; UI/download samples remain CSV. Full-download frontend control and a CSV representation of the pinned release are not implemented; real mobile behavior is untested |
 | Holds | NEED publication and R7 G03-G06 stay blocked. Owner decisions are preserved receipts; canonical inputs, issued IDs and published outputs unchanged |
@@ -87,7 +87,10 @@ delivery proofs do not certify source completeness or twelve launch-ready produc
 | Earlier digest-bound Cedar runtime | `6d445f460357581981a4b096d5bd53dd0d8d668c..3cf2583af9cd07e52dd1605659a319c242b54a61` | [Application CI35953021899](https://github.com/teim-team/cedar-press/actions/runs/35953021899) and [Postgres CI35953021926](https://github.com/teim-team/cedar-press/actions/runs/35953021926) pass. Local full suite: 337 tests, 305 passed/32 DB skips, 80% coverage; Ubuntu Postgres: 76 passed, no skips. Includes coherent upstream-tampering denial, both collection namespaces and exact bytes |
 | Final Cedar runtime | `6d445f460357581981a4b096d5bd53dd0d8d668c..c0263d8fbed32121207c40499ea601abba4d7194` | [Application CI35954050177](https://github.com/teim-team/cedar-press/actions/runs/35954050177) and [Postgres CI35954050274](https://github.com/teim-team/cedar-press/actions/runs/35954050274) pass. Local full suite: 338 tests, 306 passed/32 DB skips, 80% coverage. Ubuntu Postgres: 77 passed, no skips; same-cookie downgrade/deletion denied before fetching data |
 | Cedar review documentation | `c0263d8fbed32121207c40499ea601abba4d7194..8f2797797f0f5f3949a4fa73b02e8dd5e41ac3fe` | [Application CI35954460096](https://github.com/teim-team/cedar-press/actions/runs/35954460096) and [Postgres CI35954460047](https://github.com/teim-team/cedar-press/actions/runs/35954460047) pass for the packet and one-page onboarding procedure; runtime unchanged |
-| Final Lumecon runtime | `0ae36dda36d650b1b3861173fb122e7603b0dc3f..2ce2f9a884cb08a013d6a800e1fd34f6547be360` | [Ubuntu CI35952919244](https://github.com/teim-team/Lumecon-data/actions/runs/35952919244), both Python versions: 460 passed, 90.8% coverage, catalog/API projection digest agreement, real storage containment and immutable rollback; all supported gates pass |
+| Earlier digest-bound Lumecon runtime | `0ae36dda36d650b1b3861173fb122e7603b0dc3f..2ce2f9a884cb08a013d6a800e1fd34f6547be360` | [Ubuntu CI35952919244](https://github.com/teim-team/Lumecon-data/actions/runs/35952919244), both Python versions: 460 passed, 90.8% coverage, catalog/API projection digest agreement, real storage containment and immutable rollback; all supported gates pass |
+| Final Lumecon documentation | `505a42dd1f60d66af7cfbf05b295c4c3b03ce57f..f882fb14ab9179b287222b27b33cb6462378e6e1` | [Ubuntu CI35955263405](https://github.com/teim-team/Lumecon-data/actions/runs/35955263405) passes all gates on both Python versions for the clarified candidate/production README; runtime unchanged |
+| Final Lumecon runtime | `0ae36dda36d650b1b3861173fb122e7603b0dc3f..505a42dd1f60d66af7cfbf05b295c4c3b03ce57f` | [Ubuntu CI35954993991](https://github.com/teim-team/Lumecon-data/actions/runs/35954993991), Python3.12/3.13: 464 passed, 90.8% coverage; portable Windows drive/stream refusal added, real symlink tests unchanged |
+| Cedar shipping documentation | `8f2797797f0f5f3949a4fa73b02e8dd5e41ac3fe..8d8ab26120bdd940861ac35b84cb7d15b69fda63` | [Application CI35954806347](https://github.com/teim-team/cedar-press/actions/runs/35954806347) and [Postgres CI35954806363](https://github.com/teim-team/cedar-press/actions/runs/35954806363) pass; operating instructions now match the two proofs |
 
 The earlier Cedar foundation at `cb0e9f11627f790ee756655703a16baecb5253b2`
 was merged through [PR #121](https://github.com/teim-team/cedar-press/pull/121)
@@ -315,7 +318,7 @@ and Natural Resources proofs; this does not certify every component table.
 | Legislation / native_bills | 14 +73/890/1092; Congress/Voteview/curated sources | bill_id; separate actions, rollcalls, member votes; plural CE roles | 207 / 55 introduced | Bill-table local vertical slice passed; ancillary release not proved |
 | Deals / deals_classified | 88 +126, overlap153; reviewed source ledgers | Deal_ID, project/event distinction | 105 /103 Event_Year; 99 /102 full dates | Fresh build relies on preserved enrichment; not presumed R7-independent |
 | NAGPRA / nagpra_notices | 77 +1077/1084; FR | document_number; separate party/institution tables | 900 /633 publication date | Seven undeclared joined fields, BLOCKED export |
-| Native Advocacy and Engagement / native_entity_lobbying_disclosures (one component) | LDA04/05 +65/350/1091 | Filing/attribution, source filing ID | 1,377 /672 filing_year | Broader promised components unvalidated; intake size and nullable attribution contract block next release |
+| Native Advocacy and Engagement / native_entity_lobbying_disclosures (one component) | LDA04/05 +65/350/1091 | Filing/attribution, source filing ID | 1,377 /672 filing_year | Broader promised components unvalidated; intake size and component contracts block next release (nullable reference preservation is now implemented) |
 | Prime / prime_contracts | 40 +archive/as-of/corrections; transaction extracts | Transaction key; business/owner roles distinct | 47,599 /55,014 action date | Identity history and nonadditive amounts |
 | Subcontracting / subawards | 20 +121/910/911 | Subaward/report key; prime/sub CE separate | 6,306 /2,049 subaward date | Role contract and repeats |
 | Native-Owned / native_owned_businesses | 330 +publication/date stages; directories | business_source_id assertion, not unique legal firm | Current register | 523 accuracy holds,19 permission unchecked; R7 blocked |
@@ -480,6 +483,16 @@ or code stamp. Deployment artifact retention is one day; S3 sync deletes removed
 assets. Bucket versioning and recoverability are unknown. Server README's blanket
 in-memory claim is stale relative to `server/DATABASE.md` and PostgreSQL code.
 
+The final storage correction rejects colon-bearing components before filesystem
+probing, covering Windows drive-relative names and NTFS alternate streams on every
+platform. Three regression inputs were accepted by the old helper; a fourth
+failed only in the later filesystem probe. All four now fail at the component
+boundary. Existing release dataset/digest validation already rejected these names,
+so this is helper hardening, not a claimed prior customer-download exploit.
+Local focused storage checks: 7 passed; documentation checks: 7 passed. Ubuntu
+runs all 464 tests, including real symlinks, without a weakened safety gate.
+Valid release semantics and transform version are unchanged.
+
 ## Evidence appendix: storage and retention
 
 Read-only Windows discovery: C NTFS 506,332,180,480 bytes total,
@@ -626,6 +639,10 @@ could silently replace the shared environment.
 
 ## Evidence appendix: exact current implementation paths
 
+The Lumecon branch documentation head is
+`f882fb14ab9179b287222b27b33cb6462378e6e1`; its tested runtime remains
+`505a42dd1f60d66af7cfbf05b295c4c3b03ce57f`.
+
 The current Cedar continuation is fixed through
 `c0263d8fbed32121207c40499ea601abba4d7194`, pushed to draft PR #122.
 Its local full suite passes 338 checks (306 passed, 32 database skips), with 80%
@@ -647,14 +664,18 @@ passes all gates for the same correction.
 | `a4eac8e7745d2d9fe471921039953c6cfe7ac89b` | `code/521_inventory.py`, `code/build.py`, `docs/schema/inventory.json`, `server/tests/test_pipeline_registration.py`: distinguish runtime evidence from references; pin all identified projection authorities and reject observed drift |
 | `3cf2583af9cd07e52dd1605659a319c242b54a61` | `server/cedar_press/repository.py`, `server/tests/test_release_download.py`, `server/tests/test_lumecon_contract.py`, `server/tests/fixtures/lumecon_release_contract.json`: require the catalog's manifest digest, prove coherent tampering fails, refresh only fictional catalog pins |
 | `c0263d8fbed32121207c40499ea601abba4d7194` | `server/cedar_press/app.py`, `server/tests/test_release_download.py`: recheck current subscriber before artifact access, deny stale pro cookies after downgrade/removal, fail closed on lookup failure with redacted audit; real Postgres regression included |
+| Lumecon `f882fb14ab9179b287222b27b33cb6462378e6e1` | `README.md`: distinguish real isolated candidate rehearsals from unapproved production releases; no runtime change |
+| Lumecon `505a42dd1f60d66af7cfbf05b295c4c3b03ce57f` | `src/lumecon_data/storage.py`, `tests/test_storage.py`, `README.md`: reject drive-relative/alternate-stream components portably; regression fails before the change, passes afterward and in full Ubuntu CI |
 | Lumecon `2ce2f9a884cb08a013d6a800e1fd34f6547be360` | `src/lumecon_data/catalog.py`, `src/lumecon_data/api.py`, `tests/test_catalog.py`, `tests/test_api.py`, `docs/data-contracts.md`: one safe manifest projection, catalog digest and API agreement, additive compatibility rule |
 
 The 13-path core commit contains no candidate data or runtime credentials. This
 packet and `data/cedar/README.md` were committed as
 `8f2797797f0f5f3949a4fa73b02e8dd5e41ac3fe`. The shipping-runbook follow-up
 aligns its operating instructions with these proofs; its exact paths are
-`docs/SHIPPING_RUNBOOK.md` and this packet. The draft PR head identifies that
-documentation closeout while the runtime range remains independently reviewable.
+`docs/SHIPPING_RUNBOOK.md` and this packet. The draft PR head identifies the final
+packet/README receipt update while the runtime range remains independently reviewable.
+The final update adds the portable-storage CI receipt and clarifies that a snapshot
+pilot does not certify an acquisition rebuild when workspace inputs are missing.
 
 ## Evidence appendix: exact foundation implementation paths
 
@@ -933,10 +954,11 @@ have reproduced focused evidence; the standalone `code/build_test.py` passes
 all 3 refusal tests and `code/521_inventory.py check-scripts` passes; reference-preservation provenance is corrected.
 
 The implementation range is fixed through Cedar `c0263d8`; both Ubuntu workflows
-pass, including current-account downgrade/deletion refusal. Lumecon `2ce2f9a`
-passed its full gates. This documentation
+pass, including current-account downgrade/deletion refusal. Lumecon `505a42d`
+passed its full gates. Both real rehearsals passed again against this final storage
+revision, with identical release IDs and artifact hashes. This documentation
 closeout is separate from the fixed implementation range. Production
 configuration, frontend full-download integration and remaining collection coverage
 stay separate launch gates. Neither proof authorizes publication or production changes.
 
-2026-09-24 04:14 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.
+2026-09-24 04:25 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.
