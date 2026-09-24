@@ -173,10 +173,12 @@ def read_external(inputs: gg.Inputs, root: Path | None, rel: str):
     label = "4wheeler/casino_employment_validation/" + rel
     p = (root / rel) if root else None
     if p is None or not p.is_file():
-        inputs.receipts[label] = {"path": label, "status": "ABSENT"}
+        inputs.receipts[label] = {"path": label, "status": "ABSENT",
+                                  "source": str(p.resolve()) if p is not None else ""}
         return [], []
     raw = p.read_bytes()
-    inputs.receipts[label] = {"path": label, "sha256": hashlib.sha256(raw).hexdigest(),
+    inputs.receipts[label] = {"path": label, "source": str(p.resolve()),
+                              "sha256": hashlib.sha256(raw).hexdigest(),
                               "bytes": len(raw), "status": "READ"}
     reader = csv.DictReader(io.StringIO(raw.decode("utf-8-sig", errors="strict"), newline=""))
     rows = list(reader)
@@ -255,7 +257,7 @@ LABOR_CONTRACT = {
         "period_type": "Meaning of period: OSHA filing year, Form 5500 dataset year, NLRB tally date, LODES year",
         "outcome": "NLRB tally majority only (for/against/tie); not a certification",
         "cedar_uid": "Native entity (CE) from an existing resolved link only; blank if unresolved",
-        "gaming_facility_id": "Facility id via gaming_grove.facility_id_for(cedar_place_id), only where the source row already linked a facility",
+        "gaming_facility_id": "Facility id as resolved by 1201 gaming_facility_crosswalk (mapped, or merged survivor), only where the source row already carried a legacy facility",
         "employer_name_as_reported": "Company / plan sponsor / NLRB employer exactly as filed",
         "establishment_or_unit_as_reported": "Establishment name, plan name or bargaining-unit description as filed",
         "reported_state": "State on the source record",
@@ -329,7 +331,7 @@ ADV_CONTRACT = {
         "source_event_type": "registered_lobbying / tribal_consultation / regulatory_comment / congressional_testimony",
         "event_date": "Event or posting date as the Advocacy table records it",
         "link_target_type": "gaming_facility / enterprise / cedar_uid / compact / regulatory_event / topic_only",
-        "target_id": "Id of the linked Gaming object (facility via facility_id_for, CEDAR-NEST, CE uid, compact_id) or the primary topic for topic_only",
+        "target_id": "Id of the linked Gaming object (facility via 1201 crosswalk, CEDAR-NEST, CE uid, compact_id) or the primary topic for topic_only",
         "link_basis": "Rule that made the link (issue code, matched term, attribution method, facility/compact rule)",
         "evidence_text": "Short span of the source text that evidences gaming relevance or the target",
         "topics": "Pipe-joined topics: gaming|compacts|land|taxation|regulation|sports_betting|environmental_review|facilities|enterprises",
@@ -422,9 +424,54 @@ def entity_key(s: str) -> str:
 
 
 # ---------------------------------------------------------------- shared lookups
-def load_facilities(inputs: gg.Inputs):
-    """legacy facility_id -> (cedar_place_id, cedar_uid, name, state, city)."""
+FACILITY_CROSSWALK = "gaming_facility_crosswalk.csv"
+XW_ABSENT_FLAG = "FACILITY_CROSSWALK_1201_ABSENT_NO_FACILITY_LINK"
+XW_DISPOSITION_FLAGS = {
+    "merged_into": "LEGACY_FACILITY_MERGED_INTO_SURVIVOR_PER_1201",
+    "unresolved": "FACILITY_UNRESOLVED_PER_1201",
+    "not_a_gaming_facility": "LEGACY_RECORD_NOT_A_GAMING_FACILITY_PER_1201",
+}
+
+
+def load_facility_crosswalk(inputs: gg.Inputs, out_dir):
+    """1201 is the facility authority. Its crosswalk (written earlier in the
+    same components run) disposes every legacy facility_id exactly once:
+    mapped -> its facility; merged_into -> the survivor; unresolved /
+    not_a_gaming_facility -> no facility. Returns None when absent: a
+    standalone run then emits NO facility links rather than falling back to a
+    private legacy->place mapping that 1201 may have overruled."""
+    p = Path(out_dir) / FACILITY_CROSSWALK
+    label = "components/" + FACILITY_CROSSWALK
+    if not p.is_file():
+        inputs.receipts[label] = {"path": label, "scope": "candidate_component", "status": "ABSENT"}
+        return None
+    raw = p.read_bytes()
+    # Relative to the candidate root, not absolute: the output root's own
+    # name must not enter the receipt, or two identical builds differ.
+    inputs.receipts[label] = {"path": label, "scope": "candidate_component",
+                              "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "status": "READ"}
+    rows = list(csv.DictReader(io.StringIO(raw.decode("utf-8-sig"), newline="")))
+    inputs.receipts[label]["rows"] = len(rows)
+    out = {}
+    for r in rows:
+        if r.get("key_scheme") != "legacy_facility_id":
+            continue
+        disp = r.get("disposition", "")
+        if disp == "mapped":
+            gfid, flag = r.get("gaming_facility_id", ""), ""
+        elif disp == "merged_into":
+            gfid, flag = r.get("merged_into_gaming_facility_id", ""), XW_DISPOSITION_FLAGS[disp]
+        else:
+            gfid, flag = "", XW_DISPOSITION_FLAGS.get(disp, "FACILITY_DISPOSITION_UNKNOWN_PER_1201")
+        out[r["legacy_facility_id"]] = (gfid, flag)
+    return out
+
+
+def load_facilities(inputs: gg.Inputs, out_dir=None):
+    """legacy facility_id -> (cedar_place_id, cedar_uid, name, state, city,
+    gfid = the facility 1201 resolves it to, xw_flag)."""
     _, rows = inputs.clean("gaming_facilities.csv")
+    xw = load_facility_crosswalk(inputs, out_dir) if out_dir is not None else None
     out = {}
     for r in rows:
         fid = (r.get("facility_id") or "").strip()
@@ -436,18 +483,25 @@ def load_facilities(inputs: gg.Inputs):
                     "name": r.get("facility_name", ""), "state": (r.get("state") or "").strip().upper(),
                     "city": norm(r.get("city", "")),
                     "duplicate_of": (r.get("duplicate_of_facility_id") or "").strip()}
+        if xw is None:
+            out[fid]["gfid"], out[fid]["xw_flag"] = "", XW_ABSENT_FLAG
+        else:
+            out[fid]["gfid"], out[fid]["xw_flag"] = xw.get(fid, ("", "LEGACY_FACILITY_ABSENT_FROM_1201_CROSSWALK"))
     return out
 
 
 def place_facility(facilities, legacy_fid: str, row_place: str = ""):
-    """Facility id ONLY through the legacy facility_id -> cedar_place_id mapping
-    in gaming_facilities.csv. Returns (gaming_facility_id, flag)."""
+    """Facility id ONLY through 1201's crosswalk disposition of the legacy
+    facility_id the source row already carried. Returns (gaming_facility_id,
+    flag); the legacy key itself stays in legacy_facility_id (internal)."""
+    if not legacy_fid:
+        return "", ""
     f = facilities.get(legacy_fid)
-    if not f or not f["place"]:
-        return "", "FACILITY_UNRESOLVED_NO_PLACE_ID" if legacy_fid else ""
-    if row_place and row_place != f["place"]:
+    if not f:
+        return "", "LEGACY_FACILITY_ID_NOT_IN_GAMING_FACILITIES"
+    if row_place and f["place"] and row_place != f["place"]:
         return "", "FACILITY_PLACE_ID_DISAGREES_WITH_GAMING_FACILITIES"
-    return gg.facility_id_for(f["place"]), ""
+    return f["gfid"], f["xw_flag"]
 
 
 def load_neid_crosswalk(inputs: gg.Inputs):
@@ -763,8 +817,7 @@ def nlrb_evidence(r, facilities_by_name, neid_to_ce):
             method = "dba_brand_equals_cedar_facility_name_same_state"
             if f["city"] and city and f["city"] != city:
                 method += ";city_differs"
-            return (f["cedar_uid"], gg.facility_id_for(f["place"]), fid, method,
-                    "medium", "")
+            return (f["cedar_uid"], f["gfid"], fid, method, "medium", "")
     self_id = bool(TRIBAL_SELF_ID_RE.search(employer))
     tid = (r.get("tribe_id") or "").strip()
     if self_id and tid and r.get("resolution") == "matched":
@@ -791,9 +844,11 @@ def build_nlrb(inputs, fw_root, facilities, neid_to_ce, withheld, coverage, lega
         return []
     by_name = defaultdict(list)
     for fid, f in facilities.items():
-        if f["place"] and f["cedar_uid"] and not f["duplicate_of"]:
-            by_name[(fkey(f["name"]), f["state"])].append((fid, f))
+        if f["cedar_uid"] and not f["duplicate_of"]:
             by_name[("__uid__", f["cedar_uid"])].append(f)
+        # Brand route only through a facility 1201 resolves (mapped/merged).
+        if f["gfid"] and f["cedar_uid"] and not f["duplicate_of"]:
+            by_name[(fkey(f["name"]), f["state"])].append((fid, f))
     out, reasons, seen = [], Counter(), Counter()
     for r in rows:
         case = (r.get("Case Number") or "").strip()
@@ -922,7 +977,7 @@ def build_advocacy(inputs, facilities, withheld, coverage, legacy_report):
     fac_by_uid = defaultdict(list)
     owner_names = {u: " ".join(sorted(v)) for u, v in facility_owner_names(inputs).items()}
     for fid, f in facilities.items():
-        if not (f["place"] and f["cedar_uid"]) or f["duplicate_of"]:
+        if not (f["gfid"] and f["cedar_uid"]) or f["duplicate_of"]:
             continue
         # Brand core: the facility name minus generic words. A single-token
         # core must be long and must not be a word of the owner's own name
@@ -936,7 +991,7 @@ def build_advocacy(inputs, facilities, withheld, coverage, legacy_report):
         owner_words = set(norm(owner_names.get(f["cedar_uid"], "")).split())
         free = [t for t in core if t not in owner_words and t not in NON_BRAND_WORDS and len(t) >= 4]
         if core and free:
-            fac_by_uid[f["cedar_uid"]].append((f["place"], " ".join(core)))
+            fac_by_uid[f["cedar_uid"]].append((f["gfid"], " ".join(core)))
     for u in fac_by_uid:
         fac_by_uid[u] = sorted(set(fac_by_uid[u]))
     _, nest = inputs.clean("nest_enterprises.csv", required=False)
@@ -990,9 +1045,9 @@ def build_advocacy(inputs, facilities, withheld, coverage, legacy_report):
                                  link_basis="; ".join(basis) + f"; client attributed by Advocacy collection ({r.get('attribution_method', '')})",
                                  evidence_text=evidence, confidence=conf_attr, review_status="machine_matched"))
             text_n = f" {norm(text)} "
-            for place, name_n in facility_targets(text_n, uid, fac_by_uid):
+            for gfid, name_n in facility_targets(text_n, uid, fac_by_uid):
                 links.append(adv_row(**common, link_target_type="gaming_facility",
-                                     target_id=gg.facility_id_for(place),
+                                     target_id=gfid,
                                      link_basis=f"issue text names Cedar facility '{name_n}' of the same client cedar_uid",
                                      evidence_text=span(text, re.search(r"(?i)" + r"\W+".join(map(re.escape, name_n.split())), text)) if re.search(r"(?i)" + r"\W+".join(map(re.escape, name_n.split())), text) else name_n,
                                      confidence="medium", review_status="machine_matched"))
@@ -1144,7 +1199,11 @@ def build(inputs: gg.Inputs, out_dir: Path, fourwheeler_root: Path | None = FOUR
     notes: list[str] = []
     legacy_report: dict = {}
 
-    facilities = load_facilities(inputs)
+    facilities = load_facilities(inputs, out_dir)
+    if all(f["xw_flag"] == XW_ABSENT_FLAG for f in facilities.values()):
+        notes.append("1201 gaming_facility_crosswalk.csv absent from the output dir: standalone run, "
+                     "NO facility links emitted (no fallback to a private legacy->place mapping).")
+    coverage["facility_resolution_source"] = "1201 " + FACILITY_CROSSWALK
     fh, frows = inputs.clean("gaming_facilities.csv")
     legacy_prefix_scan("data/clean/gaming_facilities.csv", fh, frows, legacy_report)
     neid_to_ce = load_neid_crosswalk(inputs)

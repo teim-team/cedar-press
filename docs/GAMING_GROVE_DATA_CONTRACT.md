@@ -1038,7 +1038,7 @@ Build: `py -3 code/build.py candidate gaming --input-root <Cedar data root> --ou
 | 6 | `source_event_type` | `public_derived` | yes | registered_lobbying / tribal_consultation / regulatory_comment / congressional_testimony |
 | 7 | `event_date` | `public_official` | yes | Event or posting date as the Advocacy table records it |
 | 8 | `link_target_type` | `public_derived` | yes | gaming_facility / enterprise / cedar_uid / compact / regulatory_event / topic_only |
-| 9 | `target_id` | `public_derived` | yes | Id of the linked Gaming object (facility via facility_id_for, CEDAR-NEST, CE uid, compact_id) or the primary topic for topic_only |
+| 9 | `target_id` | `public_derived` | yes | Id of the linked Gaming object (facility via 1201 crosswalk, CEDAR-NEST, CE uid, compact_id) or the primary topic for topic_only |
 | 10 | `link_basis` | `public_derived` | yes | Rule that made the link (issue code, matched term, attribution method, facility/compact rule) |
 | 11 | `evidence_text` | `public_official` | yes | Short span of the source text that evidences gaming relevance or the target |
 | 12 | `topics` | `public_derived` | yes | Pipe-joined topics: gaming\|compacts\|land\|taxation\|regulation\|sports_betting\|environmental_review\|facilities\|enterprises |
@@ -1092,7 +1092,7 @@ Build: `py -3 code/build.py candidate gaming --input-root <Cedar data root> --ou
 | 13 | `period_type` | `public_derived` | yes | Meaning of period: OSHA filing year, Form 5500 dataset year, NLRB tally date, LODES year |
 | 14 | `outcome` | `public_derived` | yes | NLRB tally majority only (for/against/tie); not a certification |
 | 15 | `cedar_uid` | `public_derived` | yes | Native entity (CE) from an existing resolved link only; blank if unresolved |
-| 16 | `gaming_facility_id` | `public_derived` | yes | Facility id via gaming_grove.facility_id_for(cedar_place_id), only where the source row already linked a facility |
+| 16 | `gaming_facility_id` | `public_derived` | yes | Facility id as resolved by 1201 gaming_facility_crosswalk (mapped, or merged survivor), only where the source row already carried a legacy facility |
 | 17 | `employer_name_as_reported` | `public_official` | yes | Company / plan sponsor / NLRB employer exactly as filed |
 | 18 | `establishment_or_unit_as_reported` | `public_official` | yes | Establishment name, plan name or bargaining-unit description as filed |
 | 19 | `reported_state` | `public_official` | yes | State on the source record |

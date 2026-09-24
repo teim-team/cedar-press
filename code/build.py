@@ -1195,7 +1195,12 @@ def cmd_grove_candidate(args) -> int:
         # A receipt may name an input outside the root by an absolute `source`;
         # a bare label that resolves nowhere cannot be rechecked and is named
         # as such rather than reported as a changed input.
-        path = Path(item["source"]) if item.get("source") else source / item["path"]
+        # An earlier component's output (scope candidate_component) is
+        # recorded relative to the candidate root.
+        if item.get("scope") == "candidate_component":
+            path = target / item["path"]
+        else:
+            path = Path(item["source"]) if item.get("source") else source / item["path"]
         if item.get("status") == "ABSENT":
             if path.exists():
                 changed.append(item["path"])

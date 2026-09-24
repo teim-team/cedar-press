@@ -35,6 +35,9 @@ SAGINAW = "CE-0019W-SN"  # Saginaw Chippewa
 MORONGO = "CE-00178-Q1"
 PLACE_FOX = "CEDAR-PLACE-000674-N2"
 PLACE_SOAR = "CEDAR-PLACE-000192-Y0"
+PLACE_NOTGAMING = "CEDAR-PLACE-000139-PK"
+PLACE_MERGED_LEGACY = "CEDAR-PLACE-000140-AA"
+PLACE_SURVIVOR = "CEDAR-PLACE-000529-P9"
 
 
 def write_csv(path: Path, rows: list[dict], header: list[str] | None = None):
@@ -64,6 +67,12 @@ def make_fixture(root: Path) -> tuple[Path, Path]:
         {"facility_id": "CCP-25600", "cedar_place_id": PLACE_SOAR, "cedar_uid": SAGINAW,
          "facility_name": "Soaring Eagle Casino & Resort", "state": "MI", "city": "Mount Pleasant",
          "tribe": "Saginaw Chippewa", "tribe_canonical_name": "Saginaw Chippewa Indian Tribe"},
+        # 1201 disposes these two legacy rows: one is not a gaming facility,
+        # one is merged into a survivor with a DIFFERENT place id.
+        {"facility_id": "VP-0002", "cedar_place_id": PLACE_NOTGAMING, "cedar_uid": MASH,
+         "facility_name": "Pequot Smoke Shop", "state": "CT", "city": "Mashantucket"},
+        {"facility_id": "VP-0133", "cedar_place_id": PLACE_MERGED_LEGACY, "cedar_uid": MASH,
+         "facility_name": "Foxwoods Bingo", "state": "CT", "city": "Mashantucket"},
     ], ["facility_id", "cedar_place_id", "cedar_uid", "facility_name", "state", "city", "tribe",
         "tribe_canonical_name", "duplicate_of_facility_id"])
     write_csv(clean / "cedar_entity_identity_crosswalk.csv", [
@@ -99,6 +108,16 @@ def make_fixture(root: Path) -> tuple[Path, Path]:
         {"observation_id": "EMP-LODES-000001", "facility_id": "CCP-10600", "cedar_place_id": PLACE_FOX,
          "year": "2022", "employment": "5000", "measurement_type": "LODES_BLOCK_WORKPLACE_JOBS",
          "source_quote": 'w_geocode="090110000000001"; C000="5000"; CNS17="4000"; CNS18="500"',
+         "source_record": "CT_wac.csv.gz", "fetched_date": "2026-08-07", "state": "CT", "cedar_uid": MASH,
+         "match_rule": "facility_lat_lon_geocoded_to_2020_block"},
+        {"observation_id": "EMP-LODES-000002", "facility_id": "VP-0002", "cedar_place_id": PLACE_NOTGAMING,
+         "year": "2022", "employment": "40", "measurement_type": "LODES_BLOCK_WORKPLACE_JOBS",
+         "source_quote": 'w_geocode="090110000000002"; C000="40"; CNS17="0"',
+         "source_record": "CT_wac.csv.gz", "fetched_date": "2026-08-07", "state": "CT", "cedar_uid": MASH,
+         "match_rule": "facility_lat_lon_geocoded_to_2020_block"},
+        {"observation_id": "EMP-LODES-000003", "facility_id": "VP-0133", "cedar_place_id": PLACE_MERGED_LEGACY,
+         "year": "2022", "employment": "70", "measurement_type": "LODES_BLOCK_WORKPLACE_JOBS",
+         "source_quote": 'w_geocode="090110000000003"; C000="70"; CNS17="60"',
          "source_record": "CT_wac.csv.gz", "fetched_date": "2026-08-07", "state": "CT", "cedar_uid": MASH,
          "match_rule": "facility_lat_lon_geocoded_to_2020_block"},
         {"observation_id": "EMP-DOC-000001", "year": "2026", "employment": "1075",
@@ -175,6 +194,27 @@ def make_fixture(root: Path) -> tuple[Path, Path]:
     return root, fw
 
 
+def write_1201_crosswalk(out_dir: Path):
+    """What 1201 writes into the same components dir before 1203 runs."""
+    fx = gg.facility_id_for
+    rows = [
+        {"legacy_facility_id": "CCP-10600", "key_scheme": "legacy_facility_id", "disposition": "mapped",
+         "gaming_facility_id": fx(PLACE_FOX)},
+        {"legacy_facility_id": "CCP-10600", "key_scheme": "cedar_place_id", "disposition": "mapped",
+         "gaming_facility_id": fx(PLACE_FOX)},
+        {"legacy_facility_id": "CCP-25600", "key_scheme": "legacy_facility_id", "disposition": "mapped",
+         "gaming_facility_id": fx(PLACE_SOAR)},
+        {"legacy_facility_id": "VP-0002", "key_scheme": "legacy_facility_id",
+         "disposition": "not_a_gaming_facility", "gaming_facility_id": ""},
+        {"legacy_facility_id": "VP-0133", "key_scheme": "legacy_facility_id", "disposition": "merged_into",
+         "gaming_facility_id": fx(PLACE_SURVIVOR), "merged_into_gaming_facility_id": fx(PLACE_SURVIVOR)},
+    ]
+    write_csv(out_dir / "gaming_facility_crosswalk.csv", rows,
+              ["legacy_facility_id", "key_scheme", "disposition", "gaming_facility_id",
+               "merged_into_gaming_facility_id"])
+    return {r["gaming_facility_id"] for r in rows if r["gaming_facility_id"]}
+
+
 def rows_of(path: Path):
     with path.open(encoding="utf-8", newline="") as fh:
         return list(csv.DictReader(fh))
@@ -187,6 +227,7 @@ class LaneF(unittest.TestCase):
         base = Path(cls.tmp.name)
         cls.root, cls.fw = make_fixture(base / "in")
         cls.out = base / "out"
+        cls.xw_ids = write_1201_crosswalk(cls.out)
         cls.result = M.build(gg.Inputs(cls.root), cls.out, cls.fw)
         cls.labor = rows_of(cls.out / M.LABOR_TABLE)
         cls.links = rows_of(cls.out / M.ADV_TABLE)
@@ -257,7 +298,7 @@ class LaneF(unittest.TestCase):
         self.assertFalse(any("EMP-DOC" in r["legacy_observation_ids"] for r in self.labor))
         self.assertEqual(self.result["withheld"].get("excluded_to_lane_E_projected"), 1)
         lodes = [r for r in self.labor if r["source_system"] == "census_lodes_wac"]
-        self.assertEqual(len(lodes), 2)
+        self.assertEqual(len(lodes), 6)
         self.assertTrue(all(r["rights_class"] not in gg.PUBLIC_RIGHTS for r in lodes))
         _, pub = gg.public_projection(M.LABOR_TABLE, M.LABOR_HEADER, self.labor,
                                       M.LABOR_CONTRACT["field_rights"])
@@ -307,6 +348,7 @@ class LaneF(unittest.TestCase):
     # --- determinism and the ID hold
     def test_rebuild_is_byte_identical(self):
         out2 = Path(self.tmp.name) / "out2"
+        write_1201_crosswalk(out2)
         M.build(gg.Inputs(self.root), out2, self.fw)
         for t in (M.LABOR_TABLE, M.ADV_TABLE):
             a = hashlib.sha256((self.out / t).read_bytes()).hexdigest()
@@ -320,6 +362,42 @@ class LaneF(unittest.TestCase):
                 M.labor_row(source_system="dol_form5500", source_record_id="x", measure="m")
         finally:
             os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
+
+    # --- 1201 is the facility authority
+    def test_facilities_resolved_only_through_1201_crosswalk(self):
+        used = {r["gaming_facility_id"] for r in self.labor if r["gaming_facility_id"]}
+        used |= {r["target_id"] for r in self.links if r["link_target_type"] == "gaming_facility"}
+        self.assertTrue(used)
+        self.assertLessEqual(used, self.xw_ids)          # no dangling facility refs
+        self.assertNotIn(gg.facility_id_for(PLACE_NOTGAMING), used)
+        self.assertNotIn(gg.facility_id_for(PLACE_MERGED_LEGACY), used)
+        lod = {r["legacy_facility_id"]: r for r in self.labor
+               if r["source_system"] == "census_lodes_wac" and r["measure"] == "block_total_jobs_all_employers"}
+        self.assertEqual(lod["VP-0002"]["gaming_facility_id"], "")
+        self.assertIn("LEGACY_RECORD_NOT_A_GAMING_FACILITY_PER_1201", lod["VP-0002"]["flags"])
+        self.assertEqual(lod["VP-0133"]["gaming_facility_id"], gg.facility_id_for(PLACE_SURVIVOR))
+        self.assertIn("LEGACY_FACILITY_MERGED_INTO_SURVIVOR_PER_1201", lod["VP-0133"]["flags"])
+
+    def test_standalone_run_without_crosswalk_emits_no_facility_links(self):
+        out3 = Path(self.tmp.name) / "standalone"
+        res = M.build(gg.Inputs(self.root), out3, self.fw)
+        labor = rows_of(out3 / M.LABOR_TABLE)
+        links = rows_of(out3 / M.ADV_TABLE)
+        self.assertFalse(any(r["gaming_facility_id"] for r in labor))
+        self.assertFalse(any(r["link_target_type"] == "gaming_facility" for r in links))
+        self.assertTrue(any("NO facility links" in n for n in res["notes"]))
+        self.assertEqual(res["inputs"]["components/gaming_facility_crosswalk.csv"]["status"], "ABSENT")
+
+    def test_external_input_receipt_has_absolute_source(self):
+        rec = self.result["inputs"]["4wheeler/casino_employment_validation/data/resolved_nlrb_gaming.csv"]
+        self.assertTrue(Path(rec["source"]).is_absolute())
+        self.assertEqual(hashlib.sha256(Path(rec["source"]).read_bytes()).hexdigest(), rec["sha256"])
+        xw = self.result["inputs"]["components/gaming_facility_crosswalk.csv"]
+        # In-candidate input: relative to the candidate root, so the output
+        # root's name never enters the receipt (byte-identical reruns).
+        self.assertEqual(xw["scope"], "candidate_component")
+        self.assertNotIn("source", xw)
+        self.assertEqual(hashlib.sha256((self.out / "gaming_facility_crosswalk.csv").read_bytes()).hexdigest(), xw["sha256"])
 
     def test_duplicate_pk_refused(self):
         r = self.labor[0]
