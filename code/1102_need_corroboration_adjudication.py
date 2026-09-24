@@ -165,6 +165,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 import re
 import shutil
 import sys
@@ -173,7 +174,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 csv.field_size_limit(10_000_000)
-TODAY = date.today().isoformat()
+TODAY = date.fromisoformat(os.environ.get("CEDAR_RUN_DATE", date.today().isoformat())).isoformat()
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -182,6 +183,7 @@ except Exception:
 NEED = ROOT / "data" / "clean" / "need_enterprises.csv"
 EDGES = ROOT / "data" / "clean" / "fpds_uei_edges.csv"
 LEDGER = ROOT / "data" / "clean" / "cedar_identifier_ledger_final.csv"
+HANDLE_HISTORY = ROOT / "graveyard" / "cicd" / "cedar_handle_history.csv"
 CONFLICTS = ROOT / "data" / "staging" / "need" / "evidence_conflicts.csv"
 CONTRA = ROOT / "review" / f"need_fpds_parent_contradictions_{TODAY}.csv"
 DUPES = ROOT / "review" / f"need_name_variant_duplicates_{TODAY}.csv"
@@ -249,18 +251,63 @@ def digest(rows, fields):
     return h.hexdigest()
 
 
+def ledger_uid_bindings(ledger, history):
+    """Compare parent attributions in CE space; never compare a handle to a CE.
+
+    Legacy-only rows need a unique recorded binding. Ambiguous/unknown handles
+    remain unresolved. A contradictory explicit CE and history is not promoted.
+    """
+    aliases = {}
+    for row in history:
+        handle = (row.get("handle") or "").strip()
+        uid = (row.get("cedar_uid") or "").strip()
+        if handle and uid:
+            aliases.setdefault(handle, set()).add(uid)
+    result = {}
+    for row in ledger:
+        if row.get("identifier_type") != "UEI":
+            continue
+        uid = (row.get("cedar_uid") or "").strip()
+        handle = (row.get("tribe_id") or "").strip()
+        recorded = aliases.get(handle, set())
+        if recorded and (len(recorded) != 1 or (uid and uid not in recorded)):
+            continue
+        uid = uid or (next(iter(recorded)) if len(recorded) == 1 else "")
+        identifier = (row.get("identifier") or "").strip()
+        if uid and identifier:
+            result.setdefault(identifier, set()).add(uid)
+    return result
+
+
 def build(dry_run=False) -> int:
+    # PRECONDITION, before any read that could be mistaken for a result. 1102
+    # mutates exactly one canonical table (NEED) plus its declared diagnostics;
+    # an absent or mis-shaped flagship must stop it here rather than produce an
+    # empty enrichment.
+    for label, path, cols in (("the NEED flagship", NEED,
+                               ("enterprise_id", "owner_hub_cedar_uid")),
+                              ("the FPDS UEI edge set", EDGES, ()),
+                              ("the identifier ledger", LEDGER, ())):
+        if not path.exists():
+            print(f"  [1102] REFUSED: {label} is absent: {path}")
+            return 1
+        probe, pf = read_table(path)
+        if not probe:
+            print(f"  [1102] REFUSED: {label} is empty: {path}")
+            return 1
+        miss = [c for c in cols if c not in pf]
+        if miss:
+            print(f"  [1102] REFUSED: {label} lacks {miss}")
+            return 1
+
     rows, fields = read_table(NEED)
     base = [c for c in fields if c not in NEW]
     before = digest(rows, base)
     n_before = len(rows)
 
     ledger, _ = read_table(LEDGER)
-    uei2ent = {}
-    for r in ledger:
-        if (r.get("identifier_type") or "") == "UEI" and (r.get("tribe_id")
-                                                          or ""):
-            uei2ent.setdefault(r["identifier"], set()).add(r["tribe_id"])
+    history, _ = read_table(HANDLE_HISTORY)
+    uei2ent = ledger_uid_bindings(ledger, history)
 
     edges, _ = read_table(EDGES)
     by_uei, by_name, below = {}, {}, {}
@@ -280,7 +327,7 @@ def build(dry_run=False) -> int:
     sib = {}
     for r in rows:
         if r.get("uei"):
-            sib.setdefault(r.get("owner_hub_handle"), set()).add(r["uei"])
+            sib.setdefault(r.get("owner_hub_cedar_uid"), set()).add(r["uei"])
 
     st = {"rows": n_before, "corroboration": {}, "route": {},
           "published_uei": 0, "dupe_groups": 0, "dupe_rows": 0}
@@ -290,7 +337,7 @@ def build(dry_run=False) -> int:
     # -- duplicate name variants, measured before anything is written --------
     groups = {}
     for r in rows:
-        groups.setdefault((r.get("owner_hub_handle"),
+        groups.setdefault((r.get("owner_hub_cedar_uid"),
                            base_name(r.get("enterprise_name"))),
                           []).append(r)
     dup_of = {}
@@ -313,7 +360,7 @@ def build(dry_run=False) -> int:
             dup_of[m["enterprise_id"]] = (gid, kind, len(members), bn)
             dupes.append({
                 "group_id": gid, "variant_kind": kind,
-                "owner_hub_handle": hub,
+                "owner_hub_cedar_uid": hub,
                 "owner_hub_name": m.get("owner_hub_name"),
                 "enterprise_id": m.get("enterprise_id"),
                 "enterprise_name": m.get("enterprise_name"),
@@ -330,8 +377,8 @@ def build(dry_run=False) -> int:
 
     for r in rows:
         for c in NEW:
-            r.setdefault(c, "")
-        hub = r.get("owner_hub_handle") or ""
+            r[c] = ""
+        hub = r.get("owner_hub_cedar_uid") or ""
         uei = (r.get("uei") or "").strip()
         if uei:
             st["published_uei"] += 1
@@ -397,7 +444,7 @@ def build(dry_run=False) -> int:
             contra.append({
                 "enterprise_id": r.get("enterprise_id"),
                 "enterprise_name": r.get("enterprise_name"),
-                "need_owner_hub_handle": hub,
+                "need_owner_hub_cedar_uid": hub,
                 "need_owner_hub_name": r.get("owner_hub_name"),
                 "need_relationship": r.get("relationship"),
                 "need_evidence_class": r.get("evidence_class"),
@@ -422,7 +469,7 @@ def build(dry_run=False) -> int:
         gid, kind, nmem, bn = d
         r["duplicate_name_variant_group"] = gid
         r["duplicate_name_variant_basis"] = (
-            f"{nmem} enterprises under owner hub {r.get('owner_hub_handle')} "
+            f"{nmem} enterprises under owner hub {r.get('owner_hub_cedar_uid')} "
             f"share the parenthetical-stripped normalised name '{bn}'; the "
             f"variant is {kind}. NEED clusters on (owner hub, normalised name) "
             "and a trailing parenthetical survives normalisation, so a "
@@ -516,7 +563,7 @@ def verify(path: Path | None = None) -> int:
     sib = {}
     for r in rows:
         if r.get("uei"):
-            sib.setdefault(r.get("owner_hub_handle"), set()).add(r["uei"])
+            sib.setdefault(r.get("owner_hub_cedar_uid"), set()).add(r["uei"])
     groups = {}
     for r in rows:
         g = (r.get("duplicate_name_variant_group") or "").strip()
@@ -539,14 +586,14 @@ def verify(path: Path | None = None) -> int:
                 fails.append(("I2", eid, f"CORROBORATED on {obs} observations, "
                                          f"below the {JV_FLOOR} floor"))
             res = (r.get("fpds_parent_resolves_to") or "").strip()
-            hub = (r.get("owner_hub_handle") or "").strip()
+            hub = (r.get("owner_hub_cedar_uid") or "").strip()
             if res != hub and res != f"sibling_enterprise_of:{hub}":
                 fails.append(("I3", eid, f"CORROBORATED but the parent "
                                          f"resolves to {res!r}, not to {hub}"))
     for g, members in groups.items():
         if len(members) < 2:
             fails.append(("I4", g, "duplicate group with fewer than 2 members"))
-        keys = {(m.get("owner_hub_handle"),
+        keys = {(m.get("owner_hub_cedar_uid"),
                  base_name(m.get("enterprise_name"))) for m in members}
         if len(keys) != 1:
             fails.append(("I4", g, "group members do not share a (hub, "
@@ -558,7 +605,74 @@ def verify(path: Path | None = None) -> int:
     return 1 if fails else 0
 
 
+def fixture_selftest() -> int:
+    """Exercise the enricher with synthetic, isolated files and no private data."""
+    import tempfile
+    names = ("ROOT", "NEED", "EDGES", "LEDGER", "HANDLE_HISTORY", "CONFLICTS",
+             "CONTRA", "DUPES", "MANIFEST")
+    original = {name: globals()[name] for name in names}
+    try:
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            globals()["ROOT"] = root
+            for name in names[1:]:
+                globals()[name] = root / (name.lower() + ".csv")
+            rows = [
+                {"enterprise_id": "A", "enterprise_name": "College", "owner_hub_cedar_uid": "CE-A", "uei": "CHILD-A"},
+                {"enterprise_id": "B", "enterprise_name": "College", "owner_hub_cedar_uid": "CE-B", "uei": "CHILD-B"},
+                {"enterprise_id": "C", "enterprise_name": "Different", "owner_hub_cedar_uid": "CE-A", "uei": "CHILD-C"},
+                {"enterprise_id": "D", "enterprise_name": "Sibling", "owner_hub_cedar_uid": "CE-A", "uei": "CHILD-D"},
+            ]
+            write_table(NEED, rows, list(rows[0]))
+            edges = [
+                {"child_uei": "CHILD-A", "child_name": "College", "parent_uei": "PARENT", "parent_name": "Nation A", "n_observations": "1009"},
+                {"child_uei": "CHILD-B", "child_name": "College", "parent_uei": "CHILD-A", "parent_name": "College", "n_observations": "30"},
+                {"child_uei": "CHILD-C", "child_name": "Different", "parent_uei": "OTHER", "parent_name": "Nation B", "n_observations": "30"},
+                {"child_uei": "CHILD-D", "child_name": "Sibling", "parent_uei": "CHILD-A", "parent_name": "College", "n_observations": "30"},
+            ]
+            write_table(EDGES, edges, list(edges[0]))
+            ledger = [
+                {"identifier_type": "UEI", "identifier": "PARENT", "tribe_id": "LEGACY-A", "cedar_uid": ""},
+                {"identifier_type": "UEI", "identifier": "OTHER", "tribe_id": "LEGACY-B", "cedar_uid": "CE-B"},
+            ]
+            write_table(LEDGER, ledger, list(ledger[0]))
+            history = [{"handle": "LEGACY-A", "cedar_uid": "CE-A"}]
+            write_table(HANDLE_HISTORY, history, list(history[0]))
+            assert build() == 0
+            actual, fields = read_table(NEED)
+            by_id = {row["enterprise_id"]: row for row in actual}
+            assert by_id["A"]["fpds_parent_corroboration"] == "CORROBORATED"
+            assert by_id["A"]["fpds_parent_resolves_to"] == "CE-A"
+            assert "owner hub CE-A" in by_id["A"]["fpds_parent_corroboration_basis"]
+            assert by_id["B"]["fpds_parent_corroboration"] == "PARENT_UNRESOLVED", "cross-hub sibling must not corroborate"
+            assert by_id["C"]["fpds_parent_corroboration"] == "CONTRADICTED"
+            assert by_id["D"]["fpds_parent_resolves_to"] == "sibling_enterprise_of:CE-A"
+            assert all(not row["duplicate_name_variant_group"] for row in actual), "same name across different hubs is not a duplicate"
+            assert verify() == 0
+            assert build() == 0
+            assert read_table(NEED)[0] == actual, "rerun must be idempotent"
+            ambiguous = history + [{"handle": "LEGACY-A", "cedar_uid": "CE-B"}]
+            assert "PARENT" not in ledger_uid_bindings(ledger, ambiguous)
+            conflict = [dict(ledger[0], cedar_uid="CE-B")]
+            assert not ledger_uid_bindings(conflict, history)
+            assert "PARENT" not in ledger_uid_bindings(ledger, [])
+            # Previously computed enrichment must not survive loss of source evidence.
+            edges = [edges[2]]
+            write_table(EDGES, edges, list(edges[0]))
+            assert build() == 0
+            cleared = {row["enterprise_id"]: row for row in read_table(NEED)[0]}
+            assert cleared["A"]["fpds_parent_corroboration"] == "NO_DECLARED_PARENT"
+            assert cleared["A"]["fpds_parent_resolves_to"] == ""
+            assert cleared["A"]["fpds_parent_corroboration_route"] == ""
+        print("  [1102] fixture selftest: PASS (CE/legacy, conflicting/unknown aliases, cross-hub isolation, rerun)")
+        return 0
+    finally:
+        globals().update(original)
+
+
 def selftest() -> int:
+    if fixture_selftest():
+        return 1
     import tempfile
     rows, fields = read_table(NEED)
     if any(c not in fields for c in NEW):

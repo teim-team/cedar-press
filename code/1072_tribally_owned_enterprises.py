@@ -44,6 +44,11 @@ STAGES
   assemble  zero network. Merges every staged ownership assertion Cedar
             already holds into one normalised edge set, with the ANCSA and
             named-collision guards applied.
+  migrate-legacy
+            ONE-TIME, idempotent. Seeds data/spine/cedar_need_id_register.csv
+            from the legacy data/spine/cedar_nest_id_register.csv so no rebuild
+            can remint an issued CEDAR-NEST id. Allocates nothing. Refuses a
+            differing canonical register. Run BEFORE the first build.
   build     writes data/clean/need_enterprises.csv and
             data/clean/need_enterprise_relations.csv, minting a Cedar sub-hub
             id per enterprise.
@@ -78,7 +83,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 SCRIPT = "code/1072_tribally_owned_enterprises.py"
-BUILT = date.today().isoformat()
+BUILT = date.fromisoformat(os.environ.get("CEDAR_RUN_DATE", date.today().isoformat())).isoformat()
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"
@@ -102,6 +107,16 @@ OUT_EDGE = CLEAN / "need_enterprise_relations.csv"
 # Kept in data/spine because an identifier a customer joins on must
 # survive a staging wipe, and because it is identity, not output.
 IDREG = SPINE / "cedar_need_id_register.csv"
+#: THE LEGACY NEST ARTIFACTS. The 2026-09-10 rename (docs/NEED_RENAME_2026-09-10.md)
+#: renamed code, docs and the catalog; the physical artifacts stayed under their
+#: NEST paths. `migrate-legacy` moves them across ONCE, preserving every issued
+#: CEDAR-NEST id. These are read-only inputs and are never modified or deleted.
+LEGACY_IDREG = SPINE / "cedar_nest_id_register.csv"
+LEGACY_STAGE = CEDAR / "data" / "staging" / "nest"
+LEGACY_EDGES = LEGACY_STAGE / "ownership_edges_staged.jsonl"
+IDREG_FIELDS = ["enterprise_id", "owner_hub_cedar_uid",
+                "enterprise_name_normalized", "minted", "minted_by",
+                "minted_basis"]
 
 # ---------------------------------------------------------------------------
 # EXCLUSIONS. docs/PUBLICATION_POLICY.md - TERMS_STATED_RESTRICTIVE publishers
@@ -179,6 +194,15 @@ def read_jsonl(p) -> list:
             if line:
                 out.append(json.loads(line))
     return out
+
+
+def _disp(p) -> str:
+    """Display only. Never used to resolve or open anything."""
+    p = Path(p)
+    try:
+        return p.resolve().relative_to(CEDAR).as_posix()
+    except ValueError:
+        return p.as_posix()
 
 
 def write_csv(path: Path, cols: list, rows: list) -> None:
@@ -1495,6 +1519,118 @@ def federal_contracting_index():
     return names, ueis, cages
 
 
+def _read_idreg(path):
+    """Register rows keyed by enterprise_id, with the binding each one carries."""
+    rows = read_csv(path)
+    by_id, by_binding = {}, {}
+    for r in rows:
+        eid = (r.get("enterprise_id") or "").strip()
+        key = ((r.get("owner_hub_cedar_uid") or "").strip(),
+               (r.get("enterprise_name_normalized") or "").strip())
+        if not eid:
+            continue
+        by_id[eid] = r
+        by_binding.setdefault(key, set()).add(eid)
+    return rows, by_id, by_binding
+
+
+def stage_migrate_legacy(argv) -> int:
+    """CONTROLLED NEST-to-NEED MIGRATION. Seeds the canonical id register from
+    the legacy one so that no rebuild can ever remint an issued id.
+
+        py -3 code/1072_tribally_owned_enterprises.py migrate-legacy
+
+    It allocates NOTHING. It reads data/spine/cedar_nest_id_register.csv,
+    validates it, and writes data/spine/cedar_need_id_register.csv with every
+    binding preserved byte-for-byte in content. Run it BEFORE the first
+    `build`, because `build` reads the canonical register to decide what is
+    already bound - and an absent register means every cluster looks new.
+
+    Idempotent: a second run against an identical canonical register is a
+    no-op. A canonical register whose content DIFFERS is refused, never
+    overwritten.
+    """
+    print("=== 1072 migrate-legacy: controlled NEST-to-NEED migration ===")
+    if not LEGACY_IDREG.exists():
+        print(f"  REFUSED: the legacy register is absent: {_disp(LEGACY_IDREG)}")
+        return 1
+    legacy_rows, legacy_by_id, legacy_by_binding = _read_idreg(LEGACY_IDREG)
+    if not legacy_rows:
+        print(f"  REFUSED: the legacy register is empty: {_disp(LEGACY_IDREG)}")
+        return 1
+    missing_cols = [c for c in IDREG_FIELDS if c not in legacy_rows[0]]
+    if missing_cols:
+        print(f"  REFUSED: the legacy register lacks {missing_cols}")
+        return 1
+    conflicts = {k: v for k, v in legacy_by_binding.items() if len(v) > 1}
+    if conflicts:
+        print(f"  REFUSED: {len(conflicts)} owner/name binding(s) claim more than "
+              f"one id, e.g. {list(conflicts.items())[:2]}")
+        return 1
+    print(f"  legacy register      {len(legacy_rows):,} rows, "
+          f"{len(legacy_by_id):,} ids, {len(legacy_by_binding):,} bindings, 0 conflicts")
+
+    if IDREG.exists():
+        cur_rows, cur_by_id, _ = _read_idreg(IDREG)
+        same = (len(cur_rows) == len(legacy_rows)
+                and all(cur_by_id.get(e) == legacy_by_id.get(e) for e in legacy_by_id)
+                and set(cur_by_id) == set(legacy_by_id))
+        if same:
+            print(f"  canonical register already carries the same {len(cur_rows):,} "
+                  f"bindings - nothing to do (idempotent)")
+            return 0
+        lost = sorted(set(cur_by_id) - set(legacy_by_id))[:3]
+        print(f"  REFUSED: {_disp(IDREG)} exists and DIFFERS "
+              f"({len(cur_rows):,} rows vs {len(legacy_rows):,}); "
+              f"ids not in the legacy register: {lost}")
+        print("  a canonical register is never overwritten by this migration")
+        return 1
+
+    # The counter must already account for every issued ordinal, or a later
+    # allocate() could hand out one that is live.
+    import importlib
+    cedar_ids = importlib.import_module("cedar_ids")
+    counter = cedar_ids._load()["counters"].get("CEDAR-NEST", 0)
+    ordinals = [int(e.split("-")[2]) for e in legacy_by_id
+                if len(e.split("-")) > 2 and e.split("-")[2].isdigit()]
+    if ordinals and counter < max(ordinals):
+        print(f"  REFUSED: the CEDAR-NEST counter is {counter} but the register "
+              f"issues up to {max(ordinals)}; a mint would collide")
+        return 1
+    print(f"  CEDAR-NEST counter   {counter} (register max {max(ordinals) if ordinals else 0})")
+
+    # ATOMIC. Every check above ran before this point; the register is built
+    # under a staging name, verified there, and only then promoted with one
+    # os.replace. A failure - including a cosmetic one - can never leave a
+    # partially initialised canonical register behind.
+    staging = IDREG.with_suffix(IDREG.suffix + ".migrating")
+    try:
+        write_csv(staging, IDREG_FIELDS, legacy_rows)
+        probe, probe_by_id, probe_by_binding = _read_idreg(staging)
+        if set(probe_by_id) != set(legacy_by_id) or len(probe) != len(legacy_rows):
+            print("  REFUSED: the staged register does not match the legacy one; "
+                  "nothing promoted")
+            return 1
+        if any(probe_by_id[e] != legacy_by_id[e] for e in legacy_by_id):
+            print("  REFUSED: a staged binding differs from the legacy one; "
+                  "nothing promoted")
+            return 1
+        if any(len(v) > 1 for v in probe_by_binding.values()):
+            print("  REFUSED: the staged register carries a conflicting binding")
+            return 1
+        os.replace(staging, IDREG)
+    finally:
+        if staging.exists():
+            staging.unlink()
+    after, after_by_id, _ = _read_idreg(IDREG)
+    if set(after_by_id) != set(legacy_by_id):
+        print("  REFUSED: the promoted register does not match the legacy one")
+        return 1
+    print(f"  wrote {_disp(IDREG)}: {len(after):,} bindings preserved, 0 ids minted")
+    print("  legacy artifacts left untouched; run `build --from-legacy-staging` next")
+    return 0
+
+
 def stage_build(argv) -> int:
     import importlib
     cedar_ids = importlib.import_module("cedar_ids")
@@ -1509,9 +1645,34 @@ def stage_build(argv) -> int:
     spec.loader.exec_module(m503)
     m503.selftest()
 
-    edges = read_jsonl(EDGES_STAGED)
+    # THE STAGED EVIDENCE. `--from-legacy-staging` is the ONE explicit route to
+    # the pre-rename evidence under data/staging/nest/. An ordinary build never
+    # falls back to it: a missing NEED input fails closed, because silently
+    # building from a different evidence set is how a rebuild stops being a
+    # rebuild.
+    from_legacy = "--from-legacy-staging" in argv
+    edges_path = LEGACY_EDGES if from_legacy else EDGES_STAGED
+    if from_legacy:
+        print(f"  MIGRATION BUILD: reading the legacy staged evidence "
+              f"{_disp(edges_path)} (explicit --from-legacy-staging)")
+        if not IDREG.exists():
+            print("  REFUSED: run `migrate-legacy` first - the canonical id "
+                  "register must exist before a build, or every cluster is new")
+            return 1
+    edges = read_jsonl(edges_path)
     if not edges:
-        print("no staged edges - run `assemble` first")
+        print(f"no staged edges at {_disp(edges_path)} - run `assemble` first"
+              + (" (or check the legacy staging directory)" if from_legacy else ""))
+        return 1
+    # The preserved migration input includes upstream automated attributions.
+    # Do not let --from-legacy-staging bypass the corrected 1133 quarantine.
+    # Keep every issued ID/input intact; refuse BEFORE rebuilding outputs.
+    held = sum(e.get("source_id") == "OWNERV6" for e in edges)
+    if held:
+        print(f"REFUSED: {held} staged OWNERV6 observations remain under the "
+              "2026-09-23 systemic affiliation hold. Preserve this migration "
+              "snapshot; a corrected evidence-qualified staging release is "
+              "required before rebuilding. No outputs or IDs were changed.")
         return 1
     hubs = Hubs()
 
@@ -1523,8 +1684,9 @@ def stage_build(argv) -> int:
     # it would fuse two nations' similarly named firms.
     try:
         from rapidfuzz import fuzz
-    except Exception:                                   # noqa: BLE001
-        fuzz = None
+    except ImportError as exc:
+        print(f"REFUSED: required clustering dependency rapidfuzz is unavailable: {exc}")
+        return 1
 
     by_hub = defaultdict(list)
     for e in edges:
@@ -1659,6 +1821,10 @@ def stage_build(argv) -> int:
              r["enterprise_id"] for r in idreg_rows}
     need = [(h, norm(c)) for h, c, _e, _v in clusters
             if (h, norm(c)) not in idreg]
+    if need and from_legacy:
+        print(f"REFUSED: migration would mint {len(need)} new enterprise IDs; "
+              "review changed inputs or bindings before any write")
+        return 1
     if need:
         got = cedar_ids.allocate("CEDAR-NEST", len(need),
                                  note="NEED enterprise sub-hubs, 1072")
@@ -2082,17 +2248,12 @@ INVARIANTS = """
 
 
 def stage_verify(argv) -> int:
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(
-        "cedar_503v", str(CEDAR / "code" / "503_identity.py"))
-    m503 = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m503)
-
     ents = read_csv(OUT_ENT)
     edges = read_csv(OUT_EDGE)
     reg = {r["cedar_uid"] for r in read_csv(SPINE / "cedar_identity_register.csv")}
     fails = []
-    print("=== 1072 verify ===" + INVARIANTS)
+    print("=== 1072 structural/ID verification; not affiliation or release approval ===" + INVARIANTS)
+    print("  SYSTEMIC PUBLICATION HOLD remains: these checks do not establish source-supported affiliations.")
     if not ents:
         print("  FAIL I0  no enterprise rows")
         return 1
@@ -2100,13 +2261,21 @@ def stage_verify(argv) -> int:
     ids = [r["enterprise_id"] for r in ents]
     if len(set(ids)) != len(ids):
         fails.append(f"I1 duplicate enterprise_id ({len(ids) - len(set(ids))})")
-    bad_ck = [i for i in ids
-              if not re.match(r"^CEDAR-NEST-\d{6}-[0-9A-Z]{2}$", i)
-              or m503.check_chars(m503.encode(int(i.split("-")[2]))) != i.split("-")[3]]
+    from cedar_ids import identifier_contract, validate_identifier, IdentifierContractError
+    enterprise_contract = identifier_contract("need", "need_enterprises.csv", "enterprise_id")
+    entity_contract = identifier_contract("need", "need_enterprises.csv", "owner_hub_cedar_uid")
+    def invalid_identifier(value, contract, registered=None):
+        try:
+            validate_identifier(value, contract, registered_ids=registered)
+            return False
+        except IdentifierContractError:
+            return True
+    bad_ck = [i for i in ids if invalid_identifier(i, enterprise_contract)]
     if bad_ck:
         fails.append(f"I1 bad check characters on {len(bad_ck)}: {bad_ck[:3]}")
 
-    off = [r["enterprise_id"] for r in ents if r["owner_hub_cedar_uid"] not in reg]
+    off = [r["enterprise_id"] for r in ents
+           if invalid_identifier(r["owner_hub_cedar_uid"], entity_contract, reg)]
     if off:
         fails.append(f"I2 {len(off)} rows whose owner hub is not in the register: {off[:3]}")
 
@@ -2751,7 +2920,8 @@ def main() -> int:
     stages = {"mine": stage_mine, "assemble": stage_assemble,
               "build": stage_build, "codebook": stage_codebook,
               "conserve": stage_conserve, "verify": stage_verify,
-              "selfcheck": stage_selfcheck}
+              "selfcheck": stage_selfcheck,
+              "migrate-legacy": stage_migrate_legacy}
     if len(sys.argv) < 2 or sys.argv[1] not in stages:
         print(__doc__)
         print("stages: " + " ".join(sorted(stages)))
