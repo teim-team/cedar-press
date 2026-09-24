@@ -30,9 +30,9 @@ import importlib.util
 import json
 import sys
 import unittest
-from unittest.mock import patch
 from contextlib import ExitStack
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 CODE = ROOT / "code"
@@ -43,7 +43,8 @@ sys.path.insert(0, str(CODE))
 
 def _load_publication():
     spec = importlib.util.spec_from_file_location(
-        "cedar_publication", CODE / "cedar_publication.py")
+        "cedar_publication", CODE / "cedar_publication.py"
+    )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -67,8 +68,10 @@ REFUSED_AS_SAMPLED = {
     "federal-register": (("event_date_basis",), pub.OwedDerivation),
     "deals": (("Deal_Category", "Notes"), pub.OwedDerivation),
     "contractors": (("extent_competed",), pub.OwedDerivation),
-    "need": (("cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"),
-             pub.NEEDAffiliationPublicationHold),
+    "need": (
+        ("cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"),
+        pub.NEEDAffiliationPublicationHold,
+    ),
     # entity_id and cedar_spine_entity_id both disagree with cedar_uid on the
     # Menominee row: neither is an alias, and neither is deleted unadjudicated.
     "nonprofits": (("entity_id", "cedar_spine_entity_id"), pub.UnadjudicatedIdentifier),
@@ -106,15 +109,21 @@ def supply_owed_targets(collection: str, rows) -> set:
     rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
     built = [n["column"] for n in entry["new"] if not n.get("status")]
     supplied = set()
-    carriers = {f["column"] for f in entry["fields"]
-                if f["decision"] == "combine" and f["to"] == f["column"]}
+    carriers = {
+        f["column"]
+        for f in entry["fields"]
+        if f["decision"] == "combine" and f["to"] == f["column"]
+    }
     for f, target, _stuck in pub.owed_derivations(entry, rename, built, rows):
-        if target in [n["column"] for n in entry["new"] if not n.get("status")
-                      and n.get("from") != "rule:blank"]:
+        if target in [
+            n["column"]
+            for n in entry["new"]
+            if not n.get("status") and n.get("from") != "rule:blank"
+        ]:
             continue
         for r in rows:
             if target in carriers:
-                r[f["column"]] = ""          # folded into the carrier, for the test only
+                r[f["column"]] = ""  # folded into the carrier, for the test only
             elif (r.get(f["column"]) or "").strip() and not (r.get(target) or "").strip():
                 r[target] = f"supplied from {f['column']}"
         supplied.add(target)
@@ -134,23 +143,36 @@ def neutralised(collection: str, header, rows):
 class TestCombinedPlan(unittest.TestCase):
     def test_plan_and_build_check_joined_schema_without_matching_empty_keys(self):
         spec = importlib.util.spec_from_file_location(
-            "customer_combine_test", CODE / "1137_customer_dataset_combine.py")
+            "customer_combine_test", CODE / "1137_customer_dataset_combine.py"
+        )
         combine = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(combine)
-        contract = {"nagpra": {"tables": [
-            {"table": "flag.csv", "key_columns": ["key"]},
-            {"table": "one.csv", "key_columns": ["key"], "status": "shippable"},
-            {"table": "many.csv", "key_columns": ["key"], "status": "shippable"},
-        ]}}
+        contract = {
+            "nagpra": {
+                "tables": [
+                    {"table": "flag.csv", "key_columns": ["key"]},
+                    {"table": "one.csv", "key_columns": ["key"], "status": "shippable"},
+                    {"table": "many.csv", "key_columns": ["key"], "status": "shippable"},
+                ]
+            }
+        }
+
         class ReachedPublication(Exception):
             pass
+
         def fixture_load(path, **kwargs):
-            rows = ({"flag.csv": [{"key": "a"}, {"key": ""}],
-                     "one.csv": [{"key": "a", "detail": "supported"},
-                                 {"key": "", "detail": "must not link"}],
-                     "many.csv": [{"key": "a"}, {"key": "a"},
-                                  {"key": ""}, {"key": ""}]})[path.name]
+            rows = (
+                {
+                    "flag.csv": [{"key": "a"}, {"key": ""}],
+                    "one.csv": [
+                        {"key": "a", "detail": "supported"},
+                        {"key": "", "detail": "must not link"},
+                    ],
+                    "many.csv": [{"key": "a"}, {"key": "a"}, {"key": ""}, {"key": ""}],
+                }
+            )[path.name]
             return list(rows[0]), [dict(r) for r in rows], {}
+
         def inspect_schema(collection, header, rows, own):
             self.assertEqual(len(rows), 2)
             self.assertIn("one__detail", header)
@@ -160,14 +182,19 @@ class TestCombinedPlan(unittest.TestCase):
             self.assertEqual(rows[0]["n_many"], "2")
             self.assertEqual(rows[1]["n_many"], "0")
             raise ReachedPublication()
+
         for dry in (True, False):
             with self.subTest(dry=dry), ExitStack() as stack:
                 replacements = {
-                    "contracts": lambda: contract, "shelves": lambda: {"nagpra": "standard"},
-                    "FLAGSHIP": {"nagpra": "flag.csv"}, "find": lambda n: Path(n),
-                    "load": fixture_load, "one_per_key": lambda meta, key: meta["table"] == "one.csv",
+                    "contracts": lambda: contract,
+                    "shelves": lambda: {"nagpra": "standard"},
+                    "FLAGSHIP": {"nagpra": "flag.csv"},
+                    "find": lambda n: Path(n),
+                    "load": fixture_load,
+                    "one_per_key": lambda meta, key: meta["table"] == "one.csv",
                     "publishable_columns": lambda columns: columns,
-                    "recompute_derived": lambda *args: {}, "apply_field_map": inspect_schema,
+                    "recompute_derived": lambda *args: {},
+                    "apply_field_map": inspect_schema,
                 }
                 for key, value in replacements.items():
                     stack.enter_context(patch.object(combine, key, value))
@@ -180,21 +207,31 @@ class TestCombinedPlan(unittest.TestCase):
 class TestNeedExportHold(unittest.TestCase):
     def test_plan_and_build_stop_without_writing_even_when_cross_reference_is_blank(self):
         spec = importlib.util.spec_from_file_location(
-            "need_customer_combine_test", CODE / "1137_customer_dataset_combine.py")
+            "need_customer_combine_test", CODE / "1137_customer_dataset_combine.py"
+        )
         combine = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(combine)
         contract = {"need": {"tables": [{"table": "flag.csv", "key_columns": ["enterprise_id"]}]}}
         for dry in (True, False):
             with self.subTest(dry=dry), ExitStack() as stack:
+
                 def fixture_load(path, **kwargs):
-                    row = {"enterprise_id": "CEDAR-NEST-TEST", "cedar_uid": "CE-00001-AA",
-                           "enterprise_existing_cedar_uid": ""}
+                    row = {
+                        "enterprise_id": "CEDAR-NEST-TEST",
+                        "cedar_uid": "CE-00001-AA",
+                        "enterprise_existing_cedar_uid": "",
+                    }
                     return list(row), [row], {}
+
                 replacements = {
-                    "contracts": lambda: contract, "shelves": lambda: {"need": "pro"},
-                    "FLAGSHIP": {"need": "flag.csv"}, "find": lambda n: Path(n),
-                    "load": fixture_load, "publishable_columns": lambda columns: columns,
-                    "recompute_derived": lambda *args: {}, "apply_field_map": pub.apply_field_map,
+                    "contracts": lambda: contract,
+                    "shelves": lambda: {"need": "pro"},
+                    "FLAGSHIP": {"need": "flag.csv"},
+                    "find": lambda n: Path(n),
+                    "load": fixture_load,
+                    "publishable_columns": lambda columns: columns,
+                    "recompute_derived": lambda *args: {},
+                    "apply_field_map": pub.apply_field_map,
                 }
                 for key, value in replacements.items():
                     stack.enter_context(patch.object(combine, key, value))
@@ -227,17 +264,23 @@ class TestApplyFieldMap(unittest.TestCase):
                 self.assertTrue(result["mapped"])
                 expected = [c for c in entry["order"] if c not in result["owed"]]
                 opening = [c for c in entry["opening"] if c not in result["owed"]]
-                self.assertEqual(header[:len(opening)], opening)
+                self.assertEqual(header[: len(opening)], opening)
                 self.assertEqual(header, expected)
                 self.assertEqual(header[-1], "research_note")
                 # Nothing internal, documented, combined or derived survives,
                 # except a combine's carrier: the source that already bears
                 # the target's name (contractors' sector), kept as the target.
                 targets = {f["to"] for f in entry["fields"] if f["decision"] == "rename"}
-                carriers = {f["column"] for f in entry["fields"]
-                            if f["decision"] == "combine" and f["to"] == f["column"]}
-                gone = {f["column"] for f in entry["fields"]
-                        if f["decision"] in ("internal", "document", "combine", "derive")}
+                carriers = {
+                    f["column"]
+                    for f in entry["fields"]
+                    if f["decision"] == "combine" and f["to"] == f["column"]
+                }
+                gone = {
+                    f["column"]
+                    for f in entry["fields"]
+                    if f["decision"] in ("internal", "document", "combine", "derive")
+                }
                 gone -= targets | carriers
                 self.assertFalse(gone & set(header))
                 for r in rows:
@@ -245,7 +288,7 @@ class TestApplyFieldMap(unittest.TestCase):
                     self.assertEqual(set(r), set(header))
                 for f in entry["fields"]:
                     if f["decision"] == "rename":
-                        if f["column"] not in targets:   # a chain: the name is reused
+                        if f["column"] not in targets:  # a chain: the name is reused
                             self.assertNotIn(f["column"], header)
                         self.assertIn(f["to"], header)
                 # No prohibited name, no retired scheme's name anywhere shipped.
@@ -254,33 +297,59 @@ class TestApplyFieldMap(unittest.TestCase):
                     for r in rows:
                         self.assertIsNone(pub.RETIRED_TOKEN.search(r[c] or ""), (c, r[c]))
                 # Every retirement entry is reported with its rows.
-                self.assertEqual({r["column"] for r in result["retirement"]},
-                                 {r["column"] for r in entry["retire"]})
+                self.assertEqual(
+                    {r["column"] for r in result["retirement"]},
+                    {r["column"] for r in entry["retire"]},
+                )
 
     def test_need_affiliation_hold_survives_blank_removed_or_internal_cross_reference(self):
         from copy import deepcopy
+
         for cross_reference in ("CE-00001-AA", "", None):
             with self.subTest(cross_reference=cross_reference):
-                row = {"enterprise_id": "CEDAR-NEST-TEST", "cedar_uid": "CE-00002-AA",
-                       "owner_hub_cedar_uid": "CE-00002-AA"}
+                row = {
+                    "enterprise_id": "CEDAR-NEST-TEST",
+                    "cedar_uid": "CE-00002-AA",
+                    "owner_hub_cedar_uid": "CE-00002-AA",
+                }
                 if cross_reference is not None:
                     row["enterprise_existing_cedar_uid"] = cross_reference
                 rows, header = [row], list(row)
                 before = deepcopy((header, rows))
-                with patch.object(pub, "field_map", return_value={"need": {
-                    "fields": [{"column": "enterprise_existing_cedar_uid", "decision": "internal"}]
-                }}), self.assertRaises(pub.NEEDAffiliationPublicationHold):
+                with (
+                    patch.object(
+                        pub,
+                        "field_map",
+                        return_value={
+                            "need": {
+                                "fields": [
+                                    {
+                                        "column": "enterprise_existing_cedar_uid",
+                                        "decision": "internal",
+                                    }
+                                ]
+                            }
+                        },
+                    ),
+                    self.assertRaises(pub.NEEDAffiliationPublicationHold),
+                ):
                     pub.apply_field_map("need", header, rows, set(header))
                 self.assertEqual((header, rows), before)
-        with patch.object(pub, "field_map", return_value={}), self.assertRaises(pub.NEEDAffiliationPublicationHold):
+        with (
+            patch.object(pub, "field_map", return_value={}),
+            self.assertRaises(pub.NEEDAffiliationPublicationHold),
+        ):
             pub.apply_field_map("need", [], [], set())
         pub.assert_collection_publishable("nagpra")
 
     def test_the_singular_block_is_filled_from_the_register(self):
         reg = pub.register()
-        singular = (("contractors", "prime_contracts"), ("subcontracting", "subawards"),
-                    ("natural-resources", "resource_revenue"),
-                    ("lobbying", "native_entity_lobbying_disclosures"))
+        singular = (
+            ("contractors", "prime_contracts"),
+            ("subcontracting", "subawards"),
+            ("natural-resources", "resource_revenue"),
+            ("lobbying", "native_entity_lobbying_disclosures"),
+        )
         for coll, table in singular:
             header, rows = sample(coll, table)
             neutralised(coll, header, rows)
@@ -341,8 +410,9 @@ class TestApplyFieldMap(unittest.TestCase):
                             expected.append((uid.strip(), declared["role"]))
                 got = list(zip(cols["cedar_uids"], cols["entity_roles"], strict=True))
                 self.assertEqual(got, expected)
-                aligned = zip(cols["cedar_uids"], cols["canonical_names"],
-                              cols["entity_classes"], strict=True)
+                aligned = zip(
+                    cols["cedar_uids"], cols["canonical_names"], cols["entity_classes"], strict=True
+                )
                 for uid, name, cls in aligned:
                     if uid in reg:
                         self.assertEqual((name, cls), reg[uid])
@@ -353,8 +423,10 @@ class TestApplyFieldMap(unittest.TestCase):
                 for r in rows:
                     statuses = json.loads(r["entity_link_statuses"])
                     self.assertEqual(len(statuses), len(json.loads(r["cedar_uids"])))
-                    self.assertTrue(r["source_url"].startswith("https://www.congress.gov/bill/"),
-                                    r["source_url"])
+                    self.assertTrue(
+                        r["source_url"].startswith("https://www.congress.gov/bill/"),
+                        r["source_url"],
+                    )
             else:
                 for r in rows:
                     additional = json.loads(r["additional_institution_names"])
@@ -392,7 +464,7 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_an_alias_of_cedar_uid_is_verified_row_by_row(self):
         header, rows = sample("natural-resources", "resource_revenue")
         neutralised("natural-resources", header, rows)
-        rows[3]["recipient_entity_id"] = "CE-00000-00"      # disagrees with cedar_uid
+        rows[3]["recipient_entity_id"] = "CE-00000-00"  # disagrees with cedar_uid
         with self.assertRaises(pub.AliasDisagreement) as caught:
             pub.apply_field_map("natural-resources", header, rows, set(header))
         self.assertIn("recipient_entity_id", caught.exception.columns)
@@ -424,7 +496,7 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_a_retired_scheme_in_a_shipped_value_or_name_stops_the_dataset(self):
         header, rows = sample("contractors", "prime_contracts")
         neutralised("contractors", header, rows)
-        rows[0]["award_base_description"] = "keyed via NEID TRBF-0001"   # ships as `description`
+        rows[0]["award_base_description"] = "keyed via NEID TRBF-0001"  # ships as `description`
         # (the sample carries 'Oneida' in several cells, which must not match)
         rows[1]["awardee_name"] = "ONEIDA NATION ENTERPRISES"
         with self.assertRaises(pub.RetiredIdentifierPresent) as caught:
@@ -465,8 +537,9 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertEqual(rows[0]["business_name"], "Example Builders LLC")
         self.assertIn("certifying_authority_entity_id", header)
         self.assertNotIn("nation_id", header)
-        adjudicated = [r["column"] for r in result["retirement"]
-                       if r["disposition"] == "adjudicate"]
+        adjudicated = [
+            r["column"] for r in result["retirement"] if r["disposition"] == "adjudicate"
+        ]
         self.assertEqual(adjudicated, ["nation_id"])
         # A populated nation_id stops the dataset until it is adjudicated.
         rows2 = [dict(r) for r in rows]
@@ -478,6 +551,7 @@ class TestApplyFieldMap(unittest.TestCase):
 
     def test_a_withheld_register_name_never_falls_back_to_a_raw_name(self):
         import cedar_domain
+
         reg = pub.register()
         withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
         withheld = [uid for uid, (name, cls) in reg.items() if cls == withheld_class]
@@ -583,8 +657,10 @@ class TestApplyFieldMap(unittest.TestCase):
         supply_owed_targets("deals", rows)
         header.append("research_note")
         for r in rows:
-            r["research_note"] = ("Announced value is the Native party's consideration; "
-                                  "the project total is the whole project.")
+            r["research_note"] = (
+                "Announced value is the Native party's consideration; "
+                "the project total is the whole project."
+            )
         pub.apply_field_map("deals", header, rows, set(header) - {"research_note"})
         self.assertNotIn("Notes", header)
         self.assertIn("deal_type", header)
@@ -606,8 +682,9 @@ class TestApplyFieldMap(unittest.TestCase):
         header.append("entity_names_as_published")
         for r in rows:
             r["entity_names_as_published"] = json.dumps(["one name only"])
-        misaligned = [r for r in rows
-                      if len([u for u in r["entity_cedar_uids"].split("|") if u.strip()]) != 1]
+        misaligned = [
+            r for r in rows if len([u for u in r["entity_cedar_uids"].split("|") if u.strip()]) != 1
+        ]
         if misaligned:
             own = set(header) - {"entity_names_as_published"}
             with self.assertRaises(pub.FieldMapRefusal):
@@ -620,7 +697,7 @@ class TestApplyFieldMap(unittest.TestCase):
         header, rows = sample("legislation", "native_bills")
         rows[0]["bill_scope"] = ""
         nobody = next(r for r in rows[1:] if r["bill_scope"] == "general")
-        nobody["entity_cedar_uids"] = ""            # a general bill naming nobody
+        nobody["entity_cedar_uids"] = ""  # a general bill naming nobody
         pub.apply_field_map("legislation", header, rows, set(header))
         self.assertIn("collective_scopes", header)
         for r in rows[1:]:
@@ -636,8 +713,9 @@ class TestApplyFieldMap(unittest.TestCase):
         # The scope never fills the entity block: the general bill naming
         # nobody has an empty array of uids, not a scope code in it.
         self.assertEqual(json.loads(nobody["cedar_uids"]), [])
-        self.assertEqual(json.loads(nobody["collective_scopes"])[0]["scope"],
-                         "federally-recognized-tribes")
+        self.assertEqual(
+            json.loads(nobody["collective_scopes"])[0]["scope"], "federally-recognized-tribes"
+        )
         # A class the vocabulary does not know stops the dataset.
         header, rows = sample("legislation", "native_bills")
         rows[0]["bill_scope"] = "general"
@@ -651,23 +729,28 @@ class TestApplyFieldMap(unittest.TestCase):
         for r in rows:
             r["bill_scope"] = "general"
         rows[0]["entity_class_scope"] = ""
-        rows[1]["entity_class_scope"] = ("Federally Recognized Tribe|"
-                                         "Alaska Native Village Corporation")
-        rows[2]["entity_class_scope"] = ("Alaska Native Regional Corporation|"
-                                         "Alaska Native Village Corporation")
+        rows[1]["entity_class_scope"] = (
+            "Federally Recognized Tribe|Alaska Native Village Corporation"
+        )
+        rows[2]["entity_class_scope"] = (
+            "Alaska Native Regional Corporation|Alaska Native Village Corporation"
+        )
         rows[3]["entity_class_scope"] = "Alaska Native Village Government"
         rows[4]["entity_class_scope"] = "Intertribal Organization"
         rows[5]["entity_class_scope"] = "Native Hawaiian Organization"
         pub.apply_field_map("legislation", header, rows, set(header))
         got = [[e["scope"] for e in json.loads(r["collective_scopes"])] for r in rows[:6]]
-        self.assertEqual(got, [["indian-country"],
-                               ["federally-recognized-tribes",
-                                "alaska-native-village-corporations"],
-                               ["alaska-native-regional-corporations",
-                                "alaska-native-village-corporations"],
-                               ["alaska-native-villages"],
-                               ["intertribal-organizations"],
-                               ["native-hawaiian-organizations"]])
+        self.assertEqual(
+            got,
+            [
+                ["indian-country"],
+                ["federally-recognized-tribes", "alaska-native-village-corporations"],
+                ["alaska-native-regional-corporations", "alaska-native-village-corporations"],
+                ["alaska-native-villages"],
+                ["intertribal-organizations"],
+                ["native-hawaiian-organizations"],
+            ],
+        )
         # So does a bill_scope value the rule does not know: it is not
         # "evaluated and names none" (Codex, PR #69).
         header, rows = sample("legislation", "native_bills")
@@ -702,8 +785,13 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertIn("entity_link_status", header)
         # The Federal Register's column is owed and supplied by the terminal:
         # a supplied element outside the vocabulary is refused, by column.
-        element = {"scope": "all-tribes-everywhere", "relationship": "addressed",
-                   "as_of": None, "as_of_rule": "unknown", "basis": "x"}
+        element = {
+            "scope": "all-tribes-everywhere",
+            "relationship": "addressed",
+            "as_of": None,
+            "as_of_rule": "unknown",
+            "basis": "x",
+        }
 
         def supplied(el):
             header, rows = sample("federal-register", "consultation_events")
@@ -719,13 +807,15 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertEqual(caught.exception.columns, ["collective_scopes"])
         # Without a basis, with an unknown relationship, or a parameterised
         # scope without its parameter, likewise; a good element ships.
-        for bad in (dict(element, scope="indian-country", basis=""),
-                    dict(element, scope="indian-country", relationship="covers"),
-                    dict(element, scope="federally-recognized-tribes-in-state"),
-                    dict(element, scope="indian-country", as_of="2026"),
-                    dict(element, scope="indian-country", as_of="2026-99-99"),
-                    dict(element, scope="indian-country", as_of="2026-02-30"),
-                    dict(element, scope="indian-country", as_of_rule="record_date", as_of=None)):
+        for bad in (
+            dict(element, scope="indian-country", basis=""),
+            dict(element, scope="indian-country", relationship="covers"),
+            dict(element, scope="federally-recognized-tribes-in-state"),
+            dict(element, scope="indian-country", as_of="2026"),
+            dict(element, scope="indian-country", as_of="2026-99-99"),
+            dict(element, scope="indian-country", as_of="2026-02-30"),
+            dict(element, scope="indian-country", as_of_rule="record_date", as_of=None),
+        ):
             header, rows, own = supplied(bad)
             with self.assertRaises(pub.ScopeRefused):
                 pub.apply_field_map("federal-register", header, rows, own)
@@ -765,8 +855,11 @@ class TestApplyFieldMap(unittest.TestCase):
                 continue
             book = codebook["tables"][entry["key"]]
             listed = {f["column"] for f in book["fields"] if not f.get("add")}
-            ships = {f["column"] for f in entry["fields"]
-                     if f["decision"] in ("keep", "withhold", "rename")}
+            ships = {
+                f["column"]
+                for f in entry["fields"]
+                if f["decision"] in ("keep", "withhold", "rename")
+            }
             self.assertTrue(ships <= listed, (coll, sorted(ships - listed)))
 
 
