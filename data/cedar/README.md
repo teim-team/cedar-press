@@ -4,6 +4,62 @@ Real rows from the Cedar Press data project, in the shape this product already
 declares. **This is wired in now.** It was not when the paragraph here said so,
 and the wiring is described below.
 
+## Runtime metadata contract (takeover verification, 2026-09-23)
+
+These five small product contracts are **tracked Git inputs**. All five were already
+tracked at `b6abb374a7a40216a7648ef79fc1df9e5b471f79`, although `/data/*` ignored
+new copies. The narrow `.gitignore` exceptions now make that policy explicit;
+unapproved sibling JSON, bulk CSV, raw data and restricted decisions stay ignored.
+Do not replace these files with consumer-specific copies or regenerate missing
+release history from the latest dataset. Large data belongs in the governed
+versioned data store; this repository retains the metadata for the release it serves.
+
+| File | Authority and required inputs | Consumers | Fresh-clone and release rule |
+|---|---|---|---|
+| `codebook.json` | Curated field definitions; no JSON generator. `scripts/codebook-markdown.mjs` generates its Markdown view, not this source. | `src/features/grove/explore.js` supplies headings/record meanings; codebook and guide generators; `server/tests/test_field_map.py` and Explore tests compare approved fields. | Commit the reviewed source. Definitions cannot be reconstructed from column names alone. Generated documentation is reproducible and freshness-checked. |
+| `collections.manifest.json` | `scripts/import_cedar_manifest.py`, from `760_collection_descriptors.py` outputs, `1135_full_dataset_review_bundle.py` review manifest/samples, and `770_sample_extracts.py` flagship declarations. | `collection.js` and `server/cedar_press/collections.py`, then catalog, filters, sources, citations, downloads and API; Explore, guides, codebook, field-map, sample, release and SEO generators. | Commit the imported release snapshot. A fresh product clone can serve and test it, but cannot regenerate it without the pinned workspace descriptors and release inputs. Never substitute an empty-workspace import. The importer's `--audit` also writes; it is not a read-only verification command. |
+| `field_map.json` | Curated publication/column decisions under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`; no JSON generator. `scripts/field-map-markdown.mjs` generates its two review documents. | `code/cedar_publication.py` applies it during `1137_customer_dataset_combine.py` exports; guide/field-map generators, Explore and Python field-map tests. | Commit reviewed decisions. A clone can test fixtures and sample compatibility; proving mappings on full customer files needs the full-data release job. Do not infer a decision for an undeclared column. |
+| `releases.json` | `scripts/record-release.mjs`, using the manifest **and retained prior ledger**. | `src/features/grove/pressReleases.js`, release feed and citations, release tests; `scripts/dump-press.mjs` includes that catalog in the Python API snapshot. | Commit append-only release history. `--check` verifies current manifest/ledger consistency without rewriting history. The latest manifest cannot recreate superseded releases. |
+| `samples.published.json` | `scripts/measure-samples.mjs`, using the manifest plus Git index and matching public sample bytes. | `collection.js` and Python `collections.py` determine sample availability, then download/UI/API paths; sample and collection parity tests. | Commit the deterministic measured snapshot with its inputs. `--check` and `--selftest` distinguish committed, absent, untracked and unstaged samples. A file merely present on one machine is not a published sample. |
+
+The supported freshness surface remains `make check-generated`: codebook, Explore,
+field-map, guides, samples, release ledger and SEO checks. Both PR CI and deployment
+call it. The product build bundles the tracked contracts; it does not fetch bulk
+inputs or invent new release metadata. `pressDownload.test.js` now checks all five
+are tracked and exempted by name, and proves unrelated data remains ignored.
+`server/tests/test_collection.py` also requires all five in the index, retaining
+its existing checks for the Explore contracts.
+
+**Reproduced verification.** An independent local clone at the SHA above was
+materialized with only the proposed tracked metadata/test/attribute patch. No
+ignored full-data inputs or existing `node_modules` were copied. Windows' default
+`core.autocrlf=true` initially made four generated-text checks fail: Git blobs
+were LF, while checkout files became CRLF. Exact generated output paths now have
+`text eol=lf` in `.gitattributes`; R7 byte-preservation attributes are unchanged.
+Applying the attribute patch before first checkout reproduced all seven freshness
+checks successfully. `npm ci` and `npm run build` passed; 58 focused JavaScript
+Explore/download/release tests and 43 Python collection/UI-API parity tests passed.
+Removing the codebook ignore exception deliberately failed the new regression
+test, and restoring it returned the fixture to its original state. This used
+Node 24.21.0 and Python 3.14 on Windows; deployment and browser rehearsal were not
+performed by this metadata check. Vite still reports its existing large-chunk warning.
+
+**What those passes establish.** These files agree with the committed product
+snapshot, declared sample availability and tested JavaScript/Python consumer
+behavior. They do **not** certify the new full-data release. All twelve current
+manifest descriptors still say `v1`, updated `2026-09-04`; vintage remains
+unmeasured. The codebook explicitly says its initial meanings require confirmation
+against build scripts. The sample record reports 19 declared samples unavailable.
+The pending NEED candidate and any new NAGPRA full export must pass their own
+publication gates before these snapshots are updated together. Current deployment
+bytes and entitled full-download equivalence remain unverified here.
+
+For a new approved release, use the pinned full-data producers and importer,
+review changes to the same contracts and sample files, record the new version
+without replacing history, then run the existing generated and consumer checks
+from a clean checkout. Commit the resulting coherent metadata snapshot under the
+release authorization; do not label a passing static build a completed data release.
+
 ## Why this exists
 
 `server/cedar_press/collections.py` said it plainly:

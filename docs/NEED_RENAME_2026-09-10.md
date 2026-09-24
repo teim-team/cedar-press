@@ -36,11 +36,29 @@ datasets are ever cited side by side, the citation carries the source note.
 | corroboration record | `docs/NEST_CORROBORATION.json` | `docs/NEED_CORROBORATION.json` |
 | pipeline scripts | `code/1102_nest_*`, `1130_nest_*`, `1133_nest_*`, `1157_nest_*` | the same numbers, `_need_` |
 
-Everything the repository holds is renamed. The site catalog, the collection
-manifest, the descriptors, the release records, the dataset contracts, the
-codebook, the field map, the schema tree, the structured data in `index.html`
-and the server's press payload all read `need` now, and the test suites pass
-against it.
+The site catalog, the collection manifest, the descriptors, the release
+records, the dataset contracts, the codebook, the field map, the schema tree,
+the structured data in `index.html` and the server's press payload all read
+`need` now, and the test suites pass against it.
+
+**Corrected 2026-09-17.** The sentence above originally read "Everything the
+repository holds is renamed." That was true of code, documentation and the
+catalog and false of the data. The physical artifacts stayed under their NEST
+paths for a further week: `data/clean/nest_enterprises.csv`,
+`nest_enterprise_relations.csv`, `nest_entity_dual_role.csv`,
+`data/spine/cedar_nest_id_register.csv` and the staged evidence in
+`data/staging/nest/`. Nothing read them — all twenty-odd live consumers had been
+renamed to the `need_*` paths — so the collection's flagship was simply absent
+from disk, and every reader degraded silently to an empty table rather than
+failing.
+
+The artifact migration is a separate, controlled step: `code/1072
+migrate-legacy` seeds the canonical id register from the legacy one before any
+build can allocate, and `build --from-legacy-staging` is the single explicit
+route to the pre-rename evidence. Both were validated in isolation before being
+offered for production. The legacy artifacts are retained, untouched, and every
+issued `CEDAR-NEST-` and `NESTREL-` identifier is preserved exactly — which is
+the point of the section below.
 
 ## What did NOT change, and why
 

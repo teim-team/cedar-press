@@ -148,6 +148,26 @@ def plan_for(cid: str):
             "ambiguous": ambiguous, "blocked": blocked, "rb": rb, "en": en}
 
 
+def plan_problems(p) -> list[str]:
+    """An incomplete discovery plan is not an executable build contract."""
+    issues = []
+    if not p["tables"]:
+        issues.append("NO_TABLES: no collection tables discovered; provide pinned inputs and a declared path")
+    if not p["phase1"] and not p["phase2"]:
+        issues.append("NO_STAGES: no producers discovered; check the I/O inventory")
+    if p["ambiguous"]:
+        issues.append("AMBIGUOUS_STAGES: " + ", ".join(p["ambiguous"]))
+    if p["blocked"]:
+        issues.append("BLOCKED_STAGES: " + ", ".join(p["blocked"]))
+    for table in p["tables"]:
+        if not any(table in targets for targets in (*p["rb"].values(), *p["en"].values())):
+            issues.append("NO_PRODUCER: " + table)
+    for stage in p["phase1"] + p["phase2"]:
+        if not (HERE / stage).is_file():
+            issues.append("MISSING_STAGE: " + stage)
+    return issues
+
+
 def cmd_list(_args) -> int:
     arch = _load_architecture()
     rebuilders, enrichers = _io_map()
@@ -211,6 +231,10 @@ def cmd_plan(args) -> int:
             print(f"  {t}  ->  re-run {', '.join(CP.enrichers_to_rerun(t)[:3]) or 'unknown'}")
 
     print("\nDRY RUN. Nothing was executed.")
+    problems = plan_problems(p)
+    if problems:
+        print("REFUSED: incomplete plan\n  " + "\n  ".join(problems))
+        return 1
     print(f"To execute: py -3 code/build.py run {p['id']} --execute")
     return 0
 
@@ -220,9 +244,10 @@ def cmd_run(args) -> int:
         print("run REQUIRES --execute. Showing the plan instead.\n", file=sys.stderr)
         return cmd_plan(args)
     p = plan_for(args.collection)
-    if p["blocked"]:
-        sys.exit(f"refusing: {len(p['blocked'])} NEVER_RUN script(s) in scope. "
-                 f"Resolve by hand: {', '.join(p['blocked'])}")
+    problems = plan_problems(p)
+    if problems:
+        print("REFUSED: incomplete plan\n  " + "\n  ".join(problems), file=sys.stderr)
+        return 1
 
     order = [("rebuild", s) for s in p["phase1"]] + \
             [("enrich", s) for s in p["phase2"]]
@@ -425,10 +450,145 @@ def cmd_ship(args) -> int:
     return 0
 
 
+# The bounded NEED migration uses declared stages and independent copied inputs.
+# It cannot publish: the destination must be absent, outside the input tree.
+NEED_INPUTS = (
+    "data/spine/_id_registry.json", "data/spine/cedar_nest_id_register.csv",
+    "data/spine/cedar_identity_register.csv", "data/spine/cedar_identifier_ledger.csv",
+    "data/spine/cedar_negative_constraints.csv", "data/clean/nest_enterprises.csv",
+    "data/clean/nest_enterprise_relations.csv", "data/clean/nest_entity_dual_role.csv",
+    "data/clean/prime_contracts.csv", "data/clean/fpds_uei_cage_map.csv",
+    "data/clean/fpds_uei_edges.csv", "data/clean/cedar_identifier_ledger_final.csv",
+    "data/clean/cedar_constellation_edges.csv", "data/clean/entity_aliases.csv",
+    "data/raw/external/sba_dsbs_native_entities.csv",
+    "data/raw/external/anc_tribal_subsidiary_lookup.csv",
+    "graveyard/cicd/cedar_handle_history.csv",
+    "data/staging/nest/ownership_edges_staged.jsonl",
+)
+NEED_OUTPUTS = (
+    "data/spine/cedar_need_id_register.csv", "data/clean/need_enterprises.csv",
+    "data/clean/need_enterprise_relations.csv", "data/clean/need_entity_dual_role.csv",
+)
+
+
+def cmd_candidate(args) -> int:
+    import csv
+    import hashlib
+    import os
+    import shutil
+    import time
+    from datetime import date
+
+    source = Path(args.input_root).resolve()
+    owner = Path(args.owner_dir).resolve()
+    target = Path(args.output_root).resolve()
+    as_of = date.fromisoformat(args.as_of).isoformat()
+    if target.exists() or target.is_relative_to(source) or source.is_relative_to(target):
+        raise SystemExit("REFUSED: candidate root must be new and separate from the input root")
+    inputs = [(source / rel, rel) for rel in NEED_INPUTS]
+    for suffix in ("", "_v2", "_v3", "_v5_geocoded", "_v6_geocoded"):
+        name = "native_entity_enterprise_dataset" + suffix + ".csv"
+        inputs.append((owner / name, "data/raw/external/need_owner/" + name))
+    missing = [str(path) for path, _ in inputs if not path.is_file()]
+    if missing:
+        raise SystemExit("REFUSED: missing inputs, nothing created: " + ", ".join(missing))
+    total = sum(path.stat().st_size for path, _ in inputs)
+    if shutil.disk_usage(target.parent).free < 2 * total + 5_000_000_000:
+        raise SystemExit("REFUSED: insufficient disk for candidate and recovery headroom")
+
+    def sha(path):
+        with path.open("rb") as stream:
+            return hashlib.file_digest(stream, "sha256").hexdigest()
+
+    # Copy code, never symlink it: every stage derives its root from __file__.
+    # Previous output headers are deliberately absent from the new build tree.
+    target.mkdir()
+    for directory in ("code", "docs", "review", "logs"):
+        (target / directory).mkdir()
+    code_receipt = []
+    for path in sorted(HERE.rglob("*.py")):
+        rel = path.relative_to(HERE)
+        if "__pycache__" in rel.parts:
+            continue
+        dest = target / "code" / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, dest)
+        code_receipt.append({"path": "code/" + rel.as_posix(), "sha256": sha(dest)})
+    shutil.copy2(ROOT / "requirements.txt", target / "requirements.txt")
+    receipt = []
+    for path, rel in inputs:
+        before = sha(path)
+        dest = target / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, dest)
+        if sha(dest) != before or sha(path) != before:
+            raise SystemExit("REFUSED: input changed during copy: " + str(path))
+        receipt.append({"path": rel, "source": str(path), "sha256": before, "bytes": path.stat().st_size})
+    manifest = {"schema": "cedar.need.candidate.v1", "as_of": as_of,
+                "code": code_receipt, "inputs": receipt, "steps": [], "status": "BUILDING"}
+    manifest_path = target / "logs/need-candidate.json"
+
+    def save():
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+    env = dict(os.environ, CEDAR_RUN_DATE=as_of, CEDAR_DUCKDB_MEMORY_LIMIT="512MB",
+               CEDAR_DUCKDB_THREADS="1", CEDAR_DUCKDB_MAX_SPILL="2GB", OMP_NUM_THREADS="1")
+    stages = [
+        ["1072_tribally_owned_enterprises.py", "migrate-legacy"],
+        ["1072_tribally_owned_enterprises.py", "build", "--from-legacy-staging"],
+        ["1102_need_corroboration_adjudication.py"],
+        ["1177_retire_handle_column.py", "apply", "--only=data/clean/need_enterprises.csv,data/clean/need_enterprise_relations.csv"],
+        ["1130_need_owner_v6_reconcile.py", "build", "--owner-dir", "data/raw/external/need_owner"],
+        ["1072_tribally_owned_enterprises.py", "verify"],
+        ["1102_need_corroboration_adjudication.py", "verify"],
+        ["1130_need_owner_v6_reconcile.py", "verify", "--owner-dir", "data/raw/external/need_owner"],
+        ["1130_need_owner_v6_reconcile_test.py"],
+    ]
+    save()
+    for number, stage in enumerate(stages, 1):
+        start = time.monotonic()
+        log = target / "logs" / f"{number:02d}-{stage[0]}.log"
+        with log.open("w", encoding="utf-8") as output:
+            result = subprocess.run([sys.executable, "-B", str(target / "code" / stage[0]), *stage[1:]],
+                                    cwd=target, env=env, stdout=output, stderr=subprocess.STDOUT)
+        manifest["steps"].append({"command": stage, "exit_code": result.returncode,
+                                  "seconds": round(time.monotonic() - start, 3), "log": str(log.relative_to(target))})
+        print(f"[{number}/{len(stages)}] {stage[0]} exit {result.returncode}", flush=True)
+        if result.returncode:
+            manifest["status"] = "FAILED"
+            save()
+            return 1
+        save()
+    csv.field_size_limit(10_000_000)
+    def rows(rel):
+        with (target / rel).open(encoding="utf-8-sig", newline="") as stream:
+            return list(csv.DictReader(stream))
+    before = rows("data/spine/cedar_nest_id_register.csv")
+    after = rows(NEED_OUTPUTS[0])
+    if before != after or sha(target / "data/spine/_id_registry.json") != next(x["sha256"] for x in receipt if x["path"] == "data/spine/_id_registry.json"):
+        manifest["status"] = "FAILED_ID_CONSERVATION"
+        save()
+        return 1
+    manifest["outputs"] = [{"path": rel, "sha256": sha(target / rel), "rows": len(rows(rel))} for rel in NEED_OUTPUTS]
+    changed = [x["path"] for x in receipt if sha(target / x["path"]) != x["sha256"] or sha(Path(x["source"])) != x["sha256"]]
+    manifest["changed_inputs"] = changed
+    manifest["status"] = "FAILED_INPUT_CONSERVATION" if changed else "CANDIDATE_VERIFIED_NOT_PROMOTED"
+    save()
+    print(manifest_path)
+    return 1 if changed else 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list", help="the collections and their script counts").set_defaults(func=cmd_list)
+    candidate = sub.add_parser("candidate", help="build an isolated, unpublished NEED migration candidate")
+    candidate.add_argument("collection", choices=["need"])
+    candidate.add_argument("--input-root", required=True)
+    candidate.add_argument("--owner-dir", required=True)
+    candidate.add_argument("--output-root", required=True)
+    candidate.add_argument("--as-of", required=True)
+    candidate.set_defaults(func=cmd_candidate)
     sh = sub.add_parser("ship", help="run the documented ship chain (7 steps)")
     sh.add_argument("--execute", action="store_true",
                     help="actually run it; without this you get the chain")

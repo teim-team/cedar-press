@@ -326,10 +326,10 @@ def load_1130():
 # must not win the canonical-display-name contest against an audited filing.
 FAMILY_TO_EVIDENCE_CLASS = {
     "entity_self_published": (
-        "parent_self_published_company_list",
-        "the verification_source is the PARENT's own website, which is the "
-        "same evidence class 1072 already publishes for a parent's company "
-        "list"),
+        "owner_research_dataset_unattributed",
+        "a source-family label alone does not establish that the publisher "
+        "is this parent or that its text states this relationship; preserve "
+        "the observation without promoting it to a parent's company list"),
     "federal_registry": (
         "federal_certification_registry",
         "SBA DSBS or the IRS EO Business Master File - a federal register "
@@ -428,6 +428,20 @@ def build_context():
             need_keys, corrections)
 
 
+def affiliation_route_is_quarantined(data_sources, attribution_method):
+    """Shared admission guard for fresh imports and preserved staged evidence.
+
+    Inputs are the original owner-v6 source fields, not a generated evidence
+    class. Keep explicit historical hand rulings distinct; no new approval flag.
+    """
+    source = (data_sources or "").strip()
+    method = (attribution_method or "").strip()
+    return method != "hand" and (
+        method == "cluster_v3" or source in {
+            "irs_990_bmf_strict", "sba_dsbs_native_entities",
+            "aihec_tribal_colleges", "ch2_tribal_press_corpus"})
+
+
 def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
              need_keys, corrections):
     """-> (edges, refused, uei_held, counts). No writes."""
@@ -498,6 +512,23 @@ def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
                 refuse("NO_TRIBE_ID_ON_THE_ROW",
                        "the row names an enterprise but no owner, so it "
                        "cannot be hubbed. Source: %s" % (ds or "(none)"))
+            continue
+
+        # These upstream routes assigned tribes by automated token/crosswalk
+        # inference. A valid parent UID or a directory/IRS/SBA URL verifies
+        # neither this child-parent relationship nor its publication. Preserve
+        # the observation in owner_v6_refused.csv; do not re-emit the assertion.
+        # An explicit hand ruling remains a separate, governed input. There is
+        # no invented approval flag that could silently bypass this quarantine.
+        if affiliation_route_is_quarantined(ds, am):
+            refuse("AUTOMATED_AFFILIATION_ROUTE_QUARANTINED",
+                   "upstream route data_sources=%s attribution_method=%s "
+                   "does not demonstrate this child-parent relationship. "
+                   "The route used inferred tribal assignments; register "
+                   "resolution and generic source URLs cannot promote them. "
+                   "Held for a reviewed explicit relationship correction; "
+                   "the source record and issued identity history are retained."
+                   % (ds, am or "(blank)"))
             continue
 
         if tid not in xwalk:

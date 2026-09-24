@@ -1,5 +1,105 @@
 # Shipping runbook
 
+<!-- BEGIN CODEX-ISOLATED-CANDIDATE-RUNBOOK -->
+## Current early-access candidate procedure (2026-09-23)
+
+This section supersedes the August gaming chain below for the Codex takeover.
+That chain is retained as historical recovery documentation, not a current launch
+command. Current state and blockers belong in docs/TERMINAL_HANDOFF.md.
+
+### Systemic hold supersedes the prior candidate command
+
+The owner review exposed defective automated affiliation routes. New 1072 builds
+refuse staged OWNERV6 before output writes, including explicit legacy staging.
+The command below is retained as the reproducible historical migration path; it
+now stops deliberately until a corrected evidence-qualified staging release exists.
+Do not add a bypass or reinterpret this as a dependency failure. Completed pinned
+candidates remain recoverable ID-migration evidence, not release candidates.
+The independent publication hold remains even after the field's INTERNAL_ONLY
+ruling is implemented. No replacement affiliation is promoted automatically.
+
+### Isolated NEED build
+
+Run from Desktop/cedar-press-codex, using a NEW output root each time:
+
+```
+py -3 -B code/build.py candidate need --input-root C:/Users/esm247/Desktop/cedar-press-codex --owner-dir C:/Users/esm247/Desktop/cedar-press-codex/data/raw/external/need_owner --output-root C:/Users/esm247/cedar-takeover-checkpoint/need-candidate-NEW --as-of 2026-09-23
+```
+
+The supported runner declares NEED_INPUTS/NEED_OUTPUTS in code/build.py, copies
+pinned inputs and code into the empty output root, and executes nine real command
+stages there. Owner snapshots are copied from the explicit owner-dir. The runner
+refuses an existing or overlapping target and insufficient disk headroom. It pins
+CEDAR_RUN_DATE and constrains DuckDB memory to 512 MB, one thread and 2 GB spill.
+
+Write boundary: the new candidate root (code, copied inputs, staging, clean outputs,
+spine candidate register, diagnostics, review, docs and logs). It does not promote
+to the original Windows workspace or customer exports. Preserve the ENTIRE root
+and logs/need-candidate.json, not merely four output tables. Inputs and allocator
+hashes must remain unchanged; register rows/bindings and all issued IDs survive.
+No missing dependency or empty plan may count as successful execution.
+
+Recovery: prior candidates and the original workspace remain untouched. A failed
+candidate is retained with its step logs; choose a new output root after repairing
+the defect. Do not delete diagnostic history or overwrite an active review's
+candidate. Production promotion requires a separately reviewed complete write set,
+backup and restoration proof; this procedure authorizes none.
+
+### Active owner review and receipt import
+
+The existing builder has a bounded NEED mode:
+
+```
+py -3 -B code/08_build_review_page.py --need-review review/need_existing_cedar_uid_evidence.json
+```
+
+It verifies input hashes, writes review/cedar_review.html and preserves a previous
+page by content hash. DO NOT run it while Elijah is reviewing the current queue.
+The local service at 127.0.0.1:8765 serves that page only on this machine. Browser
+storage is origin-specific: moving from file to HTTP requires exporting/importing
+decisions. Always retain the downloaded decision CSV as a durable copy.
+
+```
+py -3 -B code/09_import_rulings.py --need-review <returned.csv> --queue review/need_existing_cedar_uid_evidence.json --receipt-ledger <isolated-receipt.json> --dry-run
+```
+
+After preview validates, omit --dry-run to record the decisions idempotently in
+that explicit receipt ledger. The existing eight review CSV columns are retained;
+seven appended columns pin decision ID, reviewer/time, evidence fingerprint,
+queue version, affiliation target and superseded decision. Unknown targets,
+conflicting decisions, stale evidence, malformed timestamps and missing reasoning
+are refused. HOLD remains held. This mode NEVER writes canonical identity,
+publication policy or exports; receipt status is pending application. The legacy
+identifier-propagation path refuses NEED review queues rather than interpreting
+publication choices or affiliation decisions as identifier assignments.
+
+Actual application must implement the owner's authorized disposition in the
+existing field contract, preserve identity/evidence history, validate downstream
+outputs and generate an applied/held/stale/conflict receipt. Recording a receipt
+is not that application, and does not open the NEED gate automatically.
+
+### Export planning and product metadata
+
+```
+py -3 -B code/1137_customer_dataset_combine.py plan nagpra
+```
+
+Planning executes the same joins and publication checks as building, without
+writing an export. Missing field decisions are failures in both paths. Blank
+join keys never match. Do not strip a blocked field to make the plan pass.
+NAGPRA currently refuses seven joined diagnostic/count columns pending explicit
+contract destinations; NEED refuses under its independent systemic affiliation hold; its own-entity
+field is now internal-only by explicit owner ruling.
+
+Small runtime metadata stays tracked under narrow .gitignore exceptions. Authority,
+generators and clean-checkout proof are recorded in data/cedar/README.md. Run the
+seven Makefile check-generated commands before app checks/build; a data-less clone
+validates committed release metadata, not missing raw data or the entire pipeline.
+Do not run import_cedar_manifest.py --audit assuming it is read-only: it mutates
+manifest/publication outputs. Release ledger history must be preserved.
+<!-- END CODEX-ISOLATED-CANDIDATE-RUNBOOK -->
+
+
 *Written 2026-08-26 alongside `docs/GAMING_SOURCE_AUDIT_2026-08-26.md`, which
 found the gaming collection shipping **912 of 104,412 rows — 0.87%** — because
 this chain had not been run since 2026-08-06 and silently dropped everything it

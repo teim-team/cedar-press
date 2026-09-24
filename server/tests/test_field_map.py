@@ -30,6 +30,8 @@ import importlib.util
 import json
 import sys
 import unittest
+from unittest.mock import patch
+from contextlib import ExitStack
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -65,7 +67,8 @@ REFUSED_AS_SAMPLED = {
     "federal-register": (("event_date_basis",), pub.OwedDerivation),
     "deals": (("Deal_Category", "Notes"), pub.OwedDerivation),
     "contractors": (("extent_competed",), pub.OwedDerivation),
-    "need": (("enterprise_existing_cedar_uid",), pub.UnadjudicatedIdentifier),
+    "need": (("cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"),
+             pub.NEEDAffiliationPublicationHold),
     # entity_id and cedar_spine_entity_id both disagree with cedar_uid on the
     # Menominee row: neither is an alias, and neither is deleted unadjudicated.
     "nonprofits": (("entity_id", "cedar_spine_entity_id"), pub.UnadjudicatedIdentifier),
@@ -128,6 +131,79 @@ def neutralised(collection: str, header, rows):
     return header, rows
 
 
+class TestCombinedPlan(unittest.TestCase):
+    def test_plan_and_build_check_joined_schema_without_matching_empty_keys(self):
+        spec = importlib.util.spec_from_file_location(
+            "customer_combine_test", CODE / "1137_customer_dataset_combine.py")
+        combine = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(combine)
+        contract = {"nagpra": {"tables": [
+            {"table": "flag.csv", "key_columns": ["key"]},
+            {"table": "one.csv", "key_columns": ["key"], "status": "shippable"},
+            {"table": "many.csv", "key_columns": ["key"], "status": "shippable"},
+        ]}}
+        class ReachedPublication(Exception):
+            pass
+        def fixture_load(path, **kwargs):
+            rows = ({"flag.csv": [{"key": "a"}, {"key": ""}],
+                     "one.csv": [{"key": "a", "detail": "supported"},
+                                 {"key": "", "detail": "must not link"}],
+                     "many.csv": [{"key": "a"}, {"key": "a"},
+                                  {"key": ""}, {"key": ""}]})[path.name]
+            return list(rows[0]), [dict(r) for r in rows], {}
+        def inspect_schema(collection, header, rows, own):
+            self.assertEqual(len(rows), 2)
+            self.assertIn("one__detail", header)
+            self.assertIn("n_many", header)
+            self.assertEqual(rows[0]["one__detail"], "supported")
+            self.assertEqual(rows[1]["one__detail"], "")
+            self.assertEqual(rows[0]["n_many"], "2")
+            self.assertEqual(rows[1]["n_many"], "0")
+            raise ReachedPublication()
+        for dry in (True, False):
+            with self.subTest(dry=dry), ExitStack() as stack:
+                replacements = {
+                    "contracts": lambda: contract, "shelves": lambda: {"nagpra": "standard"},
+                    "FLAGSHIP": {"nagpra": "flag.csv"}, "find": lambda n: Path(n),
+                    "load": fixture_load, "one_per_key": lambda meta, key: meta["table"] == "one.csv",
+                    "publishable_columns": lambda columns: columns,
+                    "recompute_derived": lambda *args: {}, "apply_field_map": inspect_schema,
+                }
+                for key, value in replacements.items():
+                    stack.enter_context(patch.object(combine, key, value))
+                emit = stack.enter_context(patch.object(combine, "emit"))
+                with self.assertRaises(ReachedPublication):
+                    combine.build(dry=dry, only=("nagpra",))
+                emit.assert_not_called()
+
+
+class TestNeedExportHold(unittest.TestCase):
+    def test_plan_and_build_stop_without_writing_even_when_cross_reference_is_blank(self):
+        spec = importlib.util.spec_from_file_location(
+            "need_customer_combine_test", CODE / "1137_customer_dataset_combine.py")
+        combine = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(combine)
+        contract = {"need": {"tables": [{"table": "flag.csv", "key_columns": ["enterprise_id"]}]}}
+        for dry in (True, False):
+            with self.subTest(dry=dry), ExitStack() as stack:
+                def fixture_load(path, **kwargs):
+                    row = {"enterprise_id": "CEDAR-NEST-TEST", "cedar_uid": "CE-00001-AA",
+                           "enterprise_existing_cedar_uid": ""}
+                    return list(row), [row], {}
+                replacements = {
+                    "contracts": lambda: contract, "shelves": lambda: {"need": "pro"},
+                    "FLAGSHIP": {"need": "flag.csv"}, "find": lambda n: Path(n),
+                    "load": fixture_load, "publishable_columns": lambda columns: columns,
+                    "recompute_derived": lambda *args: {}, "apply_field_map": pub.apply_field_map,
+                }
+                for key, value in replacements.items():
+                    stack.enter_context(patch.object(combine, key, value))
+                emit = stack.enter_context(patch.object(combine, "emit"))
+                with self.assertRaises(pub.NEEDAffiliationPublicationHold):
+                    combine.build(dry=dry, only=("need",))
+                emit.assert_not_called()
+
+
 class TestApplyFieldMap(unittest.TestCase):
     def test_every_sampled_flagship_comes_out_as_the_exact_approved_header(self):
         fm = pub.field_map()
@@ -141,6 +217,12 @@ class TestApplyFieldMap(unittest.TestCase):
                 header, rows = sample(coll, table)
                 header, rows = neutralised(coll, header, rows)
                 own = set(header)
+                if coll == "need":
+                    # The owner quarantined the affiliation path independently
+                    # of schema formatting and identifier-field disposition.
+                    with self.assertRaises(pub.NEEDAffiliationPublicationHold):
+                        pub.apply_field_map(coll, header, rows, own)
+                    continue
                 result = pub.apply_field_map(coll, header, rows, own)
                 self.assertTrue(result["mapped"])
                 expected = [c for c in entry["order"] if c not in result["owed"]]
@@ -174,6 +256,25 @@ class TestApplyFieldMap(unittest.TestCase):
                 # Every retirement entry is reported with its rows.
                 self.assertEqual({r["column"] for r in result["retirement"]},
                                  {r["column"] for r in entry["retire"]})
+
+    def test_need_affiliation_hold_survives_blank_removed_or_internal_cross_reference(self):
+        from copy import deepcopy
+        for cross_reference in ("CE-00001-AA", "", None):
+            with self.subTest(cross_reference=cross_reference):
+                row = {"enterprise_id": "CEDAR-NEST-TEST", "cedar_uid": "CE-00002-AA",
+                       "owner_hub_cedar_uid": "CE-00002-AA"}
+                if cross_reference is not None:
+                    row["enterprise_existing_cedar_uid"] = cross_reference
+                rows, header = [row], list(row)
+                before = deepcopy((header, rows))
+                with patch.object(pub, "field_map", return_value={"need": {
+                    "fields": [{"column": "enterprise_existing_cedar_uid", "decision": "internal"}]
+                }}), self.assertRaises(pub.NEEDAffiliationPublicationHold):
+                    pub.apply_field_map("need", header, rows, set(header))
+                self.assertEqual((header, rows), before)
+        with patch.object(pub, "field_map", return_value={}), self.assertRaises(pub.NEEDAffiliationPublicationHold):
+            pub.apply_field_map("need", [], [], set())
+        pub.assert_collection_publishable("nagpra")
 
     def test_the_singular_block_is_filled_from_the_register(self):
         reg = pub.register()

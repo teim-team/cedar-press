@@ -72,7 +72,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def P(*a): return os.path.join(ROOT, *a)
 
 BUILT_BY = "1130_need_owner_v6_reconcile.py"
-BUILT_DATE = datetime.date.today().isoformat()
+BUILT_DATE = datetime.date.fromisoformat(os.environ.get("CEDAR_RUN_DATE", datetime.date.today().isoformat())).isoformat()
 
 OWNER_DIR = os.path.join(
     os.path.expanduser("~"), "Desktop", "dissertation", "data",
@@ -103,6 +103,16 @@ REGISTER  = P("data", "spine", "cedar_identity_register.csv")
 NEED_IDS  = P("data", "spine", "cedar_need_id_register.csv")
 LEDGER    = P("data", "spine", "cedar_identifier_ledger.csv")
 DSBS      = P("data", "raw", "external", "sba_dsbs_native_entities.csv")
+#: LEGACY COMPATIBILITY BRIDGE, read-only. 1177 deleted `handle` from every
+#: live table and kept this binding history precisely so an older artifact
+#: naming a handle can still be read. The owner v6 file predates the
+#: retirement and its `tribe_id` IS a handle, so this is the only bridge
+#: from that historical input to a cedar_uid. It is NOT a general
+#: graveyard authority and NOTHING here republishes `handle`.
+HANDLE_HISTORY = P("graveyard", "cicd", "cedar_handle_history.csv")
+ALIASES = P("data", "clean", "entity_aliases.csv")
+#: verification_status values that DISQUALIFY an alias as evidence.
+ALIAS_DEAD = {"DENIED", "CONTESTED", "EXPIRED", "SUPERSEDED", "RETIRED", "WITHDRAWN"}
 
 
 # ---------------------------------------------------------------------------
@@ -275,18 +285,72 @@ PREFIX_CLASS = {
 }
 
 
+def load_handle_bridge(live_uids):
+    """The retired handle->cedar_uid bindings, validated. FAILS CLOSED.
+
+    Only CURRENT bindings count: `status == "current"` and no `valid_to`. A
+    handle claiming two uids, or a uid outside the live identity register, is
+    refused rather than guessed - the whole point of the bridge is that it is
+    unambiguous.
+    """
+    if not os.path.exists(HANDLE_HISTORY):
+        raise SystemExit(
+            "the legacy handle compatibility bridge is absent at %s; the owner "
+            "v6 tribe_id cannot be resolved without it" % HANDLE_HISTORY)
+    rows = rd(HANDLE_HISTORY)
+    if not rows:
+        raise SystemExit("the handle compatibility bridge is empty: %s" % HANDLE_HISTORY)
+    need_cols = {"handle", "cedar_uid", "status", "valid_to"}
+    missing = need_cols - set(rows[0].keys())
+    if missing:
+        raise SystemExit("the handle compatibility bridge lacks %s" % sorted(missing))
+    bridge, conflicts, off_register = {}, [], []
+    for r in rows:
+        h = (r.get("handle") or "").strip()
+        u = (r.get("cedar_uid") or "").strip()
+        if not h or not u:
+            continue
+        if (r.get("status") or "").strip() != "current" or (r.get("valid_to") or "").strip():
+            continue
+        if u not in live_uids:
+            off_register.append((h, u))
+            continue
+        if h in bridge and bridge[h] != u:
+            conflicts.append((h, bridge[h], u))
+            continue
+        bridge[h] = u
+    if conflicts:
+        raise SystemExit("the handle compatibility bridge is CONFLICTING: %r" % conflicts[:5])
+    if off_register:
+        raise SystemExit(
+            "the handle compatibility bridge maps %d handle(s) outside the live "
+            "identity register, e.g. %r" % (len(off_register), off_register[:5]))
+    return bridge
+
+
 def load_register():
     reg = rd(REGISTER)
+    live_uids = {(r.get("cedar_uid") or "").strip() for r in reg}
+    bridge = load_handle_bridge(live_uids)
+    by_uid = {(r.get("cedar_uid") or "").strip(): r for r in reg}
     by_handle = {}
     by_stem = collections.defaultdict(list)
     names = collections.defaultdict(set)   # distinctive token set -> uids
+    for h, u in bridge.items():
+        r = by_uid.get(u)
+        if r is None:
+            continue
+        # A COPY carrying the historical handle, so the diagnostics can name it.
+        # The register row itself is never mutated and `handle` is never
+        # written back to any canonical table.
+        rh = dict(r, handle=h)
+        by_handle[h] = rh
+        seg = h.split("-")
+        if len(seg) > 1:
+            by_stem[seg[1]].append(rh)
+    print("  [1130] handle compatibility bridge: %d current bindings, %d stems"
+          % (len(by_handle), len(by_stem)))
     for r in reg:
-        h = (r.get("handle") or "").strip()
-        if h:
-            by_handle[h] = r
-            seg = h.split("-")
-            if len(seg) > 1:
-                by_stem[seg[1]].append(r)
         for nm in (r.get("canonical_name"), r.get("federal_register_legal_name")):
             t = dtoks(nm or "")
             if t:
@@ -294,13 +358,123 @@ def load_register():
     return reg, by_handle, by_stem, names
 
 
-def resolve_parent(tid, canon, by_handle, by_stem, reg):
+def load_alias_index():
+    """normalized alias -> {cedar_uid}, excluding disqualified rows."""
+    idx = collections.defaultdict(set)
+    for r in rd(ALIASES):
+        if (r.get("verification_status") or "").strip().upper() in ALIAS_DEAD:
+            continue
+        a = norm(r.get("alias_name") or "")
+        u = (r.get("cedar_uid") or "").strip()
+        if a and u:
+            idx[a].add(u)
+    return idx
+
+
+def resolve_intertribal(tid, canon, reg, alias_idx):
+    """INTERTRIBAL- values resolve ONLY organisation-to-organisation.
+
+    An intertribal organisation is its own legal person - never an alias of a
+    member tribe, a service area or a similarly named body - so a generic token
+    match may not reach it. Two routes only, both requiring the target to be
+    class `Intertribal Organization`:
+
+      1. the normalized source name IS the target's canonical name or a
+         registered alias;
+      2. the source name is that, plus ONE trailing acronym token, where the
+         acronym is itself a registered alias of the SAME target, unique to it,
+         and agrees with the acronym inside the source tribe_id.
+
+    Anything else is unresolved. Ambiguity is never resolved by preference.
+    """
+    src = norm(canon or "")
+    if not src:
+        return "", "UNRESOLVED_INTERTRIBAL_NO_NAME", (
+            "an INTERTRIBAL- source row carries no organisation name")
+    org = {r["cedar_uid"]: r for r in reg
+           if (r.get("entity_class") or "").strip() == "Intertribal Organization"}
+    by_name = collections.defaultdict(set)
+    for u, r in org.items():
+        for nm in (r.get("canonical_name"), r.get("federal_register_legal_name")):
+            k = norm(nm or "")
+            if k:
+                by_name[k].add(u)
+
+    def targets(key):
+        hit = set(by_name.get(key, set()))
+        hit |= {u for u in alias_idx.get(key, set()) if u in org}
+        return hit
+
+    # ---- route 1: exact --------------------------------------------------
+    t1 = targets(src)
+    if len(t1) == 1:
+        u = next(iter(t1))
+        return u, "intertribal_exact_name_class", (
+            "the source organisation name %r is exactly the canonical name or a "
+            "registered alias of %s, and that entity's class is Intertribal "
+            "Organization" % (canon, u))
+    if len(t1) > 1:
+        return "", "UNRESOLVED_INTERTRIBAL_AMBIGUOUS", (
+            "%r matches %d intertribal organisations: %s" % (canon, len(t1), sorted(t1)))
+
+    # ---- route 2: one trailing acronym token, independently verified ------
+    parts = src.split()
+    if len(parts) >= 2:
+        acro, stem = parts[-1], " ".join(parts[:-1])
+        # WHICH kind of registration matched the stem decides the method name.
+        # canonical-name stem  -> ..._acronym
+        # alias-only stem      -> ..._registered_full_name_plus_canonical_acronym
+        # (the second is the case where the entity is REGISTERED UNDER ITS
+        # INITIALS and its expanded name is a registered alias; an acronym as a
+        # canonical name does not invalidate an otherwise exact, uniquely
+        # registered alias relationship.)
+        stem_canon = set(by_name.get(stem, set()))
+        t2 = targets(stem)
+        if len(t2) > 1:
+            return "", "UNRESOLVED_INTERTRIBAL_AMBIGUOUS", (
+                "%r (less its trailing token) matches %d intertribal "
+                "organisations: %s" % (canon, len(t2), sorted(t2)))
+        if len(t2) == 1:
+            u = next(iter(t2))
+            owners = alias_idx.get(acro, set())
+            tid_acro = ""
+            seg = (tid or "").split("-")
+            if len(seg) > 2:
+                tid_acro = norm(seg[1])
+            if not owners:
+                return "", "UNRESOLVED_INTERTRIBAL_ACRONYM_UNVERIFIED", (
+                    "the trailing token %r is not a registered alias of any entity, "
+                    "so it is initials rather than evidence" % acro)
+            if owners != {u}:
+                return "", "UNRESOLVED_INTERTRIBAL_ACRONYM_AMBIGUOUS", (
+                    "the acronym %r is a registered alias of %d entities (%s), so it "
+                    "cannot identify one" % (acro, len(owners), sorted(owners)))
+            if tid_acro and tid_acro != acro:
+                return "", "UNRESOLVED_INTERTRIBAL_ACRONYM_DISAGREES", (
+                    "the source tribe_id carries %r but the name's trailing token is "
+                    "%r" % (tid_acro, acro))
+            method = ("intertribal_exact_name_class_acronym" if u in stem_canon
+                      else "intertribal_registered_full_name_plus_canonical_acronym")
+            return u, method, (
+                "the source name is %s's canonical name or registered alias plus the "
+                "trailing acronym %r, which is itself a registered alias of that same "
+                "entity and of no other, and agrees with the tribe_id"
+                % (u, acro))
+    return "", "UNRESOLVED_INTERTRIBAL_NOT_IN_REGISTER", (
+        "no intertribal organisation carries %r as its canonical name or a "
+        "registered alias" % canon)
+
+
+def resolve_parent(tid, canon, by_handle, by_stem, reg, alias_idx=None):
     """Return (cedar_uid, method, note).  Unresolved is an honest outcome
     (ADR-010) and is NEVER forced to a match."""
     tid = (tid or "").strip()
     if not tid:
         return "", "NO_PARENT_ID_ON_ROW", ("the owner's row carries no "
                                            "tribe_id; it cannot be hubbed")
+    # An intertribal organisation is never resolved by the generic token route.
+    if tid.upper().startswith("INTERTRIBAL-"):
+        return resolve_intertribal(tid, canon, reg, alias_idx or {})
     if tid in by_handle:
         r = by_handle[tid]
         return r["cedar_uid"], "handle_exact", (
@@ -318,7 +492,7 @@ def resolve_parent(tid, canon, by_handle, by_stem, reg):
             return r["cedar_uid"], "handle_stem_unique", (
                 "the owner's handle %s and Cedar's %s share the mnemonic "
                 "stem %s, and that stem is unique in position 2 of the live "
-                "register" % (tid, r["handle"], seg[1]))
+                "register" % (tid, r.get("handle", ""), seg[1]))
 
     # ROUTE 3 - maximal distinctive-token subset, class-gated, unique at the
     # maximum.  ENTITY_MATCH_RULES rule 1 (no all-generic name), the class
@@ -353,14 +527,14 @@ def resolve_parent(tid, canon, by_handle, by_stem, reg):
             "A name matching two spine entities resolves to neither "
             "(ENTITY_MATCH_RULES rule 13)."
             % (len(best), bestn,
-               "; ".join("%s=%s" % (x[0]["handle"], x[0]["canonical_name"])
+               "; ".join("%s=%s" % (x[0].get("handle", ""), x[0]["canonical_name"])
                          for x in best[:4])))
     r, nm = best[0]
     return r["cedar_uid"], "name_tokens_class_gated_unique", (
         "the owner's %r and Cedar's %r (%s, class %s) agree on all %d of "
         "Cedar's distinctive tokens, uniquely at that maximum inside the "
         "class the owner's handle prefix %s declares"
-        % (canon, nm, r["handle"], r.get("entity_class"), bestn, pfx))
+        % (canon, nm, r.get("handle", ""), r.get("entity_class"), bestn, pfx))
 
 
 # ===========================================================================
@@ -381,9 +555,9 @@ FAMILY_EXACT = {
     "documented_native_entity_org": ("cedar_inference",
          "an internal label, not a publisher."),
     "data/other/tribal_colleges_aihec.csv (AIHEC list)": (
-        "entity_self_published",
-        "a member association's directory reports what the member told it, "
-        "so it is the member speaking (1118 FAMILIES, entity_self_published)."),
+        "compiled_directory",
+        "AIHEC lists institutions; this directory label alone does not name "
+        "the institution's owner or prove the imported tribal affiliation."),
     "chapter2_trust/output/tribal_press/ch2_tribal_newspapers.csv": (
         "compiled_directory",
         "a compiled research corpus; provenance per row is not recorded."),
@@ -413,8 +587,10 @@ def family_of(vsrc):
             return ("cedar_inference",
                     "an internal table given an http prefix; it is not a "
                     "published page.")
-        return ("entity_self_published",
-                "the entity's own web page (%s)." % host)
+        return ("unattributed",
+                "URL host %s is not a verified publisher for this relationship. "
+                "Retain the URL, but a URL alone cannot establish a parent's "
+                "own subsidiary list." % host)
     if "canonical_tribe_table.csv" in v:
         return ("cedar_inference", "an internal table, not a publisher.")
     return ("unattributed",
@@ -433,7 +609,42 @@ SBA_UPSTREAM = "sba_dsbs_extract:uei:%s"
 # ===========================================================================
 # BUILD
 # ===========================================================================
+def preflight():
+    """Every mandatory input, proved BEFORE anything is created or written.
+
+    `version_comparison.csv` used to be written before the owner and NEED
+    checks, so a failed build left a partial artifact behind. Nothing is
+    created until every required input is present and shaped correctly.
+    """
+    need = [("the owner v6 dataset", owner_path(AUTHORITATIVE),
+             ("tribe_id", "enterprise_name")),
+            ("the NEED flagship", NEED, ("enterprise_id", "owner_hub_cedar_uid")),
+            ("the identity register", REGISTER,
+             ("cedar_uid", "canonical_name", "entity_class")),
+            ("the handle compatibility bridge", HANDLE_HISTORY,
+             ("handle", "cedar_uid", "status", "valid_to")),
+            ("the alias layer", ALIASES,
+             ("alias_name", "cedar_uid", "verification_status")),
+            ("the SBA DSBS extract", DSBS, ("uei", "cage_code", "name_clean"))]
+    problems = []
+    for label, path, cols in need:
+        if not os.path.exists(path):
+            problems.append("%s is absent: %s" % (label, path))
+            continue
+        rows = rd(path)
+        if not rows:
+            problems.append("%s is empty: %s" % (label, path))
+            continue
+        missing = [c for c in cols if c not in rows[0]]
+        if missing:
+            problems.append("%s lacks %s: %s" % (label, missing, path))
+    if problems:
+        raise SystemExit("1130 preflight FAILED, nothing written:" + chr(10)
+                         + chr(10).join("   - " + p for p in problems))
+
+
 def cmd_build():
+    preflight()
     os.makedirs(STAGE, exist_ok=True)
     consv = []
 
@@ -460,6 +671,8 @@ def cmd_build():
     if not need:
         raise SystemExit("data/clean/need_enterprises.csv is empty or absent")
     reg, by_handle, by_stem, _regnames = load_register()
+    alias_idx = load_alias_index()
+    print("  [1130] alias index: %d normalized aliases" % len(alias_idx))
     live_uids = {r["cedar_uid"] for r in reg}
 
     # ---- 1. parent crosswalk ---------------------------------------------
@@ -476,7 +689,8 @@ def cmd_build():
     for t in sorted(x for x in rows_by_tid if x):
         canon = (canon_by_tid[t].most_common(1)[0][0]
                  if canon_by_tid[t] else "")
-        uid, method, note = resolve_parent(t, canon, by_handle, by_stem, reg)
+        uid, method, note = resolve_parent(t, canon, by_handle, by_stem, reg,
+                                            alias_idx)
         if uid:
             tid2uid[t] = uid
         rr = by_handle.get(t) or next(
@@ -900,7 +1114,7 @@ def cmd_build():
     # ---- 6. THE ANC / NHO DUAL ROLE ---------------------------------------
     dual = build_dual_role(owner, need, reg, tid2uid, live_uids, account)
     write_csv(OUT_DUAL, dual,
-              required_first=("cedar_uid", "handle", "canonical_name",
+              required_first=("cedar_uid", "canonical_name",
                               "entity_class", "dual_role"))
 
     # ---- 7. conservation of the owner file itself -------------------------
@@ -1089,7 +1303,7 @@ def build_dual_role(owner, need, reg, tid2uid, live_uids, account):
         is_nho = cls == "Native Hawaiian Organization"
         fams = sorted({family_of(v)[0] for v in e["srcs"]})
         out.append(dict(
-            cedar_uid=uid, handle=rr.get("handle", ""),
+            cedar_uid=uid,
             canonical_name=rr.get("canonical_name", ""),
             entity_class=cls,
             dual_role="Y",
@@ -1247,12 +1461,44 @@ FLOORS = dict(
     parent_crosswalk_resolved=600,
     reconciliation_rows=1000,
     already_in_need=100,
-    net_new=1000,
     need_not_in_owner=100,
     dual_role_rows=25,
     corroboration_pairs=100,
     v3_recovery=50,
 )
+
+
+def reconciliation_issues(owner, crosswalk, need, recon):
+    """Independently reconcile the owner-key partition and its exact matches."""
+    targets = collections.defaultdict(set)
+    for row in crosswalk:
+        if row.get("cedar_uid"):
+            targets[row["owner_tribe_id"]].add(row["cedar_uid"])
+    issues = ["ambiguous parent: " + key for key, values in targets.items() if len(values) != 1]
+    expected = collections.Counter()
+    for row in owner:
+        name = norm(row.get("enterprise_name", ""))
+        uids = targets.get((row.get("tribe_id") or "").strip(), set())
+        if name and len(uids) == 1:
+            expected[(next(iter(uids)), name)] += 1
+    actual = collections.Counter((r.get("cedar_uid", ""), r.get("enterprise_name_normalized", "")) for r in recon)
+    if set(expected) != set(actual) or any(count != 1 for count in actual.values()):
+        issues.append("owner cluster keys missing, duplicated or unexpected")
+    by_key = collections.defaultdict(set)
+    for row in need:
+        by_key[(row["owner_hub_cedar_uid"], row["enterprise_name_normalized"])].add(row["enterprise_id"])
+    for row in recon:
+        key = (row.get("cedar_uid", ""), row.get("enterprise_name_normalized", ""))
+        ids = by_key.get(key, set())
+        elsewhere = any(other[1] == key[1] and other[0] != key[0] for other in by_key)
+        status = ("ALREADY_IN_NEED" if ids else
+                  "NET_NEW_HUB_DISAGREEMENT" if elsewhere else "NET_NEW_TO_NEED")
+        if row.get("reconciliation_status") != status:
+            issues.append("incorrect status: " + repr(key))
+        matched = row.get("matched_need_enterprise_id", "")
+        if len(ids) > 1 or (ids and matched not in ids) or (not ids and matched):
+            issues.append("incorrect matched binding: " + repr(key))
+    return issues
 
 
 def cmd_verify(quiet=False):
@@ -1323,8 +1569,13 @@ def cmd_verify(quiet=False):
             if r["reconciliation_status"].startswith("NET_NEW"))
     say(a >= FLOORS["already_in_need"], "I4a_already_in_need",
         "%d (floor %d)" % (a, FLOORS["already_in_need"]))
-    say(n >= FLOORS["net_new"], "I4b_net_new",
-        "%d (floor %d)" % (n, FLOORS["net_new"]))
+    # A growing NEED register legitimately reduces the unmatched queue.
+    # Re-derive classifications from the pinned inputs instead of requiring
+    # at least 1,000 absences forever. No measured floor is reset.
+    issues = reconciliation_issues(rd(owner_path(AUTHORITATIVE)), xw, need, recon)
+    say(not issues, "I4b_exact_reconciliation",
+        "%d net-new keys; %d input/key/status defects%s"
+        % (n, len(issues), ("; " + issues[0]) if issues else ""))
     say(a + n == len(recon), "I4c_status_total",
         "%d + %d == %d rows" % (a, n, len(recon)))
 
@@ -1530,7 +1781,14 @@ def cmd_selftest():
 
 
 if __name__ == "__main__":
-    cmd = sys.argv[1] if len(sys.argv) > 1 else "help"
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("versions", "build", "codebook", "verify", "selftest"))
+    parser.add_argument("--owner-dir", help="Pinned directory containing the owner input versions")
+    args = parser.parse_args()
+    if args.owner_dir:
+        OWNER_DIR = os.path.abspath(args.owner_dir)
+    cmd = args.command
     if cmd == "versions":
         cmd_versions()
     elif cmd == "build":

@@ -945,6 +945,295 @@ def reclassify(old_entity_id, new_entity_class, token=None,
     }
 
 
+
+# Read-only typed bindings for the existing ID service. These declarations do
+# not allocate IDs, replace issued registries, or certify a table's uniqueness.
+# Row-key/grain authority remains 512.GRAIN and generated dataset_contracts.json;
+# source-ID syntax is not an assertion of Native status or legal equivalence.
+from dataclasses import dataclass
+from functools import lru_cache
+from types import MappingProxyType
+
+
+@dataclass(frozen=True)
+class IdentifierContract:
+    collection: str
+    table: str
+    column: str
+    namespace: str
+    object_kind: str
+    role: str
+    grain: str
+    mint_authority: str
+    register: str = ""
+    pattern: str = ""
+
+    @property
+    def binding(self):
+        return (self.collection, self.table, self.column)
+
+
+class IdentifierContractError(ValueError):
+    pass
+
+
+def _id_contract(collection, table, column, namespace, object_kind, role,
+                 grain, mint_authority, register="", pattern=""):
+    return IdentifierContract(collection, table, column, namespace, object_kind,
+                              role, grain, mint_authority, register, pattern)
+
+
+# Explicit field bindings; a generic name such as tribe_id never selects one.
+# Patterns describe observed issued formats, not permission to mint that format.
+_ID_BINDINGS = [
+    _id_contract("identity", "cedar_identity_register.csv", "cedar_uid", "CE",
+                 "native_entity", "identity", "one canonical Native entity",
+                 "503_identity.py", "data/spine/cedar_identity_register.csv"),
+    _id_contract("business", "registries/Cedar_Business_Register.csv", "business_uid", "CB",
+                 "business", "identity", "one issued R7 business identity",
+                 "R7 issued registry; import remains gated", "R7:registries/Cedar_Business_Register.csv",
+                 r"CB-[0-9]{7}"),
+    _id_contract("need", "need_enterprises.csv", "enterprise_id", "CEDAR-NEST",
+                 "enterprise", "identity",
+                 "one legacy issued enterprise record; historical hub+normalized-name binding, not global legal-business equivalence",
+                 "1072 via cedar_ids.allocate", "data/spine/cedar_need_id_register.csv"),
+    _id_contract("need", "need_enterprise_relations.csv", "enterprise_edge_id", "NESTREL",
+                 "relationship", "relationship", "one source/evidence relationship observation; pairs may repeat",
+                 "1072_tribally_owned_enterprises.py", pattern=r"NESTREL-[0-9A-F]{14}"),
+    _id_contract("funding", "federal_funding_transactions.csv", "assistance_transaction_unique_key",
+                 "USAspending-assistance", "source_record", "transaction",
+                 "source assistance transaction", "USAspending source"),
+    _id_contract("federal-register", "consultation_events.csv", "consultation_event_id",
+                 "CONS-FR", "source_document", "notice",
+                 "FR notice reference; participant rows can repeat it",
+                 "consultation producer from FR document number", pattern=r"CONS-FR-.+"),
+    _id_contract("legislation", "native_bills.csv", "bill_id", "Congress-bill",
+                 "source_record", "bill", "Congress/chamber/type/number bill",
+                 "Congress source components", pattern=r"[0-9]+-[a-z]+-[0-9]+"),
+    _id_contract("deals", "deals_classified.csv", "Deal_ID", "Deals-ledger",
+                 "record", "deal_record", "one existing Deals ledger record",
+                 "existing source-specific Deals ledgers", pattern=r"(?:FA|ND|NLTR|ANCSA2|ANCSA|ANCSA3|SECX|MA2020|ACQ2020|IDOBS)-.+"),
+    _id_contract("nagpra", "nagpra_notices.csv", "document_number", "Federal-Register",
+                 "source_document", "notice", "one Federal Register notice",
+                 "Federal Register", pattern=r"[0-9]{2,4}-[0-9]+"),
+    _id_contract("lobbying", "native_entity_lobbying_disclosures.csv", "filing_uuid",
+                 "LDA-filing", "source_record", "filing", "one source disclosure filing",
+                 "LDA source", pattern=r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"),
+    _id_contract("contractors", "prime_contracts.csv", "contract_transaction_unique_key",
+                 "FPDS-transaction", "source_record", "transaction",
+                 "source contract action; legacy aggregates may lack it",
+                 "FPDS/USAspending source"),
+    _id_contract("subcontracting", "subawards.csv", "subaward_source_record_id",
+                 "subaward-source", "source_record", "reported_subaward",
+                 "source report identity; repeats require grain validation",
+                 "source SAM/FSRS record"),
+    _id_contract("owned", "native_owned_businesses.csv", "business_source_id",
+                 "business-source", "source_record", "directory_observation",
+                 "directory source observation, not a canonical business",
+                 "source directory record"),
+    _id_contract("natural-resources", "resource_revenue.csv", "resource_revenue_event_id",
+                 "RRE", "record", "resource_observation", "existing revenue observation",
+                 "resource-ledger producer; historical stability must be checked",
+                 pattern=r"RRE-.+"),
+    _id_contract("nonprofits", "np_orgs.csv", "EIN", "IRS-EIN",
+                 "external_identifier", "organization_tax_identifier",
+                 "source tax identifier, not proof of CE equivalence", "IRS",
+                 pattern=r"[0-9]{9}"),
+]
+for _collection, _table, _column, _role in [
+    ("need", "need_enterprises.csv", "cedar_uid", "affiliated_entity"),
+    ("need", "need_enterprises.csv", "owner_hub_cedar_uid", "related_native_hub"),
+    ("funding", "federal_funding_transactions.csv", "cedar_uid", "recipient_attribution"),
+    ("contractors", "prime_contracts.csv", "cedar_uid", "native_attribution"),
+    ("subcontracting", "subawards.csv", "prime_cedar_uid", "prime_attribution"),
+    ("subcontracting", "subawards.csv", "sub_cedar_uid", "subcontractor_attribution"),
+]:
+    _ID_BINDINGS.append(_id_contract(
+        _collection, _table, _column, "CE", "native_entity", _role,
+        "Native entity in the declared role, not row identity", "503_identity.py",
+        "data/spine/cedar_identity_register.csv"))
+
+IDENTIFIER_CONTRACTS = MappingProxyType({c.binding: c for c in _ID_BINDINGS})
+del _ID_BINDINGS
+
+
+def identifier_contract(collection, table, column):
+    """Refuse undeclared bindings; never infer a namespace from column spelling."""
+    try:
+        return IDENTIFIER_CONTRACTS[(collection, table, column)]
+    except KeyError as exc:
+        raise IdentifierContractError("undeclared identifier binding") from exc
+
+
+@lru_cache(maxsize=1)
+def _entity_validator():
+    # Reuse the existing check-character implementation, without running its CLI.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "_cedar_shared_identity_validator", CEDAR / "code" / "503_identity.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_identifier(value, contract, registered_ids=None, *, source_system=None):
+    """Read-only shape/checksum check; membership needs a pinned register input.
+
+    A successful shape check is not identity evidence or publication permission.
+    Empty/unresolved values must be handled explicitly before requesting a join.
+    """
+    if IDENTIFIER_CONTRACTS.get(contract.binding) != contract:
+        raise IdentifierContractError("identifier contract is not declared by this service")
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise IdentifierContractError("identifier must be a nonblank exact string")
+    if contract.object_kind in {"source_record", "source_document", "external_identifier"}:
+        if source_system != contract.mint_authority or registered_ids is None:
+            raise IdentifierContractError("source authority and pinned source keys required")
+    if contract.namespace == "CE":
+        valid = _entity_validator().valid(value)
+    elif contract.namespace == "CEDAR-NEST":
+        match = re.fullmatch(r"CEDAR-NEST-([0-9]{6})-([0-9A-HJKMNP-TV-Z]{2})", value)
+        identity = _entity_validator()
+        valid = bool(match and match[2] == identity.check_chars(identity.encode(int(match[1]))))
+    else:
+        valid = not contract.pattern or bool(re.fullmatch(contract.pattern, value))
+        # A source key is not made into a Cedar object by copying its value.
+        if contract.namespace not in {"CB", "NESTREL"} and re.match(r"(?:CE|CB|CEDAR)-", value):
+            valid = False
+    if not valid:
+        raise IdentifierContractError(f"value is not valid for {contract.namespace}")
+    if registered_ids is not None and value not in registered_ids:
+        raise IdentifierContractError("identifier absent from pinned register")
+    return value
+
+
+def validate_identity_join(left, right, mapping_contract=None):
+    """Validate declared identity joins, never ownership or inferred equivalence.
+
+    Cross-collection or cross-role joins require an explicit mapping declaration
+    pinned to evidence and register version. Its review/import belongs to the
+    existing owner-decision path; this function does not authorize that decision.
+    """
+    if left.namespace != right.namespace or left.object_kind != right.object_kind:
+        raise IdentifierContractError("different objects/namespaces require a reviewed relationship or crosswalk")
+    if left.collection != right.collection or left.role != right.role:
+        required = {
+            "left": left.binding, "right": right.binding,
+            "left_role": left.role, "right_role": right.role, "kind": "identity",
+        }
+        if not mapping_contract or any(mapping_contract.get(k) != v for k, v in required.items()):
+            raise IdentifierContractError("explicit field-and-role mapping contract required")
+        if any(not isinstance(mapping_contract.get(k), str) or not mapping_contract[k].strip()
+               for k in ("evidence", "registry_version", "decision_id")):
+            raise IdentifierContractError("mapping requires evidence, pinned registry and decision reference")
+    return True
+
+
+def validate_identity_key(columns, stable_columns):
+    """Object identity must not be derived from mutable descriptive attributes."""
+    mutable = {"name", "canonical_name", "entity_class", "classification", "ownership",
+               "owner", "owner_cedar_uid", "owner_hub_cedar_uid", "address", "geography",
+               "state", "city", "status", "built_date", "retrieval_date",
+               "enterprise_name", "enterprise_name_normalized", "business_name",
+               "parent_enterprise_id"}
+    if not columns or len(set(columns)) != len(columns):
+        raise IdentifierContractError("identity key must be nonempty and nonrepeating")
+    if any(c not in stable_columns or c.lower() in mutable for c in columns):
+        raise IdentifierContractError("identity key uses undeclared or mutable attributes")
+    return True
+
+
+def validate_derived_identifiers(source_ids, derived_ids):
+    """A filtered/reordered view may preserve IDs; it cannot invent identities."""
+    source = set(source_ids)
+    if any(not isinstance(v, str) or not v.strip() or v not in source for v in derived_ids):
+        raise IdentifierContractError("derived output invented or blanked an identifier")
+    return True
+
+
+
+def validate_unique_record_keys(rows, primary_key, *, nullable_key_parts=()):
+    """Measure the stated grain on the supplied complete snapshot; never dedupe."""
+    if not primary_key or len(set(primary_key)) != len(primary_key):
+        raise IdentifierContractError("declared primary key is absent or repeated")
+    if not set(nullable_key_parts).issubset(primary_key):
+        raise IdentifierContractError("nullable key parts are not in declared grain")
+    keys = set()
+    for row in rows:
+        if any(column not in row for column in primary_key):
+            raise IdentifierContractError("record lacks a declared key column")
+        key = tuple(row[column] for column in primary_key)
+        if not any(value is not None and str(value).strip() for value in key):
+            raise IdentifierContractError("blank record key")
+        if any((value is None or not str(value).strip()) and column not in nullable_key_parts
+               for column, value in zip(primary_key, key)):
+            raise IdentifierContractError("blank required key part")
+        try:
+            if key in keys:
+                raise IdentifierContractError("duplicate key at declared grain")
+            keys.add(key)
+        except TypeError as exc:
+            raise IdentifierContractError("key values must be immutable scalars") from exc
+    return frozenset(keys)
+
+
+def validate_binding_history(previous, current):
+    """Compare ID -> immutable object-token maps from pinned registers.
+
+    Tokens must represent previously adjudicated objects, never current names or
+    ownership attributes. This checks conservation; it does not adjudicate tokens.
+    Retirement preserves a binding in current history rather than removing it.
+    """
+    if any(not isinstance(key, str) or not key.strip() for key in current):
+        raise IdentifierContractError("blank issued identifier")
+    for key, object_token in previous.items():
+        if key not in current:
+            raise IdentifierContractError("issued binding disappeared")
+        if current[key] != object_token:
+            raise IdentifierContractError("issued identifier reassigned")
+    try:
+        tokens = list(current.values())
+        if any(token is None or token == "" for token in tokens):
+            raise IdentifierContractError("missing immutable object token")
+        if len(set(tokens)) != len(tokens):
+            raise IdentifierContractError("same object assigned competing identifiers")
+    except TypeError as exc:
+        raise IdentifierContractError("object tokens must be immutable") from exc
+    return True
+
+
+def validate_release_reference(collection, version, manifest):
+    """Resolve a version in its collection scope, never as a universal version."""
+    matches = [entry for entry in manifest.get("collections", [])
+               if entry.get("id") == collection]
+    if len(matches) != 1 or not version or matches[0].get("descriptor", {}).get("version") != version:
+        raise IdentifierContractError("release does not identify one manifest collection")
+    return (collection, version)
+
+
+def global_record_reference(collection, table, row, *, release_version,
+                            manifest, grain_contract, validated_keys):
+    """A scoped reference tuple, not a newly minted Cedar identity.
+
+    grain_contract is the caller's pinned collection-table contract, measured by
+    validate_unique_record_keys on the full snapshot. Existing generated grain
+    evidence must be remeasured when inputs change; a source ID alone is not enough.
+    """
+    validate_release_reference(collection, release_version, manifest)
+    if (grain_contract.get("collection") != collection or grain_contract.get("table") != table
+            or not grain_contract.get("grain") or not grain_contract.get("primary_key")
+            or not any(c.collection == collection and c.table == table
+                       for c in IDENTIFIER_CONTRACTS.values())):
+        raise IdentifierContractError("explicit declared collection/table grain required")
+    keys = validate_unique_record_keys(
+        [row], grain_contract["primary_key"],
+        nullable_key_parts=grain_contract.get("nullable_key_parts", ()))
+    key = next(iter(keys))
+    if key not in validated_keys:
+        raise IdentifierContractError("record key not in the validated snapshot")
+    return (collection, table, release_version, key)
+
+
 if __name__ == "__main__":
     import csv
     import sys

@@ -887,6 +887,28 @@ class FieldMapRefusal(SystemExit):
         super().__init__(f"{collection}: {message}")
 
 
+class NEEDAffiliationPublicationHold(FieldMapRefusal):
+    """Owner-directed route quarantine, independent of the identity cross-reference."""
+    def __init__(self):
+        super().__init__("need", ["cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"],
+                         "NEED affiliation publication is quarantined pending the route audit, "
+                         "regression tests and stratified source-evidence review. Changing or "
+                         "removing enterprise_existing_cedar_uid does not release this hold. "
+                         "No customer export is authorized by a field-level ruling alone.")
+
+
+def assert_collection_publishable(collection: str) -> None:
+    """Enforce collection-level holds before any public schema transformation.
+
+    The September 23 owner directive quarantines NEED affiliation derivation,
+    including previously accepted links. No environment flag, blank field or
+    metadata-only edit can lift it; release requires a reviewed policy change
+    supported by the route audit and evidence checks.
+    """
+    if collection == "need":
+        raise NEEDAffiliationPublicationHold()
+
+
 class UndecidedColumns(FieldMapRefusal):
     def __init__(self, collection: str, columns: list):
         super().__init__(collection, columns,
@@ -1290,9 +1312,10 @@ def apply_field_map(collection: str, header: list, rows: list,
     (a `SystemExit`) rather than ship a dataset it cannot vouch for.
 
     `own_cols` is the flagship's own header. Columns outside it were
-    synthesised by the build (joins and counts); they are not the map's to
-    decide and are appended after the approved header, in the order given.
+    synthesised by the build (joins and counts); these must be approved targets
+    in the same map or the dataset is refused before export.
     """
+    assert_collection_publishable(collection)
     entry = field_map().get(collection)
     if not entry or not entry.get("fields"):
         return {"mapped": False}

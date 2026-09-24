@@ -66,7 +66,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CLEAN = ROOT / "data" / "clean"
 SPINE = ROOT / "data" / "spine"
-TODAY = date.today().isoformat()
+TODAY = date.fromisoformat(os.environ.get("CEDAR_RUN_DATE", date.today().isoformat())).isoformat()
 csv.field_size_limit(10_000_000)
 
 #: Every file carrying a handle column, and the uid column that replaces it.
@@ -236,6 +236,21 @@ def main() -> int:
         print(f"\n  1177 selftest   {'ok' if not bad else 'FAIL'}   {bad} failure(s)")
         return 1 if bad else 0
 
+    # SCOPED APPLY. `--only a.csv,b.csv` restricts the strip to named TARGETS,
+    # for a migration that must touch its own new tables and nothing else. The
+    # unknown-file refusal below still runs over the WHOLE tree: scoping what is
+    # written never narrows what is checked.
+    only = []
+    for a in sys.argv[2:]:
+        if a.startswith("--only="):
+            only = [x.strip() for x in a.split("=", 1)[1].split(",") if x.strip()]
+    if only:
+        bad = [x for x in only if x not in TARGETS]
+        if bad:
+            print(f"  REFUSING: --only names {bad}, which are not in TARGETS")
+            return 2
+        print(f"  scoped apply: {len(only)} of {len(TARGETS)} target(s)")
+
     on_disk = sweep()
     unknown = [f for f in on_disk if f not in TARGETS and f not in RETIRE_WHOLE]
     if unknown:
@@ -286,7 +301,7 @@ def main() -> int:
         return 0
 
     print()
-    for rel, why in RETIRE_WHOLE.items():
+    for rel, why in ({} if only else RETIRE_WHOLE).items():
         src = ROOT / rel
         if not src.exists():
             continue
@@ -298,7 +313,7 @@ def main() -> int:
             encoding="utf-8")
         print(f"  {Path(rel).name:<48} -> graveyard/cicd/  (whole file)")
 
-    for rel in TARGETS:
+    for rel in (only or list(TARGETS)):
         p = ROOT / rel
         if not p.exists():
             continue

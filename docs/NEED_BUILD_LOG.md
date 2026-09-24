@@ -1699,3 +1699,104 @@ ruling covers, so no ruled corporation names the target. They are repointed by
 the brand guard where the name carries it and raised by `1157` where it does
 not.
 <!-- END NEST-OWNERV6-BRAND-GUARD-2026-09-02 -->
+
+
+<!-- BEGIN CODEX-NEED-AFFILIATION-ROUTE-AUDIT -->
+## Codex affiliation-route audit, September 23, 2026
+
+Read-only trace against pinned `need-candidate-b`: 5,820 enterprise rows,
+8,690 formal relationship observations. OWNERV6 contributes 4,901 observations
+on 4,714 distinct enterprise IDs. The enterprise display-source field names
+OWNERV6 on only 4,227 rows; it is not a complete lineage denominator.
+Route membership measures exposure, not a finding that every row is wrong.
+
+| Upstream route | Formal observations | Distinct enterprise IDs |
+|---|---:|---:|
+| master registry / cluster_v3 | 2,178 | 2,168 |
+| IRS strict crosswalk | 986 | 986 |
+| SBA crosswalk | 735 | 731 |
+| AIHEC college crosswalk | 12 | 12 |
+| master registry / hand | 440 | 436 |
+| master registry / web_verified | 41 | 40 |
+| master registry / subsidiary_lookup | 82 | 82 |
+| ANC subsidiary lookup | 386 | 386 |
+| press corpus | 41 | 41 |
+
+The four quarantined routes together account for 3,911 formal observations on
+3,828 distinct enterprise IDs; 175 also have other observations, and 3,653 have
+only observations from these routes. These are exposure counts, not a finding
+that every attribution is false. No identities are retired by this hold.
+
+The raw v6 input has 18,110 rows, 6,025 with tribe_id. Its AIHEC route has
+37 rows / 21 assigned parents; SBA has 4,059 / 919; IRS has 1,089 / 1,089.
+The actual upstream generators were located in
+`Desktop/dissertation/data/tribal_federal_spending/`:
+`enrich_need_with_tcus.py:49` selects the first canonical entity sharing any
+5-character token; `sam_extracts/_integrate_sba_sbs.py:76` uses first-winner
+4-character token mappings. The v2 SBA crosswalk only retries previously
+unmatched rows and preserves the v1 assignments.
+
+A read-only replay against the current upstream canonical table reproduced:
+Saginaw college -> Bad River from CHIPPEWA; Little Big Horn and Little Priest
+-> Little River from LITTLE; Turtle Mountain -> Table Mountain from MOUNTAIN;
+Wind River -> Bad River from RIVER. SBA reproduced Four Corner Pest -> Te-Moak
+from FOUR inside the descriptive alias `Four constituent bands...`, Hawaiian
+Islands Land Trust -> Pribilof from ISLANDS, NHO Charity -> Santee from
+ORGANIZATION, and San Juan Services -> San Juan from JUAN. These are mechanical
+crosswalk outputs, not published evidence of those relationships.
+
+1133 consumes the assigned tribe_id, resolves that parent through 1130, and
+emits OWNERV6 unspecified affiliation. 1072 then accepts the supplied parent UID.
+The erroneous affiliation therefore precedes the review UI. AIHEC source-family
+classification additionally inflated an association directory into a parent's
+self-published company list, which 1157 exempts from inference-name checks.
+
+Bounded correction: 1130 now classifies the AIHEC list as compiled_directory and
+unrecognized HTTP publishers as unattributed. 1133 no longer promotes a bare
+entity_self_published family label to parent_self_published_company_list.
+1133 additionally refuses automated cluster_v3, IRS-only, SBA crosswalk and AIHEC
+affiliation routes before parent resolution, retaining observations through the
+existing owner_v6_refused.csv output when the importer runs. Explicit hand rulings
+remain separate. A known parent UID, exact matching name or generic IRS URL
+cannot bypass the route quarantine. Existing 1130 regression suite: 48 passed,
+0 failed, including directory/URL controls and route-negative fixtures.
+No candidate, register, decision,
+canonical table, customer export or publication was changed. Legacy staging must
+be regenerated or explicitly migrated before the corrected labels reach a fresh
+candidate. The legacy-staging 1072 path bypasses 1133, so its consumer gate must
+also prevent the held routes from reaching a release. The prior candidate remains evidence, not a corrected release.
+
+Machine-readable counts, input/code hashes and replay details:
+`C:/Users/esm247/cedar-takeover-checkpoint/need-affiliation-route-audit.json`.
+
+### Bounded survivor assessment and freeze, 2026-09-23
+
+The 1,256 admissions remaining in the earlier proof were not a validated remainder.
+A purposive 29-record diagnostic covered all six remaining routes and reported
+parent-class strata. It is not an estimated false-positive rate. The earlier route
+counts were hand 527, web_verified 40, subsidiary_lookup 108, ANC lookup 533,
+newspaper corpus 45, and documented intertribal organizations 3.
+
+The newspaper importer enrich_need_v2.py (external dissertation workspace), lines
+67-76, selects the first parent sharing any token of five or more characters.
+Candidate Navajo Times still points to Cayuga; Char-Koosta still points to
+Assiniboine/Gros Ventre. The source newspaper corpus is absent at the declared
+chapter2_trust/output/tribal_press/ch2_tribal_newspapers.csv path. The 1133 guard
+now also refuses ch2_tribal_press_corpus; three named negative controls pass.
+The earlier full-proof JSON predates this additional guard; its 45 newspaper
+admissions must not be reported as current admissions.
+
+Survivors include genuine source leads, historical human rulings, generic URLs,
+repeated lookup lineage, and organization-to-self rows. None is automatically
+promoted. Shee Atika Languages illustrates a separate deferred status issue:
+1072 already corrected its hub to Shee Atika Corporation, but candidate status is
+operating despite corporate 2012/2018 reports describing dissolution. Preserve
+CEDAR-NEST-006048-5X and hold the assertion; no source-date-to-active-status
+inference is approved. Owner replacement information remains a proposed correction.
+
+Focused freeze checks: 51 reconciliation/admission tests, 16 migration tests,
+14 namespace tests, 4 decision-import tests, 21 publication tests, 2 runner tests,
+and 6 dependency checks pass. Further NEED expansion is deferred under the
+publication hold while infrastructure becomes the primary review lane.
+
+<!-- END CODEX-NEED-AFFILIATION-ROUTE-AUDIT -->

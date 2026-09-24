@@ -169,3 +169,27 @@ test("a shelf collection without release bookkeeping cites by name", async () =>
   assert.ok(citeLine.includes("Example Shelf Collection"));
   assert.ok(citeLine.includes("cedarpress.ai"));
 });
+
+// These release contracts are runtime dependencies, including on a fresh clone.
+// --no-index tests the ignore rules themselves even for already tracked files.
+test("product metadata is tracked and narrowly exempted from data ignores", () => {
+  const root = fileURLToPath(new URL("../../../", import.meta.url));
+  const metadata = ["codebook.json", "collections.manifest.json", "field_map.json",
+    "releases.json", "samples.published.json"];
+  for (const name of metadata) {
+    const path = `data/cedar/${name}`;
+    const tracked = spawnSync("git", ["ls-files", "--error-unmatch", path],
+      { cwd: root, encoding: "utf8" });
+    assert.equal(tracked.status, 0, `${path} must be committed: ${tracked.stderr}`);
+    const ignored = spawnSync("git", ["check-ignore", "--no-index", "--quiet", path],
+      { cwd: root, encoding: "utf8" });
+    assert.equal(ignored.status, 1, `${path} must have a narrow .gitignore exception`);
+  }
+  for (const path of ["data/cedar/unapproved.json", "data/cedar/full.csv",
+    "data/cedar/restricted/owner-decisions.json", "data/clean/full.csv",
+    "data/raw/source.json"]) {
+    const ignored = spawnSync("git", ["check-ignore", "--no-index", "--quiet", path],
+      { cwd: root, encoding: "utf8" });
+    assert.equal(ignored.status, 0, `${path} must remain ignored`);
+  }
+});

@@ -730,13 +730,10 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
     def test_the_release_ledger_is_tracked(self) -> None:
-        # Codex, PR #52. `.gitignore` excludes `/data/*` as a directory, so a
-        # file the site imports from data/cedar/ reaches the repository only
-        # by `git add -f`. The first ledger was written, read by the build and
-        # never committed, and `main` could not build. Every file the client
-        # imports from data/cedar/ must be in the index.
-        for name in ("collections.manifest.json", "releases.json",
-                     "samples.published.json", "explore.json",
+        # All runtime metadata must survive a fresh clone, including the
+        # curated field contracts that cannot be regenerated from datasets.
+        for name in ("codebook.json", "field_map.json", "collections.manifest.json",
+                     "releases.json", "samples.published.json", "explore.json",
                      "explore.overrides.json"):
             with self.subTest(file=name):
                 result = subprocess.run(  # noqa: S603
@@ -746,7 +743,7 @@ class TestGeneratorAndManifestAgree(unittest.TestCase):
                 )
                 self.assertEqual(
                     result.returncode, 0,
-                    f"data/cedar/{name} is not tracked; `git add -f data/cedar/{name}`",
+                    f"data/cedar/{name} is not tracked; commit the authoritative runtime contract",
                 )
 
 

@@ -1,0 +1,21 @@
+# Cedar Press - the data workspace's Python dependencies.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# `server/pyproject.toml` declares the FastAPI service only. The pipeline
+# scripts under `code/` run outside that environment (`py -3 code/NNNN_*.py`),
+# and until 2026-09-17 nothing declared what they need. That is not a tidiness
+# problem: `code/1072_tribally_owned_enterprises.py` clusters enterprise names
+# with rapidfuzz and SILENTLY FALLS BACK to no clustering when the import
+# fails. The fallback changes which rows collapse into one enterprise, and an
+# enterprise's identity is its (owner hub, normalised name) binding - so a
+# machine without rapidfuzz would mint different ids for the same evidence.
+#
+# The build log records rapidfuzz deciding specific cases: `cp leasing` fused
+# with `c p leasing`, `glacier technologies limited liability` kept apart.
+# Those outcomes are part of the published dataset, so the library that made
+# them is a dependency, not a convenience.
+#
+# Bounded rather than pinned: 3.x has been API-stable for `fuzz.ratio`, and the
+# floor is the version the 2026-09-02 v1 build used.
+rapidfuzz>=3.0,<4.0

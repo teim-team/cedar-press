@@ -56,11 +56,16 @@ Removed from `cedar_pipeline.NEVER_RUN` on 2026-09-01, after the fix and after
 perfectly good narrower route; this one is no longer a trap.
 """
 
+import argparse
 import csv
+import hashlib
+import json
+import os
+import tempfile
 import re
 import sys
 from collections import Counter, defaultdict
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -199,6 +204,10 @@ def main(dry_run=False):
         inbox.extend(rows)
     if not inbox:
         raise SystemExit("No rulings_inbox_*.csv found in review/")
+
+    if any(r.get("queue") in {"need_field", "need_affiliation"}
+           or (r.get("review_id") or "").startswith("NEED:") for r in inbox):
+        raise SystemExit("NEED review decisions require --need-review; legacy propagation refused")
 
     ledger, fields, union = load_base()
     excl = read_csv(SPINE / "cedar_exclusion_rulings.csv")
@@ -584,5 +593,143 @@ def main(dry_run=False):
         "ok": not lost_cols and len(ledger) >= rows_before}}
 
 
+NEED_REVIEW_COLUMNS = [
+    "review_id", "queue", "uei", "cage_code", "entity_or_firm", "question",
+    "YOUR_RULING", "YOUR_NOTE", "decision_id", "reviewer", "decided_at",
+    "evidence_fingerprint", "queue_version", "target_cedar_uid", "supersedes_decision_id",
+]
+NEED_RECEIPT_SCHEMA = "cedar.need.review.receipts.v1"
+
+
+def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
+    """Record review history only. Never apply identity or publication rulings."""
+    csv_path, queue_path, receipt_path = map(Path, (csv_path, queue_path, receipt_path))
+    receipt_path = receipt_path.resolve()
+    if (receipt_path.suffix.lower() != ".json"
+            or receipt_path in {csv_path.resolve(), queue_path.resolve()}
+            or any(p.lower() in {"data", "spine", "clean", "code", "docs", "public",
+                                 "server", ".git", "node_modules"} for p in receipt_path.parts)):
+        raise ValueError("Receipt must be a separate noncanonical JSON file outside production trees")
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    fingerprint = queue["evidence_fingerprint"]
+    if not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+        raise ValueError("Invalid queue evidence fingerprint")
+    candidate = Path(queue["candidate_root"]).resolve()
+    for relative, expected in queue["input_sha256"].items():
+        source = (candidate / relative).resolve()
+        if not source.is_relative_to(candidate):
+            raise ValueError("Queue input escapes candidate root")
+        with source.open("rb") as handle:
+            actual = hashlib.file_digest(handle, "sha256").hexdigest()
+        if actual != expected:
+            raise ValueError("Stale queue input: " + relative)
+    cases = {"NEED:" + r["enterprise"]["enterprise_id"]: r
+             for r in queue["records"] if r["exception"]}
+    field_case = "NEED:enterprise_existing_cedar_uid"
+    with csv_path.open(encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != NEED_REVIEW_COLUMNS:
+            raise ValueError("Invalid NEED review CSV header")
+        incoming = list(reader)
+    if not incoming:
+        raise ValueError("No explicit decisions in review CSV")
+    for row in incoming:
+        if set(row) != set(NEED_REVIEW_COLUMNS) or any(v is None for v in row.values()):
+            raise ValueError("Malformed NEED review row")
+        for key in ("decision_id", "reviewer", "decided_at", "YOUR_NOTE", "question"):
+            if not row[key].strip():
+                raise ValueError("Missing " + key)
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}", row["decision_id"]):
+            raise ValueError("Invalid decision_id")
+        when = datetime.fromisoformat(row["decided_at"].replace("Z", "+00:00"))
+        if when.tzinfo is None or when > datetime.now(timezone.utc):
+            raise ValueError("Decision timestamp must have timezone and cannot be future")
+        if row["evidence_fingerprint"] != fingerprint or row["queue_version"] != queue["review_id"]:
+            raise ValueError("Stale evidence fingerprint or queue version")
+        if row["uei"] or row["cage_code"]:
+            raise ValueError("NEED review does not authorize identifier attribution")
+        if row["review_id"] == field_case:
+            if (row["queue"] != "need_field" or row["target_cedar_uid"]
+                    or row["entity_or_firm"] != "enterprise_existing_cedar_uid"
+                    or row["YOUR_RULING"] not in {"INTERNAL_ONLY", "PUBLISH_CURRENT",
+                                                     "RENAME_IDENTITY_LINK", "RELATIONSHIP_ONLY"}):
+                raise ValueError("Invalid field-level ruling")
+        else:
+            record = cases.get(row["review_id"])
+            if not record:
+                raise ValueError("Unknown or nonexception case: " + row["review_id"])
+            enterprise = record["enterprise"]
+            if (row["queue"] != "need_affiliation"
+                    or row["entity_or_firm"] != enterprise["enterprise_name"]
+                    or row["target_cedar_uid"] != enterprise["owner_hub_cedar_uid"]
+                    or row["YOUR_RULING"] not in {"SUPPORT", "HOLD", "REJECT"}):
+                raise ValueError("Invalid exception ruling, name, or target")
+    receipt_path.parent.mkdir(parents=True, exist_ok=True) if not dry_run else None
+    lock_path = receipt_path.with_name(receipt_path.name + ".lock")
+    lock = None
+    temporary = None
+    try:
+        if not dry_run:
+            lock = lock_path.open("x", encoding="utf-8")
+        if receipt_path.exists():
+            ledger = json.loads(receipt_path.read_text(encoding="utf-8"))
+            if set(ledger) != {"schema", "decisions"} or ledger["schema"] != NEED_RECEIPT_SCHEMA:
+                raise ValueError("Receipt path contains an unrelated or invalid ledger")
+        else:
+            ledger = {"schema": NEED_RECEIPT_SCHEMA, "decisions": []}
+        seen, heads = {}, {}
+        for entry in ledger["decisions"]:
+            decision = entry["decision"]
+            did, case = decision["decision_id"], decision["review_id"]
+            if did in seen or decision["supersedes_decision_id"] != heads.get(case, ""):
+                raise ValueError("Receipt history is duplicated or has broken supersession")
+            seen[did], heads[case] = decision, did
+        receipts = []
+        for row in incoming:
+            did, case = row["decision_id"], row["review_id"]
+            if did in seen:
+                if seen[did] != row:
+                    raise ValueError("Conflicting duplicate decision_id: " + did)
+                receipts.append({"decision_id": did, "status": "ALREADY_RECORDED"})
+                continue
+            if row["supersedes_decision_id"] != heads.get(case, ""):
+                raise ValueError("Conflicting ruling requires explicit supersession of current decision")
+            status = "HELD" if row["YOUR_RULING"] == "HOLD" else "RECORDED_PENDING_APPLICATION"
+            ledger["decisions"].append({"decision": row, "status": status})
+            seen[did], heads[case] = dict(row), did
+            receipts.append({"decision_id": did, "status": status})
+        if not dry_run and any(r["status"] != "ALREADY_RECORDED" for r in receipts):
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="\n",
+                                             dir=receipt_path.parent, delete=False) as handle:
+                temporary = Path(handle.name)
+                json.dump(ledger, handle, indent=2, ensure_ascii=False)
+                handle.write("\n")
+            os.replace(temporary, receipt_path)
+            temporary = None
+        print(json.dumps({"schema": NEED_RECEIPT_SCHEMA, "applied": False,
+                          "dry_run": dry_run, "receipts": receipts}, indent=2))
+        return receipts
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        if lock is not None:
+            lock.close()
+            lock_path.unlink()
+
+
 if __name__ == "__main__":
-    main(dry_run="--dry-run" in sys.argv)
+    if "--need-review" in sys.argv:
+        parser = argparse.ArgumentParser(description="Record NEED decisions without applying them")
+        parser.add_argument("--need-review", required=True)
+        parser.add_argument("--queue", required=True)
+        parser.add_argument("--receipt-ledger", required=True)
+        parser.add_argument("--dry-run", action="store_true")
+        args = parser.parse_args()
+        try:
+            record_need_review(args.need_review, args.queue, args.receipt_ledger, args.dry_run)
+        except (ValueError, KeyError, OSError, TypeError) as error:
+            raise SystemExit("NEED REVIEW REFUSED: " + str(error))
+    else:
+        if any(flag in sys.argv for flag in ("--queue", "--receipt-ledger")):
+            raise SystemExit("NEED review flags require --need-review; legacy mode refused")
+        main(dry_run="--dry-run" in sys.argv)

@@ -1335,6 +1335,123 @@ renderTiles(); renderFilters(); renderQueues(); applyAll(); updateProgress();
 </script>
 """
 
+
+# Bounded NEED review mode in the existing review builder. No register writes.
+def build_need_review(evidence_path):
+    import hashlib
+    payload = json.loads(Path(evidence_path).read_text(encoding="utf-8"))
+    selected = [r for r in payload["records"] if r["exception"]]
+    if len(selected) != 18 or len({r["enterprise"]["enterprise_id"] for r in selected}) != 18:
+        raise ValueError("NEED review requires exactly the pinned 18 exceptional cases")
+    root = Path(payload["candidate_root"])
+    for rel, expected in payload["input_sha256"].items():
+        if hashlib.sha256((root / rel).read_bytes()).hexdigest() != expected:
+            raise ValueError("Stale NEED review evidence: " + rel)
+    payload["records"] = selected  # Never ask the owner to inspect the other 85.
+    body = NEED_REVIEW_HTML.replace("__NEED_DATA__", json.dumps(payload, ensure_ascii=True).replace("<", "\\u003c"))
+    REVIEW.mkdir(exist_ok=True)
+    target = REVIEW / "cedar_review.html"
+    if target.exists():
+        backup = REVIEW / ("cedar_review.previous-" + hashlib.sha256(target.read_bytes()).hexdigest()[:12] + ".html")
+        if not backup.exists():
+            backup.write_bytes(target.read_bytes())
+    target.write_text(body, encoding="utf-8")
+    print(target)
+
+NEED_REVIEW_HTML = r"""<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cedar owner review ? NEED</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;background:#f4f3ee;color:#172c29;margin:0}main{max-width:1080px;margin:auto;padding:24px}h1,h2{line-height:1.2}article,.panel{background:white;border:1px solid #bbc8bf;border-radius:10px;padding:22px;margin:18px 0}header{border-bottom:3px solid #315e4b;padding-bottom:12px}label{display:block;font-weight:600;margin:10px 0 4px}textarea,input,select{font:inherit;box-sizing:border-box;width:100%;padding:9px;border:1px solid #7b9183;border-radius:4px}textarea{min-height:90px}button{font:inherit;background:#25563f;color:white;padding:10px 14px;border:0;border-radius:4px;cursor:pointer;margin:8px 8px 4px 0}button.hold{background:#765d23}button.reject{background:#85423a}button:focus-visible,a:focus-visible{outline:3px solid #ce941c}small,.muted{color:#4e6258}.status{font-weight:bold}.saved{border-left:6px solid #2c6950}.warning{background:#fff0d5;padding:12px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #c9d3cc;padding:9px;text-align:left}a{color:#145b7c;overflow-wrap:anywhere}pre{white-space:pre-wrap}details{margin:12px 0}#payload{min-height:180px}#topstatus{position:sticky;top:0;background:#e4eee6;padding:12px;z-index:2}blockquote{margin:12px;border-left:3px solid #9aafa1;padding-left:12px}code{overflow-wrap:anywhere}.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:200px}
+</style><main><header><h1>Cedar NEED: your field decision, then 18 exceptions</h1>
+<p>Nothing here publishes NEED, changes an identity, or opens the export gate. Resolve saves an explicit decision for validation and application by Codex. Notes alone remain drafts.</p></header>
+<div id="topstatus" role="status" aria-live="polite"></div>
+<section class="panel"><label for="reviewer">Reviewer name</label><input id="reviewer" autocomplete="name" placeholder="Enter your name before resolving">
+<p>Work saves in this browser at this same file path. Use Copy Decisions or Download Decisions for a durable copy and return that file or copied text in this conversation. Import Decisions restores the same export without duplicating decisions.</p>
+<button id="copy">Copy Decisions</button><button id="download">Download Decisions</button><button id="importbutton">Import Decisions</button><input id="importfile" type="file" accept=".csv,text/csv" hidden>
+<details id="exportpanel"><summary>Copyable exported decisions / import receipt</summary><textarea id="payload" aria-label="Copyable decisions"></textarea><pre id="receipt"></pre></details>
+</section>
+<article id="field"><h2>1. Decide how this field is published</h2>
+<p><code>enterprise_existing_cedar_uid</code> links a NEED enterprise record to the Cedar register entry believed to describe <strong>that enterprise itself</strong>. It does not identify its owner. The separate <code>cedar_uid</code> and <code>owner_hub_cedar_uid</code> identify its associated hub.</p>
+<p>103 populated enterprise rows reference 99 distinct registered entities. All references resolve to active register entries; 102 reproduce a unique normalized-name match and one a form-folded match. That is not independent proof of legal equivalence. Their hub relationships are 92 unspecified affiliations, seven shareholding/ancestry ties, two subsidiaries and two wholly-owned relationships.</p>
+<p><strong>Recommendation: retain internally; exclude from customer exports for early access.</strong> Preserve the original cross-references and evidence. Review the 18 exceptional affiliations below separately. This ruling does not certify the other 85 or approve legal-entity merges.</p>
+<table><tr><th>Choice</th><th>Consequence</th></tr>
+<tr><td>Publish current meaning</td><td>Expose own-entity links; requires evidence that supports each published identity assertion and clear distinction from hub identity.</td></tr>
+<tr><td>Rename as identity link</td><td>Use an explicit enterprise-to-register identity relationship with evidence and status. A clearer name alone does not validate equivalence.</td></tr>
+<tr><td>Relationship table only</td><td>Requires an explicit identity-link predicate/contract; the present NEED relation table records hub relationships, not identity equivalence.</td></tr>
+<tr><td>Internal only (recommended)</td><td>Keep every value internally, exclude from all customer surfaces only after your ruling is imported, the existing field contract is amended, and exclusion/preservation tests pass. Unsupported affiliations remain held.</td></tr></table>
+<label for="fieldchoice">Publication disposition</label><select id="fieldchoice"><option value="INTERNAL_ONLY">Internal only ? recommended</option><option value="PUBLISH_CURRENT">Publish current meaning</option><option value="RENAME_IDENTITY_LINK">Rename as explicit identity link</option><option value="RELATIONSHIP_ONLY">Relationship table only</option></select>
+<label for="fieldnote">Reason / conditions</label><textarea id="fieldnote" placeholder="Record your reason or any conditions. A selection or note alone does not resolve this decision."></textarea>
+<button id="fieldresolve">Record field decision</button><p id="fieldstatus" class="status">Draft ? not resolved</p></article>
+<section><h2>2. Review only these 18 exceptional affiliations</h2><p>Resolve supports the current affiliation with your cited evidence; Hold leaves it unresolved; Reject rejects that specific affiliation, not the enterprise's Native status or register identity. No alternative hub is applied automatically. Use notes to state a proposed correction and its evidence.</p><p class="warning">Preserved source excerpts and links below have not been freshly verified on the web. Service, management and charter evidence are distinct from legal ownership. One prior human ruling is shown explicitly and must not be silently overwritten.</p><div id="cases"></div></section>
+<section class="panel"><h2>Removed from human review: code defects</h2><p>Tohono O'odham Community College's apparent FPDS parent contradiction compared a legacy handle with the stable Cedar UID of the same hub. Code now resolves unique historical bindings and compares Cedar UIDs. Related sibling and duplicate checks also used a retired hub column, collapsing different hubs; those comparisons now preserve hub boundaries and clear stale enrichment on rerun. Focused regression fixtures pass. The pinned review candidate remains unchanged; a fresh build must remeasure enrichment before release.</p><details><summary>Review provenance and decision history</summary><pre id="provenance"></pre><pre id="history"></pre></details></section></main>
+<script>
+'use strict';
+const DATA=__NEED_DATA__;
+const COLS=['review_id','queue','uei','cage_code','entity_or_firm','question','YOUR_RULING','YOUR_NOTE','decision_id','reviewer','decided_at','evidence_fingerprint','queue_version','target_cedar_uid','supersedes_decision_id'];
+const FIELD='NEED:enterprise_existing_cedar_uid';
+const key='cedar-review-need-v1';
+let state={drafts:{},events:[],reviewer:'',exported:''},storageError='';
+try{const raw=localStorage.getItem(key);if(raw)state={...state,...JSON.parse(raw)};}catch(e){storageError='Browser storage unavailable: export before closing.';}
+const spec=new Map([[FIELD,{id:FIELD,queue:'need_field',title:'enterprise_existing_cedar_uid',question:'Publication disposition of enterprise own-entity cross-reference',target:''}]]);
+const el=id=>document.getElementById(id);
+function text(tag,value,parent){const n=document.createElement(tag);n.textContent=value;parent.appendChild(n);return n;}
+function link(url,label,parent){if(!/^https?:\/\//i.test(url))return text('span',url,parent);const n=text('a',label||url,parent);n.href=url.split(/\s/)[0];n.target='_blank';n.rel='noopener noreferrer';return n;}
+function current(id){return state.events.filter(e=>e.review_id===id).at(-1);}
+function save(){try{localStorage.setItem(key,JSON.stringify(state));storageError='';}catch(e){storageError='Browser storage unavailable: copy/download before closing.';}refresh();}
+function draft(id,changes){state.drafts[id]={...(state.drafts[id]||{}),...changes};save();}
+function latestValid(id){const e=current(id);return e&&e.evidence_fingerprint===DATA.evidence_fingerprint?e:null;}
+function refresh(){let n=0;for(const [id,s]of spec){const e=current(id);if(e)n++;const dest=id===FIELD?el('fieldstatus'):el('status-'+id);if(dest)dest.textContent=e?(e.evidence_fingerprint===DATA.evidence_fingerprint?'Saved locally; pending import/application: ':'STALE evidence; review again: ')+e.YOUR_RULING:'Draft ? not resolved';const card=id===FIELD?el('field'):el('card-'+id);if(card)card.classList.toggle('saved',!!latestValid(id));}
+ el('topstatus').textContent=`${n} of 19 decisions saved; ${state.events.length} history entries. `+(state.exported===JSON.stringify(state.events)&&n?'Current decisions exported. ':'Export decisions before returning them. ')+storageError;
+ el('history').textContent=state.events.map(e=>`${e.decided_at} | ${e.review_id} | ${e.YOUR_RULING} | ${e.reviewer} | supersedes ${e.supersedes_decision_id||'none'}`).join('\n');}
+function resolve(id,disposition){const s=spec.get(id),note=(state.drafts[id]?.note||'').trim(),reviewer=el('reviewer').value.trim();if(!reviewer||!note){alert('Enter your reviewer name and a reason/evidence note before recording a decision.');return;}const old=current(id);const event={review_id:id,queue:s.queue,uei:'',cage_code:'',entity_or_firm:s.title,question:s.question,YOUR_RULING:disposition,YOUR_NOTE:note,decision_id:'NEED-DEC-'+crypto.randomUUID(),reviewer,decided_at:new Date().toISOString(),evidence_fingerprint:DATA.evidence_fingerprint,queue_version:DATA.review_id,target_cedar_uid:s.target,supersedes_decision_id:old?.decision_id||''};state.events.push(event);state.reviewer=reviewer;save();}
+const reasons={
+'005215-RM':'BIE management evidence names Navajo; current hub is Barrow. Hold this affiliation pending direct evidence.',
+'005255-JW':'BIE management evidence names Navajo; current hub is Barrow. Hold this affiliation pending direct evidence.',
+'005256-RN':'BIE management evidence names Navajo; current hub is Barrow. Hold this affiliation pending direct evidence.',
+'005298-SZ':'BIE management evidence names Navajo; current hub is Barrow. Hold this affiliation pending direct evidence.',
+'003089-J4':'BIE management evidence names Navajo; current hub is Kashia. Hold this affiliation pending direct evidence.',
+'003243-7Y':'AIHEC names Crow chartering authority; NEED assigns Little River. Hold affiliation; do not silently substitute an owner.',
+'003245-KG':'AIHEC names Winnebago chartering authority; NEED assigns Little River. Hold affiliation; do not silently substitute an owner.',
+'003197-90':'Prior human ruling in user_final_tribes.dta assigns Kootenai (NESTREL-E3449B1B868E98). AIHEC charter names Confederated Salish and Kootenai. Reopen only this association with the prior ruling preserved.',
+'002115-4X':'Same registered college also appears under Saginaw. Bad River link derives from an automated AIHEC-list attribution. Hold that association pending specific evidence.',
+'004130-16':'Same registered college also appears under San Carlos. San Felipe link derives from IRS BMF EIN 832845995, which does not itself establish affiliation. Hold pending evidence.',
+'004233-T5':'Individual-business identity match is distinct from the unsupported SBA crosswalk to San Juan. Active SBA certifications blank in preserved extract. Hold affiliation.',
+'004358-WT':'Individual-business identity match is distinct from the unsupported SBA crosswalk to Te-Moak. Active SBA certifications blank in preserved extract. Hold affiliation.',
+'005538-1F':'Registered NHO assigned Pribilof through SBA crosswalk; active certifications blank and no relationship excerpt. Hold affiliation, retain identity evidence.',
+'004784-S4':'Registered NHO assigned Santee through SBA crosswalk; active certifications blank and no relationship excerpt. Hold affiliation, retain identity evidence.',
+'001981-3E':'Existing service evidence names Redding instead of Agua Caliente; service evidence is not exhaustive. Hold pending direct evidence for this additional affiliation, not an automatic redirection.',
+'003838-KS':'Existing name-resolution edge names Yurok, not Resighini; it does not disprove another affiliation. Hold pending direct evidence, not automatic redirection.',
+'004213-X1':'Existing name-resolution edge names Seneca, not Seneca-Cayuga. Hold pending direct evidence; different nations cannot be equated by a shared token.',
+'005299-ZR':'Santa Fe school to Barrow derives from automated cluster_v3 in a SAM attribution file, not direct relationship evidence. Hold pending evidence.'};
+DATA.records.forEach((r,i)=>{const x=r.enterprise,id='NEED:'+x.enterprise_id,tail=x.enterprise_id.replace('CEDAR-NEST-','');spec.set(id,{id,queue:'need_affiliation',title:x.enterprise_name,question:'Does the evidence support the recorded affiliation with '+x.owner_hub_name+'?',target:x.owner_hub_cedar_uid,uei:x.uei,cage:x.cage_code});
+ const a=document.createElement('article');a.id='card-'+id;el('cases').appendChild(a);text('h3',`${i+1}. ${x.enterprise_name}`,a);text('p',`Current hub: ${x.owner_hub_name} (${x.owner_hub_cedar_uid}). Recorded: ${x.relation_class}/${x.relationship}. Enterprise: ${x.enterprise_id}; own-entity cross-reference: ${x.enterprise_existing_cedar_uid}.`,a);text('p','Interpretation / recommendation: '+reasons[tail],a);
+ text('p',`Registered entity: ${r.register_target.canonical_name} ? ${r.register_target.entity_class}.`,a);
+ const evidence=text('details','',a);text('summary','Source evidence and prior observations ('+r.formal_relationships.length+')',evidence);
+ for(const z of r.formal_relationships){text('p',`${z.enterprise_edge_id} | ${z.source_review_status} | ${z.evidence_class} | ${z.source_edition_date||'source edition date absent'}`,evidence);text('blockquote',z.quote||'No source quotation in preserved observation. '+z.source_document,evidence);link(z.source_url,z.source_url,evidence);}
+ for(const z of r.constellation_evidence){text('p',`Comparison ${z.edge_id}: ${z.tier} ? ${z.to_hub_name}; ownership claim: ${z.is_ownership_claim}.`,evidence);text('blockquote',z.evidence_excerpt||z.evidence_basis,evidence);link(z.evidence_source,z.evidence_source,evidence);}
+ const label=text('label','Notes / evidence / proposed interpretation',a);const ta=document.createElement('textarea');ta.id='note-'+id;label.htmlFor=ta.id;ta.value=state.drafts[id]?.note||current(id)?.YOUR_NOTE||'';ta.addEventListener('input',()=>draft(id,{note:ta.value}));a.appendChild(ta);
+ for(const [caption,value,cls]of [['Resolve ? support current affiliation','SUPPORT',''],['Hold','HOLD','hold'],['Reject this affiliation','REJECT','reject']]){const b=text('button',caption,a);b.className=cls;b.onclick=()=>resolve(id,value);}
+ const st=text('p','Draft ? not resolved',a);st.id='status-'+id;st.className='status';});
+el('reviewer').value=state.reviewer;el('reviewer').oninput=()=>{state.reviewer=el('reviewer').value;save();};
+el('fieldnote').value=state.drafts[FIELD]?.note||current(FIELD)?.YOUR_NOTE||'';
+el('fieldchoice').value=state.drafts[FIELD]?.choice||current(FIELD)?.YOUR_RULING||'INTERNAL_ONLY';
+el('fieldnote').oninput=()=>draft(FIELD,{note:el('fieldnote').value});el('fieldchoice').onchange=()=>draft(FIELD,{choice:el('fieldchoice').value});el('fieldresolve').onclick=()=>resolve(FIELD,el('fieldchoice').value);
+function csv(){const quote=v=>'"'+String(v??'').replaceAll('"','""')+'"';return COLS.join(',')+'\r\n'+state.events.map(e=>COLS.map(k=>quote(e[k])).join(',')).join('\r\n')+'\r\n';}
+function expose(){const value=csv();el('payload').value=value;el('exportpanel').open=true;return value;}
+el('copy').onclick=async()=>{const value=expose();try{await navigator.clipboard.writeText(value);state.exported=JSON.stringify(state.events);save();el('receipt').textContent='Copied decisions. Paste the text back to Codex.';}catch(e){el('payload').focus();el('payload').select();el('receipt').textContent='Clipboard unavailable. Copy the selected text manually.';}};
+el('download').onclick=()=>{const value=expose(),url=URL.createObjectURL(new Blob([value],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='cedar_need_decisions.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);state.exported=JSON.stringify(state.events);save();el('receipt').textContent='Download requested. Keep the CSV and return it to Codex for validated import.';};
+function parseCsv(value){let rows=[],row=[],cell='',quoted=false;for(let i=0;i<value.length;i++){const c=value[i];if(quoted){if(c==='"'&&value[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}else if(c==='"')quoted=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'){row.push(cell.replace(/\r$/,''));rows.push(row);row=[];cell='';}else cell+=c;}if(quoted)throw Error('Unterminated CSV quote');if(cell||row.length){row.push(cell.replace(/\r$/,''));rows.push(row);}const header=rows.shift();if(JSON.stringify(header)!==JSON.stringify(COLS))throw Error('Unsupported decision columns');return rows.filter(r=>r.some(Boolean)).map(r=>{if(r.length!==COLS.length)throw Error('Malformed CSV row');return Object.fromEntries(COLS.map((k,i)=>[k,r[i]]));});}
+function importDecisions(value){const incoming=parseCsv(value),all=[...state.events];let added=0,duplicate=0;for(const e of incoming){const s=spec.get(e.review_id);if(!s||e.queue!==s.queue||e.target_cedar_uid!==s.target)throw Error('Unknown case or target');if(e.evidence_fingerprint!==DATA.evidence_fingerprint||e.queue_version!==DATA.review_id)throw Error('Stale evidence or queue');if(!e.decision_id||!e.reviewer.trim()||!e.YOUR_NOTE.trim()||!Number.isFinite(Date.parse(e.decided_at)))throw Error('Missing decision identity, reviewer, note or timestamp');const allowed=e.review_id===FIELD?['INTERNAL_ONLY','PUBLISH_CURRENT','RENAME_IDENTITY_LINK','RELATIONSHIP_ONLY']:['SUPPORT','HOLD','REJECT'];if(!allowed.includes(e.YOUR_RULING))throw Error('Unknown disposition');const same=all.find(z=>z.decision_id===e.decision_id);if(same){if(COLS.some(k=>same[k]!==e[k]))throw Error('Conflicting decision ID');duplicate++;continue;}const previous=all.filter(z=>z.review_id===e.review_id).at(-1);if((previous?.decision_id||'')!==e.supersedes_decision_id)throw Error('Conflicting or missing superseded decision');all.push(e);added++;}state.events=all;save();for(const e of incoming){if(e.review_id===FIELD)el('fieldstatus').textContent='Imported locally; pending canonical application: '+e.YOUR_RULING;}const receipt={imported:added,duplicate,canonical_application:'NOT_APPLIED'};el('receipt').textContent=JSON.stringify(receipt,null,2);el('exportpanel').open=true;return receipt;}
+el('importbutton').onclick=()=>el('importfile').click();el('importfile').onchange=async()=>{try{importDecisions(await el('importfile').files[0].text());}catch(e){el('receipt').textContent='Import refused: '+e.message;el('exportpanel').open=true;}finally{el('importfile').value='';}};
+el('provenance').textContent=JSON.stringify({queue:DATA.review_id,evidence_fingerprint:DATA.evidence_fingerprint,input_sha256:DATA.input_sha256},null,2);
+window.needReview={csv,importDecisions,counts:()=>({events:state.events.length,cases:spec.size}),COLS};refresh();
+</script></html>"""
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) == 3 and sys.argv[1] == "--need-review":
+        build_need_review(sys.argv[2])
+    else:
+        main()
 
