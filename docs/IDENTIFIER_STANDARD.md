@@ -1,9 +1,11 @@
 # The Cedar identifier standard
 
-*Policy, hand-written, stable. **No counts live here** — every number about
-identifiers is measured by `code/501_build_entity_inventory.py` into
-`docs/ENTITY_INVENTORY.md`. A rule that carries its own statistics goes stale
-and starts lying; this file carries only rules.*
+> 2026-09-24 retirement correction: the older passages below describe the
+> pre-retirement handle system. The **CICD retirement contract** at the end of
+> this document controls wherever a historical passage conflicts with it.
+
+*Policy plus a dated retirement audit. Re-measure snapshot counts before release.
+`code/audit_retired_ids.py` reproduces retired-value counts without editing data.*
 
 Read this before writing anything that resolves, joins, or publishes an entity.
 
@@ -64,8 +66,8 @@ corporation reclassified):
 1. **`cedar_uid` never changes.** Not for any reason. Ever.
 2. The **old handle is retired to an alias** with `valid_to` set. It keeps
    resolving — historical filings use it and must keep working.
-3. A **new handle is minted** in the new class and becomes current, with
-   `valid_from`.
+3. No new class-prefixed handle is minted. Record the class change and keep
+   the old handle as read-only provenance.
 4. `entity_class` and `class_since_basis` are updated on the register row, with
    the citation (FR notice, court order) in the basis.
 5. **No row is rewritten in any dataset.** They carry `cedar_uid`; they are
@@ -83,7 +85,8 @@ that already had one**, and dropped the old handle from a register documented
 as append-only. A buyer who had joined on a handle would have lost their
 historical rows with no way to discover it.
 
-`data/spine/cedar_handle_history.csv` retains every binding ever issued:
+`graveyard/cicd/cedar_handle_history.csv` and
+`data/spine/cedar_retired_neid_crosswalk.csv` retain historical bindings:
 
 ```
 handle, cedar_uid, valid_from, valid_to, status, change_reason, recorded_date
@@ -140,11 +143,12 @@ supersedes ADR-008.
 
 ## 1. There is one identity system, and it is ours
 
-**`cedar_uid` is the identity (see §0); the class-prefixed handle below is the
-readable attribute of it.** Every Native entity has both, and nothing outside
-them is an identity — everything else is an *attribute of* an entity.
+**`cedar_uid` is the identity.** The class-prefixed handles below are
+retired historical keys, not current identity attributes or new issuance
+targets. New Native entities do not receive one. Other objects have
+separately typed identifiers.
 
-Cedar IDs are class-prefixed and readable on sight:
+Historical Cedar handles were class-prefixed and readable on sight:
 
 | prefix | class |
 |---|---|
@@ -162,7 +166,7 @@ Cedar IDs are class-prefixed and readable on sight:
 | `CNSF` | Federal-level constituency entity |
 | `CNSS` | State-level constituency entity |
 | `SGVF` | Federal-level self-governance consortium |
-| `CEDAR-ENT-` | Individually Native-owned business and other minted entities |
+| `CEDAR-ENT-` | Historical individually Native-owned business surrogate; retired for new issuance |
 
 Those are ENTITY (hub) prefixes. Two prefixes name SUB-HUBS and are **not** entities — see §2:
 
@@ -171,14 +175,9 @@ Those are ENTITY (hub) prefixes. Two prefixes name SUB-HUBS and are **not** enti
 | `CEDAR-NEST-nnnnnn-CC` | an enterprise a nation, ANC or NHO owns. The collection was renamed NEST → NEED on 2026-09-10 and the prefix was NOT: these ids are issued, and a prefix is never rewritten — `docs/NEED_RENAME_2026-09-10.md` | `data/spine/cedar_need_id_register.csv` |
 | `CEDAR-PLACE-nnnnnn-CC` | a **physical place** an entity operates — gaming property, BIE school, IHS facility, BIA office, distinguished by a `place_class` COLUMN, never by the prefix | `data/spine/cedar_place_id_register.csv` |
 
-*Verified against the spine 2026-08-28: every prefix above is present, and no
-prefix in the spine is missing from this table. If you add a class, add its
-prefix here — an undocumented prefix is how a reader concludes a class does not
-exist.*
-
-`tribe_id` is the canonical column name for a Cedar ID, for historical reasons.
-It is **not** a tribe-only field — an NHO and an individually-owned firm both
-carry one. Do not rename it casually; ~71 tables key on it.
+*This is a historical vocabulary, not a minting template. The original
+`tribe_id` columns in internal tables hold retired handles. They are never
+canonical `cedar_uid` fields and cannot be copied into new releases.*
 
 ### The CICD / lineage-A integer scheme is RETIRED as an identity
 
@@ -465,3 +464,184 @@ SERVICES, INC.`** and **`AXSEUM, INC.`** — one registrant, one rename, zero
 tokens in common. No name matcher reaches across that; the identifier does. It
 is the ASRC argument in miniature, and it is the reason the map is worth its
 defects.
+
+---
+
+## CICD retirement contract and Gaming handoff (2026-09-24)
+
+This section supersedes the pre-retirement language above that calls a
+class-prefixed handle a current attribute or proposes a new handle on
+reclassification. The source finding is
+`docs/GAMING_ID_CONTRACT_REQUEST.md` on `claude/gaming-intelligence`.
+Code review used the isolated `codex/cicd-id-retirement-audit` worktree from
+`origin/pr122` (`3195e70`), `origin/main` (`6d445f4`), the active Press
+workspace (`49c846a`), the Gaming worktree (`9ab9efc` at inspection), and
+Lumecon Data (`f882fb1`). The populated active Press data tree was read-only;
+Claude's branch and uncommitted Gaming work were untouched.
+**Gaming is a Cedar Grove collection, outside Cedar Press's twelve-collection
+launch set.** The old `dist/customer/gaming.csv` is a historical Press artifact,
+not authorization for a new Press Gaming release.
+
+### Allowed IDs and boundaries
+
+| Object | New canonical ID and authority | Historical/source values |
+|---|---|---|
+| Native entity | `cedar_uid = CE-xxxxx-CC`, `503_identity.mint`; exact register membership and check characters required | `TRBF`, `TRBS`, `AKNF`, `ANVC`, `ANRC`, `CNSF`, `CNSS`, `NHO`, `ITO`, `TCU`, `CDFI`, `BIE`, `UIO`, `SGVF`, `CEDAR-ENT` are read-only handles, never `cedar_uid` |
+| Legal business/operator | `CB-` in the separate Cedar Business Register, with its own reviewed binding | A business is not made a Native entity by ownership |
+| Tribally owned enterprise sub-hub | Existing `CEDAR-NEST-nnnnnn-CC`, ordinal from `cedar_ids.allocate`, check characters from `503_identity`; append-only NEED register | NEED affiliation remains on its separate publication hold. `CEDAR-HOLD` is retired and unissued |
+| Physical gaming facility | Existing `CEDAR-PLACE-nnnnnn-CC`, allocated through `code/1129_place_ids.py` using the shared `cedar_ids` counter and `503_identity` checks; bind only after place-identity review | `CCP-`, `VP-`, `TPL-`, `CEDAR-FAC-` and `CED-` are source-scoped/internal facility keys. Keep them beside the canonical place ID in an internal crosswalk, never as the public Gaming facility ID. `CEDAR-FAC` may still name an internal source row; it is not a second physical-place namespace |
+| Compact/agreement | Existing `CEDAR-CONTRACT` allocator for a Cedar-authored stable compact object, with source compact number retained | Do not derive identity from mutable title, state or tribe name |
+| Payment, license issuance, decision, regulatory/environmental/litigation event | Existing `CEDAR-EVENT` allocator for a Cedar-authored event; retain any stable official source event ID separately | Existing `GLD` values are historical Gaming decision source IDs, not a new global event namespace |
+| Labor, revenue, capacity, amenity and source observation | Existing `CEDAR-OBS` allocator for a Cedar-authored observation; `CEDAR-SRC` for a source record and `CEDAR-REL` for an evidenced relationship | Preserve official filing/transaction keys and their row grain; do not convert an aggregate regional observation into a tribe or facility observation |
+
+The fifteen `GREV`, `GPAY`, `GREG`, etc. hashes currently proposed in
+`claude/gaming-intelligence:code/gaming_grove.py` are **not registered Cedar
+namespaces**. Its `PROV-` values are structural dry-run markers only. Claude
+must replace those public IDs with registered object IDs, and must retain a
+stable source-key crosswalk so rebuilds reuse the same issued ID. A hash of
+source keys may be an internal deduplication key, never independent mint
+authority. `PROV-`, `CCP-`, `VP-`, `TPL-` and retired class handles are rejected
+from canonical ID columns, governed manifests, APIs and customer outputs.
+
+For a legacy entity handle, call
+`cedar_publication.resolve_retired_entity_handle(handle)`. It reads the
+historical binding vocabulary and returns only one exact `CE-` binding;
+unknown or contested values raise. Keep the original in an internal
+provenance crosswalk. Never prefix-strip or manufacture a CE value. The
+crosswalk is a reader, not an allocator or publication field.
+
+### Evidence, enforcement and remaining release blocker
+
+The live Cedar Press workspace measured on 2026-09-24 has 1,916 rows and
+1,916 distinct `CE-` values in `data/spine/cedar_identity_register.csv`, with
+zero non-CE values in `cedar_uid`. The historical
+`data/spine/cedar_retired_neid_crosswalk.csv` has 1,555 rows and 1,555
+distinct retired values; `graveyard/cicd/cedar_handle_history.csv` has 1,555
+rows. The place register has 1,051 source-key binding rows for 997 distinct
+places; 771 rows / 717 distinct place IDs are classed `GAMING_PROPERTY`.
+The NEED register has 6,089 distinct `CEDAR-NEST` IDs. Multiple source keys
+for one place are expected; a new facility ID per source row would duplicate
+one property.
+
+The historical spine `data/spine/cedar_entity_spine.csv` has 1,555 rows;
+its `tribe_id` column contains `TRBF` 348, `AKNF` 229, `NHO` 210, `BIE` 185,
+`ANVC` 179, `CDFI` 93, `TRBS` 64, `ITO` 56, `CEDAR-ENT` 45, `UIO` 43,
+`TCU` 37, `SGVF` 29, `CNSF` 22, `ANRC` 12 and `CNSS` 3. These are historical
+handles, not `cedar_uid`. The 787-row
+`data/clean/gaming_facilities.csv` has `facility_id` `CCP` 595, `VP` 164,
+`TPL` 15 and `CEDAR-FAC` 13; its `tribe_id` has `TRBF` 739, `CNSF` 43 and
+`AKNF` 3, while `entity_id` has `TRBF` 226 and `AKNF` 2. In the place register,
+`source_key` has `CCP` 595, `VP` 148, `TPL` 15 and `CEDAR-FAC` 13. The 16
+`VP` facility rows without a corresponding `VP` source-key binding require
+identity review or an explicit unresolved status before Gaming publication;
+the count difference alone does not authorize a merge or a new place ID.
+They are `VP-0063`, `VP-0101`, `VP-0102`, `VP-0109`, `VP-0110`, `VP-0241`,
+`VP-0242`, `VP-0243`, `VP-0254`, `VP-0255`, `VP-0335`, `VP-0336`, `VP-0337`,
+`VP-0338`, `VP-0405` and `VP-0406`.
+
+`cedar_ids.allocate`, `format_id` and `declare_static_block` now reject every
+retired issuance prefix, including the previously allocatable `CEDAR-ENT`
+and `CEDAR-HOLD`. `cedar_ids.class_prefix` and `reclassify` refuse historical
+issuance; `historical_class_prefix` is read-only. The old inline minting script
+`426_mint_bristol_bay_spine_entities.py` refuse new class-prefixed handles.
+The same refusal closes the historical `52`, `61`, `73 add`, `75`, `163` and `524 promote`
+write entry points; source evidence and read-only measurements remain intact.
+These safeguards exist on this audit branch only until integrated. At the
+inspection point, `origin/main` and the active Press/Gaming worktrees still
+carry older issuance code, so **repository-wide zero active minting is not yet
+proved**. Cherry-pick/merge this commit and rerun the guards on each release
+branch before lifting the Gaming ID hold.
+The legacy spine and clean tables still contain old handles as historical
+input, source keys and compatibility evidence; their mere presence there is
+not a new issuance. The `code/audit_retired_ids.py` CSV inventory prints exact
+path, column, prefix, occurrence count, row count and example for every file
+under the supplied roots, including ignored files. Run it against `data/spine`,
+`data/clean`, `dist/customer`, `dist/review/samples`, and
+`public/data/cedar/samples` in the populated workspace before each release.
+
+The independent `1165_delivered_publication_audit.py` full scan found zero
+**retired Native-handle** violations in 16 delivered CSVs, including an old
+787-row Gaming CSV. That check did not cover vendor facility IDs. The original
+`1169_release_verify.py --json` gate found zero retired Native handles in
+17 customer CSVs and 476 sample files, but **failed** the customer database:
+15 of 280 tables still have 18 retired-scheme columns containing 13,549
+populated rows. It also marked the no-regression and semantic checks
+`NOT_ESTABLISHED`. Thus no claim of complete retirement or a green Press
+release is warranted. The database migration and twelve-collection semantic
+readiness remain engineering tasks, without editing the active launch queue.
+The separate read-only inventory found that the old `dist/customer/gaming.csv`
+still publishes `CCP-` in `facility_id` on 595 rows, `VP-` on 164 and `TPL-`
+on 15, plus vendor IDs in provenance columns. This artifact is incompatible
+with the new Cedar Grove-only Gaming contract and must not be promoted.
+It also publishes `CEDAR-FAC-` in `facility_id` on 13 rows and once in
+`entity_match_basis`: 935 source-only facility-key occurrences in all.
+Exact source-only facility ID counts in this 787-row file are:
+
+| Path | Column | CCP | VP | TPL |
+|---|---|---:|---:|---:|
+| `dist/customer/gaming.csv` | `facility_id` | 595 | 164 | 15 |
+| same | `duplicate_of_facility_id` | 9 | 1 | 0 |
+| same | `entity_match_basis` | 17 | 5 | 2 |
+| same | `gaming_property_federal_traces__property_likelihood_basis` | 8 | 1 | 0 |
+| same | `loyalty_program_property__entity_tier_basis` | 35 | 12 | 1 |
+| same | `open_date_absent_reason` | 29 | 7 | 1 |
+| same | `open_date_basis` / `open_date_event_basis` | 0 | 4 | 0 |
+| same | `open_date_evidence` | 1 | 14 | 0 |
+
+The uncapped inventory read 25 current spine CSVs, 596 clean CSVs (including
+ignored historical backups), 17 customer CSVs and 476 sample CSVs without
+writing to those trees, with zero read errors. The CLI prints the exact
+path-column-prefix counts; the public Gaming counts above were remeasured
+after adding the internal `CEDAR-FAC-` source namespace to the screen.
+These are **screening occurrences**, not distinct entities or publication
+violations: e.g. `BIE-funded` and `NHO-owned` match the broad prefix screen but
+are not registered handles. Exact membership and object-role checks determine
+violations. Reproduce every path/column/count with:
+
+```powershell
+python code/audit_retired_ids.py data/spine data/clean dist/customer dist/review/samples public/data/cedar/samples
+```
+
+The active Press release gate is red independently of Gaming. Its customer
+database identity check fails, and semantic/no-regression checks are not
+established. That is the current twelve-collection readiness result; the old
+`docs/DATASET_READINESS.md` 15/15 READY figure is a 2026-09-02 source-artifact
+check and does not establish storefront release readiness. The twelve-collection
+identifier-contract test still enumerates exactly twelve launch collections.
+Focused Cedar identity/field-map tests passed (46 cases); the `1169` release
+selftest proved 17 positive/negative controls. Lumecon's contract and pipeline
+suite passed 121 cases; its sole failure was Windows symlink creation privilege
+(`WinError 1314`) before the security assertion ran. The Press collection and
+download suite reached 66 cases with one import error because `uvicorn` is
+absent from this worktree's Python environment. Neither environment failure
+is evidence of a green release.
+`1169` now tests exact historical vocabulary inside composite/prose values as
+well as bare cells, and also blocks `CCP-`, `VP-`, `TPL-` and `CEDAR-FAC-`
+numeric IDs on Gaming customer/sample surfaces. Its selftest plants both a composite
+handle and a vendor facility ID. Existing outputs must be regenerated only
+under a separately authorized release process; this audit does not touch them.
+Running the amended customer check on a temporary copy of the live
+`gaming.csv` returns `FAIL` with 935 source-only facility-key occurrences.
+
+Lumecon Data's `identity.mode: registered_reference` verifies exact pinned
+membership, nullable blanks and immutable release bindings. It does not
+independently determine CE checksum or Native identity; the Cedar producer
+must validate against the authoritative register before constructing the
+binding. A source mapping containing a retired handle must be refused, not
+blessed through an `id: id` entry. Existing Lumecon tests cover unknown and
+modified registered references; a cross-repository release fixture with a
+retired handle is still needed before claiming end-to-end proof.
+
+**Claude stop condition:** keep Gaming ID creation and release paused until
+the shared-ID binding migration, negative tests for every canonical table and
+public surface, Lumecon fixture, and independent release scan all pass with
+zero retired values. Do not change the active Press Gaming artifact or its
+review queue as a side effect of this contract.
+
+The human identity queue is limited to the 16 unbound `VP` facility keys,
+contested historical handle bindings, and any operator/enterprise/place
+equivalence lacking direct evidence. Assign each a reviewed same-place,
+distinct-place or unresolved decision with source and date. Migrating the
+customer database, retiring the old Press Gaming output, adding Lumecon
+negative fixtures, wiring the new Gaming release and resolving missing source
+coverage are engineering/release tasks, not human identity rulings.

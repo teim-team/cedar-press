@@ -619,6 +619,24 @@ def neid_map():
     return _NEID_MAP
 
 
+def resolve_retired_entity_handle(handle: str) -> str:
+    """Read-only compatibility lookup; never mints or guesses a cedar_uid.
+
+    Only an exact historical crosswalk member with one reviewed binding can
+    resolve. Unknown and contested values require identity review.
+    """
+    if not isinstance(handle, str) or not handle or handle != handle.strip():
+        raise ValueError("retired handle must be an exact nonblank string")
+    mapping = neid_map()
+    if handle in _NEID_AMBIGUOUS:
+        raise ValueError("retired handle has conflicting identity bindings")
+    uid = mapping.get(handle)
+    from cedar_ids import _entity_validator
+    if not uid or not _UID.fullmatch(uid) or not _entity_validator().valid(uid):
+        raise ValueError("retired handle has no valid registered cedar_uid")
+    return uid
+
+
 def _embedded_neid_re():
     """An alternation built FROM the harvested vocabulary, not from a shape.
 

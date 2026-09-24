@@ -302,6 +302,7 @@ def token(name, taken):
 
 
 def main():
+    raise SystemExit("Retired NHO-/ITO- issuance is disabled; mint CE- through 503_identity after review")
     log("=== Cedar Press 61: add NHOs + intertribal organizations ===\n")
 
     spine = read_csv(SPINE)

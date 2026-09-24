@@ -956,6 +956,7 @@ def resolve_owner(owner_name, spine):
 
 
 def cmd_add():
+    raise SystemExit("Retired TCU-/CDFI- issuance is disabled; mint CE- through 503_identity after review")
     print("=== 73 --add ===\n")
     spine = read_csv(SPINE_P)
     fields = list(spine[0].keys())
