@@ -59,16 +59,21 @@ export default function PressDoorCollections({ selectedId, onPick, onPoint }) {
       </div>
 
       {SHELVES.map(({ tier, entries }) => (
-        <div className="cp-dcol__shelf" key={tier.id}>
+        /* The shelf whose collection is in hand carries `is-active`, so the
+           strip also answers which plan the pointed collection comes with;
+           the CSS makes that a colour, never a movement. */
+        <div className={`cp-dcol__shelf${active?.shelf === tier.shelf ? " is-active" : ""}`} key={tier.id}>
           <span className="cp-dcol__tier">
             <TierName name={tier.name} />
             <small>{tier.question}</small>
           </span>
           <ul className="cp-dcol__grid">
-            {entries.map((entry) => {
+            {entries.map((entry, i) => {
               const on = entry.id === selectedId;
               return (
-                <li key={entry.id}>
+                /* `--i` is the tile's place on its shelf: the stylesheet
+                   staggers the shelf's arrival on it, left to right. */
+                <li key={entry.id} style={{ "--i": i }}>
                   <button
                     type="button"
                     className={`cp-dcol__tile${on ? " is-on" : ""}`}

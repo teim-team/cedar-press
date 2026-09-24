@@ -50,7 +50,7 @@ export function ProcessRail() {
   return (
     <ol className="cp-proc">
       {CONSTRUCTION_STEPS.map((stage, index) => (
-        <li className="cp-proc__stage" key={stage.id}>
+        <li className="cp-proc__stage" key={stage.id} style={{ "--i": index }}>
           <span className="cp-proc__n">{String(index + 1).padStart(2, "0")}</span>
           <h3 className="cp-proc__name">{stage.label}</h3>
           <p className="cp-proc__body">{stage.note}</p>

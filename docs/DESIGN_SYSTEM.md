@@ -75,6 +75,86 @@ supporting records", or four words when Cedar composed it. No chip, no
 "Evidence used" disclosure, no taxonomy prefix. A cited-record count is
 printed only when the service supplies one — absent, never `0`.
 
+## Motion
+
+One curve, three kinds of movement, and two audiences that get less.
+
+**The curve.** `--cp-ease: cubic-bezier(0.22, 1, 0.36, 1)`, declared once on
+`.teim-rd` at the top of `press.css`. It is the family's `--ease`
+(lumecon-website `global.css`), the page entrance (`cp-page-in`) and the
+door's `--door-ease`, which is now an alias of it. Every rule written since
+2026-09-24 says `var(--cp-ease)`; `pressMotion.test.js` fails a rule in the
+touched set that names a curve instead. **Drift, recorded rather than
+fixed:** `cubic-bezier(0.2, 0, 0, 1)` survives on `.cp-fade` and on a dozen
+older card hovers, and plain `ease` on more; each is pulled onto the token
+when its rule is next touched, not in a sweep that would put sixty
+unrelated lines in one diff. The Cedar panel (`.cp-dc`, `.cedar-widget`)
+declares the same value for itself and is left exactly as PR #119 left it.
+
+**Arrival** — once, on scroll, never on the first screen. `.cp-fade` blocks
+are revealed by `useFadeIn` (see the hook for why anything on the first
+screen is marked `cp-fade--now` and does not transition). Inside a revealed
+block, a set reads in order rather than landing as a slab: the door's four
+claims and three ways in stagger by `transition-delay` on the items
+themselves (0/70/140/210ms); the twelve collection tiles and Methods' seven
+process stages stagger by a keyframe (`cp-tile-in`, `cp-stage-in`) on each
+item's own `--i`, 45ms and 55ms a beat, with a `backwards` fill and no
+forward fill, so an arrived element is free to answer the pointer. Both are
+inert under `.cp-fade--now` — which, measured on the built door, is what the
+twelve are on every common desktop window (their top sits at 0.77 to 1.01 of
+the window height from 1280x720 to 1920x1080, inside the hook's 1.1 slack), so
+on a desktop they arrive with the page and the stagger is what a phone, or a
+window under about 1100 wide, sees.
+
+**Response** — a fine pointer, or keyboard focus. A lift of at most 3px with
+a soft shadow (the twelve: `translateY(-2px)` + `--door-shadow-surface`; the
+hero frame 3px). Every `:hover` on the door and on Methods' process rail is
+inside `@media (hover: hover) and (pointer: fine)`, and `:focus-visible`
+lifts a tile the same way. The pattern is lumecon-website PR #353 (the Why
+Lumecon cards). Nothing loops, nothing moves after it has arrived, and
+nothing around the lifted element moves.
+
+**State** — colour only. The shelf whose collection is in hand
+(`.cp-dcol__shelf.is-active`) takes the accent on its rule and its plan
+name; a tapped tile is `.is-on`. A state is never a movement.
+
+**Reduced motion** removes travel, not response: no transition, no
+animation, every arrival already in place, and a pointed tile raised on the
+next frame rather than over 180ms. The old rule of also cancelling the lift
+made the pointer response vanish for that reader, which is not what the
+setting asks for.
+
+**Touch** gets no hover state anywhere. A touch browser pins `:hover` to the
+last thing tapped, so an unguarded lift leaves the tile a reader chose raised
+beside the one they chose next. The tap's own state (`.is-on`,
+`aria-pressed`) is what a finger gets. The phone smoke project runs with
+`hasTouch`, and "a finger gets no hover state" asserts it.
+
+**What stays still, and why.**
+
+- Figures. No count-ups on record or collection counts: a frame mid-count is
+  a number that appears in no release, on a product whose first invariant is
+  that every figure traces to one; and every headline figure (the door's
+  facts, What's new's pulse) sits on a first screen, where the site's own
+  rule is that nothing moves after paint.
+- The record table, the column control and a record's field groups. A
+  working surface; every screen of motion there costs rows, and its card
+  mode renders only at touch widths, where there is no hover to answer.
+- The masthead and the footer. Structural, identical on every page.
+- The Cedar launcher and panel. Reworked in PR #119, and shared with the
+  site; sized and measured there.
+- Expand/collapse. Already native `<details>` wherever a note is long:
+  Methods' reasoning, What's new's change lists, a record's field groups, the
+  collection profile, the request page's requester rules. Nothing else on
+  the site shows a long note all at once, so nothing new was folded.
+
+Radius stays at 10px or under (the tiles are 4px), nothing added is a
+gradient, and no copy changed.
+
+Measured by: `the door's twelve arrive and respond` (3), `a finger gets no
+hover state`, `Methods' seven stages arrive as a sequence` in
+`tests/smoke.spec.js`, and `src/features/grove/pressMotion.test.js` (7).
+
 ## Where this is deliberately not the Lumecon website
 
 `lumecon-website` is the family's visual source of truth and the material,

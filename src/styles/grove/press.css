@@ -20,6 +20,15 @@
  * the rule it modifies silently loses. Two real bugs have come from exactly
  * that; put modifiers after their base. */
 
+/* ── Motion: one curve ─────────────────────────────────────────────────────
+ * Every transition and entrance the product draws runs on this curve. It is
+ * the family's `--ease` (lumecon-website `global.css`), the curve the page
+ * entrance (`cp-page-in`) and the door (`--door-ease`, an alias of this)
+ * already used. A rule that names a second cubic-bezier is drift: pull it
+ * here rather than adding a third. The rest of the motion contract — reduced
+ * motion, touch, what may move and when — is docs/DESIGN_SYSTEM.md, "Motion". */
+.teim-rd { --cp-ease: cubic-bezier(0.22, 1, 0.36, 1); }
+
 /* min-width: 0 because .teim-rd is a column flex container: without it the
  * collection strip's card minimums (3 x 360px) propagate up as this page's
  * minimum width and the whole page scrolls sideways on narrow windows,
@@ -1204,15 +1213,28 @@
 /* Hover on the process rail: the step under the pointer answers in teal
  * and the rest recede slightly, so a seven-step line can be read one step
  * at a time. */
-.teim-rd .cp-proc__stage { transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.2, 0, 0, 1); }
-.teim-rd .cp-proc:hover .cp-proc__stage { opacity: 0.55; }
-.teim-rd .cp-proc:hover .cp-proc__stage:hover { opacity: 1; transform: translateY(-3px); }
-.teim-rd .cp-proc__stage:hover .cp-proc__name { color: var(--dteal); }
-.teim-rd .cp-proc__stage:hover::before { background: var(--dteal); width: 10px; height: 10px; }
-.teim-rd .cp-proc__name { transition: color 0.2s ease; }
+.teim-rd .cp-proc__stage { transition: opacity 0.2s var(--cp-ease), transform 0.22s var(--cp-ease); }
+/* Pointing at one stage dims the others — for a pointer that can hover; on a
+ * touch screen the last tapped stage would otherwise stay lit and the other
+ * six stay dimmed. */
+@media (hover: hover) and (pointer: fine) {
+  .teim-rd .cp-proc:hover .cp-proc__stage { opacity: 0.55; }
+  .teim-rd .cp-proc:hover .cp-proc__stage:hover { opacity: 1; transform: translateY(-3px); }
+  .teim-rd .cp-proc__stage:hover .cp-proc__name { color: var(--dteal); }
+  .teim-rd .cp-proc__stage:hover::before { background: var(--dteal); width: 10px; height: 10px; }
+}
+.teim-rd .cp-proc__name { transition: color 0.2s var(--cp-ease); }
+/* The stages are a sequence, so they arrive as one: each on its own beat
+ * once the chapter (`.cp-ch`, a `.cp-fade` block) is in. Same construction
+ * as the door's tiles — a `backwards` fill, no forward fill, `--i` from
+ * ProcessRail — and the same exemption for a chapter already on the first
+ * screen. */
+@keyframes cp-stage-in { from { opacity: 0; transform: translateY(8px); } }
+.teim-rd .cp-ch.cp-fade.is-in:not(.cp-fade--now) .cp-proc__stage { animation: cp-stage-in 0.45s var(--cp-ease) backwards; animation-delay: calc(var(--i, 0) * 55ms); }
 @media (prefers-reduced-motion: reduce) {
-  .teim-rd .cp-proc__stage { transition: none; }
+  .teim-rd .cp-proc__stage, .teim-rd .cp-proc__name { transition: none; }
   .teim-rd .cp-proc:hover .cp-proc__stage:hover { transform: none; }
+  .teim-rd .cp-ch.cp-fade.is-in:not(.cp-fade--now) .cp-proc__stage { animation: none; }
 }
 .teim-rd .cp-proc__stage::before { content: ''; position: absolute; top: -3px; left: 0; width: 7px; height: 7px; background: var(--teal); }
 .teim-rd .cp-proc__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.11em; color: var(--dteal); }
@@ -1393,8 +1415,33 @@
 .teim-rd .cp-dcol__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.55rem; }
 .teim-rd .cp-dcol__grid > li { display: flex; }
 .teim-rd .cp-dcol__tile { display: flex; flex-direction: column; align-items: flex-start; gap: 0.45rem; width: 100%; height: 100%; min-height: 92px; padding: 0.7rem 0.7rem 0.6rem; border: 1px solid var(--door-rule); border-radius: 4px; background: var(--door-surface); box-shadow: var(--door-shadow-control); text-align: left; font: inherit; cursor: pointer; transition: border-color 0.16s var(--door-ease), box-shadow 0.16s var(--door-ease), transform 0.18s var(--door-ease); }
-.teim-rd .cp-dcol__tile:hover { border-color: var(--teal-line); box-shadow: var(--door-shadow-surface); transform: translateY(-2px); }
-.teim-rd .cp-dcol__tile:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+/* The lift answers a fine pointer and keyboard focus, never a finger: a
+ * touch browser leaves :hover on whatever was tapped last, so the tile a
+ * reader chose would sit raised beside the one they chose next. A tap has
+ * its own state, `.is-on`, which is what a finger gets (docs/DESIGN_SYSTEM.md,
+ * Motion). */
+@media (hover: hover) and (pointer: fine) {
+  .teim-rd .cp-dcol__tile:hover { border-color: var(--teal-line); box-shadow: var(--door-shadow-surface); transform: translateY(-2px); }
+}
+.teim-rd .cp-dcol__tile:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; border-color: var(--teal-line); box-shadow: var(--door-shadow-surface); transform: translateY(-2px); }
+/* The twelve arrive in order. The section is a `.cp-fade` block revealed by
+ * useFadeIn; once it is in, each tile rises on its own beat (`--i`, written
+ * by PressDoorCollections, is the tile's place on its shelf), so a shelf
+ * reads left to right rather than landing as one slab. A keyframe with a
+ * `backwards` fill and no forward fill: the tile is held at its start until
+ * its beat, and once it has arrived nothing about it is still animated, so
+ * the hover lift above is free to move it. `.cp-fade--now` is the hook's
+ * "already on the first screen" mark, and a tile the reader is looking at
+ * when the page appears does not arrive twice. */
+@keyframes cp-tile-in { from { opacity: 0; transform: translateY(10px); } }
+.teim-rd .cp-dcol.cp-fade.is-in:not(.cp-fade--now) .cp-dcol__grid > li { animation: cp-tile-in 0.45s var(--cp-ease) backwards; animation-delay: calc(var(--i, 0) * 45ms); }
+/* The shelf whose collection is in hand: its rule and its plan name take the
+ * accent, so pointing along the strip also says which plan the pointed
+ * collection comes with. A state, not a movement. */
+.teim-rd .cp-dcol__shelf { transition: border-color 0.2s var(--cp-ease); }
+.teim-rd .cp-dcol__tier { transition: color 0.2s var(--cp-ease); }
+.teim-rd .cp-dcol__shelf.is-active { border-top-color: var(--teal-line); }
+.teim-rd .cp-dcol__shelf.is-active .cp-dcol__tier { color: var(--dteal); }
 .teim-rd .cp-dcol__tile.is-on { border-color: var(--dteal); background: var(--teal-tint); box-shadow: var(--door-shadow-surface); }
 .teim-rd .cp-dcol__mark { display: grid; place-items: center; width: 26px; height: 26px; color: var(--dteal); }
 .teim-rd .cp-dcol__mark svg { width: 21px; height: 21px; }
@@ -1413,7 +1460,13 @@
   .teim-rd .cp-dcol__tile { min-height: 84px; }
   .teim-rd .cp-dcol__note { min-height: 0; }
 }
-@media (prefers-reduced-motion: reduce) { .teim-rd .cp-dcol__tile { transition: none; } .teim-rd .cp-dcol__tile:hover { transform: none; } }
+/* Reduced motion keeps the response and drops the travel: the tile is
+ * raised the moment it is pointed at, with no transition, and the twelve are
+ * simply there. */
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-dcol__tile, .teim-rd .cp-dcol__shelf, .teim-rd .cp-dcol__tier { transition: none; }
+  .teim-rd .cp-dcol.cp-fade.is-in:not(.cp-fade--now) .cp-dcol__grid > li { animation: none; }
+}
 
 
 /* ── The question mark ───────────────────────────────────────────────────
@@ -2350,7 +2403,7 @@
   --door-accent-light: #5fd9cc;
   --door-action-top: #0d8f83;
   --door-action-bottom: #086b62;
-  --door-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --door-ease: var(--cp-ease);
   --door-shadow-control: 0 1px 2px rgba(10, 15, 38, 0.08);
   --door-shadow-surface: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 1px 2px rgba(10, 28, 52, 0.06), 0 9px 24px -18px rgba(10, 28, 52, 0.2), 0 28px 64px -40px rgba(10, 28, 52, 0.28);
   --door-shadow-high: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 2px 5px rgba(10, 28, 52, 0.07), 0 18px 42px -22px rgba(10, 28, 52, 0.24), 0 48px 96px -52px rgba(10, 28, 52, 0.34);
@@ -2626,11 +2679,13 @@
 .teim-rd .cp-why__photolabel span { display: block; color: #fff; font-weight: 700; }
 .teim-rd .cp-why__proof { list-style: none; counter-reset: step; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.4rem clamp(1.4rem, 3vw, 2.6rem); }
 .teim-rd .cp-why__item { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.18); transition: border-color 0.2s var(--door-ease); }
-.teim-rd .cp-why__item:hover { border-top-color: var(--door-accent-light); }
+@media (hover: hover) and (pointer: fine) {
+  .teim-rd .cp-why__item:hover { border-top-color: var(--door-accent-light); }
+  .teim-rd .cp-why__item:hover .cp-why__ic { transform: translateY(-2px); }
+}
 /* The step number is the thing that makes the four read as an order rather
  * than as four unrelated virtues, which is what the headline needed. */
 .teim-rd .cp-why__step { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.11em; color: var(--door-accent-light); }
-.teim-rd .cp-why__item:hover .cp-why__ic { transform: translateY(-2px); }
 .teim-rd .cp-why__ic { transition: transform 0.24s var(--door-ease); }
 .teim-rd .cp-why__ic { display: flex; color: var(--door-accent-light); }
 .teim-rd .cp-why__ic svg { width: 2.4rem; height: 2.4rem; }
@@ -3022,19 +3077,24 @@
 /* A source name answers the pointer, which is also what tells a reader the
  * run can be stopped and read. */
 .teim-rd .cp-hero3__run li { transition: color 0.16s var(--door-ease); }
-.teim-rd .cp-hero3__run li:hover { color: var(--dteal); }
 /* The ways-in rows take the accent on their own rule. */
 .teim-rd .cp-ways__row { transition: border-color 0.2s var(--door-ease); }
-.teim-rd .cp-ways__row:hover { border-bottom-color: var(--dteal); }
-.teim-rd .cp-ways__row:hover .cp-ways__label { color: var(--ink); }
 .teim-rd .cp-ways__label { transition: color 0.2s var(--door-ease); }
 /* The window lifts a little when it is pointed at, the way the marketing
- * site's product frame does. It is the page's one hoverable object. */
+ * site's product frame does. */
 .teim-rd .cp-hero3__frame { transition: transform 0.3s var(--door-ease), box-shadow 0.3s var(--door-ease); }
-.teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 4px 8px rgba(10, 28, 52, 0.08), 0 26px 54px -24px rgba(10, 28, 52, 0.3), 0 60px 110px -56px rgba(10, 28, 52, 0.38); }
+/* Every pointer response on the door is for a pointer that can hover. A
+ * finger cannot, and a touch browser pins :hover to the last thing tapped,
+ * so a guarded rule is the difference between a response and a stuck one. */
+@media (hover: hover) and (pointer: fine) {
+  .teim-rd .cp-hero3__run li:hover { color: var(--dteal); }
+  .teim-rd .cp-ways__row:hover { border-bottom-color: var(--dteal); }
+  .teim-rd .cp-ways__row:hover .cp-ways__label { color: var(--ink); }
+  .teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 4px 8px rgba(10, 28, 52, 0.08), 0 26px 54px -24px rgba(10, 28, 52, 0.3), 0 60px 110px -56px rgba(10, 28, 52, 0.38); }
+}
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cp-door .cp-why__item, .teim-rd .cp-door .cp-ways__row { transition-delay: 0ms; }
-  .teim-rd .cp-hero3__frame, .teim-rd .cp-hero3__run li, .teim-rd .cp-ways__row, .teim-rd .cp-ways__label { transition: none; }
+  .teim-rd .cp-hero3__frame, .teim-rd .cp-hero3__run li, .teim-rd .cp-ways__row, .teim-rd .cp-ways__label, .teim-rd .cp-why__ic { transition: none; }
   .teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: none; }
 }
 
