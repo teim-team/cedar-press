@@ -8,6 +8,7 @@ import logging
 import os
 import tempfile
 import unittest
+from http.client import IncompleteRead
 from pathlib import Path
 from unittest.mock import patch
 
@@ -291,6 +292,18 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.assertIn("timestamp", event)
         self.assertNotIn("private-secret-token", stream.getvalue())
         self.assertNotIn("fixture@example", stream.getvalue())
+
+    def test_truncated_upstream_response_fails_closed_and_is_audited(self):
+        self.mock_fetch.side_effect = IncompleteRead(b"private partial response", 12)
+        with self.assertLogs("cedar_press.download", level="INFO") as log:
+            response = self.client.get(
+                "/press/collections/legislation/full-download", params={"release_id": self.rid}
+            )
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(len(log.records), 1)
+        event = json.loads(log.records[0].getMessage())
+        self.assertEqual(event["outcome"], "unavailable")
+        self.assertNotIn("private partial response", log.output[0] + response.text)
 
     def test_primary_key_and_count_mismatch_fail_closed(self):
         self.manifest["primary_key"] = ["missing"]

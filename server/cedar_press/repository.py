@@ -27,6 +27,7 @@ import os
 import re
 from collections.abc import Mapping
 from functools import lru_cache
+from http.client import HTTPException
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -467,7 +468,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             "filename": f"{collection_id}-{release_id}.jsonl",
             "media_type": "application/x-ndjson",
         }
-    except (OSError, ValueError, KeyError, TypeError) as error:
+    except (OSError, HTTPException, ValueError, KeyError, TypeError) as error:
         raise FullReleaseUnavailable(
             "Pinned full release unavailable or failed verification"
         ) from error
