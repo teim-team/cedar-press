@@ -1,6 +1,227 @@
 # Havala infrastructure review packet
 
+<!-- BEGIN CURRENT-LAUNCH-DASHBOARD -->
+## Current launch dashboard
+Updated 2026-09-24 22:00 UTC. All twelve full scans completed. These are internal QA results, not tasks for Elijah. No release is certified by a preview or a passing field map. Release-eligible counts remain **not certified** until evidence, rights, whole-product and delivery gates pass; prior Legislation/Natural Resources local transport proofs remain valid infrastructure evidence.
+
+| Collection | Input ? projected candidate rows | Row-policy withheld | 2025 / 2026 | Validation / remaining blocker | Next Codex action | New owner cards |
+|---|---:|---|---|---|---|---:|
+| Federal Funding | 701,955 ? 0 | 0 | 43,254 / 18,325 | REFUSED: Attribution vocabulary and recipient-type derivation; refresh/transport unproved | Recode public status conservatively; implement source-backed recipient dictionary | 0 |
+| Federal Register | 11,402 ? 0 | 0 | 8 / 6 | REFUSED: Date precision owed; 1,006 blank participant keys need grain treatment; current discovery gap | Separate document release from participant series and derive documented precision | 0 |
+| Legislation | 3,069 -> 3,064 | 5: treaty inclusion hold | 207 / 55 | FIELD_MAP_AND_KEY_PASS: Five treaty rows held; 34 reservation-only votes need reconciliation; three remaining missing URLs; actions/votes delivery unproved | Trace vote-only inclusion route; validate source evidence and supporting tables | 0 |
+| Deals | 1,073 ? 0 | 0 | 105 / 103 | REFUSED: deal_type/status/structure and substantive Notes derivation owed | Complete canonical taxonomy projection and preserve source qualifications | 0 |
+| NAGPRA | 6,792 ? 6,792 | 0 | 900 / 633 | FIELD_MAP_AND_KEY_PASS: Historical bridge classification/link evidence not fully validated; new release path not rehearsed | Rebuild isolated party bridge with negative controls and source stratification | 0 |
+| Advocacy & Engagement | 27,825 ? 27,825 | 0 | 1,377 / 672 | FIELD_MAP_AND_KEY_PASS: Disclosures only; other promised Advocacy components unproved; intake size limit | Validate all promised components; adapt bounded release intake without weakening limits | 0 |
+| Prime Contracting | 1,217,768 ? 0 | 0 | 47,599 / 55,014 | REFUSED: Competition mapping passes; sector derivation and 639,544 blank composite keys remain | Rerun projection; resolve transaction-versus-award grain before release | 0 |
+| Subcontracting | 89,809 ? 70,597 | 19,212: duplicate_status=exact_repeat_within_source, duplicate_status=superseded_by_primary_source | 6,306 / 2,049 | FIELD_MAP_AND_KEY_PASS: Projection passes; source rights and per-route affiliation evidence/entitled path remain unproved | Verify source rights and route evidence; rehearse generic release-to-download | 0 |
+| Native-Owned | 4,273 ? 0 | 548: publishable | Current register; not annual | REFUSED: 19 internal fields now declared; legacy nation_id semantics still block | Trace nation_id producer and legal-object/affiliation semantics without identity promotion | 0 |
+| Native Nonprofits | 12,764 ? 0 | 75: disposition=NATIVE_PROPOSED_AWAITING_OWNER_RULING, disposition=CONFLICT_EXCLUDED_AND_RULED_NATIVE | Current register; not annual | REFUSED: entity_id legal-object semantics; ruling propagation pending isolated validation | Validate EIN/ruling propagation and distinguish entity identity from organization membership | 0 |
+| Natural Resources | 11,305 ? 11,305 | 0 | 505 / 280 | FIELD_MAP_AND_KEY_PASS: Flagship local path proved; mixed scope/periods and supporting-table completeness unproved | Validate public aggregation/suppression semantics and ancillary delivery | 0 |
+| Cedar NEED | 5,820 ? 0 | 0; entire 5,820-row candidate publication-held | Current register; not annual | REFUSED: Collection publication hold; affiliation evidence quarantine | Preserve hold/issued IDs and validate bounded surviving-evidence assessment | 0 |
+
+**Interpretation:** withheld counts are whole-row policy exclusions, separate from attribution masks and collection holds. Subcontracting excludes 18,366 exact repeats and 846 superseded reports. Native-Owned excludes 548 publishability holds. Nonprofits excludes 73 legacy pending rulings and two conflicts; these are not automatically 75 qualified owner cards. Natural Resources has 9,840 publisher-suppressed attribution rows retained at their permitted aggregate grain. Federal Register counts above refer to consultation rows; its separate broad document table has 156,897 rows, including 5,283/3,899 in 2025/2026. Advocacy counts cover disclosures only, not its full product scope.
+
+**Concrete corrections:** shared row-policy execution now serves both 1135 and 1137; two obsolete Funding dispatch edges (335/336) were removed from the existing generated contract and build consumer. No historical script was deleted. Deals purchase-allocation wording corrected 14 published-view classifications without changing source rows. Subcontracting public contract/codebook no longer assert ownership. The NEID instrument-description false positive is narrowly fixed while genuine retired IDs still refuse. Prime competition uses the existing DAIMS dictionary: all 1,217,768 rows checked, zero undefined codes and zero disagreements with stored normalization.
+
+**Internal validation receipts:** `C:/Users/esm247/cedar-takeover-checkpoint/launch-candidates-2026-09-24/measurements.json` and `launch-candidates-2026-09-24-repaired/measurements.json`. All twelve source SHA-256 values match before/after. Subcontracting now produces 70,597 rows, SHA-256 `712b724ac3beabf2832b4d026bc5b9acdbfb4e583d97aff091044e47ff74a979`. The initial Legislation scan matched the prior 3,069-row pinned projection (`d38902f...`); Natural Resources matches prior 11,305-row projection (`b66526a...`). Neither equality proves source relevance or completeness.
+
+**Additional content checks:** Legislation: 591 linked bills, 3,061 source URLs, zero duplicate bill IDs; eight missing URLs need repair, including five treaty-shaped records. NAGPRA: 6,169 linked notices, all 6,792 source URLs, zero duplicate document IDs; identity bridge evidence still requires validation. Advocacy disclosures: 26,513 linked rows, all 27,825 source URLs; 1,312 unlinked rows are not automatically erroneous. Missing NAGPRA item counts remain unknown, never zero.
+
+**Verification:** 80 focused tests pass (`python -B -m unittest server.tests.test_candidate_review server.tests.test_field_map server.tests.test_need_review_import server.tests.test_id_contracts server.tests.test_np_ruling_precedence`). Prime rerun and registration baseline refresh completed. Registration: 25/25 pass. Release-download suite: 22 passed, one existing Windows symlink skip; protections were not weakened. Total focused execution: 127 passed, one skipped. No new Linux CI or deployment result is claimed.
+
+**Measured operational inventory:** 684 Python files: 76 active producers, eight validator/migration/review utilities, seven product-consumer/shared-service files, five standalone tests/fixtures, 588 unresolved. These are static evidence categories, not runtime certification. No new production script was added; zero files retired. The unresolved count is reported as measured, not reduced by relabeling.
+
+### Current bounded commit range and exclusions
+
+Implementation commits after `fcde1c693bb30f96174e7ddec112878f9d4daa9a`: `e1bf39d` removes obsolete Funding dispatch edges; `4604851` consolidates row policy and adds candidate validation, publication safeguards and public-contract corrections. Use `git diff --stat fcde1c6..4604851` and `git show --name-only` for exact files. This packet/launch-control update follows separately.
+
+Excluded and unchanged by these commits: pre-existing `data/spine/cedar_entity_types.csv`, `docs/NEED_CORROBORATION.json`, `docs/TERMINAL_HANDOFF.md`, `docs/imports/r7_audit/CURRENT.json`, `review/OWNER_DECISION_QUEUE.md`, R7 locks and bundle `f37240f77e40bf5e390219ae`. Candidate CSV/HTML/receipts remain outside Git. No frontend, production release pointer, AWS resource, source row or issued ID was committed.
+
+Reproduce isolated candidates with `python -B code/1135_full_dataset_review_bundle.py candidate --input-root "C:/Users/esm247/Desktop/Cedar Press" --output-root "<new directory outside Git>" --queue review/launch_control.json --need-root "C:/Users/esm247/cedar-takeover-checkpoint/need-candidate-d"`. Optional repeated `--collection` selects a bounded rerun. Run the 80-test command above, `python -B -m unittest server.tests.test_pipeline_registration`, and the existing release-download command in this packet. Never reuse an output directory or interpret a `.partial` file as a candidate.
+
+### Latest bounded corrections and internal receipts
+
+The Prime rerun completed on all 1,217,768 rows: competition passes; `supersector` still lacks its public `sector` derivation, and the declared mixed-grain key has 639,544 incomplete rows. No zero-byte candidate survives completion. Future in-progress files use `.csv.partial`, and successful runs pin code/configuration hashes in `run-context.json`.
+
+Legislation now projects **3,064** rows, withholding five source-preserved treaty records under a named inclusion hold. The old 3,069-row artifact remains unchanged and is transport evidence only, not the current approved content. New candidate SHA-256: `1ae0dfa33112fe6ab6a7b2e3c8c3318a26e85a6b59a51504269cb25b0906edb8`. Upstream `votingpatterns/44_classify_senate_tribal_votes.py` matched generic treaty reservations: 34 of 141 selected Senate votes depend only on that pattern, across 12 bill IDs and 22 bill-less votes. White Earth is a genuine counterexample: no blanket deletion. Codex must reconcile the remaining route and related tables. Primary checks include [NATO treaty document](https://www.congress.gov/117/cdoc/tdoc3/CDOC-117tdoc3.pdf) and [Spain tax protocol](https://www.govinfo.gov/app/details/CDOC-113tdoc4).
+
+Native-Owned: 19 fields traced to 615/953/1001/1100 are now explicitly internal. The 548 withheld rows split into **523 explicit accuracy holds plus 25 other publishability holds**; `publish_hold=Y` overrides stale `publishable=Y`. No candidate identifiers become customer identities. The next refusal is `nation_id` semantics (838 populated rows in the first projection chunk, **not** a full-population count). Receipt: `C:/Users/esm247/cedar-takeover-checkpoint/launch-candidates-2026-09-24-admission/measurements.json`.
+
+Protected original inputs rechecked: 19 NEED, 12 NAGPRA and two publication-manifest files match their preservation hashes. No issued IDs, original source rows, active owner-review artifact or published datasets were intentionally written by these commands.
+
+### Every currently identified blocker and its owner
+Engineering checks marked not run remain launch blockers, not passed gates. Havala reviews the resulting difficult engineering choices; routine repairs are Codex-owned. No unqualified identity case is assigned to Elijah.
+
+**Federal Funding**
+- **Codex - engineering defect:** Recipient-type derivation and attribution-status public contract; transaction-grain/additive totals; bounded release transport.
+- **Codex - missing-source / research task:** Refresh 2025/2026 partitions and measure source cutoff/omissions.
+- **Codex - linkage research, not yet a qualified owner decision:** Review high-impact attribution evidence; 155197 rows without CE are not automatically owner cases.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Federal Register**
+- **Codex - engineering defect:** Source discovery and post-2022 parser/observability; event-date precision and source-grain contract.
+- **Codex - missing-source / research task:** Acquire supported current document universe; distinguish generic consultation from named participants.
+- **Codex - linkage research, not yet a qualified owner decision:** Only affirmative participant mentions support links; unobservability is not zero.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Legislation**
+- **Codex - engineering defect:** Ancillary action/vote contracts and consumer coverage; production/full-download UI remains untested.
+- **Codex - missing-source / research task:** Refresh actions/votes; resolve 8 historical source URLs or disclose absence.
+- **Codex - linkage research, not yet a qualified owner decision:** Multi-entity measures may validly lack singular CE; no new owner batch identified.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Deals**
+- **Codex - engineering defect:** Caveat/Candidate_Status presentation versus approved field map; owed type/structure/status crosswalks; substantive Notes editorial mapping.
+- **Codex - missing-source / research task:** Resolve date-basis coverage and primary-source gaps; qualification evidence must survive.
+- **Codex - linkage research, not yet a qualified owner decision:** R7-dependent business links and existing unmatched parties require exact-object evidence, not blanket approval.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**NAGPRA**
+- **Codex - engineering defect:** Candidate-class and alias errors in the entity bridge; immutable release and entitled-download proof still not run.
+- **Codex - missing-source / research task:** Verify current notice discovery/corrections against supported cutoff.
+- **Codex - linkage research, not yet a qualified owner decision:** Keep notice, institution, affiliation and consultation roles separate; no new owner batch qualified.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Advocacy & Engagement**
+- **Codex - engineering defect:** Disclosure transport cap; component-specific contracts and samples; product is Native Advocacy and Engagement.
+- **Codex - missing-source / research task:** Measure all promised meetings/calendars/testimony/comments/consultation sources; disclosure rows are only one component.
+- **Codex - linkage research, not yet a qualified owner decision:** 1312 disclosure rows lack CE; source roles must be resolved before proposing linkages.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Prime Contracting**
+- **Codex - engineering defect:** Mixed transaction/aggregate grain, composite keys, protected transport and financial nonadditivity.
+- **Codex - missing-source / research task:** Refresh action/revision coverage and dated contractor/parent evidence.
+- **Codex - linkage research, not yet a qualified owner decision:** Business versus parent UEI/CAGE conflicts including R7; preserve disputed or withdrawn attribution.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Subcontracting**
+- **Codex - engineering defect:** Expose prime/subcontractor roles; generic CE mapping discrepancies; composite subaward key and amount filters.
+- **Codex - missing-source / research task:** Refresh reports and source lineage; repeated source IDs alone are not duplicates.
+- **Codex - linkage research, not yet a qualified owner decision:** 117 populated generic/prime disagreements need role diagnosis; account separately for null asymmetry in the earlier 654-row comparison.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Native-Owned**
+- **Codex - engineering defect:** Publication filters and sample omission; current approved register versus pending R7 importer/cutover.
+- **Codex - missing-source / research task:** 523 accuracy holds and 19 unchecked terms flags need source-level evidence/policy application.
+- **Codex - linkage research, not yet a qualified owner decision:** R7 exact-object bindings and unresolved business inclusion; 83 proposals are not automatically 83 owner questions.
+- **Elijah - existing product-policy / application gate:** Existing R7 G04 CB-format, G05 name-publication and G06 ship-bar decisions are absent from the frozen canonical decision record. Preserve these gates; this is not a new policy-waiver request or an identity card..
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Native Nonprofits**
+- **Codex - engineering defect:** Automated-exclusion versus research precedence; published legacy-ID fields; preserve EIN object grain.
+- **Codex - missing-source / research task:** Research 73 inclusion proposals and verify current control evidence for two conflicting automated exclusions.
+- **Codex - linkage research, not yet a qualified owner decision:** 6597 blank linkage-tier rows are research backlog, not owner decisions; exact EIN/CE evidence required.
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Natural Resources**
+- **Codex - engineering defect:** Full-product frontend and supporting-table integration remain; flagship download path already proved.
+- **Codex - missing-source / research task:** Refresh source-observable periods; preserve suppressed recipients and reporting lag.
+- **Codex - linkage research, not yet a qualified owner decision:** 705 CE references retained; missing recipients may be publisher-suppressed, not match defects.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Cedar NEED**
+- **Codex - engineering defect:** Apply recorded INTERNAL_ONLY/publication hold; migration and relationship evidence-admission contract.
+- **Codex - missing-source / research task:** Finish quarantined-route evidence reconciliation; keep original inclusion sources.
+- **Codex - linkage research, not yet a qualified owner decision:** Remaining affiliations and CE/business same-object distinctions; no automatic promotion from surviving quarantine.
+- **Elijah - existing product-policy / application gate:** Existing R7 G04 CB-format, G05 name-publication and G06 ship-bar decisions are absent from the frozen canonical decision record. Preserve these gates; this is not a new policy-waiver request or an identity card..
+- **Codex - engineering / verification:** immutable release, catalog pin, entitled-download denial/success, audit and rollback remain unproved for this collection.
+- **Codex - engineering / verification:** source-rights enforcement, all promised supporting tables, representative sample and actual full-product behavior must pass the complete release gates; no whole-collection readiness is inferred from row counts.
+
+**Shared gates:** Codex owns staging/production configuration and operational checks, but production mutation remains unauthorized. Credential/source access failures belong to **external-source limitation** when demonstrated; no current unknown is relabeled as a human decision. **External-source limitation:** FR unnamed participants, Natural Resources suppressed recipients and nonprofit reporting lag cannot be filled by inferred facts. **Resolved:** the narrow Legislation/Natural Resources local flagship download proofs and NAGPRA seven-field plan defect and historical source-ID validation defect; none establishes production release. The source-backed NAGPRA candidate-class selftest also passes; it does not certify the complete bridge.
+
+### One qualified owner-review queue, grouped by collection
+First-batch result: **No owner decisions ready**. This is a researched screening result, not completion of the engineering or source work. No 10-20-card batch has been manufactured from stale rulings, parser defects or missing evidence. The existing local review menu retains its empty state and prior decision history.
+
+| Collection | Qualified decisions | Why zero; who works next |
+|---|---:|---|
+| Federal Funding | 0 | Omaha Housing Authority: 5,024 current records already excluded with blank CE. Stale queue item resolved; other attribution research remains Codex-owned. **Next owner: Codex.** |
+| Federal Register | 0 | All 1,006 blank CE rows explicitly lack named participants. No identity can be invented from generic consultation. **Next owner: Codex.** |
+| Legislation | 0 | Plural/general measures do not require a single tribal identity. No researched residual legal-object ambiguity identified. **Next owner: Codex.** |
+| Deals | 0 | 114 blank CE records are not 114 decisions. SFIS and AFN single-parent questions were already ruled by Elijah on August 6; preserve those rulings. **Next owner: Codex.** |
+| NAGPRA | 0 | 222 ambiguous-method rows/110 strings need candidate-class and alias repair. San Carlos notice names the tribe; generic Hawaiian Civic Club needs source research. **Next owner: Codex.** |
+| Advocacy & Engagement | 0 | 515 unmatched clients include acquisition noise; 166 single-token flags are method buckets. Research Lytton/Mille Lacs filings and aliases before any owner card. **Next owner: Codex.** |
+| Prime Contracting | 0 | Separate contractor, establishment and parent identities. Current candidates require source-row/identifier reconciliation, not blanket owner ratification. **Next owner: Codex.** |
+| Subcontracting | 0 | 117 populated generic/prime disagreements plus null asymmetry require engineering reconciliation; 6,000 API rows are discovery candidates, not owner cases. **Next owner: Codex.** |
+| Native-Owned | 0 | R7 has 83 researched proposals; exact-object source gaps/conflicts remain. No batch of unresearched or automatically approved equivalences is eligible. **Next owner: Codex.** |
+| Native Nonprofits | 0 | 73 stored awaiting-owner labels are not 73 qualified decisions. AITRC is distinct from its corporate member; current control evidence for two other nonprofits remains Codex research. **Next owner: Codex.** |
+| Natural Resources | 0 | 9,840 publisher-suppressed plus 508 class-recipient observations are not missing tribe matches; 252 resource-party-only observations need correct grain. **Next owner: Codex.** |
+| Cedar NEED | 0 | Recovered 20 decision events across 19 cards are preserved, including INTERNAL_ONLY and 18 affiliation rejections. Do not ask those questions again. **Next owner: Codex.** |
+
+Existing R7 name-publication/ship-bar policy gates are separately recorded above; they are not 83 new identity questions. A future owner linkage card must contain evidence, proposed linkage, recommendation, one-sentence reason, strongest source, what becomes unblocked, and Confirm / Reject / Keep Separate.
+### Latest completed engineering and research checks
+
+- **NAGPRA:** seven joined acquisition/diagnostic fields now have explicit internal dispositions; public schema stays at 52 fields. The supported plan returns 6,792 rows. All 6,792 original source keys validate, including 619 historical forms; no identifiers were renamed. Twelve protected input hashes remain unchanged.
+- **Native Nonprofits:** 13 fixtures pass for consolidated-ruling precedence through script70 matching and script167 hub/fallback. The AITRC case is an existing unresolved-identity ruling being overwritten by code, not a new owner ambiguity. There are 353 currently CE-linked organizations overlapping settled unresolved-EIN rulings (345 containment matches); this is the potentially affected population, not 353 proven false inclusions. Across all consolidated hold actions, the read-only measurement is 1,250 held EIN rows and 464 currently CE-linked rows; these include exclusions, conflicts and class-only rulings as well as unresolved identities. Role-preservation and malformed-EIN controls pass. Downstream candidate application remains pending.
+- **Native-Owned:** `PROP-NBID-CONFLICT-016` / `TBD-079:155` is evidence-resolved, application pending. [Kaiva's current roster](https://kaivacorp.com/our-companies/) confirms Kaiva Services LLC, UEI `CDBFJXPN7KL5`, CAGE `8N8Q5`; its [current capability sheet](https://kaivacorp.com/wp-content/uploads/2026/04/KAI.Infrastructure-Technology.pdf) explains the Ivins/Tulsa locations. The retained MCN workbook row156 columnB names Shivwits. Muscogee certification and Shivwits affiliation are distinct facts. Codex must correct source propagation while preserving the historical refusal, private fields and exact business object. No owner card or canonical promotion is warranted from this finding alone.
+- Combined focused command: `python -B -m unittest server.tests.test_np_ruling_precedence server.tests.test_id_contracts server.tests.test_field_map server.tests.test_need_review_import -q`: **67 PASS**. These are local fixture/contract checks, not new Ubuntu CI or a published release.
+
+Final verification for this bounded update: **67 focused tests +22 producer-registration tests PASS**; `python -B code/1104_nagpra_affiliation_rule_audit.py selftest` PASS; `python -B code/521_inventory.py check-scripts` PASS; `git diff --check` PASS. Existing writer risks remain pending, not authorized by census refresh. The 19 NEED,12 NAGPRA and2 publication input hashes still match, as does the original nonprofit flagship hash and active NEED HTML. R7 package/entity-type hashes match; its pre-existing lock-owner metadata differs from the older baseline and is dated September23 23:06 UTC. It was neither edited nor removed in this update.
+
+The two nonprofit conflicts are automated filters, not individual Elijah rulings: `NPEXCL-03925` / EIN860928837 and `NPEXCL-02937` / EIN731014291. [Navajo Language Academy's history](https://www.navajolanguageacademy.org/nla_history.htm) supports independent incorporation and funding for its1999 institute, not present identity/control by Navajo Nation. The Cheyenne Cultural Center's specific government relationship still needs charter/governance evidence; a redirected historical NPS link is not a retrieved source. Codex owns this research and authority correction. Neither becomes an invented owner decision.
+
+Current changes remain uncommitted on `codex/legislation-release-consumer` at `3195e7069d8717f81a33849f592b65b16f293e84`; no new CI run is claimed. No frontend, rounding, canonical producer execution or publication was performed in this update. Remaining immediate work: isolated nonprofit/bridge comparisons, Native-Owned source-column correction, and researched linkage backlog across the other collections.
+
+<!-- END CURRENT-LAUNCH-DASHBOARD -->
+
 ## Read this first
+
+### Owner-review boundary ? correction
+
+> Elijah is only reviewing genuinely ambiguous identity, affiliation, or legal-object linkages where human judgment is required. Never place code defects, schemas, missing fields, tests, source refreshes, documentation, infrastructure, or other engineering work in his adjudication queue. Codex is a frontier coding model and must diagnose and fix those issues itself, validate the fix, and keep working. Only escalate when the repository and available authoritative sources cannot determine a linkage or when an actual product-policy choice belongs to the owner. A queue that asks Elijah to resolve engineering problems is a failed deliverable.
+
+The owner menu now omits engineering, recorded and unresearched cards entirely.
+The 17-item implementation record remains in the existing launch-control input;
+it is not a 17-decision request to Elijah. R7's 83 proposals remain preserved but
+are not asserted to be owner-ready before source triage. Existing browser history,
+exports and receipt recovery remain available; no decision or evidence is deleted.
+
+
+
+### Current owner menu and work ownership ? September 24
+
+[Local review menu](http://127.0.0.1:8765/cedar_review_menu.html): **No owner decisions ready**.
+The 17 implementation items and 83 frozen R7 proposals are not 100 human decisions.
+Engineering, source retrieval and unresearched linkages are excluded. No receipt commands,
+schemas, rounding choice or engineering holds appear on the owner page. Existing saved
+histories are retained; Codex imports returned exports. No canonical decisions were invented.
+
+Claude owns rounding. Codex's verified uncommitted rounding changes were removed,
+with recovery copies and before/after hashes outside the repositories at
+`C:\Users\esm247\cedar-takeover-checkpoint\rounding-removal-2026-09-24`.
+The Cedar priorities implementation and test files match HEAD again. The remaining
+non-rounding Lumecon semantic/documentation checks pass: **68 passed**. This is a
+cleanup check, not a claim that Claude's rounding implementation was tested here.
+
+All **83 unique R7 pairs** now have a recorded first-pass research outcome in the
+existing `review/r7_launch_review.json` input. No owner card is qualified yet.
+Thirteen retrieved USAspending API snapshots support exact corporate parent UEI/name
+bindings and preserve distinct contractor identifiers. The response bytes and SHA256
+receipts are outside Git at `C:\Users\esm247\cedar-takeover-checkpoint\r7-primary-evidence`.
+Seven pairs carry explicit conflicts requiring reconciliation: Shee Atika's exclusion,
+UIC and Tikigaq's mixed-object evidence, Aleknagik and Bering Straits' federal parent
+labels, and Minto Development and Natives of Kodiak's classifications. Other missing
+registrations and historical-status questions remain conservative research holds.
+Source support is not an owner ruling, current ownership certification or gate approval.
+Search-index-only evidence is marked as such; it is not represented as a captured record.
+
+Current blocker ownership is maintained once, in the dashboard above.
+
+The active NEED HTML hash remains
+`418c01b931cf5e57d9fca34b079b8f35e2f4c1393bd9e67c9a71b18d1e54dfc7`.
+The owner menu's empty state was exercised in installed Edge; the underlying review
+engine's earlier save/reload/export/idempotent-import checks remain separate evidence.
+Current work is uncommitted; draft heads remain Cedar `3195e70`, Lumecon `f882fb1`.
+No new Ubuntu CI is claimed for this batch. No canonical data, issued IDs, frozen R7
+bundle, publication hold, frontend or published output was changed by this cleanup.
 
 Two real flagships, Legislation and Natural Resources, pass authorized download
 and rollback through the same release-pinned adapter. The shared build preserves
@@ -295,8 +516,10 @@ must match the declared flagship. No new human ruling or identity policy was cre
   the size gate remains and this component is not a release of the broader product.
   Prior projection SHA256: `5044ee3d2f50985e7b0537ed8937ea9232a8c47da29f42261c040932bf469d3f`.
 - **NAGPRA:** 6,792 notices; 52 standalone approved fields, 900/633 publication-year
-  rows. Seven undeclared joined columns and 619 legacy-format source IDs remain
-  unresolved release-contract issues. It was excluded from this pilot; no gate relaxed.
+  rows. The original pilot was blocked by seven undeclared joined columns and 619
+  historical source-ID formats. Both defects now pass focused checks using explicit internal
+  field dispositions and unchanged publisher-issued identifiers. Bridge evidence quality and
+  the collection release/download rehearsal remain unproved; no publication occurred.
 - **Deals:** current projection refuses undeclared `Caveat`/`Candidate_Status`;
   preserve source qualifications and resolve the declared contract before another
   attempt. Do not assume R7 independence or remove those fields to force success.
@@ -971,4 +1194,6 @@ closeout is separate from the fixed implementation range. Production
 configuration, frontend full-download integration and remaining collection coverage
 stay separate launch gates. Neither proof authorizes publication or production changes.
 
-2026-09-24 04:33 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.
+Checkpoint 2026-09-24 20:35 UTC: READY WITH WARNINGS - twelve-collection dashboard current; 89 focused/registration tests and NAGPRA selftest pass; no newly qualified owner batch; isolated candidate application and remaining collection gates still pending; publication hold preserved.
+
+2026-09-24 22:10 UTC ? READY WITH WARNINGS: bounded implementation review; twelve-collection release remains blocked by the explicit data and delivery gates above.

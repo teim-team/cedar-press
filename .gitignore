@@ -213,6 +213,8 @@ _profile_cache.json
 # The consolidated owner-decision queue is a curated document, not scratch -
 # its history shows what was asked and when it was answered.
 !review/OWNER_DECISION_QUEUE.md
+# Curated launch-control input to the existing review builder; HTML and receipts stay local.
+!review/launch_control.json
 
 # Agent worktrees are private scratch, never part of the tree. Committed as a
 # gitlink with no .gitmodules entry they become an unusable pseudo-submodule
