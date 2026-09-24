@@ -70,6 +70,9 @@ DERIVED_PREFIXES = {
     "GLIT": "litigation or administrative proceeding",
     "GADV": "advocacy/lobbying link (points at the Advocacy collection's own ID)",
     "GSRC": "source observation / source registry record",
+    "GSBK": "online sportsbook reported unit (brand, license or shared report series)",
+    "GFOB": "gaming financial observation (one reported unit x period x revision)",
+    "GGAP": "machine-readable coverage gap",
 }
 _DERIVED_RE = re.compile(r"^(%s)-[0-9A-F]{12}$" % "|".join(DERIVED_PREFIXES))
 
@@ -152,18 +155,24 @@ ENTERPRISE_ID_RE = re.compile(r"^CEDAR-NEST-\d{6}-[0-9A-Z]{2}$")
 RIGHTS_CLASSES = {
     "public_official": "Official government/tribal publication; attributed, publishable after transformation review",
     "public_derived": "Computed only from public_official fields by a documented method",
+    "public_first_party": "Self-published by the operator/property/tribe (e.g. a casino's own site); publishable for self-description (name, address, status, self-described affiliation), never independent proof of ownership, legal control, revenue allocation or tribal retention",
+    "secondary_corroboration": "Secondary compilation (press, industry tracker) reproducing figures; source-limited until matched to the original regulator record",
     "internal_vendor": "Commercial directory / Casino City Press / trade-directory lineage; internal QA only",
     "internal_model": "Modeled, estimated, IMPLAN or research-inferred value; internal QA only",
     "internal_crosswalk": "Identifier kept for reconciliation, never a public key",
     "withheld_unverified": "No independent publishable evidence yet; withheld",
     "withheld_suppressed": "Source-suppressed or confidentiality-limited; withheld",
 }
-PUBLIC_RIGHTS = {"public_official", "public_derived"}
+PUBLIC_RIGHTS = {"public_official", "public_derived", "public_first_party"}
 
 RELATIONSHIP_TYPES = {
     "owner", "operator", "affiliate", "licensee", "landholder", "beneficiary",
     "management_contractor", "other_documented",
+    # reported-unit relationships (online sportsbook series, shared reports)
+    "reported_for", "licensed_to", "operated_by", "located_at",
 }
+# A shared reported total is stored once; linked entities never receive a copy.
+ALLOCATION_STATUSES = {"not_allocated", "source_allocated", "allocation_unknown", "single_entity"}
 REVIEW_STATUSES = {"source_asserted", "machine_matched", "reviewed_confirmed",
                    "reviewed_disputed", "unresolved"}
 CONFIDENCE = {"high", "medium", "low"}
