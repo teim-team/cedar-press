@@ -61,7 +61,8 @@ preserving old data-table measurements. Its separate authorization axis has
 116 declared dependencies/568 `unresolved_not_authorized` files; it does not measure
 the same thing as 587 unresolved roles. No historical/safely removable file was proved.
 Tests, comments and generated reports remain recorded references but cannot alone
-promote a file into an active runtime classification.
+promote a file into an active runtime classification. Among the 78 producers,
+36 still have unresolved I/O literals; these are declared routes, not fully traced builds.
 
 One copied normalizer was removed: 1130 now delegates to 1072 while preserving its
 public `norm` API. All 1,916 register-name outputs match. Existing numbered NEED
@@ -356,6 +357,15 @@ comments, arbitrary strings, tests or generated report references. Dynamic targe
 non-Python dispatch and unproved call reachability remain limitations, not implicit
 authority. A count of unresolved files is not a count of obsolete files.
 
+All 78 producer records have explicit collection/output/entry-point mappings.
+The parser detects read paths for 74 and write paths for 77; empty detection does
+not prove no I/O. Thirty-six retain literals whose read/write direction is
+unresolved. Actual runtime consumer candidates are recorded for 8; the remaining
+70 still have declared runner dispatch rather than a proven Python import/literal
+call chain. Their contract outputs and static consumers are review evidence, not
+a complete runtime generator/consumer trace. This is an explicit remainder of
+the operating-surface work; it was not closed by relabeling the historical files.
+
 The refreshed 521 script section now measures 684 files, replacing 577 stale records.
 Its 116 strict declared dependencies cover all existing collection declarations,
 not just the 78 launch-producer classification; 568 remain `unresolved_not_authorized`.
@@ -368,9 +378,9 @@ checkout produces exit 1 `UNINVENTORIED_DATA_CODE`.
 
 Sixteen registration/provenance tests pass, including strict CSV header/row-shape checks,
 isolated release roots outside every Git checkout and unchanged/null entity-link
-conservation. The latest full local suite ran 337 tests: 305 passed and 32
+conservation. The latest full local suite ran 338 tests: 306 passed and 32
 database-dependent skips, with 80% coverage. The separate Ubuntu run passed all
-76 database-backed checks. Supported dispatch rejects undeclared stages and
+77 database-backed checks. Supported dispatch rejects undeclared stages and
 outputs, parallel runner registration, path escapes and `NEVER_RUN` entries.
 These are registry/dispatch checks, not proof that arbitrary shell jobs or dynamic
 code cannot write outside the graph. In particular, an inventoried helper invoked
@@ -961,4 +971,4 @@ closeout is separate from the fixed implementation range. Production
 configuration, frontend full-download integration and remaining collection coverage
 stay separate launch gates. Neither proof authorizes publication or production changes.
 
-2026-09-24 04:25 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.
+2026-09-24 04:33 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.
