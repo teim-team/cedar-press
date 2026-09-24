@@ -9,6 +9,10 @@ Each test names the failure mode it proves cannot happen:
     public field or a public row - including a Census point geocoded from it;
   * a legacy facility record dropped without exactly one disposition;
   * ownership stated without evidence (vendor affiliation, non-agreeing text);
+  * a property's own website treated as independent proof: its fields must
+    carry public_first_party, its "owned and operated by" is an affiliate
+    claim (never owner/operator), and coverage separates official-only from
+    official-or-first-party (owner ruling 2026-09-24);
   * a relationship / period interval that ends before it starts;
   * a new facility ID minted for a place-less "no casino" record;
   * a vendor placeholder day shown as a day;
@@ -51,8 +55,9 @@ COLUMNS = sorted(set(re.findall(r'\[["\']([a-z][a-z0-9_]+)["\']\]', PRODUCER.rea
 
 # valid canonical CE uids (check characters verified by 503_identity)
 MIAMI, MODOC, ABS_SHAWNEE, OTOE = "CE-0016Y-PQ", "CE-00175-5P", "CE-00124-6D", "CE-00181-J2"
-P1, P2, P3, P4, P5 = ("CEDAR-PLACE-000001-6S", "CEDAR-PLACE-000002-CJ", "CEDAR-PLACE-000003-AA",
-                      "CEDAR-PLACE-000004-BB", "CEDAR-PLACE-000005-CC")
+P1, P2, P3, P4, P5, P6 = ("CEDAR-PLACE-000001-6S", "CEDAR-PLACE-000002-CJ", "CEDAR-PLACE-000003-AA",
+                          "CEDAR-PLACE-000004-BB", "CEDAR-PLACE-000005-CC", "CEDAR-PLACE-000006-DD")
+SELF_SITE = "https://skycasino.example/"
 VENDOR_NAME = "Vendorland Casino Deluxe"
 VENDOR_ADDR = "999 Vendor Only Road"
 RESEARCH_ADDR = "123 Research Compiled Way"
@@ -88,6 +93,36 @@ def fixture_tables():
             open_date_absent_reason="not a gaming facility - this row comes from votingpatterns"),
         # 5: research-only property
         fac("VP-0005", P5, "Research Only Casino", OTOE, address=RESEARCH_ADDR),
+        # 6: evidenced only by its own website (first-party)
+        fac("VP-0006", P6, "Sky Research Name", OTOE, address=RESEARCH_ADDR),
+    ]
+
+    def spa(aid, cls, sub, value, fid, url, quote, **kw):
+        r = {"assertion_id": aid, "assertion_class": cls, "assertion_subclass": sub, "asserted_value": value,
+             "facility_id": fid, "cedar_uid": OTOE, "attribution_basis": "single_property_host",
+             "record_scope": "entity", "source_url": url, "source_quote": quote, "retrieved_at": "2026-08-20"}
+        r.update(kw)
+        return r
+    first_party = [
+        spa("SPA-10", "SELF_PUBLISHED_IDENTITY_ASSERTION", "legal_or_published_name", "Sky Casino", "VP-0006",
+            SELF_SITE, "Welcome to Sky Casino"),
+        spa("SPA-11", "SELF_PUBLISHED_LOCATION_ASSERTION", "street_address", "1 Sky Road", "VP-0006",
+            SELF_SITE + "contact", "1 Sky Road"),
+        spa("SPA-12", "SELF_PUBLISHED_LOCATION_ASSERTION", "city", "Red Rock", "VP-0006", SELF_SITE + "contact", "Red Rock"),
+        spa("SPA-13", "SELF_PUBLISHED_LOCATION_ASSERTION", "state", "OK", "VP-0006", SELF_SITE + "contact", "OK"),
+        spa("SPA-14", "SELF_PUBLISHED_OPERATING_HOURS_ASSERTION", "hours", "Open 24/7", "VP-0006",
+            SELF_SITE, "Open 24/7"),
+        spa("SPA-15", "SELF_PUBLISHED_OWNERSHIP_ASSERTION", "owned_and_operated_by", "the Otoe-Missouria Tribe",
+            "VP-0006", SELF_SITE + "about", "Sky Casino is owned and operated by the Otoe-Missouria Tribe",
+            asserted_owner_names_tribal_form="Y", asserted_owner_is_management_brand="N",
+            agrees_with_curated_owner="SHARES_TOKEN:otoe"),
+        spa("SPA-16", "SELF_PUBLISHED_MANAGEMENT_ASSERTION", "managed_by", "Fixture Hospitality Brand", "VP-0006",
+            SELF_SITE + "about", "managed by Fixture Hospitality Brand",
+            asserted_owner_names_tribal_form="N", asserted_owner_is_management_brand="Y"),
+        # the NIGC-listed property's own site, retrieved AFTER the NIGC listing:
+        # the official listing must still be the status evidence
+        spa("SPA-17", "SELF_PUBLISHED_OPERATING_HOURS_ASSERTION", "hours", "Open daily", "CCP-200",
+            "https://thundercasino.example/hours", "Open daily", cedar_uid=ABS_SHAWNEE, retrieved_at="2026-09-01"),
     ]
     tables = {
         "data/clean/gaming_facilities.csv": F,
@@ -153,7 +188,7 @@ def fixture_tables():
              "assertion_subclass": "in_operation_since", "asserted_value": "2008", "facility_id": "CCP-100",
              "cedar_uid": ABS_SHAWNEE, "attribution_basis": "single_property_host", "record_scope": "entity",
              "source_url": "https://vendorland.example/games", "source_quote": "Pragmatic Play since 2008",
-             "retrieved_at": "2026-08-12"}],
+             "retrieved_at": "2026-08-12"}] + first_party,
         "data/clean/gaming_property_self_published_claims.csv": [],
         "data/clean/gaming_web_harvest_observations.csv": [],
         "data/clean/gaming_property_universe_events.csv": [
@@ -317,7 +352,7 @@ class NoMintForPlacelessRows(_Base):
         self.assertEqual(r["publication_status"], "unresolved")
 
     def test_facility_ids_only_wrap_existing_places(self):
-        fixture_places = {P1, P2, P3, P4, P5}
+        fixture_places = {P1, P2, P3, P4, P5, P6}
         for name in M.CONTRACTS:
             for r in self.t[name]:
                 g = r.get("gaming_facility_id", "")
@@ -340,14 +375,39 @@ class Relationships(_Base):
                 self.assertEqual(r["relationship_type"], "affiliate")
                 self.assertNotIn(r["rights_class"], gg.PUBLIC_RIGHTS)
 
-    def test_owner_only_with_agreeing_evidence(self):
-        owners = [r for r in self.rels() if r["relationship_type"] == "owner"]
-        self.assertEqual(len(owners), 1)
-        self.assertEqual(owners[0]["gaming_facility_id"], gg.facility_id_for(P2))
-        self.assertIn("owned and operated by", owners[0]["evidence_text"])
-        self.assertFalse(any(r["relationship_type"] == "owner" and r["gaming_facility_id"] == gg.facility_id_for(P1)
+    def test_agreeing_own_site_claim_is_affiliate_not_owner(self):
+        # "owned and operated by" on the property's own site, agreeing with the
+        # curated entity: a self-described affiliation, never owner/operator.
+        fp = [r for r in self.rels() if r["gaming_facility_id"] == gg.facility_id_for(P2)
+              and r["source_system"] == "operator_website"]
+        self.assertEqual(len(fp), 1)
+        r = fp[0]
+        self.assertEqual((r["relationship_type"], r["claimed_relationship_type"], r["review_status"], r["rights_class"]),
+                         ("affiliate", "owner|operator", "source_asserted", "public_first_party"))
+        self.assertIn("owned and operated by", r["evidence_text"])
+        # the non-agreeing claim (P1) yields no relationship at all
+        self.assertFalse(any(r["source_system"] == "operator_website" and r["gaming_facility_id"] == gg.facility_id_for(P1)
                              for r in self.rels()))
         self.assertTrue(all(r["ownership_percent"] == "" for r in self.rels()))
+
+    def test_first_party_only_relationship_never_owner_or_operator(self):
+        for r in self.rels():
+            if r["rights_class"] == "public_first_party" or r["source_system"] in M.FIRST_PARTY_SYSTEMS:
+                self.assertEqual(r["relationship_type"], "affiliate", r)
+                self.assertEqual(r["review_status"], "source_asserted", r)
+        sky = {r["party_name"]: r for r in self.rels() if r["gaming_facility_id"] == gg.facility_id_for(P6)
+               and r["source_system"] == "operator_website"}
+        self.assertEqual(sky["Otoe-Missouria"]["claimed_relationship_type"], "owner|operator")
+        self.assertEqual(sky["Fixture Hospitality Brand"]["claimed_relationship_type"], "management_contractor")
+        self.assertEqual(sky["Fixture Hospitality Brand"]["relationship_type"], "affiliate")
+
+    def test_ownership_never_asserted_without_official_evidence(self):
+        for r in self.rels():
+            if r["relationship_type"] in ("owner", "operator"):
+                self.assertEqual(r["rights_class"], "public_official", r)
+                self.assertIn(r["source_system"], M.OFFICIAL_SYSTEMS, r)
+        # no fixture source is official evidence of ownership, so none is stated
+        self.assertFalse([r for r in self.rels() if r["relationship_type"] in ("owner", "operator")])
 
     def test_joint_operation_both_parties(self):
         uids = {r["cedar_uid"] for r in self.rels() if r["gaming_facility_id"] == gg.facility_id_for(P3)}
@@ -367,6 +427,42 @@ class Relationships(_Base):
         bad2 = dict(base, cedar_uid="TRBF-ASHAWN-00")
         with self.assertRaises(gg.GamingContractError):
             gg.write_table(self.out / "x", "gaming_facility_relationships.csv", list(base), [bad2], c)
+
+
+class FirstParty(_Base):
+    """Owner ruling 2026-09-24: a property's own site is public_first_party."""
+
+    def sky(self):
+        return next(r for r in self.t["gaming_grove_facilities.csv"] if r["cedar_place_id"] == P6)
+
+    def test_first_party_fields_carry_public_first_party(self):
+        row = self.sky()
+        self.assertEqual((row["public_name"], row["street_address"], row["city"], row["current_status"]),
+                         ("Sky Casino", "1 Sky Road", "Red Rock", "operating"))
+        for k in ("public_name_rights", "address_rights", "status_rights"):
+            self.assertEqual(row[k], "public_first_party", k)
+        self.assertEqual(row["publication_status"], "public")      # publishable self-description
+        self.assertEqual(row["n_independent_sources"], "0")         # but not independent
+        for name in ("gaming_facility_names.csv", "gaming_facility_history.csv",
+                     "gaming_facility_capacity.csv", "gaming_facility_relationships.csv"):
+            for r in self.t[name]:
+                if r["source_system"] == "operator_website" and r["rights_class"] in gg.PUBLIC_RIGHTS:
+                    self.assertEqual(r["rights_class"], "public_first_party", (name, r))
+        self.assertFalse(any(r["rights_class"] == "public_official" and r["source_system"] == "operator_website"
+                             for n in M.CONTRACTS for r in self.t[n] if "source_system" in r))
+
+    def test_official_status_preferred_over_later_own_site(self):
+        row = next(r for r in self.t["gaming_grove_facilities.csv"] if r["cedar_place_id"] == P2)
+        self.assertEqual((row["status_source_system"], row["status_rights"]),
+                         ("nigc_gaming_location_map", "public_official"))
+
+    def test_coverage_separates_official_from_first_party(self):
+        cov = self.receipt["coverage"]
+        self.assertNotIn("name_location_status_all_independent", cov)
+        both = cov["name_location_status_official_or_first_party"]
+        off = cov["name_location_status_official_only"]
+        self.assertEqual(both - off, cov["name_location_status_needs_first_party"])
+        self.assertEqual(both - off, 1)                              # Sky Casino only
 
 
 class Dates(_Base):

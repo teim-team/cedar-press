@@ -45,9 +45,13 @@ RULINGS THIS PRODUCER APPLIES (and where they come from)
   * A Census geocode of a withheld address is withheld too: re-geocoding does
     not launder the input.
   * The operator's own website (single-property host, retrieved with URL and
-    quote) is `public_official` for its own name/location/operating status and
-    its own reported counts - it is the sovereign's or its enterprise's own
-    publication about its own property. Text-mined DATE claims from marketing
+    quote) is `public_first_party` (owner ruling 2026-09-24): publishable for
+    its own name, address, operating status, reported counts and SELF-DESCRIBED
+    affiliation, but never independent proof of ownership, legal control,
+    revenue allocation or tribal retention. Where a regulator/official source
+    also evidences a field, the official value is selected; the coverage
+    receipt reports name+location+status from official evidence only and from
+    official-or-first-party evidence separately. Text-mined DATE claims from marketing
     copy are NOT: they are demonstrably noisy ("Pragmatic Play ... since 2008"
     was extracted as a casino's in-operation-since), so they stay leads.
   * An NIGC map listing is a LISTING, not an opening; a snapshot diff bounds a
@@ -55,11 +59,16 @@ RULINGS THIS PRODUCER APPLIES (and where they come from)
   * YYYY-12-31 / YYYY-MM-15 values in the vendor workbook are placeholders
     (code/1159); they are carried at the precision the source supports and
     flagged, never shown as a day.
-  * Relationships default to `affiliate`. `owner`/`operator` only where the
-    operator's own site says "owned by"/"owned and operated by" AND the named
-    owner agrees with the curated entity; a management brand is a
-    `management_contractor`, never an owner. No ownership percentage is
-    stated anywhere authoritative, so none is written.
+  * Relationships default to `affiliate`. `owner`/`operator` only where
+    official/independent evidence establishes them (none of today's inputs
+    does). A property site saying "owned by"/"owned and operated by" a party
+    that agrees with the curated entity is a SELF-DESCRIBED affiliation:
+    `affiliate`, `source_asserted`, `public_first_party`, with the site's words
+    kept in evidence_text and what it claimed in `claimed_relationship_type`.
+    A management brand named only on the site is likewise an affiliate
+    claiming `management_contractor`; SEC filings remain the independent
+    management_contractor evidence. No ownership percentage is stated
+    anywhere authoritative, so none is written.
   * NEED/NEST enterprise links are under an affiliation HOLD and no source
     here links a NEST enterprise to a facility except by name, so none is
     emitted (count reported).
@@ -108,8 +117,24 @@ YN = {"Y", "N"}
 
 OFFICIAL_SYSTEMS = {"nigc_gaming_location_map", "ca_cgcc_official_lists",
                     "state_regulator_or_federal_record", "sec_edgar",
-                    "operator_website", "us_census_geocoder", "osha_ita",
+                    "us_census_geocoder", "osha_ita",
                     "nigc_map_snapshot_diff", "cedar_hand_research_official_url"}
+# The property's / operator's own publication about itself (owner ruling
+# 2026-09-24): publishable self-description, not independent proof.
+FIRST_PARTY = "public_first_party"
+FIRST_PARTY_SYSTEMS = {"operator_website"}
+# What a first-party page claimed, carried on the (affiliate) relationship row.
+CLAIM_ORDER = ("owner", "operator", "management_contractor", "other_documented")
+
+
+def join_claims(claims) -> str:
+    """Canonical pipe-joined claim set (fixed order, so reruns are identical)."""
+    cs = set(claims)
+    return "|".join(c for c in CLAIM_ORDER if c in cs)
+
+
+CLAIMED_RELATIONSHIP_TYPES = {join_claims(c for i, c in enumerate(CLAIM_ORDER) if m >> i & 1)
+                              for m in range(1 << len(CLAIM_ORDER))}
 
 # Commercial directories: same class as Casino City (internal_vendor).
 DIRECTORY_HOSTS = {"500nations.com", "worldcasinodirectory.com", "allbiz.com",
@@ -277,15 +302,15 @@ def facility_type_from(name: str, schema_type: str = "") -> tuple[str, str]:
 FAC_SPEC = [
     ("gaming_facility_id", "public_derived", "Gaming facility ID rendered by gaming_grove.facility_id_for from the place ID (PROV- until the ID contract is approved)"),
     ("record_status", "public_derived", "property | held_open_pending_owner_ruling | disputed_distinctness | cross_reference_stub"),
-    ("publication_status", "public_derived", "public (name+location+status all independently evidenced) | source_limited (some) | withheld (none) | unresolved (identity not settled)"),
-    ("public_name", "public_official", "Facility name as published by the highest-priority independent source; blank when none"),
+    ("publication_status", "public_derived", "public (name+location+status all evidenced by official or first-party (own-site) sources; see *_rights) | source_limited (some) | withheld (none) | unresolved (identity not settled)"),
+    ("public_name", "public_official", "Facility name as published by the highest-priority publishable source (regulator first; operator site is public_first_party); blank when none"),
     ("public_name_source_system", "public_derived", "Source system of public_name"),
     ("public_name_source_url", "public_official", "URL of the source of public_name"),
     ("public_name_as_of", "public_derived", "As-of/retrieval date of public_name (ISO)"),
     ("public_name_rights", "public_derived", "Rights class of this row's public_name value"),
     ("facility_type", "public_derived", "Facility type derived from the public name or operator schema.org type; unknown when not derivable"),
     ("facility_type_basis", "public_derived", "What facility_type was derived from"),
-    ("street_address", "public_official", "Street address from an independent source (regulator map or operator website)"),
+    ("street_address", "public_official", "Street address from the regulator map, else the operator website (then address_rights=public_first_party)"),
     ("city", "public_official", "City from an independent source"),
     ("state", "public_official", "State (USPS) from an independent source"),
     ("postal_code", "public_official", "ZIP from an independent source"),
@@ -297,13 +322,13 @@ FAC_SPEC = [
     ("county_fips", "public_official", "5-digit county FIPS from the Census geocoder"),
     ("county_source_system", "public_derived", "Source system of county"),
     ("county_rights", "public_derived", "Rights class of this row's county values"),
-    ("latitude", "public_official", "Latitude (WGS84) from NIGC point, Census geocode of an independent address, or operator website"),
+    ("latitude", "public_official", "Latitude (WGS84) from NIGC point, Census geocode of an official address, or operator website (then coordinate_rights=public_first_party)"),
     ("longitude", "public_official", "Longitude (WGS84)"),
     ("coordinate_source_system", "public_derived", "Source system of the coordinate"),
     ("coordinate_method", "public_derived", "NIGC_PUBLISHED_POINT | CENSUS_GEOCODE_EXACT | CENSUS_GEOCODE_NON_EXACT | OPERATOR_WEBSITE_POINT"),
     ("coordinate_as_of", "public_derived", "As-of/retrieval date of the coordinate"),
     ("coordinate_rights", "public_derived", "Rights class of this row's coordinate"),
-    ("current_status", "public_derived", "operating when an independent dated source shows it listed/reporting/advertising; unknown otherwise (a vendor 'closed' is internal and not shown)"),
+    ("current_status", "public_derived", "operating when an official dated source shows it listed/reporting (preferred) or the operator's own site advertises it (status_rights=public_first_party); unknown otherwise (a vendor 'closed' is internal and not shown)"),
     ("status_as_of", "public_derived", "Date of the most recent independent status evidence"),
     ("status_basis", "public_derived", "Plain statement of what the status evidence is"),
     ("status_source_system", "public_derived", "Source system of the status evidence"),
@@ -311,7 +336,7 @@ FAC_SPEC = [
     ("status_rights", "public_derived", "Rights class of this row's status"),
     ("withheld_fields", "public_derived", "Field groups withheld on this row and why (field:reason;...)"),
     ("n_legacy_records", "public_derived", "Number of legacy source records resolved to this facility (mapped + merged_into + unresolved)"),
-    ("n_independent_sources", "public_derived", "Distinct independent (public) source systems evidencing this facility"),
+    ("n_independent_sources", "public_derived", "Distinct independent (public, non-first-party) source systems evidencing this facility"),
     ("n_name_rows", "public_derived", "Rows in gaming_facility_names (all rights)"),
     ("n_public_name_rows", "public_derived", "Public rows in gaming_facility_names"),
     ("n_history_rows", "public_derived", "Rows in gaming_facility_history (all rights)"),
@@ -408,7 +433,8 @@ REL_SPEC = [
     ("party_name", "public_official", "Party name as the source states it (external companies; the Native entity's register name otherwise)"),
     ("party_external_id", "public_official", "External identifier of an external company (SEC CIK)"),
     ("party_external_id_scheme", "public_derived", "Scheme of party_external_id"),
-    ("relationship_type", "public_derived", "owner | operator | affiliate | licensee | landholder | beneficiary | management_contractor | other_documented"),
+    ("relationship_type", "public_derived", "owner | operator | affiliate | licensee | landholder | beneficiary | management_contractor | other_documented; owner/operator only on official/independent evidence"),
+    ("claimed_relationship_type", "public_first_party", "What a first-party (own-site) source claimed for itself (owner | operator | owner|operator | management_contractor); the row stays affiliate; blank otherwise"),
     ("role_as_stated", "public_official", "The source's own words for the role"),
     ("ownership_percent", "public_official", "Only from an authoritative source; blank everywhere today"),
     ("effective_start", "public_derived", "Start of the relationship where the source states it"),
@@ -499,13 +525,14 @@ CONTRACTS = {
         ["relationship_id"], REL_SPEC,
         required=["gaming_facility_id", "party_kind", "relationship_type", "confidence", "review_status", "rights_class"],
         enums={"party_kind": PARTY_KINDS, "relationship_type": gg.RELATIONSHIP_TYPES,
+               "claimed_relationship_type": CLAIMED_RELATIONSHIP_TYPES,
                "confidence": gg.CONFIDENCE, "review_status": gg.REVIEW_STATUSES,
                "rights_class": gg.RIGHTS_CLASSES},
         dates=["effective_start", "effective_end", "observed_as_of", "source_date", "retrieved_date"],
         intervals=[("effective_start", "effective_end")],
         public_ids=["relationship_id", "gaming_facility_id", "cedar_uid", "enterprise_id"],
         derived={"relationship_id": "GREL"},
-        nonadd="A relationship row is not an ownership share; no percentages are summed or inferred.",
+        nonadd="A relationship row is not an ownership share; no percentages are summed or inferred. A first-party affiliate row's claimed_relationship_type is the site's own claim, not an established owner/operator relationship.",
         status="source_limited",
         supersedes=["gaming_facilities.cedar_uid / operating_entity_cedar_uids", "sec_gaming_management_contract_terms (facility-named rows)",
                     "gaming_property_self_published_assertions (ownership/management)"],
@@ -557,10 +584,10 @@ def _url_rights(url: str, evidence: str, own_hosts: set) -> tuple[str, str]:
     if h in DIRECTORY_HOSTS:
         return "internal_vendor", "commercial_directory"
     if h in own_hosts:
-        return "public_official", "operator_website"
+        return FIRST_PARTY, "operator_website"
     ev = (evidence or "").lower()
     if "own" in ev and ("site" in ev or "page" in ev or "listing" in ev):
-        return "public_official", "operator_website_per_researcher"
+        return FIRST_PARTY, "operator_website_per_researcher"
     return "withheld_unverified", "secondary_source_lead"
 
 
@@ -733,7 +760,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             "source_date": src_date, "retrieved_date": retrieved, "rights_class": rights,
             "_place": place}
         if rights in gg.PUBLIC_RIGHTS and kind == "status_observation" and status in ("operating", "listed"):
-            ev[place]["status"].append((date or na, system, url, text[:300]))
+            ev[place]["status"].append((date or na, system, url, text[:300], rights))
 
     METRIC_FAMILY = {"gaming_machines": "gaming_devices", "gaming_machines_authorized_max": "gaming_devices",
                      "class_iii_gaming_devices": "gaming_devices", "table_games": "gaming_tables",
@@ -785,19 +812,27 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
 
     def add_rel(place, kind, party_key, rtype, system, rec, *, cedar_uid="", party_name="", ext_id="",
                 ext_scheme="", role="", start="", end="", observed="", text="", conf="low",
-                review="machine_matched", url="", src_date="", retrieved="", rights="withheld_unverified"):
+                review="machine_matched", url="", src_date="", retrieved="", rights="withheld_unverified",
+                claimed=""):
         if not place:
             return
+        # Ownership/operation is never asserted on first-party evidence alone
+        # (owner ruling 2026-09-24): the caller must already have re-typed it.
+        if rights == FIRST_PARTY and rtype in ("owner", "operator", "management_contractor"):
+            raise gg.GamingContractError(f"first-party evidence cannot establish {rtype} ({system} {rec})")
         k = (place, party_key, rtype, system)
         if k in rel_acc:
             rel_acc[k]["n_source_records"] += 1
+            if claimed:
+                old = set(filter(None, rel_acc[k]["claimed_relationship_type"].split("|")))
+                rel_acc[k]["claimed_relationship_type"] = join_claims(old | set(claimed.split("|")))
             return
         rid = gg.derive_id("GREL", place, party_key, rtype, system)
         rel_acc[k] = {
             "relationship_id": rid, "gaming_facility_id": gfid(place), "party_kind": kind,
             "cedar_uid": cedar_uid, "enterprise_id": "", "party_name": party_name,
             "party_external_id": ext_id, "party_external_id_scheme": ext_scheme,
-            "relationship_type": rtype,
+            "relationship_type": rtype, "claimed_relationship_type": claimed,
             "role_as_stated": (scrub(role) if rights in gg.PUBLIC_RIGHTS else role)[:200], "ownership_percent": "",
             "effective_start": start, "effective_end": end, "observed_as_of": observed,
             "evidence_text": (scrub(text) if rights in gg.PUBLIC_RIGHTS else text)[:600],
@@ -1078,7 +1113,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         add_cap(place, r["metric"], r["value"], r["unit"], "PROPERTY_REPORTED_COUNT", "operator_website",
                 r["observation_id"], as_of=ret, prec="observed_on_retrieval_date", attrib=ab,
                 quote=r["source_quote"], url=r["source_url"], retrieved=ret,
-                rights="public_official" if public else "withheld_unverified")
+                rights=FIRST_PARTY if public else "withheld_unverified")
     for r in SPC:
         fid = r["facility_id"]
         if not fid or fid not in disp or r["also_in_gaming_property_site_observations"] == "Y":
@@ -1095,7 +1130,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         add_cap(place, r["metric"], r["value"], r["unit"], "PROPERTY_REPORTED_COUNT", "operator_website",
                 r["claim_id"], as_of=ret, prec="observed_on_retrieval_date", qual=qual, attrib=ab,
                 quote=r["source_quote"], url=r["source_url"], retrieved=ret,
-                rights="public_official" if public else "withheld_unverified")
+                rights=FIRST_PARTY if public else "withheld_unverified")
     for r in LOY:
         fid = r["facility_id"]
         if fid not in disp or not resolved_place(fid):
@@ -1104,7 +1139,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         add_cap(resolved_place(fid), "loyalty_program", "", "", "AMENITY_PRESENT", "operator_website",
                 r["loyalty_program_id"], as_of=obs, prec="observed_on_retrieval_date", attrib=r["evidence_basis"],
                 quote=r["source_quote"], url=r["source_url"], retrieved=obs, value_text=r["program_name"],
-                rights="public_official" if r["source_url"] and r["confidence_tier"] in ("A", "B") else "withheld_unverified")
+                rights=FIRST_PARTY if r["source_url"] and r["confidence_tier"] in ("A", "B") else "withheld_unverified")
 
     # ---- 7. operator website: self-published assertions (name, location, status, ownership, dates)
     loc_by_page = defaultdict(dict)
@@ -1129,7 +1164,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             if re.search(r"casino|resort|bingo|gaming|hotel|sportsbook", lv) and not re.search(
                     r"\btribe\b|\bnation\b|\bband\b|\bindians\b|\bcommunity\b|rancheria\b|pueblo of", lv):
                 add_name(place, v, "operator_website", "operator_website", r["assertion_id"], r["source_url"],
-                         ret, ret, "observed_on_retrieval_date", r["source_quote"][:300], "public_official",
+                         ret, ret, "observed_on_retrieval_date", r["source_quote"][:300], FIRST_PARTY,
                          retrieved=ret)
             else:
                 ctx.withheld["operator_site_name_is_entity_not_property"] += 1
@@ -1139,7 +1174,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             add_hist(place, "status_observation", "status_observation", "operator_website", r["assertion_id"],
                      status="operating", date=ret, prec="observed_on_retrieval_date",
                      text="Operator's own site publishes current operating hours: " + r["asserted_value"][:200],
-                     review="machine_matched", url=r["source_url"], retrieved=ret, rights="public_official")
+                     review="machine_matched", url=r["source_url"], retrieved=ret, rights=FIRST_PARTY)
         elif cls == "SELF_PUBLISHED_DATE_ASSERTION":
             etype = {"opening": "opening", "in_operation_since": "opening", "renovation": "renovation",
                      "expansion": "expansion", "anniversary": "anniversary_claim",
@@ -1156,11 +1191,15 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             u = good_uid(r["cedar_uid"], "gaming_property_self_published_assertions.cedar_uid")
             agrees = r["agrees_with_curated_owner"].startswith(("SHARES_TOKEN", "AGREE", "EXACT"))
             brand = r["asserted_owner_is_management_brand"] == "Y"
+            # The site's own words are a SELF-DESCRIBED affiliation, never an
+            # independent owner/operator/manager finding (owner ruling
+            # 2026-09-24): affiliate + what the site claimed.
             if brand:
-                add_rel(place, "external_company", "brand:" + r["asserted_value"].lower()[:80], "management_contractor",
+                add_rel(place, "external_company", "brand:" + r["asserted_value"].lower()[:80], "affiliate",
                         "operator_website", r["assertion_id"], party_name=r["asserted_value"][:120],
-                        role=sub, observed=ret, text=r["source_quote"], conf="low", review="machine_matched",
-                        url=r["source_url"], retrieved=ret, rights="public_official")
+                        role=sub, observed=ret, text=r["source_quote"], conf="low", review="source_asserted",
+                        url=r["source_url"], retrieved=ret, rights=FIRST_PARTY, claimed="management_contractor")
+                ctx.withheld["first_party_management_claim_kept_as_affiliate"] += 1
                 continue
             if not (u and agrees and r["asserted_owner_names_tribal_form"] != "N"):
                 ctx.withheld["ownership_assertion_not_matching_curated_entity"] += 1
@@ -1168,11 +1207,11 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             types = {"owned_by": ["owner"], "owned_and_operated_by": ["owner", "operator"],
                      "enterprise_of": ["owner"], "owner_asserts": ["owner"], "parent_organization": ["owner"],
                      "operated_by": ["operator"]}.get(sub, ["other_documented"])
-            for t in types:
-                add_rel(place, "native_entity", u, t, "operator_website", r["assertion_id"], cedar_uid=u,
-                        party_name=register[u]["canonical_name"], role=f"{sub}: {r['asserted_value'][:120]}",
-                        observed=ret, text=r["source_quote"], conf="medium", review="machine_matched",
-                        url=r["source_url"], retrieved=ret, rights="public_official")
+            add_rel(place, "native_entity", u, "affiliate", "operator_website", r["assertion_id"], cedar_uid=u,
+                    party_name=register[u]["canonical_name"], role=f"{sub}: {r['asserted_value'][:120]}",
+                    observed=ret, text=r["source_quote"], conf="medium", review="source_asserted",
+                    url=r["source_url"], retrieved=ret, rights=FIRST_PARTY, claimed=join_claims(types))
+            ctx.withheld["first_party_ownership_claim_kept_as_affiliate"] += 1
     for (place, url), parts in sorted(loc_by_page.items()):
         ret = max(v[1] for v in parts.values())
         if "street_address" in parts or "city" in parts:
@@ -1233,7 +1272,8 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             per_place[row["_place"]][key] += 1
             if row["rights_class"] in gg.PUBLIC_RIGHTS:
                 per_place[row["_place"]][key + "_pub"] += 1
-                per_place[row["_place"]]["sys:" + row["source_system"]] += 1
+                if row["rights_class"] != FIRST_PARTY:   # a property's own site is not independent
+                    per_place[row["_place"]]["sys:" + row["source_system"]] += 1
 
     # A regulator street address shared by 3+ distinct places, or a c/o / P.O.
     # box / HC box string, is an administrative or mailing address (Chickasaw
@@ -1292,6 +1332,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         wf = []
         names = [(n["last_observed"] or n["first_observed"], n["source_system"], n["source_url"], n["name"],
                   n["name_id"], n["name_type"]) for n in names_by_place.get(place, [])]
+        name_official = any(n["rights_class"] == "public_official" for n in names_by_place.get(place, []))
         names = sorted(names, key=lambda t: (NAME_PRI.get(t[5], 5), "" if not t[0] else "~" + t[0], t[1], t[3]))
         # prefer the most recent within the best-priority class
         if names:
@@ -1299,7 +1340,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             cands = sorted([t for t in names if NAME_PRI.get(t[5], 5) == best_pri], key=lambda t: (t[0], t[3]), reverse=True)
             asof, system, url, name, nid, _ = cands[0]
             row.update(public_name=name, public_name_source_system=system, public_name_source_url=url,
-                       public_name_as_of=asof, public_name_rights="public_official")
+                       public_name_as_of=asof, public_name_rights=ctx.names[nid]["rights_class"])
             ctx.names[nid]["is_selected_public_name"] = "Y"
         else:
             row["public_name_rights"] = "withheld_unverified"
@@ -1323,7 +1364,8 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         if addr:
             ret, system, url, street, city, st, z = addr[0]
             row.update(street_address=street, city=city, state=usps(st), postal_code=z, address_source_system=system,
-                       address_source_url=url, address_as_of=ret, address_rights="public_official")
+                       address_source_url=url, address_as_of=ret,
+                       address_rights=FIRST_PARTY if system in FIRST_PARTY_SYSTEMS else "public_official")
         elif len(good_addr) < len(e["address"]) and not e["cityonly"]:
             # administrative/mailing address: the regulator's STATE is still the
             # property's state; street, city and ZIP are not shown.
@@ -1363,7 +1405,8 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         if coords:
             rank, ret, system, method, lat, lon, _ = coords[0]
             row.update(latitude=lat, longitude=lon, coordinate_source_system=system, coordinate_method=method,
-                       coordinate_as_of=ret, coordinate_rights="public_official")
+                       coordinate_as_of=ret,
+                       coordinate_rights=FIRST_PARTY if system in FIRST_PARTY_SYSTEMS else "public_official")
             p0 = (fnum(lat), fnum(lon))
             far = [c for c in coords[1:] if None not in p0 and fnum(c[4]) is not None
                    and haversine_km(p0, (fnum(c[4]), fnum(c[5]))) > 5]
@@ -1375,11 +1418,13 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             wf.append("coordinate:no_independent_point")
             withheld_fields["coordinate:no_independent_point"] += 1
         # status
-        st_ev = sorted(e["status"], reverse=True)
+        # Official status evidence is preferred over the operator's own site,
+        # most recent first within each class.
+        st_ev = sorted(e["status"], key=lambda t: (t[4] == "public_official", t[:4]), reverse=True)
         if st_ev:
-            d, system, url, text = st_ev[0]
+            d, system, url, text, srights = st_ev[0]
             row.update(current_status="operating", status_as_of=d, status_basis=text[:300],
-                       status_source_system=system, status_source_url=url, status_rights="public_official")
+                       status_source_system=system, status_source_url=url, status_rights=srights)
         else:
             row.update(current_status="unknown", status_rights="withheld_unverified")
             wf.append("status:no_independent_dated_evidence")
@@ -1400,8 +1445,17 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             pub = "withheld"
         row["publication_status"] = pub
         coverage["publication_status:" + pub] += 1
+        # Two coverage numbers (owner ruling 2026-09-24): third-party official
+        # evidence only, and official-or-first-party (what publishes today).
+        loc_official = any(t[4] for t in good_addr) or bool(e["cityonly"]) or any(
+            t[2] not in FIRST_PARTY_SYSTEMS for t in coords)
+        status_official = any(t[4] == "public_official" for t in st_ev)
         if has_name and has_loc and has_status:
-            coverage["name_location_status_all_independent"] += 1
+            coverage["name_location_status_official_or_first_party"] += 1
+            if name_official and loc_official and status_official:
+                coverage["name_location_status_official_only"] += 1
+            else:
+                coverage["name_location_status_needs_first_party"] += 1
         for k, v in (("has_public_name", has_name), ("has_public_location", has_loc),
                      ("has_public_status", has_status), ("has_public_street_address", bool(row["street_address"])),
                      ("has_public_coordinate", bool(row["latitude"]))):
@@ -1624,7 +1678,8 @@ def main(argv=None):
     cov = receipt["coverage"]
     print(f"facilities={receipt['qa']['facility_places_total']} "
           f"public={cov.get('publication_status:public', 0)} "
-          f"name+location+status={cov.get('name_location_status_all_independent', 0)}")
+          f"name+location+status official_only={cov.get('name_location_status_official_only', 0)} "
+          f"official_or_first_party={cov.get('name_location_status_official_or_first_party', 0)}")
     for t in receipt["tables"]:
         print(f"  {t['table']}: {t['rows']} rows ({t.get('rows_public', '-')} public) sha256={t['sha256'][:12]}")
 
