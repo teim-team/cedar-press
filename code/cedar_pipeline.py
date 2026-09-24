@@ -74,6 +74,17 @@ RELEASE_PILOTS = {
 }
 
 
+def retired_table_writer(script, table):
+    """Explicit table-scoped retirement outranks discovery and stale contracts."""
+    return any(o["file"] == table and script in o.get("retired_writers", [])
+               for o in KNOWN_ORDERINGS)
+
+
+def active_table_writers(table, scripts):
+    """Filter dispatch edges; retain historical scripts and unrelated outputs."""
+    return [script for script in scripts if not retired_table_writer(script, table)]
+
+
 def registration_problems(plan, contracts=None):
     """Refuse discovered producer stages absent from the existing contracts.
 
@@ -139,7 +150,9 @@ def registration_problems(plan, contracts=None):
         if not outputs:
             issues.append("UNDECLARED_OUTPUTS: " + stage)
         for output in sorted(outputs):
-            if output not in by_table:
+            if retired_table_writer(stage, output):
+                issues.append("RETIRED_TABLE_WRITER: " + stage + " -> " + output)
+            elif output not in by_table:
                 issues.append("UNREGISTERED_TABLE: " + str(output))
             elif stage not in by_table[output]:
                 issues.append("UNREGISTERED_PRODUCER: " + stage + " -> " + output)
@@ -731,6 +744,8 @@ KNOWN_ORDERINGS = [
     {"rebuild": "24_funding_merge.py",
      "enricher": "503_identity.py",
      "file": "federal_funding_transactions.csv",
+     "retired_writers": ["335_harmonize_assistance_seams_in_place.py",
+                         "336_correct_scheme_resolution_by_spine_membership.py"],
      "cost": "not yet paid - 505 runs LAST of all enrichers; any rebuild of a "
              "stamped table drops cedar_uid and ships a dataset a customer "
              "cannot join",

@@ -20,6 +20,67 @@ SPEC.loader.exec_module(PIPELINE)
 
 
 class ProducerRegistrationTest(unittest.TestCase):
+    def test_writer_authority_refresh_preserves_measurements_and_input(self):
+        spec = importlib.util.spec_from_file_location(
+            "contract_refresh", ROOT / "code/512_build_dataset_contracts.py")
+        generator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(generator)
+        doc = json.loads((ROOT / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8"))
+        # Include stale edges even after the checked-in generated contract is refreshed.
+        table = next(t for c in doc["contracts"] for t in c["tables"]
+                     if t["table"] == "federal_funding_transactions.csv")
+        retired = ["335_harmonize_assistance_seams_in_place.py",
+                   "336_correct_scheme_resolution_by_spine_membership.py"]
+        table["enriched_by"] += [s for s in retired if s not in table["enriched_by"]]
+        before = copy.deepcopy(doc)
+        expected = copy.deepcopy(doc)
+        for contract in expected["contracts"]:
+            for target in contract["tables"]:
+                if target["table"] == "federal_funding_transactions.csv":
+                    for field in ("rebuilt_by", "enriched_by"):
+                        target[field] = [s for s in target[field] if s not in retired]
+        with patch.object(generator, "build_contracts", side_effect=AssertionError("no data scan")):
+            actual = generator.refresh_writer_authority(doc)
+        self.assertEqual(actual, expected)
+        self.assertEqual(doc, before)
+        self.assertEqual(generator.refresh_writer_authority(actual), actual)
+
+    def test_retired_funding_edges_cannot_be_reauthorized_by_stale_contract(self):
+        table = "federal_funding_transactions.csv"
+        retired = ["335_harmonize_assistance_seams_in_place.py",
+                   "336_correct_scheme_resolution_by_spine_membership.py"]
+        for stage in retired:
+            plan = {"id": "funding", "phase1": [], "phase2": [stage],
+                    "rb": {}, "en": {stage: [table]}}
+            contracts = {"contracts": [{"collection": "funding",
+                "rebuild_command": "py -3 code/build.py run funding --execute",
+                "tables": [{"table": table, "enriched_by": [stage]}]}]}
+            with self.subTest(stage=stage):
+                self.assertIn("RETIRED_TABLE_WRITER: " + stage + " -> " + table,
+                              PIPELINE.registration_problems(plan, contracts))
+        self.assertEqual(PIPELINE.active_table_writers(
+            table, retired + ["24_funding_merge.py", "503_identity.py"]),
+            ["24_funding_merge.py", "503_identity.py"])
+        self.assertEqual(PIPELINE.active_table_writers("historical.csv", retired), retired)
+
+    def test_funding_plan_cuts_over_discovered_retired_edges_without_build(self):
+        spec = importlib.util.spec_from_file_location("funding_build", ROOT / "code/build.py")
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        table = "federal_funding_transactions.csv"
+        retired = ["335_harmonize_assistance_seams_in_place.py",
+                   "336_correct_scheme_resolution_by_spine_membership.py"]
+        with (patch.object(runner, "collection_tables", return_value=[table]),
+              patch.object(runner, "_io_map", return_value=(
+                  {table: ["24_funding_merge.py"]},
+                  {table: retired + ["503_identity.py"]})),
+              patch.object(runner.subprocess, "run") as dispatch):
+            plan = runner.plan_for("funding")
+        self.assertEqual(plan["phase1"], ["24_funding_merge.py"])
+        self.assertEqual(plan["phase2"], ["503_identity.py"])
+        self.assertFalse(set(retired) & (set(plan["rb"]) | set(plan["en"])))
+        dispatch.assert_not_called()
+
     def test_projection_provenance_records_absence_and_changed_decision_inputs(self):
         spec = importlib.util.spec_from_file_location("authority_build", ROOT / "code/build.py")
         runner = importlib.util.module_from_spec(spec)

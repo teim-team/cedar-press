@@ -114,9 +114,9 @@ def plan_for(cid: str):
     rb: dict[str, list[str]] = {}
     en: dict[str, list[str]] = {}
     for t in tables:
-        for s in rebuilders.get(t, []):
+        for s in CP.active_table_writers(t, rebuilders.get(t, [])):
             rb.setdefault(s, []).append(t)
-        for s in enrichers.get(t, []):
+        for s in CP.active_table_writers(t, enrichers.get(t, [])):
             en.setdefault(s, []).append(t)
 
     # A DECLARED ORDERING RESOLVES AMBIGUITY.

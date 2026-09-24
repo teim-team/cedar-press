@@ -55,7 +55,7 @@ Rebuild: `py -3 code/build.py run funding --execute` — 20 tables.
 | `faads_transactions.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `faads_transactions_all_agencies.csv` | shippable | `tribe_id` `cedar_uid` | `30_funding_pre2008.py` | `1086_faads_award_key_promote.py` |
 | `federal_funding_rulings_from_dofile.csv` | unregistered | — | — | — |
-| `federal_funding_transactions.csv` | shippable | `cedar_uid` | `24_funding_merge.py` | `1131_attribution_method_vocabulary.py` `1140_linkage_close.py` `115_pull_assistance_archive.py` `335_harmonize_assistance_seams_in_place.py` `336_correct_scheme_resolution_by_spine_membership.py` `503_identity.py` |
+| `federal_funding_transactions.csv` | shippable | `cedar_uid` | `24_funding_merge.py` | `1131_attribution_method_vocabulary.py` `1140_linkage_close.py` `115_pull_assistance_archive.py` `503_identity.py` |
 | `federal_funding_tribe_year_panel.csv` | shippable | `cedar_uid` | — | — |
 | `federal_funding_year_comparison_2026-08-05.csv` | internal-by-decision | — | — | — |
 | `funding_identifier_harvest.csv` | internal-by-decision | `cage_code` | — | — |
