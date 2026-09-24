@@ -8,13 +8,14 @@ import logging
 import os
 import tempfile
 import unittest
+import uuid
 from http.client import IncompleteRead
 from pathlib import Path
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from cedar_press import repository
+from cedar_press import db, repository, subscribers
 from cedar_press.app import app
 from cedar_press.session import Session, current_session
 
@@ -115,6 +116,49 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.assertIn("authorized_prepared", captured.output[0])
         self.assertNotIn("fixture@example", captured.output[0])
         self.assertIn("no-store", response.headers["cache-control"])
+
+    @unittest.skipUnless(
+        os.environ.get("CEDAR_PRESS_TEST_DATABASE_URL"), "requires disposable Postgres fixture"
+    )
+    def test_database_subscriber_login_reaches_the_exact_pinned_artifact(self):
+        # No dependency override: exercise the actual database -> login -> cookie
+        # -> entitlement -> release path. The data transport remains fictional.
+        app.dependency_overrides.clear()
+        email = f"release-{uuid.uuid4().hex}@example.invalid"
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASE_URL": os.environ["CEDAR_PRESS_TEST_DATABASE_URL"],
+                "CEDAR_PRESS_INSECURE_COOKIE": "1",
+                "CEDAR_PRESS_ENVIRONMENT": "development",
+            },
+        ):
+            db.reset_for_tests()
+            try:
+                db.migrate()
+                subscribers.create(email, "disposable-fixture-password", "press")
+                url = "/press/collections/legislation/full-download"
+                self.assertEqual(
+                    self.client.get(url, params={"release_id": self.rid}).status_code, 401
+                )
+                login = self.client.post(
+                    "/auth/login", json={"email": email, "password": "disposable-fixture-password"}
+                )
+                self.assertEqual(login.status_code, 200)
+                db.reset_for_tests()
+                self.assertIsNotNone(subscribers.authenticate(email, "disposable-fixture-password"))
+                with self.assertLogs("cedar_press.download", level="INFO") as captured:
+                    response = self.client.get(url, params={"release_id": self.rid})
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    response.content,
+                    b"".join(repository._canonical_bytes(row) for row in self.rows),
+                )
+                self.assertIn("authorized_prepared", captured.output[0])
+                self.assertNotIn(email, captured.output[0])
+            finally:
+                db.execute("DELETE FROM cedar_press_subscribers WHERE email = %s", (email,))
+                db.reset_for_tests()
 
     def test_anonymous_and_wrong_tier_never_touch_release(self):
         for session, status in [(None, 401), (Session("fixture", "unknown"), 403)]:
