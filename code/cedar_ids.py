@@ -244,6 +244,52 @@ def format_id(prefix, n):
     return f"{prefix}-{n:0{width}d}"
 
 
+# --------------------------------------------------------------------------
+# GAMING ID BLOCKS - declared HERE, persistently (repository split 2026-09-24)
+#
+# Cedar's identity service is the ONE issuer of Gaming object IDs. Lumecon-data
+# (`claude/gaming-grove-release`, lumecon_data/gaming/) builds the Gaming
+# components and PROPOSES bindings (stable source key -> an ordinal inside
+# these blocks) against a pinned, read-only snapshot of Cedar's Gaming registry;
+# it never marks an ID issued. Only `code/build.py gaming-issue-ids` (Cedar,
+# owner-authorized, not yet run) turns PROPOSED into ISSUED in Cedar's live
+# register and emits the versioned registry snapshot Lumecon pins.
+#
+# Declared at import so every `allocate()` in any process steps over them
+# (before the split they were declared only when gaming_grove.py was imported).
+# Same values as ratified 2026-09-24 (docs/IDENTIFIER_STANDARD.md): chosen far
+# above every live counter then measured in data/spine/_id_registry.json.
+# server/tests/test_gaming_release.py checks Lumecon's proposal constants
+# against these, never the other way round.
+# --------------------------------------------------------------------------
+GAMING_BLOCKS = {
+    "CEDAR-OBS": (500_000_001, 509_999_999),
+    "CEDAR-EVENT": (500_001, 799_999),
+    "CEDAR-REL": (50_000_001, 50_999_999),
+    "CEDAR-SRC": (500_000_001, 500_999_999),
+    "CEDAR-CONTRACT": (10_000_001, 10_099_999),
+}
+GAMING_BLOCK_OWNER = "cedar_ids (Cedar Grove Gaming ID issuance)"
+GAMING_BLOCK_WHY = ("Gaming component objects: PROPOSED by Lumecon-data from stable source keys, "
+                    "ISSUED only by Cedar (build.py gaming-issue-ids); ratified contract "
+                    "docs/IDENTIFIER_STANDARD.md 2026-09-24")
+for _prefix, (_lo, _hi) in GAMING_BLOCKS.items():
+    declare_static_block(_prefix, _lo, _hi, GAMING_BLOCK_OWNER, GAMING_BLOCK_WHY)
+del _prefix, _lo, _hi
+
+
+def gaming_block_ordinal(value, prefix=None):
+    """Ordinal of a Gaming object ID inside its declared block, else None."""
+    for p, (lo, hi) in GAMING_BLOCKS.items():
+        if prefix and p != prefix:
+            continue
+        match = re.fullmatch(r"%s-(\d{%d})" % (re.escape(p), PREFIXES[p][1]), value or "")
+        if match:
+            n = int(match.group(1))
+            return n if lo <= n <= hi else None
+    return None
+
+
 class _Lock:
     """Exclusive file lock. Windows-safe: O_CREAT|O_EXCL is atomic."""
 

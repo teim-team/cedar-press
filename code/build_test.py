@@ -43,5 +43,31 @@ class PlanSafetyTests(unittest.TestCase):
                 self.assertIn(invariant, stream.getvalue())
                 run.assert_not_called()
 
+
+class RegisteredReferenceTests(unittest.TestCase):
+    """The single-flagship release pilot (natural-resources carries cedar_uid)
+    keeps the retired-handle guard: Lumecon's registered_reference checks pinned
+    membership only, so Cedar refuses `TRBF-X-00: TRBF-X-00` before any intake.
+    Kept in Cedar after the 2026-09-24 Gaming split because a Press pilot uses it."""
+
+    CE = "CE-00001-6S"
+
+    def test_a_retired_or_non_ce_value_is_never_blessed(self):
+        handle = "TRBF-POARCH-00"
+        with self.assertRaisesRegex(SystemExit, "registered_reference mapping would bless .*" + handle):
+            build.pilot_registered_reference({self.CE, handle})
+        retired = build.RetiredHandleMatcher(None, {handle})
+        self.assertTrue(retired.search(handle + "-NIGC-2007-0011-0010"))
+        self.assertFalse(retired.search(self.CE))
+        self.assertEqual(build.pilot_registered_reference({self.CE}, retired), {self.CE: self.CE})
+
+    def test_every_release_pilot_is_a_single_flagship(self):
+        # Gaming left the pilots with its producers; no component release unit remains.
+        self.assertEqual(sorted(build.CP.RELEASE_PILOTS), ["legislation", "natural-resources"])
+        for config in build.CP.RELEASE_PILOTS.values():
+            self.assertNotIn("components", config)
+        self.assertFalse(hasattr(build.CP, "GROVE_COMPONENTS"))
+
+
 if __name__ == "__main__":
     unittest.main()

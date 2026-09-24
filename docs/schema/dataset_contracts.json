@@ -7424,12 +7424,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_names.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "facility_name_as_published"
       }
      ]
@@ -7481,12 +7481,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_government_payments.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "all 41,758 lines"
       }
      ]
@@ -7552,7 +7552,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -7717,7 +7717,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -7792,7 +7792,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -7840,7 +7840,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -7903,12 +7903,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "*",
-       "producer": "1203_gaming_grove_labor_advocacy.py",
+       "producer": "Lumecon-data lumecon_data/gaming/labor_advocacy.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -7966,7 +7966,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -8032,22 +8032,22 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_government_payments.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "TAX_OR_PAYMENT and FEDERAL_EXCISE_TAX rows"
       },
       {
        "component": "gaming_online_sportsbook_financials.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "cross-referenced: MI/CT online sportsbook months overlap and are flagged nonadditive (both kept)"
       },
       {
        "component": "gaming_reported_revenue_observations.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "all non-payment rows"
       }
      ]
@@ -8097,12 +8097,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_financial_disclosures.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "all rows"
       }
      ]
@@ -8175,12 +8175,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_financial_disclosures.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "all rows (federal award, not revenue)"
       }
      ]
@@ -8234,17 +8234,17 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_government_payments.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "payment/receipt/obligation lines (Net Win and rate lines go elsewhere)"
       },
       {
        "component": "gaming_reported_revenue_observations.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "Net Win lines and property-revenue absence"
       }
      ]
@@ -8304,12 +8304,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_capacity.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "capacity/authorization rows"
       }
      ]
@@ -8382,7 +8382,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -8505,12 +8505,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1203_gaming_grove_labor_advocacy.py",
+       "producer": "Lumecon-data lumecon_data/gaming/labor_advocacy.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_labor_observations.csv",
-       "producer": "1203_gaming_grove_labor_advocacy.py",
+       "producer": "Lumecon-data lumecon_data/gaming/labor_advocacy.py",
        "role": "source: re-grained to one source record per measure; PROJECTED/ENV rows left to lane E"
       }
      ]
@@ -8574,42 +8574,42 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_capacity.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "latest_* capacity (vendor, internal"
       },
       {
        "component": "gaming_facility_crosswalk.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "facility_id / casino_city_id (retired from public keys"
       },
       {
        "component": "gaming_facility_history.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "open/close/status columns"
       },
       {
        "component": "gaming_facility_names.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "facility_name"
       },
       {
        "component": "gaming_facility_relationships.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "cedar_uid / operating_entity_cedar_uids"
       },
       {
        "component": "gaming_grove_facilities.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "legacy 787-row source-record table: identity + fields re-derived; vendor fields dropped"
       },
       {
        "component": "*",
-       "producer": "1203_gaming_grove_labor_advocacy.py",
+       "producer": "Lumecon-data lumecon_data/gaming/labor_advocacy.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -8713,17 +8713,17 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_financial_disclosures.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "all rows (NIGC reviewed drafts, execution unconfirmed)"
       },
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -8855,7 +8855,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -8997,17 +8997,17 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_names.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "nigc_location_name"
       },
       {
        "component": "gaming_grove_facilities.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "name/status evidence"
       }
      ]
@@ -9110,7 +9110,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -9253,7 +9253,7 @@
      "grove_consumers": [
       {
        "component": "gaming_grove_facilities.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "property view of the same records"
       }
      ]
@@ -9361,7 +9361,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -9421,12 +9421,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1203_gaming_grove_labor_advocacy.py",
+       "producer": "Lumecon-data lumecon_data/gaming/labor_advocacy.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_labor_observations.csv",
-       "producer": "1203_gaming_grove_labor_advocacy.py",
+       "producer": "Lumecon-data lumecon_data/gaming/labor_advocacy.py",
        "role": "source: labor-demand statements, internal"
       }
      ]
@@ -9455,12 +9455,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_grove_facilities.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "location evidence"
       }
      ]
@@ -9508,17 +9508,17 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_history.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "date claims, as leads"
       },
       {
        "component": "gaming_facility_relationships.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "ownership/management"
       }
      ]
@@ -9567,12 +9567,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_capacity.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": ""
       }
      ]
@@ -9632,12 +9632,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_capacity.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": ""
       }
      ]
@@ -9703,17 +9703,17 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_history.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": ""
       },
       {
        "component": "gaming_facility_names.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "renamed"
       }
      ]
@@ -9769,7 +9769,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -9856,7 +9856,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -9909,7 +9909,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -9980,12 +9980,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_capacity.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": ""
       }
      ]
@@ -10082,7 +10082,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10137,7 +10137,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10171,7 +10171,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10208,7 +10208,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10241,7 +10241,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10276,7 +10276,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10311,12 +10311,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10378,7 +10378,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10432,12 +10432,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_regional_revenue.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "source of every region row (read-only)"
       }
      ]
@@ -10483,12 +10483,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_revenue_bands.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "source (read-only)"
       }
      ]
@@ -10531,12 +10531,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_financial_disclosures.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "all rows"
       }
      ]
@@ -10574,22 +10574,22 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_financial_disclosures.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "all rows as contract_term disclosures"
       },
       {
        "component": "*",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_facility_relationships.csv",
-       "producer": "1201_gaming_grove_facilities.py",
+       "producer": "Lumecon-data lumecon_data/gaming/facilities.py",
        "role": "facility-named rows"
       }
      ]
@@ -10645,17 +10645,17 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "read as input (Inputs.clean)"
       },
       {
        "component": "gaming_government_payments.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "payment-class rows (WI, NY, AZ contributions)"
       },
       {
        "component": "gaming_reported_revenue_observations.csv",
-       "producer": "1200_gaming_grove_revenue.py",
+       "producer": "Lumecon-data lumecon_data/gaming/revenue.py",
        "role": "revenue and documented-absence rows"
       }
      ]
@@ -10713,7 +10713,7 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
@@ -10740,1072 +10740,12 @@
      "grove_consumers": [
       {
        "component": "*",
-       "producer": "1202_gaming_grove_compacts_regulatory.py",
+       "producer": "Lumecon-data lumecon_data/gaming/compacts_regulatory.py",
        "role": "read as input (Inputs.clean)"
       }
      ]
-    },
-    {
-     "table": "gaming_facility_capacity.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per dated capacity/amenity observation for one facility from one source record.",
-     "primary_key": [
-      "capacity_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_capacity_official.csv",
-       "role": "capacity/authorization rows"
-      },
-      {
-       "table": "gaming_property_site_observations.csv",
-       "role": ""
-      },
-      {
-       "table": "gaming_property_self_published_claims.csv",
-       "role": ""
-      },
-      {
-       "table": "gaming_facilities.csv",
-       "role": "latest_* capacity (vendor, internal"
-      },
-      {
-       "table": "loyalty_program_property.csv",
-       "role": ""
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_crosswalk.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One row per (legacy facility record, identifier scheme, identifier value); every legacy gaming_facilities row has a legacy_facility_id row carrying its disposition.",
-     "primary_key": [
-      "legacy_facility_id",
-      "key_scheme",
-      "key_value"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "facility_id / casino_city_id (retired from public keys"
-      },
-      {
-       "table": "data/spine/cedar_place_id_register.csv",
-       "role": "read"
-      },
-      {
-       "table": "review/place_gaming_.csv",
-       "role": "* (read"
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_history.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per dated facility event or dated status observation from one source record.",
-     "primary_key": [
-      "history_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "open/close/status columns"
-      },
-      {
-       "table": "gaming_property_universe_events.csv",
-       "role": ""
-      },
-      {
-       "table": "gaming_property_self_published_assertions.csv",
-       "role": "date claims, as leads"
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_names.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per (facility, source record, name) observation; names are observations with first/last observed dates, not validity periods.",
-     "primary_key": [
-      "name_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "facility_name"
-      },
-      {
-       "table": "gaming_nigc_roster_link.csv",
-       "role": "nigc_location_name"
-      },
-      {
-       "table": "ca_gaming_facilities_official.csv",
-       "role": "facility_name_as_published"
-      },
-      {
-       "table": "gaming_property_universe_events.csv",
-       "role": "renamed"
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_relationships.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per (facility, party, relationship type, source system).",
-     "primary_key": [
-      "relationship_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "cedar_uid / operating_entity_cedar_uids"
-      },
-      {
-       "table": "sec_gaming_management_contract_terms.csv",
-       "role": "facility-named rows"
-      },
-      {
-       "table": "gaming_property_self_published_assertions.csv",
-       "role": "ownership/management"
-      }
-     ]
-    },
-    {
-     "table": "gaming_grove_facilities.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per distinct physical gaming property (a CEDAR-PLACE gaming place that at least one legacy record resolves to as mapped or unresolved).",
-     "primary_key": [
-      "gaming_facility_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "legacy 787-row source-record table: identity + fields re-derived; vendor fields dropped"
-      },
-      {
-       "table": "gaming_properties.csv",
-       "role": "property view of the same records"
-      },
-      {
-       "table": "cedar_places.csv",
-       "role": "GAMING_PROPERTY rows: id source"
-      },
-      {
-       "table": "gaming_property_locations.csv",
-       "role": "location evidence"
-      },
-      {
-       "table": "gaming_nigc_roster_link.csv",
-       "role": "name/status evidence"
-      }
-     ]
-    },
-    {
-     "table": "gaming_coverage_gaps.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One machine-readable coverage gap or qualified observation: one missing series, figure or period range (or one non-reconciling published row) for one subject, as established by a named source.",
-     "primary_key": [
-      "coverage_gap_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": []
-    },
-    {
-     "table": "gaming_financial_disclosures.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "One financial disclosure as filed or printed: one SEC figure or contract term, one FAC audit statement or federal-award line, one NIGC financing review, or one bond/rating disclosure.",
-     "primary_key": [
-      "financial_disclosure_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "sec_gaming_financial_disclosures.csv",
-       "role": "all rows"
-      },
-      {
-       "table": "sec_gaming_management_contract_terms.csv",
-       "role": "all rows as contract_term disclosures"
-      },
-      {
-       "table": "fac_audit_gaming_disclosures.csv",
-       "role": "all rows"
-      },
-      {
-       "table": "fac_audit_sefa_gaming_programs.csv",
-       "role": "all rows (federal award, not revenue)"
-      },
-      {
-       "table": "gaming_financing_events.csv",
-       "role": "all rows (NIGC reviewed drafts, execution unconfirmed)"
-      },
-      {
-       "table": "tribal_bond_issuances.csv",
-       "role": "gaming bond rows (Moody's lineage: internal_vendor)"
-      },
-      {
-       "table": "seminole_bond_disclosures.csv",
-       "role": "rows not already carried from tribal_bond_issuances"
-      }
-     ]
-    },
-    {
-     "table": "gaming_government_payments.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "One government payment line as published: one payer, one recipient, one fund, one period, one status (paid/forecast/obligation/suppressed), one amount.",
-     "primary_key": [
-      "payment_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "ca_gaming_payments.csv",
-       "role": "all 41,758 lines"
-      },
-      {
-       "table": "fl_gaming_payments.csv",
-       "role": "payment/receipt/obligation lines (Net Win and rate lines go elsewhere)"
-      },
-      {
-       "table": "state_gaming_observations.csv",
-       "role": "payment-class rows (WI, NY, AZ contributions)"
-      },
-      {
-       "table": "digital_gaming_revenue.csv",
-       "role": "TAX_OR_PAYMENT and FEDERAL_EXCISE_TAX rows"
-      }
-     ]
-    },
-    {
-     "table": "gaming_online_sportsbook_financials.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One financial observation: one reported online-sportsbook unit x one period (monthly calendar month, or annual calendar year for annual-only sources) x one publication revision, with each financial measure in its own column.",
-     "primary_key": [
-      "financial_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "digital_gaming_revenue.csv",
-       "role": "cross-referenced: MI/CT online sportsbook months overlap and are flagged nonadditive (both kept)"
-      }
-     ]
-    },
-    {
-     "table": "gaming_online_sportsbook_relationships.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One typed relationship between one reported online-sportsbook unit and one Native entity over the package's collected window; carries no money.",
-     "primary_key": [
-      "relationship_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": []
-    },
-    {
-     "table": "gaming_online_sportsbook_units.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One reported online-sportsbook unit: a single reporting series (tribal license, master license, casino online license, brand, operator row, shared three-tribe report or multi-brand license aggregate) in one jurisdiction as one source publishes it.",
-     "primary_key": [
-      "sportsbook_unit_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": []
-    },
-    {
-     "table": "gaming_regional_revenue.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "One NIGC-published gross gaming revenue figure for one geography (a region under one region-system version, or the printed national total) and one NIGC fiscal year, from one report.",
-     "primary_key": [
-      "revenue_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "nigc_regional_ggr.csv",
-       "role": "source of every region row (read-only)"
-      },
-      {
-       "table": "review/nigc_total_reconciliation_2026-08-06.csv",
-       "role": "NIGC printed national totals (read-only)"
-      },
-      {
-       "table": "inflation_deflator.csv",
-       "role": "deflator series metadata"
-      }
-     ]
-    },
-    {
-     "table": "gaming_reported_revenue_observations.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "One reported revenue-type measure for one reporting party (state aggregate, tribe, property or online licensee) for one period, as one source row publishes it.",
-     "primary_key": [
-      "reported_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "state_gaming_observations.csv",
-       "role": "revenue and documented-absence rows"
-      },
-      {
-       "table": "fl_gaming_payments.csv",
-       "role": "Net Win lines and property-revenue absence"
-      },
-      {
-       "table": "digital_gaming_revenue.csv",
-       "role": "all non-payment rows"
-      }
-     ]
-    },
-    {
-     "table": "gaming_revenue_bands.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "One NIGC revenue range (band) in one fiscal-year report: its printed share of operations and of national GGR.",
-     "primary_key": [
-      "band_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1200_gaming_grove_revenue.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "nigc_revenue_bands.csv",
-       "role": "source (read-only)"
-      }
-     ]
-    },
-    {
-     "table": "gaming_compact_terms.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "one row per extracted contractual clause term (structured terms plus exclusivity/dispute clauses from the compact_terms view)",
-     "primary_key": [
-      "gaming_term_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "compact_structured_terms",
-       "role": "source (1:1)"
-      },
-      {
-       "table": "compact_terms",
-       "role": "derived view; only exclusivity and dispute_provision rows added (other types duplicate structured terms)"
-      }
-     ]
-    },
-    {
-     "table": "gaming_compact_versions.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "one row per compact version (original instrument, amendment or extension) as indexed by BIA",
-     "primary_key": [
-      "version_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "compact_versions",
-       "role": "source (1:1)"
-      },
-      {
-       "table": "compact_structured_terms",
-       "role": "expiration_date terms feed expiry_date"
-      }
-     ]
-    },
-    {
-     "table": "gaming_compacts.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "one row per tribal-state Class III compact base instrument (or secretarial procedures) in the BIA index",
-     "primary_key": [
-      "compact_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "compacts",
-       "role": "source (1:1, columns renamed, legacy tribe_id/entity_id dropped)"
-      }
-     ]
-    },
-    {
-     "table": "gaming_environmental_reviews.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "one row per NEPA review document per project (EA, EIS, FONSI, ROD, NOA, NOI, scoping), deduplicated on document URL",
-     "primary_key": [
-      "environmental_review_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_land_decisions",
-       "role": "document lists"
-      },
-      {
-       "table": "raw/external/gaming_nepa/_SOURCE_MANIFEST.csv",
-       "role": "pilot documents"
-      },
-      {
-       "table": "nigc_document_surface",
-       "role": "NIGC past FONSIs"
-      },
-      {
-       "table": "gaming_projections / gaming_project_facilities / gaming_mitigation_agreements",
-       "role": "counts only"
-      },
-      {
-       "table": "nepa_eplanning_projects",
-       "role": "checked; no gaming projects (BLM register)"
-      }
-     ]
-    },
-    {
-     "table": "gaming_land_eligibility.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "one row per BIA gaming land decision or NIGC Indian-lands opinion (determination), with its current index status and latest later action",
-     "primary_key": [
-      "land_eligibility_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_land_decisions",
-       "role": "source (1:1)"
-      },
-      {
-       "table": "nigc_indian_lands_opinions",
-       "role": "source (1:1)"
-      },
-      {
-       "table": "gaming_decision_events",
-       "role": "latest subsequent action"
-      }
-     ]
-    },
-    {
-     "table": "gaming_licenses.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "one row per licence mention, wagering authorisation or machine-allocation interval as published by its source",
-     "primary_key": [
-      "license_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_vendor_tribal_licenses",
-       "role": "SEC-filing licence mentions (self-references excluded)"
-      },
-      {
-       "table": "digital_gaming_relationships",
-       "role": "state wagering authorisations/operations"
-      },
-      {
-       "table": "wa_machine_allocations",
-       "role": "compact machine allocations"
-      },
-      {
-       "table": "wa_machine_transfers",
-       "role": "empty in source"
-      }
-     ]
-    },
-    {
-     "table": "gaming_litigation.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "one row per court or administrative proceeding (forum + docket or reporter citation) affecting gaming compacts, land, regulation or financing",
-     "primary_key": [
-      "litigation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "native_issue_litigation_positions",
-       "role": "Advocacy collection: LINKED by position_id, rows not copied"
-      },
-      {
-       "table": "native_issue_litigation_coverage",
-       "role": "forum coverage"
-      },
-      {
-       "table": "gaming_land_decisions / gaming_decision_events",
-       "role": "BIA notes citing cases"
-      },
-      {
-       "table": "admin_appeal_decisions",
-       "role": "IBIA gaming captions"
-      },
-      {
-       "table": "nigc_document_surface",
-       "role": "NIGC commission final decisions"
-      },
-      {
-       "table": "raw/external/fl_gaming/_SOURCE_MANIFEST.csv",
-       "role": "USCOURTS opinions"
-      },
-      {
-       "table": "staging/tribal_debt_court_dockets",
-       "role": "CourtListener dockets (staging, not promoted)"
-      }
-     ]
-    },
-    {
-     "table": "gaming_regulatory_events.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "public",
-     "key_columns": [],
-     "grain": "one row per dated regulatory action, deduplicated on its stable source key (FR document number, NIGC record id, BIA event id); merged source IDs kept in also_cited_by",
-     "primary_key": [
-      "regulatory_event_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1202_gaming_grove_compacts_regulatory.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1202_gaming_grove_compacts_regulatory.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "compacts",
-       "role": "event source"
-      },
-      {
-       "table": "compact_versions",
-       "role": "event source"
-      },
-      {
-       "table": "compact_events",
-       "role": "event source"
-      },
-      {
-       "table": "gaming_land_decisions",
-       "role": "event source"
-      },
-      {
-       "table": "gaming_decision_events",
-       "role": "event source"
-      },
-      {
-       "table": "nigc_declination_letters",
-       "role": "event source"
-      },
-      {
-       "table": "nigc_enforcement_actions",
-       "role": "event source"
-      },
-      {
-       "table": "nigc_action_parties",
-       "role": "event source"
-      },
-      {
-       "table": "nigc_management_contract_approvals",
-       "role": "event source"
-      },
-      {
-       "table": "nigc_indian_lands_opinions",
-       "role": "event source"
-      },
-      {
-       "table": "nigc_game_classification_opinions",
-       "role": "event source"
-      },
-      {
-       "table": "gaming_ordinances",
-       "role": "event source"
-      },
-      {
-       "table": "federal_actions",
-       "role": "event source"
-      },
-      {
-       "table": "federal_actions_entity_bridge",
-       "role": "event source"
-      },
-      {
-       "table": "consultation_events",
-       "role": "event source"
-      },
-      {
-       "table": "gaming_financing_events",
-       "role": "event source"
-      }
-     ]
-    },
-    {
-     "table": "gaming_advocacy_links.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One (advocacy/engagement event, linked Gaming object) pair; the event row itself stays in the Advocacy & Engagement collection.",
-     "primary_key": [
-      "advocacy_link_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1203_gaming_grove_labor_advocacy.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1203_gaming_grove_labor_advocacy.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "native_entity_lobbying_disclosures.csv",
-       "role": "authoritative source; linked, never copied"
-      },
-      {
-       "table": "consultation_events.csv",
-       "role": "authoritative source; linked"
-      },
-      {
-       "table": "regulations_gov_comments.csv",
-       "role": "authoritative source; linked"
-      },
-      {
-       "table": "data/source/advocacy/congressional_testimony_2025_2026.csv",
-       "role": "authoritative source; linked"
-      }
-     ]
-    },
-    {
-     "table": "gaming_labor_observations.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One measure of one source labor record: an OSHA ITA establishment-year, a DOL Form 5500 plan filing (ACK_ID), an NLRB election tally, a LODES block-year, or a property-site labor-demand statement.",
-     "primary_key": [
-      "labor_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1203_gaming_grove_labor_advocacy.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1203_gaming_grove_labor_advocacy.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_employment_observations.csv",
-       "role": "source: re-grained to one source record per measure; PROJECTED/ENV rows left to lane E"
-      },
-      {
-       "table": "gaming_property_labor_demand.csv",
-       "role": "source: labor-demand statements, internal"
-      },
-      {
-       "table": "data/staging/gaming_employment_form5500_staged.csv",
-       "role": "not read: staging, superseded by the merged clean rows"
-      },
-      {
-       "table": "data/staging/gaming_employment_osha_tribe_staged.csv",
-       "role": "not read: staging, superseded by the merged clean rows"
-      }
-     ]
     }
-   ],
-   "n_grove_components": 25
+   ]
   },
   {
    "collection": "_entity_layer",

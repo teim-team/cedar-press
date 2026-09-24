@@ -18294,8 +18294,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 18,
-   "mentioned_outside_history": 17,
+   "mentions": 17,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -20899,8 +20899,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 7,
-   "mentioned_outside_history": 6,
+   "mentions": 8,
+   "mentioned_outside_history": 7,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -21009,8 +21009,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -22378,574 +22378,6 @@
     "local_check_harness_calls": []
    },
    "registration_status": "declared_dependency"
-  },
-  {
-   "script": "1200_gaming_grove_revenue.py",
-   "dir": "",
-   "number": "1200",
-   "duplicate_number": true,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    ".receipt.json"
-   ],
-   "reads": [
-    "inflation_deflator.csv",
-    "nigc_regional_ggr.csv",
-    "nigc_total_reconciliation_2026-08-06.csv"
-   ],
-   "in_a_contract": true,
-   "in_an_ordering": false,
-   "mentions": 6,
-   "mentioned_outside_history": 6,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 1530,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [
-    "code/1200_gaming_grove_revenue_test.py",
-    "code/cedar_pipeline.py",
-    "data/cedar/field_map.json",
-    "docs/schema/dataset_contracts.json"
-   ],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": [
-     "assert_no_cross_version_sum",
-     "check_bands_against_regions",
-     "check_fy2025",
-     "check_one_preferred_national",
-     "check_payments",
-     "check_regions_have_no_entity_ids"
-    ]
-   },
-   "unknown_io_literals": [
-    "ca_gaming_payments.csv",
-    "digital_gaming_revenue.csv",
-    "fac_audit_gaming_disclosures.csv",
-    "fac_audit_sefa_gaming_programs.csv",
-    "fl_gaming_payments.csv",
-    "gaming_financial_disclosures.csv",
-    "gaming_financing_events.csv",
-    "gaming_government_payments.csv",
-    "gaming_regional_revenue.csv",
-    "gaming_reported_revenue_observations.csv",
-    "gaming_revenue_bands.csv",
-    "gaming_revenue_bounds.csv",
-    "nigc_revenue_bands.csv",
-    "sec_gaming_financial_disclosures.csv",
-    "sec_gaming_management_contract_terms.csv",
-    "seminole_bond_disclosures.csv",
-    "state_gaming_observations.csv",
-    "tribal_bond_issuances.csv"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 1,
-    "local_check_harness_calls": [
-     "assert_no_cross_version_sum"
-    ]
-   },
-   "registration_status": "declared_dependency"
-  },
-  {
-   "script": "1200_gaming_grove_revenue_test.py",
-   "dir": "",
-   "number": "1200",
-   "duplicate_number": true,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 358,
-   "operational_role": "test/fixture",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "ca_gaming_payments.csv",
-    "inflation_deflator.csv",
-    "nigc_regional_ggr.csv"
-   ],
-   "embedded_test_functions": 25,
-   "standalone_test_evidence": {
-    "unittest_classes": [
-     "RegionalTests",
-     "VintageRuleTests",
-     "PaymentTests",
-     "ObservationTests",
-     "IdentifierTests"
-    ],
-    "pytest_import": false,
-    "filename_convention": true,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "1201_gaming_grove_facilities.py",
-   "dir": "",
-   "number": "1201",
-   "duplicate_number": true,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "1201_gaming_grove_facilities.receipt.json",
-    "gaming_facility_relationships.csv"
-   ],
-   "reads": [
-    "cedar_identity_register.csv",
-    "cedar_place_id_register.csv",
-    "nest_enterprises.csv",
-    "nigc_management_contract_approvals.csv",
-    "nigc_region_assignments.csv",
-    "place_gaming_adjudication_2026-09-02.csv",
-    "place_gaming_hold_open_disposition_2026-09-02.csv",
-    "place_non_place_rows_2026-09-02.csv"
-   ],
-   "in_a_contract": true,
-   "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 1688,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [
-    "code/1201_gaming_grove_facilities_test.py",
-    "code/cedar_pipeline.py",
-    "docs/schema/dataset_contracts.json"
-   ],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "GAMING_JOINT_OPERATORS.json",
-    "ca_gaming_facilities_official.csv",
-    "gaming_capacity_official.csv",
-    "gaming_facilities.csv",
-    "gaming_facility_capacity.csv",
-    "gaming_facility_crosswalk.csv",
-    "gaming_facility_history.csv",
-    "gaming_facility_names.csv",
-    "gaming_grove_facilities.csv",
-    "gaming_nigc_roster_link.csv",
-    "gaming_property_federal_traces.csv",
-    "gaming_property_locations.csv",
-    "gaming_property_self_published_assertions.csv",
-    "gaming_property_self_published_claims.csv",
-    "gaming_property_site_observations.csv",
-    "gaming_property_universe_events.csv",
-    "gaming_web_harvest_observations.csv",
-    "loyalty_program_property.csv",
-    "sec_gaming_management_contract_terms.csv"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "declared_dependency"
-  },
-  {
-   "script": "1201_gaming_grove_facilities_test.py",
-   "dir": "",
-   "number": "1201",
-   "duplicate_number": true,
-   "kind": "enricher",
-   "evidence": [
-    "read-modify-writes: gaming_facility_capacity.csv"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "gaming_facility_capacity.csv",
-    "gaming_facility_crosswalk.csv",
-    "gaming_facility_history.csv",
-    "gaming_facility_names.csv",
-    "gaming_facility_relationships.csv",
-    "gaming_grove_facilities.csv",
-    "place_non_place_rows_2026-09-02.csv"
-   ],
-   "reads": [
-    "gaming_facility_capacity.csv"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 513,
-   "operational_role": "test/fixture",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "ca_gaming_facilities_official.csv",
-    "cedar_identity_register.csv",
-    "cedar_place_id_register.csv",
-    "gaming_capacity_official.csv",
-    "gaming_facilities.csv",
-    "gaming_nigc_roster_link.csv",
-    "gaming_property_federal_traces.csv",
-    "gaming_property_locations.csv",
-    "gaming_property_self_published_assertions.csv",
-    "gaming_property_self_published_claims.csv",
-    "gaming_property_site_observations.csv",
-    "gaming_property_universe_events.csv",
-    "gaming_web_harvest_observations.csv",
-    "loyalty_program_property.csv",
-    "nest_enterprises.csv",
-    "nigc_management_contract_approvals.csv",
-    "nigc_region_assignments.csv",
-    "place_gaming_adjudication_2026-09-02.csv",
-    "place_gaming_hold_open_disposition_2026-09-02.csv",
-    "sec_gaming_management_contract_terms.csv"
-   ],
-   "embedded_test_functions": 28,
-   "standalone_test_evidence": {
-    "unittest_classes": [
-     "_Base",
-     "Determinism"
-    ],
-    "pytest_import": false,
-    "filename_convention": true,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "1202_gaming_grove_compacts_regulatory.py",
-   "dir": "",
-   "number": "1202",
-   "duplicate_number": true,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: federal_actions.csv"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    ".receipt.json",
-    "federal_actions.csv"
-   ],
-   "reads": [
-    "federal_actions.csv",
-    "gaming_litigation.csv"
-   ],
-   "in_a_contract": true,
-   "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 1982,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [
-    "code/1202_gaming_grove_compacts_regulatory_test.py",
-    "code/cedar_pipeline.py",
-    "docs/schema/dataset_contracts.json"
-   ],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "_SOURCE_MANIFEST.csv",
-    "admin_appeal_decisions.csv",
-    "compact_events.csv",
-    "compact_structured_terms.csv",
-    "compact_terms.csv",
-    "compact_versions.csv",
-    "compacts.csv",
-    "consultation_events.csv",
-    "digital_gaming_relationships.csv",
-    "docket_16-1320.json",
-    "federal_actions_entity_bridge.csv",
-    "gaming_compact_terms.csv",
-    "gaming_compact_versions.csv",
-    "gaming_compacts.csv",
-    "gaming_decision_events.csv",
-    "gaming_environmental_reviews.csv",
-    "gaming_financing_events.csv",
-    "gaming_land_decisions.csv",
-    "gaming_land_eligibility.csv",
-    "gaming_licenses.csv",
-    "gaming_mitigation_agreements.csv",
-    "gaming_ordinances.csv",
-    "gaming_project_facilities.csv",
-    "gaming_projections.csv",
-    "gaming_regulatory_events.csv",
-    "gaming_vendor_tribal_licenses.csv",
-    "native_issue_litigation_coverage.csv",
-    "native_issue_litigation_positions.csv",
-    "nepa_eplanning_projects.csv",
-    "nigc_action_parties.csv",
-    "nigc_declination_letters.csv",
-    "nigc_document_surface.csv",
-    "nigc_enforcement_actions.csv",
-    "nigc_game_classification_opinions.csv",
-    "nigc_indian_lands_opinions.csv",
-    "nigc_management_contract_approvals.csv",
-    "scotus_23A315.json",
-    "tribal_debt_court_dockets.csv",
-    "wa_machine_allocations.csv",
-    "wa_machine_transfers.csv"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "declared_dependency"
-  },
-  {
-   "script": "1202_gaming_grove_compacts_regulatory_test.py",
-   "dir": "",
-   "number": "1202",
-   "duplicate_number": true,
-   "kind": "unknown",
-   "evidence": [],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 258,
-   "operational_role": "test/fixture",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "compact_structured_terms.csv",
-    "compact_terms.csv",
-    "compact_versions.csv",
-    "compacts.csv",
-    "federal_actions.csv",
-    "gaming_compact_terms.csv",
-    "gaming_compacts.csv",
-    "gaming_decision_events.csv",
-    "gaming_environmental_reviews.csv",
-    "gaming_land_decisions.csv",
-    "gaming_land_eligibility.csv",
-    "gaming_litigation.csv",
-    "gaming_ordinances.csv",
-    "gaming_project_facilities.csv",
-    "gaming_regulatory_events.csv",
-    "nigc_declination_letters.csv",
-    "nigc_enforcement_actions.csv",
-    "nigc_indian_lands_opinions.csv",
-    "nigc_management_contract_approvals.csv"
-   ],
-   "embedded_test_functions": 12,
-   "standalone_test_evidence": {
-    "unittest_classes": [
-     "LaneETest"
-    ],
-    "pytest_import": false,
-    "filename_convention": true,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "1203_gaming_grove_labor_advocacy.py",
-   "dir": "",
-   "number": "1203",
-   "duplicate_number": true,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    ".receipt.json",
-    "congressional_testimony_2025_2026.csv",
-    "gaming_advocacy_links.csv",
-    "gaming_employment_osha_tribe_staged.csv",
-    "gaming_labor_observations.csv"
-   ],
-   "reads": [
-    "_SOURCE_MANIFEST.csv",
-    "_gambling_naics_rows.csv",
-    "cedar_entity_identity_crosswalk.csv",
-    "compacts.csv",
-    "gaming_employment_observations.csv",
-    "gaming_facilities.csv",
-    "native_federal_advocacy_2025_2026.csv",
-    "resolved_nlrb_gaming.csv"
-   ],
-   "in_a_contract": true,
-   "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 1325,
-   "operational_role": "unresolved",
-   "collection_output_entrypoints": [],
-   "static_consumers": [
-    "code/1203_gaming_grove_labor_advocacy_test.py",
-    "code/cedar_pipeline.py",
-    "docs/schema/dataset_contracts.json"
-   ],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": [
-     "assert_labor_invariants",
-     "assert_link_invariants"
-    ]
-   },
-   "unknown_io_literals": [
-    " fr_consultations_new_2025_2026.csv",
-    "consultation_events.csv",
-    "dear_tribal_leader_letters.csv",
-    "fr_ex_parte_parties.csv",
-    "gaming_employment_form5500_staged.csv",
-    "gaming_facility_crosswalk.csv",
-    "gaming_property_labor_demand.csv",
-    "native_entity_lobbying_disclosures.csv",
-    "nest_enterprises.csv",
-    "nonprofit_schedule_c_lobbying.csv",
-    "regulations_gov_comments.csv"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": [
-     "assert_labor_invariants",
-     "assert_link_invariants"
-    ]
-   },
-   "registration_status": "declared_dependency"
-  },
-  {
-   "script": "1203_gaming_grove_labor_advocacy_test.py",
-   "dir": "",
-   "number": "1203",
-   "duplicate_number": true,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "_SOURCE_MANIFEST.csv",
-    "_gambling_naics_rows.csv",
-    "cedar_entity_identity_crosswalk.csv",
-    "compacts.csv",
-    "consultation_events.csv",
-    "gaming_employment_observations.csv",
-    "gaming_facilities.csv",
-    "native_entity_lobbying_disclosures.csv",
-    "regulations_gov_comments.csv"
-   ],
-   "reads": [
-    "gaming_facility_crosswalk.csv",
-    "resolved_nlrb_gaming.csv"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 410,
-   "operational_role": "test/fixture",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 15,
-   "standalone_test_evidence": {
-    "unittest_classes": [
-     "LaneF"
-    ],
-    "pytest_import": false,
-    "filename_convention": true,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "unresolved_not_authorized"
   },
   {
    "script": "120_normalize_rulings.py",
@@ -37037,8 +36469,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 23,
-   "mentioned_outside_history": 22,
+   "mentions": 22,
+   "mentioned_outside_history": 21,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -37198,8 +36630,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 83,
-   "mentioned_outside_history": 82,
+   "mentions": 81,
+   "mentioned_outside_history": 80,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -49575,16 +49007,20 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
    "lines": 70,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
+   "static_consumers": [
+    "code/build.py"
+   ],
+   "runtime_consumer_candidates": [
+    "code/build.py"
+   ],
    "operational_call_evidence": {
     "publication_calls": [],
     "validation_calls": []
@@ -49608,39 +49044,30 @@
    "kind": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: -candidate.json, .receipt.json, _GROVE_DATA_CONTRACT.md, manifest.json"
+    "read-modify-writes: manifest.json"
    ],
    "never_run": false,
    "never_run_reason": "",
    "writes": [
-    "-candidate.json",
-    ".receipt.json",
     "RELEASE_STAMP.json",
-    "_GROVE_DATA_CONTRACT.md",
     "_id_registry.json",
-    "change_report.json",
-    "coverage.json",
     "manifest.json",
     "need-candidate.json"
    ],
    "reads": [
-    "-candidate.json",
-    ".receipt.json",
-    "_GROVE_DATA_CONTRACT.md",
     "cedar_nest_id_register.csv",
     "dataset_contracts.json",
-    "field_map.json",
     "lint_bug_classes.json",
     "manifest.json"
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 94,
-   "mentioned_outside_history": 93,
+   "mentions": 91,
+   "mentioned_outside_history": 90,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 1712,
+   "lines": 1031,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -49651,7 +49078,6 @@
     "code/521_inventory.py",
     "code/build_test.py",
     "code/cedar_pipeline.py",
-    "data/cedar/field_map.json",
     "docs/defect_class_retro_sweep.json",
     "docs/releases/nagpra-0de7096/manifest.json",
     "docs/releases/nagpra-6c92a41/manifest.json",
@@ -49659,7 +49085,6 @@
     "docs/releases/natural-resources-6c92a41/manifest.json",
     "docs/releases/subcontracting-6c92a41/manifest.json",
     "docs/schema/dataset_contracts.json",
-    "server/tests/test_gaming_release.py",
     "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [
@@ -49668,8 +49093,10 @@
    ],
    "operational_call_evidence": {
     "publication_calls": [
+     "publication._embedded_neid_re",
      "publication.apply_field_map",
-     "publication.field_map_entry",
+     "publication.field_map",
+     "publication.neid_map",
      "publication.recompute_derived",
      "publication.register"
     ],
@@ -49691,9 +49118,11 @@
     "cedar_retired_neid_crosswalk.csv",
     "cedar_ruling_ledger_consolidated.csv",
     "entity_aliases.csv",
+    "field_map.json",
     "fpds_uei_cage_map.csv",
     "fpds_uei_edges.csv",
     "fragments -> codebook_master.csv",
+    "gaming_id_bindings.csv",
     "need_enterprise_relations.csv",
     "need_enterprises.csv",
     "need_entity_dual_role.csv",
@@ -49853,8 +49282,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -50714,7 +50143,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 1306,
+   "lines": 1352,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -50739,9 +50168,7 @@
     "code/audit_retired_ids.py",
     "code/build.py",
     "code/cedar_publication.py",
-    "code/gaming_grove.py",
-    "docs/CONSOLIDATION_DOC_INVENTORY.json",
-    "server/tests/test_gaming_release.py"
+    "docs/CONSOLIDATION_DOC_INVENTORY.json"
    ],
    "runtime_consumer_candidates": [
     "code/1072_tribally_owned_enterprises.py",
@@ -50759,8 +50186,7 @@
     "code/97_build_aliases_and_relationships.py",
     "code/audit_retired_ids.py",
     "code/build.py",
-    "code/cedar_publication.py",
-    "code/gaming_grove.py"
+    "code/cedar_publication.py"
    ],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -51118,12 +50544,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 32,
-   "mentioned_outside_history": 31,
+   "mentions": 31,
+   "mentioned_outside_history": 30,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 1795,
+   "lines": 1720,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -51154,7 +50580,6 @@
     "code/build.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
     "docs/defect_class_retro_sweep.json",
-    "server/tests/test_gaming_release.py",
     "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [
@@ -51195,7 +50620,6 @@
     "cedar_identifier_graph_edges.csv",
     "cedar_identifier_ledger_final.csv",
     "cedar_identity_register.csv",
-    "cedar_nest_id_register.csv",
     "consultation_events.csv",
     "federal-register.md",
     "federal_actions.csv",
@@ -51206,7 +50630,6 @@
     "fr_ex_parte_parties.csv",
     "fr_ex_parte_party_entity_links.csv",
     "gaming_facilities.csv",
-    "gaming_regional_revenue.csv",
     "lobbying_issue_families_filing.csv",
     "nagpra_notice_entity_bridge.csv",
     "nagpra_notice_institutions.csv",
@@ -51356,7 +50779,6 @@
     "code/build.py",
     "server/cedar_press/repository.py",
     "server/tests/test_field_map.py",
-    "server/tests/test_gaming_release.py",
     "src/features/grove/pressAccess.js",
     "src/features/grove/pressAccess.test.js",
     "src/features/grove/pressCatalog.js"
@@ -51654,193 +51076,6 @@
     "unittest_classes": [],
     "pytest_import": false,
     "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "gaming_grove.py",
-   "dir": "",
-   "number": "",
-   "duplicate_number": false,
-   "kind": "rebuild",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 5,
-   "mentioned_outside_history": 5,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 302,
-   "operational_role": "active validator/migration/review",
-   "collection_output_entrypoints": [],
-   "static_consumers": [
-    "code/1200_gaming_grove_revenue.py",
-    "code/1200_gaming_grove_revenue_test.py",
-    "code/1201_gaming_grove_facilities.py",
-    "code/1201_gaming_grove_facilities_test.py",
-    "code/1202_gaming_grove_compacts_regulatory.py",
-    "code/1203_gaming_grove_labor_advocacy.py",
-    "code/1203_gaming_grove_labor_advocacy_test.py",
-    "server/tests/test_gaming_release.py"
-   ],
-   "runtime_consumer_candidates": [
-    "code/1200_gaming_grove_revenue.py",
-    "code/1201_gaming_grove_facilities.py",
-    "code/1202_gaming_grove_compacts_regulatory.py",
-    "code/1203_gaming_grove_labor_advocacy.py"
-   ],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": [
-     "validate_rows"
-    ]
-   },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 0,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "gaming_grove_online_sports.py",
-   "dir": "",
-   "number": "",
-   "duplicate_number": false,
-   "kind": "enricher",
-   "evidence": [
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [],
-   "reads": [
-    "_ZIP_CONTENT_MANIFEST.csv",
-    "cedar_entity_names.csv",
-    "cedar_identity_register.csv",
-    "release_stats.json",
-    "source_manifest.csv"
-   ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 1119,
-   "operational_role": "active validator/migration/review",
-   "collection_output_entrypoints": [],
-   "static_consumers": [
-    "code/1200_gaming_grove_revenue.py"
-   ],
-   "runtime_consumer_candidates": [
-    "code/1200_gaming_grove_revenue.py"
-   ],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": [
-     "check_financials",
-     "check_measure_semantics",
-     "check_relationships"
-    ]
-   },
-   "unknown_io_literals": [
-    "Key into package revenue_definitions.csv",
-    "annual_only.csv",
-    "coverage_gaps.csv",
-    "digital_gaming_revenue.csv",
-    "gaming_coverage_gaps.csv",
-    "gaming_online_sportsbook_financials.csv",
-    "gaming_online_sportsbook_relationships.csv",
-    "gaming_online_sportsbook_units.csv",
-    "metric_evidence.csv",
-    "monthly_online_sports.csv",
-    "revenue_definitions.csv",
-    "series_coverage.csv",
-    "source_revisions.csv",
-    "supplementary_monthly.csv",
-    "tribal_relationships.csv",
-    "validation_checks.csv"
-   ],
-   "embedded_test_functions": 0,
-   "standalone_test_evidence": {
-    "unittest_classes": [],
-    "pytest_import": false,
-    "filename_convention": false,
-    "assertion_nodes": 1,
-    "local_check_harness_calls": []
-   },
-   "registration_status": "unresolved_not_authorized"
-  },
-  {
-   "script": "gaming_grove_online_sports_test.py",
-   "dir": "",
-   "number": "",
-   "duplicate_number": false,
-   "kind": "both",
-   "evidence": [
-    "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
-   ],
-   "never_run": false,
-   "never_run_reason": "",
-   "writes": [
-    "mi.xlsx",
-    "pa.xlsx",
-    "release_stats.json"
-   ],
-   "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
-   "oneoff_shaped": false,
-   "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 381,
-   "operational_role": "test/fixture",
-   "collection_output_entrypoints": [],
-   "static_consumers": [],
-   "runtime_consumer_candidates": [],
-   "operational_call_evidence": {
-    "publication_calls": [],
-    "validation_calls": []
-   },
-   "unknown_io_literals": [
-    "annual_only.csv",
-    "cedar_identity_register.csv",
-    "coverage_gaps.csv",
-    "metric_evidence.csv",
-    "monthly_online_sports.csv",
-    "revenue_definitions.csv",
-    "series_coverage.csv",
-    "source_manifest.csv",
-    "source_revisions.csv",
-    "supplementary_monthly.csv",
-    "tribal_relationships.csv",
-    "validation_checks.csv"
-   ],
-   "embedded_test_functions": 13,
-   "standalone_test_evidence": {
-    "unittest_classes": [
-     "Built"
-    ],
-    "pytest_import": false,
-    "filename_convention": true,
     "assertion_nodes": 0,
     "local_check_harness_calls": []
    },
@@ -52572,22 +51807,6 @@
    "1188_import_chatgpt_r7_business_register.py",
    "1188_import_chatgpt_r7_business_register_test.py"
   ],
-  "code:1200": [
-   "1200_gaming_grove_revenue.py",
-   "1200_gaming_grove_revenue_test.py"
-  ],
-  "code:1201": [
-   "1201_gaming_grove_facilities.py",
-   "1201_gaming_grove_facilities_test.py"
-  ],
-  "code:1202": [
-   "1202_gaming_grove_compacts_regulatory.py",
-   "1202_gaming_grove_compacts_regulatory_test.py"
-  ],
-  "code:1203": [
-   "1203_gaming_grove_labor_advocacy.py",
-   "1203_gaming_grove_labor_advocacy_test.py"
-  ],
   "code:148": [
    "148_build_gaming_vendor_tribal_licenses.py",
    "148_resolve_schedule_i_recipients.py"
@@ -52816,18 +52035,18 @@
   "generated": "2026-09-24",
   "generator": "code/521_inventory.py scripts-only",
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
-  "scripts": 696,
+  "scripts": 685,
   "operational_role_counts": {
    "active producer": 78,
-   "active validator/migration/review": 9,
+   "active validator/migration/review": 7,
    "product consumer/shared service": 7,
-   "test/fixture": 10,
-   "unresolved": 592
+   "test/fixture": 5,
+   "unresolved": 588
   },
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
-  "embedded_selftest_files": 129,
-  "unresolved_not_authorized": 576,
+  "embedded_selftest_files": 124,
+  "unresolved_not_authorized": 569,
   "table_snapshot_preserved_sha256": "c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee",
   "data_generated_unchanged": "2026-09-02",
   "limitation": "Static census is not runtime write proof or authorization to run a producer."
