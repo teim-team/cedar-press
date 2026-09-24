@@ -609,10 +609,18 @@ def full_download(
         if repository.is_grove_release(collection_id) and component is None:
             audit("invalid_release_request")
             raise HTTPException(status_code=400, detail="Explicit component required")
-        if component is None:
-            release = repository.full_release(collection_id, release_id)
+        if repository.is_grove_release(collection_id):
+            release = repository.grove_full_release(collection_id, release_id, component=component)
+        elif component is not None:
+            audit("invalid_release_request")
+            raise HTTPException(status_code=400, detail="A Press flagship has no components")
         else:
-            release = repository.full_release(collection_id, release_id, component=component)
+            release = repository.full_release(collection_id, release_id)
+    except repository.GroveReleaseNotPinned as error:
+        # Production state until the Gaming IDs are issued: say so plainly,
+        # never substitute a sample or an unpinned file.
+        audit("not_pinned")
+        raise HTTPException(status_code=503, detail="No released data is pinned for this collection yet") from error
     except repository.FullReleaseUnavailable as error:
         audit("unavailable")
         raise HTTPException(status_code=503, detail="Full release unavailable") from error

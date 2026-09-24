@@ -248,76 +248,65 @@ from independent backups in staging; approve a specific catalog/release and test
 actual production denial/download/rollback. No AWS resource, deployment, public
 release or production pointer was changed by this procedure. NEED remains held.
 
-### Cedar Grove Gaming: candidate build and release pilot (2026-09-24)
+### Cedar Grove Gaming: consuming the pinned Lumecon release (2026-09-24)
 
 Gaming is a **Cedar Grove** collection. It is not one of the twelve Press
-shelves and never enters the ship chain below. It uses the same runner, pilot,
-Lumecon contracts and adapter, with no Gaming-specific infrastructure. The
-contract for every component table is generated in
-`docs/GAMING_GROVE_DATA_CONTRACT.md`. Proposed shared-infrastructure changes are
-in `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md`.
+shelves and never enters the ship chain below. Since the 2026-09-24
+repository split, **Cedar does not build Gaming**. The producers, the candidate,
+the leak gate, the data contract and the release/catalog build are in
+Lumecon-data (`claude/gaming-grove-release`, `lumecon-data gaming ...`). Cedar
+does three things: it issues Gaming IDs, it pins one Lumecon release, and it
+serves authorized components of that release. The ownership map and the full
+cross-repository sequence are in `docs/HAVALA_INFRASTRUCTURE_REVIEW.md`. The
+server's checks are in `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md`.
 
-1. **Registration.** The producers are listed in
-   `cedar_pipeline.GROVE_COMPONENTS["gaming"]` (1200 to 1203). Each producer
-   exposes `CONTRACTS`. Run
-   `py -3 code/build.py grove-contracts gaming` to regenerate three things from
-   those contracts: the component entries and the `grove_role` of every
-   pre-existing gaming table in `docs/schema/dataset_contracts.json`, the pilot's
-   `gaming/gaming_regional_revenue` field-map entry, and the contract doc.
-   `--check` exits 1 when any of the three is stale. After a field-map change,
-   run `node scripts/field-map-markdown.mjs`. A component that reuses an
-   existing clean table's name is refused with `NAME_COLLISION`.
-   `code/512_build_dataset_contracts.py` derives from `data/clean` and does not
-   yet preserve these entries. Rerun `grove-contracts` after any 512
-   regeneration.
-2. **Candidate (one entry).**
-   `py -3 code/build.py candidate gaming --input-root "C:\Users\esm247\Desktop\Cedar Press" --output-root <new dir outside Git> --as-of <YYYY-MM-DD> [--previous <prior candidate root>]`
-   - The build refuses an existing or overlapping root, and any unregistered
-     or malformed component, before it creates anything.
-   - Producers run in the declared order. Each gets its own log under `logs/`,
-     and the chain stops at the first failure.
-   - Every table is then revalidated from its bytes with
-     `gaming_grove.validate_rows`, and its receipt hash is checked.
-   - Cross-table references are checked (`cedar_pipeline.GROVE_REFERENCES`).
-     Facility and compact IDs must exist in the component that holds them as
-     its key. `cedar_uid` must exist in the identity register, and
-     `enterprise_id` in the NEST/NEED issued register.
-   - Input and code hashes must not change during the run.
-   - Outputs: `logs/gaming-candidate.json`, `samples/` (10 rows per table,
-     public projection only), `coverage.json` and `change_report.json`.
-   - Final status is one of `LOCAL_CANDIDATE_NOT_PROMOTED`,
-     `LOCAL_DRY_RUN_PROVISIONAL_IDS` (any `PROV-` ID present) or `FAILED_*`.
-3. **ID hold.** Until the CICD identifier-retirement audit returns an
-   allowed-ID contract, producers render only `PROV-` IDs, and only when
-   `CEDAR_GAMING_PROVISIONAL_IDS=1` is set. Candidates are therefore
-   `LOCAL_DRY_RUN_PROVISIONAL_IDS`, which is not promotable. No Gaming binding
-   exists in `cedar_ids` yet.
-4. **Release pilot.**
-   `code/build.py release-pilot gaming --source <candidate>\components\gaming_regional_revenue.csv --output-root <isolated store> --as-of <date>`
-   The flagship is the NIGC regional revenue component. The Casino City
-   lineage `FLAGSHIP["gaming"] = gaming_facilities.csv` is refused by name
-   until `cedar_publication` moves FLAGSHIP.
+1. **Build and rehearse in Lumecon-data.** Use `lumecon-data gaming build`
+   from the Cedar input root and a pinned Cedar registry snapshot, then
+   `lumecon-data gaming release` into a store outside Git. A release built from
+   PROPOSED IDs is a **rehearsal**: Cedar never pins one.
+2. **Issue the Gaming IDs (Cedar, the one issuer). NOT AUTHORIZED YET.**
+   Preconditions: Codex's certificate of the candidate, and an owner decision
+   ID. First do a dry run, which writes nothing:
+   `py -3 code/build.py gaming-issue-ids --proposed <Lumecon PROPOSED bindings artifact> --proposed-sha256 <its hash> --registry-sha256 <registry snapshot the proposal used, or ABSENT>`.
+   Then execute by adding
+   `--execute --certificate <c> --decision-id <d> --approved-by <name>`.
+   - The command refuses:
+     - an artifact whose hash differs from the pin;
+     - a proposal built from an older registry;
+     - a dropped, changed or reassigned live binding;
+     - an ID outside its `cedar_ids` block;
+     - a row that claims ISSUED without Cedar issuance.
+   - It writes `data/spine/gaming_id_bindings.csv` once. The prior bytes are
+     kept as `.bak_<date>_pre_issuance`.
+   - It appends to `data/spine/gaming_id_issuance_log.jsonl` and writes
+     `data/spine/gaming_id_registry_snapshots/gaming_id_bindings.<sha>.csv`.
+     Hand that SHA-256 to Lumecon.
+3. **Production release (Lumecon-data).** Lumecon rebuilds against the issued
+   snapshot and produces ONE `gaming` release, with one collection manifest and
+   components under it, plus one `cedar_grove` catalog.
+4. **Pin (Cedar PR).** Put `catalog_id`, `catalog_sha256` (over the exact
+   catalog file), `dataset_id: "gaming"`, `release_id` and `manifest_sha256`
+   into `data/cedar/grove_release_pin.json`. Deploy those exact catalog bytes
+   at `CEDAR_GROVE_RELEASE_CATALOG`, and give the Lumecon API grant for
+   dataset `gaming`. Until this step the route answers `503 No released data
+   is pinned for this collection yet`, which is the intended production state
+   today.
+5. **Verify.**
+   - Run the `gaming-release-consumer` CI job at the Lumecon commit that built
+     the release.
+   - Then, as a grove or tree subscriber:
+     `GET /press/collections/gaming/full-download?release_id=<pinned>&component=<stem>`.
+     It must return the exact bytes, with `X-Cedar-SHA256` equal to the
+     component's manifest hash.
+6. **Rollback.** Revert the pin PR. The prior release is immutable in the
+   Lumecon store, and all components switch back together.
 
-   The pilot refuses in these cases:
-   - any `PROV-` value
-   - any Casino City/vendor ID (`CCP-`, `VP-`, `TPL-`)
-   - a non-CE `cedar_uid`
-   - an unmapped flagship
-   - a key without a `cedar_ids` binding
-
-   Today it therefore stops at the ID hold, which is the intended result. It
-   writes a `cedar_grove` Lumecon catalog.
-5. **Delivery gap.** The Cedar server adapter serves only storefront
-   (`LAUNCH_COLLECTION`) collections from `cedar_press` catalogs. It refuses
-   Gaming to every tier before fetching anything, and it refuses a
-   `cedar_grove` catalog. The existing `grove`/`tree` tiers already reach the
-   grove shelf, but a reviewed Grove catalog declaration is Havala's change to
-   make (see the notes doc). `server/tests/test_gaming_release.py` proves both
-   refusals and simulates that declaration.
-
-Tests: `py -3 -B -m unittest discover -s server/tests -t server -p test_gaming_release.py`
-with `PYTHONPATH` set to the Lumecon `src` and Cedar `server` directories, using
-the Lumecon `.venv` Python.
+Tests (Lumecon `.venv` Python, with `PYTHONPATH` set to the Lumecon-data
+`src` directory of `claude/gaming-grove-release` and the Cedar `server`
+directory):
+`python -m unittest discover -s server/tests -t server -p "test_gaming_*.py"`.
+Set `CEDAR_REQUIRE_LUMECON_GAMING=1` to turn a missing Lumecon fixture release
+into a failure instead of a skip.
 
 <!-- END CODEX-ISOLATED-CANDIDATE-RUNBOOK -->
 

@@ -194,6 +194,32 @@ SHA-256 hashes are of complete CSV bytes in C:/Users/esm247/Desktop/Cedar Press/
 
 ## Implementation status (Claude, 2026-09-24, branch `claude/gaming-intelligence`)
 
+**Repository split (2026-09-24, owner directive; read this first).** Data-side
+Gaming state now lives in **Lumecon-data branch `claude/gaming-grove-release`**:
+the producers (`src/lumecon_data/gaming/`, ported with history from 1200-1203,
+`gaming_grove.py` and the online sportsbook module), the candidate build, the
+leak gate, the data contract (`docs/gaming-contract.md`, `schemas/gaming/`),
+the VP dispositions (`decisions/gaming/`) and the release and catalog build.
+Lumecon builds ONE multi-component Gaming release with one collection manifest
+and one catalog entry, and it only PROPOSES ID bindings.
+
+Cedar (`claude/gaming-grove-consumer`, on top of this branch's `75a2f1b`, which
+is unchanged) keeps:
+- the identity service, as the sole issuer: the `cedar_ids.GAMING_BLOCKS`
+  reservation and `code/build.py gaming-issue-ids`, which is not run;
+- the pin `data/cedar/grove_release_pin.json`, which is empty until issuance;
+- the consumer adapter, entitlement and audit;
+- the `gaming/*` field-map presentation entry, which is checked against the
+  pinned contract.
+
+The ownership map and the release sequence are in
+[HAVALA_INFRASTRUCTURE_REVIEW.md](../HAVALA_INFRASTRUCTURE_REVIEW.md#gaming-repository-ownership-and-cross-repository-release-sequence-2026-09-24).
+Cedar's side is in the [infrastructure notes](../GAMING_GROVE_INFRASTRUCTURE_NOTES.md).
+
+The text below records the state and measurements as built on
+`claude/gaming-intelligence`. Where it names a Cedar producer, command or
+file that has since moved, the Lumecon-data branch is now authoritative.
+
 Current state, updated in place. Built on Cedar PR #122 (`codex/legislation-release-consumer` @3195e70), this audit, and Codex's identifier-retirement commit (cherry-picked `b8626c9` → `0331b82`). Local commits only: not pushed, not promoted, not published.
 
 **Identity: migrated to the ratified contract, no ID issued.** Per `docs/IDENTIFIER_STANDARD.md` ("CICD retirement contract"):
@@ -201,13 +227,13 @@ Current state, updated in place. Built on Cedar PR #122 (`codex/legislation-rele
 - Existing `CEDAR-PLACE` for physical facilities.
 - Existing Cedar NEED enterprise IDs only where an enterprise independently qualifies. Gaming never creates or feeds NEED.
 - `CB` for legal operators, held (`held_business_unbound`) until the gated business register binds them.
-- `CEDAR-OBS` for observations, `CEDAR-EVENT` for events, `CEDAR-REL` for relationships, `CEDAR-SRC` for sportsbook reporting series and `CEDAR-CONTRACT` for compacts and compact versions, all from static blocks declared in `code/gaming_grove.py`.
+- `CEDAR-OBS` for observations, `CEDAR-EVENT` for events, `CEDAR-REL` for relationships, `CEDAR-SRC` for sportsbook reporting series and `CEDAR-CONTRACT` for compacts and compact versions, all from static blocks now declared persistently in `cedar_ids.GAMING_BLOCKS` (formerly from `code/gaming_grove.py`).
 
 `VP`, `CCP`, `TPL`, `CEDAR-FAC` and `PROV` survive only as internal source keys. A candidate writes 93,824 **PROPOSED** bindings to its own append-only register: OBS 25,433, EVENT 60,716, REL 5,775, SRC 35 and CONTRACT 1,865. The live registry is untouched, and `release-pilot` refuses any ID not `ISSUED` in the live register.
 
 The full before/after crosswalk is `<candidate>/components/gaming_id_migration_crosswalk.csv`, 95,380 rows. It maps every PROV key, compact key, facility key and legacy handle column to a public ID or a held status, with affected row counts.
 
-The controlled issuance process (preconditions, reviewers, commands, checks, rollback) is section 10 of [infrastructure notes](../GAMING_GROVE_INFRASTRUCTURE_NOTES.md). It has not been run.
+The controlled issuance process is Cedar's `code/build.py gaming-issue-ids`. It reads Lumecon's PROPOSED bindings artifact, pinned by hash, and emits a registry snapshot for Lumecon to pin. Preconditions, commands and rollback are in `docs/SHIPPING_RUNBOOK.md` (Cedar Grove Gaming). It has not been run.
 
 Remaining for Codex:
 - Declare Gaming bindings in `cedar_ids.IDENTIFIER_CONTRACTS`.
@@ -215,13 +241,13 @@ Remaining for Codex:
 - Fix the 1169 composite-handle blind spot.
 - Remove retired handles embedded in Advocacy's own event IDs.
 
-**16 unbound VP keys: all not-a-gaming-facility.** The reviewed dispositions are in `docs/GAMING_VP_DISPOSITIONS_2026-09-24.csv`.
+**16 unbound VP keys: all not-a-gaming-facility.** The reviewed dispositions are now in Lumecon-data `decisions/gaming/` (formerly `docs/GAMING_VP_DISPOSITIONS_2026-09-24.csv`).
 - Each is a votingpatterns "no casino" assertion with no address. 1129 deliberately excludes them, and NIGC and CGCC corroborate that.
 - VP-0101's "no casino" claim for Yurok is false (Redwood Hotel Casino is `CEDAR-PLACE-000109-XN`) and is never published.
 - Tribe-level capacity and CGCC rows hung on these keys were re-keyed to the tribe.
 - No owner card was needed.
 
-**Maintained surface.** One entry:
+**Maintained surface (as built here; now `lumecon-data gaming build` in Lumecon-data).** One entry:
 
 `py -3 code/build.py candidate gaming --input-root <Cedar Press> --output-root <new dir outside git> --as-of YYYY-MM-DD [--bindings <live register>]`
 
@@ -235,7 +261,7 @@ The runner revalidates every table, checks cross-table references, pins input an
 
 `grove-contracts gaming [--check]` regenerates registration, the field map and [the data contract](../GAMING_GROVE_DATA_CONTRACT.md). The 65 pre-existing gaming tables carry an explicit `grove_role`; nothing was deleted.
 
-**Release path.** Multi-component: a release unit is (collection, component table).
+**Release path (as built here; superseded).** Multi-component: a release unit was (collection, component table). After the split it is ONE Lumecon collection release. Cedar pins that one release and refuses per-table releases.
 - `release-pilot` validates every declared component before writing anything, makes one Lumecon release per component, and builds one catalog.
 - The server serves Grove components to grove and tree tiers from a separately pinned Grove catalog (`collections.GROVE_RELEASE_IDS`).
 - It refuses PROV- values, vendor facility keys, retired handles (composite forms included), non-CE `cedar_uid`, non-ISSUED bindings, and non-public rights on any field or row.
@@ -337,15 +363,16 @@ Rerunning 13 would delete the only copy, so the bundle is preserved with a verif
 Not run: the full `npm test` coverage gate (needs `npm install`) and `1169_release_verify.py selftest` (needs the populated workspace's vocabulary). Codex's independent verification and issuance certificate are the next step.
 
 **Open items.**
-1. **Live issuance** (Codex, then owner): the section 10 preconditions, then an owner decision ID. This blocks publication only.
+1. **Live issuance** (Codex certificate, then an owner decision ID): Cedar `code/build.py gaming-issue-ids`. After it, Lumecon builds a production release and Cedar opens a pin PR. This blocks publication only.
 2. **Havala**:
    - a second Grove catalog variable vs one store keyed by product;
    - the Grove landing route;
    - moving the rights check into `apply_field_map`;
-   - persisting static blocks in `cedar_ids`;
+   - block reservation (Cedar) vs ordinal proposal (Lumecon), now that the blocks are persisted in `cedar_ids`;
    - the 16 MiB Lumecon intake cap vs the payments table;
    - `512_build_dataset_contracts.py` preserving producer-declared entries;
-   - `--authority-root` for the pilot.
+   - `--authority-root` for the pilot;
+   - the repository ownership map and release sequence in `HAVALA_INFRASTRUCTURE_REVIEW.md`.
 3. **Owner identity rulings** (bounded; do not pause engineering): the Stables place merge (VP-0153 vs CCP-305300); the 7 Clans Ponca link, kept `reviewed_disputed`.
 4. **Acquisition leads** (not acquired):
    - OLMS LM filings and state WARN notices;

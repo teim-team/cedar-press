@@ -76,6 +76,72 @@ Resources preserves source qualifications verbatim in `research_note`, refusing
 conflicts. Suppression, uncertain links and mixed measures remain visible. Two
 delivery proofs do not certify source completeness or twelve launch-ready products.
 
+### Gaming: repository ownership and cross-repository release sequence (2026-09-24)
+
+Owner directive, 2026-09-24: Lumecon-data is the authoritative home for Lumecon
+datasets, and Cedar Press/Cedar Grove consumes governed releases from it. No
+canonical Gaming data, ID binding register or authoritative producer exists in
+both repositories. The Gaming work on Cedar `claude/gaming-intelligence`
+(`75a2f1b`, unmodified) was split with history into Lumecon-data
+`claude/gaming-grove-release` (producers, based on `f882fb1`) and Cedar
+`claude/gaming-grove-consumer` (consumer, based on `75a2f1b`). The owner's
+corrections the same day fixed two points: **Cedar is the one ID issuer**, and
+**Gaming is one multi-component release**, not a set of per-table releases.
+
+| Concern | Lumecon-data (`claude/gaming-grove-release`) | cedar-press (`claude/gaming-grove-consumer`) |
+|---|---|---|
+| Gaming producers: revenue, facilities, compacts/regulatory, labor/advocacy, online sports; shared validators, rights vocabulary, derived keys | **Owns**: `src/lumecon_data/gaming/` (ported from Cedar 1200-1203, `gaming_grove.py`, `gaming_grove_online_sports.py`, with their tests) | Nothing. A test fails if a producer, component CSV or component registration reappears |
+| Candidate build, leak gate, contract export | **Owns**: `lumecon-data gaming build`, `leak-gate`, `contracts`/`export-contracts` | Nothing |
+| Gaming data contract (fields, types, grain, keys, rights) | **Owns**: generated `docs/gaming-contract.md`, JSON under `schemas/gaming/`, and the contract embedded in every release manifest | The `gaming/*` field-map entry is presentation only; the server refuses it unless it matches the pinned release's embedded contract |
+| Reviewed Gaming decisions (VP dispositions) | **Owns**: `decisions/gaming/` | Nothing |
+| Gaming ID blocks | Declares the same values as constants and **proposes** ordinals inside them | **Owns** the reservation: `cedar_ids.GAMING_BLOCKS`, declared at import so every `allocate()` steps over them |
+| Gaming ID binding register | Writes an append-only **PROPOSED** bindings artifact; reads a pinned, read-only snapshot of Cedar's registry by hash; never marks an ID issued | **Sole issuer**: `code/build.py gaming-issue-ids` (dry run by default; not run) writes the live register `data/spine/gaming_id_bindings.csv` (outside Git) and emits a content-addressed registry snapshot for Lumecon to pin |
+| Entity, place, NEED and retired-handle registers | Read as a pinned identity-reference snapshot by hash (`identity.mode: registered_reference`) | **Owns**: `cedar_ids`, `503_identity.py`, 1129 place IDs, `cedar_publication.resolve_retired_entity_handle`, `docs/IDENTIFIER_STANDARD.md`, `docs/GAMING_ID_CONTRACT_REQUEST.md` |
+| Legacy Gaming clean tables (65, Cedar's transitional inputs) | Reads them by hash from the input root | **Owns** `data/clean` and their contracts in `docs/schema/dataset_contracts.json`, with `grove_role` naming the Lumecon consumer module |
+| Release and catalog | **Owns**: ONE immutable Gaming release (dataset `gaming`, one collection manifest with per-component schema, hashes, row counts, rights and download permission), ONE `cedar_grove` catalog entry; rehearsal vs production; `gaming fixture-release` for CI | Nothing is built here |
+| Which release is served | Nothing | **Owns**: `data/cedar/grove_release_pin.json` (catalog_id, catalog SHA-256, release_id, collection-manifest SHA-256), read with the existing `CEDAR_GROVE_RELEASE_CATALOG` location. Empty until issuance |
+| Entitlement, component download, audit, landing metadata | Read-only API with server dataset grants | **Owns**: `repository.grove_full_release`, `app.full_download`; grove/tree only, decided before any read |
+| CI | `make check` | Job `gaming-release-consumer` installs Lumecon-data at a pinned commit, builds the fixture release, runs the consumer tests |
+
+**Data intake.** Lumecon-data owns the one governed data-intake framework.
+Its authoritative contract is `docs/data-intake.md` on Lumecon-data branch
+`claude/data-intake-contract`, and this packet does not restate it. Cedar keeps
+consumer behavior only. This branch adds no intake logic or source registry:
+Gaming acquisition, source manifests and candidate intake are Lumecon's.
+
+**Cross-repository release sequence.** Each step fails closed; nothing reads a
+branch head, a `current` pointer or a local CSV.
+
+1. **Lumecon build.** `lumecon-data gaming build` builds the candidate from a
+   pinned Cedar input root and a pinned Cedar identity/registry snapshot. It
+   writes the components, the PROPOSED bindings artifact and the leak-gate
+   report. Rebuilding from the same inputs is byte-identical.
+2. **Rehearsal release.** From the real candidate, into a store outside Git.
+   It is labelled rehearsal, is not customer-eligible and is never pinned by
+   Cedar.
+3. **Binding issuance gate (Cedar).** Codex certifies the candidate, and the
+   owner records a decision ID. Then `code/build.py gaming-issue-ids --proposed
+   <artifact> --proposed-sha256 <h> --registry-sha256 <snapshot the proposal
+   used> --execute --certificate <c> --decision-id <d> --approved-by <name>`
+   writes Cedar's live register once and prints the new registry snapshot hash.
+   **Not authorized or run yet.**
+4. **Production release and catalog (Lumecon).** Lumecon rebuilds against the
+   issued snapshot, builds one production release and one `cedar_grove`
+   catalog, and records the release ID and manifest hash.
+5. **Cedar pin update PR.** Edit `data/cedar/grove_release_pin.json` with the
+   four values and deploy the catalog bytes at `CEDAR_GROVE_RELEASE_CATALOG`.
+   The server verifies the catalog bytes, `catalog_id`, the entry, the
+   collection-manifest hash and each component's contract before it serves.
+6. **CI pair.** The Lumecon PR is green at commit X. The Cedar PR's
+   `gaming-release-consumer` job installs Lumecon-data at X, which must be
+   pushed, builds the fixture release and runs the consumer tests with skips
+   counted as failures.
+7. **Merge order.** Merge Lumecon first. Then update the Cedar CI pin to the
+   merged commit and merge the Cedar PR (code and pin). Deploy last.
+   **Rollback** is a revert of the Cedar pin PR. The prior release is still in
+   the immutable store, so every component returns to its prior bytes
+   together.
+
 ## Evidence appendix: fixed review ranges and CI
 
 | Repository | Fixed verified range | Evidence |

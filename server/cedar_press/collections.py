@@ -118,13 +118,14 @@ EXCLUDED_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
 #: catalog. A declared id is served only while the manifest still places it on
 #: the ``grove`` shelf in ``excluded`` (the storefront neither sells nor
 #: previews it), so a collection that moves shelf stops being Grove-served
-#: rather than being served twice. Which COMPONENTS are served is not listed
-#: here: it is the collection's governed field-map entries
-#: (``data/cedar/field_map.json`` keys ``<collection>/<component>``, generated
-#: from ``cedar_pipeline.RELEASE_PILOTS[...]["components"]`` by
-#: ``code/build.py grove-contracts``) that the pinned catalog also pins. Access
+#: rather than being served twice. WHICH release is served is not listed here:
+#: it is the one Lumecon-data collection release pinned in
+#: ``data/cedar/grove_release_pin.json`` (``repository.grove_release_pin``).
+#: Which COMPONENTS are offered is the collection's field-map presentation
+#: entries (``data/cedar/field_map.json`` keys ``<collection>/<component>``),
+#: each validated against that release's embedded component contract. Access
 #: reuses the existing tier model: a tier whose shelf reaches ``grove``
-#: (``grove``, ``tree``). No tier, route or catalog format is added.
+#: (``grove``, ``tree``). No tier or route is added.
 GROVE_RELEASE_IDS: tuple[str, ...] = ("gaming",)
 GROVE_RELEASE_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
     entry

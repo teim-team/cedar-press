@@ -827,7 +827,7 @@ def cmd_release_pilot(args):
 # an ordinal inside the Gaming blocks cedar_ids reserves), against a pinned
 # read-only snapshot of Cedar's live Gaming registry. Lumecon never marks an
 # ID issued. This command is the controlled Cedar step that does, ported from
-# the former `grove-promote-bindings` (same checks, same backup and log):
+# the former Grove binding-promotion command (same checks, backup and log):
 #
 #   1. the PROPOSED artifact is exactly the one pinned by SHA-256;
 #   2. it was built from exactly the live registry snapshot now on disk;
