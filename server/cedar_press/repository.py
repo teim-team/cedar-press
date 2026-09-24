@@ -381,10 +381,17 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             raise FullReleaseUnavailable("Malformed release ID")
         if not metadata_only and requested_release_id != release_id:
             raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
+        manifest_digest = pin.get("manifest_sha256")
+        if not isinstance(manifest_digest, str) or not re.fullmatch(
+            r"[0-9a-f]{64}", manifest_digest
+        ):
+            raise FullReleaseUnavailable("Catalog lacks an approved manifest digest")
         prefix = f"/v1/datasets/{collection_id}/releases/{release_id}"
         manifest = _release_json(prefix + "/manifest")
         if not isinstance(manifest, dict) or not isinstance(manifest.get("rights"), dict):
             raise FullReleaseUnavailable("Malformed manifest")
+        if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != manifest_digest:
+            raise FullReleaseUnavailable("Manifest differs from the approved catalog pin")
         for name in ("dataset_id", "release_id", "record_count", "fields", "rights", "synthetic"):
             if manifest[name] != pin[name]:
                 raise FullReleaseUnavailable("Release metadata differs from pinned catalog")

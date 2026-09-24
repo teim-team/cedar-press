@@ -45,7 +45,6 @@ class ReleaseDownloadTest(unittest.TestCase):
             "rights": {"publication_class": "publishable", "redistribution": True},
             "synthetic": False,
         }
-        self.write_catalog()
         content = b"".join(repository._canonical_bytes(row) for row in self.rows)
         self.manifest = {
             **self.pin,
@@ -58,6 +57,7 @@ class ReleaseDownloadTest(unittest.TestCase):
                 }
             },
         }
+        self.approve_manifest_fixture()
         self.env = patch.dict(os.environ, {"CEDAR_PRESS_RELEASE_CATALOG": str(self.catalog)})
         self.env.start()
         self.addCleanup(self.env.stop)
@@ -103,6 +103,12 @@ class ReleaseDownloadTest(unittest.TestCase):
         }
         value["catalog_id"] = hashlib.sha256(repository._canonical_bytes(value)).hexdigest()
         self.catalog.write_text(json.dumps(value), encoding="utf-8")
+
+    def approve_manifest_fixture(self):
+        self.pin["manifest_sha256"] = hashlib.sha256(
+            repository._canonical_bytes(self.manifest)
+        ).hexdigest()
+        self.write_catalog()
 
     def response(self, path):
         if path.endswith("/manifest"):
@@ -232,6 +238,34 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.assertEqual(response.status_code, 503)
         self.assertNotIn(b"fixture-bill", response.content)
 
+    def test_coherent_upstream_tampering_cannot_change_the_approved_artifact(self):
+        approved_catalog = self.catalog.read_bytes()
+        self.rows[0]["title"] = "changed upstream claim"
+        content = b"".join(repository._canonical_bytes(row) for row in self.rows)
+        self.manifest["files"]["records.jsonl"] = {
+            "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()
+        }
+        with self.assertLogs("cedar_press.download", level="INFO") as logs:
+            response = self.client.get(
+                "/press/collections/legislation/full-download", params={"release_id": self.rid}
+            )
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(self.catalog.read_bytes(), approved_catalog)
+        self.assertNotIn("changed upstream claim", response.text + str(logs.output))
+        self.assertIn("unavailable", logs.output[0])
+
+    def test_legacy_or_malformed_manifest_pin_fails_before_upstream_access(self):
+        for digest in (None, "", "not-a-hash", 1):
+            with self.subTest(digest=digest):
+                self.pin["manifest_sha256"] = digest
+                self.write_catalog()
+                response = self.client.get(
+                    "/press/collections/legislation/full-download",
+                    params={"release_id": self.rid},
+                )
+                self.assertEqual(response.status_code, 503)
+        self.mock_fetch.assert_not_called()
+
     def test_catalog_corruption_and_malformed_pin_refused(self):
         self.catalog.write_text("{}")
         self.assertEqual(
@@ -258,8 +292,8 @@ class ReleaseDownloadTest(unittest.TestCase):
             {"fields": [{"name": "internal_secret"}]},
         ]:
             self.pin = {**copy.deepcopy(baseline), **mutation}
-            self.write_catalog()
-            self.manifest.update(self.pin)
+            self.manifest.update({k: v for k, v in self.pin.items() if k != "manifest_sha256"})
+            self.approve_manifest_fixture()
             self.assertEqual(
                 self.client.get(
                     "/press/collections/legislation/full-download", params={"release_id": self.rid}
@@ -343,7 +377,7 @@ class ReleaseDownloadTest(unittest.TestCase):
             self.assertNotIn("fictional@example.invalid", logs.output[0])
         self.pin["rights"]["redistribution"] = False
         self.manifest["rights"]["redistribution"] = False
-        self.write_catalog()
+        self.approve_manifest_fixture()
         with self.assertLogs("cedar_press.download", level="INFO") as logs:
             response = self.client.get(url, params={"release_id": self.rid})
         self.assertEqual(response.status_code, 503)
@@ -364,7 +398,7 @@ class ReleaseDownloadTest(unittest.TestCase):
                 for key in self.header
             ],
         )
-        self.write_catalog()
+        self.pin.pop("manifest_sha256", None)
         content = b"".join(repository._canonical_bytes(row) for row in self.rows)
         self.manifest = {
             **self.pin,
@@ -377,6 +411,7 @@ class ReleaseDownloadTest(unittest.TestCase):
                 }
             },
         }
+        self.approve_manifest_fixture()
         result = self.client.get(
             "/press/collections/lobbying/full-download", params={"release_id": self.rid}
         )
@@ -435,6 +470,7 @@ class ReleaseDownloadTest(unittest.TestCase):
 
     def test_primary_key_and_count_mismatch_fail_closed(self):
         self.manifest["primary_key"] = ["missing"]
+        self.approve_manifest_fixture()
         self.assertEqual(
             self.client.get(
                 "/press/collections/legislation/full-download", params={"release_id": self.rid}

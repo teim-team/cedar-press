@@ -55,6 +55,14 @@ class LumeconContractTest(unittest.TestCase):
         ):
             return repository.full_release(entry["collection_id"], requested or rid)
 
+    def repin_fixture_manifest(self, entry):
+        content = entry["catalog"]
+        content["collections"][0]["manifest_sha256"] = hashlib.sha256(
+            repository._canonical_bytes(entry["manifest"])
+        ).hexdigest()
+        content.pop("catalog_id", None)
+        content["catalog_id"] = hashlib.sha256(repository._canonical_bytes(content)).hexdigest()
+
     def test_actual_lumecon_unicode_serialization_and_catalog_hashes(self):
         vector = self.fixture["canonical_vector"]
         self.assertEqual(
@@ -120,30 +128,39 @@ class LumeconContractTest(unittest.TestCase):
                 changed = copy.deepcopy(entry)
                 changed["manifest"]["rights"]["redistribution"] = False
                 changed["catalog"]["collections"][0]["rights"]["redistribution"] = False
-                content = changed["catalog"]
-                content.pop("catalog_id")
-                content["catalog_id"] = hashlib.sha256(
-                    repository._canonical_bytes(content)
-                ).hexdigest()
+                self.repin_fixture_manifest(changed)
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     self.consume(changed)
 
-    def test_corrupted_artifact_and_synthetic_wire_state_are_refused(self):
+    def test_corrupted_artifact_is_refused(self):
         for entry in self.fixture["collections"]:
             with self.subTest(collection=entry["collection_id"], defect="bytes"):
                 changed = copy.deepcopy(entry)
                 changed["records_jsonl_utf8"] += "\n"
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     self.consume(changed)
-            with self.subTest(collection=entry["collection_id"], defect="synthetic"):
+
+    def test_catalog_digest_refuses_coherently_replaced_manifest_and_artifact(self):
+        for entry in self.fixture["collections"]:
+            with self.subTest(collection=entry["collection_id"]):
+                changed = copy.deepcopy(entry)
+                rows = [json.loads(line) for line in changed["records_jsonl_utf8"].splitlines()]
+                rows[0]["research_note"] = "An unapproved changed claim"
+                content = b"".join(repository._canonical_bytes(row) for row in rows)
+                changed["records_jsonl_utf8"] = content.decode("utf-8")
+                changed["manifest"]["files"]["records.jsonl"] = {
+                    "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()
+                }
+                self.assertEqual(changed["catalog"], entry["catalog"])
+                with self.assertRaises(repository.FullReleaseUnavailable):
+                    self.consume(changed)
+    def test_synthetic_wire_state_with_valid_manifest_pin_is_refused(self):
+        for entry in self.fixture["collections"]:
+            with self.subTest(collection=entry["collection_id"]):
                 changed = copy.deepcopy(entry)
                 changed["manifest"]["synthetic"] = True
                 changed["catalog"]["collections"][0]["synthetic"] = True
-                content = changed["catalog"]
-                content.pop("catalog_id")
-                content["catalog_id"] = hashlib.sha256(
-                    repository._canonical_bytes(content)
-                ).hexdigest()
+                self.repin_fixture_manifest(changed)
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     self.consume(changed)
 
