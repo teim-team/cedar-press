@@ -3943,4 +3943,11 @@ identity specification, 1133 source admission and 1072 legacy consumer hold;
 These changes preserve issued IDs. No new ID allocator, event registry, promoted
 relationship, or review queue is authorized by technical test success. Current
 NEED human review remains pinned; returned decisions require validated receipts.
+The continuation owns code/build.py, server/cedar_press/repository.py and app.py,
+server/README.md, the two release-download test/rehearsal files, and focused lint
+corrections in the existing field-map/review-import tests. It consumes the existing
+Lumecon HTTP and catalog contracts; no identity allocator or release format is copied.
+All candidates remain isolated and unpromoted. The original checkpoint branch is
+preserved; continuation starts from upstream 6d445f4 on codex/legislation-release-consumer.
+
 <!-- END CODEX-EARLY-ACCESS-TAKEOVER -->
