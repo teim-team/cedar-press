@@ -191,3 +191,44 @@ SHA-256 hashes are of complete CSV bytes in C:/Users/esm247/Desktop/Cedar Press/
 | state_gaming_observations.csv | 494 | 34 | period_end 1992–2025 | 3995f6ab7af4ebbe19535f684b9aade48ab22fcbb2e7927cd5e9920c31504d99 |
 | wa_machine_allocations.csv | 75 | 17 | fetched_date 2026–2026 | d560da011a0fe2b22ff2972db4dc615ecc3b7de72440e3e6a473da986acda5d2 |
 | wa_machine_transfers.csv | 0 | 18 | — | 97aa260f4bf2d681e6bc8a07ad15c88388ba1550b70add8403f8ed6bc8b2fce2 |
+
+## Implementation status (Claude, 2026-09-24, branch `claude/gaming-intelligence`)
+
+Built on Cedar PR #122 (`codex/legislation-release-consumer` @3195e70) with this audit merged. Not pushed, not promoted, not published.
+
+**Owner ID hold.** Gaming ID creation is paused pending Codex's CICD identifier-retirement audit ([request](../GAMING_ID_CONTRACT_REQUEST.md)). Every Gaming ID renders `PROV-` through one swap point (`code/gaming_grove.py`: `derive_id`, `facility_id_for`); `cedar_uid` accepts only checksum-valid `CE-` IDs via the shared 503 validator; vendor `CCP-/VP-/TPL-` IDs exist only in the internal crosswalk. `release-pilot gaming` refuses provisional, vendor and non-CE IDs (verified on the live candidate: `REFUSED: provisional identifier (ID contract pending)`).
+
+**Maintained surface.** One entry, `py -3 code/build.py candidate gaming --input-root <Cedar Press> --output-root <new dir outside git> --as-of YYYY-MM-DD` (set `CEDAR_GAMING_PROVISIONAL_IDS=1` until the ID contract lands). It runs the four registered producers in `cedar_pipeline.GROVE_COMPONENTS` (1200 revenue/payments/disclosures, 1201 facilities, 1202 compacts/regulatory/land/NEPA/licenses/litigation, 1203 labor/advocacy links), revalidates every table with the shared validators, checks cross-table references (`GROVE_REFERENCES`), pins input and code hashes, and writes a manifest, public-only samples, coverage and a change report (`--previous`). `build.py grove-contracts gaming [--check]` regenerates the dataset_contracts gaming entry, the pilot field-map entry and [the data contract](../GAMING_GROVE_DATA_CONTRACT.md). The 65 pre-existing gaming tables carry an explicit `grove_role` (47 source input, 5 internal QA, 13 legacy retained); nothing was deleted. Shared-infrastructure proposals are for Havala/Codex in [infrastructure notes](../GAMING_GROVE_INFRASTRUCTURE_NOTES.md), not applied to their branches.
+
+**Candidate result.** Two builds into different roots are byte-identical; validation passed with no problems; canonical `Cedar Press/data/clean` hashes unchanged before/after. Status `LOCAL_DRY_RUN_PROVISIONAL_IDS`.
+
+| Component table | Rows | Table status |
+|---|---:|---|
+| gaming_regional_revenue (198 region + 26 printed national, FY2001–2025) | 224 | public |
+| gaming_revenue_bands (FY2022–2025) | 20 | public |
+| gaming_government_payments (CA+FL; forecasts never paid/summable) | 53,465 | public rows 53,124 |
+| gaming_reported_revenue_observations (state, digital) | 8,832 | public rows 8,508 |
+| gaming_financial_disclosures (SEC, FAC, bonds) | 1,935 | public rows 1,756 |
+| gaming_grove_facilities (379 of 702 with independently evidenced name+location+status) | 702 | source_limited |
+| gaming_facility_names / history / capacity | 1,353 / 2,231 / 3,458 | source_limited |
+| gaming_facility_relationships (owner/operator only with evidence) | 880 | source_limited |
+| gaming_facility_crosswalk (all 787 legacy rows disposed exactly once) | 3,133 | internal |
+| gaming_compacts / versions | 707 / 1,158 | public |
+| gaming_compact_terms (regex extraction; a rate is never a payment) | 3,213 | internal |
+| gaming_regulatory_events (declination never approval; reversals kept) | 3,776 | public |
+| gaming_land_eligibility | 240 | public |
+| gaming_environmental_reviews / licenses / litigation | 214 / 694 / 96 | source_limited |
+| gaming_labor_observations (participants never employees; LODES internal) | 4,852 | internal |
+| gaming_advocacy_links (links only; Advocacy IDs preserved, no amounts) | 4,871 | internal |
+
+Only `gaming_regional_revenue` can pass the release path today (one field-map entry per collection); it is the Grove flagship override in `RELEASE_PILOTS["gaming"]`, replacing the vendor-lineage `FLAGSHIP["gaming"]` which cedar_publication's owner should move.
+
+**616 / 46 / 22 provenance.** All three reproduce exactly from the untracked `Desktop\4wheeler\casino_employment_validation_SHARE\` bundle (built 2026-08-12 by `13_build_share_bundle.py`): `data/casino_employment_panel.csv` (sha256 `8c125cf7…5bb2f`) = 616 rows, 46 tribes, 1992–2025; `data/facility_events.csv` (`97ddd6f6…b9697`) = 22 rows. **616/46 are a stale snapshot** — ~40 minutes later the live panel became 735 rows / 55 tribes; no filter on it yields 616. **22 is current** (byte-identical in every copy); this audit's "none verifies 22" missed that file. The figures are exact but mislabelled: the panel's grain is tribe × year × source (605 distinct tribe-years), 565 of 616 rows are Form 5500 plan participants rather than employees, and the 22 events cover 13 tribes, three of them non-gaming businesses. Because rerunning 13 would delete the only copy, the bundle is preserved with a verified SHA-256 manifest at `C:\Users\esm247\cedar-grove-gaming-work\preserved\4wheeler_share_2026-08-12\`. The 74-table inventory reproduced exactly (rows, columns, SHA-256).
+
+**Open decisions.**
+1. **ID contract** (Codex, blocking): facility allocator/prefix, component-ID policy (derived vs `cedar_ids.allocate`), enterprise namespace, legacy-handle parser.
+2. **Operator websites** (owner): 1201 treats a property's own site as `public_official` for name/location/capacity and 25 owner / 23 operator links (named owner must match the curated tribe). Downgrade if the owner wants only third-party official evidence.
+3. **Identity rulings** (owner): The Stables place merge (VP-0153 vs CCP-305300); 7 Clans Ponca link kept `reviewed_disputed`.
+4. **Havala**: multi-table release unit, Grove catalog declaration in the server (server accepts only `cedar_press` catalogs today), 16 MiB Lumecon intake cap vs the payments table, and `512_build_dataset_contracts.py` preserving producer-declared entries.
+
+**Source-limited leads (not acquired).** OLMS LM filings, state WARN notices, EPA EIS database, Army Corps permits, state sports-wagering/licensing censuses, and litigation dockets (CourtListener robots.txt refused; one probe was sent and stopped). Producer receipts list each lead.
