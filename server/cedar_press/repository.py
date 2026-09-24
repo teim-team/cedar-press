@@ -2,8 +2,8 @@
 
 Every route reads through here, so the move from the ported modules to
 Postgres is one module's worth of change rather than a rewrite of the API.
-The shapes returned are the shapes the client already reads — see
-``src/features/grove/`` — because a repository that returns its own idea of a
+The shapes returned are the shapes the client already reads â€” see
+``src/features/grove/`` â€” because a repository that returns its own idea of a
 collection just moves the translation somewhere less visible.
 
 The catalog, the citation register and the CSV shaping live in
@@ -20,8 +20,17 @@ from the Cedar data workspace in ``code/``.
 
 from __future__ import annotations
 
+import hashlib
+import importlib.util
+import json
+import os
+import re
 from collections.abc import Mapping
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from cedar_press import collection_profiles, press_catalog
 from cedar_press import collections as launch
@@ -89,6 +98,7 @@ def _dataset_payload(dataset: Any) -> dict[str, Any]:
         "method": dataset.method,
         "cedar": launch.collection_cedar_facts(dataset.id),
         "sample": launch.collection_sample(dataset.id),
+        "fullRelease": full_release_metadata(dataset.id),
         "tables": list(launch.collection_tables(dataset.id)),
         "unmeasured": {
             field: reason
@@ -178,9 +188,7 @@ def sample_unavailable_reason(collection_id: str) -> str | None:
 
 
 def download_name(collection_id: str) -> str:
-    dataset = next(
-        (item for item in launch.LAUNCH_COLLECTION if item.id == collection_id), None
-    )
+    dataset = next((item for item in launch.LAUNCH_COLLECTION if item.id == collection_id), None)
     version = dataset.version if dataset else "v0"
     # The filename says it is a sample. A file called `deals-v0.csv` sitting in
     # somebody's downloads folder a month later cannot be told apart from the
@@ -191,8 +199,8 @@ def download_name(collection_id: str) -> str:
 def releases() -> list[dict[str, Any]]:
     """Release history per collection, most recently updated first.
 
-    Served from the dumped snapshot of ``pressReleases.js`` — the same
-    change notes the What's New feed renders — so the service and the page
+    Served from the dumped snapshot of ``pressReleases.js`` â€” the same
+    change notes the What's New feed renders â€” so the service and the page
     describe one history rather than two.
     """
     rows = [
@@ -207,7 +215,7 @@ def _thaw(value: Any) -> Any:
 
     ``press_catalog`` deep-freezes its snapshot so no caller can edit the
     catalogue every later caller sees, which leaves nested values as
-    ``mappingproxy`` — a type the JSON serializer refuses. Copying at the top
+    ``mappingproxy`` â€” a type the JSON serializer refuses. Copying at the top
     level only was not enough: an article's body and figures are nested, and
     the failure surfaced as a 500 on a route whose data was fine.
     """
@@ -243,3 +251,222 @@ def articles() -> list[dict[str, Any]]:
 def citations() -> list[dict[str, Any]]:
     """Every recorded public use of a collection. Empty until one lands."""
     return [_thaw(entry) for entry in press_catalog.CITATIONS]
+
+
+class FullReleaseUnavailable(ValueError):
+    """The pinned full file cannot be verified; never substitute a sample."""
+
+
+def _canonical_bytes(value):
+    return (
+        json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
+MAX_RELEASE_BYTES = 128 * 1024 * 1024
+
+
+def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
+    base = os.environ.get("CEDAR_PRESS_DATA_API", "").rstrip("/")
+    token = os.environ.get("CEDAR_PRESS_DATA_TOKEN", "")
+    environment = os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development")
+    parsed = urlparse(base)
+    if environment not in {"development", "staging", "production"}:
+        raise FullReleaseUnavailable("Unknown service environment")
+    if (
+        not token
+        or not parsed.hostname
+        or parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+        or parsed.path not in {"", "/"}
+        or any(character.isspace() for character in token)
+    ):
+        raise FullReleaseUnavailable("Missing or invalid data service configuration")
+    local = parsed.hostname in {"127.0.0.1", "localhost", "::1"}
+    if parsed.scheme != "https" and not (
+        environment == "development" and parsed.scheme == "http" and local
+    ):
+        raise FullReleaseUnavailable("Data service requires HTTPS outside local development")
+    if environment != "development" and (
+        local or os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") == "1"
+    ):
+        raise FullReleaseUnavailable(
+            "Production/staging cannot use local or insecure configuration"
+        )
+
+    class NoRedirect(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            raise FullReleaseUnavailable("Data service redirects are refused")
+
+    request = Request(base + path, headers={"Authorization": "Bearer " + token})
+    with build_opener(NoRedirect()).open(request, timeout=30) as response:
+        content = response.read(limit + 1)
+    if len(content) > limit:
+        raise FullReleaseUnavailable("Data response exceeds configured safety limit")
+    return content
+
+
+def _release_json(path):
+    return json.loads(_release_bytes(path, limit=4 * 1024 * 1024))
+
+
+@lru_cache(maxsize=1)
+def _publication_policy():
+    # The existing governed producer owns the hold. Do not recreate it in the API.
+    path = Path(__file__).resolve().parents[2] / "code/cedar_publication.py"
+    spec = importlib.util.spec_from_file_location("cedar_release_publication", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def full_release(collection_id, requested_release_id=None, *, metadata_only=False):
+    """Exact pinned Lumecon artifact, checked against the existing product field map.
+
+    A trusted, reviewed catalog enables a collection; user parameters cannot select
+    a different release. Holds remain enforced by the canonical publication owner.
+    """
+    if not any(item.id == collection_id for item in launch.LAUNCH_COLLECTION):
+        raise FullReleaseUnavailable("Unknown collection")
+    try:
+        policy = _publication_policy()
+    except (OSError, ImportError, AttributeError) as error:
+        raise FullReleaseUnavailable("Publication policy unavailable") from error
+    try:
+        policy.assert_collection_publishable(collection_id)
+    except policy.FieldMapRefusal as error:
+        raise FullReleaseUnavailable("Collection publication is held") from error
+    location = os.environ.get("CEDAR_PRESS_RELEASE_CATALOG")
+    if not location:
+        raise FullReleaseUnavailable("No pinned release catalog configured")
+    try:
+        catalog = json.loads(Path(location).read_text(encoding="utf-8"))
+        if not isinstance(catalog, dict) or not isinstance(catalog.get("collections"), list):
+            raise FullReleaseUnavailable("Malformed catalog")
+        if any(not isinstance(item, dict) for item in catalog["collections"]):
+            raise FullReleaseUnavailable("Malformed catalog entries")
+        catalog_id = catalog.pop("catalog_id")
+        if hashlib.sha256(_canonical_bytes(catalog)).hexdigest() != catalog_id:
+            raise FullReleaseUnavailable("Catalog checksum mismatch")
+        if (
+            type(catalog.get("schema_version")) is not int
+            or catalog["schema_version"] != 1
+            or catalog.get("product") != "cedar_press"
+            or catalog.get("entitlement_required") is not True
+        ):
+            raise FullReleaseUnavailable("Wrong product catalog")
+        pins = [item for item in catalog["collections"] if item["dataset_id"] == collection_id]
+        if len(pins) != 1:
+            raise FullReleaseUnavailable("Exactly one pinned collection release required")
+        pin = pins[0]
+        release_id = pin["release_id"]
+        if not isinstance(release_id, str) or not re.fullmatch(r"[0-9a-f]{64}", release_id):
+            raise FullReleaseUnavailable("Malformed release ID")
+        if not metadata_only and requested_release_id != release_id:
+            raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
+        prefix = f"/v1/datasets/{collection_id}/releases/{release_id}"
+        manifest = _release_json(prefix + "/manifest")
+        if not isinstance(manifest, dict) or not isinstance(manifest.get("rights"), dict):
+            raise FullReleaseUnavailable("Malformed manifest")
+        for name in ("dataset_id", "release_id", "record_count", "fields", "rights", "synthetic"):
+            if manifest[name] != pin[name]:
+                raise FullReleaseUnavailable("Release metadata differs from pinned catalog")
+        if (
+            type(manifest.get("schema_version")) is not int
+            or manifest["schema_version"] != 1
+            or manifest["synthetic"] is not False
+            or manifest["rights"]["publication_class"] not in {"public", "publishable"}
+            or manifest["rights"].get("redistribution") is not True
+        ):
+            raise FullReleaseUnavailable("Release is not eligible for customer delivery")
+        header = [field["name"] for field in manifest["fields"]]
+        field_map = json.loads(
+            (Path(__file__).resolve().parents[2] / "data/cedar/field_map.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        entries = [
+            (name, entry)
+            for name, entry in field_map["tables"].items()
+            if name.startswith(collection_id + "/")
+        ]
+        if len(entries) != 1 or header != entries[0][1]["order"]:
+            raise FullReleaseUnavailable("Full release does not match product field map")
+        table_id = entries[0][0].split("/", 1)[1]
+        count = manifest["record_count"]
+        expected = manifest["files"]["records.jsonl"]
+        if (
+            type(count) is not int
+            or count < 1
+            or type(expected["bytes"]) is not int
+            or not 0 < expected["bytes"] <= MAX_RELEASE_BYTES
+            or not re.fullmatch(r"[0-9a-f]{64}", expected["sha256"])
+        ):
+            raise FullReleaseUnavailable("Invalid or oversized release artifact")
+        route = f"/press/collections/{collection_id}/full-download?release_id={release_id}"
+        if metadata_only:
+            return {
+                "kind": "full",
+                "release_id": release_id,
+                "schema_version": 1,
+                "record_count": count,
+                "fields": header,
+                "table_id": table_id,
+                "scope": "Pinned flagship table only; ancillary tables excluded",
+                "format": "jsonl",
+                "records_sha256": expected["sha256"],
+                "download_path": route,
+            }
+        content = _release_bytes(prefix + "/download", limit=expected["bytes"])
+        if (
+            len(content) != expected["bytes"]
+            or hashlib.sha256(content).hexdigest() != expected["sha256"]
+        ):
+            raise FullReleaseUnavailable("Served bytes differ from verified release artifact")
+        rows = [json.loads(line) for line in content.splitlines()]
+        if len(rows) != count or any(
+            not isinstance(row, dict) or set(row) != set(header) for row in rows
+        ):
+            raise FullReleaseUnavailable("Record count or schema mismatch")
+        primary_key = manifest["primary_key"]
+        if (
+            not isinstance(primary_key, list)
+            or not primary_key
+            or not set(primary_key) <= set(header)
+        ):
+            raise FullReleaseUnavailable("Missing declared row identity")
+        keys = [tuple(row[key] for key in primary_key) for row in rows]
+        if (
+            any(any(value is None or value == "" for value in key) for key in keys)
+            or len(set(keys)) != count
+        ):
+            raise FullReleaseUnavailable("Invalid primary keys")
+        return {
+            "content": content,
+            "release_id": release_id,
+            "record_count": count,
+            "sha256": expected["sha256"],
+            "fields": header,
+            "citation": f"Cedar Press {collection_id}/{table_id}, release {release_id}",
+            "filename": f"{collection_id}-{release_id}.jsonl",
+            "media_type": "application/x-ndjson",
+        }
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise FullReleaseUnavailable(
+            "Pinned full release unavailable or failed verification"
+        ) from error
+
+
+def full_release_metadata(collection_id):
+    """Preview counts are never substituted for a verified full-release descriptor."""
+    if not os.environ.get("CEDAR_PRESS_RELEASE_CATALOG"):
+        return None
+    try:
+        return full_release(collection_id, metadata_only=True)
+    except FullReleaseUnavailable:
+        return {"kind": "full", "status": "unavailable"}

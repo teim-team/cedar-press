@@ -1,0 +1,1754 @@
+{
+  "provenance": {
+    "purpose": "Fictional redistributable protocol tests ONLY; never customer evidence. synthetic=false and fictional crosswalk approval exercise the production protocol without real identities.",
+    "producer_repository": "teim-team/Lumecon-data",
+    "producer_commit": "4752fda72aadb474d401db303fde68def432bbac",
+    "producer_source_sha256": {
+      "storage.py": "bfc963b556df4132f4bd4b4c70f9f89beb45fc5bc01f1c7ff16d937feb2ad7e6",
+      "contracts.py": "9d07ed8f6e15d3a2c43c2b24b2f2ef068c4c2db451a467445ebe4866d288b6f2",
+      "pipeline.py": "efcb3c0ff467f637f6ebb9dafafddb2d94b5fe6d43ffe463db1ee90ecfc594fd",
+      "catalog.py": "fafb89ddea361d114473098646359ffb932883f0d3de2b30d2e4d03ac9488bbb",
+      "api.py": "b77493ee4a81253c92ee81cb73463d697b5e9722608a96d34400b2d02c17cbae"
+    },
+    "construction": "DatasetContract -> ingest_csv -> build_release -> build_catalog -> create_app TestClient manifest and download; temporary storage only."
+  },
+  "canonical_vector": {
+    "text": "Hawaiʻi; café; 中文",
+    "missing": null,
+    "boolean": false,
+    "integer": 7
+  },
+  "collections": [
+    {
+      "collection_id": "legislation",
+      "catalog": {
+        "schema_version": 1,
+        "product": "cedar_press",
+        "collections": [
+          {
+            "dataset_id": "legislation",
+            "release_id": "c0feccdb8e96781d787f431cba4bf937fd5b6b42a7b4be83ee3fcec8c0cab097",
+            "title": "Fictional compatibility fixture - not customer evidence",
+            "row_grain": "One fictional test record",
+            "record_count": 1,
+            "synthetic": false,
+            "geography": "Fictional",
+            "time_coverage": "Test only",
+            "source_id": "fictional-contract-test",
+            "source": {
+              "owner": "Fictional test author",
+              "url": "https://example.invalid/fictional-fixture",
+              "checked_at": "2026-09-23",
+              "access_method": "manual_import",
+              "jurisdiction": "Test only",
+              "coverage": "One fictional row",
+              "cadence": "Fixture only",
+              "terms_notes": "Redistributable fictional test data",
+              "caveats": []
+            },
+            "rights": {
+              "license": "Redistributable fictional fixture",
+              "publication_class": "publishable",
+              "redistribution": true,
+              "retrieval": false,
+              "training": false,
+              "evaluation": false
+            },
+            "fields": [
+              {
+                "name": "cedar_uids",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "canonical_names",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "entity_classes",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "entity_roles",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "entity_names_as_published",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "bill_id",
+                "type": "string",
+                "nullable": false,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "congress",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "chamber",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "bill_type",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "bill_number",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "title",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "policy_area",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "bill_scope",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "affected_entity_classes",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "collective_scopes",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "affected_entities_as_published",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "introduced_date",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "sponsor_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "sponsor_bioguide_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "cosponsor_count",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "latest_action",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "latest_action_date",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "outcome",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "companion_bill_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "rollcall_count",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "resolved_entity_count",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "entity_link_statuses",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_system",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_url",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "research_note",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              }
+            ],
+            "manifest_path": "/v1/datasets/legislation/releases/c0feccdb8e96781d787f431cba4bf937fd5b6b42a7b4be83ee3fcec8c0cab097/manifest"
+          }
+        ],
+        "entitlement_required": true,
+        "catalog_id": "f39d059392455e1af22180f2da78c7c165f8f86003b47294a34cead79a5713e2"
+      },
+      "catalog_canonical_utf8": "{\"catalog_id\":\"f39d059392455e1af22180f2da78c7c165f8f86003b47294a34cead79a5713e2\",\"collections\":[{\"dataset_id\":\"legislation\",\"fields\":[{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"cedar_uids\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"canonical_names\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"entity_classes\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"entity_roles\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"entity_names_as_published\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"bill_id\",\"nullable\":false,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"congress\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"chamber\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"bill_type\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"bill_number\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"title\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"policy_area\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"bill_scope\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"affected_entity_classes\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"collective_scopes\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"affected_entities_as_published\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"introduced_date\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"sponsor_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"sponsor_bioguide_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"cosponsor_count\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"latest_action\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"latest_action_date\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"outcome\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"companion_bill_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"rollcall_count\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"resolved_entity_count\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"entity_link_statuses\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"source_system\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"source_url\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"research_note\",\"nullable\":true,\"type\":\"string\",\"unit\":null}],\"geography\":\"Fictional\",\"manifest_path\":\"/v1/datasets/legislation/releases/c0feccdb8e96781d787f431cba4bf937fd5b6b42a7b4be83ee3fcec8c0cab097/manifest\",\"record_count\":1,\"release_id\":\"c0feccdb8e96781d787f431cba4bf937fd5b6b42a7b4be83ee3fcec8c0cab097\",\"rights\":{\"evaluation\":false,\"license\":\"Redistributable fictional fixture\",\"publication_class\":\"publishable\",\"redistribution\":true,\"retrieval\":false,\"training\":false},\"row_grain\":\"One fictional test record\",\"source\":{\"access_method\":\"manual_import\",\"cadence\":\"Fixture only\",\"caveats\":[],\"checked_at\":\"2026-09-23\",\"coverage\":\"One fictional row\",\"jurisdiction\":\"Test only\",\"owner\":\"Fictional test author\",\"terms_notes\":\"Redistributable fictional test data\",\"url\":\"https://example.invalid/fictional-fixture\"},\"source_id\":\"fictional-contract-test\",\"synthetic\":false,\"time_coverage\":\"Test only\",\"title\":\"Fictional compatibility fixture - not customer evidence\"}],\"entitlement_required\":true,\"product\":\"cedar_press\",\"schema_version\":1}\n",
+      "manifest": {
+        "contract_sha256": "68ac6df1f9fc677f42ad158f929cbecff8c39b8f6e7c433056e3712ee1920b9e",
+        "dataset_id": "legislation",
+        "fields": [
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "cedar_uids",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "canonical_names",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "entity_classes",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "entity_roles",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "entity_names_as_published",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "bill_id",
+            "nullable": false,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "congress",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "chamber",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "bill_type",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "bill_number",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "title",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "policy_area",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "bill_scope",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "affected_entity_classes",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "collective_scopes",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "affected_entities_as_published",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "introduced_date",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "sponsor_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "sponsor_bioguide_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "cosponsor_count",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "latest_action",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "latest_action_date",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "outcome",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "companion_bill_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "rollcall_count",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "resolved_entity_count",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "entity_link_statuses",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_system",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_url",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "research_note",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          }
+        ],
+        "files": {
+          "contract.json": {
+            "bytes": 6021,
+            "sha256": "68ac6df1f9fc677f42ad158f929cbecff8c39b8f6e7c433056e3712ee1920b9e"
+          },
+          "records.jsonl": {
+            "bytes": 707,
+            "sha256": "6db88ce70407305bbc0d08be752909783d6814fda2fccc72f995ac1b952e10b3"
+          },
+          "records.parquet": {
+            "bytes": 7488,
+            "sha256": "c048d6ff8cd4942e5cd8d22de4cef7dcc2ca41d8f5ef39879918b16b82be39c0"
+          },
+          "validation.json": {
+            "bytes": 332,
+            "sha256": "b59cb975cd8a8aadf98d2219cb91544c0be98f206d92c67613a4bc4acd9c4c29"
+          }
+        },
+        "geography": "Fictional",
+        "primary_key": [
+          "bill_id"
+        ],
+        "record_count": 1,
+        "release_id": "c0feccdb8e96781d787f431cba4bf937fd5b6b42a7b4be83ee3fcec8c0cab097",
+        "rights": {
+          "evaluation": false,
+          "license": "Redistributable fictional fixture",
+          "publication_class": "publishable",
+          "redistribution": true,
+          "retrieval": false,
+          "training": false
+        },
+        "row_grain": "One fictional test record",
+        "schema_version": 1,
+        "source": {
+          "access_method": "manual_import",
+          "cadence": "Fixture only",
+          "caveats": [],
+          "checked_at": "2026-09-23",
+          "coverage": "One fictional row",
+          "jurisdiction": "Test only",
+          "owner": "Fictional test author",
+          "sha256": "5dcc12556f495af7ab46f00484eae0ef781c5175e736aec26afcd0213781999c",
+          "snapshot_id": "5dcc12556f495af7ab46f00484eae0ef781c5175e736aec26afcd0213781999c",
+          "source_id": "fictional-contract-test",
+          "terms_notes": "Redistributable fictional test data",
+          "url": "https://example.invalid/fictional-fixture"
+        },
+        "synthetic": false,
+        "time_coverage": "Test only",
+        "title": "Fictional compatibility fixture - not customer evidence",
+        "transform_version": "csv-contract-v3",
+        "writer": {
+          "environment": {
+            "lock": {
+              "mismatches": [],
+              "sha256": "d60af01f94c5cab025b48dd096104f938956b6d3ca51ba7430f552e72d79f098",
+              "verified": true
+            },
+            "lumecon_data": "0.1.0",
+            "python": "3.13.12"
+          },
+          "pyarrow": "25.0.1"
+        },
+        "representation": "release_metadata.v1"
+      },
+      "records_jsonl_utf8": "{\"affected_entities_as_published\":null,\"affected_entity_classes\":null,\"bill_id\":\"119-hr-999999\",\"bill_number\":null,\"bill_scope\":null,\"bill_type\":null,\"canonical_names\":null,\"cedar_uids\":null,\"chamber\":null,\"collective_scopes\":null,\"companion_bill_id\":null,\"congress\":null,\"cosponsor_count\":null,\"entity_classes\":null,\"entity_link_statuses\":null,\"entity_names_as_published\":null,\"entity_roles\":null,\"introduced_date\":null,\"latest_action\":null,\"latest_action_date\":null,\"outcome\":null,\"policy_area\":null,\"research_note\":null,\"resolved_entity_count\":null,\"rollcall_count\":null,\"source_system\":null,\"source_url\":null,\"sponsor_bioguide_id\":null,\"sponsor_name\":null,\"title\":\"Fictional Hawaiʻi protocol fixture\"}\n"
+    },
+    {
+      "collection_id": "lobbying",
+      "catalog": {
+        "schema_version": 1,
+        "product": "cedar_press",
+        "collections": [
+          {
+            "dataset_id": "lobbying",
+            "release_id": "956fb1cd66cdb89a45a7c47ab148c062218ea6e752e28908e5db5161dc1b4a11",
+            "title": "Fictional compatibility fixture - not customer evidence",
+            "row_grain": "One fictional test record",
+            "record_count": 1,
+            "synthetic": false,
+            "geography": "Fictional",
+            "time_coverage": "Test only",
+            "source_id": "fictional-contract-test",
+            "source": {
+              "owner": "Fictional test author",
+              "url": "https://example.invalid/fictional-fixture",
+              "checked_at": "2026-09-23",
+              "access_method": "manual_import",
+              "jurisdiction": "Test only",
+              "coverage": "One fictional row",
+              "cadence": "Fixture only",
+              "terms_notes": "Redistributable fictional test data",
+              "caveats": []
+            },
+            "rights": {
+              "license": "Redistributable fictional fixture",
+              "publication_class": "publishable",
+              "redistribution": true,
+              "retrieval": false,
+              "training": false,
+              "evaluation": false
+            },
+            "fields": [
+              {
+                "name": "cedar_uid",
+                "type": "string",
+                "nullable": false,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "canonical_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "entity_class",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "cedar_entity_role",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "activity_id",
+                "type": "string",
+                "nullable": false,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "activity_type",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_record_id",
+                "type": "string",
+                "nullable": false,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "reporting_year",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "reporting_period",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "activity_date",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "activity_title",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "client_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "client_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "client_state",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "registrant_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "registrant_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "registrant_state",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "self_filed",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "participant_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "participant_role",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "government_bodies",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "issue_codes",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "issues_text",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "affiliated_organizations",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "income_usd",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "expenses_usd",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "reported_amount_usd",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "amount_basis",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "termination_date",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "supersession_status",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "is_superseded",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "superseded_by_record_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "supersession_group_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "attribution_withdrawn",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "attribution_withdrawn_reason",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_system",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_url",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "research_note",
+                "type": "string",
+                "nullable": true,
+                "description": "Existing Cedar product field-map fixture",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              }
+            ],
+            "manifest_path": "/v1/datasets/lobbying/releases/956fb1cd66cdb89a45a7c47ab148c062218ea6e752e28908e5db5161dc1b4a11/manifest"
+          }
+        ],
+        "entitlement_required": true,
+        "catalog_id": "d420a7b3d5cce5e50ae9ea20005a0df2f8469b941d92e3e025ee5b1a3d662f72"
+      },
+      "catalog_canonical_utf8": "{\"catalog_id\":\"d420a7b3d5cce5e50ae9ea20005a0df2f8469b941d92e3e025ee5b1a3d662f72\",\"collections\":[{\"dataset_id\":\"lobbying\",\"fields\":[{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"cedar_uid\",\"nullable\":false,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"canonical_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"entity_class\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"cedar_entity_role\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"activity_id\",\"nullable\":false,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"activity_type\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"source_record_id\",\"nullable\":false,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"reporting_year\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"reporting_period\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"activity_date\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"activity_title\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"client_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"client_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"client_state\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"registrant_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"registrant_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"registrant_state\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"self_filed\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"participant_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"participant_role\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"government_bodies\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"issue_codes\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"issues_text\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"affiliated_organizations\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"income_usd\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"expenses_usd\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"reported_amount_usd\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"amount_basis\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"termination_date\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"supersession_status\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"is_superseded\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"superseded_by_record_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"supersession_group_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"attribution_withdrawn\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"attribution_withdrawn_reason\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"source_system\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"source_url\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Existing Cedar product field-map fixture\",\"missing_values\":[\"\"],\"name\":\"research_note\",\"nullable\":true,\"type\":\"string\",\"unit\":null}],\"geography\":\"Fictional\",\"manifest_path\":\"/v1/datasets/lobbying/releases/956fb1cd66cdb89a45a7c47ab148c062218ea6e752e28908e5db5161dc1b4a11/manifest\",\"record_count\":1,\"release_id\":\"956fb1cd66cdb89a45a7c47ab148c062218ea6e752e28908e5db5161dc1b4a11\",\"rights\":{\"evaluation\":false,\"license\":\"Redistributable fictional fixture\",\"publication_class\":\"publishable\",\"redistribution\":true,\"retrieval\":false,\"training\":false},\"row_grain\":\"One fictional test record\",\"source\":{\"access_method\":\"manual_import\",\"cadence\":\"Fixture only\",\"caveats\":[],\"checked_at\":\"2026-09-23\",\"coverage\":\"One fictional row\",\"jurisdiction\":\"Test only\",\"owner\":\"Fictional test author\",\"terms_notes\":\"Redistributable fictional test data\",\"url\":\"https://example.invalid/fictional-fixture\"},\"source_id\":\"fictional-contract-test\",\"synthetic\":false,\"time_coverage\":\"Test only\",\"title\":\"Fictional compatibility fixture - not customer evidence\"}],\"entitlement_required\":true,\"product\":\"cedar_press\",\"schema_version\":1}\n",
+      "manifest": {
+        "contract_sha256": "c2586f6c8dd379bf8923dbae364f140b738af60f0ade9f3561712e48ff37e6ec",
+        "dataset_id": "lobbying",
+        "fields": [
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "cedar_uid",
+            "nullable": false,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "canonical_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "entity_class",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "cedar_entity_role",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "activity_id",
+            "nullable": false,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "activity_type",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_record_id",
+            "nullable": false,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "reporting_year",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "reporting_period",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "activity_date",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "activity_title",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "client_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "client_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "client_state",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "registrant_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "registrant_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "registrant_state",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "self_filed",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "participant_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "participant_role",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "government_bodies",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "issue_codes",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "issues_text",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "affiliated_organizations",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "income_usd",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "expenses_usd",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "reported_amount_usd",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "amount_basis",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "termination_date",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "supersession_status",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "is_superseded",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "superseded_by_record_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "supersession_group_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "attribution_withdrawn",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "attribution_withdrawn_reason",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_system",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_url",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Existing Cedar product field-map fixture",
+            "missing_values": [
+              ""
+            ],
+            "name": "research_note",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          }
+        ],
+        "files": {
+          "contract.json": {
+            "bytes": 7703,
+            "sha256": "c2586f6c8dd379bf8923dbae364f140b738af60f0ade9f3561712e48ff37e6ec"
+          },
+          "records.jsonl": {
+            "bytes": 986,
+            "sha256": "ccc319aea49c59fcb7dcec420d031ecb6833bcecff950f2be2a701568012a915"
+          },
+          "records.parquet": {
+            "bytes": 9866,
+            "sha256": "27c76814fd0deaacd644c2ac8471d7db11aa7482cb48002ce36b9fe696b86c6d"
+          },
+          "validation.json": {
+            "bytes": 329,
+            "sha256": "cca7018e7b6bcd48429ad7925c4fe6a53684f41aa5529953579a51a4d8184931"
+          }
+        },
+        "geography": "Fictional",
+        "primary_key": [
+          "activity_id"
+        ],
+        "record_count": 1,
+        "release_id": "956fb1cd66cdb89a45a7c47ab148c062218ea6e752e28908e5db5161dc1b4a11",
+        "rights": {
+          "evaluation": false,
+          "license": "Redistributable fictional fixture",
+          "publication_class": "publishable",
+          "redistribution": true,
+          "retrieval": false,
+          "training": false
+        },
+        "row_grain": "One fictional test record",
+        "schema_version": 1,
+        "source": {
+          "access_method": "manual_import",
+          "cadence": "Fixture only",
+          "caveats": [],
+          "checked_at": "2026-09-23",
+          "coverage": "One fictional row",
+          "jurisdiction": "Test only",
+          "owner": "Fictional test author",
+          "sha256": "44d588123c13dcd9491a697e89bf20fd882266430b5072929521c8235363ff42",
+          "snapshot_id": "44d588123c13dcd9491a697e89bf20fd882266430b5072929521c8235363ff42",
+          "source_id": "fictional-contract-test",
+          "terms_notes": "Redistributable fictional test data",
+          "url": "https://example.invalid/fictional-fixture"
+        },
+        "synthetic": false,
+        "time_coverage": "Test only",
+        "title": "Fictional compatibility fixture - not customer evidence",
+        "transform_version": "csv-contract-v3",
+        "writer": {
+          "environment": {
+            "lock": {
+              "mismatches": [],
+              "sha256": "d60af01f94c5cab025b48dd096104f938956b6d3ca51ba7430f552e72d79f098",
+              "verified": true
+            },
+            "lumecon_data": "0.1.0",
+            "python": "3.13.12"
+          },
+          "pyarrow": "25.0.1"
+        },
+        "representation": "release_metadata.v1"
+      },
+      "records_jsonl_utf8": "{\"activity_date\":null,\"activity_id\":\"lda:00000000-0000-4000-8000-000000000001\",\"activity_title\":\"Fictional Hawaiʻi protocol fixture\",\"activity_type\":null,\"affiliated_organizations\":null,\"amount_basis\":null,\"attribution_withdrawn\":null,\"attribution_withdrawn_reason\":null,\"canonical_name\":null,\"cedar_entity_role\":null,\"cedar_uid\":\"CE-FICTIONAL-TEST\",\"client_id\":null,\"client_name\":null,\"client_state\":null,\"entity_class\":null,\"expenses_usd\":null,\"government_bodies\":null,\"income_usd\":null,\"is_superseded\":null,\"issue_codes\":null,\"issues_text\":null,\"participant_name\":null,\"participant_role\":null,\"registrant_id\":null,\"registrant_name\":null,\"registrant_state\":null,\"reported_amount_usd\":null,\"reporting_period\":null,\"reporting_year\":null,\"research_note\":null,\"self_filed\":null,\"source_record_id\":\"00000000-0000-4000-8000-000000000001\",\"source_system\":null,\"source_url\":null,\"superseded_by_record_id\":null,\"supersession_group_id\":null,\"supersession_status\":null,\"termination_date\":null}\n"
+    }
+  ],
+  "canonical_vector_utf8": "{\"boolean\":false,\"integer\":7,\"missing\":null,\"text\":\"Hawaiʻi; café; 中文\"}\n"
+}
