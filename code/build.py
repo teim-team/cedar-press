@@ -593,11 +593,12 @@ def cmd_release_pilot(args):
 
     source = Path(args.source).resolve()
     target = Path(args.output_root).resolve()
-    if target == source.parent or source.is_relative_to(target):
+    if target.is_relative_to(source.parent) or source.is_relative_to(target):
         raise SystemExit("REFUSED: release store must be separate from canonical input")
     original = source.read_bytes()
     import io
-    original_keys = {row["bill_id"] for row in csv.DictReader(io.StringIO(original.decode("utf-8-sig")))}
+    original_rows = list(csv.DictReader(io.StringIO(original.decode("utf-8-sig"))))
+    original_keys = {row["bill_id"] for row in original_rows}
     spec = importlib.util.spec_from_file_location("pilot_combiner", Path(__file__).with_name("1137_customer_dataset_combine.py"))
     combine = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(combine)
@@ -608,7 +609,7 @@ def cmd_release_pilot(args):
     if result.get("owed") or held:
         raise SystemExit("REFUSED: pilot has held records or owed public fields")
     validate_unique_record_keys(records, ["bill_id"])
-    if {row["bill_id"] for row in records} != original_keys:
+    if len(records) != len(original_rows) or {row["bill_id"] for row in records} != original_keys:
         raise SystemExit("REFUSED: publication projection changed source bill IDs")
     register = publication.register()
     ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
@@ -626,7 +627,7 @@ def cmd_release_pilot(args):
     writer.writeheader()
     writer.writerows(records)
     public_bytes = buffer.getvalue().encode("utf-8")
-    artifact = target / "intake" / "legislation.csv"
+    artifact = target / "intake" / "legislation" / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
     immutable_bytes(artifact, public_bytes)
     missing_urls = [row["bill_id"] for row in records if not row.get("source_url")]
     authority_hashes = []

@@ -299,6 +299,17 @@ def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
             "Production/staging cannot use local or insecure configuration"
         )
 
+    if environment != "development":
+        secret = os.environ.get("CEDAR_PRESS_SECRET", "")
+        database = os.environ.get("DATABASE_URL", "")
+        if (
+            len(secret) < 32
+            or len(token) < 32
+            or not database.startswith(("postgresql://", "postgres://"))
+            or os.environ.get("CEDAR_PRESS_ACCOUNTS", "").strip()
+        ):
+            raise FullReleaseUnavailable("Persistent protected service configuration required")
+
     class NoRedirect(HTTPRedirectHandler):
         def redirect_request(self, req, fp, code, msg, headers, newurl):
             raise FullReleaseUnavailable("Data service redirects are refused")

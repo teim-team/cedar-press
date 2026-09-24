@@ -93,6 +93,9 @@ Server-only configuration (never Vite/browser variables):
 - `CEDAR_PRESS_DATA_API`: the Lumecon API origin. HTTPS is required; HTTP loopback
   is allowed only in development. Staging/production reject loopback and insecure cookies.
 - `CEDAR_PRESS_DATA_TOKEN`: a dataset-scoped backend grant; never a subscriber credential.
+- Staging/production also require explicit secrets of at least 32 characters, a
+  Postgres `DATABASE_URL`, and no development `CEDAR_PRESS_ACCOUNTS` fallback.
+  Configuration validation is not proof of database availability or deployment readiness.
 
 Cedar enforces subscriber access before fetching data, checks catalog integrity,
 explicit release equality, schema, publication holds, rights, exact artifact

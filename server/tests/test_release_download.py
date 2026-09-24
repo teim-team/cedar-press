@@ -306,6 +306,8 @@ class ReleaseConfigurationTest(unittest.TestCase):
     def test_invalid_configuration_never_sends_request(self):
         configurations = [
             {"CEDAR_PRESS_ENVIRONMENT": "unknown"},
+            {"CEDAR_PRESS_ENVIRONMENT": "production"},
+            {"CEDAR_PRESS_ENVIRONMENT": "staging"},
             {"CEDAR_PRESS_DATA_API": "http://remote.invalid"},
             {"CEDAR_PRESS_DATA_API": "https://user:secret@example.invalid"},
             {"CEDAR_PRESS_DATA_TOKEN": "secret\n"},
@@ -324,6 +326,42 @@ class ReleaseConfigurationTest(unittest.TestCase):
                     },
                     clear=True,
                 ),
+                patch.object(repository, "build_opener") as opener,
+            ):
+                with self.assertRaises(repository.FullReleaseUnavailable):
+                    repository._release_bytes("/v1/datasets")
+                opener.assert_not_called()
+
+    def test_production_configuration_is_explicit_and_transport_remains_bounded(self):
+        configured = {
+            "CEDAR_PRESS_ENVIRONMENT": "production",
+            "CEDAR_PRESS_DATA_API": "https://data.example.invalid",
+            "CEDAR_PRESS_DATA_TOKEN": "fixture-" + "t" * 32,
+            "CEDAR_PRESS_SECRET": "fixture-" + "s" * 32,
+            "DATABASE_URL": "postgresql://fixture.invalid/not-connected",
+        }
+        with (
+            patch.dict(os.environ, configured, clear=True),
+            patch.object(repository, "build_opener") as opener,
+        ):
+            opener.return_value.open.return_value.__enter__.return_value.read.return_value = b"{}"
+            self.assertEqual(repository._release_json("/v1/datasets"), {})
+            request = opener.return_value.open.call_args.args[0]
+            self.assertEqual(request.full_url, "https://data.example.invalid/v1/datasets")
+            self.assertEqual(opener.return_value.open.call_args.kwargs["timeout"], 30)
+            opener.return_value.open.return_value.__enter__.return_value.read.return_value = (
+                b"too long"
+            )
+            with self.assertRaises(repository.FullReleaseUnavailable):
+                repository._release_bytes("/v1/datasets", limit=2)
+        for changes in [
+            {"CEDAR_PRESS_ACCOUNTS": '{"fake":"never-use-env-accounts-in-production"}'},
+            {"DATABASE_URL": "sqlite://memory"},
+            {"CEDAR_PRESS_SECRET": "short"},
+            {"CEDAR_PRESS_DATA_TOKEN": "short"},
+        ]:
+            with (
+                patch.dict(os.environ, {**configured, **changes}, clear=True),
                 patch.object(repository, "build_opener") as opener,
             ):
                 with self.assertRaises(repository.FullReleaseUnavailable):
