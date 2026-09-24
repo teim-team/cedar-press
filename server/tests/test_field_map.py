@@ -650,6 +650,40 @@ class TestApplyFieldMap(unittest.TestCase):
             pub.apply_field_map("contractors", header, rows, own)
         self.assertEqual(caught.exception.columns, ["n_prime_contracts_awards"])
 
+    def test_explicitly_internal_join_is_projected_without_public_schema_change(self):
+        header, rows = sample("legislation", "native_bills")
+        own = set(header)
+        field = "source_index__parser_diagnostic"
+        header.append(field)
+        for row in rows:
+            row[field] = "internal extraction bookkeeping"
+        mapping = json.loads(json.dumps(pub.field_map()))
+        mapping["legislation"]["fields"].append(
+            {"column": field, "decision": "internal", "why": "Fixture reviewed disposition"}
+        )
+        with patch.object(pub, "field_map", return_value=mapping):
+            pub.apply_field_map("legislation", header, rows, own)
+        self.assertNotIn(field, header)
+        self.assertTrue(all(field not in row for row in rows))
+        self.assertEqual(len(rows), 10)
+
+    def test_joined_keep_without_public_target_still_refuses_before_mutation(self):
+        header, rows = sample("legislation", "native_bills")
+        own = set(header)
+        field = "source_index__unapproved_public_field"
+        header.append(field)
+        for row in rows:
+            row[field] = "must not silently ship or disappear"
+        before = [dict(row) for row in rows]
+        mapping = json.loads(json.dumps(pub.field_map()))
+        mapping["legislation"]["fields"].append(
+            {"column": field, "decision": "keep", "why": "Missing public target"}
+        )
+        with patch.object(pub, "field_map", return_value=mapping):
+            with self.assertRaises(pub.UndecidedColumns):
+                pub.apply_field_map("legislation", header, rows, own)
+        self.assertEqual(rows, before)
+
     def test_nothing_leaves_before_its_replacement_exists(self):
         # A combine whose target the terminal has not delivered holds the
         # dataset: Deals' categories may not vanish before deal_type exists

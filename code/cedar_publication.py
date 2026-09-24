@@ -1332,7 +1332,13 @@ def apply_field_map(collection: str, header: list, rows: list,
     # A column outside the flagship that IS an approved target (a supplied
     # research_note, names as published from the bridge) is the terminal
     # delivering an owed derivation, and is welcome.
-    joined = [c for c in header if c not in own and c not in entry["order"]]
+    # An explicitly internal joined input has a reviewed destination: it is
+    # removed by the same projection as internal flagship fields. It must not
+    # be added to the public order just to make the schema check accept it.
+    # No inferred dispositions: unknown joins and undeclared public targets
+    # still refuse before any row is changed.
+    joined = [c for c in header if c not in own and c not in entry["order"]
+              and decision.get(c, {}).get("decision") != "internal"]
     if joined:
         raise UndecidedColumns(collection, joined)
     uid_col = entry["entity_uid"]
