@@ -554,7 +554,7 @@ producer transfer and consumer retirement; no whole-repository migration is clai
 
 | Legislation fact | Before / after proof |
 |---|---|
-| Canonical source | 3,069 rows and 3,069 unique issued bill IDs preserved |
+| Canonical source | 3,069 rows and 3,069 unique issued bill IDs preserved; SHA256 `2c6e451cebdd05cc955730c7e7cc67016bb6ac454513feeee16ab33bbed7c060` |
 | Projection | 39 source columns to 30 existing approved fields; excluded columns follow the field map |
 | Date coverage | 207 introduced2025 and55 introduced2026; no refresh/completeness claim |
 | Snapshot | `d38902f72f7bdc42f096bbee87c1fa8051021027c1c2ca2960c91946a50f7552` |
@@ -795,9 +795,44 @@ implement signed session expiry, revocation, current-tier refresh or production
 backup. The default local/full CI suite still reports those database tests as
 skipped when its database variable is absent; the separate job is their evidence.
 
-The latest local full suite before the extra database-only test ran308 tests:
-277passed,31skipped,80%coverage. Its earlier seven documentation-census failures
-were corrected and the complete rerun passed. The extra focused suite ran17:
-16passed,1database skip locally; that test then passed on Ubuntu Postgres.
+The latest local full suite before the extra database-only test ran 308 tests:
+277 passed, 31 skipped, 80% coverage. Its earlier seven documentation-census failures
+were corrected and the complete rerun passed. The extra focused suite ran 17:
+16 passed, 1 database skip locally; that test then passed on Ubuntu Postgres.
 
-2026-09-24 02:39 UTC - READY WITH WARNINGS: reusable local release/download foundation and Ubuntu safety/database tests pass; production and full-collection readiness remain gated.
+
+### Fixed review range and final CI receipts
+
+**Cedar complete review range:**
+`6d445f460357581981a4b096d5bd53dd0d8d668c..cdc3b31dc703fd951b64529c4d2075d0987fb920`.
+This includes the implementation range listed above and the documentation commit
+`cdc3b31dc703fd951b64529c4d2075d0987fb920`, whose exact paths are:
+
+```text
+docs/ARCHITECTURE.md
+docs/ARCHITECTURE_DECISIONS.md
+docs/HAVALA_INFRASTRUCTURE_REVIEW.md
+docs/SHIPPING_RUNBOOK.md
+```
+
+That complete range passed both final workflows:
+[Checks35948194088](https://github.com/teim-team/cedar-press/actions/runs/35948194088)
+and [Subscriber storage35948193898](https://github.com/teim-team/cedar-press/actions/runs/35948193898).
+Measured results:398Node passes/1skip;180Playwright passes;309Python tests run,
+277passed/32database-dependent skips,80%coverage. The dedicated Postgres job
+passed71tests with zero skips, exercising those database contracts separately.
+Lint, all seven generated-file checks and dependency audits passed. The receipt
+addition after this fixed range changes this packet only; it does not alter code,
+fixtures, schemas or data. PR metadata identifies its head separately.
+
+The Lumecon complete range remains
+`0ae36dda36d650b1b3861173fb122e7603b0dc3f..59026aafe16c50ebc38cb0f4a07b558aa78d5431`,
+with both Python versions passing [Ubuntu35946422118](https://github.com/teim-team/Lumecon-data/actions/runs/35946422118).
+Neither draft PR is merged. Original raw bill SHA256 still matches the release's
+pinned canonical-source hash. The active owner review HTML SHA256 remains
+`418c01b931cf5e57d9fca34b079b8f35e2f4c1393bd9e67c9a71b18d1e54dfc7`.
+The17changed Cedar paths contain no canonical data, customer/sample exports,
+product frontend files, R7 state, review artifacts, locks, caches or machine
+credentials. Lumecon's working tree is clean; Cedar's listed exclusions remain.
+
+2026-09-24 02:44 UTC - READY WITH WARNINGS: reusable local release/download foundation and Ubuntu safety/database tests pass; production and full-collection readiness remain gated.
