@@ -48,6 +48,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime
@@ -481,6 +482,10 @@ def cmd_candidate(args) -> int:
     import time
     from datetime import date
 
+    if args.collection in CP.GROVE_COMPONENTS:
+        return cmd_grove_candidate(args)
+    if not args.owner_dir:
+        raise SystemExit("REFUSED: the NEED candidate requires --owner-dir")
     source = Path(args.input_root).resolve()
     owner = Path(args.owner_dir).resolve()
     target = Path(args.output_root).resolve()
@@ -634,6 +639,67 @@ def pilot_authority_hashes(root):
                        if (root / relative).is_file() else "ABSENT") for relative in paths}
 
 
+def pilot_table(collection, config, flagship):
+    """The pilot's table: FLAGSHIP, or a bounded, named replacement of it.
+
+    A pilot may name its own `table` only while FLAGSHIP still names either
+    that table or the one the pilot explicitly `replaces_flagship` (Gaming:
+    FLAGSHIP says `gaming_facilities.csv`, vendor lineage, which is refused
+    here by name). Once FLAGSHIP's owner moves it, the override is redundant
+    rather than a second authority that can drift.
+    """
+    declared = flagship.get(collection)
+    table = config.get("table") or declared
+    if not table:
+        raise SystemExit("REFUSED: no flagship declared for " + collection)
+    if table != declared and declared != config.get("replaces_flagship"):
+        raise SystemExit("REFUSED: pilot table disagrees with cedar_publication.FLAGSHIP")
+    if table == config.get("replaces_flagship"):
+        raise SystemExit("REFUSED: " + table + " is the replaced flagship, not a release table")
+    return table
+
+
+def pilot_table_contract(collection, table):
+    """Grain and key from the existing collection contract; never inferred."""
+    contracts = json.loads((HERE.parent / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8"))
+    declarations = [item for item in contracts["contracts"] if item["collection"] == collection]
+    tables = [item for d in declarations for item in d["tables"] if item["table"] == table]
+    if len(declarations) != 1 or len(tables) != 1:
+        raise SystemExit(f"REFUSED: {collection}/{table} needs exactly one registered table contract")
+    return tables[0]
+
+
+# Values a release refuses while an identifier contract is pending or a
+# vendor lineage is involved. Provisional IDs exist only for local dry runs
+# (gaming_grove, owner hold 2026-09-24); CCP- numbers are Casino City
+# property numbers. The entity check reuses cedar_ids' CE contract (503's
+# checksum), not a second pattern.
+_PROVISIONAL_RE = re.compile(r"(?<![A-Za-z0-9])PROV-")
+_VENDOR_RE = re.compile(r"(?<![A-Za-z0-9])(?:CCP|VP|TPL)-\d+(?![0-9])")
+
+
+def pilot_identifier_refusals(rows):
+    """Name every provisional, vendor-lineage or non-CE entity value; [] if none."""
+    from cedar_ids import identifier_contract, validate_identifier
+    ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
+    problems, seen = [], set()
+    for row in rows:
+        for column, value in row.items():
+            value = value or ""
+            if _PROVISIONAL_RE.search(value):
+                seen.add(("provisional identifier (ID contract pending)", column))
+            if _VENDOR_RE.search(value):
+                seen.add(("vendor-lineage identifier", column))
+            if value and (column == "cedar_uid" or column.endswith("_cedar_uid")):
+                try:
+                    validate_identifier(value, ce)
+                except ValueError:
+                    seen.add(("non-CE entity identifier", column))
+    for what, column in sorted(seen):
+        problems.append(f"{what} in {column}")
+    return problems
+
+
 def cmd_release_pilot(args):
     """Project one existing flagship through its approved contract; never promote."""
     import csv
@@ -651,10 +717,8 @@ def cmd_release_pilot(args):
     config = CP.RELEASE_PILOTS[collection]
     authority_root = HERE.parent
     authorities = pilot_authority_hashes(authority_root)
-    table = publication.FLAGSHIP[collection]
-    contracts = json.loads((HERE.parent / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8"))
-    declaration = next(item for item in contracts["contracts"] if item["collection"] == collection)
-    table_contract = next(item for item in declaration["tables"] if item["table"] == table)
+    table = pilot_table(collection, config, publication.FLAGSHIP)
+    table_contract = pilot_table_contract(collection, table)
     keys = table_contract["primary_key"]
     if not keys:
         raise SystemExit("REFUSED: flagship has no declared primary key")
@@ -667,6 +731,10 @@ def cmd_release_pilot(args):
     original = source.read_bytes()
     import io
     original_rows = pilot_source_rows(original)
+    if config.get("identifier_refusals"):
+        refused = pilot_identifier_refusals(original_rows)
+        if refused:
+            raise SystemExit("REFUSED: " + "; ".join(refused))
     validate_unique_record_keys(original_rows, keys)
     spec = importlib.util.spec_from_file_location("pilot_combiner", Path(__file__).with_name("1137_customer_dataset_combine.py"))
     combine = importlib.util.module_from_spec(spec)
@@ -675,6 +743,10 @@ def cmd_release_pilot(args):
     own = set(header)
     publication.recompute_derived(collection, header, records)
     result = publication.apply_field_map(collection, header, records, own)
+    if not result.get("mapped"):
+        # An unmapped collection passes through apply_field_map unchanged, which
+        # would release every column. A release needs an approved field map.
+        raise SystemExit("REFUSED: no approved field-map entry for this flagship")
     if result.get("owed") or held:
         raise SystemExit("REFUSED: pilot has held records or owed public fields")
     validate_unique_record_keys(records, keys)
@@ -682,7 +754,11 @@ def cmd_release_pilot(args):
     register = publication.register()
     ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
     public_contract = publication.field_map()[collection]
-    record_contracts = {key: identifier_contract(collection, table, key) for key in keys}
+    try:
+        record_contracts = {key: identifier_contract(collection, table, key) for key in keys}
+    except ValueError as error:
+        raise SystemExit(f"REFUSED: no declared identifier binding for {collection}/{table} "
+                         f"primary key {keys}; release waits for cedar_ids ({error})") from error
     source_keys = {key: {row[key] for row in original_rows} for key in keys}
     for row in records:
         for key in keys:
@@ -735,7 +811,8 @@ def cmd_release_pilot(args):
                 "Missing source URLs for historical types: " + ", ".join(missing_urls),
                 "Not the full collection; no production promotion"] + config["caveats"] + authority_hashes},
         "rights": config["rights"],
-        "synthetic": False, "geography": "United States", "time_coverage": "Existing historical register including 2025 and 2026; source lag unmeasured"})
+        "synthetic": False, "geography": "United States",
+        "time_coverage": config.get("time_coverage", "Existing historical register including 2025 and 2026; source lag unmeasured")})
     snapshot = ingest_csv(contract, artifact, target)
     manifest = build_release(contract, snapshot["snapshot_id"], target)
     second = build_release(contract, snapshot["snapshot_id"], target)
@@ -743,9 +820,691 @@ def cmd_release_pilot(args):
             or pilot_authority_hashes(authority_root) != authorities):
         raise SystemExit("REFUSED: nondeterministic release or changed canonical input/authority")
     verify_release(target, collection, manifest["release_id"])
-    catalog = build_catalog(target, [(collection, manifest["release_id"])], product="cedar_press")
+    catalog = build_catalog(target, [(collection, manifest["release_id"])],
+                            product=config.get("product", "cedar_press"))
     immutable_bytes(target / "catalogs" / (catalog["catalog_id"] + ".json"), canonical_json(catalog))
     print(json.dumps({"release_id": manifest["release_id"], "record_count": manifest["record_count"], "catalog": str(target / "catalogs" / (catalog["catalog_id"] + ".json")), "status": "LOCAL_CANDIDATE_NOT_PROMOTED"}))
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# CEDAR GROVE COMPONENT CANDIDATES: `candidate <grove collection>` and
+# `grove-contracts <grove collection>`
+# ---------------------------------------------------------------------------
+# A Grove collection (Gaming) is several component tables written by the
+# numbered producers in cedar_pipeline.GROVE_COMPONENTS, each exposing
+# `CONTRACTS` and a `build --input-root --output-root --as-of` CLI (interface:
+# code/gaming_grove.py and docs/GAMING_GROVE_DATA_CONTRACT.md).
+#
+# This runner adds only what no single producer can check alone: declared
+# order, registration against dataset_contracts.json, a re-validation of every
+# table with the shared validators, cross-table references, input and code
+# conservation, and ONE candidate manifest in the NEED candidate's shape. It
+# never publishes, promotes or mints: release stays with `release-pilot`, which
+# hands a single approved flagship to Lumecon.
+GROVE_CODE = HERE            # tests point this at synthetic fixture producers
+GROVE_SAMPLE_ROWS = 10
+GROVE_CONTRACT_KEYS = ("grain", "primary_key", "field_rights", "field_descriptions",
+                       "publication_status")
+# A supersedes role containing one of these marks the clean table historical
+# (retained, never deleted) rather than a live source input.
+GROVE_SUPERSEDED_ROLES = ("supersed", "replac", "deprecat", "consolidat", "retire")
+
+
+def _sha_bytes(data):
+    import hashlib
+    return hashlib.sha256(data).hexdigest()
+
+
+def _csv_table(data):
+    """(header, rows) from exact bytes; strict, so a ragged row is refused."""
+    import csv
+    import io
+    csv.field_size_limit(10_000_000)
+    reader = csv.reader(io.StringIO(data.decode("utf-8-sig"), newline=""), strict=True)
+    header = next(reader, [])
+    rows = []
+    for row in reader:
+        if len(row) != len(header):
+            raise ValueError("ragged CSV row")
+        rows.append(dict(zip(header, row)))
+    return header, rows
+
+
+def _csv_bytes(header, rows):
+    import csv
+    import io
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=header, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue().encode("utf-8")
+
+
+def grove_module(collection):
+    """The collection's shared contract module (gaming -> code/gaming_grove.py)."""
+    import importlib
+    return importlib.import_module(collection.replace("-", "_") + "_grove")
+
+
+def grove_producers(collection):
+    """[(script, path, module)] in declared order. Refuses a missing producer,
+    one without CONTRACTS, and a table two producers both claim."""
+    from collections import Counter
+    out, missing = [], []
+    for script in CP.GROVE_COMPONENTS[collection]:
+        path = GROVE_CODE / script
+        if not path.is_file():
+            missing.append(script)
+            continue
+        spec = importlib.util.spec_from_file_location("grove_" + path.stem, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)                            # type: ignore
+        if not isinstance(getattr(module, "CONTRACTS", None), dict) or not module.CONTRACTS:
+            raise SystemExit(f"REFUSED: {script} declares no CONTRACTS")
+        out.append((script, path, module))
+    if missing:
+        raise SystemExit("REFUSED: registered producers missing: " + ", ".join(missing))
+    claimed = Counter(t for _, _, m in out for t in m.CONTRACTS)
+    twice = sorted(t for t, n in claimed.items() if n > 1)
+    if twice:
+        raise SystemExit("REFUSED: tables claimed by two producers: " + ", ".join(twice))
+    return out
+
+
+def grove_contract_problems(collection, producers):
+    """Structural checks on the declarations themselves, before any build."""
+    g = grove_module(collection)
+    problems = []
+    for script, _, module in producers:
+        for table, c in sorted(module.CONTRACTS.items()):
+            missing = [k for k in GROVE_CONTRACT_KEYS if k not in c]
+            if missing:
+                problems.append(f"MALFORMED_CONTRACT: {script} {table} lacks {missing}")
+                continue
+            rights, notes = c["field_rights"], c["field_descriptions"]
+            unknown = sorted({v for v in rights.values() if v not in g.RIGHTS_CLASSES})
+            if unknown:
+                problems.append(f"UNKNOWN_RIGHTS_CLASS: {table} {unknown}")
+            bare = [col for col in rights if not str(notes.get(col, "")).strip()]
+            if bare:
+                problems.append(f"UNDESCRIBED_FIELDS: {table} {bare[:5]}")
+            if c["publication_status"] not in g.PUBLICATION_STATUSES:
+                problems.append(f"UNKNOWN_PUBLICATION_STATUS: {table} {c['publication_status']!r}")
+            if not c["primary_key"] or any(k not in rights for k in c["primary_key"]):
+                problems.append(f"UNCLASSIFIED_PRIMARY_KEY: {table} {c['primary_key']}")
+            prefixes = sorted({p for p in c.get("derived_ids", {}).values() if p not in g.DERIVED_PREFIXES})
+            if prefixes:
+                problems.append(f"UNDECLARED_DERIVED_PREFIX: {table} {prefixes}")
+    return problems
+
+
+def grove_plan(collection, producers):
+    """The plan shape registration_problems already checks for `run`."""
+    return {"id": collection, "phase1": [s for s, _, _ in producers], "phase2": [],
+            "rb": {s: sorted(m.CONTRACTS) for s, _, m in producers}, "en": {}}
+
+
+def grove_reference_problems(collection, loaded, source, inputs, primary_keys):
+    """Every nonblank cross-table reference must exist in its authority.
+
+    Blank is allowed (unresolved stays unresolved). Declared in
+    cedar_pipeline.GROVE_REFERENCES; a column matches by exact name or by a
+    `_<name>` suffix (operator_enterprise_id, successor_compact_id).
+    """
+    import csv
+    import io
+    problems = []
+    for column, kind, where, key in CP.GROVE_REFERENCES.get(collection, []):
+        if kind == "component" and where is None:
+            owners = sorted(t for t, pk in primary_keys.items() if list(pk) == [key])
+            if len(owners) > 1:
+                problems.append(f"AMBIGUOUS_REFERENCE_AUTHORITY: {key} is the key of {owners}")
+                continue
+            where = owners[0] if owners else "<component keyed by " + key + ">"
+        users = [(t, c) for t, (header, _) in sorted(loaded.items()) for c in header
+                 if (c == column or c.endswith("_" + column))
+                 and not (kind == "component" and t == where and c == key)]
+        if not users:
+            continue
+        if kind == "component":
+            if where not in loaded:
+                problems.append(f"REFERENCE_AUTHORITY_ABSENT: {users[0][0]}.{users[0][1]} needs {where}")
+                continue
+            known = {r.get(key, "") for r in loaded[where][1]}
+        else:
+            path = source / where
+            if not path.is_file():
+                problems.append(f"REFERENCE_AUTHORITY_ABSENT: {users[0][0]}.{users[0][1]} needs input {where}")
+                continue
+            data = path.read_bytes()
+            record = inputs.setdefault(where, {"path": where, "sha256": _sha_bytes(data),
+                                               "bytes": len(data), "status": "READ", "read_by": []})
+            record["read_by"] = sorted(set(record["read_by"]) | {"build.py:references"})
+            known = {r.get(key, "") for r in csv.DictReader(io.StringIO(data.decode("utf-8-sig"), newline=""))}
+        for table, col in users:
+            values = {part.strip() for r in loaded[table][1]
+                      for part in (r.get(col) or "").split("|") if part.strip()}
+            dangling = sorted(values - known)
+            if dangling:
+                problems.append(f"DANGLING_REFERENCE: {table}.{col} -> {where}.{key}: "
+                                f"{len(dangling)} value(s) e.g. {dangling[:3]}")
+    return problems
+
+
+def grove_validate(collection, producers, source, components):
+    """Re-validate every declared table from its bytes with the shared validators."""
+    g = grove_module(collection)
+    problems, tables, inputs, receipts, loaded = [], [], {}, {}, {}
+    for script, _, module in producers:
+        path = components / (Path(script).stem + ".receipt.json")
+        if not path.is_file():
+            problems.append(f"MISSING_RECEIPT: {script}")
+            continue
+        receipt = json.loads(path.read_text(encoding="utf-8"))
+        for item in receipt.get("tables", []):
+            receipts[item.get("table")] = (script, item)
+        for rel, item in sorted((receipt.get("inputs") or {}).items()):
+            prior = inputs.get(rel)
+            if prior and prior.get("sha256") != item.get("sha256"):
+                problems.append(f"INPUT_READ_TWICE_DIFFERENTLY: {rel}")
+            record = inputs.setdefault(rel, {k: v for k, v in item.items() if k != "read_by"})
+            record["read_by"] = sorted(set(record.get("read_by", [])) | {script})
+    declared = set()
+    for script, _, module in producers:
+        for table, contract in sorted(module.CONTRACTS.items()):
+            declared.add(table)
+            path = components / table
+            if not path.is_file():
+                problems.append(f"NOT_WRITTEN: {table} declared by {script}")
+                continue
+            data = path.read_bytes()
+            try:
+                header, rows = _csv_table(data)
+            except (ValueError, UnicodeDecodeError) as error:
+                problems.append(f"UNREADABLE: {table} ({error})")
+                continue
+            loaded[table] = (header, rows)
+            problems += g.validate_rows(table, header, rows, contract)
+            rights = contract["field_rights"]
+            if [c for c in header if c not in rights]:
+                problems.append(f"UNCLASSIFIED_FIELDS: {table} {[c for c in header if c not in rights][:5]}")
+            if [c for c in rights if c not in header]:
+                problems.append(f"DECLARED_FIELDS_ABSENT: {table} {[c for c in rights if c not in header][:5]}")
+            digest = _sha_bytes(data)
+            owner, item = receipts.get(table, (None, {}))
+            if owner != script or item.get("sha256") != digest:
+                problems.append(f"RECEIPT_MISMATCH: {table} bytes differ from {script}'s receipt")
+            provisional = sum(1 for r in rows for v in r.values() if _PROVISIONAL_RE.search(v or ""))
+            public = [c for c in header if rights.get(c) in g.PUBLIC_RIGHTS]
+            tables.append({"table": table, "producer": script, "rows": len(rows),
+                           "columns": len(header), "bytes": len(data), "sha256": digest,
+                           "grain": contract["grain"], "primary_key": list(contract["primary_key"]),
+                           "publication_status": contract["publication_status"],
+                           "public_fields": len(public), "withheld_fields": len(header) - len(public),
+                           "provisional_id_values": provisional})
+    stray = sorted(p.name for p in components.glob("*.csv") if p.name not in declared)
+    if stray:
+        problems.append("UNDECLARED_OUTPUTS: " + ", ".join(stray))
+    primary_keys = {t: c["primary_key"] for _, _, m in producers for t, c in m.CONTRACTS.items()}
+    problems += grove_reference_problems(collection, loaded, source, inputs, primary_keys)
+    return {"problems": problems, "tables": tables, "inputs": inputs, "loaded": loaded,
+            "receipts": {s: json.loads((components / (Path(s).stem + ".receipt.json")).read_text(encoding="utf-8"))
+                         for s, _, _ in producers
+                         if (components / (Path(s).stem + ".receipt.json")).is_file()}}
+
+
+_YEAR_RE = re.compile(r"^(\d{4})")
+
+
+def grove_coverage(producers, loaded, receipts):
+    """Measured per table: rows, public/withheld fields, year span, 2025/2026 rows."""
+    out = {}
+    for script, _, module in producers:
+        for table, contract in sorted(module.CONTRACTS.items()):
+            if table not in loaded:
+                continue
+            header, rows = loaded[table]
+            # Retrieval/build dates say when Cedar looked, not what is covered.
+            year_cols = [c for c in header
+                         if (c in contract.get("dates", []) and not re.search(r"retriev|fetch|built", c))
+                         or c in ("year", "fiscal_year", "calendar_year", "period_year")]
+            years = []
+            touched = {"2025": 0, "2026": 0}
+            for r in rows:
+                row_years = {m.group(1) for c in year_cols for m in [_YEAR_RE.match(r.get(c) or "")] if m}
+                years.extend(row_years)
+                for y in touched:
+                    touched[y] += y in row_years
+            out[table] = {"producer": script, "rows": len(rows), "year_columns": year_cols,
+                          "min_year": min(years) if years else None,
+                          "max_year": max(years) if years else None,
+                          "rows_touching_2025": touched["2025"], "rows_touching_2026": touched["2026"],
+                          "publication_status": contract["publication_status"]}
+    for script, receipt in sorted(receipts.items()):
+        out.setdefault("_producers", {})[script] = {k: receipt.get(k) for k in ("coverage", "withheld", "notes")}
+    return out
+
+
+def grove_change_report(collection, previous, loaded, producers):
+    """Per table: added / removed / unchanged / changed, with key-level counts."""
+    report = {"previous": str(previous), "tables": {}}
+    before_manifest = json.loads((previous / "logs" / f"{collection}-candidate.json").read_text(encoding="utf-8"))
+    report["previous_status"] = before_manifest.get("status")
+    keys = {t: m.CONTRACTS[t]["primary_key"] for _, _, m in producers for t in m.CONTRACTS}
+    names = sorted(set(keys) | {p.name for p in (previous / "components").glob("*.csv")})
+    for table in names:
+        path = previous / "components" / table
+        old = _csv_table(path.read_bytes()) if path.is_file() else None
+        new = loaded.get(table)
+        if old is None and new is None:
+            continue
+        if old is None or new is None:
+            report["tables"][table] = {"status": "added" if old is None else "removed",
+                                       "rows_before": len(old[1]) if old else 0,
+                                       "rows_after": len(new[1]) if new else 0}
+            continue
+        pk = keys.get(table) or old[0][:1]
+        before = {tuple(r.get(k, "") for k in pk): r for r in old[1]}
+        after = {tuple(r.get(k, "") for k in pk): r for r in new[1]}
+        changed = sum(1 for k in set(before) & set(after) if before[k] != after[k])
+        entry = {"rows_before": len(old[1]), "rows_after": len(new[1]),
+                 "keys_added": len(set(after) - set(before)),
+                 "keys_removed": len(set(before) - set(after)), "keys_changed": changed,
+                 "columns_added": [c for c in new[0] if c not in old[0]],
+                 "columns_removed": [c for c in old[0] if c not in new[0]]}
+        entry["status"] = "unchanged" if (not changed and old[0] == new[0] and not entry["keys_added"]
+                                          and not entry["keys_removed"]) else "changed"
+        report["tables"][table] = entry
+    return report
+
+
+def cmd_grove_candidate(args) -> int:
+    """Run the registered Grove producers into a new isolated root; never promote."""
+    import os
+    import time
+    from datetime import date
+
+    collection = args.collection
+    source = Path(args.input_root).resolve()
+    target = Path(args.output_root).resolve()
+    as_of = date.fromisoformat(args.as_of).isoformat()
+    # The NEED candidate's rule, plus the pilot store's: never inside a repository.
+    if target.exists() or target.is_relative_to(source) or source.is_relative_to(target):
+        raise SystemExit("REFUSED: candidate root must be new and separate from the input root")
+    if any((parent / ".git").exists() for parent in target.parents):
+        raise SystemExit("REFUSED: candidate root must be outside Git repositories")
+    if not (source / "data" / "clean").is_dir():
+        raise SystemExit(f"REFUSED: no populated data/clean under {source}")
+    previous = Path(args.previous).resolve() if args.previous else None
+    if previous and not (previous / "logs" / f"{collection}-candidate.json").is_file():
+        raise SystemExit("REFUSED: --previous is not a Grove candidate root")
+    g = grove_module(collection)
+    producers = grove_producers(collection)
+    problems = grove_contract_problems(collection, producers)
+    problems += CP.registration_problems(grove_plan(collection, producers))
+    if problems:
+        raise SystemExit("REFUSED: unregistered or malformed components; nothing created\n  "
+                         + "\n  ".join(problems)
+                         + f"\n  (sync registration: py -3 code/build.py grove-contracts {collection})")
+    code_paths = [p for _, p, _ in producers] + [Path(g.__file__).resolve(), Path(__file__).resolve(),
+                                                  HERE / "cedar_pipeline.py"]
+    code = [{"path": "code/" + p.name, "sha256": _sha_bytes(p.read_bytes())} for p in code_paths]
+
+    target.mkdir(parents=True)
+    components, logs = target / "components", target / "logs"
+    components.mkdir()
+    logs.mkdir()
+    manifest = {"schema": "cedar.grove.candidate.v1", "collection": collection, "as_of": as_of,
+                "input_root": str(source), "id_contract_status": getattr(g, "ID_CONTRACT_STATUS", None),
+                "code": code, "inputs": [], "steps": [], "status": "BUILDING"}
+    manifest_path = logs / f"{collection}-candidate.json"
+
+    def save():
+        manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    env = dict(os.environ, CEDAR_RUN_DATE=as_of, CEDAR_DUCKDB_MEMORY_LIMIT="512MB",
+               CEDAR_DUCKDB_THREADS="1", CEDAR_DUCKDB_MAX_SPILL="2GB", OMP_NUM_THREADS="1")
+    save()
+    for number, (script, path, _module) in enumerate(producers, 1):
+        start = time.monotonic()
+        log = logs / f"{number:02d}-{script}.log"
+        argv = ["build", "--input-root", str(source), "--output-root", str(components), "--as-of", as_of]
+        with log.open("w", encoding="utf-8") as output:
+            # cwd is the candidate root: a stray relative write lands here,
+            # never in the repository or the canonical input tree.
+            result = subprocess.run([sys.executable, "-B", str(path), *argv], cwd=target, env=env,
+                                    stdout=output, stderr=subprocess.STDOUT)
+        manifest["steps"].append({"command": [script, *argv], "exit_code": result.returncode,
+                                  "seconds": round(time.monotonic() - start, 3),
+                                  "log": "logs/" + log.name})
+        print(f"[{number}/{len(producers)}] {script} exit {result.returncode}", flush=True)
+        if result.returncode:
+            manifest["status"] = "FAILED"
+            save()
+            return 1
+        save()
+
+    checked = grove_validate(collection, producers, source, components)
+    loaded = checked.pop("loaded")
+    manifest["inputs"] = [checked["inputs"][k] for k in sorted(checked["inputs"])]
+    manifest["outputs"] = checked["tables"]
+    manifest["validation"] = {"problems": checked["problems"], "passed": not checked["problems"]}
+    changed, unverifiable = [], []
+    for item in manifest["inputs"]:
+        # A receipt may name an input outside the root by an absolute `source`;
+        # a bare label that resolves nowhere cannot be rechecked and is named
+        # as such rather than reported as a changed input.
+        path = Path(item["source"]) if item.get("source") else source / item["path"]
+        if item.get("status") == "ABSENT":
+            if path.exists():
+                changed.append(item["path"])
+        elif not path.is_file():
+            unverifiable.append(item["path"])
+        elif _sha_bytes(path.read_bytes()) != item.get("sha256"):
+            changed.append(item["path"])
+    manifest["changed_inputs"] = changed
+    manifest["unverifiable_inputs"] = unverifiable
+    code_changed = [c["path"] for c, p in zip(code, code_paths) if _sha_bytes(p.read_bytes()) != c["sha256"]]
+    manifest["changed_code"] = code_changed
+
+    samples_dir = target / "samples"
+    samples_dir.mkdir()
+    samples = []
+    for script, _, module in producers:
+        for table, contract in sorted(module.CONTRACTS.items()):
+            if table not in loaded:
+                continue
+            header, rows = loaded[table]
+            keep, public = g.public_projection(table, header, rows, contract["field_rights"])
+            data = _csv_bytes(keep, public[:GROVE_SAMPLE_ROWS])
+            (samples_dir / table).write_bytes(data)
+            samples.append({"table": table, "rows": min(len(public), GROVE_SAMPLE_ROWS),
+                            "public_rows": len(public), "public_fields": keep,
+                            "publication_status": contract["publication_status"],
+                            "sha256": _sha_bytes(data), "path": "samples/" + table})
+    manifest["samples"] = samples
+    coverage = grove_coverage(producers, loaded, checked["receipts"])
+    (target / "coverage.json").write_text(json.dumps(coverage, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    manifest["coverage"] = "coverage.json"
+    if previous:
+        report = grove_change_report(collection, previous, loaded, producers)
+        (target / "change_report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
+                                                   encoding="utf-8")
+        manifest["change_report"] = "change_report.json"
+    provisional = sum(t["provisional_id_values"] for t in checked["tables"])
+    manifest["provisional_id_values"] = provisional
+    if checked["problems"]:
+        manifest["status"] = "FAILED_VALIDATION"
+    elif changed:
+        manifest["status"] = "FAILED_INPUT_CONSERVATION"
+    elif code_changed:
+        manifest["status"] = "FAILED_CODE_CONSERVATION"
+    elif provisional:
+        # Owner hold 2026-09-24: structure only. Not promotable, not releasable.
+        manifest["status"] = "LOCAL_DRY_RUN_PROVISIONAL_IDS"
+    else:
+        manifest["status"] = "LOCAL_CANDIDATE_NOT_PROMOTED"
+    save()
+    for problem in checked["problems"]:
+        print("  !! " + problem)
+    print(manifest_path)
+    print("status: " + manifest["status"])
+    return 0 if manifest["status"].startswith("LOCAL_") else 1
+
+
+# ---- `grove-contracts`: registration, pilot field map and contract doc ----
+# Generated from the producers' CONTRACTS so the field rights stay in one
+# place. The outputs are the EXISTING authorities (dataset_contracts.json, the
+# field map) plus one generated doc; `--check` makes staleness a failure.
+
+def _supersedes(item):
+    """(clean table, role) from a `supersedes` item: {"table","role"} or 'x.csv (role)'."""
+    if isinstance(item, dict):
+        return str(item.get("table", "")), str(item.get("role", ""))
+    # Free text: "gaming_facilities (legacy ...)", "gaming_facilities.facility_name",
+    # "review/x_2026-08-06.csv". The leading token names the table.
+    text = str(item).strip()
+    match = re.match(r"([\w/-]+)(\.csv)?", text)
+    if not match:
+        return text, ""
+    return match.group(1) + ".csv", text[match.end():].strip(" :-().")
+
+
+_READS_RE = re.compile(r"""\.clean\(\s*["']([^"']+\.csv)["']|\.read\(\s*["']data/clean/([^"']+\.csv)["']""")
+
+
+def grove_static_reads(path):
+    """Clean tables a producer reads through `Inputs`, from its source text."""
+    return sorted({a or b for a, b in _READS_RE.findall(path.read_text(encoding="utf-8"))})
+
+
+def grove_dataset_contracts(collection, producers, text):
+    """dataset_contracts.json with this collection's Grove components registered
+    and every pre-existing table given an explicit grove_role. Nothing removed."""
+    data = json.loads(text)
+    entries = [c for c in data["contracts"] if c.get("collection") == collection]
+    if len(entries) != 1:
+        raise SystemExit(f"REFUSED: {collection} needs exactly one existing collection contract")
+    entry = entries[0]
+    existing = [t for t in entry["tables"] if not t.get("grove_component")]
+    # A component may not reuse an existing clean table's name: they are
+    # different objects (different grain, rights and writer), one contract
+    # entry cannot describe both, and promoting the component would overwrite
+    # the table its own producer reads.
+    clash = sorted({t["table"] for t in existing}
+                   & {t for _, _, m in producers for t in m.CONTRACTS})
+    if clash:
+        owners = {t: s for s, _, m in producers for t in m.CONTRACTS}
+        raise SystemExit("REFUSED: NAME_COLLISION: Grove component table(s) reuse an existing "
+                         f"{collection} clean table name: "
+                         + ", ".join(f"{t} ({owners[t]})" for t in clash)
+                         + ". Give the component a distinct name; nothing was written.")
+    consumers = {}
+    for script, path, module in producers:
+        for table, c in sorted(module.CONTRACTS.items()):
+            for item in c.get("supersedes", []):
+                name, role = _supersedes(item)
+                consumers.setdefault(name, []).append({"component": table, "producer": script, "role": role})
+        for name in grove_static_reads(path):
+            consumers.setdefault(name, []).append({"component": "*", "producer": script,
+                                                   "role": "read as input (Inputs.clean)"})
+    for t in existing:
+        t.pop("grove_role", None)
+        t.pop("grove_consumers", None)
+        uses = [dict(u) for u in {tuple(sorted(u.items())) for u in consumers.get(t["table"], [])}]
+        uses = sorted(uses, key=lambda u: (u["producer"], u["component"], u["role"]))
+        if uses and all(any(k in u["role"].lower() for k in GROVE_SUPERSEDED_ROLES) for u in uses):
+            t["grove_role"] = "historical_superseded_by_grove"
+        elif uses:
+            t["grove_role"] = "grove_source_input"
+        elif t.get("status") in ("licensed-never-ships", "internal-by-decision"):
+            t["grove_role"] = "internal_qa"
+        else:
+            t["grove_role"] = "legacy_retained_not_in_grove"
+        if uses:
+            t["grove_consumers"] = uses
+    components = []
+    for script, _, module in producers:
+        for table, c in sorted(module.CONTRACTS.items()):
+            components.append({
+                "table": table, "status": "grove_component", "grove_component": True,
+                "publication_status": c["publication_status"], "key_columns": [],
+                "grain": c["grain"], "primary_key": list(c["primary_key"]), "join_cardinality": {},
+                "grain_declared_by": f"producer CONTRACTS in code/{script}; synced by "
+                                     f"code/build.py grove-contracts {collection}",
+                "grain_validated": False, "measured_rows_per_join_key": {}, "grain_open_question": "",
+                "grain_defect": "", "grain_evidence": {}, "key_refused": {}, "population_scope": {},
+                "rebuilt_by": [script], "enriched_by": [], "never_run_warning": [],
+                "location": f"Grove candidate components root (code/build.py candidate {collection}); not data/clean",
+                "supersedes": [dict(zip(("table", "role"), _supersedes(i))) for i in c.get("supersedes", [])],
+            })
+    entry["tables"] = existing + components
+    entry["n_grove_components"] = len(components)
+    return json.dumps(data, indent=1, ensure_ascii=True).encode("utf-8")
+
+
+def grove_field_map_entry(collection, script, table, contract):
+    """The pilot table's field-map entry, projected from its field rights."""
+    g = grove_module(collection)
+    rights = contract["field_rights"]
+    header = list(rights)
+    public = [c for c in header if rights[c] in g.PUBLIC_RIGHTS]
+    fields = [{"column": c, "decision": "keep" if rights[c] in g.PUBLIC_RIGHTS else "internal",
+               "why": f"Grove field rights {rights[c]}: {g.RIGHTS_CLASSES[rights[c]]}",
+               "spec": f"code/{script} CONTRACTS"} for c in header]
+    order, new = list(public), []
+    if "research_note" not in header:
+        order.append("research_note")
+        new.append({"column": "research_note", "from": "rule:blank",
+                    "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."})
+    return {
+        "collection": collection, "public_file": table, "row": contract["grain"],
+        "opening": [], "entity_uid": "cedar_uid", "plural": False,
+        "entity_role": "none: the rows attribute no Native entity",
+        "columns_today": len(header), "columns_target": len(order),
+        "default_viewer": [c for c in contract.get("default_viewer", public[:8]) if c in order],
+        "header_source": f"producer CONTRACTS (code/{script}); generated by code/build.py "
+                         f"grove-contracts {collection}. Edit the producer's field_rights, not this entry",
+        "fields": fields, "new": new, "order": order, "retire": [],
+    }
+
+
+def grove_field_map(collection, producers, text):
+    """field_map.json with the Grove pilot's entry regenerated (only that entry)."""
+    data = json.loads(text)
+    config = CP.RELEASE_PILOTS.get(collection, {})
+    table = config.get("table")
+    stale = [k for k, t in data["tables"].items()
+             if t.get("collection") == collection and "grove-contracts" in t.get("header_source", "")]
+    for k in stale:
+        data["tables"].pop(k)
+    owner = [(s, m.CONTRACTS[table]) for s, _, m in producers if table and table in m.CONTRACTS]
+    if owner:
+        others = [k for k, t in data["tables"].items() if t.get("collection") == collection]
+        if others:
+            raise SystemExit(f"REFUSED: {collection} already has a hand-written field-map entry {others}")
+        script, contract = owner[0]
+        data["tables"][collection + "/" + Path(table).stem] = grove_field_map_entry(collection, script, table, contract)
+    return (json.dumps(data, indent=1, ensure_ascii=False) + "\n").encode("utf-8")
+
+
+def grove_contract_doc(collection, producers, contracts_bytes):
+    g = grove_module(collection)
+    lines = []
+    p = lines.append
+    p(f"# {collection.title()} Grove data contract")
+    p("")
+    p(f"Generated by `py -3 code/build.py grove-contracts {collection}` from each registered producer's "
+      "`CONTRACTS` and the shared vocabularies in "
+      f"`code/{Path(g.__file__).name}`. Do not edit; `--check` fails when this file is stale.")
+    p("")
+    p(f"Collection `{collection}` is a **Cedar Grove** collection, not a Cedar Press storefront collection. "
+      f"Schema `{getattr(g, 'SCHEMA_VERSION', '')}`. Identifier contract status: "
+      f"`{getattr(g, 'ID_CONTRACT_STATUS', 'UNDECLARED')}`; while it is not `APPROVED`, every component ID "
+      "is rendered `PROV-...`, candidates are `LOCAL_DRY_RUN_PROVISIONAL_IDS`, and `release-pilot` refuses them.")
+    p("")
+    p("Build: `py -3 code/build.py candidate " + collection + " --input-root <Cedar data root> "
+      "--output-root <new root outside Git> --as-of <YYYY-MM-DD> [--previous <prior candidate root>]`. "
+      "Release (one approved flagship): `code/build.py release-pilot " + collection + "`.")
+    p("")
+    p("## Producers, in run order")
+    p("")
+    p("| # | Producer | Tables |")
+    p("|---:|---|---|")
+    for i, (script, _, module) in enumerate(producers, 1):
+        p(f"| {i} | `code/{script}` | {', '.join(f'`{t}`' for t in sorted(module.CONTRACTS))} |")
+    p("")
+    p("## Field rights classes")
+    p("")
+    for name, meaning in g.RIGHTS_CLASSES.items():
+        public = "public" if name in g.PUBLIC_RIGHTS else "never public"
+        p(f"- `{name}` ({public}): {meaning}")
+    p("")
+    p("## Derived identifier prefixes")
+    p("")
+    for name, meaning in g.DERIVED_PREFIXES.items():
+        p(f"- `{name}`: {meaning}")
+    p("")
+    p("## Tables")
+    for script, _, module in producers:
+        for table, c in sorted(module.CONTRACTS.items()):
+            rights = c["field_rights"]
+            public = [x for x in rights if rights[x] in g.PUBLIC_RIGHTS]
+            p("")
+            p(f"### `{table}` (`code/{script}`)")
+            p("")
+            p(f"- **Grain:** {c['grain']}")
+            p(f"- **Primary key:** {', '.join(f'`{k}`' for k in c['primary_key'])}")
+            p(f"- **Publication status:** `{c['publication_status']}`; {len(public)} public of {len(rights)} fields")
+            if c.get("row_rights_column"):
+                p(f"- **Row-level rights column:** `{c['row_rights_column']}`")
+            if c.get("nonadditive_note"):
+                p(f"- **Non-additivity:** {c['nonadditive_note']}")
+            if c.get("derived_ids"):
+                p("- **Derived IDs:** " + ", ".join(f"`{k}` -> `{v}`" for k, v in sorted(c["derived_ids"].items())))
+            if c.get("public_id_columns"):
+                p("- **Public ID columns:** " + ", ".join(f"`{k}`" for k in c["public_id_columns"]))
+            if c.get("intervals"):
+                p("- **Intervals:** " + ", ".join(f"`{a}` <= `{b}`" for a, b in c["intervals"]))
+            for col, allowed in sorted(c.get("enums", {}).items()):
+                p(f"- **`{col}` vocabulary:** " + ", ".join(f"`{v}`" for v in sorted(allowed)))
+            for item in c.get("supersedes", []):
+                name, role = _supersedes(item)
+                p(f"- **Draws from / supersedes:** `{name}`" + (f" ({role})" if role else ""))
+            p("")
+            p("| # | Column | Rights | Public | Description |")
+            p("|---:|---|---|---|---|")
+            for i, col in enumerate(rights, 1):
+                desc = str(c["field_descriptions"].get(col, "")).replace("|", "\\|").replace("\n", " ")
+                p(f"| {i} | `{col}` | `{rights[col]}` | {'yes' if col in public else 'no'} | {desc} |")
+    contracts = json.loads(contracts_bytes)
+    entry = next(c for c in contracts["contracts"] if c.get("collection") == collection)
+    p("")
+    p("## Pre-existing clean tables and their Grove role")
+    p("")
+    p("Classified from the producers' `supersedes` declarations and the codebook status. Nothing is deleted; "
+      "`legacy_retained_not_in_grove` means no Grove component reads it yet, and it stays historical until a caller "
+      "and output contract are proved.")
+    p("")
+    p("| Table | Codebook status | Grove role | Read by |")
+    p("|---|---|---|---|")
+    for t in entry["tables"]:
+        if t.get("grove_component"):
+            continue
+        users = ", ".join(sorted({f"`{u['component']}`" for u in t.get("grove_consumers", [])}))
+        p(f"| `{t['table']}` | {t.get('status', '')} | `{t.get('grove_role', '')}` | {users} |")
+    p("")
+    return ("\n".join(lines)).encode("utf-8")
+
+
+def cmd_grove_contracts(args) -> int:
+    collection = args.collection
+    producers = grove_producers(collection)
+    problems = grove_contract_problems(collection, producers)
+    if problems:
+        raise SystemExit("REFUSED: malformed producer contracts\n  " + "\n  ".join(problems))
+    contracts_path = ROOT / "docs/schema/dataset_contracts.json"
+    field_map_path = ROOT / "data/cedar/field_map.json"
+    contracts = grove_dataset_contracts(collection, producers, contracts_path.read_text(encoding="utf-8"))
+    outputs = {
+        contracts_path: contracts,
+        field_map_path: grove_field_map(collection, producers, field_map_path.read_text(encoding="utf-8")),
+        ROOT / "docs" / f"{collection.upper()}_GROVE_DATA_CONTRACT.md":
+            grove_contract_doc(collection, producers, contracts),
+    }
+    stale = [path for path, data in outputs.items() if not path.is_file() or path.read_bytes() != data]
+    for path in stale:
+        rel = path.relative_to(ROOT).as_posix()
+        if args.check:
+            print("STALE: " + rel + f"  (run: py -3 code/build.py grove-contracts {collection})")
+        else:
+            path.write_bytes(outputs[path])
+            print("wrote " + rel)
+    if args.check:
+        if stale:
+            return 1
+        print(f"{collection} Grove registration, field map and contract doc current")
     return 0
 
 
@@ -753,13 +1512,18 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list", help="the collections and their script counts").set_defaults(func=cmd_list)
-    candidate = sub.add_parser("candidate", help="build an isolated, unpublished NEED migration candidate")
-    candidate.add_argument("collection", choices=["need"])
+    candidate = sub.add_parser("candidate", help="build an isolated, unpublished NEED migration or Grove component candidate")
+    candidate.add_argument("collection", choices=["need", *sorted(CP.GROVE_COMPONENTS)])
     candidate.add_argument("--input-root", required=True)
-    candidate.add_argument("--owner-dir", required=True)
+    candidate.add_argument("--owner-dir", help="NEED only: the owner dataset directory")
     candidate.add_argument("--output-root", required=True)
     candidate.add_argument("--as-of", required=True)
+    candidate.add_argument("--previous", help="Grove only: a prior candidate root for the change report")
     candidate.set_defaults(func=cmd_candidate)
+    grove = sub.add_parser("grove-contracts", help="sync Grove component registration, field-map entry and contract doc from producer CONTRACTS")
+    grove.add_argument("collection", choices=sorted(CP.GROVE_COMPONENTS))
+    grove.add_argument("--check", action="store_true", help="exit 1 if any generated output is stale; write nothing")
+    grove.set_defaults(func=cmd_grove_contracts)
     pilot = sub.add_parser("release-pilot", help="unpublished allowlisted flagship via existing Lumecon contracts")
     pilot.add_argument("collection", choices=sorted(CP.RELEASE_PILOTS))
     pilot.add_argument("--source", required=True)

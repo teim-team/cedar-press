@@ -896,7 +896,8 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_an_unmapped_collection_is_left_alone(self):
         header = ["facility_id", "name", "built_date"]
         rows = [{"facility_id": "1", "name": "x", "built_date": "2026-01-01"}]
-        result = pub.apply_field_map("gaming", header, rows, set(header))
+        # Fictional id: gaming now has a generated Grove field-map entry.
+        result = pub.apply_field_map("fixture-unmapped", header, rows, set(header))
         self.assertEqual(result, {"mapped": False})
         self.assertEqual(header, ["facility_id", "name", "built_date"])
 

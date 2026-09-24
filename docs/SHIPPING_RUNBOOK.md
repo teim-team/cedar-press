@@ -248,6 +248,77 @@ from independent backups in staging; approve a specific catalog/release and test
 actual production denial/download/rollback. No AWS resource, deployment, public
 release or production pointer was changed by this procedure. NEED remains held.
 
+### Cedar Grove Gaming: candidate build and release pilot (2026-09-24)
+
+Gaming is a **Cedar Grove** collection. It is not one of the twelve Press
+shelves and never enters the ship chain below. It uses the same runner, pilot,
+Lumecon contracts and adapter, with no Gaming-specific infrastructure. The
+contract for every component table is generated in
+`docs/GAMING_GROVE_DATA_CONTRACT.md`. Proposed shared-infrastructure changes are
+in `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md`.
+
+1. **Registration.** The producers are listed in
+   `cedar_pipeline.GROVE_COMPONENTS["gaming"]` (1200 to 1203). Each producer
+   exposes `CONTRACTS`. Run
+   `py -3 code/build.py grove-contracts gaming` to regenerate three things from
+   those contracts: the component entries and the `grove_role` of every
+   pre-existing gaming table in `docs/schema/dataset_contracts.json`, the pilot's
+   `gaming/gaming_regional_revenue` field-map entry, and the contract doc.
+   `--check` exits 1 when any of the three is stale. After a field-map change,
+   run `node scripts/field-map-markdown.mjs`. A component that reuses an
+   existing clean table's name is refused with `NAME_COLLISION`.
+   `code/512_build_dataset_contracts.py` derives from `data/clean` and does not
+   yet preserve these entries. Rerun `grove-contracts` after any 512
+   regeneration.
+2. **Candidate (one entry).**
+   `py -3 code/build.py candidate gaming --input-root "C:\Users\esm247\Desktop\Cedar Press" --output-root <new dir outside Git> --as-of <YYYY-MM-DD> [--previous <prior candidate root>]`
+   - The build refuses an existing or overlapping root, and any unregistered
+     or malformed component, before it creates anything.
+   - Producers run in the declared order. Each gets its own log under `logs/`,
+     and the chain stops at the first failure.
+   - Every table is then revalidated from its bytes with
+     `gaming_grove.validate_rows`, and its receipt hash is checked.
+   - Cross-table references are checked (`cedar_pipeline.GROVE_REFERENCES`).
+     Facility and compact IDs must exist in the component that holds them as
+     its key. `cedar_uid` must exist in the identity register, and
+     `enterprise_id` in the NEST/NEED issued register.
+   - Input and code hashes must not change during the run.
+   - Outputs: `logs/gaming-candidate.json`, `samples/` (10 rows per table,
+     public projection only), `coverage.json` and `change_report.json`.
+   - Final status is one of `LOCAL_CANDIDATE_NOT_PROMOTED`,
+     `LOCAL_DRY_RUN_PROVISIONAL_IDS` (any `PROV-` ID present) or `FAILED_*`.
+3. **ID hold.** Until the CICD identifier-retirement audit returns an
+   allowed-ID contract, producers render only `PROV-` IDs, and only when
+   `CEDAR_GAMING_PROVISIONAL_IDS=1` is set. Candidates are therefore
+   `LOCAL_DRY_RUN_PROVISIONAL_IDS`, which is not promotable. No Gaming binding
+   exists in `cedar_ids` yet.
+4. **Release pilot.**
+   `code/build.py release-pilot gaming --source <candidate>\components\gaming_regional_revenue.csv --output-root <isolated store> --as-of <date>`
+   The flagship is the NIGC regional revenue component. The Casino City
+   lineage `FLAGSHIP["gaming"] = gaming_facilities.csv` is refused by name
+   until `cedar_publication` moves FLAGSHIP.
+
+   The pilot refuses in these cases:
+   - any `PROV-` value
+   - any Casino City/vendor ID (`CCP-`, `VP-`, `TPL-`)
+   - a non-CE `cedar_uid`
+   - an unmapped flagship
+   - a key without a `cedar_ids` binding
+
+   Today it therefore stops at the ID hold, which is the intended result. It
+   writes a `cedar_grove` Lumecon catalog.
+5. **Delivery gap.** The Cedar server adapter serves only storefront
+   (`LAUNCH_COLLECTION`) collections from `cedar_press` catalogs. It refuses
+   Gaming to every tier before fetching anything, and it refuses a
+   `cedar_grove` catalog. The existing `grove`/`tree` tiers already reach the
+   grove shelf, but a reviewed Grove catalog declaration is Havala's change to
+   make (see the notes doc). `server/tests/test_gaming_release.py` proves both
+   refusals and simulates that declaration.
+
+Tests: `py -3 -B -m unittest discover -s server/tests -t server -p test_gaming_release.py`
+with `PYTHONPATH` set to the Lumecon `src` and Cedar `server` directories, using
+the Lumecon `.venv` Python.
+
 <!-- END CODEX-ISOLATED-CANDIDATE-RUNBOOK -->
 
 

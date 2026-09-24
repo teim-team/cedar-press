@@ -71,6 +71,63 @@ RELEASE_PILOTS = {
                     "Source-suppressed beneficiaries remain unresolved; no inferred entity links",
                     "Complete source qualifications retained verbatim in research_note"],
     },
+    # Cedar Grove, not a Press storefront collection. The flagship is the NIGC
+    # regional revenue component (producer 1200), NOT `FLAGSHIP["gaming"]`
+    # (`gaming_facilities.csv`, Casino City lineage), which this pilot refuses
+    # by name until cedar_publication's owner moves FLAGSHIP. Optional keys
+    # used only here: table/replaces_flagship (that bounded override),
+    # product (Lumecon catalog product), time_coverage, identifier_refusals
+    # (refuse provisional PROV-, vendor CCP-/VP-/TPL- and non-CE entity IDs).
+    "gaming": {
+        "owner": "National Indian Gaming Commission gross gaming revenue reports, via Cedar Grove",
+        "url": "https://www.nigc.gov/commission/reports-and-publications/gross-gaming-revenue-reports/",
+        "rights": {"license": "U.S. federal government publication (NIGC); Cedar requires NIGC attribution",
+                   "publication_class": "publishable", "redistribution": True, "retrieval": True},
+        "caveats": ["Cedar Grove research release; not a Cedar Press storefront collection",
+                    "NIGC administrative-region and national totals only; no tribe-, enterprise- or facility-level revenue",
+                    "Regional totals are never allocated to tribes or facilities, by operation count or otherwise",
+                    "Fiscal years FY2001-FY2025 as published; no FY2026 figure or interpolation",
+                    "Nominal and real-2025 dollars are separate fields and never added; region-system vintages are not additive",
+                    "Attribution: National Indian Gaming Commission, Gross Gaming Revenue Reports"],
+        "table": "gaming_regional_revenue.csv",
+        "replaces_flagship": "gaming_facilities.csv",
+        "product": "cedar_grove",
+        "time_coverage": "NIGC fiscal years FY2001-FY2025 (latest published report); no FY2026",
+        "identifier_refusals": True,
+    },
+}
+
+# Cedar Grove component producers, in declared run order, for the supported
+# `code/build.py candidate <collection>` entry. Same runner authority as the
+# pilots above; each producer's own `CONTRACTS` supplies its tables, and those
+# tables must be registered in dataset_contracts.json (registration_problems)
+# before the runner dispatches them. Not a second registry: the list only
+# orders scripts the contracts already name.
+GROVE_COMPONENTS = {
+    "gaming": [
+        "1200_gaming_grove_revenue.py",
+        "1201_gaming_grove_facilities.py",
+        "1202_gaming_grove_compacts_regulatory.py",
+        "1203_gaming_grove_labor_advocacy.py",
+    ],
+}
+
+# Cross-table references the Grove candidate runner checks after every
+# component has built: (column, "component"|"input", authority, key column).
+# A column matches by exact name or a `_<column>` suffix; blank = unresolved
+# and allowed; a nonblank value absent from its authority fails the candidate.
+# A "component" authority of None is the one component table whose declared
+# primary key is exactly that key column (so a table rename cannot silently
+# disable the check). "input" registers are issued-ID files read from the
+# pinned input root. No facility-ID FORMAT is assumed: the pending allowed-ID
+# contract decides that.
+GROVE_REFERENCES = {
+    "gaming": [
+        ("gaming_facility_id", "component", None, "gaming_facility_id"),
+        ("compact_id", "component", None, "compact_id"),
+        ("cedar_uid", "input", "data/spine/cedar_identity_register.csv", "cedar_uid"),
+        ("enterprise_id", "input", "data/spine/cedar_nest_id_register.csv", "enterprise_id"),
+    ],
 }
 
 
