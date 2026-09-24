@@ -226,7 +226,8 @@ function browser(storage=new Map()){
  function element(){return {value:'',textContent:'',hidden:false,classList:{toggle(){}},
   appendChild(){},addEventListener(name,fn){this[name]=fn;},focus(){},select(){},
   click(){if(this.download)downloads.push(this.download);else if(this.onclick)this.onclick();}};}
- const document={getElementById(id){if(!elements.has(id))elements.set(id,element());
+ const document={getElementById(id){
+  if(!elements.has(id))elements.set(id,element());
  return elements.get(id);},
  createElement:element};
  const window={addEventListener(name,fn){events[name]=fn;}};
@@ -234,7 +235,8 @@ function browser(storage=new Map()){
  localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},
   navigator:{clipboard:{writeText:async()=>{}}},crypto:{randomUUID:()=>`fixture-${++id}`},
   alert(message){throw Error(message);},Blob,
- URL:{createObjectURL:()=>"blob:fixture",revokeObjectURL(){}},setTimeout(){}};
+ URL:{createObjectURL:()=>"blob:fixture",revokeObjectURL(){}},
+ setTimeout(){}};
  vm.createContext(context);vm.runInContext(source,context);
  return {context,storage,downloads,events,get:id=>document.getElementById(id),
    run:code=>vm.runInContext(code,context),api:window.needReview};
@@ -303,9 +305,14 @@ function browser(storage=new Map()){
         self.assertIn("export races passed", result.stdout)
 
 
-
 LAUNCH_CONTEXT_KEYS = (
-    "id", "collection", "title", "blocker_type", "question", "options", "evidence",
+    "id",
+    "collection",
+    "title",
+    "blocker_type",
+    "question",
+    "options",
+    "evidence",
 )
 
 
@@ -330,21 +337,32 @@ def launch_fixture(root):
         ("POLICY", "product/policy decision", "OPEN"),
     ):
         item = dict(
-            id="LAUNCH:" + suffix, collection="fixture", title="Fixture " + suffix,
-            blocker_type=kind, status=status, priority="P1", impact="One fixture release",
+            id="LAUNCH:" + suffix,
+            collection="fixture",
+            title="Fixture " + suffix,
+            blocker_type=kind,
+            status=status,
+            priority="P1",
+            impact="One fixture release",
             owner_review_eligible=suffix in {"SCOPE", "CONFLICT"},
             question="Select the explicitly scoped fixture disposition?",
             options={"ACCEPT_SCOPE": "Accept fixture scope", "HOLD": "Hold for evidence"},
-            evidence=[{"excerpt": "Pinned fixture evidence", "url": "https://example.invalid/evidence"}],
-            recommendation="HOLD", confidence="Unresolved evidence",
+            evidence=[
+                {"excerpt": "Pinned fixture evidence", "url": "https://example.invalid/evidence"}
+            ],
+            recommendation="HOLD",
+            confidence="Unresolved evidence",
             decision_provenance="Fixture, no canonical application authorized",
         )
         item["evidence_fingerprint"] = launch_fingerprint(item)
         items.append(item)
     return dict(
-        schema="cedar.launch.review.v1", candidate_root=str(root), review_id="launch-fixture-v1",
+        schema="cedar.launch.review.v1",
+        candidate_root=str(root),
+        review_id="launch-fixture-v1",
         evidence_fingerprint="a" * 64,
-        input_sha256={"source.bin": hashlib.sha256(b"pinned").hexdigest()}, items=items,
+        input_sha256={"source.bin": hashlib.sha256(b"pinned").hexdigest()},
+        items=items,
     )
 
 
@@ -363,10 +381,17 @@ class TestLaunchReceiptImport(unittest.TestCase):
         item = self.payload["items"][0]
         self.row = dict.fromkeys(COLUMNS, "")
         self.row.update(
-            review_id=item["id"], queue="launch_control", entity_or_firm=item["title"],
-            question=item["question"], YOUR_RULING="HOLD", YOUR_NOTE='Evidence note, "quoted"',
-            decision_id="launch-1", reviewer="Fixture reviewer", decided_at="2026-01-01T00:00:00Z",
-            evidence_fingerprint=item["evidence_fingerprint"], queue_version=self.payload["review_id"],
+            review_id=item["id"],
+            queue="launch_control",
+            entity_or_firm=item["title"],
+            question=item["question"],
+            YOUR_RULING="HOLD",
+            YOUR_NOTE='Evidence note, "quoted"',
+            decision_id="launch-1",
+            reviewer="Fixture reviewer",
+            decided_at="2026-01-01T00:00:00Z",
+            evidence_fingerprint=item["evidence_fingerprint"],
+            queue_version=self.payload["review_id"],
         )
 
     def run_import(self, rows=None):
@@ -375,9 +400,20 @@ class TestLaunchReceiptImport(unittest.TestCase):
             writer.writeheader()
             writer.writerows(rows if rows is not None else [self.row])
         return subprocess.run(
-            [sys.executable, "-B", str(SCRIPT), "--launch-review", str(self.csv),
-             "--queue", str(self.queue), "--receipt-ledger", str(self.receipt)],
-            text=True, capture_output=True, timeout=30,
+            [
+                sys.executable,
+                "-B",
+                str(SCRIPT),
+                "--launch-review",
+                str(self.csv),
+                "--queue",
+                str(self.queue),
+                "--receipt-ledger",
+                str(self.receipt),
+            ],
+            text=True,
+            capture_output=True,
+            timeout=30,
         )
 
     def test_receipt_only_idempotency_notes_and_explicit_revision(self):
@@ -389,13 +425,19 @@ class TestLaunchReceiptImport(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("ALREADY_RECORDED", result.stdout)
         self.assertEqual(self.receipt.read_bytes(), before)
-        revised = dict(self.row, decision_id="launch-2", YOUR_RULING="ACCEPT_SCOPE",
-                       YOUR_NOTE="Approve only the stated scope", supersedes_decision_id="launch-1")
+        revised = dict(
+            self.row,
+            decision_id="launch-2",
+            YOUR_RULING="ACCEPT_SCOPE",
+            YOUR_NOTE="Approve only the stated scope",
+            supersedes_decision_id="launch-1",
+        )
         result = self.run_import([revised])
         self.assertEqual(result.returncode, 0, result.stderr)
         ledger = json.loads(self.receipt.read_text(encoding="utf-8"))
-        self.assertEqual([d["status"] for d in ledger["decisions"]],
-                         ["HELD", "RECORDED_PENDING_APPLICATION"])
+        self.assertEqual(
+            [d["status"] for d in ledger["decisions"]], ["HELD", "RECORDED_PENDING_APPLICATION"]
+        )
         self.assertEqual(ledger["decisions"][0]["decision"], self.row)
         self.assertEqual(ledger["decisions"][1]["decision"], revised)
         self.assertEqual(self.source.read_bytes(), b"pinned")
@@ -405,14 +447,22 @@ class TestLaunchReceiptImport(unittest.TestCase):
         self.assertEqual(self.run_import().returncode, 0)
         before = self.receipt.read_bytes()
         changes = [
-            {"review_id": "LAUNCH:UNKNOWN"}, {"YOUR_RULING": "PROMOTE_IDENTITY"},
-            {"target_cedar_uid": "CE-FORGED"}, {"question": "Different question"},
-            {"YOUR_NOTE": ""}, {"decision_id": "other-without-supersession"},
+            {"review_id": "LAUNCH:UNKNOWN"},
+            {"YOUR_RULING": "PROMOTE_IDENTITY"},
+            {"target_cedar_uid": "CE-FORGED"},
+            {"question": "Different question"},
+            {"YOUR_NOTE": ""},
+            {"decision_id": "other-without-supersession"},
             {"evidence_fingerprint": "b" * 64},
         ]
         for item in self.payload["items"][2:]:
-            changes.append(dict(review_id=item["id"], entity_or_firm=item["title"],
-                                evidence_fingerprint=item["evidence_fingerprint"]))
+            changes.append(
+                dict(
+                    review_id=item["id"],
+                    entity_or_firm=item["title"],
+                    evidence_fingerprint=item["evidence_fingerprint"],
+                )
+            )
         for change in changes:
             with self.subTest(change=change):
                 result = self.run_import([dict(self.row, **change)])
@@ -435,8 +485,9 @@ class TestLaunchReceiptImport(unittest.TestCase):
         self.assertIn("fingerprint", result.stderr.lower())
         item["evidence_fingerprint"] = launch_fingerprint(item)
         self.queue.write_text(json.dumps(self.payload), encoding="utf-8")
-        result = self.run_import([dict(self.row, decision_id="new-stale",
-                                       supersedes_decision_id="launch-1")])
+        result = self.run_import(
+            [dict(self.row, decision_id="new-stale", supersedes_decision_id="launch-1")]
+        )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Stale evidence", result.stderr)
         self.assertEqual(self.receipt.read_bytes(), before)
@@ -453,10 +504,15 @@ class TestLaunchReceiptImport(unittest.TestCase):
         item["evidence_fingerprint"] = launch_fingerprint(item)
         self.payload["review_id"] = "launch-fixture-v2"
         self.queue.write_text(json.dumps(self.payload), encoding="utf-8")
-        revised = dict(self.row, decision_id="launch-2", YOUR_RULING="ACCEPT_SCOPE",
-                       YOUR_NOTE="Reviewed changed evidence", supersedes_decision_id="launch-1",
-                       queue_version=self.payload["review_id"],
-                       evidence_fingerprint=item["evidence_fingerprint"])
+        revised = dict(
+            self.row,
+            decision_id="launch-2",
+            YOUR_RULING="ACCEPT_SCOPE",
+            YOUR_NOTE="Reviewed changed evidence",
+            supersedes_decision_id="launch-1",
+            queue_version=self.payload["review_id"],
+            evidence_fingerprint=item["evidence_fingerprint"],
+        )
         result = self.run_import([self.row, revised])
         self.assertEqual(result.returncode, 0, result.stderr)
         ledger = json.loads(self.receipt.read_text(encoding="utf-8"))
@@ -481,14 +537,25 @@ class TestLaunchReceiptImport(unittest.TestCase):
         item = self.payload["items"][0]
         original = module.launch_item_fingerprint(item)
         self.assertEqual(original, launch_fingerprint(item))
-        cosmetic = dict(item, priority="P9", status="RECORDED", impact="Recounted impact",
-                        recommendation="New prioritization", decision_provenance="Receipt returned")
+        cosmetic = dict(
+            item,
+            priority="P9",
+            status="RECORDED",
+            impact="Recounted impact",
+            recommendation="New prioritization",
+            decision_provenance="Receipt returned",
+        )
         self.assertEqual(module.launch_item_fingerprint(cosmetic), original)
-        for key, value in [("question", "Different decision"), ("options", {"HOLD": "Hold"}),
-                           ("evidence", [{"excerpt": "Different evidence", "url": "https://example.invalid/new"}]),
-                           ("source_hashes", {"source.bin": "b" * 64})]:
+        for key, value in [
+            ("question", "Different decision"),
+            ("options", {"HOLD": "Hold"}),
+            ("evidence", [{"excerpt": "Different evidence", "url": "https://example.invalid/new"}]),
+            ("source_hashes", {"source.bin": "b" * 64}),
+        ]:
             with self.subTest(key=key):
-                self.assertNotEqual(module.launch_item_fingerprint(dict(item, **{key: value})), original)
+                self.assertNotEqual(
+                    module.launch_item_fingerprint(dict(item, **{key: value})), original
+                )
 
     def test_legacy_propagation_refused_and_active_need_page_preserved(self):
         self.run_import()
@@ -513,16 +580,19 @@ class TestLaunchReceiptImport(unittest.TestCase):
             self.assertEqual(active.read_bytes(), b"existing NEED review and browser context")
             output = self.root / "launch.html"
             module.build_launch_review(self.queue, output)
-            self.assertIn('cedar.launch.review.v1', output.read_text(encoding="utf-8"))
+            self.assertIn("cedar.launch.review.v1", output.read_text(encoding="utf-8"))
             self.assertEqual(active.read_bytes(), b"existing NEED review and browser context")
 
 
 class TestLaunchReviewBrowserState(unittest.TestCase):
     def test_launch_controls_reload_hold_hiding_and_receipt_idempotency(self):
         module = ast.parse((ROOT / "code" / "08_build_review_page.py").read_text(encoding="utf-8"))
-        template = next(ast.literal_eval(node.value) for node in module.body
-                        if isinstance(node, ast.Assign)
-                        and any(isinstance(t, ast.Name) and t.id == "NEED_REVIEW_HTML" for t in node.targets))
+        template = next(
+            ast.literal_eval(node.value)
+            for node in module.body
+            if isinstance(node, ast.Assign)
+            and any(isinstance(t, ast.Name) and t.id == "NEED_REVIEW_HTML" for t in node.targets)
+        )
         payload = launch_fixture(Path("fixture"))
         script = template.split("<script>", 1)[1].split("</script>", 1)[0]
         script = script.replace("__NEED_DATA__", json.dumps(payload))
@@ -537,15 +607,20 @@ function browser(storage=new Map(),sourceText=source){
    replaceChildren(){this.children=[];},setAttribute(){},
    addEventListener(k,fn){this[k]=fn;},focus(){},select(){},
    click(){if(this.download)downloads.push(this.download);else this.onclick?.();}};
-  Object.defineProperty(n,'id',{get(){return this._id;},set(id){this._id=id;elements.set(id,this);}});
+  Object.defineProperty(n,'id',{get(){return this._id;},
+   set(id){this._id=id;elements.set(id,this);}});
   return n;
  }
- const document={getElementById(id){if(!elements.has(id)){const n=element();n.id=id;}return elements.get(id);},
+ const document={getElementById(id){
+  if(!elements.has(id)){const n=element();n.id=id;}return elements.get(id);},
  createElement:element,querySelector:()=>document.getElementById('header')};
  const window={addEventListener(){}};
- const context={document,window,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},
+ const context={document,window,
+ localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},
  navigator:{clipboard:{writeText:async()=>{}}},crypto:{randomUUID:()=>`launch-${++sequence}`},
- alert(message){throw Error(message);},Blob,URL:{createObjectURL:()=>"blob:fixture",revokeObjectURL(){}},setTimeout(){}};
+ alert(message){throw Error(message);},Blob,
+ URL:{createObjectURL:()=>"blob:fixture",revokeObjectURL(){}},
+ setTimeout(){}};
  vm.createContext(context);vm.runInContext(sourceText,context);
  return {storage,downloads,get:id=>document.getElementById(id),elements,
  run:code=>vm.runInContext(code,context),api:window.needReview};
@@ -571,12 +646,14 @@ assert.equal(b.get('choice-'+id).value,'ACCEPT_SCOPE');
 const buttons=b.get('card-'+id).children.filter(x=>x.tag==='button');
 buttons.find(x=>x.textContent==='Hold').onclick();
 assert.equal(b.api.counts().events,1);assert.equal(b.get('card-'+id).hidden,false);
-b.get('note-'+id).value='Scoped approval, keeping original HOLD history';b.get('note-'+id).oninput();
+b.get('note-'+id).value='Scoped approval, keeping original HOLD history';
+ b.get('note-'+id).oninput();
 b.get('choice-'+id).value='ACCEPT_SCOPE';b.get('choice-'+id).onchange();
 buttons.find(x=>x.textContent==='Resolve with selected decision').onclick();
 assert.equal(b.api.counts().events,2);assert.equal(b.get('card-'+id).hidden,true);
 b=browser(b.storage);assert.equal(b.get('card-'+id).hidden,true);
-b.get('showresolved').checked=true;b.get('showresolved').onchange();assert.equal(b.get('card-'+id).hidden,false);
+b.get('showresolved').checked=true;b.get('showresolved').onchange();
+ assert.equal(b.get('card-'+id).hidden,false);
 const events=JSON.parse(b.api.recovery()).state.events;
 assert.equal(events[1].supersedes_decision_id,events[0].decision_id);
 assert.equal(events[0].YOUR_NOTE,'Draft evidence note');
@@ -589,7 +666,8 @@ assert.equal(fresh.api.counts().events,2);assert.equal(fresh.get('card-'+id).hid
 const before=fresh.api.csv();const bad=JSON.parse(JSON.stringify(ledger));
 bad.decisions[0].decision.evidence_fingerprint='b'.repeat(64);
 assert.throws(()=>fresh.api.importReceipt(bad),/Conflicting/);assert.equal(fresh.api.csv(),before);
-bad.decisions[0].status='APPLIED';assert.throws(()=>fresh.api.importReceipt(bad),/cannot authorize/);
+bad.decisions[0].status='APPLIED';
+ assert.throws(()=>fresh.api.importReceipt(bad),/cannot authorize/);
 const stale=browser(new Map(),source.replace(events[0].evidence_fingerprint,'b'.repeat(64)));
 const historical=stale.api.importReceipt(ledger);
 assert.equal(historical.imported,2);assert.equal(historical.canonical_application,'NOT_APPLIED');
@@ -600,10 +678,17 @@ assert.equal(stale.api.counts().events,2);
 fresh.get('complete').onclick();assert.equal(fresh.downloads.at(-1),'cedar_launch_decisions.csv');
 assert.equal(fresh.api.exportStatus().pending,0);
 assert.equal(fresh.storage.has('cedar-review-need-v1'),false);
-process.stdout.write('launch controls, reload, HOLD, history, receipt idempotency and isolation passed');
+process.stdout.write('launch controls, reload, HOLD, history, '+
+ 'receipt idempotency and isolation passed');
 """
-        result = subprocess.run(["node", "-e", harness], input=json.dumps(script),
-                                text=True, capture_output=True, cwd=ROOT, timeout=30)
+        result = subprocess.run(
+            ["node", "-e", harness],
+            input=json.dumps(script),
+            text=True,
+            capture_output=True,
+            cwd=ROOT,
+            timeout=30,
+        )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("receipt idempotency and isolation passed", result.stdout)
 

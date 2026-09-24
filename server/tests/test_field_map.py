@@ -62,20 +62,34 @@ class DealsQualificationTest(unittest.TestCase):
             "Acquisition-date allocation table totals the consideration",
             "The consideration was paid in cash and allocated entirely to property",
         ):
-            row = {"Deal_Category": "Acquisition", "Event_Type": "100% stock acquisition",
-                   "Value_Type": value}
+            row = {
+                "Deal_Category": "Acquisition",
+                "Event_Type": "100% stock acquisition",
+                "Value_Type": value,
+            }
             self.assertEqual(taxonomy.classify_record(row), "TRANSACTION")
-            self.assertEqual(taxonomy.classify_record(dict(
-                row, Value_Type=value + "; federal grant awarded")), "PUBLIC_AWARD")
-        self.assertEqual(taxonomy.classify_record({
-            "Deal_Category": "Grant / public financing", "Value_Type": "Allocation"
-        }), "PUBLIC_AWARD")
+            self.assertEqual(
+                taxonomy.classify_record(dict(row, Value_Type=value + "; federal grant awarded")),
+                "PUBLIC_AWARD",
+            )
+        self.assertEqual(
+            taxonomy.classify_record(
+                {"Deal_Category": "Grant / public financing", "Value_Type": "Allocation"}
+            ),
+            "PUBLIC_AWARD",
+        )
 
     def test_publication_reuses_taxonomy_before_caveats_and_is_idempotent(self):
-        row = {"Deal_ID": "FIXTURE-PURCHASE", "Deal_Category": "Acquisition",
-               "Event_Type": "100% stock acquisition", "Value_Type": "Purchase price allocation",
-               "record_class": "PUBLIC_AWARD", "transaction_type": "Grant / Public Award",
-               "Confidence": "High", "Verification_Status": "Verified"}
+        row = {
+            "Deal_ID": "FIXTURE-PURCHASE",
+            "Deal_Category": "Acquisition",
+            "Event_Type": "100% stock acquisition",
+            "Value_Type": "Purchase price allocation",
+            "record_class": "PUBLIC_AWARD",
+            "transaction_type": "Grant / Public Award",
+            "Confidence": "High",
+            "Verification_Status": "Verified",
+        }
         header, rows = list(row), [row]
         result = pub.deals_public_view(header, rows)
         self.assertEqual(result["purchase_allocation_corrections"], ["FIXTURE-PURCHASE"])
@@ -85,9 +99,14 @@ class DealsQualificationTest(unittest.TestCase):
         self.assertEqual(pub.deals_public_view(header, rows)["purchase_allocation_corrections"], [])
 
     def test_caveat_and_candidate_qualification_survive_without_overwriting_note(self):
-        row = {"Deal_ID": "FIXTURE-NOTE", "record_class": "PUBLIC_AWARD",
-               "Confidence": "Candidate from source", "research_note": "Closing date uncertain.",
-               "Notes": "Internal editorial source", "Verification_Status": ""}
+        row = {
+            "Deal_ID": "FIXTURE-NOTE",
+            "record_class": "PUBLIC_AWARD",
+            "Confidence": "Candidate from source",
+            "research_note": "Closing date uncertain.",
+            "Notes": "Internal editorial source",
+            "Verification_Status": "",
+        }
         header = list(row)
         pub.deals_public_view(header, [row])
         note = row["research_note"]
@@ -98,8 +117,12 @@ class DealsQualificationTest(unittest.TestCase):
         self.assertEqual(row["research_note"], note)
 
     def test_derived_caveat_cannot_satisfy_missing_substantive_notes(self):
-        row = {"Deal_ID": "FIXTURE-OWED", "Notes": "Do not add contingent earnout to price.",
-               "record_class": "PUBLIC_AWARD", "Confidence": "Candidate from source"}
+        row = {
+            "Deal_ID": "FIXTURE-OWED",
+            "Notes": "Do not add contingent earnout to price.",
+            "record_class": "PUBLIC_AWARD",
+            "Confidence": "Candidate from source",
+        }
         header = list(row)
         pub.deals_public_view(header, [row])
         self.assertTrue(row["Caveat"])
@@ -111,8 +134,12 @@ class DealsQualificationTest(unittest.TestCase):
         self.assertEqual(caught.exception.columns, ["Notes"])
 
     def test_derived_note_is_declared_when_in_real_owned_header(self):
-        row = {"Deal_ID": "FIXTURE-OWNED-NOTE", "Notes": "",
-               "record_class": "PUBLIC_AWARD", "Confidence": "Candidate from source"}
+        row = {
+            "Deal_ID": "FIXTURE-OWNED-NOTE",
+            "Notes": "",
+            "record_class": "PUBLIC_AWARD",
+            "Confidence": "Candidate from source",
+        }
         header = list(row)
         pub.deals_public_view(header, [row])
         expected = row["research_note"]
@@ -683,9 +710,12 @@ class TestApplyFieldMap(unittest.TestCase):
             ("Unresolved business", "bia:makah", ""),
         ):
             row = dict.fromkeys(header, "")
-            row.update(business_name_raw=name, nation_id=nation,
-                       certifying_authority_entity_id=certifier,
-                       programme_name="TERO vendor list")
+            row.update(
+                business_name_raw=name,
+                nation_id=nation,
+                certifying_authority_entity_id=certifier,
+                programme_name="TERO vendor list",
+            )
             source_rows.append(row)
         preserved = [dict(row) for row in source_rows]
         candidate = [dict(row) for row in source_rows]
@@ -694,8 +724,10 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertNotIn("nation_id", header)
         for source, published in zip(source_rows, candidate, strict=True):
             self.assertNotIn("nation_id", published)
-            self.assertEqual(published["certifying_authority_entity_id"],
-                             source["certifying_authority_entity_id"])
+            self.assertEqual(
+                published["certifying_authority_entity_id"],
+                source["certifying_authority_entity_id"],
+            )
             self.assertEqual(published["cedar_uid"], source["certifying_authority_entity_id"])
             self.assertEqual(published["business_entity_id"], "")
         retirement = next(r for r in result["retirement"] if r["column"] == "nation_id")
@@ -784,9 +816,11 @@ class TestApplyFieldMap(unittest.TestCase):
         mapping["legislation"]["fields"].append(
             {"column": field, "decision": "keep", "why": "Missing public target"}
         )
-        with patch.object(pub, "field_map", return_value=mapping):
-            with self.assertRaises(pub.UndecidedColumns):
-                pub.apply_field_map("legislation", header, rows, own)
+        with (
+            patch.object(pub, "field_map", return_value=mapping),
+            self.assertRaises(pub.UndecidedColumns),
+        ):
+            pub.apply_field_map("legislation", header, rows, own)
         self.assertEqual(rows, before)
 
     def test_nothing_leaves_before_its_replacement_exists(self):
@@ -1058,8 +1092,7 @@ class TestApplyFieldMap(unittest.TestCase):
                 for f in entry["fields"]
                 if f["decision"] in ("keep", "withhold", "rename")
             }
-            self.assertTrue(ships <= listed | generated,
-                            (coll, sorted(ships - listed - generated)))
+            self.assertTrue(ships <= listed | generated, (coll, sorted(ships - listed - generated)))
 
 
 if __name__ == "__main__":

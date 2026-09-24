@@ -27,19 +27,38 @@ class IdentifierContractsTest(unittest.TestCase):
         contract = self.contract("nagpra", "nagpra_notices.csv", "document_number")
         # The publisher API returns each exact document_number, including the
         # correction/republication prefix: /api/v1/documents/<id>.json.
-        keys = {"94-4238", "2026-05038", "X94-11116", "C9-6658",
-                "R4-28004", "E5-7680", "C1-2013-10220", "R1-2026-05038"}
+        keys = {
+            "94-4238",
+            "2026-05038",
+            "X94-11116",
+            "C9-6658",
+            "R4-28004",
+            "E5-7680",
+            "C1-2013-10220",
+            "R1-2026-05038",
+        }
         for value in keys:
             with self.subTest(value=value):
-                self.assertEqual(ids.validate_identifier(
-                    value, contract, keys, source_system="Federal Register"), value)
+                self.assertEqual(
+                    ids.validate_identifier(
+                        value, contract, keys, source_system="Federal Register"
+                    ),
+                    value,
+                )
                 with self.assertRaises(ids.IdentifierContractError):
                     ids.validate_identifier(value, self.entity)
-        for value in ("E5-999999", "CE-0016J-EB", "CB-1000520", "LOB-2000-001",
-                      "E5-7680/../x", "E5-7680\n", "X-11116", "C1-foo-10220"):
-            with self.subTest(refused=value):
-                with self.assertRaises(ids.IdentifierContractError):
-                    ids.validate_identifier(value, contract, keys, source_system="Federal Register")
+        for value in (
+            "E5-999999",
+            "CE-0016J-EB",
+            "CB-1000520",
+            "LOB-2000-001",
+            "E5-7680/../x",
+            "E5-7680\n",
+            "X-11116",
+            "C1-foo-10220",
+        ):
+            with self.subTest(refused=value), self.assertRaises(ids.IdentifierContractError):
+                ids.validate_identifier(value, contract, keys, source_system="Federal Register")
         with self.assertRaises(ids.IdentifierContractError):
             ids.validate_identifier("E5-7680", contract, keys, source_system="LDA source")
         with self.assertRaises(ids.IdentifierContractError):

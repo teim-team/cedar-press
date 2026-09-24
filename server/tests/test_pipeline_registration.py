@@ -22,15 +22,22 @@ SPEC.loader.exec_module(PIPELINE)
 class ProducerRegistrationTest(unittest.TestCase):
     def test_writer_authority_refresh_preserves_measurements_and_input(self):
         spec = importlib.util.spec_from_file_location(
-            "contract_refresh", ROOT / "code/512_build_dataset_contracts.py")
+            "contract_refresh", ROOT / "code/512_build_dataset_contracts.py"
+        )
         generator = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(generator)
         doc = json.loads((ROOT / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8"))
         # Include stale edges even after the checked-in generated contract is refreshed.
-        table = next(t for c in doc["contracts"] for t in c["tables"]
-                     if t["table"] == "federal_funding_transactions.csv")
-        retired = ["335_harmonize_assistance_seams_in_place.py",
-                   "336_correct_scheme_resolution_by_spine_membership.py"]
+        table = next(
+            t
+            for c in doc["contracts"]
+            for t in c["tables"]
+            if t["table"] == "federal_funding_transactions.csv"
+        )
+        retired = [
+            "335_harmonize_assistance_seams_in_place.py",
+            "336_correct_scheme_resolution_by_spine_membership.py",
+        ]
         table["enriched_by"] += [s for s in retired if s not in table["enriched_by"]]
         before = copy.deepcopy(doc)
         expected = copy.deepcopy(doc)
@@ -47,20 +54,38 @@ class ProducerRegistrationTest(unittest.TestCase):
 
     def test_retired_funding_edges_cannot_be_reauthorized_by_stale_contract(self):
         table = "federal_funding_transactions.csv"
-        retired = ["335_harmonize_assistance_seams_in_place.py",
-                   "336_correct_scheme_resolution_by_spine_membership.py"]
+        retired = [
+            "335_harmonize_assistance_seams_in_place.py",
+            "336_correct_scheme_resolution_by_spine_membership.py",
+        ]
         for stage in retired:
-            plan = {"id": "funding", "phase1": [], "phase2": [stage],
-                    "rb": {}, "en": {stage: [table]}}
-            contracts = {"contracts": [{"collection": "funding",
-                "rebuild_command": "py -3 code/build.py run funding --execute",
-                "tables": [{"table": table, "enriched_by": [stage]}]}]}
+            plan = {
+                "id": "funding",
+                "phase1": [],
+                "phase2": [stage],
+                "rb": {},
+                "en": {stage: [table]},
+            }
+            contracts = {
+                "contracts": [
+                    {
+                        "collection": "funding",
+                        "rebuild_command": "py -3 code/build.py run funding --execute",
+                        "tables": [{"table": table, "enriched_by": [stage]}],
+                    }
+                ]
+            }
             with self.subTest(stage=stage):
-                self.assertIn("RETIRED_TABLE_WRITER: " + stage + " -> " + table,
-                              PIPELINE.registration_problems(plan, contracts))
-        self.assertEqual(PIPELINE.active_table_writers(
-            table, retired + ["24_funding_merge.py", "503_identity.py"]),
-            ["24_funding_merge.py", "503_identity.py"])
+                self.assertIn(
+                    "RETIRED_TABLE_WRITER: " + stage + " -> " + table,
+                    PIPELINE.registration_problems(plan, contracts),
+                )
+        self.assertEqual(
+            PIPELINE.active_table_writers(
+                table, retired + ["24_funding_merge.py", "503_identity.py"]
+            ),
+            ["24_funding_merge.py", "503_identity.py"],
+        )
         self.assertEqual(PIPELINE.active_table_writers("historical.csv", retired), retired)
 
     def test_funding_plan_cuts_over_discovered_retired_edges_without_build(self):
@@ -68,13 +93,22 @@ class ProducerRegistrationTest(unittest.TestCase):
         runner = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(runner)
         table = "federal_funding_transactions.csv"
-        retired = ["335_harmonize_assistance_seams_in_place.py",
-                   "336_correct_scheme_resolution_by_spine_membership.py"]
-        with (patch.object(runner, "collection_tables", return_value=[table]),
-              patch.object(runner, "_io_map", return_value=(
-                  {table: ["24_funding_merge.py"]},
-                  {table: retired + ["503_identity.py"]})),
-              patch.object(runner.subprocess, "run") as dispatch):
+        retired = [
+            "335_harmonize_assistance_seams_in_place.py",
+            "336_correct_scheme_resolution_by_spine_membership.py",
+        ]
+        with (
+            patch.object(runner, "collection_tables", return_value=[table]),
+            patch.object(
+                runner,
+                "_io_map",
+                return_value=(
+                    {table: ["24_funding_merge.py"]},
+                    {table: retired + ["503_identity.py"]},
+                ),
+            ),
+            patch.object(runner.subprocess, "run") as dispatch,
+        ):
             plan = runner.plan_for("funding")
         self.assertEqual(plan["phase1"], ["24_funding_merge.py"])
         self.assertEqual(plan["phase2"], ["503_identity.py"])
@@ -319,14 +353,19 @@ class ScriptCensusTest(unittest.TestCase):
             path.write_text("print('original fixture')\n", encoding="utf-8")
             contracts = {"governed.csv": {"rebuilt_by": ["approved.py"]}}
             baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": []}]}
-            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+            self.assertEqual(
+                self.inventory.writer_admission_problems(root, baseline, contracts), []
+            )
             path.write_text("open('governed.csv', 'w').write('fixture')\n", encoding="utf-8")
             issues = self.inventory.writer_admission_problems(root, baseline, contracts)
             self.assertEqual(len(issues), 1)
             self.assertIn("NEW_UNREGISTERED_WRITE", issues[0])
             self.assertIn("governed.csv", issues[0])
             baseline["scripts"][0].pop("writer_evidence")
-            self.assertIn("WRITER_BASELINE_MISSING", self.inventory.writer_admission_problems(root, baseline, contracts)[0])
+            self.assertIn(
+                "WRITER_BASELINE_MISSING",
+                self.inventory.writer_admission_problems(root, baseline, contracts)[0],
+            )
 
     def test_writer_ratchet_detects_retargeted_binding_and_exposes_existing_risk(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -334,16 +373,27 @@ class ScriptCensusTest(unittest.TestCase):
             code = root / "code"
             code.mkdir()
             path = code / "helper.py"
-            source = "from pathlib import Path\nOUT = Path('data/clean') / %r\nOUT.write_text('fixture')\n"
+            source = (
+                "from pathlib import Path\n"
+                "OUT = Path('data/clean') / %r\nOUT.write_text('fixture')\n"
+            )
             path.write_text(source % "first.csv", encoding="utf-8")
             contracts = {"first.csv": {"rebuilt_by": []}, "second.csv": {"rebuilt_by": []}}
             evidence = self.inventory.writer_evidence(path, contracts)
-            baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": evidence}]}
-            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+            baseline = {
+                "scripts": [{"script": "helper.py", "dir": "", "writer_evidence": evidence}]
+            }
+            self.assertEqual(
+                self.inventory.writer_admission_problems(root, baseline, contracts), []
+            )
             path.write_text(source % "second.csv", encoding="utf-8")
-            self.assertIn("second.csv", self.inventory.writer_admission_problems(root, baseline, contracts)[0])
+            self.assertIn(
+                "second.csv", self.inventory.writer_admission_problems(root, baseline, contracts)[0]
+            )
             contracts["second.csv"]["rebuilt_by"] = ["helper.py"]
-            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+            self.assertEqual(
+                self.inventory.writer_admission_problems(root, baseline, contracts), []
+            )
 
     def test_unresolved_writer_context_changes_require_review(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -354,9 +404,14 @@ class ScriptCensusTest(unittest.TestCase):
             source = "def write(target):\n    target.write_text('fixture')\nwrite(%r)\n"
             path.write_text(source % "first.csv", encoding="utf-8")
             evidence = self.inventory.writer_evidence(path, {})
-            baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": evidence}]}
+            baseline = {
+                "scripts": [{"script": "helper.py", "dir": "", "writer_evidence": evidence}]
+            }
             path.write_text(source % "second.csv", encoding="utf-8")
-            self.assertIn("NEW_UNREGISTERED_WRITE", self.inventory.writer_admission_problems(root, baseline, {})[0])
+            self.assertIn(
+                "NEW_UNREGISTERED_WRITE",
+                self.inventory.writer_admission_problems(root, baseline, {})[0],
+            )
 
     def test_new_unknown_governed_paths_cannot_bypass_writer_ratchet(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -365,18 +420,31 @@ class ScriptCensusTest(unittest.TestCase):
             code.mkdir()
             path = code / "helper.py"
             baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": []}]}
-            for target in ("data/clean/new.csv", "public/new.csv", "dist/review/new.csv",
-                           "store/releases/new.csv", "store/snapshots/new.csv", "store/catalogs/new.json"):
+            for target in (
+                "data/clean/new.csv",
+                "public/new.csv",
+                "dist/review/new.csv",
+                "store/releases/new.csv",
+                "store/snapshots/new.csv",
+                "store/catalogs/new.json",
+            ):
                 with self.subTest(target=target):
                     path.write_text(f"open({target!r}, 'w').write('fixture')\n", encoding="utf-8")
                     issues = self.inventory.writer_admission_problems(root, baseline, {})
                     self.assertEqual(len(issues), 1)
                     self.assertIn("NEW_UNREGISTERED_WRITE", issues[0])
             contracts = {"approved.csv": {"rebuilt_by": ["helper.py"]}}
-            path.write_text("open('data/clean/approved.csv', 'w').write('fixture')\n", encoding="utf-8")
-            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+            path.write_text(
+                "open('data/clean/approved.csv', 'w').write('fixture')\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                self.inventory.writer_admission_problems(root, baseline, contracts), []
+            )
             path.write_text("open('public/approved.csv', 'w').write('fixture')\n", encoding="utf-8")
-            self.assertIn("NEW_UNREGISTERED_WRITE", self.inventory.writer_admission_problems(root, baseline, contracts)[0])
+            self.assertIn(
+                "NEW_UNREGISTERED_WRITE",
+                self.inventory.writer_admission_problems(root, baseline, contracts)[0],
+            )
 
     def test_roles_derive_from_declarations_and_test_structure(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -467,8 +535,11 @@ class ScriptCensusTest(unittest.TestCase):
                 self.inventory.add_operational_roles(records, list(code.glob("*.py")), {}, set())
             by_name = {record["script"]: record for record in records}
             for name in (
-                "test_only.py", "literal_only.py", "comment_only.py",
-                "filename_audit.py", "scope_only.py",
+                "test_only.py",
+                "literal_only.py",
+                "comment_only.py",
+                "filename_audit.py",
+                "scope_only.py",
             ):
                 with self.subTest(name=name):
                     self.assertEqual(by_name[name]["operational_role"], "unresolved")
