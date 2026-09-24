@@ -2159,3 +2159,233 @@ test.describe("dead ends", () => {
     await expect(page.getByText("Records Cedar Press has resolved to this entity")).toHaveCount(0);
   });
 });
+
+/* ── Interaction: arrival, response, state ─────────────────────────────────
+ * The motion contract is docs/DESIGN_SYSTEM.md, "Motion". These measure it
+ * in a browser: the twelve arrive in order once they are scrolled to and
+ * settle; a tile lifts under a fine pointer on the site's one curve and
+ * comes back; reduced motion is immediate; a finger gets no hover state.
+ * `pressMotion.test.js` holds the rules to what these assume. */
+
+/**
+ * One style read, after a rendering update: the animation clock only
+ * advances with one, and a read straight after `hover()` can land on the
+ * frame before the transition has started.
+ */
+const readMotion = (el) =>
+  new Promise((resolve) => {
+    let done = false;
+    const read = () => {
+      if (done) return;
+      done = true;
+      const cs = getComputedStyle(el);
+      const m = cs.transform.match(/matrix\(1, 0, 0, 1, 0, (-?[\d.]+)\)/);
+      resolve({
+        transform: cs.transform,
+        translateY: cs.transform === "none" ? 0 : m ? Number(m[1]) : null,
+        timing: cs.transitionTimingFunction,
+        transition: cs.transitionDuration,
+        animation: cs.animationName,
+        delay: cs.animationDelay,
+        opacity: Number(cs.opacity),
+        shadow: cs.boxShadow,
+      });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(read));
+    setTimeout(read, 250);
+  });
+
+/** Every running animation on the element and its descendants, finished. */
+const settledDeep = (el) =>
+  Promise.all(
+    [el, ...el.querySelectorAll("*")]
+      .flatMap((n) => n.getAnimations())
+      .map((a) => a.finished.catch(() => {})),
+  );
+
+/** The one curve, as Chromium serialises it. */
+const THE_CURVE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+/**
+ * A window where the twelve are a reveal. Measured on the built door: at
+ * 1280x720, 1366x768, 1536x864, 1440x900 and 1920x1080 the strip's top sits
+ * at 0.77 to 1.01 of the window height — inside the hook's first-screen
+ * slack (1.1), so it is revealed with the page, untransitioned, and the
+ * stagger does not apply. That is the hook's rule, not a defect. At 1024x768
+ * the strip is at 2.0 window heights and on a phone at 3.6, and there the
+ * stagger is what a reader sees. The phone project keeps its own viewport.
+ */
+async function whereTheTwelveAreAReveal(page, testInfo) {
+  if (testInfo.project.name === "desktop") await page.setViewportSize({ width: 1024, height: 768 });
+}
+
+test.describe("the door's twelve arrive and respond", () => {
+  test("the tiles arrive in order once the strip is scrolled to, and settle", async ({ page }, testInfo) => {
+    const errors = watchConsole(page);
+    await whereTheTwelveAreAReveal(page, testInfo);
+    await page.goto("/");
+    const strip = page.locator(".cp-dcol");
+    await page.locator(".cp-dcol__tile").first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    // Below the fold on arrival, so this is a reveal and not the first
+    // screen. The hook marks anything on the first screen `cp-fade--now`
+    // and the stagger does not apply there, by design.
+    const top = await strip.evaluate((el) => el.getBoundingClientRect().top / window.innerHeight);
+    expect(top, "the strip sits below the fold on arrival").toBeGreaterThan(1.1);
+    await expect(strip).not.toHaveClass(/is-in/);
+    expect(await strip.evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
+
+    await strip.scrollIntoViewIfNeeded();
+    await expect(strip).toHaveClass(/\bis-in\b/);
+    await expect(strip).not.toHaveClass(/cp-fade--now/);
+
+    // Each shelf's six run left to right on their own beats.
+    const delays = await page.locator(".cp-dcol__grid").evaluateAll((grids) =>
+      grids.map((grid) => [...grid.children].map((li) => ({
+        name: getComputedStyle(li).animationName,
+        delay: parseFloat(getComputedStyle(li).animationDelay),
+      }))));
+    expect(delays).toHaveLength(2);
+    for (const shelf of delays) {
+      expect(shelf.map((t) => t.name)).toEqual(Array(shelf.length).fill("cp-tile-in"));
+      shelf.forEach((t, i) => expect(t.delay).toBeCloseTo(i * 0.045, 3));
+    }
+
+    // And then they are simply there: opaque, untransformed, nothing running.
+    await strip.evaluate(settledDeep);
+    const rest = await page.locator(".cp-dcol__grid > li").evaluateAll((items) =>
+      items.map((li) => [getComputedStyle(li).opacity, getComputedStyle(li).transform]));
+    expect(rest).toEqual(Array(12).fill(["1", "none"]));
+    expect(errors).toEqual([]);
+  });
+
+  test("a tile lifts under a fine pointer on the site's curve, and the shelf in hand says so", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "a fine pointer");
+    await page.goto("/");
+    const tiles = page.locator(".cp-dcol__tile");
+    await tiles.first().waitFor();
+    const strip = page.locator(".cp-dcol");
+    await strip.scrollIntoViewIfNeeded();
+    await strip.evaluate(settledDeep);
+
+    const tile = tiles.nth(7); // second shelf
+    const shelves = page.locator(".cp-dcol__shelf");
+    expect((await tile.evaluate(readMotion)).transform, "rests untransformed").toBe("none");
+    await expect(shelves.nth(1)).not.toHaveClass(/is-active/);
+
+    await tile.hover();
+    // -2px on the curve; the transition is 180ms, so any later sample has landed.
+    await expect
+      .poll(async () => (await tile.evaluate(readMotion)).translateY, { message: "the tile lifts" })
+      .toBeLessThanOrEqual(-1.5);
+    const lifted = await tile.evaluate(readMotion);
+    expect(lifted.translateY).toBeGreaterThanOrEqual(-2.5);
+    expect(lifted.shadow, "a soft shadow under the lift").not.toBe("none");
+    // One curve per transitioned property, and nothing else in the list.
+    expect(lifted.timing.replaceAll(THE_CURVE, "").replace(/[, ]/g, ""), `on ${THE_CURVE}, got ${lifted.timing}`).toBe("");
+    // The shelf the pointed collection sits on takes the accent; the other does not.
+    await expect(shelves.nth(1)).toHaveClass(/is-active/);
+    await expect(shelves.nth(0)).not.toHaveClass(/is-active/);
+
+    // Leave: the pointer moves to a different empty spot on every sample.
+    let nudge = 0;
+    await expect
+      .poll(async () => {
+        nudge = (nudge + 1) % 4;
+        await page.mouse.move(2 + nudge, 2 + nudge);
+        return (await tile.evaluate(readMotion)).transform;
+      }, { message: "settles back on leave", timeout: 8000 })
+      .toBe("none");
+
+    // Keyboard focus lifts the same way.
+    await tiles.nth(2).focus();
+    await expect
+      .poll(async () => (await tiles.nth(2).evaluate(readMotion)).translateY, { message: "focus lifts" })
+      .toBeLessThanOrEqual(-1.5);
+    await expect(shelves.nth(0)).toHaveClass(/is-active/);
+  });
+
+  test("reduced motion: the twelve are simply there, and a lift is immediate", async ({ page }, testInfo) => {
+    await whereTheTwelveAreAReveal(page, testInfo);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const strip = page.locator(".cp-dcol");
+    await page.locator(".cp-dcol__tile").first().waitFor();
+    await strip.scrollIntoViewIfNeeded();
+    await expect(strip).toHaveClass(/\bis-in\b/);
+    const items = await page.locator(".cp-dcol__grid > li").evaluateAll((list) =>
+      list.map((li) => [getComputedStyle(li).animationName, getComputedStyle(li).opacity, getComputedStyle(li).transform]));
+    expect(items).toEqual(Array(12).fill(["none", "1", "none"]));
+    if (testInfo.project.name !== "desktop") return;
+    const tile = page.locator(".cp-dcol__tile").nth(3);
+    await tile.hover();
+    // Response kept, travel dropped: raised on the next read, no transition.
+    const lifted = await tile.evaluate(readMotion);
+    expect(lifted.transform).toBe("matrix(1, 0, 0, 1, 0, -2)");
+    // The stylesheet says `transition: none`; the app's global reduced-motion
+    // rule floors durations at a microsecond, so Chromium reports 1e-06s.
+    for (const duration of lifted.transition.match(/[\d.e-]+(?=s)/g)) expect(Number(duration)).toBeLessThanOrEqual(0.001);
+  });
+});
+
+test.describe("a finger gets no hover state", () => {
+  test.use({ hasTouch: true });
+
+  test("a tapped tile is chosen, never raised", async ({ page }) => {
+    await page.goto("/");
+    const emulated = await page.evaluate(() => matchMedia("(hover: none)").matches);
+    test.skip(!emulated, "this engine does not emulate a hoverless pointer from hasTouch");
+    const tiles = page.locator(".cp-dcol__tile");
+    await tiles.first().waitFor();
+    await page.locator(".cp-dcol").scrollIntoViewIfNeeded();
+    await page.locator(".cp-dcol").evaluate(settledDeep);
+    const tile = tiles.nth(9);
+    await tile.tap();
+    await expect(tile).toHaveAttribute("aria-pressed", "true");
+    // The tap's own state answers, and the shelf follows it.
+    await expect(tile).toHaveClass(/is-on/);
+    await expect(page.locator(".cp-dcol__shelf").nth(1)).toHaveClass(/is-active/);
+    // A pointer parked over a tile on this screen — what a touch browser
+    // does to the last thing tapped — raises nothing: the lift is written
+    // for `(hover: hover) and (pointer: fine)` and this screen is neither.
+    // `hover()` rather than a second tap, because a tap here does not leave
+    // :hover behind, and a test that cannot reach the rule cannot fail when
+    // the rule is unguarded (checked: with the guard removed, a tap-only
+    // version still passed).
+    await tiles.nth(4).hover();
+    await page.waitForTimeout(400);
+    expect((await tiles.nth(4).evaluate(readMotion)).transform, "no lift for a finger").toBe("none");
+    // The four claims respond to nothing under a finger either.
+    const claim = page.locator(".cp-why__item").first();
+    await claim.scrollIntoViewIfNeeded();
+    await claim.hover();
+    await page.waitForTimeout(300);
+    expect(await claim.locator(".cp-why__ic").evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+  });
+});
+
+test.describe("Methods' seven stages arrive as a sequence", () => {
+  test("each stage lands on its own beat, then the rail is still", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/methods");
+    await page.locator(".cp-proc__stage").first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    const chapter = page.locator("#m-records");
+    const top = await chapter.evaluate((el) => el.getBoundingClientRect().top / window.innerHeight);
+    expect(top, "the chapter sits below the fold on arrival").toBeGreaterThan(1.1);
+    await chapter.scrollIntoViewIfNeeded();
+    await expect(chapter).toHaveClass(/\bis-in\b/);
+    const stages = await page.locator(".cp-proc__stage").evaluateAll((list) =>
+      list.map((li) => ({ name: getComputedStyle(li).animationName, delay: parseFloat(getComputedStyle(li).animationDelay) })));
+    expect(stages.length).toBeGreaterThanOrEqual(5);
+    stages.forEach((s, i) => {
+      expect(s.name).toBe("cp-stage-in");
+      expect(s.delay).toBeCloseTo(i * 0.055, 3);
+    });
+    await chapter.evaluate(settledDeep);
+    const rest = await page.locator(".cp-proc__stage").evaluateAll((list) =>
+      list.map((li) => [getComputedStyle(li).opacity, getComputedStyle(li).transform]));
+    expect(rest).toEqual(Array(stages.length).fill(["1", "none"]));
+    expect(errors).toEqual([]);
+  });
+});

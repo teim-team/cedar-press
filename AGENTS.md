@@ -151,15 +151,15 @@ root: its `-s server/tests -t server` is why a bare
 importable` (`tests/` at the root is the Playwright smoke directory, not a
 Python package).
 
-**Verified 2026-09-23**, in the order above: `npm run lint` exits `0` ·
+**Verified 2026-09-24**, in the order above: `npm run lint` exits `0` ·
 `make check-generated` reports all seven files current · `npm run test`
-reports `381 pass, 0 fail` and a coverage floor met at 84.43 lines /
+reports `398 pass, 0 fail` and a coverage floor met at 84.43 lines /
 83.33 branches / 90.24 functions · `ruff check server` reports
 `All checks passed!` · `make test-python` reports `Ran 265 tests … OK
-(skipped=30)` and its floor met · `make audit-python` and `make audit-node`
+(skipped=31)` and its floor met · `make audit-python` and `make audit-node`
 report no known vulnerabilities. The Playwright pair, re-run the same day
-(`npx playwright install --with-deps chromium`, then `npm run test:smoke`),
-reports `171 passed`, `25 skipped`. `npm run build`, `npm run build:site`
+(browsers already installed, then `npm run test:smoke`), reports
+`180 passed`, `26 skipped`. `npm run build`, `npm run build:site`
 and `npm run seo:check` also complete; the build's chunk-size warning is
 pre-existing.
 
