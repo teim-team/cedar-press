@@ -194,41 +194,149 @@ SHA-256 hashes are of complete CSV bytes in C:/Users/esm247/Desktop/Cedar Press/
 
 ## Implementation status (Claude, 2026-09-24, branch `claude/gaming-intelligence`)
 
-Built on Cedar PR #122 (`codex/legislation-release-consumer` @3195e70) with this audit merged. Not pushed, not promoted, not published.
+Current state, updated in place. Built on Cedar PR #122 (`codex/legislation-release-consumer` @3195e70), this audit, and Codex's identifier-retirement commit (cherry-picked `b8626c9` → `0331b82`). Local commits only: not pushed, not promoted, not published.
 
-**Owner ID hold.** Gaming ID creation is paused pending Codex's CICD identifier-retirement audit ([request](../GAMING_ID_CONTRACT_REQUEST.md)). Every Gaming ID renders `PROV-` through one swap point (`code/gaming_grove.py`: `derive_id`, `facility_id_for`); `cedar_uid` accepts only checksum-valid `CE-` IDs via the shared 503 validator; vendor `CCP-/VP-/TPL-` IDs exist only in the internal crosswalk. `release-pilot gaming` refuses provisional, vendor and non-CE IDs (verified on the live candidate: `REFUSED: provisional identifier (ID contract pending)`).
+**Identity: migrated to the ratified contract, no ID issued.** Per `docs/IDENTIFIER_STANDARD.md` ("CICD retirement contract"):
+- `CE` for Native entities.
+- Existing `CEDAR-PLACE` for physical facilities.
+- Existing Cedar NEED enterprise IDs only where an enterprise independently qualifies. Gaming never creates or feeds NEED.
+- `CB` for legal operators, held (`held_business_unbound`) until the gated business register binds them.
+- `CEDAR-OBS` for observations, `CEDAR-EVENT` for events, `CEDAR-REL` for relationships, `CEDAR-SRC` for sportsbook reporting series and `CEDAR-CONTRACT` for compacts and compact versions, all from static blocks declared in `code/gaming_grove.py`.
 
-**Maintained surface.** One entry, `py -3 code/build.py candidate gaming --input-root <Cedar Press> --output-root <new dir outside git> --as-of YYYY-MM-DD` (set `CEDAR_GAMING_PROVISIONAL_IDS=1` until the ID contract lands). It runs the four registered producers in `cedar_pipeline.GROVE_COMPONENTS` (1200 revenue/payments/disclosures, 1201 facilities, 1202 compacts/regulatory/land/NEPA/licenses/litigation, 1203 labor/advocacy links), revalidates every table with the shared validators, checks cross-table references (`GROVE_REFERENCES`), pins input and code hashes, and writes a manifest, public-only samples, coverage and a change report (`--previous`). `build.py grove-contracts gaming [--check]` regenerates the dataset_contracts gaming entry, the pilot field-map entry and [the data contract](../GAMING_GROVE_DATA_CONTRACT.md). The 65 pre-existing gaming tables carry an explicit `grove_role` (47 source input, 5 internal QA, 13 legacy retained); nothing was deleted. Shared-infrastructure proposals are for Havala/Codex in [infrastructure notes](../GAMING_GROVE_INFRASTRUCTURE_NOTES.md), not applied to their branches.
+`VP`, `CCP`, `TPL`, `CEDAR-FAC` and `PROV` survive only as internal source keys. A candidate writes 93,824 **PROPOSED** bindings to its own append-only register: OBS 25,433, EVENT 60,716, REL 5,775, SRC 35 and CONTRACT 1,865. The live registry is untouched, and `release-pilot` refuses any ID not `ISSUED` in the live register.
 
-**Candidate result.** Two builds into different roots are byte-identical; validation passed with no problems; canonical `Cedar Press/data/clean` hashes unchanged before/after. Status `LOCAL_DRY_RUN_PROVISIONAL_IDS`.
+The full before/after crosswalk is `<candidate>/components/gaming_id_migration_crosswalk.csv`, 95,380 rows. It maps every PROV key, compact key, facility key and legacy handle column to a public ID or a held status, with affected row counts.
+
+The controlled issuance process (preconditions, reviewers, commands, checks, rollback) is section 10 of [infrastructure notes](../GAMING_GROVE_INFRASTRUCTURE_NOTES.md). It has not been run.
+
+Remaining for Codex:
+- Declare Gaming bindings in `cedar_ids.IDENTIFIER_CONTRACTS`.
+- Run the independent scan.
+- Fix the 1169 composite-handle blind spot.
+- Remove retired handles embedded in Advocacy's own event IDs.
+
+**16 unbound VP keys: all not-a-gaming-facility.** The reviewed dispositions are in `docs/GAMING_VP_DISPOSITIONS_2026-09-24.csv`.
+- Each is a votingpatterns "no casino" assertion with no address. 1129 deliberately excludes them, and NIGC and CGCC corroborate that.
+- VP-0101's "no casino" claim for Yurok is false (Redwood Hotel Casino is `CEDAR-PLACE-000109-XN`) and is never published.
+- Tribe-level capacity and CGCC rows hung on these keys were re-keyed to the tribe.
+- No owner card was needed.
+
+**Maintained surface.** One entry:
+
+`py -3 code/build.py candidate gaming --input-root <Cedar Press> --output-root <new dir outside git> --as-of YYYY-MM-DD [--bindings <live register>]`
+
+Producers run in `cedar_pipeline.GROVE_COMPONENTS` order:
+1. 1201: facilities.
+2. 1200: revenue, payments, disclosures and online sportsbook (module `gaming_grove_online_sports.py`).
+3. 1202: compacts, regulatory events, land, NEPA, licenses and litigation.
+4. 1203: labor and advocacy links.
+
+The runner revalidates every table, checks cross-table references, pins input and code hashes and runs the public leak gate (`grove-leak-gate`). It writes a deterministic manifest (timing is split into `*.volatile.json`), public-only samples, and coverage and change reports.
+
+`grove-contracts gaming [--check]` regenerates registration, the field map and [the data contract](../GAMING_GROVE_DATA_CONTRACT.md). The 65 pre-existing gaming tables carry an explicit `grove_role`; nothing was deleted.
+
+**Release path.** Multi-component: a release unit is (collection, component table).
+- `release-pilot` validates every declared component before writing anything, makes one Lumecon release per component, and builds one catalog.
+- The server serves Grove components to grove and tree tiers from a separately pinned Grove catalog (`collections.GROVE_RELEASE_IDS`).
+- It refuses PROV- values, vendor facility keys, retired handles (composite forms included), non-CE `cedar_uid`, non-ISSUED bindings, and non-public rights on any field or row.
+- Press collections are unchanged; the Legislation and Natural Resources release tests pass unmodified.
+
+**Verification on the migrated candidate (`idmig-1` vs `idmig-2`).**
+- All governed outputs, the manifest included, are byte-identical.
+- Validation passed with 0 changed or unverifiable inputs.
+- The leak gate over 50 public surfaces (87,538 rows) found 0 retired, vendor or PROV values. Before the final build it caught Advocacy source-event IDs embedding `TRBF-` handles; that column is now internal.
+- Every public row is `public_official`, `public_derived` or `public_first_party`.
+- Shared and overlapping totals stay nonadditive.
+- Tests pass: all 380 server tests (32 skipped for environment), the producer tests, build_test, 1170, both node checks and `grove-contracts --check`.
+- The live `_id_registry.json` counters are unchanged.
 
 | Component table | Rows | Table status |
 |---|---:|---|
-| gaming_regional_revenue (198 region + 26 printed national, FY2001–2025) | 224 | public |
+| gaming_regional_revenue (198 region + 26 printed national, FY2001–2025; one preferred national figure per FY; FY2013 has no printed total) | 224 | public |
 | gaming_revenue_bands (FY2022–2025) | 20 | public |
 | gaming_government_payments (CA+FL; forecasts never paid/summable) | 53,465 | public rows 53,124 |
 | gaming_reported_revenue_observations (state, digital) | 8,832 | public rows 8,508 |
 | gaming_financial_disclosures (SEC, FAC, bonds) | 1,935 | public rows 1,756 |
-| gaming_grove_facilities (379 of 702 with independently evidenced name+location+status) | 702 | source_limited |
+| gaming_online_sportsbook_units | 35 | internal |
+| gaming_online_sportsbook_financials (1,249 regulator/official, 297 secondary) | 1,546 | internal |
+| gaming_online_sportsbook_relationships (25 single-entity, 14 not allocated) | 39 | internal |
+| gaming_coverage_gaps | 20 | internal |
+| gaming_grove_facilities (379 of 702 with official name+location+status) | 702 | source_limited |
 | gaming_facility_names / history / capacity | 1,353 / 2,231 / 3,458 | source_limited |
-| gaming_facility_relationships (owner/operator only with evidence) | 880 | source_limited |
-| gaming_facility_crosswalk (all 787 legacy rows disposed exactly once) | 3,133 | internal |
+| gaming_facility_relationships (0 owner/operator; 33 first-party self-described affiliations) | 865 | source_limited |
+| gaming_facility_crosswalk (all 787 legacy rows disposed once) | 3,133 | internal |
 | gaming_compacts / versions | 707 / 1,158 | public |
-| gaming_compact_terms (regex extraction; a rate is never a payment) | 3,213 | internal |
-| gaming_regulatory_events (declination never approval; reversals kept) | 3,776 | public |
+| gaming_compact_terms | 3,213 | internal |
+| gaming_regulatory_events | 3,776 | public |
 | gaming_land_eligibility | 240 | public |
 | gaming_environmental_reviews / licenses / litigation | 214 / 694 / 96 | source_limited |
-| gaming_labor_observations (participants never employees; LODES internal) | 4,852 | internal |
-| gaming_advocacy_links (links only; Advocacy IDs preserved, no amounts) | 4,871 | internal |
+| gaming_labor_observations | 4,852 | internal |
+| gaming_advocacy_links | 4,871 | internal |
 
-Only `gaming_regional_revenue` can pass the release path today (one field-map entry per collection); it is the Grove flagship override in `RELEASE_PILOTS["gaming"]`, replacing the vendor-lineage `FLAGSHIP["gaming"]` which cedar_publication's owner should move.
+Only public-status components can enter a release; the Gaming pilot declares one today (`gaming_regional_revenue`).
 
-**616 / 46 / 22 provenance.** All three reproduce exactly from the untracked `Desktop\4wheeler\casino_employment_validation_SHARE\` bundle (built 2026-08-12 by `13_build_share_bundle.py`): `data/casino_employment_panel.csv` (sha256 `8c125cf7…5bb2f`) = 616 rows, 46 tribes, 1992–2025; `data/facility_events.csv` (`97ddd6f6…b9697`) = 22 rows. **616/46 are a stale snapshot** — ~40 minutes later the live panel became 735 rows / 55 tribes; no filter on it yields 616. **22 is current** (byte-identical in every copy); this audit's "none verifies 22" missed that file. The figures are exact but mislabelled: the panel's grain is tribe × year × source (605 distinct tribe-years), 565 of 616 rows are Form 5500 plan participants rather than employees, and the 22 events cover 13 tribes, three of them non-gaming businesses. Because rerunning 13 would delete the only copy, the bundle is preserved with a verified SHA-256 manifest at `C:\Users\esm247\cedar-grove-gaming-work\preserved\4wheeler_share_2026-08-12\`. The 74-table inventory reproduced exactly (rows, columns, SHA-256).
+**Online sportsbook package (owner-delivered 2026-09-24).** The three delivered files are hash-pinned and read-only in `cedar-grove-gaming-work/raw/online_sports_2026-09-24/`. The delivered names differ from the integration review: the workbook is `tribal_online_sports_2026-09-24.xlsx`, and there is no standalone monthly CSV (the build reads the zip's `data/*.csv`).
 
-**Open decisions.**
-1. **ID contract** (Codex, blocking): facility allocator/prefix, component-ID policy (derived vs `cedar_ids.allocate`), enterprise namespace, legacy-handle parser.
-2. **Operator websites** (owner): 1201 treats a property's own site as `public_official` for name/location/capacity and 25 owner / 23 operator links (named owner must match the curated tribe). Downgrade if the owner wants only third-party official evidence.
-3. **Identity rulings** (owner): The Stables place merge (VP-0153 vs CCP-305300); 7 Clans Ponca link kept `reviewed_disputed`.
-4. **Havala**: multi-table release unit, Grove catalog declaration in the server (server accepts only `cedar_press` catalogs today), 16 MiB Lumecon intake cap vs the payments table, and `512_build_dataset_contracts.py` preserving producer-declared entries.
+Reproduced counts:
+- 1,247 regulator monthly + 293 secondary monthly = 1,540 monthly rows, plus 6 annual-only.
+- 31 linked tribes.
+- 10 states: 7 with regulator monthly data (CT IN ME MI NJ OH PA), plus AZ secondary monthly, AR secondary annual and IL official annual.
+- All 98 cited sources re-hash.
 
-**Source-limited leads (not acquired).** OLMS LM filings, state WARN notices, EPA EIS database, Army Corps permits, state sports-wagering/licensing censuses, and litigation dockets (CourtListener robots.txt refused; one probe was sent and stopped). Producer receipts list each lead.
+Count distinctions:
+- **34 CE IDs vs 31 linked tribes.** The package register lists 34 tribes. Three have no financial row and appear only as coverage-gap participation leads:
+  - Eastern Band of Cherokee Indians (NC): no operator-level series.
+  - Southern Ute Indian Tribe (CO): no historical series.
+  - Ute Mountain Ute Tribe (CO): participation needs review.
+
+  All 34 are valid, active CE IDs; 31 is the correct linked-tribe figure.
+- **297 secondary vs 293.** The 297 non-public rows are the 293 secondary monthly rows plus 4 annual Arkansas BetSaracen rows (2022–2025, from a casino revenue dashboard rounded to $0.01M). The other 2 annual rows, Illinois Hard Rock Bet 2024–2025, come from Illinois Gaming Board annual reports and are official, so 1,247 + 2 = 1,249 rows are public_official.
+
+Controls:
+- The NJ license/brand overlap is refused in 62 rows.
+- The PA Mohegan Dec-2019 discrepancy is isolated to its row (published −31,744.02, calculated −42,875.40).
+- Maine's three-tribe report is stored once and not allocated.
+- 771 MI/CT rows cross-reference 3,882 existing digital-revenue rows, with equal values.
+- One of the seven property-naming units links on evidence (MI NHBP → FireKeepers, `CEDAR-PLACE-000176-S0`); six stay unresolved.
+
+Public wording: a Native-entity link identifies a documented affiliation, regulatory relationship or beneficiary context, not an ownership share or retained income.
+
+**616 / 46 / 22 provenance.** All three reproduce exactly from the untracked `Desktop\4wheeler\casino_employment_validation_SHARE\` bundle, built 2026-08-12 by `13_build_share_bundle.py`:
+- `data/casino_employment_panel.csv` (sha256 `8c125cf7…5bb2f`): 616 rows, 46 tribes, 1992–2025.
+- `data/facility_events.csv` (`97ddd6f6…b9697`): 22 rows.
+
+**616/46 are a stale snapshot.** About 40 minutes later the live panel became 735 rows / 55 tribes, and no filter on it yields 616.
+
+**22 is current**: the file is byte-identical in every copy. This audit's "none verifies 22" missed it.
+
+The figures are exact but mislabelled:
+- The grain is tribe × year × source (605 distinct tribe-years).
+- 565 of the 616 rows are Form 5500 plan participants rather than employees.
+- The 22 events cover 13 tribes, three of them non-gaming businesses.
+
+Rerunning 13 would delete the only copy, so the bundle is preserved with a verified SHA-256 manifest at `C:\Users\esm247\cedar-grove-gaming-work\preserved\4wheeler_share_2026-08-12\`. The 74-table inventory reproduced exactly (rows, columns, SHA-256).
+
+**Evidence rules applied.**
+- Operator and casino websites are `public_first_party`: usable for self-description, never proof of ownership, control, revenue allocation or retention. The former 25 owner / 23 operator rows are now 33 self-described affiliations.
+- Secondary compilations are `secondary_corroboration` and never public.
+- Vendor lineage (Casino City, votingpatterns, trade directories) stays internal.
+
+**Open items.**
+1. **Live issuance** (Codex, then owner): the section 10 preconditions, then an owner decision ID. This blocks publication only.
+2. **Havala**:
+   - a second Grove catalog variable vs one store keyed by product;
+   - the Grove landing route;
+   - moving the rights check into `apply_field_map`;
+   - persisting static blocks in `cedar_ids`;
+   - the 16 MiB Lumecon intake cap vs the payments table;
+   - `512_build_dataset_contracts.py` preserving producer-declared entries;
+   - `--authority-root` for the pilot.
+3. **Owner identity rulings** (bounded; do not pause engineering): the Stables place merge (VP-0153 vs CCP-305300); the 7 Clans Ponca link, kept `reviewed_disputed`.
+4. **Acquisition leads** (not acquired):
+   - OLMS LM filings and state WARN notices;
+   - the EPA EIS database and Army Corps permits;
+   - state sports-wagering and licensing censuses;
+   - litigation dockets;
+   - Arizona official sportsbook reports after 2022;
+   - Illinois and Arkansas monthly sportsbook series.
+5. **Privacy rule for retrieval**: requests use a project contact, and saved diagnostics never contain personal identifying headers. One earlier CourtListener probe carried the owner's email in its user-agent; it was stopped by robots.txt and nothing was downloaded.
