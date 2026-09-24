@@ -1615,7 +1615,7 @@
     {
      "column": "cedar_entity_role",
      "label": "Entity role",
-     "meaning": "Why the entity is on this row: from native_direction: owner of the subcontractor, of the prime, or of both.",
+     "meaning": "Source-based Native attribution on the subcontractor side, prime-contractor side, or both. Separate prime_cedar_uid and sub_cedar_uid retain the roles. These links do not establish ownership or legal equivalence; both does not mean one entity owns both parties.",
      "add": true
     },
     {

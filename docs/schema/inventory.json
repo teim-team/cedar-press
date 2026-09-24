@@ -20284,8 +20284,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 3,
-   "mentioned_outside_history": 2,
+   "mentions": 4,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -23955,19 +23955,23 @@
    "dir": "",
    "number": "1135",
    "duplicate_number": false,
-   "kind": "both",
+   "kind": "enricher",
    "evidence": [
-    "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: __10.csv"
    ],
    "never_run": false,
    "never_run_reason": "",
    "writes": [
-    "__10.csv"
+    "__10.csv",
+    "__candidate.csv",
+    "__source_preview.csv",
+    "measurements.json",
+    "run-context.json"
    ],
    "reads": [
     "MANIFEST.csv",
     "__10.csv",
+    "collections.manifest.json",
     "dataset_contracts.json"
    ],
    "in_a_contract": false,
@@ -23976,8 +23980,8 @@
    "mentioned_outside_history": 14,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 717,
+   "last_modified": "2026-09-24",
+   "lines": 898,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -23992,19 +23996,20 @@
    "operational_call_evidence": {
     "publication_calls": [
      "apply_field_map",
-     "apply_official_names",
-     "enforce_denials",
-     "is_publication_eligible",
-     "mask_attribution",
-     "publishable_columns",
-     "translate_neid_values"
+     "policy.apply_field_map",
+     "policy.field_map",
+     "policy.product_id",
+     "policy.recompute_derived",
+     "policy.register",
+     "publishable_columns"
     ],
     "validation_calls": [
      "verify"
     ]
    },
    "unknown_io_literals": [
-    "*__10.csv"
+    "*__10.csv",
+    "cedar_identity_register.csv"
    ],
    "embedded_test_functions": 0,
    "standalone_test_evidence": {
@@ -24016,20 +24021,60 @@
    },
    "writer_evidence": [
     {
-     "line": 274,
+     "line": 279,
      "operation": "path.open",
-     "target": "<unresolved>",
-     "scope": "unresolved_target",
+     "target": "<unresolved>/data/clean/<unresolved>",
+     "scope": "protected_surface",
      "table": null,
-     "signature": "3267fa6775daa995bb8968dccd8cd87892f29cc04c97477a514d0c592a6e247b"
+     "signature": "4f46047164d1ad33104c6abb08736ece8e690ef767b1cd569246bb4f941cf761"
     },
     {
-     "line": 520,
+     "line": 471,
      "operation": ".open",
      "target": "<unresolved>/dist/review/MANIFEST.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "26939250fa32ed5e99dc37ef4754ebc97ac0105afc8a667f4e9d6fded311b617"
+     "signature": "164cef9cecc8518834c3b967abd447dbf4ce0497080d4d1a0bdd7c8a5f4d0fa3"
+    },
+    {
+     "line": 735,
+     "operation": "partial.open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "d776fa96e315c072d346864fd9376bd2cd378b4fa058f007df197b90b14a4e1c"
+    },
+    {
+     "line": 854,
+     "operation": ".write_text",
+     "target": "<unresolved>/<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "c36cfa86c9b1b07bf7a9cfc32c8798056fa51e4e90e37de2acf641f7cf5c132c"
+    },
+    {
+     "line": 859,
+     "operation": ".write_text",
+     "target": "<unresolved>/index.html",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "b6c8d26772428e0bfe5a9eee05a0bf211306d8b7fdd78e11c31cf7a81b88a4f4"
+    },
+    {
+     "line": 864,
+     "operation": ".write_text",
+     "target": "<unresolved>/run-context.json",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "83a400059a35aebd10c9cfc26eda9dbff1365b890d5361e3fddb42cafe205cab"
+    },
+    {
+     "line": 866,
+     "operation": ".write_text",
+     "target": "<unresolved>/measurements.json",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "74dfd1f181b5e19751686f5ef5287142e81c9f9275f710a001398f997a4dd1a1"
     }
    ],
    "writer_analysis_error": null,
@@ -24183,8 +24228,8 @@
    "mentioned_outside_history": 43,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 1296,
+   "last_modified": "2026-09-24",
+   "lines": 1275,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -24197,6 +24242,7 @@
     "server/tests/test_field_map.py"
    ],
    "runtime_consumer_candidates": [
+    "code/1135_full_dataset_review_bundle.py",
     "code/build.py"
    ],
    "operational_call_evidence": {
@@ -24228,36 +24274,36 @@
    },
    "writer_evidence": [
     {
-     "line": 297,
+     "line": 276,
      "operation": "path.open",
      "target": "<unresolved>/dist/customer/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "87eb179a9ece1004dc17fcdda988a4530e6479eecbcd8d648909550876f890f1"
+     "signature": "4142ad0ba393b7fe0c323de16ad8a08cbc556cdf01c7a509b6dabd180b02f27e"
     },
     {
-     "line": 461,
+     "line": 440,
      "operation": ".write_text",
      "target": "<unresolved>/dist/customer/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "2dd993e0d22214a3790f862e94084767a1f7a62d009cab52f787386910356f5d"
+     "signature": "bda06df00adb5257133dad020c3ba2e4288d2996bcc20498a377520d8d1ae05c"
     },
     {
-     "line": 569,
+     "line": 548,
      "operation": ".write_text",
      "target": "<unresolved>/dist/customer/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "7f0043b5f20e271864814745e2738fb9c7c3b197046b633d3d11ba2641f566a9"
+     "signature": "924b488c1ce73f0107fc407fa8d0704b540eed47158c1302910008b189d21b78"
     },
     {
-     "line": 1099,
+     "line": 1078,
      "operation": ".open",
      "target": "<unresolved>/dist/customer/MANIFEST.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "4799bab818904ffd556440278f14281228c7b7bd155864f0df0d45c274f472e9"
+     "signature": "ac1bd5d43eb28d9e09ed2a0b7f333b39a167b23e07d8ba31d60619233178cd93"
     }
    ],
    "writer_analysis_error": null,
@@ -37106,8 +37152,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 16,
-   "mentioned_outside_history": 15,
+   "mentions": 17,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -37116,7 +37162,8 @@
    "collection_output_entrypoints": [],
    "static_consumers": [
     "code/293_lint_bug_classes.py",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_np_ruling_precedence.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -38364,8 +38411,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 15,
-   "mentioned_outside_history": 15,
+   "mentions": 16,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -38375,7 +38422,8 @@
    "static_consumers": [
     "code/167_link_nonprofit_family_via_ein_hub.py",
     "code/293_lint_bug_classes.py",
-    "code/70_key_unjoined_datasets.py"
+    "code/70_key_unjoined_datasets.py",
+    "server/tests/test_np_ruling_precedence.py"
    ],
    "runtime_consumer_candidates": [
     "code/167_link_nonprofit_family_via_ein_hub.py",
@@ -43684,8 +43732,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 30,
-   "mentioned_outside_history": 30,
+   "mentions": 31,
+   "mentioned_outside_history": 31,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -43702,7 +43750,8 @@
     "code/00_run_all.py",
     "code/846_session_audit.py",
     "code/cedar_pipeline.py",
-    "docs/CONSOLIDATION_DOC_INVENTORY.json"
+    "docs/CONSOLIDATION_DOC_INVENTORY.json",
+    "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -47408,7 +47457,7 @@
     "assistance_tribe_id_crosswalk.csv",
     "federal_funding_transactions.csv"
    ],
-   "in_a_contract": true,
+   "in_a_contract": false,
    "in_an_ordering": true,
    "mentions": 8,
    "mentioned_outside_history": 8,
@@ -47416,17 +47465,13 @@
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
    "lines": 525,
-   "operational_role": "active producer",
-   "collection_output_entrypoints": [
-    {
-     "collection": "funding",
-     "output": "federal_funding_transactions.csv",
-     "entrypoint": "py -3 code/build.py run funding --execute"
-    }
-   ],
+   "operational_role": "unresolved",
+   "collection_output_entrypoints": [],
    "static_consumers": [
+    "code/cedar_pipeline.py",
     "docs/ASSISTANCE_SEAM_HARMONIZATION.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -47477,9 +47522,11 @@
     }
    ],
    "writer_analysis_error": null,
-   "writer_risk": "P2_declared_governed_write_candidate",
-   "undeclared_governed_tables": [],
-   "registration_status": "declared_dependency"
+   "writer_risk": "P1_undeclared_governed_write_candidate",
+   "undeclared_governed_tables": [
+    "federal_funding_transactions.csv"
+   ],
+   "registration_status": "unresolved_not_authorized"
   },
   {
    "script": "336_correct_scheme_resolution_by_spine_membership.py",
@@ -47502,7 +47549,7 @@
     "cedar_entity_spine.csv",
     "federal_funding_transactions.csv"
    ],
-   "in_a_contract": true,
+   "in_a_contract": false,
    "in_an_ordering": true,
    "mentions": 8,
    "mentioned_outside_history": 8,
@@ -47510,19 +47557,15 @@
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
    "lines": 298,
-   "operational_role": "active producer",
-   "collection_output_entrypoints": [
-    {
-     "collection": "funding",
-     "output": "federal_funding_transactions.csv",
-     "entrypoint": "py -3 code/build.py run funding --execute"
-    }
-   ],
+   "operational_role": "unresolved",
+   "collection_output_entrypoints": [],
    "static_consumers": [
+    "code/cedar_pipeline.py",
     "docs/ASSISTANCE_SEAM_HARMONIZATION.json",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
     "docs/SOURCE_FRESHNESS.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -47573,9 +47616,11 @@
     }
    ],
    "writer_analysis_error": null,
-   "writer_risk": "P2_declared_governed_write_candidate",
-   "undeclared_governed_tables": [],
-   "registration_status": "declared_dependency"
+   "writer_risk": "P1_undeclared_governed_write_candidate",
+   "undeclared_governed_tables": [
+    "federal_funding_transactions.csv"
+   ],
+   "registration_status": "unresolved_not_authorized"
   },
   {
    "script": "33_apply_party_rulings.py",
@@ -54460,7 +54505,7 @@
    "kind": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: grain_evidence.json"
+    "read-modify-writes: dataset_contracts.json, grain_evidence.json"
    ],
    "never_run": false,
    "never_run_reason": "",
@@ -54471,16 +54516,17 @@
     "grain_evidence.json"
    ],
    "reads": [
+    "dataset_contracts.json",
     "grain_evidence.json"
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 43,
-   "mentioned_outside_history": 42,
+   "mentions": 44,
+   "mentioned_outside_history": 43,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 5173,
+   "last_modified": "2026-09-24",
+   "lines": 5205,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -54493,7 +54539,8 @@
     "docs/releases/native-owned-businesses-6c92a41/manifest.json",
     "docs/releases/natural-resources-6c92a41/manifest.json",
     "docs/releases/subcontracting-6c92a41/manifest.json",
-    "review/fixtures_D/fixture_F9_grain_validation.py"
+    "review/fixtures_D/fixture_F9_grain_validation.py",
+    "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -54801,36 +54848,44 @@
    },
    "writer_evidence": [
     {
-     "line": 4579,
+     "line": 4584,
      "operation": "OUT_MD.write_text",
      "target": "<unresolved>/docs/DATASET_CONTRACTS.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "be074c80d53dc171c0f8bafda09165d26647c51a6f34af8a97d3ea33d5c06c32"
+     "signature": "7522d419267939068965aebed7ed7215513f241c98bc2ac3c4393f4923258e2b"
     },
     {
-     "line": 4988,
+     "line": 4993,
      "operation": "EVIDENCE_JSON.write_text",
      "target": "<unresolved>/docs/schema/grain_evidence.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9f9e8905ac03b358b5f659ecb2273dd8ccca7896ddc7b484834e8e1e9b1bd6f7"
+     "signature": "53655d64c2e160691680217053c1e0d688ec624254beb7c25062b65dd981a18d"
     },
     {
-     "line": 5135,
+     "line": 5140,
      "operation": "AUDIT_MD.write_text",
      "target": "<unresolved>/docs/GRAIN_AUDIT.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "5992cd8e2a0b19ba120b4e8452c89f405b04389fd983bd7ab2e36e8657fdd5cf"
+     "signature": "7d9bc57313f371dfebc2bb0c79bcf0d5728b713c29c94a8362ad1942c3778ad3"
     },
     {
-     "line": 5145,
+     "line": 5166,
      "operation": "OUT_JSON.write_text",
      "target": "<unresolved>/docs/schema/dataset_contracts.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9ed65e897c6b6d922616d8854fe1f10f5c60e9323d3cac776b638e36ddd43a46"
+     "signature": "2dc6122c5f314a9382a203829e7f00b1fe29b2a640f6bd30a42d61ad87bb317b"
+    },
+    {
+     "line": 5177,
+     "operation": "OUT_JSON.write_text",
+     "target": "<unresolved>/docs/schema/dataset_contracts.json",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "2dc6122c5f314a9382a203829e7f00b1fe29b2a640f6bd30a42d61ad87bb317b"
     }
    ],
    "writer_analysis_error": null,
@@ -62125,8 +62180,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 25,
-   "mentioned_outside_history": 24,
+   "mentions": 26,
+   "mentioned_outside_history": 25,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -62148,7 +62203,8 @@
     "code/73_bills_votes_completion.py",
     "code/cedar_pipeline.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_np_ruling_precedence.py"
    ],
    "runtime_consumer_candidates": [
     "code/73_bills_votes_completion.py"
@@ -67342,8 +67398,8 @@
    "mentioned_outside_history": 46,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 411,
+   "last_modified": "2026-09-24",
+   "lines": 431,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -73588,7 +73644,7 @@
    "mentioned_outside_history": 85,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
+   "last_modified": "2026-09-24",
    "lines": 788,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
@@ -73670,7 +73726,7 @@
      "target": "<unresolved>/docs/RELEASE_STAMP.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "cc809dd7438d255d7ba9d0710d8af22879167af17b12b7bfc65ec3ccf2c62ffa"
+     "signature": "dd4e8d496497143d6d17c35ad1d41f3e99448faf2d34472e2538f4d306018247"
     },
     {
      "line": 517,
@@ -73678,7 +73734,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "03024492988a20b5c49ea6fe44e24388c09692804139464e12c20b4f2f696abf"
+     "signature": "a64df9958565ee10f16faf2ff16e10669369bf83c71a77b896ef7b2f23fbdcbb"
     },
     {
      "line": 519,
@@ -73686,7 +73742,7 @@
      "target": "<unresolved>/requirements.txt",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a2173f813af677e798ab4cbe8f92b6dacc80e568e29ebafe54c7061620e44a4e"
+     "signature": "dd3da286649b79506bceb04514138bf87ae8c5a45953c95d1440a32398a18d2e"
     },
     {
      "line": 525,
@@ -73694,7 +73750,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "03024492988a20b5c49ea6fe44e24388c09692804139464e12c20b4f2f696abf"
+     "signature": "a64df9958565ee10f16faf2ff16e10669369bf83c71a77b896ef7b2f23fbdcbb"
     },
     {
      "line": 534,
@@ -73702,7 +73758,7 @@
      "target": "<unresolved>/logs/need-candidate.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "bfe2876aa2daacb4138540df1b1ea35191afdf3ee5afaef14a0d569da8ef5fe5"
+     "signature": "b20c9e3a789f24081a65efa88d0ebf21e2b9c3cd2284d9133ee19cbe92d62140"
     },
     {
      "line": 553,
@@ -73710,7 +73766,7 @@
      "target": "<unresolved>/logs/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6f12ff4a48dd878d614f25ccf01ffda68614ce6763f63855174d317b352a432d"
+     "signature": "11df1d9e60691110340447687bf5f20d0605c51120374e58f2f33fb7acd6e4f9"
     }
    ],
    "writer_analysis_error": null,
@@ -74782,6 +74838,7 @@
    "static_consumers": [
     "code/186_cicd_benchmark.py",
     "code/207_normalize_extent_competed.py",
+    "code/cedar_publication.py",
     "docs/API_TECHNICAL_QUIRK_VERIFICATION.json",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
     "docs/cicd_benchmark.json",
@@ -74789,7 +74846,8 @@
    ],
    "runtime_consumer_candidates": [
     "code/186_cicd_benchmark.py",
-    "code/207_normalize_extent_competed.py"
+    "code/207_normalize_extent_competed.py",
+    "code/cedar_publication.py"
    ],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -74847,6 +74905,7 @@
     "code/1072_migration_test.py",
     "code/1072_tribally_owned_enterprises.py",
     "code/1129_place_ids.py",
+    "code/1135_full_dataset_review_bundle.py",
     "code/158_extend_gaming_facilities.py",
     "code/241_promote_individual_native_firms_in_place.py",
     "code/264_add_missing_osha_tribal_facilities.py",
@@ -74867,6 +74926,7 @@
    "runtime_consumer_candidates": [
     "code/1072_tribally_owned_enterprises.py",
     "code/1129_place_ids.py",
+    "code/1135_full_dataset_review_bundle.py",
     "code/264_add_missing_osha_tribal_facilities.py",
     "code/284_audit_nondeterministic_keys.py",
     "code/328_audit_id_service_bypass.py",
@@ -75280,8 +75340,8 @@
    "mentioned_outside_history": 28,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 1720,
+   "last_modified": "2026-09-24",
+   "lines": 1735,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75390,20 +75450,20 @@
    },
    "writer_evidence": [
     {
-     "line": 1625,
+     "line": 1640,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "bba1d4bf5ecbe863c8632c74ec84cc9bb8fb8d0464e561d9dc1ec33a7179f94f"
+     "signature": "1932f1446f73f77e421d271e6d9bcfecce22609ecabd1e20c0554d58c1e2d811"
     },
     {
-     "line": 1712,
+     "line": 1727,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b1f14cb35e9f21d6889e1c16992cfeacac8be010425ac672524d7012218e31ed"
+     "signature": "ca59b7c60510e83da4aabdf0822c909a73d882a7586738388a2a11ce6c3c18d8"
     }
    ],
    "writer_analysis_error": null,
@@ -75542,7 +75602,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 3104,
+   "lines": 3186,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75638,20 +75698,20 @@
    },
    "writer_evidence": [
     {
-     "line": 2723,
+     "line": 2805,
      "operation": "COMPAT_FILE.write_text",
      "target": "<unresolved>/code/770_sample_extracts.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "2c438dcdbfa343ebf499c90dc08548cdc8fbd3c2ad6e3dd93de41363bf904736"
+     "signature": "8c41794ff25af8b67a81dec04669536576f42f3b6cee6e7178a4e9c6ad700a11"
     },
     {
-     "line": 2972,
+     "line": 3054,
      "operation": "path.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "8235d61a21d5fc564b1459cce4081ebb9fac93fd7fd360886b591abbdb2778b0"
+     "signature": "3dbf575a4a1d6f6a64400167d0e30c827d30c203f4c1292a1f00632bcd9366e5"
     }
    ],
    "writer_analysis_error": null,
@@ -77203,16 +77263,16 @@
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
   "scripts": 684,
   "operational_role_counts": {
-   "active producer": 78,
+   "active producer": 76,
    "active validator/migration/review": 8,
    "product consumer/shared service": 7,
    "test/fixture": 5,
-   "unresolved": 586
+   "unresolved": 588
   },
   "unresolved_writer_risk_counts": {
    "P0_forbidden_entrypoint": 1,
    "P1_protected_surface_write_candidate": 74,
-   "P1_undeclared_governed_write_candidate": 37,
+   "P1_undeclared_governed_write_candidate": 39,
    "P2_declared_governed_write_candidate": 4,
    "P2_unresolved_write_target": 430,
    "P3_no_detected_write_not_readonly_certified": 33,
@@ -77222,7 +77282,7 @@
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
   "embedded_selftest_files": 124,
-  "unresolved_not_authorized": 568,
+  "unresolved_not_authorized": 570,
   "table_snapshot_preserved_sha256": "c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee",
   "data_generated_unchanged": "2026-09-02",
   "limitation": "Static census is not runtime write proof or authorization to run a producer."

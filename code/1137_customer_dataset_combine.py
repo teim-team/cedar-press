@@ -187,6 +187,28 @@ def find(name):
 # `cedar_publication`. It was reimplemented identically here and in 1135.
 
 
+def publication_row(raw, header, *, gate=True, masked=None):
+    """One row policy path for customer exports and review samples.
+
+    Field-map/schema validation remains a separate mandatory collection gate.
+    A rejected row is represented explicitly, never silently dropped by callers.
+    """
+    if masked is None:
+        masked = defaultdict(int)
+    row = {column: raw.get(column, "") for column in header}
+    translate_neid_values(row)
+    apply_official_names(row)
+    if enforce_denials(row):
+        masked[DENIAL_MASK_REASON] += 1
+    if gate:
+        ok, why, disposition = is_publication_eligible(row)
+        if not ok:
+            return None, why
+        if disposition == MASK and mask_attribution(row, why):
+            masked[why] += 1
+    return row, ""
+
+
 def load(path, gate=True, masked=None, *, source_bytes=None):
     """Read a table through THE publication gate.
 
@@ -225,8 +247,6 @@ def load(path, gate=True, masked=None, *, source_bytes=None):
                       f"no rule and ships blank")
         hdr = publishable_columns(raw_hdr)
         rows, held = [], defaultdict(int)
-        neid_translated, neid_ambiguous, neid_denied = [0], [0], [0]
-        renamed = [0]
         for r in source:
             # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
             # so projecting first removes the personal-contact fields; running
@@ -235,52 +255,11 @@ def load(path, gate=True, masked=None, *, source_bytes=None):
             # order: 582 of 587 rows of the BIA tribal leaders directory,
             # withheld whole for carrying a phone number that was never going
             # to be published.
-            r = {c: r.get(c, "") for c in hdr}
-            # TRANSLATE THE RETIRED SCHEME, DO NOT JUST DROP ITS COLUMN NAMES.
-            # `publishable_columns` removes columns whose NAME says NEID; it
-            # cannot see a NEID sitting in `entity_id`, `owner_hub_handle` or
-            # `affiliated_entity_ids`. Measured 2026-09-03, AFTER the name gate
-            # shipped: 89,680 retired values still leaving on 45,213 rows in 22
-            # columns across 8 datasets. Deleting them is not available -
-            # `nagpra` and `native-owned-businesses` hold no cedar_uid at all
-            # and these are their only entity keys - so they are rewritten to
-            # Cedar's own key. The 12 NEIDs that claim more than one uid are
-            # refused and left standing rather than guessed.
-            n_tr, n_amb = translate_neid_values(r)
-            # AND THE SHORT HANDLE, which is the same class of defect one
-            # layer up. `translate_neid_values` retires a bad IDENTIFIER;
-            # this retires a bad NAME. Owner, 2026-09-04: "there should be no
-            # short handle we cant use it reliable". Seven customer datasets
-            # carried `Confederated Yakama` for the Confederated Tribes and
-            # Bands of the Yakama Nation, because the register's short handle
-            # propagated into every one of them.
-            renamed[0] += apply_official_names(r)
-            # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY DATASET.
-            # Applying the municipal-PHA ruling to the assistance table left 14
-            # rows of the DELIVERED subcontracting.csv still carrying
-            # sub_cedar_uid = CE-0017W-FN for the Omaha city housing authority,
-            # $3,221,778.36. Per-table application cannot close that; this can.
-            # Counted as the MASK it is, under its own reason, so the manifest's
-            # `rows_attribution_masked` / `attribution_masked_why` carry it
-            # (Codex, PR #51: the cell counter here was never read).
-            if enforce_denials(r):
-                masked[DENIAL_MASK_REASON] += 1
-            neid_translated[0] += n_tr
-            neid_ambiguous[0] += n_amb
-            if gate:
-                # THE gate: licensing + personal data (`row_ok`, unchanged)
-                # plus the deny-by-default adjudication policy added
-                # 2026-09-02. Three outcomes, not two - a MASK keeps the row
-                # and withholds the Cedar attribution on it, because a prime
-                # contract whose ownership ruling was withdrawn is still a real
-                # federal award and dropping it would lose public record.
-                ok, why, disp = is_publication_eligible(r)
-                if not ok:
-                    held[why] += 1
-                    continue
-                if disp == MASK and mask_attribution(r, why):
-                    masked[why] += 1
-            rows.append(r)
+            projected, why = publication_row(r, hdr, gate=gate, masked=masked)
+            if projected is None:
+                held[why] += 1
+            else:
+                rows.append(projected)
     return hdr, rows, held
 
 

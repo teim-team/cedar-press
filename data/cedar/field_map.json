@@ -1527,6 +1527,28 @@
      "blocking": true
     },
     {
+     "column": "Caveat",
+     "decision": "derive",
+     "to": "research_note",
+     "why": "Preserve the publish-time factual qualification in research_note; never substitute it for the owed substantive Notes editorial pass.",
+     "spec": "§4",
+     "blocking": true
+    },
+    {
+     "column": "Candidate_Status",
+     "decision": "derive",
+     "to": "research_note",
+     "why": "Preserve the publish-time factual qualification in research_note; never substitute it for the owed substantive Notes editorial pass.",
+     "spec": "§4",
+     "blocking": true
+    },
+    {
+     "column": "research_note",
+     "decision": "keep",
+     "why": "Approved public target supplied by the editorial pass and cedar_publication.deals_public_view. Preserve Caveat and Candidate_Status qualifications without waiving the blocking substantive Notes editorial pass.",
+     "spec": "§4"
+    },
+    {
      "column": "Date_Added",
      "decision": "internal",
      "why": "Classification timestamp.",
@@ -3230,9 +3252,9 @@
     },
     {
      "column": "competition_type",
-     "from": "combine:extent_competed|extent_competed_normalized",
-     "why": "Consolidated through a validated dictionary.",
-     "status": "pending"
+     "from": "projection:cedar_extent_competed.normalize",
+     "why": "Built by cedar_publication.recompute_derived using the shared source-versioned dictionary; rejects conflicts.",
+     "status": "supplied_by_recompute_derived"
     },
     {
      "column": "recipient_geography_status",
@@ -3325,15 +3347,15 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "from native_direction: owner of the subcontractor, of the prime, or of both",
+   "entity_role": "from native_direction: source-based Native attribution on the subcontractor side, prime-contractor side, or both; not ownership or legal equivalence",
    "entity_roles": [
     {
      "column": "sub_cedar_uid",
-     "role": "owner of the subcontractor"
+     "role": "subcontractor-side Native attribution"
     },
     {
      "column": "prime_cedar_uid",
-     "role": "owner of the prime"
+     "role": "prime-contractor-side Native attribution"
     }
    ],
    "columns_today": 78,
@@ -5795,6 +5817,101 @@
      "decision": "internal",
      "why": "Script name.",
      "spec": "§10"
+    },
+    {
+     "column": "publishable_basis",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_uei_candidate",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_cage_candidate",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_identifier_match_status",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_identifier_match_basis",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_status",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_tier",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_method",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_rung",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_uei_linked",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_cage_linked",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_corroboration",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_publish_gate",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_no_match_reason",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_relation",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection. The firm-link, not ownership, qualification must accompany any future exposure of linked identifiers under a separate reviewed contract."
+    },
+    {
+     "column": "publishable_before_1100",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection. Recovery history does not override current permission."
+    },
+    {
+     "column": "publish_hold",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "publish_hold_basis",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "person_name_check_1100",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
     }
    ],
    "new": [

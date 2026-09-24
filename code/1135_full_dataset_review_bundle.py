@@ -193,6 +193,11 @@ from cedar_publication import (          # noqa: E402
     enforce_denials, DENIAL_MASK_REASON,
 )
 
+# The customer combiner owns row projection; sample writers call it rather
+# than maintaining a second ordering of masks, denials and rights checks.
+import importlib
+_customer = importlib.import_module("1137_customer_dataset_combine")
+
 csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 CLEAN = ROOT / "data" / "clean"
@@ -332,71 +337,17 @@ def build(mode: str) -> int:
                     dropped = [c for c in hdr if c not in cols]
                     kept, held = [], defaultdict(int)
                     masked = defaultdict(int)
-                    for r in rd:
-                        # PROJECT BEFORE GATING. `row_ok`'s NEVER check is a
-                        # backstop for a personal field under a name the drop
-                        # list does not know; run it on the RAW row and it
-                        # fires on the very fields `publishable_columns` is
-                        # about to remove. That cost 582 of 587 rows of the BIA
-                        # tribal leaders directory - withheld whole for
-                        # carrying a phone number that was never going to be
-                        # published anyway.
-                        r = {c: r.get(c, "") for c in cols}
-                        # TRANSLATE THE RETIRED SCHEME HERE TOO.
-                        #
-                        # Codex, PR #46: `1137.load()` calls this and 1135 did
-                        # not, so a retired NEID arriving under a generic name
-                        # like `entity_id` or `affiliated_entity_ids` survived
-                        # the column gate and shipped in `dist/review` samples
-                        # and full exports - while the primary customer export
-                        # translated it. **The live site importer consumes the
-                        # 1135 samples**, so the two customer-facing surfaces
-                        # disagreed about identity.
-                        #
-                        # That is the same shape as the defect `1169` exists to
-                        # catch between the CSVs and the database, one layer
-                        # further down: a rule applied at one writer and not
-                        # its sibling. The rule belongs to
-                        # `cedar_publication`, so every writer calls it.
-                        translate_neid_values(r)
-                        # AND the short handle. Measured 2026-09-04: the
-                        # ten-row samples this script writes are copied
-                        # verbatim into public/data/cedar/samples/ by
-                        # scripts/import_cedar_manifest.py, and 77 of
-                        # them shipped a retired NEID while 3 shipped
-                        # `Confederated Yakama` - AFTER every file in
-                        # dist/customer had been cleaned of both. The
-                        # samples read the INTERNAL tables, so they
-                        # bypass the publication layer unless the gates
-                        # are applied here too. Same rule, same module,
-                        # every writer.
-                        apply_official_names(r)
-                        # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY WRITER.
-                        # Codex, PR #50: 1137 enforced the denials and this
-                        # writer did not, so rebuilding after the Omaha ruling
-                        # fixed dist/customer/subcontracting.csv while the
-                        # dist/review samples the live site importer consumes
-                        # still carried the denied attribution. Same rule,
-                        # same module, every writer. Raises rather than
-                        # continues when the ledger cannot be read. Counted
-                        # as the MASK it is, under its own reason, so the
-                        # manifest's `rows_attribution_masked` and
-                        # `attribution_masked_why` carry it: Codex, PR #51,
-                        # a counter that is written and never read leaves the
-                        # samples changed and the audit trail silent.
-                        if enforce_denials(r):
-                            masked[DENIAL_MASK_REASON] += 1
-                        # CP-002: ONE gate, and all three of its outcomes.
-                        # `is_publication_eligible` is `row_ok` plus the
-                        # deny-by-default adjudication policy; a MASK keeps the
-                        # row and withholds the Cedar attribution on it.
-                        ok, why, disp = is_publication_eligible(r)
-                        if ok:
-                            if disp == MASK and mask_attribution(r, why):
-                                masked[why] += 1
-                            kept.append(r)
-                        else:
+                    source = rd
+                    if tname == _FLAGSHIP["deals"]:
+                        source = list(rd)
+                        _customer.deals_public_view(hdr, source)
+                        cols = publishable_columns(hdr)
+                    for raw in source:
+                        row, why = _customer.publication_row(raw, cols, masked=masked)
+                        if row is None:
                             held[why] += 1
+                        else:
+                            kept.append(row)
             except OSError as e:
                 man.append({"collection": coll, "table": tname, "note": str(e)})
                 continue
@@ -696,7 +647,237 @@ def verify() -> int:
     return 1 if bad else 0
 
 
+def candidate_review(input_root, output_root, queue_path, need_root=None, selected=None):
+    """Local usefulness samples and measured gates; never a product publication.
+
+    Uses the same row policy and field-map functions as the customer writer.
+    Source-field previews are explicitly distinguished from validated projections.
+    Large inputs are streamed in 1,000-row chunks; no canonical target is writable.
+    """
+    import hashlib
+    import html
+    import copy
+    from collections import Counter
+    import cedar_publication as policy
+    from cedar_ids import validate_identifier, identifier_contract
+
+    def digest(path):
+        with path.open("rb") as stream:
+            return hashlib.file_digest(stream, "sha256").hexdigest()
+
+    source_root = Path(input_root).resolve()
+    target = Path(output_root).resolve()
+    if target.is_relative_to(source_root) or any((parent / ".git").exists()
+            for parent in (target, *target.parents)):
+        raise ValueError("Candidate review must be outside repositories and source storage")
+    if target.exists():
+        raise ValueError("Use a new candidate directory; existing artifacts are immutable")
+    queue = json.loads(Path(queue_path).read_text(encoding="utf-8"))
+    if len(queue["collections"]) != 12:
+        raise ValueError("Expected exactly twelve launch collections")
+    import re
+    ids = [i["collection_id"] for i in queue["collections"]]
+    if len(set(ids)) != 12 or any(not re.fullmatch(r"[a-z][a-z0-9-]*", i) for i in ids):
+        raise ValueError("Collection IDs must be unique safe path components")
+    if selected and not set(selected).issubset(ids):
+        raise ValueError("Unknown selected collection")
+    manifest = json.loads((ROOT / "data/cedar/collections.manifest.json").read_text(encoding="utf-8"))
+    descriptions = {c["id"]: c["descriptor"] for c in manifest["collections"]}
+    contracts = json.loads(CONTRACTS.read_text(encoding="utf-8"))["contracts"]
+    field_maps = policy.field_map()
+    reg = policy.register()
+    ce_contract = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
+    authorities = [Path(__file__), Path(_customer.__file__), Path(policy.__file__),
+                   Path(queue_path), CONTRACTS, policy.FIELD_MAP_PATH,
+                   ROOT / "data/cedar/collections.manifest.json"]
+    authority_hashes = {str(p.resolve()): digest(p) for p in authorities if p.exists()}
+    target.mkdir(parents=True)
+    results, cards = [], []
+    for item in queue["collections"]:
+        cid = item["collection_id"]
+        if selected and cid not in selected:
+            continue
+        table = item["flagship"]
+        if Path(table).name != table or not table.endswith(".csv"):
+            raise ValueError("Unsafe flagship filename")
+        coll = next((k for k, v in _FLAGSHIP.items() if v == table), cid)
+        mapped_coll = policy.product_id(coll)
+        root = Path(need_root).resolve() if coll == "need" and need_root else source_root
+        path = root / "data/clean" / table
+        result = {"collection_id": cid, "table": table, "source": str(path),
+                  "canonical_source": root == source_root, "rows": 0,
+                  "row_policy_eligible": 0, "withheld": 0, "schema_blockers": [],
+                  "candidate_projection_rows": 0, "release_eligible_rows": None,
+                  "release_status": "NOT_CERTIFIED", "sample_scope": "Internal technical validation only"}
+        results.append(result)
+        title = item["title"]
+        desc = descriptions.get(mapped_coll, {})
+        sample, buckets, held, masked = [], Counter(), Counter(), defaultdict(int)
+        years, identities, provenance = Counter(), Counter(), Counter()
+        duplicate_keys, blank_keys, seen = 0, 0, set()
+        if path.exists():
+            before = digest(path)
+            result["source_sha256"] = before
+            declared = next((c for c in contracts if c["collection"] == coll), {})
+            keys = next((t.get("primary_key", []) for t in declared.get("tables", []) if t["table"] == table), [])
+            result["primary_key"] = keys
+            mapping = field_maps.get(mapped_coll, {})
+            safe_fields = {f["column"] for f in mapping.get("fields", []) if f["decision"] in ("keep", "rename")}
+            date_preferences = {"funding": "action_date", "contractors": "action_date",
+                "subcontracting": "subaward_date", "lobbying": "filing_year",
+                "legislation": "introduced_date", "nagpra": "publication_date",
+                "federal-register": "notice_date", "deals": "Event_Year",
+                "natural-resources": "period_start"}
+            date_col = date_preferences.get(coll)
+            result["date_basis"] = date_col or "nonannual register"
+            projection = target / (cid + "__candidate.csv")
+            partial = projection.with_suffix(".csv.partial")
+            out = partial.open("w", encoding="utf-8", newline="")
+            writer, chunk = None, []
+            def flush():
+                nonlocal writer, chunk
+                if not chunk or result["schema_blockers"]:
+                    chunk = []
+                    return
+                rows = chunk
+                chunk = []
+                cols = list(header)
+                try:
+                    policy.recompute_derived(coll, cols, rows)
+                    fm = policy.apply_field_map(mapped_coll, cols, rows, set(header))
+                    if not fm.get("mapped") or fm.get("owed"):
+                        raise ValueError("Unmapped or owed public fields: " + str(fm.get("owed")))
+                    for row in rows:
+                        for name in cols:
+                            if name == "cedar_uid" or name.endswith("_cedar_uid"):
+                                if row.get(name):
+                                    validate_identifier(row[name], ce_contract, registered_ids=reg)
+                            if name == "cedar_uids":
+                                for uid in json.loads(row[name]):
+                                    if uid is not None:
+                                        validate_identifier(uid, ce_contract, registered_ids=reg)
+                    if writer is None:
+                        writer = csv.DictWriter(out, fieldnames=cols, lineterminator="\n")
+                        writer.writeheader()
+                    if cols != writer.fieldnames:
+                        raise ValueError("Projection schema changed across chunks")
+                    writer.writerows(rows)
+                    result["candidate_projection_rows"] += len(rows)
+                except (policy.FieldMapRefusal, ValueError, KeyError) as error:
+                    result["schema_blockers"].append(str(error))
+            with path.open(encoding="utf-8-sig", newline="") as source:
+                reader = csv.DictReader(source)
+                raw_header = list(reader.fieldnames or [])
+                if len(set(raw_header)) != len(raw_header):
+                    raise ValueError("Duplicate source headers: " + table)
+                rows = reader
+                canonical_rows = None
+                if coll == "deals":
+                    rows = list(reader)
+                    canonical_rows = copy.deepcopy(rows)
+                    result["presentation"] = _customer.deals_public_view(raw_header, rows)
+                header = publishable_columns(raw_header)
+                if not safe_fields:
+                    result["schema_blockers"].append("No reviewed safe preview fields")
+                for row_index, raw in enumerate(rows):
+                    measured = canonical_rows[row_index] if canonical_rows is not None else raw
+                    result["rows"] += 1
+                    if None in raw or any(v is None for v in raw.values()):
+                        raise ValueError("Malformed source row width: " + table)
+                    if keys:
+                        key = tuple(raw.get(k, "") for k in keys)
+                        blank_keys += any(not v for v in key)
+                        duplicate_keys += key in seen
+                        seen.add(key)
+                    year = str(raw.get(date_col, ""))[:4] if date_col else "register"
+                    if year: years[year] += 1
+                    for k, v in measured.items():
+                        if v and (k == "cedar_uid" or k.endswith("_cedar_uid")) and v.startswith("CE-"):
+                            identities[k] += 1
+                        if v and (("source" in k.lower() and "url" in k.lower()) or k.lower() in {"source_file", "filing_url", "source_authority", "source"}):
+                            provenance[k] += 1
+                    projected, why = _customer.publication_row(raw, header, masked=masked)
+                    if projected is None:
+                        held[why] += 1
+                        continue
+                    result["row_policy_eligible"] += 1
+                    bucket = year if year in ("2025", "2026") else "other"
+                    if buckets[bucket] < 4:
+                        preview = {k: projected.get(k, "") for k in header if k in safe_fields}
+                        if preview:
+                            sample.append(preview); buckets[bucket] += 1
+                    if not result["schema_blockers"]:
+                        chunk.append(projected)
+                        if len(chunk) == 1000: flush()
+                flush()
+            out.close()
+            result.update(years=dict(years), identity_link_coverage=dict(identities),
+                          provenance_coverage=dict(provenance), withheld=sum(held.values()),
+                          withheld_reasons=dict(held), attribution_masks=dict(masked),
+                          duplicate_key_surplus=duplicate_keys, blank_key_rows=blank_keys)
+            if duplicate_keys or blank_keys or not keys:
+                result["schema_blockers"].append("Declared key incomplete or duplicate; no new key invented")
+            if result["schema_blockers"]:
+                partial.unlink()  # exact file created in this new, checked output directory
+                result["candidate_projection_rows"] = 0
+                result["release_eligible_rows"] = 0
+            else:
+                partial.rename(projection)
+                result["projection"] = projection.name
+                result["projection_sha256"] = digest(projection)
+                result["release_eligible_rows"] = None  # source completeness/full release gates remain independent
+            result["source_unchanged"] = before == digest(path)
+            if not result["source_unchanged"]: raise ValueError("Source changed during read: " + str(path))
+        else:
+            result["schema_blockers"] = ["Canonical input absent: " + str(path)]
+            result["release_eligible_rows"] = 0
+        result["sample_rows"] = len(sample)
+        if sample:
+            sample_path = target / (cid + "__source_preview.csv")
+            write_csv(sample_path, list(sample[0]), sample)
+            result["sample"] = sample_path.name
+        blocks = '; '.join(result["schema_blockers"]) or 'Full collection release and source-completeness checks remain separate.'
+        rows_html = ''.join('<tr>' + ''.join('<td>' + html.escape(str(v)) + '</td>' for v in r.values()) + '</tr>' for r in sample)
+        headings = ''.join('<th>' + html.escape(k) + '</th>' for k in (sample[0] if sample else {}))
+        body = ('<!doctype html><meta charset="utf-8"><title>' + html.escape(title) + '</title>'
+            '<style>body{font:16px system-ui;margin:2rem}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:8px;min-width:140px;max-width:420px;overflow-wrap:anywhere}nav{position:sticky;left:0}</style>'
+            '<nav><a href="index.html">All twelve collections</a></nav><h1>' + html.escape(title) + '</h1><p>'
+            + html.escape(desc.get('tracks', 'Current register candidate.')) + '</p><p>Sources: '
+            + html.escape(desc.get('sources', 'See source rows.')) + '</p>'
+            '<p><strong>INTERNAL USEFULNESS REVIEW. Source-field preview, not a published or release-certified dataset.</strong> '
+            'Only fields approved to keep or rename are shown after row rights/denial filters; missing derived fields are not fabricated. '
+            'A policy-eligible row is not necessarily release-eligible. NEED remains on publication hold.</p><p>'
+            + html.escape(blocks) + '</p><p>Codex owns validation and blocker removal. '
+            'This artifact assigns no task or decision to Elijah.</p><p>'
+            + (('<a href="' + result['sample'] + '">Download source preview</a>') if sample else 'No safe sample available')
+            + '</p><table><thead><tr>' + headings + '</tr></thead><tbody>' + rows_html + '</tbody></table>')
+        (target / (cid + '.html')).write_text(body, encoding='utf-8')
+        cards.append('<li><a href="' + cid + '.html">' + html.escape(title) + '</a>: '
+            + str(result['rows']) + ' source rows; ' + str(result['row_policy_eligible']) + ' pass row policy; '
+            + str(result['candidate_projection_rows']) + ' projected candidate rows; ' + str(len(sample)) + ' preview rows.</li>')
+        print(json.dumps(result), flush=True)
+    (target / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>Cedar collection usefulness review</title>'
+        '<h1>Twelve collection usefulness review</h1><p>Local candidate review. No data is published. '
+        'These samples are separate from owner identity decisions; release blockers remain explicit.</p><ul>' + ''.join(cards) + '</ul>', encoding='utf-8')
+    if any(digest(Path(p)) != expected for p, expected in authority_hashes.items()):
+        raise ValueError("Candidate authority changed during run; outputs are not certified")
+    (target / 'run-context.json').write_text(json.dumps({"authority_sha256": authority_hashes,
+        "publication": "PROHIBITED: internal candidate validation only"}, indent=2) + '\n', encoding='utf-8')
+    (target / 'measurements.json').write_text(json.dumps(results, indent=2) + '\n', encoding='utf-8')
+    return 0
+
+
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "candidate":
+        import argparse
+        parser = argparse.ArgumentParser(description="Isolated collection usefulness samples")
+        parser.add_argument("--input-root", required=True)
+        parser.add_argument("--output-root", required=True)
+        parser.add_argument("--queue", required=True)
+        parser.add_argument("--need-root")
+        parser.add_argument("--collection", action="append")
+        args = parser.parse_args(sys.argv[2:])
+        return candidate_review(args.input_root, args.output_root, args.queue, args.need_root, args.collection)
     mode = sys.argv[1] if len(sys.argv) > 1 else "plan"
     if mode == "verify":
         return verify()

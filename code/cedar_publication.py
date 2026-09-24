@@ -1080,6 +1080,24 @@ def owed_derivations(entry: dict, rename: dict, built_cols: list, rows: list):
         yield f, target, stuck
 
 
+def retired_identifier_in_value(collection: str, column: str, value: str) -> bool:
+    """Distinguish a researched instrument homonym from Cedar identity leakage.
+
+    NOIRLab identifies NEID as an astronomical spectrograph:
+    https://noirlab.edu/public/programs/kitt-peak-national-observatory/wiyn-35m-telescope/neid/
+    The subaward description for ASST_NON_80NSSC25K0179_080 discusses its
+    observations and stellar characterization. Only that scientific phrase is
+    ignored by the token check; source text is never edited, and every other
+    identifier token in the same value still fails closed.
+    """
+    inspected = value
+    if collection == "subcontracting" and column == "description" and re.search(
+            r"\bstellar characterization\b", value, re.I):
+        inspected = re.sub(r"\bNEID\s+observations\b", "instrument observations", value,
+                           flags=re.I)
+    return bool(RETIRED_TOKEN.search(inspected))
+
+
 class RetiredIdentifierPresent(FieldMapRefusal):
     def __init__(self, collection: str, where: str, n: int, example: str):
         super().__init__(collection, [where],
@@ -1564,7 +1582,7 @@ def apply_field_map(collection: str, header: list, rows: list,
         raise RetiredIdentifierPresent(collection, "the header", len(bad_names),
                                        ", ".join(bad_names))
     for c in header:
-        hits = [row[c] for row in rows if RETIRED_TOKEN.search(row.get(c) or "")]
+        hits = [row[c] for row in rows if retired_identifier_in_value(collection, c, row.get(c) or "")]
         if hits:
             raise RetiredIdentifierPresent(collection, c, len(hits), hits[0][:60])
     return {"mapped": True, "renamed": rename, "dropped": drop,
@@ -2051,6 +2069,23 @@ def recompute_derived(collection: str, header, rows) -> dict:
     caller can report it rather than assert silently.
     """
     changed = {}
+    if str(collection).strip().lower() == "contractors":
+        from cedar_extent_competed import normalize, UNDEFINED
+        prepared = []
+        for row in rows:
+            label, _ = normalize(row.get("extent_competed", ""))
+            previous = row.get("extent_competed_normalized", "").strip()
+            if label == UNDEFINED or (previous and previous != label):
+                raise FieldMapRefusal(collection, ["extent_competed", "extent_competed_normalized"],
+                                      "Competition dictionary is undefined or disagrees with the stored normalization")
+            if row.get("competition_type") and row["competition_type"] != label:
+                raise FieldMapRefusal(collection, ["competition_type"], "Conflicting competition projection")
+            prepared.append(label)
+        if "competition_type" not in header:
+            header.append("competition_type")
+        for row, label in zip(rows, prepared):
+            row["competition_type"] = label
+        return {"competition_type": len(prepared)}
     if str(collection).strip().lower() == "natural-resources":
         # The existing field map requires these factual qualifications to
         # survive in research_note. Preserve the complete source text; never
@@ -2142,16 +2177,49 @@ def deals_public_view(header, rows) -> dict:
     describe the row is not applied), and the presentation counts. A refused
     correction is reported, never silently skipped; the caller prints it.
     """
-    out = {"corrections": 0, "refused": [], "caveats": 0, "unmapped": {}}
+    out = {"corrections": 0, "refused": [], "caveats": 0, "unmapped": {},
+           "purchase_allocation_corrections": []}
     fact = _script("1185", "deals_fact_check_2025_2026")
     log, skipped, _n13, _n14 = fact.apply_all(rows)
     out["corrections"] = len(log)
     out["refused"] = [(f, d, why) for f, d, why in skipped
                       if why != "row not found"]
+    # Reuse the canonical taxonomy's bounded accounting correction before
+    # deriving caveats. Otherwise a purchase-price allocation invents a public
+    # award and its misleading recipient-level aggregation warning. This only
+    # changes derived publication-copy fields; canonical source rows stay put.
+    taxonomy = _script("88", "build_deals_taxonomy")
+    for row in rows:
+        if (row.get("Deal_Category") == "Acquisition"
+                and row.get("record_class") == "PUBLIC_AWARD"
+                and row.get("transaction_type") == "Grant / Public Award"
+                and taxonomy.purchase_allocation_context(row)
+                and taxonomy.classify_record(row) == "TRANSACTION"):
+            row["record_class"] = "TRANSACTION"
+            row["transaction_type"] = taxonomy.classify(
+                row["Deal_Category"], taxonomy.TXN_TYPE)
+            out["purchase_allocation_corrections"].append(row.get("Deal_ID", ""))
     present = _script("1184", "deals_public_presentation")
     unmapped, stats = present.transform(rows)
     out["unmapped"] = unmapped
     out["caveats"] = stats.get("caveats", 0)
+    for row in rows:
+        # A short derived caveat cannot stand in for the owed editorial pass
+        # on substantive Notes. Leave its target absent so that gate still
+        # refuses. Once supplied, retain it and both factual qualifications.
+        note = row.get("research_note") or ""
+        if row.get("Notes") and not note:
+            continue
+        additions = [row.get("Caveat") or ""]
+        if row.get("Candidate_Status"):
+            additions.append("Candidate status: " + row["Candidate_Status"])
+        for qualification in additions:
+            if qualification and qualification not in note:
+                note = (note + " " + qualification).strip()
+        if note:
+            row["research_note"] = note
+            if "research_note" not in header:
+                header.append("research_note")
     for col in DEALS_PRESENTATION_COLUMNS + ("Source_1_Type_detail",
                                              "Source_2_Type_detail"):
         if col not in header:
@@ -2357,6 +2425,16 @@ def mask_attribution(r, state_reason: str) -> int:
     return cleared
 
 
+# Voteview-only foreign treaty vehicles admitted by the upstream generic
+# `reservation` regex. Keep source rows/issued IDs, but hold their bill/vote
+# projections pending corrected inclusion evidence. Not an entity adjudication.
+# Route: votingpatterns/44 -> Cedar14 source B ->1092 title backfill.
+LEGISLATION_INCLUSION_HOLDS = frozenset({
+    "99-treatydocno-97", "99-treatydocno-98", "99-treatydocno-99",
+    "116-treatydoc-1134", "117-treatydoc-1173",
+})
+
+
 def is_publication_eligible(r) -> tuple[bool, str, str]:
     """THE gate. (eligible, reason, disposition).
 
@@ -2371,6 +2449,10 @@ def is_publication_eligible(r) -> tuple[bool, str, str]:
     strictly safer than the old behaviour but is not the policy - so 1137 and
     1135 both apply it, and `verify` checks they do.
     """
+    if str(r.get("publish_hold") or "").strip().upper() in {"Y", "YES", "TRUE", "1"}:
+        return False, "publish_hold", WITHHOLD
+    if r.get("bill_id") in LEGISLATION_INCLUSION_HOLDS:
+        return False, "legislation_inclusion_reservation_homonym", WITHHOLD
     ok, why = row_ok(r)
     if not ok:
         return False, why, WITHHOLD

@@ -53,6 +53,82 @@ def _load_publication():
 pub = _load_publication()
 
 
+class DealsQualificationTest(unittest.TestCase):
+    def test_purchase_allocation_is_not_public_award(self):
+        taxonomy = pub._script("88", "build_deals_taxonomy")
+        for value in (
+            "Fair value of consideration; purchase price allocation finalized",
+            "The note allocates the total purchase price to tangible assets",
+            "Acquisition-date allocation table totals the consideration",
+            "The consideration was paid in cash and allocated entirely to property",
+        ):
+            row = {"Deal_Category": "Acquisition", "Event_Type": "100% stock acquisition",
+                   "Value_Type": value}
+            self.assertEqual(taxonomy.classify_record(row), "TRANSACTION")
+            self.assertEqual(taxonomy.classify_record(dict(
+                row, Value_Type=value + "; federal grant awarded")), "PUBLIC_AWARD")
+        self.assertEqual(taxonomy.classify_record({
+            "Deal_Category": "Grant / public financing", "Value_Type": "Allocation"
+        }), "PUBLIC_AWARD")
+
+    def test_publication_reuses_taxonomy_before_caveats_and_is_idempotent(self):
+        row = {"Deal_ID": "FIXTURE-PURCHASE", "Deal_Category": "Acquisition",
+               "Event_Type": "100% stock acquisition", "Value_Type": "Purchase price allocation",
+               "record_class": "PUBLIC_AWARD", "transaction_type": "Grant / Public Award",
+               "Confidence": "High", "Verification_Status": "Verified"}
+        header, rows = list(row), [row]
+        result = pub.deals_public_view(header, rows)
+        self.assertEqual(result["purchase_allocation_corrections"], ["FIXTURE-PURCHASE"])
+        self.assertEqual(row["record_class"], "TRANSACTION")
+        self.assertEqual(row["transaction_type"], "Acquisition")
+        self.assertNotIn("recipient-level", row["Caveat"])
+        self.assertEqual(pub.deals_public_view(header, rows)["purchase_allocation_corrections"], [])
+
+    def test_caveat_and_candidate_qualification_survive_without_overwriting_note(self):
+        row = {"Deal_ID": "FIXTURE-NOTE", "record_class": "PUBLIC_AWARD",
+               "Confidence": "Candidate from source", "research_note": "Closing date uncertain.",
+               "Notes": "Internal editorial source", "Verification_Status": ""}
+        header = list(row)
+        pub.deals_public_view(header, [row])
+        note = row["research_note"]
+        self.assertIn("Closing date uncertain.", note)
+        self.assertIn(row["Caveat"], note)
+        self.assertIn("Candidate status: Candidate - not hand-verified", note)
+        pub.deals_public_view(header, [row])
+        self.assertEqual(row["research_note"], note)
+
+    def test_derived_caveat_cannot_satisfy_missing_substantive_notes(self):
+        row = {"Deal_ID": "FIXTURE-OWED", "Notes": "Do not add contingent earnout to price.",
+               "record_class": "PUBLIC_AWARD", "Confidence": "Candidate from source"}
+        header = list(row)
+        pub.deals_public_view(header, [row])
+        self.assertTrue(row["Caveat"])
+        self.assertNotIn("research_note", row)
+        header = pub.publishable_columns(header)
+        row = {key: value for key, value in row.items() if key in header}
+        with self.assertRaises(pub.OwedDerivation) as caught:
+            pub.apply_field_map("deals", header, [row], set(header))
+        self.assertEqual(caught.exception.columns, ["Notes"])
+
+    def test_derived_note_is_declared_when_in_real_owned_header(self):
+        row = {"Deal_ID": "FIXTURE-OWNED-NOTE", "Notes": "",
+               "record_class": "PUBLIC_AWARD", "Confidence": "Candidate from source"}
+        header = list(row)
+        pub.deals_public_view(header, [row])
+        expected = row["research_note"]
+        self.assertIn("Public award record", expected)
+        self.assertIn("Candidate - not hand-verified", expected)
+        header = pub.publishable_columns(header)
+        row = {key: value for key, value in row.items() if key in header}
+        # The real loader sees the publish-time target as part of its header.
+        # Declare it explicitly instead of exempting it from unknown-field gates.
+        self.assertIn("research_note", header)
+        pub.apply_field_map("deals", header, [row], set(header))
+        self.assertEqual(row["research_note"], expected)
+        self.assertNotIn("Caveat", header)
+        self.assertNotIn("Candidate_Status", header)
+
+
 class ResourceQualificationTest(unittest.TestCase):
     def test_source_qualifications_survive_verbatim_and_rerun(self):
         header = ["beneficiary_note"]
@@ -941,12 +1017,20 @@ class TestApplyFieldMap(unittest.TestCase):
                 continue
             book = codebook["tables"][entry["key"]]
             listed = {f["column"] for f in book["fields"] if not f.get("add")}
+            # A generated public target can arrive in the real loader header
+            # and therefore also need an explicit keep declaration. Accept it
+            # only when BOTH authorities identify it as a generated output;
+            # raw kept fields still require a non-add codebook entry.
+            generated = {f["column"] for f in book["fields"] if f.get("add")} & {
+                f["column"] for f in entry.get("new", [])
+            }
             ships = {
                 f["column"]
                 for f in entry["fields"]
                 if f["decision"] in ("keep", "withhold", "rename")
             }
-            self.assertTrue(ships <= listed, (coll, sorted(ships - listed)))
+            self.assertTrue(ships <= listed | generated,
+                            (coll, sorted(ships - listed - generated)))
 
 
 if __name__ == "__main__":

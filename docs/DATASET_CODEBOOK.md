@@ -400,7 +400,7 @@ Collection `subcontracting` · table `subawards` · 89,809 rows in the full tabl
 | 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. |
 | 2 | `canonical_name` (*to add*) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. |
 | 3 | `entity_class` (*to add*) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. |
-| 4 | `cedar_entity_role` (*to add*) | Entity role | Why the entity is on this row: from native_direction: owner of the subcontractor, of the prime, or of both. |
+| 4 | `cedar_entity_role` (*to add*) | Entity role | Source-based Native attribution on the subcontractor side, prime-contractor side, or both. Separate prime_cedar_uid and sub_cedar_uid retain the roles. These links do not establish ownership or legal equivalence; both does not mean one entity owns both parties. |
 | 5 | `subaward_source_record_id` (*rename to `subaward_record_id`*) | Subaward ID | The subaward report's identifier. |
 | 6 | `subaward_number` | Subaward number | The subaward's own number as the prime reported it. |
 | 7 | `subaward_sam_report_id` (*rename to `report_id`*) | Report ID | The SAM subaward report's identifier: the version of the report this row comes from. |
