@@ -20,7 +20,6 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
 spec = importlib.util.spec_from_file_location("lane_e", HERE / "1202_gaming_grove_compacts_regulatory.py")
 lane = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(lane)
@@ -182,7 +181,7 @@ class LaneETest(unittest.TestCase):
                          "gaming_decision_events:GLD-CA-test-20250110-E02"):
             self.assertIn(expected, cites)
         self.assertEqual(ev[0]["event_type"], "compact_fr_notice")   # highest-precedence source kept
-        self.assertEqual(ev[0]["compact_id"], "CMP-AZ-test-20240520")
+        self.assertEqual(ev[0]["compact_id"], gg.derive_id("GCMP", "CMP-AZ-test-20240520"))   # bound later to CEDAR-CONTRACT
         self.assertEqual(ev[0]["decision_id"], "GLD-CA-test-20250110")
         self.assertEqual(ev[0]["regulatory_event_id"], gg.derive_id("GREG", "FR", FRNUM))
         # an unrelated FR row is filtered out, not emitted
@@ -238,13 +237,24 @@ class LaneETest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.run_build()
 
-    def test_ids_paused_without_provisional_flag(self):
-        os.environ.pop("CEDAR_GAMING_PROVISIONAL_IDS", None)
-        try:
-            with self.assertRaises(gg.IdContractPending):
-                self.run_build()
-        finally:
-            os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
+    def test_compact_key_is_source_id_never_public_identity(self):
+        """The BIA-index key names a tribe and a date: compact_id / version_id
+        are CEDAR-CONTRACT key tokens (bound by the runner), the key survives
+        only as source_record_id, and no PROV- value is written."""
+        _, _, out = self.run_build("ids")
+        import csv
+        for table in ("gaming_compacts.csv", "gaming_compact_versions.csv"):
+            with (out / table).open(encoding="utf-8", newline="") as fh:
+                rows = list(csv.DictReader(fh))
+            self.assertTrue(rows)
+            for r in rows:
+                key_col = "compact_id" if table == "gaming_compacts.csv" else "version_id"
+                klass, key = gg.decode_token(r[key_col])
+                self.assertEqual(klass, "GCMP" if key_col == "compact_id" else "GCMV")
+                self.assertEqual(r["source_record_id"], __import__("json").loads(key)[1])
+                self.assertEqual(gg.KEY_CLASSES[klass][0], "CEDAR-CONTRACT")
+        for path in out.glob("*.csv"):
+            self.assertNotIn("PROV-", path.read_text(encoding="utf-8"), path.name)
 
     def test_parse_case_citations_known_shapes(self):
         got = lane.parse_case_citations(

@@ -6,9 +6,9 @@
         --output-root C:\\Users\\esm247\\cedar-grove-gaming-work\\components
 
 Writes `gaming_labor_observations.csv`, `gaming_advocacy_links.csv` and
-`1203_gaming_grove_labor_advocacy.receipt.json`. Needs
-CEDAR_GAMING_PROVISIONAL_IDS=1 while the owner's ID hold stands (every ID is
-then a non-promotable `PROV-` ID; see gaming_grove.ID_CONTRACT_STATUS).
+`1203_gaming_grove_labor_advocacy.receipt.json`. Component IDs are source-key
+tokens that the candidate runner binds to registered CEDAR-OBS (labor) and
+CEDAR-REL (advocacy links) IDs; see gaming_grove.ID_CONTRACT_STATUS.
 
 WHY A NEW LABOR TABLE WHEN gaming_employment_observations.csv EXISTS
 --------------------------------------------------------------------
@@ -242,7 +242,7 @@ LABOR_CONTRACT = {
     "derived_ids": {"labor_observation_id": "GLAB"},
     "field_rights": _LABOR_RIGHTS,
     "field_descriptions": {
-        "labor_observation_id": "Derived GLAB id from source_system + source_record_id + measure",
+        "labor_observation_id": "Registered CEDAR-OBS ID (Gaming block) bound to the stable key source_system + source_record_id + measure",
         "source_system": "Publisher/system of the labor record",
         "source_record_id": "Publisher's own record key (OSHA establishment_id:year; EIN/ACK_ID/dataset year; NLRB case/unit/tally; LODES file::block)",
         "measure": "What was measured; plan participants are never called employees",
@@ -299,7 +299,11 @@ TARGET_TYPES = {"gaming_facility", "enterprise", "cedar_uid", "compact",
 EVENT_TYPES = {"registered_lobbying", "tribal_consultation", "regulatory_comment",
                "congressional_testimony"}
 _ADV_RIGHTS = {c: "public_derived" for c in ADV_HEADER}
-_ADV_RIGHTS.update({"source_event_id": "public_official", "source_native_id": "public_official",
+# source_event_id is the Advocacy collection's own key. Some consultation keys
+# are composites that embed a retired entity handle
+# (`TRBF-POARCH-00-NIGC-...`), so it is an internal join key; the public
+# provenance is source_native_id (the publisher's own id).
+_ADV_RIGHTS.update({"source_event_id": "internal_crosswalk", "source_native_id": "public_official",
                     "evidence_text": "public_official", "source_url": "public_official",
                     "source_date": "public_official", "event_date": "public_official",
                     "source_record_id": "public_official", "source_system": "public_official",
@@ -323,15 +327,15 @@ ADV_CONTRACT = {
     "derived_ids": {"advocacy_link_id": "GADV"},
     "field_rights": _ADV_RIGHTS,
     "field_descriptions": {
-        "advocacy_link_id": "Derived GADV id from collection + table + source_event_id + target",
+        "advocacy_link_id": "Registered CEDAR-REL ID (Gaming block) bound to the stable key collection + table + source_event_id + target",
         "source_collection": "Always advocacy_engagement: the authoritative collection",
         "source_table": "Advocacy collection table the event lives in",
-        "source_event_id": "That table's own event key, verbatim (LDA filing_uuid, consultation_event_id, comment row id, testimony_id)",
+        "source_event_id": "That table's own event key, verbatim (LDA filing_uuid, consultation_event_id, comment row id, testimony_id); internal join key because some consultation keys embed a retired entity handle",
         "source_native_id": "Publisher's own id, verbatim (LDA filing_uuid, regulations.gov comment id, FR document number, hearing witness id)",
         "source_event_type": "registered_lobbying / tribal_consultation / regulatory_comment / congressional_testimony",
         "event_date": "Event or posting date as the Advocacy table records it",
         "link_target_type": "gaming_facility / enterprise / cedar_uid / compact / regulatory_event / topic_only",
-        "target_id": "Id of the linked Gaming object (facility via 1201 crosswalk, CEDAR-NEST, CE uid, compact_id) or the primary topic for topic_only",
+        "target_id": "Id of the linked object: gaming facility (CEDAR-PLACE via 1201 crosswalk), existing Cedar NEED enterprise (legacy prefix CEDAR-NEST), Native entity (CE uid), compact (CEDAR-CONTRACT compact_id), or the primary topic for topic_only",
         "link_basis": "Rule that made the link (issue code, matched term, attribution method, facility/compact rule)",
         "evidence_text": "Short span of the source text that evidences gaming relevance or the target",
         "topics": "Pipe-joined topics: gaming|compacts|land|taxation|regulation|sports_betting|environmental_review|facilities|enterprises",
@@ -906,6 +910,10 @@ def adv_row(**kw) -> dict:
     row["source_collection"] = "advocacy_engagement"
     row["advocacy_link_id"] = gg.derive_id("GADV", row["source_collection"], row["source_table"],
                                            row["source_event_id"], row["link_target_type"], row["target_id"])
+    if row["link_target_type"] == "compact" and row["target_id"]:
+        # The BIA-index compact key names a tribe and a date: the link points
+        # at the compact's bound CEDAR-CONTRACT ID (same token as 1202's).
+        row["target_id"] = gg.derive_id("GCMP", row["target_id"])
     return row
 
 

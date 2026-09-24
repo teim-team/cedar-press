@@ -51,6 +51,7 @@ import json
 import re
 import subprocess
 import sys
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -669,17 +670,24 @@ def pilot_table_contract(collection, table):
     return tables[0]
 
 
-# Values a release refuses while an identifier contract is pending or a
-# vendor lineage is involved. Provisional IDs exist only for local dry runs
-# (gaming_grove, owner hold 2026-09-24); CCP- numbers are Casino City
-# property numbers. The entity check reuses cedar_ids' CE contract (503's
-# checksum), not a second pattern.
+# Values a release refuses. PROV- values were the pre-contract Gaming dry-run
+# rendering; GKEY~ tokens are unbound source keys; CCP- numbers are Casino
+# City property numbers and VP-/TPL-/CEDAR-FAC- are source-scoped facility
+# keys (ratified contract 2026-09-24: internal crosswalk only). A retired
+# entity handle is matched by exact historical membership
+# (cedar_publication's vocabulary), never by shape. The entity check reuses
+# cedar_ids' CE contract (503's checksum), not a second pattern.
 _PROVISIONAL_RE = re.compile(r"(?<![A-Za-z0-9])PROV-")
-_VENDOR_RE = re.compile(r"(?<![A-Za-z0-9])(?:CCP|VP|TPL)-\d+(?![0-9])")
+_TOKEN_RE = re.compile(r"GKEY~")
+_VENDOR_RE = re.compile(r"(?<![A-Za-z0-9])(?:CCP|VP|TPL|CEDAR-FAC)-\d+(?![0-9])")
+_GAMING_OBJECT_RE = re.compile(r"(?<![A-Za-z0-9-])CEDAR-(?:OBS|EVENT|REL|SRC|CONTRACT)-\d+(?![0-9])")
 
 
-def pilot_identifier_refusals(rows):
-    """Name every provisional, vendor-lineage or non-CE entity value; [] if none."""
+def pilot_identifier_refusals(rows, *, retired_pattern=None, bindings_status=None):
+    """Name every provisional, unbound, vendor/source-key, retired-handle,
+    non-CE entity value and (when `bindings_status` is given: a Grove
+    collection with an ID binding register) every Gaming object ID whose
+    binding is not ISSUED in the live register; [] if none."""
     from cedar_ids import identifier_contract, validate_identifier
     ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
     problems, seen = [], set()
@@ -687,17 +695,71 @@ def pilot_identifier_refusals(rows):
         for column, value in row.items():
             value = value or ""
             if _PROVISIONAL_RE.search(value):
-                seen.add(("provisional identifier (ID contract pending)", column))
+                seen.add(("provisional identifier (PROV-)", column))
+            if _TOKEN_RE.search(value):
+                seen.add(("unbound identifier key token", column))
             if _VENDOR_RE.search(value):
-                seen.add(("vendor-lineage identifier", column))
+                seen.add(("vendor-lineage or source facility key", column))
+            if retired_pattern is not None and value and retired_pattern.search(value):
+                seen.add(("retired entity handle", column))
             if value and (column == "cedar_uid" or column.endswith("_cedar_uid")):
                 try:
                     validate_identifier(value, ce)
                 except ValueError:
                     seen.add(("non-CE entity identifier", column))
+            if bindings_status is not None and value and (column == "gaming_facility_id"
+                                                          or column.endswith("_gaming_facility_id")):
+                import gaming_grove
+                if not gaming_grove.is_place_id(value):
+                    seen.add(("facility identifier is not a checked CEDAR-PLACE", column))
+            if bindings_status is not None:
+                for match in _GAMING_OBJECT_RE.finditer(value):
+                    status = bindings_status.get(match.group(0))
+                    if status != "ISSUED":
+                        seen.add((f"identifier binding {status or 'ABSENT'} (not ISSUED in the live "
+                                  "Gaming ID binding register)", column))
     for what, column in sorted(seen):
         problems.append(f"{what} in {column}")
     return problems
+
+
+def pilot_registered_reference(values, retired=None):
+    """The {uid: uid} self-mapping a Lumecon `registered_reference` binding pins.
+
+    Lumecon checks exact pinned membership only (docs/IDENTIFIER_STANDARD.md,
+    2026-09-24): given `TRBF-X-00: TRBF-X-00` it would bless a retired handle.
+    So every member must pass the CE contract (503 checksum) and must not be a
+    retired handle, or the release is refused here, before any intake.
+    """
+    from cedar_ids import identifier_contract, validate_identifier
+    ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
+    bad = []
+    for value in sorted(values):
+        try:
+            validate_identifier(value, ce)
+        except ValueError:
+            bad.append(value)
+            continue
+        if retired is not None and retired.search(value):
+            bad.append(value)
+    if bad:
+        raise SystemExit("REFUSED: registered_reference mapping would bless non-CE or retired "
+                         "value(s): " + ", ".join(bad[:5]))
+    return {value: value for value in sorted(values)}
+
+
+def pilot_bindings_status(collection, path=None):
+    """{issued ID: status} from the LIVE binding register of a Grove collection
+    that declares one (gaming_grove.LIVE_BINDINGS), or None for a collection
+    without one. An absent register is {} - so no ID can pass - never None."""
+    try:
+        g = grove_module(collection)
+    except ImportError:
+        return None
+    if not hasattr(g, "read_bindings"):
+        return None
+    path = Path(path) if path else ROOT / g.LIVE_BINDINGS
+    return {r["issued_id"]: r["status"] for r in g.read_bindings(path if path.is_file() else None)}
 
 
 # A release unit is (collection, component table). A pilot whose
@@ -828,6 +890,13 @@ def cmd_release_pilot(args):
     spec.loader.exec_module(combine)
     register = publication.register()
     ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
+    bindings_status = pilot_bindings_status(collection, getattr(args, "bindings", None))
+    embedded = publication._embedded_neid_re()
+    retired_re = RetiredHandleMatcher(embedded, set(publication.neid_map()) | set(publication._NEID_AMBIGUOUS))
+    if component_mode and embedded.pattern == "(?!x)x":
+        # An empty historical vocabulary would make the retired-handle check
+        # vacuous; a component release fails closed instead.
+        raise SystemExit("REFUSED: retired entity-handle vocabulary is empty in this checkout")
 
     # Phase 1: project and validate EVERY unit before anything is written, so
     # one refused component stops the whole collection release, artifact-free.
@@ -844,7 +913,8 @@ def cmd_release_pilot(args):
         original_rows = pilot_source_rows(original)
         # Unconditional for components; opt-in (unchanged) for single flagships.
         if config.get("identifier_refusals") or component_mode:
-            refused = pilot_identifier_refusals(original_rows)
+            refused = pilot_identifier_refusals(original_rows, retired_pattern=retired_re,
+                                                bindings_status=bindings_status)
             if refused:
                 raise SystemExit("REFUSED: " + (table + ": " if component_mode else "") + "; ".join(refused))
         validate_unique_record_keys(original_rows, keys)
@@ -867,6 +937,8 @@ def cmd_release_pilot(args):
             raise SystemExit("REFUSED: pilot has held records or owed public fields")
         validate_unique_record_keys(records, keys)
         assert_pilot_conservation(original_rows, records, keys)
+        if "cedar_uid" in header:          # Phase 1: refuse before any artifact exists
+            pilot_registered_reference({row["cedar_uid"] for row in records if row.get("cedar_uid")}, retired_re)
         try:
             record_contracts = {key: identifier_contract(collection, table, key) for key in keys}
         except ValueError as error:
@@ -913,7 +985,7 @@ def cmd_release_pilot(args):
             identity = {"mode": "registered_reference", "source_field": "cedar_uid", "target_field": "cedar_uid",
                         "namespace": "native_entity", "registry_version": hashlib.sha256(canonical_json(register)).hexdigest(),
                         **CP.REFERENCE_PRESERVATION_AUTHORITY,
-                        "mapping": {uid: uid for uid in sorted(existing_ids)}}
+                        "mapping": pilot_registered_reference(existing_ids, retired_re)}
         if component_mode:
             title = f"Cedar {collection} component {Path(table).stem} - local integration candidate"
             described = "Existing Cedar field_map " + public_contract["key"] + " contract: "
@@ -1171,14 +1243,18 @@ def grove_validate(collection, producers, source, components):
             if owner != script or item.get("sha256") != digest:
                 problems.append(f"RECEIPT_MISMATCH: {table} bytes differ from {script}'s receipt")
             provisional = sum(1 for r in rows for v in r.values() if _PROVISIONAL_RE.search(v or ""))
+            unbound = sum(1 for r in rows for v in r.values() if _TOKEN_RE.search(v or ""))
+            if unbound:
+                problems.append(f"UNBOUND_ID_TOKEN: {table} has {unbound} key token value(s) after binding")
             public = [c for c in header if rights.get(c) in g.PUBLIC_RIGHTS]
             tables.append({"table": table, "producer": script, "rows": len(rows),
                            "columns": len(header), "bytes": len(data), "sha256": digest,
                            "grain": contract["grain"], "primary_key": list(contract["primary_key"]),
                            "publication_status": contract["publication_status"],
                            "public_fields": len(public), "withheld_fields": len(header) - len(public),
-                           "provisional_id_values": provisional})
-    stray = sorted(p.name for p in components.glob("*.csv") if p.name not in declared)
+                           "provisional_id_values": provisional, "unbound_token_values": unbound})
+    runner_tables = set(getattr(g, "RUNNER_TABLES", ()))
+    stray = sorted(p.name for p in components.glob("*.csv") if p.name not in declared | runner_tables)
     if stray:
         problems.append("UNDECLARED_OUTPUTS: " + ", ".join(stray))
     primary_keys = {t: c["primary_key"] for _, _, m in producers for t, c in m.CONTRACTS.items()}
@@ -1254,8 +1330,138 @@ def grove_change_report(collection, previous, loaded, producers):
     return report
 
 
+class RetiredHandleMatcher:
+    """Exact historical membership of a retired entity handle, as a bare or
+    delimited value (1169's `retired_value_pattern`) OR as the leading member
+    of a hyphen composite key such as `TRBF-POARCH-00-NIGC-2007-0011-0010`,
+    which that pattern's trailing lookahead does not see. Candidates come from
+    `audit_retired_ids.PATTERN`; membership, never shape, decides."""
+
+    def __init__(self, pattern, vocab):
+        import audit_retired_ids
+        self.pattern, self.vocab, self.screen = pattern, frozenset(vocab), audit_retired_ids.PATTERN
+
+    def search(self, value):
+        if not value or "-" not in value:
+            return False
+        if self.pattern is not None and self.pattern.search(value):
+            return True
+        for match in self.screen.finditer(value):
+            parts = match.group(0).split("-")
+            if any("-".join(parts[:i]) in self.vocab for i in range(len(parts), 1, -1)):
+                return True
+        return False
+
+
+def grove_retired_pattern(source):
+    """Exact-membership retired-handle + source facility-key pattern for a
+    Grove leak scan, from the INPUT root's historical vocabulary (1169's
+    `retired_value_pattern`, never a shape). The same four read-only sources
+    `cedar_publication.neid_map` reads, rooted at the pinned input."""
+    import csv
+    verify = sys.modules.get("release_verify_1169")
+    if verify is None:
+        spec = importlib.util.spec_from_file_location("release_verify_1169", HERE / "1169_release_verify.py")
+        verify = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = verify                                 # dataclasses need it registered
+        spec.loader.exec_module(verify)                                 # type: ignore
+    vocab = set()
+    for rel, col in (("data/spine/cedar_retired_neid_crosswalk.csv", "retired_neid"),
+                     ("graveyard/cicd/cedar_handle_history.csv", "handle"),
+                     ("data/clean/cedar_identifier_ledger_final.csv", "tribe_id"),
+                     ("data/spine/cedar_identity_register.csv", "handle")):
+        path = source / rel
+        if not path.is_file():
+            continue
+        with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            for row in csv.DictReader(fh):
+                value = (row.get(col) or "").strip()
+                if value:
+                    vocab.add(value)
+    return RetiredHandleMatcher(verify.retired_value_pattern(vocab, gaming_facilities=True), vocab), len(vocab)
+
+
+def grove_leak_gate(collection, producers, loaded, source, target):
+    """Public-release leak gate over EVERY public projection a Grove candidate
+    could ship: the public projection (public fields x public rows) of every
+    declared component, all rows, plus every written sample file.
+
+    Zero findings required: provisional PROV-, unbound key tokens, CCP-/VP-/
+    TPL-/CEDAR-FAC- source keys, retired entity handles (exact historical
+    membership, 1169), non-CE uids, unchecked place/enterprise IDs and
+    malformed Gaming object IDs. `audit_retired_ids.py`'s broader prefix
+    screen is run on the same cells and reported as screening occurrences
+    (a screen, not a violation). Internal crosswalks (the runner's binding
+    register and migration crosswalk, internal_crosswalk fields and rows)
+    are excluded by construction and named as such.
+    """
+    import audit_retired_ids
+    g = grove_module(collection)
+    pattern, vocab_size = grove_retired_pattern(source)
+    findings, screen, scanned = Counter(), Counter(), {}
+    examples = {}
+
+    def scan(label, header, rows):
+        hits = g.leak_findings(label, header, rows, retired_pattern=pattern)
+        for (what, col), n in hits.items():
+            findings[(label, col, what)] += n
+        for r in rows:
+            for col in header:
+                for m in audit_retired_ids.PATTERN.finditer(r.get(col) or ""):
+                    screen[(label, col)] += 1
+                    examples.setdefault((label, col), m.group(0)[:80])
+        scanned[label] = len(rows)
+
+    for _, _, module in producers:
+        for table, contract in sorted(module.CONTRACTS.items()):
+            if table in loaded:
+                header, rows = loaded[table]
+                keep, public = g.public_projection(table, header, rows, contract["field_rights"])
+                scan("public:" + table, keep, public)
+    for path in sorted((target / "samples").glob("*.csv")):
+        header, rows = _csv_table(path.read_bytes())
+        scan("sample:" + path.name, header, rows)
+    total = sum(findings.values())
+    return {"passed": total == 0, "findings_total": total,
+            "findings": [{"surface": s, "column": c, "finding": w, "values": n}
+                         for (s, c, w), n in sorted(findings.items())],
+            "screen_occurrences_total": sum(screen.values()),
+            "screen_occurrences": [{"surface": s, "column": c, "values": n, "example": examples[(s, c)]}
+                                   for (s, c), n in sorted(screen.items())],
+            "surfaces_scanned": dict(sorted(scanned.items())),
+            "retired_vocabulary_size": vocab_size,
+            "excluded_internal": sorted(set(getattr(g, "RUNNER_TABLES", ())))
+            + ["every field and row whose rights class is not public (internal_crosswalk, internal_vendor, "
+               "internal_model, withheld_*, secondary_corroboration)"],
+            "method": "gaming_grove.leak_findings + 1169 retired_value_pattern(gaming_facilities=True) "
+                      "over the input root's historical vocabulary; audit_retired_ids.PATTERN as a screen"}
+
+
+def grove_rebind_receipts(components, producers, rewritten):
+    """Producer receipts name pre-binding hashes; record the bound bytes and
+    keep the pre-binding hash beside them (a candidate_component read by a
+    later producer included)."""
+    for script, _, _ in producers:
+        path = components / (Path(script).stem + ".receipt.json")
+        if not path.is_file():
+            continue
+        receipt = json.loads(path.read_text(encoding="utf-8"))
+        for item in receipt.get("tables", []):
+            if item.get("table") in rewritten:
+                item["pre_binding_sha256"], item["sha256"] = rewritten[item["table"]]
+        for rel, item in (receipt.get("inputs") or {}).items():
+            table = rel.split("/", 1)[1] if rel.startswith("components/") else None
+            if item.get("scope") == "candidate_component" and table in rewritten and item.get("sha256"):
+                if item["sha256"] != rewritten[table][0]:
+                    raise SystemExit(f"REFUSED: {script} read {rel} at bytes the binding pass did not start from")
+                item["pre_binding_sha256"], item["sha256"] = rewritten[table]
+        path.write_text(json.dumps(receipt, indent=1, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def cmd_grove_candidate(args) -> int:
-    """Run the registered Grove producers into a new isolated root; never promote."""
+    """Run the registered Grove producers into a new isolated root, bind their
+    component keys through the ID binding register, validate, sample and run
+    the public leak gate; never promote, never write the live register."""
     import os
     import time
     from datetime import date
@@ -1275,6 +1481,14 @@ def cmd_grove_candidate(args) -> int:
     if previous and not (previous / "logs" / f"{collection}-candidate.json").is_file():
         raise SystemExit("REFUSED: --previous is not a Grove candidate root")
     g = grove_module(collection)
+    binds = hasattr(g, "bind_candidate")
+    bindings = None
+    if binds:
+        # The prior register is READ-ONLY input: by default the live one under
+        # the input root (absent = empty). The candidate writes its own copy.
+        bindings = Path(args.bindings).resolve() if getattr(args, "bindings", None) else source / g.LIVE_BINDINGS
+        if bindings.is_relative_to(target):
+            raise SystemExit("REFUSED: --bindings must not be inside the new candidate root")
     producers = grove_producers(collection)
     problems = grove_contract_problems(collection, producers)
     problems += CP.registration_problems(grove_plan(collection, producers))
@@ -1290,13 +1504,20 @@ def cmd_grove_candidate(args) -> int:
     components, logs = target / "components", target / "logs"
     components.mkdir()
     logs.mkdir()
+    # Deterministic manifest: no wall-clock and no output-root path, so two
+    # builds of the same inputs are byte-identical. Timings and the real argv
+    # go to the separate volatile log.
     manifest = {"schema": "cedar.grove.candidate.v1", "collection": collection, "as_of": as_of,
                 "input_root": str(source), "id_contract_status": getattr(g, "ID_CONTRACT_STATUS", None),
-                "code": code, "inputs": [], "steps": [], "status": "BUILDING"}
+                "code": code, "inputs": [], "steps": [], "status": "BUILDING",
+                "volatile_log": f"logs/{collection}-candidate.volatile.json"}
+    volatile = {"output_root": str(target), "steps": []}
     manifest_path = logs / f"{collection}-candidate.json"
 
     def save():
         manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (logs / f"{collection}-candidate.volatile.json").write_text(
+            json.dumps(volatile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     env = dict(os.environ, CEDAR_RUN_DATE=as_of, CEDAR_DUCKDB_MEMORY_LIMIT="512MB",
                CEDAR_DUCKDB_THREADS="1", CEDAR_DUCKDB_MAX_SPILL="2GB", OMP_NUM_THREADS="1")
@@ -1310,9 +1531,11 @@ def cmd_grove_candidate(args) -> int:
             # never in the repository or the canonical input tree.
             result = subprocess.run([sys.executable, "-B", str(path), *argv], cwd=target, env=env,
                                     stdout=output, stderr=subprocess.STDOUT)
-        manifest["steps"].append({"command": [script, *argv], "exit_code": result.returncode,
-                                  "seconds": round(time.monotonic() - start, 3),
-                                  "log": "logs/" + log.name})
+        manifest["steps"].append({"command": [script, "build", "--input-root", "<input_root>",
+                                              "--output-root", "<candidate>/components", "--as-of", as_of],
+                                  "exit_code": result.returncode, "log": "logs/" + log.name})
+        volatile["steps"].append({"script": script, "argv": argv,
+                                  "seconds": round(time.monotonic() - start, 3)})
         print(f"[{number}/{len(producers)}] {script} exit {result.returncode}", flush=True)
         if result.returncode:
             manifest["status"] = "FAILED"
@@ -1320,8 +1543,40 @@ def cmd_grove_candidate(args) -> int:
             return 1
         save()
 
+    if binds:
+        contracts = {t: c for _, _, m in producers for t, c in m.CONTRACTS.items()}
+        try:
+            bound = g.bind_candidate(components, contracts, bindings if bindings.is_file() else None, as_of)
+        except (ValueError, KeyError, getattr(__import__("cedar_ids"), "IdCollision")) as error:
+            manifest["status"] = "FAILED_BINDING"
+            manifest["binding_error"] = str(error)
+            save()
+            print("status: FAILED_BINDING: " + str(error))
+            return 1
+        grove_rebind_receipts(components, producers, bound["rewritten"])
+        register_bytes = (components / g.BINDINGS_TABLE).read_bytes()
+        prior = {"path": (bindings.relative_to(source).as_posix() if bindings.is_relative_to(source)
+                          else str(bindings)), "status": "ABSENT"}
+        if bindings.is_file():
+            prior.update(status="READ", sha256=_sha_bytes(bindings.read_bytes()),
+                         bytes=len(bindings.read_bytes()), read_by=["build.py:bind_candidate"])
+            if not bindings.is_relative_to(source):
+                prior["source"] = str(bindings)
+        used = Counter(bound["status"][i] for i in set(bound["mapping"].values()))
+        manifest["id_binding"] = {
+            "prior_register": prior, "register_output": "components/" + g.BINDINGS_TABLE,
+            "register_output_sha256": _sha_bytes(register_bytes),
+            "blocks": {p: list(b) for p, b in sorted(g.GAMING_BLOCKS.items())},
+            "summary": bound["summary"], "ids_used_by_status": dict(sorted(used.items())),
+            "rewritten_tables": sorted(bound["rewritten"]),
+            "live_register_written": False,
+            "promotion": "PROPOSED -> ISSUED is a separate controlled step "
+                         "(docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md section 10); not run by this command"}
+
     checked = grove_validate(collection, producers, source, components)
     loaded = checked.pop("loaded")
+    if binds:
+        checked["inputs"][manifest["id_binding"]["prior_register"]["path"]] = manifest["id_binding"]["prior_register"]
     manifest["inputs"] = [checked["inputs"][k] for k in sorted(checked["inputs"])]
     manifest["outputs"] = checked["tables"]
     manifest["validation"] = {"problems": checked["problems"], "passed": not checked["problems"]}
@@ -1331,9 +1586,12 @@ def cmd_grove_candidate(args) -> int:
         # a bare label that resolves nowhere cannot be rechecked and is named
         # as such rather than reported as a changed input.
         # An earlier component's output (scope candidate_component) is
-        # recorded relative to the candidate root.
+        # recorded relative to the candidate root; a reviewed disposition file
+        # tracked in this repository (scope repository) relative to it.
         if item.get("scope") == "candidate_component":
             path = target / item["path"]
+        elif item.get("scope") == "repository":
+            path = HERE.parent / item["path"]
         else:
             path = Path(item["source"]) if item.get("source") else source / item["path"]
         if item.get("status") == "ABSENT":
@@ -1347,6 +1605,15 @@ def cmd_grove_candidate(args) -> int:
     manifest["unverifiable_inputs"] = unverifiable
     code_changed = [c["path"] for c, p in zip(code, code_paths) if _sha_bytes(p.read_bytes()) != c["sha256"]]
     manifest["changed_code"] = code_changed
+
+    if binds and hasattr(g, "migration_crosswalk"):
+        header, rows, summary = g.migration_crosswalk(loaded, bound, contracts,
+                                                     retired_pattern=grove_retired_pattern(source)[0],
+                                                     receipts=checked["receipts"])
+        data = _csv_bytes(header, rows)
+        (components / g.MIGRATION_CROSSWALK_TABLE).write_bytes(data)
+        manifest["id_migration"] = {"crosswalk": "components/" + g.MIGRATION_CROSSWALK_TABLE,
+                                    "sha256": _sha_bytes(data), "rows": len(rows), "summary": summary}
 
     samples_dir = target / "samples"
     samples_dir.mkdir()
@@ -1364,6 +1631,8 @@ def cmd_grove_candidate(args) -> int:
                             "publication_status": contract["publication_status"],
                             "sha256": _sha_bytes(data), "path": "samples/" + table})
     manifest["samples"] = samples
+    gate = grove_leak_gate(collection, producers, loaded, source, target) if hasattr(g, "leak_findings") else None
+    manifest["leak_gate"] = gate
     coverage = grove_coverage(producers, loaded, checked["receipts"])
     (target / "coverage.json").write_text(json.dumps(coverage, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     manifest["coverage"] = "coverage.json"
@@ -1374,23 +1643,134 @@ def cmd_grove_candidate(args) -> int:
         manifest["change_report"] = "change_report.json"
     provisional = sum(t["provisional_id_values"] for t in checked["tables"])
     manifest["provisional_id_values"] = provisional
+    proposed = binds and manifest["id_binding"]["ids_used_by_status"].get("PROPOSED", 0)
     if checked["problems"]:
         manifest["status"] = "FAILED_VALIDATION"
     elif changed:
         manifest["status"] = "FAILED_INPUT_CONSERVATION"
     elif code_changed:
         manifest["status"] = "FAILED_CODE_CONSERVATION"
+    elif gate is not None and not gate["passed"]:
+        manifest["status"] = "FAILED_LEAK_GATE"
     elif provisional:
-        # Owner hold 2026-09-24: structure only. Not promotable, not releasable.
+        # Legacy PROV- values: structure only. Not promotable, not releasable.
         manifest["status"] = "LOCAL_DRY_RUN_PROVISIONAL_IDS"
+    elif proposed:
+        # Registered-format IDs from PROPOSED bindings: not releasable until
+        # the controlled promotion marks them ISSUED in the live register.
+        manifest["status"] = "LOCAL_CANDIDATE_PROPOSED_BINDINGS"
     else:
         manifest["status"] = "LOCAL_CANDIDATE_NOT_PROMOTED"
     save()
     for problem in checked["problems"]:
         print("  !! " + problem)
+    if gate is not None:
+        print(f"leak gate: {'PASS' if gate['passed'] else 'FAIL'} ({gate['findings_total']} finding(s), "
+              f"{gate['screen_occurrences_total']} screening occurrence(s))")
     print(manifest_path)
     print("status: " + manifest["status"])
     return 0 if manifest["status"].startswith("LOCAL_") else 1
+
+
+def cmd_grove_leak_gate(args) -> int:
+    """Re-run the public-release leak gate on an existing Grove candidate root
+    (for an independent verifier); prints JSON, writes nothing."""
+    collection = args.collection
+    target = Path(args.candidate).resolve()
+    manifest = json.loads((target / "logs" / f"{collection}-candidate.json").read_text(encoding="utf-8"))
+    producers = grove_producers(collection)
+    loaded = {}
+    for _, _, module in producers:
+        for table in module.CONTRACTS:
+            path = target / "components" / table
+            if path.is_file():
+                loaded[table] = _csv_table(path.read_bytes())
+    gate = grove_leak_gate(collection, producers, loaded, Path(args.input_root or manifest["input_root"]), target)
+    print(json.dumps(gate, indent=2, sort_keys=True))
+    return 0 if gate["passed"] else 1
+
+
+def cmd_grove_promote_bindings(args) -> int:
+    """PROPOSED -> ISSUED for a verified Grove candidate's ID bindings, into the
+    live register. Dry run by default: prints the plan and writes nothing.
+
+    `--execute` is the controlled, owner-authorized step described in
+    docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md section 10. It refuses unless the
+    candidate passed validation, conservation and the leak gate, was built
+    from exactly the live register now on disk, and every live binding
+    survives unchanged; it keeps a byte copy of the prior register and
+    appends one line to the promotion log. It never allocates, renumbers or
+    removes a binding.
+    """
+    import os
+    from datetime import date
+    from cedar_ids import validate_binding_history
+    collection = args.collection
+    g = grove_module(collection)
+    target = Path(args.candidate).resolve()
+    manifest_path = target / "logs" / f"{collection}-candidate.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    live_root = Path(args.live_root).resolve()
+    live = live_root / g.LIVE_BINDINGS
+    problems = []
+    if manifest.get("status") not in ("LOCAL_CANDIDATE_PROPOSED_BINDINGS", "LOCAL_CANDIDATE_NOT_PROMOTED"):
+        problems.append(f"candidate status is {manifest.get('status')}")
+    if not (manifest.get("validation") or {}).get("passed"):
+        problems.append("candidate validation did not pass")
+    if not (manifest.get("leak_gate") or {}).get("passed"):
+        problems.append("candidate leak gate did not pass")
+    for item in manifest.get("code", []):
+        name = Path(item["path"]).name
+        path = GROVE_CODE / name if (GROVE_CODE / name).is_file() else HERE / name
+        if not path.is_file() or _sha_bytes(path.read_bytes()) != item["sha256"]:
+            problems.append(f"code changed since the candidate was built: {item['path']}")
+    prior = (manifest.get("id_binding") or {}).get("prior_register") or {}
+    live_sha = _sha_bytes(live.read_bytes()) if live.is_file() else None
+    if (prior.get("sha256") if prior.get("status") == "READ" else None) != live_sha:
+        problems.append("the candidate was not built from the live register now on disk; rebuild with "
+                        "--bindings pointing at it")
+    candidate_register = target / "components" / g.BINDINGS_TABLE
+    if _sha_bytes(candidate_register.read_bytes()) != (manifest.get("id_binding") or {}).get("register_output_sha256"):
+        problems.append("candidate binding register differs from its manifest")
+    if problems:
+        raise SystemExit("REFUSED: " + "; ".join(problems))
+    before = g.read_bindings(live if live.is_file() else None)
+    rows = g.read_bindings(candidate_register)
+    validate_binding_history({r["issued_id"]: r["source_key_sha256"] for r in before},
+                             {r["issued_id"]: r["source_key_sha256"] for r in rows})
+    kept = {r["issued_id"]: r for r in rows}
+    changed = [r["issued_id"] for r in before if kept[r["issued_id"]] != r]
+    if changed:
+        raise SystemExit(f"REFUSED: {len(changed)} live binding(s) would change, e.g. {changed[:3]}")
+    promote = [r for r in rows if r["status"] == "PROPOSED"]
+    plan = {"live_register": str(live), "live_rows_before": len(before), "rows_after": len(rows),
+            "promote_to_ISSUED": dict(sorted(Counter(r["object_prefix"] for r in promote).items())),
+            "candidate": str(target), "candidate_manifest_sha256": _sha_bytes(manifest_path.read_bytes()),
+            "executed": False}
+    if not args.execute:
+        print(json.dumps(plan, indent=2, sort_keys=True))
+        print("DRY RUN: nothing written. Re-run with --execute --decision-id <owner decision> --approved-by <name>")
+        return 0
+    if not (args.decision_id and args.approved_by):
+        raise SystemExit("REFUSED: --execute needs --decision-id and --approved-by")
+    out = [dict(r, status="ISSUED") for r in rows]
+    data = g.csv_bytes(g.BINDING_HEADER, out)
+    live.parent.mkdir(parents=True, exist_ok=True)
+    stamp = date.today().isoformat()
+    if live.is_file():
+        backup = live.with_name(live.name + f".bak_{stamp}_pre_promotion")
+        if backup.exists():
+            raise SystemExit(f"REFUSED: backup {backup.name} already exists; promote at most once a day")
+        backup.write_bytes(live.read_bytes())
+    tmp = live.with_suffix(".csv.tmp")
+    tmp.write_bytes(data)
+    os.replace(tmp, live)
+    plan.update(executed=True, decision_id=args.decision_id, approved_by=args.approved_by, promoted_on=stamp,
+                before_sha256=live_sha, after_sha256=_sha_bytes(data))
+    with (live.parent / "gaming_id_bindings_promotions.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(plan, sort_keys=True) + "\n")
+    print(json.dumps(plan, indent=2, sort_keys=True))
+    return 0
 
 
 # ---- `grove-contracts`: registration, pilot field map and contract doc ----
@@ -1559,8 +1939,15 @@ def grove_contract_doc(collection, producers, contracts_bytes):
     p("")
     p(f"Collection `{collection}` is a **Cedar Grove** collection, not a Cedar Press storefront collection. "
       f"Schema `{getattr(g, 'SCHEMA_VERSION', '')}`. Identifier contract status: "
-      f"`{getattr(g, 'ID_CONTRACT_STATUS', 'UNDECLARED')}`; while it is not `APPROVED`, every component ID "
-      "is rendered `PROV-...`, candidates are `LOCAL_DRY_RUN_PROVISIONAL_IDS`, and `release-pilot` refuses them.")
+      f"`{getattr(g, 'ID_CONTRACT_STATUS', 'UNDECLARED')}` (docs/IDENTIFIER_STANDARD.md, \"CICD retirement "
+      "contract and Gaming handoff (2026-09-24)\"). `cedar_uid` is a CE Native entity; `gaming_facility_id` is "
+      "the existing checked `CEDAR-PLACE` ID; `enterprise_id` is an existing Cedar NEED enterprise ID (legacy "
+      "prefix `CEDAR-NEST`) only when that enterprise independently qualifies; `business_uid` is a `CB` Cedar "
+      "Business ID from the gated register (none bound yet: blank with `held_business_unbound`). Every other "
+      "component ID is a registered Cedar object ID bound from a stable source key through the Gaming ID "
+      "binding register (below). `CCP-`, `VP-`, `TPL-`, `CEDAR-FAC-`, `PROV-` values and retired entity "
+      "handles are internal source keys only. A candidate whose IDs are PROPOSED is "
+      "`LOCAL_CANDIDATE_PROPOSED_BINDINGS`, and `release-pilot` refuses every ID not ISSUED in the live register.")
     p("")
     p("Build: `py -3 code/build.py candidate " + collection + " --input-root <Cedar data root> "
       "--output-root <new root outside Git> --as-of <YYYY-MM-DD> [--previous <prior candidate root>]`. "
@@ -1580,11 +1967,30 @@ def grove_contract_doc(collection, producers, contracts_bytes):
         public = "public" if name in g.PUBLIC_RIGHTS else "never public"
         p(f"- `{name}` ({public}): {meaning}")
     p("")
-    p("## Derived identifier prefixes")
-    p("")
-    for name, meaning in g.DERIVED_PREFIXES.items():
-        p(f"- `{name}`: {meaning}")
-    p("")
+    if hasattr(g, "KEY_CLASSES"):
+        p("## Component identifiers: key classes, registered prefixes and Gaming blocks")
+        p("")
+        p("A producer names a component by its stable source key (`derive_id(KEY_CLASS, *parts)`, never a "
+          "name alone). The candidate runner binds each key to the next ordinal of its prefix's Gaming block "
+          "(declared through `cedar_ids.declare_static_block`, so `cedar_ids.allocate` steps over it) in "
+          "sorted `source_key_sha256` order, reusing every binding in the prior register exactly. The key "
+          "class and hash live only in the internal register `" + getattr(g, "BINDINGS_TABLE", "") + "`.")
+        p("")
+        p("| Key class | Registered prefix | Gaming block | Keys |")
+        p("|---|---|---|---|")
+        for name, (prefix, meaning) in g.KEY_CLASSES.items():
+            lo, hi = g.GAMING_BLOCKS[prefix]
+            p(f"| `{name}` | `{prefix}` | {lo}-{hi} | {meaning} |")
+        p("")
+        p("Coverage gaps carry a natural composite key (`coverage_gap_id` = "
+          "gap_source|component_table|state|cedar_uid|subject|source_status); no ID is minted for an absence.")
+        p("")
+    else:
+        p("## Derived identifier prefixes")
+        p("")
+        for name, meaning in g.DERIVED_PREFIXES.items():
+            p(f"- `{name}`: {meaning}")
+        p("")
     p("## Tables")
     for script, _, module in producers:
         for table, c in sorted(module.CONTRACTS.items()):
@@ -1601,7 +2007,10 @@ def grove_contract_doc(collection, producers, contracts_bytes):
             if c.get("nonadditive_note"):
                 p(f"- **Non-additivity:** {c['nonadditive_note']}")
             if c.get("derived_ids"):
-                p("- **Derived IDs:** " + ", ".join(f"`{k}` -> `{v}`" for k, v in sorted(c["derived_ids"].items())))
+                classes = getattr(g, "KEY_CLASSES", {})
+                p("- **Bound component IDs:** " + ", ".join(
+                    f"`{k}` -> `{classes[v][0]}` (key class `{v}`)" if v in classes else f"`{k}` -> `{v}`"
+                    for k, v in sorted(c["derived_ids"].items())))
             if c.get("public_id_columns"):
                 p("- **Public ID columns:** " + ", ".join(f"`{k}`" for k in c["public_id_columns"]))
             if c.get("intervals"):
@@ -1678,7 +2087,23 @@ def main() -> int:
     candidate.add_argument("--output-root", required=True)
     candidate.add_argument("--as-of", required=True)
     candidate.add_argument("--previous", help="Grove only: a prior candidate root for the change report")
+    candidate.add_argument("--bindings", help="Grove only: prior ID binding register to reuse, READ-ONLY "
+                           "(default: <input-root>/data/spine/gaming_id_bindings.csv; absent = empty)")
     candidate.set_defaults(func=cmd_candidate)
+    gate = sub.add_parser("grove-leak-gate", help="re-run the public-release leak gate on a Grove candidate root")
+    gate.add_argument("collection", choices=sorted(CP.GROVE_COMPONENTS))
+    gate.add_argument("--candidate", required=True)
+    gate.add_argument("--input-root", help="historical-vocabulary root (default: the candidate's input_root)")
+    gate.set_defaults(func=cmd_grove_leak_gate)
+    promote = sub.add_parser("grove-promote-bindings",
+                             help="PROPOSED -> ISSUED for a verified Grove candidate (dry run unless --execute)")
+    promote.add_argument("collection", choices=sorted(CP.GROVE_COMPONENTS))
+    promote.add_argument("--candidate", required=True)
+    promote.add_argument("--live-root", required=True, help="the populated Cedar workspace holding the live register")
+    promote.add_argument("--execute", action="store_true", help="write the live register (owner-authorized only)")
+    promote.add_argument("--decision-id")
+    promote.add_argument("--approved-by")
+    promote.set_defaults(func=cmd_grove_promote_bindings)
     grove = sub.add_parser("grove-contracts", help="sync Grove component registration, field-map entry and contract doc from producer CONTRACTS")
     grove.add_argument("collection", choices=sorted(CP.GROVE_COMPONENTS))
     grove.add_argument("--check", action="store_true", help="exit 1 if any generated output is stale; write nothing")
@@ -1689,6 +2114,8 @@ def main() -> int:
                        help="the flagship CSV; for a pilot declaring components, once per component")
     pilot.add_argument("--output-root", required=True)
     pilot.add_argument("--as-of", required=True)
+    pilot.add_argument("--bindings", help="Grove only: the LIVE ID binding register (default: "
+                       "data/spine/gaming_id_bindings.csv in this checkout); every shipped Gaming ID must be ISSUED")
     pilot.set_defaults(func=cmd_release_pilot)
     sh = sub.add_parser("ship", help="run the documented ship chain (7 steps)")
     sh.add_argument("--execute", action="store_true",

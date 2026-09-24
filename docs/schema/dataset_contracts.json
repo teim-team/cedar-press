@@ -10746,6 +10746,268 @@
      ]
     },
     {
+     "table": "gaming_facility_capacity.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "source_limited",
+     "key_columns": [],
+     "grain": "One row per dated capacity/amenity observation for one facility from one source record.",
+     "primary_key": [
+      "capacity_observation_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1201_gaming_grove_facilities.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": [
+      {
+       "table": "gaming_capacity_official.csv",
+       "role": "capacity/authorization rows"
+      },
+      {
+       "table": "gaming_property_site_observations.csv",
+       "role": ""
+      },
+      {
+       "table": "gaming_property_self_published_claims.csv",
+       "role": ""
+      },
+      {
+       "table": "gaming_facilities.csv",
+       "role": "latest_* capacity (vendor, internal"
+      },
+      {
+       "table": "loyalty_program_property.csv",
+       "role": ""
+      }
+     ]
+    },
+    {
+     "table": "gaming_facility_crosswalk.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "internal",
+     "key_columns": [],
+     "grain": "One row per (legacy facility record, identifier scheme, identifier value); every legacy gaming_facilities row has a legacy_facility_id row carrying its disposition.",
+     "primary_key": [
+      "legacy_facility_id",
+      "key_scheme",
+      "key_value"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1201_gaming_grove_facilities.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": [
+      {
+       "table": "gaming_facilities.csv",
+       "role": "facility_id / casino_city_id (retired from public keys"
+      },
+      {
+       "table": "data/spine/cedar_place_id_register.csv",
+       "role": "read"
+      },
+      {
+       "table": "review/place_gaming_.csv",
+       "role": "* (read"
+      }
+     ]
+    },
+    {
+     "table": "gaming_facility_history.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "source_limited",
+     "key_columns": [],
+     "grain": "One row per dated facility event or dated status observation from one source record.",
+     "primary_key": [
+      "history_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1201_gaming_grove_facilities.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": [
+      {
+       "table": "gaming_facilities.csv",
+       "role": "open/close/status columns"
+      },
+      {
+       "table": "gaming_property_universe_events.csv",
+       "role": ""
+      },
+      {
+       "table": "gaming_property_self_published_assertions.csv",
+       "role": "date claims, as leads"
+      }
+     ]
+    },
+    {
+     "table": "gaming_facility_names.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "source_limited",
+     "key_columns": [],
+     "grain": "One row per (facility, source record, name) observation; names are observations with first/last observed dates, not validity periods.",
+     "primary_key": [
+      "name_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1201_gaming_grove_facilities.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": [
+      {
+       "table": "gaming_facilities.csv",
+       "role": "facility_name"
+      },
+      {
+       "table": "gaming_nigc_roster_link.csv",
+       "role": "nigc_location_name"
+      },
+      {
+       "table": "ca_gaming_facilities_official.csv",
+       "role": "facility_name_as_published"
+      },
+      {
+       "table": "gaming_property_universe_events.csv",
+       "role": "renamed"
+      }
+     ]
+    },
+    {
+     "table": "gaming_facility_relationships.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "source_limited",
+     "key_columns": [],
+     "grain": "One row per (facility, party, relationship type, source system).",
+     "primary_key": [
+      "relationship_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1201_gaming_grove_facilities.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": [
+      {
+       "table": "gaming_facilities.csv",
+       "role": "cedar_uid / operating_entity_cedar_uids"
+      },
+      {
+       "table": "sec_gaming_management_contract_terms.csv",
+       "role": "facility-named rows"
+      },
+      {
+       "table": "gaming_property_self_published_assertions.csv",
+       "role": "ownership/management"
+      }
+     ]
+    },
+    {
+     "table": "gaming_grove_facilities.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "source_limited",
+     "key_columns": [],
+     "grain": "One row per distinct physical gaming property (a CEDAR-PLACE gaming place that at least one legacy record resolves to as mapped or unresolved).",
+     "primary_key": [
+      "gaming_facility_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1201_gaming_grove_facilities.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": [
+      {
+       "table": "gaming_facilities.csv",
+       "role": "legacy 787-row source-record table: identity + fields re-derived; vendor fields dropped"
+      },
+      {
+       "table": "gaming_properties.csv",
+       "role": "property view of the same records"
+      },
+      {
+       "table": "cedar_places.csv",
+       "role": "GAMING_PROPERTY rows: id source"
+      },
+      {
+       "table": "gaming_property_locations.csv",
+       "role": "location evidence"
+      },
+      {
+       "table": "gaming_nigc_roster_link.csv",
+       "role": "name/status evidence"
+      }
+     ]
+    },
+    {
      "table": "gaming_coverage_gaps.csv",
      "status": "grove_component",
      "grove_component": true,
@@ -11067,268 +11329,6 @@
       {
        "table": "nigc_revenue_bands.csv",
        "role": "source (read-only)"
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_capacity.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per dated capacity/amenity observation for one facility from one source record.",
-     "primary_key": [
-      "capacity_observation_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_capacity_official.csv",
-       "role": "capacity/authorization rows"
-      },
-      {
-       "table": "gaming_property_site_observations.csv",
-       "role": ""
-      },
-      {
-       "table": "gaming_property_self_published_claims.csv",
-       "role": ""
-      },
-      {
-       "table": "gaming_facilities.csv",
-       "role": "latest_* capacity (vendor, internal"
-      },
-      {
-       "table": "loyalty_program_property.csv",
-       "role": ""
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_crosswalk.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "internal",
-     "key_columns": [],
-     "grain": "One row per (legacy facility record, identifier scheme, identifier value); every legacy gaming_facilities row has a legacy_facility_id row carrying its disposition.",
-     "primary_key": [
-      "legacy_facility_id",
-      "key_scheme",
-      "key_value"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "facility_id / casino_city_id (retired from public keys"
-      },
-      {
-       "table": "data/spine/cedar_place_id_register.csv",
-       "role": "read"
-      },
-      {
-       "table": "review/place_gaming_.csv",
-       "role": "* (read"
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_history.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per dated facility event or dated status observation from one source record.",
-     "primary_key": [
-      "history_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "open/close/status columns"
-      },
-      {
-       "table": "gaming_property_universe_events.csv",
-       "role": ""
-      },
-      {
-       "table": "gaming_property_self_published_assertions.csv",
-       "role": "date claims, as leads"
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_names.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per (facility, source record, name) observation; names are observations with first/last observed dates, not validity periods.",
-     "primary_key": [
-      "name_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "facility_name"
-      },
-      {
-       "table": "gaming_nigc_roster_link.csv",
-       "role": "nigc_location_name"
-      },
-      {
-       "table": "ca_gaming_facilities_official.csv",
-       "role": "facility_name_as_published"
-      },
-      {
-       "table": "gaming_property_universe_events.csv",
-       "role": "renamed"
-      }
-     ]
-    },
-    {
-     "table": "gaming_facility_relationships.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per (facility, party, relationship type, source system).",
-     "primary_key": [
-      "relationship_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "cedar_uid / operating_entity_cedar_uids"
-      },
-      {
-       "table": "sec_gaming_management_contract_terms.csv",
-       "role": "facility-named rows"
-      },
-      {
-       "table": "gaming_property_self_published_assertions.csv",
-       "role": "ownership/management"
-      }
-     ]
-    },
-    {
-     "table": "gaming_grove_facilities.csv",
-     "status": "grove_component",
-     "grove_component": true,
-     "publication_status": "source_limited",
-     "key_columns": [],
-     "grain": "One row per distinct physical gaming property (a CEDAR-PLACE gaming place that at least one legacy record resolves to as mapped or unresolved).",
-     "primary_key": [
-      "gaming_facility_id"
-     ],
-     "join_cardinality": {},
-     "grain_declared_by": "producer CONTRACTS in code/1201_gaming_grove_facilities.py; synced by code/build.py grove-contracts gaming",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
-     "grain_open_question": "",
-     "grain_defect": "",
-     "grain_evidence": {},
-     "key_refused": {},
-     "population_scope": {},
-     "rebuilt_by": [
-      "1201_gaming_grove_facilities.py"
-     ],
-     "enriched_by": [],
-     "never_run_warning": [],
-     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
-     "supersedes": [
-      {
-       "table": "gaming_facilities.csv",
-       "role": "legacy 787-row source-record table: identity + fields re-derived; vendor fields dropped"
-      },
-      {
-       "table": "gaming_properties.csv",
-       "role": "property view of the same records"
-      },
-      {
-       "table": "cedar_places.csv",
-       "role": "GAMING_PROPERTY rows: id source"
-      },
-      {
-       "table": "gaming_property_locations.csv",
-       "role": "location evidence"
-      },
-      {
-       "table": "gaming_nigc_roster_link.csv",
-       "role": "name/status evidence"
       }
      ]
     },

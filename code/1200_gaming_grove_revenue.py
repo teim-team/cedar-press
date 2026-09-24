@@ -65,15 +65,19 @@ WHAT IS DELIBERATELY LEFT OUT (decision recorded in the receipt)
     belong to the facility/capacity lane and are counted, not emitted.
 
 IDENTIFIERS
-    Component ids come only from gaming_grove.derive_id (PROVISIONAL while the
-    owner's ID hold stands - run with CEDAR_GAMING_PROVISIONAL_IDS=1). Facility
-    ids only via gaming_grove.facility_id_for(cedar_place_id). cedar_uid is
-    carried only where the source row already has a canonical CE- value
-    (gaming_grove.is_ce_uid); legacy TRBF-/entity_id values are counted and
-    dropped, never translated, and no name is ever joined to an entity.
+    Component ids come only from gaming_grove.derive_id over stable source
+    keys; the candidate runner binds each key to a registered Cedar object ID
+    (CEDAR-OBS / CEDAR-EVENT / CEDAR-SRC / CEDAR-REL, Gaming blocks) through
+    the Gaming ID binding register, so a standalone run of this script writes
+    internal key tokens, never a public ID. Facility ids are the existing
+    CEDAR-PLACE value via gaming_grove.facility_id_for(cedar_place_id); the
+    seven online sportsbook units that name a property are linked only through
+    1201's facility tables, and only when unambiguous (so 1201 runs first).
+    cedar_uid is carried only where the source row already has a canonical CE-
+    value (gaming_grove.is_ce_uid); legacy TRBF-/entity_id values are counted
+    and dropped, never translated, and no name is ever joined to an entity.
 
 Usage:
-    set CEDAR_GAMING_PROVISIONAL_IDS=1
     py -3 code/1200_gaming_grove_revenue.py build --input-root "C:/Users/.../Cedar Press" \
         --output-root C:/Users/.../cedar-grove-gaming-work/components
 """
@@ -81,6 +85,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
 import json
 import re
 import sys
@@ -143,15 +148,29 @@ def _contract(spec, **kw):
     return c
 
 
-def _money(v):
-    """Canonical decimal text for a dollar value; '' stays ''."""
+def _money(v, scale=1):
+    """Canonical decimal text for a dollar value; '' stays ''.
+
+    Exact: parsed and scaled as a Decimal, never through a binary float (a
+    float rendered 0.1+0.2-style residues and rounded sub-cent source values).
+    An integral value prints as an integer; otherwise every source decimal is
+    kept, padded to at least cents. `scale` is an exact multiplier (10**6 for a
+    usd_millions source unit).
+    """
     v = (v or "").strip()
     if v == "":
         return ""
-    f = float(v)
-    if f == int(f) and abs(f) < 1e15:
-        return str(int(f))
-    return f"{f:.2f}"
+    try:
+        d = Decimal(v) * Decimal(scale)
+    except InvalidOperation as exc:
+        raise ValueError(f"not a decimal dollar value: {v!r}") from exc
+    if not d.is_finite():
+        raise ValueError(f"not a finite dollar value: {v!r}")
+    if d == d.to_integral_value():
+        return str(int(d))
+    text = format(d.normalize(), "f")
+    whole, frac = text.split(".")
+    return whole + "." + frac.ljust(2, "0")
 
 
 _MDY = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
@@ -198,7 +217,7 @@ def _year(d):
 
 # ================================================================== 1. REGIONS
 REGION_SPEC = [
-    ("revenue_observation_id", "public_derived", "Derived GREV id from (version, geography level, region id or NATIONAL, FY, source document)"),
+    ("revenue_observation_id", "public_derived", "Registered CEDAR-OBS ID (Gaming block) bound to the stable key (version, geography level, region id or NATIONAL, FY, source document)"),
     ("geography_level", "public_official", "nigc_region, or national where NIGC prints a national total"),
     ("region_system_code", "public_official", "Region system family (NIGC_REGION)"),
     ("region_system_version", "public_official", "NIGC region-system version the figure was published under; never sum across versions"),
@@ -320,7 +339,7 @@ def sum_regions(rows, version, fiscal_year, source_document=None):
     docs = {r["source_document"] for r in sel}
     if len(docs) > 1:
         raise gg.GamingContractError(f"{version} FY{fiscal_year}: regions from {len(docs)} reports; pick one vintage")
-    return sum(int(float(r["ggr_nominal_usd"])) for r in sel), sum(int(r["operation_count"] or 0) for r in sel), len(sel)
+    return sum(int(Decimal(r["ggr_nominal_usd"])) for r in sel), sum(int(r["operation_count"] or 0) for r in sel), len(sel)
 
 
 def assert_no_cross_version_sum(rows):
@@ -391,13 +410,13 @@ def build_regional(inputs: gg.Inputs, notes):
     for n in recon:
         fy = int(n["fiscal_year"])
         doc = n["source_document"]
-        printed = int(float(n["printed_ggr_usd"]))
+        printed = int(Decimal(n["printed_ggr_usd"]))
         ops = int(n["printed_operations"])
         # the regions of this national total are the rows from the same report
         s_usd, s_ops, n_reg = sum_regions(out, n["region_system_version"], fy, doc)
         if n_reg == 0:  # printed total from a report whose regions are carried under another row vintage
             s_usd, s_ops, n_reg = sum_regions(out, n["region_system_version"], fy)
-        tol = float(n["tolerance_usd"])
+        tol = Decimal(n["tolerance_usd"])
         ok = abs(printed - s_usd) <= tol and ops == s_ops
         if not ok:
             unreconciled.append((n["region_system_version"], fy))
@@ -418,7 +437,7 @@ def build_regional(inputs: gg.Inputs, notes):
             found = "no_text_layer"
         else:
             found = "yes" if any(t in txt for t in _printed_tokens(printed, n["figure_precision"])) else "no"
-        f = float(dmeta[fy]["factor_to_base"]) if fy in dmeta else None
+        f = Decimal(dmeta[fy]["factor_to_base"]) if fy in dmeta else None
         out.append({
             "revenue_observation_id": gg.derive_id("GREV", n["region_system_version"], "national", "NATIONAL", fy, doc),
             "geography_level": "national",
@@ -432,7 +451,7 @@ def build_regional(inputs: gg.Inputs, notes):
             "figure_precision": n["figure_precision"],
             "ggr_nominal_usd": str(printed),
             "operation_count": str(ops),
-            "ggr_real_usd": f"{printed * f:.2f}" if f else "",
+            "ggr_real_usd": str((printed * f).quantize(Decimal("0.01"), ROUND_HALF_EVEN)) if f else "",
             "real_usd_base_year": dmeta[fy]["base_year"] if fy in dmeta else "",
             "deflator_series": dmeta[fy]["source"] if fy in dmeta else "",
             "deflator_factor": dmeta[fy]["factor_to_base"] if fy in dmeta else "",
@@ -483,7 +502,7 @@ def check_fy2025(rows):
 
 # ================================================================== 2. BANDS
 BAND_SPEC = [
-    ("band_observation_id", "public_derived", "Derived GBND id from (source band_id, FY, report)"),
+    ("band_observation_id", "public_derived", "Registered CEDAR-OBS ID (Gaming block) bound to the stable key (source band_id, FY, report)"),
     ("source_band_id", "internal_crosswalk", "Upstream nigc_revenue_bands.band_id"),
     ("fiscal_year", "public_official", "NIGC report fiscal year"),
     ("fiscal_year_definition", "public_official", "NIGC fiscal-year definition (operations' own fiscal years)"),
@@ -581,7 +600,7 @@ PARTY_TYPES = {"tribe", "state_government", "state_fund", "local_governments", "
                "online_licensee", "aggregate_of_suppressed_tribes", "all_tribes_state_aggregate"}
 
 PAY_SPEC = [
-    ("payment_observation_id", "public_derived", "Derived GPAY id from (source table, source record id)"),
+    ("payment_observation_id", "public_derived", "Registered CEDAR-EVENT ID (Gaming block) bound to the stable key (source table, source record id)"),
     ("source_system", "public_official", "Upstream clean table the line was read from"),
     ("source_record_id", "public_official", "Upstream id (payment_id / observation_id / revenue_id), preserved"),
     ("source_metric", "public_official", "Upstream metric name, unchanged"),
@@ -615,7 +634,7 @@ PAY_SPEC = [
     ("summable_within_series", "public_derived", "yes only for paid, non-excluded, non-cumulative lines; add only within nonadditive_series_key"),
     ("nonadditive_series_key", "public_derived", "Lines may be added only when this key is equal"),
     ("upstream_revenue_evidence_class", "public_official", "Upstream revenue_evidence_class (a payment is never a revenue figure)"),
-    ("overlaps_online_sportsbook_observation_id", "public_derived", "GFOB id of the online-sports package observation for the same state/month/licensee (digital sportsbook tax rows); never add both"),
+    ("overlaps_online_sportsbook_observation_id", "public_derived", "financial_observation_id (CEDAR-OBS) of the online-sports package observation for the same state/month/licensee (digital sportsbook tax rows); never add both"),
     ("document_status", "public_official", "original / revised / latest_statement_for_period, as upstream"),
     ("source_authority", "public_official", "Publishing agency"),
     ("source_document_type", "public_official", "Kind of source document"),
@@ -842,8 +861,8 @@ def payments_from_state(rows, uid, withheld):
         payer = r["tribe_name_as_published"] or r["tribe_canonical_name"] if ptype == "tribe" \
             else f"All {r['state']} compact tribes (state aggregate)"
         cu = uid.take(r["cedar_uid"], "state_gaming_observations.csv") if ptype == "tribe" else ""
-        mult = 1e6 if r["unit"] == "usd_millions" else 1
-        amt = _money(str(float(r["value"]) * mult)) if r["value"] not in ("",) else ""
+        mult = 10 ** 6 if r["unit"] == "usd_millions" else 1
+        amt = _money(r["value"], mult) if r["value"] not in ("",) else ""
         out.append(_pay_row(
             source_system="state_gaming_observations", source_record_id=r["observation_id"], source_metric=m,
             state=r["state"], fund="",
@@ -901,7 +920,7 @@ SCOPES = {"state_aggregate", "tribe", "property", "online_licensee", "enterprise
 EVIDENCE = {"direct_reported", "derived_from_compact_rate", "bound", "model", "forecast", "documented_absence"}
 
 OBS_SPEC = [
-    ("reported_observation_id", "public_derived", "Derived GSRC id from (source table, source record id)"),
+    ("reported_observation_id", "public_derived", "Registered CEDAR-OBS ID (Gaming block) bound to the stable key (source table, source record id)"),
     ("source_system", "public_official", "Upstream clean table"),
     ("source_record_id", "public_official", "Upstream id, preserved"),
     ("source_metric", "public_official", "Upstream metric name, unchanged"),
@@ -929,7 +948,7 @@ OBS_SPEC = [
     ("summable_within_series", "public_derived", "yes only for direct_reported, non-excluded, non-alternate rows; add only within nonadditive_series_key"),
     ("nonadditive_series_key", "public_derived", "Rows may be added only when this key is equal"),
     ("absence_reason", "public_official", "For documented_absence rows: why the figure does not exist"),
-    ("overlaps_online_sportsbook_observation_id", "public_derived", "GFOB id of the online-sports package observation describing the same state/month/licensee; the two are never added"),
+    ("overlaps_online_sportsbook_observation_id", "public_derived", "financial_observation_id (CEDAR-OBS) of the online-sports package observation describing the same state/month/licensee; the two are never added"),
     ("source_authority", "public_official", "Publishing agency"),
     ("source_document", "public_official", "Source document / dataset"),
     ("source_url", "public_official", "Source URL"),
@@ -998,8 +1017,8 @@ def obs_from_state(rows, uid, withheld):
         else:
             ev, measure = "direct_reported", ("net_win" if m.startswith("net_win") else "gross_gaming_revenue")
         scope = {"state": "state_aggregate", "tribe": "tribe", "property": "property"}.get(r["applies_to"], "state_aggregate")
-        mult = 1e6 if r["unit"] == "usd_millions" else 1
-        val = _money(str(float(r["value"]) * mult)) if (r["value"] and not absence) else ""
+        mult = 10 ** 6 if r["unit"] == "usd_millions" else 1
+        val = _money(r["value"], mult) if (r["value"] and not absence) else ""
         cadence = "calendar_year" if r["as_of_date_precision"] == "reporting_period" and r["period_start"].endswith("-01-01") \
             else ("fiscal_year" if r["period_start"] else "none")
         out.append(_obs_row(
@@ -1107,7 +1126,7 @@ DISCLOSURE_KINDS = {"sec_facility_financial_figure", "sec_management_contract_te
 FIN_EVIDENCE = {"direct_reported", "derived_from_stated_rate", "narrative", "execution_unconfirmed", "contract_term"}
 
 FIN_SPEC = [
-    ("financial_disclosure_id", "public_derived", "Derived GFIN id from (source table, source record key)"),
+    ("financial_disclosure_id", "public_derived", "Registered CEDAR-OBS ID (Gaming block) bound to the stable key (source table, source record key)"),
     ("source_system", "public_official", "Upstream clean table"),
     ("source_record_id", "public_official", "Upstream id, preserved (FAC narrative rows: report_id|page|document type)"),
     ("disclosure_kind", "public_official", "Kind of disclosure"),
@@ -1429,7 +1448,8 @@ def build(inputs: gg.Inputs, out_dir: Path, online_sports_root=None) -> dict:
     # Online sports package (imported module; never appended to regional revenue).
     missing_national = check_one_preferred_national(regions)
     os_tables, os_cov, os_withheld, os_notes, dg_overlap = gos.build_component(
-        inputs, online_sports_root or gos.DEFAULT_PACKAGE_ROOT, dg, nigc_gaps(regions, missing_national))
+        inputs, online_sports_root or gos.DEFAULT_PACKAGE_ROOT, dg, nigc_gaps(regions, missing_national),
+        facility_index=gos.load_facility_index(inputs, out_dir))
     withheld.update(os_withheld)
     notes += os_notes
     for r in obs + pays:

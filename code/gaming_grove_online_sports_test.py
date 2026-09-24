@@ -27,7 +27,6 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
 import gaming_grove as gg  # noqa: E402
 import gaming_grove_online_sports as gos  # noqa: E402
 
@@ -358,18 +357,39 @@ class Built(unittest.TestCase):
             self.assertNotIn("source", self.inputs.receipts[k])
             self.assertTrue((self.inputs.root / k).is_file(), k)      # build.py re-verifies input_root / path
 
-    def test_prov_hold_respected(self):
-        for t in (gos.T_FOB, gos.T_UNITS, gos.T_REL, gos.T_GAP):
+    def test_ids_are_registered_prefix_tokens_and_gaps_use_natural_keys(self):
+        want = {"sportsbook_unit_id": "CEDAR-SRC", "financial_observation_id": "CEDAR-OBS",
+                "relationship_id": "CEDAR-REL"}
+        for t in (gos.T_FOB, gos.T_UNITS, gos.T_REL):
             for r in self.tables[t]:
                 for col in gos.CONTRACTS[t]["derived_ids"]:
-                    self.assertTrue(r[col].startswith("PROV-"), (t, col, r[col]))
-        os.environ.pop("CEDAR_GAMING_PROVISIONAL_IDS")
-        try:
-            root, pkg, expected = make_package(Path(self.tmp.name) / "hold")
-            with self.assertRaises(gg.IdContractPending):
-                gos.build_component(gg.Inputs(root), pkg, [], expected=expected)
-        finally:
-            os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
+                    self.assertEqual(gg.KEY_CLASSES[gg.decode_token(r[col])[0]][0], want[col], (t, col))
+        for r in self.tables[gos.T_GAP]:
+            self.assertEqual(r["coverage_gap_id"], "|".join(r[c] for c in gos.GAP_KEY_COLUMNS))
+            self.assertNotIn("GKEY~", r["coverage_gap_id"])
+        self.assertNotIn("coverage_gap_id", gos.CONTRACTS[gos.T_GAP]["derived_ids"])
+
+    def test_property_named_unit_links_only_an_unambiguous_facility(self):
+        units = [dict(sportsbook_unit_id="U1", jurisdiction="MI", property_named_in_source="FireKeepers Casino",
+                      gaming_facility_id="", facility_link_status="property_named_unresolved"),
+                 dict(sportsbook_unit_id="U2", jurisdiction="PA", property_named_in_source="Wind Creek",
+                      gaming_facility_id="", facility_link_status="property_named_unresolved"),
+                 dict(sportsbook_unit_id="U3", jurisdiction="CT", property_named_in_source="Twin Casino",
+                      gaming_facility_id="", facility_link_status="property_named_unresolved")]
+        rels = [{"sportsbook_unit_id": "U1", "cedar_uid": HANNAH}, {"sportsbook_unit_id": "U3", "cedar_uid": MOHEG}]
+        fk, wc, t1, t2 = ("CEDAR-PLACE-000176-S0", "CEDAR-PLACE-000004-R4", "CEDAR-PLACE-000001-6S",
+                          "CEDAR-PLACE-000002-CJ")
+        index = {"by_name": {("MI", "firekeepers"): {fk}, ("AL", "wind creek"): {wc}, ("CT", "twin"): {t1, t2}},
+                 "uids": {fk: {HANNAH}, wc: {SEMI}, t1: {MOHEG}, t2: {MOHEG}}}
+        withheld = Counter()
+        gos.resolve_unit_facilities(units, rels, index, withheld)
+        self.assertEqual([(u["gaming_facility_id"], u["facility_link_status"]) for u in units],
+                         [(fk, "property_named_resolved"),               # one MI facility, same tribe
+                          ("", "property_named_unresolved"),             # only an AL property: other state
+                          ("", "property_named_unresolved")])            # two candidates: ambiguous
+        units[0].update(gaming_facility_id="", facility_link_status="property_named_unresolved")
+        gos.resolve_unit_facilities(units[:1], [], None, Counter())      # 1201 absent: no link
+        self.assertEqual(units[0]["gaming_facility_id"], "")
 
     def test_tables_pass_the_shared_validator(self):
         for t, c in gos.CONTRACTS.items():

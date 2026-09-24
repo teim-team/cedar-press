@@ -78,8 +78,10 @@ RELEASE_PILOTS = {
     # used only here: table/replaces_flagship (that bounded override; with
     # components, `table` is the landing component), product (Lumecon catalog
     # product), time_coverage, identifier_refusals (refuse provisional PROV-,
-    # vendor CCP-/VP-/TPL- and non-CE entity IDs; unconditional for
-    # components), and components.
+    # key tokens, vendor CCP-/VP-/TPL-/CEDAR-FAC-, retired entity handles,
+    # non-CE entity IDs and any Gaming object ID whose binding is not ISSUED
+    # in the live Gaming ID binding register; unconditional for components),
+    # and components.
     #
     # `components` makes the collection a multi-component release unit: an
     # ordered {component table: its own owner/url/rights/time_coverage/caveats}
@@ -123,8 +125,11 @@ RELEASE_PILOTS = {
 # orders scripts the contracts already name.
 GROVE_COMPONENTS = {
     "gaming": [
-        "1200_gaming_grove_revenue.py",
+        # 1201 first: it is the facility authority, and 1200 links the online
+        # sportsbook units that name a property through 1201's facility tables
+        # (1201 reads no 1200 output). 1203 reads 1201's crosswalk too.
         "1201_gaming_grove_facilities.py",
+        "1200_gaming_grove_revenue.py",
         "1202_gaming_grove_compacts_regulatory.py",
         "1203_gaming_grove_labor_advocacy.py",
     ],
@@ -137,8 +142,9 @@ GROVE_COMPONENTS = {
 # A "component" authority of None is the one component table whose declared
 # primary key is exactly that key column (so a table rename cannot silently
 # disable the check). "input" registers are issued-ID files read from the
-# pinned input root. No facility-ID FORMAT is assumed: the pending allowed-ID
-# contract decides that.
+# pinned input root. Formats (CE check characters, checked CEDAR-PLACE and
+# Cedar NEED enterprise IDs, Gaming object IDs in their blocks) are enforced
+# by gaming_grove.validate_rows under the ratified 2026-09-24 ID contract.
 GROVE_REFERENCES = {
     "gaming": [
         ("gaming_facility_id", "component", None, "gaming_facility_id"),

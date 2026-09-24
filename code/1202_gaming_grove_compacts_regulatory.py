@@ -48,17 +48,23 @@ THE DISTINCTIONS THIS SCRIPT EXISTS TO KEEP
   existing link (gaming_grove.is_ce_uid). Legacy TRBF-/handle values are never
   copied or translated here; they are counted and reported.
 
-IDENTIFIERS (OWNER HOLD 2026-09-24)
------------------------------------
-New component IDs (GREG/GENV/GLIC/GLIT/GSRC) come only from
-gaming_grove.derive_id over stable source keys and are PROVISIONAL (PROV-...)
-until the CICD identifier-retirement audit returns. Run with
-CEDAR_GAMING_PROVISIONAL_IDS=1 for a structural dry run. Existing source IDs
-(compact_id, version_id, term_id, decision_id, NIGC ids, FR document numbers)
-are preserved verbatim in their own columns.
+IDENTIFIERS (ratified contract 2026-09-24)
+------------------------------------------
+Every component ID is a source-key token from gaming_grove.derive_id that the
+candidate runner binds to a registered Cedar object ID: events, land
+decisions, environmental reviews, licence issuances and proceedings to
+CEDAR-EVENT; clause terms to CEDAR-OBS; compacts and compact versions to
+CEDAR-CONTRACT. The BIA-index compact key (CMP-<state>-<slug>-<date>) is
+built from a tribe name and a date, so it is NOT an identity: it is kept as
+the source ID (`source_record_id`, `also_cited_by`) and the public
+`compact_id` / `version_id` / `successor_compact_id` are the bound
+CEDAR-CONTRACT IDs. A compact version is a distinct instrument document
+(amendment, extension, renewal), so it is a contract object of its own, not
+an event: its approval is the separate CEDAR-EVENT in
+`regulatory_event_id`. Other source IDs (term_id, decision_id, NIGC ids, FR
+document numbers) are preserved verbatim in their own columns.
 
 USAGE
-    set CEDAR_GAMING_PROVISIONAL_IDS=1
     py -3 code/1202_gaming_grove_compacts_regulatory.py build \
         --input-root "C:\\Users\\esm247\\Desktop\\Cedar Press" \
         --output-root C:\\Users\\esm247\\cedar-grove-gaming-work\\components
@@ -362,7 +368,7 @@ EVIDENCE = [
 ]
 
 COMPACT_COLS = [
-    ("compact_id", PUB, "BIA-index instrument ID from compacts.csv, preserved (CMP-<state>-<slug>-<yyyymmdd>)"),
+    ("compact_id", DER, "Registered CEDAR-CONTRACT ID (Gaming block) bound to the BIA-index compact key; the key itself (CMP-<state>-<slug>-<yyyymmdd>) is source_record_id"),
     ("instrument_type", PUB, "compact | secretarial-procedures | orphan-no-base-instrument-in-index"),
     ("state", PUB, "State named on the BIA index row"),
     ("tribe_name_as_published", PUB, "Tribe string as printed in the BIA index Tribes column"),
@@ -381,14 +387,14 @@ COMPACT_COLS = [
     ("renewal_provisions", PUB, "Renewal language quoted from the instrument"),
     ("status", DER, "active | renegotiated | expired | unknown (rule-based, see status_basis)"),
     ("status_basis", DER, "Rule that produced status (a later base instrument, not a document saying so)"),
-    ("successor_compact_id", DER, "Next base instrument for the same state+tribe in the BIA index"),
+    ("successor_compact_id", DER, "compact_id (CEDAR-CONTRACT) of the next base instrument for the same state+tribe in the BIA index"),
     ("n_versions", DER, "Count of versions in gaming_compact_versions for this compact"),
     ("source_pdf", PUB, "BIA PDF filename"),
 ] + EVIDENCE
 
 VERSION_COLS = [
-    ("version_id", PUB, "Version ID from compact_versions.csv, preserved"),
-    ("compact_id", PUB, "Parent instrument"),
+    ("version_id", DER, "Registered CEDAR-CONTRACT ID (Gaming block) of this version instrument, bound to the compact_versions.csv version key (kept as source_record_id)"),
+    ("compact_id", DER, "Parent instrument (CEDAR-CONTRACT compact_id)"),
     ("state", PUB, "State of the parent instrument"),
     ("tribe_name_as_published", PUB, "BIA index Tribes column for this version row"),
     ("cedar_uid", DER, "Inherited from the parent compact's existing CE link"),
@@ -412,11 +418,11 @@ VERSION_COLS = [
 ] + EVIDENCE
 
 TERM_COLS = [
-    ("gaming_term_id", DER, "Derived clause-observation ID (GSRC) from the source table + source key"),
+    ("gaming_term_id", DER, "Registered CEDAR-OBS ID (Gaming block) for the clause-observation, bound to the source table + source key"),
     ("term_id", PUB, "compact_structured_terms term_id, preserved; blank for compact_terms view rows"),
     ("term_source_table", PUB, "compact_structured_terms | compact_terms"),
-    ("compact_id", PUB, "Instrument the clause is in"),
-    ("version_id", PUB, "Version the clause is in"),
+    ("compact_id", DER, "Instrument the clause is in (CEDAR-CONTRACT compact_id)"),
+    ("version_id", DER, "Version the clause is in (CEDAR-CONTRACT version_id)"),
     ("cedar_uid", DER, "Existing CE link carried by the source row"),
     ("state", PUB, "State"),
     ("term_field", PUB, "Clause family as extracted (revenue_sharing_rate, exclusivity, ...)"),
@@ -444,7 +450,7 @@ TERM_COLS = [
 ] + EVIDENCE
 
 EVENT_COLUMNS_SPEC = [
-    ("regulatory_event_id", DER, "Derived event ID (GREG) from the stable source key (FR doc number, NIGC id, BIA event id)"),
+    ("regulatory_event_id", DER, "Registered CEDAR-EVENT ID (Gaming block) for the event, bound to the stable source key (FR doc number, NIGC id, BIA event id)"),
     ("event_type", DER, "Controlled vocabulary of regulatory action types"),
     ("event_subtype", PUB, "Source-specific subtype (NOV code, ordinance type, version role, FR action line)"),
     ("agency", PUB, "Acting agency (BIA/AS-IA, NIGC, NIGC OGC, Governor, Federal Register agency)"),
@@ -460,8 +466,8 @@ EVENT_COLUMNS_SPEC = [
     ("subject_name_as_published", PUB, "Subject tribe/party/game as printed by the source"),
     ("state", PUB, "State when the source names one"),
     ("gaming_facility_id", XW, "Facility (via gaming_grove.facility_id_for) only when the source carries a place id; else blank"),
-    ("compact_id", PUB, "Linked compact(s) (pipe-joined) when the source links one"),
-    ("version_id", PUB, "Linked compact version(s)"),
+    ("compact_id", DER, "Linked compact(s) (pipe-joined CEDAR-CONTRACT compact_id values) when the source links one"),
+    ("version_id", DER, "Linked compact version(s) (pipe-joined CEDAR-CONTRACT version_id values)"),
     ("decision_id", PUB, "Linked BIA gaming land decision(s)"),
     ("fr_document_number", PUB, "Federal Register document number (citation); raw key for cross-lane links"),
     ("docket_ids", PUB, "Agency / regulations.gov docket IDs printed on the FR document (pipe-joined)"),
@@ -479,7 +485,7 @@ EVENT_COLUMNS_SPEC = [
 EVENT_COLUMNS = [c[0] for c in EVENT_COLUMNS_SPEC]
 
 LAND_COLS = [
-    ("land_eligibility_id", DER, "Derived determination ID (GREG namespace 'LAND-ELIGIBILITY')"),
+    ("land_eligibility_id", DER, "Registered CEDAR-EVENT ID (Gaming block) for the determination, bound to the key (LAND-ELIGIBILITY, source system, decision/opinion id)"),
     ("determination_kind", DER, "bia_gaming_land_decision | nigc_indian_lands_opinion"),
     ("determination_body", PUB, "Interior (BIA/AS-IA) or NIGC Office of General Counsel"),
     ("decision_id", PUB, "Source decision/opinion ID, preserved"),
@@ -504,7 +510,7 @@ LAND_COLS = [
 ] + EVIDENCE
 
 ENV_COLS = [
-    ("environmental_review_id", DER, "Derived review-document ID (GENV) from the document URL or source key"),
+    ("environmental_review_id", DER, "Registered CEDAR-EVENT ID (Gaming block) for the review-document, bound to the document URL or source key"),
     ("project_key", PUB, "Project key (NEPA pilot project_id, else the BIA decision_id); never a facility id"),
     ("project_key_basis", DER, "Which identifier project_key is"),
     ("review_level", DER, "EIS | EA | CATEX | unknown"),
@@ -528,7 +534,7 @@ ENV_COLS = [
 ] + EVIDENCE
 
 LIC_COLS = [
-    ("license_id", DER, "Derived licence/authorisation ID (GLIC) from the source key"),
+    ("license_id", DER, "Registered CEDAR-EVENT ID (Gaming block) for the licence/authorisation, bound to the source key"),
     ("license_family", DER, "vendor_license_mention | wagering_authorization | machine_allocation"),
     ("authority_name", PUB, "Licensing authority as named (tribal regulator, state host, compact appendix)"),
     ("authority_level", DER, "tribal | state | tribal_state_compact"),
@@ -555,7 +561,7 @@ LIC_COLS = [
 ] + EVIDENCE
 
 LIT_COLS = [
-    ("litigation_id", DER, "Derived proceeding ID (GLIT) from forum + docket/citation"),
+    ("litigation_id", DER, "Registered CEDAR-EVENT ID (Gaming block) for the proceeding, bound to forum + docket/citation"),
     ("proceeding_kind", DER, "federal_court_case | supreme_court_docket | administrative_appeal | nigc_commission_proceeding"),
     ("case_name", PUB, "Caption as published (blank when the source does not name the case)"),
     ("forum", PUB, "Court or tribunal"),
@@ -600,8 +606,9 @@ CONTRACTS = {
         "An instrument is not a payment, a facility or a licence. n_versions counts versions; never sum instruments across states as 'compacts in force'.",
         enums={"approval_type": {"secretarial", "deemed-approved", "secretarial-procedures", "unknown"}},
         dates=["bia_decision_date", "original_effective_date", "term_end", "source_date", "retrieved_date"],
+        derived={"compact_id": "GCMP", "successor_compact_id": "GCMP"},
         public_ids=["compact_id", "cedar_uid"],
-        id_recipe='compact_id is the existing BIA-index source ID (not derived here)'),
+        id_recipe='compact_id = derive_id("GCMP", BIA-index compact key); successor_compact_id likewise; the key is source_record_id'),
     "gaming_compact_versions.csv": _contract(
         "one row per compact version (original instrument, amendment or extension) as indexed by BIA",
         ["version_id"], VERSION_COLS, "public",
@@ -610,8 +617,9 @@ CONTRACTS = {
         "Versions are successive states of one instrument: never count versions as instruments.",
         enums={"approval_status": {"approved", "deemed_approved", "prescribed", "extended", "unknown"}},
         dates=["approval_date", "effective_date", "expiry_date", "source_date", "retrieved_date"],
-        derived={"regulatory_event_id": "GREG"}, public_ids=["version_id", "compact_id", "cedar_uid"],
-        id_recipe='version_id is the existing source ID; regulatory_event_id per gaming_regulatory_events recipe'),
+        derived={"regulatory_event_id": "GREG", "version_id": "GCMV", "compact_id": "GCMP"},
+        public_ids=["version_id", "compact_id", "cedar_uid"],
+        id_recipe='version_id = derive_id("GCMV", compact_versions version key); compact_id = derive_id("GCMP", compact key); regulatory_event_id per gaming_regulatory_events recipe'),
     "gaming_compact_terms.csv": _contract(
         "one row per extracted contractual clause term (structured terms plus exclusivity/dispute clauses from the compact_terms view)",
         ["gaming_term_id"], TERM_COLS, "internal",
@@ -622,7 +630,8 @@ CONTRACTS = {
                "is_payment_observation": {"no"},
                "term_source_table": {"compact_structured_terms", "compact_terms"}},
         dates=["effective_from", "effective_to", "source_date", "retrieved_date"],
-        derived={"gaming_term_id": "GSRC"}, public_ids=["compact_id", "version_id", "cedar_uid"],
+        derived={"gaming_term_id": "GSRC", "compact_id": "GCMP", "version_id": "GCMV"},
+        public_ids=["compact_id", "version_id", "cedar_uid"],
         id_recipe='gaming_term_id = derive_id("GSRC", "compact_structured_terms", term_id) | derive_id("GSRC", "compact_terms", version_id, term_type, source_page, sha256(quote)[:16])'),
     "gaming_regulatory_events.csv": _contract(
         "one row per dated regulatory action, deduplicated on its stable source key (FR document number, NIGC record id, BIA event id); merged source IDs kept in also_cited_by",
@@ -1874,6 +1883,20 @@ ACQUISITION_LEADS = [
 
 
 # ---------------------------------------------------------------- build
+# Columns that carry a BIA-index compact/version key (pipe lists allowed).
+# The key names a tribe and a date, so it is never the public ID: each value
+# becomes the token of its CEDAR-CONTRACT binding, after every join above has
+# used the source key. `source_record_id` / `also_cited_by` keep the key.
+COMPACT_KEY_COLUMNS = {"compact_id": "GCMP", "successor_compact_id": "GCMP", "version_id": "GCMV"}
+
+
+def bind_compact_keys(rows):
+    for r in rows:
+        for col, klass in COMPACT_KEY_COLUMNS.items():
+            if r.get(col):
+                r[col] = "|".join(gg.derive_id(klass, v) for v in r[col].split("|") if v.strip())
+
+
 def build(inputs: gg.Inputs, out_dir: Path) -> dict:
     ctx = Ctx(inputs)
     bag = EventBag()
@@ -1903,6 +1926,8 @@ def build(inputs: gg.Inputs, out_dir: Path) -> dict:
         "gaming_land_eligibility.csv": land, "gaming_environmental_reviews.csv": env,
         "gaming_licenses.csv": lic, "gaming_litigation.csv": lit,
     }
+    for rows in tables.values():
+        bind_compact_keys(rows)
     receipts = []
     for name, rows in tables.items():
         c = CONTRACTS[name]

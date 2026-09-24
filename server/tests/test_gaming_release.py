@@ -4,8 +4,15 @@ All fixtures are fictional and data-less. Three layers, each reusing the
 shared path rather than a Gaming copy of it:
 
 * ``code/build.py candidate gaming``: registered producers run in declared
-  order into a new isolated root; shared validators, cross-table references,
-  provisional-ID status and change report.
+  order into a new isolated root; source-key tokens bound through the Gaming
+  ID binding register (reuse across rebuilds, deterministic new ordinals, a
+  tampered prior register refused); shared validators, cross-table
+  references, the public-release leak gate (PROV-, CCP-, VP-, TPL-,
+  CEDAR-FAC-, a composite retired handle, a malformed Gaming ID each refused
+  by name), a byte-identical manifest with timings in the volatile log, and
+  the change report.
+* Every canonical Gaming table and public ID surface: a planted bad value is
+  named by both the leak gate and the release refusal.
 * ``code/build.py release-pilot gaming``: a multi-component release unit. Two
   synthetic components, each with its own field-map entry, grain, key and
   rights, released through the one projection path into two immutable Lumecon
@@ -15,7 +22,10 @@ shared path rather than a Gaming copy of it:
   artifact is written; then (with fixture identifier bindings standing in for
   the pending allowed-ID contract) exact bytes, determinism, immutable-
   replacement refusal and rollback to a prior verified catalog. Single-flagship
-  pilots and single-entry field-map callers are shown unchanged.
+  pilots and single-entry field-map callers are shown unchanged. A Gaming
+  object ID ships only when ISSUED in the live binding register, and the
+  Lumecon ``registered_reference`` fixture proves a retired handle mapped
+  ``id: id`` is refused by Cedar although Lumecon alone would accept it.
 * The Cedar server adapter with the reviewed Grove declaration
   (``collections.GROVE_RELEASE_COLLECTIONS``): per-component exact download
   from the pinned Grove catalog for grove/tree, denial before any catalog or
@@ -55,7 +65,8 @@ BUILD = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(BUILD)
 
 CE = "CE-00001-6S"          # an issued CE id with a valid check pair
-PLACE = "CEDAR-PLACE-000001-AB"
+PLACE = "CEDAR-PLACE-000001-6S"   # ordinal 1 with its 503 check characters
+RETIRED = "TRBF-FIXTURE-00"        # a fixture retired handle (historical vocabulary only)
 
 # ---------------------------------------------------------------- fixture producers
 PRODUCER = textwrap.dedent('''
@@ -69,21 +80,24 @@ PRODUCER = textwrap.dedent('''
     SCRIPT = Path(__file__).stem
     CONTRACTS = {contracts}
 
+    LEAKS = {{"leak_prov": "see PROV-GREG-0123456789AB", "leak_ccp": "CCP-45100", "leak_vp": "VP-0101",
+             "leak_tpl": "TPL-0127", "leak_fac": "CEDAR-FAC-000013",
+             "leak_handle": "{retired}-NIGC-2007-0001", "leak_malformed": "CEDAR-OBS-000000001"}}
+
     def rows_for(table):
-        prov = MODE == "provisional"
-        fac = ("PROV-GFAC:" if prov else "GFAC-") + "{place}"
-        grev = ("PROV-" if prov else "") + "GREV-0123456789AB"
-        greg = ("PROV-" if prov else "") + "GREG-0123456789AB"
+        fac = "{place}"
+        grev = gg.derive_id("GREV", "fixture_region", "R1", "2025")
+        greg = gg.derive_id("GREG", "FR", "2025-00001")
         if table == "gaming_grove_facilities.csv":
             return [{{"gaming_facility_id": fac, "cedar_uid": "{ce}", "facility_name": "Fictional Casino",
                       "rights_class": "public_official"}}]
         if table == "gaming_regulatory_events.csv":
-            ref = "GFAC-MISSING" if MODE == "dangling" else fac
+            ref = "CEDAR-PLACE-000002-CJ" if MODE == "dangling" else fac
             out = [{{"event_id": greg, "gaming_facility_id": ref, "event_date": "2025-01-02",
-                     "rights_class": "public_official"}}]
+                     "note": LEAKS.get(MODE, "fixture note"), "rights_class": "public_official"}}]
             if MODE == "added":
-                out.append({{"event_id": greg.replace("0123", "9999"), "gaming_facility_id": fac,
-                            "event_date": "2026-03-04", "rights_class": "public_official"}})
+                out.append({{"event_id": gg.derive_id("GREG", "FR", "2026-00002"), "gaming_facility_id": fac,
+                            "event_date": "2026-03-04", "note": "", "rights_class": "public_official"}})
             return out
         return [{{"revenue_observation_id": grev, "region_name": "Fictional Region", "fiscal_year": "2025",
                  "ggr_nominal_usd": "100", "internal_estimate": "7", "rights_class": "public_official"}}]
@@ -132,7 +146,7 @@ EVENTS = {
     "gaming_regulatory_events.csv": _contract(
         ["event_id"],
         {"event_id": "public_derived", "gaming_facility_id": "public_derived",
-         "event_date": "public_official", "rights_class": "public_official"},
+         "event_date": "public_official", "note": "public_official", "rights_class": "public_official"},
         "one fictional regulatory event", dates=["event_date"], derived_ids={"event_id": "GREG"}),
     "gaming_regional_revenue.csv": _contract(
         ["revenue_observation_id"],
@@ -160,11 +174,15 @@ class GroveFixture(unittest.TestCase):
         (self.source / "data" / "clean" / "fixture_source.csv").write_text("a\n1\n", encoding="utf-8")
         (self.source / "data" / "spine" / "cedar_identity_register.csv").write_text(
             f"cedar_uid,canonical_name\n{CE},Fictional Nation\n", encoding="utf-8")
+        # The historical vocabulary the leak gate matches by exact membership.
+        (self.source / "data" / "spine" / "cedar_retired_neid_crosswalk.csv").write_text(
+            f"retired_neid,cedar_uid\n{RETIRED},{CE}\n", encoding="utf-8")
         self.code = base / "code"
         self.code.mkdir()
         for script, contracts in zip(SCRIPTS, (FACILITIES, EVENTS), strict=True):
             (self.code / script).write_text(
-                PRODUCER.format(code=str(CODE), contracts=_py_literal(contracts), place=PLACE, ce=CE),
+                PRODUCER.format(code=str(CODE), contracts=_py_literal(contracts), place=PLACE, ce=CE,
+                                retired=RETIRED),
                 encoding="utf-8")
         self.base = base
         self.registry = {"contracts": [{
@@ -184,11 +202,12 @@ class GroveFixture(unittest.TestCase):
             patcher.start()
             self.addCleanup(patcher.stop)
 
-    def run_candidate(self, name, mode="ok", previous=None):
+    def run_candidate(self, name, mode="ok", previous=None, bindings=None):
         target = self.base / name
         args = argparse.Namespace(collection="gaming", input_root=str(self.source), owner_dir=None,
                                   output_root=str(target), as_of="2026-09-24",
-                                  previous=str(previous) if previous else None)
+                                  previous=str(previous) if previous else None,
+                                  bindings=str(bindings) if bindings else None)
         with patch.dict(os.environ, {"FIXTURE_MODE": mode}), contextlib.redirect_stdout(io.StringIO()):
             code = BUILD.cmd_candidate(args)
         manifest = json.loads((target / "logs" / "gaming-candidate.json").read_text(encoding="utf-8"))
@@ -201,7 +220,7 @@ class GroveCandidateTest(GroveFixture):
         existing.mkdir()
         for target in (existing, self.source / "candidate", self.source.parent):
             args = argparse.Namespace(collection="gaming", input_root=str(self.source), owner_dir=None,
-                                      output_root=str(target), as_of="2026-09-24", previous=None)
+                                      output_root=str(target), as_of="2026-09-24", previous=None, bindings=None)
             with self.subTest(target=target), self.assertRaisesRegex(SystemExit, "REFUSED"):
                 BUILD.cmd_candidate(args)
         self.assertFalse((self.source / "candidate").exists())
@@ -213,22 +232,86 @@ class GroveCandidateTest(GroveFixture):
             self.run_candidate("unregistered")
         self.assertFalse((self.base / "unregistered").exists())
 
-    def test_provisional_ids_run_in_order_and_are_never_promotable(self):
-        code, target, manifest = self.run_candidate("provisional", mode="provisional")
+    def bindings(self, target):
+        return BUILD._csv_table((target / "components" / gaming_grove.BINDINGS_TABLE).read_bytes())[1]
+
+    def test_ids_are_bound_proposed_in_order_and_never_promotable(self):
+        code, target, manifest = self.run_candidate("bound")
         self.assertEqual(code, 0)
-        self.assertEqual(manifest["status"], "LOCAL_DRY_RUN_PROVISIONAL_IDS")
+        self.assertEqual(manifest["status"], "LOCAL_CANDIDATE_PROPOSED_BINDINGS")
         self.assertEqual([s["command"][0] for s in manifest["steps"]], SCRIPTS)
-        self.assertGreater(manifest["provisional_id_values"], 0)
+        self.assertEqual(manifest["provisional_id_values"], 0)
         self.assertTrue(manifest["validation"]["passed"], manifest["validation"])
+        self.assertTrue(manifest["leak_gate"]["passed"], manifest["leak_gate"])
+        self.assertFalse(manifest["id_binding"]["live_register_written"])
+        register = self.bindings(target)
+        self.assertEqual({(r["issued_id"], r["key_class"], r["status"]) for r in register},
+                         {("CEDAR-OBS-500000001", "GREV", "PROPOSED"), ("CEDAR-EVENT-500001", "GREG", "PROPOSED")})
+        events = (target / "components" / EVENTS_TABLE).read_text(encoding="utf-8")
+        self.assertIn("CEDAR-EVENT-500001", events)
+        self.assertNotIn("GKEY~", events)
+        self.assertIn(PLACE, events)                                # the place ID itself, unwrapped
+        crosswalk = (target / "components" / gaming_grove.MIGRATION_CROSSWALK_TABLE).read_text(encoding="utf-8")
+        self.assertIn("PROV-GREV-", crosswalk)
+        self.assertIn("CEDAR-OBS-500000001", crosswalk)
+        # The manifest is deterministic: timings and the output root live in the volatile log.
+        text = (target / "logs" / "gaming-candidate.json").read_text(encoding="utf-8")
+        self.assertNotIn("seconds", text)
+        self.assertNotIn(str(target), text)
+        volatile = json.loads((target / "logs" / "gaming-candidate.volatile.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(volatile["steps"]), 2)
+        self.assertIn("seconds", volatile["steps"][0])
         self.assertIn("data/clean/fixture_source.csv", [i["path"] for i in manifest["inputs"]])
         self.assertIn("data/spine/cedar_identity_register.csv", [i["path"] for i in manifest["inputs"]])
         for output in manifest["outputs"]:
             data = (target / "components" / output["table"]).read_bytes()
             self.assertEqual(hashlib.sha256(data).hexdigest(), output["sha256"])
 
+    def test_rebuild_reuses_bindings_and_is_byte_identical(self):
+        _, first, _ = self.run_candidate("first")
+        _, second, _ = self.run_candidate("second")
+        for rel in sorted(p.relative_to(first) for p in first.rglob("*") if p.is_file()):
+            if rel.as_posix().endswith(".volatile.json") or rel.suffix == ".log":
+                continue
+            self.assertEqual((first / rel).read_bytes(), (second / rel).read_bytes(), rel)
+        prior = first / "components" / gaming_grove.BINDINGS_TABLE
+        code, third, manifest = self.run_candidate("third", mode="added", bindings=prior)
+        self.assertEqual(code, 0)
+        register = {r["issued_id"]: r for r in self.bindings(third)}
+        old = {r["issued_id"]: r for r in self.bindings(first)}
+        for issued, row in old.items():
+            self.assertEqual(register[issued], row)                 # reused byte-exactly
+        new = sorted(set(register) - set(old))
+        self.assertEqual(new, ["CEDAR-EVENT-500002"])               # next ordinal in the block
+        self.assertEqual(manifest["id_binding"]["summary"]["CEDAR-EVENT"],
+                         {"new_PROPOSED": 1, "register_rows": 2, "reused_PROPOSED": 1})
+        self.assertEqual(manifest["id_binding"]["prior_register"]["status"], "READ")
+
+    def test_tampered_prior_register_is_refused(self):
+        _, first, _ = self.run_candidate("first")
+        prior = first / "components" / gaming_grove.BINDINGS_TABLE
+        tampered = self.base / "tampered.csv"
+        tampered.write_bytes(prior.read_bytes().replace(b"CEDAR-OBS-500000001", b"CEDAR-OBS-000000001"))
+        code, _, manifest = self.run_candidate("tampered", bindings=tampered)
+        self.assertEqual((code, manifest["status"]), (1, "FAILED_BINDING"))
+        self.assertIn("outside the Gaming CEDAR-OBS block", manifest["binding_error"])
+
+    def test_leak_gate_refuses_each_planted_value_by_name(self):
+        cases = {"leak_prov": "provisional identifier (PROV-)", "leak_ccp": "vendor/source facility key",
+                 "leak_vp": "vendor/source facility key", "leak_tpl": "vendor/source facility key",
+                 "leak_fac": "vendor/source facility key", "leak_handle": "retired entity handle",
+                 "leak_malformed": "malformed Gaming object identifier"}
+        for mode, finding in cases.items():
+            with self.subTest(mode=mode):
+                code, _, manifest = self.run_candidate(mode, mode=mode)
+                self.assertEqual((code, manifest["status"]), (1, "FAILED_LEAK_GATE"))
+                named = {(f["surface"], f["column"], f["finding"]) for f in manifest["leak_gate"]["findings"]}
+                self.assertIn(("public:" + EVENTS_TABLE, "note", finding), named)
+                self.assertIn(("sample:" + EVENTS_TABLE, "note", finding), named)
+
     def test_approved_candidate_samples_public_fields_and_reports_changes(self):
         code, first, manifest = self.run_candidate("first")
-        self.assertEqual((code, manifest["status"]), (0, "LOCAL_CANDIDATE_NOT_PROMOTED"))
+        self.assertEqual((code, manifest["status"]), (0, "LOCAL_CANDIDATE_PROPOSED_BINDINGS"))
         sample = (first / "samples" / "gaming_grove_facilities.csv").read_text(encoding="utf-8")
         self.assertNotIn("facility_name", sample)          # withheld_unverified never sampled
         self.assertNotIn("Fictional Casino", sample)
@@ -298,6 +381,60 @@ class GroveCandidateTest(GroveFixture):
         self.assertIn("historical_superseded_by_grove", doc)
 
 
+class PromotionTest(GroveFixture):
+    """`grove-promote-bindings`: dry run by default; the controlled step flips
+    PROPOSED -> ISSUED only for a verified candidate built from the live
+    register, keeps a backup and a promotion log, and never renumbers."""
+
+    def promote(self, candidate, live_root, **kw):
+        args = argparse.Namespace(collection="gaming", candidate=str(candidate), live_root=str(live_root),
+                                  execute=kw.get("execute", False), decision_id=kw.get("decision_id"),
+                                  approved_by=kw.get("approved_by"))
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            code = BUILD.cmd_grove_promote_bindings(args)
+        return code, out.getvalue()
+
+    def test_dry_run_then_controlled_execute_then_reuse(self):
+        live_root = self.base / "live"
+        live = live_root / gaming_grove.LIVE_BINDINGS
+        _, first, _ = self.run_candidate("first", bindings=live)
+        code, text = self.promote(first, live_root)
+        self.assertEqual(code, 0)
+        self.assertIn("DRY RUN", text)
+        self.assertFalse(live.exists())
+        with self.assertRaisesRegex(SystemExit, "needs --decision-id"):
+            self.promote(first, live_root, execute=True)
+        self.promote(first, live_root, execute=True, decision_id="FIXTURE-DECISION-1", approved_by="fixture owner")
+        status = BUILD.pilot_bindings_status("gaming", live)
+        self.assertEqual(status, {"CEDAR-OBS-500000001": "ISSUED", "CEDAR-EVENT-500001": "ISSUED"})
+        log = (live.parent / "gaming_id_bindings_promotions.jsonl").read_text(encoding="utf-8")
+        self.assertIn("FIXTURE-DECISION-1", log)
+        # The old candidate was not built from the register now live: refused.
+        with self.assertRaisesRegex(SystemExit, "not built from the live register"):
+            self.promote(first, live_root)
+        # A rebuild from the live register reuses the ISSUED IDs exactly.
+        code, second, manifest = self.run_candidate("second", mode="added", bindings=live)
+        self.assertEqual(code, 0)
+        rows = {r["issued_id"]: r["status"] for r in self.bindings(second)}
+        self.assertEqual(rows, {"CEDAR-OBS-500000001": "ISSUED", "CEDAR-EVENT-500001": "ISSUED",
+                                "CEDAR-EVENT-500002": "PROPOSED"})
+        # The next promotion keeps a byte copy of the register it replaces.
+        before = live.read_bytes()
+        self.promote(second, live_root, execute=True, decision_id="FIXTURE-DECISION-2", approved_by="fixture owner")
+        backups = list(live.parent.glob(live.name + ".bak_*_pre_promotion"))
+        self.assertEqual([b.read_bytes() for b in backups], [before])
+        self.assertEqual(set(BUILD.pilot_bindings_status("gaming", live).values()), {"ISSUED"})
+
+    def bindings(self, target):
+        return BUILD._csv_table((target / "components" / gaming_grove.BINDINGS_TABLE).read_bytes())[1]
+
+    def test_failed_candidate_cannot_be_promoted(self):
+        live_root = self.base / "live"
+        _, bad, _ = self.run_candidate("bad", mode="leak_ccp", bindings=live_root / gaming_grove.LIVE_BINDINGS)
+        with self.assertRaisesRegex(SystemExit, "candidate status is FAILED_LEAK_GATE"):
+            self.promote(bad, live_root)
+
+
 def _real_registration():
     spec = importlib.util.spec_from_file_location("gaming_registration", CODE / "cedar_pipeline.py")
     module = importlib.util.module_from_spec(spec)
@@ -316,15 +453,18 @@ REGION = "gaming_regional_revenue.csv"
 EVENTS_TABLE = "gaming_regulatory_events.csv"
 REGION_CONTRACT = EVENTS[REGION]
 EVENT_CONTRACT = EVENTS[EVENTS_TABLE]
+# cedar_ids declares no Gaming identifier contract yet (Codex's file). These
+# fixture bindings use a fictional keyed namespace so the release MECHANICS can
+# be tested; real Gaming object IDs are exercised by the binding refusals below.
 BINDINGS = (
     cedar_ids.IdentifierContract(
-        "gaming", REGION, "revenue_observation_id", "GREV", "record", "observation",
-        "fixture only: stands in for the pending allowed-ID contract",
-        "fixture: pending CICD identifier-retirement audit", pattern=r"GREV-[0-9A-F]{12}"),
+        "gaming", REGION, "revenue_observation_id", "FIXTURE-REV", "record", "observation",
+        "fixture only: stands in for a declared Gaming identifier contract",
+        "fixture: cedar_ids Gaming binding pending", pattern=r"FIXTURE-REV-[0-9]{4}"),
     cedar_ids.IdentifierContract(
-        "gaming", EVENTS_TABLE, "event_id", "GREG", "record", "observation",
-        "fixture only: stands in for the pending allowed-ID contract",
-        "fixture: pending CICD identifier-retirement audit", pattern=r"GREG-[0-9A-F]{12}"),
+        "gaming", EVENTS_TABLE, "event_id", "FIXTURE-EVT", "record", "observation",
+        "fixture only: stands in for a declared Gaming identifier contract",
+        "fixture: cedar_ids Gaming binding pending", pattern=r"FIXTURE-EVT-[0-9]{4}"),
 )
 FIXTURE_RIGHTS = {"license": "Fixture public record", "publication_class": "publishable",
                   "redistribution": True, "retrieval": True}
@@ -350,20 +490,22 @@ class GamingReleasePilotTest(unittest.TestCase):
         self.canonical = base / "canonical"
         self.canonical.mkdir()
         self.store = base / "store"
+        # The LIVE binding register stand-in (absent = nothing is ISSUED).
+        self.live_bindings = base / "live_gaming_id_bindings.csv"
         self.headers = {REGION: list(REGION_CONTRACT["field_rights"]),
                         EVENTS_TABLE: list(EVENT_CONTRACT["field_rights"])}
         self.rows = {
             REGION: [
-                {"revenue_observation_id": "GREV-0123456789AB", "region_name": "Fictional Region",
+                {"revenue_observation_id": "FIXTURE-REV-0001", "region_name": "Fictional Region",
                  "fiscal_year": "2025", "ggr_nominal_usd": "100", "internal_estimate": "7",
                  "rights_class": "public_official"},
-                {"revenue_observation_id": "GREV-0123456789AC", "region_name": "Second Region",
+                {"revenue_observation_id": "FIXTURE-REV-0002", "region_name": "Second Region",
                  "fiscal_year": "2024", "ggr_nominal_usd": "90", "internal_estimate": "",
                  "rights_class": "public_official"},
             ],
             EVENTS_TABLE: [
-                {"event_id": "GREG-0123456789AB", "gaming_facility_id": PLACE,
-                 "event_date": "2025-01-02", "rights_class": "public_official"},
+                {"event_id": "FIXTURE-EVT-0001", "gaming_facility_id": PLACE,
+                 "event_date": "2025-01-02", "note": "", "rights_class": "public_official"},
             ],
         }
         self.contracts = {REGION: REGION_CONTRACT, EVENTS_TABLE: EVENT_CONTRACT}
@@ -405,7 +547,7 @@ class GamingReleasePilotTest(unittest.TestCase):
 
     def pilot(self, sources, as_of="2026-09-24"):
         args = argparse.Namespace(collection="gaming", source=[str(s) for s in sources],
-                                  output_root=str(self.store), as_of=as_of)
+                                  output_root=str(self.store), as_of=as_of, bindings=str(self.live_bindings))
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             BUILD.cmd_release_pilot(args)
@@ -444,9 +586,17 @@ class GamingReleasePilotTest(unittest.TestCase):
             rows[0].update(changes)
             return rows
         cases = [
-            (events_with(event_id="PROV-GREG-0123456789AB"), None,
-             "gaming_regulatory_events.csv: provisional identifier"),
-            (events_with(gaming_facility_id="CCP-1234"), None, "vendor-lineage identifier in gaming_facility_id"),
+            (events_with(note="PROV-GREG-0123456789AB"), None,
+             "gaming_regulatory_events.csv: provisional identifier \\(PROV-\\) in note"),
+            (events_with(note=gaming_grove.derive_id("GREG", "FR", "x")), None, "unbound identifier key token in note"),
+            (events_with(gaming_facility_id="CCP-1234"), None,
+             "vendor-lineage or source facility key in gaming_facility_id"),
+            (events_with(note="CEDAR-FAC-000013"), None, "vendor-lineage or source facility key in note"),
+            (events_with(gaming_facility_id="CEDAR-PLACE-000001-AB"), None,
+             "facility identifier is not a checked CEDAR-PLACE in gaming_facility_id"),
+            (events_with(note="TRBF-POARCH-00-NIGC-2007-0011-0010"), None, "retired entity handle in note"),
+            (events_with(note="CEDAR-OBS-500000001"), None,
+             "identifier binding ABSENT \\(not ISSUED in the live Gaming ID binding register\\) in note"),
             (events_with(rights_class="secondary_corroboration"), None,
              "row rights class\\(es\\) not public: secondary_corroboration"),
             (events_with(rights_class="internal_vendor"), None, "not public: internal_vendor"),
@@ -492,6 +642,57 @@ class GamingReleasePilotTest(unittest.TestCase):
     def test_release_waits_for_the_identifier_contract(self):
         with self.assertRaisesRegex(SystemExit, "no declared identifier binding"):
             self.pilot(self.write_all())
+        self.assert_nothing_written()
+
+    def write_live_bindings(self, status):
+        rows = [{"object_prefix": "CEDAR-OBS", "key_class": "GREV", "source_key": '["GREV","fixture"]',
+                 "source_key_sha256": gaming_grove.source_key_sha256('["GREV","fixture"]'),
+                 "issued_id": "CEDAR-OBS-500000001", "table": REGION, "column": "revenue_observation_id",
+                 "status": status, "first_seen_as_of": "2026-09-24"}]
+        self.live_bindings.write_bytes(gaming_grove.csv_bytes(gaming_grove.BINDING_HEADER, rows))
+
+    def test_gaming_ids_ship_only_when_issued_in_the_live_register(self):
+        """A candidate's PROPOSED binding cannot ship; an ISSUED one passes the
+        binding check and then waits on the cedar_ids Gaming contract (Codex)."""
+        rows = copy.deepcopy(self.rows[REGION])
+        rows[0]["revenue_observation_id"] = "CEDAR-OBS-500000001"
+        region = self.write(REGION, rows=rows)
+        events = self.write(EVENTS_TABLE)
+        for status, message in ((None, "identifier binding ABSENT"), ("PROPOSED", "identifier binding PROPOSED")):
+            if status:
+                self.write_live_bindings(status)
+            with self.subTest(status=status), self.bind(), self.assertRaisesRegex(
+                    SystemExit, "REFUSED: gaming_regional_revenue.csv: " + message + " .*revenue_observation_id"):
+                self.pilot([region, events])
+        self.write_live_bindings("ISSUED")
+        with self.assertRaisesRegex(SystemExit, "no declared identifier binding"):
+            self.pilot([region, events])
+        self.assert_nothing_written()
+
+    def test_lumecon_registered_reference_fixture_refuses_a_retired_handle(self):
+        """Cross-repository fixture (docs/IDENTIFIER_STANDARD.md 2026-09-24):
+        Lumecon's registered_reference checks pinned membership only, so it
+        ACCEPTS `TRBF-X-00: TRBF-X-00`; Cedar must refuse that mapping before
+        any intake, even when the handle sits in the pinned register."""
+        from lumecon_data.contracts import IdentityBinding
+        handle = "TRBF-POARCH-00"
+        accepted = IdentityBinding.model_validate({
+            "mode": "registered_reference", "source_field": "cedar_uid", "target_field": "cedar_uid",
+            "namespace": "native_entity", "registry_version": "fixture", "approved_by": "fixture",
+            "approved_on": "2026-09-24", "mapping": {handle: handle}})
+        self.assertEqual(accepted.mapping, {handle: handle})        # the boundary Cedar must guard
+        with self.assertRaisesRegex(SystemExit, "registered_reference mapping would bless .*" + handle):
+            BUILD.pilot_registered_reference({CE, handle})
+        retired = BUILD.RetiredHandleMatcher(None, {handle})
+        self.assertEqual(BUILD.pilot_registered_reference({CE}, retired), {CE: CE})
+        header = self.headers[EVENTS_TABLE] + ["cedar_uid"]
+        rows = copy.deepcopy(self.rows[EVENTS_TABLE])
+        rows[0]["cedar_uid"] = handle
+        region = self.write(REGION)
+        events = self.write(EVENTS_TABLE, rows=rows, header=header)
+        with patch.object(cedar_publication, "register", return_value={handle: ("x", "y"), CE: ("x", "y")}), \
+                self.bind(), self.assertRaisesRegex(SystemExit, "REFUSED: .*(non-CE entity identifier|retired entity handle) in cedar_uid"):
+            self.pilot([region, events])
         self.assert_nothing_written()
 
     def test_two_components_one_catalog_exact_bytes_immutability_and_rollback(self):
@@ -587,6 +788,122 @@ class SingleFlagshipUnchangedTest(unittest.TestCase):
                              "gaming/gaming_regulatory_events")
             self.assertEqual(cedar_publication.field_map_entry("gaming", "gaming_regional_revenue")["key"],
                              "gaming/gaming_regional_revenue")
+
+
+# ---------------------------------------------------------------- every canonical table
+def _real_gaming_contracts():
+    """{table: contract} from the registered Gaming producers (no data read)."""
+    out = {}
+    for script in BUILD.CP.GROVE_COMPONENTS["gaming"]:
+        spec = importlib.util.spec_from_file_location("contracts_" + Path(script).stem, CODE / script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        out.update(module.CONTRACTS)
+    return out
+
+
+PLANTED = {
+    "PROV-GREV-0123456789AB": ("provisional identifier (PROV-)", "provisional identifier (PROV-)"),
+    "CCP-45100": ("vendor/source facility key", "vendor-lineage or source facility key"),
+    "VP-0101": ("vendor/source facility key", "vendor-lineage or source facility key"),
+    "TPL-0127": ("vendor/source facility key", "vendor-lineage or source facility key"),
+    "CEDAR-FAC-000013": ("vendor/source facility key", "vendor-lineage or source facility key"),
+    RETIRED + "-NIGC-2007-0001": ("retired entity handle", "retired entity handle"),
+    "CEDAR-OBS-000000001": ("malformed Gaming object identifier", "identifier binding ABSENT"),
+    "CEDAR-EVENT-500001": (None, "identifier binding PROPOSED"),
+}
+
+
+class EveryCanonicalTableRefusesPlantedIdsTest(unittest.TestCase):
+    """For every canonical Gaming table, every public ID surface (declared
+    public ID columns, bound component-ID columns and one public text column)
+    refuses each planted value BY NAME, in both the candidate leak gate and the
+    release refusal. Rows are synthetic; nothing is read from data."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.contracts = _real_gaming_contracts()
+        cls.retired = BUILD.RetiredHandleMatcher(None, {RETIRED})
+        cls.status = {"CEDAR-EVENT-500001": "PROPOSED"}
+
+    def surfaces(self, contract):
+        rights = contract["field_rights"]
+        public = [c for c in rights if rights[c] in gaming_grove.PUBLIC_RIGHTS and c != "rights_class"]
+        ids = [c for c in list(contract.get("public_id_columns", [])) + list(contract.get("derived_ids", {}))
+               if c in public]
+        text = [c for c in public if c not in ids and not c.endswith("cedar_uid")][:1]
+        return sorted(set(ids + text))
+
+    def test_the_matrix_covers_every_registered_table(self):
+        self.assertEqual(len(self.contracts), 25)
+        self.assertTrue(all(self.surfaces(c) for t, c in self.contracts.items()
+                            if any(v in gaming_grove.PUBLIC_RIGHTS for v in c["field_rights"].values())))
+
+    def test_planted_values_are_refused_by_name_on_every_public_surface(self):
+        for table, contract in sorted(self.contracts.items()):
+            header = list(contract["field_rights"])
+            for column in self.surfaces(contract):
+                for value, (gate_finding, release_refusal) in PLANTED.items():
+                    row = {c: "" for c in header}
+                    row["rights_class"] = "public_official"
+                    row[column] = value
+                    keep, public = gaming_grove.public_projection(table, header, [row], contract["field_rights"])
+                    with self.subTest(table=table, column=column, value=value):
+                        self.assertIn(column, keep)
+                        found = gaming_grove.leak_findings(table, keep, public, retired_pattern=self.retired)
+                        if gate_finding:
+                            self.assertIn((gate_finding, column), found)
+                        refused = BUILD.pilot_identifier_refusals(public, retired_pattern=self.retired,
+                                                                  bindings_status=self.status)
+                        self.assertTrue(any(r.startswith(release_refusal) and r.endswith(" in " + column)
+                                            for r in refused), refused)
+
+    def test_non_ce_uid_and_unchecked_place_are_named(self):
+        header = ["cedar_uid", "gaming_facility_id", "enterprise_id"]
+        row = {"cedar_uid": "TRBF-0001", "gaming_facility_id": "CEDAR-PLACE-000001-AB",
+               "enterprise_id": "CEDAR-NEST-000001-AB"}
+        found = gaming_grove.leak_findings("x", header, [row])
+        self.assertIn(("non-CE entity identifier", "cedar_uid"), found)
+        self.assertIn(("unchecked facility identifier", "gaming_facility_id"), found)
+        self.assertIn(("non-NEED enterprise identifier", "enterprise_id"), found)
+        found = gaming_grove.leak_findings("x", ["note"], [{"note": gaming_grove.derive_id("GREV", "k")}])
+        self.assertIn(("unbound key token", "note"), found)
+
+
+class GamingBlocksTest(unittest.TestCase):
+    """The Gaming static blocks are declared through the ID service, so the
+    shared allocator steps over them and a colliding declaration is refused."""
+
+    def test_allocate_steps_over_every_gaming_block(self):
+        import cedar_ids as ids
+        with tempfile.TemporaryDirectory() as temp, \
+                patch.object(ids, "REGISTRY", Path(temp) / "_id_registry.json"), \
+                patch.object(ids, "LOCK", Path(temp) / "_id_registry.lock"):
+            for prefix, (lo, hi) in gaming_grove.GAMING_BLOCKS.items():
+                (Path(temp) / "_id_registry.json").write_text(
+                    json.dumps({"counters": {prefix: lo - 2}, "types": {}}), encoding="utf-8")
+                got = ids.allocate(prefix, 2)
+                self.assertEqual(got, [ids.format_id(prefix, lo - 1), ids.format_id(prefix, hi + 1)], prefix)
+                self.assertIsNone(gaming_grove.issued_ordinal(got[1]))
+
+    def test_overlapping_declaration_by_another_owner_is_refused(self):
+        import cedar_ids as ids
+        lo, hi = gaming_grove.GAMING_BLOCKS["CEDAR-REL"]
+        with self.assertRaises(ids.IdCollision):
+            ids.declare_static_block("CEDAR-REL", hi, hi + 10, "someone else", "fixture")
+        ids.declare_static_block("CEDAR-REL", lo, hi, gaming_grove.BLOCK_OWNER, gaming_grove.BLOCK_WHY)  # idempotent
+
+    def test_new_keys_take_block_ordinals_in_sorted_hash_order(self):
+        tokens = {gaming_grove.derive_id("GPAY", "src", str(i)): {"table": "t.csv", "column": "id"}
+                  for i in range(5)}
+        mapping, rows, _ = gaming_grove.assign_bindings(tokens, [], "2026-09-24")
+        by_hash = sorted(rows, key=lambda r: r["source_key_sha256"])
+        self.assertEqual([r["issued_id"] for r in by_hash],
+                         [f"CEDAR-EVENT-{500001 + i}" for i in range(5)])
+        again, rows2, summary = gaming_grove.assign_bindings(tokens, rows, "2026-09-25")
+        self.assertEqual(again, mapping)
+        self.assertEqual(rows2, rows)
+        self.assertEqual(summary["CEDAR-EVENT"], {"register_rows": 5, "reused_PROPOSED": 5})
 
 
 # ---------------------------------------------------------------- server adapter

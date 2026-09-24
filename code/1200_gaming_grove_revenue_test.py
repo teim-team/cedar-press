@@ -22,7 +22,6 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
 import gaming_grove as gg  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location("rev1200", HERE / "1200_gaming_grove_revenue.py")
@@ -334,17 +333,32 @@ class ObservationTests(unittest.TestCase):
 
 
 class IdentifierTests(unittest.TestCase):
-    def test_ids_paused_without_provisional_flag(self):
-        os.environ.pop("CEDAR_GAMING_PROVISIONAL_IDS")
-        try:
-            with self.assertRaises(gg.IdContractPending):
-                gg.derive_id("GPAY", "x", "y")
-        finally:
-            os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
+    def test_component_ids_are_source_key_tokens_never_public_ids(self):
+        tok = gg.derive_id("GPAY", "x", "y")
+        self.assertTrue(gg.TOKEN_RE.fullmatch(tok))
+        self.assertEqual(gg.decode_token(tok), ("GPAY", '["GPAY","x","y"]'))
+        self.assertFalse(tok.startswith("PROV-"))
+        self.assertTrue(gg.is_derived_id(tok, "GPAY"))
+        self.assertFalse(gg.is_derived_id(tok, "GREV"))
+        self.assertTrue(gg.is_derived_id("CEDAR-EVENT-500001", "GPAY"))
+        self.assertFalse(gg.is_derived_id("CEDAR-EVENT-000001", "GPAY"))      # outside the Gaming block
+        self.assertFalse(gg.is_derived_id("PROV-GPAY-0123456789AB", "GPAY"))
+
+    def test_money_is_exact_decimal_never_float(self):
+        self.assertEqual(M._money("9007199254740993"), "9007199254740993")   # 2**53 + 1: float loses it
+        self.assertEqual(M._money("1234.5"), "1234.50")
+        self.assertEqual(M._money("12.345"), "12.345")                       # sub-cent kept, not rounded
+        self.assertEqual(M._money("0.1", 10 ** 6), "100000")
+        self.assertEqual(M._money("1.23456789", 10 ** 6), "1234567.89")
+        self.assertEqual(M._money("-0.50"), "-0.50")
+        self.assertEqual(M._money(""), "")
+        for bad in ("nan", "inf", "1,000", "abc"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                M._money(bad)
 
     def test_vendor_facility_id_never_rendered(self):
         self.assertEqual(M._place("CCP-45100"), "")
-        self.assertTrue(M._place("CEDAR-PLACE-000140-WC").endswith("CEDAR-PLACE-000140-WC"))
+        self.assertEqual(M._place("CEDAR-PLACE-000140-WC"), "CEDAR-PLACE-000140-WC")   # unwrapped, no PROV-
 
     def test_every_column_has_rights_and_description(self):
         for t, c in M.CONTRACTS.items():

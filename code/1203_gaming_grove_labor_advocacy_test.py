@@ -23,7 +23,6 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
 import gaming_grove as gg  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location("lane_f", HERE / "1203_gaming_grove_labor_advocacy.py")
@@ -36,7 +35,7 @@ MORONGO = "CE-00178-Q1"
 PLACE_FOX = "CEDAR-PLACE-000674-N2"
 PLACE_SOAR = "CEDAR-PLACE-000192-Y0"
 PLACE_NOTGAMING = "CEDAR-PLACE-000139-PK"
-PLACE_MERGED_LEGACY = "CEDAR-PLACE-000140-AA"
+PLACE_MERGED_LEGACY = "CEDAR-PLACE-000140-WC"
 PLACE_SURVIVOR = "CEDAR-PLACE-000529-P9"
 
 
@@ -355,13 +354,18 @@ class LaneF(unittest.TestCase):
             b = hashlib.sha256((out2 / t).read_bytes()).hexdigest()
             self.assertEqual(a, b, t)
 
-    def test_ids_refused_without_provisional_flag(self):
-        os.environ.pop("CEDAR_GAMING_PROVISIONAL_IDS")
-        try:
-            with self.assertRaises(gg.IdContractPending):
-                M.labor_row(source_system="dol_form5500", source_record_id="x", measure="m")
-        finally:
-            os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
+    def test_ids_are_source_key_tokens_for_registered_prefixes(self):
+        row = M.labor_row(source_system="dol_form5500", source_record_id="x", measure="m")
+        klass, _ = gg.decode_token(row["labor_observation_id"])
+        self.assertEqual(gg.KEY_CLASSES[klass][0], "CEDAR-OBS")
+        for r in self.links:
+            self.assertEqual(gg.KEY_CLASSES[gg.decode_token(r["advocacy_link_id"])[0]][0], "CEDAR-REL")
+            self.assertNotIn("PROV-", "".join(r.values()))
+
+    def test_advocacy_source_event_key_is_internal(self):
+        """Advocacy keys can embed a retired handle (TRBF-...-NIGC-...): the
+        link keeps it as an internal join key, never a public field."""
+        self.assertEqual(M.ADV_CONTRACT["field_rights"]["source_event_id"], "internal_crosswalk")
 
     # --- 1201 is the facility authority
     def test_facilities_resolved_only_through_1201_crosswalk(self):

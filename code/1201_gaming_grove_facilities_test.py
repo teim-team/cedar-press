@@ -55,8 +55,9 @@ COLUMNS = sorted(set(re.findall(r'\[["\']([a-z][a-z0-9_]+)["\']\]', PRODUCER.rea
 
 # valid canonical CE uids (check characters verified by 503_identity)
 MIAMI, MODOC, ABS_SHAWNEE, OTOE = "CE-0016Y-PQ", "CE-00175-5P", "CE-00124-6D", "CE-00181-J2"
-P1, P2, P3, P4, P5, P6 = ("CEDAR-PLACE-000001-6S", "CEDAR-PLACE-000002-CJ", "CEDAR-PLACE-000003-AA",
-                          "CEDAR-PLACE-000004-BB", "CEDAR-PLACE-000005-CC", "CEDAR-PLACE-000006-DD")
+# Real ordinals with their 503 check characters (facility IDs are checked).
+P1, P2, P3, P4, P5, P6 = ("CEDAR-PLACE-000001-6S", "CEDAR-PLACE-000002-CJ", "CEDAR-PLACE-000003-JB",
+                          "CEDAR-PLACE-000004-R4", "CEDAR-PLACE-000005-YX", "CEDAR-PLACE-000006-4P")
 SELF_SITE = "https://skycasino.example/"
 VENDOR_NAME = "Vendorland Casino Deluxe"
 VENDOR_ADDR = "999 Vendor Only Road"
@@ -154,6 +155,16 @@ def fixture_tables():
              "county": "Pottawatomie County", "county_fips": "40125", "retrieved_at": "2026-08-12"}],
         "data/clean/ca_gaming_facilities_official.csv": [],
         "data/clean/gaming_capacity_official.csv": [
+            # a tribe-level compact authorization the clean table hung on the
+            # 'no casino' VP key: re-keyed to the tribe, never a facility row
+            {"observation_id": "GCO-CP-00099", "facility_id": "VP-0009", "cedar_uid": ABS_SHAWNEE,
+             "facility_match_method": "sole_property_of_tribe_in_state",
+             "metric": "gaming_facilities_authorized_max", "metric_class": "authorization",
+             "measurement_status": "authorized", "measurement_type": "AUTHORIZED_MAXIMUM",
+             "value": "2", "unit": "facilities", "as_of_date": "2003-01-01", "as_of_date_precision": "day",
+             "source_authority": "Fixture compact", "source_document_type": "compact",
+             "source_url": "https://compact.example.gov/c.pdf", "source_quote": "two facilities",
+             "fetched_date": "2026-08-07"},
             {"observation_id": "GCO-1", "facility_id": "CCP-200", "facility_match_method": "exact_name_in_state",
              "metric": "gaming_machines", "metric_class": "capacity_measurement",
              "measurement_status": "reported_measurement", "measurement_type": "REGULATORY_REPORTED_COUNT",
@@ -233,13 +244,33 @@ def write_fixture(root: Path, tables: dict):
                 w.writerow({c: r.get(c, "") for c in COLUMNS})
 
 
+VP_DISP_HEADER = ["vp_key", "decision", "cedar_place_id", "evidence_summary", "sources", "evidence_date",
+                  "confidence", "reviewer", "reviewed_on"]
+
+
+def write_vp_dispositions(path: Path, rows):
+    """A fixture stand-in for docs/GAMING_VP_DISPOSITIONS_2026-09-24.csv."""
+    with path.open("w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=VP_DISP_HEADER, lineterminator="\n")
+        w.writeheader()
+        for r in rows:
+            w.writerow({c: r.get(c, "") for c in VP_DISP_HEADER})
+    # An absolute path wins over the repository root in Inputs.repository.
+    M.VP_DISPOSITIONS = str(path)
+
+
+VP0009_REVIEW = {"vp_key": "VP-0009", "decision": "NOT_A_GAMING_FACILITY",
+                 "evidence_summary": "fixture: tribe-level 'no casino' assertion; contradicted by a listed casino",
+                 "confidence": "high", "reviewer": "fixture", "reviewed_on": "2026-09-24"}
+
+
 class _Base(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
         cls.tmp = tempfile.TemporaryDirectory()
         cls.root = Path(cls.tmp.name) / "in"
         write_fixture(cls.root, fixture_tables())
+        write_vp_dispositions(Path(cls.tmp.name) / "vp.csv", [VP0009_REVIEW])
         cls.out = Path(cls.tmp.name) / "out"
         cls.receipt = M.build(gg.Inputs(cls.root), cls.out)
         cls.t = {}
@@ -357,7 +388,7 @@ class NoMintForPlacelessRows(_Base):
             for r in self.t[name]:
                 g = r.get("gaming_facility_id", "")
                 if g:
-                    self.assertIn(g.replace("PROV-GFAC:", ""), fixture_places)
+                    self.assertIn(g, fixture_places)          # the place ID itself, never wrapped
         # the held-open record's own place is kept in the crosswalk, not given a facility row
         self.assertNotIn(gg.facility_id_for(P4), {r["gaming_facility_id"] for r in self.t["gaming_grove_facilities.csv"]})
         x = next(r for r in self.t["gaming_facility_crosswalk.csv"] if r["legacy_facility_id"] == "VP-0153")
@@ -496,17 +527,41 @@ class Determinism(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "in"
             write_fixture(root, fixture_tables())
-            os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
+            write_vp_dispositions(Path(tmp) / "vp.csv", [VP0009_REVIEW])
             r1 = M.build(gg.Inputs(root), Path(tmp) / "a")
             r2 = M.build(gg.Inputs(root), Path(tmp) / "b")
             self.assertEqual([t["sha256"] for t in r1["tables"]], [t["sha256"] for t in r2["tables"]])
-            del os.environ["CEDAR_GAMING_PROVISIONAL_IDS"]
-            try:
-                if gg.ID_CONTRACT_STATUS != "APPROVED":
-                    with self.assertRaises(gg.IdContractPending):
-                        M.build(gg.Inputs(root), Path(tmp) / "c")
-            finally:
-                os.environ["CEDAR_GAMING_PROVISIONAL_IDS"] = "1"
+            # component IDs are key tokens until the runner binds them; no PROV- anywhere
+            for t in r1["tables"]:
+                text = (Path(tmp) / "a" / t["table"]).read_text(encoding="utf-8")
+                self.assertNotIn("PROV-", text)
+
+
+class ReviewedNotAFacility(_Base):
+    def test_reviewed_vp_key_is_held_and_tribe_level_row_rekeyed(self):
+        xw = self.t["gaming_facility_crosswalk.csv"]
+        own = next(r for r in xw if r["legacy_facility_id"] == "VP-0009" and r["key_scheme"] == "legacy_facility_id")
+        self.assertEqual(own["disposition"], "not_a_gaming_facility")
+        self.assertIn("REVIEWED 2026-09-24", own["disposition_basis"])
+        cap = next(r for r in xw if r["key_value"] == "GCO-CP-00099")
+        self.assertEqual((cap["key_scheme"], cap["rekeyed_cedar_uid"], cap["gaming_facility_id"]),
+                         ("capacity_official_observation_id", ABS_SHAWNEE, ""))
+        self.assertFalse(any(r["source_record_id"] == "GCO-CP-00099" for r in self.t["gaming_facility_capacity.csv"]))
+
+    def test_no_casino_claim_never_public(self):
+        for name, c in M.CONTRACTS.items():
+            for r in self.public_rows(name):
+                self.assertFalse(any("no casino" in (v or "").lower() for v in r.values()), (name, r))
+
+
+class VpDispositions(unittest.TestCase):
+    def test_review_must_name_known_placeless_rows(self):
+        byfid = {"VP-0009": {"cedar_place_id": ""}, "VP-0002": {"cedar_place_id": P2}}
+        self.assertEqual(set(M.check_vp_dispositions([VP0009_REVIEW], byfid)), {"VP-0009"})
+        for bad in (dict(VP0009_REVIEW, vp_key="VP-9999"), dict(VP0009_REVIEW, vp_key="VP-0002"),
+                    dict(VP0009_REVIEW, decision="BIND_TO_PLACE"), dict(VP0009_REVIEW, cedar_place_id=P1)):
+            with self.subTest(bad=bad), self.assertRaises(gg.GamingContractError):
+                M.check_vp_dispositions([bad], byfid)
 
 
 if __name__ == "__main__":

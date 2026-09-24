@@ -298,7 +298,7 @@ class Package:
 
 # ------------------------------------------------------------------ contracts
 UNIT_SPEC = [
-    ("sportsbook_unit_id", "public_derived", "Derived GSBK id from (package, state, source series_id)"),
+    ("sportsbook_unit_id", "public_derived", "Registered source-series ID (CEDAR-SRC, Gaming block) bound to the stable key (package, state, source series_id)"),
     ("source_package", "public_official", "Delivered package label (online_sports_2026-09-24)"),
     ("source_series_id", "public_official", "Package series_id, preserved (a local series key, not an entity id)"),
     ("jurisdiction", "public_official", "State whose regulator (or secondary publisher) reports the unit"),
@@ -307,8 +307,8 @@ UNIT_SPEC = [
     ("reporting_entity_as_reported", "public_official", "Licensee / operator / report-group label as the source prints it"),
     ("platform_labels_as_reported", "public_official", "Distinct platform/brand labels printed for the unit (pipe-separated); may be stale, not dated partnership history"),
     ("property_named_in_source", "public_official", "Casino property the source names for the unit, if any (text; not an identity claim)"),
-    ("gaming_facility_id", "public_derived", "Facility id only via 1201's CEDAR-PLACE crosswalk when a source names a property; blank = unresolved"),
-    ("facility_link_status", "public_official", "no_property_named or property_named_unresolved (no crosswalk available to producer 1200)"),
+    ("gaming_facility_id", "public_derived", "Existing CEDAR-PLACE ID of the property the source names, only when 1201's facility tables resolve it unambiguously (see resolve_unit_facilities); blank = unresolved"),
+    ("facility_link_status", "public_official", "no_property_named, property_named_unresolved (named property not resolved unambiguously) or property_named_resolved"),
     ("evidence_tier", "public_official", "Package evidence tier (primary_regulator / secondary_compilation)"),
     ("source_class", "public_official", "regulator_official, official_annual or secondary_corroboration"),
     ("period_type", "public_official", "monthly or annual; a unit reports one grain"),
@@ -323,7 +323,7 @@ UNIT_SPEC = [
     ("shared_report", "public_official", "yes when one published total covers several Native entities (never allocated)"),
     ("linked_entity_count", "public_derived", "Number of distinct cedar_uid linked by relationships (context, never a divisor)"),
     ("allocation_status", "public_official", "single_entity only when one entity holds/reports the whole unit; otherwise not_allocated"),
-    ("nonadditive_with_unit_ids", "public_derived", "Units whose same-period values overlap this unit's (pipe-separated GSBK ids); never add them"),
+    ("nonadditive_with_unit_ids", "public_derived", "Units whose same-period values overlap this unit's (pipe-separated sportsbook_unit_id values); never add them"),
     ("nonadditive_reason", "public_official", "Why the overlap exists"),
     ("source_url", "public_official", "Series source URL (package series_coverage)"),
     ("source_notes", "public_official", "Package series note, verbatim"),
@@ -338,7 +338,7 @@ UNIT_CONTRACT = _contract(
     enums={"reported_unit_type": UNIT_TYPES, "source_class": SOURCE_CLASSES, "period_type": PERIOD_TYPES,
            "handle_available": {"yes", "no"}, "shared_report": {"yes", "no"},
            "allocation_status": gg.ALLOCATION_STATUSES,
-           "facility_link_status": {"no_property_named", "property_named_unresolved"},
+           "facility_link_status": {"no_property_named", "property_named_unresolved", "property_named_resolved"},
            "publication_status": gg.PUBLICATION_STATUSES},
     dates=["first_period", "last_period"],
     intervals=[("first_period", "last_period")],
@@ -353,8 +353,8 @@ UNIT_CONTRACT = _contract(
 )
 
 FOB_SPEC = [
-    ("financial_observation_id", "public_derived", "Derived GFOB id from (package, source record_id, revision_label)"),
-    ("sportsbook_unit_id", "public_derived", "GSBK id of the reported unit (join to units; entities only via relationships)"),
+    ("financial_observation_id", "public_derived", "Registered observation ID (CEDAR-OBS, Gaming block) bound to the stable key (package, source record_id, revision_label)"),
+    ("sportsbook_unit_id", "public_derived", "sportsbook_unit_id (CEDAR-SRC) of the reported unit (join to units; entities only via relationships)"),
     ("source_package", "public_official", "Delivered package label"),
     ("source_record_id", "public_official", "Package record_id, preserved"),
     ("source_series_id", "public_official", "Package series_id, preserved"),
@@ -389,7 +389,7 @@ FOB_SPEC = [
     ("qa_status", "public_official", "Package extraction/reconciliation disposition"),
     ("source_notes", "public_official", "Package row note, verbatim"),
     ("additivity", "public_official", "additive_across_months_within_unit_and_measure (monthly) or annual_only_never_mixed_with_monthly"),
-    ("nonadditive_with_observation_ids", "public_derived", "GFOB ids of overlapping same-period observations (NJ license aggregate vs brand); never add both"),
+    ("nonadditive_with_observation_ids", "public_derived", "financial_observation_id values of overlapping same-period observations (NJ license aggregate vs brand); never add both"),
     ("nonadditive_reason", "public_official", "Why the overlap exists"),
     ("existing_overlap_source_record_ids", "public_derived", "digital_gaming_revenue revenue_ids (source_record_id in gaming_reported_revenue_observations / gaming_government_payments) describing the same state, month and licensee; never add both"),
     ("existing_overlap_value_check", "public_derived", "none, all_compared_values_equal, or differs:<metrics> between this row and the overlapping digital rows"),
@@ -436,8 +436,8 @@ FOB_CONTRACT = _contract(
 )
 
 REL_SPEC = [
-    ("relationship_id", "public_derived", "Derived GREL id from (package, series_id, cedar_uid, package relationship type, valid_from)"),
-    ("sportsbook_unit_id", "public_derived", "GSBK id of the reported unit"),
+    ("relationship_id", "public_derived", "Registered relationship ID (CEDAR-REL, Gaming block) bound to the stable key (package, series_id, cedar_uid, package relationship type, valid_from)"),
+    ("sportsbook_unit_id", "public_derived", "sportsbook_unit_id (CEDAR-SRC) of the reported unit"),
     ("source_series_id", "public_official", "Package series_id"),
     ("jurisdiction", "public_official", "State"),
     ("cedar_uid", "public_derived", "Native entity (checksum-valid CE id present and active in the current identity register)"),
@@ -485,7 +485,7 @@ REL_CONTRACT = _contract(
 )
 
 GAP_SPEC = [
-    ("coverage_gap_id", "public_derived", "Derived GGAP id from (gap source, component, state, cedar_uid, subject)"),
+    ("coverage_gap_id", "public_derived", "Natural composite key (no minted ID): gap_source|component_table|state|cedar_uid|subject|source_status"),
     ("gap_source", "public_official", "online_sports_package, online_sports_package_series_coverage, online_sports_package_validation, or nigc_regional_revenue"),
     ("component_table", "public_official", "Gaming component table the gap belongs to"),
     ("state", "public_official", "State (MULTI = national/multi-state; blank = national NIGC)"),
@@ -516,7 +516,6 @@ GAP_CONTRACT = _contract(
            "publication_status": gg.PUBLICATION_STATUSES},
     dates=["known_start", "known_end", "missing_from", "missing_through"],
     intervals=[("missing_from", "missing_through")],
-    derived_ids={"coverage_gap_id": "GGAP"},
     nonadditive_note="A gap is an absence, never a zero; unlisted tribes and missing periods are not zero activity.",
     publication_status="internal",
     supersedes=[],
@@ -640,7 +639,74 @@ def _property_named(series_id, entity):
     return ""
 
 
-def build_component(inputs: gg.Inputs, package_root, digital_rows, extra_gaps=(), expected=None):
+_GENERIC_NAME_WORDS = {"casino", "hotel", "resort", "and", "the", "spa", "at", "llc", "inc"}
+FACILITY_TABLES = ("gaming_grove_facilities.csv", "gaming_facility_names.csv", "gaming_facility_relationships.csv")
+
+
+def _core_name(text):
+    words = re.findall(r"[a-z0-9]+", (text or "").lower())
+    return " ".join(w for w in words if w not in _GENERIC_NAME_WORDS)
+
+
+def load_facility_index(inputs: gg.Inputs, out_dir):
+    """1201's facility authority, written earlier in the same components run:
+    {(state, core name): {gaming_facility_id}} and {gaming_facility_id:
+    {cedar_uid}}. None when 1201 has not run (standalone): no link is made
+    rather than a private name match 1201 never saw. Receipted relative to the
+    candidate root, like 1203's crosswalk read."""
+    out_dir = Path(out_dir)
+    data = {}
+    for table in FACILITY_TABLES:
+        p = out_dir / table
+        label = "components/" + table
+        if not p.is_file():
+            inputs.receipts[label] = {"path": label, "scope": "candidate_component", "status": "ABSENT"}
+            return None
+        raw = p.read_bytes()
+        rows = list(csv.DictReader(io.StringIO(raw.decode("utf-8-sig"), newline="")))
+        inputs.receipts[label] = {"path": label, "scope": "candidate_component", "status": "READ",
+                                  "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "rows": len(rows)}
+        data[table] = rows
+    state = {r["gaming_facility_id"]: r["state"] for r in data["gaming_grove_facilities.csv"]
+             if r["record_status"] == "property"}
+    by_name = defaultdict(set)
+    for r in data["gaming_facility_names.csv"]:
+        fid = r["gaming_facility_id"]
+        if fid in state and state[fid]:
+            by_name[(state[fid], _core_name(r["name"]))].add(fid)
+    uids = defaultdict(set)
+    for r in data["gaming_facility_relationships.csv"]:
+        if r["cedar_uid"]:
+            uids[r["gaming_facility_id"]].add(r["cedar_uid"])
+    return {"by_name": by_name, "uids": uids}
+
+
+def resolve_unit_facilities(units, rels, index, withheld):
+    """Link a unit to the existing CEDAR-PLACE of the property its source names,
+    ONLY when unambiguous: exactly one 1201 facility in the unit's
+    jurisdiction has a name whose core words equal the named property's, and
+    (when the unit has linked Native entities) that facility is related to
+    one of them. Everything else stays unresolved; nothing is guessed."""
+    linked = defaultdict(set)
+    for r in rels:
+        linked[r["sportsbook_unit_id"]].add(r["cedar_uid"])
+    for u in units:
+        prop = u["property_named_in_source"]
+        if not prop:
+            continue
+        hits = set(index["by_name"].get((u["jurisdiction"], _core_name(prop)), ())) if index else set()
+        if hits and linked[u["sportsbook_unit_id"]]:
+            hits = {f for f in hits if index["uids"].get(f, set()) & linked[u["sportsbook_unit_id"]]}
+        if len(hits) == 1:
+            u["gaming_facility_id"] = gg.facility_id_for(hits.pop())
+            u["facility_link_status"] = "property_named_resolved"
+            withheld["unit_property_named_facility_resolved"] += 1
+        else:
+            withheld["unit_property_named_facility_unresolved"] += 1
+
+
+def build_component(inputs: gg.Inputs, package_root, digital_rows, extra_gaps=(), expected=None,
+                    facility_index=None):
     """Return {table: rows} plus coverage/withheld/notes and digital overlap map."""
     pkg = Package(package_root, inputs)
     notes, withheld = [], Counter()
@@ -814,8 +880,7 @@ def build_component(inputs: gg.Inputs, package_root, digital_rows, extra_gaps=()
             "source_url": url, "source_notes": sc["notes"],
             "rights_class": rc, "publication_status": _pub(rc),
         })
-        if prop:
-            withheld["unit_property_named_facility_unresolved"] += 1
+    resolve_unit_facilities(units, rels, facility_index, withheld)
     check_relationships(rels, units)
 
     # ---- financial observations
@@ -1054,11 +1119,15 @@ def cross_reference_digital(fobs, rels, digital_rows):
     return {"summary": summary, "by_revenue_id": by_revenue_id}
 
 
+GAP_KEY_COLUMNS = ("gap_source", "component_table", "state", "cedar_uid", "subject", "source_status")
+
+
 def gap_row(**kw):
     row = {c: "" for c in GAP_CONTRACT["header"]}
     row.update(kw)
-    row["coverage_gap_id"] = gg.derive_id("GGAP", row["gap_source"], row["component_table"], row["state"],
-                                          row["cedar_uid"], row["subject"], row["source_status"])
+    # A coverage gap is an absence, not an object: its key is the natural
+    # composite of what is missing (ratified contract: no minted ID).
+    row["coverage_gap_id"] = "|".join(row[c].strip() for c in GAP_KEY_COLUMNS)
     if row["cedar_uid"]:
         gg.checked_cedar_uid(row["cedar_uid"])
     row["rights_class"] = row["rights_class"] or "public_derived"

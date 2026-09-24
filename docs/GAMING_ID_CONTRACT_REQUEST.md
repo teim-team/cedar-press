@@ -1,11 +1,17 @@
 # Request to Codex: CICD identifier-retirement audit (blocks Gaming ID creation)
 
-Status: **OPEN — sent 2026-09-24 by the owner. Gaming ID creation is paused.**
-Architecture questions go to Havala, not Elijah. Codex returns the allowed-ID
-contract below to the Gaming branch (`claude/gaming-intelligence`) before any
-Gaming identifier is issued. Until then `code/gaming_grove.py` renders only
-non-promotable `PROV-` identifiers (`ID_CONTRACT_STATUS =
-"PENDING_CICD_RETIREMENT_AUDIT"`), and the release path refuses them.
+Status: **ANSWERED 2026-09-24.** Codex ratified the allowed-ID contract in
+`docs/IDENTIFIER_STANDARD.md`, section "CICD retirement contract and Gaming
+handoff (2026-09-24)". The Gaming candidate identity layer has been migrated
+to it (`ID_CONTRACT_STATUS = "RATIFIED_CANDIDATE_BINDINGS"`). The design,
+blocks and binding register are in
+`docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md` section 4, and the controlled
+promotion process is in section 10. **No Gaming ID is issued.** Every
+candidate binding is `PROPOSED`, and the release path refuses anything not
+`ISSUED` in the live register. Codex's stop condition still holds: no live
+issuance and no release until the shared-ID binding migration, the negative
+tests, the Lumecon fixture and an independent release scan all pass with zero
+retired values. The request text below is kept as the historical record.
 
 ## Owner's instruction (verbatim)
 

@@ -20,9 +20,11 @@ status, open date, capacity - is Casino City lineage, which is internal QA
 only (docs/GAMING_SPEC_RECONCILIATION.md: "Casino City may be read for QA and
 may never be published or resold"). So this producer:
 
-  * keys the facility on the place, never on the vendor number
-    (`gaming_grove.facility_id_for` is the only renderer; the ID contract is
-    on OWNER HOLD, so every ID written here is a non-promotable PROV- value);
+  * keys the facility on the place, never on the vendor number: the public
+    `gaming_facility_id` IS the existing CEDAR-PLACE value
+    (`gaming_grove.facility_id_for`, ratified ID contract 2026-09-24); every
+    other component ID is a source-key token the candidate runner binds to a
+    registered CEDAR-OBS / CEDAR-EVENT / CEDAR-REL ID;
   * rebuilds every public field from INDEPENDENT evidence only - the NIGC
     gaming location map, the California Gambling Control Commission lists,
     state regulators' facility-level reports, SEC filings, the operator's own
@@ -69,9 +71,20 @@ RULINGS THIS PRODUCER APPLIES (and where they come from)
     claiming `management_contractor`; SEC filings remain the independent
     management_contractor evidence. No ownership percentage is stated
     anywhere authoritative, so none is written.
-  * NEED/NEST enterprise links are under an affiliation HOLD and no source
-    here links a NEST enterprise to a facility except by name, so none is
-    emitted (count reported).
+  * Cedar NEED enterprise links are under an affiliation HOLD and no source
+    here links an existing NEED enterprise to a facility except by name, so
+    none is emitted (count reported). An external operator/management company
+    is carried as reported text with `business_uid` blank and
+    `business_binding_status = held_business_unbound`: a CB business ID comes
+    only from the gated Cedar Business Register, and none is bound yet.
+  * The 16 votingpatterns "no casino" VP- rows are reviewed
+    NOT_A_GAMING_FACILITY (docs/GAMING_VP_DISPOSITIONS_2026-09-24.csv, read as
+    a receipted repository input). They get no facility and no place; the
+    tribe-level compact authorizations and CGCC "N/A" rows that the clean
+    tables hung on those keys are re-keyed in the internal crosswalk to the
+    tribe's cedar_uid with no facility. VP-0101's "no casino" claim for the
+    Yurok Tribe is contradicted by the NIGC and CGCC listings of Redwood Hotel
+    Casino (CEDAR-PLACE-000109-XN) and is never written to a public field.
   * Held-open place groups (docs/.../place_gaming_hold_open_disposition):
     The Stables (Miami/Modoc joint operation) and 7 Clans First Council
     (Ponca vs Otoe-Missouria) stay `unresolved` on the questioned record;
@@ -164,7 +177,7 @@ def _contract(grain, pk, spec, *, required=(), enums=None, dates=(), intervals=(
     }
 
 
-VENDOR_TEXT_RE = re.compile(r"\b(?:CCP|VP|TPL)-\d+\b")
+VENDOR_TEXT_RE = re.compile(r"\b(?:CCP|VP|TPL|CEDAR-FAC)-\d+\b")
 
 
 def scrub(text: str) -> str:
@@ -300,7 +313,7 @@ def facility_type_from(name: str, schema_type: str = "") -> tuple[str, str]:
 # (column, field rights class, description). Every column is classified; the
 # per-row `*_rights` columns say whether THIS row's value is public.
 FAC_SPEC = [
-    ("gaming_facility_id", "public_derived", "Gaming facility ID rendered by gaming_grove.facility_id_for from the place ID (PROV- until the ID contract is approved)"),
+    ("gaming_facility_id", "public_derived", "Gaming facility ID: the existing checked CEDAR-PLACE ID of the property (1129), via gaming_grove.facility_id_for"),
     ("record_status", "public_derived", "property | held_open_pending_owner_ruling | disputed_distinctness | cross_reference_stub"),
     ("publication_status", "public_derived", "public (name+location+status all evidenced by official or first-party (own-site) sources; see *_rights) | source_limited (some) | withheld (none) | unresolved (identity not settled)"),
     ("public_name", "public_official", "Facility name as published by the highest-priority publishable source (regulator first; operator site is public_first_party); blank when none"),
@@ -345,7 +358,7 @@ FAC_SPEC = [
     ("n_public_capacity_rows", "public_derived", "Public rows in gaming_facility_capacity"),
     ("n_relationship_rows", "public_derived", "Rows in gaming_facility_relationships (all rights)"),
     ("n_public_relationship_rows", "public_derived", "Public rows in gaming_facility_relationships"),
-    ("cedar_place_id", "internal_crosswalk", "Underlying CEDAR-PLACE id (1129); internal while the ID contract is on hold"),
+    ("cedar_place_id", "internal_crosswalk", "Underlying CEDAR-PLACE id (1129); equals gaming_facility_id, kept for the internal crosswalk join"),
     ("dedup_basis", "internal_crosswalk", "How the legacy records sharing this place were adjudicated (alias vs co-located vs held open)"),
     ("qa_flags", "internal_crosswalk", "Conflicts found (address/coordinate/status/listing) - internal because some cite vendor values"),
 ]
@@ -362,6 +375,7 @@ XW_SPEC = [
     ("disposition_basis", "internal_crosswalk", "Evidence/ruling behind the disposition"),
     ("merged_into_gaming_facility_id", "internal_crosswalk", "For merged_into: the surviving facility"),
     ("candidate_gaming_facility_id", "internal_crosswalk", "For unresolved: the facility this record is suspected to duplicate"),
+    ("rekeyed_cedar_uid", "internal_crosswalk", "For a tribe-level source row hung on a not-a-facility legacy key (compact authorization, CGCC 'N/A' row): the Native entity (CE) it is re-keyed to, with no facility; blank otherwise"),
     ("publication_status", "internal_crosswalk", "internal for every crosswalk row; unresolved for place-less rows"),
     ("source_table", "internal_crosswalk", "Clean table the key was read from"),
     ("rights_class", "internal_crosswalk", "Always internal_crosswalk"),
@@ -377,7 +391,7 @@ EVID = [
 ]
 
 NAME_SPEC = [
-    ("name_id", "public_derived", "GFNM derived id from (facility, source system, source record, field)"),
+    ("name_id", "public_derived", "Registered CEDAR-OBS ID (Gaming block) bound to the stable key (facility, source system, source record, field)"),
     ("gaming_facility_id", "public_derived", "Facility"),
     ("name", "public_official", "Name exactly as the source publishes it"),
     ("name_type", "public_derived", "regulator_listed | state_regulator_reported | operator_website | federal_dataset | vendor_directory | research_compilation | regulator_listed_prior"),
@@ -390,7 +404,7 @@ NAME_SPEC = [
 ] + EVID
 
 HIST_SPEC = [
-    ("history_id", "public_derived", "GFST derived id"),
+    ("history_id", "public_derived", "Registered CEDAR-EVENT ID (Gaming block) bound to a stable source key"),
     ("gaming_facility_id", "public_derived", "Facility"),
     ("record_kind", "public_derived", "event | status_observation"),
     ("event_type", "public_derived", "opening/closure/renaming/... or status_observation / regulator_listing_*"),
@@ -407,7 +421,7 @@ HIST_SPEC = [
 ] + EVID
 
 CAP_SPEC = [
-    ("capacity_observation_id", "public_derived", "GFCP derived id"),
+    ("capacity_observation_id", "public_derived", "Registered CEDAR-OBS ID (Gaming block) bound to a stable source key"),
     ("gaming_facility_id", "public_derived", "Facility"),
     ("metric", "public_derived", "What is counted (gaming_machines, table_games, hotel_rooms, gaming_square_feet, ...)"),
     ("metric_family", "public_derived", "gaming_devices | gaming_tables | lodging | floor_space | amenity | venue"),
@@ -425,11 +439,13 @@ CAP_SPEC = [
 ] + EVID
 
 REL_SPEC = [
-    ("relationship_id", "public_derived", "GREL derived id from (facility, party, type, source system)"),
+    ("relationship_id", "public_derived", "Registered CEDAR-REL ID (Gaming block) bound to the stable key (facility, party, type, source system)"),
     ("gaming_facility_id", "public_derived", "Facility"),
     ("party_kind", "public_derived", "native_entity | enterprise | external_company"),
     ("cedar_uid", "public_derived", "Native entity (canonical CE- id only; blank when party is not a Native entity)"),
-    ("enterprise_id", "public_derived", "NEST enterprise id (none emitted: affiliation HOLD, no non-name evidence)"),
+    ("enterprise_id", "public_derived", "Existing Cedar NEED enterprise ID (legacy prefix CEDAR-NEST), only when that enterprise independently qualifies; none emitted today (NEED affiliation HOLD, no non-name evidence)"),
+    ("business_uid", "public_derived", "Cedar Business ID (CB) of a distinct legal business party, only from the gated Cedar Business Register; blank today (none bound)"),
+    ("business_binding_status", "public_derived", "held_business_unbound for an external company (operator-as-reported text only, no CB binding yet); not_applicable for a Native entity or NEED enterprise party"),
     ("party_name", "public_official", "Party name as the source states it (external companies; the Native entity's register name otherwise)"),
     ("party_external_id", "public_official", "External identifier of an external company (SEC CIK)"),
     ("party_external_id_scheme", "public_derived", "Scheme of party_external_id"),
@@ -526,6 +542,7 @@ CONTRACTS = {
         required=["gaming_facility_id", "party_kind", "relationship_type", "confidence", "review_status", "rights_class"],
         enums={"party_kind": PARTY_KINDS, "relationship_type": gg.RELATIONSHIP_TYPES,
                "claimed_relationship_type": CLAIMED_RELATIONSHIP_TYPES,
+               "business_binding_status": gg.BUSINESS_BINDING_STATUSES,
                "confidence": gg.CONFIDENCE, "review_status": gg.REVIEW_STATUSES,
                "rights_class": gg.RIGHTS_CLASSES},
         dates=["effective_start", "effective_end", "observed_as_of", "source_date", "retrieved_date"],
@@ -549,6 +566,27 @@ QUESTIONED = {
     "VP-0170": ("CCP-843900", "7 Clans First Council: VP-0170 files the property to the Ponca Tribe; the Otoe-Missouria Tribe's own casino listing and the NIGC map name the same address for CCP-843900 (review/place_gaming_hold_open_disposition, ESCALATE_OWNER). Held unresolved pending the owner's repoint ruling."),
     "VP-0153": ("CCP-305300", "The Stables: one property, Miami/Modoc joint operation; VP-0153 keys it to Modoc alone while CCP-305300 carries both operators (docs/GAMING_JOINT_OPERATORS.json). Same property on the facts; merging two place ids is an owner ruling (ESCALATE_OWNER)."),
 }
+
+
+VP_DISPOSITIONS = "docs/GAMING_VP_DISPOSITIONS_2026-09-24.csv"
+
+
+def check_vp_dispositions(rows, byfid):
+    """{vp key: reviewed row} for NOT_A_GAMING_FACILITY decisions, refusing a
+    review that names an unknown key, carries a place, or contradicts 1129
+    (a reviewed not-a-facility key that 1129 bound to a place is an identity
+    conflict for the owner, not something to resolve here)."""
+    out = {}
+    for r in rows:
+        k = r["vp_key"]
+        if r["decision"] != "NOT_A_GAMING_FACILITY":
+            raise gg.GamingContractError(f"{VP_DISPOSITIONS}: {k} decision {r['decision']!r} is not handled")
+        if k not in byfid:
+            raise gg.GamingContractError(f"{VP_DISPOSITIONS}: {k} is not a gaming_facilities row")
+        if r.get("cedar_place_id") or byfid[k].get("cedar_place_id"):
+            raise gg.GamingContractError(f"{VP_DISPOSITIONS}: {k} is reviewed not-a-facility but carries a place id")
+        out[k] = r
+    return out
 
 
 class _Ctx:
@@ -614,12 +652,14 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
     _, ADJ = inputs.read("review/place_gaming_adjudication_2026-09-02.csv")
     _, HOLD = inputs.read("review/place_gaming_hold_open_disposition_2026-09-02.csv")
     _, NONPLACE = inputs.read("review/place_non_place_rows_2026-09-02.csv")
+    _, VPDISP = inputs.repository(VP_DISPOSITIONS)
 
     register = {r["cedar_uid"]: r for r in REG}
     binding = {r["source_key"]: r["binding_role"] for r in PREG if r["place_class"] == "GAMING_PROPERTY"}
     byfid = {r["facility_id"]: r for r in F}
     trace = {r["facility_id"]: r for r in TRACE}
     nonplace = {r["facility_id"]: r for r in NONPLACE}
+    vp_reviewed = check_vp_dispositions(VPDISP, byfid)
     hold = {}
     for h in HOLD:
         for fid in h["facility_ids"].split(";"):
@@ -648,7 +688,12 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         lik = t.get("property_likelihood", "")
         dup = r["duplicate_of_facility_id"]
         absent = r["open_date_absent_reason"]
-        if not place:
+        if fid in vp_reviewed:
+            v = vp_reviewed[fid]
+            disp[fid] = ("not_a_gaming_facility", "", "",
+                         f"REVIEWED {v['reviewed_on']} ({VP_DISPOSITIONS}): {v['decision']}, confidence {v['confidence']}; "
+                         + v["evidence_summary"][:400])
+        elif not place:
             np_ = nonplace.get(fid, {})
             disp[fid] = ("not_a_gaming_facility", "", "",
                          "NOT_A_PLACE: " + (np_.get("reason") or r["cedar_place_id_absent_reason"]))
@@ -830,7 +875,9 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
         rid = gg.derive_id("GREL", place, party_key, rtype, system)
         rel_acc[k] = {
             "relationship_id": rid, "gaming_facility_id": gfid(place), "party_kind": kind,
-            "cedar_uid": cedar_uid, "enterprise_id": "", "party_name": party_name,
+            "cedar_uid": cedar_uid, "enterprise_id": "", "business_uid": "",
+            "business_binding_status": "held_business_unbound" if kind == "external_company" else "not_applicable",
+            "party_name": party_name,
             "party_external_id": ext_id, "party_external_id_scheme": ext_scheme,
             "relationship_type": rtype, "claimed_relationship_type": claimed,
             "role_as_stated": (scrub(role) if rights in gg.PUBLIC_RIGHTS else role)[:200], "ownership_percent": "",
@@ -1499,9 +1546,16 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
     for r in NIGC:
         nigc_by_fid[r["facility_id"]].append(r)
     ca_by_fid = defaultdict(list)
+    tribe_level = {}
     for r in CA:
         if r["facility_id"]:
             ca_by_fid[r["facility_id"]].append(r)
+            tribe_level[("ca_cgcc_record_id", r["record_id"])] = r
+    capo_by_fid = defaultdict(list)
+    for r in CAPO:
+        if r["facility_id"]:
+            capo_by_fid[r["facility_id"]].append(r)
+            tribe_level[("capacity_official_observation_id", r["observation_id"])] = r
     for fid in sorted(byfid):
         r = byfid[fid]
         d, tgt, cand, why = disp[fid]
@@ -1511,7 +1565,7 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
                 "gaming_facility_id": gfid(live), "cedar_place_id": place,
                 "place_binding_role": binding.get(fid, ""), "disposition": d, "disposition_basis": why,
                 "merged_into_gaming_facility_id": gfid(tgt) if d == "merged_into" else "",
-                "candidate_gaming_facility_id": gfid(cand) if cand else "",
+                "candidate_gaming_facility_id": gfid(cand) if cand else "", "rekeyed_cedar_uid": "",
                 "publication_status": "unresolved" if not place else "internal",
                 "rights_class": "internal_crosswalk"}
         keys = [("legacy_facility_id", fid, "gaming_facilities")]
@@ -1523,6 +1577,8 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             keys.append(("nigc_marker_id", m, "nigc_region_assignments"))
         for c in ca_by_fid.get(fid, []):
             keys.append(("ca_cgcc_record_id", c["record_id"], "ca_gaming_facilities_official"))
+        for c in capo_by_fid.get(fid, []) if fid in vp_reviewed else []:
+            keys.append(("capacity_official_observation_id", c["observation_id"], "gaming_capacity_official"))
         if place:
             keys.append(("cedar_place_id", place, "cedar_place_id_register"))
         seen = set()
@@ -1530,7 +1586,17 @@ def build(inputs: "gg.Inputs", out_dir: Path) -> dict:
             if (scheme, val) in seen:
                 continue
             seen.add((scheme, val))
-            xw.append(dict(base, key_scheme=scheme, key_value=val, source_table=src))
+            row = dict(base, key_scheme=scheme, key_value=val, source_table=src)
+            if fid in vp_reviewed and scheme in ("ca_cgcc_record_id", "capacity_official_observation_id"):
+                # A tribe-level record the clean table hung on a reviewed
+                # not-a-facility key: re-keyed to the tribe, never a place.
+                src_row = tribe_level[(scheme, val)]
+                row["rekeyed_cedar_uid"] = good_uid(src_row.get("cedar_uid", ""), src + ".cedar_uid")
+                row["disposition_basis"] = ("tribe-level record (" + (src_row.get("metric") or src_row.get("list_type") or "")
+                                            + ") re-keyed from reviewed not-a-facility key " + fid
+                                            + " to the Native entity; no facility. " + why)[:600]
+                ctx.withheld["tribe_level_rows_rekeyed_from_not_a_facility_keys"] += 1
+            xw.append(row)
 
     # ---------------------------------------------------------- write
     def strip(rows):
