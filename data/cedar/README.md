@@ -17,25 +17,27 @@ the existing runner, manifest, catalog and download adapter.
    dates, rights, grain, primary key and publication holds. Preserve rows and issued
    IDs. Resolve owed fields through `data/cedar/field_map.json` and existing owner
    decisions; never discard qualifications or rematch identities to pass.
-2. **Register the collection.** Add its entry to
-   `code/cedar_pipeline.py::RELEASE_PILOTS`, using the existing
-   `docs/schema/dataset_contracts.json` key/grain and `cedar_publication.FLAGSHIP`.
-   Regenerate changed contracts through their owners. Lumecon's `DatasetContract`,
+2. **Register the producer in Lumecon Data.** Follow its authoritative
+   `docs/data-intake.md` and `docs/developer-guide.md`: a reviewed source profile,
+   existing `DatasetContract`, bounded producer under `collections/`, and the
+   existing `collection-build` dispatch. Cedar's `RELEASE_PILOTS` is only a
+   compatibility allowlist, not the source schema or producer registry.
+   Preserve existing grains/keys during migration and regenerate contracts
+   through their owners. Lumecon's `DatasetContract`,
    `ingest_csv`, `build_release` and `verify_release` own governed releases.
    `registered_reference` preserves existing scalar CE links: null stays null,
    unknown fails; preserve plural associations separately. The fixed
    `REFERENCE_PRESERVATION_AUTHORITY` records preservation authorization, not
    historical identity approval or the build's check date.
-3. **Build and repeat in isolation.** Use an existing Python environment with both
-   repositories' dependencies. The Cedar checkout needs its pinned ignored
-   `data/spine/cedar_entity_names.csv`, identity register and applicable authority
-   inputs; `--source` does not transfer them. Keep stores outside Git checkouts and
-   canonical input directories. The source basename must match the flagship:
+3. **Build and repeat in isolation.** Use Lumecon's declared locked environment
+   and explicit immutable source, reviewed field-map, resolved register and scope
+   snapshots. Legislation additionally needs its action snapshot. These are
+   migration inputs, not live imports of the Cedar workspace. Keep stores outside
+   Git checkouts and canonical input directories:
 
    ```powershell
-   Set-Location '<Cedar-Press-checkout>'
-   $env:PYTHONPATH='<Lumecon-data-checkout>\src;<Cedar-Press-checkout>\server'
-   & '<Lumecon-python>' -B code/build.py release-pilot legislation --source '<canonical-root>\native_bills.csv' --output-root '<isolated-store>' --as-of '2026-09-23'
+   Set-Location '<Lumecon-data-checkout>'
+   & '<Lumecon-python>' -B -m lumecon_data collection-build legislation --source '<snapshot>\native_bills.csv' --actions '<snapshot>\native_bill_actions.csv' --field-map '<snapshot>\legislation-field-map.json' --register '<snapshot>\register.json' --scopes '<snapshot>\scopes.json' --root '<isolated-store>' --as-of '2026-09-24'
    ```
 
    `--as-of` is an operator check date, not source cutoff. Require deterministic
@@ -53,7 +55,9 @@ the existing runner, manifest, catalog and download adapter.
    development credentials and refuses inherited `DATABASE_URL`/`CEDAR_PRESS_DB`:
 
    ```powershell
-   & '<Lumecon-python>' -B server/tests/release_download_rehearsal.py --store '<isolated-store>' --catalog '<printed-catalog-path>'
+   Set-Location '<Cedar-Press-checkout>'
+   $env:PYTHONPATH='<Lumecon-data-checkout>\src;<Cedar-Press-checkout>\server'
+   & '<consumer-test-python>' -B server/tests/release_download_rehearsal.py --store '<isolated-store>' --catalog '<printed-catalog-path>'
    ```
 
    Require anonymous/wrong-tier denial, exact authorized bytes, matching metadata,
@@ -72,17 +76,20 @@ the existing runner, manifest, catalog and download adapter.
    and published hashes; exclude private candidates from Git. Record results in
    the existing Havala packet. Production changes require separate authorization.
 
-**Minimum files:** the existing pilot configuration; producer/publication transform
-and approved field-map/codebook/contracts only when necessary; focused tests and
-existing review evidence. Refresh registered executable changes with
+**Minimum files:** Lumecon's reviewed collection contract/producer and tests;
+Cedar's product field presentation/catalog and consumer tests only where required.
+Do not add another Cedar transform or handwritten release schema. Refresh
+registered transitional executable changes with
 `python code/521_inventory.py scripts-only`; preserve dated table measurements.
 No numbered scripts, new registries or collection-specific adapter branches.
 Retire replaced producers only after consumer, test and documentation cutover.
 
-**Measured onboarding:** Natural Resources added 9 configuration lines and one
+**Historical onboarding before producer cutover:** Natural Resources added 9 configuration lines and one
 19-line qualification-preservation branch: zero new configuration files/endpoints
 or shared-adapter collection branches. Shared build and Lumecon validation changes
-are additional, separately reviewed infrastructure work.
+are additional, separately reviewed infrastructure work. Its producer and source
+qualification rules now live in Lumecon; this historical count does not describe
+the later repository migration.
 
 ## Runtime metadata contract (takeover verification, 2026-09-23)
 

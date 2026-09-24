@@ -4,6 +4,46 @@
 ## Current launch dashboard
 ### Release closure and repository cutover (2026-09-24)
 
+Current coordinated review surfaces:
+[Cedar PR #122](https://github.com/teim-team/cedar-press/pull/122), producer
+cutover `6aa8eb395715289a90c4cbe9984361ace9c14935..52fe0d8f34989f954f2ad9ece1084d97b58a16be`,
+and [Lumecon draft PR #9](https://github.com/teim-team/Lumecon-data/pull/9),
+stacked on storage PR #8,
+`f882fb14ab9179b287222b27b33cb6462378e6e1..88ba2b6232c8064fce91e7c17fe5c011b06d569d`.
+
+| Commit | Bounded responsibility / exact file group |
+|---|---|
+| Lumecon `122060d` | `collections/{__init__,projection,legislation}.py`, `tests/test_legislation.py`: shared projection primitives and bill producer/admission |
+| Lumecon `1c7a342` | `collections/natural_resources.py`, `tests/test_natural_resources.py`: revenue qualifications and evidence-backed attribution mask |
+| Lumecon `16244b6` | Existing `contracts.py`, `pipeline.py`, `catalog.py`, `cli.py`; intake schema/export; three runtime test files; Makefile/CI; intake/developer/index/glossary/README/guidance documentation |
+| Lumecon `88ba2b6` | `tests/test_catalog_database.py`: explicitly close SQLite test connections after Python 3.13 warnings-as-errors caught fixture leaks |
+| Cedar `52fe0d8` | Existing `build.py`, `1135`, `1137`, `cedar_pipeline.py`, `cedar_publication.py`; generated inventory; candidate/field-map/registration tests; download rehearsal; shipping runbook and this packet |
+
+No canonical source tables, released datasets, frontend, active owner-review
+artifact or R7 bundle were committed. Cedar's pre-existing NEED corroboration,
+terminal handoff, R7 pointer/locks/bundle, owner queue and entity-types work remain
+excluded and untouched. Lumecon's isolated review worktree was clean after the
+implementation commits; Claude's original worktree was not changed.
+
+Verification commands: Lumecon `uv run pytest tests/test_intake.py
+tests/test_legislation.py tests/test_natural_resources.py
+tests/test_collection_build.py tests/test_catalog_database.py tests/test_docs.py -q`
+passed **118**; `ruff check .`, `ruff format --check .`, `mypy src` and
+`python scripts/export_schemas.py --check` passed. Cedar
+`python -B -m unittest server.tests.test_candidate_review
+server.tests.test_field_map server.tests.test_pipeline_registration
+server.tests.test_release_download` passed **87, one Windows symlink skip**.
+The full Windows suite was stopped after reproducing the known offline guard
+failure in `asyncio`'s local socketpair setup; no protection was weakened.
+Authoritative Ubuntu full-suite/coverage and pinned-consumer validation run:
+[36071687852](https://github.com/teim-team/Lumecon-data/actions/runs/36071687852)
+passed Python 3.12 and pinned Cedar compatibility; Python 3.13 caught SQLite
+fixture cleanup, fixed in `88ba2b6`. The new run is
+[36071980826](https://github.com/teim-team/Lumecon-data/actions/runs/36071980826).
+The rerun is **green on Python 3.12 and 3.13**, including the full 575-test suite,
+90.93% measured Python 3.13 coverage, dependency audit, wheel packaging and pinned
+Cedar compatibility. Linux exercises the real storage/symlink safety tests.
+
 **Shared intake authority:** Lumecon Data's `docs/data-intake.md`, on
 `codex/collection-release-closure`, synthesizes the existing source registries,
 acquisition paths and build logs. Gaming uses that same framework through its
@@ -34,6 +74,13 @@ production completeness evidence.
 | Natural Resources revenue | `bd254496b977351ca7fe1bcdef8d336d7ed3f48cff3ef9ff24615b56003eefc0` | 11,120 / 185 pending source qualification | `16e95935e7e7849230bba959bc551bcea2b4f9179b36be1dcca224fc1a30aeae` |
 
 Both used Lumecon's canonical projection and existing immutable release format.
+Public manifest pins are Legislation
+`abff4e868691bec87434656eeddb7c73ad205a6ac7bca7153d60a36c8ea558ae`
+and Natural Resources
+`b6607b0c94770d280ee8aa8a5e88f8459c4c8bcdfb34d38801b882aae2296c4a`.
+Release rows measure 130/24 bills by introduction date and 496/280 revenue
+observations by period-start year for 2025/2026. Natural Resources retains 586
+populated recipient CE links; unknown/suppressed recipients remain unlinked.
 Local Cedar login, anonymous 401, wrong-entitlement 403, authorized exact bytes,
 redacted audit events, malformed/missing/stale release refusal and two-version
 rollback passed. Development SQLite catalog import was repeated without a
@@ -1316,3 +1363,5 @@ stay separate launch gates. Neither proof authorizes publication or production c
 Checkpoint 2026-09-24 20:35 UTC: READY WITH WARNINGS - twelve-collection dashboard current; 89 focused/registration tests and NAGPRA selftest pass; no newly qualified owner batch; isolated candidate application and remaining collection gates still pending; publication hold preserved.
 
 2026-09-24 22:18 UTC - READY WITH WARNINGS: candidate repairs committed; release and broad CI gates remain explicitly blocked.
+
+2026-09-24 23:21 UTC - READY WITH WARNINGS: shared Lumecon intake contract and guards committed; Ubuntu Python 3.12/3.13 and pinned Cedar compatibility pass; two corrected flagship download/import/rollback rehearsals pass. Gaming source remains explicitly partial; live acquisition, ancillary components, remaining collections, frontend sample reconciliation and production remain gated. NEED hold preserved.
