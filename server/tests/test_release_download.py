@@ -77,6 +77,12 @@ class ReleaseDownloadTest(unittest.TestCase):
             "fixture@example.invalid", "press"
         )
         self.addCleanup(app.dependency_overrides.clear)
+        self.subscriber_lookup = patch.object(
+            subscribers, "find",
+            return_value=subscribers.Subscriber("fixture@example.invalid", "press_pro", "fixture"),
+        )
+        self.mock_subscriber = self.subscriber_lookup.start()
+        self.addCleanup(self.subscriber_lookup.stop)
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
 
@@ -145,6 +151,7 @@ class ReleaseDownloadTest(unittest.TestCase):
         # No dependency override: exercise the actual database -> login -> cookie
         # -> entitlement -> release path. The data transport remains fictional.
         app.dependency_overrides.clear()
+        self.subscriber_lookup.stop()
         email = f"release-{uuid.uuid4().hex}@example.invalid"
         pro_email = f"release-pro-{uuid.uuid4().hex}@example.invalid"
         with patch.dict(
@@ -201,6 +208,25 @@ class ReleaseDownloadTest(unittest.TestCase):
                 self.assertIn("authorized_prepared", approval.output[0])
                 self.assertNotIn(pro_email, approval.output[0])
                 self.assertNotIn("disposable-pro-password", approval.output[0])
+
+                # Keep the same signed pro cookie while the actual entitlement
+                # changes. Downgrading or removing the account must take effect
+                # before any artifact request, without requiring another login.
+                db.execute(
+                    "UPDATE cedar_press_subscribers SET tier = %s WHERE email = %s",
+                    ("press", pro_email),
+                )
+                self.mock_fetch.reset_mock()
+                self.assertEqual(
+                    self.client.get(resources_url, params={"release_id": self.rid}).status_code,
+                    403,
+                )
+                db.execute("DELETE FROM cedar_press_subscribers WHERE email = %s", (pro_email,))
+                self.assertEqual(
+                    self.client.get(resources_url, params={"release_id": self.rid}).status_code,
+                    401,
+                )
+                self.mock_fetch.assert_not_called()
 
             finally:
                 for address in (email, pro_email):
@@ -265,6 +291,33 @@ class ReleaseDownloadTest(unittest.TestCase):
                 )
                 self.assertEqual(response.status_code, 503)
         self.mock_fetch.assert_not_called()
+
+    def test_current_account_denial_and_outage_fail_closed_without_fetch_or_secrets(self):
+        app.dependency_overrides[current_session] = lambda: Session(
+            "fixture@example.invalid", "press_pro"
+        )
+        cases = [
+            (None, None, 401, "denied_account"),
+            (subscribers.Subscriber("fixture@example.invalid", "press", "fixture"),
+             None, 403, "denied_entitlement"),
+            (subscribers.Subscriber("fixture@example.invalid", "unknown", "fixture"),
+             None, 403, "denied_entitlement"),
+            (None, RuntimeError("secret-database-connection"), 503, "authorization_unavailable"),
+        ]
+        for account, error, status, event in cases:
+            with self.subTest(event=event, account=account):
+                self.mock_subscriber.return_value = account
+                self.mock_subscriber.side_effect = error
+                with self.assertLogs("cedar_press.download", level="INFO") as captured:
+                    response = self.client.get(
+                        "/press/collections/natural-resources/full-download",
+                        params={"release_id": self.rid},
+                    )
+                self.assertEqual(response.status_code, status)
+                self.assertIn(event, captured.output[0])
+                self.assertNotIn("fixture@example", captured.output[0])
+                self.assertNotIn("secret-database", captured.output[0] + response.text)
+                self.mock_fetch.assert_not_called()
 
     def test_catalog_corruption_and_malformed_pin_refused(self):
         self.catalog.write_text("{}")

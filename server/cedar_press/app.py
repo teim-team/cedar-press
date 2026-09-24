@@ -573,6 +573,20 @@ def full_download(
     if not repository.may_open(session.tier, collection_id):
         _download_audit(collection_id, "denied_entitlement", requested_release_id=release_id)
         raise HTTPException(status_code=403, detail="Collection not included")
+    # A signed cookie proves a prior login, not a current subscription. Use the
+    # existing account authority before touching a protected release; an account
+    # outage must not fall back to the cookie's stale tier.
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        _download_audit(collection_id, "authorization_unavailable", requested_release_id=release_id)
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        _download_audit(collection_id, "denied_account", requested_release_id=release_id)
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_open(subscriber.tier, collection_id):
+        _download_audit(collection_id, "denied_entitlement", requested_release_id=release_id)
+        raise HTTPException(status_code=403, detail="Collection not included")
     try:
         if not release_id or not re.fullmatch(r"[0-9a-f]{64}", release_id):
             _download_audit(collection_id, "invalid_release_request")
