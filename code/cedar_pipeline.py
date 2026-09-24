@@ -54,24 +54,9 @@ REFERENCE_PRESERVATION_AUTHORITY = {
     "approved_by": "Owner execution directive: preserve existing issued IDs; reference validation only, no identity or affiliation adjudication",
     "approved_on": "2026-09-23",
 }
-RELEASE_PILOTS = {
-    "legislation": {
-        "owner": "Cedar Press curated legislation register",
-        "url": "https://www.congress.gov/",
-        "rights": {"license": "Existing Cedar public projection contract", "publication_class": "publishable", "redistribution": True, "retrieval": True},
-        "caveats": ["Bill flagship only; votes and actions excluded",
-                    "Names as published remain null where no source span is supplied"],
-    },
-    "natural-resources": {
-        "owner": "Cedar Press curated public resource observations",
-        "url": "https://revenuedata.doi.gov/",
-        "rights": {"license": "Existing Cedar public projection contract", "publication_class": "publishable", "redistribution": True, "retrieval": True},
-        "caveats": ["Revenue flagship only; ancillary tables excluded",
-                    "Mixed rates, transfers and aggregates are not additive",
-                    "Source-suppressed beneficiaries remain unresolved; no inferred entity links",
-                    "Complete source qualifications retained verbatim in research_note"],
-    },
-}
+# Compatibility command allowlist, not producer metadata or release authority.
+# Collection schemas, rights and transformations live in Lumecon-data.
+RELEASE_PILOTS = ("legislation", "natural-resources")
 
 
 def retired_table_writer(script, table):

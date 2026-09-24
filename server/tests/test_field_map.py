@@ -156,73 +156,32 @@ class DealsQualificationTest(unittest.TestCase):
         self.assertNotIn("Candidate_Status", header)
 
 
-class ResourceQualificationTest(unittest.TestCase):
-    def test_refuted_borough_recipient_is_masked_without_changing_payment(self):
-        row = {
-            "resource_revenue_event_id": "RRE-ANCSA-NANA-OUT_PILT-2022",
-            "cedar_uid": "CE-0000J-C2",
-            "recipient_entity_id": "CE-0000J-C2",
-            "recipient_entity_name": "Northwest Arctic Borough",
-            "payer_entity_id": "CE-0007G-30",
-            "amount_usd": "26700000.00",
-            "beneficiary_note": "Payment in Lieu of Taxes to NWAB / $26.7 million",
-        }
-        ok, why, disposition = pub.is_publication_eligible(row)
-        self.assertTrue(ok)
-        self.assertEqual(disposition, pub.MASK)
-        self.assertEqual(why, "resource_recipient_refuted")
-        self.assertEqual(pub.mask_attribution(row, why), 2)
-        self.assertEqual(row["cedar_uid"], "")
-        self.assertEqual(row["recipient_entity_id"], "")
-        self.assertEqual(row["recipient_entity_name"], "Northwest Arctic Borough")
-        self.assertEqual(row["payer_entity_id"], "CE-0007G-30")
-        self.assertEqual(row["amount_usd"], "26700000.00")
-        self.assertIn("not the recipient", row["entity_attribution_basis"])
-        self.assertNotEqual(pub.is_publication_eligible(row)[2], pub.MASK)
-        original_note = row["beneficiary_note"]
-        header = list(row)
-        pub.recompute_derived("natural-resources", header, [row])
-        self.assertIn(original_note, row["research_note"])
-        self.assertIn("previous Arctic Village link is contradicted", row["research_note"])
-        self.assertEqual(row["beneficiary_note"], original_note)
-        self.assertEqual(pub.recompute_derived("natural-resources", header, [row]), {})
+class MigratedProducerDelegationTest(unittest.TestCase):
+    def test_resource_qualification_uses_lumecon_without_mutating_on_failure(self):
+        from types import ModuleType
+        from unittest.mock import Mock
 
-    def test_resource_mask_is_not_a_blanket_entity_or_payer_rejection(self):
-        row = {"resource_revenue_event_id": "OTHER", "cedar_uid": "CE-0000J-C2"}
-        self.assertNotEqual(pub.is_publication_eligible(row)[2], pub.MASK)
-
-    def test_reservation_holds_propagate_to_votes_without_rejecting_white_earth(self):
-        self.assertEqual(len(pub.LEGISLATION_VOTE_INCLUSION_HOLDS), 33)
-        self.assertEqual(len(pub.LEGISLATION_INCLUSION_HOLDS), 11)
-        for vote_id in pub.LEGISLATION_VOTE_INCLUSION_HOLDS:
-            self.assertFalse(pub.is_publication_eligible({"vote_id": vote_id})[0])
-        self.assertTrue(pub.is_publication_eligible({"vote_id": "S099-0372"})[0])
-
-    def test_source_qualifications_survive_verbatim_and_rerun(self):
+        module = ModuleType("lumecon_data.collections.natural_resources")
+        module.qualify_rows = Mock(side_effect=ValueError("unreviewed evidence"))
+        rows = [{"beneficiary_note": "original"}]
         header = ["beneficiary_note"]
-        note = "Rate per headright, NOT total revenue. Recipient suppressed.\nDo not sum."
-        rows = [{"beneficiary_note": note}]
-        self.assertEqual(
-            pub.recompute_derived("natural-resources", header, rows), {"research_note": 1}
-        )
-        self.assertEqual(rows[0]["research_note"], note)
-        self.assertEqual(header, ["beneficiary_note", "research_note"])
-        self.assertEqual(pub.recompute_derived("natural-resources", header, rows), {})
+        with patch.dict(sys.modules, {module.__name__: module}):
+            with self.assertRaisesRegex(ValueError, "unreviewed evidence"):
+                pub.recompute_derived("natural-resources", header, rows)
+        self.assertEqual(rows, [{"beneficiary_note": "original"}])
+        self.assertEqual(header, ["beneficiary_note"])
+        module.qualify_rows.assert_called_once_with(rows)
 
-    def test_conflicting_notes_refuse_before_any_row_changes(self):
-        rows = [
-            {"beneficiary_note": "first"},
-            {"beneficiary_note": "suppressed", "research_note": "observed zero"},
-        ]
-        before = [dict(row) for row in rows]
-        with self.assertRaises(pub.FieldMapRefusal):
-            pub.recompute_derived("natural-resources", ["beneficiary_note"], rows)
-        self.assertEqual(rows, before)
+    def test_legislation_diagnostic_uses_canonical_admission_result(self):
+        from types import ModuleType
+        from unittest.mock import Mock
 
-    def test_blank_source_does_not_erase_existing_note(self):
-        rows = [{"beneficiary_note": "", "research_note": "Existing evidence"}]
-        pub.recompute_derived("natural-resources", [], rows)
-        self.assertEqual(rows[0]["research_note"], "Existing evidence")
+        module = ModuleType("lumecon_data.collections.legislation")
+        module.legislation_admission_hold = Mock(return_value="evidence_hold")
+        row = {"bill_id": "fixture-id"}
+        with patch.dict(sys.modules, {module.__name__: module}):
+            self.assertEqual(pub.is_publication_eligible(row), (False, "evidence_hold", pub.WITHHOLD))
+        module.legislation_admission_hold.assert_called_once_with(row)
 
 
 #: Datasets whose samples the applier must REFUSE as they stand, with the

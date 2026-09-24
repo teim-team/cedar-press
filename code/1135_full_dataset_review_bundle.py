@@ -286,6 +286,7 @@ def write_csv(path: Path, cols, rows):
 def build(mode: str) -> int:
     do_full = mode == "full"
     cols_map = collections()
+    _customer.refuse_migrated_producers(cols_map)
     man = []
     # DEDUPLICATION IS SCOPED TO (collection, table), NOT TO THE TABLE.
     #
@@ -691,6 +692,10 @@ def candidate_review(input_root, output_root, queue_path, need_root=None, select
                    Path(queue_path), CONTRACTS, policy.FIELD_MAP_PATH,
                    ROOT / "data/cedar/collections.manifest.json"]
     authority_hashes = {str(p.resolve()): digest(p) for p in authorities if p.exists()}
+    requested_tables = {item["flagship"] for item in queue["collections"]
+                        if not selected or item["collection_id"] in selected}
+    _customer.refuse_migrated_producers(
+        collection for collection, table in _FLAGSHIP.items() if table in requested_tables)
     target.mkdir(parents=True)
     results, cards = [], []
     for item in queue["collections"]:
@@ -776,17 +781,6 @@ def candidate_review(input_root, output_root, queue_path, need_root=None, select
                     rows = list(reader)
                     canonical_rows = copy.deepcopy(rows)
                     result["presentation"] = _customer.deals_public_view(raw_header, rows)
-                if coll == "legislation":
-                    dependency = _customer.publication_dependencies(path)[0]
-                    evidence = dependency.read_bytes()
-                    authority_hashes[str(dependency.resolve())] = hashlib.sha256(evidence).hexdigest()
-                    rows = list(reader)
-                    canonical_rows = copy.deepcopy(rows)
-                    corrections = _customer.legislation_action_dates(rows, evidence)
-                    result["source_dependencies"] = [{"path": str(dependency),
-                        "sha256": hashlib.sha256(evidence).hexdigest(), "bytes": len(evidence),
-                        "role": "official_introduction_actions"}]
-                    result["introduction_date_corrections"] = corrections
                 header = publishable_columns(raw_header)
                 if not safe_fields:
                     result["schema_blockers"].append("No reviewed safe preview fields")

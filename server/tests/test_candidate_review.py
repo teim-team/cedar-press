@@ -1,7 +1,5 @@
 """Isolated candidate evidence must not become a publishable release by accident."""
 
-import csv
-import hashlib
 import importlib
 import io
 import json
@@ -20,76 +18,23 @@ policy = importlib.import_module("cedar_publication")
 
 
 class CandidateReviewTest(unittest.TestCase):
-    @staticmethod
-    def introduction_bytes(*dates, source_system="Library of Congress"):
-        stream = io.StringIO(newline="")
-        writer = csv.DictWriter(
-            stream,
-            fieldnames=[
-                "bill_id",
-                "action_date",
-                "action_text",
-                "action_code",
-                "source_system",
-                "source_url",
-            ],
-        )
-        writer.writeheader()
-        for value in dates:
-            writer.writerow(
-                {
-                    "bill_id": "115-s-1484",
-                    "action_date": value,
-                    "action_text": "Introduced in Senate",
-                    "action_code": "10000",
-                    "source_system": source_system,
-                    "source_url": "https://api.congress.gov/v3/bill/115/s/1484/actions",
-                }
-            )
-        return stream.getvalue().encode()
-
-    def test_legislation_dates_use_pinned_actions_preserve_ids_and_source(self):
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "native_bills.csv"
-            original = b"bill_id,introduced_date,title\n115-s-1484,2026-03-24,ANCSA\n"
-            path.write_bytes(original)
-            actions = self.introduction_bytes("2017-06-29", "2017-06-29")
-            receipt = []
-            with (
-                patch.object(customer, "translate_neid_values"),
-                patch.object(customer, "apply_official_names"),
-                patch.object(customer, "enforce_denials", return_value=0),
-            ):
-                _, rows, held = customer.load(
-                    path,
-                    source_bytes=original,
-                    legislation_actions_bytes=actions,
-                    dependency_receipt=receipt,
-                )
-            self.assertEqual(rows[0]["introduced_date"], "2017-06-29")
-            self.assertEqual(rows[0]["bill_id"], "115-s-1484")
-            self.assertFalse(held)
-            self.assertEqual(path.read_bytes(), original)
-            self.assertEqual(receipt[0]["sha256"], hashlib.sha256(actions).hexdigest())
-            self.assertEqual(receipt[0]["corrected_rows"], 1)
-            self.assertEqual(
-                customer.publication_dependencies(path), [path.with_name("native_bill_actions.csv")]
-            )
-            self.assertEqual(customer.legislation_action_dates(rows, actions), [])
-            with self.assertRaisesRegex(ValueError, "requires pinned"):
-                customer.load(path, source_bytes=original)
-
-    def test_legislation_conflicts_and_untrusted_evidence_fail_before_mutation(self):
-        for actions in (
-            self.introduction_bytes("2017-06-29", "2017-06-30"),
-            self.introduction_bytes("2026-03-24"),
-            self.introduction_bytes("2017-06-29", source_system="Unknown"),
-            self.introduction_bytes("2017-06-29").replace(b"/1484/actions", b"/999/actions"),
-        ):
-            rows = [{"bill_id": "115-s-1484", "introduced_date": "2026-03-24"}]
-            with self.assertRaises(ValueError):
-                customer.legislation_action_dates(rows, actions)
-            self.assertEqual(rows[0]["introduced_date"], "2026-03-24")
+    def test_migrated_producers_refuse_before_reads_or_writes(self):
+        for collection, filename in (("legislation", "native_bills.csv"),
+                                     ("natural-resources", "resource_revenue.csv")):
+            with self.subTest(collection=collection):
+                with patch.object(Path, "open") as opened:
+                    with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                        customer.load(Path(filename))
+                    opened.assert_not_called()
+                with patch.object(customer, "contracts") as contracts:
+                    with self.assertRaisesRegex(ValueError, "Lumecon Data collection-build"):
+                        customer.build(dry=False, only=(collection,))
+                    contracts.assert_not_called()
+                with patch.object(bundle, "collections", return_value={collection: {filename: True}}):
+                    with patch.object(bundle, "find") as find:
+                        with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                            bundle.build("samples")
+                        find.assert_not_called()
 
     def test_load_receipts_conserve_withheld_rows(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -119,15 +64,6 @@ class CandidateReviewTest(unittest.TestCase):
         self.assertEqual(
             policy.is_publication_eligible({"publish_hold": "Y", "publishable": "Y"}),
             (False, "publish_hold", policy.WITHHOLD),
-        )
-
-    def test_false_treaty_inclusion_is_held_without_erasing_issued_id(self):
-        for identifier in policy.LEGISLATION_INCLUSION_HOLDS:
-            row = {"bill_id": identifier, "publishable": "Y"}
-            self.assertFalse(policy.is_publication_eligible(row)[0])
-            self.assertEqual(row["bill_id"], identifier)
-        self.assertTrue(
-            policy.is_publication_eligible({"bill_id": "99-s-1396", "publishable": "Y"})[0]
         )
 
     def test_competition_uses_existing_dictionary_and_fails_closed(self):
@@ -193,10 +129,9 @@ class CandidateReviewTest(unittest.TestCase):
             source = base / "source"
             clean = source / "data/clean"
             clean.mkdir(parents=True)
-            raw = b"bill_id,title,source_url,publishable,email\nb1,<script>bad</script>,https://example.test/1,Y,private\nb2,withheld,https://example.test/2,N,secret\nb3,allowed,https://example.test/3,Y,private\n"
-            file = clean / "native_bills.csv"
+            raw = b"record_id,title,source_url,publishable,email\nb1,<script>bad</script>,https://example.test/1,Y,private\nb2,withheld,https://example.test/2,N,secret\nb3,allowed,https://example.test/3,Y,private\n"
+            file = clean / "native_entity_lobbying_disclosures.csv"
             file.write_bytes(raw)
-            (clean / "native_bill_actions.csv").write_bytes(self.introduction_bytes())
             metadata = base / "authority/data/cedar"
             metadata.mkdir(parents=True)
             (metadata / "collections.manifest.json").write_text(
@@ -204,7 +139,7 @@ class CandidateReviewTest(unittest.TestCase):
                     {
                         "collections": [
                             {
-                                "id": "legislation",
+                                "id": "lobbying",
                                 "descriptor": {"tracks": "Bills", "sources": "Fixture"},
                             }
                         ]
@@ -217,9 +152,9 @@ class CandidateReviewTest(unittest.TestCase):
                     {
                         "contracts": [
                             {
-                                "collection": "legislation",
+                                "collection": "lobbying",
                                 "tables": [
-                                    {"table": "native_bills.csv", "primary_key": ["bill_id"]}
+                                    {"table": "native_entity_lobbying_disclosures.csv", "primary_key": ["record_id"]}
                                 ],
                             }
                         ]
@@ -234,7 +169,7 @@ class CandidateReviewTest(unittest.TestCase):
                             {
                                 "collection_id": "fixture-" + str(i),
                                 "title": "Fixture",
-                                "flagship": "native_bills.csv",
+                                "flagship": "native_entity_lobbying_disclosures.csv",
                             }
                             for i in range(12)
                         ]
@@ -249,7 +184,7 @@ class CandidateReviewTest(unittest.TestCase):
                     policy,
                     "field_map",
                     return_value={
-                        "legislation": {
+                        "lobbying": {
                             "fields": [
                                 {"column": x, "decision": "keep"} for x in ("title", "source_url")
                             ]
@@ -262,12 +197,18 @@ class CandidateReviewTest(unittest.TestCase):
                 patch.object(
                     policy,
                     "apply_field_map",
-                    side_effect=policy.FieldMapRefusal("legislation", [], "fixture refusal"),
+                    side_effect=policy.FieldMapRefusal("lobbying", [], "fixture refusal"),
                 )
             )
             for name in ("translate_neid_values", "apply_official_names"):
                 stack.enter_context(patch.object(customer, name))
             stack.enter_context(patch.object(customer, "enforce_denials", return_value=0))
+            saved_queue = queue.read_text()
+            queue.write_text(saved_queue.replace("native_entity_lobbying_disclosures.csv", "native_bills.csv"))
+            with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                bundle.candidate_review(source, base / "retired-output", queue)
+            self.assertFalse((base / "retired-output").exists())
+            queue.write_text(saved_queue)
             with redirect_stdout(io.StringIO()):
                 bundle.candidate_review(source, base / "output", queue)
             rows = json.loads((base / "output/measurements.json").read_text())

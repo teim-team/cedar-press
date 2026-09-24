@@ -9,6 +9,37 @@ command. The fixed infrastructure review range, current proofs and blockers are 
 `docs/HAVALA_INFRASTRUCTURE_REVIEW.md`; the existing terminal handoff retains the
 workspace takeover context.
 
+### Migrated flagship release path (2026-09-24)
+
+Legislation bills and Natural Resources revenue now use Lumecon Data's
+`collection-build` command, documented in its existing `docs/developer-guide.md`.
+Their source-registration rules are defined once in Lumecon's
+`docs/data-intake.md`. Cedar's `release-pilot` is a compatibility caller;
+the old customer-combine and review-bundle producer routes refuse these
+flagships before writing. Do not restore a second producer to fix that refusal.
+
+Use an explicit outside-Git store and immutable source/field-map/register/scope
+snapshots. Run Lumecon `verify`, then `catalog-import` twice to prove retry
+idempotency. Select the reviewed release using `catalog-select`; rollback uses
+the same command with a previously selected release and `--rollback`.
+These commands affect only the development metadata index, not production.
+Preserve the complete immutable store plus operational database/audit history;
+restore into a separate root, reverify hashes, reimport manifests and select the
+prior pin. Never overwrite a release to repair a failed build.
+
+The real local consumer rehearsal is:
+
+```text
+python -B server/tests/release_download_rehearsal.py --store <verified-store> --catalog <pinned-catalog.json>
+```
+
+Run with the reviewed Lumecon package and Cedar server dependencies installed.
+It verifies local login, entitlement denial/success, exact pinned bytes, redacted
+audit events, catalog-import retry and two-version rollback. It creates only
+development test state inside the chosen store. The Havala packet records exact
+release IDs and receipts; PostgreSQL, production provisioning and ancillary
+component certification remain separate gates.
+
 ### Systemic hold supersedes the prior candidate command
 
 The owner review exposed defective automated affiliation routes. New 1072 builds

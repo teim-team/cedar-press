@@ -6,10 +6,12 @@ import copy
 import importlib.util
 import io
 import json
+import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
@@ -20,6 +22,44 @@ SPEC.loader.exec_module(PIPELINE)
 
 
 class ProducerRegistrationTest(unittest.TestCase):
+    def test_release_pilot_delegates_pinned_inputs_without_local_builder(self):
+        spec = importlib.util.spec_from_file_location("delegated_build", ROOT / "code/build.py")
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        publication = __import__("cedar_publication")
+        pipeline = types.ModuleType("lumecon_data.pipeline")
+        pipeline.build_collection_release = Mock(return_value={
+            "manifest": {"release_id": "fixture-release", "record_count": 1},
+            "catalog_path": "fixture-catalog", "receipt_sha256": "fixture-receipt"})
+        storage = types.ModuleType("lumecon_data.storage")
+        storage.checked_path = lambda value: value
+        storage.canonical_json = lambda value: json.dumps(value, sort_keys=True).encode()
+        modules = {"lumecon_data": types.ModuleType("lumecon_data"),
+                   "lumecon_data.pipeline": pipeline, "lumecon_data.storage": storage}
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            source_dir = base / "source"
+            source_dir.mkdir()
+            source = source_dir / "native_bills.csv"
+            source.write_bytes(b"fixture source bytes")
+            actions = source.with_name("native_bill_actions.csv")
+            actions.write_bytes(b"fixture action bytes")
+            args = argparse.Namespace(collection="legislation", source=str(source),
+                                      output_root=str(base / "store"), as_of="2026-09-24")
+            with (patch.dict(sys.modules, modules),
+                  patch.object(publication, "field_map", return_value={"legislation": {"fixture": "map"}}),
+                  patch.object(publication, "register", return_value={}),
+                  patch.object(publication, "scopes", return_value={}),
+                  contextlib.redirect_stdout(io.StringIO())):
+                self.assertEqual(runner.cmd_release_pilot(args), 0)
+            call = pipeline.build_collection_release.call_args
+            self.assertEqual(call.args, (base / "store", "legislation"))
+            self.assertEqual(call.kwargs["source_bytes"], b"fixture source bytes")
+            self.assertEqual(call.kwargs["actions_bytes"], b"fixture action bytes")
+            self.assertEqual(json.loads(call.kwargs["field_map_bytes"]), {"fixture": "map"})
+            self.assertFalse((base / "store").exists())
+            self.assertEqual(source.read_bytes(), b"fixture source bytes")
+
     def test_writer_authority_refresh_preserves_measurements_and_input(self):
         spec = importlib.util.spec_from_file_location(
             "contract_refresh", ROOT / "code/512_build_dataset_contracts.py"
@@ -134,90 +174,6 @@ class ProducerRegistrationTest(unittest.TestCase):
             self.assertEqual(len(present[key]), 64)
             path.write_text("changed fixture ruling", encoding="utf-8")
             self.assertNotEqual(present, runner.pilot_authority_hashes(root))
-
-    def test_release_projection_cannot_fill_or_reassign_entity_links(self):
-        spec = importlib.util.spec_from_file_location("conserved_build", ROOT / "code/build.py")
-        runner = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(runner)
-        original = [{"record": "one", "cedar_uid": ""}, {"record": "two", "cedar_uid": "existing"}]
-        runner.assert_pilot_conservation(original, list(reversed(original)), ["record"])
-        for records in (
-            [{"record": "one", "cedar_uid": "new"}, original[1]],
-            [original[0], {"record": "two", "cedar_uid": "other"}],
-            original[:1],
-        ):
-            with self.subTest(records=records), self.assertRaises(ValueError):
-                runner.assert_pilot_conservation(original, records, ["record"])
-
-    def test_release_partition_requires_keyed_hold_and_mask_evidence(self):
-        spec = importlib.util.spec_from_file_location("partition_build", ROOT / "code/build.py")
-        runner = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(runner)
-        source = [{"record": "a", "cedar_uid": "existing"}, {"record": "b", "cedar_uid": ""}]
-        hold = {"source_row_index": 1, "event": "withheld", "reason": "publication hold"}
-        result = runner.assert_pilot_conservation(source, source[:1], ["record"], [hold])
-        self.assertEqual(result["withheld_rows"], 1)
-        self.assertEqual(result["decisions"][0]["source_key"], ["b"])
-        mask = {
-            "source_row_index": 0,
-            "event": "masked",
-            "reasons": {"ruled denial": 1},
-            "before": {"cedar_uid": "existing"},
-            "after": {"cedar_uid": ""},
-        }
-        output = [{"record": "a", "cedar_uid": ""}]
-        runner.assert_pilot_conservation(source, output, ["record"], [hold, mask])
-        cases = [
-            (source, [hold]),
-            (source[:1], []),
-            (source[:1], [hold, hold]),
-            (source[:1] * 2, [hold]),
-            (output, [hold]),
-            ([{"record": "a", "cedar_uid": "reassigned"}], [hold, mask]),
-            (source[:1], [{"source_row_index": 4, "reason": "hold"}]),
-            (source[:1], [{"source_row_index": 1, "reason": ""}]),
-        ]
-        for records, decisions in cases:
-            with self.subTest(records=records, decisions=decisions), self.assertRaises(ValueError):
-                runner.assert_pilot_conservation(source, records, ["record"], decisions)
-        with self.assertRaises(ValueError):
-            runner.assert_pilot_conservation(source + source[:1], source, ["record"])
-
-    def test_release_partition_preserves_plural_identity_references(self):
-        spec = importlib.util.spec_from_file_location("plural_build", ROOT / "code/build.py")
-        runner = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(runner)
-        source = [{"record": "a", "entity_cedar_uids": "CE-one|CE-two"}]
-        output = [{"record": "a", "cedar_uids": '["CE-two",null,"CE-one"]'}]
-        runner.assert_pilot_conservation(
-            source, output, ["record"], identity_field="entity_cedar_uids"
-        )
-        for value in ('["CE-one"]', '["CE-three","CE-two"]', '["CE-one","CE-two","CE-two"]'):
-            with self.subTest(value=value), self.assertRaises(ValueError):
-                runner.assert_pilot_conservation(
-                    source,
-                    [{"record": "a", "cedar_uids": value}],
-                    ["record"],
-                    identity_field="entity_cedar_uids",
-                )
-
-    def test_release_projection_refuses_lossy_source_csv(self):
-        spec = importlib.util.spec_from_file_location("source_build", ROOT / "code/build.py")
-        runner = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(runner)
-        for source in (
-            b"id,note,note\n1,first,second\n",
-            b"id,note\n1,a,extra\n",
-            b"id,note\n1\n",
-            b"id,\n1,a\n",
-            b"id, note\n1,a\n",
-        ):
-            with self.subTest(source=source), self.assertRaises(ValueError):
-                runner.pilot_source_rows(source)
-        self.assertEqual(
-            runner.pilot_source_rows(b'id,note\n1,"first\nsecond"\n'),
-            [{"id": "1", "note": "first\nsecond"}],
-        )
 
     def test_candidate_store_cannot_target_any_repository(self):
         spec = importlib.util.spec_from_file_location("target_build", ROOT / "code/build.py")

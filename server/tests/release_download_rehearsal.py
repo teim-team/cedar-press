@@ -12,6 +12,7 @@ import logging
 import os
 import secrets
 import socket
+import sqlite3
 import threading
 import time
 from pathlib import Path
@@ -28,10 +29,14 @@ def main():
             "REFUSED: rehearsal requires an isolated environment without database configuration"
         )
     from lumecon_data.api import create_app
-    from lumecon_data.catalog import build_catalog
+    from lumecon_data.catalog import (
+        build_catalog,
+        import_catalog_release,
+        select_catalog_release,
+    )
     from lumecon_data.contracts import DatasetContract
     from lumecon_data.pipeline import build_release, verify_release
-    from lumecon_data.storage import canonical_json, immutable_bytes
+    from lumecon_data.storage import canonical_json, checked_path, immutable_bytes
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--store", type=Path, required=True)
@@ -55,6 +60,19 @@ def main():
     )
     second_path = args.store / "catalogs" / (second_catalog["catalog_id"] + ".json")
     immutable_bytes(second_path, canonical_json(second_catalog))
+    database_path = checked_path(args.store, "operational", "release-catalog.sqlite")
+    database_path.parent.mkdir(parents=True, exist_ok=True)
+    database = sqlite3.connect(database_path)
+    for _ in range(2):
+        assert import_catalog_release(database, args.store, dataset, pin["release_id"],
+                                      product="cedar_press") == first_catalog
+    assert database.execute(
+        "SELECT count(*) FROM lumecon_releases WHERE dataset_id=? AND release_id=?",
+        (dataset, pin["release_id"]),
+    ).fetchone()[0] == 1
+    assert select_catalog_release(database, args.store, dataset, pin["release_id"],
+                                  product="cedar_press") == first_catalog
+    import_catalog_release(database, args.store, dataset, second["release_id"], product="cedar_press")
     token = secrets.token_hex(32)
     password = secrets.token_hex(32)
     os.environ["CEDAR_PRESS_ENVIRONMENT"] = "development"
@@ -136,6 +154,8 @@ def main():
             endpoint = f"/press/collections/{dataset}/full-download"
             assert client.get(endpoint, params={"release_id": "../outside"}).status_code == 400
             assert client.get(endpoint, params={"release_id": "0" * 64}).status_code == 503
+            assert select_catalog_release(database, args.store, dataset, second["release_id"],
+                                          product="cedar_press") == second_catalog
             os.environ["CEDAR_PRESS_RELEASE_CATALOG"] = str(second_path)
             assert client.get(route).status_code == 503  # Stale pins cannot silently follow latest.
             newer = client.get(
@@ -145,6 +165,8 @@ def main():
                 newer.status_code == 200
                 and newer.headers["x-cedar-release"] == second["release_id"]
             )
+            assert select_catalog_release(database, args.store, dataset, pin["release_id"],
+                                          product="cedar_press", rollback=True) == first_catalog
             os.environ["CEDAR_PRESS_RELEASE_CATALOG"] = str(args.catalog)
             restored = client.get(route)
             assert restored.content == before.content
@@ -206,6 +228,8 @@ def main():
                 "rollback_from": second["release_id"],
                 "artifact_sha256": before.headers["x-cedar-sha256"],
                 "canonical_release_unchanged": True,
+                "catalog_database": "SQLite development metadata only; PostgreSQL not tested",
+                "idempotent_import": True,
                 "checks": [
                     "real data API",
                     "real Cedar login",
@@ -216,6 +240,7 @@ def main():
                     "current-run audit completeness and redaction",
                     "malformed and nonexistent release refusal",
                     "rollback",
+                    "versioned catalog database import, retry and rollback",
                 ],
             }
             (args.store / "rehearsal-result.json").write_text(json.dumps(result, indent=2) + "\n")
@@ -226,6 +251,7 @@ def main():
         service.should_exit = True
         worker.join(timeout=10)
         sock.close()
+        database.close()
 
 
 if __name__ == "__main__":

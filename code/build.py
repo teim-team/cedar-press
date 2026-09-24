@@ -580,91 +580,12 @@ def cmd_candidate(args) -> int:
     return 1 if changed else 0
 
 
-def pilot_source_rows(content):
-    """Refuse lossy CSV structures before publication code constructs dictionaries."""
-    import csv
-    import io
-    reader = csv.reader(io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True)
-    header = next(reader, [])
-    if not header or any(not name.strip() or name != name.strip() for name in header) or len(set(header)) != len(header):
-        raise ValueError("REFUSED: source headers must be unique, nonblank exact names")
-    rows = []
-    for row in reader:
-        if len(row) != len(header):
-            raise ValueError("REFUSED: source row width differs from header")
-        rows.append(dict(zip(header, row)))
-    return rows
-
-
 def assert_pilot_target(source, target):
     """Candidate stores stay outside repositories and the source directory."""
     if target.is_relative_to(source.parent) or source.is_relative_to(target):
         raise ValueError("REFUSED: release store must be separate from canonical input")
     if any((parent / ".git").exists() for parent in (target, *target.parents)):
         raise ValueError("REFUSED: candidate release store must be outside Git repositories")
-
-
-def assert_pilot_conservation(original_rows, records, keys, decisions=(), identity_field=None):
-    """Partition source keys using explicit canonical gate decisions; never mint IDs."""
-    from collections import Counter
-    def indexed(rows):
-        result = {}
-        for row in rows:
-            key = tuple(row[name] for name in keys)
-            if any(not value for value in key) or key in result:
-                raise ValueError("REFUSED: duplicate or blank source/output record ID")
-            result[key] = row
-        return result
-    before, after = indexed(original_rows), indexed(records)
-    held, masks = {}, {}
-    for decision in decisions:
-        index = decision.get("source_row_index")
-        if type(index) is not int or not 0 <= index < len(original_rows):
-            raise ValueError("REFUSED: publication decision has no valid source row")
-        key = tuple(original_rows[index][name] for name in keys)
-        event = decision.get("event", "withheld")
-        if event == "withheld":
-            if key in held or not decision.get("reason"):
-                raise ValueError("REFUSED: duplicate or unexplained withheld decision")
-            held[key] = decision["reason"]
-        elif event == "masked":
-            if key in masks or not decision.get("reasons"):
-                raise ValueError("REFUSED: duplicate or unexplained identity mask")
-            masks[key] = decision
-        else:
-            raise ValueError("REFUSED: unknown publication decision")
-    if set(after) & set(held) or set(after) | set(held) != set(before):
-        raise ValueError("REFUSED: source must equal eligible plus explicitly withheld keys")
-    if not set(masks) <= set(after):
-        raise ValueError("REFUSED: identity mask does not address an eligible row")
-    def references(value):
-        if not value:
-            return Counter()
-        values = json.loads(value) if value.lstrip().startswith("[") else value.split("|")
-        if not isinstance(values, list):
-            raise ValueError("REFUSED: malformed plural identity values")
-        return Counter(item for item in values if item)
-    for key, row in after.items():
-        if identity_field and "cedar_uids" in row:
-            old = references(before[key].get(identity_field, ""))
-            new = references(row.get("cedar_uids", ""))
-            if old != new:
-                evidence = masks.get(key, {})
-                if (new - old or not evidence or
-                        references(evidence.get("before", {}).get(identity_field, "")) != old or
-                        references(evidence.get("after", {}).get(identity_field, "")) != new):
-                    raise ValueError("REFUSED: publication projection changed plural entity references")
-        if "cedar_uid" in row and "cedar_uid" in before[key]:
-            old, new = before[key]["cedar_uid"] or "", row["cedar_uid"] or ""
-            if old != new:
-                evidence = masks.get(key, {})
-                if (new or not old or evidence.get("before", {}).get("cedar_uid") != old
-                        or evidence.get("after", {}).get("cedar_uid", None) != ""):
-                    raise ValueError("REFUSED: publication projection changed an existing entity reference")
-    return {"source_rows": len(before), "eligible_rows": len(after),
-            "withheld_rows": len(held), "withheld_reasons": dict(sorted(Counter(held.values()).items())),
-            "decisions": [dict(item, source_key=list(tuple(original_rows[item["source_row_index"]][name] for name in keys)))
-                          for item in decisions]}
 
 
 def pilot_authority_hashes(root):
@@ -686,137 +607,52 @@ def pilot_authority_hashes(root):
 
 
 def cmd_release_pilot(args):
-    """Project one existing flagship through its approved contract; never promote."""
-    import csv
-    import json
-    import hashlib
-    import importlib.util
-    from lumecon_data.contracts import DatasetContract
-    from lumecon_data.pipeline import ingest_csv, build_release, verify_release
-    from lumecon_data.catalog import build_catalog
-    from lumecon_data.storage import immutable_bytes, canonical_json, checked_path
+    """Compatibility command: Lumecon owns projection, validation and release.
+
+    Retire this adapter once operator/runbook callers supply their pinned input
+    snapshots directly to Lumecon's collection-build command. It owns no data
+    transformation, release schema, identity policy or storage implementation.
+    """
+    from lumecon_data.pipeline import build_collection_release
+    from lumecon_data.storage import canonical_json, checked_path
     import cedar_publication as publication
-    from cedar_ids import identifier_contract, validate_identifier, validate_unique_record_keys
 
     collection = args.collection
-    config = CP.RELEASE_PILOTS[collection]
-    authority_root = HERE.parent
-    authorities = pilot_authority_hashes(authority_root)
-    table = publication.FLAGSHIP[collection]
-    contracts = json.loads((HERE.parent / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8"))
-    declaration = next(item for item in contracts["contracts"] if item["collection"] == collection)
-    table_contract = next(item for item in declaration["tables"] if item["table"] == table)
-    keys = table_contract["primary_key"]
-    if not keys:
-        raise SystemExit("REFUSED: flagship has no declared primary key")
+    if collection not in CP.RELEASE_PILOTS:
+        raise SystemExit("REFUSED: collection has no migrated producer")
     source = Path(args.source).resolve()
-    if source.name != table:
-        raise SystemExit("REFUSED: source filename must match the declared flagship table")
-    # Check the supplied path before resolve can conceal symlink components.
+    if source.name != publication.FLAGSHIP[collection]:
+        raise SystemExit("REFUSED: source filename must match the declared flagship")
     target = checked_path(Path(args.output_root)).resolve()
     assert_pilot_target(source, target)
-    original = source.read_bytes()
-    import io
-    original_rows = pilot_source_rows(original)
-    validate_unique_record_keys(original_rows, keys)
-    spec = importlib.util.spec_from_file_location("pilot_combiner", Path(__file__).with_name("1137_customer_dataset_combine.py"))
-    combine = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(combine)
-    dependencies = {path: path.read_bytes() for path in combine.publication_dependencies(source)}
-    decisions, dependency_receipt = [], []
-    header, records, held = combine.load(
-        source, source_bytes=original,
-        legislation_actions_bytes=next(iter(dependencies.values()), None),
-        dependency_receipt=dependency_receipt, decision_receipt=decisions)
-    def dependencies_unchanged():
-        return all(path.read_bytes() == content for path, content in dependencies.items())
-    own = set(header)
-    publication.recompute_derived(collection, header, records)
-    result = publication.apply_field_map(collection, header, records, own)
-    if result.get("owed"):
-        raise SystemExit("REFUSED: pilot has owed public fields")
-    validate_unique_record_keys(records, keys)
-    conservation = assert_pilot_conservation(original_rows, records, keys, decisions,
-        identity_field=publication.field_map()[collection].get("entity_uid"))
-    if conservation["withheld_reasons"] != dict(held):
-        raise SystemExit("REFUSED: row-policy counts disagree with keyed withholding evidence")
-    register = publication.register()
-    ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
-    public_contract = publication.field_map()[collection]
-    record_contracts = {key: identifier_contract(collection, table, key) for key in keys}
-    source_keys = {key: {row[key] for row in original_rows} for key in keys}
-    for row in records:
-        for key in keys:
-            binding = record_contracts[key]
-            validate_identifier(row[key], binding, registered_ids=source_keys[key],
-                                source_system=binding.mint_authority)
-        if public_contract.get("plural"):
-            values = json.loads(row["cedar_uids"])
-            arrays = [json.loads(row[name]) for name in ("canonical_names", "entity_classes", "entity_roles", "entity_names_as_published", "entity_link_statuses")]
-            if any(len(values) != len(array) for array in arrays):
-                raise SystemExit("REFUSED: misaligned entity-role arrays")
-        else:
-            values = [row.get("cedar_uid") or None]
-        for value in values:
-            if value is not None:
-                validate_identifier(value, ce, registered_ids=register)
-    buffer = io.StringIO(newline="")
-    writer = csv.DictWriter(buffer, fieldnames=header, lineterminator="\n")
-    writer.writeheader()
-    writer.writerows(records)
-    public_bytes = buffer.getvalue().encode("utf-8")
-    if pilot_authority_hashes(authority_root) != authorities or not dependencies_unchanged():
-        raise SystemExit("REFUSED: projection authority or dependency changed during candidate build")
-    conservation["source_sha256"] = hashlib.sha256(original).hexdigest()
-    conservation["dependencies"] = dependency_receipt
-    receipt_bytes = canonical_json(conservation)
-    receipt_sha = hashlib.sha256(receipt_bytes).hexdigest()
-    immutable_bytes(target / "review" / collection / (receipt_sha + ".json"), receipt_bytes)
-    artifact = target / "intake" / collection / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
-    immutable_bytes(artifact, public_bytes)
-    missing_urls = ["/".join(row[key] for key in keys) for row in records if not row.get("source_url")]
-    authority_hashes = [relative + (" ABSENT" if digest == "ABSENT" else " SHA256 " + digest)
-                        for relative, digest in authorities.items()]
-    authority_hashes.extend("Dependency " + Path(item["path"]).name + " SHA256 " + item["sha256"] for item in dependency_receipt)
-    authority_hashes.extend([
-        "Internal keyed publication conservation receipt SHA256 " + receipt_sha,
-        "Source rows: " + str(conservation["source_rows"]) + "; eligible: " + str(conservation["eligible_rows"]) + "; withheld: " + str(conservation["withheld_rows"]),
-        "Withheld reasons: " + json.dumps(conservation["withheld_reasons"], sort_keys=True)])
-    authority_hashes.append("Resolved entity/name/role register SHA256 " + hashlib.sha256(canonical_json(register)).hexdigest())
-    identity = None
-    if "cedar_uid" in header:
-        existing_ids = {row["cedar_uid"] for row in records if row.get("cedar_uid")}
-        identity = {"mode": "registered_reference", "source_field": "cedar_uid", "target_field": "cedar_uid",
-                    "namespace": "native_entity", "registry_version": hashlib.sha256(canonical_json(register)).hexdigest(),
-                    **CP.REFERENCE_PRESERVATION_AUTHORITY,
-                    "mapping": {uid: uid for uid in sorted(existing_ids)}}
-    contract = DatasetContract.model_validate({
-        "dataset_id": collection, "source_id": "cedar-approved-" + collection + "-projection",
-        "title": "Cedar " + collection + " flagship - local integration candidate",
-        "row_grain": table_contract["grain"],
-        "primary_key": keys,
-        "fields": [{"name": name, "type": "string", "nullable": name not in keys, "description": "Existing Cedar field_map " + collection + " contract: " + name} for name in header],
-        "identity": identity,
-        "source": {"owner": config["owner"], "url": config["url"],
-            "checked_at": args.as_of, "access_method": "manual_import", "jurisdiction": "United States",
-            "coverage": "Pinned existing flagship, not a new acquisition or completeness certificate",
-            "cadence": "Local integration candidate only", "terms_notes": "Existing approved Cedar publication field map; internal fields removed before intake",
-            "caveats": ["Canonical input SHA256: " + hashlib.sha256(original).hexdigest(),
-                "Source cutoff not independently refreshed",
-                "Missing source URLs for historical types: " + ", ".join(missing_urls),
-                "Not the full collection; no production promotion"] + config["caveats"] + authority_hashes},
-        "rights": config["rights"],
-        "synthetic": False, "geography": "United States", "time_coverage": "Existing historical register including 2025 and 2026; source lag unmeasured"})
-    snapshot = ingest_csv(contract, artifact, target)
-    manifest = build_release(contract, snapshot["snapshot_id"], target)
-    second = build_release(contract, snapshot["snapshot_id"], target)
-    if (manifest["release_id"] != second["release_id"] or source.read_bytes() != original
-            or pilot_authority_hashes(authority_root) != authorities or not dependencies_unchanged()):
-        raise SystemExit("REFUSED: nondeterministic release or changed canonical input/authority")
-    verify_release(target, collection, manifest["release_id"])
-    catalog = build_catalog(target, [(collection, manifest["release_id"])], product="cedar_press")
-    immutable_bytes(target / "catalogs" / (catalog["catalog_id"] + ".json"), canonical_json(catalog))
-    print(json.dumps({"release_id": manifest["release_id"], "record_count": manifest["record_count"], "catalog": str(target / "catalogs" / (catalog["catalog_id"] + ".json")), "status": "LOCAL_CANDIDATE_NOT_PROMOTED"}))
+    authorities = pilot_authority_hashes(HERE.parent)
+    inputs = {source: source.read_bytes()}
+    actions = None
+    crosswalk = None
+    if collection == "legislation":
+        dependency = source.with_name("native_bill_actions.csv")
+        inputs[dependency] = dependency.read_bytes()
+        actions = inputs[dependency]
+    elif collection == "natural-resources":
+        crosswalk = canonical_json(publication.neid_map())
+    field_map = canonical_json(publication.field_map()[collection])
+    register = canonical_json(publication.register())
+    scopes = canonical_json(publication.scopes())
+    if pilot_authority_hashes(HERE.parent) != authorities:
+        raise SystemExit("REFUSED: metadata changed while its snapshot was captured")
+    result = build_collection_release(
+        target, collection, source_bytes=inputs[source], field_map_bytes=field_map,
+        register_bytes=register, scopes_bytes=scopes, as_of=args.as_of,
+        actions_bytes=actions, legacy_crosswalk_bytes=crosswalk)
+    if (any(path.read_bytes() != content for path, content in inputs.items())
+            or pilot_authority_hashes(HERE.parent) != authorities):
+        raise SystemExit("REFUSED: source or metadata changed during delegated candidate build")
+    manifest = result["manifest"]
+    print(json.dumps({"release_id": manifest["release_id"],
+        "record_count": manifest["record_count"], "catalog": result["catalog_path"],
+        "receipt_sha256": result["receipt_sha256"],
+        "producer": "lumecon_data.pipeline.build_collection_release",
+        "status": "LOCAL_CANDIDATE_NOT_PROMOTED"}))
     return 0
 
 

@@ -4,6 +4,52 @@
 ## Current launch dashboard
 ### Release closure and repository cutover (2026-09-24)
 
+**Shared intake authority:** Lumecon Data's `docs/data-intake.md`, on
+`codex/collection-release-closure`, synthesizes the existing source registries,
+acquisition paths and build logs. Gaming uses that same framework through its
+Cedar Grove profile; it is not a thirteenth Cedar Press collection. The typed
+source profile and acquisition observation extend Lumecon's existing dataset
+contract and schema export, without changing the immutable release format.
+Remaining risks are migration of legacy acquisition callers, independently
+proved pagination completeness, source-specific rights and live cadence
+enforcement. Located source packages and offline fixtures do not certify a live
+refresh. The full contract belongs only in Lumecon Data.
+
+The shared intake suite passed 29 offline tests. The actual CT Gaming package
+has 171 distinct licensee-month observations (36 from 2025, 18 from 2026), but
+its fixed-limit retrieval does not prove the source universe. The typed guard
+refused it as partial; no Gaming release was created. Its immutable validation
+receipt is
+`C:/Users/esm247/cedar-takeover-checkpoint/intake-ct-validation/bd1ad644b1d830df2a3942ca34bebc501fece6a1a678d4b9e04eb3a9afeab5ba.json`.
+The filename matches its SHA256. Revalidating the embedded `SourceIntakeRecord`
+against the original raw bytes reproduces the refusal. Complete Gaming/federal
+and incremental-window tests use explicitly synthetic fixtures, not invented
+production completeness evidence.
+
+**Lumecon-owned flagship rehearsals, September 24:**
+
+| Flagship | Exact local release ID | Download rows / held | Download SHA256 |
+|---|---|---|---|
+| Legislation bills | `2aa7ee2a86e82e962fa2cad70a364c70c09a46415b8b86488740944a04f05eaf` | 3,058 / 11 unsupported inclusions | `e5f8672190ab801370d4cf001baa30ea066253cbef12e7d7e15d6d245f57f650` |
+| Natural Resources revenue | `bd254496b977351ca7fe1bcdef8d336d7ed3f48cff3ef9ff24615b56003eefc0` | 11,120 / 185 pending source qualification | `16e95935e7e7849230bba959bc551bcea2b4f9179b36be1dcca224fc1a30aeae` |
+
+Both used Lumecon's canonical projection and existing immutable release format.
+Local Cedar login, anonymous 401, wrong-entitlement 403, authorized exact bytes,
+redacted audit events, malformed/missing/stale release refusal and two-version
+rollback passed. Development SQLite catalog import was repeated without a
+duplicate, and pin rollback retained original artifacts. PostgreSQL, production
+access and advertised ancillary tables are not certified. Receipts are
+`C:/Users/esm247/cedar-takeover-checkpoint/lumecon-legislation-locked-final-2026-09-24/rehearsal-result.json`
+and `C:/Users/esm247/cedar-takeover-checkpoint/lumecon-resources-final-2026-09-24/rehearsal-result.json`.
+
+Cedar checkpoint `6aa8eb3` passed subscriber storage CI run
+[36068685079](https://github.com/teim-team/cedar-press/actions/runs/36068685079).
+Application CI [36068685097](https://github.com/teim-team/cedar-press/actions/runs/36068685097)
+failed the existing frontend sample-header equality assertion at
+`src/features/grove/explore.test.js:598`: Deals' declared `Candidate_Status`,
+`Caveat` and `research_note` are absent from the older sample. Claude owns that
+frontend reconciliation; no frontend file was changed by this cutover.
+
 The user has reaffirmed **Lumecon-data as the authoritative producer, schema,
 identity-binding, validation, storage and release repository for exactly the
 twelve Cedar Press collections below**. Cedar owns presentation, product catalog,
