@@ -86,6 +86,7 @@ ID_CONTRACT_STATUS = "PENDING_CICD_RETIREMENT_AUDIT"
 CE_UID_RE = re.compile(r"^CE-[0-9A-HJKMNP-TV-Z]{5}-[0-9A-HJKMNP-TV-Z]{2}$")
 
 
+@__import__('functools').lru_cache(maxsize=None)
 def is_ce_uid(value: str) -> bool:
     import cedar_ids
     return bool(CE_UID_RE.match(value or "")) and cedar_ids._entity_validator().valid(value)
