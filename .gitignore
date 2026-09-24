@@ -192,11 +192,15 @@ data/restricted/
 # in the index.
 !/public/data/cedar/samples/**/*.csv
 
-# data/cedar/samples.published.json, the measured record of which declared
-# samples the repository does NOT hold (scripts/measure-samples.mjs), is read
-# by the client, the API and the tests. Like the manifest and the ledger
-# beside it, it is force-added once and tracked from then on: `/data/*` above
-# ignores the directory itself, so a negation here cannot reach the file.
+# Small product release contracts must survive a fresh clone. Reopen only
+# this directory, then allow exactly these files; bulk and private data stay ignored.
+!/data/cedar/
+/data/cedar/*
+!/data/cedar/codebook.json
+!/data/cedar/collections.manifest.json
+!/data/cedar/field_map.json
+!/data/cedar/releases.json
+!/data/cedar/samples.published.json
 
 # Requirements / lockfiles, wherever they turn up.
 !requirements*.txt
