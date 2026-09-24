@@ -90,6 +90,55 @@ jobs:
       - run: make audit-python
       - run: make audit-node
 
+  # Cedar consumes Gaming from Lumecon-data (repository split 2026-09-24). This
+  # job proves the consumer against the EXACT Lumecon commit it is paired with:
+  # it installs lumecon-data at a pinned commit SHA of branch
+  # `claude/gaming-grove-release` (never a branch name or `main`), builds the
+  # deterministic synthetic Gaming fixture release with that commit's own
+  # `lumecon-data gaming fixture-release`, and runs the consumer tests with
+  # CEDAR_REQUIRE_LUMECON_GAMING=1, so a missing Lumecon fixture is a failure,
+  # not a skip. The SHA must be PUSHED to teim-team/Lumecon-data before this
+  # job can fetch it; while it exists only locally the job fails at install.
+  # Update LUMECON_DATA_SHA in the same pull request that updates
+  # data/cedar/grove_release_pin.json (merge order: Lumecon first).
+  gaming-release-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LUMECON_DATA_SHA: 2ea57b5af924d1b324ec8e5416887f1488df5625  # claude/gaming-grove-release; local until pushed
+      CEDAR_REQUIRE_LUMECON_GAMING: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -e 'server[dev]' httpx2
+      # teim-team/Lumecon-data is private (anonymous clone answers 404), so the
+      # install reads with a repository-scoped, read-only token secret. No
+      # other credential enters this job; a fork's pull request gets no secret
+      # and fails here rather than skipping.
+      - name: Install Lumecon-data at the pinned commit
+        env:
+          LUMECON_DATA_READ_TOKEN: ${{ secrets.LUMECON_DATA_READ_TOKEN }}
+        run: pip install "lumecon-data[api] @ git+https://x-access-token:${LUMECON_DATA_READ_TOKEN}@github.com/teim-team/Lumecon-data@${LUMECON_DATA_SHA}"
+      - name: Build the synthetic Gaming fixture release (smoke)
+        run: python -m lumecon_data gaming fixture-release --store "$RUNNER_TEMP/gaming-fixture-store"
+      - name: Run the Gaming consumer tests without silent skips
+        run: |
+          python - <<'PY'
+          import sys
+          import unittest
+          sys.path.insert(0, "server")
+          suite = unittest.defaultTestLoader.loadTestsFromNames([
+              "tests.test_gaming_release",
+              "tests.test_gaming_issuance",
+          ])
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if result.skipped:
+              raise SystemExit("Gaming consumer run unexpectedly skipped tests")
+          raise SystemExit(0 if result.wasSuccessful() else 1)
+          PY
+
 # Not a step: `ruff format --check server`. It would reformat 18 of 30
 # files today. That is a real cleanup with its own review, not something to
 # slip into a CI pass -- and adopting the gate while it is red teaches people
