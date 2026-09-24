@@ -897,15 +897,19 @@ def mint(n: int) -> str:
 
 def valid(uid: str) -> bool:
     try:
-        _, p, c = uid.split("-")
-        return len(p) == 5 and all(ch in B32 for ch in p) and check_chars(p) == c
-    except ValueError:
+        namespace, p, c = uid.split("-")
+        return (namespace == "CE" and len(p) == 5
+                and all(ch in B32 for ch in p) and check_chars(p) == c)
+    except (AttributeError, ValueError):
         return False
 
 
 def selftest() -> None:
     a = mint(1234)
     assert valid(a), "mint/valid roundtrip"
+    for namespace in ("CB", "LOB", "SRC"):
+        assert not valid(a.replace("CE-", namespace + "-", 1)), "wrong namespace"
+    assert not valid(None), "non-string is not an entity identifier"
     p = a.split("-")[1]
     # substitution caught
     bad = p[:2] + B32[(B32.index(p[2]) + 1) % 32] + p[3:]

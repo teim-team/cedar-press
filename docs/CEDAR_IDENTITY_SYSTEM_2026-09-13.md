@@ -1,7 +1,7 @@
 # The Cedar identity system
 
 *The owner's specification, given 2026-09-13. This file is the current
-statement of the two-namespace identity model. Where it disagrees with an
+statement of the identity model, extended by the owner on 2026-09-23. Where it disagrees with an
 earlier document, this one is later and wins; §7 lists every disagreement
 found so far rather than leaving them for someone to trip over.*
 
@@ -137,20 +137,47 @@ missing, get shared, and get reported wrong by sources. Cedar IDs do not.
 
 ---
 
-## 5. Dataset records still need their own IDs
+## 5. One framework, collection-scoped record namespaces
 
-Cedar IDs say **who**. Dataset IDs say **what happened**: `award_id`,
-`deal_id`, `filing_id`, `document_id`, `notice_id`, `bill_id`,
-`subcontract_id`, `event_id`, `enterprise_id` from a source system.
+Owner direction, 2026-09-23: the two durable identity anchors sit within one shared
+ID framework, not a universal event registry and not unrelated per-script schemes.
+An ID belongs to one object type and one immutable declared grain. Existing issued
+IDs remain stable, including CEDAR-NEST and NESTREL; illustrative DEAL/LOB prefixes
+are not an instruction to rename existing IDs or mint replacements.
 
-Each dataset row identifies its record/event with its own ID and then links to
-the relevant `CE-…` and/or `CB-…`. For multi-party economic events, a shared
-research-event key connects the related rows without falsely treating the
-parties as one entity.
+| Layer | Meaning |
+|---|---|
+| cedar_uid | Durable canonical Native entity; never a source tribe_id, business or event |
+| business_uid / enterprise_id | Durable business/enterprise object; distinct from its affiliated entity |
+| Collection record ID | Record/event in a declared collection and table grain |
+| source_system + source_record_id | External issuing system and its original identifier |
+| Relationship ID | Explicit evidence-backed connection between stable typed objects |
+| Release ID | Published version/snapshot, not a record or entity |
 
-> **The practical rule:** Cedar IDs identify durable subjects; dataset IDs
-> identify records and events; relationship rows explain how subjects are
-> connected.
+Use (collection_id, table_id, record_id) as the global infrastructure reference.
+A lobbying filing cannot be a deal merely because a string key matches; the two
+connect through a validated canonical identity or an explicit relationship mapping.
+A source-native bill/document/award ID remains source-native even when used as a
+collection table's natural key. Do not silently promote it into Cedar identity.
+
+Extend code/cedar_ids.py and the existing identity/key services as the central
+contract and validator authority. Every namespace declares meaning, owner,
+validation pattern, minting authority, collection/table scope and immutable grain.
+Do not create per-script registries. Collection packages may mint only their
+declared record IDs. Source rows never populate cedar_uid through a bare assignment
+from tribe_id. Shared validators must reject wrong namespace/object type, duplicate
+keys, immutable binding reassignment and undeclared cross-collection joins.
+
+Changing names, classification, source evidence or affiliation does not change
+stable IDs. Keep object bindings separate from mutable attributes. Derived samples
+and aggregates do not acquire permanent IDs merely because a script emits them;
+registration requires a real stable citation need. Legacy generic event_id fields
+must be inventoried and scoped, not globally joined or bulk-renamed.
+
+Cross-listing schools, colleges, CDFIs, nonprofits or businesses across collections
+is collection membership, not an identity merge. Same-legal-object claims require
+explicit evidence-gated relationships. Public affiliation wording and preservation
+of precise source assertions follow docs/PUBLICATION_POLICY.md.
 
 ---
 
