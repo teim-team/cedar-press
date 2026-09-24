@@ -826,88 +826,93 @@ def build(dry: bool, only: tuple = ()) -> int:
         fkeys = sorted(fkeys, key=lambda k: (-_fine[k], fkeys.index(k)))
 
         joined, refused, added_cols = [], [], 0
-        if not dry:
-            for tname, tmeta in sorted(meta.items()):
-                if tname == fname or tmeta.get("status") != "shippable":
-                    continue
-                tpath = find(tname)
-                if not tpath:
-                    continue
-                key = next((k for k in fkeys
-                            if k in (tmeta.get("key_columns") or [])), None)
-                if not key:
-                    continue
-                if not one_per_key(tmeta, key):
-                    # One-to-many. Joining would MULTIPLY the flagship, so the
-                    # buyer gets a count instead of a duplicated row.
-                    thdr, trows, _ = load(tpath)
-                    if key not in thdr:
-                        continue
-                    cnt = defaultdict(int)
-                    for r in trows:
-                        cnt[(r.get(key) or "").strip()] += 1
-                    col = f"n_{tpath.stem}"
-                    for r in frows:
-                        # str, not int. Every other cell in these dicts is a
-                        # string read out of a CSV, and a lone int made
-                        # `profile()` raise on `.strip()`. A row that is
-                        # str-typed everywhere except one column is a trap for
-                        # the next reader too.
-                        r[col] = str(cnt.get((r.get(key) or "").strip(), 0))
-                    fhdr.append(col)
-                    added_cols += 1
-                    refused.append(f"{tpath.stem}(1:many on {key} -> {col})")
-                    continue
+        # Planning executes the same joins and publication checks as a build;
+        # only artifact writes are skipped. Otherwise a clean plan can hide
+        # undeclared columns introduced by supporting tables.
+        for tname, tmeta in sorted(meta.items()):
+            if tname == fname or tmeta.get("status") != "shippable":
+                continue
+            tpath = find(tname)
+            if not tpath:
+                continue
+            key = next((k for k in fkeys
+                        if k in (tmeta.get("key_columns") or [])), None)
+            if not key:
+                continue
+            if not one_per_key(tmeta, key):
+                # One-to-many. Joining would MULTIPLY the flagship, so the
+                # buyer gets a count instead of a duplicated row.
                 thdr, trows, _ = load(tpath)
-                # RE-MEASURE. The contracts file records a cardinality that was
-                # true when the grain sweep ran; the table may have been
-                # rebuilt since. Codex, PR #35: `setdefault` silently keeps the
-                # first row and discards the rest, and the row-count check
-                # CANNOT catch it - a join widens rows and never appends to
-                # `frows`, so the count is unchanged by construction and the
-                # advertised safeguard passes while the customer receives an
-                # arbitrary one of N supporting records.
-                #
-                # It also answers the review question I put in the PR: no,
-                # trusting the declared measurement is not sufficient. Measure
-                # on the rows actually loaded, and refuse when it fails.
-                idx = {}
-                dupe_key = 0
+                if key not in thdr:
+                    continue
+                cnt = defaultdict(int)
                 for r in trows:
                     k2 = (r.get(key) or "").strip()
-                    if k2 in idx:
-                        dupe_key += 1
-                        continue
-                    idx[k2] = r
-                if dupe_key:
-                    refused.append(f"{tpath.stem}(DECLARED 1:1 on {key}, "
-                                   f"MEASURED {dupe_key} duplicate key(s) - "
-                                   f"join refused, contracts file is stale)")
-                    print(f"      !! {tpath.stem}: declared one-to-one on "
-                          f"{key}, measured {dupe_key} duplicate key(s); "
-                          f"REFUSED")
-                    continue
-                new = [c2 for c2 in thdr if c2 != key and c2 not in fhdr]
-                if not new:
-                    continue
-                pre = tpath.stem
+                    if k2:
+                        cnt[k2] += 1
+                col = f"n_{tpath.stem}"
                 for r in frows:
-                    src = idx.get((r.get(key) or "").strip())
-                    for c2 in new:
-                        r[f"{pre}__{c2}"] = (src or {}).get(c2, "")
-                fhdr.extend(f"{pre}__{c2}" for c2 in new)
-                added_cols += len(new)
-                joined.append(f"{pre}({key})")
-                # THE CHECK, not the promise. A join that moved the row count
-                # is reverted, because a rule that is only documented is a rule
-                # the next writer breaks.
-                if len(frows) != n0:
-                    print(f"      !! {pre} moved rows {n0}->{len(frows)}; "
-                          f"REVERTED")
-                    for c2 in new:
-                        fhdr.remove(f"{pre}__{c2}")
-                    joined.pop()
-
+                    # str, not int. Every other cell in these dicts is a
+                    # string read out of a CSV, and a lone int made
+                    # `profile()` raise on `.strip()`. A row that is
+                    # str-typed everywhere except one column is a trap for
+                    # the next reader too.
+                    r[col] = str(cnt.get((r.get(key) or "").strip(), 0))
+                fhdr.append(col)
+                added_cols += 1
+                refused.append(f"{tpath.stem}(1:many on {key} -> {col})")
+                continue
+            thdr, trows, _ = load(tpath)
+            # RE-MEASURE. The contracts file records a cardinality that was
+            # true when the grain sweep ran; the table may have been
+            # rebuilt since. Codex, PR #35: `setdefault` silently keeps the
+            # first row and discards the rest, and the row-count check
+            # CANNOT catch it - a join widens rows and never appends to
+            # `frows`, so the count is unchanged by construction and the
+            # advertised safeguard passes while the customer receives an
+            # arbitrary one of N supporting records.
+            #
+            # It also answers the review question I put in the PR: no,
+            # trusting the declared measurement is not sufficient. Measure
+            # on the rows actually loaded, and refuse when it fails.
+            idx = {}
+            dupe_key = 0
+            for r in trows:
+                k2 = (r.get(key) or "").strip()
+                if not k2:
+                    continue
+                if k2 in idx:
+                    dupe_key += 1
+                    continue
+                idx[k2] = r
+            if dupe_key:
+                refused.append(f"{tpath.stem}(DECLARED 1:1 on {key}, "
+                               f"MEASURED {dupe_key} duplicate key(s) - "
+                               f"join refused, contracts file is stale)")
+                print(f"      !! {tpath.stem}: declared one-to-one on "
+                      f"{key}, measured {dupe_key} duplicate key(s); "
+                      f"REFUSED")
+                continue
+            new = [c2 for c2 in thdr if c2 != key and c2 not in fhdr]
+            if not new:
+                continue
+            pre = tpath.stem
+            for r in frows:
+                src = idx.get((r.get(key) or "").strip())
+                for c2 in new:
+                    r[f"{pre}__{c2}"] = (src or {}).get(c2, "")
+            fhdr.extend(f"{pre}__{c2}" for c2 in new)
+            added_cols += len(new)
+            joined.append(f"{pre}({key})")
+            # THE CHECK, not the promise. A join that moved the row count
+            # is reverted, because a rule that is only documented is a rule
+            # the next writer breaks.
+            if len(frows) != n0:
+                print(f"      !! {pre} moved rows {n0}->{len(frows)}; "
+                      f"REVERTED")
+                for c2 in new:
+                    fhdr.remove(f"{pre}__{c2}")
+                joined.pop()
         # BAND THE COLUMNS BEFORE ANYTHING IS WRITTEN, so the CSV, the
         # codebook and the notes all present the same order. Doing it inside
         # `emit` alone would have shipped a spreadsheet whose columns ran in a

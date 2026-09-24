@@ -4626,12 +4626,12 @@
     {
      "column": "enterprise_existing_cedar_uid",
      "decision": "internal",
-     "why": "A distinct Cedar uid on the enterprise itself (the sample: Oglala Lakota College, a register entity). Not equivalent to cedar_uid; the writer stops the dataset until it is adjudicated.",
+     "why": "Owner ruling 2026-09-23: preserve internally; the ambiguous cross-reference does not prove legal equivalence or ownership. NEED remains under an independent systemic affiliation publication hold.",
      "spec": "retirement",
      "retire": {
       "identifies": "the enterprise as a register entity in its own right, distinct from its owner",
-      "disposition": "adjudicate",
-      "replacement": "enterprise_id, or a documented cross-reference to the enterprise's own cedar_uid",
+      "disposition": "internal_crosswalk",
+      "replacement": "Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge.",
       "column": "enterprise_existing_cedar_uid"
      }
     },
@@ -4840,8 +4840,8 @@
     },
     {
      "identifies": "the enterprise as a register entity in its own right, distinct from its owner",
-     "disposition": "adjudicate",
-     "replacement": "enterprise_id, or a documented cross-reference to the enterprise's own cedar_uid",
+     "disposition": "internal_crosswalk",
+     "replacement": "Preserve internally; future same-legal-object relationship requires explicit evidence and contract. No identity merge.",
      "column": "enterprise_existing_cedar_uid"
     }
    ]

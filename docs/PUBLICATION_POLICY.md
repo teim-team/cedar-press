@@ -3,6 +3,77 @@
 *Written 2026-09-01. Live doc. Owner decision — this settles item 16.11 in the
 decision queue and sets the default for every dataset.*
 
+<!-- BEGIN OWNER-AFFILIATION-POLICY-2026-09-23 -->
+## Owner ruling, 2026-09-23: source-attributed affiliation
+
+This ruling supersedes stronger ownership wording elsewhere in older operational
+instructions. It applies across NEED, Native-Owned Businesses, Native Nonprofits,
+contracting, subcontracting and every collection displaying ownership or affiliation.
+The same underlying evidence must not support stronger wording in another collection.
+
+The customer-facing default is **affiliated with**, requiring affirmative evidence
+connecting the organization to the named Native entity. Name similarity, shared
+words, geography, a model suggestion or an upstream crosswalk alone is insufficient.
+When evidence supports inclusion but not a specific entity link, preserve the valid
+source-identified record with an unresolved entity relationship; do not invent a hub.
+Where acceptable Native-inclusion evidence is absent, hold or exclude under the
+collection's existing inclusion contract, without pretending uncertainty is proof.
+
+Cedar verifies that the cited source reports the connection. Cedar does not thereby
+independently certify current ownership percentages, beneficial ownership, voting
+control or a complete ownership chain. A stronger direct ownership assertion needs
+an authoritative current record of the relevant structure AND an explicit supporting
+publication contract. Certification is published as the named program/status and its
+observation date, not converted into an undated ownership claim.
+
+Retain precise source assertions rather than erasing them. The evidence contract
+must preserve affiliated CE UID, affiliation basis, source-described relationship,
+exact source and supporting excerpt, source/observation date, known effective period,
+evidence strength, directly stated versus inferred status, and conflicts/limitations.
+Source-described predicates include listed_as_enterprise_by,
+described_as_subsidiary_by, described_as_wholly_owned_by, chartered_by, operated_by,
+member_of, certified_under, serves, and affiliated_with_unspecified. Unknown remains
+unresolved. For example, publish that a company is affiliated with an ANC and that
+its dated annual report describes it as wholly owned; do not silently convert the
+quotation into Cedar's assertion of present wholly-owned status.
+
+Entity identity, business/enterprise objects, events, collection membership and
+relationships remain separate. Stable CE and enterprise/business IDs are retained;
+legitimate cross-listing does not imply legal equivalence. Schools, tribal colleges,
+CDFIs, nonprofits and intertribal organizations use their appropriate existing
+entity classes and supported relationships, not an ordinary-enterprise default.
+Schools' location, BIE status, charter and operation are different facts.
+
+`enterprise_existing_cedar_uid` is INTERNAL_ONLY under its current ambiguous
+semantics. Preserve its values and evidence. A future same-legal-object link requires
+an explicitly named, evidence-gated predicate, not an ownership inference or an ID
+merge. The field-level ruling does not release the systemic affiliation hold below.
+The executable field map still retains its older stop until the replacement contract
+and independent hold are tested; do not remove it merely because this prose records
+the owner's decision.
+
+### NEED systemic stop and review requirements
+
+The reviewed false pairings are not a completed 18-row adjudication exercise. Keep
+all stable enterprise IDs and validated migration work; quarantine the questionable
+affiliation path from publication. Trace exact source rows and transformations, audit
+the full affected route population, and require negative controls plus a new
+stratified quality sample before proposing promotion. Do not regenerate the owner's
+active review queue while its decisions remain only in the browser.
+
+Preserve REJECT decisions/notes and apply them idempotently after validating their
+case and evidence bindings. Affirmative replacement information is proposed evidence,
+not automatic promotion. Prior human rulings remain in history. Revised review cards
+must include original inclusion source and excerpt, URL/date, match method, full
+canonical target name/UID/class and aliases, competing candidates, organization type,
+precise proposed relationship and uncertainty. Ambiguous short labels are inadequate.
+
+This ruling does not authorize publication, taxonomy invention, retroactive ownership
+inference, register ID changes, or silently discarding source observations. A before/
+after report must identify affected rows, classes, relationship types, unresolved
+cases and any downstream output changes. Existing source/privacy restrictions remain.
+<!-- END OWNER-AFFILIATION-POLICY-2026-09-23 -->
+
 ## The owner's framing
 
 > *"It doesn't make sense to list every single source for every single row of

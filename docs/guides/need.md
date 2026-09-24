@@ -104,10 +104,6 @@ A blank is never zero and never an invented date. A blank JSON-list cell means u
 
 ## What is still owed
 
-Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):
-
-- `enterprise_existing_cedar_uid`: the enterprise as a register entity in its own right, distinct from its owner (adjudicate).
-
 Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
