@@ -651,7 +651,7 @@ def cmd_release_pilot(args):
     spec = importlib.util.spec_from_file_location("pilot_combiner", Path(__file__).with_name("1137_customer_dataset_combine.py"))
     combine = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(combine)
-    header, records, held = combine.load(source)
+    header, records, held = combine.load(source, source_bytes=original)
     own = set(header)
     publication.recompute_derived(collection, header, records)
     result = publication.apply_field_map(collection, header, records, own)
@@ -691,7 +691,8 @@ def cmd_release_pilot(args):
     for relative in ("data/cedar/field_map.json", "data/cedar/scopes.json",
                      "data/spine/cedar_identity_register.csv", "data/spine/cedar_entity_names.csv",
                      "docs/schema/dataset_contracts.json", "code/cedar_pipeline.py",
-                     "code/cedar_publication.py", "code/cedar_ids.py", "code/build.py"):
+                     "code/cedar_publication.py", "code/cedar_ids.py", "code/build.py",
+                     "code/1137_customer_dataset_combine.py"):
         authority = Path(__file__).resolve().parents[1] / relative
         if authority.is_file():
             authority_hashes.append(relative + " SHA256 " + hashlib.sha256(authority.read_bytes()).hexdigest())

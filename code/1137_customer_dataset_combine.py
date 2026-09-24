@@ -105,6 +105,7 @@ gets a manifest line saying so rather than an empty file that looks complete.
 from __future__ import annotations
 
 import csv
+import io
 import json
 import re
 import sys
@@ -186,16 +187,24 @@ def find(name):
 # `cedar_publication`. It was reimplemented identically here and in 1135.
 
 
-def load(path, gate=True, masked=None):
+def load(path, gate=True, masked=None, *, source_bytes=None):
     """Read a table through THE publication gate.
 
     `masked` is an optional counter the caller passes in to collect the
     attribution masks - `is_publication_eligible` returns three things, not
     two, and a caller that reads only the boolean silently reverts CP-017.
+    A release caller supplies its already hashed `source_bytes` so a concurrent
+    source rewrite cannot change the projected rows after snapshot validation.
+    The path still identifies the table's existing publication rules.
     """
     if masked is None:
         masked = defaultdict(int)
-    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+    stream = (
+        path.open(encoding="utf-8-sig", errors="replace", newline="")
+        if source_bytes is None
+        else io.StringIO(source_bytes.decode("utf-8-sig"), newline="")
+    )
+    with stream as fh:
         rd = csv.DictReader(fh)
         raw_hdr = list(rd.fieldnames or [])
         source = rd

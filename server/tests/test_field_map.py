@@ -170,6 +170,29 @@ def neutralised(collection: str, header, rows):
 
 
 class TestCombinedPlan(unittest.TestCase):
+    def test_pinned_bytes_use_publication_gate_without_reopening_changed_source(self):
+        spec = importlib.util.spec_from_file_location(
+            "pinned_customer_combine_test", CODE / "1137_customer_dataset_combine.py"
+        )
+        combine = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(combine)
+        pinned = b"record_id,note\nfixture-1,original source claim\n"
+        with (
+            patch.object(Path, "open", side_effect=AssertionError("mutable source reopened")),
+            patch.object(combine, "publishable_columns", side_effect=lambda columns: columns),
+            patch.object(combine, "translate_neid_values", return_value=(0, 0)),
+            patch.object(combine, "apply_official_names", return_value=0),
+            patch.object(combine, "enforce_denials", return_value=False),
+            patch.object(
+                combine, "is_publication_eligible", return_value=(True, "", False)
+            ) as gate,
+        ):
+            header, rows, held = combine.load(Path("fixture.csv"), source_bytes=pinned)
+        self.assertEqual(header, ["record_id", "note"])
+        self.assertEqual(rows, [{"record_id": "fixture-1", "note": "original source claim"}])
+        self.assertEqual(dict(held), {})
+        gate.assert_called_once()
+
     def test_plan_and_build_check_joined_schema_without_matching_empty_keys(self):
         spec = importlib.util.spec_from_file_location(
             "customer_combine_test", CODE / "1137_customer_dataset_combine.py"

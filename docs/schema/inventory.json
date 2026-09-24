@@ -18276,7 +18276,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 1287,
+   "lines": 1296,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -35178,15 +35178,17 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 9,
-   "mentioned_outside_history": 9,
+   "mentions": 10,
+   "mentioned_outside_history": 10,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
    "lines": 1345,
-   "operational_role": "unresolved",
+   "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
-   "static_consumers": [],
+   "static_consumers": [
+    "server/tests/test_pipeline_registration.py"
+   ],
    "unknown_io_literals": [
     "AGENTS.md",
     "ARCHITECTURE.md",
@@ -45225,12 +45227,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 85,
-   "mentioned_outside_history": 84,
+   "mentions": 86,
+   "mentioned_outside_history": 85,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 771,
+   "lines": 772,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -45247,7 +45249,8 @@
     "docs/releases/native-owned-businesses-6c92a41/manifest.json",
     "docs/releases/natural-resources-6c92a41/manifest.json",
     "docs/releases/subcontracting-6c92a41/manifest.json",
-    "docs/schema/dataset_contracts.json"
+    "docs/schema/dataset_contracts.json",
+    "server/tests/test_pipeline_registration.py"
    ],
    "unknown_io_literals": [
     "anc_tribal_subsidiary_lookup.csv",
@@ -46383,8 +46386,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 28,
-   "mentioned_outside_history": 27,
+   "mentions": 29,
+   "mentioned_outside_history": 28,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -46418,7 +46421,8 @@
     "code/88_build_deals_taxonomy.py",
     "code/build.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_pipeline_registration.py"
    ],
    "unknown_io_literals": [
     "assistance_tribe_id_crosswalk.csv",
@@ -47684,9 +47688,9 @@
   "operational_role_counts": {
    "active producer": 78,
    "active validator/migration/review": 50,
-   "product consumer/shared service": 21,
+   "product consumer/shared service": 22,
    "test/fixture": 5,
-   "unresolved": 530
+   "unresolved": 529
   },
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; referenced product consumer/shared service; referenced validator/migration/review; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static AST imports and Python-path literals, plus tracked command/config references. Tests may be consumers. These are not verified external scheduler or runtime invocations.",
