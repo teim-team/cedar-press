@@ -34,15 +34,39 @@ limitation rather than invent links or rename issued record IDs. There are 591
 source rows with entity associations; blank associations do not mean exclusion.
 No release, entitlement-to-full-download test, or rollback proof was completed.
 
-**Concrete external blocker:** the existing Lumecon writer requires O_NOFOLLOW,
-which Windows Python 3.13 lacks. A bounded compatibility patch retains exclusive
-creation and rejects Windows reparse points. Its storage suite reports 22 passed,
-2 failed: both failures are Windows `WinError 1314` when tests create real symbolic
-links. The current account lacks that privilege. The safety checks were not
-skipped, the system configuration was not changed, and the unverified patch was
-not committed. Continue in an authorized environment able to run those tests;
-do not silently disable link protection. An approved Windows developer-mode or
-privileged test environment is the exact external prerequisite, not AWS access.
+**Current external blocker (Linux continuation checked 2026-09-23):** no usable
+Linux runtime is installed on this machine. `wsl --list --verbose` reports
+"The Windows Subsystem for Linux is not installed." `Get-Command docker` finds
+no CLI; standard system and per-user executable paths do not exist, and no
+Docker service or process was found. The per-user DockerDesktop directory contains
+only `tmp-delete`; Docker installer logs record uninstall completion on August 28.
+No WSL distribution, Docker container, or Linux-native checkout was created.
+
+The earlier Windows storage result remains 22 passed, two fixture failures from
+`WinError 1314` creating real symbolic links. That is a test-environment limitation,
+not evidence of a product failure. The two-file compatibility patch is still
+uncommitted. No safety test was weakened or skipped; no system component was
+installed and no Windows security setting was changed. User authorization to
+install a Linux runtime, or access to an existing Linux environment, is required
+before the requested Linux verification and conditional storage commit.
+
+Exact discovery commands (PowerShell):
+
+```powershell
+Get-Command wsl,docker -ErrorAction SilentlyContinue
+wsl --list --verbose
+Get-Service -Name '*docker*','*wsl*','LxssManager' -ErrorAction SilentlyContinue
+Get-Process -Name '*docker*' -ErrorAction SilentlyContinue
+Test-Path 'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
+Test-Path 'C:\Users\esm247\AppData\Local\Programs\DockerDesktop\resources\bin\docker.exe'
+Get-ChildItem 'C:\Users\esm247\AppData\Local\Programs\DockerDesktop'
+```
+
+No Linux tests ran, so traversal, symlink escape, malformed paths, immutable
+collision and rollback are not newly certified. The Legislation vertical slice
+remains incomplete at the previously measured 3,069-row public projection.
+NEED, R7 and architecture audits were not reopened. Production deployment is
+still separately unauthorized; local Linux verification does not require AWS.
 
 ## Repository and canonical ownership
 
