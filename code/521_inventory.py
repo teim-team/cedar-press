@@ -623,6 +623,9 @@ def refresh_script_census():
         "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
         "scripts": len(scripts),
         "operational_role_counts": dict(sorted(Counter(s["operational_role"] for s in scripts).items())),
+        "unresolved_writer_risk_counts": dict(sorted(Counter(s["writer_risk"] for s in scripts
+                                                             if s["operational_role"] == "unresolved").items())),
+        "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
         "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
         "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
         "embedded_selftest_files": sum(s["embedded_test_functions"] > 0 for s in scripts),
@@ -689,6 +692,123 @@ def _test_reference(path, tree):
             or any(isinstance(node, ast.ClassDef)
                    and any(_call_name(base).endswith("TestCase") for base in node.bases)
                    for node in ast.walk(tree)))
+
+
+def writer_evidence(path, table_contracts):
+    """Potential write sites from AST operations, never inferred from comments.
+
+    Binding expansion is deliberately conservative: ambiguous bindings remain
+    unresolved. This is a review priority and change ratchet, not write tracing.
+    """
+    tree = ast.parse(Path(path).read_text(encoding="utf-8-sig"))
+    bindings = defaultdict(list)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    bindings[target.id].append(node.value)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.value:
+            bindings[node.target.id].append(node.value)
+
+    def expand(node, seen=frozenset()):
+        if isinstance(node, ast.Name) and node.id not in seen and len(bindings[node.id]) == 1:
+            return expand(bindings[node.id][0], seen | {node.id})
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            return expand(node.left, seen).rstrip("/") + "/" + expand(node.right, seen)
+        if isinstance(node, ast.Call) and _call_name(node.func) in {"Path", "pathlib.Path"} and node.args:
+            return expand(node.args[0], seen)
+        return "<unresolved>"
+
+    context_digest = hashlib.sha256(ast.dump(tree, include_attributes=False).encode()).hexdigest()
+    sites = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _call_name(node.func)
+        method = name.rsplit(".", 1)[-1]
+        target = None
+        if method in {"write_text", "write_bytes"} and isinstance(node.func, ast.Attribute):
+            target = node.func.value
+        elif name in {"open", "io.open", "builtins.open"} or method == "open":
+            module_open = {"io.open", "builtins.open", "gzip.open", "bz2.open", "lzma.open"}
+            positional = 0 if isinstance(node.func, ast.Attribute) and name not in module_open else 1
+            mode = next((keyword.value for keyword in node.keywords if keyword.arg == "mode"),
+                        node.args[positional] if len(node.args) > positional else ast.Constant("r"))
+            value = expand(mode)
+            if value == "<unresolved>" or (re.fullmatch(r"[rwax][bt+]{0,2}", value)
+                                           and any(flag in value for flag in "wax+")):
+                target = node.func.value if positional == 0 else (node.args[0] if node.args else None)
+        elif method in {"to_csv", "to_json", "to_parquet", "to_pickle"}:
+            target = node.args[0] if node.args else next((k.value for k in node.keywords if k.arg in {"path", "path_or_buf"}), None)
+        elif name in {"os.replace", "os.rename", "shutil.copy", "shutil.copy2", "shutil.copyfile", "shutil.move"}:
+            target = node.args[1] if len(node.args) > 1 else None
+        if target is None:
+            continue
+        destination = expand(target).replace("\\", "/")
+        basename = destination.rsplit("/", 1)[-1]
+        normalized = "/" + destination.lstrip("/")
+        protected = any(part in normalized for part in (
+            "/data/spine/", "/data/cedar/", "/data/clean/", "/public/", "/dist/",
+            "/releases/", "/snapshots/", "/catalogs/",
+        ))
+        governed = basename if basename in table_contracts else None
+        declared_clean = governed and "/data/clean/" in normalized
+        scope = "governed_table" if declared_clean else "protected_surface" if protected else "governed_table" if governed else "unresolved_target" if "<unresolved>" in destination else "other_literal_target"
+        # Include bindings, so retargeting OUT without changing OUT.open fires.
+        dependencies = sorted({ast.dump(value, include_attributes=False)
+                               for item in ast.walk(target) if isinstance(item, ast.Name)
+                               for value in bindings[item.id]})
+        unresolved_context = context_digest if "<unresolved>" in destination else None
+        signature = hashlib.sha256(json.dumps([ast.dump(target, include_attributes=False), destination,
+                                              dependencies, method, unresolved_context], sort_keys=True).encode()).hexdigest()
+        sites.append({"line": node.lineno, "operation": name, "target": destination,
+                      "scope": scope, "table": governed, "signature": signature})
+    return sorted(sites, key=lambda site: (site["line"], site["signature"]))
+
+
+def writer_admission_problems(root=ROOT, inventory=None, table_contracts=None):
+    """Refuse newly observed unregistered write edges; expose legacy debt separately.
+
+    The committed inventory is an explicit measured baseline, not approval.
+    Refreshing it requires review of its changed edges. This cannot detect
+    arbitrary dynamic dispatch, imported write helpers or external commands.
+    """
+    root = Path(root)
+    if inventory is None:
+        inventory = json.loads((root / "docs/schema/inventory.json").read_text(encoding="utf-8"))
+    if table_contracts is None:
+        table_contracts = read_contracts()[0]
+    authority = {table: set(value.get("rebuilt_by", []) + value.get("enriched_by", []))
+                 for table, value in table_contracts.items()}
+    for ordering in cp.KNOWN_ORDERINGS:
+        if ordering["file"] in authority:
+            authority[ordering["file"]].update((ordering["rebuild"], ordering["enricher"]))
+    baseline = {(Path(row.get("dir", "").replace(".", "/")) / row["script"]).as_posix(): row
+                for row in inventory["scripts"]}
+    problems = []
+    for path in sorted((root / "code").rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        relative = path.relative_to(root / "code").as_posix()
+        previous = baseline.get(relative, {})
+        if "writer_evidence" not in previous:
+            problems.append("WRITER_BASELINE_MISSING: code/" + relative)
+            continue
+        signatures = {site["signature"] for site in previous["writer_evidence"]}
+        try:
+            current = writer_evidence(path, table_contracts)
+        except (SyntaxError, UnicodeError, OSError):
+            problems.append("WRITER_ANALYSIS_UNAVAILABLE: code/" + relative)
+            continue
+        for site in current:
+            if site["signature"] in signatures or site["scope"] == "other_literal_target":
+                continue
+            if site["scope"] == "governed_table" and path.name in authority.get(site["table"], set()):
+                continue
+            problems.append(f"NEW_UNREGISTERED_WRITE: code/{relative}:{site['line']} -> {site['target']}")
+    return problems
 
 
 def add_operational_roles(scripts, references, table_contracts=None, launch_collections=None):
@@ -824,6 +944,38 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
                                                     "filename_convention": filename_test,
                                                     "assertion_nodes": assertion_nodes,
                                                     "local_check_harness_calls": check_calls}})
+        try:
+            writes = writer_evidence(path, table_contracts)
+            analysis_error = None
+        except (SyntaxError, UnicodeError, OSError) as error:
+            writes, analysis_error = [], type(error).__name__
+        undeclared = []
+        for site in writes:
+            if not site["table"]:
+                continue
+            contract = table_contracts[site["table"]]
+            owners = set(contract.get("rebuilt_by", []) + contract.get("enriched_by", []))
+            owners.update(value for ordering in cp.KNOWN_ORDERINGS if ordering["file"] == site["table"]
+                          for value in (ordering["rebuild"], ordering["enricher"]))
+            if name not in owners:
+                undeclared.append(site["table"])
+        scopes = {site["scope"] for site in writes}
+        if name in cp.NEVER_RUN:
+            risk = "P0_forbidden_entrypoint"
+        elif "protected_surface" in scopes:
+            risk = "P1_protected_surface_write_candidate"
+        elif undeclared:
+            risk = "P1_undeclared_governed_write_candidate"
+        elif "governed_table" in scopes:
+            risk = "P2_declared_governed_write_candidate"
+        elif analysis_error or "unresolved_target" in scopes:
+            risk = "P2_unresolved_write_target"
+        elif writes:
+            risk = "P3_other_literal_write_candidate"
+        else:
+            risk = "P3_no_detected_write_not_readonly_certified"
+        script.update({"writer_evidence": writes, "writer_analysis_error": analysis_error,
+                       "writer_risk": risk, "undeclared_governed_tables": sorted(set(undeclared))})
 
 
 def classify_script(s):
@@ -1378,7 +1530,8 @@ def main():
         return refresh_script_census()
     if a.cmd == "check-scripts":
         issues = cp.script_inventory_problems(ROOT)
-        print("\n".join(issues) if issues else "Script inventory admission check passed")
+        issues.extend(writer_admission_problems(ROOT))
+        print("\n".join(issues) if issues else "No new script/write admission violations; existing inventoried writer risks remain pending review")
         return int(bool(issues))
 
     if a.cmd == "selftest":

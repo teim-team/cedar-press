@@ -225,6 +225,98 @@ class ScriptCensusTest(unittest.TestCase):
         cls.inventory = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.inventory)
 
+    def test_writer_evidence_uses_write_operations_not_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "candidate.py"
+            path.write_text(
+                "from pathlib import Path\n"
+                "OUT = Path('data/clean') / 'governed.csv'\n"
+                "text = 'data/spine/private.csv write_text'\n"
+                "OUT.read_text()\n"
+                "OUT.write_text('fixture')\n"
+                "open('read_only.csv', 'r')\n"
+                "gzip.open('data.csv', 'r')\n"
+                "Image.open('data.png')\n"
+                "def dynamic(target):\n    target.write_bytes(b'fixture')\n",
+                encoding="utf-8",
+            )
+            evidence = self.inventory.writer_evidence(path, {"governed.csv": {}})
+            self.assertEqual(len(evidence), 2)
+            self.assertEqual(evidence[0]["target"], "data/clean/governed.csv")
+            self.assertEqual(evidence[0]["scope"], "governed_table")
+            self.assertEqual(evidence[1]["scope"], "unresolved_target")
+
+    def test_current_tree_has_no_new_unregistered_writer_edges(self):
+        self.assertEqual(self.inventory.writer_admission_problems(ROOT), [])
+
+    def test_new_writer_edges_cannot_be_admitted_by_filename_receipt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            code = root / "code"
+            code.mkdir()
+            path = code / "helper.py"
+            path.write_text("print('original fixture')\n", encoding="utf-8")
+            contracts = {"governed.csv": {"rebuilt_by": ["approved.py"]}}
+            baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": []}]}
+            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+            path.write_text("open('governed.csv', 'w').write('fixture')\n", encoding="utf-8")
+            issues = self.inventory.writer_admission_problems(root, baseline, contracts)
+            self.assertEqual(len(issues), 1)
+            self.assertIn("NEW_UNREGISTERED_WRITE", issues[0])
+            self.assertIn("governed.csv", issues[0])
+            baseline["scripts"][0].pop("writer_evidence")
+            self.assertIn("WRITER_BASELINE_MISSING", self.inventory.writer_admission_problems(root, baseline, contracts)[0])
+
+    def test_writer_ratchet_detects_retargeted_binding_and_exposes_existing_risk(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            code = root / "code"
+            code.mkdir()
+            path = code / "helper.py"
+            source = "from pathlib import Path\nOUT = Path('data/clean') / %r\nOUT.write_text('fixture')\n"
+            path.write_text(source % "first.csv", encoding="utf-8")
+            contracts = {"first.csv": {"rebuilt_by": []}, "second.csv": {"rebuilt_by": []}}
+            evidence = self.inventory.writer_evidence(path, contracts)
+            baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": evidence}]}
+            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+            path.write_text(source % "second.csv", encoding="utf-8")
+            self.assertIn("second.csv", self.inventory.writer_admission_problems(root, baseline, contracts)[0])
+            contracts["second.csv"]["rebuilt_by"] = ["helper.py"]
+            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+
+    def test_unresolved_writer_context_changes_require_review(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            code = root / "code"
+            code.mkdir()
+            path = code / "helper.py"
+            source = "def write(target):\n    target.write_text('fixture')\nwrite(%r)\n"
+            path.write_text(source % "first.csv", encoding="utf-8")
+            evidence = self.inventory.writer_evidence(path, {})
+            baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": evidence}]}
+            path.write_text(source % "second.csv", encoding="utf-8")
+            self.assertIn("NEW_UNREGISTERED_WRITE", self.inventory.writer_admission_problems(root, baseline, {})[0])
+
+    def test_new_unknown_governed_paths_cannot_bypass_writer_ratchet(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            code = root / "code"
+            code.mkdir()
+            path = code / "helper.py"
+            baseline = {"scripts": [{"script": "helper.py", "dir": "", "writer_evidence": []}]}
+            for target in ("data/clean/new.csv", "public/new.csv", "dist/review/new.csv",
+                           "store/releases/new.csv", "store/snapshots/new.csv", "store/catalogs/new.json"):
+                with self.subTest(target=target):
+                    path.write_text(f"open({target!r}, 'w').write('fixture')\n", encoding="utf-8")
+                    issues = self.inventory.writer_admission_problems(root, baseline, {})
+                    self.assertEqual(len(issues), 1)
+                    self.assertIn("NEW_UNREGISTERED_WRITE", issues[0])
+            contracts = {"approved.csv": {"rebuilt_by": ["helper.py"]}}
+            path.write_text("open('data/clean/approved.csv', 'w').write('fixture')\n", encoding="utf-8")
+            self.assertEqual(self.inventory.writer_admission_problems(root, baseline, contracts), [])
+            path.write_text("open('public/approved.csv', 'w').write('fixture')\n", encoding="utf-8")
+            self.assertIn("NEW_UNREGISTERED_WRITE", self.inventory.writer_admission_problems(root, baseline, contracts)[0])
+
     def test_roles_derive_from_declarations_and_test_structure(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
