@@ -42,7 +42,21 @@ jobs:
         run: |
           python - <<'PY'
           import sys
+          import os
           import unittest
+          import psycopg
+          # The existing connected-backend tests exercise teim-app's optional
+          # users seam. This fixture owns only this disposable CI database.
+          # The standalone test creates a second database with no users table.
+          with psycopg.connect(os.environ["CEDAR_PRESS_TEST_DATABASE_URL"]) as connection:
+              connection.execute("""
+                  CREATE TABLE users (
+                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                      email TEXT NOT NULL UNIQUE,
+                      password_hash TEXT NOT NULL,
+                      workspace_tier TEXT
+                  )
+              """)
           sys.path.insert(0, "server")
           suite = unittest.defaultTestLoader.loadTestsFromNames([
               "tests.test_subscribers",
