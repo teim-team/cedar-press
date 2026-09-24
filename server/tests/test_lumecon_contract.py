@@ -79,10 +79,10 @@ class LumeconContractTest(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 repository._canonical_bytes({"value": value})
 
-    def test_two_namespaces_receive_exact_producer_artifacts(self):
+    def test_three_namespaces_receive_exact_producer_artifacts(self):
         self.assertEqual(
             {entry["collection_id"] for entry in self.fixture["collections"]},
-            {"legislation", "lobbying"},
+            {"legislation", "lobbying", "natural-resources"},
         )
         for entry in self.fixture["collections"]:
             with self.subTest(collection=entry["collection_id"]):
@@ -111,6 +111,22 @@ class LumeconContractTest(unittest.TestCase):
                         changed["manifest"]["release_id"] = "0" * 64
                     with self.assertRaises(repository.FullReleaseUnavailable):
                         self.consume(changed)
+
+    def test_malformed_pin_and_redistribution_denial_for_every_collection(self):
+        for entry in self.fixture["collections"]:
+            with self.subTest(collection=entry["collection_id"]):
+                with self.assertRaises(repository.FullReleaseUnavailable):
+                    self.consume(entry, "../outside")
+                changed = copy.deepcopy(entry)
+                changed["manifest"]["rights"]["redistribution"] = False
+                changed["catalog"]["collections"][0]["rights"]["redistribution"] = False
+                content = changed["catalog"]
+                content.pop("catalog_id")
+                content["catalog_id"] = hashlib.sha256(
+                    repository._canonical_bytes(content)
+                ).hexdigest()
+                with self.assertRaises(repository.FullReleaseUnavailable):
+                    self.consume(changed)
 
     def test_corrupted_artifact_and_synthetic_wire_state_are_refused(self):
         for entry in self.fixture["collections"]:

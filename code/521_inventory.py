@@ -43,6 +43,8 @@ USAGE
     py -3 code/521_inventory.py --no-scan    # cache only; uncached -> UNKNOWN
     py -3 code/521_inventory.py check        # exit 1 if INVENTORY.md is stale
     py -3 code/521_inventory.py selftest     # the fixtures; exit 1 if a derivation broke
+    py -3 code/521_inventory.py scripts-only # refresh script roles/evidence, preserving table snapshot
+    py -3 code/521_inventory.py check-scripts # data-less admission check; no writes
 
 WHAT `check` MEANS. It regenerates into memory and compares the HEADLINE
 counts against the committed document. It does not diff prose. A stale headline
@@ -54,10 +56,13 @@ docs/INVENTORY.md, docs/KNOWN_ISSUES.md. Touches no pipeline.
 """
 
 import argparse
+import ast
 import csv
+import hashlib
 import json
 import re
 import sqlite3
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from datetime import date, datetime
@@ -497,7 +502,7 @@ def _all_text_files():
             yield p
 
 
-def inventory_scripts():
+def inventory_scripts(text_files=None):
     contracts, _ = read_contracts()
     planned = set()
     for c in contracts.values():
@@ -515,7 +520,7 @@ def inventory_scripts():
     names = {p.name: p for p in scripts}
     mentions = Counter()
     mention_where = defaultdict(set)
-    for f in _all_text_files():
+    for f in (_all_text_files() if text_files is None else text_files):
         try:
             txt = f.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -583,6 +588,165 @@ def inventory_scripts():
                          .splitlines()),
         })
     return out, dupes
+
+
+def refresh_script_census():
+    """Update the existing script section without recertifying data tables.
+
+    References are bounded to Git-tracked project text. Installed libraries,
+    ignored candidate outputs and browser artifacts do not establish a caller.
+    This census does not authorize a producer: the supported runner separately
+    checks its output declarations against dataset_contracts and KNOWN_ORDERINGS.
+    """
+    original = json.loads(OUT_JSON.read_text(encoding="utf-8"))
+    table_bytes = json.dumps(original["tables"], sort_keys=True, separators=(",", ":")).encode()
+    tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode("utf-8").split("\0")
+    suffixes = {".py", ".md", ".json", ".ps1", ".txt", ".yml", ".yaml", ".js", ".mjs"}
+    references = [ROOT / name for name in tracked if name
+                  and Path(name).suffix.lower() in suffixes and (ROOT / name).is_file()]
+    scripts, dupes = inventory_scripts(references)
+    add_operational_roles(scripts, references)
+    declared_names = {name for table in read_contracts()[0].values()
+                      for name in table.get("rebuilt_by", []) + table.get("enriched_by", [])}
+    declared_names.update(name for ordering in cp.KNOWN_ORDERINGS
+                          for name in (ordering["rebuild"], ordering["enricher"]))
+    for script in scripts:
+        script["registration_status"] = (
+            "declared_dependency" if script["script"] in declared_names
+            else "unresolved_not_authorized"
+        )
+    original["scripts"] = scripts
+    original["duplicate_numbers"] = {f"{d}:{n}": names for (d, n), names in dupes.items()}
+    original["script_census"] = {
+        "generated": TODAY,
+        "generator": "code/521_inventory.py scripts-only",
+        "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
+        "scripts": len(scripts),
+        "operational_role_counts": dict(sorted(Counter(s["operational_role"] for s in scripts).items())),
+        "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; referenced product consumer/shared service; referenced validator/migration/review; existing unreferenced archive candidate; unresolved",
+        "reference_scope": "Static AST imports and Python-path literals, plus tracked command/config references. Tests may be consumers. These are not verified external scheduler or runtime invocations.",
+        "embedded_selftest_files": sum(s["embedded_test_functions"] > 0 for s in scripts),
+        "unresolved_not_authorized": sum(s["registration_status"] == "unresolved_not_authorized"
+                                         for s in scripts),
+        "table_snapshot_preserved_sha256": hashlib.sha256(table_bytes).hexdigest(),
+        "data_generated_unchanged": original.get("generated"),
+        "limitation": "Static census is not runtime write proof or authorization to run a producer.",
+    }
+    assert json.dumps(original["tables"], sort_keys=True, separators=(",", ":")).encode() == table_bytes
+    OUT_JSON.write_text(json.dumps(original, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps(original["script_census"], indent=2))
+    return 0
+
+
+def add_operational_roles(scripts, references, table_contracts=None, launch_collections=None):
+    """Attach measured operational evidence to THE existing inventory records.
+
+    No role confers execution authority. Uncertain records remain unresolved.
+    In particular, an old script or a producer containing a selftest is not an
+    archive candidate or a standalone test just because its name suggests one.
+    """
+    if table_contracts is None:
+        table_contracts = read_contracts()[0]
+    if launch_collections is None:
+        import cedar_publication as publication
+        launch_collections = {name for name, shelf in publication.shelves().items()
+                              if shelf in publication.STOREFRONT_SHELVES}
+    producers = defaultdict(list)
+    for table, contract in table_contracts.items():
+        if contract["collection"] not in launch_collections:
+            continue
+        names = set(contract.get("rebuilt_by", []) + contract.get("enriched_by", []))
+        names.update(name for ordering in cp.KNOWN_ORDERINGS if ordering["file"] == table
+                     for name in (ordering["rebuild"], ordering["enricher"]))
+        for name in sorted(names):
+            producers[name].append({"collection": contract["collection"], "output": table,
+                                    "entrypoint": contract.get("rebuild_command", "")})
+    consumers = defaultdict(set)
+    for path in references:
+        if any(part in {"graveyard", "archive", "node_modules"} for part in path.parts):
+            continue
+        relative = path.relative_to(ROOT).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if path.suffix == ".py":
+            try:
+                tree = ast.parse(text)
+            except SyntaxError:
+                continue
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        consumers[alias.name.split(".")[0] + ".py"].add(relative)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    consumers[node.module.split(".")[0] + ".py"].add(relative)
+                elif isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value.endswith(".py"):
+                    consumers[Path(node.value).name].add(relative)
+        elif path.suffix in {".yml", ".yaml", ".json", ".ps1", ".mjs", ".js"}:
+            if path.name in _CATALOGUE:
+                continue
+            for token in re.findall(r"(?:code/|scripts/)([a-zA-Z0-9_./-]+\.py)", text):
+                consumers[Path(token).name].add(relative)
+    archive = {Path(name).name for name, _ in read_archive_candidates()["candidates"]}
+    for script in scripts:
+        name = script["script"]
+        path = CODE / script["dir"].replace(".", "/") / name
+        relative = path.relative_to(ROOT).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
+            tree = ast.Module(body=[], type_ignores=[])
+        aliases, case_names, pytest = {"unittest"}, {"TestCase"}, False
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name == "unittest":
+                        aliases.add(alias.asname or alias.name)
+                    pytest |= alias.name == "pytest"
+            elif isinstance(node, ast.ImportFrom):
+                pytest |= node.module == "pytest"
+                if node.module == "unittest":
+                    case_names.update(alias.asname or alias.name for alias in node.names
+                                      if alias.name == "TestCase")
+        functions = [node.name for node in ast.walk(tree)
+                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        cases = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
+                 and any(isinstance(base, ast.Name) and base.id in case_names
+                         or isinstance(base, ast.Attribute) and base.attr == "TestCase"
+                         and isinstance(base.value, ast.Name) and base.value.id in aliases
+                         for base in node.bases)]
+        callers = sorted(consumers[name] - {relative})
+        filename_test = bool(re.search(r"(^test_|_test\.py$|^tests?\.)", name))
+        assertion_nodes = sum(isinstance(node, ast.Assert) for node in ast.walk(tree))
+        check_calls = sorted({node.func.id for node in ast.walk(tree)
+                              if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                              and node.func.id in functions
+                              and (node.func.id in {"check", "expect"}
+                                   or node.func.id.startswith("assert_"))})
+        standalone = bool(cases or pytest and any(n.startswith("test_") for n in functions)
+                          or filename_test and (assertion_nodes or check_calls))
+        if standalone:
+            role = "test/fixture"
+        elif any(part in {"graveyard", "archive"} for part in path.relative_to(CODE).parts):
+            role = "historical"
+        elif name in producers:
+            role = "active producer"
+        elif callers and ("cedar_publication" in text or name in {"build.py", "cedar_pipeline.py", "cedar_ids.py"}):
+            role = "product consumer/shared service"
+        elif callers and any(word in name for word in ("test", "verify", "audit", "review", "ruling", "migration", "inventory", "assert", "check")):
+            role = "active validator/migration/review"
+        elif name in archive and not callers and script["mentions"] == 0:
+            role = "unreferenced retirement candidate"
+        else:
+            role = "unresolved"
+        script.update({"operational_role": role,
+                       "collection_output_entrypoints": producers.get(name, []),
+                       "static_consumers": callers,
+                       "unknown_io_literals": cp.declared_io(path)["unknown"],
+                       "embedded_test_functions": sum("selftest" in n or n.startswith("test_") for n in functions),
+                       "standalone_test_evidence": {"unittest_classes": cases, "pytest_import": pytest,
+                                                    "filename_convention": filename_test,
+                                                    "assertion_nodes": assertion_nodes,
+                                                    "local_check_harness_calls": check_calls}})
 
 
 def classify_script(s):
@@ -1128,10 +1292,17 @@ HEADLINE_RE = re.compile(
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("cmd", nargs="?", default="build",
-                    choices=["build", "check", "selftest"])
+                    choices=["build", "check", "selftest", "scripts-only", "check-scripts"])
     ap.add_argument("--no-scan", action="store_true",
                     help="use the cache only; anything uncached prints UNKNOWN")
     a = ap.parse_args()
+
+    if a.cmd == "scripts-only":
+        return refresh_script_census()
+    if a.cmd == "check-scripts":
+        issues = cp.script_inventory_problems(ROOT)
+        print("\n".join(issues) if issues else "Script inventory admission check passed")
+        return int(bool(issues))
 
     if a.cmd == "selftest":
         print("=== 521_inventory selftest ===\n")

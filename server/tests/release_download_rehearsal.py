@@ -18,14 +18,21 @@ from pathlib import Path
 
 import uvicorn
 from fastapi.testclient import TestClient
-from lumecon_data.api import create_app
-from lumecon_data.catalog import build_catalog
-from lumecon_data.contracts import DatasetContract
-from lumecon_data.pipeline import build_release, verify_release
-from lumecon_data.storage import canonical_json, immutable_bytes
 
 
 def main():
+    # Development labels do not override database selection. Refuse inherited
+    # stores before importing either service or creating any candidate artifact.
+    if any(os.environ.get(name, "").strip() for name in ("DATABASE_URL", "CEDAR_PRESS_DB")):
+        raise SystemExit(
+            "REFUSED: rehearsal requires an isolated environment without database configuration"
+        )
+    from lumecon_data.api import create_app
+    from lumecon_data.catalog import build_catalog
+    from lumecon_data.contracts import DatasetContract
+    from lumecon_data.pipeline import build_release, verify_release
+    from lumecon_data.storage import canonical_json, immutable_bytes
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--store", type=Path, required=True)
     parser.add_argument("--catalog", type=Path, required=True)
@@ -55,7 +62,7 @@ def main():
     os.environ["CEDAR_PRESS_INSECURE_COOKIE"] = "1"
     os.environ["CEDAR_PRESS_ACCOUNTS"] = json.dumps(
         {
-            "pilot@example.invalid": {"password": password, "tier": "press"},
+            "pilot@example.invalid": {"password": password, "tier": "press_pro"},
             "denied@example.invalid": {"password": password, "tier": "unknown"},
         }
     )
@@ -78,7 +85,9 @@ def main():
     assert service.started, "Local data API did not start"
     from cedar_press.app import app
 
-    audit = logging.FileHandler(args.store / "download-rehearsal.audit.jsonl", encoding="utf-8")
+    audit_path = args.store / "download-rehearsal.audit.jsonl"
+    audit_start = audit_path.stat().st_size if audit_path.exists() else 0
+    audit = logging.FileHandler(audit_path, encoding="utf-8")
     logger = logging.getLogger("cedar_press.download")
     logger.setLevel(logging.INFO)
     logger.addHandler(audit)
@@ -124,6 +133,9 @@ def main():
                 ).read_bytes()
             )
             assert hashlib.sha256(before.content).hexdigest() == before.headers["x-cedar-sha256"]
+            endpoint = f"/press/collections/{dataset}/full-download"
+            assert client.get(endpoint, params={"release_id": "../outside"}).status_code == 400
+            assert client.get(endpoint, params={"release_id": "0" * 64}).status_code == 503
             os.environ["CEDAR_PRESS_RELEASE_CATALOG"] = str(second_path)
             assert client.get(route).status_code == 503  # Stale pins cannot silently follow latest.
             newer = client.get(
@@ -143,13 +155,50 @@ def main():
             )
             assert not (args.store / "current").exists(), "No promotion is authorized"
             audit.flush()
-            outcomes = [
-                json.loads(line)["outcome"]
-                for line in (args.store / "download-rehearsal.audit.jsonl").read_text().splitlines()
-            ]
-            assert {"denied_anonymous", "denied_entitlement", "authorized_prepared"} <= set(
-                outcomes
+            audit_text = audit_path.read_bytes()[audit_start:].decode("utf-8")
+            events = [json.loads(line) for line in audit_text.splitlines()]
+            assert len(events) == 8, "Every attempt in this run must have its own audit event"
+            assert len({event["request_id"] for event in events}) == len(events)
+            allowed = {
+                "collection_id",
+                "event",
+                "outcome",
+                "release_id",
+                "request_id",
+                "requested_release_id",
+                "sha256",
+                "timestamp",
+            }
+            assert all(set(event) == allowed for event in events)
+            assert all(
+                secret not in audit_text
+                for secret in (
+                    token,
+                    password,
+                    "pilot@example.invalid",
+                    "denied@example.invalid",
+                    "../outside",
+                )
             )
+            outcomes = [event["outcome"] for event in events]
+            assert outcomes == [
+                "denied_anonymous",
+                "denied_entitlement",
+                "authorized_prepared",
+                "invalid_release_request",
+                "unavailable",
+                "unavailable",
+                "authorized_prepared",
+                "authorized_prepared",
+            ]
+            assert all(event["collection_id"] == dataset for event in events)
+            approvals = [event for event in events if event["outcome"] == "authorized_prepared"]
+            assert [event["release_id"] for event in approvals] == [
+                pin["release_id"],
+                second["release_id"],
+                pin["release_id"],
+            ]
+            assert all(event["sha256"] == before.headers["x-cedar-sha256"] for event in approvals)
             result = {
                 "status": "PASSED_LOCAL_NOT_PRODUCTION",
                 "rows": len(rows),
@@ -164,6 +213,8 @@ def main():
                     "403",
                     "200",
                     "audit",
+                    "current-run audit completeness and redaction",
+                    "malformed and nonexistent release refusal",
                     "rollback",
                 ],
             }

@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import importlib.util
 import io
 import json
 import logging
@@ -79,6 +80,20 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
 
+    def use_producer_fixture(self, collection_id):
+        fixture = json.loads(
+            (Path(__file__).with_name("fixtures") / "lumecon_release_contract.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        entry = next(row for row in fixture["collections"] if row["collection_id"] == collection_id)
+        self.manifest = copy.deepcopy(entry["manifest"])
+        self.pin = copy.deepcopy(entry["catalog"]["collections"][0])
+        self.rid = self.manifest["release_id"]
+        self.rows = [json.loads(line) for line in entry["records_jsonl_utf8"].splitlines()]
+        self.write_catalog()
+        return entry["records_jsonl_utf8"].encode("utf-8")
+
     def write_catalog(self):
         value = {
             "schema_version": 1,
@@ -125,6 +140,7 @@ class ReleaseDownloadTest(unittest.TestCase):
         # -> entitlement -> release path. The data transport remains fictional.
         app.dependency_overrides.clear()
         email = f"release-{uuid.uuid4().hex}@example.invalid"
+        pro_email = f"release-pro-{uuid.uuid4().hex}@example.invalid"
         with patch.dict(
             os.environ,
             {
@@ -156,8 +172,33 @@ class ReleaseDownloadTest(unittest.TestCase):
                 )
                 self.assertIn("authorized_prepared", captured.output[0])
                 self.assertNotIn(email, captured.output[0])
+                expected = self.use_producer_fixture("natural-resources")
+                resources_url = "/press/collections/natural-resources/full-download"
+                self.mock_fetch.reset_mock()
+                with self.assertLogs("cedar_press.download", level="INFO") as denial:
+                    denied = self.client.get(resources_url, params={"release_id": self.rid})
+                self.assertEqual(denied.status_code, 403)
+                self.mock_fetch.assert_not_called()
+                self.assertIn("denied_entitlement", denial.output[0])
+                self.assertNotIn(email, denial.output[0])
+                subscribers.create(pro_email, "disposable-pro-password", "press_pro")
+                login = self.client.post(
+                    "/auth/login", json={"email": pro_email, "password": "disposable-pro-password"}
+                )
+                self.assertEqual(login.status_code, 200)
+                db.reset_for_tests()
+                self.assertIsNotNone(subscribers.authenticate(pro_email, "disposable-pro-password"))
+                with self.assertLogs("cedar_press.download", level="INFO") as approval:
+                    approved = self.client.get(resources_url, params={"release_id": self.rid})
+                self.assertEqual(approved.status_code, 200)
+                self.assertEqual(approved.content, expected)
+                self.assertIn("authorized_prepared", approval.output[0])
+                self.assertNotIn(pro_email, approval.output[0])
+                self.assertNotIn("disposable-pro-password", approval.output[0])
+
             finally:
-                db.execute("DELETE FROM cedar_press_subscribers WHERE email = %s", (email,))
+                for address in (email, pro_email):
+                    db.execute("DELETE FROM cedar_press_subscribers WHERE email = %s", (address,))
                 db.reset_for_tests()
 
     def test_anonymous_and_wrong_tier_never_touch_release(self):
@@ -266,6 +307,49 @@ class ReleaseDownloadTest(unittest.TestCase):
             self.assertNotIn("../outside", log.output[0])
         self.mock_fetch.assert_not_called()
 
+    def test_natural_resources_pro_entitlement_and_exact_artifact(self):
+        expected = self.use_producer_fixture("natural-resources")
+        url = "/press/collections/natural-resources/full-download"
+        for session, status in [(None, 401), (Session("fictional@example.invalid", "press"), 403)]:
+            app.dependency_overrides[current_session] = lambda value=session: value
+            self.mock_fetch.reset_mock()
+            with self.assertLogs("cedar_press.download", level="INFO") as logs:
+                result = self.client.get(url, params={"release_id": self.rid})
+            self.assertEqual(result.status_code, status)
+            self.mock_fetch.assert_not_called()
+            self.assertNotIn("fictional@example.invalid", logs.output[0])
+        app.dependency_overrides[current_session] = lambda: Session(
+            "fictional@example.invalid", "press_pro"
+        )
+        with self.assertLogs("cedar_press.download", level="INFO") as logs:
+            result = self.client.get(url, params={"release_id": self.rid})
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.content, expected)
+        self.assertEqual(result.headers["x-cedar-sha256"], hashlib.sha256(expected).hexdigest())
+        self.assertIn("authorized_prepared", logs.output[0])
+        self.assertNotIn("fictional@example.invalid", logs.output[0])
+
+    def test_natural_resources_invalid_requests_and_rights_are_audited(self):
+        self.use_producer_fixture("natural-resources")
+        app.dependency_overrides[current_session] = lambda: Session(
+            "fictional@example.invalid", "press_pro"
+        )
+        url = "/press/collections/natural-resources/full-download"
+        for pin, status in [("../outside", 400), ("0" * 64, 503)]:
+            with self.assertLogs("cedar_press.download", level="INFO") as logs:
+                response = self.client.get(url, params={"release_id": pin})
+            self.assertEqual(response.status_code, status)
+            self.assertNotIn("../outside", logs.output[0])
+            self.assertNotIn("fictional@example.invalid", logs.output[0])
+        self.pin["rights"]["redistribution"] = False
+        self.manifest["rights"]["redistribution"] = False
+        self.write_catalog()
+        with self.assertLogs("cedar_press.download", level="INFO") as logs:
+            response = self.client.get(url, params={"release_id": self.rid})
+        self.assertEqual(response.status_code, 503)
+        self.assertIn("unavailable", logs.output[0])
+        self.assertNotIn("fictional@example.invalid", logs.output[0])
+
     def test_second_collection_uses_identical_adapter(self):
         field_map = json.loads(
             (Path(__file__).parents[2] / "data/cedar/field_map.json").read_text()
@@ -360,6 +444,20 @@ class ReleaseDownloadTest(unittest.TestCase):
 
 
 class ReleaseConfigurationTest(unittest.TestCase):
+    def test_rehearsal_refuses_inherited_database_before_creating_artifacts(self):
+        spec = importlib.util.spec_from_file_location(
+            "isolated_rehearsal", Path(__file__).with_name("release_download_rehearsal.py")
+        )
+        rehearsal = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(rehearsal)
+        for key in ("DATABASE_URL", "CEDAR_PRESS_DB"):
+            with patch.dict(os.environ, {key: "sensitive-fixture-not-a-real-store"}, clear=True):
+                with self.assertRaisesRegex(
+                    SystemExit, "requires an isolated environment"
+                ) as error:
+                    rehearsal.main()
+                self.assertNotIn("sensitive-fixture", str(error.exception))
+
     def test_invalid_configuration_never_sends_request(self):
         configurations = [
             {"CEDAR_PRESS_ENVIRONMENT": "unknown"},

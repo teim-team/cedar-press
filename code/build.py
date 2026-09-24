@@ -25,8 +25,9 @@ THIS FILE CONTAINS NO KNOWLEDGE OF ITS OWN. That is the point. It asks:
     500_build_architecture_map      which tables belong to which collection
     293's class6_io_map             which scripts write which table
 
-Adding a dataset means adding one entry to `COLLECTIONS` in
-`500_build_architecture_map.py`. It does not mean editing this file.
+Adding a dataset requires its existing collection/table contracts and declared
+producer/output registration. Release pilots additionally enter the reviewed
+`cedar_pipeline.RELEASE_PILOTS` allowlist; they reuse the same release adapter.
 
 DRY RUN IS THE DEFAULT, AND `run` STILL REFUSES WITHOUT `--execute`.
 A runner that executes by accident is worse than no runner: many of these
@@ -165,6 +166,7 @@ def plan_problems(p) -> list[str]:
     for stage in p["phase1"] + p["phase2"]:
         if not (HERE / stage).is_file():
             issues.append("MISSING_STAGE: " + stage)
+    issues.extend(CP.registration_problems(p))
     return issues
 
 
@@ -578,6 +580,42 @@ def cmd_candidate(args) -> int:
     return 1 if changed else 0
 
 
+def pilot_source_rows(content):
+    """Refuse lossy CSV structures before publication code constructs dictionaries."""
+    import csv
+    import io
+    reader = csv.reader(io.StringIO(content.decode("utf-8-sig"), newline=""), strict=True)
+    header = next(reader, [])
+    if not header or any(not name.strip() or name != name.strip() for name in header) or len(set(header)) != len(header):
+        raise ValueError("REFUSED: source headers must be unique, nonblank exact names")
+    rows = []
+    for row in reader:
+        if len(row) != len(header):
+            raise ValueError("REFUSED: source row width differs from header")
+        rows.append(dict(zip(header, row)))
+    return rows
+
+
+def assert_pilot_target(source, target):
+    """Candidate stores stay outside repositories and the source directory."""
+    if target.is_relative_to(source.parent) or source.is_relative_to(target):
+        raise ValueError("REFUSED: release store must be separate from canonical input")
+    if any((parent / ".git").exists() for parent in (target, *target.parents)):
+        raise ValueError("REFUSED: candidate release store must be outside Git repositories")
+
+
+def assert_pilot_conservation(original_rows, records, keys):
+    """A publication projection cannot add/drop records or change existing CE links."""
+    before = {tuple(row[key] for key in keys): row for row in original_rows}
+    after = {tuple(row[key] for key in keys): row for row in records}
+    if len(records) != len(original_rows) or set(after) != set(before):
+        raise ValueError("REFUSED: publication projection changed source record IDs")
+    for key, row in after.items():
+        if "cedar_uid" in row and "cedar_uid" in before[key]:
+            if (row["cedar_uid"] or "") != (before[key]["cedar_uid"] or ""):
+                raise ValueError("REFUSED: publication projection changed an existing entity reference")
+
+
 def cmd_release_pilot(args):
     """Project one existing flagship through its approved contract; never promote."""
     import csv
@@ -587,80 +625,108 @@ def cmd_release_pilot(args):
     from lumecon_data.contracts import DatasetContract
     from lumecon_data.pipeline import ingest_csv, build_release, verify_release
     from lumecon_data.catalog import build_catalog
-    from lumecon_data.storage import immutable_bytes, canonical_json
+    from lumecon_data.storage import immutable_bytes, canonical_json, checked_path
     import cedar_publication as publication
     from cedar_ids import identifier_contract, validate_identifier, validate_unique_record_keys
 
+    collection = args.collection
+    config = CP.RELEASE_PILOTS[collection]
+    table = publication.FLAGSHIP[collection]
+    contracts = json.loads((HERE.parent / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8"))
+    declaration = next(item for item in contracts["contracts"] if item["collection"] == collection)
+    table_contract = next(item for item in declaration["tables"] if item["table"] == table)
+    keys = table_contract["primary_key"]
+    if not keys:
+        raise SystemExit("REFUSED: flagship has no declared primary key")
     source = Path(args.source).resolve()
-    target = Path(args.output_root).resolve()
-    if target.is_relative_to(source.parent) or source.is_relative_to(target):
-        raise SystemExit("REFUSED: release store must be separate from canonical input")
+    if source.name != table:
+        raise SystemExit("REFUSED: source filename must match the declared flagship table")
+    # Check the supplied path before resolve can conceal symlink components.
+    target = checked_path(Path(args.output_root)).resolve()
+    assert_pilot_target(source, target)
     original = source.read_bytes()
     import io
-    original_rows = list(csv.DictReader(io.StringIO(original.decode("utf-8-sig"))))
-    original_keys = {row["bill_id"] for row in original_rows}
+    original_rows = pilot_source_rows(original)
+    validate_unique_record_keys(original_rows, keys)
     spec = importlib.util.spec_from_file_location("pilot_combiner", Path(__file__).with_name("1137_customer_dataset_combine.py"))
     combine = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(combine)
     header, records, held = combine.load(source)
     own = set(header)
-    publication.recompute_derived("legislation", header, records)
-    result = publication.apply_field_map("legislation", header, records, own)
+    publication.recompute_derived(collection, header, records)
+    result = publication.apply_field_map(collection, header, records, own)
     if result.get("owed") or held:
         raise SystemExit("REFUSED: pilot has held records or owed public fields")
-    validate_unique_record_keys(records, ["bill_id"])
-    if len(records) != len(original_rows) or {row["bill_id"] for row in records} != original_keys:
-        raise SystemExit("REFUSED: publication projection changed source bill IDs")
+    validate_unique_record_keys(records, keys)
+    assert_pilot_conservation(original_rows, records, keys)
     register = publication.register()
     ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
+    public_contract = publication.field_map()[collection]
+    record_contracts = {key: identifier_contract(collection, table, key) for key in keys}
+    source_keys = {key: {row[key] for row in original_rows} for key in keys}
     for row in records:
-        values = json.loads(row["cedar_uids"])
-        arrays = [json.loads(row[name]) for name in ("canonical_names", "entity_classes", "entity_roles", "entity_names_as_published", "entity_link_statuses")]
-        if any(len(values) != len(array) for array in arrays):
-            raise SystemExit("REFUSED: misaligned entity-role arrays")
+        for key in keys:
+            binding = record_contracts[key]
+            validate_identifier(row[key], binding, registered_ids=source_keys[key],
+                                source_system=binding.mint_authority)
+        if public_contract.get("plural"):
+            values = json.loads(row["cedar_uids"])
+            arrays = [json.loads(row[name]) for name in ("canonical_names", "entity_classes", "entity_roles", "entity_names_as_published", "entity_link_statuses")]
+            if any(len(values) != len(array) for array in arrays):
+                raise SystemExit("REFUSED: misaligned entity-role arrays")
+        else:
+            values = [row.get("cedar_uid") or None]
         for value in values:
             if value is not None:
                 validate_identifier(value, ce, registered_ids=register)
-    import io
     buffer = io.StringIO(newline="")
     writer = csv.DictWriter(buffer, fieldnames=header, lineterminator="\n")
     writer.writeheader()
     writer.writerows(records)
     public_bytes = buffer.getvalue().encode("utf-8")
-    artifact = target / "intake" / "legislation" / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
+    artifact = target / "intake" / collection / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
     immutable_bytes(artifact, public_bytes)
-    missing_urls = [row["bill_id"] for row in records if not row.get("source_url")]
+    missing_urls = ["/".join(row[key] for key in keys) for row in records if not row.get("source_url")]
     authority_hashes = []
     for relative in ("data/cedar/field_map.json", "data/cedar/scopes.json",
                      "data/spine/cedar_identity_register.csv", "data/spine/cedar_entity_names.csv",
+                     "docs/schema/dataset_contracts.json", "code/cedar_pipeline.py",
                      "code/cedar_publication.py", "code/cedar_ids.py", "code/build.py"):
         authority = Path(__file__).resolve().parents[1] / relative
         if authority.is_file():
             authority_hashes.append(relative + " SHA256 " + hashlib.sha256(authority.read_bytes()).hexdigest())
     authority_hashes.append("Resolved entity/name/role register SHA256 " + hashlib.sha256(canonical_json(register)).hexdigest())
+    identity = None
+    if "cedar_uid" in header:
+        existing_ids = {row["cedar_uid"] for row in records if row.get("cedar_uid")}
+        identity = {"mode": "registered_reference", "source_field": "cedar_uid", "target_field": "cedar_uid",
+                    "namespace": "native_entity", "registry_version": hashlib.sha256(canonical_json(register)).hexdigest(),
+                    **CP.REFERENCE_PRESERVATION_AUTHORITY,
+                    "mapping": {uid: uid for uid in sorted(existing_ids)}}
     contract = DatasetContract.model_validate({
-        "dataset_id": "legislation", "source_id": "cedar-approved-bill-projection",
-        "title": "Cedar Legislation bill register - local integration candidate",
-        "row_grain": "One bill per immutable source bill_id; votes/actions excluded",
-        "primary_key": ["bill_id"],
-        "fields": [{"name": name, "type": "string", "nullable": name != "bill_id", "description": "Existing Cedar field_map legislation contract: " + name} for name in header],
-        "source": {"owner": "Cedar Press curated legislation register", "url": "https://www.congress.gov/",
+        "dataset_id": collection, "source_id": "cedar-approved-" + collection + "-projection",
+        "title": "Cedar " + collection + " flagship - local integration candidate",
+        "row_grain": table_contract["grain"],
+        "primary_key": keys,
+        "fields": [{"name": name, "type": "string", "nullable": name not in keys, "description": "Existing Cedar field_map " + collection + " contract: " + name} for name in header],
+        "identity": identity,
+        "source": {"owner": config["owner"], "url": config["url"],
             "checked_at": args.as_of, "access_method": "manual_import", "jurisdiction": "United States",
-            "coverage": "Pinned existing bill register, not a new acquisition or completeness certificate",
+            "coverage": "Pinned existing flagship, not a new acquisition or completeness certificate",
             "cadence": "Local integration candidate only", "terms_notes": "Existing approved Cedar publication field map; internal fields removed before intake",
             "caveats": ["Canonical input SHA256: " + hashlib.sha256(original).hexdigest(),
-                "Source cutoff not independently refreshed", "Names as published remain null where no source span is supplied",
+                "Source cutoff not independently refreshed",
                 "Missing source URLs for historical types: " + ", ".join(missing_urls),
-                "Not the full Legislation and Votes collection; no production promotion"] + authority_hashes},
-        "rights": {"license": "Existing Cedar public projection contract", "publication_class": "publishable", "redistribution": True, "retrieval": True},
+                "Not the full collection; no production promotion"] + config["caveats"] + authority_hashes},
+        "rights": config["rights"],
         "synthetic": False, "geography": "United States", "time_coverage": "Existing historical register including 2025 and 2026; source lag unmeasured"})
     snapshot = ingest_csv(contract, artifact, target)
     manifest = build_release(contract, snapshot["snapshot_id"], target)
     second = build_release(contract, snapshot["snapshot_id"], target)
     if manifest["release_id"] != second["release_id"] or source.read_bytes() != original:
         raise SystemExit("REFUSED: nondeterministic release or changed canonical input")
-    verify_release(target, "legislation", manifest["release_id"])
-    catalog = build_catalog(target, [("legislation", manifest["release_id"])], product="cedar_press")
+    verify_release(target, collection, manifest["release_id"])
+    catalog = build_catalog(target, [(collection, manifest["release_id"])], product="cedar_press")
     immutable_bytes(target / "catalogs" / (catalog["catalog_id"] + ".json"), canonical_json(catalog))
     print(json.dumps({"release_id": manifest["release_id"], "record_count": manifest["record_count"], "catalog": str(target / "catalogs" / (catalog["catalog_id"] + ".json")), "status": "LOCAL_CANDIDATE_NOT_PROMOTED"}))
     return 0
@@ -677,8 +743,8 @@ def main() -> int:
     candidate.add_argument("--output-root", required=True)
     candidate.add_argument("--as-of", required=True)
     candidate.set_defaults(func=cmd_candidate)
-    pilot = sub.add_parser("release-pilot", help="unpublished legislation table via existing Lumecon contracts")
-    pilot.add_argument("collection", choices=["legislation"])
+    pilot = sub.add_parser("release-pilot", help="unpublished allowlisted flagship via existing Lumecon contracts")
+    pilot.add_argument("collection", choices=sorted(CP.RELEASE_PILOTS))
     pilot.add_argument("--source", required=True)
     pilot.add_argument("--output-root", required=True)
     pilot.add_argument("--as-of", required=True)

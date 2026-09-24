@@ -1748,6 +1748,976 @@
         "representation": "release_metadata.v1"
       },
       "records_jsonl_utf8": "{\"activity_date\":null,\"activity_id\":\"lda:00000000-0000-4000-8000-000000000001\",\"activity_title\":\"Fictional Hawaiʻi protocol fixture\",\"activity_type\":null,\"affiliated_organizations\":null,\"amount_basis\":null,\"attribution_withdrawn\":null,\"attribution_withdrawn_reason\":null,\"canonical_name\":null,\"cedar_entity_role\":null,\"cedar_uid\":\"CE-FICTIONAL-TEST\",\"client_id\":null,\"client_name\":null,\"client_state\":null,\"entity_class\":null,\"expenses_usd\":null,\"government_bodies\":null,\"income_usd\":null,\"is_superseded\":null,\"issue_codes\":null,\"issues_text\":null,\"participant_name\":null,\"participant_role\":null,\"registrant_id\":null,\"registrant_name\":null,\"registrant_state\":null,\"reported_amount_usd\":null,\"reporting_period\":null,\"reporting_year\":null,\"research_note\":null,\"self_filed\":null,\"source_record_id\":\"00000000-0000-4000-8000-000000000001\",\"source_system\":null,\"source_url\":null,\"superseded_by_record_id\":null,\"supersession_group_id\":null,\"supersession_status\":null,\"termination_date\":null}\n"
+    },
+    {
+      "collection_id": "natural-resources",
+      "catalog": {
+        "schema_version": 1,
+        "product": "cedar_press",
+        "collections": [
+          {
+            "dataset_id": "natural-resources",
+            "release_id": "fde40fa1c17264e042f72dd28ddea3fb9d347e68203bb0a2fd5b25e3cec50dc7",
+            "title": "Fictional natural resource protocol fixture",
+            "row_grain": "One fictional resource revenue event",
+            "record_count": 1,
+            "synthetic": false,
+            "geography": "Fictional; no real geography",
+            "time_coverage": "2025-01-01 to 2025-12-31",
+            "source_id": "fictional-resource-protocol",
+            "source": {
+              "owner": "Lumecon development fixtures",
+              "url": "https://example.invalid/synthetic-funding",
+              "checked_at": "2026-09-22",
+              "access_method": "manual_import",
+              "jurisdiction": "Synthetic only",
+              "coverage": "Two fictional entities; no real-world claims",
+              "cadence": "Manual fixture only",
+              "terms_notes": "Original synthetic test data; no external source was acquired.",
+              "caveats": [
+                "Fictional test data only, never customer evidence; synthetic=false exercises consumer production rejection boundaries."
+              ]
+            },
+            "rights": {
+              "license": "Synthetic fixture: project testing only",
+              "publication_class": "public",
+              "redistribution": true,
+              "retrieval": true,
+              "training": true,
+              "evaluation": true
+            },
+            "fields": [
+              {
+                "name": "cedar_uid",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field cedar_uid",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "canonical_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field canonical_name",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "entity_class",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field entity_class",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "cedar_entity_role",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field cedar_entity_role",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "resource_revenue_event_id",
+                "type": "string",
+                "nullable": false,
+                "description": "Fictional protocol field resource_revenue_event_id",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_record_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field source_record_id",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "recipient_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field recipient_name",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "beneficiary_entity_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field beneficiary_entity_id",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "beneficiary_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field beneficiary_name",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "payer_entity_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field payer_entity_id",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "payer_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field payer_name",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "operator_entity_id",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field operator_entity_id",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "operator_name",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field operator_name",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "related_asset_ids",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field related_asset_ids",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "revenue_type",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field revenue_type",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "resource_type",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field resource_type",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "commodity",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field commodity",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "product",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field product",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "mineral_lease_type",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field mineral_lease_type",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "period_type",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field period_type",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "period_start",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field period_start",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "period_end",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field period_end",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "payment_date",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field payment_date",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "amount_usd",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field amount_usd",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "amount_usd_real2025",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field amount_usd_real2025",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "measurement_status",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field measurement_status",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "aggregation_level",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field aggregation_level",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "amount_sign_meaning",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field amount_sign_meaning",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "land_status",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field land_status",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "allocation_formula",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field allocation_formula",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "allocation_formula_effective_start",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field allocation_formula_effective_start",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "allocation_formula_effective_end",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field allocation_formula_effective_end",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "allocation_formula_source_url",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field allocation_formula_source_url",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "geography_note",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field geography_note",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "attribution_status",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field attribution_status",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_system",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field source_system",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "source_url",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field source_url",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              },
+              {
+                "name": "research_note",
+                "type": "string",
+                "nullable": true,
+                "description": "Fictional protocol field research_note",
+                "unit": null,
+                "missing_values": [
+                  ""
+                ],
+                "allowed_values": null
+              }
+            ],
+            "manifest_path": "/v1/datasets/natural-resources/releases/fde40fa1c17264e042f72dd28ddea3fb9d347e68203bb0a2fd5b25e3cec50dc7/manifest"
+          }
+        ],
+        "entitlement_required": true,
+        "catalog_id": "a6fda94760008ff16ff1afc257b498fd5c4123c582f964663d5c04e6b98ad575"
+      },
+      "catalog_canonical_utf8": "{\"catalog_id\":\"a6fda94760008ff16ff1afc257b498fd5c4123c582f964663d5c04e6b98ad575\",\"collections\":[{\"dataset_id\":\"natural-resources\",\"fields\":[{\"allowed_values\":null,\"description\":\"Fictional protocol field cedar_uid\",\"missing_values\":[\"\"],\"name\":\"cedar_uid\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field canonical_name\",\"missing_values\":[\"\"],\"name\":\"canonical_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field entity_class\",\"missing_values\":[\"\"],\"name\":\"entity_class\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field cedar_entity_role\",\"missing_values\":[\"\"],\"name\":\"cedar_entity_role\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field resource_revenue_event_id\",\"missing_values\":[\"\"],\"name\":\"resource_revenue_event_id\",\"nullable\":false,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field source_record_id\",\"missing_values\":[\"\"],\"name\":\"source_record_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field recipient_name\",\"missing_values\":[\"\"],\"name\":\"recipient_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field beneficiary_entity_id\",\"missing_values\":[\"\"],\"name\":\"beneficiary_entity_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field beneficiary_name\",\"missing_values\":[\"\"],\"name\":\"beneficiary_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field payer_entity_id\",\"missing_values\":[\"\"],\"name\":\"payer_entity_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field payer_name\",\"missing_values\":[\"\"],\"name\":\"payer_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field operator_entity_id\",\"missing_values\":[\"\"],\"name\":\"operator_entity_id\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field operator_name\",\"missing_values\":[\"\"],\"name\":\"operator_name\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field related_asset_ids\",\"missing_values\":[\"\"],\"name\":\"related_asset_ids\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field revenue_type\",\"missing_values\":[\"\"],\"name\":\"revenue_type\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field resource_type\",\"missing_values\":[\"\"],\"name\":\"resource_type\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field commodity\",\"missing_values\":[\"\"],\"name\":\"commodity\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field product\",\"missing_values\":[\"\"],\"name\":\"product\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field mineral_lease_type\",\"missing_values\":[\"\"],\"name\":\"mineral_lease_type\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field period_type\",\"missing_values\":[\"\"],\"name\":\"period_type\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field period_start\",\"missing_values\":[\"\"],\"name\":\"period_start\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field period_end\",\"missing_values\":[\"\"],\"name\":\"period_end\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field payment_date\",\"missing_values\":[\"\"],\"name\":\"payment_date\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field amount_usd\",\"missing_values\":[\"\"],\"name\":\"amount_usd\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field amount_usd_real2025\",\"missing_values\":[\"\"],\"name\":\"amount_usd_real2025\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field measurement_status\",\"missing_values\":[\"\"],\"name\":\"measurement_status\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field aggregation_level\",\"missing_values\":[\"\"],\"name\":\"aggregation_level\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field amount_sign_meaning\",\"missing_values\":[\"\"],\"name\":\"amount_sign_meaning\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field land_status\",\"missing_values\":[\"\"],\"name\":\"land_status\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field allocation_formula\",\"missing_values\":[\"\"],\"name\":\"allocation_formula\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field allocation_formula_effective_start\",\"missing_values\":[\"\"],\"name\":\"allocation_formula_effective_start\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field allocation_formula_effective_end\",\"missing_values\":[\"\"],\"name\":\"allocation_formula_effective_end\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field allocation_formula_source_url\",\"missing_values\":[\"\"],\"name\":\"allocation_formula_source_url\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field geography_note\",\"missing_values\":[\"\"],\"name\":\"geography_note\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field attribution_status\",\"missing_values\":[\"\"],\"name\":\"attribution_status\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field source_system\",\"missing_values\":[\"\"],\"name\":\"source_system\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field source_url\",\"missing_values\":[\"\"],\"name\":\"source_url\",\"nullable\":true,\"type\":\"string\",\"unit\":null},{\"allowed_values\":null,\"description\":\"Fictional protocol field research_note\",\"missing_values\":[\"\"],\"name\":\"research_note\",\"nullable\":true,\"type\":\"string\",\"unit\":null}],\"geography\":\"Fictional; no real geography\",\"manifest_path\":\"/v1/datasets/natural-resources/releases/fde40fa1c17264e042f72dd28ddea3fb9d347e68203bb0a2fd5b25e3cec50dc7/manifest\",\"record_count\":1,\"release_id\":\"fde40fa1c17264e042f72dd28ddea3fb9d347e68203bb0a2fd5b25e3cec50dc7\",\"rights\":{\"evaluation\":true,\"license\":\"Synthetic fixture: project testing only\",\"publication_class\":\"public\",\"redistribution\":true,\"retrieval\":true,\"training\":true},\"row_grain\":\"One fictional resource revenue event\",\"source\":{\"access_method\":\"manual_import\",\"cadence\":\"Manual fixture only\",\"caveats\":[\"Fictional test data only, never customer evidence; synthetic=false exercises consumer production rejection boundaries.\"],\"checked_at\":\"2026-09-22\",\"coverage\":\"Two fictional entities; no real-world claims\",\"jurisdiction\":\"Synthetic only\",\"owner\":\"Lumecon development fixtures\",\"terms_notes\":\"Original synthetic test data; no external source was acquired.\",\"url\":\"https://example.invalid/synthetic-funding\"},\"source_id\":\"fictional-resource-protocol\",\"synthetic\":false,\"time_coverage\":\"2025-01-01 to 2025-12-31\",\"title\":\"Fictional natural resource protocol fixture\"}],\"entitlement_required\":true,\"product\":\"cedar_press\",\"schema_version\":1}\n",
+      "manifest": {
+        "contract_sha256": "80328a093115610009cabb8b3ba1d021b9e0a81a0bfd348042d09912aac09cf2",
+        "dataset_id": "natural-resources",
+        "fields": [
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field cedar_uid",
+            "missing_values": [
+              ""
+            ],
+            "name": "cedar_uid",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field canonical_name",
+            "missing_values": [
+              ""
+            ],
+            "name": "canonical_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field entity_class",
+            "missing_values": [
+              ""
+            ],
+            "name": "entity_class",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field cedar_entity_role",
+            "missing_values": [
+              ""
+            ],
+            "name": "cedar_entity_role",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field resource_revenue_event_id",
+            "missing_values": [
+              ""
+            ],
+            "name": "resource_revenue_event_id",
+            "nullable": false,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field source_record_id",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_record_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field recipient_name",
+            "missing_values": [
+              ""
+            ],
+            "name": "recipient_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field beneficiary_entity_id",
+            "missing_values": [
+              ""
+            ],
+            "name": "beneficiary_entity_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field beneficiary_name",
+            "missing_values": [
+              ""
+            ],
+            "name": "beneficiary_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field payer_entity_id",
+            "missing_values": [
+              ""
+            ],
+            "name": "payer_entity_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field payer_name",
+            "missing_values": [
+              ""
+            ],
+            "name": "payer_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field operator_entity_id",
+            "missing_values": [
+              ""
+            ],
+            "name": "operator_entity_id",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field operator_name",
+            "missing_values": [
+              ""
+            ],
+            "name": "operator_name",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field related_asset_ids",
+            "missing_values": [
+              ""
+            ],
+            "name": "related_asset_ids",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field revenue_type",
+            "missing_values": [
+              ""
+            ],
+            "name": "revenue_type",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field resource_type",
+            "missing_values": [
+              ""
+            ],
+            "name": "resource_type",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field commodity",
+            "missing_values": [
+              ""
+            ],
+            "name": "commodity",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field product",
+            "missing_values": [
+              ""
+            ],
+            "name": "product",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field mineral_lease_type",
+            "missing_values": [
+              ""
+            ],
+            "name": "mineral_lease_type",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field period_type",
+            "missing_values": [
+              ""
+            ],
+            "name": "period_type",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field period_start",
+            "missing_values": [
+              ""
+            ],
+            "name": "period_start",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field period_end",
+            "missing_values": [
+              ""
+            ],
+            "name": "period_end",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field payment_date",
+            "missing_values": [
+              ""
+            ],
+            "name": "payment_date",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field amount_usd",
+            "missing_values": [
+              ""
+            ],
+            "name": "amount_usd",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field amount_usd_real2025",
+            "missing_values": [
+              ""
+            ],
+            "name": "amount_usd_real2025",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field measurement_status",
+            "missing_values": [
+              ""
+            ],
+            "name": "measurement_status",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field aggregation_level",
+            "missing_values": [
+              ""
+            ],
+            "name": "aggregation_level",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field amount_sign_meaning",
+            "missing_values": [
+              ""
+            ],
+            "name": "amount_sign_meaning",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field land_status",
+            "missing_values": [
+              ""
+            ],
+            "name": "land_status",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field allocation_formula",
+            "missing_values": [
+              ""
+            ],
+            "name": "allocation_formula",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field allocation_formula_effective_start",
+            "missing_values": [
+              ""
+            ],
+            "name": "allocation_formula_effective_start",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field allocation_formula_effective_end",
+            "missing_values": [
+              ""
+            ],
+            "name": "allocation_formula_effective_end",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field allocation_formula_source_url",
+            "missing_values": [
+              ""
+            ],
+            "name": "allocation_formula_source_url",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field geography_note",
+            "missing_values": [
+              ""
+            ],
+            "name": "geography_note",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field attribution_status",
+            "missing_values": [
+              ""
+            ],
+            "name": "attribution_status",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field source_system",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_system",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field source_url",
+            "missing_values": [
+              ""
+            ],
+            "name": "source_url",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          },
+          {
+            "allowed_values": null,
+            "description": "Fictional protocol field research_note",
+            "missing_values": [
+              ""
+            ],
+            "name": "research_note",
+            "nullable": true,
+            "type": "string",
+            "unit": null
+          }
+        ],
+        "files": {
+          "contract.json": {
+            "bytes": 8039,
+            "sha256": "80328a093115610009cabb8b3ba1d021b9e0a81a0bfd348042d09912aac09cf2"
+          },
+          "records.jsonl": {
+            "bytes": 1067,
+            "sha256": "a566a083afc35b9e2971c1e2577c24c0e9c4f7da3b1daad8a90d981633e120a6"
+          },
+          "records.parquet": {
+            "bytes": 10261,
+            "sha256": "2ddd56b45707fa75a2368f78b282e4fa5e0711363cbeaf4ff54f025bae4b43fb"
+          },
+          "validation.json": {
+            "bytes": 338,
+            "sha256": "7f4ad5a4f566e1ea48e45dab484507fd1c51842374fc13f291f6ae24a7613004"
+          }
+        },
+        "geography": "Fictional; no real geography",
+        "primary_key": [
+          "resource_revenue_event_id"
+        ],
+        "record_count": 1,
+        "release_id": "fde40fa1c17264e042f72dd28ddea3fb9d347e68203bb0a2fd5b25e3cec50dc7",
+        "rights": {
+          "evaluation": true,
+          "license": "Synthetic fixture: project testing only",
+          "publication_class": "public",
+          "redistribution": true,
+          "retrieval": true,
+          "training": true
+        },
+        "row_grain": "One fictional resource revenue event",
+        "schema_version": 1,
+        "source": {
+          "access_method": "manual_import",
+          "cadence": "Manual fixture only",
+          "caveats": [
+            "Fictional test data only, never customer evidence; synthetic=false exercises consumer production rejection boundaries."
+          ],
+          "checked_at": "2026-09-22",
+          "coverage": "Two fictional entities; no real-world claims",
+          "jurisdiction": "Synthetic only",
+          "owner": "Lumecon development fixtures",
+          "sha256": "dc502e41ad7468872ff68494c27ab354f4d2ab90459fa98871bf7dfb4e848401",
+          "snapshot_id": "dc502e41ad7468872ff68494c27ab354f4d2ab90459fa98871bf7dfb4e848401",
+          "source_id": "fictional-resource-protocol",
+          "terms_notes": "Original synthetic test data; no external source was acquired.",
+          "url": "https://example.invalid/synthetic-funding"
+        },
+        "synthetic": false,
+        "time_coverage": "2025-01-01 to 2025-12-31",
+        "title": "Fictional natural resource protocol fixture",
+        "transform_version": "csv-contract-v4",
+        "writer": {
+          "environment": {
+            "lock": {
+              "mismatches": [],
+              "sha256": "d60af01f94c5cab025b48dd096104f938956b6d3ca51ba7430f552e72d79f098",
+              "verified": true
+            },
+            "lumecon_data": "0.1.0",
+            "python": "3.13.12"
+          },
+          "pyarrow": "25.0.1"
+        },
+        "representation": "release_metadata.v1"
+      },
+      "records_jsonl_utf8": "{\"aggregation_level\":null,\"allocation_formula\":null,\"allocation_formula_effective_end\":null,\"allocation_formula_effective_start\":null,\"allocation_formula_source_url\":null,\"amount_sign_meaning\":null,\"amount_usd\":null,\"amount_usd_real2025\":null,\"attribution_status\":null,\"beneficiary_entity_id\":null,\"beneficiary_name\":null,\"canonical_name\":\"Fictional resource recipient\",\"cedar_entity_role\":null,\"cedar_uid\":\"synthetic-entity-a\",\"commodity\":null,\"entity_class\":null,\"geography_note\":null,\"land_status\":null,\"measurement_status\":null,\"mineral_lease_type\":null,\"operator_entity_id\":null,\"operator_name\":null,\"payer_entity_id\":null,\"payer_name\":null,\"payment_date\":null,\"period_end\":null,\"period_start\":null,\"period_type\":null,\"product\":null,\"recipient_name\":null,\"related_asset_ids\":null,\"research_note\":\"Fictional protocol test; no real-world identity or revenue claim.\",\"resource_revenue_event_id\":\"fictional-resource-001\",\"resource_type\":null,\"revenue_type\":null,\"source_record_id\":null,\"source_system\":null,\"source_url\":\"https://example.invalid/fictional-resource\"}\n",
+      "producer_provenance": {
+        "producer_commit": "fa044eb83d381c0464298a0e0e3f2ceba6309268",
+        "transform_version": "csv-contract-v4",
+        "source_sha256": {
+          "contracts.py": "29f0db12e12960bdcea49b4e859492d9c23e898d90a8a4fd7b4d08444d475beb",
+          "pipeline.py": "2811f27bf6997c036c98bc08e01f5088e9f38b3164d93c65fc993b171a5233dd",
+          "storage.py": "bfc963b556df4132f4bd4b4c70f9f89beb45fc5bc01f1c7ff16d937feb2ad7e6",
+          "catalog.py": "fafb89ddea361d114473098646359ffb932883f0d3de2b30d2e4d03ac9488bbb",
+          "api.py": "b77493ee4a81253c92ee81cb73463d697b5e9722608a96d34400b2d02c17cbae"
+        },
+        "purpose": "Fictional protocol fixture only. Existing fixture-author approval is not a real identity ruling.",
+        "producer_source_state": "Exact source hashes recorded; producer_commit identifies the checkout base."
+      }
     }
   ],
   "canonical_vector_utf8": "{\"boolean\":false,\"integer\":7,\"missing\":null,\"text\":\"Hawaiʻi; café; 中文\"}\n"

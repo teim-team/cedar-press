@@ -38,12 +38,146 @@ Claimed 2026-08-26 with script numbers 284-292.
 """
 
 import ast
+import json
 import re
+import shlex
 from pathlib import Path
 
 CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
+
+# Reviewed bridge inputs to the existing Lumecon release command. This is an
+# allowlist in the existing runner authority, not a second manifest or catalog.
+# Table grain, primary key and public fields come from the existing contracts.
+REFERENCE_PRESERVATION_AUTHORITY = {
+    "approved_by": "Owner execution directive: preserve existing issued IDs; reference validation only, no identity or affiliation adjudication",
+    "approved_on": "2026-09-23",
+}
+RELEASE_PILOTS = {
+    "legislation": {
+        "owner": "Cedar Press curated legislation register",
+        "url": "https://www.congress.gov/",
+        "rights": {"license": "Existing Cedar public projection contract", "publication_class": "publishable", "redistribution": True, "retrieval": True},
+        "caveats": ["Bill flagship only; votes and actions excluded",
+                    "Names as published remain null where no source span is supplied"],
+    },
+    "natural-resources": {
+        "owner": "Cedar Press curated public resource observations",
+        "url": "https://revenuedata.doi.gov/",
+        "rights": {"license": "Existing Cedar public projection contract", "publication_class": "publishable", "redistribution": True, "retrieval": True},
+        "caveats": ["Revenue flagship only; ancillary tables excluded",
+                    "Mixed rates, transfers and aggregates are not additive",
+                    "Source-suppressed beneficiaries remain unresolved; no inferred entity links",
+                    "Complete source qualifications retained verbatim in research_note"],
+    },
+}
+
+
+def registration_problems(plan, contracts=None):
+    """Refuse discovered producer stages absent from the existing contracts.
+
+    The generated I/O map discovers possible writers; it does not authorize
+    them. dataset_contracts.json remains the table/stage authority, with
+    KNOWN_ORDERINGS supplying explicit, reviewed dependencies. Backup-derived
+    orderings and filename guesses cannot register a new production writer.
+    This checks the supported runner's dispatch boundary, not arbitrary shell
+    execution; dynamic writes still require isolated write-boundary tests.
+    """
+    if contracts is None:
+        try:
+            contracts = json.loads(
+                (CEDAR / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8")
+            )
+        except (OSError, ValueError):
+            return ["REGISTRATION_UNAVAILABLE: dataset_contracts.json must be present and valid"]
+    if not isinstance(contracts, dict) or not isinstance(contracts.get("contracts"), list):
+        return ["REGISTRATION_UNAVAILABLE: malformed collection contracts"]
+    matches = [c for c in contracts["contracts"]
+               if isinstance(c, dict) and c.get("collection") == plan.get("id")]
+    if len(matches) != 1:
+        return ["UNREGISTERED_COLLECTION: exactly one existing contract is required"]
+    contract = matches[0]
+    try:
+        command = shlex.split(contract.get("rebuild_command", ""))
+    except (ValueError, TypeError):
+        command = []
+    suffix = ["code/build.py", "run", plan["id"], "--execute"]
+    if command[-4:] != suffix or command[:-4] not in (["py", "-3"], ["python"], ["python3"]):
+        return ["UNSUPPORTED_ENTRY_POINT: contract must route through code/build.py run"]
+    tables = contract.get("tables")
+    if not isinstance(tables, list) or any(not isinstance(t, dict) for t in tables):
+        return ["REGISTRATION_UNAVAILABLE: malformed table contracts"]
+    by_table = {}
+    for table in tables:
+        name = table.get("table")
+        if not isinstance(name, str) or not name or name in by_table:
+            return ["REGISTRATION_UNAVAILABLE: missing or duplicate table name"]
+        builders, enrichers = table.get("rebuilt_by", []), table.get("enriched_by", [])
+        if (not isinstance(builders, list) or not isinstance(enrichers, list)
+                or any(not isinstance(s, str) for s in builders + enrichers)):
+            return ["REGISTRATION_UNAVAILABLE: malformed producer declarations"]
+        by_table[name] = set(builders + enrichers)
+    # These are hand-declared dependencies in the existing pipeline authority.
+    # Do not call all_orderings(): it adds inferred backup-name observations.
+    for ordering in KNOWN_ORDERINGS:
+        if ordering["file"] in by_table:
+            by_table[ordering["file"]].update((ordering["rebuild"], ordering["enricher"]))
+    issues = []
+    stages = plan.get("phase1", []) + plan.get("phase2", [])
+    if any(not isinstance(stage, str) for stage in stages):
+        return ["INVALID_STAGE_PATH: stage names must be strings"]
+    for stage in sorted(set(stages)):
+        if (not isinstance(stage, str) or not stage.endswith(".py")
+                or "/" in stage or "\\" in stage or stage in {".", ".."}):
+            issues.append("INVALID_STAGE_PATH: " + str(stage))
+            continue
+        if stage in NEVER_RUN:
+            issues.append("FORBIDDEN_PRODUCER: " + stage)
+            continue
+        outputs = set(plan.get("rb", {}).get(stage, []) + plan.get("en", {}).get(stage, []))
+        if not outputs:
+            issues.append("UNDECLARED_OUTPUTS: " + stage)
+        for output in sorted(outputs):
+            if output not in by_table:
+                issues.append("UNREGISTERED_TABLE: " + str(output))
+            elif stage not in by_table[output]:
+                issues.append("UNREGISTERED_PRODUCER: " + stage + " -> " + output)
+    return issues
+
+
+def script_inventory_problems(root=CEDAR, inventory=None):
+    """Require new data-code files to enter the existing 521 inventory.
+
+    Census inclusion is not permission to build: registration_problems also
+    checks every dispatched stage/output against the collection authority.
+    This deliberately treats previously inventoried unresolved scripts as
+    unresolved, not approved. Neither check claims to police direct shell runs.
+    """
+    root = Path(root)
+    if inventory is None:
+        try:
+            inventory = json.loads(
+                (root / "docs/schema/inventory.json").read_text(encoding="utf-8")
+            )
+        except (OSError, ValueError):
+            return ["SCRIPT_INVENTORY_UNAVAILABLE: regenerate the existing 521 script census"]
+    if not isinstance(inventory, dict) or not isinstance(inventory.get("scripts"), list):
+        return ["SCRIPT_INVENTORY_UNAVAILABLE: malformed script census"]
+    registered = set()
+    for item in inventory["scripts"]:
+        if not isinstance(item, dict) or not isinstance(item.get("script"), str):
+            return ["SCRIPT_INVENTORY_UNAVAILABLE: malformed script record"]
+        directory = item.get("dir", "").replace(".", "/")
+        registered.add((Path(directory) / item["script"]).as_posix())
+    issues = []
+    for path in sorted((root / "code").rglob("*.py")):
+        relative = path.relative_to(root / "code").as_posix()
+        if "__pycache__" in path.parts:
+            continue
+        if relative not in registered:
+            issues.append("UNINVENTORIED_DATA_CODE: code/" + relative)
+    return issues
 
 
 class ForbiddenScript(Exception):

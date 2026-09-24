@@ -2045,6 +2045,25 @@ def recompute_derived(collection: str, header, rows) -> dict:
     caller can report it rather than assert silently.
     """
     changed = {}
+    if str(collection).strip().lower() == "natural-resources":
+        # The existing field map requires these factual qualifications to
+        # survive in research_note. Preserve the complete source text; never
+        # summarize away suppressed beneficiaries, units or nonadditivity.
+        for row in rows:
+            note = row.get("beneficiary_note") or ""
+            existing = row.get("research_note") or ""
+            if note and existing and existing != note:
+                raise FieldMapRefusal(collection, ["beneficiary_note", "research_note"],
+                                      "conflicting qualifications require review; neither is overwritten")
+        if "research_note" not in header:
+            header.append("research_note")
+        count = 0
+        for row in rows:
+            note = row.get("beneficiary_note") or ""
+            if note and row.get("research_note") != note:
+                row["research_note"] = note
+                count += 1
+        return {"research_note": count} if count else {}
     if str(collection).strip().lower() != "deals":
         return changed
     have_month = {"day", "month"}

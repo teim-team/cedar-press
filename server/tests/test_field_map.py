@@ -52,6 +52,35 @@ def _load_publication():
 
 pub = _load_publication()
 
+
+class ResourceQualificationTest(unittest.TestCase):
+    def test_source_qualifications_survive_verbatim_and_rerun(self):
+        header = ["beneficiary_note"]
+        note = "Rate per headright, NOT total revenue. Recipient suppressed.\nDo not sum."
+        rows = [{"beneficiary_note": note}]
+        self.assertEqual(
+            pub.recompute_derived("natural-resources", header, rows), {"research_note": 1}
+        )
+        self.assertEqual(rows[0]["research_note"], note)
+        self.assertEqual(header, ["beneficiary_note", "research_note"])
+        self.assertEqual(pub.recompute_derived("natural-resources", header, rows), {})
+
+    def test_conflicting_notes_refuse_before_any_row_changes(self):
+        rows = [
+            {"beneficiary_note": "first"},
+            {"beneficiary_note": "suppressed", "research_note": "observed zero"},
+        ]
+        before = [dict(row) for row in rows]
+        with self.assertRaises(pub.FieldMapRefusal):
+            pub.recompute_derived("natural-resources", ["beneficiary_note"], rows)
+        self.assertEqual(rows, before)
+
+    def test_blank_source_does_not_erase_existing_note(self):
+        rows = [{"beneficiary_note": "", "research_note": "Existing evidence"}]
+        pub.recompute_derived("natural-resources", [], rows)
+        self.assertEqual(rows[0]["research_note"], "Existing evidence")
+
+
 #: Datasets whose samples the applier must REFUSE as they stand, with the
 #: column that stops them. These are findings, not fixture defects: the
 #: writer will refuse the full table for the same reason until the terminal
