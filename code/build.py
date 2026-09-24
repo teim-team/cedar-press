@@ -616,6 +616,24 @@ def assert_pilot_conservation(original_rows, records, keys):
                 raise ValueError("REFUSED: publication projection changed an existing entity reference")
 
 
+def pilot_authority_hashes(root):
+    """Pin existing projection authorities, including absent optional legacy maps."""
+    import hashlib
+    paths = (
+        "data/cedar/field_map.json", "data/cedar/scopes.json",
+        "data/spine/cedar_identity_register.csv", "data/spine/cedar_entity_names.csv",
+        "data/clean/cedar_identifier_ledger_final.csv",
+        "graveyard/cicd/cedar_handle_history.csv",
+        "data/spine/cedar_retired_neid_crosswalk.csv",
+        "data/clean/cedar_ruling_ledger_consolidated.csv",
+        "docs/schema/dataset_contracts.json", "code/cedar_pipeline.py",
+        "code/cedar_publication.py", "code/cedar_ids.py", "code/build.py",
+        "code/1137_customer_dataset_combine.py", "code/cedar_domain.py", "code/503_identity.py",
+    )
+    return {relative: (hashlib.sha256((root / relative).read_bytes()).hexdigest()
+                       if (root / relative).is_file() else "ABSENT") for relative in paths}
+
+
 def cmd_release_pilot(args):
     """Project one existing flagship through its approved contract; never promote."""
     import csv
@@ -631,6 +649,8 @@ def cmd_release_pilot(args):
 
     collection = args.collection
     config = CP.RELEASE_PILOTS[collection]
+    authority_root = HERE.parent
+    authorities = pilot_authority_hashes(authority_root)
     table = publication.FLAGSHIP[collection]
     contracts = json.loads((HERE.parent / "docs/schema/dataset_contracts.json").read_text(encoding="utf-8"))
     declaration = next(item for item in contracts["contracts"] if item["collection"] == collection)
@@ -684,18 +704,13 @@ def cmd_release_pilot(args):
     writer.writeheader()
     writer.writerows(records)
     public_bytes = buffer.getvalue().encode("utf-8")
+    if pilot_authority_hashes(authority_root) != authorities:
+        raise SystemExit("REFUSED: projection authority changed during candidate build")
     artifact = target / "intake" / collection / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
     immutable_bytes(artifact, public_bytes)
     missing_urls = ["/".join(row[key] for key in keys) for row in records if not row.get("source_url")]
-    authority_hashes = []
-    for relative in ("data/cedar/field_map.json", "data/cedar/scopes.json",
-                     "data/spine/cedar_identity_register.csv", "data/spine/cedar_entity_names.csv",
-                     "docs/schema/dataset_contracts.json", "code/cedar_pipeline.py",
-                     "code/cedar_publication.py", "code/cedar_ids.py", "code/build.py",
-                     "code/1137_customer_dataset_combine.py"):
-        authority = Path(__file__).resolve().parents[1] / relative
-        if authority.is_file():
-            authority_hashes.append(relative + " SHA256 " + hashlib.sha256(authority.read_bytes()).hexdigest())
+    authority_hashes = [relative + (" ABSENT" if digest == "ABSENT" else " SHA256 " + digest)
+                        for relative, digest in authorities.items()]
     authority_hashes.append("Resolved entity/name/role register SHA256 " + hashlib.sha256(canonical_json(register)).hexdigest())
     identity = None
     if "cedar_uid" in header:
@@ -724,8 +739,9 @@ def cmd_release_pilot(args):
     snapshot = ingest_csv(contract, artifact, target)
     manifest = build_release(contract, snapshot["snapshot_id"], target)
     second = build_release(contract, snapshot["snapshot_id"], target)
-    if manifest["release_id"] != second["release_id"] or source.read_bytes() != original:
-        raise SystemExit("REFUSED: nondeterministic release or changed canonical input")
+    if (manifest["release_id"] != second["release_id"] or source.read_bytes() != original
+            or pilot_authority_hashes(authority_root) != authorities):
+        raise SystemExit("REFUSED: nondeterministic release or changed canonical input/authority")
     verify_release(target, collection, manifest["release_id"])
     catalog = build_catalog(target, [(collection, manifest["release_id"])], product="cedar_press")
     immutable_bytes(target / "catalogs" / (catalog["catalog_id"] + ".json"), canonical_json(catalog))

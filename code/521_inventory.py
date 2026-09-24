@@ -623,8 +623,8 @@ def refresh_script_census():
         "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
         "scripts": len(scripts),
         "operational_role_counts": dict(sorted(Counter(s["operational_role"] for s in scripts).items())),
-        "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; referenced product consumer/shared service; referenced validator/migration/review; existing unreferenced archive candidate; unresolved",
-        "reference_scope": "Static AST imports and Python-path literals, plus tracked command/config references. Tests may be consumers. These are not verified external scheduler or runtime invocations.",
+        "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
+        "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
         "embedded_selftest_files": sum(s["embedded_test_functions"] > 0 for s in scripts),
         "unresolved_not_authorized": sum(s["registration_status"] == "unresolved_not_authorized"
                                          for s in scripts),
@@ -636,6 +636,59 @@ def refresh_script_census():
     OUT_JSON.write_text(json.dumps(original, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(original["script_census"], indent=2))
     return 0
+
+
+def _call_name(node):
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return _call_name(node.value) + "." + node.attr
+    return ""
+
+
+def _runtime_script_references(tree):
+    """Conservative literal imports/dispatch, not arbitrary string mentions.
+
+    Dynamic variable targets and transitive execution require separate review.
+    A reference is evidence of a potential runtime edge, not reachability proof.
+    """
+    targets = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            targets.update(alias.name.split(".")[-1] + ".py" for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            targets.add(node.module.split(".")[-1] + ".py")
+        elif isinstance(node, ast.Call):
+            call = _call_name(node.func)
+            if call in {"importlib.import_module", "import_module"}:
+                if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                    targets.add(node.args[0].value.split(".")[-1] + ".py")
+            elif call in {"subprocess.run", "subprocess.call", "subprocess.check_call",
+                          "subprocess.check_output", "subprocess.Popen", "runpy.run_path",
+                          "importlib.util.spec_from_file_location", "spec_from_file_location"}:
+                # Only the actual command/path argument. Ignore output/log/error text.
+                index = 1 if call.endswith("spec_from_file_location") else 0
+                if len(node.args) > index:
+                    targets.update(Path(value.value).name for value in ast.walk(node.args[index])
+                                   if isinstance(value, ast.Constant) and isinstance(value.value, str)
+                                   and value.value.endswith(".py"))
+    return targets
+
+
+def _test_reference(path, tree):
+    if any(part in {"tests", "test", "fixtures", "review"} or part.startswith("fixtures_")
+           for part in path.parts):
+        return True
+    if re.search(r"(^test_|_test\.py$|\.spec\.)", path.name):
+        return True
+    pytest_import = any(isinstance(node, ast.Import) and any(alias.name == "pytest" for alias in node.names)
+                        or isinstance(node, ast.ImportFrom) and node.module == "pytest"
+                        for node in ast.walk(tree))
+    return (pytest_import and any(isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                  and node.name.startswith("test_") for node in ast.walk(tree))
+            or any(isinstance(node, ast.ClassDef)
+                   and any(_call_name(base).endswith("TestCase") for base in node.bases)
+                   for node in ast.walk(tree)))
 
 
 def add_operational_roles(scripts, references, table_contracts=None, launch_collections=None):
@@ -662,6 +715,7 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
             producers[name].append({"collection": contract["collection"], "output": table,
                                     "entrypoint": contract.get("rebuild_command", "")})
     consumers = defaultdict(set)
+    runtime_consumers = defaultdict(set)
     for path in references:
         if any(part in {"graveyard", "archive", "node_modules"} for part in path.parts):
             continue
@@ -672,6 +726,9 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
                 tree = ast.parse(text)
             except SyntaxError:
                 continue
+            if not _test_reference(path.relative_to(ROOT), tree):
+                for target in _runtime_script_references(tree):
+                    runtime_consumers[target].add(relative)
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     for alias in node.names:
@@ -715,6 +772,23 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
                          and isinstance(base.value, ast.Name) and base.value.id in aliases
                          for base in node.bases)]
         callers = sorted(consumers[name] - {relative})
+        runtime_callers = sorted(runtime_consumers[name] - {relative})
+        publication_aliases = {alias.asname or alias.name for node in ast.walk(tree)
+                               if isinstance(node, ast.Import) for alias in node.names
+                               if alias.name == "cedar_publication"}
+        publication_functions = {alias.asname or alias.name for node in ast.walk(tree)
+                                 if isinstance(node, ast.ImportFrom) and node.module == "cedar_publication"
+                                 for alias in node.names if alias.name != "shelves"}
+        publication_calls = sorted({_call_name(node.func) for node in ast.walk(tree)
+                                    if isinstance(node, ast.Call)
+                                    and (_call_name(node.func) in publication_functions
+                                         or isinstance(node.func, ast.Attribute)
+                                         and _call_name(node.func.value) in publication_aliases
+                                         and node.func.attr != "shelves")})
+        validation_calls = sorted({_call_name(node.func) for node in ast.walk(tree)
+                                   if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                                   and node.func.id in functions
+                                   and re.match(r"^(check|verify|validate|audit|review|assert|reconcile)(_|$)", node.func.id)})
         filename_test = bool(re.search(r"(^test_|_test\.py$|^tests?\.)", name))
         assertion_nodes = sum(isinstance(node, ast.Assert) for node in ast.walk(tree))
         check_calls = sorted({node.func.id for node in ast.walk(tree)
@@ -730,9 +804,9 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
             role = "historical"
         elif name in producers:
             role = "active producer"
-        elif callers and ("cedar_publication" in text or name in {"build.py", "cedar_pipeline.py", "cedar_ids.py"}):
+        elif runtime_callers and (publication_calls or name in {"build.py", "cedar_pipeline.py", "cedar_ids.py", "cedar_publication.py"}):
             role = "product consumer/shared service"
-        elif callers and any(word in name for word in ("test", "verify", "audit", "review", "ruling", "migration", "inventory", "assert", "check")):
+        elif runtime_callers and validation_calls:
             role = "active validator/migration/review"
         elif name in archive and not callers and script["mentions"] == 0:
             role = "unreferenced retirement candidate"
@@ -741,6 +815,9 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
         script.update({"operational_role": role,
                        "collection_output_entrypoints": producers.get(name, []),
                        "static_consumers": callers,
+                       "runtime_consumer_candidates": runtime_callers,
+                       "operational_call_evidence": {"publication_calls": publication_calls,
+                                                     "validation_calls": validation_calls},
                        "unknown_io_literals": cp.declared_io(path)["unknown"],
                        "embedded_test_functions": sum("selftest" in n or n.startswith("test_") for n in functions),
                        "standalone_test_evidence": {"unittest_classes": cases, "pytest_import": pytest,

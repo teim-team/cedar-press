@@ -20,6 +20,26 @@ SPEC.loader.exec_module(PIPELINE)
 
 
 class ProducerRegistrationTest(unittest.TestCase):
+    def test_projection_provenance_records_absence_and_changed_decision_inputs(self):
+        spec = importlib.util.spec_from_file_location("authority_build", ROOT / "code/build.py")
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            before = runner.pilot_authority_hashes(root)
+            key = "data/clean/cedar_ruling_ledger_consolidated.csv"
+            self.assertEqual(before[key], "ABSENT")
+            self.assertIn("code/503_identity.py", before)
+            self.assertIn("graveyard/cicd/cedar_handle_history.csv", before)
+            path = root / key
+            path.parent.mkdir(parents=True)
+            path.write_text("fixture ruling", encoding="utf-8")
+            present = runner.pilot_authority_hashes(root)
+            self.assertNotEqual(before, present)
+            self.assertEqual(len(present[key]), 64)
+            path.write_text("changed fixture ruling", encoding="utf-8")
+            self.assertNotEqual(present, runner.pilot_authority_hashes(root))
+
     def test_release_projection_cannot_fill_or_reassign_entity_links(self):
         spec = importlib.util.spec_from_file_location("conserved_build", ROOT / "code/build.py")
         runner = importlib.util.module_from_spec(spec)
@@ -255,6 +275,63 @@ class ScriptCensusTest(unittest.TestCase):
                     "local_check_harness_calls"
                 ],
                 ["check"],
+            )
+
+    def test_runtime_roles_require_executable_edges_and_calls(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            code = root / "code"
+            code.mkdir()
+            bodies = {
+                "test_only.py": "import cedar_publication as pub\npub.apply_field_map([])\n",
+                "literal_only.py": "def check():\n    return True\ncheck()\n",
+                "comment_only.py": "# cedar_publication\nprint('fixture')\n",
+                "filename_audit.py": "print('fixture')\n",
+                "real_validation.py": "def validate_rows():\n    return True\nvalidate_rows()\n",
+                "real_product.py": (
+                    "from cedar_publication import apply_field_map\napply_field_map([])\n"
+                ),
+                "scope_only.py": "import cedar_publication as pub\npub.shelves()\n",
+                "caller.py": (
+                    "import comment_only, filename_audit, scope_only\n"
+                    "note = 'literal_only.py'\n"
+                    "import subprocess, importlib.util\n"
+                    "subprocess.run(['python', 'real_validation.py'], stderr='literal_only.py')\n"
+                    "importlib.util.spec_from_file_location('product', 'real_product.py')\n"
+                ),
+                "caller_test.py": "import test_only\n",
+            }
+            for name, content in bodies.items():
+                (code / name).write_text(content, encoding="utf-8")
+            records = [{"script": name, "dir": "", "mentions": 0} for name in bodies]
+            with (
+                patch.object(self.inventory, "ROOT", root),
+                patch.object(self.inventory, "CODE", code),
+                patch.object(
+                    self.inventory, "read_archive_candidates", return_value={"candidates": []}
+                ),
+            ):
+                self.inventory.add_operational_roles(records, list(code.glob("*.py")), {}, set())
+            by_name = {record["script"]: record for record in records}
+            for name in (
+                "test_only.py", "literal_only.py", "comment_only.py",
+                "filename_audit.py", "scope_only.py",
+            ):
+                with self.subTest(name=name):
+                    self.assertEqual(by_name[name]["operational_role"], "unresolved")
+            self.assertEqual(by_name["test_only.py"]["static_consumers"], ["code/caller_test.py"])
+            self.assertEqual(by_name["test_only.py"]["runtime_consumer_candidates"], [])
+            self.assertEqual(by_name["literal_only.py"]["static_consumers"], ["code/caller.py"])
+            self.assertEqual(by_name["literal_only.py"]["runtime_consumer_candidates"], [])
+            self.assertEqual(
+                by_name["real_validation.py"]["operational_role"],
+                "active validator/migration/review",
+            )
+            self.assertEqual(
+                by_name["real_product.py"]["operational_role"], "product consumer/shared service"
+            )
+            self.assertEqual(
+                by_name["real_product.py"]["runtime_consumer_candidates"], ["code/caller.py"]
             )
 
     def test_script_refresh_preserves_prior_table_snapshot(self):
