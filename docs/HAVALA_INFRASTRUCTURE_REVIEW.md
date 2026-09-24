@@ -98,16 +98,44 @@ corrections the same day fixed two points: **Cedar is the one ID issuer**, and
 | Gaming ID binding register | Writes an append-only **PROPOSED** bindings artifact; reads a pinned, read-only snapshot of Cedar's registry by hash; never marks an ID issued | **Sole issuer**: `code/build.py gaming-issue-ids` (dry run by default; not run) writes the live register `data/spine/gaming_id_bindings.csv` (outside Git) and emits a content-addressed registry snapshot for Lumecon to pin |
 | Entity, place, NEED and retired-handle registers | Read as a pinned identity-reference snapshot by hash (`identity.mode: registered_reference`) | **Owns**: `cedar_ids`, `503_identity.py`, 1129 place IDs, `cedar_publication.resolve_retired_entity_handle`, `docs/IDENTIFIER_STANDARD.md`, `docs/GAMING_ID_CONTRACT_REQUEST.md` |
 | Legacy Gaming clean tables (65, Cedar's transitional inputs) | Reads them by hash from the input root | **Owns** `data/clean` and their contracts in `docs/schema/dataset_contracts.json`, with `grove_role` naming the Lumecon consumer module |
-| Release and catalog | **Owns**: ONE immutable Gaming release (dataset `gaming`, one collection manifest with per-component schema, hashes, row counts, rights and download permission), ONE `cedar_grove` catalog entry; rehearsal vs production; `gaming fixture-release` for CI | Nothing is built here |
+| Release and catalog | **Owns**: ONE immutable Gaming collection release (`gaming`, one collection manifest with per-component schema, hashes, row counts, rights and download permission), ONE `cedar_grove` catalog entry; rehearsal vs production; `gaming fixture-release` for CI | Nothing is built here |
 | Which release is served | Nothing | **Owns**: `data/cedar/grove_release_pin.json` (catalog_id, catalog SHA-256, release_id, collection-manifest SHA-256), read with the existing `CEDAR_GROVE_RELEASE_CATALOG` location. Empty until issuance |
 | Entitlement, component download, audit, landing metadata | Read-only API with server dataset grants | **Owns**: `repository.grove_full_release`, `app.full_download`; grove/tree only, decided before any read |
 | CI | `make check` | Job `gaming-release-consumer` installs Lumecon-data at a pinned commit, builds the fixture release, runs the consumer tests |
 
 **Data intake.** Lumecon-data owns the one governed data-intake framework.
 Its authoritative contract is `docs/data-intake.md` on Lumecon-data branch
-`claude/data-intake-contract`, and this packet does not restate it. Cedar keeps
-consumer behavior only. This branch adds no intake logic or source registry:
-Gaming acquisition, source manifests and candidate intake are Lumecon's.
+`claude/data-intake-contract` (`3aa2517`, `76b22a8`). The branch also holds
+per-collection profiles under `intake/profiles/`: 13 profiles, including
+gaming, and 108 sources, all `draft` pending Havala review. It also holds the
+existing-material inventory `intake/existing-material.csv`: 289 rows, 222
+superseded and 67 authoritative. This packet does not restate the contract.
+Cedar keeps consumer behavior only. This branch adds no intake logic or source
+registry.
+
+Remaining intake risks:
+
+- The Cedar Press FR pullers `code/10` and `code/342` violate the contract:
+  0.6 s pacing, 2 workers, up to 6 retries on 429, and a contact email in the
+  User-Agent. They must be brought under the Lumecon fetcher or fixed.
+- Only 18 of 93 Press sources have raw hashes. Only 3 sources are newly
+  registered with receipts: online sports, the FR API and the NEED owner
+  files.
+- Rights are unresolved for USAspending terms, BGOV/HigherGov deliveries,
+  ProPublica and Voteview.
+- Readiness conflict: `collections.manifest` and DATASET_READINESS say READY,
+  while Havala's 2026-09-24 review says no collection is ready.
+- Native-Owned: 3,725 of 4,273 rows are marked publishable while consent is
+  unresolved. The live NEED workspace `nest_enterprises.csv` is marked
+  publishable despite the hold.
+- Lumecon's `DatasetContract` still allows one source per dataset.
+  Multi-source lineage lives in the profiles and gate receipt hashes, not yet
+  in release manifests.
+- `make check` is not proven green on Linux CI. Windows-only failures already
+  exist at `f882fb1`.
+- `claude/data-intake-contract` and `claude/gaming-grove-release` will
+  conflict in `cli.py`. Merge the intake contract first, then rebase or merge
+  Gaming onto it.
 
 **Cross-repository release sequence.** Each step fails closed; nothing reads a
 branch head, a `current` pointer or a local CSV.
@@ -136,7 +164,8 @@ branch head, a `current` pointer or a local CSV.
    `gaming-release-consumer` job installs Lumecon-data at X, which must be
    pushed, builds the fixture release and runs the consumer tests with skips
    counted as failures.
-7. **Merge order.** Merge Lumecon first. Then update the Cedar CI pin to the
+7. **Merge order.** Merge Lumecon first: `claude/data-intake-contract`, then
+   `claude/gaming-grove-release` rebased onto it. Then update the Cedar CI pin to the
    merged commit and merge the Cedar PR (code and pin). Deploy last.
    **Rollback** is a revert of the Cedar pin PR. The prior release is still in
    the immutable store, so every component returns to its prior bytes
