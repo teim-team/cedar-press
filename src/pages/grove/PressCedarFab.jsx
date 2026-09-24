@@ -42,7 +42,7 @@ import { REPEAT_BRIDGES } from "../../features/grove/cedarConversation.js";
 import { appUrl, contactHref } from "../../features/grove/appLink.js";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { PRESS_DATA_PATH } from "../../features/grove/pressRoutes.js";
-import { OPEN_EXAMPLES, SCOPED_EXAMPLES, fabFollowUps, isDrillDown, topicOf } from "../../features/grove/readerCedar.js";
+import { OPEN_EXAMPLES, fabFollowUps, fabStarters, isDrillDown, topicOf, unavailableReply } from "../../features/grove/readerCedar.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 import { useCedarThread } from "../../features/grove/useCedarThread.js";
@@ -167,14 +167,11 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
         track(EVENT.cedarAsked, { length: question.length, gated: true });
         return { text: "", kind: "gate", gate: gated };
       }
-      // Unscoped, the profiles have nothing to answer from; say so here
-      // rather than spending a request on a refusal the client words better.
-      if (!at && !connected) {
-        return {
-          text: "Open a collection and choose “Ask Cedar about this collection”, and the question lands already scoped.",
-          kind: "routing",
-        };
-      }
+      // Disconnected, no request can succeed whatever the scope; unscoped
+      // and connected, the profiles have nothing to answer from. Either is
+      // said here rather than spent on a request that returns a refusal.
+      const unavailable = unavailableReply({ connected, scope: at });
+      if (unavailable) return unavailable;
 
       // A bare "tell me more" is about the last thing Cedar said. The
       // service sees the question with that topic attached; the reader sees
@@ -230,7 +227,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
     [examples],
   );
 
-  const { thread, pending, ask, cancel } = useCedarThread({ resolve, followUpsFor });
+  const { thread, pending, ask, cancel, retire } = useCedarThread({ resolve, followUpsFor });
 
   useEffect(() => {
     if (open && connected) {
@@ -257,8 +254,10 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
       const next = event?.detail;
       if (!next?.id || !next?.name) return;
       // A reader can re-scope mid-flight; the late answer must not land
-      // under the new collection's name.
+      // under the new collection's name, and the quick replies under the
+      // last answer were about the collection being left.
       cancel();
+      retire();
       setScope({ id: next.id, name: next.name });
       // A caller can hand the question over with the scope (the What's New
       // feed asks about a specific release), so the reader arrives with the
@@ -276,7 +275,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
       window.removeEventListener("cedar:ask-collection", onScope);
       window.removeEventListener("cedar:open", onOpen);
     };
-  }, [cancel]);
+  }, [cancel, retire]);
 
   // Every question is asked at an explicit scope, so a chip that sets one
   // does not race the state update. `echo` is what the transcript shows when
@@ -286,24 +285,24 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
     void ask(question, { scope: at, echo });
   };
 
-  const starters = (scope ? SCOPED_EXAMPLES : examples).slice(0, 5).map((example) => {
-    const item = typeof example === "string" ? { q: example, scope: null } : { q: example.q, scope: example.scope ?? null };
-    // A suggestion that names a collection scopes to it in the same tap, so
-    // every suggestion shown is answerable as shown.
-    const at = scope ?? item.scope;
-    return {
-      label: item.scope && !scope ? `${item.q} (${item.scope.name})` : item.q,
-      onSelect: () => {
-        if (item.scope && !scope) setScope(item.scope);
-        askAt(item.q, at);
-      },
-    };
-  });
+  // A suggestion that names a collection scopes to it in the same tap, so
+  // every suggestion shown is answerable as shown. None while disconnected:
+  // the composer is disabled then, and so are these.
+  const starters = fabStarters({ scope, examples, connected }).map((item) => ({
+    label: item.label,
+    onSelect: () => {
+      if (item.scope && !scope) setScope(item.scope);
+      askAt(item.text, scope ?? item.scope);
+    },
+  }));
 
+  // A quick reply is asked at the scope it was offered for, which it
+  // carries, not at whatever the panel is scoped to by the time it is
+  // tapped. An unscoped chip that names a collection scopes to it.
   const followUps = thread.followUps.map((next) => ({
     label: next.label,
     onSelect: () => {
-      const at = scope ?? next.scope ?? null;
+      const at = next.scope ?? scope ?? null;
       if (next.scope && !scope) setScope(next.scope);
       askAt(next.text, at, next.label);
     },
@@ -367,6 +366,7 @@ export function PressCedarFab({ gated = null, examples = OPEN_EXAMPLES }) {
                   className="cp-dc__scopeclear"
                   onClick={() => {
                     cancel();
+                    retire();
                     setScope(null);
                   }}
                 >

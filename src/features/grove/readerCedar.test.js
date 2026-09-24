@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { freshMemory, remember } from "./cedarConversation.js";
-import { OPEN_EXAMPLES, SCOPED_EXAMPLES, fabFollowUps, isDrillDown, topicOf } from "./readerCedar.js";
+import { OPEN_EXAMPLES, SCOPED_EXAMPLES, fabFollowUps, fabStarters, isDrillDown, topicOf, unavailableReply } from "./readerCedar.js";
 
 const SCOPE = { id: "deals", name: "Deals in Indian Country" };
 
@@ -71,4 +71,32 @@ test("a gate, a routing note or an error has nothing to follow up", () => {
 test("every starter offered unscoped is a real collection", () => {
   assert.ok(OPEN_EXAMPLES.length >= 3);
   for (const example of OPEN_EXAMPLES) assert.ok(example.scope.id && example.scope.name);
+});
+
+// ── Findings from the review of 235a8ce ──────────────────────────────────
+
+test("a panel that cannot reach the collections offers no starters: they would all fail", () => {
+  assert.deepEqual(fabStarters({ scope: null, examples: OPEN_EXAMPLES, connected: false }), []);
+  assert.deepEqual(fabStarters({ scope: SCOPE, examples: OPEN_EXAMPLES, connected: false }), []);
+});
+
+test("connected, the starters are the profile's questions when scoped and the collection starters when not", () => {
+  const scoped = fabStarters({ scope: SCOPE, examples: OPEN_EXAMPLES, connected: true });
+  assert.deepEqual(scoped.map((s) => s.label), SCOPED_EXAMPLES);
+  assert.ok(scoped.every((s) => s.scope === SCOPE));
+  const open = fabStarters({ scope: null, examples: OPEN_EXAMPLES, connected: true });
+  assert.equal(open.length, Math.min(5, OPEN_EXAMPLES.length));
+  for (const s of open) {
+    assert.ok(s.scope?.id);
+    assert.ok(s.label.endsWith(`(${s.scope.name})`));
+    assert.equal(s.text, s.label.replace(` (${s.scope.name})`, ""));
+  }
+});
+
+test("a disconnected request is unavailable whatever its scope, never a call", () => {
+  assert.equal(unavailableReply({ connected: false, scope: SCOPE })?.kind, "routing");
+  assert.equal(unavailableReply({ connected: false, scope: null })?.kind, "routing");
+  assert.match(unavailableReply({ connected: false, scope: SCOPE }).text, /can't reach the collections/);
+  assert.equal(unavailableReply({ connected: true, scope: null })?.kind, "routing");
+  assert.equal(unavailableReply({ connected: true, scope: SCOPE }), null);
 });

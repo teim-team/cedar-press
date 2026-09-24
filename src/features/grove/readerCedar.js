@@ -106,3 +106,42 @@ export function fabFollowUps(memory, reply, { scope, examples }) {
   return out.slice(0, 3);
 }
 
+
+/**
+ * The starter chips for the empty panel: the profile's questions when the
+ * panel is scoped, the collection starters when it is not, each carrying the
+ * scope its question is about so the tap that asks also picks the release.
+ * None at all when the collections cannot be reached: the composer is
+ * disabled then, and a chip that could only produce an error turn is not an
+ * invitation.
+ */
+export function fabStarters({ scope, examples, connected }) {
+  if (!connected) return [];
+  const items = scope
+    ? SCOPED_EXAMPLES.map((q) => ({ q, scope }))
+    : examples.map((example) => (typeof example === "string" ? { q: example, scope: null } : { q: example.q, scope: example.scope ?? null }));
+  return items.slice(0, 5).map((item) => ({
+    label: item.scope && !scope ? `${item.q} (${item.scope.name})` : item.q,
+    text: item.q,
+    scope: item.scope,
+  }));
+}
+
+/**
+ * The reply a request gets before any call is made, or null when the call
+ * can go ahead. Disconnected, nothing reaches the collections whatever the
+ * scope; connected but unscoped, the profiles have nothing to answer from
+ * and the panel words the routing better than a request would.
+ */
+export function unavailableReply({ connected, scope }) {
+  if (!connected) {
+    return { text: "I can't reach the collections from here yet. Send the question to the research desk, or open the platform.", kind: "routing" };
+  }
+  if (!scope) {
+    return {
+      text: "Open a collection and choose \u201cAsk Cedar about this collection\u201d, and the question lands already scoped.",
+      kind: "routing",
+    };
+  }
+  return null;
+}

@@ -107,12 +107,17 @@ export function createMatcher(intents, { outOfScopeTriggers = [] } = {}) {
   const oos = outOfScopeTriggers.map((t) => normalise(t)).filter((n) => n.trim());
   const byId = new Map(intents.map((intent) => [intent.id, intent]));
 
-  /** Every intent that scores, with its score. Longer phrases weigh more. */
-  function scoreAll(question) {
+  /**
+   * Every intent that scores, with its score. Longer phrases weigh more.
+   * `exclude` leaves a set of intent ids out of the running, which is how a
+   * follow-up phrase that names a topic is scored against the topics alone.
+   */
+  function scoreAll(question, { exclude = null } = {}) {
     const asked = normalise(question);
     if (asked.trim().length < 2) return [];
     const scored = [];
     for (const { intent, needles } of bank) {
+      if (exclude?.has(intent.id)) continue;
       let score = 0;
       for (const needle of needles) if (asked.includes(needle)) score += Math.max(1, words(needle));
       if (score > 0) scored.push({ intent, score });
@@ -121,17 +126,29 @@ export function createMatcher(intents, { outOfScopeTriggers = [] } = {}) {
   }
 
   /** The top score and every intent tied at it, in declaration order. */
-  function topMatches(question) {
-    const scored = scoreAll(question);
+  function topMatches(question, options = {}) {
+    const scored = scoreAll(question, options);
     let best = 0;
     for (const s of scored) if (s.score > best) best = s.score;
     return { score: best, intents: scored.filter((s) => s.score === best).map((s) => s.intent) };
   }
 
   /** The best intent, or null when nothing matched a whole phrase. */
-  function classify(question) {
-    const { score, intents: tied } = topMatches(question);
+  function classify(question, options = {}) {
+    const { score, intents: tied } = topMatches(question, options);
     return score >= 1 ? tied[0] : null;
+  }
+
+  /**
+   * Whether the question IS one of the intent's triggers and nothing more
+   * (a trailing "please" allowed): "tell me more", not "tell me more about
+   * deals". A bare follow-up is about the last topic; one that names a
+   * topic is about that topic.
+   */
+  function isBare(question, intent) {
+    const asked = normalise(question).trim().replace(/ please$/, "");
+    const needles = bank.find((b) => b.intent === intent)?.needles ?? [];
+    return needles.some((needle) => needle.trim() === asked);
   }
 
   /**
@@ -140,8 +157,8 @@ export function createMatcher(intents, { outOfScopeTriggers = [] } = {}) {
    * current second. Needs a multi-word hit, or a tie with the primary, so a
    * stray single word cannot claim a quick-reply slot.
    */
-  function secondary(question, primaryId) {
-    const scored = scoreAll(question);
+  function secondary(question, primaryId, options = {}) {
+    const scored = scoreAll(question, options);
     const primary = scored.find((s) => s.intent.id === primaryId)?.score ?? 0;
     const rest = scored
       .filter((s) => s.intent.id !== primaryId && s.intent.chip)
@@ -184,7 +201,7 @@ export function createMatcher(intents, { outOfScopeTriggers = [] } = {}) {
     return oos.some((needle) => asked.includes(needle));
   }
 
-  return { intents, byId, scoreAll, topMatches, classify, secondary, fuzzy, nearest, isOutOfScope };
+  return { intents, byId, scoreAll, topMatches, classify, isBare, secondary, fuzzy, nearest, isOutOfScope };
 }
 
 /* ── Memory ──────────────────────────────────────────────────────────────── */
@@ -254,15 +271,22 @@ export function resolveLocally(bank, memory, question, { forced = null } = {}) {
 
   // A chip is an explicit choice of intent: route straight to it rather than
   // re-classifying its label, which may not contain its own triggers.
-  const matched = forced ?? matcher.classify(question);
-  const isDrillDown =
-    !forced && matched != null && (drill.has(matched.id) || affirm.has(matched.id)) && typeof prior?.expanded === "string";
+  let matched = forced ?? matcher.classify(question);
+  // A follow-up phrase is about the last topic only when it is the whole
+  // question: "tell me more". "Tell me more about funding" names a topic,
+  // and its three-word trigger must not outweigh the one-word topic it
+  // names, so the follow-up intents leave the running and the rest decide.
+  const followUpIds = new Set([...drill, ...affirm]);
+  const bare = matched != null && followUpIds.has(matched.id) && matcher.isBare(question, matched);
+  const scoring = !forced && matched != null && followUpIds.has(matched.id) && !bare ? { exclude: followUpIds } : {};
+  if (scoring.exclude) matched = matcher.classify(question, scoring);
+  const isDrillDown = !forced && bare && typeof prior?.expanded === "string";
 
   if (isDrillDown) {
     return { text: prior.expanded, intent: prior, kind: "drilldown", secondary: null, missed: false, clarified: false };
   }
 
-  const { score, intents: tied } = matcher.topMatches(question);
+  const { score, intents: tied } = matcher.topMatches(question, scoring);
   const candidates = tied.filter((i) => i.chip);
   const oos = !forced && matcher.isOutOfScope(question);
 
@@ -294,9 +318,13 @@ export function resolveLocally(bank, memory, question, { forced = null } = {}) {
 
   const seen = memory.answered[intent.id] ?? 0;
   const kind = seen > 0 ? "repeat" : "answer";
-  const text = seen > 0 ? repeatAnswer(intent, seen, memory.expandedShown.includes(intent.id)) : intent.answer;
-  const second = forced || nonTopic.has(intent.id) ? null : matcher.secondary(question, intent.id);
-  return { text, intent, kind, secondary: second, missed: false, clarified: false };
+  const expandedSeen = memory.expandedShown.includes(intent.id);
+  const text = seen > 0 ? repeatAnswer(intent, seen, expandedSeen) : intent.answer;
+  // A repeat that served the deeper answer has supplied the depth: the
+  // quick replies must not offer it again, and the memory records it.
+  const deepened = seen > 0 && !intent.variants?.length && typeof intent.expanded === "string" && !expandedSeen;
+  const second = forced || nonTopic.has(intent.id) ? null : matcher.secondary(question, intent.id, scoring);
+  return { text, intent, kind, secondary: second, missed: false, clarified: false, deepened };
 }
 
 /** Which audience a question names, if any: `{ key, intentId }` or null. */
@@ -321,7 +349,7 @@ export function remember(memory, resolution, { nonTopicIds = new Set(), audience
   let priorTopic = memory.priorTopic ?? null;
 
   if (intent && kind !== "drilldown") answered[intent.id] = (answered[intent.id] ?? 0) + 1;
-  if (intent && (kind === "drilldown" || (kind === "repeat" && resolution.text.startsWith(REPEAT_DEEPEN)))) {
+  if (intent && (kind === "drilldown" || resolution.deepened)) {
     if (!expandedShown.includes(intent.id)) expandedShown.push(intent.id);
   }
   if (intent && !resolution.clarified && !nonTopicIds.has(intent.id)) priorTopic = intent;
@@ -368,14 +396,20 @@ export function followUpsFor(bank, memory, resolution) {
     return out.slice(0, MAX_FOLLOW_UPS);
   }
   if (resolution.kind === "clarify") {
-    for (const candidate of resolution.candidates ?? []) push(candidate.id);
-    return out.slice(0, MAX_FOLLOW_UPS);
+    // A clarification resolves THIS question, so every tied topic is a
+    // choice, whether or not the thread has discussed it before; the
+    // answered filter above is for suggesting new ground, not for this.
+    for (const candidate of (resolution.candidates ?? []).slice(0, MAX_FOLLOW_UPS)) {
+      if (candidate.chip) out.push({ label: candidate.chip, text: candidate.chip, intent: candidate });
+    }
+    return out;
   }
 
   if (resolution.secondary) push(resolution.secondary.id);
   if (
     intent &&
     resolution.kind !== "drilldown" &&
+    !resolution.deepened &&
     typeof intent.expanded === "string" &&
     !memory.expandedShown.includes(intent.id)
   ) {
@@ -395,6 +429,12 @@ const turn = (role, text, extra = {}) => ({ key: `t${(nextKey += 1)}`, role, tex
 
 /** An empty thread with a fresh memory. */
 export const freshThread = () => Object.freeze({ turns: Object.freeze([]), memory: freshMemory(), followUps: Object.freeze([]) });
+
+/** The thread with its quick replies retired: the turns and the memory stay. */
+export function retireFollowUps(thread) {
+  if (!thread.followUps.length) return thread;
+  return Object.freeze({ ...thread, followUps: Object.freeze([]) });
+}
 
 /** The thread with the reader's turn appended and the last quick replies retired. */
 export function beginTurn(thread, echo) {

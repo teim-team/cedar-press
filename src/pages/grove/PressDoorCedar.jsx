@@ -92,7 +92,7 @@ export default function PressDoorCedar() {
     return resolution;
   }, []);
 
-  const { thread, pending, ask } = useCedarThread({
+  const { thread, pending, ask, cancel } = useCedarThread({
     resolve,
     followUpsFor: doorFollowUps,
     nonTopicIds: NON_TOPIC_IDS,
@@ -121,6 +121,11 @@ export default function PressDoorCedar() {
       if (!detail?.id) return;
       const intent = intentForCollection(detail.id);
       setOpen(true);
+      // A turn may still be composing (the pause lasts up to 1.6s, and the
+      // panel may have been closed over it). The reader has asked for a
+      // collection now; that request replaces the one in flight rather
+      // than being dropped at the hook's one-at-a-time guard.
+      cancel();
       if (intent) void ask(`What is in ${detail.name ?? intent.chip}?`, { forced: intent });
     };
     window.addEventListener("cedar:open", onOpen);
@@ -129,7 +134,7 @@ export default function PressDoorCedar() {
       window.removeEventListener("cedar:open", onOpen);
       window.removeEventListener("cedar:ask-collection", onCollection);
     };
-  }, [ask]);
+  }, [ask, cancel]);
 
   // Escape closes, a click outside closes, and the panel takes focus when it
   // opens. The outside click is captured on pointerdown so a chip that

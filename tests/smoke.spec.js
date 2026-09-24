@@ -1269,6 +1269,13 @@ test.describe("Ask Cedar", () => {
       expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
     }
 
+    // This build is standalone: nothing reaches the collections. The
+    // composer is disabled, and so are the starters, which used to render
+    // scoped chips whose every tap became a NOT_CONNECTED error turn.
+    await expect(panel.locator(".cp-dc__input")).toBeDisabled();
+    await expect(panel.locator(".cp-dc__chip")).toHaveCount(0);
+    await expect(panel.locator(".cp-dc__bubble").first()).toContainText("can't reach the collections");
+
     if (testInfo.project.name === "phone") {
       // The launcher is hidden while a full-screen dialog is up — it would
       // sit on top of the answer, and it is no longer the way out. The
@@ -1389,6 +1396,34 @@ test.describe("the Cedar panel is the site's panel", () => {
     // machinery.
     await expect(page.locator(".cp-dc__disclaimer")).toContainText("Verify important details");
     await expect(page.locator(".cp-dc__disclaimer")).not.toContainText("prepared");
+    expect(errors).toEqual([]);
+  });
+
+  // A page-level "Ask Cedar about this collection" while a turn is still
+  // composing (the pause runs up to 1.6s) replaces that turn. It used to be
+  // dropped at the hook's one-at-a-time guard: the panel reopened, the
+  // collection question never appeared, and the earlier answer landed instead.
+  test("a collection asked for while the door is composing replaces the turn in flight", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await page.locator(".cp-dc__fab").click();
+    await page.locator(".cp-dc__input").fill("what is nagpra");
+    await page.locator(".cp-dc__send").click();
+    await expect(page.locator(".cp-dc__bubble--typing")).toBeVisible();
+    // Mid-pause: close, then ask for a collection from the page.
+    await page.locator(".cp-dc__close").click();
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent("cedar:ask-collection", { detail: { id: "deals", name: "Deals in Indian Country" } }));
+    });
+    const answered = page.locator(".cp-dc__msg--bot:not([aria-hidden])");
+    await expect(page.locator(".cp-dc__msg--you").last()).toContainText("What is in Deals in Indian Country?");
+    await expect(answered.last()).toContainText("It is included in Cedar Press");
+    await expect(answered.last()).not.toContainText("Notices of Inventory Completion");
+    // The replaced turn's answer never lands, even after its pause would have ended.
+    await page.waitForTimeout(1800);
+    await expect(answered).toHaveCount(2);
     expect(errors).toEqual([]);
   });
 });

@@ -22,6 +22,7 @@ import {
   remember,
   repeatAnswer,
   resolveLocally,
+  retireFollowUps,
   settleTurn,
   shouldClarify,
   thinkingPause,
@@ -284,4 +285,50 @@ test("the expectation line is the site's, in the house style", () => {
   assert.match(EXPECTATION_LINE, /^Cedar can make mistakes\. Verify important details/);
   assert.doesNotMatch(EXPECTATION_LINE, /prepared|preset|script/i);
   assert.doesNotMatch(EXPECTATION_LINE, /—|&/);
+});
+
+// ── Findings from the review of 235a8ce ──────────────────────────────────
+
+test("a follow-up that names a topic is that topic, not a drill-down into the last one", () => {
+  const c = converse();
+  c.say("deals");
+  const named = c.say("tell me more about funding");
+  assert.equal(named.kind, "answer");
+  assert.equal(named.intent.id, "funding");
+  assert.equal(named.text, "Funding answer.");
+  // On a fresh thread it is the topic too, not a request to pick one.
+  const fresh = converse().say("tell me more about deals");
+  assert.equal(fresh.intent.id, "deals");
+  assert.equal(fresh.text, "Deals answer.");
+  // A bare phrase still drills, with or without a please.
+  const bare = converse();
+  bare.say("deals");
+  assert.equal(bare.say("Tell me more, please").kind, "drilldown");
+});
+
+test("a clarification offers every tied topic, including ones already discussed", () => {
+  const c = converse();
+  c.say("funding");
+  c.say("tribal government");
+  const r = c.say("federal awards tribal government");
+  assert.equal(r.kind, "clarify");
+  assert.deepEqual(r.chips, ["Federal Funding", "I work for a tribal government"]);
+});
+
+test("a repeat that already supplied the depth does not offer to go deeper again", () => {
+  const c = converse();
+  c.say("deals");
+  const deeper = c.say("deals");
+  assert.equal(deeper.text, REPEAT_DEEPEN + "Deals, deeper.");
+  assert.ok(!deeper.chips.includes("Tell me more"), deeper.chips.join(" / "));
+  assert.ok(c.memory.expandedShown.includes("deals"));
+});
+
+test("retiring the quick replies leaves the turns and the memory alone", () => {
+  let t = freshThread();
+  t = settleTurn(beginTurn(t, "deals"), { text: "Deals answer.", intent: INTENTS[2] }, { followUpsFor: () => [{ label: "x" }] });
+  const retired = retireFollowUps(t);
+  assert.deepEqual([...retired.followUps], []);
+  assert.equal(retired.turns, t.turns);
+  assert.equal(retired.memory, t.memory);
 });

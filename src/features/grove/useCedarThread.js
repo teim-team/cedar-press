@@ -14,10 +14,11 @@
 // question, context)` names the quick replies, given the same context the
 // resolver saw. `cancel()` abandons a turn in flight
 // (the reader re-scoped mid-answer) so a late reply cannot land under the
-// wrong heading.
+// wrong heading; `retire()` takes the quick replies off a finished answer
+// whose scope the reader has since left.
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { beginTurn, freshThread, settleTurn, thinkingPause } from "./cedarConversation.js";
+import { beginTurn, freshThread, retireFollowUps, settleTurn, thinkingPause } from "./cedarConversation.js";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -81,5 +82,7 @@ export function useCedarThread({ resolve, followUpsFor, nonTopicIds, detectAudie
     setPending(false);
   }, []);
 
-  return { thread, pending, ask, cancel };
+  const retire = useCallback(() => setThread((current) => retireFollowUps(current)), []);
+
+  return { thread, pending, ask, cancel, retire };
 }
