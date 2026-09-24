@@ -105,6 +105,7 @@ gets a manifest line saying so rather than an empty file that looks complete.
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json
 import re
@@ -209,7 +210,69 @@ def publication_row(raw, header, *, gate=True, masked=None):
     return row, ""
 
 
-def load(path, gate=True, masked=None, *, source_bytes=None):
+def publication_dependencies(path):
+    """Explicit evidence inputs required by a table's public projection."""
+    path = Path(path)
+    return [path.with_name("native_bill_actions.csv")] if path.name == FLAGSHIP["legislation"] else []
+
+
+def legislation_action_dates(rows, actions_bytes):
+    """Reconcile introduction dates to pinned, source-attributed introduction actions.
+
+    The upstream introductions extract contains retrieval dates in historical
+    introduction fields. Never infer a replacement from a Congress or title.
+    Conflicting or unsupported introduction evidence fails before rows change.
+    """
+    targets = {r.get("bill_id", "") for r in rows}
+    dates = defaultdict(set)
+    reader = csv.DictReader(io.StringIO(actions_bytes.decode("utf-8-sig"), newline=""))
+    required = {"bill_id", "action_date", "action_text", "action_code", "source_system", "source_url"}
+    if not required.issubset(reader.fieldnames or []):
+        raise ValueError("Legislation introduction evidence lacks required columns")
+    for action in reader:
+        identifier = action.get("bill_id", "")
+        if identifier not in targets or not (
+            action.get("action_code") == "10000"
+            or action.get("action_text") in {"Introduced in House", "Introduced in Senate"}
+        ):
+            continue
+        if (action.get("source_system") != "Library of Congress"
+                or not action.get("source_url", "").startswith("https://api.congress.gov/v3/bill/")):
+            raise ValueError("Unsupported legislation introduction evidence: " + identifier)
+        parts = identifier.split("-")
+        kind = {"hre": "hres", "hjr": "hjres"}.get(parts[1], parts[1]) if len(parts) == 3 else ""
+        expected_url = f"https://api.congress.gov/v3/bill/{parts[0]}/{kind}/{parts[-1]}/actions"
+        if action["source_url"] != expected_url:
+            raise ValueError("Introduction evidence URL disagrees with bill identity: " + identifier)
+        value = action.get("action_date", "")
+        try:
+            parsed = date.fromisoformat(value)
+            congress = int(identifier.split("-", 1)[0])
+            start = 1789 + 2 * (congress - 1)
+            if parsed.isoformat() != value or not date(start, 1, 3) <= parsed < date(start + 2, 1, 3):
+                raise ValueError("Introduction outside its Congress")
+        except (ValueError, TypeError) as exc:
+            raise ValueError("Invalid legislation introduction evidence: " + identifier) from exc
+        dates[identifier].add(value)
+    conflicts = sorted(k for k, values in dates.items() if len(values) != 1)
+    if conflicts:
+        raise ValueError("Conflicting legislation introduction evidence: " + ", ".join(conflicts))
+    corrections = []
+    for row in rows:
+        identifier = row.get("bill_id", "")
+        if dates.get(identifier):
+            value = next(iter(dates[identifier]))
+            if row.get("introduced_date", "") != value:
+                corrections.append({"bill_id": identifier, "before": row.get("introduced_date", ""), "after": value})
+    by_id = {r["bill_id"]: r["after"] for r in corrections}
+    for row in rows:
+        if row.get("bill_id") in by_id:
+            row["introduced_date"] = by_id[row["bill_id"]]
+    return corrections
+
+
+def load(path, gate=True, masked=None, *, source_bytes=None,
+         legislation_actions_bytes=None, dependency_receipt=None, decision_receipt=None):
     """Read a table through THE publication gate.
 
     `masked` is an optional counter the caller passes in to collect the
@@ -230,6 +293,17 @@ def load(path, gate=True, masked=None, *, source_bytes=None):
         rd = csv.DictReader(fh)
         raw_hdr = list(rd.fieldnames or [])
         source = rd
+        dependencies = publication_dependencies(path)
+        if dependencies:
+            if source_bytes is not None and legislation_actions_bytes is None:
+                raise ValueError("Pinned legislation projection requires pinned native_bill_actions.csv bytes")
+            evidence = legislation_actions_bytes if legislation_actions_bytes is not None else dependencies[0].read_bytes()
+            source = list(rd)
+            corrections = legislation_action_dates(source, evidence)
+            if dependency_receipt is not None:
+                dependency_receipt.append({"path": str(dependencies[0]), "sha256": hashlib.sha256(evidence).hexdigest(),
+                                           "bytes": len(evidence), "role": "official_introduction_actions",
+                                           "corrected_rows": len(corrections), "corrections": corrections})
         if path.name == FLAGSHIP["deals"]:
             # THE DEALS TABLE IS CORRECTED AND PRESENTED HERE, on the raw
             # rows, before projection drops the internal columns the
@@ -247,7 +321,7 @@ def load(path, gate=True, masked=None, *, source_bytes=None):
                       f"no rule and ships blank")
         hdr = publishable_columns(raw_hdr)
         rows, held = [], defaultdict(int)
-        for r in source:
+        for source_row_index, r in enumerate(source):
             # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
             # so projecting first removes the personal-contact fields; running
             # `row_ok` on the RAW row instead fires its NEVER backstop on the
@@ -255,11 +329,22 @@ def load(path, gate=True, masked=None, *, source_bytes=None):
             # order: 582 of 587 rows of the BIA tribal leaders directory,
             # withheld whole for carrying a phone number that was never going
             # to be published.
+            before_masks = dict(masked) if decision_receipt is not None else {}
             projected, why = publication_row(r, hdr, gate=gate, masked=masked)
             if projected is None:
                 held[why] += 1
+                if decision_receipt is not None:
+                    decision_receipt.append({"event": "withheld", "source_row_index": source_row_index, "reason": why,
+                                             **{k: r[k] for k in ("bill_id", "vote_id", "record_id") if k in r}})
             else:
                 rows.append(projected)
+                if decision_receipt is not None:
+                    reasons = {k: v - before_masks.get(k, 0) for k, v in masked.items() if v > before_masks.get(k, 0)}
+                    if reasons:
+                        identity = [k for k in r if "cedar_uid" in k]
+                        decision_receipt.append({"event": "masked", "source_row_index": source_row_index,
+                                                 "reasons": reasons, "before": {k: r[k] for k in identity},
+                                                 "after": {k: projected.get(k, "") for k in identity}})
     return hdr, rows, held
 
 

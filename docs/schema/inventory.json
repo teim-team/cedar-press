@@ -23976,12 +23976,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 14,
-   "mentioned_outside_history": 14,
+   "mentions": 15,
+   "mentioned_outside_history": 15,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 898,
+   "lines": 909,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -24026,7 +24026,7 @@
      "target": "<unresolved>/data/clean/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "4f46047164d1ad33104c6abb08736ece8e690ef767b1cd569246bb4f941cf761"
+     "signature": "eda4bd7d0a06fe0929b0c3033fa463515081d87d99ed3e5bc063e2348160775f"
     },
     {
      "line": 471,
@@ -24034,7 +24034,7 @@
      "target": "<unresolved>/dist/review/MANIFEST.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "164cef9cecc8518834c3b967abd447dbf4ce0497080d4d1a0bdd7c8a5f4d0fa3"
+     "signature": "4c2339a7281c1bf5e69f866665c1df7d70c6ed58eb7de8d2471dad9142a592aa"
     },
     {
      "line": 735,
@@ -24042,39 +24042,39 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "d776fa96e315c072d346864fd9376bd2cd378b4fa058f007df197b90b14a4e1c"
+     "signature": "e5d91696756554e6544cb7d977b4937de3b0699f9c23eb00d0afe221a7499f40"
     },
     {
-     "line": 854,
+     "line": 865,
      "operation": ".write_text",
      "target": "<unresolved>/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "c36cfa86c9b1b07bf7a9cfc32c8798056fa51e4e90e37de2acf641f7cf5c132c"
+     "signature": "7a7d5aa4b700f257252dfb9320aab4561445ad85cae5cca9598a488965ab50f4"
     },
     {
-     "line": 859,
+     "line": 870,
      "operation": ".write_text",
      "target": "<unresolved>/index.html",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b6c8d26772428e0bfe5a9eee05a0bf211306d8b7fdd78e11c31cf7a81b88a4f4"
+     "signature": "703f32567892b85d8d42b3a04185522cc8362d06f6114423461149fe8f74b77f"
     },
     {
-     "line": 864,
+     "line": 875,
      "operation": ".write_text",
      "target": "<unresolved>/run-context.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "83a400059a35aebd10c9cfc26eda9dbff1365b890d5361e3fddb42cafe205cab"
+     "signature": "04e74869d5459f0b36a1b9eaaded4212dd9ebbe00b3c0a2445b2cb4cc2aa251b"
     },
     {
-     "line": 866,
+     "line": 877,
      "operation": ".write_text",
      "target": "<unresolved>/measurements.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "74dfd1f181b5e19751686f5ef5287142e81c9f9275f710a001398f997a4dd1a1"
+     "signature": "a0e447f2c39d1a6fda9ce3ab76d327f8368d0689366644d1831b3014f4471614"
     }
    ],
    "writer_analysis_error": null,
@@ -24229,7 +24229,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 1275,
+   "lines": 1360,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -24263,7 +24263,9 @@
      "verify"
     ]
    },
-   "unknown_io_literals": [],
+   "unknown_io_literals": [
+    "native_bill_actions.csv"
+   ],
    "embedded_test_functions": 0,
    "standalone_test_evidence": {
     "unittest_classes": [],
@@ -24274,36 +24276,36 @@
    },
    "writer_evidence": [
     {
-     "line": 276,
+     "line": 361,
      "operation": "path.open",
-     "target": "<unresolved>/dist/customer/<unresolved>",
-     "scope": "protected_surface",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
      "table": null,
-     "signature": "4142ad0ba393b7fe0c323de16ad8a08cbc556cdf01c7a509b6dabd180b02f27e"
+     "signature": "32ff802e0069856c077e6e54c499afdfe0fb37ac008571ce6f056df59656659d"
     },
     {
-     "line": 440,
+     "line": 525,
      "operation": ".write_text",
      "target": "<unresolved>/dist/customer/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "bda06df00adb5257133dad020c3ba2e4288d2996bcc20498a377520d8d1ae05c"
+     "signature": "008c0b35b2a0976e9ed3147927b3bd7c73f04df66bc04e89a28181465cb141d6"
     },
     {
-     "line": 548,
+     "line": 633,
      "operation": ".write_text",
      "target": "<unresolved>/dist/customer/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "924b488c1ce73f0107fc407fa8d0704b540eed47158c1302910008b189d21b78"
+     "signature": "c0a07c458388b7fa87ba45476cd1a658182b7ebf5880053fdbcf0cb28ed2c800"
     },
     {
-     "line": 1078,
+     "line": 1163,
      "operation": ".open",
      "target": "<unresolved>/dist/customer/MANIFEST.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "ac1bd5d43eb28d9e09ed2a0b7f333b39a167b23e07d8ba31d60619233178cd93"
+     "signature": "c35c8271966d40f43d967bd65027c2adc2f5bb4e4aaf0aef2c6a788503032347"
     }
    ],
    "writer_analysis_error": null,
@@ -73645,7 +73647,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 788,
+   "lines": 859,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -73726,7 +73728,7 @@
      "target": "<unresolved>/docs/RELEASE_STAMP.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "dd4e8d496497143d6d17c35ad1d41f3e99448faf2d34472e2538f4d306018247"
+     "signature": "d505c21a88e377576ef411cf35a7fd9834908820135c7d7cf2d9d8abcd6d5f4c"
     },
     {
      "line": 517,
@@ -73734,7 +73736,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a64df9958565ee10f16faf2ff16e10669369bf83c71a77b896ef7b2f23fbdcbb"
+     "signature": "6eaddb42214a59b2f95e38ede73c5b7695fa981caf78fe135100e9f3737ba039"
     },
     {
      "line": 519,
@@ -73742,7 +73744,7 @@
      "target": "<unresolved>/requirements.txt",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "dd3da286649b79506bceb04514138bf87ae8c5a45953c95d1440a32398a18d2e"
+     "signature": "95feadfb68b37aa88fe388578606daf73c3be848b7eb7ee4d7836a58960da83c"
     },
     {
      "line": 525,
@@ -73750,7 +73752,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a64df9958565ee10f16faf2ff16e10669369bf83c71a77b896ef7b2f23fbdcbb"
+     "signature": "6eaddb42214a59b2f95e38ede73c5b7695fa981caf78fe135100e9f3737ba039"
     },
     {
      "line": 534,
@@ -73758,7 +73760,7 @@
      "target": "<unresolved>/logs/need-candidate.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b20c9e3a789f24081a65efa88d0ebf21e2b9c3cd2284d9133ee19cbe92d62140"
+     "signature": "f96ce843f5dcc0ed9bd5ec10ac9355edfa70b5ed1d4a8a1ba332eaee60b5a772"
     },
     {
      "line": 553,
@@ -73766,7 +73768,7 @@
      "target": "<unresolved>/logs/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "11df1d9e60691110340447687bf5f20d0605c51120374e58f2f33fb7acd6e4f9"
+     "signature": "8a8f720d306478b43ff06b21bea713090d0cae05309628d14ab95eb4bb37412f"
     }
    ],
    "writer_analysis_error": null,
@@ -75602,7 +75604,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 3186,
+   "lines": 3229,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75698,20 +75700,20 @@
    },
    "writer_evidence": [
     {
-     "line": 2805,
+     "line": 2848,
      "operation": "COMPAT_FILE.write_text",
      "target": "<unresolved>/code/770_sample_extracts.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "8c41794ff25af8b67a81dec04669536576f42f3b6cee6e7178a4e9c6ad700a11"
+     "signature": "c46d03c6d15b7d2a4307d71d9741554b08c7c25b1d5298264ac962eede3156dc"
     },
     {
-     "line": 3054,
+     "line": 3097,
      "operation": "path.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "3dbf575a4a1d6f6a64400167d0e30c827d30c203f4c1292a1f00632bcd9366e5"
+     "signature": "bdc86da06267250a997ed000473d6eb2ff0363d08d86f343ed5d2bf0c4f6bb25"
     }
    ],
    "writer_analysis_error": null,

@@ -604,16 +604,67 @@ def assert_pilot_target(source, target):
         raise ValueError("REFUSED: candidate release store must be outside Git repositories")
 
 
-def assert_pilot_conservation(original_rows, records, keys):
-    """A publication projection cannot add/drop records or change existing CE links."""
-    before = {tuple(row[key] for key in keys): row for row in original_rows}
-    after = {tuple(row[key] for key in keys): row for row in records}
-    if len(records) != len(original_rows) or set(after) != set(before):
-        raise ValueError("REFUSED: publication projection changed source record IDs")
+def assert_pilot_conservation(original_rows, records, keys, decisions=(), identity_field=None):
+    """Partition source keys using explicit canonical gate decisions; never mint IDs."""
+    from collections import Counter
+    def indexed(rows):
+        result = {}
+        for row in rows:
+            key = tuple(row[name] for name in keys)
+            if any(not value for value in key) or key in result:
+                raise ValueError("REFUSED: duplicate or blank source/output record ID")
+            result[key] = row
+        return result
+    before, after = indexed(original_rows), indexed(records)
+    held, masks = {}, {}
+    for decision in decisions:
+        index = decision.get("source_row_index")
+        if type(index) is not int or not 0 <= index < len(original_rows):
+            raise ValueError("REFUSED: publication decision has no valid source row")
+        key = tuple(original_rows[index][name] for name in keys)
+        event = decision.get("event", "withheld")
+        if event == "withheld":
+            if key in held or not decision.get("reason"):
+                raise ValueError("REFUSED: duplicate or unexplained withheld decision")
+            held[key] = decision["reason"]
+        elif event == "masked":
+            if key in masks or not decision.get("reasons"):
+                raise ValueError("REFUSED: duplicate or unexplained identity mask")
+            masks[key] = decision
+        else:
+            raise ValueError("REFUSED: unknown publication decision")
+    if set(after) & set(held) or set(after) | set(held) != set(before):
+        raise ValueError("REFUSED: source must equal eligible plus explicitly withheld keys")
+    if not set(masks) <= set(after):
+        raise ValueError("REFUSED: identity mask does not address an eligible row")
+    def references(value):
+        if not value:
+            return Counter()
+        values = json.loads(value) if value.lstrip().startswith("[") else value.split("|")
+        if not isinstance(values, list):
+            raise ValueError("REFUSED: malformed plural identity values")
+        return Counter(item for item in values if item)
     for key, row in after.items():
+        if identity_field and "cedar_uids" in row:
+            old = references(before[key].get(identity_field, ""))
+            new = references(row.get("cedar_uids", ""))
+            if old != new:
+                evidence = masks.get(key, {})
+                if (new - old or not evidence or
+                        references(evidence.get("before", {}).get(identity_field, "")) != old or
+                        references(evidence.get("after", {}).get(identity_field, "")) != new):
+                    raise ValueError("REFUSED: publication projection changed plural entity references")
         if "cedar_uid" in row and "cedar_uid" in before[key]:
-            if (row["cedar_uid"] or "") != (before[key]["cedar_uid"] or ""):
-                raise ValueError("REFUSED: publication projection changed an existing entity reference")
+            old, new = before[key]["cedar_uid"] or "", row["cedar_uid"] or ""
+            if old != new:
+                evidence = masks.get(key, {})
+                if (new or not old or evidence.get("before", {}).get("cedar_uid") != old
+                        or evidence.get("after", {}).get("cedar_uid", None) != ""):
+                    raise ValueError("REFUSED: publication projection changed an existing entity reference")
+    return {"source_rows": len(before), "eligible_rows": len(after),
+            "withheld_rows": len(held), "withheld_reasons": dict(sorted(Counter(held.values()).items())),
+            "decisions": [dict(item, source_key=list(tuple(original_rows[item["source_row_index"]][name] for name in keys)))
+                          for item in decisions]}
 
 
 def pilot_authority_hashes(root):
@@ -671,14 +722,24 @@ def cmd_release_pilot(args):
     spec = importlib.util.spec_from_file_location("pilot_combiner", Path(__file__).with_name("1137_customer_dataset_combine.py"))
     combine = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(combine)
-    header, records, held = combine.load(source, source_bytes=original)
+    dependencies = {path: path.read_bytes() for path in combine.publication_dependencies(source)}
+    decisions, dependency_receipt = [], []
+    header, records, held = combine.load(
+        source, source_bytes=original,
+        legislation_actions_bytes=next(iter(dependencies.values()), None),
+        dependency_receipt=dependency_receipt, decision_receipt=decisions)
+    def dependencies_unchanged():
+        return all(path.read_bytes() == content for path, content in dependencies.items())
     own = set(header)
     publication.recompute_derived(collection, header, records)
     result = publication.apply_field_map(collection, header, records, own)
-    if result.get("owed") or held:
-        raise SystemExit("REFUSED: pilot has held records or owed public fields")
+    if result.get("owed"):
+        raise SystemExit("REFUSED: pilot has owed public fields")
     validate_unique_record_keys(records, keys)
-    assert_pilot_conservation(original_rows, records, keys)
+    conservation = assert_pilot_conservation(original_rows, records, keys, decisions,
+        identity_field=publication.field_map()[collection].get("entity_uid"))
+    if conservation["withheld_reasons"] != dict(held):
+        raise SystemExit("REFUSED: row-policy counts disagree with keyed withholding evidence")
     register = publication.register()
     ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
     public_contract = publication.field_map()[collection]
@@ -704,13 +765,23 @@ def cmd_release_pilot(args):
     writer.writeheader()
     writer.writerows(records)
     public_bytes = buffer.getvalue().encode("utf-8")
-    if pilot_authority_hashes(authority_root) != authorities:
-        raise SystemExit("REFUSED: projection authority changed during candidate build")
+    if pilot_authority_hashes(authority_root) != authorities or not dependencies_unchanged():
+        raise SystemExit("REFUSED: projection authority or dependency changed during candidate build")
+    conservation["source_sha256"] = hashlib.sha256(original).hexdigest()
+    conservation["dependencies"] = dependency_receipt
+    receipt_bytes = canonical_json(conservation)
+    receipt_sha = hashlib.sha256(receipt_bytes).hexdigest()
+    immutable_bytes(target / "review" / collection / (receipt_sha + ".json"), receipt_bytes)
     artifact = target / "intake" / collection / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
     immutable_bytes(artifact, public_bytes)
     missing_urls = ["/".join(row[key] for key in keys) for row in records if not row.get("source_url")]
     authority_hashes = [relative + (" ABSENT" if digest == "ABSENT" else " SHA256 " + digest)
                         for relative, digest in authorities.items()]
+    authority_hashes.extend("Dependency " + Path(item["path"]).name + " SHA256 " + item["sha256"] for item in dependency_receipt)
+    authority_hashes.extend([
+        "Internal keyed publication conservation receipt SHA256 " + receipt_sha,
+        "Source rows: " + str(conservation["source_rows"]) + "; eligible: " + str(conservation["eligible_rows"]) + "; withheld: " + str(conservation["withheld_rows"]),
+        "Withheld reasons: " + json.dumps(conservation["withheld_reasons"], sort_keys=True)])
     authority_hashes.append("Resolved entity/name/role register SHA256 " + hashlib.sha256(canonical_json(register)).hexdigest())
     identity = None
     if "cedar_uid" in header:
@@ -740,7 +811,7 @@ def cmd_release_pilot(args):
     manifest = build_release(contract, snapshot["snapshot_id"], target)
     second = build_release(contract, snapshot["snapshot_id"], target)
     if (manifest["release_id"] != second["release_id"] or source.read_bytes() != original
-            or pilot_authority_hashes(authority_root) != authorities):
+            or pilot_authority_hashes(authority_root) != authorities or not dependencies_unchanged()):
         raise SystemExit("REFUSED: nondeterministic release or changed canonical input/authority")
     verify_release(target, collection, manifest["release_id"])
     catalog = build_catalog(target, [(collection, manifest["release_id"])], product="cedar_press")

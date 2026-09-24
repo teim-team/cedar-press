@@ -157,6 +157,47 @@ class DealsQualificationTest(unittest.TestCase):
 
 
 class ResourceQualificationTest(unittest.TestCase):
+    def test_refuted_borough_recipient_is_masked_without_changing_payment(self):
+        row = {
+            "resource_revenue_event_id": "RRE-ANCSA-NANA-OUT_PILT-2022",
+            "cedar_uid": "CE-0000J-C2",
+            "recipient_entity_id": "CE-0000J-C2",
+            "recipient_entity_name": "Northwest Arctic Borough",
+            "payer_entity_id": "CE-0007G-30",
+            "amount_usd": "26700000.00",
+            "beneficiary_note": "Payment in Lieu of Taxes to NWAB / $26.7 million",
+        }
+        ok, why, disposition = pub.is_publication_eligible(row)
+        self.assertTrue(ok)
+        self.assertEqual(disposition, pub.MASK)
+        self.assertEqual(why, "resource_recipient_refuted")
+        self.assertEqual(pub.mask_attribution(row, why), 2)
+        self.assertEqual(row["cedar_uid"], "")
+        self.assertEqual(row["recipient_entity_id"], "")
+        self.assertEqual(row["recipient_entity_name"], "Northwest Arctic Borough")
+        self.assertEqual(row["payer_entity_id"], "CE-0007G-30")
+        self.assertEqual(row["amount_usd"], "26700000.00")
+        self.assertIn("not the recipient", row["entity_attribution_basis"])
+        self.assertNotEqual(pub.is_publication_eligible(row)[2], pub.MASK)
+        original_note = row["beneficiary_note"]
+        header = list(row)
+        pub.recompute_derived("natural-resources", header, [row])
+        self.assertIn(original_note, row["research_note"])
+        self.assertIn("previous Arctic Village link is contradicted", row["research_note"])
+        self.assertEqual(row["beneficiary_note"], original_note)
+        self.assertEqual(pub.recompute_derived("natural-resources", header, [row]), {})
+
+    def test_resource_mask_is_not_a_blanket_entity_or_payer_rejection(self):
+        row = {"resource_revenue_event_id": "OTHER", "cedar_uid": "CE-0000J-C2"}
+        self.assertNotEqual(pub.is_publication_eligible(row)[2], pub.MASK)
+
+    def test_reservation_holds_propagate_to_votes_without_rejecting_white_earth(self):
+        self.assertEqual(len(pub.LEGISLATION_VOTE_INCLUSION_HOLDS), 33)
+        self.assertEqual(len(pub.LEGISLATION_INCLUSION_HOLDS), 11)
+        for vote_id in pub.LEGISLATION_VOTE_INCLUSION_HOLDS:
+            self.assertFalse(pub.is_publication_eligible({"vote_id": vote_id})[0])
+        self.assertTrue(pub.is_publication_eligible({"vote_id": "S099-0372"})[0])
+
     def test_source_qualifications_survive_verbatim_and_rerun(self):
         header = ["beneficiary_note"]
         note = "Rate per headright, NOT total revenue. Recipient suppressed.\nDo not sum."

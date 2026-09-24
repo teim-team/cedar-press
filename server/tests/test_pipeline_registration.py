@@ -149,6 +149,58 @@ class ProducerRegistrationTest(unittest.TestCase):
             with self.subTest(records=records), self.assertRaises(ValueError):
                 runner.assert_pilot_conservation(original, records, ["record"])
 
+    def test_release_partition_requires_keyed_hold_and_mask_evidence(self):
+        spec = importlib.util.spec_from_file_location("partition_build", ROOT / "code/build.py")
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        source = [{"record": "a", "cedar_uid": "existing"}, {"record": "b", "cedar_uid": ""}]
+        hold = {"source_row_index": 1, "event": "withheld", "reason": "publication hold"}
+        result = runner.assert_pilot_conservation(source, source[:1], ["record"], [hold])
+        self.assertEqual(result["withheld_rows"], 1)
+        self.assertEqual(result["decisions"][0]["source_key"], ["b"])
+        mask = {
+            "source_row_index": 0,
+            "event": "masked",
+            "reasons": {"ruled denial": 1},
+            "before": {"cedar_uid": "existing"},
+            "after": {"cedar_uid": ""},
+        }
+        output = [{"record": "a", "cedar_uid": ""}]
+        runner.assert_pilot_conservation(source, output, ["record"], [hold, mask])
+        cases = [
+            (source, [hold]),
+            (source[:1], []),
+            (source[:1], [hold, hold]),
+            (source[:1] * 2, [hold]),
+            (output, [hold]),
+            ([{"record": "a", "cedar_uid": "reassigned"}], [hold, mask]),
+            (source[:1], [{"source_row_index": 4, "reason": "hold"}]),
+            (source[:1], [{"source_row_index": 1, "reason": ""}]),
+        ]
+        for records, decisions in cases:
+            with self.subTest(records=records, decisions=decisions), self.assertRaises(ValueError):
+                runner.assert_pilot_conservation(source, records, ["record"], decisions)
+        with self.assertRaises(ValueError):
+            runner.assert_pilot_conservation(source + source[:1], source, ["record"])
+
+    def test_release_partition_preserves_plural_identity_references(self):
+        spec = importlib.util.spec_from_file_location("plural_build", ROOT / "code/build.py")
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        source = [{"record": "a", "entity_cedar_uids": "CE-one|CE-two"}]
+        output = [{"record": "a", "cedar_uids": '["CE-two",null,"CE-one"]'}]
+        runner.assert_pilot_conservation(
+            source, output, ["record"], identity_field="entity_cedar_uids"
+        )
+        for value in ('["CE-one"]', '["CE-three","CE-two"]', '["CE-one","CE-two","CE-two"]'):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                runner.assert_pilot_conservation(
+                    source,
+                    [{"record": "a", "cedar_uids": value}],
+                    ["record"],
+                    identity_field="entity_cedar_uids",
+                )
+
     def test_release_projection_refuses_lossy_source_csv(self):
         spec = importlib.util.spec_from_file_location("source_build", ROOT / "code/build.py")
         runner = importlib.util.module_from_spec(spec)

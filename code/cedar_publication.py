@@ -396,6 +396,9 @@ BLOCKED_COMBINATIONS = (
 # masking `entity_id` in nonprofits would blank the ORGANISATION's own id,
 # which is the row's subject and must survive.
 MASK_COLS = {
+    "resource_recipient_refuted": ("cedar_uid", "canonical_name", "tribe_id",
+                                    "recipient_entity_id", "cedar_uid_basis",
+                                    "entity_class", "cedar_entity_role"),
     # keyed by the state column, or by a `BLOCKED_COMBINATIONS` reason
     "quarantined_method_not_ruled_tier_A": ("cedar_uid", "tribe_id",
                                             "canonical_name"),
@@ -1167,7 +1170,8 @@ def _ordinal(n: int) -> str:
 _BILL_TYPES = {"hr": "house-bill", "s": "senate-bill", "hjres": "house-joint-resolution",
                "sjres": "senate-joint-resolution", "hconres": "house-concurrent-resolution",
                "sconres": "senate-concurrent-resolution", "hres": "house-resolution",
-               "sres": "senate-resolution"}
+               "sres": "senate-resolution",
+               "hre": "house-resolution", "hjr": "house-joint-resolution"}
 
 
 def _geography_status(row: dict, prefix: str) -> str:
@@ -2090,8 +2094,17 @@ def recompute_derived(collection: str, header, rows) -> dict:
         # The existing field map requires these factual qualifications to
         # survive in research_note. Preserve the complete source text; never
         # summarize away suppressed beneficiaries, units or nonadditivity.
-        for row in rows:
+        def resource_note(row):
             note = row.get("beneficiary_note") or ""
+            if (row.get("resource_revenue_event_id") == "RRE-ANCSA-NANA-OUT_PILT-2022"
+                    and row.get("entity_attribution_status") == "unresolved"
+                    and row.get("entity_attribution_basis", "").startswith(
+                        "Recipient Cedar attribution withheld:")):
+                note = note + " | " + row["entity_attribution_basis"]
+            return note
+
+        for row in rows:
+            note = resource_note(row)
             existing = row.get("research_note") or ""
             if note and existing and existing != note:
                 raise FieldMapRefusal(collection, ["beneficiary_note", "research_note"],
@@ -2100,7 +2113,7 @@ def recompute_derived(collection: str, header, rows) -> dict:
             header.append("research_note")
         count = 0
         for row in rows:
-            note = row.get("beneficiary_note") or ""
+            note = resource_note(row)
             if note and row.get("research_note") != note:
                 row["research_note"] = note
                 count += 1
@@ -2422,6 +2435,16 @@ def mask_attribution(r, state_reason: str) -> int:
         if c in r and (r.get(c) or "").strip() not in ("", "0"):
             r[c] = "0"
             cleared += 1
+    if col == "resource_recipient_refuted":
+        # NANA's FY22 source names Northwest Arctic Borough, not Arctic
+        # Village. Retain the payment and payer evidence, never substitute
+        # the payer as the recipient. This corrects a resolver error only.
+        r["entity_attribution_status"] = "unresolved"
+        r["entity_attribution_basis"] = (
+            "Recipient Cedar attribution withheld: the source names Northwest "
+            "Arctic Borough; the previous Arctic Village link is contradicted. "
+            "NANA is the payer, not the recipient."
+        )
     return cleared
 
 
@@ -2432,6 +2455,21 @@ def mask_attribution(r, state_reason: str) -> int:
 LEGISLATION_INCLUSION_HOLDS = frozenset({
     "99-treatydocno-97", "99-treatydocno-98", "99-treatydocno-99",
     "116-treatydoc-1134", "117-treatydoc-1173",
+    "93-hr-11537", "97-hjres-265", "99-s-2638", "100-s-1394",
+    "105-s-104", "113-hr-803",
+})
+
+# The shared reservation-keyword route selected these votes without affirmative
+# Native relevance. Keep the actual White Earth vote S099-0372. Withholding
+# propagates by vote_id into member positions, not by inventing new identities.
+LEGISLATION_VOTE_INCLUSION_HOLDS = frozenset({
+    "S093-1031", "S095-0695", "S095-0696", "S095-0697", "S095-0731",
+    "S095-0736", "S095-0737", "S095-0738", "S095-0739", "S095-0740",
+    "S095-0741", "S095-0742", "S095-0743", "S095-0745", "S095-0746",
+    "S095-0747", "S095-0748", "S095-0749", "S095-0750", "S095-0751",
+    "S095-0752", "S095-0754", "S095-0805", "S097-0292", "S099-0570",
+    "S099-0723", "S099-0724", "S099-0725", "S100-0308", "S105-0037",
+    "S113-0504", "S116-0208", "S117-0809",
 })
 
 
@@ -2451,7 +2489,8 @@ def is_publication_eligible(r) -> tuple[bool, str, str]:
     """
     if str(r.get("publish_hold") or "").strip().upper() in {"Y", "YES", "TRUE", "1"}:
         return False, "publish_hold", WITHHOLD
-    if r.get("bill_id") in LEGISLATION_INCLUSION_HOLDS:
+    if (r.get("bill_id") in LEGISLATION_INCLUSION_HOLDS
+            or r.get("vote_id") in LEGISLATION_VOTE_INCLUSION_HOLDS):
         return False, "legislation_inclusion_reservation_homonym", WITHHOLD
     ok, why = row_ok(r)
     if not ok:
@@ -2459,6 +2498,10 @@ def is_publication_eligible(r) -> tuple[bool, str, str]:
     d, sreason = adjudication(r)
     if d == WITHHOLD:
         return False, sreason, WITHHOLD
+    if (r.get("resource_revenue_event_id") == "RRE-ANCSA-NANA-OUT_PILT-2022"
+            and (r.get("cedar_uid") == "CE-0000J-C2"
+                 or r.get("recipient_entity_id") == "AKNF-ARCTIC-00-DOYONL-CATHTG-TNNACH-VENTGV")):
+        return True, "resource_recipient_refuted", MASK
     return True, sreason, d
 
 

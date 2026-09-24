@@ -1,5 +1,7 @@
 """Isolated candidate evidence must not become a publishable release by accident."""
 
+import csv
+import hashlib
 import importlib
 import io
 import json
@@ -18,6 +20,101 @@ policy = importlib.import_module("cedar_publication")
 
 
 class CandidateReviewTest(unittest.TestCase):
+    @staticmethod
+    def introduction_bytes(*dates, source_system="Library of Congress"):
+        stream = io.StringIO(newline="")
+        writer = csv.DictWriter(
+            stream,
+            fieldnames=[
+                "bill_id",
+                "action_date",
+                "action_text",
+                "action_code",
+                "source_system",
+                "source_url",
+            ],
+        )
+        writer.writeheader()
+        for value in dates:
+            writer.writerow(
+                {
+                    "bill_id": "115-s-1484",
+                    "action_date": value,
+                    "action_text": "Introduced in Senate",
+                    "action_code": "10000",
+                    "source_system": source_system,
+                    "source_url": "https://api.congress.gov/v3/bill/115/s/1484/actions",
+                }
+            )
+        return stream.getvalue().encode()
+
+    def test_legislation_dates_use_pinned_actions_preserve_ids_and_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "native_bills.csv"
+            original = b"bill_id,introduced_date,title\n115-s-1484,2026-03-24,ANCSA\n"
+            path.write_bytes(original)
+            actions = self.introduction_bytes("2017-06-29", "2017-06-29")
+            receipt = []
+            with (
+                patch.object(customer, "translate_neid_values"),
+                patch.object(customer, "apply_official_names"),
+                patch.object(customer, "enforce_denials", return_value=0),
+            ):
+                _, rows, held = customer.load(
+                    path,
+                    source_bytes=original,
+                    legislation_actions_bytes=actions,
+                    dependency_receipt=receipt,
+                )
+            self.assertEqual(rows[0]["introduced_date"], "2017-06-29")
+            self.assertEqual(rows[0]["bill_id"], "115-s-1484")
+            self.assertFalse(held)
+            self.assertEqual(path.read_bytes(), original)
+            self.assertEqual(receipt[0]["sha256"], hashlib.sha256(actions).hexdigest())
+            self.assertEqual(receipt[0]["corrected_rows"], 1)
+            self.assertEqual(
+                customer.publication_dependencies(path), [path.with_name("native_bill_actions.csv")]
+            )
+            self.assertEqual(customer.legislation_action_dates(rows, actions), [])
+            with self.assertRaisesRegex(ValueError, "requires pinned"):
+                customer.load(path, source_bytes=original)
+
+    def test_legislation_conflicts_and_untrusted_evidence_fail_before_mutation(self):
+        for actions in (
+            self.introduction_bytes("2017-06-29", "2017-06-30"),
+            self.introduction_bytes("2026-03-24"),
+            self.introduction_bytes("2017-06-29", source_system="Unknown"),
+            self.introduction_bytes("2017-06-29").replace(b"/1484/actions", b"/999/actions"),
+        ):
+            rows = [{"bill_id": "115-s-1484", "introduced_date": "2026-03-24"}]
+            with self.assertRaises(ValueError):
+                customer.legislation_action_dates(rows, actions)
+            self.assertEqual(rows[0]["introduced_date"], "2026-03-24")
+
+    def test_load_receipts_conserve_withheld_rows(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fixture.csv"
+            path.write_text("record_id,publishable\nkeep,Y\nhold,N\n")
+            receipt = []
+            with (
+                patch.object(customer, "translate_neid_values"),
+                patch.object(customer, "apply_official_names"),
+                patch.object(customer, "enforce_denials", return_value=0),
+            ):
+                _, rows, held = customer.load(path, decision_receipt=receipt)
+            self.assertEqual(len(rows) + sum(held.values()), 2)
+            self.assertEqual(
+                receipt,
+                [
+                    {
+                        "event": "withheld",
+                        "source_row_index": 1,
+                        "reason": "publishable",
+                        "record_id": "hold",
+                    }
+                ],
+            )
+
     def test_accuracy_hold_overrides_stale_publishable_flag(self):
         self.assertEqual(
             policy.is_publication_eligible({"publish_hold": "Y", "publishable": "Y"}),
@@ -99,6 +196,7 @@ class CandidateReviewTest(unittest.TestCase):
             raw = b"bill_id,title,source_url,publishable,email\nb1,<script>bad</script>,https://example.test/1,Y,private\nb2,withheld,https://example.test/2,N,secret\nb3,allowed,https://example.test/3,Y,private\n"
             file = clean / "native_bills.csv"
             file.write_bytes(raw)
+            (clean / "native_bill_actions.csv").write_bytes(self.introduction_bytes())
             metadata = base / "authority/data/cedar"
             metadata.mkdir(parents=True)
             (metadata / "collections.manifest.json").write_text(

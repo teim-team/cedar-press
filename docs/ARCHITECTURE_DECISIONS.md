@@ -3950,4 +3950,13 @@ Lumecon HTTP and catalog contracts; no identity allocator or release format is c
 All candidates remain isolated and unpromoted. The original checkpoint branch is
 preserved; continuation starts from upstream 6d445f4 on codex/legislation-release-consumer.
 
+Release closure ownership (2026-09-24): the integrator owns cedar_publication.py,
+test_field_map.py and canonical review/runbook updates. The Legislation worker
+owns 1137 plus dependency wiring in 1135 and test_candidate_review.py. The
+infrastructure worker owns build.py and test_pipeline_registration.py. Source
+research is read-only. These workers return changes to the integrator; only the
+integrator commits. Local commits and draft-branch pushes are now authorized by
+Elijah; production publication, identity promotion and Claude frontend edits
+remain prohibited. Original canonical data and active review artifacts stay pinned.
+
 <!-- END CODEX-EARLY-ACCESS-TAKEOVER -->

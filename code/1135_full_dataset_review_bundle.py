@@ -776,6 +776,17 @@ def candidate_review(input_root, output_root, queue_path, need_root=None, select
                     rows = list(reader)
                     canonical_rows = copy.deepcopy(rows)
                     result["presentation"] = _customer.deals_public_view(raw_header, rows)
+                if coll == "legislation":
+                    dependency = _customer.publication_dependencies(path)[0]
+                    evidence = dependency.read_bytes()
+                    authority_hashes[str(dependency.resolve())] = hashlib.sha256(evidence).hexdigest()
+                    rows = list(reader)
+                    canonical_rows = copy.deepcopy(rows)
+                    corrections = _customer.legislation_action_dates(rows, evidence)
+                    result["source_dependencies"] = [{"path": str(dependency),
+                        "sha256": hashlib.sha256(evidence).hexdigest(), "bytes": len(evidence),
+                        "role": "official_introduction_actions"}]
+                    result["introduction_date_corrections"] = corrections
                 header = publishable_columns(raw_header)
                 if not safe_fields:
                     result["schema_blockers"].append("No reviewed safe preview fields")

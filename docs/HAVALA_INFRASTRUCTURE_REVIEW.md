@@ -2,6 +2,71 @@
 
 <!-- BEGIN CURRENT-LAUNCH-DASHBOARD -->
 ## Current launch dashboard
+### Release closure and repository cutover (2026-09-24)
+
+The user has reaffirmed **Lumecon-data as the authoritative producer, schema,
+identity-binding, validation, storage and release repository for exactly the
+twelve Cedar Press collections below**. Cedar owns presentation, product catalog,
+entitlements and pinned-release consumption. Gaming is excluded. Current Cedar
+producer code is transitional, not a permanent second data platform. No canonical
+datasets are being committed to either repository or copied into the application.
+
+Preserved checkpoint: Cedar PR #122 `f66f85370983ead93c5bf57ff9bd18d42e74bd35`.
+An isolated Lumecon code worktree at `Desktop/lumecon-release-closure`, branch
+`codex/collection-release-closure`, starts at PR #8 head
+`f882fb14ab9179b287222b27b33cb6462378e6e1`. Claude's dirty original Lumecon
+worktree, semantic work and Cedar frontend remain untouched.
+
+**New measured Legislation proof:** 108 erroneous introduction dates were
+corrected against unique official introduction actions; 11 unsupported bill
+inclusions and 33 vote-route selections are held. The corrected bill projection
+contains **3,058 rows, 130 / 24 introduced in 2025 / 2026**. Source rows and IDs
+remain unchanged. Local release
+`2d9190263939d5293bf214d9fb12774b95a59fcf103313791af383f2a361f4c7`
+passed real local login/API, anonymous 401, wrong entitlement 403, authorized
+200, exact JSONL bytes, eight redacted audit events, invalid/stale/missing refusal,
+and rollback from `3ade173422020a3cc1aa997b5ff9bbb2b9bca932899b6c2b23ae85f90d1fd0e7`.
+Downloaded SHA-256:
+`e5f8672190ab801370d4cf001baa30ea066253cbef12e7d7e15d6d245f57f650`.
+Receipt: `C:/Users/esm247/cedar-takeover-checkpoint/closure-legislation-corrected-2026-09-24/rehearsal-result.json`.
+This certifies neither the advertised supporting tables nor completed producer
+migration; it is the corrected transport regression reference for cutover.
+
+**Natural Resources correction:** one surviving resolver error attached Arctic
+Village to a $26.7 million payment to Northwest Arctic Borough. The candidate
+mask preserves the payment, source recipient name and NANA payer, and removes
+only unsupported recipient attribution. The implicated historical containment
+route produced 127 tier-A proposals; 126 no longer carry those recipient links.
+Source-specific public qualifications are being repaired without overriding the
+existing Native-entity-own-publication ruling. Ancillary party key
+`PL-RAS-LEASE-00034-LESSOR` represents two different lessors and must not be
+deduplicated away. The old 11,305-row pilot is not a new certification.
+
+Current-to-target path:
+`pinned sources -> transitional Cedar projection -> Lumecon immutable release -> Cedar entitlement/download`
+becomes
+`pinned sources -> Lumecon collection producer + bindings -> validated components -> immutable release + manifest hash -> Lumecon catalog/storage import -> Cedar pinned consumer -> entitlement/download -> audited rollback`.
+Producer cutover requires cell-level comparison and removal/delegation of the
+old implementation in the same reviewed migration. No independent handwritten
+consumer schema is introduced. JSONL is presently both immutable transport and
+the full customer payload; public samples are separately declared CSV views.
+
+| Shared responsibility | Authoritative home / current implementation | Cutover boundary |
+|---|---|---|
+| Sources, transforms, component schemas and identity bindings | Lumecon-data; Cedar registered producers remain transitional | Move bounded producers with pinned inputs; remove old writable authority after parity |
+| Release contracts, manifests, hashes and immutable files | Lumecon `contracts.py`, `pipeline.py`, `storage.py` | Existing formats retained |
+| Release catalog and storage/database metadata | Lumecon `catalog.py` | Metadata references immutable payloads; no duplicate canonical row store |
+| Product descriptions and display configuration | Cedar `data/cedar` and product code | Validate against versioned producer schema |
+| Entitlement, API/download response and audit | Cedar server | Explicit release pin; mismatches fail closed |
+| Frontend implementation | Claude-owned Cedar frontend | No edits in this pass |
+
+Production database ingestion, S3 deployment, persistent production login,
+monitoring and operational restore remain unexecuted. Local fixtures and Ubuntu
+contracts must not be described as a production rehearsal. No new owner cases
+were identified by these engineering corrections.
+
+The table below retains the previous twelve-collection scan; the corrected
+Legislation counts above supersede its old date and five-hold measurements.
 Updated 2026-09-24 22:18 UTC. All twelve full scans completed. These are internal QA results, not tasks for Elijah. No release is certified by a preview or a passing field map. Release-eligible counts remain **not certified** until evidence, rights, whole-product and delivery gates pass; prior Legislation/Natural Resources local transport proofs remain valid infrastructure evidence.
 
 | Collection | Input -> projected candidate rows | Row-policy withheld | 2025 / 2026 | Validation / remaining blocker | Next Codex action | New owner cards |
