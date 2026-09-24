@@ -321,6 +321,21 @@ Rerunning 13 would delete the only copy, so the bundle is preserved with a verif
 - Secondary compilations are `secondary_corroboration` and never public.
 - Vendor lineage (Casino City, votingpatterns, trade directories) stays internal.
 
+**Recorded test results (before pushing for review).** Run on 2026-09-24 against a clean working tree, with the Lumecon venv (`PYTHONPATH=<Lumecon>/src;server`) for the server suite and `py -3` for the rest:
+
+| Check | Result |
+|---|---|
+| Producer tests 1200 / 1201 / 1202 / 1203 / online sports | 26 / 31 / 12 / 16 / 14 OK |
+| `code/build_test.py` | 3 OK |
+| `code/1170_dependency_contract_test.py` | 6 passed |
+| Server suite (`unittest discover -s server/tests -t server`) | 380 OK, 32 skipped (Postgres or other environment) |
+| `node --test` per `src/**/*.test.js` | 29 files pass; 6 cannot load `react` because this worktree has no `node_modules`. The branch changes nothing under `src/` |
+| field-map, guides, `grove-contracts gaming`, 521 `check-scripts` (all `--check`) | current / passed |
+| `git diff --check` | clean |
+| Candidate `idmig-1` vs `idmig-2` | governed outputs and manifest byte-identical; leak gate 0 findings |
+
+Not run: the full `npm test` coverage gate (needs `npm install`) and `1169_release_verify.py selftest` (needs the populated workspace's vocabulary). Codex's independent verification and issuance certificate are the next step.
+
 **Open items.**
 1. **Live issuance** (Codex, then owner): the section 10 preconditions, then an owner decision ID. This blocks publication only.
 2. **Havala**:
