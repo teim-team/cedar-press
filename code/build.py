@@ -819,6 +819,167 @@ def cmd_release_pilot(args):
     return 0
 
 
+# ---------------------------------------------------------------------------
+# GAMING ID ISSUANCE: `gaming-issue-ids` (Cedar is the ONE issuer)
+# ---------------------------------------------------------------------------
+# Repository split 2026-09-24. Lumecon-data builds the Gaming components and
+# writes an append-only register of PROPOSED bindings (stable source key ->
+# an ordinal inside the Gaming blocks cedar_ids reserves), against a pinned
+# read-only snapshot of Cedar's live Gaming registry. Lumecon never marks an
+# ID issued. This command is the controlled Cedar step that does, ported from
+# the former `grove-promote-bindings` (same checks, same backup and log):
+#
+#   1. the PROPOSED artifact is exactly the one pinned by SHA-256;
+#   2. it was built from exactly the live registry snapshot now on disk;
+#   3. every row is well formed, inside its cedar_ids block, and no live
+#      binding disappears, changes or is reassigned (validate_binding_history);
+#   4. dry run by default; `--execute` needs Codex's certificate ID, the
+#      owner's decision ID and the approver's name;
+#   5. writes the live register once (prior bytes kept), appends one line to
+#      the issuance log and emits an immutable, content-addressed registry
+#      snapshot whose SHA-256 Lumecon pins for the next (production) release.
+#
+# NOT RUN: issuance is unauthorized until the certificate and decision exist.
+GAMING_BINDINGS = "data/spine/gaming_id_bindings.csv"
+GAMING_SNAPSHOTS = "data/spine/gaming_id_registry_snapshots"
+GAMING_BINDING_HEADER = ["object_prefix", "key_class", "source_key", "source_key_sha256", "issued_id",
+                         "table", "column", "status", "first_seen_as_of"]
+GAMING_BINDING_STATUSES = {"PROPOSED", "ISSUED"}
+
+
+def _sha_bytes(data):
+    import hashlib
+    return hashlib.sha256(data).hexdigest()
+
+
+def gaming_source_key_sha256(source_key):
+    """sha256 of the unit-separator-joined [class, *parts] (the register's dedup key)."""
+    return _sha_bytes("\x1f".join(json.loads(source_key)).encode("utf-8"))
+
+
+def read_gaming_bindings(path):
+    """Rows of a Gaming binding register, fully re-checked; absent -> [].
+
+    Every ID must sit inside the cedar_ids block of its own prefix, each key
+    class must map to one prefix, and each source key and ID may appear once."""
+    import csv
+    import io
+    from cedar_ids import gaming_block_ordinal
+    if path is None or not Path(path).is_file():
+        return []
+    reader = csv.DictReader(io.StringIO(Path(path).read_bytes().decode("utf-8-sig"), newline=""))
+    if list(reader.fieldnames or []) != GAMING_BINDING_HEADER:
+        raise ValueError(f"binding register {path} header is not {GAMING_BINDING_HEADER}")
+    rows = list(reader)
+    seen_key, seen_id, class_prefix = set(), set(), {}
+    for r in rows:
+        prefix, klass = r["object_prefix"], r["key_class"]
+        if class_prefix.setdefault(klass, prefix) != prefix:
+            raise ValueError(f"binding {r['issued_id']}: key class {klass} bound to two prefixes")
+        if r["status"] not in GAMING_BINDING_STATUSES:
+            raise ValueError(f"binding {r['issued_id']}: status {r['status']!r}")
+        if gaming_block_ordinal(r["issued_id"], prefix) is None:
+            raise ValueError(f"binding {r['issued_id']!r} is outside the Cedar Gaming {prefix} block")
+        try:
+            parts = json.loads(r["source_key"])
+        except ValueError as exc:
+            raise ValueError(f"binding {r['issued_id']}: unreadable source_key") from exc
+        if (not isinstance(parts, list) or parts[:1] != [klass]
+                or gaming_source_key_sha256(r["source_key"]) != r["source_key_sha256"]):
+            raise ValueError(f"binding {r['issued_id']}: source_key_sha256 does not match its source_key")
+        if r["source_key_sha256"] in seen_key:
+            raise ValueError(f"source key bound twice: {r['source_key_sha256']}")
+        if r["issued_id"] in seen_id:
+            raise ValueError(f"issued ID bound twice: {r['issued_id']}")
+        seen_key.add(r["source_key_sha256"])
+        seen_id.add(r["issued_id"])
+    return rows
+
+
+def _gaming_bindings_bytes(rows):
+    import csv
+    import io
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=GAMING_BINDING_HEADER, lineterminator="\n", extrasaction="raise")
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue().encode("utf-8")
+
+
+def cmd_gaming_issue_ids(args) -> int:
+    """PROPOSED -> ISSUED for a pinned Lumecon Gaming proposal, into Cedar's
+    live Gaming registry. Dry run by default; see the block comment above."""
+    import os
+    from collections import Counter
+    from datetime import date
+    from cedar_ids import validate_binding_history
+    proposed_path = Path(args.proposed).resolve()
+    proposed_bytes = proposed_path.read_bytes()
+    live_root = Path(args.live_root).resolve()
+    live = live_root / GAMING_BINDINGS
+    live_sha = _sha_bytes(live.read_bytes()) if live.is_file() else "ABSENT"
+    problems = []
+    if _sha_bytes(proposed_bytes) != args.proposed_sha256:
+        problems.append("the PROPOSED bindings artifact is not the one pinned by --proposed-sha256")
+    if args.registry_sha256 != live_sha:
+        problems.append(f"the proposal was built from registry snapshot {args.registry_sha256}, "
+                        f"but the live registry now on disk is {live_sha}; rebuild the proposal in Lumecon-data")
+    if problems:
+        raise SystemExit("REFUSED: " + "; ".join(problems))
+    try:
+        before = read_gaming_bindings(live if live.is_file() else None)
+        rows = read_gaming_bindings(proposed_path)
+        validate_binding_history({r["issued_id"]: r["source_key_sha256"] for r in before},
+                                 {r["issued_id"]: r["source_key_sha256"] for r in rows})
+    except ValueError as error:
+        raise SystemExit(f"REFUSED: {error}") from error
+    kept = {r["issued_id"]: r for r in rows}
+    changed = [r["issued_id"] for r in before if kept[r["issued_id"]] != r]
+    if changed:
+        raise SystemExit(f"REFUSED: {len(changed)} live binding(s) would change, e.g. {changed[:3]}")
+    live_ids = {r["issued_id"] for r in before}
+    stray = [r["issued_id"] for r in rows if r["issued_id"] not in live_ids and r["status"] != "PROPOSED"]
+    if stray:
+        raise SystemExit(f"REFUSED: {len(stray)} binding(s) claim ISSUED without Cedar issuance, e.g. {stray[:3]}")
+    issue = [r for r in rows if r["status"] == "PROPOSED"]
+    plan = {"live_register": str(live), "live_rows_before": len(before), "rows_after": len(rows),
+            "issue": dict(sorted(Counter(r["object_prefix"] for r in issue).items())),
+            "proposed": str(proposed_path), "proposed_sha256": args.proposed_sha256,
+            "registry_sha256_before": live_sha, "executed": False}
+    if not args.execute:
+        print(json.dumps(plan, indent=2, sort_keys=True))
+        print("DRY RUN: nothing written. Re-run with --execute --certificate <Codex certificate> "
+              "--decision-id <owner decision> --approved-by <name>")
+        return 0
+    if not (args.certificate and args.decision_id and args.approved_by):
+        raise SystemExit("REFUSED: --execute needs --certificate, --decision-id and --approved-by")
+    data = _gaming_bindings_bytes([dict(r, status="ISSUED") for r in rows])
+    after_sha = _sha_bytes(data)
+    snapshot = live_root / GAMING_SNAPSHOTS / f"gaming_id_bindings.{after_sha}.csv"
+    if snapshot.exists() and snapshot.read_bytes() != data:
+        raise SystemExit(f"REFUSED: snapshot {snapshot.name} exists with different bytes")
+    live.parent.mkdir(parents=True, exist_ok=True)
+    stamp = date.today().isoformat()
+    if live.is_file():
+        backup = live.with_name(live.name + f".bak_{stamp}_pre_issuance")
+        if backup.exists():
+            raise SystemExit(f"REFUSED: backup {backup.name} already exists; issue at most once a day")
+        backup.write_bytes(live.read_bytes())
+    tmp = live.with_suffix(".csv.tmp")
+    tmp.write_bytes(data)
+    os.replace(tmp, live)
+    snapshot.parent.mkdir(parents=True, exist_ok=True)
+    if not snapshot.exists():
+        snapshot.write_bytes(data)
+    plan.update(executed=True, certificate=args.certificate, decision_id=args.decision_id,
+                approved_by=args.approved_by, issued_on=stamp, registry_sha256_after=after_sha,
+                registry_snapshot=str(snapshot))
+    with (live.parent / "gaming_id_issuance_log.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(plan, sort_keys=True) + "\n")
+    print(json.dumps(plan, indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -836,6 +997,18 @@ def main() -> int:
     pilot.add_argument("--output-root", required=True)
     pilot.add_argument("--as-of", required=True)
     pilot.set_defaults(func=cmd_release_pilot)
+    issue = sub.add_parser("gaming-issue-ids",
+                           help="Cedar issuance of a pinned Lumecon Gaming ID proposal (dry run unless --execute)")
+    issue.add_argument("--proposed", required=True, help="Lumecon PROPOSED Gaming bindings artifact (CSV)")
+    issue.add_argument("--proposed-sha256", required=True)
+    issue.add_argument("--registry-sha256", required=True,
+                       help="Cedar Gaming registry snapshot the proposal was built from, or ABSENT")
+    issue.add_argument("--live-root", default=str(ROOT))
+    issue.add_argument("--execute", action="store_true")
+    issue.add_argument("--certificate")
+    issue.add_argument("--decision-id")
+    issue.add_argument("--approved-by")
+    issue.set_defaults(func=cmd_gaming_issue_ids)
     sh = sub.add_parser("ship", help="run the documented ship chain (7 steps)")
     sh.add_argument("--execute", action="store_true",
                     help="actually run it; without this you get the chain")
