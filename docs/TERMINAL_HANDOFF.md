@@ -1,158 +1,157 @@
-# Terminal handoff — what the site needs from the workspace
+# Terminal handoff ? current Codex implementation checkpoint
 
-*The one file to read after pulling `cedar-press`. Rewritten in place, never
-appended to: it is a list of what is open, not a journal. Last rewritten
-2026-09-16.*
+*Rewritten in place, never appended to. Updated 2026-09-23.*
 
-**Re-verified 2026-09-18: `r7-audit-integration` has merged and the paragraph
-below is kept only as the record of how the work got there.** PR #84 merged that
-branch into `main` at 010d951, and the branch no longer exists on the remote.
-`origin/main` is now 7ed56f8, carrying #84 and then #85 and #86 on top, so every
-commit named below (e5d5d56, 36f3781, b12cd23, 9be18d1, b0db46f, c2270bf) is an
-ancestor of `main` — each confirmed with `git merge-base --is-ancestor`, not
-assumed. **There is no longer a review branch to go to PR; `main` is the
-reviewed state.** Note that a local `main` ref left over from before the merge
-can still sit at d5dcd71 or earlier, which is what makes this easy to misread:
-compare against `origin/main`, not `main`. The JS suite measures 223 of 223 on
-`origin/main` today, so the local-only sitemap failure recorded below is no
-longer reproducible here. The server and Python measurements were not re-run and
-are left as recorded.
+## Workspace and ownership
 
-*Superseded, kept as the record —* **Verified 2026-09-16:** The reviewed work lives on `r7-audit-integration`, which carries `origin/main` through e5d5d56 (PRs #81, #82 and #83, the site redesign) merged at 36f3781, the three reviewed R7 commits b12cd23, 9be18d1 and b0db46f intact and never rewritten, and c2270bf re-measuring item 5. That branch is what goes to PR review into `main`; local `main` is not updated by any of this and still sits at b0db46f. R7 was refrozen once under the reviewed tool and is still not imported: current bundle e6708a8f8e608cd16df9c09c, integrity PASS, NOT_APPROVED, report exit 10, store CLEAN, all 83 proposed pairs UNRESOLVED, and no business register under data/spine/. Four files stay untracked and are never staged: the lock files docs/imports/r7_audit/.lock and .lock.owner.json, and two pre-bundle artifacts read by no code, docs/imports/R7_2026-09-14_FREEZE_MANIFEST.json and docs/imports/R7_2026-09-14_equivalence_adjudication_queue.csv (the owner decides whether to delete them). Measured on the merged tree: the `code/1188` suite runs 209 assertions (70 positive controls, 139 negative fixtures) with 0 failed; server 191 pass (1161 subtests); JS 222 of 223, the one failure the local-only sitemap check (CI green).
+Codex worktree: C:/Users/esm247/Desktop/cedar-press-codex, branch
+codex/early-access-takeover, base b6abb374a7a40216a7648ef79fc1df9e5b471f79.
+Dirty changes are intentional, uncommitted and unpushed. Scope is recorded in
+`docs/ARCHITECTURE_DECISIONS.md`. Original Desktop/Cedar Press remains on
+collections-coverage-audit at 49c846a4c39c5f2ec1995753ac17f1a9044bd466.
+Six tracked edits and eight untracked files were preserved with checksums before
+integration. Do not reset, clean, pull blindly, or write in the original worktree.
 
-**If you read nothing else, read §1.** It is every open item, what to do, and
-how you will know it is done. Everything below §1 explains why.
+Lumecon Data: C:/Users/esm247/Desktop/Lumecon-data, branch codex/cedar-press-pilot,
+base 0ae36dda36d650b1b3861173fb122e7603b0dc3f. Foundation/hardening PRs are merged.
+Python 3.13 environment installed with uv; no real collection transfer completed.
 
----
+Checkpoint root: C:/Users/esm247/cedar-takeover-checkpoint. It holds working-set,
+NEED/owner/R7/publication/NAGPRA input receipts and independent candidate folders.
+Machine baseline: 20 physical / 28 logical cores, about 16 GB RAM, only 3.2 GB
+available initially. Run large transforms sequentially, DuckDB 512 MB / one thread.
+Do not infer capacity from cores or launch multiple contracting-data copies at once.
 
-## 1. Open items
+## Active human review ? preserve it
 
-| # | What | Where | Done when |
-|---|---|---|---|
-| 1 | **Mint the `CB-` business register.** BLOCKED ON THE OWNER. R7 frozen and audited, not imported. `code/1188_import_chatgpt_r7_business_register.py` reads the R7 ZIP directly and imports nothing; its tests are `py -3 -B code/1188_import_chatgpt_r7_business_register_test.py`. Current audit bundle e6708a8f8e608cd16df9c09c via `docs/imports/r7_audit/CURRENT.json` (refrozen 2026-09-16; schema v3; integrity PASS; reproduces from current inputs; import approval NOT_APPROVED, G03-G06 blocked); history 5bfe75935203e605fed449cb (v2), b1dbf9c7681d781dd7955c5d, 5c21f711f2d6e81d03e1a095, e6708a8f8e608cd16df9c09c, all four kept. **Bundles are immutable: never edit anything under docs/imports/r7_audit/bundles/**; their bytes are content-addressed, so any formatting, quoting or newline change is corruption, and `.gitattributes` stops git converting them. The owner edits only docs/imports/R7_OWNER_DECISIONS.json (typed decisions; may open gates) and docs/imports/R7_OWNER_NOTES.json (commentary; never a gate); neither exists yet, and their schemas are in the tool's docstring. `freeze` and `recover` hold one OS-managed lock for the whole operation and recheck every consequential input immediately before activation; a held lock is refused (exit 5), never waited on. The operating system releases the lock when its holder exits or dies, so there is no stale lock and no unlock step: after a crash, run `recover`. Report exits 10 while not approved, 5 when a freeze or recover holds the lock, 6 when the audit store has not been initialized (the report creates nothing, not even the lock file: run `freeze` first), and 11 when an input changes while the report runs, so a stale snapshot is never returned as 0 or 10. The report holds the same lock for its whole snapshot. `freeze` exit 0 means audit artifacts were written, not approval. Retention: every activated bundle is kept, nothing is pruned, and failed-transaction leftovers are renamed aside and listed by the report inventory. When an approved import lands, flip `live: false` → `true` on `IDENTIFIERS[1]` in `src/features/grove/pressIdentity.js`. | `docs/imports/r7_audit/CURRENT.json` | Every gate OPEN on CURRENT recorded decisions, and the import made as a separate reviewed change. |
-| 2 | **Settle the `CB-` format.** Three specifications compete (ADR-043, the 2026-09-13 specification, R7 as issued). Measured: reusing the existing entity-id check function (`check_chars` in `code/503_identity.py`) on a 7-digit serial covers only 5 of the 7 digits and misses 28.57% of single-digit substitutions; that is a naive implementation, not ADR-043 itself. Proposed, not adopted: the R7 serial plus ISO 7064 MOD 97-10 check digits, which would amend ADR-043. Owner to decide. | `docs/CB_ID_FORMAT_PROPOSAL_2026-09-14.md` | The owner's decision is recorded and ADR-043 and the identity specification agree with it. |
-| 3 | **Re-run linkage coverage whenever a flagship changes**, and consider adding it to the release path so it is not a thing to remember. `py -3 code/1139_linkage_coverage.py apply` | `docs/LINKAGE_COVERAGE.md` | `npm test` passes in `cedar-press`. It reads that file and fails if the headline total, either named extreme, **or the measurement date** has moved. The date check is what makes a regeneration visible: gate 62 measures live data but does not rewrite this document, so without it two stale things can agree with each other. |
-| 4 | **Decide the Federal Reserve claim.** The site says the linkage methods come out of the team's years inside the Federal Reserve system. It does not say the Fed uses or endorses them, because nothing here evidences that. | `docs/CEDAR_PRESS_SITE_2026-09-13.md` §3.2 | Either evidence of institutional use is recorded in this repo, or the current sentence is confirmed as the strongest defensible one. |
-| 5 | **Rename role-specific columns** in published datasets: `native_entity_uid`, `recipient_native_entity_uid`, `owner_cedar_uid`, `parent_cedar_uid`, `business_uid`. PARTLY DONE, and the old bar tested the wrong thing. Measured 2026-09-16: not one of the five names appears anywhere in tracked `data/` (0 occurrences; `cedar_uid` appears 301 times). The samples ship `cedar_uid` (contractors, deals, funding, nonprofits, the entity layer), `owner_hub_cedar_uid` (need), a name rather than an id (`recipient_entity_name`, natural-resources), a class rather than an id (`native_entity_classes`, lobbying), and no entity id at all (federal-register). The site already stopped advertising names that do not ship: `src/features/grove/pressIdentity.js` holds `fields` (what ships: `cedar_uid`, and nothing for business) apart from `becoming` (the specification's names), so the chip-versus-column mismatch is closed and the old done-when was satisfied without a single column being renamed. The `attribution_columns` metadata added upstream on 2026-09-16 to `data/cedar/explore.overrides.json` (8 of the 12 tables) names existing attribution columns for the record page; it renames nothing. What is left is the rename itself, which waits on the identifier decisions in items 2 and 9. | `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §1, §4 | A published table ships a role-specific column name and `fields` in `src/features/grove/pressIdentity.js` names it. |
-| 6 | **Audit for the mixing rule.** Enforced over R7's frozen registries by `code/1188` check I10 (negative fixtures cover both directions). Still open over published datasets, once they carry business ids. | `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` §3 | An audit over the published previews exists and passes. |
-| 7 | ~~Name NEED "Cedar NEED" at source.~~ **RESOLVED 2026-09-18, no change needed.** This was filed as a doc-versus-test contradiction; it is not one. The descriptor's *formal* name already leads with Cedar (`Cedar Native Entity Enterprise Dataset (NEED)`), only `short_name` is the bare `NEED`, and `collectionShort()` overlays the storefront short so **every reader-facing surface shows `Cedar NEED`** (door strip, frame rail, shelf, picker, basis line). `src/features/grove/pressCatalog.test.js` asserts exactly that, plus a general guard that no short name shown to a reader is a bare acronym of a Cedar name. The 2026-09-14 rename was reverted because it changed the wrong layer: the descriptor is the workspace's, the catalog is the site's, and the site renames in the catalog. Nothing to decide. | `src/features/grove/pressCatalog.test.js` | Done. |
-| 8 | **Cluster free-text `use_case`** if the request tally matters. The Priorities form is free text now, so `server/cedar_press/priorities.py`'s exact-string tally will fragment. | `server/cedar_press/priorities.py` | Either a clustering step exists, or the tally is accepted as fragmenting. Do not reintroduce a menu; the owner ruled that out. |
-| 9 | **Rule on the R7 import gates.** Proposed equivalence pairs (proposals, not equivalences): all 83 UNRESOLVED in the current bundle's queue (generated evidence only: 60 weak or insufficient, 17 identifier not in ledger, 3 no identifier, 2 conflict, 1 refuted, 0 candidate). The ledger records attribution, never legal identity. Decisions go only in the decisions file (docs/imports/R7_OWNER_DECISIONS.json, schema v2 in `code/1188`, not yet created); each pair decision names the evidence fingerprint reviewed and goes STALE if that evidence changes. Ship bars, including whether tribal TERO certifications rank with state certifications: `docs/SHIP_BARS_DRAFT_2026-09-14.md`. G05 needs owner approval AND the live policy function in `code/cedar_domain.py` to publish names. | `code/1188_import_chatgpt_r7_business_register.py` | G03, G05, G06 open on CURRENT decisions. |
-| 10 | **Approve the documentation consolidation.** Existing files stay canonical; nothing new competes. Handoff: this file. Navigation: `START_HERE.md`. Generated data map: `docs/DATA_ARCHITECTURE.md`. Runbook: `docs/SHIPPING_RUNBOOK.md`, whose historical "chain is staged, not run" warning must be refreshed before it is presented as the current procedure; approved ship bars fold into it and `docs/schema/dataset_contracts.json`. Inventory: extend `code/521_inventory.py`. `code/465_consolidation_inventory.py` stays, because `code/502_archive_candidates.py` consumes its output. An approved CB format folds into `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md` with its decision history kept. Nothing moved, deleted or marked obsolete until approved. | this file | The owner approves the plan. |
+Elijah is working at http://127.0.0.1:8765/cedar_review.html.
+Do not regenerate that page, change its evidence or reorder its queue while active.
+The loop uses `code/08_build_review_page.py` and `code/09_import_rulings.py`.
+The field-level INTERNAL_ONLY ruling is now authorized in the policy and field map.
+The active page remains a preserved historical batch, not clearance of its route.
+It contains 18 affiliation exceptions; the other
+85 populated cross-reference records are excluded from the human queue.
+`review/OWNER_DECISION_QUEUE.md` contains the semantic explanation and scope.
+Local review HTML/evidence are ignored artifacts, not committed production data.
 
-| 11 | ~~Decide when the lobbying collection loses its ampersand.~~ **DONE 2026-09-18.** Renamed to `Native Federal Advocacy and Engagement`. Six sources moved together, because the name is embedded verbatim in the citation written as the last row of every downloaded CSV: `data/cedar/collections.manifest.json` (the descriptor `collectionCitation` actually reads), `src/features/grove/pressCatalog.js` (the storefront), `data/cedar/codebook.json`, `docs/datasets/_descriptors.json`, `data/cedar/releases.json` (the ledger) and the prerendered `index.html`, with `server/cedar_press/_press_data.json` regenerated by `node scripts/dump-press.mjs`. The ledger is **not** exempt as a historical record: `src/features/grove/pressReleases.test.js` asserts the ledger and the manifest agree on the current version's name, and leaving it behind failed that test, which is what caught the half-done rename. No version bump: the data did not change, and `code/1169`'s release gate compares blurbs rather than names. Python needed no edit, since it reads the name from the regenerated JSON. | `data/cedar/collections.manifest.json` | Done: 223 tests pass, `seo:check` current, `build:site` clean, and the old string survives nowhere. |
+Browser tests proved drafts do not resolve, reopening preserves decisions, Copy
+and Download agree, revisions preserve history, stale evidence is refused, and
+reimport is idempotent. Actual browser CSV also passed the Python receipt importer
+twice with byte-identical second receipt. All were synthetic TEST REVIEWER cases;
+no real owner decisions are recorded. `server/tests/test_need_review_import.py`
+contains four regression tests. Receipts do not apply policy or publish data.
 
-**Nothing else.** No dataset, schema, or publication rule changed on 2026-09-14;
-every open decision is items 1, 2, 9 and 10. Items 7 and 11 closed 2026-09-18.
-
----
-
-## 1b. Two gates that stopped the deploy, and will again
-
-The live site did not move for two merges because both failed the Python step
-in `.github/workflows/deploy.yml`, which sits **before** the build and the
-Pages upload. Neither is a flake; both are gates working.
-
-1. **Change the catalog, re-run the dump.**
-   `node scripts/dump-press.mjs > server/cedar_press/_press_data.json`.
-   The API reads that snapshot and `test_collection` fails rather than skips
-   when it disagrees with the JavaScript.
-2. **Name a `src/…/grove` path in a document, re-measure the rename table.**
-   `docs/ARCHITECTURE.md` carries counts that `test_rename_plan` re-measures on
-   every run, and the failure prints the current values for you to paste.
-
-Run the whole thing before merging, because **CI runs nothing on a pull
-request**:
+First safe continuation when a decision file arrives:
 
 ```
-npm run lint && npm run test && npm run test:smoke
-ruff check server && (cd server && python -m unittest discover -s tests -t .)
+py -3 -B code/09_import_rulings.py --need-review <returned.csv> --queue review/need_existing_cedar_uid_evidence.json --receipt-ledger <isolated-receipt.json> --dry-run
 ```
 
----
+Review the receipt, import unchanged valid explicit decisions without requesting
+another approval, then implement their authorized effects with contract tests.
+Do not feed these rulings into legacy identifier propagation. No publication yet.
 
-## 2. How the site tells you it is out of date
+## New owner systemic stop
 
-The site does not describe the workspace in prose that can go stale. It reads
-the workspace's own files and **fails its own build** when they move. Run
-`npm test` in `cedar-press` and these are the assertions that speak:
+The 2026-09-23 owner ruling in `docs/PUBLICATION_POLICY.md` now requires
+source-attributed public affiliation, internal-only enterprise cross-references,
+and an affirmative-evidence gate across collections. The 18-case review revealed
+a systemic route problem, not completed adjudication. Audit full route populations,
+preserve decisions, and hold NEED publication independently of the field disposition.
+Do not regenerate a review until route negative controls and stratified evidence pass.
+Confirmed defective token routes and evidence inflation are recorded in
+`docs/NEED_BUILD_LOG.md`. Four routes touch 3,828 enterprise IDs / 3,911 observations;
+all OWNERV6 touches 4,714 IDs / 4,901 observations. Exposure is not proof every link
+is wrong. The checkpoint quarantine manifest preserves every affected key.
+1133 refuses known automated routes; 1072 refuses legacy OWNERV6 staging before
+writing outputs. Previously completed candidates remain migration proofs, not
+affiliation-quality certificates. Their nine-stage success predates this new stop.
+Two isolated pre-hold candidates had identical output hashes; the second used
+about 699 MB peak summed process RSS and 20.3 seconds. No new queue generated.
 
-| Test | Reads | Fails when |
+## Completed implementation and remaining gates
+
+| Work | Measured result | Next gate |
 |---|---|---|
-| `src/features/grove/pressIdentity.test.js` | `public/data/cedar/register.json` | a register class the Methods page names disappears; the uid the page shows, `CE-00134-BX`, stops being Cherokee Nation; the withheld class stops being withheld; the count of individually owned firms moves off 45 |
-| `src/features/grove/pressIdentity.test.js` | `docs/LINKAGE_COVERAGE.md` | the headline total, the best figure or the worst figure moves by a digit |
-| `src/features/grove/pressIdentity.test.js` | `docs/IDENTIFIER_STANDARD.md` | it stops documenting `cedar_uid` |
-| `src/features/grove/pressSources.test.js` | `cedar_source_registry/sources.jsonl`, the collection descriptors | the door names a source kind the workspace no longer reads, or a declared program count moves |
-| `src/features/grove/pressCatalog.test.js` | the manifest | a collection is sold without a descriptor, or measured without a shelf |
+| NEED migration | Candidate-c ran all nine supported stages; 5,820 enterprises, 8,690 relations, 6,089 bindings including 269 historical-only, 367 dual-role rows; no minted IDs or changed inputs | Systemic affiliation hold; bounded patch review only, no promotion |
+| NEED hub diagnostics | Fixed retired-handle comparisons, cross-hub sibling/duplicate grouping, stale enrichment; fixture tests pass | Candidate-c comparison review; immutable human review remains candidate-b |
+| NEED measured correction | 1,096 rows change only five diagnostic fields; 216 parent-status changes; corroborated 255?399, contradicted 195?25, unresolved 423?449; duplicate-marked rows 404?144 | These are code-derived diagnostics, not new ownership approvals |
+| NEED field | 103 populated rows / 99 own-entity CEs / 77 hubs; four relation patterns; all references active, no cross-reference changes in candidate-c | INTERNAL_ONLY owner ruling recorded in field map; independent NEED hold remains |
+| Build orchestrator | Existing `code/build.py` now refuses empty/incomplete plans and owns isolated candidate command | Further collection producer consolidation and retirement not certified |
+| NAGPRA export | `code/1137_customer_dataset_combine.py` plan now executes actual joins; blank keys cannot join; 19 publication tests pass | Seven undeclared joined fields still stop both plan and build; no export generated |
+| Runtime metadata | All five were tracked; narrow ignore exceptions and tracking tests added | Clean Windows clone passed all seven generated checks, build, 58 JS / 43 Python tests; see `data/cedar/README.md` |
+| R7 | Isolated active bundle f37240f77e40bf5e390219ae integrity PASS; 17,282 issued / 17,279 active CBs; 83 unresolved proposals; G03?G06 blocked | Format/policy and supported evidence decisions; no importer/promotion approved |
+| Delivery | Current product still serves committed samples; no full entitled release path proved | Validated Lumecon release ? product/API/download; deployed access/storage verification |
 
-So the workflow after a data change is: run the generator, run `npm test` in
-`cedar-press`, and fix what it names. A red test here is the site telling you a
-published claim no longer matches the data.
+Code fixes: `code/1072_tribally_owned_enterprises.py`,
+`code/1102_need_corroboration_adjudication.py`, `code/1130_need_owner_v6_reconcile.py`,
+`code/1177_retire_handle_column.py`; recovered tests are in the worktree.
+1130 now verifies exact input-derived reconciliation instead of a fabricated
+minimum for net-new candidates. Fixed run dates use CEDAR_RUN_DATE.
 
----
+R7 policy and identity authority remain `docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md`
+and `code/1188_import_chatgpt_r7_business_register.py`. Do not change the CB UI flag
+`live: false` → `true` until an approved imported register and product integration
+justify it. Issued CBs in an external package are not an imported subscriber register.
+Current withholding rules in `code/cedar_domain.py` remain effective.
 
-## 3. What the site now claims, in one place
+## Twelve-collection launch matrix
 
-Two documents, both dated 2026-09-13:
+These are measured row/date baselines, NOT acceptance certificates. Source cutoffs
+are unmeasured for every row; observation maxima are not retrieval/freshness proof.
+Delivery is NOT TESTED for all twelve. All data readiness is NOT TESTED except
+NEED/NAGPRA/Native-Owned, which are BLOCKED for the specific gates named above.
+Full input hashes and date distributions live beside launch-measurements in the
+checkpoint, not duplicated here. Last reproduced full pipeline: NEED candidate-c;
+others not run (NAGPRA publication plan deliberately refuses).
 
-- **`docs/CEDAR_IDENTITY_SYSTEM_2026-09-13.md`** — the owner's identity
-  specification. `CE-…` and `CB-…`, what each identifies, what stays outside
-  them, the role-specific columns, and four disagreements with earlier
-  documents that this handoff's items 1, 2, 5 and 6 exist to close.
-- **`docs/CEDAR_PRESS_SITE_2026-09-13.md`** — every claim the site makes with
-  the file that proves it, the copy rulings applied, and Codex's four findings
-  on PR #77 with what each one changed.
+| Collection | Rows | 2025 / 2026 by measured basis | Next blocker |
+|---|---:|---|---|
+| Funding | 701,955 | 43,254 / 18,325 action date | Source refresh, attribution and additive grain |
+| Federal Register | 11,402 consultation rows | 8 / 6 notice date | Discovery coverage; broad documents are separate |
+| Legislation | 3,069 | 207 / 55 introduced | Bill/action/vote scope and current refresh |
+| Deals | 1,073 | 105 / 103 Event_Year; strict dates 99 / 102 | Fiscal/partial dates explain different denominators; validate sources |
+| NAGPRA | 6,792 | 900 / 633 publication date | Seven joined fields need explicit existing-contract destinations |
+| Advocacy | 27,825 | 1,377 / 672 filing_year | Reconcile earlier reported year basis before release |
+| Prime Contracting | 1,217,768 | 47,599 / 55,014 action date | Refresh, identity and adjustment semantics |
+| Subcontracting | 89,809 | 6,306 / 2,049 subaward date | Correct prime/subcontractor roles and repeated reports |
+| Native-Owned | 4,273 | Current register, not annual | Approved publishable scope; R7 import blocked |
+| Nonprofits | 12,764 | Organization snapshot, not annual | Inclusion evidence versus filings and CE attribution |
+| Natural Resources | 11,305 | 505 / 280 period_start | Mixed period grains; 36 / 24 is payment_date subset; suppression |
+| NEED | 5,820 | Current register, not annual | Active owner review; no export or promotion |
 
-Read the identity file first. It is the authority on the model; the site file
-is the record of how the site was made to match it.
+## Shared ID framework, initial implementation
 
----
+`code/cedar_ids.py` extends the existing service with declared namespace/table/role
+contracts and read-only validators. `code/503_identity.py` now refuses a CE checksum
+payload under CB/LOB/other prefixes. `server/tests/test_id_contracts.py` covers
+namespace, source/native separation, mapping, immutable bindings, duplicates and
+derived views. NEED's existing verifier calls the shared service for enterprise
+and affiliated CE IDs; actual 5,820-row structural verification passes.
+This is an initial integration, not proof every legacy join or mint route complies.
+Existing NEED hub/name-bound allocation remains a migration concern: do not mint
+replacement IDs merely because an affiliation/name changes. No IDs were minted.
 
-## 4. What changed in the site, for orientation
+## Infrastructure is now the primary lane
 
-Not action items. Here so a diff of ~1,500 lines is not a surprise.
+See `docs/HAVALA_INFRASTRUCTURE_REVIEW.md` for the single architecture packet.
+NEED survivor assessment is bounded; no new queue or promotion. Legislation bill
+register is the provisional pilot, not a validated full collection. Protected
+downloads currently return public samples; a pinned full-release adapter is missing.
+D: has about 843 GiB free and is reported fixed SATA, not confirmed removable.
+No data moved; AWS deployed state remains unverified without configured access.
 
-**Methods** now carries the identity argument in four sections: the two
-identifiers; the worked example of a nation and the company it owns; what is
-kept outside an identifier; and why the collection improves with use. The
-twelve collection marks index the per-collection specifics. "Accuracy has a
-time dimension" and its illustrative timeline are gone.
+## Supported checks and restrictions
 
-**Priorities** leads with a free-text box. The `<select>` of seven use cases is
-a free field, per the owner's ruling that subscribers can write anything. See
-item 7.
+`Makefile` is the shared CI gate authority; `.github/workflows/ci.yml` runs PR checks,
+and `.github/workflows/deploy.yml` gates publication. Earlier no-PR-check prose is stale.
+`docs/SHIPPING_RUNBOOK.md` retains historical chains; do not execute its old gaming
+sequence as the twelve-collection launch command. `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`
+and `data/cedar/field_map.json` remain the publication contract.
 
-**Collections** shows each flagship's declared 6-8 column view instead of the
-codebook's 27-54, which is the owner's own selection from
-`docs/PUBLIC_DATASET_SPEC_2026-09-05.md` and had never been read by the viewer.
-An open record carries the source document, the resolution basis, the release
-and a copyable citation.
-
-**Overview** leads with a search, labelled as reaching the ten-record previews,
-because that is what the serving layer offers today.
-
-**Copy rulings applied:** "Records are only the beginning" is cut from the door
-and Methods; no argument opens on a federal contract any more; and the site no
-longer implies Cedar withholds what it resolves (see the identity file, and
-`INDIVIDUAL_NATIVE_WITHHELD_FIELDS` in `code/cedar_domain.py`).
-
----
-
-## 5. Running the site
-
-`README.md` covers it. In short:
-
-```
-npm ci
-npm run lint          # eslint
-npm run test          # node --test, the unit suite that reads this workspace
-npm run test:smoke    # playwright, builds the site and drives it
-npm run build
-```
-
-CI runs exactly those on a push to `main` (`.github/workflows/deploy.yml`) and
-runs **nothing on a pull request**, so run them locally before merging.
-
----
-
-**Checkpoint 2026-09-14: BLOCKED** — R7 frozen and audited; import waits on the owner's rulings in items 2, 9 and 10.
+Local coherent commits are authorized solely for a fixed Havala review range.
+No pushes, production database changes, publishing, permanent deletion or
+customer communications are authorized by this checkpoint. Shared identity and
+publication remain single-writer. Preserve the active review while independent
+work continues. Candidate success is not a release, fresh-clone success is not a
+full-data rebuild, and no collection is certified ready by this handoff.

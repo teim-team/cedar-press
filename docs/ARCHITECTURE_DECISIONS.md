@@ -3914,3 +3914,33 @@ entity identity, and identity is this repository's spine. ADR-015's transaction
 geography is already built and needs none of it.
 
 <!-- END ADR-044-PLATFORM-HUB -->
+
+<!-- BEGIN CODEX-EARLY-ACCESS-TAKEOVER -->
+## Codex takeover ownership, 2026-09-23
+
+Codex owns the isolated `Desktop/cedar-press-codex` worktree on
+`codex/early-access-takeover`, based on upstream `b6abb37`.
+Claude's original `Desktop/Cedar Press` worktree remains untouched. Its six
+tracked changes and eight untracked files were preserved with hashes at
+`C:/Users/esm247/cedar-takeover-checkpoint`; NEED code/tests were recovered
+from that receipt. The upstream handoff is retained for reconciliation.
+
+First owned write scope: NEED candidate inputs/outputs in this worktree;
+1072, 1102, 1130, 1177 and their tests; the existing build.py command surface
+and its focused tests; this block, terminal handoff and shipping runbook.
+Identity bindings and owner decisions are inputs. No original register,
+production release pointer, publication policy, commit or push is authorized.
+Migration candidate IDs must not be minted. Independent copies and hashes
+preserve the originals; diagnostics and staging stay in the isolated tree.
+Additional user-directed scope: runtime metadata tracking/freshness in .gitignore,
+existing product tests and data/cedar/README.md; 1137 export planning and its
+existing publication tests; grouped NEED field review appended to the existing
+review/OWNER_DECISION_QUEUE.md. Parallel workers own disjoint files. No policy
+ruling or identity adjudication is implied by preparing the review artifact.
+Owner-directed corrective scope now includes the existing publication policy,
+identity specification, 1133 source admission and 1072 legacy consumer hold;
+503 namespace validation and cedar_ids typed contracts with fixture tests.
+These changes preserve issued IDs. No new ID allocator, event registry, promoted
+relationship, or review queue is authorized by technical test success. Current
+NEED human review remains pinned; returned decisions require validated receipts.
+<!-- END CODEX-EARLY-ACCESS-TAKEOVER -->
