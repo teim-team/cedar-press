@@ -668,14 +668,43 @@ class TestApplyFieldMap(unittest.TestCase):
         adjudicated = [
             r["column"] for r in result["retirement"] if r["disposition"] == "adjudicate"
         ]
-        self.assertEqual(adjudicated, ["nation_id"])
-        # A populated nation_id stops the dataset until it is adjudicated.
-        rows2 = [dict(r) for r in rows]
-        header2 = [f["column"] for f in entry["fields"]]
-        rows2 = [{c: "" for c in header2} for _ in range(1)]
-        rows2[0]["nation_id"] = "NATION-17"
-        with self.assertRaises(pub.UnadjudicatedIdentifier):
-            pub.apply_field_map("owned", header2, rows2, set(header2))
+        self.assertEqual(adjudicated, [])
+
+    def test_owned_source_nation_is_internal_context_not_certifier_or_business_identity(self):
+        entry = pub.field_map()["owned"]
+        header = [f["column"] for f in entry["fields"]]
+        # These source contexts occur in the Tulalip NAOB directory. They
+        # do not assert that the business or its certifier is the named nation.
+        authority = "TRBF-TULALP-00"
+        source_rows = []
+        for name, nation, certifier in (
+            ("Akana", "bia:three-affiliated-tribes", authority),
+            ("Diverse Contractors", "bia:makah", authority),
+            ("Unresolved business", "bia:makah", ""),
+        ):
+            row = dict.fromkeys(header, "")
+            row.update(business_name_raw=name, nation_id=nation,
+                       certifying_authority_entity_id=certifier,
+                       programme_name="TERO vendor list")
+            source_rows.append(row)
+        preserved = [dict(row) for row in source_rows]
+        candidate = [dict(row) for row in source_rows]
+        result = pub.apply_field_map("owned", header, candidate, set(header))
+        self.assertEqual(source_rows, preserved)
+        self.assertNotIn("nation_id", header)
+        for source, published in zip(source_rows, candidate, strict=True):
+            self.assertNotIn("nation_id", published)
+            self.assertEqual(published["certifying_authority_entity_id"],
+                             source["certifying_authority_entity_id"])
+            self.assertEqual(published["cedar_uid"], source["certifying_authority_entity_id"])
+            self.assertEqual(published["business_entity_id"], "")
+        retirement = next(r for r in result["retirement"] if r["column"] == "nation_id")
+        self.assertEqual(retirement["disposition"], "internal_crosswalk")
+        self.assertEqual(retirement["rows_affected"], 3)
+        self.assertEqual(retirement["unresolved"], 0)
+        field = next(f for f in entry["fields"] if f["column"] == "nation_id")
+        declared = next(r for r in entry["retire"] if r["column"] == "nation_id")
+        self.assertEqual(field["retire"], declared)
 
     def test_a_withheld_register_name_never_falls_back_to_a_raw_name(self):
         import cedar_domain

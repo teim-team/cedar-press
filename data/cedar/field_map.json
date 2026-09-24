@@ -5516,12 +5516,12 @@
     {
      "column": "nation_id",
      "decision": "internal",
-     "why": "An identifier of the certifying nation in another namespace; its equivalence to certifying_authority_entity_id is not settled from the declaration. Stops the dataset until adjudicated.",
+     "why": "330_build_native_owned_businesses.rec takes this source-association slug from source configuration or a staging-row override; the builder preserves it separately from the certifying authority. Its codebook defines the nation the source associates with the business, not a verified business identity. For example, a Tulalip directory entry may name Makah or Three Affiliated Tribes here. Preserve internally without asserting equivalence, ownership or affiliation, and never use it to fill a Cedar identity.",
      "spec": "retirement",
      "retire": {
-      "identifies": "the certifying nation, in a namespace the declaration does not name",
-      "disposition": "adjudicate",
-      "replacement": "certifying_authority_entity_id",
+      "identifies": "source-associated nation or authority context from source configuration or staging; not the business legal identity",
+      "disposition": "internal_crosswalk",
+      "replacement": "Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid.",
       "column": "nation_id"
      }
     },
@@ -5983,9 +5983,9 @@
      "column": "certifying_authority_entity_id"
     },
     {
-     "identifies": "the certifying nation, in a namespace the declaration does not name",
-     "disposition": "adjudicate",
-     "replacement": "certifying_authority_entity_id",
+     "identifies": "source-associated nation or authority context from source configuration or staging; not the business legal identity",
+     "disposition": "internal_crosswalk",
+     "replacement": "Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid.",
      "column": "nation_id"
     },
     {

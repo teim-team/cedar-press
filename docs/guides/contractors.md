@@ -82,7 +82,7 @@ The approved header, in the owner's exact order (49 columns, of which 2 are owed
 | 30 | `reported_buy_indian` | Buy Indian Act reported (yes or no) | Whether the award reports use of the Buy Indian Act preference. Reported use, not eligibility. | yes or no (1 or 0) | not stated; 0 is no |
 | 31 | `reported_indian_business` | Indian business reported (yes or no) | Whether the award reports the contractor as an Indian business under the relevant preference. | yes or no (1 or 0) | not stated; 0 is no |
 | 32 | `reported_native_preference` | Native preference reported | Whether the award reports a Native preference (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 33 | `competition_type` | competition type | Consolidated through a validated dictionary. | — | owed: not in the file until the terminal builds it |
+| 33 | `competition_type` | competition type | Built by cedar_publication.recompute_derived using the shared source-versioned dictionary; rejects conflicts. | — | owed: not in the file until the terminal builds it |
 | 34 | `recipient_city` (was `recipient_city_name`) | Awardee city | City of the awardee's address. | text | the source states none, or not applicable to this row |
 | 35 | `recipient_state` (was `recipient_state_code`) | Awardee state | Its state. | text | the source states none, or not applicable to this row |
 | 36 | `recipient_county` (was `geo_recipient_county_name`) | Recipient county | The county of the contractor's address, which is not where the work is performed. | text | the source states none, or not applicable to this row |
@@ -137,7 +137,7 @@ A blank is never zero and never an invented date. A blank JSON-list cell means u
 Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
 
 - `sector` (combine:sector\|supersector): One readable sector through the dictionary.
-- `competition_type` (combine:extent_competed\|extent_competed_normalized): Consolidated through a validated dictionary.
+- `competition_type` (projection:cedar_extent_competed.normalize): Built by cedar_publication.recompute_derived using the shared source-versioned dictionary; rejects conflicts.
 
 ## Release, citation and method
 

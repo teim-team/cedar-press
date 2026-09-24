@@ -30,7 +30,7 @@ Generated from `data/cedar/field_map.json` and the sample headers by `scripts/fi
 | `nonprofits` | `cedar_spine_entity_id` | the spine entity the organization was keyed to before a redirect that cedar_uid reflects and this column does not, on at least one row | cedar_uid | adjudicate | 9 | 9 |
 | `nonprofits` | `key_redirect_proposed_entity_id` | a proposed redirect of the entity link | cedar_uid, once the redirect is ruled | internal_crosswalk | 0 | 0 |
 | `owned` | `certifying_authority_entity_id` | the certifying authority, a canonical Native entity | kept; also copied into cedar_uid with role certifying_authority | object_id | — | 0 |
-| `owned` | `nation_id` | the certifying nation, in a namespace the declaration does not name | certifying_authority_entity_id | adjudicate | — | 0 |
+| `owned` | `nation_id` | source-associated nation or authority context from source configuration or staging; not the business legal identity | Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid. | internal_crosswalk | — | 0 |
 | `owned` | `business_entity_id` | the business as a register entity, where the identity system assigns one | kept as business_entity_id | object_id | — | 0 |
 
 NEED remains blocked by a systemic affiliation publication hold, independently of its internal-only enterprise cross-reference. The owner ruling requires a full-route audit, negative controls and a stratified quality sample before promotion. Funding still requires recoding retired attribution vocabulary; Nonprofits still has distinct unadjudicated identity links. Preserve all evidence and issued IDs; do not erase a blocked claim to pass the gate.

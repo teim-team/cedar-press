@@ -5,7 +5,7 @@
   "candidate_root": "..",
   "input_sha256": {
     "data/cedar/collections.manifest.json": "2173bf6914ac28fa818c2ccad44002d80c1bcb93422d8143ce62f3060b5fc8b4",
-    "data/cedar/field_map.json": "d4a4972778e6923f583b9f62e4269bf3b4b6a51e4274946c7ccd2191e2f1aba6",
+    "data/cedar/field_map.json": "fa4cec4bcee3fb40a8084fb0deaa78293e983a77d99b3944cecdc28ec10fcadb",
     "data/cedar/samples.published.json": "fa70bec3fe2ecb63aca5b1fcc6c5e3f9c95255db12ad3a8fd9e8c1dcc52eb910",
     "docs/PUBLICATION_POLICY.md": "7b5c3fa706d4bfc6ee3a30bca01108e964d75ca2f1c3e953c34a78df0dfa2cd9"
   },
@@ -893,7 +893,7 @@
       "identity": "All source URLs;3,725 publishable flags;523 accuracy holds;19 terms unchecked",
       "data_status": "BLOCKED",
       "delivery_status": "BLOCKED",
-      "blocker": "19 internal fields declared and holds enforced; nation_id legacy object/relationship semantics remain unresolved.",
+      "blocker": "Current source rights, evidence-specific affiliation validation and versioned entitled-download rehearsal remain unproved.",
       "gates": {
         "source_refresh": {
           "status": "NOT TESTED",
@@ -963,7 +963,7 @@
       "owner_queue_reason": "Current unresolved work is Codex engineering/source verification or previously recorded rulings; no evidence-complete ambiguous new linkage card is ready.",
       "completed_checks": "4,273 source assertions counted; publish/accuracy/terms flags measured; R7 kept separate",
       "work_underway": "Validate existing publishable register independently of R7; retain withholding; implement reviewed importer without equivalence bypass.",
-      "next_concrete_action": "Declare internal fields from producer evidence and rerun rights-filtered projection",
+      "next_concrete_action": "Validate source assertions and rights; rehearse the generic release path without exposing internal candidate identifiers.",
       "blocker_owners": {
         "engineering_defect": "Codex",
         "missing_source_or_research": "Codex",
@@ -985,7 +985,7 @@
         }
       ],
       "candidate_input_rows": 4273,
-      "candidate_projection_rows": 0,
+      "candidate_projection_rows": 3725,
       "row_policy_eligible_rows": 3725,
       "release_eligible_rows": null,
       "release_eligible_status": "NOT_CERTIFIED",
@@ -1003,12 +1003,10 @@
       "blank_key_rows": 0,
       "source_sha256": "e96b27c652020fcf1ffb23671f203cea0919a3582eb696bd572f3e5473ca19b6",
       "source_unchanged": true,
-      "validation_result": "REFUSED",
+      "validation_result": "FIELD_MAP_AND_KEY_PASS",
       "validation_limit": "Schema/key success does not certify factual links, source rights, promised components or production delivery.",
-      "current_projection_sha256": null,
-      "current_projection_blockers": [
-        "owned: nation_id carries a competing identifier on 838 row(s) whose object is not settled (retirement disposition `adjudicate`); the dataset stops until it is adjudicated, and the column is neither retained nor deleted"
-      ]
+      "current_projection_sha256": "4c1bc38818bc268ce906dfb3018764354d9f0dcd0e496e0d8d21cc48b23aef1c",
+      "current_projection_blockers": []
     },
     {
       "collection_id": "nonprofits",
@@ -1911,6 +1909,6 @@
   ],
   "records": [],
   "measurement_boundary": "Internal candidate validation. Owner decision count is not an engineering task count. Annual counts use source rows before filtering. NEED is an isolated candidate, not canonical production. Null release-eligible count means not certified, never zero inferred from unmeasured gates.",
-  "evidence_fingerprint": "61946691456e6453c9c0f564123859ac7dac45874a8ac0af33baab3764a567e1",
+  "evidence_fingerprint": "8f4204a8b308091238af4560b6f2123055a0ce893d6b0bc46aaa0caf1f67210b",
   "owner_menu_rule": "Only fully researched, genuinely ambiguous identity, affiliation or legal-object linkages requiring owner judgment. No policy ratification, engineering, research, commands or schemas."
 }
