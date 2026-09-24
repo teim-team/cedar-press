@@ -8041,6 +8041,11 @@
        "role": "TAX_OR_PAYMENT and FEDERAL_EXCISE_TAX rows"
       },
       {
+       "component": "gaming_online_sportsbook_financials.csv",
+       "producer": "1200_gaming_grove_revenue.py",
+       "role": "cross-referenced: MI/CT online sportsbook months overlap and are flagged nonadditive (both kept)"
+      },
+      {
        "component": "gaming_reported_revenue_observations.csv",
        "producer": "1200_gaming_grove_revenue.py",
        "role": "all non-payment rows"
@@ -10741,6 +10746,33 @@
      ]
     },
     {
+     "table": "gaming_coverage_gaps.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "internal",
+     "key_columns": [],
+     "grain": "One machine-readable coverage gap or qualified observation: one missing series, figure or period range (or one non-reconciling published row) for one subject, as established by a named source.",
+     "primary_key": [
+      "coverage_gap_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1200_gaming_grove_revenue.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": []
+    },
+    {
      "table": "gaming_financial_disclosures.csv",
      "status": "grove_component",
      "grove_component": true,
@@ -10839,6 +10871,92 @@
        "role": "TAX_OR_PAYMENT and FEDERAL_EXCISE_TAX rows"
       }
      ]
+    },
+    {
+     "table": "gaming_online_sportsbook_financials.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "internal",
+     "key_columns": [],
+     "grain": "One financial observation: one reported online-sportsbook unit x one period (monthly calendar month, or annual calendar year for annual-only sources) x one publication revision, with each financial measure in its own column.",
+     "primary_key": [
+      "financial_observation_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1200_gaming_grove_revenue.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": [
+      {
+       "table": "digital_gaming_revenue.csv",
+       "role": "cross-referenced: MI/CT online sportsbook months overlap and are flagged nonadditive (both kept)"
+      }
+     ]
+    },
+    {
+     "table": "gaming_online_sportsbook_relationships.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "internal",
+     "key_columns": [],
+     "grain": "One typed relationship between one reported online-sportsbook unit and one Native entity over the package's collected window; carries no money.",
+     "primary_key": [
+      "relationship_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1200_gaming_grove_revenue.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": []
+    },
+    {
+     "table": "gaming_online_sportsbook_units.csv",
+     "status": "grove_component",
+     "grove_component": true,
+     "publication_status": "internal",
+     "key_columns": [],
+     "grain": "One reported online-sportsbook unit: a single reporting series (tribal license, master license, casino online license, brand, operator row, shared three-tribe report or multi-brand license aggregate) in one jurisdiction as one source publishes it.",
+     "primary_key": [
+      "sportsbook_unit_id"
+     ],
+     "join_cardinality": {},
+     "grain_declared_by": "producer CONTRACTS in code/1200_gaming_grove_revenue.py; synced by code/build.py grove-contracts gaming",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [
+      "1200_gaming_grove_revenue.py"
+     ],
+     "enriched_by": [],
+     "never_run_warning": [],
+     "location": "Grove candidate components root (code/build.py candidate gaming); not data/clean",
+     "supersedes": []
     },
     {
      "table": "gaming_regional_revenue.csv",
@@ -11687,7 +11805,7 @@
      ]
     }
    ],
-   "n_grove_components": 21
+   "n_grove_components": 25
   },
   {
    "collection": "_entity_layer",

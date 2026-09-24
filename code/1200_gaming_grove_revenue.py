@@ -34,6 +34,25 @@ WHY THIS EXISTS
     gaming_financial_disclosures.csv
         SEC, FAC, NIGC financing-review and bond disclosures. FAC SEFA
         amount_expended is a FEDERAL AWARD expenditure, not gaming revenue.
+    gaming_online_sportsbook_units / _financials / _relationships.csv and
+    gaming_coverage_gaps.csv
+        The owner-delivered online sports package (online_sports_2026-09-24),
+        built by the imported module gaming_grove_online_sports.py (see its
+        docstring): one row per reported unit, per unit x period x revision,
+        per unit-entity link, and per machine-readable gap. Never appended to
+        regional revenue. Overlapping digital_gaming_revenue sportsbook rows
+        stay in gaming_reported_revenue_observations / gaming_government_payments
+        and are cross-referenced both ways (overlaps_online_sportsbook_
+        observation_id), so neither side is added to the other.
+
+NIGC NATIONAL-TOTAL VINTAGE RULE
+    NIGC prints FY2002 and FY2007 national totals twice (own-year report and a
+    later report's prior-year column). preferred_figure_for_fy marks exactly one
+    figure per (geography level, fiscal year): own_year_report is preferred over
+    prior_year_column; when only a prior_year_column figure exists it is
+    preferred. FY2013 has regions (prior-year column of the FY2014 chart) but
+    no printed national total; it is disclosed in coverage and in
+    gaming_coverage_gaps, never computed from regions.
 
 WHAT IS DELIBERATELY LEFT OUT (decision recorded in the receipt)
     gaming_revenue_bounds.csv (13,803 rows) repeats NIGC regional ceilings
@@ -70,6 +89,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gaming_grove as gg  # noqa: E402
+import gaming_grove_online_sports as gos  # noqa: E402
 
 SCRIPT = "1200_gaming_grove_revenue"
 
@@ -78,6 +98,7 @@ T_BANDS = "gaming_revenue_bands.csv"
 T_PAY = "gaming_government_payments.csv"
 T_OBS = "gaming_reported_revenue_observations.csv"
 T_FIN = "gaming_financial_disclosures.csv"
+T_OS_UNITS, T_OS_FOB, T_OS_REL, T_GAPS = gos.T_UNITS, gos.T_FOB, gos.T_REL, gos.T_GAP
 
 NIGC_TXT_DIR = "data/raw/external/nigc/ggr_reports/_txt"
 NIGC_RECON = "review/nigc_total_reconciliation_2026-08-06.csv"
@@ -187,6 +208,8 @@ REGION_SPEC = [
     ("fiscal_year", "public_official", "NIGC report fiscal year"),
     ("fiscal_year_definition", "public_official", "How NIGC's fiscal year is defined (not federal Oct-Sep, not calendar)"),
     ("figure_vintage", "public_official", "own_year_report or prior_year_column (restated/first published in the next report)"),
+    ("preferred_figure_for_fy", "public_derived", "yes on exactly one report's figures per (geography_level, fiscal_year) under preferred_figure_rule; no = retained other vintage, never added to the preferred one"),
+    ("preferred_figure_rule", "public_official", "The deterministic vintage rule applied"),
     ("figure_precision", "public_official", "exact_dollars, exact_thousands or rounded_0.1B as printed"),
     ("ggr_nominal_usd", "public_official", "Gross gaming revenue in NOMINAL US dollars as printed"),
     ("operation_count", "public_official", "Gaming operations (audited-financial-statement submitters) as printed"),
@@ -222,6 +245,7 @@ REGION_CONTRACT = _contract(
     enums={"geography_level": {"nigc_region", "national"},
            "figure_precision": {"exact_dollars", "exact_thousands", "rounded_0.1B"},
            "figure_vintage": {"own_year_report", "prior_year_column"},
+           "preferred_figure_for_fy": {"yes", "no"},
            "check_reconciles": {"", "yes", "no"},
            "printed_total_found_in_source_text": {"", "yes", "no", "no_text_layer"},
            "rights_class": gg.PUBLIC_RIGHTS},
@@ -233,6 +257,47 @@ REGION_CONTRACT = _contract(
                 {"table": "inflation_deflator.csv", "role": "deflator series metadata"}],
     row_rights_column="rights_class",
 )
+
+VINTAGE_RULE = ("One preferred figure per (geography_level, fiscal_year): the report whose own year it is "
+                "(own_year_report) is preferred over a later report's prior-year column (prior_year_column); "
+                "when only a prior_year_column figure exists it is preferred. Non-preferred figures are "
+                "retained restatements/first publications and are never added to preferred ones.")
+
+
+def apply_vintage_rule(rows):
+    """Mark exactly one source document preferred per (geography level, FY)."""
+    docs = defaultdict(dict)
+    for r in rows:
+        k = (r["geography_level"], r["fiscal_year"])
+        prior = docs[k].get(r["source_document"])
+        if prior and prior != r["figure_vintage"]:
+            raise gg.GamingContractError(f"{k} {r['source_document']}: one report with two vintages")
+        docs[k][r["source_document"]] = r["figure_vintage"]
+    chosen = {}
+    for k, d in docs.items():
+        own = sorted(doc for doc, v in d.items() if v == "own_year_report")
+        prior = sorted(doc for doc, v in d.items() if v == "prior_year_column")
+        pick = own if own else prior
+        if len(pick) != 1:
+            raise gg.GamingContractError(f"REFUSED: vintage rule ambiguous for {k}: own={own} prior={prior}")
+        chosen[k] = pick[0]
+    for r in rows:
+        r["preferred_figure_for_fy"] = "yes" if chosen[(r["geography_level"], r["fiscal_year"])] == r["source_document"] else "no"
+        r["preferred_figure_rule"] = VINTAGE_RULE
+    return rows
+
+
+def check_one_preferred_national(rows):
+    """Exactly one preferred national figure for every FY that has one; returns
+    the fiscal years with regions but no printed national total."""
+    pref = Counter(r["fiscal_year"] for r in rows if r["geography_level"] == "national"
+                   and r["preferred_figure_for_fy"] == "yes")
+    nat = {r["fiscal_year"] for r in rows if r["geography_level"] == "national"}
+    bad = sorted(fy for fy in nat if pref[fy] != 1)
+    if bad:
+        raise gg.GamingContractError(f"REFUSED: preferred national figure not unique for FY {bad}")
+    return sorted({r["fiscal_year"] for r in rows if r["geography_level"] == "nigc_region"} - nat)
+
 
 FORBIDDEN_REGION_COLUMNS = ("cedar_uid", "gaming_facility_id", "facility_id", "cedar_place_id",
                             "enterprise_id", "tribe_id")
@@ -392,6 +457,8 @@ def build_regional(inputs: gg.Inputs, notes):
         })
     if unreconciled:
         raise gg.GamingContractError(f"REFUSED: national totals do not reconcile: {unreconciled}")
+    apply_vintage_rule(out)
+    check_one_preferred_national(out)
     fy25 = check_fy2025(out)
     notes.append(f"FY2025 check: 8 regions sum to printed national ${fy25[0]:,} and {fy25[1]} operations "
                  "(NIGC_R4_FY2017_present, GGR25_071526.pdf); printed total located in the report text.")
@@ -548,6 +615,7 @@ PAY_SPEC = [
     ("summable_within_series", "public_derived", "yes only for paid, non-excluded, non-cumulative lines; add only within nonadditive_series_key"),
     ("nonadditive_series_key", "public_derived", "Lines may be added only when this key is equal"),
     ("upstream_revenue_evidence_class", "public_official", "Upstream revenue_evidence_class (a payment is never a revenue figure)"),
+    ("overlaps_online_sportsbook_observation_id", "public_derived", "GFOB id of the online-sports package observation for the same state/month/licensee (digital sportsbook tax rows); never add both"),
     ("document_status", "public_official", "original / revised / latest_statement_for_period, as upstream"),
     ("source_authority", "public_official", "Publishing agency"),
     ("source_document_type", "public_official", "Kind of source document"),
@@ -861,6 +929,7 @@ OBS_SPEC = [
     ("summable_within_series", "public_derived", "yes only for direct_reported, non-excluded, non-alternate rows; add only within nonadditive_series_key"),
     ("nonadditive_series_key", "public_derived", "Rows may be added only when this key is equal"),
     ("absence_reason", "public_official", "For documented_absence rows: why the figure does not exist"),
+    ("overlaps_online_sportsbook_observation_id", "public_derived", "GFOB id of the online-sports package observation describing the same state/month/licensee; the two are never added"),
     ("source_authority", "public_official", "Publishing agency"),
     ("source_document", "public_official", "Source document / dataset"),
     ("source_url", "public_official", "Source URL"),
@@ -1262,7 +1331,7 @@ def fin_from_sources(inputs, uid, withheld):
 
 # ================================================================== orchestration
 CONTRACTS = {T_REGION: REGION_CONTRACT, T_BANDS: BAND_CONTRACT, T_PAY: PAY_CONTRACT,
-             T_OBS: OBS_CONTRACT, T_FIN: FIN_CONTRACT}
+             T_OBS: OBS_CONTRACT, T_FIN: FIN_CONTRACT, **gos.CONTRACTS}
 for _t, _c in CONTRACTS.items():
     missing = [c for c in _c["header"] if c not in _c["field_rights"] or c not in _c["field_descriptions"]]
     assert not missing, (_t, missing)
@@ -1299,7 +1368,41 @@ def _coverage(rows, date_cols):
     return dict(sorted(by_year.items()))
 
 
-def build(inputs: gg.Inputs, out_dir: Path) -> dict:
+def nigc_gaps(regions, missing_national):
+    """NIGC coverage gaps as gaming_coverage_gaps rows (never computed values)."""
+    out = []
+    for fy in missing_national:
+        docs = sorted({r["source_document"] for r in regions if r["fiscal_year"] == fy})
+        out.append(dict(gap_source="nigc_regional_revenue", component_table=T_REGION, state="", cedar_uid="",
+                        entity_name_in_source="", subject=f"NIGC printed national gross gaming revenue total FY{fy}",
+                        measure="nigc_gross_gaming_revenue (national)", expected_frequency="fiscal_year",
+                        known_start=fy, known_end=fy, missing_from=fy, missing_through=fy,
+                        missing_periods=f"FY{fy} national total",
+                        source_status="national_total_not_printed",
+                        reason=(f"FY{fy} regions are carried only from {', '.join(docs)} (figure_vintage "
+                                "prior_year_column), which prints no FY national total; Cedar never computes one "
+                                "from regions"),
+                        next_action="Locate an NIGC publication printing the FY national total (press release or FY report)",
+                        evidence_url="https://www.nigc.gov/downloads/gross-gaming-revenue-reports/",
+                        affected_record_id=""))
+    latest = max(int(r["fiscal_year"]) for r in regions)
+    latest_doc = [r for r in regions if r["fiscal_year"] == str(latest) and r["preferred_figure_for_fy"] == "yes"]
+    out.append(dict(gap_source="nigc_regional_revenue", component_table=T_REGION, state="", cedar_uid="",
+                    entity_name_in_source="", subject=f"NIGC gross gaming revenue FY{latest + 1}",
+                    measure="nigc_gross_gaming_revenue (regions and national)", expected_frequency="fiscal_year",
+                    known_start="", known_end="", missing_from=str(latest + 1), missing_through=str(latest + 1),
+                    missing_periods=f"FY{latest + 1} (all regions and national)",
+                    source_status="not_yet_published",
+                    reason=(f"latest NIGC report held is FY{latest} ({latest_doc[0]['source_document'] if latest_doc else ''}, "
+                            f"retrieved {latest_doc[0]['retrieved_date'] if latest_doc else ''}); NIGC publishes about "
+                            "16 months after the fiscal year"),
+                    next_action="Re-check the NIGC GGR archive after the next annual release",
+                    evidence_url="https://www.nigc.gov/downloads/gross-gaming-revenue-reports/",
+                    affected_record_id=""))
+    return out
+
+
+def build(inputs: gg.Inputs, out_dir: Path, online_sports_root=None) -> dict:
     notes, withheld = [], Counter()
     uid = UidGate()
     tables = []
@@ -1323,6 +1426,16 @@ def build(inputs: gg.Inputs, out_dir: Path) -> dict:
     obs = obs_from_state(st, uid, withheld) + obs_from_fl(fl, uid, withheld) + obs_from_digital(dg, uid, withheld)
     fins = fin_from_sources(inputs, uid, withheld)
 
+    # Online sports package (imported module; never appended to regional revenue).
+    missing_national = check_one_preferred_national(regions)
+    os_tables, os_cov, os_withheld, os_notes, dg_overlap = gos.build_component(
+        inputs, online_sports_root or gos.DEFAULT_PACKAGE_ROOT, dg, nigc_gaps(regions, missing_national))
+    withheld.update(os_withheld)
+    notes += os_notes
+    for r in obs + pays:
+        r["overlaps_online_sportsbook_observation_id"] = (
+            dg_overlap.get(r["source_record_id"], "") if r["source_system"] == "digital_gaming_revenue" else "")
+
     # Internal-only QA tables: read for a hash receipt, never emitted (see module docstring).
     _, bounds = inputs.clean("gaming_revenue_bounds.csv", required=False)
     withheld["gaming_revenue_bounds_not_emitted_internal_ceiling_repeats"] = len(bounds)
@@ -1330,13 +1443,14 @@ def build(inputs: gg.Inputs, out_dir: Path) -> dict:
                  "regional ceilings across facilities (never summable) and votingpatterns values are compact-rate/GDP "
                  "models; both stay internal QA outside the component tables.")
 
-    for table, rows, contract in ((T_REGION, regions, REGION_CONTRACT), (T_BANDS, bands, BAND_CONTRACT),
-                                  (T_PAY, pays, PAY_CONTRACT), (T_OBS, obs, OBS_CONTRACT), (T_FIN, fins, FIN_CONTRACT)):
+    emitted = [(T_REGION, regions, REGION_CONTRACT), (T_BANDS, bands, BAND_CONTRACT),
+               (T_PAY, pays, PAY_CONTRACT), (T_OBS, obs, OBS_CONTRACT), (T_FIN, fins, FIN_CONTRACT)]
+    emitted += [(t, os_tables[t], gos.CONTRACTS[t]) for t in (T_OS_UNITS, T_OS_FOB, T_OS_REL, T_GAPS)]
+    for table, rows, contract in emitted:
         tables.append(gg.write_table(out_dir, table, contract["header"], rows, contract))
 
     pub = {}
-    for table, rows, contract in ((T_REGION, regions, REGION_CONTRACT), (T_BANDS, bands, BAND_CONTRACT),
-                                  (T_PAY, pays, PAY_CONTRACT), (T_OBS, obs, OBS_CONTRACT), (T_FIN, fins, FIN_CONTRACT)):
+    for table, rows, contract in emitted:
         keep, prow = gg.public_projection(table, contract["header"], rows, contract["field_rights"])
         pub[table] = {"public_fields": len(keep), "withheld_fields": len(contract["header"]) - len(keep),
                       "public_rows": len(prow), "rows": len(rows),
@@ -1346,6 +1460,11 @@ def build(inputs: gg.Inputs, out_dir: Path) -> dict:
         T_REGION: {"fiscal_years": _coverage(regions, ["fiscal_year"]),
                    "national_rows": sum(r["geography_level"] == "national" for r in regions),
                    "latest_fiscal_year": max(int(r["fiscal_year"]) for r in regions),
+                   "fiscal_years_without_printed_national_total": missing_national,
+                   "fiscal_years_with_two_printed_national_totals": sorted(
+                       fy for fy, n in Counter(r["fiscal_year"] for r in regions
+                                               if r["geography_level"] == "national").items() if n > 1),
+                   "preferred_figure_rule": VINTAGE_RULE,
                    "fy2026": "not published: NIGC archive lists FY25 (released July 2026) as latest on 2026-09-24"},
         T_BANDS: {"fiscal_years": _coverage(bands, ["fiscal_year"])},
         T_PAY: {"period_end_years": _coverage(pays, ["period_end", "period_start"]),
@@ -1353,15 +1472,20 @@ def build(inputs: gg.Inputs, out_dir: Path) -> dict:
                 "by_status": dict(sorted(Counter(r["payment_status"] for r in pays).items())),
                 "by_direction": dict(sorted(Counter(r["direction"] for r in pays).items())),
                 "with_cedar_uid": sum(1 for r in pays if r["party_cedar_uid"]),
-                "distinct_cedar_uid": len({r["party_cedar_uid"] for r in pays if r["party_cedar_uid"]})},
+                "distinct_cedar_uid": len({r["party_cedar_uid"] for r in pays if r["party_cedar_uid"]}),
+                "overlapping_online_sportsbook_rows": sum(1 for r in pays if r["overlaps_online_sportsbook_observation_id"])},
         T_OBS: {"period_end_years": _coverage(obs, ["period_end", "period_start"]),
                 "by_scope": dict(sorted(Counter(r["scope"] for r in obs).items())),
                 "by_evidence": dict(sorted(Counter(r["evidence_class"] for r in obs).items())),
                 "with_cedar_uid": sum(1 for r in obs if r["cedar_uid"]),
-                "alternate_columns": sum(1 for r in obs if r["alternate_column_of"])},
+                "alternate_columns": sum(1 for r in obs if r["alternate_column_of"]),
+                "overlapping_online_sportsbook_rows": sum(1 for r in obs if r["overlaps_online_sportsbook_observation_id"])},
         T_FIN: {"years": _coverage(fins, ["period_end", "fiscal_year", "source_date"]),
                 "by_kind": dict(sorted(Counter(r["disclosure_kind"] for r in fins).items())),
                 "with_facility_id": sum(1 for r in fins if r["gaming_facility_id"])},
+        T_OS_FOB: os_cov,
+        T_GAPS: {"rows": len(os_tables[T_GAPS]),
+                 "by_gap_source": dict(sorted(Counter(r["gap_source"] for r in os_tables[T_GAPS]).items()))},
     }
     legacy = {f"{t}:{c}": n for (t, c), n in sorted(uid.legacy.items())}
     return {"tables": tables, "inputs": dict(sorted(inputs.receipts.items())), "coverage": cov,
@@ -1383,10 +1507,12 @@ def main(argv=None):
     b.add_argument("--input-root", default=str(gg.DEFAULT_INPUT_ROOT))
     b.add_argument("--output-root", required=True)
     b.add_argument("--as-of", default="")
+    b.add_argument("--online-sports-root", default=str(gos.DEFAULT_PACKAGE_ROOT),
+                   help="unpacked online sports package (tribal_sports/); env CEDAR_GAMING_ONLINE_SPORTS_ROOT")
     a = ap.parse_args(argv)
     inputs = gg.Inputs(a.input_root)
     out = Path(a.output_root)
-    receipt = build(inputs, out)
+    receipt = build(inputs, out, Path(a.online_sports_root))
     receipt["script"] = f"code/{SCRIPT}.py"
     receipt["schema_version"] = gg.SCHEMA_VERSION
     receipt["as_of"] = a.as_of

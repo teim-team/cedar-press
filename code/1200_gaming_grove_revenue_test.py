@@ -68,12 +68,13 @@ def make_root(tmp: Path, fy25=FY25, printed=46162783570, text="Totals      $46,1
                      "source_url": "https://www.nigc.gov/x", "source_document": "GGR25_071526.pdf",
                      "source_document_title": "FY 2025", "fetched_date": "2026-08-06"})
     # the same FY2002 under two systems: legitimately present, never to be summed together
-    for ver, doc, usd in (("NIGC_R1_FY2001_FY2002", "a2002.pdf", 100000), ("NIGC_R2_FY2003_FY2007", "b2003.pdf", 110000)):
+    for ver, doc, usd, vint in (("NIGC_R1_FY2001_FY2002", "a2002.pdf", 100000, "own_year_report"),
+                                ("NIGC_R2_FY2003_FY2007", "b2003.pdf", 110000, "prior_year_column")):
         rows.append({"administrative_region_id": f"CEDAR-ADMREG-{ver[-4:]}", "region_system_code": "NIGC_REGION",
                      "region_name": "Region I", "region_system_version": ver, "fiscal_year": "2002",
                      "ggr_usd": str(usd), "ggr_usd_real2025": str(usd * 2), "operation_count": "3",
                      "revenue_measure": "nigc_gross_gaming_revenue", "includes_nongaming_revenue": "false",
-                     "figure_precision": "exact_thousands", "figure_vintage": "own_year_report",
+                     "figure_precision": "exact_thousands", "figure_vintage": vint,
                      "deflator_factor_2025": "2.0", "inflation_base_year": "2025", "region_states_in_force": "WA",
                      "source_url": "https://www.nigc.gov/x", "source_document": doc,
                      "source_document_title": "old", "fetched_date": "2026-08-06"})
@@ -164,6 +165,40 @@ class RegionalTests(unittest.TestCase):
         with self.assertRaises(gg.GamingContractError):
             M.check_bands_against_regions([{"fiscal_year": "2025", "national_ggr_nominal_usd": "46000000000",
                                             "national_operation_count": "545"}], regions)
+
+
+def nat(fy, doc, vintage):
+    return {"geography_level": "national", "fiscal_year": fy, "source_document": doc, "figure_vintage": vintage}
+
+
+class VintageRuleTests(unittest.TestCase):
+    def test_exactly_one_preferred_national_figure_per_fy(self):
+        rows = [nat("2002", "r2002.pdf", "own_year_report"), nat("2002", "r2003.pdf", "prior_year_column"),
+                nat("2001", "r2002.pdf", "prior_year_column"),
+                {"geography_level": "nigc_region", "fiscal_year": "2013", "source_document": "r2014.pdf",
+                 "figure_vintage": "prior_year_column"}]
+        M.apply_vintage_rule(rows)
+        pref = {(r["fiscal_year"], r["source_document"]): r["preferred_figure_for_fy"] for r in rows
+                if r["geography_level"] == "national"}
+        self.assertEqual(pref, {("2002", "r2002.pdf"): "yes", ("2002", "r2003.pdf"): "no",
+                                ("2001", "r2002.pdf"): "yes"})   # prior-year column alone is preferred
+        self.assertEqual(M.check_one_preferred_national(rows), ["2013"])  # regions, no printed national
+        with self.assertRaises(gg.GamingContractError):
+            M.check_one_preferred_national([dict(r, preferred_figure_for_fy="yes") for r in rows])
+
+    def test_ambiguous_vintage_refused(self):
+        with self.assertRaises(gg.GamingContractError):
+            M.apply_vintage_rule([nat("2002", "a.pdf", "own_year_report"), nat("2002", "b.pdf", "own_year_report")])
+
+    def test_built_regions_carry_the_rule(self):
+        with tempfile.TemporaryDirectory() as d:
+            rows = M.build_regional(make_root(Path(d)), [])
+        fy02 = {r["source_document"]: r["preferred_figure_for_fy"] for r in rows if r["fiscal_year"] == "2002"}
+        self.assertEqual(fy02, {"a2002.pdf": "yes", "b2003.pdf": "no"})
+        self.assertTrue(all(r["preferred_figure_rule"] == M.VINTAGE_RULE for r in rows))
+        gaps = M.nigc_gaps(rows, ["2002"])
+        self.assertEqual([g["source_status"] for g in gaps], ["national_total_not_printed", "not_yet_published"])
+        self.assertEqual(gaps[1]["missing_from"], "2026")
 
 
 def ca_row(**kw):
