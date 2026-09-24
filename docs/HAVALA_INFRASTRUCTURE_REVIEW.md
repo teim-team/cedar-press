@@ -1,48 +1,136 @@
 # Havala infrastructure review packet
 
-Updated 2026-09-24 UTC (September 23 local). Review target: repository boundaries, maintainability, release safety,
-and the locally proven source-to-download seam. NEED adjudication is not the
-reviewer's task. The local bill-table vertical slice passed; no production launch is claimed. Start with
-the fixed ranges, source-to-download diagram, sprint closure and ten review questions.
+## Read this first
 
-## Review branches and immutable evidence
+Two real flagships, Legislation and Natural Resources, pass authorized download
+and rollback through the same release-pinned adapter. The shared build preserves
+rows, IDs and nullable existing references. Review the infrastructure, ownership
+and maintainability; twelve-collection readiness, production deployment and full
+frontend delivery remain incomplete. NEED adjudication is supporting evidence.
 
-The original Cedar checkpoint branch was pushed without force at
-`cb0e9f11627f790ee756655703a16baecb5253b2` and is preserved. GitHub refused a
-new draft because [PR #121](https://github.com/teim-team/cedar-press/pull/121)
-had already merged that exact head outside this session. No merge was performed
-by this implementation pass. Current continuation branch is
-`codex/legislation-release-consumer`, based on upstream
-`6d445f460357581981a4b096d5bd53dd0d8d668c`. Excluded dirty data stayed untouched.
+| What to review | Current measured position |
+|---|---|
+| Review branches | Cedar [draft PR #122](https://github.com/teim-team/cedar-press/pull/122), `codex/legislation-release-consumer`; Lumecon [draft PR #8](https://github.com/teim-team/Lumecon-data/pull/8), `codex/legislation-storage-safety` |
+| Real release proof | Legislation: 3,069 bill IDs/30 fields. Natural Resources: 11,305 source-observation record IDs/38 fields, 705 existing CE references/17 distinct IDs, qualifications preserved. Both: exact JSONL, real login, 401/403/200, redacted audit and immutable rollback |
+| CI foundation | Cedar `c0263d8`: application and disposable-Postgres workflows pass, including 77 database-backed checks with no skips and stale-account denial. Lumecon `2ce2f9a`: 460 Ubuntu tests on Python3.12/3.13, 90.8% coverage, real symlink checks; exact receipts below |
+| Current batch | Cedar baseline `1c2d1d9`; two frozen-runtime proofs pass with catalog-bound manifest digests, 16 registration/provenance checks and exact source-byte projection. Runtime changes are committed and pushed; no real candidate data is in Git |
+| Product boundary | Full API download is exact JSONL; UI/download samples remain CSV. Full-download frontend control and a CSV representation of the pinned release are not implemented; real mobile behavior is untested |
+| Holds | NEED publication and R7 G03-G06 stay blocked. Owner decisions are preserved receipts; canonical inputs, issued IDs and published outputs unchanged |
 
-The current Cedar review is [draft PR #122](https://github.com/teim-team/cedar-press/pull/122).
-Its fixed implementation range starts at `6d445f460357581981a4b096d5bd53dd0d8d668c`.
-The implementation head and exact files are listed below; documentation-only updates
-follow it. Nothing in this sprint was merged or deployed.
+### One authority for each responsibility
 
-Lumecon review: [draft PR #8](https://github.com/teim-team/Lumecon-data/pull/8),
-branch `codex/legislation-storage-safety`, fixed range
-`0ae36dda36d650b1b3861173fb122e7603b0dc3f..59026aafe16c50ebc38cb0f4a07b558aa78d5431`.
-[Ubuntu CI 35946422118](https://github.com/teim-team/Lumecon-data/actions/runs/35946422118)
-passed Python 3.12 and 3.13, including real symlink containment, malformed and
-nonexistent paths, immutable overwrite refusal, verified rollback, types, schemas,
-dependency audit and package smoke. Python 3.12 reported 434 passed and 90.12%
-coverage (floor 88%). Earlier run 35946082199 exposed three CLI tests expecting
-empty stderr after structured audit events were added; the tests now validate the
-exact audit schema and preserve error-channel checks. The passing head includes
-that correction, not a skipped gate.
+| Responsibility | Canonical implementation now | What still must move or close |
+|---|---|---|
+| Acquisition and collection transforms | Existing Cedar collection stages under `code/`; supported command surface `code/build.py` | Transitional producer ownership transfers to Lumecon only with pinned rebuild, consumer cutover and actual retirement |
+| Identity | `code/cedar_ids.py`, CE checksum delegated to `503_identity.py`; existing issued registers | No copied allocator or new cross-repository identity registry; namespace gaps remain explicitly held |
+| Publication/evidence decisions | `code/cedar_publication.py`, `data/cedar/field_map.json`; NEED route guard in `1133_need_owner_v6_builder_input.py` | A route surviving exclusion does not earn evidence approval; 1072 and publication hold remain separate safeguards |
+| Governed releases/storage | Lumecon `contracts.py`, `pipeline.py`, `storage.py`, `catalog.py` and read-only `api.py`; `catalog.manifest_metadata` is the single public manifest projection | Local immutable storage works; production object-store adapter, retention and monitoring are not deployed |
+| Product metadata | Five tracked `data/cedar/` contracts, using their existing curated/import/history generators | Additive `fullRelease` metadata comes from a reviewed Lumecon catalog; it does not replace these contracts |
+| Entitlements/downloads | Cedar `server/cedar_press/repository.py` and `app.py`; existing account/activation database | Server grants are separate from subscriber entitlements. Full downloads recheck the current subscriber tier; signed expiry and session revocation remain launch work |
+| Frontend | Existing Cedar product UI, owned by the concurrent frontend workstream | Connect the approved full-release affordance without relabeling a sample as full data |
 
-The two local Windows limitations remain documented: the offline network fixture
-intercepts asyncio's local socket setup, and symlink creation raises WinError 1314.
-They were not bypassed or weakened. Ubuntu CI is required before storage changes
-can merge. No WSL, Docker, Developer Mode or system component was installed.
+```mermaid
+flowchart LR
+  A[Pinned canonical input] --> B[Cedar publication projection and shared identity checks]
+  B --> C[Lumecon schema and primary-key validation]
+  C --> D[Immutable snapshot and release manifest]
+  D --> E[Versioned local artifacts]
+  E --> F[Cedar catalog pin and manifest digest]
+  F --> G[Session and entitlement check]
+  G --> H[Exact JSONL download and redacted audit]
+  E --> I[Select prior verified catalog for rollback]
+```
 
-## Locally passed Legislation vertical slice
+### Operating surface and what remains complicated
+
+| Task | Supported entry point / boundary |
+|---|---|
+| Inspect/check execution ownership | `python code/build.py plan <collection>` and `python code/521_inventory.py check-scripts`; plans do not certify rebuilds, and discovered writers do not authorize themselves |
+| Build a registered release pilot | `python code/build.py release-pilot <legislation or natural-resources> --source <canonical-flagship.csv> --output-root <isolated-store> --as-of <date>`; configuration in `cedar_pipeline.RELEASE_PILOTS`, existing table keys/grain/field map |
+| Prove a pinned release through Cedar | `python server/tests/release_download_rehearsal.py --store <store> --catalog <catalog.json>`; local credentials only |
+| Verify storage / explicitly select a version | Existing Lumecon `verify`, `compare`, `catalog`, `promote` commands; publication is a separate authorization |
+| Add the next collection | [One-page procedure](../data/cedar/README.md#add-a-collection-to-the-governed-release-path); same catalog, field map, release format and adapter |
+
+The existing inventory/contract/reference scan measures **684 Python files under
+`code/`**, with mutually exclusive observed roles: **78 active producers,
+7 validators/migration/review components, 7 product-consumer/shared components,
+5 identified test/fixture components, and 587 unresolved operational roles**.
+These static roles are not runtime certification. Mixed tools with self-tests
+remain operational components. Inventory coverage increased from 577 to 684 files,
+preserving old data-table measurements. Its separate authorization axis has
+116 declared dependencies/568 `unresolved_not_authorized` files; it does not measure
+the same thing as 587 unresolved roles. No historical/safely removable file was proved.
+Tests, comments and generated reports remain recorded references but cannot alone
+promote a file into an active runtime classification.
+
+One copied normalizer was removed: 1130 now delegates to 1072 while preserving its
+public `norm` API. All 1,916 register-name outputs match. Existing numbered NEED
+stages remain required components; **one duplicate-logic cutover, zero whole-file
+retirements** is the measured result, not a repository cleanup claim. The public
+manifest projection also moved from the API to its catalog owner; API and catalog
+now call that one implementation, with the old API definition removed.
+
+Only approved flagships are served; ancillary tables are excluded. Natural
+Resources preserves source qualifications verbatim in `research_note`, refusing
+conflicts. Suppression, uncertain links and mixed measures remain visible. Two
+delivery proofs do not certify source completeness or twelve launch-ready products.
+
+## Evidence appendix: fixed review ranges and CI
+
+| Repository | Fixed verified range | Evidence |
+|---|---|---|
+| Cedar Press foundation | `6d445f460357581981a4b096d5bd53dd0d8d668c..cdc3b31dc703fd951b64529c4d2075d0987fb920` | [Application CI35948194088](https://github.com/teim-team/cedar-press/actions/runs/35948194088): 398 Node passes/1 skip, 180 Playwright passes, 309 Python tests (277 passed/32 DB skips), 80% coverage, lint/generated/dependency checks. [Postgres CI35948193898](https://github.com/teim-team/cedar-press/actions/runs/35948193898): 71 tests, zero skips, including real subscriber login/cookie to pinned download |
+| Lumecon Data verified foundation | `0ae36dda36d650b1b3861173fb122e7603b0dc3f..59026aafe16c50ebc38cb0f4a07b558aa78d5431` | [Ubuntu CI35946422118](https://github.com/teim-team/Lumecon-data/actions/runs/35946422118), Python 3.12/3.13; 434 tests; Python 3.12 coverage 90.12% against 88% floor; schemas/types/dependencies/package pass |
+| Earlier Cedar continuation | `1c2d1d9e232e727b60505debaa517f6a5139860b..0678a5013870aeea0d8a26f71c11656d771fc130` | [Application CI35951178975](https://github.com/teim-team/cedar-press/actions/runs/35951178975): 398 Node passes/1 skip, 180 Playwright passes/26 skips, 330 Python checks (298 passed/32 database skips), 80% coverage; lint/generated/dependency gates pass. [Postgres CI35951178969](https://github.com/teim-team/cedar-press/actions/runs/35951178969): 74 tests, zero skips, including both collections through real subscriber login and entitlement checks |
+| Earlier Lumecon runtime | `59026aafe16c50ebc38cb0f4a07b558aa78d5431..185802b631a3289597278c77bbd4d34a51f5285a` | [Ubuntu CI35949981368](https://github.com/teim-team/Lumecon-data/actions/runs/35949981368) passed Python3.12/3.13, 456 tests and 90.8% coverage, including nullable `registered_reference`, v4 builds and v3 verification. Earlier stale-version-reference failures were corrected, not skipped |
+| Lumecon documentation continuation | `185802b631a3289597278c77bbd4d34a51f5285a..5e7ad162a89ba8f7f172a9c15d0efa9f1d849169` | [Ubuntu CI35950758323](https://github.com/teim-team/Lumecon-data/actions/runs/35950758323) passed all gates on Python 3.12/3.13: 456 tests, 90.8% coverage. Existing README/data-contracts docs explain preservation versus crosswalk approval; no runtime change |
+| Earlier digest-bound Cedar runtime | `6d445f460357581981a4b096d5bd53dd0d8d668c..3cf2583af9cd07e52dd1605659a319c242b54a61` | [Application CI35953021899](https://github.com/teim-team/cedar-press/actions/runs/35953021899) and [Postgres CI35953021926](https://github.com/teim-team/cedar-press/actions/runs/35953021926) pass. Local full suite: 337 tests, 305 passed/32 DB skips, 80% coverage; Ubuntu Postgres: 76 passed, no skips. Includes coherent upstream-tampering denial, both collection namespaces and exact bytes |
+| Final Cedar runtime | `6d445f460357581981a4b096d5bd53dd0d8d668c..c0263d8fbed32121207c40499ea601abba4d7194` | [Application CI35954050177](https://github.com/teim-team/cedar-press/actions/runs/35954050177) and [Postgres CI35954050274](https://github.com/teim-team/cedar-press/actions/runs/35954050274) pass. Local full suite: 338 tests, 306 passed/32 DB skips, 80% coverage. Ubuntu Postgres: 77 passed, no skips; same-cookie downgrade/deletion denied before fetching data |
+| Final Lumecon runtime | `0ae36dda36d650b1b3861173fb122e7603b0dc3f..2ce2f9a884cb08a013d6a800e1fd34f6547be360` | [Ubuntu CI35952919244](https://github.com/teim-team/Lumecon-data/actions/runs/35952919244), both Python versions: 460 passed, 90.8% coverage, catalog/API projection digest agreement, real storage containment and immutable rollback; all supported gates pass |
+
+The earlier Cedar foundation at `cb0e9f11627f790ee756655703a16baecb5253b2`
+was merged through [PR #121](https://github.com/teim-team/cedar-press/pull/121)
+outside this implementation session. Neither current draft PR was merged by this
+work. Ubuntu supplies real symlink tests: Windows WinError 1314 and the network
+fixture's local asyncio socket limitation were not bypassed. No WSL, Docker, Developer Mode or privileged system installation was performed.
+The unintended user-managed Python/virtual-environment change is disclosed below;
+it was not a system security-setting change.
+
+Application CI skips database tests when no database is configured; the separate
+Postgres workflow is their evidence, not a reinterpretation of skips as passes.
+It uses a disposable Postgres 16 service, fixture credentials and no production
+secrets or deployment permission. It tests existing persistence contracts; it does
+not implement session expiry/revocation or certify production backups. Full downloads now
+recheck the existing subscriber store: a deleted account is refused, a downgraded
+account cannot use its old tier, and a store failure returns 503 before any artifact
+fetch. Both the cookie tier and current tier must allow access, so an upgraded
+subscriber signs in again. Other routes retain their existing session behavior.
+
+### Review questions, in priority order
+
+1. Does the producer/product boundary leave one authority for each fact and ID?
+2. Are explicit pins, schema/identity checks and exact-byte verification sufficient?
+3. Do entitlement denial, stale-pin refusal and audit events fail closed?
+4. Are immutable storage, real symlink tests, rollback and restore proof adequate?
+5. Does the flagship/ancillary and JSONL/sample-CSV boundary tell the truth?
+6. Do the execution guards and consumer cutovers reduce competing write routes?
+7. Are the remaining session, deployment, monitoring and recovery gaps concrete?
+8. Can the next collection follow the documented procedure without another runner?
+9. Are NEED/R7 publication holds independent of passing infrastructure tests?
+10. Are excluded data, preserved decisions and the fixed review range unambiguous?
+
+## Evidence appendix: real collection proofs
+
+### Legislation: shared registry-driven flagship (v4)
 
 The pilot uses the existing canonical 3,069-row bill artifact, existing approved
 30-column field map, shared CE checksum/register validation and unchanged bill IDs.
 The supported `code/build.py release-pilot legislation` command invokes Lumecon's
 existing DatasetContract, ingest_csv, build_release, verify_release and build_catalog.
+The current proof uses the shared registry-driven command and v4 transform,
+including declared record namespaces, minting authorities and pinned source keys.
+The delivered JSONL checksum remains identical to the prior v3 artifact. Lumecon
+also retains verification compatibility for the prior immutable v3 release.
 It does not promote a pointer. Source/register/policy/code hashes are retained in
 contract provenance. Cedar's source snapshot is read-only; the small derived
 public projection is retained under the isolated local release store.
@@ -59,12 +147,16 @@ explicitly excluded from this adapter scope. It has no Legislation-specific
 paths. Unpinned releases and NEED under its independent hold fail closed.
 
 The real rehearsal runs a Lumecon loopback API with a random development-only
-service grant and Cedar's real login/session/entitlement routes. It proves 401,
+service grant and Cedar's real login/session/entitlement routes. It refuses inherited
+`DATABASE_URL` or `CEDAR_PRESS_DB` before starting, so a configured operational
+database cannot be touched accidentally. It proves 401,
 403, full 3,069-row 200 response, API catalog/version agreement, exact JSONL checksum,
 structured audit record, switching to a second valid immutable metadata-version
 release and back, byte-identical restored artifact, and unchanged original release
-files. No current release pointer, production account, production credential,
-canonical source, or published output is modified. Audit means authorized/prepared,
+files. Current-run auditing requires exactly eight events with the expected ordered
+outcomes, excluding previous-run lines, and checks that credentials and account
+identifiers are absent. No current release pointer, production account, production
+credential, canonical source, or published output is modified. Audit means authorized/prepared,
 not proof of completed network transfer. Persistent production log collection
 and production session/entitlement lifecycle remain launch gates.
 
@@ -73,14 +165,18 @@ invented. Names-as-published are null without source excerpts. Votes/actions and
 other ancillary tables are excluded explicitly. This validates one local
 infrastructure path, not full Legislation coverage or all twelve collections.
 
-Reproduction (PowerShell, existing environments only):
+Reproduction (PowerShell, existing environments only). The Cedar checkout needs
+the pinned ignored entity-name and identity-register inputs; a clean Git clone
+does not contain all raw data. `--as-of` is an operator-supplied check date, not
+the source cutoff. The environment below imports both repositories' packages:
 
 ```powershell
-$env:PYTHONPATH='C:\Users\esm247\Desktop\Lumecon-data\src'
+Set-Location 'C:\Users\esm247\Desktop\cedar-press-codex'
+$env:PYTHONPATH='C:\Users\esm247\Desktop\Lumecon-data\src;C:\Users\esm247\Desktop\cedar-press-codex\server'
 & 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B code/build.py release-pilot legislation --source 'C:\Users\esm247\Desktop\Cedar Press\data\clean\native_bills.csv' --output-root 'C:\Users\esm247\cedar-takeover-checkpoint\legislation-release-store' --as-of 2026-09-23
 # Use the exact catalog path printed above:
-& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store 'C:\Users\esm247\cedar-takeover-checkpoint\legislation-release-store' --catalog <printed-catalog-path>
-py -3 -B -m unittest discover -s server/tests -t server -p test_release_download.py
+& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store 'C:\Users\esm247\cedar-takeover-checkpoint\legislation-release-store' --catalog '<printed-catalog-path>'
+& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B -m unittest discover -s server/tests -t server -p test_release_download.py
 ```
 
 The local rehearsal receipt and audit log stay beside the actual artifacts under
@@ -88,106 +184,128 @@ The local rehearsal receipt and audit log stay beside the actual artifacts under
 to CI or committed. CI runs redistributable fictional consumer fixtures, while
 Lumecon's Ubuntu suite tests actual filesystem containment and immutable storage.
 
-## Repository and canonical ownership
 
-| Responsibility | Current implementation | Canonical boundary / transition |
-|---|---|---|
-| Acquisition, raw evidence, staging, reconciliation | Cedar `code/` and ignored data workspace | Lumecon Data after each proven transfer; current Cedar producers remain explicit transitional components |
-| Immutable snapshots, typed contracts, release validation | Lumecon `contracts.py`, `pipeline.py`, `storage.py` | Lumecon; reuse existing content-addressed formats |
-| Identity namespaces and existing issued registers | Cedar `cedar_ids.py`, delegated CE checksum in `503_identity.py` | One existing identity service; no copied allocator in Lumecon |
-| NEED evidence admission | `1133_need_owner_v6_builder_input.py::affiliation_route_is_quarantined` | Canonical known-route exclusion; not a general affirmative-evidence certifier |
-| NEED supported command | `code/build.py candidate need` | One command surface; numbered stages remain required components |
-| Field publication policy | `cedar_publication.py` and `data/cedar/field_map.json` | One policy contract; do not fork per consumer |
-| UI, accounts, entitlements, API and downloads | Cedar `src/`, `server/` | Cedar Press; Lumecon development bearer grants are not subscriber entitlements |
-| Product release description | Five tracked files under `data/cedar/` | Existing curated/workspace/history generators; additive fullRelease metadata comes from the approved Lumecon catalog |
+| Legislation fact | Before / after proof |
+|---|---|
+| Canonical source | 3,069 rows and 3,069 unique issued bill IDs preserved; SHA256 `2c6e451cebdd05cc955730c7e7cc67016bb6ac454513feeee16ab33bbed7c060` |
+| Projection | 39 source columns to 30 existing approved fields; excluded columns follow the field map |
+| Date coverage | 207 introduced2025 and55 introduced2026; no refresh/completeness claim |
+| Snapshot | `d38902f72f7bdc42f096bbee87c1fa8051021027c1c2ca2960c91946a50f7552` |
+| Selected release | `6714cee5257c18b4e6fbc6ded0ff8ebce1a9913b9381e42a42d157de5ba58961` |
+| Catalog | `9abb3d35b8f4ecf2efa009b525b7b10a008ef7e76405ed0d86bc7d1ee2708a60` |
+| Exact artifact | 3,742,181 JSONL bytes; SHA256 `fa1df255ebd304b622386b59004c843fe6375de4f94dd39c6532eebfbf78ef5b`, unchanged from prior v3 proof |
+| Rollback exercise | Select valid `a4f8a773ab534b411e252476c5b77718f07cc150c85c919570f35a4e2957c966`, then restore selected release; original release files unchanged |
+| Access/audit | Anonymous401, wrong-tier403, authorized200; explicit stale pin503; redacted timestamped audit events |
+| Remaining scope | Eight historic source URLs missing; actions, votes and ancillary tables not included in this bill-table proof |
 
-Lumecon currently has manual CSV intake, local immutable storage, deterministic
-normalization, validation/quarantine, comparisons, explicit promotion, catalogs,
-and a read-only API. It has no production acquisition adapters, cloud store,
-collection database ingestion, or production object-storage adapter. The read-only API now serves verified exact
-JSONL artifacts as well as paged records. Limits are 16 MiB
-source and 128 MiB artifact, with in-memory normalization. Cedar PostgreSQL stores
-accounts/codes/activity, not collection data. Lumecon's single exact IdentityBinding
-does not represent plural optional bill/entity associations; do not coerce them
-into a singular cedar_uid or copy another identity implementation.
+The local receipt is `C:/Users/esm247/cedar-takeover-checkpoint/legislation-release-store/rehearsal-result.json`.
+The store and all real artifacts remain ignored and are not in either PR. Projection
+intake now uses `intake/legislation/<content-sha>.csv`, so a second source snapshot
+does not overwrite the first. Duplicate immutable releases are verified, not replaced.
 
-## Source-to-download path
 
-```mermaid
-flowchart LR
-  A[Canonical bill artifact and pinned evidence] --> B[Cedar publication projection and shared identity checks]
-  B --> C[Lumecon schema and primary-key validation]
-  C --> D[Immutable snapshot and versioned release manifest]
-  D --> E[Local development store; later approved object storage]
-  E --> F[Cedar existing repository adapter and catalog]
-  F --> G[Server session and entitlement check]
-  G --> H[Complete authorized artifact download]
-  H --> I[Structured audit outcome]
-  E --> J[Restore prior immutable release pin]
+### Natural Resources: second real proof using the same adapter
+
+The existing `resource_revenue` flagship passed the shared build and exact-download
+path. `resource_revenue_event_id` is the existing source-observation primary key;
+its name does not imply that national aggregates, per-headright rates and individual
+payments are interchangeable events. No new IDs, identity
+matches or affiliation claims were introduced. The existing pro-tier shelf is
+respected; the rehearsal authorizes the appropriate pro subscriber.
+
+| Fact | Measured result |
+|---|---|
+| Rows and fields | 11,305 source rows/keys preserved; 38 approved fields; exact key-set comparison passed |
+| Canonical input SHA256 | `9967a3de568cb9d730d0b56323cfad62183510d3f3fd9f591af1d0f25b7af258` |
+| Source/identity coverage | 11,305 source URLs; 705 existing CE references covering 17 distinct registered entities; other links remain blank |
+| Source qualifications | `beneficiary_note` copied verbatim to approved `research_note`; conflicting nonblank values fail. All 11,305 notes and CE references compared to actual JSONL with zero changes |
+| CSV intake | 12,553,172 bytes; internal projection only, not a promised full customer CSV |
+| Source snapshot | `b66526ac85755846d13ddca23a291a9d5998913480a646a5a7620bf82a8d6c63` |
+| Release | `2309f1097a3a4fab3bdcaab66fac5792426d8826d95ba51fdc6765e7c7b59836` |
+| Catalog | `2a82c64231ef0cc6098500ed4677835f6b7b00494c17e62b5317c9757daee013` |
+| Exact JSONL | 21,767,478 bytes; SHA256 `d05530d6785d31902261c44b4bab77f93d392f58bd26bb244545c14a7b58b4ef` |
+| Rollback | Select valid `4d652d34659a0e5e82ea4bbbf0334af57e6e9d67250167584ab185f7f53c5c1d`, restore selected release; original files unchanged |
+| Real consumer proof | Lumecon loopback API, real Cedar login/cookie, anonymous401, wrong-tier403, authorized200, audit and rollback passed |
+| Date/scope limits | 505/280 rows by 2025/2026 `period_start`, versus 36/24 by `payment_date`; mixed periods/measures and suppression remain, source cutoff unmeasured |
+
+Receipt: `C:/Users/esm247/cedar-takeover-checkpoint/natural-resources-release-store/rehearsal-result.json`.
+This proves another flagship delivery path; it does not refresh the source, prove
+its completeness, make incompatible financial measures additive or release its
+ancillary tables. The output is an unpublished local candidate.
+
+Populated `period_start` dates span 1880-01-01 through 2026-07-01 (10,813 rows).
+Payment dates span 2008-09-22 through 2026-08-21 (495 rows); retrieval dates span
+2026-08-05 through 2026-09-01. The maximum period endpoint, 2026-09-30, does not
+establish observed activity through that date. Grains include 9,791 national
+aggregates, 508 per-headright rates, 167 state aggregates, 779 entity-specific
+observations and 60 components. They cannot be summed as one financial total.
+
+```powershell
+Set-Location 'C:\Users\esm247\Desktop\cedar-press-codex'
+$env:PYTHONPATH='C:\Users\esm247\Desktop\Lumecon-data\src;C:\Users\esm247\Desktop\cedar-press-codex\server'
+& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B code/build.py release-pilot natural-resources --source 'C:\Users\esm247\Desktop\Cedar Press\data\clean\resource_revenue.csv' --output-root 'C:\Users\esm247\cedar-takeover-checkpoint\natural-resources-release-store' --as-of 2026-09-23
+& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store 'C:\Users\esm247\cedar-takeover-checkpoint\natural-resources-release-store' --catalog 'C:\Users\esm247\cedar-takeover-checkpoint\natural-resources-release-store\catalogs\2a82c64231ef0cc6098500ed4677835f6b7b00494c17e62b5317c9757daee013.json'
 ```
 
-The complete diagram was exercised locally for the bounded bill table. The current protected endpoint
-`GET /press/collections/{id}/download` enforces tier but returns the ten-row
-sample through `repository.collection_csv`, with a `-sample.csv` filename.
-The additive full-download route now uses the same repository/access boundary;
-the existing sample route remains explicitly a sample and is never a full fallback.
-Pin immutable release IDs, verify the actual served bytes, and retain Cedar's
-citation/schema/field-map contract. No second manifest or release registry.
+The pilot now has two entries in `code/cedar_pipeline.py::RELEASE_PILOTS`.
+`build.py` reads the existing dataset-contract primary key/grain and publication
+field map; no collection-specific endpoint or competing manifest was introduced.
+The measured Natural Resources onboarding surface is **9 configuration lines** in
+`RELEASE_PILOTS` and **19 lines** in one canonical publication qualification branch:
+zero new configuration files, zero endpoints and zero collection-specific branches
+in the shared server adapter. These counts exclude the separately reviewed shared
+build, guard and Lumecon nullable-reference changes; they are not a claim that the
+entire second-collection implementation required only 28 lines.
 
-## Infrastructure gap table
+Scalar preexisting IDs use Lumecon's nullable `registered_reference` mode: exact
+registered references are validated without matching or remapping, null remains
+null, and unknown references fail. This is reference integrity, not new evidence
+of ownership or affiliation. Plural bill/entity arrays retain their distinct
+Cedar validation path rather than being coerced into one entity ID.
 
-| Area | Evidence / gap | Required local or production completion |
-|---|---|---|
-| Repository ownership | Producer boundary above; Cedar still performs transformations | Transfer one producer and switch its consumers before retirement |
-| Object storage/versioning | Local immutable release and portable key/restore tests pass | S3 backend/versioning remain specified, not deployed; site bucket is not the data store |
-| Database/catalog | Existing Cedar metadata and account PostgreSQL; no data catalog database | Use existing catalog adapter; do not add a database solely for demonstration |
-| Promotion | Lumecon verify/compare/promote exists | Pin reviewed real release; never follow current pointer per request |
-| API | Generic explicit-release adapter and exact-artifact endpoint tested | Real Legislation table verified; other real collections pending |
-| Authentication | Signed cookie; PostgreSQL activation available | Signed expiry, revocation/current-tier validation remain missing; restart DB tests now run in disposable Ubuntu CI; production persistence unverified |
-| Authorized download | Existing sample route retained; additive full route returns exact pinned JSONL | Anonymous401, wrong-tier403, authorized200 and stale-pin503 pass locally |
-| Audit | Structured release-created/reused/selection and download-denial/success/failure events tested | Central retention, monitoring and alerts not deployed; success means prepared, not confirmed transfer |
-| Secrets/config | Environment-based config; no AWS CLI/profile available locally | Authorized owner verifies deployment configuration without exposing values |
-| CI | Shared Makefile gates; metadata checks and fixtures | Full pinned private-input release job is separate and not run by ordinary CI |
-| Rollback | Immutable release model exists | Local valid-pin rollback passed; deployed service rollback untested |
-| Backup/DR | Fixture source/release backup restored and hashes verified; missing/corrupt restores refused | Production backup, retention and disaster-recovery rehearsal remain unverified |
-| AWS/domain/TLS | HOSTNAMES documents ACM, CloudFront, private S3 site origin, Route53 | Assets are documented, NOT reverified live; do not recreate certificate |
-| Monitoring/alerts | No verified operational alert path | Add health/version/release proof and owned delivery-failure alert route before launch |
+**Reference-binding provenance corrected and verified:** `approved_on` no longer
+uses the operator's `args.as_of` check date. `cedar_pipeline.REFERENCE_PRESERVATION_AUTHORITY`
+records the existing **2026-09-23 owner execution directive to preserve canonical
+rows and issued IDs**, once, with this exact limited attribution:
 
-`docs/HOSTNAMES.md` names the existing cedarpress.ai assets. No AWS account was
-queried. Its historical OIDC failure is not a fresh deployment diagnosis.
-`deploy.yml` builds once and separates S3/CloudFront from Pages publication.
-API deployed hostname/configuration remains unverified. API health lacks a release
-or code stamp. Deployment artifact retention is one day; S3 sync deletes removed
-assets. Bucket versioning and recoverability are unknown. Server README's blanket
-in-memory claim is stale relative to `server/DATABASE.md` and PostgreSQL code.
+> Owner execution directive: preserve existing issued IDs; reference validation
+> only, no identity or affiliation adjudication.
 
-## Required metadata
+The fixed date authorizes preservation/reference validation. It is neither the
+original approval date of an entity nor a new ownership, equivalence or affiliation
+ruling. The final Natural Resources manifest contains that date and text, with the
+separate full-register hash
+`68e3dd6e19870d7ff5e500512a4bc725802bfededa44f68f24758b4af20fb8d3`.
+Acquisition/source cutoff remains separate. The rebuilt frozen-runtime candidate
+and real download/rollback proof passed. Strict conservation additionally rejects
+filling previously null CE links or reassigning existing ones, and the input filename
+must match the declared flagship. No new human ruling or identity policy was created.
 
-All five files were already tracked despite broad `/data/*` ignore rules. Narrow
-exceptions and tracking tests now prevent accidental omission; LF attributes
-stabilize generated checks on Windows. No duplicate metadata files were created.
+### Other candidates and concrete refusal boundaries
 
-| File | Authority / generation | Consumers / freshness |
-|---|---|---|
-| codebook.json | Curated schema contract; codebook-markdown generates its documentation | Client/server descriptions; check-generated + tracking tests |
-| field_map.json | Curated owner publication contract | cedar_publication, docs/guides; field-map and guide --check |
-| collections.manifest.json | scripts/import_cedar_manifest.py from workspace descriptors/samples | Client/server catalogs/imports; parity tests; full regeneration requires ignored inputs |
-| releases.json | scripts/record-release.mjs preserves release history | Client/API release history; cannot reconstruct history from current data alone |
-| samples.published.json | scripts/measure-samples.mjs from Git index and sample bytes | Sample availability/downloads; deterministic freshness check |
+- **Native Advocacy and Engagement disclosure component:** 27,825 rows/38 fields,
+  unique filing keys and all source URLs; 26,513 populated CE references and 1,312
+  unresolved links. Its 20,053,457-byte projection exceeds the existing 16,777,216-byte
+  source cap. Nullable registered-reference validation now exists in Lumecon, but
+  the size gate remains and this component is not a release of the broader product.
+  Prior projection SHA256: `5044ee3d2f50985e7b0537ed8937ea9232a8c47da29f42261c040932bf469d3f`.
+- **NAGPRA:** 6,792 notices; 52 standalone approved fields, 900/633 publication-year
+  rows. Seven undeclared joined columns and 619 legacy-format source IDs remain
+  unresolved release-contract issues. It was excluded from this pilot; no gate relaxed.
+- **Deals:** current projection refuses undeclared `Caveat`/`Candidate_Status`;
+  preserve source qualifications and resolve the declared contract before another
+  attempt. Do not assume R7 independence or remove those fields to force success.
+- **Federal Register / nonprofits:** projection checks refused owed date-precision
+  fields and unadjudicated identifiers respectively. These are bounded refusal
+  results, not new broad audits. NEED stays excluded under its publication hold.
 
-Full generator/consumer details remain at `data/cedar/README.md`. Fresh independent
-Windows checkout plus explicit reviewed overlay passed seven generated checks,
-application build, 58 JS and 43 Python checks earlier. After the owner-policy change,
-the five changed metadata/document files were overlaid and both affected freshness
-checks passed again. This is clone completeness, not twelve full-data rebuilds.
-
-## Twelve-collection operating model
+## Evidence appendix: twelve-collection operating model
 
 All source cutoffs remain unmeasured. Counts are measured local baselines, not
 coverage certification. Supporting tables retain their own grains. All consume
 1137 customer exports / 1135 samples through the manifest importer and Cedar
-client/server adapters. A generic full entitled route now exists and the bill-table
-release passed a real local rehearsal; this does not certify every component table.
+client/server adapters. The generic full entitled route has real local Legislation
+and Natural Resources proofs; this does not certify every component table.
 
 | Collection / flagship | Producer and source | Grain / identity | 2025 / 2026 | Blocker |
 |---|---|---|---|---|
@@ -201,20 +319,93 @@ release passed a real local rehearsal; this does not certify every component tab
 | Subcontracting / subawards | 20 +121/910/911 | Subaward/report key; prime/sub CE separate | 6,306 /2,049 subaward date | Role contract and repeats |
 | Native-Owned / native_owned_businesses | 330 +publication/date stages; directories | business_source_id assertion, not unique legal firm | Current register | 523 accuracy holds,19 permission unchecked; R7 blocked |
 | Nonprofits / np_orgs | 17 +rulings/linkage; IRS/research | EIN organization; fiscal filings separate | Register/actual filing periods | 6,597 untiered; missing CE not automatic exclusion |
-| Natural Resources / resource_revenue | 83 +scope/link; ONRR/state | Source-specific revenue observation | 505 /280 period_start;36 /24 payment_date | Mixed fiscal/calendar grains, suppression |
+| Natural Resources / resource_revenue | 83 +scope/link; ONRR/state | Source-specific revenue observation; resource_revenue_event_id, optional existing CE | 505 /280 period_start;36 /24 payment_date | Flagship local delivery passed; mixed grains, suppression and source completeness still limit release claims |
 | NEED / need_enterprises | build candidate need;1072/1102/1177/1130 | Stable enterprise and relationship IDs | Register | Systemic affiliation hold, BLOCKED |
 
 No collection is READY here. Data status NOT TESTED except explicit NEED and
 Native-Owned blockers; NAGPRA has a reproduced delivery blocker. Delivery is
-NOT TESTED for the other collections; the Legislation flagship delivery seam alone
-is locally verified with disclosed limitations. Legislation currently previews bills and
+NOT TESTED for the other collections; the Legislation and Natural Resources
+flagship delivery seams are locally verified with disclosed limitations. Legislation currently previews bills and
 Advocacy disclosures; old mismatch claims are stale. Gaming is Grove only;
 Recognition is scrapped. Native-Owned storefront alias `owned` is explicit.
 Validation uses existing `build.py plan <collection>` then declared stages;
 1137 plan now exercises actual publication joins. Do not run the historical
 entire command chains as if they were twelve validated release jobs.
 
-## Consolidation within the touched scope
+## Evidence appendix: consolidation and execution ownership
+
+The operational scan reuses existing 521 inventory, collection contracts,
+`KNOWN_ORDERINGS` and AST/CLI-reference extraction. Denominator: current
+`code/**/*.py`, 684 files. Producer classification requires an existing contract
+or declared ordering; all 78 identified producers meet that static criterion and
+no named stage file is missing. Static references may include tests; runtime
+candidates require non-test Python imports or literal dispatch evidence. The 587
+unresolved classifications require bounded future investigation; lack of a
+recognized caller is not deletion authority. The measurement stays with its
+existing canonical inventory at `docs/schema/inventory.json`, under `script_census`
+and each script's operational role, collection/output entry points, static consumers
+and unknown I/O literals. Reproduce it with `python code/521_inventory.py scripts-only`;
+that command rewrites the script census while preserving dated data-table evidence.
+`check-scripts` is the read-only guard. No new inventory system or status document.
+The final correction removed activity classifications supported only by filenames,
+comments, arbitrary strings, tests or generated report references. Dynamic targets,
+non-Python dispatch and unproved call reachability remain limitations, not implicit
+authority. A count of unresolved files is not a count of obsolete files.
+
+The refreshed 521 script section now measures 684 files, replacing 577 stale records.
+Its 116 strict declared dependencies cover all existing collection declarations,
+not just the 78 launch-producer classification; 568 remain `unresolved_not_authorized`.
+The data-table portion remains byte-equivalent under canonical serialization,
+SHA256 `c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee`;
+its 2026-09-02 measurement date was not presented as refreshed. Script census has
+its own date. `521_inventory.py check-scripts` passes, including a fresh Git
+archive checkout without `data/`. Adding an unregistered builder to that isolated
+checkout produces exit 1 `UNINVENTORIED_DATA_CODE`.
+
+Sixteen registration/provenance tests pass, including strict CSV header/row-shape checks,
+isolated release roots outside every Git checkout and unchanged/null entity-link
+conservation. The latest full local suite ran 337 tests: 305 passed and 32
+database-dependent skips, with 80% coverage. The separate Ubuntu run passed all
+76 database-backed checks. Supported dispatch rejects undeclared stages and
+outputs, parallel runner registration, path escapes and `NEVER_RUN` entries.
+These are registry/dispatch checks, not proof that arbitrary shell jobs or dynamic
+code cannot write outside the graph. In particular, an inventoried helper invoked
+inside a registered stage is not yet a proven transitive write boundary. Isolated runtime write-boundary checks remain
+required for each production transfer. Existing Makefile unittest discovery includes
+the registration checks; no new parallel runner was added.
+
+Release-pilot input guards reject duplicate CSV headers and ragged records before
+projection, reject symlink/reparse escape before resolving the target, and require
+the release store outside every Git checkout. Existing publication and ID checks
+remain in the same supported producer path.
+
+Projection now reads the exact bytes hashed before publication. A regression test
+refuses any reopen of a mutable source while pinned bytes are supplied. Sixteen
+existing authority paths are hashed, including translation maps, denial ledger,
+domain policy and delegated CE validator; absent optional inputs are explicit.
+Checks before output construction and after the build refuse changed authorities.
+These files must remain frozen during the run; boundary checks are not an OS lock
+against an edit that is changed and restored between observations.
+
+The catalog now pins SHA256 of the exact safe API manifest projection. Previously,
+changing an upstream artifact together with its manifest hash could pass Cedar
+while retaining the approved release ID. Regression tests now reject that case
+for every fixture collection; missing digest pins also fail before upstream access.
+Existing catalog schema 1 is extended additively; full-download consumers require
+the digest. Regenerate old catalogs from verified releases, without rewriting the
+releases themselves. Private identity maps stay out of the public projection.
+
+Committed bounded consolidation (`42e04ae0748e56db9a5f015057558b9e8e927613`):
+`1130_need_owner_v6_reconcile.py` imports and
+aliases `1072_tribally_owned_enterprises.py::norm` instead of maintaining its copied normalizer
+and suffix pattern. 1133 already uses that same owner. The 1130 public API is
+unchanged; all 1,916 register-name results match the prior implementation, SHA256
+`ba026bc000294b3ea3ab6f926ddb4e3ed515056acfc8267356cbe553d9828f54`.
+Focused checks: 59 reconciliation, 16 migration and 6 dependency tests passed.
+No canonical rows, issued IDs or publication holds changed. No exact duplicate
+tracked script or unused touched entry point was proved removable. These stages
+remain required until their candidate-build consumers, schemas, outputs and
+historical command contracts are transferred and validated together.
 
 - Canonical identity owner: cedar_ids delegates CE checksum to 503; 1072 now
   calls that shared service. Shared validators do not certify every legacy caller.
@@ -240,7 +431,80 @@ NEED's historical hub/name allocation must not mint replacement IDs after change
 These were not expanded into a repository-wide refactor. R7 gates remain blocked;
 503 code changes invalidate prior fingerprints by design, not by auto-approval.
 
-## NEED bounds and R7
+## Evidence appendix: required metadata
+
+All five files were already tracked despite broad `/data/*` ignore rules. Narrow
+exceptions and tracking tests now prevent accidental omission; LF attributes
+stabilize generated checks on Windows. No duplicate metadata files were created.
+
+| File | Authority / generation | Consumers / freshness |
+|---|---|---|
+| codebook.json | Curated schema contract; codebook-markdown generates its documentation | Client/server descriptions; check-generated + tracking tests |
+| field_map.json | Curated owner publication contract | cedar_publication, docs/guides; field-map and guide --check |
+| collections.manifest.json | scripts/import_cedar_manifest.py from workspace descriptors/samples | Client/server catalogs/imports; parity tests; full regeneration requires ignored inputs |
+| releases.json | scripts/record-release.mjs preserves release history | Client/API release history; cannot reconstruct history from current data alone |
+| samples.published.json | scripts/measure-samples.mjs from Git index and sample bytes | Sample availability/downloads; deterministic freshness check |
+
+Full generator/consumer details remain at `data/cedar/README.md`. Fresh independent
+Windows checkout plus explicit reviewed overlay passed seven generated checks,
+application build, 58 JS and 43 Python checks earlier. After the owner-policy change,
+the five changed metadata/document files were overlaid and both affected freshness
+checks passed again. This is clone completeness, not twelve full-data rebuilds.
+
+## Evidence appendix: infrastructure gaps
+
+| Area | Evidence / gap | Required local or production completion |
+|---|---|---|
+| Repository ownership | Producer boundary above; Cedar still performs transformations | Transfer one producer and switch its consumers before retirement |
+| Object storage/versioning | Local immutable release and portable key/restore tests pass | S3 backend/versioning remain specified, not deployed; site bucket is not the data store |
+| Database/catalog | Existing Cedar metadata and account PostgreSQL; no data catalog database | Use existing catalog adapter; do not add a database solely for demonstration |
+| Promotion | Lumecon verify/compare/promote exists | Pin reviewed real release; never follow current pointer per request |
+| API | Generic explicit-release adapter and exact-artifact endpoint tested | Real Legislation and Natural Resources flagships verified; ancillary/other collections pending |
+| Scale bounds | 16 MiB source intake, 128 MiB artifact, in-memory normalization | Streaming/larger-source work needs a bounded implementation; caps remain enforced |
+| Authentication | Signed cookie; PostgreSQL activation available | Full downloads reject removed/downgraded accounts and fail closed on lookup errors; signed expiry and session revocation remain missing; restart DB tests now run in disposable Ubuntu CI; production persistence unverified |
+| Authorized download | Existing sample route retained; additive full route returns exact pinned JSONL | Anonymous401, wrong-tier403, authorized200 and stale-pin503 pass locally |
+| Audit | Structured release-created/reused/selection and download-denial/success/failure events tested | Central retention, monitoring and alerts not deployed; success means prepared, not confirmed transfer |
+| Secrets/config | Environment-based config; no AWS CLI/profile available locally | Authorized owner verifies deployment configuration without exposing values |
+| CI | Shared Makefile gates; metadata checks and fixtures | Full pinned private-input release job is separate and not run by ordinary CI |
+| Rollback | Immutable release model exists | Local valid-pin rollback passed; deployed service rollback untested |
+| Backup/DR | Fixture source/release backup restored and hashes verified; missing/corrupt restores refused | Production backup, retention and disaster-recovery rehearsal remain unverified |
+| AWS/domain/TLS | HOSTNAMES documents ACM, CloudFront, private S3 site origin, Route53 | Assets are documented, NOT reverified live; do not recreate certificate |
+| Monitoring/alerts | No verified operational alert path | Add health/version/release proof and owned delivery-failure alert route before launch |
+
+`docs/HOSTNAMES.md` names the existing cedarpress.ai assets. No AWS account was
+queried. Its historical OIDC failure is not a fresh deployment diagnosis.
+`deploy.yml` builds once and separates S3/CloudFront from Pages publication.
+API deployed hostname/configuration remains unverified. API health lacks a release
+or code stamp. Deployment artifact retention is one day; S3 sync deletes removed
+assets. Bucket versioning and recoverability are unknown. Server README's blanket
+in-memory claim is stale relative to `server/DATABASE.md` and PostgreSQL code.
+
+## Evidence appendix: storage and retention
+
+Read-only Windows discovery: C NTFS 506,332,180,480 bytes total,
+15,121,911,808 free; D NTFS 1,000,186,310,656 total,904,739,921,920 free.
+C is NVMe SSD; other reported device WDC WD10EALX SATA, media unspecified.
+D is reported fixed, not removable; confirm enclosure externally rather than
+asserting USB/removability. Sequential archive suitability is plausible, not
+benchmarked throughput. No write benchmark or movement was performed.
+D root has Archive and _migration_logs; Archive contains tero and other projects.
+tero has code/data/graveyard/output/scripts/src. No Cedar/Lumecon-named checkout
+was observed at these inspected levels; no unrelated personal-tree scan occurred.
+
+Proposed retention: Git holds code/contracts/small fixtures/product metadata and
+release manifests. Lumecon owns canonical processing and version references.
+Private versioned object storage holds immutable raw/release artifacts. Database
+holds operational accounts/entitlements/catalog indexes, never competing facts.
+Internal SSD holds active environments and bounded scratch. D may hold verified
+backup/archive copies, never the sole canonical or production store. Every archive
+requires relative-path manifest, SHA256,size,source/as-of,rights,producer/release
+version,restore instructions and a verified restore sample. Retain issued identity
+history and decisions permanently; retain prior releases while citations depend
+on them. Do not remove active copies until two independently recoverable copies
+and a restore test exist. Cache disposal and retention expiry remain separately
+scoped actions; no automatic deletion or migration is authorized here.
+
+## Evidence appendix: preserved NEED decisions and R7 boundary
 
 Pre-hold candidate-c/d preserved 5,820 enterprises,8,690 relationships,6,089
 bindings (269 historical-only),367 dual-role rows,zero minted IDs. Outputs were
@@ -297,32 +561,7 @@ prime40A/40B identifier/owner attribution, and subcontracting20 prime/sub roles.
 Business registration, Native affiliation and same-legal-object assertions must
 remain separate throughout.
 
-## Storage and retention
-
-Read-only Windows discovery: C NTFS 506,332,180,480 bytes total,
-15,121,911,808 free; D NTFS 1,000,186,310,656 total,904,739,921,920 free.
-C is NVMe SSD; other reported device WDC WD10EALX SATA, media unspecified.
-D is reported fixed, not removable; confirm enclosure externally rather than
-asserting USB/removability. Sequential archive suitability is plausible, not
-benchmarked throughput. No write benchmark or movement was performed.
-D root has Archive and _migration_logs; Archive contains tero and other projects.
-tero has code/data/graveyard/output/scripts/src. No Cedar/Lumecon-named checkout
-was observed at these inspected levels; no unrelated personal-tree scan occurred.
-
-Proposed retention: Git holds code/contracts/small fixtures/product metadata and
-release manifests. Lumecon owns canonical processing and version references.
-Private versioned object storage holds immutable raw/release artifacts. Database
-holds operational accounts/entitlements/catalog indexes, never competing facts.
-Internal SSD holds active environments and bounded scratch. D may hold verified
-backup/archive copies, never the sole canonical or production store. Every archive
-requires relative-path manifest, SHA256,size,source/as-of,rights,producer/release
-version,restore instructions and a verified restore sample. Retain issued identity
-history and decisions permanently; retain prior releases while citations depend
-on them. Do not remove active copies until two independently recoverable copies
-and a restore test exist. Cache disposal and retention expiry remain separately
-scoped actions; no automatic deletion or migration is authorized here.
-
-## Reproduction and test evidence
+## Evidence appendix: reproduction commands
 
 Run from Cedar worktree (Windows py -3; Linux python equivalent):
 
@@ -342,51 +581,194 @@ node scripts/guides-markdown.mjs --check
 git diff --check
 ```
 
-Focused results: 14 ID,16 migration,51 reconciliation,6 dependency,2 runner,
-4 original review-import,21 publication,43 collection and9 legacy download tests passed. These are historical foundation
-counts; the newer release-download suite and full CI results follow.
-Initial sandbox failures were fixture/subprocess permissions; actual reruns passed.
-An initial collection invocation without `-t server` failed import and was corrected.
-The full application suite was rerun this sprint. Cedar Ubuntu CI at `9aabf0a`
-([run35946723461](https://github.com/teim-team/cedar-press/actions/runs/35946723461))
-passed lint, seven generated checks, Node coverage, 180 Playwright smoke tests,
-307 Python tests run (276 passed; 31 Postgres-dependent skips), 80% Python coverage and both
-dependency audits. Those 31 database tests are NOT RUN, not successful persistence
-proof. Local Node:398 passed,0 failed,1 skipped; coverage84.43%lines/83.42%branches/
-90.24%functions. A two-line LCOV path-normalization correction makes Windows paths
-comparable to Git paths without lowering coverage floors. Local app build passed.
+Foundation focused measurements: 14 ID, 16 migration, 51 reconciliation,
+6 dependency, 2 runner, 4 original review-import, 21 publication, 43 collection and
+9 legacy download tests passed. These are dated foundation counts. Current full
+application, database and Linux safety results are the fixed CI receipts above.
+New tests include controlled truncated-upstream failure, explicit release requests,
+non-Legislation adapter fixtures, environment validation and actual database login.
 
-A subsequent negative test reproduced a truncated-upstream HTTP exception bypassing
-the failure audit. The bounded correction maps HTTPException to a controlled503
-and asserts one redacted unavailable event; focused release tests now total16.
-The final-head Ubuntu run is recorded in the closing evidence below.
+### Reproducible gates
 
-Linux verification now uses the existing GitHub Actions workflow, not a local
-system installation. Both declared Python versions passed. New consumer checks
-cover anonymous/wrong-tier denial before fetching, rights/schema/corruption
-refusal, NEED hold, explicit full-file metadata, audit and pin rollback.
+Cedar Ubuntu: `make check`, then the existing Playwright smoke command
+`npm run test:smoke` in its configured development fixture. The current workflow
+runs these same constituent gates from a clean checkout. Lumecon Ubuntu: use its
+existing workflow/Makefile and declared development dependencies; focused tests:
 
-Current production responsibilities: `code/build.py` adds one command to
-the existing runner; `server/cedar_press/repository.py` owns the release adapter;
-`server/cedar_press/app.py` owns HTTP authorization and audit outcome. New files are focused tests, a fictional cross-repository contract fixture and
-the local real-data `server/tests/release_download_rehearsal.py`. No numbered production script or
-new manifest format exists. Two previously changed test files receive formatting
-corrections required by the full lint gate; no assertions were weakened.
+```text
+python -m pytest tests/test_storage.py tests/test_pipeline.py tests/test_api.py tests/test_cli.py
+python -m unittest discover -s server/tests -t server -p test_release_download.py
+python -m unittest discover -s server/tests -t server -p test_lumecon_contract.py
+python -m unittest discover -s server/tests -t server -p test_need_review_import.py
+```
 
-## Review order and questions
+The first command runs in Lumecon; the remaining commands run in Cedar with its
+server development dependencies. Use the real-data reproduction commands earlier
+only in the data-capable workspace. Set the catalog argument to the recorded
+`catalogs/9abb3d35b8f4ecf2efa009b525b7b10a008ef7e76405ed0d86bc7d1ee2708a60.json`.
+Neither CI nor fictional fixtures certify private-source completeness.
 
-1. Is the producer/product boundary correct, with one identity authority during transfer?
-2. Do the Ubuntu containment tests and immutable-store implementation cover the required safety boundary?
-3. Is the bounded bill-register scope honest about missing URLs and ancillary tables?
-4. Does the implemented pinned download seam preserve entitlements and fail closed?
-5. Are publication holds independent of field removal and legacy staging bypass?
-6. Are namespace/grain validation and known legacy gaps clearly bounded?
-7. Are metadata tracking and freshness gates sufficient across Windows/Linux clones?
-8. Are consumer-cutover and retirement conditions concrete enough to prevent permanent duplicates?
-9. Which deployment/session/backup gaps must be closed before attendee access?
-10. Are excluded generated/private artifacts and the fixed review boundary unambiguous?
+Preservation recheck: all 19 NEED input hashes, 2 publication input hashes and 12 NAGPRA
+input hashes match their original checkpoint manifests, with zero missing files.
+All 14 preserved original implementation/test files also match. No publication,
+canonical-data promotion, frontend edit, AWS mutation, merge or external-drive
+movement occurred. Project dependencies were installed only into existing project
+environments. During this sprint an unintended `uv run ruff` auto-setup downloaded
+user-managed CPython 3.12.13 under `AppData/Roaming/uv/python` and recreated the
+Lumecon `.venv` (previously 3.13). Further automatic setup stopped; the declared
+API/Cedar dependencies were restored using `uv pip --python .venv/Scripts/python.exe`.
+No WSL, Docker, Developer Mode, Windows security change or administrator install
+was performed. Subsequent local proofs used explicit Python 3.12.13; Ubuntu CI
+independently passed 3.12 and 3.13. Do not use `uv run` for local checks when it
+could silently replace the shared environment.
 
-## Preserved foundation and exclusions
+
+## Evidence appendix: exact current implementation paths
+
+The current Cedar continuation is fixed through
+`c0263d8fbed32121207c40499ea601abba4d7194`, pushed to draft PR #122.
+Its local full suite passes 338 checks (306 passed, 32 database skips), with 80%
+coverage. Both real rehearsal receipts pass again with the current-account guard.
+[Postgres CI35954050274](https://github.com/teim-team/cedar-press/actions/runs/35954050274)
+passes 77 checks with zero skips, including same-cookie downgrade/deletion denial.
+[Application CI35954050177](https://github.com/teim-team/cedar-press/actions/runs/35954050177)
+passes all gates for the same correction.
+
+| Commit | Exact paths and purpose |
+|---|---|
+| `42e04ae0748e56db9a5f015057558b9e8e927613` | `code/1130_need_owner_v6_reconcile.py`, `code/1130_need_owner_v6_reconcile_test.py`: replace the copied normalizer with canonical 1072 delegation; prove identity and edge-case/register-name parity |
+| `0678a5013870aeea0d8a26f71c11656d771fc130` | `code/521_inventory.py`, `code/cedar_pipeline.py`, `docs/schema/inventory.json`: existing registry/census, declared-stage guard and pilot configuration |
+| same commit | `code/build.py`, `code/build_test.py`, `code/cedar_publication.py`: shared release construction, namespace/conservation/input/store guards and qualification preservation |
+| same commit | `server/tests/fixtures/lumecon_release_contract.json`, `server/tests/release_download_rehearsal.py`, `server/tests/test_lumecon_contract.py`, `server/tests/test_release_download.py`: reusable contract, isolated real consumer proof, exact bytes/audit/rollback and failures |
+| same commit | `server/tests/test_pipeline_registration.py`: registration/census, malformed-input, unsafe-root and conservation controls |
+| same commit | `docs/ARCHITECTURE.md`, `server/tests/test_field_map.py`: current architecture reference census and publication-contract regression expectations |
+| `9568358c82fbf644724b64fb1258c88f0cecddd6` | `code/1137_customer_dataset_combine.py`, `code/build.py`, `server/tests/test_field_map.py`, `docs/schema/inventory.json`: project exact hashed source bytes, preserve the publication gate and record the combiner dependency |
+| `a4eac8e7745d2d9fe471921039953c6cfe7ac89b` | `code/521_inventory.py`, `code/build.py`, `docs/schema/inventory.json`, `server/tests/test_pipeline_registration.py`: distinguish runtime evidence from references; pin all identified projection authorities and reject observed drift |
+| `3cf2583af9cd07e52dd1605659a319c242b54a61` | `server/cedar_press/repository.py`, `server/tests/test_release_download.py`, `server/tests/test_lumecon_contract.py`, `server/tests/fixtures/lumecon_release_contract.json`: require the catalog's manifest digest, prove coherent tampering fails, refresh only fictional catalog pins |
+| `c0263d8fbed32121207c40499ea601abba4d7194` | `server/cedar_press/app.py`, `server/tests/test_release_download.py`: recheck current subscriber before artifact access, deny stale pro cookies after downgrade/removal, fail closed on lookup failure with redacted audit; real Postgres regression included |
+| Lumecon `2ce2f9a884cb08a013d6a800e1fd34f6547be360` | `src/lumecon_data/catalog.py`, `src/lumecon_data/api.py`, `tests/test_catalog.py`, `tests/test_api.py`, `docs/data-contracts.md`: one safe manifest projection, catalog digest and API agreement, additive compatibility rule |
+
+The 13-path core commit contains no candidate data or runtime credentials. This
+packet and `data/cedar/README.md` are the two documentation closeout paths; their
+documentation commit is identified by the draft PR head; the fixed runtime range
+above remains independently reviewable.
+
+## Evidence appendix: exact foundation implementation paths
+
+**Prior Cedar implementation range (included in the fixed foundation above):** `6d445f460357581981a4b096d5bd53dd0d8d668c..8163c2a8ae4980c1b8302659001f7ba48cfd19be`.
+
+`c1fbb72478833bb4aee312048d169a2bc5b20d0d` - Preserve review drafts and decision history through explicit recovery exports.
+
+```text
+code/08_build_review_page.py
+server/tests/test_need_review_import.py
+```
+
+`c1f35ce72ee9f8fc5910c355f4b969251bf643f4` - Consume explicit governed release pins through entitled exact-artifact downloads.
+
+```text
+code/build.py
+server/README.md
+server/cedar_press/app.py
+server/cedar_press/repository.py
+server/tests/fixtures/lumecon_release_contract.json
+server/tests/release_download_rehearsal.py
+server/tests/test_lumecon_contract.py
+server/tests/test_release_download.py
+```
+
+`ed4cdde3b8763902c0bd456d8df410e3548d9c03` - Keep inherited documentation and Python checks reproducible.
+
+```text
+docs/ARCHITECTURE.md
+server/tests/test_field_map.py
+```
+
+`ef4d1ec21a7fda98d3018f2d579cff6e3860d08b` - Compare native coverage paths with canonical Git paths.
+
+```text
+scripts/coverage-gate.mjs
+```
+
+`9aabf0a6ed37ddb1c9c01849783f39ab55ca3960` - Bound environment configuration and version projection intake paths.
+
+```text
+code/build.py
+server/README.md
+server/cedar_press/repository.py
+server/tests/test_release_download.py
+```
+
+`3546e71fdc2e016c227a0a84f34dab0e996395e0` - Audit truncated upstream release responses as controlled failures.
+
+```text
+server/cedar_press/repository.py
+server/tests/test_release_download.py
+```
+
+`fd926efbd26993b62b562edc8b643c7b706e8b0c` - Exercise subscriber persistence contracts on disposable Postgres CI.
+
+```text
+.github/workflows/subscriber-storage.yml
+```
+
+`b45ef4c5fbdb96304897a5ef82adeb2e170ca72d` - Supply the optional platform identity fixture in isolated database CI.
+
+```text
+.github/workflows/subscriber-storage.yml
+```
+
+`8163c2a8ae4980c1b8302659001f7ba48cfd19be` - Verify real database subscriber login, cookie and exact pinned download through the existing adapter; no session dependency override.
+
+```text
+server/tests/test_release_download.py
+```
+
+**Lumecon Data fixed implementation range:** `0ae36dda36d650b1b3861173fb122e7603b0dc3f..59026aafe16c50ebc38cb0f4a07b558aa78d5431`.
+
+`4752fda72aadb474d401db303fde68def432bbac` - WIP: preserve immutable storage safety across Windows and Linux.
+
+```text
+src/lumecon_data/storage.py
+tests/test_storage.py
+```
+
+`9b9cddca25a2c5024663d9e3c45c034185a53cd6` - Serve exact verified release artifacts through the governed API.
+
+```text
+src/lumecon_data/api.py
+tests/test_api.py
+```
+
+`c203faa1d664b7dfdcc0ee77f68b9d0ffaca3a1b` - Audit immutable release creation and version selection.
+
+```text
+src/lumecon_data/pipeline.py
+tests/test_pipeline.py
+```
+
+`574416e802a11d92178582e04a3b362ecb3ce79f` - Verify portable versioned keys and hash-checked backup restoration.
+
+```text
+tests/test_pipeline.py
+```
+
+`59026aafe16c50ebc38cb0f4a07b558aa78d5431` - Validate structured audit output without weakening CLI error checks.
+
+```text
+tests/test_cli.py
+```
+
+The prior fixed documentation changes cover this packet, the existing shipping
+runbook, architecture-decision note and required architecture census correction.
+The current documentation batch edits this packet and the existing
+`data/cedar/README.md` developer/metadata authority; it adds no status document. The prior
+uncommitted TERMINAL_HANDOFF edit remains outside this sprint's authoritative packet;
+it must not be mistaken for the current test/branch authority. Exact exclusions
+above remain uncommitted, including R7 generated state and the review queue.
+
+
+## Evidence appendix: preserved foundation and exclusions
 
 The identity/NEED/metadata foundation is already in PR121 at
 `cb0e9f11627f790ee756655703a16baecb5253b2`. Its historical commits are
@@ -394,7 +776,7 @@ The identity/NEED/metadata foundation is already in PR121 at
 `746d3e267f2f45618a47b01d77690fe299a268ba` (NEED admission),
 `d7b25d1670e7223da3581c06db268095f59ff0e9` (publication/review consumers),
 and `d88709d451345f4c049b9f61292fe41aed646797` (metadata).
-They are background for the current fixed infrastructure range below, not a request
+They are background for the fixed infrastructure ranges above, not a request
 to reopen NEED adjudication or re-review every historical script.
 
 Remaining uncommitted Cedar paths are deliberately excluded:
@@ -416,7 +798,7 @@ No remote or deployed outputs were changed. Weekly usage is unavailable to this
 session; no remaining quota is invented. 16 GiB RAM and roughly14 GiB free internal
 disk constrain builds to one at a time. Read-only agent lanes do not imply parallel builds.
 
-## Native Advocacy and Engagement component evidence
+## Evidence appendix: Advocacy component measurements
 
 Read-only measurement of the original Windows `data/clean` files on 2026-09-24.
 This is the broader **Native Federal Advocacy and Engagement** collection, whose
@@ -535,304 +917,20 @@ rights, schema compatibility, sample representativeness or entitled delivery was
 certified by this inventory. Missing publication/consumer contracts remain product
 blockers even if the LDA projection independently passes its infrastructure tests.
 
-## Sprint closure: reusable contract and measured release
 
-The bounded infrastructure scope is implemented and tested locally; production
-provisioning and full-collection coverage are not complete. This sprint began
-2026-09-24 01:53 UTC. Code and tests were pushed only to draft review branches.
+## Current batch closeout
 
-**Existing contract, not a new format.** Lumecon DatasetContract schema1 defines
-fields/grain/primary key/source provenance; its existing snapshot and release
-manifests retain hashes and validation results. Its existing catalog pins a
-collection and release. Cedar validates that catalog against its existing field
-map and independent publication gate, requests an explicit release ID, and serves
-exact verified `records.jsonl` bytes from the existing immutable release directory.
-An approved catalog pin selects rollback; neither caller nor rollback rewrites the
-prior artifact. The API adapter is collection-agnostic. The transitional canonical
-bill-to-publication projection remains in Cedar's existing build.py until a proven
-producer transfer and consumer retirement; no whole-repository migration is claimed.
+Both frozen-runtime real releases pass actual login, denied/approved access,
+malformed and nonexistent pin refusal, exact-byte download, exactly eight current-run
+redacted audit events and immutable rollback. Their source rows, issued IDs and
+customer artifact hashes are preserved. Registry checks and the normalizer cutover
+have reproduced focused evidence; reference-preservation provenance is corrected.
 
-| Legislation fact | Before / after proof |
-|---|---|
-| Canonical source | 3,069 rows and 3,069 unique issued bill IDs preserved; SHA256 `2c6e451cebdd05cc955730c7e7cc67016bb6ac454513feeee16ab33bbed7c060` |
-| Projection | 39 source columns to 30 existing approved fields; excluded columns follow the field map |
-| Date coverage | 207 introduced2025 and55 introduced2026; no refresh/completeness claim |
-| Snapshot | `d38902f72f7bdc42f096bbee87c1fa8051021027c1c2ca2960c91946a50f7552` |
-| Selected release | `490eba602ae5401165a738f7aad2d0af74cdc06f6eeb4db2564f362790112936` |
-| Catalog | `926ad5e964a72a44f85be1397dcc252f91071c45db9ca02c5690913468328163` |
-| Exact artifact SHA256 | `fa1df255ebd304b622386b59004c843fe6375de4f94dd39c6532eebfbf78ef5b` |
-| Rollback exercise | Select valid `ea36f4554c75cbf669b48bd458a26fa25ef5408d042cd1f4f27fda0714ec57d3`, then restore selected release; original release files unchanged |
-| Access/audit | Anonymous401, wrong-tier403, authorized200; explicit stale pin503; redacted timestamped audit events |
-| Remaining scope | Eight historic source URLs missing; actions, votes and ancillary tables not included in this bill-table proof |
+The implementation range is fixed through Cedar `c0263d8`; both Ubuntu workflows
+pass, including current-account downgrade/deletion refusal. Lumecon `2ce2f9a`
+passed its full gates. This documentation
+closeout is separate from the fixed implementation range. Production
+configuration, frontend full-download integration and remaining collection coverage
+stay separate launch gates. Neither proof authorizes publication or production changes.
 
-The local receipt is `C:/Users/esm247/cedar-takeover-checkpoint/legislation-release-store/rehearsal-result.json`.
-The store and all real artifacts remain ignored and are not in either PR. Projection
-intake now uses `intake/legislation/<content-sha>.csv`, so a second source snapshot
-does not overwrite the first. Duplicate immutable releases are verified, not replaced.
-
-### Next three candidates and actual second-collection attempt
-
-1. Native Advocacy and Engagement's **disclosure component only**:27,825rows,
-   38approved fields, unique filing keys, all source URLs;26,513populated CE values
-   validated against the pinned register,1,312unresolved links preserved. The real
-   projection is20,053,457bytes, SHA256
-   `5044ee3d2f50985e7b0537ed8937ea9232a8c47da29f42261c040932bf469d3f`.
-   Its attempted next intake is blocked by the existing16,777,216-byte source cap
-   and nonnullable scalar IdentityBinding. No rows were dropped, limits bypassed,
-   fabricated links introduced or alternate manifest invented. A bounded supported
-   intake/nullable-attribution extension is required, plus the broader component
-   reconciliation above. A fictional second-collection consumer test already proves
-   the adapter has no Legislation-only path assumptions; it is not a real release.
-2. Natural Resources:11,305unique declared revenue keys;705populated CE links
-   validated. Existing publication validation refuses `beneficiary_note` on all
-   11,305rows without a declared preserved destination. Keep suppression and mixed
-   periods intact; do not strip context to pass. Source cutoffs remain unmeasured.
-3. NAGPRA:6,792notices,52standalone approved fields,900/633publication-year rows.
-   Seven undeclared joined columns still block full export.619legacy source IDs
-   require a precise source-format validator correction, preserving issued IDs.
-   It was not selected as the pilot and the gate was not weakened.
-
-### Infrastructure state by evidence level
-
-- **Implemented and tested:** explicit development/staging/production configuration
-  validation; existing versioned filesystem layout; schema/identity/publication
-  checks; exact artifacts and immutable writes; explicit pins; entitlement denial
-  and success fixtures; redacted release/download audit; rollback; fixture backup
-  and restore; real Legislation rehearsal; fresh GitHub checkouts and contract parity.
-- **Specified but not deployed:** environment-separated private S3 layout and
-  conditional immutable creation; Postgres catalog index projected from the same
-  manifest; retention and production backup/restore procedure. Existing shipping
-  runbook contains operating commands and boundaries, not a new status system.
-- **Blocked by credentials/authorization:** live AWS certificate/domain/storage/API
-  verification, production provisioning, secrets, deployment and production restore.
-  No AWS CLI/profile or AWS environment-variable names were present; nothing was
-  provisioned. The reported existing certificate was not recreated.
-- **Deferred for reviewed implementation:** persistent session expiry/revocation and
-  current-tier enforcement, production monitoring/alerts,
-  streaming intake/artifacts above bounded limits, remaining collection components,
-  full producer transfer and retirement. NEED/R7 holds remain independent of CI.
-
-Cedar validates `CEDAR_PRESS_ENVIRONMENT` as development/staging/production.
-Nondevelopment release access requires HTTPS without loopback, explicit persistent
-session secret and service token, Postgres DATABASE_URL, secure cookies, and no
-fallback CEDAR_PRESS_ACCOUNTS. This is configuration validation, not proof of a
-running database or complete secure production session lifecycle.
-
-### Exact current implementation paths
-
-**Cedar Press fixed implementation range:** `6d445f460357581981a4b096d5bd53dd0d8d668c..8163c2a8ae4980c1b8302659001f7ba48cfd19be`.
-
-`c1fbb72478833bb4aee312048d169a2bc5b20d0d` ? Preserve review drafts and decision history through explicit recovery exports.
-
-```text
-code/08_build_review_page.py
-server/tests/test_need_review_import.py
-```
-
-`c1f35ce72ee9f8fc5910c355f4b969251bf643f4` ? Consume explicit governed release pins through entitled exact-artifact downloads.
-
-```text
-code/build.py
-server/README.md
-server/cedar_press/app.py
-server/cedar_press/repository.py
-server/tests/fixtures/lumecon_release_contract.json
-server/tests/release_download_rehearsal.py
-server/tests/test_lumecon_contract.py
-server/tests/test_release_download.py
-```
-
-`ed4cdde3b8763902c0bd456d8df410e3548d9c03` ? Keep inherited documentation and Python checks reproducible.
-
-```text
-docs/ARCHITECTURE.md
-server/tests/test_field_map.py
-```
-
-`ef4d1ec21a7fda98d3018f2d579cff6e3860d08b` ? Compare native coverage paths with canonical Git paths.
-
-```text
-scripts/coverage-gate.mjs
-```
-
-`9aabf0a6ed37ddb1c9c01849783f39ab55ca3960` ? Bound environment configuration and version projection intake paths.
-
-```text
-code/build.py
-server/README.md
-server/cedar_press/repository.py
-server/tests/test_release_download.py
-```
-
-`3546e71fdc2e016c227a0a84f34dab0e996395e0` ? Audit truncated upstream release responses as controlled failures.
-
-```text
-server/cedar_press/repository.py
-server/tests/test_release_download.py
-```
-
-`fd926efbd26993b62b562edc8b643c7b706e8b0c` ? Exercise subscriber persistence contracts on disposable Postgres CI.
-
-```text
-.github/workflows/subscriber-storage.yml
-```
-
-`b45ef4c5fbdb96304897a5ef82adeb2e170ca72d` ? Supply the optional platform identity fixture in isolated database CI.
-
-```text
-.github/workflows/subscriber-storage.yml
-```
-
-`8163c2a8ae4980c1b8302659001f7ba48cfd19be` - Verify real database subscriber login, cookie and exact pinned download through the existing adapter; no session dependency override.
-
-```text
-server/tests/test_release_download.py
-```
-
-**Lumecon Data fixed implementation range:** `0ae36dda36d650b1b3861173fb122e7603b0dc3f..59026aafe16c50ebc38cb0f4a07b558aa78d5431`.
-
-`4752fda72aadb474d401db303fde68def432bbac` ? WIP: preserve immutable storage safety across Windows and Linux.
-
-```text
-src/lumecon_data/storage.py
-tests/test_storage.py
-```
-
-`9b9cddca25a2c5024663d9e3c45c034185a53cd6` ? Serve exact verified release artifacts through the governed API.
-
-```text
-src/lumecon_data/api.py
-tests/test_api.py
-```
-
-`c203faa1d664b7dfdcc0ee77f68b9d0ffaca3a1b` ? Audit immutable release creation and version selection.
-
-```text
-src/lumecon_data/pipeline.py
-tests/test_pipeline.py
-```
-
-`574416e802a11d92178582e04a3b362ecb3ce79f` ? Verify portable versioned keys and hash-checked backup restoration.
-
-```text
-tests/test_pipeline.py
-```
-
-`59026aafe16c50ebc38cb0f4a07b558aa78d5431` ? Validate structured audit output without weakening CLI error checks.
-
-```text
-tests/test_cli.py
-```
-
-Documentation changes accompanying this packet are limited to this packet, the
-existing shipping runbook, the previously scoped architecture-decision note and
-the required architecture census correction. The prior
-uncommitted TERMINAL_HANDOFF edit remains outside this sprint's authoritative packet;
-it must not be mistaken for the current test/branch authority. Exact exclusions
-above remain uncommitted, including R7 generated state and the review queue.
-
-### Reproducible gates
-
-Cedar Ubuntu: `make check`, then the existing Playwright smoke command
-`npm run test:smoke` in its configured development fixture. The current workflow
-runs these same constituent gates from a clean checkout. Lumecon Ubuntu: use its
-existing workflow/Makefile and declared development dependencies; focused tests:
-
-```text
-python -m pytest tests/test_storage.py tests/test_pipeline.py tests/test_api.py tests/test_cli.py
-python -m unittest discover -s server/tests -t server -p test_release_download.py
-python -m unittest discover -s server/tests -t server -p test_lumecon_contract.py
-python -m unittest discover -s server/tests -t server -p test_need_review_import.py
-```
-
-The first command runs in Lumecon; the remaining commands run in Cedar with its
-server development dependencies. Use the real-data reproduction commands earlier
-only in the data-capable workspace. Set the catalog argument to the recorded
-`catalogs/926ad5e964a72a44f85be1397dcc252f91071c45db9ca02c5690913468328163.json`.
-Neither CI nor fictional fixtures certify private-source completeness.
-
-Preservation recheck: all 19 NEED input hashes, 2 publication input hashes and 12 NAGPRA
-input hashes match their original checkpoint manifests, with zero missing files.
-All 14 preserved original implementation/test files also match. No publication,
-canonical-data promotion, frontend edit, AWS mutation, merge or external-drive
-movement occurred. Project dependencies were installed only into existing project
-environments; no system component was installed.
-
-### Final implementation CI and documentation validation
-
-Cedar implementation head `3546e71fdc2e016c227a0a84f34dab0e996395e0` passed
-[Ubuntu CI35947302778](https://github.com/teim-team/cedar-press/actions/runs/35947302778),
-including the truncated-response regression. This supersedes the earlier passing
-9aabf0a implementation run. Lumecon remains at the passing59026aa range above.
-Editing this packet removed one historical path reference, and the local full
-suite correctly detected the resulting documentation census change. The existing
-architecture table/prose was updated from 361 to 360; no test was weakened.
-
-
-The additional subscriber-storage workflow uses a disposable Postgres 16 service
-with development-only fixture credentials and no production secrets or deployment
-permissions. It executes existing subscriber, priorities and release-download tests
-and fails if any are skipped. The first run correctly exposed a missing test-owned
-optional platform users table; the fixture now supplies that seam, while the
-existing standalone test creates a separate database without it. No application
-migration or production schema was changed. The corrected 70-test run passed with zero skips:
-[subscriber CI35947907029](https://github.com/teim-team/cedar-press/actions/runs/35947907029).
-A subsequent test connects a real Postgres subscriber through actual login/cookie
-handling to the pinned adapter; its final 71-test run is linked below.
-
-The current Cedar frontend continues to use its established sample behavior.
-This branch adds full-release API/catalog metadata and verifies authorized API
-bytes; Claude-owned frontend wiring to that full-release control is not claimed
-complete. Browser smoke proves existing UI compatibility, not a new full-download
-button or real Safari/mobile coverage.
-
-
-The final database test addition passed: [Ubuntu subscriber run35948052316](https://github.com/teim-team/cedar-press/actions/runs/35948052316),
-**71 tests, zero skips**, including real database subscriber login/cookie to exact
-pinned bytes, restart persistence and standalone/platform-seam cases. This closes
-the missing database-fixture evidence for these existing contracts; it does not
-implement signed session expiry, revocation, current-tier refresh or production
-backup. The default local/full CI suite still reports those database tests as
-skipped when its database variable is absent; the separate job is their evidence.
-
-The latest local full suite before the extra database-only test ran 308 tests:
-277 passed, 31 skipped, 80% coverage. Its earlier seven documentation-census failures
-were corrected and the complete rerun passed. The extra focused suite ran 17:
-16 passed, 1 database skip locally; that test then passed on Ubuntu Postgres.
-
-
-### Fixed review range and final CI receipts
-
-**Cedar complete review range:**
-`6d445f460357581981a4b096d5bd53dd0d8d668c..cdc3b31dc703fd951b64529c4d2075d0987fb920`.
-This includes the implementation range listed above and the documentation commit
-`cdc3b31dc703fd951b64529c4d2075d0987fb920`, whose exact paths are:
-
-```text
-docs/ARCHITECTURE.md
-docs/ARCHITECTURE_DECISIONS.md
-docs/HAVALA_INFRASTRUCTURE_REVIEW.md
-docs/SHIPPING_RUNBOOK.md
-```
-
-That complete range passed both final workflows:
-[Checks35948194088](https://github.com/teim-team/cedar-press/actions/runs/35948194088)
-and [Subscriber storage35948193898](https://github.com/teim-team/cedar-press/actions/runs/35948193898).
-Measured results:398Node passes/1skip;180Playwright passes;309Python tests run,
-277passed/32database-dependent skips,80%coverage. The dedicated Postgres job
-passed71tests with zero skips, exercising those database contracts separately.
-Lint, all seven generated-file checks and dependency audits passed. The receipt
-addition after this fixed range changes this packet only; it does not alter code,
-fixtures, schemas or data. PR metadata identifies its head separately.
-
-The Lumecon complete range remains
-`0ae36dda36d650b1b3861173fb122e7603b0dc3f..59026aafe16c50ebc38cb0f4a07b558aa78d5431`,
-with both Python versions passing [Ubuntu35946422118](https://github.com/teim-team/Lumecon-data/actions/runs/35946422118).
-Neither draft PR is merged. Original raw bill SHA256 still matches the release's
-pinned canonical-source hash. The active owner review HTML SHA256 remains
-`418c01b931cf5e57d9fca34b079b8f35e2f4c1393bd9e67c9a71b18d1e54dfc7`.
-The17changed Cedar paths contain no canonical data, customer/sample exports,
-product frontend files, R7 state, review artifacts, locks, caches or machine
-credentials. Lumecon's working tree is clean; Cedar's listed exclusions remain.
-
-2026-09-24 02:44 UTC - READY WITH WARNINGS: reusable local release/download foundation and Ubuntu safety/database tests pass; production and full-collection readiness remain gated.
+2026-09-24 04:10 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.
