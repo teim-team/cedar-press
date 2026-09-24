@@ -33,11 +33,17 @@ SPEC.loader.exec_module(BUILD)
 
 def binding(n, status="PROPOSED", klass="GPAY", prefix="CEDAR-EVENT"):
     key = json.dumps([klass, "fixture", str(n)])
-    return {"object_prefix": prefix, "key_class": klass, "source_key": key,
-            "source_key_sha256": BUILD.gaming_source_key_sha256(key),
-            "issued_id": cedar_ids.format_id(prefix, cedar_ids.GAMING_BLOCKS[prefix][0] + n),
-            "table": "fixture.csv", "column": "payment_event_id", "status": status,
-            "first_seen_as_of": "2026-09-24"}
+    return {
+        "object_prefix": prefix,
+        "key_class": klass,
+        "source_key": key,
+        "source_key_sha256": BUILD.gaming_source_key_sha256(key),
+        "issued_id": cedar_ids.format_id(prefix, cedar_ids.GAMING_BLOCKS[prefix][0] + n),
+        "table": "fixture.csv",
+        "column": "payment_event_id",
+        "status": status,
+        "first_seen_as_of": "2026-09-24",
+    }
 
 
 class GamingBlocksTest(unittest.TestCase):
@@ -45,23 +51,30 @@ class GamingBlocksTest(unittest.TestCase):
     allocate() in every process steps over them."""
 
     def test_allocate_steps_over_every_gaming_block(self):
-        with tempfile.TemporaryDirectory() as temp, \
-                patch.object(cedar_ids, "REGISTRY", Path(temp) / "_id_registry.json"), \
-                patch.object(cedar_ids, "LOCK", Path(temp) / "_id_registry.lock"):
+        with (
+            tempfile.TemporaryDirectory() as temp,
+            patch.object(cedar_ids, "REGISTRY", Path(temp) / "_id_registry.json"),
+            patch.object(cedar_ids, "LOCK", Path(temp) / "_id_registry.lock"),
+        ):
             for prefix, (lo, hi) in cedar_ids.GAMING_BLOCKS.items():
                 (Path(temp) / "_id_registry.json").write_text(
-                    json.dumps({"counters": {prefix: lo - 2}, "types": {}}), encoding="utf-8")
+                    json.dumps({"counters": {prefix: lo - 2}, "types": {}}), encoding="utf-8"
+                )
                 got = cedar_ids.allocate(prefix, 2)
-                self.assertEqual(got, [cedar_ids.format_id(prefix, lo - 1),
-                                       cedar_ids.format_id(prefix, hi + 1)], prefix)
+                self.assertEqual(
+                    got,
+                    [cedar_ids.format_id(prefix, lo - 1), cedar_ids.format_id(prefix, hi + 1)],
+                    prefix,
+                )
                 self.assertIsNone(cedar_ids.gaming_block_ordinal(got[1]))
 
     def test_overlapping_declaration_by_another_owner_is_refused(self):
         lo, hi = cedar_ids.GAMING_BLOCKS["CEDAR-REL"]
         with self.assertRaises(cedar_ids.IdCollision):
             cedar_ids.declare_static_block("CEDAR-REL", hi, hi + 10, "someone else", "fixture")
-        cedar_ids.declare_static_block("CEDAR-REL", lo, hi, cedar_ids.GAMING_BLOCK_OWNER,
-                                       cedar_ids.GAMING_BLOCK_WHY)  # idempotent
+        cedar_ids.declare_static_block(
+            "CEDAR-REL", lo, hi, cedar_ids.GAMING_BLOCK_OWNER, cedar_ids.GAMING_BLOCK_WHY
+        )  # idempotent
 
     def test_lumecon_proposes_inside_exactly_these_blocks(self):
         """Lumecon's proposal constants must equal Cedar's reservation (never
@@ -69,7 +82,9 @@ class GamingBlocksTest(unittest.TestCase):
         try:
             from lumecon_data.gaming import contract as lumecon_gaming
         except ImportError:
-            self.skipTest("lumecon_data.gaming not installed (Lumecon branch claude/gaming-grove-release)")
+            self.skipTest(
+                "lumecon_data.gaming not installed (Lumecon branch claude/gaming-grove-release)"
+            )
         blocks = getattr(lumecon_gaming, "GAMING_BLOCKS", None)
         if blocks is None:
             self.skipTest("installed lumecon_data.gaming exposes no GAMING_BLOCKS")
@@ -89,9 +104,16 @@ class GamingIssuanceTest(unittest.TestCase):
         return path, hashlib.sha256(path.read_bytes()).hexdigest()
 
     def run_issue(self, path, digest, registry, **extra):
-        args = argparse.Namespace(proposed=str(path), proposed_sha256=digest, registry_sha256=registry,
-                                  live_root=str(self.root), execute=False, certificate=None,
-                                  decision_id=None, approved_by=None)
+        args = argparse.Namespace(
+            proposed=str(path),
+            proposed_sha256=digest,
+            registry_sha256=registry,
+            live_root=str(self.root),
+            execute=False,
+            certificate=None,
+            decision_id=None,
+            approved_by=None,
+        )
         for key, value in extra.items():
             setattr(args, key, value)
         out = io.StringIO()
@@ -100,8 +122,15 @@ class GamingIssuanceTest(unittest.TestCase):
         return code, out.getvalue()
 
     def execute(self, path, digest, registry):
-        return self.run_issue(path, digest, registry, execute=True, certificate="CODEX-CERT-FIXTURE",
-                              decision_id="DECISION-FIXTURE", approved_by="fixture")
+        return self.run_issue(
+            path,
+            digest,
+            registry,
+            execute=True,
+            certificate="CODEX-CERT-FIXTURE",
+            decision_id="DECISION-FIXTURE",
+            approved_by="fixture",
+        )
 
     def test_dry_run_then_execute_then_reuse_emits_a_pinnable_snapshot(self):
         path, digest = self.proposal([binding(0), binding(1)])
@@ -117,9 +146,15 @@ class GamingIssuanceTest(unittest.TestCase):
         after = hashlib.sha256(self.live.read_bytes()).hexdigest()
         snapshot = self.root / BUILD.GAMING_SNAPSHOTS / f"gaming_id_bindings.{after}.csv"
         self.assertEqual(snapshot.read_bytes(), self.live.read_bytes())
-        log = [json.loads(line) for line in
-               (self.live.parent / "gaming_id_issuance_log.jsonl").read_text(encoding="utf-8").splitlines()]
-        self.assertEqual((log[-1]["registry_sha256_after"], log[-1]["decision_id"]), (after, "DECISION-FIXTURE"))
+        log = [
+            json.loads(line)
+            for line in (self.live.parent / "gaming_id_issuance_log.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+        ]
+        self.assertEqual(
+            (log[-1]["registry_sha256_after"], log[-1]["decision_id"]), (after, "DECISION-FIXTURE")
+        )
         # The next Lumecon proposal, built from that snapshot, keeps the issued
         # rows byte-exact and proposes one more; stale snapshots are refused.
         path2, digest2 = self.proposal(rows + [binding(2)], "proposed2.csv")
@@ -140,7 +175,10 @@ class GamingIssuanceTest(unittest.TestCase):
             ([], "disappeared"),
             ([moved], "disappeared|reassigned"),
             (issued + [binding(3, status="ISSUED")], "claim ISSUED without Cedar issuance"),
-            (issued + [dict(binding(4), issued_id="CEDAR-EVENT-000001")], "outside the Cedar Gaming"),
+            (
+                issued + [dict(binding(4), issued_id="CEDAR-EVENT-000001")],
+                "outside the Cedar Gaming",
+            ),
         ]:
             with self.subTest(pattern=pattern):
                 bad, bad_digest = self.proposal(rows, "bad.csv")

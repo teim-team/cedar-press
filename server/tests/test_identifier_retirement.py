@@ -42,7 +42,9 @@ class IdentifierRetirementTest(unittest.TestCase):
         for file, function in entrypoints.items():
             with self.subTest(file=file):
                 tree = ast.parse((ROOT / "code" / file).read_text(encoding="utf-8"))
-                node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == function)
+                node = next(
+                    n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == function
+                )
                 self.assertIsInstance(node.body[0], ast.Raise)
 
     def test_retired_prefixes_cannot_issue_by_any_shared_allocator_api(self):

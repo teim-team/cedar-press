@@ -531,23 +531,24 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
 
 
 #: THE Cedar Grove release pin: the one file naming the immutable Lumecon-data
-#: release set Cedar serves for each declared Grove collection. It extends the
-#: existing ``CEDAR_GROVE_RELEASE_CATALOG`` mechanism rather than replacing it:
-#: that variable still says where the reviewed catalog's bytes are, and this
-#: committed pin says WHICH bytes they must be (catalog SHA-256 and catalog_id)
-#: and which one release inside them (release_id and collection-manifest
-#: SHA-256). A catalog, manifest or artifact that differs is refused; nothing
-#: falls back to a sample, a local CSV, a branch or a ``current`` pointer.
-#: Changing what Cedar serves is a reviewed edit of this file; rollback is the
-#: revert of that edit.
+#: COLLECTION release Cedar serves for each declared Grove collection. It
+#: extends the existing ``CEDAR_GROVE_RELEASE_CATALOG`` mechanism rather than
+#: replacing it: that variable still says where the reviewed catalog's bytes
+#: are, and this committed pin says WHICH bytes they must be (catalog SHA-256
+#: and catalog_id) and which one release inside them (release_id and the
+#: collection-manifest SHA-256). A catalog, manifest or artifact that differs is
+#: refused; nothing falls back to a sample, a local CSV, a branch or a
+#: ``current`` pointer. Changing what Cedar serves is a reviewed edit of this
+#: file; rollback is the revert of that edit, and every component moves with it.
 GROVE_RELEASE_PIN = Path(__file__).resolve().parents[2] / "data/cedar/grove_release_pin.json"
 GROVE_RELEASE_CATALOG_ENV = "CEDAR_GROVE_RELEASE_CATALOG"
-#: Release kinds this server delivers. Lumecon distinguishes real-candidate
-#: rehearsals and synthetic fixtures from production; only production reaches a
-#: customer. Tests widen this to the synthetic fixture kind explicitly.
-GROVE_SERVED_RELEASE_KINDS: frozenset[str] = frozenset({"production"})
+#: Lumecon release classes this server delivers. A rehearsal (real candidate,
+#: PROPOSED IDs) and a synthetic fixture never reach a customer; only the
+#: consumer tests widen these two settings, explicitly.
+GROVE_SERVED_RELEASE_CLASSES: frozenset[str] = frozenset({"production"})
+GROVE_SERVE_SYNTHETIC = False
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-_PIN_KEYS = {"catalog_id", "catalog_sha256", "dataset_id", "release_id", "manifest_sha256"}
+_PIN_KEYS = {"catalog_id", "catalog_sha256", "collection_id", "release_id", "manifest_sha256"}
 
 
 class GroveReleaseNotPinned(FullReleaseUnavailable):
@@ -557,8 +558,8 @@ class GroveReleaseNotPinned(FullReleaseUnavailable):
 def grove_release_pin(collection_id: str) -> dict[str, str]:
     """The reviewed pin for one Grove collection, strictly shaped, or a refusal.
 
-    Exactly one release per collection: the pinned ``dataset_id`` IS the
-    collection id. Per-table releases (``<collection>--<table>``) are never
+    Exactly one collection release: the pinned ``collection_id`` IS the Grove
+    collection. A per-table dataset (``<collection>--<table>``) is never
     assembled into a collection, so a pin naming one is refused.
     """
     try:
@@ -581,14 +582,18 @@ def grove_release_pin(collection_id: str) -> dict[str, str]:
         not isinstance(pin, dict)
         or set(pin) != _PIN_KEYS
         or not all(isinstance(pin[key], str) for key in _PIN_KEYS)
-        or not all(_SHA256.fullmatch(pin[key]) for key in _PIN_KEYS - {"dataset_id"})
+        or not all(_SHA256.fullmatch(pin[key]) for key in _PIN_KEYS - {"collection_id"})
     ):
         raise FullReleaseUnavailable("Malformed Grove release pin")
-    if pin["dataset_id"] != collection_id:
+    if pin["collection_id"] != collection_id:
         raise FullReleaseUnavailable(
             "A Grove pin names one collection release, never a per-table release"
         )
     return dict(pin)
+
+
+def _grove_prefix(pin: dict[str, str]) -> str:
+    return f"/v1/collections/{pin['collection_id']}/releases/{pin['release_id']}"
 
 
 def _grove_catalog(pin: dict[str, str]) -> dict[str, Any]:
@@ -600,11 +605,9 @@ def _grove_catalog(pin: dict[str, str]) -> dict[str, Any]:
     if hashlib.sha256(raw).hexdigest() != pin["catalog_sha256"]:
         raise FullReleaseUnavailable("Catalog differs from the pinned catalog")
     catalog = json.loads(raw)
-    if not isinstance(catalog, dict) or not isinstance(catalog.get("collections"), list):
+    if not isinstance(catalog, dict):
         raise FullReleaseUnavailable("Malformed catalog")
-    if any(not isinstance(item, dict) for item in catalog["collections"]):
-        raise FullReleaseUnavailable("Malformed catalog entries")
-    catalog_id = catalog.pop("catalog_id")
+    catalog_id = catalog.pop("catalog_id", None)
     if (
         catalog_id != pin["catalog_id"]
         or hashlib.sha256(_canonical_bytes(catalog)).hexdigest() != catalog_id
@@ -617,39 +620,45 @@ def _grove_catalog(pin: dict[str, str]) -> dict[str, Any]:
         or catalog.get("entitlement_required") is not True
     ):
         raise FullReleaseUnavailable("Wrong product catalog")
-    if any(
-        str(item.get("dataset_id", "")).startswith(pin["dataset_id"] + GROVE_COMPONENT_SEPARATOR)
-        for item in catalog["collections"]
-    ):
+    # A dataset catalog of per-table releases is not a collection release,
+    # however its dataset IDs are spelled.
+    if catalog.get("catalog_kind") != "collection_releases" or "collections" in catalog:
         raise FullReleaseUnavailable("Per-table releases cannot stand in for a collection release")
-    entries = [item for item in catalog["collections"] if item.get("dataset_id") == pin["dataset_id"]]
-    if len(entries) != 1:
+    entries = catalog.get("collection_releases")
+    if not isinstance(entries, list) or any(not isinstance(item, dict) for item in entries):
+        raise FullReleaseUnavailable("Malformed catalog entries")
+    mine = [item for item in entries if item.get("collection_id") == pin["collection_id"]]
+    if len(mine) != 1:
         raise FullReleaseUnavailable("Exactly one pinned collection release required")
-    entry = entries[0]
-    if entry.get("release_id") != pin["release_id"] or entry.get("manifest_sha256") != pin["manifest_sha256"]:
+    entry = mine[0]
+    if (
+        entry.get("release_id") != pin["release_id"]
+        or entry.get("manifest_sha256") != pin["manifest_sha256"]
+        or entry.get("manifest_path") != _grove_prefix(pin) + "/manifest"
+    ):
         raise FullReleaseUnavailable("Catalog entry differs from the pinned release")
     return entry
 
 
 def _grove_manifest(pin: dict[str, str]) -> dict[str, Any]:
     """The one collection-level manifest, byte-verified against the pin."""
-    prefix = f"/v1/datasets/{pin['dataset_id']}/releases/{pin['release_id']}"
-    manifest = _release_json(prefix + "/manifest")
+    manifest = _release_json(_grove_prefix(pin) + "/manifest")
     if not isinstance(manifest, dict):
         raise FullReleaseUnavailable("Malformed manifest")
     if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != pin["manifest_sha256"]:
         raise FullReleaseUnavailable("Manifest differs from the pinned release")
     if (
-        manifest.get("dataset_id") != pin["dataset_id"]
+        manifest.get("collection_id") != pin["collection_id"]
         or manifest.get("release_id") != pin["release_id"]
+        or manifest.get("release_kind") != "collection"
+        or manifest.get("product") != "cedar_grove"
         or type(manifest.get("schema_version")) is not int
         or manifest["schema_version"] != 1
-        or not isinstance(manifest.get("components"), list)
+        or not isinstance(manifest.get("components"), dict)
     ):
         raise FullReleaseUnavailable("Malformed collection manifest")
-    kind = manifest.get("release_kind")
-    if kind not in GROVE_SERVED_RELEASE_KINDS or (
-        manifest.get("synthetic") is not False and kind == "production"
+    if manifest.get("release_class") not in GROVE_SERVED_RELEASE_CLASSES or (
+        manifest.get("synthetic") is not False and not GROVE_SERVE_SYNTHETIC
     ):
         raise FullReleaseUnavailable("Release is not eligible for customer delivery")
     return manifest
@@ -659,20 +668,15 @@ def grove_component_contract(manifest: dict[str, Any], collection_id: str, compo
     """One component's embedded contract, checked against Cedar's presentation
     entry ``<collection>/<component>`` in the field map (no schema copy here:
     the field map may only present what the pinned contract declares)."""
-    matches = [
-        item
-        for item in manifest["components"]
-        if isinstance(item, dict) and item.get("component_id") == component
-    ]
-    if len(matches) != 1:
+    contract = manifest["components"].get(component)
+    if not isinstance(contract, dict):
         raise FullReleaseUnavailable("Component is not in the pinned release")
-    contract = matches[0]
     rights = contract.get("rights")
     if (
         not isinstance(rights, dict)
         or rights.get("publication_class") not in {"public", "publishable"}
         or rights.get("redistribution") is not True
-        or contract.get("downloadable") is not True
+        or contract.get("download_permitted") is not True
     ):
         raise FullReleaseUnavailable("Component is not eligible for customer delivery")
     fields = contract.get("fields")
@@ -682,14 +686,13 @@ def grove_component_contract(manifest: dict[str, Any], collection_id: str, compo
     entry = _field_map_tables().get(f"{collection_id}/{component}")
     if not entry or entry.get("collection") != collection_id or header != entry.get("order"):
         raise FullReleaseUnavailable("Full release does not match product field map")
-    presented = {
-        item["column"]: item.get("rights_class")
-        for item in entry.get("fields", [])
-        if item.get("decision") in {"keep", "rename"}
-    }
-    for field in fields:
-        declared = field.get("rights_class")
-        if declared is not None and field["name"] in presented and presented[field["name"]] != declared:
+    declared_rights = (contract.get("metadata") or {}).get("field_rights") or {}
+    for item in entry.get("fields", []):
+        if (
+            item.get("decision") in {"keep", "rename"}
+            and item["column"] in declared_rights
+            and item.get("rights_class") != declared_rights[item["column"]]
+        ):
             raise FullReleaseUnavailable("Field-map rights differ from the pinned contract")
     primary_key = contract.get("primary_key")
     if not isinstance(primary_key, list) or not primary_key or not set(primary_key) <= set(header):
@@ -708,10 +711,12 @@ def grove_component_contract(manifest: dict[str, Any], collection_id: str, compo
     return contract, header, primary_key, count, expected
 
 
-def grove_full_release(collection_id, requested_release_id=None, *, component=None, metadata_only=False):
+def grove_full_release(
+    collection_id, requested_release_id=None, *, component=None, metadata_only=False
+):
     """One authorized component of the ONE pinned Lumecon release of a Grove collection.
 
-    Order: declared collection, well-formed component, publication hold, pin,
+    Order: declared collection, offered component, publication hold, pin,
     pinned catalog bytes, pinned collection manifest, the component's embedded
     contract against the field map, then (unless ``metadata_only``) the exact
     component bytes. Any mismatch fails closed; nothing is substituted.
@@ -737,7 +742,7 @@ def grove_full_release(collection_id, requested_release_id=None, *, component=No
             raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
-        contract, header, primary_key, count, expected = grove_component_contract(
+        _contract, header, primary_key, count, expected = grove_component_contract(
             manifest, collection_id, component
         )
         route = (
@@ -757,11 +762,9 @@ def grove_full_release(collection_id, requested_release_id=None, *, component=No
                 "records_sha256": expected["sha256"],
                 "download_path": route,
             }
-        path = (
-            f"/v1/datasets/{pin['dataset_id']}/releases/{release_id}"
-            f"/components/{component}/download"
+        content = _release_bytes(
+            _grove_prefix(pin) + f"/components/{component}/download", limit=expected["bytes"]
         )
-        content = _release_bytes(path, limit=expected["bytes"])
         if (
             len(content) != expected["bytes"]
             or hashlib.sha256(content).hexdigest() != expected["sha256"]

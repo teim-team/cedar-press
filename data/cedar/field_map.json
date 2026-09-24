@@ -5846,7 +5846,7 @@
    "plural": false,
    "entity_role": "none: the rows attribute no Native entity",
    "columns_today": 38,
-   "columns_target": 39,
+   "columns_target": 38,
    "default_viewer": [
     "revenue_observation_id",
     "geography_level",
@@ -6126,13 +6126,7 @@
      "rights_class": "public_official"
     }
    ],
-   "new": [
-    {
-     "column": "research_note",
-     "from": "rule:blank",
-     "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."
-    }
-   ],
+   "new": [],
    "order": [
     "revenue_observation_id",
     "geography_level",
@@ -6171,8 +6165,7 @@
     "source_url",
     "source_date",
     "retrieved_date",
-    "rights_class",
-    "research_note"
+    "rights_class"
    ],
    "retire": []
   }

@@ -620,7 +620,9 @@ def full_download(
         # Production state until the Gaming IDs are issued: say so plainly,
         # never substitute a sample or an unpinned file.
         audit("not_pinned")
-        raise HTTPException(status_code=503, detail="No released data is pinned for this collection yet") from error
+        raise HTTPException(
+            status_code=503, detail="No released data is pinned for this collection yet"
+        ) from error
     except repository.FullReleaseUnavailable as error:
         audit("unavailable")
         raise HTTPException(status_code=503, detail="Full release unavailable") from error

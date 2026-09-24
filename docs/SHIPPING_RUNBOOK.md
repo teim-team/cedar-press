@@ -285,7 +285,7 @@ server's checks are in `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md`.
    snapshot and produces ONE `gaming` release, with one collection manifest and
    components under it, plus one `cedar_grove` catalog.
 4. **Pin (Cedar PR).** Put `catalog_id`, `catalog_sha256` (over the exact
-   catalog file), `dataset_id: "gaming"`, `release_id` and `manifest_sha256`
+   catalog file), `collection_id: "gaming"`, `release_id` and `manifest_sha256`
    into `data/cedar/grove_release_pin.json`. Deploy those exact catalog bytes
    at `CEDAR_GROVE_RELEASE_CATALOG`, and give the Lumecon API grant for
    dataset `gaming`. Until this step the route answers `503 No released data

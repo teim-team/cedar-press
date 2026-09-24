@@ -52,7 +52,7 @@ online sportsbook module, `build.py candidate gaming`, `grove-contracts`,
 ```json
 {"schema_version": 1, "product": "cedar_grove", "pins": {
   "gaming": {"catalog_id": "<64 hex>", "catalog_sha256": "<64 hex>",
-             "dataset_id": "gaming", "release_id": "<64 hex>",
+             "collection_id": "gaming", "release_id": "<64 hex>",
              "manifest_sha256": "<64 hex>"}}}
 ```
 
@@ -65,13 +65,15 @@ online sportsbook module, `build.py candidate gaming`, `grove-contracts`,
   still names where the reviewed catalog's bytes are deployed. The pin says
   which bytes they must be (`catalog_sha256` over the exact file and the
   recomputed `catalog_id`) and which release inside them.
-- **One release, not per-table releases.** `dataset_id` must equal the
-  collection ID. A pin naming `gaming--<table>` is refused, and so is a
-  catalog carrying any `gaming--*` entry. Cedar never assembles a collection
-  from unrelated table releases.
+- **One release, not per-table releases.** `collection_id` must equal the
+  collection ID. A pin naming `gaming--<table>` is refused. So is any catalog
+  that is not a Lumecon `collection_releases` catalog, such as a dataset
+  catalog of per-table releases. Cedar never assembles a collection from
+  unrelated table releases.
 - **Rehearsal and synthetic releases are never served.**
-  `repository.GROVE_SERVED_RELEASE_KINDS` is `{"production"}`. Only the tests
-  widen it, to the synthetic fixture kind.
+  `repository.GROVE_SERVED_RELEASE_CLASSES` is `{"production"}` and
+  `GROVE_SERVE_SYNTHETIC` is `False`. Only the consumer tests widen them, for
+  the synthetic rehearsal fixture.
 - **Rollback** is a revert of the pin PR. Because it is one release, every
   component returns to its prior bytes together (atomic).
 
@@ -87,18 +89,23 @@ online sportsbook module, `build.py candidate gaming`, `grove-contracts`,
 4. The pin is well formed and names the collection.
 5. The catalog bytes at `CEDAR_GROVE_RELEASE_CATALOG` hash to
    `catalog_sha256`, `catalog_id` recomputes, and the product is
-   `cedar_grove` with `entitlement_required`. There are no per-table entries,
-   exactly one entry for the collection, and its `release_id` and
-   `manifest_sha256` equal the pin.
+   `cedar_grove` with `entitlement_required`. The catalog kind is
+   `collection_releases`, with exactly one entry for the collection. That
+   entry's `release_id`, `manifest_sha256` and
+   `manifest_path` (`/v1/collections/<id>/releases/<rid>/manifest`) equal the
+   pin.
 6. The collection manifest fetched from the Lumecon API hashes to
-   `manifest_sha256` and names the pinned dataset and release, with a served
-   release kind.
+   `manifest_sha256`. It names the pinned collection and release, has
+   `release_kind: collection` and product `cedar_grove`, and its
+   `release_class` and `synthetic` flag are served.
 7. The component's embedded contract has public/publishable rights,
-   redistribution and a download permission. Its field names, in order, equal
-   the field-map `order`, and any declared per-field `rights_class` equals the
-   field map's. Its primary key is within the header, and the count and
+   redistribution, and `download_permitted: true`. Its field names, in order,
+   equal the field-map `order`, and each shipped field's `rights_class` equals
+   the contract's `metadata.field_rights`. Its primary key is within the header, and the count and
    artifact size are bounded.
-8. The component bytes match the manifest's size and SHA-256, the record count
+8. The component bytes come from
+   `/v1/collections/<id>/releases/<rid>/components/<name>/download`. They
+   match the manifest's size and SHA-256, the record count
    and schema, and the primary keys are nonblank and unique.
 
 The response is exact JSONL with `X-Cedar-Release`, `X-Cedar-SHA256`,
@@ -116,15 +123,18 @@ The response is exact JSONL with `X-Cedar-Release`, `X-Cedar-SHA256`,
   - `ZeroCanonicalDuplicationTest` fails if a producer module, binding
     register, component CSV or schema copy reappears.
   - `PinnedLumeconReleaseTest` builds the synthetic fixture release with the
-    installed `lumecon-data gaming fixture-release` and serves it through
-    Lumecon's own API app. It covers schema compatibility per component,
+    installed `lumecon-data gaming fixture-release`, plus a second, later
+    release. It serves them through Lumecon's own verification
+    (`verify_collection_release`, `collection_manifest_metadata`,
+    `read_collection_component`) in place of the API hop, because Lumecon's
+    read-only API has no collection routes yet. It covers schema compatibility per component,
     manifest/hash agreement, exact bytes, idempotent re-pinning, atomic
     rollback, unavailable and mismatched releases, and refusal of per-table
     catalogs.
 - `server/tests/test_gaming_issuance.py`: the blocks are declared in
   `cedar_ids`, and Lumecon's constants must equal them. It also covers the
   issuance dry run, execution, reuse, snapshot and every refusal.
-- CI: `.github/workflows/gaming-release-consumer.yml`.
+- CI: job `gaming-release-consumer` in `.github/workflows/ci.yml`.
 
 ## 5. Still PROPOSED / for Havala
 
