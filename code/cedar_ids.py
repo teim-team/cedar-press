@@ -1015,7 +1015,12 @@ _ID_BINDINGS = [
                  "existing source-specific Deals ledgers", pattern=r"(?:FA|ND|NLTR|ANCSA2|ANCSA|ANCSA3|SECX|MA2020|ACQ2020|IDOBS)-.+"),
     _id_contract("nagpra", "nagpra_notices.csv", "document_number", "Federal-Register",
                  "source_document", "notice", "one Federal Register notice",
-                 "Federal Register", pattern=r"[0-9]{2,4}-[0-9]+"),
+                 # Publisher-issued historical, electronic, correction and
+                 # republication IDs are distinct source keys, never renamed.
+                 # Confirmed against the Federal Register documents API;
+                 # validate_identifier still requires pinned source membership.
+                 "Federal Register",
+                 pattern=r"(?:[0-9]{2,4}|E[0-9]|X[0-9]{2}|[CR][0-9](?:-[0-9]{4})?)-[0-9]+"),
     _id_contract("lobbying", "native_entity_lobbying_disclosures.csv", "filing_uuid",
                  "LDA-filing", "source_record", "filing", "one source disclosure filing",
                  "LDA source", pattern=r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"),
