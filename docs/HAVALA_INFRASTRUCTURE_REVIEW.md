@@ -86,6 +86,7 @@ delivery proofs do not certify source completeness or twelve launch-ready produc
 | Lumecon documentation continuation | `185802b631a3289597278c77bbd4d34a51f5285a..5e7ad162a89ba8f7f172a9c15d0efa9f1d849169` | [Ubuntu CI35950758323](https://github.com/teim-team/Lumecon-data/actions/runs/35950758323) passed all gates on Python 3.12/3.13: 456 tests, 90.8% coverage. Existing README/data-contracts docs explain preservation versus crosswalk approval; no runtime change |
 | Earlier digest-bound Cedar runtime | `6d445f460357581981a4b096d5bd53dd0d8d668c..3cf2583af9cd07e52dd1605659a319c242b54a61` | [Application CI35953021899](https://github.com/teim-team/cedar-press/actions/runs/35953021899) and [Postgres CI35953021926](https://github.com/teim-team/cedar-press/actions/runs/35953021926) pass. Local full suite: 337 tests, 305 passed/32 DB skips, 80% coverage; Ubuntu Postgres: 76 passed, no skips. Includes coherent upstream-tampering denial, both collection namespaces and exact bytes |
 | Final Cedar runtime | `6d445f460357581981a4b096d5bd53dd0d8d668c..c0263d8fbed32121207c40499ea601abba4d7194` | [Application CI35954050177](https://github.com/teim-team/cedar-press/actions/runs/35954050177) and [Postgres CI35954050274](https://github.com/teim-team/cedar-press/actions/runs/35954050274) pass. Local full suite: 338 tests, 306 passed/32 DB skips, 80% coverage. Ubuntu Postgres: 77 passed, no skips; same-cookie downgrade/deletion denied before fetching data |
+| Cedar review documentation | `c0263d8fbed32121207c40499ea601abba4d7194..8f2797797f0f5f3949a4fa73b02e8dd5e41ac3fe` | [Application CI35954460096](https://github.com/teim-team/cedar-press/actions/runs/35954460096) and [Postgres CI35954460047](https://github.com/teim-team/cedar-press/actions/runs/35954460047) pass for the packet and one-page onboarding procedure; runtime unchanged |
 | Final Lumecon runtime | `0ae36dda36d650b1b3861173fb122e7603b0dc3f..2ce2f9a884cb08a013d6a800e1fd34f6547be360` | [Ubuntu CI35952919244](https://github.com/teim-team/Lumecon-data/actions/runs/35952919244), both Python versions: 460 passed, 90.8% coverage, catalog/API projection digest agreement, real storage containment and immutable rollback; all supported gates pass |
 
 The earlier Cedar foundation at `cb0e9f11627f790ee756655703a16baecb5253b2`
@@ -649,9 +650,11 @@ passes all gates for the same correction.
 | Lumecon `2ce2f9a884cb08a013d6a800e1fd34f6547be360` | `src/lumecon_data/catalog.py`, `src/lumecon_data/api.py`, `tests/test_catalog.py`, `tests/test_api.py`, `docs/data-contracts.md`: one safe manifest projection, catalog digest and API agreement, additive compatibility rule |
 
 The 13-path core commit contains no candidate data or runtime credentials. This
-packet and `data/cedar/README.md` are the two documentation closeout paths; their
-documentation commit is identified by the draft PR head; the fixed runtime range
-above remains independently reviewable.
+packet and `data/cedar/README.md` were committed as
+`8f2797797f0f5f3949a4fa73b02e8dd5e41ac3fe`. The shipping-runbook follow-up
+aligns its operating instructions with these proofs; its exact paths are
+`docs/SHIPPING_RUNBOOK.md` and this packet. The draft PR head identifies that
+documentation closeout while the runtime range remains independently reviewable.
 
 ## Evidence appendix: exact foundation implementation paths
 
@@ -761,8 +764,9 @@ tests/test_cli.py
 
 The prior fixed documentation changes cover this packet, the existing shipping
 runbook, architecture-decision note and required architecture census correction.
-The current documentation batch edits this packet and the existing
-`data/cedar/README.md` developer/metadata authority; it adds no status document. The prior
+The current documentation batch edits this packet, the existing
+`data/cedar/README.md` developer/metadata authority and `docs/SHIPPING_RUNBOOK.md`;
+it adds no status document. The prior
 uncommitted TERMINAL_HANDOFF edit remains outside this sprint's authoritative packet;
 it must not be mistaken for the current test/branch authority. Exact exclusions
 above remain uncommitted, including R7 generated state and the review queue.
@@ -784,6 +788,7 @@ Remaining uncommitted Cedar paths are deliberately excluded:
 ```text
 data/spine/cedar_entity_types.csv
 docs/NEED_CORROBORATION.json
+docs/TERMINAL_HANDOFF.md
 docs/imports/r7_audit/CURRENT.json
 docs/imports/r7_audit/.lock
 docs/imports/r7_audit/.lock.owner.json
@@ -924,7 +929,8 @@ Both frozen-runtime real releases pass actual login, denied/approved access,
 malformed and nonexistent pin refusal, exact-byte download, exactly eight current-run
 redacted audit events and immutable rollback. Their source rows, issued IDs and
 customer artifact hashes are preserved. Registry checks and the normalizer cutover
-have reproduced focused evidence; reference-preservation provenance is corrected.
+have reproduced focused evidence; the standalone `code/build_test.py` passes
+all 3 refusal tests and `code/521_inventory.py check-scripts` passes; reference-preservation provenance is corrected.
 
 The implementation range is fixed through Cedar `c0263d8`; both Ubuntu workflows
 pass, including current-account downgrade/deletion refusal. Lumecon `2ce2f9a`
@@ -933,4 +939,4 @@ closeout is separate from the fixed implementation range. Production
 configuration, frontend full-download integration and remaining collection coverage
 stay separate launch gates. Neither proof authorizes publication or production changes.
 
-2026-09-24 04:10 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.
+2026-09-24 04:14 UTC - READY WITH WARNINGS: both frozen-runtime flagship proofs, digest-bound downloads, focused guards, Cedar application/Postgres CI and Lumecon Ubuntu CI pass; production and twelve-collection readiness remain gated.

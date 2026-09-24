@@ -5,7 +5,9 @@
 
 This section supersedes the August gaming chain below for the Codex takeover.
 That chain is retained as historical recovery documentation, not a current launch
-command. Current state and blockers belong in docs/TERMINAL_HANDOFF.md.
+command. The fixed infrastructure review range, current proofs and blockers are in
+`docs/HAVALA_INFRASTRUCTURE_REVIEW.md`; the existing terminal handoff retains the
+workspace takeover context.
 
 ### Systemic hold supersedes the prior candidate command
 
@@ -102,8 +104,11 @@ manifest/publication outputs. Release ledger history must be preserved.
 
 The implementation and measured release/CI results are recorded in
 `docs/HAVALA_INFRASTRUCTURE_REVIEW.md`. This section defines operating boundaries;
-it does not certify a deployed service. Lumecon Data owns source snapshots,
-transforms, contracts, validation and immutable releases. Cedar Press owns its
+it does not certify a deployed service. Lumecon Data owns governed snapshots,
+release contracts, validation and immutable storage. Existing acquisition and
+collection transforms remain transitional Cedar stages until a tested ownership
+transfer retires them; the publication projection currently remains in Cedar.
+Cedar Press owns its
 catalog adapter, sessions, entitlement checks, download responses and audit events.
 The existing Lumecon CLI is the operator interface; no additional runner or
 manifest format is required.
@@ -127,6 +132,30 @@ SQLite behavior. Do not certify restart persistence from development tests.
 stays on the backend. `CEDAR_PRESS_INSECURE_COOKIE=1` is local-only. Production
 must set the persistent session secret, allowed origins and database explicitly.
 No secret value belongs in Git, a catalog, an audit event or a command transcript.
+
+**Registered collection rehearsal.** Follow the short
+[Add a collection procedure](../data/cedar/README.md#add-a-collection-to-the-governed-release-path).
+`code/build.py release-pilot` is the supported Cedar entry point for the reviewed
+Legislation and Natural Resources flagships; it calls the existing Lumecon
+contract/build/catalog functions. Use the exact pinned source, authority inputs,
+environment and isolated store from the Havala packet. No new endpoint or
+collection-specific release format is required.
+
+Full downloads require an approved catalog with `manifest_sha256`; regenerate
+older catalogs from verified releases rather than weakening the consumer. The
+digest binds the safe API manifest and its artifact hashes. Full downloads are
+exact JSONL, while existing product samples remain CSV. A full customer CSV or
+frontend control needs a separate verified implementation.
+
+The full-download route checks both the signed cookie's tier and the current
+subscriber store before fetching an artifact. Removed accounts return 401;
+downgraded accounts return 403; lookup failures return a redacted 503 and never
+fall back to stale cookie authorization. Upgraded subscribers sign in again.
+Session expiry/revocation and other routes' existing behavior remain separate
+production work. The current two-collection proof covers real login, 401/403/200,
+exact bytes, redacted current-run audit events and selection of a prior valid
+catalog without modifying either release. `authorized_prepared` records response
+preparation, not proof that the network delivered the entire response.
 
 **Object layout.** Preserve the existing Lumecon layout within each independent
 store: `raw/<source_id>/<snapshot_id>/source.csv`, `receipts/<source_id>/`,
