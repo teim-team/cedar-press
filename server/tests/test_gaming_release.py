@@ -6,17 +6,22 @@ shared path rather than a Gaming copy of it:
 * ``code/build.py candidate gaming``: registered producers run in declared
   order into a new isolated root; shared validators, cross-table references,
   provisional-ID status and change report.
-* ``code/build.py release-pilot gaming``: refusal of provisional, vendor and
-  non-CE identifiers and of the vendor-lineage flagship; then (with a fixture
-  identifier binding standing in for the pending allowed-ID contract) exact
-  Lumecon release bytes, determinism, immutable-replacement refusal and
-  rollback to a prior verified catalog.
-* The Cedar server adapter: today it refuses Gaming for every tier before any
-  fetch and refuses a ``cedar_grove`` catalog. The last class simulates the
-  reviewed Grove declaration proposed in docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md
-  with the EXISTING tier model (grove/tree reach the grove shelf) to prove the
-  adapter's denial, exact bytes, redacted audit, stale-account and rollback
-  behaviour carry over unchanged.
+* ``code/build.py release-pilot gaming``: a multi-component release unit. Two
+  synthetic components, each with its own field-map entry, grain, key and
+  rights, released through the one projection path into two immutable Lumecon
+  releases pinned in ONE ``cedar_grove`` catalog; every declared component
+  required; a provisional, vendor, non-CE, non-public-row, non-public-field,
+  non-public-status or unmapped component refuses the whole release before any
+  artifact is written; then (with fixture identifier bindings standing in for
+  the pending allowed-ID contract) exact bytes, determinism, immutable-
+  replacement refusal and rollback to a prior verified catalog. Single-flagship
+  pilots and single-entry field-map callers are shown unchanged.
+* The Cedar server adapter with the reviewed Grove declaration
+  (``collections.GROVE_RELEASE_COLLECTIONS``): per-component exact download
+  from the pinned Grove catalog for grove/tree, denial before any catalog or
+  artifact access for anonymous, press/press_pro and stale accounts, redacted
+  audit naming the component, stale-pin refusal and rollback of both
+  components; the storefront still neither sells nor previews Gaming.
 """
 
 import argparse
@@ -307,15 +312,37 @@ try:
 except ImportError:
     HAVE_LUMECON = False
 
-REGION_CONTRACT = EVENTS["gaming_regional_revenue.csv"]
-BINDING = cedar_ids.IdentifierContract(
-    "gaming", "gaming_regional_revenue.csv", "revenue_observation_id", "GREV", "record",
-    "observation", "fixture only: stands in for the pending allowed-ID contract",
-    "fixture: pending CICD identifier-retirement audit", pattern=r"GREV-[0-9A-F]{12}")
+REGION = "gaming_regional_revenue.csv"
+EVENTS_TABLE = "gaming_regulatory_events.csv"
+REGION_CONTRACT = EVENTS[REGION]
+EVENT_CONTRACT = EVENTS[EVENTS_TABLE]
+BINDINGS = (
+    cedar_ids.IdentifierContract(
+        "gaming", REGION, "revenue_observation_id", "GREV", "record", "observation",
+        "fixture only: stands in for the pending allowed-ID contract",
+        "fixture: pending CICD identifier-retirement audit", pattern=r"GREV-[0-9A-F]{12}"),
+    cedar_ids.IdentifierContract(
+        "gaming", EVENTS_TABLE, "event_id", "GREG", "record", "observation",
+        "fixture only: stands in for the pending allowed-ID contract",
+        "fixture: pending CICD identifier-retirement audit", pattern=r"GREG-[0-9A-F]{12}"),
+)
+FIXTURE_RIGHTS = {"license": "Fixture public record", "publication_class": "publishable",
+                  "redistribution": True, "retrieval": True}
+# Two synthetic governed components of one Grove collection, each with its own
+# grain, key, rights and field-map entry, declared exactly as a real pilot is.
+COMPONENTS = {
+    REGION: {"owner": "Fixture regulator (regional totals)", "url": "https://example.invalid/region",
+             "rights": FIXTURE_RIGHTS, "caveats": ["fixture region caveat"],
+             "time_coverage": "fixture fiscal years"},
+    EVENTS_TABLE: {"owner": "Fixture regulator (events)", "url": "https://example.invalid/events",
+                   "rights": FIXTURE_RIGHTS, "caveats": ["fixture event caveat"]},
+}
 
 
 @unittest.skipUnless(HAVE_LUMECON, "requires Lumecon Data on PYTHONPATH")
 class GamingReleasePilotTest(unittest.TestCase):
+    """Two components -> two immutable Lumecon releases pinned in ONE catalog."""
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -323,123 +350,243 @@ class GamingReleasePilotTest(unittest.TestCase):
         self.canonical = base / "canonical"
         self.canonical.mkdir()
         self.store = base / "store"
-        self.header = list(REGION_CONTRACT["field_rights"])
-        self.rows = [
-            {"revenue_observation_id": "GREV-0123456789AB", "region_name": "Fictional Region",
-             "fiscal_year": "2025", "ggr_nominal_usd": "100", "internal_estimate": "7",
-             "rights_class": "public_official"},
-            {"revenue_observation_id": "GREV-0123456789AC", "region_name": "Second Region",
-             "fiscal_year": "2024", "ggr_nominal_usd": "90", "internal_estimate": "",
-             "rights_class": "public_official"},
-        ]
-        entry = BUILD.grove_field_map_entry("gaming", "fixture", "gaming_regional_revenue.csv",
-                                            REGION_CONTRACT)
-        real_map = cedar_publication.field_map()
-        self.fixture_map = {**real_map, "gaming": dict(entry, key="gaming/gaming_regional_revenue")}
+        self.headers = {REGION: list(REGION_CONTRACT["field_rights"]),
+                        EVENTS_TABLE: list(EVENT_CONTRACT["field_rights"])}
+        self.rows = {
+            REGION: [
+                {"revenue_observation_id": "GREV-0123456789AB", "region_name": "Fictional Region",
+                 "fiscal_year": "2025", "ggr_nominal_usd": "100", "internal_estimate": "7",
+                 "rights_class": "public_official"},
+                {"revenue_observation_id": "GREV-0123456789AC", "region_name": "Second Region",
+                 "fiscal_year": "2024", "ggr_nominal_usd": "90", "internal_estimate": "",
+                 "rights_class": "public_official"},
+            ],
+            EVENTS_TABLE: [
+                {"event_id": "GREG-0123456789AB", "gaming_facility_id": PLACE,
+                 "event_date": "2025-01-02", "rights_class": "public_official"},
+            ],
+        }
+        self.contracts = {REGION: REGION_CONTRACT, EVENTS_TABLE: EVENT_CONTRACT}
+        self.status = {REGION: "public", EVENTS_TABLE: "public"}
+        self.entries = dict(cedar_publication.field_map_entries())
+        for table, contract in self.contracts.items():
+            stem = Path(table).stem
+            entry = BUILD.grove_field_map_entry("gaming", "fixture", table, contract)
+            self.entries[("gaming", stem)] = dict(entry, key="gaming/" + stem)
+        config = dict(BUILD.CP.RELEASE_PILOTS["gaming"], components=COMPONENTS)
         for patcher in (
             # The worktree has no ignored ruling ledger; the fixture rows carry
             # no UEI, so an empty verified-denial set changes nothing.
             patch.object(cedar_publication, "denied_ueis", return_value=frozenset()),
-            patch.object(cedar_publication, "field_map", side_effect=lambda: self.fixture_map),
-            patch.object(BUILD, "pilot_table_contract", return_value={
-                "primary_key": ["revenue_observation_id"], "grain": REGION_CONTRACT["grain"]}),
+            # The compat cache must not keep fixture entries after the test.
+            patch.object(cedar_publication, "_FIELD_MAP", {}),
+            patch.object(cedar_publication, "field_map_entries", side_effect=lambda: self.entries),
+            patch.object(BUILD, "pilot_table_contract", side_effect=lambda c, t: {
+                "primary_key": self.contracts[t]["primary_key"], "grain": self.contracts[t]["grain"],
+                "publication_status": self.status[t]}),
+            patch.dict(BUILD.CP.RELEASE_PILOTS, {"gaming": config}),
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
 
     def bind(self):
         bindings = dict(cedar_ids.IDENTIFIER_CONTRACTS)
-        bindings[BINDING.binding] = BINDING
+        for binding in BINDINGS:
+            bindings[binding.binding] = binding
         return patch.object(cedar_ids, "IDENTIFIER_CONTRACTS", MappingProxyType(bindings))
 
-    def write(self, rows=None, name="gaming_regional_revenue.csv"):
-        path = self.canonical / name
-        path.write_bytes(BUILD._csv_bytes(self.header, rows or self.rows))
+    def write(self, table, rows=None, header=None):
+        path = self.canonical / table
+        path.write_bytes(BUILD._csv_bytes(header or self.headers[table], rows or self.rows[table]))
         return path
 
-    def pilot(self, source, as_of="2026-09-24"):
-        args = argparse.Namespace(collection="gaming", source=str(source),
+    def write_all(self):
+        return [self.write(table) for table in (REGION, EVENTS_TABLE)]
+
+    def pilot(self, sources, as_of="2026-09-24"):
+        args = argparse.Namespace(collection="gaming", source=[str(s) for s in sources],
                                   output_root=str(self.store), as_of=as_of)
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             BUILD.cmd_release_pilot(args)
         return json.loads(out.getvalue().strip().splitlines()[-1])
 
-    def test_provisional_vendor_and_non_ce_identifiers_are_refused(self):
-        cases = [
-            ("revenue_observation_id", "PROV-GREV-0123456789AB", "provisional identifier"),
-            ("region_name", "Casino property CCP-1234", "vendor-lineage identifier"),
-            ("region_name", "VP-77", "vendor-lineage identifier"),
-        ]
-        for column, value, message in cases:
-            with self.subTest(value=value), self.bind():
-                rows = copy.deepcopy(self.rows)
-                rows[0][column] = value
-                with self.assertRaisesRegex(SystemExit, "REFUSED: .*" + message):
-                    self.pilot(self.write(rows))
-        self.header.append("cedar_uid")
-        rows = copy.deepcopy(self.rows)
-        for row in rows:
-            row["cedar_uid"] = ""
-        rows[0]["cedar_uid"] = "TRBF-0001"
-        with self.bind(), self.assertRaisesRegex(SystemExit, "non-CE entity identifier in cedar_uid"):
-            self.pilot(self.write(rows))
+    def assert_nothing_written(self):
         self.assertFalse((self.store / "releases").exists())
+        self.assertFalse((self.store / "intake").exists())
+        self.assertFalse((self.store / "catalogs").exists())
 
-    def test_vendor_lineage_flagship_and_unmapped_table_are_refused(self):
-        with self.bind(), self.assertRaisesRegex(SystemExit, "REFUSED"):
-            self.pilot(self.write(name="gaming_facilities.csv"))
+    def test_every_declared_component_is_required_and_named(self):
+        region, events = self.write_all()
+        stray = self.write("gaming_facilities.csv", header=["facility_id"], rows=[{"facility_id": "x"}])
+        cases = [
+            ([region], "missing gaming_regulatory_events.csv"),
+            ([region, events, stray], "no declared component: gaming_facilities.csv"),
+            ([region, events, region], "supplied twice"),
+        ]
+        for sources, message in cases:
+            with self.subTest(message=message), self.bind(), self.assertRaisesRegex(SystemExit, message):
+                self.pilot(sources)
+        config = dict(BUILD.CP.RELEASE_PILOTS["gaming"])
+        with self.assertRaisesRegex(SystemExit, "replaced flagship cannot be a release component"):
+            BUILD.pilot_units("gaming", dict(config, components={**COMPONENTS, "gaming_facilities.csv": {}}),
+                              cedar_publication.FLAGSHIP, [region, events, stray])
         with self.assertRaisesRegex(SystemExit, "replaced flagship"):
-            BUILD.pilot_table("gaming", dict(BUILD.CP.RELEASE_PILOTS["gaming"],
-                                             table="gaming_facilities.csv"), cedar_publication.FLAGSHIP)
+            BUILD.pilot_table("gaming", dict(config, table="gaming_facilities.csv"), cedar_publication.FLAGSHIP)
         with self.assertRaisesRegex(SystemExit, "disagrees"):
-            BUILD.pilot_table("gaming", BUILD.CP.RELEASE_PILOTS["gaming"], {"gaming": "other.csv"})
-        self.fixture_map.pop("gaming")
-        with self.bind(), self.assertRaisesRegex(SystemExit, "no approved field-map entry"):
-            self.pilot(self.write())
+            BUILD.pilot_table("gaming", config, {"gaming": "other.csv"})
+        self.assert_nothing_written()
+
+    def test_a_refused_component_stops_the_whole_release(self):
+        """One bad component refuses the collection before ANY artifact is written."""
+        def events_with(**changes):
+            rows = copy.deepcopy(self.rows[EVENTS_TABLE])
+            rows[0].update(changes)
+            return rows
+        cases = [
+            (events_with(event_id="PROV-GREG-0123456789AB"), None,
+             "gaming_regulatory_events.csv: provisional identifier"),
+            (events_with(gaming_facility_id="CCP-1234"), None, "vendor-lineage identifier in gaming_facility_id"),
+            (events_with(rights_class="secondary_corroboration"), None,
+             "row rights class\\(es\\) not public: secondary_corroboration"),
+            (events_with(rights_class="internal_vendor"), None, "not public: internal_vendor"),
+            (events_with(cedar_uid="TRBF-0001"), self.headers[EVENTS_TABLE] + ["cedar_uid"],
+             "non-CE entity identifier in cedar_uid"),
+        ]
+        for rows, header, message in cases:
+            with self.subTest(message=message), self.bind():
+                region = self.write(REGION)
+                events = self.write(EVENTS_TABLE, rows=rows, header=header)
+                with self.assertRaisesRegex(SystemExit, "REFUSED: .*" + message):
+                    self.pilot([region, events])
+        self.assert_nothing_written()
+
+    def test_non_public_field_rights_status_or_unmapped_component_is_refused(self):
+        region, events = self.write_all()
+        key = ("gaming", "gaming_regulatory_events")
+        original = self.entries[key]
+        leaked = copy.deepcopy(original)
+        for field in leaked["fields"]:
+            if field["column"] == "event_date":
+                field["rights_class"] = "internal_model"
+        self.entries[key] = leaked
+        with self.bind(), self.assertRaisesRegex(SystemExit, "field event_date ships with rights class internal_model"):
+            self.pilot([region, events])
+        undeclared = copy.deepcopy(original)
+        for field in undeclared["fields"]:
+            field.pop("rights_class")
+        self.entries[key] = undeclared
+        with self.bind(), self.assertRaisesRegex(SystemExit, "rights class UNDECLARED"):
+            self.pilot([region, events])
+        self.entries[key] = original
+        self.status[EVENTS_TABLE] = "source_limited"
+        with self.bind(), self.assertRaisesRegex(SystemExit, "source_limited, not public"):
+            self.pilot([region, events])
+        self.status[EVENTS_TABLE] = "public"
+        self.entries.pop(key)
+        with self.bind(), self.assertRaisesRegex(
+                SystemExit, "no approved field-map entry for this flagship component gaming_regulatory_events.csv"):
+            self.pilot([region, events])
+        self.assert_nothing_written()
 
     def test_release_waits_for_the_identifier_contract(self):
         with self.assertRaisesRegex(SystemExit, "no declared identifier binding"):
-            self.pilot(self.write())
-        self.assertFalse((self.store / "releases").exists())
+            self.pilot(self.write_all())
+        self.assert_nothing_written()
 
-    def test_exact_bytes_determinism_immutability_and_rollback(self):
+    def test_two_components_one_catalog_exact_bytes_immutability_and_rollback(self):
         from lumecon_data.catalog import manifest_metadata
         from lumecon_data.pipeline import verify_release
         from lumecon_data.storage import canonical_json, immutable_bytes
         with self.bind():
-            first = self.pilot(self.write())
-            again = self.pilot(self.write())
-        self.assertEqual(first["release_id"], again["release_id"])
-        self.assertEqual(first["record_count"], 2)
-        release = self.store / "releases" / "gaming" / first["release_id"]
-        records = release / "records.jsonl"
-        lines = [json.loads(line) for line in records.read_bytes().splitlines()]
-        order = self.fixture_map["gaming"]["order"]
-        self.assertEqual([set(row) for row in lines], [set(order), set(order)])
-        self.assertEqual({row["revenue_observation_id"] for row in lines},
-                         {row["revenue_observation_id"] for row in self.rows})
-        self.assertNotIn(b"internal_estimate", records.read_bytes())
+            first = self.pilot(self.write_all())
+            again = self.pilot(self.write_all())
+        self.assertEqual(first, again)                       # deterministic, same catalog
+        ids = {c["table"]: c for c in first["components"]}
+        self.assertEqual([c["dataset_id"] for c in first["components"]],
+                         ["gaming--gaming_regional_revenue", "gaming--gaming_regulatory_events"])
+        self.assertEqual((ids[REGION]["record_count"], ids[EVENTS_TABLE]["record_count"]), (2, 1))
         catalog_a = json.loads(Path(first["catalog"]).read_text(encoding="utf-8"))
         self.assertEqual(catalog_a["product"], "cedar_grove")
-        before = {p.name: p.read_bytes() for p in release.iterdir()}
-        with self.assertRaises(ValueError):
-            immutable_bytes(records, b'{"replaced": true}\n')
-        self.assertEqual(records.read_bytes(), before["records.jsonl"])
-        changed = copy.deepcopy(self.rows)
+        self.assertEqual({(p["dataset_id"], p["release_id"]) for p in catalog_a["collections"]},
+                         {(c["dataset_id"], c["release_id"]) for c in first["components"]})
+        before = {}
+        for table, component in ids.items():
+            release = self.store / "releases" / component["dataset_id"] / component["release_id"]
+            records = release / "records.jsonl"
+            lines = [json.loads(line) for line in records.read_bytes().splitlines()]
+            order = self.entries[("gaming", Path(table).stem)]["order"]
+            self.assertEqual([set(row) for row in lines], [set(order)] * len(self.rows[table]))
+            self.assertNotIn(b"internal_estimate", records.read_bytes())
+            before[table] = {p.name: p.read_bytes() for p in release.iterdir()}
+            with self.assertRaises(ValueError):
+                immutable_bytes(records, b'{"replaced": true}\n')
+            self.assertEqual(records.read_bytes(), before[table]["records.jsonl"])
+        # A change to ONE component: a new release for it, the sibling's release
+        # ID unchanged, and a new catalog pinning both.
+        changed = copy.deepcopy(self.rows[REGION])
         changed[0]["ggr_nominal_usd"] = "101"
         with self.bind():
-            second = self.pilot(self.write(changed), as_of="2026-09-25")
-        self.assertNotEqual(second["release_id"], first["release_id"])
+            second = self.pilot([self.write(REGION, rows=changed), self.write(EVENTS_TABLE)], as_of="2026-09-25")
+        after = {c["table"]: c for c in second["components"]}
+        self.assertNotEqual(after[REGION]["release_id"], ids[REGION]["release_id"])
         self.assertNotEqual(second["catalog"], first["catalog"])
-        # Rollback = select the prior verified catalog; neither release changes.
-        manifest = verify_release(self.store, "gaming", first["release_id"])
-        pin = catalog_a["collections"][0]
-        self.assertEqual(pin["release_id"], first["release_id"])
-        self.assertEqual(pin["manifest_sha256"],
-                         hashlib.sha256(canonical_json(manifest_metadata(manifest))).hexdigest())
-        self.assertEqual({p.name: p.read_bytes() for p in release.iterdir()}, before)
-        verify_release(self.store, "gaming", second["release_id"])
+        # Rollback = select the prior verified catalog: every pin it names still
+        # verifies and matches its manifest digest; no release byte changed.
+        for pin in catalog_a["collections"]:
+            manifest = verify_release(self.store, pin["dataset_id"], pin["release_id"])
+            self.assertEqual(pin["manifest_sha256"],
+                             hashlib.sha256(canonical_json(manifest_metadata(manifest))).hexdigest())
+        for table, component in ids.items():
+            release = self.store / "releases" / component["dataset_id"] / component["release_id"]
+            self.assertEqual({p.name: p.read_bytes() for p in release.iterdir()}, before[table])
+        for component in second["components"]:
+            verify_release(self.store, component["dataset_id"], component["release_id"])
+
+
+class SingleFlagshipUnchangedTest(unittest.TestCase):
+    """Press pilots and single-entry field-map callers see the old behaviour."""
+
+    def test_single_flagship_units_and_dataset_ids_are_unchanged(self):
+        for collection in ("legislation", "natural-resources"):
+            config = BUILD.CP.RELEASE_PILOTS[collection]
+            self.assertNotIn("components", config)
+            table = cedar_publication.FLAGSHIP[collection]
+            with tempfile.TemporaryDirectory() as temp:
+                source = Path(temp) / table
+                units = BUILD.pilot_units(collection, config, cedar_publication.FLAGSHIP, [source])
+                self.assertEqual(units, [(table, source.resolve(), collection, config)])
+                with self.assertRaisesRegex(SystemExit, "exactly one --source"):
+                    BUILD.pilot_units(collection, config, cedar_publication.FLAGSHIP, [source, source])
+                with self.assertRaisesRegex(SystemExit, "must match the declared flagship"):
+                    BUILD.pilot_units(collection, config, cedar_publication.FLAGSHIP, [Path(temp) / "x.csv"])
+            self.assertEqual(BUILD.release_dataset_id(collection), collection)
+
+    def test_compat_field_map_matches_the_keyed_accessor_for_single_entry_collections(self):
+        entries = cedar_publication.field_map_entries()
+        compat = cedar_publication.field_map()
+        for collection, entry in compat.items():
+            mine = [e for (c, _), e in entries.items() if c == collection]
+            if len(mine) == 1:
+                self.assertEqual(cedar_publication.field_map_entry(collection)["key"], entry["key"])
+            self.assertEqual(entry["key"], mine[0]["key"])
+        self.assertIsNone(cedar_publication.field_map_entry("fixture-unmapped"))
+
+    def test_a_multi_component_collection_needs_a_named_component(self):
+        entries = dict(cedar_publication.field_map_entries())
+        for table, contract in ((REGION, REGION_CONTRACT), (EVENTS_TABLE, EVENT_CONTRACT)):
+            stem = Path(table).stem
+            entries[("gaming", stem)] = dict(
+                BUILD.grove_field_map_entry("gaming", "fixture", table, contract), key="gaming/" + stem)
+        with patch.object(cedar_publication, "field_map_entries", return_value=entries):
+            with self.assertRaisesRegex(SystemExit, "2 component entries"):
+                cedar_publication.field_map_entry("gaming")
+            with self.assertRaises(cedar_publication.FieldMapRefusal):
+                cedar_publication.apply_field_map("gaming", ["event_id"], [], {"event_id"})
+            self.assertEqual(cedar_publication.field_map_entry("gaming", EVENTS_TABLE)["key"],
+                             "gaming/gaming_regulatory_events")
+            self.assertEqual(cedar_publication.field_map_entry("gaming", "gaming_regional_revenue")["key"],
+                             "gaming/gaming_regional_revenue")
 
 
 # ---------------------------------------------------------------- server adapter
@@ -454,47 +601,45 @@ try:
 except ImportError:
     HAVE_SERVER = False
 
-GAMING_KEY = "gaming/gaming_regional_revenue"
+SERVED = ("gaming_regional_revenue", "gaming_regulatory_events")
 
 
 @unittest.skipUnless(HAVE_SERVER, "requires the Cedar server development dependencies")
 class GamingServerDeliveryTest(unittest.TestCase):
-    """Denial, exact bytes, audit and rollback for a Grove pin."""
+    """The reviewed Grove declaration serves each pinned component exactly.
+
+    Two synthetic components in one ``cedar_grove`` catalog pinned at
+    CEDAR_GROVE_RELEASE_CATALOG; the existing tier model (grove/tree reach the
+    grove shelf) decides access before any catalog or artifact is read."""
 
     URL = "/press/collections/gaming/full-download"
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.catalog = Path(self.temp.name) / "catalog.json"
-        field_map = json.loads((ROOT / "data/cedar/field_map.json").read_text(encoding="utf-8"))
-        entry = field_map["tables"].get(GAMING_KEY)
-        self.header = entry["order"] if entry else ["revenue_observation_id", "research_note"]
-        self.rows = [{name: None for name in self.header}]
-        self.rows[0]["revenue_observation_id"] = "GREV-0123456789AB"
-        self.rid = "c" * 64
-        self.pin = {"dataset_id": "gaming", "release_id": self.rid, "record_count": 1,
-                    "fields": [{"name": n, "type": "string", "nullable": n != "revenue_observation_id"}
-                               for n in self.header],
-                    "rights": {"publication_class": "publishable", "redistribution": True},
-                    "synthetic": False}
-        content = b"".join(repository._canonical_bytes(row) for row in self.rows)
-        self.manifest = {**self.pin, "schema_version": 1, "primary_key": ["revenue_observation_id"],
-                         "files": {"records.jsonl": {"sha256": hashlib.sha256(content).hexdigest(),
-                                                     "bytes": len(content)}}}
-        self.pin["manifest_sha256"] = hashlib.sha256(repository._canonical_bytes(self.manifest)).hexdigest()
-        self.product = "cedar_press"
+        self.catalog = Path(self.temp.name) / "grove-catalog.json"
+        tables = json.loads((ROOT / "data/cedar/field_map.json").read_text(encoding="utf-8"))["tables"]
+        self.tables = {k: v for k, v in tables.items() if v.get("collection") != "gaming"}
+        self.headers = {
+            "gaming_regional_revenue": ["revenue_observation_id", "region_name", "ggr_nominal_usd", "research_note"],
+            "gaming_regulatory_events": ["event_id", "gaming_facility_id", "event_date", "research_note"],
+        }
+        self.keys = {"gaming_regional_revenue": "revenue_observation_id", "gaming_regulatory_events": "event_id"}
+        for stem, header in self.headers.items():
+            self.tables["gaming/" + stem] = {"collection": "gaming", "order": header}
+        self.version("a", "100")
+        self.product = "cedar_grove"
         self.write_catalog()
+        self.fetched = []
         for patcher in (
-            patch.dict(os.environ, {"CEDAR_PRESS_RELEASE_CATALOG": str(self.catalog)}),
-            patch.object(repository, "_release_bytes", side_effect=lambda *a, **k: b"".join(
-                repository._canonical_bytes(row) for row in self.rows)),
+            patch.dict(os.environ, {"CEDAR_GROVE_RELEASE_CATALOG": str(self.catalog)}),
+            patch.object(repository, "_field_map_tables", side_effect=lambda: self.tables),
+            patch.object(repository, "_release_bytes", side_effect=self.download),
+            patch.object(repository, "_release_json", side_effect=self.response),
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
-        fetch = patch.object(repository, "_release_json", side_effect=self.response)
-        self.fetch = fetch.start()
-        self.addCleanup(fetch.stop)
+        os.environ.pop("CEDAR_PRESS_RELEASE_CATALOG", None)
         self.subscriber = patch.object(subscribers, "find", return_value=subscribers.Subscriber(
             "grove-fixture@example.invalid", "grove", "fixture"))
         self.account = self.subscriber.start()
@@ -503,99 +648,174 @@ class GamingServerDeliveryTest(unittest.TestCase):
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
 
-    def write_catalog(self):
+    def version(self, letter, value):
+        """One pinned version of BOTH components (rids derived from `letter`)."""
+        # The upstream store keeps every version; the catalog decides which one.
+        self.upstream = getattr(self, "upstream", {})
+        self.content, self.pins = {}, []
+        for i, (stem, header) in enumerate(sorted(self.headers.items())):
+            row = {name: None for name in header}
+            row[self.keys[stem]] = f"{stem}-{letter}"
+            row[header[1]] = value
+            content = repository._canonical_bytes(row)
+            rid = hashlib.sha256(f"{letter}{i}".encode()).hexdigest()
+            pin = {"dataset_id": "gaming--" + stem, "release_id": rid, "record_count": 1,
+                   "fields": [{"name": n, "type": "string", "nullable": n != self.keys[stem]} for n in header],
+                   "rights": {"publication_class": "publishable", "redistribution": True},
+                   "synthetic": False}
+            manifest = {**pin, "schema_version": 1, "primary_key": [self.keys[stem]],
+                        "files": {"records.jsonl": {"sha256": hashlib.sha256(content).hexdigest(),
+                                                    "bytes": len(content)}}}
+            pin["manifest_sha256"] = hashlib.sha256(repository._canonical_bytes(manifest)).hexdigest()
+            self.content[stem] = content
+            self.upstream[(pin["dataset_id"], rid)] = (manifest, content)
+            self.pins.append(pin)
+        self.rid = {pin["dataset_id"].split("--")[1]: pin["release_id"] for pin in self.pins}
+
+    def write_catalog(self, path=None):
         value = {"schema_version": 1, "product": self.product, "entitlement_required": True,
-                 "collections": [self.pin]}
+                 "collections": self.pins}
         value["catalog_id"] = hashlib.sha256(repository._canonical_bytes(value)).hexdigest()
-        self.catalog.write_text(json.dumps(value), encoding="utf-8")
+        (path or self.catalog).write_text(json.dumps(value), encoding="utf-8")
+
+    def _stored(self, path):
+        parts = path.split("/")                 # /v1/datasets/<id>/releases/<rid>/...
+        self.fetched.append(path)
+        return self.upstream[(parts[3], parts[5])]
 
     def response(self, path):
-        return copy.deepcopy(self.manifest)
+        return copy.deepcopy(self._stored(path)[0])
+
+    def download(self, path, limit=None):
+        return self._stored(path)[1]
 
     def session(self, tier, email="grove-fixture@example.invalid"):
         app.dependency_overrides[current_session] = (
             (lambda: None) if tier is None else (lambda: Session(email, tier)))
 
-    def get(self):
+    def get(self, component, release_id=None):
+        params = {"release_id": release_id or self.rid.get(component, "c" * 64)}
+        if component is not None:
+            params["component"] = component
         with self.assertLogs("cedar_press.download", level="INFO") as logs:
-            response = self.client.get(self.URL, params={"release_id": self.rid})
+            response = self.client.get(self.URL, params=params)
         self.assertNotIn("grove-fixture@example", " ".join(logs.output))
-        return response, logs.output
+        return response, [json.loads(line.split(":", 2)[2]) for line in logs.output]
 
-    def declared(self):
-        """The proposed reviewed Grove declaration, simulated with the existing
-        tier model: a grove-shelf dataset that grove and tree already reach."""
-        gaming = launch.CollectionDataset(
-            id="gaming", name="Gaming Intelligence (fixture)", short_name="Gaming", origin="official",
-            level="geography", tracks="fixture", rows_label="fixture", downloads=None, vintage=None,
-            version="v0", updated="", sources="NIGC", method="fixture", shelf="grove")
-        return patch.object(launch, "LAUNCH_COLLECTION", launch.LAUNCH_COLLECTION + (gaming,))
+    def test_declaration_is_the_existing_grove_shelf_and_storefront_is_unchanged(self):
+        self.assertEqual([e["id"] for e in launch.GROVE_RELEASE_COLLECTIONS], ["gaming"])
+        self.assertEqual({e["shelf"] for e in launch.GROVE_RELEASE_COLLECTIONS}, {"grove"})
+        self.assertEqual(repository.grove_components("gaming"), SERVED)
+        self.assertEqual(repository.grove_components("legislation"), ())
+        for tier in ("press", "press_pro", "grove", "tree", "unknown"):
+            with self.subTest(tier=tier):
+                # The storefront still neither sells nor previews Gaming ...
+                self.assertFalse(repository.may_open(tier, "gaming"))
+                self.assertNotIn("gaming", [c["id"] for c in repository.collections_for(tier)])
+                # ... and every Press collection's full-release rule is may_open.
+                for dataset in launch.LAUNCH_COLLECTION:
+                    self.assertEqual(repository.may_download_full(tier, dataset.id),
+                                     repository.may_open(tier, dataset.id))
+            self.assertEqual(repository.may_download_full(tier, "gaming"), tier in ("grove", "tree"))
+        self.assertFalse(repository.is_sold("gaming"))
+        self.session("grove")
+        self.assertEqual(self.client.get("/press/collections/gaming/download").status_code, 403)
 
-    def test_current_server_refuses_gaming_to_every_tier_before_any_fetch(self):
-        for tier in ("press", "press_pro", "grove", "tree"):
+    def test_each_component_is_served_exactly_with_named_headers_and_audit(self):
+        for tier in ("grove", "tree"):
+            self.session(tier)
+            self.account.return_value = subscribers.Subscriber("grove-fixture@example.invalid", tier, "fixture")
+            for stem in SERVED:
+                with self.subTest(tier=tier, component=stem):
+                    response, events = self.get(stem)
+                    self.assertEqual(response.status_code, 200, response.text)
+                    self.assertEqual(response.content, self.content[stem])
+                    self.assertEqual(response.headers["x-cedar-sha256"],
+                                     hashlib.sha256(self.content[stem]).hexdigest())
+                    self.assertEqual(response.headers["x-cedar-release"], self.rid[stem])
+                    self.assertEqual(response.headers["x-cedar-component"], stem)
+                    self.assertIn(f'filename="gaming--{stem}-{self.rid[stem]}.jsonl"',
+                                  response.headers["content-disposition"])
+                    self.assertEqual(response.headers["x-cedar-citation"],
+                                     f"Cedar Grove gaming/{stem}, release {self.rid[stem]}")
+                    self.assertEqual((events[0]["outcome"], events[0]["collection_id"], events[0]["component"]),
+                                     ("authorized_prepared", "gaming", stem))
+        # A component's release ID never opens its sibling.
+        response, _ = self.get(SERVED[0], release_id=self.rid[SERVED[1]])
+        self.assertEqual(response.status_code, 503)
+        metadata = repository.grove_release_metadata("gaming")
+        self.assertEqual([m["table_id"] for m in metadata], list(SERVED))
+        self.assertTrue(all(m["download_path"].endswith("&component=" + m["table_id"]) for m in metadata))
+
+    def test_wrong_tier_anonymous_and_stale_accounts_are_denied_before_any_access(self):
+        for tier, status in [(None, 401), ("press", 403), ("press_pro", 403)]:
             with self.subTest(tier=tier):
                 self.session(tier)
-                response, logs = self.get()
-                self.assertEqual(response.status_code, 403)
-                self.assertIn('"collection_id": "unknown"', logs[0])
-        self.fetch.assert_not_called()
-
-    def test_a_cedar_grove_catalog_is_refused_by_the_press_adapter(self):
-        self.product = "cedar_grove"
-        self.write_catalog()
-        self.session("grove")
-        with self.declared():
-            response, logs = self.get()
-        self.assertEqual(response.status_code, 503)
-        self.assertIn("unavailable", logs[0])
-        self.fetch.assert_not_called()
-
-    @unittest.skipUnless(
-        GAMING_KEY in json.loads((ROOT / "data/cedar/field_map.json").read_text(encoding="utf-8"))["tables"],
-        "requires the generated gaming field-map entry")
-    def test_declared_grove_pin_denies_serves_exact_bytes_and_rolls_back(self):
-        expected = b"".join(repository._canonical_bytes(row) for row in self.rows)
-        with self.declared():
-            for tier, status in [(None, 401), ("press", 403), ("press_pro", 403)]:
-                with self.subTest(tier=tier):
-                    self.session(tier)
-                    self.assertEqual(self.get()[0].status_code, status)
-            self.fetch.assert_not_called()
-            for tier in ("grove", "tree"):
-                self.session(tier)
-                self.account.return_value = subscribers.Subscriber(
-                    "grove-fixture@example.invalid", tier, "fixture")
-                response, logs = self.get()
-                self.assertEqual(response.status_code, 200, response.text)
-                self.assertEqual(response.content, expected)
-                self.assertEqual(response.headers["x-cedar-sha256"], hashlib.sha256(expected).hexdigest())
-                self.assertIn("authorized_prepared", logs[0])
-            # Stale account: the same grove cookie after a downgrade, a removal
-            # and an account-store outage never reaches the release.
-            self.session("grove")
-            self.fetch.reset_mock()
-            for account, error, status in [
-                (subscribers.Subscriber("grove-fixture@example.invalid", "press_pro", "fixture"), None, 403),
-                (None, None, 401),
-                (None, RuntimeError("secret-store-detail"), 503),
-            ]:
-                self.account.return_value, self.account.side_effect = account, error
-                response, logs = self.get()
+                response, events = self.get(SERVED[0])
                 self.assertEqual(response.status_code, status)
-                self.assertNotIn("secret-store-detail", response.text + " ".join(logs))
-            self.fetch.assert_not_called()
-            self.account.return_value = subscribers.Subscriber(
-                "grove-fixture@example.invalid", "grove", "fixture")
-            self.account.side_effect = None
-            # A stale pin is refused; rollback re-selects the approved catalog.
-            approved = self.catalog.read_bytes()
-            with self.assertLogs("cedar_press.download", level="INFO"):
-                self.assertEqual(self.client.get(self.URL, params={"release_id": "d" * 64}).status_code, 503)
-            self.catalog.write_text("{}")
-            self.assertEqual(self.get()[0].status_code, 503)
-            self.catalog.write_bytes(approved)
-            response, _ = self.get()
-            self.assertEqual((response.status_code, response.content), (200, expected))
+                self.assertEqual(events[0]["component"], SERVED[0])
+        # Stale account: a grove cookie after a downgrade, a removal and an
+        # account-store outage never reaches the catalog or an artifact.
+        self.session("grove")
+        for account, error, status in [
+            (subscribers.Subscriber("grove-fixture@example.invalid", "press_pro", "fixture"), None, 403),
+            (None, None, 401),
+            (None, RuntimeError("secret-store-detail"), 503),
+        ]:
+            with self.subTest(status=status):
+                self.account.return_value, self.account.side_effect = account, error
+                response, events = self.get(SERVED[1])
+                self.assertEqual(response.status_code, status)
+                self.assertNotIn("secret-store-detail", response.text + json.dumps(events))
+        self.assertEqual(self.fetched, [])
+
+    def test_missing_unknown_or_malformed_component_is_refused_and_redacted(self):
+        self.session("grove")
+        response, events = self.get(None)
+        self.assertEqual((response.status_code, events[0]["outcome"]), (400, "invalid_release_request"))
+        for component in ("private-secret-token", "gaming_facilities", "../legislation"):
+            with self.subTest(component=component):
+                response, events = self.get(component, release_id="c" * 64)
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(events[0]["component"], "unknown")
+                self.assertNotIn(component, json.dumps(events))
+        self.assertEqual(self.fetched, [])
+
+    def test_rollback_restores_every_component_and_stale_pins_are_refused(self):
+        self.session("grove")
+        approved_a = self.catalog.read_bytes()
+        content_a, rid_a = dict(self.content), dict(self.rid)
+        self.version("b", "200")
+        self.write_catalog()
+        for stem in SERVED:
+            response, _ = self.get(stem)
+            self.assertEqual((response.status_code, response.content), (200, self.content[stem]))
+            # A pin the approved catalog no longer names is refused.
+            self.assertEqual(self.get(stem, release_id=rid_a[stem])[0].status_code, 503)
+        self.catalog.write_text("{}")
+        self.assertEqual(self.get(SERVED[0])[0].status_code, 503)
+        # Rollback: reselect catalog A; both components serve A's exact bytes.
+        self.catalog.write_bytes(approved_a)
+        for stem in SERVED:
+            response, _ = self.get(stem, release_id=rid_a[stem])
+            self.assertEqual((response.status_code, response.content), (200, content_a[stem]))
+
+    def test_catalog_product_and_pin_location_are_per_product(self):
+        self.session("grove")
+        # A cedar_press-product catalog at the Grove pin is refused ...
+        self.product = "cedar_press"
+        self.write_catalog()
+        self.assertEqual(self.get(SERVED[0])[0].status_code, 503)
+        # ... and a cedar_grove catalog at the Press pin serves nothing Grove.
+        self.product = "cedar_grove"
+        press_pin = Path(self.temp.name) / "press-catalog.json"
+        self.write_catalog(press_pin)
+        with patch.dict(os.environ, {"CEDAR_PRESS_RELEASE_CATALOG": str(press_pin)}):
+            os.environ.pop("CEDAR_GROVE_RELEASE_CATALOG")
+            self.assertEqual(self.get(SERVED[0])[0].status_code, 503)
+            with self.assertRaises(repository.FullReleaseUnavailable):
+                repository.full_release("legislation", "a" * 64)
+        self.assertEqual(self.fetched, [])
 
 
 if __name__ == "__main__":

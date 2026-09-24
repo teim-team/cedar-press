@@ -875,6 +875,7 @@ PROHIBITED_PUBLIC_COLUMN = re.compile(
     r"duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|"
     r"built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime", re.I)
 _FIELD_MAP: dict = {}
+_FIELD_MAP_ENTRIES: dict = {}
 _REGISTER: dict = {}
 _UID = re.compile(r"^CE-[0-9A-Z]{5}-[0-9A-Z]{2}$")
 
@@ -1088,18 +1089,72 @@ class RetiredIdentifierPresent(FieldMapRefusal):
                          f"recode the vocabulary before this ships")
 
 
-def field_map() -> dict:
-    """collection id -> the map's table entry (with its key)."""
-    global _FIELD_MAP
-    if _FIELD_MAP:
-        return _FIELD_MAP
+def field_map_entries() -> dict:
+    """(collection id, table) -> the map's table entry (with its key).
+
+    The map is keyed `<collection>/<table>`, and `table` here is that part
+    after the slash (the public file's stem). A Press collection has one
+    entry; a Cedar Grove collection may have several governed component
+    entries (Gaming: one per released component table), each with its own
+    grain, key, rights and approved header. Keyed by the pair so a second
+    component can never silently overwrite the first, which a collection-keyed
+    dict did.
+    """
+    global _FIELD_MAP_ENTRIES
+    if _FIELD_MAP_ENTRIES:
+        return _FIELD_MAP_ENTRIES
     if not FIELD_MAP_PATH.exists():
         raise SystemExit(f"cedar_publication: {FIELD_MAP_PATH} is absent - the "
                          f"customer files are generated from it and there is "
                          f"nothing to generate them from")
     data = json.loads(FIELD_MAP_PATH.read_text(encoding="utf-8"))
-    _FIELD_MAP = {t["collection"]: dict(t, key=key)
-                  for key, t in data["tables"].items()}
+    entries = {}
+    for key, t in data["tables"].items():
+        collection, _, table = key.partition("/")
+        if collection != t["collection"] or not table or "/" in table:
+            raise SystemExit(f"cedar_publication: field-map key {key!r} is not "
+                             f"<collection>/<table> for collection {t['collection']!r}")
+        entries[(collection, table)] = dict(t, key=key)
+    _FIELD_MAP_ENTRIES = entries
+    return _FIELD_MAP_ENTRIES
+
+
+def field_map_entry(collection: str, table=None):
+    """One collection's entry, or None when the map does not know it.
+
+    `table` (a stem or a filename) selects a component exactly. Without it the
+    collection must have at most one entry: a multi-component collection is
+    REFUSED rather than resolved to one of its components, so no single-table
+    caller can project a component through another component's header.
+    """
+    if table is not None:
+        return field_map_entries().get((collection, Path(str(table)).stem))
+    found = [e for (c, _), e in field_map_entries().items() if c == collection]
+    if len(found) > 1:
+        raise FieldMapRefusal(collection, [e["key"] for e in found],
+                              f"{len(found)} component entries in the field map; "
+                              f"name the component table")
+    return found[0] if found else None
+
+
+def field_map() -> dict:
+    """collection id -> the map's table entry (with its key).
+
+    Compatibility view for the single-table callers (770, 1135, the tests).
+    Identical to the old map for every collection with one entry. A
+    collection with several component entries maps to its FIRST declared
+    entry (its landing component) so a caller asking "is this collection
+    mapped?" still hears yes; `apply_field_map` refuses to project such a
+    collection unless the caller names the component, so this value is never
+    used to shape one. Component-aware callers use `field_map_entry`.
+    """
+    global _FIELD_MAP
+    if _FIELD_MAP:
+        return _FIELD_MAP
+    out: dict = {}
+    for (collection, _), entry in field_map_entries().items():
+        out.setdefault(collection, entry)
+    _FIELD_MAP = out
     return _FIELD_MAP
 
 
@@ -1302,7 +1357,7 @@ def _rule(entry: dict, spec: str, row: dict, source_of: dict) -> str | None:
 
 
 def apply_field_map(collection: str, header: list, rows: list,
-                    own_cols=None) -> dict:
+                    own_cols=None, *, table=None) -> dict:
     """Rewrite `header` and every row in `rows` IN PLACE to the approved list.
 
     Returns what it did, for the build log, the manifest and the retirement
@@ -1314,9 +1369,13 @@ def apply_field_map(collection: str, header: list, rows: list,
     `own_cols` is the flagship's own header. Columns outside it were
     synthesised by the build (joins and counts); these must be approved targets
     in the same map or the dataset is refused before export.
+
+    `table` names a component of a multi-component (Cedar Grove) collection;
+    see `field_map_entry`. Omitted, a single-entry collection behaves exactly
+    as before and a multi-component collection is refused.
     """
     assert_collection_publishable(collection)
-    entry = field_map().get(collection)
+    entry = field_map_entry(collection, table)
     if not entry or not entry.get("fields"):
         return {"mapped": False}
     own = set(own_cols if own_cols is not None else header)

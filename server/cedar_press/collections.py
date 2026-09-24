@@ -69,6 +69,8 @@ from cedar_press.claims import CLAIM_CLASS
 __all__ = [
     "COLLECTION_FIGURES",
     "EXCLUDED_COLLECTIONS",
+    "GROVE_RELEASE_COLLECTIONS",
+    "GROVE_RELEASE_IDS",
     "LAUNCH_COLLECTION",
     "UNMEASURED_FIELDS",
     "CollectionDataset",
@@ -109,6 +111,25 @@ UNMEASURED_FIELDS: dict[str, str] = dict(_MANIFEST["unmeasured_fields"])
 #: nobody can question.
 EXCLUDED_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
     dict(entry) for entry in _MANIFEST["excluded"]
+)
+
+#: THE reviewed Cedar Grove release declaration: the one place that says which
+#: collections the full-download route may serve from a pinned ``cedar_grove``
+#: catalog. A declared id is served only while the manifest still places it on
+#: the ``grove`` shelf in ``excluded`` (the storefront neither sells nor
+#: previews it), so a collection that moves shelf stops being Grove-served
+#: rather than being served twice. Which COMPONENTS are served is not listed
+#: here: it is the collection's governed field-map entries
+#: (``data/cedar/field_map.json`` keys ``<collection>/<component>``, generated
+#: from ``cedar_pipeline.RELEASE_PILOTS[...]["components"]`` by
+#: ``code/build.py grove-contracts``) that the pinned catalog also pins. Access
+#: reuses the existing tier model: a tier whose shelf reaches ``grove``
+#: (``grove``, ``tree``). No tier, route or catalog format is added.
+GROVE_RELEASE_IDS: tuple[str, ...] = ("gaming",)
+GROVE_RELEASE_COLLECTIONS: tuple[dict[str, str], ...] = tuple(
+    entry
+    for entry in EXCLUDED_COLLECTIONS
+    if entry["id"] in GROVE_RELEASE_IDS and entry.get("shelf") == "grove"
 )
 
 

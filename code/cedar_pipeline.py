@@ -75,25 +75,43 @@ RELEASE_PILOTS = {
     # regional revenue component (producer 1200), NOT `FLAGSHIP["gaming"]`
     # (`gaming_facilities.csv`, Casino City lineage), which this pilot refuses
     # by name until cedar_publication's owner moves FLAGSHIP. Optional keys
-    # used only here: table/replaces_flagship (that bounded override),
-    # product (Lumecon catalog product), time_coverage, identifier_refusals
-    # (refuse provisional PROV-, vendor CCP-/VP-/TPL- and non-CE entity IDs).
+    # used only here: table/replaces_flagship (that bounded override; with
+    # components, `table` is the landing component), product (Lumecon catalog
+    # product), time_coverage, identifier_refusals (refuse provisional PROV-,
+    # vendor CCP-/VP-/TPL- and non-CE entity IDs; unconditional for
+    # components), and components.
+    #
+    # `components` makes the collection a multi-component release unit: an
+    # ordered {component table: its own owner/url/rights/time_coverage/caveats}
+    # (merged over the collection keys above; caveats concatenated). Each
+    # component is released through the same projection path into its own
+    # Lumecon dataset `<collection>--<stem>`, all of them pinned in ONE
+    # catalog, and `grove-contracts` generates one field-map entry per
+    # component. A component also needs a registered public table contract,
+    # public-only field and row rights and a cedar_ids binding for its key.
+    # Adding a component = one entry here + `code/build.py grove-contracts`.
     "gaming": {
-        "owner": "National Indian Gaming Commission gross gaming revenue reports, via Cedar Grove",
-        "url": "https://www.nigc.gov/commission/reports-and-publications/gross-gaming-revenue-reports/",
-        "rights": {"license": "U.S. federal government publication (NIGC); Cedar requires NIGC attribution",
-                   "publication_class": "publishable", "redistribution": True, "retrieval": True},
-        "caveats": ["Cedar Grove research release; not a Cedar Press storefront collection",
-                    "NIGC administrative-region and national totals only; no tribe-, enterprise- or facility-level revenue",
-                    "Regional totals are never allocated to tribes or facilities, by operation count or otherwise",
-                    "Fiscal years FY2001-FY2025 as published; no FY2026 figure or interpolation",
-                    "Nominal and real-2025 dollars are separate fields and never added; region-system vintages are not additive",
-                    "Attribution: National Indian Gaming Commission, Gross Gaming Revenue Reports"],
+        "owner": "Cedar Grove Gaming Intelligence (per-component sources below)",
+        "url": "https://www.nigc.gov/",
+        "caveats": ["Cedar Grove research release; not a Cedar Press storefront collection"],
         "table": "gaming_regional_revenue.csv",
         "replaces_flagship": "gaming_facilities.csv",
         "product": "cedar_grove",
-        "time_coverage": "NIGC fiscal years FY2001-FY2025 (latest published report); no FY2026",
         "identifier_refusals": True,
+        "components": {
+            "gaming_regional_revenue.csv": {
+                "owner": "National Indian Gaming Commission gross gaming revenue reports, via Cedar Grove",
+                "url": "https://www.nigc.gov/commission/reports-and-publications/gross-gaming-revenue-reports/",
+                "rights": {"license": "U.S. federal government publication (NIGC); Cedar requires NIGC attribution",
+                           "publication_class": "publishable", "redistribution": True, "retrieval": True},
+                "caveats": ["NIGC administrative-region and national totals only; no tribe-, enterprise- or facility-level revenue",
+                            "Regional totals are never allocated to tribes or facilities, by operation count or otherwise",
+                            "Fiscal years FY2001-FY2025 as published; no FY2026 figure or interpolation",
+                            "Nominal and real-2025 dollars are separate fields and never added; region-system vintages are not additive",
+                            "Attribution: National Indian Gaming Commission, Gross Gaming Revenue Reports"],
+                "time_coverage": "NIGC fiscal years FY2001-FY2025 (latest published report); no FY2026",
+            },
+        },
     },
 }
 

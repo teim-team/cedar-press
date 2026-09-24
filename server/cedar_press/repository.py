@@ -148,6 +148,54 @@ def may_open(tier: str, collection_id: str) -> bool:
     )
 
 
+def is_grove_release(collection_id: str) -> bool:
+    """Whether ``collections.GROVE_RELEASE_COLLECTIONS`` declares this collection."""
+    return any(entry["id"] == collection_id for entry in launch.GROVE_RELEASE_COLLECTIONS)
+
+
+def may_download_full(tier: str, collection_id: str) -> bool:
+    """Whether this plan may take a pinned full release of this collection.
+
+    The storefront rule (``may_open``) for every Press collection, unchanged.
+    For a collection the reviewed Grove declaration names, the same shelf rule
+    with the ``grove`` shelf: ``grove`` and ``tree`` reach it, ``press`` and
+    ``press_pro`` do not. ``may_open`` itself still refuses Grove collections
+    to every tier, so the shelf, the sample and Ask are unaffected.
+    """
+    if may_open(tier, collection_id):
+        return True
+    return is_grove_release(collection_id) and _reaches(tier, "grove")
+
+
+#: A component id is the field-map key's part after the slash (a table stem);
+#: the same shape ``code/build.py release_dataset_id`` accepts.
+_COMPONENT_ID = re.compile(r"[a-z0-9][a-z0-9_]{0,59}")
+GROVE_COMPONENT_SEPARATOR = "--"
+
+
+def _field_map_tables() -> dict[str, Any]:
+    path = Path(__file__).resolve().parents[2] / "data/cedar/field_map.json"
+    return json.loads(path.read_text(encoding="utf-8"))["tables"]
+
+
+def grove_components(collection_id: str) -> tuple[str, ...]:
+    """A declared Grove collection's governed components, in field-map order.
+
+    Empty for anything the Grove declaration does not name. A component the
+    catalog does not pin is still listed here and is refused at download.
+    """
+    if not is_grove_release(collection_id):
+        return ()
+    prefix = collection_id + "/"
+    return tuple(
+        key[len(prefix) :]
+        for key, entry in _field_map_tables().items()
+        if key.startswith(prefix)
+        and entry.get("collection") == collection_id
+        and _COMPONENT_ID.fullmatch(key[len(prefix) :])
+    )
+
+
 def is_sold(collection_id: str) -> bool:
     """Whether the storefront sells this collection to anybody at all.
 
@@ -337,14 +385,40 @@ def _publication_policy():
     return module
 
 
-def full_release(collection_id, requested_release_id=None, *, metadata_only=False):
+#: Where each product's reviewed catalog is pinned. A Lumecon catalog carries
+#: exactly one product, so Press and Grove are two pins of the same catalog
+#: format rather than one catalog with two meanings.
+RELEASE_CATALOG_ENV = {
+    "cedar_press": "CEDAR_PRESS_RELEASE_CATALOG",
+    "cedar_grove": "CEDAR_GROVE_RELEASE_CATALOG",
+}
+
+
+def full_release(collection_id, requested_release_id=None, *, metadata_only=False, component=None):
     """Exact pinned Lumecon artifact, checked against the existing product field map.
 
     A trusted, reviewed catalog enables a collection; user parameters cannot select
     a different release. Holds remain enforced by the canonical publication owner.
+
+    A Press collection is one flagship, pinned as dataset ``<collection>`` in the
+    ``cedar_press`` catalog, exactly as before (``component``, if given, must name
+    that flagship's table). A collection the Grove declaration names is several
+    governed components: ``component`` is required, and selects dataset
+    ``<collection>--<component>`` in the ``cedar_grove`` catalog and the
+    field-map entry ``<collection>/<component>``; every other check is shared.
     """
-    if not any(item.id == collection_id for item in launch.LAUNCH_COLLECTION):
+    press = any(item.id == collection_id for item in launch.LAUNCH_COLLECTION)
+    grove = not press and is_grove_release(collection_id)
+    if not press and not grove:
         raise FullReleaseUnavailable("Unknown collection")
+    if component is not None and (
+        not isinstance(component, str) or not _COMPONENT_ID.fullmatch(component)
+    ):
+        raise FullReleaseUnavailable("Malformed component")
+    if grove and component is None:
+        raise FullReleaseUnavailable("A Grove release names its component")
+    product = "cedar_grove" if grove else "cedar_press"
+    dataset_id = collection_id + GROVE_COMPONENT_SEPARATOR + component if grove else collection_id
     try:
         policy = _publication_policy()
     except (OSError, ImportError, AttributeError) as error:
@@ -353,7 +427,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
         policy.assert_collection_publishable(collection_id)
     except policy.FieldMapRefusal as error:
         raise FullReleaseUnavailable("Collection publication is held") from error
-    location = os.environ.get("CEDAR_PRESS_RELEASE_CATALOG")
+    location = os.environ.get(RELEASE_CATALOG_ENV[product])
     if not location:
         raise FullReleaseUnavailable("No pinned release catalog configured")
     try:
@@ -368,11 +442,11 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
         if (
             type(catalog.get("schema_version")) is not int
             or catalog["schema_version"] != 1
-            or catalog.get("product") != "cedar_press"
+            or catalog.get("product") != product
             or catalog.get("entitlement_required") is not True
         ):
             raise FullReleaseUnavailable("Wrong product catalog")
-        pins = [item for item in catalog["collections"] if item["dataset_id"] == collection_id]
+        pins = [item for item in catalog["collections"] if item["dataset_id"] == dataset_id]
         if len(pins) != 1:
             raise FullReleaseUnavailable("Exactly one pinned collection release required")
         pin = pins[0]
@@ -386,7 +460,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             r"[0-9a-f]{64}", manifest_digest
         ):
             raise FullReleaseUnavailable("Catalog lacks an approved manifest digest")
-        prefix = f"/v1/datasets/{collection_id}/releases/{release_id}"
+        prefix = f"/v1/datasets/{dataset_id}/releases/{release_id}"
         manifest = _release_json(prefix + "/manifest")
         if not isinstance(manifest, dict) or not isinstance(manifest.get("rights"), dict):
             raise FullReleaseUnavailable("Malformed manifest")
@@ -404,19 +478,20 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
         ):
             raise FullReleaseUnavailable("Release is not eligible for customer delivery")
         header = [field["name"] for field in manifest["fields"]]
-        field_map = json.loads(
-            (Path(__file__).resolve().parents[2] / "data/cedar/field_map.json").read_text(
-                encoding="utf-8"
-            )
-        )
         entries = [
             (name, entry)
-            for name, entry in field_map["tables"].items()
-            if name.startswith(collection_id + "/")
+            for name, entry in _field_map_tables().items()
+            if (
+                name == f"{collection_id}/{component}"
+                if grove
+                else name.startswith(collection_id + "/")
+            )
         ]
         if len(entries) != 1 or header != entries[0][1]["order"]:
             raise FullReleaseUnavailable("Full release does not match product field map")
         table_id = entries[0][0].split("/", 1)[1]
+        if component is not None and component != table_id:
+            raise FullReleaseUnavailable("Component is not this collection's pinned table")
         count = manifest["record_count"]
         expected = manifest["files"]["records.jsonl"]
         if (
@@ -428,6 +503,8 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
         ):
             raise FullReleaseUnavailable("Invalid or oversized release artifact")
         route = f"/press/collections/{collection_id}/full-download?release_id={release_id}"
+        if grove:
+            route += f"&component={component}"
         if metadata_only:
             return {
                 "kind": "full",
@@ -436,7 +513,9 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
                 "record_count": count,
                 "fields": header,
                 "table_id": table_id,
-                "scope": "Pinned flagship table only; ancillary tables excluded",
+                "scope": "One governed component of a Cedar Grove collection"
+                if grove
+                else "Pinned flagship table only; ancillary tables excluded",
                 "format": "jsonl",
                 "records_sha256": expected["sha256"],
                 "download_path": route,
@@ -465,7 +544,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             or len(set(keys)) != count
         ):
             raise FullReleaseUnavailable("Invalid primary keys")
-        return {
+        release = {
             "content": content,
             "release_id": release_id,
             "record_count": count,
@@ -475,10 +554,36 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             "filename": f"{collection_id}-{release_id}.jsonl",
             "media_type": "application/x-ndjson",
         }
+        if grove:
+            release.update(
+                component=table_id,
+                citation=f"Cedar Grove {collection_id}/{table_id}, release {release_id}",
+                filename=f"{dataset_id}-{release_id}.jsonl",
+            )
+        return release
     except (OSError, HTTPException, ValueError, KeyError, TypeError) as error:
         raise FullReleaseUnavailable(
             "Pinned full release unavailable or failed verification"
         ) from error
+
+
+def grove_release_metadata(collection_id):
+    """The landing page's descriptors: one verified entry per governed component.
+
+    ``None`` without a pinned Grove catalog; an unverifiable component is
+    reported as unavailable rather than dropped, and never replaced by a sample.
+    """
+    if not is_grove_release(collection_id) or not os.environ.get(
+        RELEASE_CATALOG_ENV["cedar_grove"]
+    ):
+        return None
+    out = []
+    for component in grove_components(collection_id):
+        try:
+            out.append(full_release(collection_id, metadata_only=True, component=component))
+        except FullReleaseUnavailable:
+            out.append({"kind": "full", "table_id": component, "status": "unavailable"})
+    return out
 
 
 def full_release_metadata(collection_id):

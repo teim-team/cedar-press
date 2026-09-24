@@ -700,12 +700,113 @@ def pilot_identifier_refusals(rows):
     return problems
 
 
+# A release unit is (collection, component table). A pilot whose
+# RELEASE_PILOTS entry declares `components` releases every declared component
+# through the same projection and validation path below and pins them all in
+# ONE catalog; each component is its own Lumecon dataset. Lumecon dataset IDs
+# match [a-z0-9][a-z0-9_-]{0,99} (no slash), so the component's dataset ID is
+# `<collection>--<table stem>`; a pilot without `components` keeps the bare
+# collection ID and its release bytes exactly as before.
+COMPONENT_SEPARATOR = "--"
+_COMPONENT_STEM_RE = re.compile(r"[a-z0-9][a-z0-9_]{0,59}")
+
+
+def release_dataset_id(collection, table=None):
+    """Lumecon dataset ID: the collection, or `<collection>--<stem>` for a component."""
+    if table is None:
+        return collection
+    stem = Path(table).stem
+    if COMPONENT_SEPARATOR in collection or not _COMPONENT_STEM_RE.fullmatch(stem):
+        raise SystemExit(f"REFUSED: {collection}/{table} cannot form a component dataset ID")
+    return collection + COMPONENT_SEPARATOR + stem
+
+
+def pilot_component_config(config, table):
+    """Release metadata for one component: the collection's keys, then the
+    component's own owner/url/rights/time_coverage; caveats concatenated."""
+    own = config["components"][table] or {}
+    merged = {k: v for k, v in config.items() if k != "components"}
+    merged.update({k: v for k, v in own.items() if k != "caveats"})
+    merged["caveats"] = list(config.get("caveats", [])) + list(own.get("caveats", []))
+    missing = [k for k in ("owner", "url", "rights") if not merged.get(k)]
+    if missing:
+        raise SystemExit(f"REFUSED: component {table} declares no {', '.join(missing)}")
+    return merged
+
+
+def pilot_units(collection, config, flagship, sources):
+    """[(table, source, dataset_id, config)] for this run, or a refusal.
+
+    Without `components`: exactly one source, the flagship (unchanged). With
+    `components`: one source per declared component and every declared
+    component present (a catalog is the collection's whole release; a partial
+    one would silently drop a component at the next pin), each source named
+    exactly as its component, the landing table among them, and the replaced
+    vendor flagship never a component.
+    """
+    landing = pilot_table(collection, config, flagship)
+    paths = [Path(s).resolve() for s in sources]
+    if "components" not in config:
+        if len(paths) != 1:
+            raise SystemExit("REFUSED: a single-flagship pilot takes exactly one --source")
+        if paths[0].name != landing:
+            raise SystemExit("REFUSED: source filename must match the declared flagship table")
+        return [(landing, paths[0], collection, config)]
+    declared = list(config["components"])
+    if landing not in declared:
+        raise SystemExit(f"REFUSED: landing table {landing} is not a declared component")
+    if config.get("replaces_flagship") in declared:
+        raise SystemExit("REFUSED: the replaced flagship cannot be a release component")
+    names = [p.name for p in paths]
+    unknown = sorted(n for n in set(names) if n not in declared)
+    if unknown:
+        raise SystemExit("REFUSED: source(s) name no declared component: " + ", ".join(unknown))
+    if len(set(names)) != len(names):
+        raise SystemExit("REFUSED: a component was supplied twice")
+    missing = [t for t in declared if t not in names]
+    if missing:
+        raise SystemExit("REFUSED: component release must supply every declared component; missing "
+                         + ", ".join(missing))
+    by_name = dict(zip(names, paths))
+    return [(t, by_name[t], release_dataset_id(collection, t), pilot_component_config(config, t))
+            for t in declared]
+
+
+def pilot_rights_refusals(collection, entry, header, rows):
+    """Component releases admit only public rights classes, field and row.
+
+    Field rights come from the component's field-map entry (`rights_class`,
+    projected from the producer's `field_rights` by `grove-contracts`); the
+    public set from the collection's shared contract module (gaming ->
+    gaming_grove.PUBLIC_RIGHTS). A shipped field without a public class, or a
+    row whose `rights_class` is not public (secondary_corroboration,
+    internal_*, withheld_*), refuses the component: dropping rows here would
+    break record conservation, so the producer must emit a public-only table.
+    """
+    try:
+        public = set(grove_module(collection).PUBLIC_RIGHTS)
+    except (ImportError, AttributeError):
+        return [f"no shared rights vocabulary for {collection}"]
+    problems = []
+    for field in entry.get("fields", []):
+        if field["decision"] in ("keep", "rename", "withhold") and field.get("rights_class") not in public:
+            problems.append(f"field {field['column']} ships with rights class "
+                            f"{field.get('rights_class') or 'UNDECLARED'}")
+    if "rights_class" in header:
+        bad = sorted({row.get("rights_class") or "" for row in rows} - public)
+        if bad:
+            problems.append("row rights class(es) not public: " + ", ".join(v or "BLANK" for v in bad))
+    return problems
+
+
 def cmd_release_pilot(args):
-    """Project one existing flagship through its approved contract; never promote."""
+    """Project an existing flagship, or every declared component, through the
+    approved contracts into immutable Lumecon releases and ONE catalog; never promote."""
     import csv
     import json
     import hashlib
     import importlib.util
+    import io
     from lumecon_data.contracts import DatasetContract
     from lumecon_data.pipeline import ingest_csv, build_release, verify_release
     from lumecon_data.catalog import build_catalog
@@ -715,115 +816,149 @@ def cmd_release_pilot(args):
 
     collection = args.collection
     config = CP.RELEASE_PILOTS[collection]
+    component_mode = "components" in config
     authority_root = HERE.parent
     authorities = pilot_authority_hashes(authority_root)
-    table = pilot_table(collection, config, publication.FLAGSHIP)
-    table_contract = pilot_table_contract(collection, table)
-    keys = table_contract["primary_key"]
-    if not keys:
-        raise SystemExit("REFUSED: flagship has no declared primary key")
-    source = Path(args.source).resolve()
-    if source.name != table:
-        raise SystemExit("REFUSED: source filename must match the declared flagship table")
+    sources = [args.source] if isinstance(args.source, str) else list(args.source)
+    units = pilot_units(collection, config, publication.FLAGSHIP, sources)
     # Check the supplied path before resolve can conceal symlink components.
     target = checked_path(Path(args.output_root)).resolve()
-    assert_pilot_target(source, target)
-    original = source.read_bytes()
-    import io
-    original_rows = pilot_source_rows(original)
-    if config.get("identifier_refusals"):
-        refused = pilot_identifier_refusals(original_rows)
-        if refused:
-            raise SystemExit("REFUSED: " + "; ".join(refused))
-    validate_unique_record_keys(original_rows, keys)
     spec = importlib.util.spec_from_file_location("pilot_combiner", Path(__file__).with_name("1137_customer_dataset_combine.py"))
     combine = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(combine)
-    header, records, held = combine.load(source, source_bytes=original)
-    own = set(header)
-    publication.recompute_derived(collection, header, records)
-    result = publication.apply_field_map(collection, header, records, own)
-    if not result.get("mapped"):
-        # An unmapped collection passes through apply_field_map unchanged, which
-        # would release every column. A release needs an approved field map.
-        raise SystemExit("REFUSED: no approved field-map entry for this flagship")
-    if result.get("owed") or held:
-        raise SystemExit("REFUSED: pilot has held records or owed public fields")
-    validate_unique_record_keys(records, keys)
-    assert_pilot_conservation(original_rows, records, keys)
     register = publication.register()
     ce = identifier_contract("identity", "cedar_identity_register.csv", "cedar_uid")
-    public_contract = publication.field_map()[collection]
-    try:
-        record_contracts = {key: identifier_contract(collection, table, key) for key in keys}
-    except ValueError as error:
-        raise SystemExit(f"REFUSED: no declared identifier binding for {collection}/{table} "
-                         f"primary key {keys}; release waits for cedar_ids ({error})") from error
-    source_keys = {key: {row[key] for row in original_rows} for key in keys}
-    for row in records:
-        for key in keys:
-            binding = record_contracts[key]
-            validate_identifier(row[key], binding, registered_ids=source_keys[key],
-                                source_system=binding.mint_authority)
-        if public_contract.get("plural"):
-            values = json.loads(row["cedar_uids"])
-            arrays = [json.loads(row[name]) for name in ("canonical_names", "entity_classes", "entity_roles", "entity_names_as_published", "entity_link_statuses")]
-            if any(len(values) != len(array) for array in arrays):
-                raise SystemExit("REFUSED: misaligned entity-role arrays")
-        else:
-            values = [row.get("cedar_uid") or None]
-        for value in values:
-            if value is not None:
-                validate_identifier(value, ce, registered_ids=register)
-    buffer = io.StringIO(newline="")
-    writer = csv.DictWriter(buffer, fieldnames=header, lineterminator="\n")
-    writer.writeheader()
-    writer.writerows(records)
-    public_bytes = buffer.getvalue().encode("utf-8")
+
+    # Phase 1: project and validate EVERY unit before anything is written, so
+    # one refused component stops the whole collection release, artifact-free.
+    projected = []
+    for table, source, dataset_id, unit_config in units:
+        table_contract = pilot_table_contract(collection, table)
+        keys = table_contract["primary_key"]
+        if not keys:
+            raise SystemExit("REFUSED: flagship has no declared primary key")
+        if component_mode and table_contract.get("publication_status", "public") != "public":
+            raise SystemExit(f"REFUSED: component {table} is {table_contract['publication_status']}, not public")
+        assert_pilot_target(source, target)
+        original = source.read_bytes()
+        original_rows = pilot_source_rows(original)
+        # Unconditional for components; opt-in (unchanged) for single flagships.
+        if config.get("identifier_refusals") or component_mode:
+            refused = pilot_identifier_refusals(original_rows)
+            if refused:
+                raise SystemExit("REFUSED: " + (table + ": " if component_mode else "") + "; ".join(refused))
+        validate_unique_record_keys(original_rows, keys)
+        header, records, held = combine.load(source, source_bytes=original)
+        own = set(header)
+        selector = table if component_mode else None
+        public_contract = publication.field_map_entry(collection, selector)
+        if component_mode and public_contract:
+            refused = pilot_rights_refusals(collection, public_contract, header, records)
+            if refused:
+                raise SystemExit(f"REFUSED: {table}: " + "; ".join(refused))
+        publication.recompute_derived(collection, header, records)
+        result = publication.apply_field_map(collection, header, records, own, table=selector)
+        if not result.get("mapped"):
+            # An unmapped collection passes through apply_field_map unchanged, which
+            # would release every column. A release needs an approved field map.
+            raise SystemExit("REFUSED: no approved field-map entry for this flagship"
+                             + (f" component {table}" if component_mode else ""))
+        if result.get("owed") or held:
+            raise SystemExit("REFUSED: pilot has held records or owed public fields")
+        validate_unique_record_keys(records, keys)
+        assert_pilot_conservation(original_rows, records, keys)
+        try:
+            record_contracts = {key: identifier_contract(collection, table, key) for key in keys}
+        except ValueError as error:
+            raise SystemExit(f"REFUSED: no declared identifier binding for {collection}/{table} "
+                             f"primary key {keys}; release waits for cedar_ids ({error})") from error
+        source_keys = {key: {row[key] for row in original_rows} for key in keys}
+        for row in records:
+            for key in keys:
+                binding = record_contracts[key]
+                validate_identifier(row[key], binding, registered_ids=source_keys[key],
+                                    source_system=binding.mint_authority)
+            if public_contract.get("plural"):
+                values = json.loads(row["cedar_uids"])
+                arrays = [json.loads(row[name]) for name in ("canonical_names", "entity_classes", "entity_roles", "entity_names_as_published", "entity_link_statuses")]
+                if any(len(values) != len(array) for array in arrays):
+                    raise SystemExit("REFUSED: misaligned entity-role arrays")
+            else:
+                values = [row.get("cedar_uid") or None]
+            for value in values:
+                if value is not None:
+                    validate_identifier(value, ce, registered_ids=register)
+        buffer = io.StringIO(newline="")
+        writer = csv.DictWriter(buffer, fieldnames=header, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(records)
+        projected.append((table, source, dataset_id, unit_config, table_contract, keys, original,
+                          header, records, public_contract, buffer.getvalue().encode("utf-8")))
     if pilot_authority_hashes(authority_root) != authorities:
         raise SystemExit("REFUSED: projection authority changed during candidate build")
-    artifact = target / "intake" / collection / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
-    immutable_bytes(artifact, public_bytes)
-    missing_urls = ["/".join(row[key] for key in keys) for row in records if not row.get("source_url")]
+
+    # Phase 2: one immutable Lumecon release per unit, then ONE catalog.
     authority_hashes = [relative + (" ABSENT" if digest == "ABSENT" else " SHA256 " + digest)
                         for relative, digest in authorities.items()]
     authority_hashes.append("Resolved entity/name/role register SHA256 " + hashlib.sha256(canonical_json(register)).hexdigest())
-    identity = None
-    if "cedar_uid" in header:
-        existing_ids = {row["cedar_uid"] for row in records if row.get("cedar_uid")}
-        identity = {"mode": "registered_reference", "source_field": "cedar_uid", "target_field": "cedar_uid",
-                    "namespace": "native_entity", "registry_version": hashlib.sha256(canonical_json(register)).hexdigest(),
-                    **CP.REFERENCE_PRESERVATION_AUTHORITY,
-                    "mapping": {uid: uid for uid in sorted(existing_ids)}}
-    contract = DatasetContract.model_validate({
-        "dataset_id": collection, "source_id": "cedar-approved-" + collection + "-projection",
-        "title": "Cedar " + collection + " flagship - local integration candidate",
-        "row_grain": table_contract["grain"],
-        "primary_key": keys,
-        "fields": [{"name": name, "type": "string", "nullable": name not in keys, "description": "Existing Cedar field_map " + collection + " contract: " + name} for name in header],
-        "identity": identity,
-        "source": {"owner": config["owner"], "url": config["url"],
-            "checked_at": args.as_of, "access_method": "manual_import", "jurisdiction": "United States",
-            "coverage": "Pinned existing flagship, not a new acquisition or completeness certificate",
-            "cadence": "Local integration candidate only", "terms_notes": "Existing approved Cedar publication field map; internal fields removed before intake",
-            "caveats": ["Canonical input SHA256: " + hashlib.sha256(original).hexdigest(),
-                "Source cutoff not independently refreshed",
-                "Missing source URLs for historical types: " + ", ".join(missing_urls),
-                "Not the full collection; no production promotion"] + config["caveats"] + authority_hashes},
-        "rights": config["rights"],
-        "synthetic": False, "geography": "United States",
-        "time_coverage": config.get("time_coverage", "Existing historical register including 2025 and 2026; source lag unmeasured")})
-    snapshot = ingest_csv(contract, artifact, target)
-    manifest = build_release(contract, snapshot["snapshot_id"], target)
-    second = build_release(contract, snapshot["snapshot_id"], target)
-    if (manifest["release_id"] != second["release_id"] or source.read_bytes() != original
-            or pilot_authority_hashes(authority_root) != authorities):
-        raise SystemExit("REFUSED: nondeterministic release or changed canonical input/authority")
-    verify_release(target, collection, manifest["release_id"])
-    catalog = build_catalog(target, [(collection, manifest["release_id"])],
+    released = []
+    for (table, source, dataset_id, unit_config, table_contract, keys, original, header, records,
+         public_contract, public_bytes) in projected:
+        artifact = target / "intake" / dataset_id / (hashlib.sha256(public_bytes).hexdigest() + ".csv")
+        immutable_bytes(artifact, public_bytes)
+        missing_urls = ["/".join(row[key] for key in keys) for row in records if not row.get("source_url")]
+        identity = None
+        if "cedar_uid" in header:
+            existing_ids = {row["cedar_uid"] for row in records if row.get("cedar_uid")}
+            identity = {"mode": "registered_reference", "source_field": "cedar_uid", "target_field": "cedar_uid",
+                        "namespace": "native_entity", "registry_version": hashlib.sha256(canonical_json(register)).hexdigest(),
+                        **CP.REFERENCE_PRESERVATION_AUTHORITY,
+                        "mapping": {uid: uid for uid in sorted(existing_ids)}}
+        if component_mode:
+            title = f"Cedar {collection} component {Path(table).stem} - local integration candidate"
+            described = "Existing Cedar field_map " + public_contract["key"] + " contract: "
+            scope = ("One governed component of the collection, released with its declared "
+                     "sibling components in one catalog; no production promotion")
+        else:
+            title = "Cedar " + collection + " flagship - local integration candidate"
+            described = "Existing Cedar field_map " + collection + " contract: "
+            scope = "Not the full collection; no production promotion"
+        contract = DatasetContract.model_validate({
+            "dataset_id": dataset_id, "source_id": "cedar-approved-" + dataset_id + "-projection",
+            "title": title,
+            "row_grain": table_contract["grain"],
+            "primary_key": keys,
+            "fields": [{"name": name, "type": "string", "nullable": name not in keys, "description": described + name} for name in header],
+            "identity": identity,
+            "source": {"owner": unit_config["owner"], "url": unit_config["url"],
+                "checked_at": args.as_of, "access_method": "manual_import", "jurisdiction": "United States",
+                "coverage": "Pinned existing flagship, not a new acquisition or completeness certificate",
+                "cadence": "Local integration candidate only", "terms_notes": "Existing approved Cedar publication field map; internal fields removed before intake",
+                "caveats": ["Canonical input SHA256: " + hashlib.sha256(original).hexdigest(),
+                    "Source cutoff not independently refreshed",
+                    "Missing source URLs for historical types: " + ", ".join(missing_urls),
+                    scope] + unit_config["caveats"] + authority_hashes},
+            "rights": unit_config["rights"],
+            "synthetic": False, "geography": "United States",
+            "time_coverage": unit_config.get("time_coverage", "Existing historical register including 2025 and 2026; source lag unmeasured")})
+        snapshot = ingest_csv(contract, artifact, target)
+        manifest = build_release(contract, snapshot["snapshot_id"], target)
+        second = build_release(contract, snapshot["snapshot_id"], target)
+        if (manifest["release_id"] != second["release_id"] or source.read_bytes() != original
+                or pilot_authority_hashes(authority_root) != authorities):
+            raise SystemExit("REFUSED: nondeterministic release or changed canonical input/authority")
+        verify_release(target, dataset_id, manifest["release_id"])
+        released.append({"table": table, "dataset_id": dataset_id, "release_id": manifest["release_id"],
+                         "record_count": manifest["record_count"]})
+    catalog = build_catalog(target, [(item["dataset_id"], item["release_id"]) for item in released],
                             product=config.get("product", "cedar_press"))
     immutable_bytes(target / "catalogs" / (catalog["catalog_id"] + ".json"), canonical_json(catalog))
-    print(json.dumps({"release_id": manifest["release_id"], "record_count": manifest["record_count"], "catalog": str(target / "catalogs" / (catalog["catalog_id"] + ".json")), "status": "LOCAL_CANDIDATE_NOT_PROMOTED"}))
+    where = str(target / "catalogs" / (catalog["catalog_id"] + ".json"))
+    if component_mode:
+        print(json.dumps({"catalog": where, "components": released, "status": "LOCAL_CANDIDATE_NOT_PROMOTED"}))
+    else:
+        print(json.dumps({"release_id": released[0]["release_id"], "record_count": released[0]["record_count"],
+                          "catalog": where, "status": "LOCAL_CANDIDATE_NOT_PROMOTED"}))
     return 0
 
 
@@ -841,7 +976,7 @@ def cmd_release_pilot(args):
 # table with the shared validators, cross-table references, input and code
 # conservation, and ONE candidate manifest in the NEED candidate's shape. It
 # never publishes, promotes or mints: release stays with `release-pilot`, which
-# hands a single approved flagship to Lumecon.
+# hands the pilot's declared component tables to Lumecon, pinned in one catalog.
 GROVE_CODE = HERE            # tests point this at synthetic fixture producers
 GROVE_SAMPLE_ROWS = 10
 GROVE_CONTRACT_KEYS = ("grain", "primary_key", "field_rights", "field_descriptions",
@@ -1355,9 +1490,11 @@ def grove_field_map_entry(collection, script, table, contract):
     rights = contract["field_rights"]
     header = list(rights)
     public = [c for c in header if rights[c] in g.PUBLIC_RIGHTS]
+    # `rights_class` rides on every field so release-pilot can refuse a shipped
+    # field whose class is not public, whatever its decision says.
     fields = [{"column": c, "decision": "keep" if rights[c] in g.PUBLIC_RIGHTS else "internal",
                "why": f"Grove field rights {rights[c]}: {g.RIGHTS_CLASSES[rights[c]]}",
-               "spec": f"code/{script} CONTRACTS"} for c in header]
+               "spec": f"code/{script} CONTRACTS", "rights_class": rights[c]} for c in header]
     order, new = list(public), []
     if "research_note" not in header:
         order.append("research_note")
@@ -1375,22 +1512,38 @@ def grove_field_map_entry(collection, script, table, contract):
     }
 
 
-def grove_field_map(collection, producers, text):
-    """field_map.json with the Grove pilot's entry regenerated (only that entry)."""
-    data = json.loads(text)
+def grove_release_tables(collection):
+    """The pilot's release tables in declared order: its `components`, else its one `table`."""
     config = CP.RELEASE_PILOTS.get(collection, {})
-    table = config.get("table")
+    if "components" in config:
+        return list(config["components"])
+    return [config["table"]] if config.get("table") else []
+
+
+def grove_field_map(collection, producers, text):
+    """field_map.json with the Grove pilot's generated entries regenerated: one
+    `<collection>/<stem>` entry per declared release component, in declared
+    order (the first is the landing component). Nothing else is touched."""
+    data = json.loads(text)
+    tables = grove_release_tables(collection)
     stale = [k for k, t in data["tables"].items()
              if t.get("collection") == collection and "grove-contracts" in t.get("header_source", "")]
     for k in stale:
         data["tables"].pop(k)
-    owner = [(s, m.CONTRACTS[table]) for s, _, m in producers if table and table in m.CONTRACTS]
-    if owner:
+    owners = {t: (s, m.CONTRACTS[t]) for s, _, m in producers for t in tables if t in m.CONTRACTS}
+    # A fixture producer set that owns none of the declared tables writes no
+    # entry (unchanged); owning some but not all is a declaration error.
+    unowned = [t for t in tables if t not in owners]
+    if owners and unowned:
+        raise SystemExit(f"REFUSED: declared release component(s) with no producer contract: {unowned}")
+    if owners:
         others = [k for k, t in data["tables"].items() if t.get("collection") == collection]
         if others:
             raise SystemExit(f"REFUSED: {collection} already has a hand-written field-map entry {others}")
-        script, contract = owner[0]
-        data["tables"][collection + "/" + Path(table).stem] = grove_field_map_entry(collection, script, table, contract)
+        for table in tables:
+            script, contract = owners[table]
+            data["tables"][collection + "/" + Path(table).stem] = grove_field_map_entry(
+                collection, script, table, contract)
     return (json.dumps(data, indent=1, ensure_ascii=False) + "\n").encode("utf-8")
 
 
@@ -1411,7 +1564,8 @@ def grove_contract_doc(collection, producers, contracts_bytes):
     p("")
     p("Build: `py -3 code/build.py candidate " + collection + " --input-root <Cedar data root> "
       "--output-root <new root outside Git> --as-of <YYYY-MM-DD> [--previous <prior candidate root>]`. "
-      "Release (one approved flagship): `code/build.py release-pilot " + collection + "`.")
+      "Release (every component declared in `cedar_pipeline.RELEASE_PILOTS`, one catalog): "
+      "`code/build.py release-pilot " + collection + " --source <component.csv> [--source ...]`.")
     p("")
     p("## Producers, in run order")
     p("")
@@ -1529,9 +1683,10 @@ def main() -> int:
     grove.add_argument("collection", choices=sorted(CP.GROVE_COMPONENTS))
     grove.add_argument("--check", action="store_true", help="exit 1 if any generated output is stale; write nothing")
     grove.set_defaults(func=cmd_grove_contracts)
-    pilot = sub.add_parser("release-pilot", help="unpublished allowlisted flagship via existing Lumecon contracts")
+    pilot = sub.add_parser("release-pilot", help="unpublished allowlisted flagship, or every declared component, via existing Lumecon contracts")
     pilot.add_argument("collection", choices=sorted(CP.RELEASE_PILOTS))
-    pilot.add_argument("--source", required=True)
+    pilot.add_argument("--source", required=True, action="append",
+                       help="the flagship CSV; for a pilot declaring components, once per component")
     pilot.add_argument("--output-root", required=True)
     pilot.add_argument("--as-of", required=True)
     pilot.set_defaults(func=cmd_release_pilot)
