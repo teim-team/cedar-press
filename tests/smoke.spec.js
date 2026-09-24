@@ -238,12 +238,12 @@ test.describe("the gate", () => {
     expect(errors).toEqual([]);
   });
 
-  // Cedar on the door answers from a prepared bank (doorCedar.js) and never
-  // reaches the network. The three things that matter: it answers, it says
-  // the answers are prepared, and it refuses what it does not have rather
-  // than guessing — a door assistant that improvises about a research
-  // product is worse than none.
-  test("Cedar on the door answers from the prepared bank", async ({ page }) => {
+  // Cedar on the door answers from its own bank (doorCedar.js) and never
+  // reaches the network. The three things that matter: it answers, it sets
+  // the same expectation the site's Cedar sets, and it says so when it has
+  // nothing for a question rather than guessing — a door assistant that
+  // improvises about a research product is worse than none.
+  test("Cedar on the door answers from its own bank", async ({ page }) => {
     const errors = watchConsole(page);
     await page.goto("/");
     await openDoorCedar(page);
@@ -256,11 +256,12 @@ test.describe("the gate", () => {
     // it arrives empty with starters. Either way there is a bot turn to read.
     const chip = page.locator(".cp-dc__chip").first();
     if (await chip.count()) await chip.click();
-    await expect(page.locator(".cp-dc__msg--bot").nth(1)).toBeVisible();
-    // A question it has nothing for is refused, not answered.
+    const answered = page.locator(".cp-dc__msg--bot:not([aria-hidden])");
+    await expect(answered.nth(1)).toBeVisible();
+    // A question it has nothing for is said to be so, not answered.
     await page.locator(".cp-dc__input").fill("what is the weather in Oslo");
     await page.locator(".cp-dc__send").click();
-    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText("do not have that one");
+    await expect(answered.last()).toContainText("do not have that one");
     expect(errors).toEqual([]);
   });
 
@@ -1268,6 +1269,13 @@ test.describe("Ask Cedar", () => {
       expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
     }
 
+    // This build is standalone: nothing reaches the collections. The
+    // composer is disabled, and so are the starters, which used to render
+    // scoped chips whose every tap became a NOT_CONNECTED error turn.
+    await expect(panel.locator(".cp-dc__input")).toBeDisabled();
+    await expect(panel.locator(".cp-dc__chip")).toHaveCount(0);
+    await expect(panel.locator(".cp-dc__bubble").first()).toContainText("can't reach the collections");
+
     if (testInfo.project.name === "phone") {
       // The launcher is hidden while a full-screen dialog is up — it would
       // sit on top of the answer, and it is no longer the way out. The
@@ -1278,6 +1286,144 @@ test.describe("Ask Cedar", () => {
       await launcher.click();
     }
     await expect(panel).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("the Cedar panel is the site's panel", () => {
+  // THE OWNER PUT THE TWO SIDE BY SIDE. "The website chat we have for cedar
+  // is better and not as wide as it is for cedar press." So the Press panel
+  // is now lumecon.ai's panel, and this holds it there by measurement rather
+  // than by reading the stylesheet.
+  //
+  // The numbers are the site's, measured off its built page on 2026-09-23
+  // (`CedarFAB.astro`'s `.cedar-fab-panel` with `cedar-chat.css`): at 1280,
+  // 1440 and 1920 wide by 900 high the open panel is 380 x 577.88 with 24px
+  // to the window's right edge and none to its bottom; the transcript sits
+  // at its 400px cap. The height is 1px of border, a 66.77px header, the
+  // 400px transcript, a 67.39px composer and a three-line note of 42.72px,
+  // so a note that wraps to four lines is the one thing that moves it, and
+  // this would name it.
+  const SITE = { width: 380, height: 577.88, rightGap: 24, bottomGap: 0 };
+  const TOLERANCE = 2;
+
+  const measure = async (panel, page) => {
+    await settled(panel);
+    const box = await panel.boundingBox();
+    const viewport = page.viewportSize();
+    return { width: box.width, height: box.height, rightGap: viewport.width - (box.x + box.width), bottomGap: viewport.height - (box.y + box.height) };
+  };
+  const expectSite = (got) => {
+    for (const key of Object.keys(SITE)) {
+      expect(Math.abs(got[key] - SITE[key]), `${key}: ${got[key]} against the site's ${SITE[key]}`).toBeLessThanOrEqual(TOLERANCE);
+    }
+  };
+
+  for (const width of [1280, 1440, 1920]) {
+    test(`at ${width} wide the door's panel measures the site's`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "desktop", "a desktop layout question");
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      await page.evaluate(() => document.fonts.ready);
+      await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+      await page.mouse.wheel(0, 1400);
+      await page.locator(".cp-dc__fab").click();
+      const panel = page.locator(".cp-dc__panel");
+      expectSite(await measure(panel, page));
+      // And after an exchange: the site's transcript is at its cap by then,
+      // and this one does not grow on the first answer.
+      await page.locator(".cp-dc__chip").first().click();
+      await expect(page.locator(".cp-dc__msg--bot:not([aria-hidden])").nth(1)).toBeVisible();
+      expectSite(await measure(panel, page));
+    });
+
+    test(`at ${width} wide the reader's panel measures the site's`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "desktop", "a desktop layout question");
+      await page.setViewportSize({ width, height: 900 });
+      await signIn(page);
+      await page.evaluate(() => document.fonts.ready);
+      // The widget is a child of the page's entering `main`, whose transform
+      // is its fixed descendants' containing block for the 340ms it runs.
+      await page.waitForFunction(() => {
+        const box = document.querySelector(".cedar-widget__launcher")?.getBoundingClientRect();
+        return Boolean(box) && box.bottom <= innerHeight && box.top >= 0;
+      });
+      await page.locator(".cedar-widget__launcher").click();
+      const panel = page.getByRole("dialog", { name: /ask cedar/i });
+      expectSite(await measure(panel, page));
+    });
+  }
+
+  // The door reads as a conversation: it remembers the last topic, goes
+  // deeper on it when asked, and when it has nothing for a question it says
+  // so and offers the closest things it can speak to. Before this it refused
+  // "tell me more" as a question it had nothing for, and every miss printed
+  // the same sentence.
+  test("the door keeps the thread: a follow-up goes deeper and a miss offers the closest topics", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await page.locator(".cp-dc__fab").click();
+    const answered = page.locator(".cp-dc__msg--bot:not([aria-hidden])");
+    const ask = async (text) => {
+      const before = await answered.count();
+      await page.locator(".cp-dc__input").fill(text);
+      await page.locator(".cp-dc__send").click();
+      await expect(answered).toHaveCount(before + 1);
+      return answered.last();
+    };
+
+    await expect(await ask("what is in the deals collection")).toContainText("It is included in Cedar Press");
+    // The starters are gone; the next questions ride under the answer, and
+    // the first of them is the way deeper.
+    await expect(page.locator(".cp-dc__chip")).toHaveCount(0);
+    const more = page.locator(".cp-dc__follow", { hasText: "Tell me more" });
+    await expect(more).toBeVisible();
+    await more.click();
+    await expect(page.locator(".cp-dc__msg--you").last()).toContainText("Tell me more");
+    await expect(answered.last()).toContainText("Going deeper on how Deals is built");
+    // Deeper is not offered twice.
+    await expect(page.locator(".cp-dc__follow", { hasText: "Tell me more" })).toHaveCount(0);
+
+    const miss = await ask("what is the weather in Oslo");
+    await expect(miss).toContainText("I do not have that one here on the front page");
+    await expect(miss).toContainText("closest things I can speak to");
+    const offered = page.locator(".cp-dc__follow");
+    await expect(offered.first()).toBeVisible();
+    expect(await offered.count()).toBeLessThanOrEqual(3);
+    // The note under the composer is the site's, not a description of the
+    // machinery.
+    await expect(page.locator(".cp-dc__disclaimer")).toContainText("Verify important details");
+    await expect(page.locator(".cp-dc__disclaimer")).not.toContainText("prepared");
+    expect(errors).toEqual([]);
+  });
+
+  // A page-level "Ask Cedar about this collection" while a turn is still
+  // composing (the pause runs up to 1.6s) replaces that turn. It used to be
+  // dropped at the hook's one-at-a-time guard: the panel reopened, the
+  // collection question never appeared, and the earlier answer landed instead.
+  test("a collection asked for while the door is composing replaces the turn in flight", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await page.locator(".cp-hero3__proof").scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 1400);
+    await page.locator(".cp-dc__fab").click();
+    await page.locator(".cp-dc__input").fill("what is nagpra");
+    await page.locator(".cp-dc__send").click();
+    await expect(page.locator(".cp-dc__bubble--typing")).toBeVisible();
+    // Mid-pause: close, then ask for a collection from the page.
+    await page.locator(".cp-dc__close").click();
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent("cedar:ask-collection", { detail: { id: "deals", name: "Deals in Indian Country" } }));
+    });
+    const answered = page.locator(".cp-dc__msg--bot:not([aria-hidden])");
+    await expect(page.locator(".cp-dc__msg--you").last()).toContainText("What is in Deals in Indian Country?");
+    await expect(answered.last()).toContainText("It is included in Cedar Press");
+    await expect(answered.last()).not.toContainText("Notices of Inventory Completion");
+    // The replaced turn's answer never lands, even after its pause would have ended.
+    await page.waitForTimeout(1800);
+    await expect(answered).toHaveCount(2);
     expect(errors).toEqual([]);
   });
 });
