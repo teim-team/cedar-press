@@ -205,8 +205,8 @@ def main(dry_run=False):
     if not inbox:
         raise SystemExit("No rulings_inbox_*.csv found in review/")
 
-    if any(r.get("queue") in {"need_field", "need_affiliation"}
-           or (r.get("review_id") or "").startswith("NEED:") for r in inbox):
+    if any(r.get("queue") in {"need_field", "need_affiliation", "launch_control"}
+           or (r.get("review_id") or "").startswith(("NEED:", "LAUNCH:")) for r in inbox):
         raise SystemExit("NEED review decisions require --need-review; legacy propagation refused")
 
     ledger, fields, union = load_base()
@@ -601,7 +601,46 @@ NEED_REVIEW_COLUMNS = [
 NEED_RECEIPT_SCHEMA = "cedar.need.review.receipts.v1"
 
 
-def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
+def launch_item_fingerprint(item):
+    """Bind substantive decision context, not queue ordering or workflow status."""
+    fields = ("id", "collection", "title", "blocker_type", "question", "options", "evidence", "source_hashes")
+    context = {key: item[key] for key in fields if key in item}
+    return hashlib.sha256(json.dumps(context, sort_keys=True, ensure_ascii=True,
+                                     separators=(",", ":")).encode()).hexdigest()
+
+
+def validate_launch_queue(queue):
+    """Validate the launch view of the existing receipt-only review contract."""
+    if queue.get("schema") != "cedar.launch.review.v1":
+        raise ValueError("Unknown launch queue schema")
+    items = queue.get("items")
+    if not isinstance(items, list) or not items:
+        raise ValueError("Launch queue has no items")
+    seen = set()
+    for item in items:
+        required = {"id", "collection", "title", "blocker_type", "impact", "priority",
+                    "question", "options", "evidence", "recommendation", "confidence",
+                    "status", "decision_provenance", "evidence_fingerprint"}
+        if not required.issubset(item):
+            raise ValueError("Incomplete launch queue item")
+        if not re.fullmatch(r"LAUNCH:[A-Z0-9_-]+", item["id"]) or item["id"] in seen:
+            raise ValueError("Invalid or duplicate launch queue ID")
+        seen.add(item["id"])
+        if item["blocker_type"] not in {"human adjudication", "product/policy decision",
+                                       "engineering defect", "missing source", "external limitation"}:
+            raise ValueError("Unknown blocker type")
+        options = item["options"]
+        if not isinstance(options, dict) or not options or "HOLD" not in options:
+            raise ValueError("Explicit choices and HOLD required")
+        if any(not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", key) for key in options):
+            raise ValueError("Invalid option code")
+        expected = launch_item_fingerprint(item)
+        if item["evidence_fingerprint"] != expected:
+            raise ValueError("Launch item fingerprint mismatch")
+    return {item["id"]: item for item in items}
+
+
+def record_need_review(csv_path, queue_path, receipt_path, dry_run=False, launch=False):
     """Record review history only. Never apply identity or publication rulings."""
     csv_path, queue_path, receipt_path = map(Path, (csv_path, queue_path, receipt_path))
     receipt_path = receipt_path.resolve()
@@ -614,7 +653,8 @@ def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
     fingerprint = queue["evidence_fingerprint"]
     if not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
         raise ValueError("Invalid queue evidence fingerprint")
-    candidate = Path(queue["candidate_root"]).resolve()
+    candidate = ((queue_path.resolve().parent / queue["candidate_root"]).resolve() if launch
+                 else Path(queue["candidate_root"]).resolve())
     for relative, expected in queue["input_sha256"].items():
         source = (candidate / relative).resolve()
         if not source.is_relative_to(candidate):
@@ -623,8 +663,9 @@ def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
             actual = hashlib.file_digest(handle, "sha256").hexdigest()
         if actual != expected:
             raise ValueError("Stale queue input: " + relative)
-    cases = {"NEED:" + r["enterprise"]["enterprise_id"]: r
-             for r in queue["records"] if r["exception"]}
+    cases = (validate_launch_queue(queue) if launch else
+             {"NEED:" + r["enterprise"]["enterprise_id"]: r
+              for r in queue["records"] if r["exception"]})
     field_case = "NEED:enterprise_existing_cedar_uid"
     with csv_path.open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
@@ -633,7 +674,7 @@ def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
         incoming = list(reader)
     if not incoming:
         raise ValueError("No explicit decisions in review CSV")
-    for row in incoming:
+    def validate_new_decision(row):
         if set(row) != set(NEED_REVIEW_COLUMNS) or any(v is None for v in row.values()):
             raise ValueError("Malformed NEED review row")
         for key in ("decision_id", "reviewer", "decided_at", "YOUR_NOTE", "question"):
@@ -644,11 +685,21 @@ def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
         when = datetime.fromisoformat(row["decided_at"].replace("Z", "+00:00"))
         if when.tzinfo is None or when > datetime.now(timezone.utc):
             raise ValueError("Decision timestamp must have timezone and cannot be future")
-        if row["evidence_fingerprint"] != fingerprint or row["queue_version"] != queue["review_id"]:
+        expected_fingerprint = cases.get(row["review_id"], {}).get("evidence_fingerprint", fingerprint)
+        if row["evidence_fingerprint"] != expected_fingerprint or (not launch and row["queue_version"] != queue["review_id"]):
             raise ValueError("Stale evidence fingerprint or queue version")
         if row["uei"] or row["cage_code"]:
             raise ValueError("NEED review does not authorize identifier attribution")
-        if row["review_id"] == field_case:
+        if launch:
+            item = cases.get(row["review_id"])
+            if (not item or row["queue"] != "launch_control" or row["target_cedar_uid"]
+                    or row["entity_or_firm"] != item["title"] or row["question"] != item["question"]
+                    or row["YOUR_RULING"] not in item["options"] or not row["queue_version"]
+                    or item["blocker_type"] != "human adjudication"
+                    or (item["blocker_type"] == "human adjudication" and item.get("owner_review_eligible") is not True)
+                    or item["status"] in {"RECORDED", "RESOLVED"}):
+                raise ValueError("Invalid, nonhuman, or already recorded launch decision")
+        elif row["review_id"] == field_case:
             if (row["queue"] != "need_field" or row["target_cedar_uid"]
                     or row["entity_or_firm"] != "enterprise_existing_cedar_uid"
                     or row["YOUR_RULING"] not in {"INTERNAL_ONLY", "PUBLISH_CURRENT",
@@ -664,6 +715,7 @@ def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
                     or row["target_cedar_uid"] != enterprise["owner_hub_cedar_uid"]
                     or row["YOUR_RULING"] not in {"SUPPORT", "HOLD", "REJECT"}):
                 raise ValueError("Invalid exception ruling, name, or target")
+
     receipt_path.parent.mkdir(parents=True, exist_ok=True) if not dry_run else None
     lock_path = receipt_path.with_name(receipt_path.name + ".lock")
     lock = None
@@ -686,12 +738,13 @@ def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
             seen[did], heads[case] = decision, did
         receipts = []
         for row in incoming:
-            did, case = row["decision_id"], row["review_id"]
+            did, case = row.get("decision_id"), row.get("review_id")
             if did in seen:
                 if seen[did] != row:
                     raise ValueError("Conflicting duplicate decision_id: " + did)
                 receipts.append({"decision_id": did, "status": "ALREADY_RECORDED"})
                 continue
+            validate_new_decision(row)
             if row["supersedes_decision_id"] != heads.get(case, ""):
                 raise ValueError("Conflicting ruling requires explicit supersession of current decision")
             status = "HELD" if row["YOUR_RULING"] == "HOLD" else "RECORDED_PENDING_APPLICATION"
@@ -718,15 +771,18 @@ def record_need_review(csv_path, queue_path, receipt_path, dry_run=False):
 
 
 if __name__ == "__main__":
-    if "--need-review" in sys.argv:
+    if "--need-review" in sys.argv or "--launch-review" in sys.argv:
         parser = argparse.ArgumentParser(description="Record NEED decisions without applying them")
-        parser.add_argument("--need-review", required=True)
+        mode = parser.add_mutually_exclusive_group(required=True)
+        mode.add_argument("--need-review")
+        mode.add_argument("--launch-review")
         parser.add_argument("--queue", required=True)
         parser.add_argument("--receipt-ledger", required=True)
         parser.add_argument("--dry-run", action="store_true")
         args = parser.parse_args()
         try:
-            record_need_review(args.need_review, args.queue, args.receipt_ledger, args.dry_run)
+            record_need_review(args.need_review or args.launch_review, args.queue,
+                               args.receipt_ledger, args.dry_run, launch=bool(args.launch_review))
         except (ValueError, KeyError, OSError, TypeError) as error:
             raise SystemExit("NEED REVIEW REFUSED: " + str(error))
     else:

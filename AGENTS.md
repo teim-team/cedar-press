@@ -1,4 +1,12 @@
 # AGENTS.md — Native Deals & Native Entity Enterprise Data Project
+
+## Owner adjudication boundary (Elijah, 2026-09-24)
+
+Round-half-away-from-zero is ratified and Claude owns its implementation. Codex must not perform rounding work or edit Claude-owned changes; Havala reviews implementation. Elijah's menu contains only fully researched, genuinely ambiguous identity, affiliation or legal-object linkages. Do not expose receipt commands, schemas, engineering holds, optional history checks or unresolved research. Codex handles imports after an export is returned. When nothing qualifies, display exactly **No owner decisions ready** and continue independent work.
+
+
+Elijah is only reviewing genuinely ambiguous identity, affiliation, or legal-object linkages where human judgment is required. Never place code defects, schemas, missing fields, tests, source refreshes, documentation, infrastructure, or other engineering work in his adjudication queue. Codex is a frontier coding model and must diagnose and fix those issues itself, validate the fix, and keep working. Only escalate when the repository and available authoritative sources cannot determine a linkage or when an actual product-policy choice belongs to the owner. A queue that asks Elijah to resolve engineering problems is a failed deliverable.
+
 *Operating guide for AI-agent sessions. Written 2026-07-31 from the full Q3 build conversation. Owner: Elijah Moreno.*
 
 ---
