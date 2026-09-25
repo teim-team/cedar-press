@@ -30748,16 +30748,17 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 18,
-   "mentioned_outside_history": 17,
+   "mentions": 19,
+   "mentioned_outside_history": 18,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 1579,
+   "last_modified": "2026-09-25",
+   "lines": 1653,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
-    "docs/DOC_CLAIM_EXCLUSIONS.json"
+    "docs/DOC_CLAIM_EXCLUSIONS.json",
+    "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -30778,30 +30779,38 @@
    },
    "writer_evidence": [
     {
-     "line": 1391,
+     "line": 1422,
      "operation": "path.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "69f51d2659fe57c26eb72a8ceb53836f1176fffac4734f00c497be5139cd560a"
+     "signature": "f40de2922f0d6404ee575ee95c54a7ac872b719bdbd8bac2134f5ee73c87fa84"
     },
     {
-     "line": 1449,
+     "line": 1463,
+     "operation": "path.write_text",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "f40de2922f0d6404ee575ee95c54a7ac872b719bdbd8bac2134f5ee73c87fa84"
+    },
+    {
+     "line": 1521,
      "operation": "p.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a25a209cc18ca1a2d26b813a5d912dfafe37bb590d7f8efd61d6ceadbf2e2e09"
+     "signature": "541ade42c7ba968133afc47f349904c06466dd74911f36b9cd66020aa820fb1d"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "2633c6070798f976efc1e877b5069987904c9e6d2a1f7a49840be93cdbc38a5f",
+   "source_sha256": "386b8a944eb1f177a06316b4574d5b03861e94a765c70b1e36ad4a076a7b1903",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>",
-    "source_sha256": "2633c6070798f976efc1e877b5069987904c9e6d2a1f7a49840be93cdbc38a5f",
+    "source_sha256": "386b8a944eb1f177a06316b4574d5b03861e94a765c70b1e36ad4a076a7b1903",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -30830,14 +30839,21 @@
     "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 1391,
+      "line": 1422,
       "operation": "path.write_text",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1449,
+      "line": 1463,
+      "operation": "path.write_text",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 1521,
       "operation": "p.write_text",
       "target": "<unresolved>",
       "scope": "unresolved_target",
@@ -103497,6 +103513,7 @@
     "code/1103_decision_queue_clearance.py",
     "code/1134_repair_ledger_state_uei_contamination.py",
     "code/1137_customer_dataset_combine.py",
+    "code/1143_methodology_papers.py",
     "code/1146_shard_directory_admission.py",
     "code/1147_released_host_directories.py",
     "code/1155_np_placename_precision.py",
@@ -103531,6 +103548,7 @@
     "code/1103_decision_queue_clearance.py",
     "code/1134_repair_ledger_state_uei_contamination.py",
     "code/1137_customer_dataset_combine.py",
+    "code/1143_methodology_papers.py",
     "code/1146_shard_directory_admission.py",
     "code/1147_released_host_directories.py",
     "code/1155_np_placename_precision.py",

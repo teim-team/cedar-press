@@ -233,6 +233,32 @@ class ProducerRegistrationTest(unittest.TestCase):
             with self.assertRaises(cedar_pipeline.ForbiddenScript):
                 module.main()
 
+    def test_methodology_authority_refresh_preserves_all_measurements_and_editorial(self):
+        spec = importlib.util.spec_from_file_location("methodology_refresh", ROOT / "code/1143_methodology_papers.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        before = (ROOT / "docs/methodology/funding.md").read_text(encoding="utf-8")
+        # Exercise a stale stored section even after its committed regeneration.
+        before = before.replace("| `24_funding_merge.py` |", "| `24_funding_merge.py`, `335_harmonize_assistance_seams_in_place.py` |", 1)
+        with patch.object(module, "measure", side_effect=AssertionError("no data measurement allowed")):
+            after = module.refresh_pipeline_authority(before, "funding")
+            self.assertEqual(module.refresh_pipeline_authority(after, "funding"), after)
+        prefix, section = before.split("## M2 ", 1)
+        _, suffix = section.split("## M3 ", 1)
+        self.assertTrue(after.startswith(prefix + "## M2 "))
+        self.assertTrue(after.endswith("## M3 " + suffix))
+        m2 = after.split("## M2 ", 1)[1].split("## M3 ", 1)[0]
+        self.assertNotIn("335_harmonize_assistance_seams_in_place.py", m2)
+        self.assertNotIn("336_correct_scheme_resolution_by_spine_membership.py", m2)
+        self.assertIn("503_identity.py", m2)
+        self.assertIn("release-pilot funding --source", m2)
+        self.assertIn("not current release certification", m2)
+        for invalid in ("missing", before.replace(module.MARK_M_E, "")):
+            with self.assertRaises(ValueError):
+                module.refresh_pipeline_authority(invalid, "funding")
+        with self.assertRaises(ValueError):
+            module.refresh_pipeline_authority(before, "../funding")
+
     def test_funding_plan_cuts_over_discovered_retired_edges_without_build(self):
         spec = importlib.util.spec_from_file_location("funding_build", ROOT / "code/build.py")
         runner = importlib.util.module_from_spec(spec)
