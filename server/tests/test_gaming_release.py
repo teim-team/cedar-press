@@ -133,6 +133,98 @@ class GamingConsumerBoundaryTest(_ServerCase):
         self.assertEqual(events[0]["outcome"], "not_pinned")
         self.assertEqual(self.fetched, [])
 
+    def test_rehearsal_needs_an_explicit_nonproduction_review_setting(self):
+        """``CEDAR_GROVE_ENVIRONMENT`` mirrors Lumecon's ``LUMECON_ENVIRONMENT``:
+        production-only by default; ``review`` adds rehearsal only outside a
+        production service; a review flag in production, or any unknown value,
+        refuses everything rather than widening or silently narrowing."""
+        classes = repository.grove_served_release_classes
+        for press_env in ("development", "staging", "production"):
+            for grove_env in (None, "", "production"):
+                with self.subTest(press=press_env, grove=grove_env):
+                    env = {"CEDAR_PRESS_ENVIRONMENT": press_env}
+                    if grove_env is not None:
+                        env["CEDAR_GROVE_ENVIRONMENT"] = grove_env
+                    with patch.dict(os.environ, env):
+                        if grove_env is None:
+                            os.environ.pop("CEDAR_GROVE_ENVIRONMENT", None)
+                        self.assertEqual(classes(), frozenset({"production"}))
+        for press_env in ("development", "staging"):
+            with (
+                self.subTest(press=press_env, grove="review"),
+                patch.dict(
+                    os.environ,
+                    {"CEDAR_PRESS_ENVIRONMENT": press_env, "CEDAR_GROVE_ENVIRONMENT": "review"},
+                ),
+            ):
+                self.assertEqual(classes(), frozenset({"production", "rehearsal"}))
+        with (
+            patch.dict(
+                os.environ,
+                {"CEDAR_PRESS_ENVIRONMENT": "production", "CEDAR_GROVE_ENVIRONMENT": "review"},
+            ),
+            self.assertRaisesRegex(repository.FullReleaseUnavailable, "never enabled"),
+        ):
+            classes()
+        for typo in ("Review", "rehearsal", "staging", "review "):
+            with (
+                self.subTest(grove=typo),
+                patch.dict(
+                    os.environ,
+                    {"CEDAR_PRESS_ENVIRONMENT": "development", "CEDAR_GROVE_ENVIRONMENT": typo},
+                ),
+                self.assertRaisesRegex(repository.FullReleaseUnavailable, "Unknown"),
+            ):
+                classes()
+        # The committed defaults: production only, synthetic never.
+        self.assertEqual(repository.GROVE_SERVED_RELEASE_CLASSES, frozenset({"production"}))
+        self.assertIs(repository.GROVE_SERVE_SYNTHETIC, False)
+
+    def test_a_multi_part_component_is_refused_never_assembled(self):
+        """A component published as parts (e.g. partitioned payments) has no
+        single verified ``records.jsonl`` in its contract. Until Cedar serves
+        parts one by one, each against its own manifest hash, it refuses the
+        component rather than concatenating bytes no manifest entry covers."""
+        header = ["payment_id", "amount_usd"]
+        part = {"bytes": 10, "sha256": "a" * 64}
+        contract = {
+            "rights": {"publication_class": "public", "redistribution": True},
+            "download_permitted": True,
+            "fields": [{"name": name} for name in header],
+            "primary_key": ["payment_id"],
+            "record_count": 2,
+            "metadata": {"field_rights": {}},
+            "files": {"records.part-0001.jsonl": part, "records.part-0002.jsonl": part},
+        }
+        manifest = {"components": {"gaming_government_payments": contract}}
+        tables = {
+            "gaming/gaming_government_payments": {
+                "collection": "gaming",
+                "order": header,
+                "fields": [],
+            }
+        }
+        with patch.object(repository, "_field_map_tables", return_value=tables):
+            with self.assertRaisesRegex(repository.FullReleaseUnavailable, "artifact"):
+                repository.grove_component_contract(
+                    manifest, "gaming", "gaming_government_payments"
+                )
+            # The single-file shape is the one accepted, so the refusal above is
+            # about the parts and nothing else.
+            single = dict(contract, files={"records.jsonl": part})
+            repository.grove_component_contract(
+                {"components": {"gaming_government_payments": single}},
+                "gaming",
+                "gaming_government_payments",
+            )
+        # And payments is not a presented Grove component today, so the route
+        # refuses it before any pin, catalog or artifact read.
+        self.assertNotIn("gaming_government_payments", repository.grove_components("gaming"))
+        self.session("grove")
+        response, _events = self.get("gaming_government_payments")
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(self.fetched, [])
+
     def test_malformed_and_per_table_pins_are_refused(self):
         good = {
             "catalog_id": "a" * 64,
@@ -434,13 +526,15 @@ class PinnedLumeconReleaseTest(_ServerCase):
         for patcher in (
             patch.object(repository, "GROVE_RELEASE_PIN", self.pin_path),
             # The fixture is a labelled synthetic rehearsal; production serves
-            # neither. Only this suite widens the served classes.
-            patch.object(
-                repository, "GROVE_SERVED_RELEASE_CLASSES", frozenset({"production", "rehearsal"})
-            ),
+            # neither. This suite runs as an explicit nonproduction review
+            # (CEDAR_GROVE_ENVIRONMENT=review, the Lumecon LUMECON_ENVIRONMENT
+            # analogue) and alone widens the synthetic switch.
             patch.object(repository, "GROVE_SERVE_SYNTHETIC", True),
             patch.object(repository, "_release_bytes", side_effect=self.lumecon_api),
-            patch.dict(os.environ, {}),
+            patch.dict(
+                os.environ,
+                {"CEDAR_PRESS_ENVIRONMENT": "development", "CEDAR_GROVE_ENVIRONMENT": "review"},
+            ),
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
@@ -492,12 +586,56 @@ class PinnedLumeconReleaseTest(_ServerCase):
         self.assertEqual((self.a["release_class"], self.a["synthetic"]), ("rehearsal", True))
         self.assertNotEqual(self.a["release_id"], self.b["release_id"])
 
-    def test_production_settings_refuse_the_synthetic_rehearsal(self):
+    def test_production_refuses_the_rehearsal_and_only_review_serves_it(self):
         self.pin(self.a)
-        with patch.object(repository, "GROVE_SERVED_RELEASE_CLASSES", frozenset({"production"})):
-            self.assertEqual(self.get(SERVED, self.a["release_id"])[0].status_code, 503)
+        release = self.a["release_id"]
+        # Review, outside production: served (the suite's setting).
+        self.assertEqual(self.get(SERVED, release)[0].status_code, 200)
+        refusals = {
+            "grove production (default)": {"CEDAR_GROVE_ENVIRONMENT": ""},
+            "grove production (explicit)": {"CEDAR_GROVE_ENVIRONMENT": "production"},
+            "review flag in a production service": {"CEDAR_PRESS_ENVIRONMENT": "production"},
+            "unknown grove setting": {"CEDAR_GROVE_ENVIRONMENT": "Review"},
+        }
+        for label, env in refusals.items():
+            with self.subTest(label), patch.dict(os.environ, env):
+                self.fetched.clear()
+                response, events = self.get(SERVED, release)
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(events[0]["outcome"], "unavailable")
+                # Refused at the manifest: no component bytes were fetched.
+                self.assertFalse(any(p.endswith("/download") for p in self.fetched))
+                with self.assertRaises(repository.FullReleaseUnavailable):
+                    repository.grove_full_release("gaming", release, component=SERVED)
+        # Review still never serves a synthetic release unless that is widened too.
         with patch.object(repository, "GROVE_SERVE_SYNTHETIC", False):
-            self.assertEqual(self.get(SERVED, self.a["release_id"])[0].status_code, 503)
+            self.assertEqual(self.get(SERVED, release)[0].status_code, 503)
+        self.assertEqual(self.get(SERVED, release)[0].status_code, 200)
+
+    def test_served_bytes_that_differ_from_the_manifest_are_refused(self):
+        """Cedar re-verifies the component bytes itself: a download that differs
+        from the pinned manifest's size/SHA-256 fails even when the manifest is
+        intact (an API or transport fault, not only a tampered store)."""
+        self.pin(self.a)
+        original = self.lumecon_api
+        good = self.component_bytes(self.a)
+        for label, served in {
+            "one byte changed": good.replace(b"1", b"2", 1),
+            "truncated": good[:-1],
+            "extra row": good + good.splitlines(keepends=True)[0],
+            "empty": b"",
+        }.items():
+            with self.subTest(label):
+
+                def api(path, limit=None, _served=served):
+                    body = original(path, limit)
+                    return _served if path.endswith("/download") else body
+
+                with patch.object(repository, "_release_bytes", side_effect=api):
+                    response, events = self.get(SERVED, self.a["release_id"])
+                self.assertEqual(response.status_code, 503)
+                self.assertNotIn(good.splitlines()[0], response.content)
+                self.assertEqual(events[0]["outcome"], "unavailable")
 
     def test_schema_compatibility_field_map_against_the_embedded_contract(self):
         manifest = self.metadata(self.verify(self.store_a, "gaming", self.a["release_id"]))

@@ -7,7 +7,7 @@ The producers, candidate build, leak gate, data contract and release/catalog
 build moved to Lumecon-data branch `claude/gaming-grove-release`, with their
 history and tests. This document now covers only what Cedar does with a Gaming
 release. The repository ownership map and the cross-repository release sequence
-are in [HAVALA_INFRASTRUCTURE_REVIEW.md](HAVALA_INFRASTRUCTURE_REVIEW.md#gaming-repository-ownership-and-cross-repository-release-sequence-2026-09-24).
+are in [HAVALA_INFRASTRUCTURE_REVIEW.md](HAVALA_INFRASTRUCTURE_REVIEW.md#gaming-and-data-intake-architecture-for-review).
 
 Data-side sections that used to live here are now Lumecon-data documents on
 `claude/gaming-grove-release`:
@@ -70,10 +70,15 @@ online sportsbook module, `build.py candidate gaming`, `grove-contracts`,
   that is not a Lumecon `collection_releases` catalog, such as a dataset
   catalog of per-table releases. Cedar never assembles a collection from
   unrelated table releases.
-- **Rehearsal and synthetic releases are never served.**
-  `repository.GROVE_SERVED_RELEASE_CLASSES` is `{"production"}` and
-  `GROVE_SERVE_SYNTHETIC` is `False`. Only the consumer tests widen them, for
-  the synthetic rehearsal fixture.
+- **Rehearsal releases are served only in an explicit nonproduction review;
+  synthetic ones never in a deployed server.** `repository.GROVE_SERVED_RELEASE_CLASSES`
+  is `{"production"}` and `GROVE_SERVE_SYNTHETIC` is `False`.
+  `CEDAR_GROVE_ENVIRONMENT=review` (the analogue of Lumecon-data's
+  `LUMECON_ENVIRONMENT=review`) adds `rehearsal`, and only when
+  `CEDAR_PRESS_ENVIRONMENT` is not `production`. Unset or `production` serves
+  production releases only. `review` in a production service, or any other
+  value, refuses every Grove download (fails closed, 503). Only the consumer
+  tests widen `GROVE_SERVE_SYNTHETIC`, for the synthetic rehearsal fixture.
 - **Rollback** is a revert of the pin PR. Because it is one release, every
   component returns to its prior bytes together (atomic).
 
@@ -126,15 +131,22 @@ The response is exact JSONL with `X-Cedar-Release`, `X-Cedar-SHA256`,
     installed `lumecon-data gaming fixture-release`, plus a second, later
     release. It serves them through Lumecon's own verification
     (`verify_collection_release`, `collection_manifest_metadata`,
-    `read_collection_component`) in place of the API hop, because Lumecon's
-    read-only API has no collection routes yet. It covers schema compatibility per component,
+    `read_collection_component`) in place of the network hop to Lumecon's
+    read-only API collection routes. It covers schema compatibility per component,
     manifest/hash agreement, exact bytes, idempotent re-pinning, atomic
-    rollback, unavailable and mismatched releases, and refusal of per-table
-    catalogs.
+    rollback, unavailable and mismatched releases, served bytes that differ
+    from the manifest (Cedar's own size/SHA-256 check), rehearsal refused in
+    production and served only under `CEDAR_GROVE_ENVIRONMENT=review`, and
+    refusal of per-table catalogs.
 - `server/tests/test_gaming_issuance.py`: the blocks are declared in
   `cedar_ids`, and Lumecon's constants must equal them. It also covers the
   issuance dry run, execution, reuse, snapshot and every refusal.
-- CI: job `gaming-release-consumer` in `.github/workflows/ci.yml`.
+- CI: job `gaming-release-consumer` in `.github/workflows/ci.yml`. It checks
+  out Lumecon-data at the exact pinned SHA with the read-only secret
+  `LUMECON_DATA_READ_TOKEN` (`persist-credentials: false`), fails unless
+  `git rev-parse HEAD` equals the pin, installs from that local checkout, and
+  fails naming the secret when it is absent. `gamingConsumerCi.test.js` (node suite)
+  lints those properties and shows each rule catching its own mutation.
 
 ## 5. Still PROPOSED / for Havala
 

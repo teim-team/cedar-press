@@ -213,14 +213,14 @@ is unchanged) keeps:
   pinned contract.
 
 The ownership map and the release sequence are in
-[HAVALA_INFRASTRUCTURE_REVIEW.md](../HAVALA_INFRASTRUCTURE_REVIEW.md#gaming-repository-ownership-and-cross-repository-release-sequence-2026-09-24).
+[HAVALA_INFRASTRUCTURE_REVIEW.md](../HAVALA_INFRASTRUCTURE_REVIEW.md#gaming-and-data-intake-architecture-for-review).
 Cedar's side is in the [infrastructure notes](../GAMING_GROVE_INFRASTRUCTURE_NOTES.md).
 
 The text below records the state and measurements as built on
 `claude/gaming-intelligence`. Where it names a Cedar producer, command or
 file that has since moved, the Lumecon-data branch is now authoritative.
 
-Current state, updated in place. Built on Cedar PR #122 (`codex/legislation-release-consumer` @3195e70), this audit, and Codex's identifier-retirement commit (cherry-picked `b8626c9` → `0331b82`). Local commits only: not pushed, not promoted, not published.
+Current state, updated in place. Built on Cedar PR #122 (`codex/legislation-release-consumer` @3195e70), this audit, and Codex's identifier-retirement commit (cherry-picked `b8626c9` → `0331b82`). These were local commits on `claude/gaming-intelligence`, which stays unpushed and unmodified. The split review branches are pushed: Lumecon-data `claude/gaming-grove-release` and `claude/data-intake-contract`, and Cedar `claude/gaming-grove-consumer`. Nothing is promoted or published.
 
 **Identity: migrated to the ratified contract, no ID issued.** Per `docs/IDENTIFIER_STANDARD.md` ("CICD retirement contract"):
 - `CE` for Native entities.

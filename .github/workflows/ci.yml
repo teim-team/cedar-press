@@ -91,36 +91,77 @@ jobs:
       - run: make audit-node
 
   # Cedar consumes Gaming from Lumecon-data (repository split 2026-09-24). This
-  # job proves the consumer against the EXACT Lumecon commit it is paired with:
-  # it installs lumecon-data at a pinned commit SHA of branch
-  # `claude/gaming-grove-release` (never a branch name or `main`), builds the
-  # deterministic synthetic Gaming fixture release with that commit's own
-  # `lumecon-data gaming fixture-release`, and runs the consumer tests with
-  # CEDAR_REQUIRE_LUMECON_GAMING=1, so a missing Lumecon fixture is a failure,
-  # not a skip. The SHA must be PUSHED to teim-team/Lumecon-data before this
-  # job can fetch it; while it exists only locally the job fails at install.
-  # Update LUMECON_DATA_SHA in the same pull request that updates
-  # data/cedar/grove_release_pin.json (merge order: Lumecon first).
+  # job proves the consumer against the EXACT Lumecon commit it is paired with.
+  #
+  # TRUST BOUNDARY (linted by the node test gamingConsumerCi.test.js):
+  # - Lumecon-data is checked out at the full commit SHA in LUMECON_DATA_SHA,
+  #   never a branch, tag, `main` or `current`, and the job fails unless
+  #   `git rev-parse HEAD` equals that pin after checkout.
+  # - teim-team/Lumecon-data is private. It is read with the secret
+  #   LUMECON_DATA_READ_TOKEN: read-only, scoped to that one repository, passed
+  #   only to actions/checkout's `token` input, never echoed and never put in a
+  #   URL. `persist-credentials: false` keeps it out of .git/config, so no
+  #   later step can reuse it. The package is installed from the local path.
+  # - Fail closed: when the secret is absent (a fork, or not configured) the
+  #   first step fails naming it. The job never skips and never passes without
+  #   running the consumer tests; CEDAR_REQUIRE_LUMECON_GAMING=1 turns a
+  #   missing Lumecon fixture into a failure too.
+  # - `contents: read` only; triggered by `pull_request`, never
+  #   `pull_request_target`, so a fork's code never runs with this secret.
+  #
+  # The pinned commit is on Lumecon-data `claude/gaming-grove-release` (pushed).
+  # Update LUMECON_DATA_SHA to the MERGED Lumecon commit in the same pull
+  # request that updates data/cedar/grove_release_pin.json (merge order:
+  # intake contract, then Lumecon Gaming, then this repository).
   gaming-release-consumer:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     env:
-      LUMECON_DATA_SHA: b683def02123bf49276b7265d73015329eb3fc9d  # claude/gaming-grove-release; local until pushed
+      LUMECON_DATA_SHA: b683def02123bf49276b7265d73015329eb3fc9d  # Lumecon-data claude/gaming-grove-release
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
+      - name: Require the Lumecon-data read token
+        env:
+          HAS_LUMECON_DATA_READ_TOKEN: ${{ secrets.LUMECON_DATA_READ_TOKEN != '' }}
+        run: |
+          if [ "$HAS_LUMECON_DATA_READ_TOKEN" != "true" ]; then
+            echo "::error title=Missing secret LUMECON_DATA_READ_TOKEN::The gaming-release-consumer job needs the repository secret LUMECON_DATA_READ_TOKEN (read-only, scoped to teim-team/Lumecon-data). It is absent: forks and unconfigured repositories fail here by design rather than skipping."
+            exit 1
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Check out Lumecon-data at the pinned commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: teim-team/Lumecon-data
+          ref: ${{ env.LUMECON_DATA_SHA }}
+          token: ${{ secrets.LUMECON_DATA_READ_TOKEN }}
+          persist-credentials: false
+          path: .lumecon-data
+      - name: Verify the Lumecon-data checkout is exactly the pin
+        run: |
+          if ! printf '%s' "$LUMECON_DATA_SHA" | grep -Eqx '[0-9a-f]{40}'; then
+            echo "::error::LUMECON_DATA_SHA must be a full 40-character commit SHA, not a branch or ref"
+            exit 1
+          fi
+          actual="$(git -C .lumecon-data rev-parse HEAD)"
+          if [ "$actual" != "$LUMECON_DATA_SHA" ]; then
+            echo "::error::Lumecon-data checkout is $actual, expected the pinned $LUMECON_DATA_SHA"
+            exit 1
+          fi
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
       - run: pip install -e 'server[dev]' httpx2
-      # teim-team/Lumecon-data is private (anonymous clone answers 404), so the
-      # install reads with a repository-scoped, read-only token secret. No
-      # other credential enters this job; a fork's pull request gets no secret
-      # and fails here rather than skipping.
-      - name: Install Lumecon-data at the pinned commit
-        env:
-          LUMECON_DATA_READ_TOKEN: ${{ secrets.LUMECON_DATA_READ_TOKEN }}
-        run: pip install "lumecon-data[api] @ git+https://x-access-token:${LUMECON_DATA_READ_TOKEN}@github.com/teim-team/Lumecon-data@${LUMECON_DATA_SHA}"
+      # A regular (non-editable) install from the verified local checkout; the
+      # checkout is then removed so the tests can only see the installed commit.
+      - name: Install Lumecon-data from the verified checkout
+        run: |
+          pip install './.lumecon-data[api]'
+          rm -rf .lumecon-data
       - name: Build the synthetic Gaming fixture release (smoke)
         run: python -m lumecon_data gaming fixture-release --store "$RUNNER_TEMP/gaming-fixture-store"
       - name: Run the Gaming consumer tests without silent skips
@@ -136,6 +177,8 @@ jobs:
           result = unittest.TextTestRunner(verbosity=2).run(suite)
           if result.skipped:
               raise SystemExit("Gaming consumer run unexpectedly skipped tests")
+          if not result.testsRun:
+              raise SystemExit("Gaming consumer run found no tests")
           raise SystemExit(0 if result.wasSuccessful() else 1)
           PY
 

@@ -547,6 +547,28 @@ GROVE_RELEASE_CATALOG_ENV = "CEDAR_GROVE_RELEASE_CATALOG"
 #: consumer tests widen these two settings, explicitly.
 GROVE_SERVED_RELEASE_CLASSES: frozenset[str] = frozenset({"production"})
 GROVE_SERVE_SYNTHETIC = False
+#: The one switch that lets a REHEARSAL (real candidate, PROPOSED IDs) be
+#: served: ``CEDAR_GROVE_ENVIRONMENT=review``, mirroring Lumecon-data's
+#: ``LUMECON_ENVIRONMENT=review``. Unset or ``production`` serves production
+#: releases only. ``review`` is refused outright when
+#: ``CEDAR_PRESS_ENVIRONMENT=production`` (nothing is served, not even the
+#: production release), and any other value is refused, so a typo or a review
+#: flag leaking into production fails closed rather than widening delivery.
+#: A synthetic fixture stays unservable in review too (``GROVE_SERVE_SYNTHETIC``).
+GROVE_ENVIRONMENT_ENV = "CEDAR_GROVE_ENVIRONMENT"
+GROVE_REVIEW_RELEASE_CLASSES: frozenset[str] = frozenset({"rehearsal"})
+
+
+def grove_served_release_classes() -> frozenset[str]:
+    """Release classes this process may deliver, from the explicit Grove setting."""
+    mode = os.environ.get(GROVE_ENVIRONMENT_ENV, "") or "production"
+    if mode == "production":
+        return GROVE_SERVED_RELEASE_CLASSES
+    if mode != "review":
+        raise FullReleaseUnavailable("Unknown Grove release environment")
+    if os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") == "production":
+        raise FullReleaseUnavailable("Rehearsal review is never enabled in production")
+    return GROVE_SERVED_RELEASE_CLASSES | GROVE_REVIEW_RELEASE_CLASSES
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _PIN_KEYS = {"catalog_id", "catalog_sha256", "collection_id", "release_id", "manifest_sha256"}
 
@@ -657,7 +679,7 @@ def _grove_manifest(pin: dict[str, str]) -> dict[str, Any]:
         or not isinstance(manifest.get("components"), dict)
     ):
         raise FullReleaseUnavailable("Malformed collection manifest")
-    if manifest.get("release_class") not in GROVE_SERVED_RELEASE_CLASSES or (
+    if manifest.get("release_class") not in grove_served_release_classes() or (
         manifest.get("synthetic") is not False and not GROVE_SERVE_SYNTHETIC
     ):
         raise FullReleaseUnavailable("Release is not eligible for customer delivery")

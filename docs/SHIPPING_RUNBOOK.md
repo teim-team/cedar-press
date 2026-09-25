@@ -263,7 +263,11 @@ server's checks are in `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md`.
 1. **Build and rehearse in Lumecon-data.** Use `lumecon-data gaming build`
    from the Cedar input root and a pinned Cedar registry snapshot, then
    `lumecon-data gaming release` into a store outside Git. A release built from
-   PROPOSED IDs is a **rehearsal**: Cedar never pins one.
+   PROPOSED IDs is a **rehearsal**: Cedar never pins one in production. A
+   nonproduction review server may serve one only with
+   `CEDAR_GROVE_ENVIRONMENT=review` (Lumecon: `LUMECON_ENVIRONMENT=review`);
+   that setting in a `CEDAR_PRESS_ENVIRONMENT=production` service refuses
+   every Grove download.
 2. **Issue the Gaming IDs (Cedar, the one issuer). NOT AUTHORIZED YET.**
    Preconditions: Codex's certificate of the candidate, and an owner decision
    ID. First do a dry run, which writes nothing:
