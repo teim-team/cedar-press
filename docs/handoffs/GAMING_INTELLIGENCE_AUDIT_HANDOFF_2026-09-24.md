@@ -373,7 +373,7 @@ Not run: the full `npm test` coverage gate (needs `npm install`) and `1169_relea
    - `512_build_dataset_contracts.py` preserving producer-declared entries;
    - `--authority-root` for the pilot;
    - the repository ownership map and release sequence in `HAVALA_INFRASTRUCTURE_REVIEW.md`.
-3. **Owner identity rulings** (bounded; do not pause engineering): the Stables place merge (VP-0153 vs CCP-305300); the 7 Clans Ponca link, kept `reviewed_disputed`.
+3. **Identity rulings: none open (2026-09-25).** 7 Clans resolved by owner ruling from sevenclans.com/about (Otoe-Missouria → OMDA → five casinos; Ponca rejected, "Ponca City" is geographic). The Stables resolved by research (one place, CEDAR-PLACE-000710-JP; Miami and Modoc joint owners/operators per FR 96-2449). Both implemented on Lumecon-data PR #10. Standing rule: linkages resolvable from first-party About/ownership pages, tribal records, regulators or existing Cedar IDs are resolved by engineering; only genuine source conflicts go to the owner. Open lead: Chilocco may have a second record (VP-0172, place 000363-S3).
 4. **Acquisition leads** (not acquired):
    - OLMS LM filings and state WARN notices;
    - the EPA EIS database and Army Corps permits;
