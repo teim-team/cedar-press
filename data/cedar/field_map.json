@@ -6097,16 +6097,9 @@
     {
      "column": "party_cedar_uid_role",
      "decision": "keep",
-     "why": "Which side the cedar_uid identifies: payer, recipient, or licensee_attributed_tribe [rights class: public_official]",
+     "why": "Which side the cedar_uid identifies: payer, recipient, or licensee_attributed_tribe [rights class: public_derived]",
      "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
-     "rights_class": "public_official"
-    },
-    {
-     "column": "entity_match_method",
-     "decision": "keep",
-     "why": "How the upstream builder linked the source name to the cedar_uid [rights class: public_official]",
-     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
-     "rights_class": "public_official"
+     "rights_class": "public_derived"
     },
     {
      "column": "direction",
@@ -6160,7 +6153,7 @@
     {
      "column": "published_unit",
      "decision": "keep",
-     "why": "Unit as printed (USD, USD millions ...) [rights class: public_official]",
+     "why": "Unit, as printed, normalised to the declared vocabulary (USD, USD millions) [rights class: public_official]",
      "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
      "rights_class": "public_official"
     },
@@ -6263,6 +6256,13 @@
      "rights_class": "public_derived"
     },
     {
+     "column": "nonadditive_with_table",
+     "decision": "keep",
+     "why": "Component table this row must never be summed with (it measures the same activity); set whenever the overlap pointer is [rights class: public_derived]",
+     "spec": "Lumecon-data gaming/revenue.py CONTRACTS",
+     "rights_class": "public_derived"
+    },
+    {
      "column": "document_status",
      "decision": "keep",
      "why": "original / revised / latest_statement_for_period, as upstream [rights class: public_official]",
@@ -6347,7 +6347,6 @@
     "recipient_type",
     "party_cedar_uid",
     "party_cedar_uid_role",
-    "entity_match_method",
     "direction",
     "amount_kind",
     "amount_role",
@@ -6370,6 +6369,7 @@
     "nonadditive_series_key",
     "upstream_revenue_evidence_class",
     "overlaps_online_sportsbook_observation_id",
+    "nonadditive_with_table",
     "document_status",
     "source_authority",
     "source_document_type",
