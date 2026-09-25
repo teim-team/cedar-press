@@ -1699,8 +1699,10 @@ the next section.
 ### Grove Gaming consumer: consolidated trust boundary
 
 One implementation: cedar-press `claude/gaming-consumer-hardening`, stacked on
-#122 (`<CEDAR_CONSUMER_PR>`), paired with Lumecon-data
-`claude/gaming-release-hardening` on PR #9 (`<LUMECON_HARDENING_PR>`). It supersedes
+#122 ([cedar-press #124](https://github.com/teim-team/cedar-press/pull/124)), paired with Lumecon-data
+`claude/gaming-release-hardening` on PR #9 ([Lumecon-data #10](https://github.com/teim-team/Lumecon-data/pull/10)).
+CI pins `LUMECON_DATA_SHA` to that branch's pushed head
+`2b0ab3b74f9ae543729034e9f96188171f32b53b`. It supersedes
 `claude/gaming-grove-consumer` (not for merge). Merge order: Lumecon #8, #9,
 the Lumecon Gaming hardening PR, cedar-press #122, then the consumer PR after its
 `LUMECON_DATA_SHA` names the merged Lumecon commit. Server checks are in
@@ -1729,11 +1731,16 @@ the Lumecon Gaming hardening PR, cedar-press #122, then the consumer PR after it
   dry run unless `--execute --certificate --decision-id --approved-by`, and it
   has not been run. Legacy class-prefixed and `CEDAR-ENT`/`CEDAR-HOLD` issuance is
   retired to read-only compatibility.
-- **Payments parts.** Cedar never assembles parts. Any component named by
-  `partitioned_components` is refused, whether it is a logical name or a part.
-  The whole release is refused when the declaration disagrees with its part
-  entries: a missing part, a changed `records.jsonl` hash or count, or a wrong
-  sum. Payments is not presented today.
+- **Payments parts.** A partitioned component is served only as the logical
+  download (`gaming_government_payments`). Direct requests for a part are
+  refused. Every part is verified before the first response byte:
+  - it passes its own contract, rights and field-map checks;
+  - it matches the exact pinned `records.jsonl` hash and row count;
+  - all parts share one schema and primary key, unique across the whole table.
+
+  Verified parts are spooled to disk in manifest order and streamed. A
+  declaration that disagrees with its parts refuses the whole release. So does
+  a missing, restricted or tampered part.
 - **Zero duplication.** A Cedar test fails if a Gaming producer, binding
   register, component CSV or schema copy reappears in cedar-press.
 
