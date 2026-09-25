@@ -1009,6 +1009,33 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
     add_maintenance_classification(scripts, references)
 
 
+# Bounded human-read source evidence for the existing census, not dispatch or
+# producer admission. Tuple: source SHA256, retained status, role, evidence and
+# remaining cutover condition. A source change invalidates this evidence.
+_REVIEWED_MAINTENANCE = {
+    "41_build_codebooks.py": ("81a509e2b7e396ca691a1be8b43332ac0931944253afef386e8612a28619d470", "ACTIVE", "shared helper; forbidden writer", "166/263/392/941/cedar_register_codebook import helpers; main guard precedes writes", "Move helper consumers before removing file; never re-enable whole-master writer"),
+    "1072_tribally_owned_enterprises.py": ("3f0ceda259353037b3d2eaa6b121a459bb0e83cbb5307305436522afcda1b640", "ACTIVE", "controlled migration/producer", "build.py NEED candidate stages invoke migrate-legacy/build/verify; 1130/1133 consume helpers", "Preserve issued IDs and migration replay; publication hold remains"),
+    "1129_place_ids.py": ("d034f6948893e331a59cc2edae567cd0e65db712981758aa0bf2466fbeb16811", "ACTIVE", "controlled migration/validation", "mint/migrate --apply mutate place register; protected literals also occur in fixtures", "Retain issued-place identity and replay authority until explicit cutover"),
+    "1180_entity_official_names.py": ("6d3a5179f9586adb70fd3ba799f89dd3cd3fe9f25b1f14623921c1c900d0d140", "ACTIVE", "canonical-name utility", "build --apply writes cedar_entity_names.csv consumed by cedar_publication and build.py pins", "Replace canonical-name generation and consumers together"),
+    "1183_native_nonprofit_entities.py": ("22f922f846747f68411b2086909bdd634a14f9434b9f877518219d579ddc0bfc", "ACTIVE", "controlled identity migration", "build writes identity register, EIN links and entity types; projection does not replace minting", "Preserve issued identities and ruled object mappings; no automatic promotion"),
+    "525_event_ids.py": ("e7d924c034ef49d2f2807ac3a212a26e44877b0f8a557c976445c833876da162", "ACTIVE", "record-grain registry utility", "Produces cedar_event_id_registry.csv and EVENT_IDS.md; subcontracting contract cites this authority", "Move event grain declarations into surviving contract before retirement"),
+    "843_retire_cicd_scheme.py": ("52840f6fe8dea16f6bb72ba6dbbfaa7bc5e9799dda865a343b1a903bb15cc90e", "HISTORICAL-RETAIN", "historical migration", "One-time CICD retirement preserves crosswalk, backups and identity/funding replay", "Retain recovery provenance; not admitted to ordinary dispatch"),
+    "02_extract_exclusion_rulings.py": ("7b5dd843cec17b1d304da137d5bddaf4bb2c8033bcb6e642b79f428110933718", "HISTORICAL-RETAIN", "historical evidence extraction", "Extracts hci_analysis.do human exclusions; output consumed by 03 and 1163 negative decisions", "Preserve original rulings and reproducible extraction"),
+    "1000_harvest_business_identifiers.py": ("2d503b47ede4645a231c633e0e119860e1867f0a0f102d98e6e7f16239633996", "ACTIVE", "transitional identifier acquisition", "sweep/web/promote; open_crosswalk duplicates 1001 non-atomic rewrite preserving other built_by rows", "Centralize crosswalk mutation with 1001; preserve distinct acquisition evidence"),
+    "1001_link_businesses_to_contracting.py": ("24651371f0288768454cc5e5325ad7a2819e9dabdfbdadc8185f471c50a13cd8", "ACTIVE", "transitional reconciliation", "Directory/federal identifier linkage; open_crosswalk duplicates 1000 mutation", "One atomic crosswalk writer after both callers cut over; retain linkage/hold outputs"),
+    "109_build_variable_registry.py": ("ec588dc4f3ad47de39f69423f8cb858e181615c3e87ffc5bf2b019624742d779", "ACTIVE", "metadata utility", "variable_registry.csv is consumed by 374_build_cedar_taxonomy_export.py", "Prove semantic metadata parity and cut over 374 before retirement"),
+    "1090_dtll_agency_harvest.py": ("ffe8ba11c0f75cbcc387acdc6e58e3b82eca086b8e2c1e8e9c3d7eb6e40aace1", "ACTIVE", "transitional acquisition", "Agency Dear Tribal Leader letters/coverage are distinct Advocacy components, not Federal Register", "Migrate acquisition and codebook fragment registration without losing component coverage"),
+    "1105_newsletter_corpus_ship.py": ("a924f5bc24761ee339aee603524d61f1e057730a497cc7f8094c1ee6095adcda", "ACTIVE", "conservation/registration utility", "Validates 990/991 newsletter outputs and writes conservation/codebook metadata", "Keep unique conservation checks; cut metadata writes over to canonical fragment writer"),
+    "1135_full_dataset_review_bundle.py": ("63c25e432765ded638fbeca158d760e3dd69ba0e3d1d8c59d473c9e575d5829e", "ACTIVE", "review utility; transitional ancillary export", "Candidate review retained; build calls refuse_migrated_producers; ancillary full-table route distinct", "Retire only proven replaced output routes, not whole review utility"),
+    "1149_codebook_money_fed.py": ("40817ad385ba14109247e4a3afb23c7e6b4b850ab3bf1fcfc0e8a123dd2c7ef9", "ACTIVE", "codebook registration/validation", "Eleven table fragments; selftest now redirects script and shared writer to synthetic temporary tree", "Preserve fragment definitions and negative controls through codebook owner cutover"),
+    "1151_customer_preview_ten.py": ("c5b0430b158e2548129b649ef264f46e94ad799e8c5bb64064a5c25313d3415c", "ACTIVE", "transitional preview producer", "1162 calls verify; DATASET_NORTH_STAR documents dist/preview producer", "Replace 1162 validation and documentation with pinned release samples before retirement"),
+    "1169_release_verify.py": ("6840dd9ff44786a3c270f812d1ca3ead5141e7a5c04ddf3c047302eb1bdb9149", "ACTIVE", "release validator", "Default verify read-only; _fixture_fails redirects protected-looking writes into TemporaryDirectory", "Retain negative release tests; fixture literals are not canonical writes"),
+    "1181_native_entities_spreadsheet.py": ("c6adbed6e7643134208775138a616ed70b3d7588d69f4736753dfa041baa031e", "ACTIVE", "entity-reference export", "dist/customer/native_entities.csv consumed by 1174 QC bundle", "Replace entity-reference product and 1174 consumer together"),
+    "1184_deals_public_presentation.py": ("2e33f4e4373d74d6fda64087de2c2e6c1b41e1853ceac6277040ef56d7b413e9", "ACTIVE", "presentation helper; legacy standalone writer", "cedar_publication.deals_public_view dynamically imports helper; standalone deals_presentation unused there", "Cut helper consumers over before file retirement; standalone writer can be separately fenced"),
+    "1186_federal_awards_rebuild.py": ("337d701f28233a5573c51dbf8792774920c468e04c352badd2a30c14897438d7", "ACTIVE", "transitional award-grain producer", "federal_awards_2025_2026.csv consumed by 1174/1176; award grain differs from transaction release", "Declare award-grain replacement and cut consumers over; transaction release alone is insufficient"),
+}
+
+
 def add_maintenance_classification(scripts, references):
     """Classify maintenance evidence without granting write or deletion authority.
 
@@ -1027,6 +1054,13 @@ def add_maintenance_classification(scripts, references):
         by_name[record["script"]].append(relative)
         hashes[digest].append(relative)
         record["source_sha256"] = digest
+    reviewed = {
+        path: _REVIEWED_MAINTENANCE[record["script"]]
+        for path, record in by_path.items()
+        if path == "code/" + record["script"]
+        and record["script"] in _REVIEWED_MAINTENANCE
+        and record["source_sha256"] == _REVIEWED_MAINTENANCE[record["script"]][0]
+    }
     workflow_calls = defaultdict(set)
     documented_calls = defaultdict(set)
     for path in references:
@@ -1052,6 +1086,7 @@ def add_maintenance_classification(scripts, references):
                     "product consumer/shared service", "test/fixture"}
     active = {path for path, record in by_path.items()
               if record.get("operational_role") in active_roles or workflow_calls[path]}
+    active.update(path for path, review in reviewed.items() if review[1] == "ACTIVE")
     # Follow actual Python import/dispatch candidates only from maintained
     # roots, not from every unreferenced script that mentions another module.
     changed = True
@@ -1073,7 +1108,9 @@ def add_maintenance_classification(scripts, references):
                    "mints_issued_ids": record["script"] in item.get("mints", [])}
                   for output, item in cp.REPLAY_ORDERS.items()
                   if record["script"] in item.get("order", [])]
-        if path in active:
+        if path in reviewed:
+            status, reason = reviewed[path][1], reviewed[path][3]
+        elif path in active:
             status, reason = "ACTIVE", "declared operational role, CI invocation or reachable Python dependency"
         elif replay:
             status, reason = "HISTORICAL-RETAIN", "explicit authoritative replay dependency; retention is not permission to execute"
@@ -1107,7 +1144,7 @@ def add_maintenance_classification(scripts, references):
                          and not record.get("runtime_consumer_candidates")
                          and not documented_calls[path] and not workflow_calls[path]
                          and not record.get("unknown_io_literals"))
-        if fully_retired and path not in active:
+        if fully_retired and path not in active and path not in reviewed:
             status, reason = "SUPERSEDED", "all observed output writers retired by existing authority; no known caller"
         provenance = record.get("collection_output_entrypoints", [])
         record["maintenance_status"] = status
@@ -1127,6 +1164,13 @@ def add_maintenance_classification(scripts, references):
             "review_write_sites": [{key: site.get(key) for key in ("line", "operation", "target", "scope", "table")}
                                    for site in record.get("writer_evidence", [])] if status == "REQUIRES-REVIEW" else [],
             "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+            "bounded_source_review": ({"source_sha256": reviewed[path][0],
+                                       "role": reviewed[path][2],
+                                       "retirement_condition": reviewed[path][4],
+                                       "grants_execution_permission": False}
+                                      if path in reviewed else None),
+            "source_review_stale": (record["script"] in _REVIEWED_MAINTENANCE
+                                    and path == "code/" + record["script"] and path not in reviewed),
         }
 
 

@@ -3,6 +3,7 @@
 import argparse
 import contextlib
 import copy
+import hashlib
 import importlib.util
 import io
 import json
@@ -720,6 +721,41 @@ pretend_loader("not_executed.py")
             self.assertEqual(
                 by_name["real_product.py"]["runtime_consumer_candidates"], ["code/caller.py"]
             )
+
+    def test_reviewed_maintenance_requires_exact_source_and_never_admits_writers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "code/archive").mkdir(parents=True)
+            body = b"VALUE = 'reviewed'\n"
+            digest = hashlib.sha256(body).hexdigest()
+            (root / "code/reviewed.py").write_bytes(body)
+            (root / "code/archive/reviewed.py").write_bytes(body)
+            records = [{"script": "reviewed.py", "dir": directory,
+                        "operational_role": "unresolved", "writer_evidence": [],
+                        "runtime_consumer_candidates": [], "unknown_io_literals": []}
+                       for directory in ("", "archive")]
+            review = {"reviewed.py": (digest, "ACTIVE", "controlled migration",
+                                      "Existing consumer requires its unique output", "Cut over consumer")}
+            with (patch.object(self.inventory, "ROOT", root),
+                  patch.object(self.inventory, "_REVIEWED_MAINTENANCE", review)):
+                self.inventory.add_maintenance_classification(records, [])
+                evidence = records[0]["maintenance_evidence"]
+                self.assertEqual(records[0]["maintenance_status"], "ACTIVE")
+                self.assertFalse(evidence["bounded_source_review"]["grants_execution_permission"])
+                self.assertFalse(evidence["retirement_authorized"])
+                self.assertIsNone(records[1]["maintenance_evidence"]["bounded_source_review"])
+                (root / "code/reviewed.py").write_text("VALUE = 'changed'\n", encoding="utf-8")
+                self.inventory.add_maintenance_classification(records, [])
+                self.assertEqual(records[0]["maintenance_status"], "REQUIRES-REVIEW")
+                self.assertTrue(records[0]["maintenance_evidence"]["source_review_stale"])
+                self.assertIsNone(records[0]["maintenance_evidence"]["bounded_source_review"])
+
+    def test_bounded_review_hashes_identify_the_inspected_sources(self):
+        for name, review in self.inventory._REVIEWED_MAINTENANCE.items():
+            with self.subTest(script=name):
+                self.assertEqual(hashlib.sha256((ROOT / "code" / name).read_bytes()).hexdigest(), review[0])
+                self.assertIn(review[1], {"ACTIVE", "HISTORICAL-RETAIN"})
+                self.assertTrue(all(review[2:]))
 
     def test_maintenance_classification_requires_evidence_and_never_authorizes_removal(self):
         with tempfile.TemporaryDirectory() as directory:
