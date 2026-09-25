@@ -1114,6 +1114,53 @@ class TestApplyFieldMap(unittest.TestCase):
 
 
 class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
+    def test_legacy_negative_controls_never_mutate_canonical_sources(self):
+        cases = (
+            ("952_nonprofit_disposition.py", "selftest", ("ROOT", "TABLE", "MANIFEST"), "TABLE"),
+            ("954_register_promoted_columns_codebook.py", "selftest", ("ROOT", "CLEAN", "FRAG", "MASTER"), "MASTER"),
+            ("1132_fac_nontribal_native_audits.py", "cmd_selftest",
+             ("ROOT", "CLEAN", "SPINE", "BULK", "OUT_CENSUS", "OUT_SEFA", "OUT_COV"), "OUT_CENSUS"),
+            ("1155_np_placename_precision.py", "cmd_selftest", ("ROOT", "NP", "SPINE"), "NP"),
+        )
+        for filename, entrypoint, names, writable in cases:
+            spec = importlib.util.spec_from_file_location("isolated_" + filename[:-3], CODE / filename)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            for fail in (False, True):
+                with self.subTest(script=filename, injected_failure=fail), tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    paths = {name: root / name for name in names}
+                    paths["ROOT"] = root
+                    for name, path in paths.items():
+                        if name != "ROOT":
+                            path.write_bytes(b"canonical sentinel\r\n")
+                    before = {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}
+                    with ExitStack() as stack:
+                        for name, path in paths.items():
+                            stack.enter_context(patch.object(module, name, path))
+                        if hasattr(module, "cb"):
+                            writer_paths = {"CEDAR": root, "CLEAN": paths["CLEAN"],
+                                            "FRAG": paths["FRAG"], "MASTER": paths["MASTER"]}
+                            for name, path in writer_paths.items():
+                                stack.enter_context(patch.object(module.cb, name, path))
+                        if fail:
+                            def interrupted():
+                                getattr(module, writable).write_bytes(b"injected fixture corruption")
+                                raise RuntimeError("injected fixture interruption")
+                            stack.enter_context(patch.object(module, "_selftest_cases", side_effect=interrupted))
+                        with redirect_stdout(io.StringIO()) as output:
+                            if fail:
+                                with self.assertRaisesRegex(RuntimeError, "injected fixture interruption"):
+                                    getattr(module, entrypoint)()
+                            else:
+                                result = getattr(module, entrypoint)()
+                                self.assertEqual(result, 0, output.getvalue())
+                        self.assertEqual({name: getattr(module, name) for name in names}, paths)
+                        if hasattr(module, "cb"):
+                            self.assertEqual({name: getattr(module.cb, name) for name in writer_paths}, writer_paths)
+                    self.assertEqual({p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}, before)
+                    self.assertFalse(any(p.is_dir() for p in root.iterdir()))
+
     def test_success_and_exception_preserve_canonical_files_and_restore_paths(self):
         spec = importlib.util.spec_from_file_location(
             "money_codebook_isolation", CODE / "1149_codebook_money_fed.py"

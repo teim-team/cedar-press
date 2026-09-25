@@ -28568,17 +28568,18 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 9,
-   "mentioned_outside_history": 9,
+   "mentions": 10,
+   "mentioned_outside_history": 10,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 1539,
+   "last_modified": "2026-09-25",
+   "lines": 1569,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
     "docs/fac_nontribal_native_audits.json",
-    "docs/schema/dataset_contracts.json"
+    "docs/schema/dataset_contracts.json",
+    "server/tests/test_field_map.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -28588,9 +28589,12 @@
    "unknown_io_literals": [
     "Federal Audit Clearinghouse (GSA), published bulk export federal_awards.csv",
     "Federal Audit Clearinghouse (GSA), published bulk export general.csv",
-    "_HOSTLOCK_%s.json"
+    "_HOSTLOCK_%s.json",
+    "census.csv",
+    "coverage.csv",
+    "sefa.csv"
    ],
-   "embedded_test_functions": 1,
+   "embedded_test_functions": 2,
    "standalone_test_evidence": {
     "unittest_classes": [],
     "pytest_import": false,
@@ -28605,7 +28609,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "4acea2b199b6a3a8932fc12b669a1d6d5abc7db360864ab74bf8d0f8b4bc3683"
+     "signature": "2cc753333b1af880a9d74aceab342133eb72a86ca88a83e6d9206a8aa9a1ed34"
     },
     {
      "line": 298,
@@ -28613,7 +28617,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "004caa41238d1968a1d371e97169e571db6e9e1ef842e4839878f48c10697852"
+     "signature": "88560e892c53b3f1d1af1e90c2684f1e01b15164755b294f844885c54727eef8"
     },
     {
      "line": 351,
@@ -28621,7 +28625,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a684c3531f4586990d2c519e352ce9ff4b1981425e8ff72ccc05b014b9e11ee6"
+     "signature": "352ec9fcdba60fdc8387d17cab80c71f244efff4acb1fe0d73ef84569c33e301"
     },
     {
      "line": 354,
@@ -28629,7 +28633,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a684c3531f4586990d2c519e352ce9ff4b1981425e8ff72ccc05b014b9e11ee6"
+     "signature": "352ec9fcdba60fdc8387d17cab80c71f244efff4acb1fe0d73ef84569c33e301"
     },
     {
      "line": 373,
@@ -28637,7 +28641,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a684c3531f4586990d2c519e352ce9ff4b1981425e8ff72ccc05b014b9e11ee6"
+     "signature": "352ec9fcdba60fdc8387d17cab80c71f244efff4acb1fe0d73ef84569c33e301"
     },
     {
      "line": 546,
@@ -28645,7 +28649,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "4acea2b199b6a3a8932fc12b669a1d6d5abc7db360864ab74bf8d0f8b4bc3683"
+     "signature": "2cc753333b1af880a9d74aceab342133eb72a86ca88a83e6d9206a8aa9a1ed34"
     },
     {
      "line": 556,
@@ -28653,7 +28657,7 @@
      "target": "<unresolved>/data/raw/fac/bulk/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "e7b7e415e5f3a1d9c1887d1938122dc8f08548110a6f7fa724175aea67960ab5"
+     "signature": "828596005c0e6a8d1563d49f41d13204df8963618c98e27d1e0cb85d59e04481"
     },
     {
      "line": 595,
@@ -28661,7 +28665,7 @@
      "target": "<unresolved>/data/raw/fac/bulk/_manifest.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "d15a2ed4ff0b97cfa908b2530222b992d9206315395cf69f041b381a4e881097"
+     "signature": "57975846e09f197d1cf9d2a43fa99f54ad31da41a4c3b44deb03990798187bad"
     },
     {
      "line": 1031,
@@ -28669,39 +28673,39 @@
      "target": "<unresolved>/docs/fac_nontribal_native_audits.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "812b584f3fcc3eaf776155397fa6d08bf7c3fc5922818de0236832b97bda17bd"
+     "signature": "c8e525078a4f798f7cd381072220f6c9f2a59fabb8e32ea8657a50d3736393c6"
     },
     {
-     "line": 1302,
+     "line": 1332,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "c93e5e8fa1a902df4a547fa5545f57f76b1224f97333dd76f4213416540ee403"
+     "signature": "18e43a5fb9d2a188216ed964fdea5f576a396550cf4229773e0ba0431fdac084"
     },
     {
-     "line": 1374,
+     "line": 1404,
      "operation": "shutil.copy2",
      "target": "<unresolved>/data/clean/fac_native_nontribal_single_audits.csv",
      "scope": "governed_table",
      "table": "fac_native_nontribal_single_audits.csv",
-     "signature": "68f61c01533e76dba9c4e2528a1287a6a7e280eacab922f3c42bdffd824fd01e"
+     "signature": "d4ae981af0cf91296c076005076617033ae183c4c692c7a18e0705b7ae41cdb2"
     },
     {
-     "line": 1507,
+     "line": 1537,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "c93e5e8fa1a902df4a547fa5545f57f76b1224f97333dd76f4213416540ee403"
+     "signature": "18e43a5fb9d2a188216ed964fdea5f576a396550cf4229773e0ba0431fdac084"
     },
     {
-     "line": 1508,
+     "line": 1538,
      "operation": "open",
      "target": "<unresolved>/data/clean/codebook_master.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "f91d21bb8042b05da29732b91dfbd9fca793d098aee6cd0af221d4a20aeee8be"
+     "signature": "4892978f3441ca69db16d28e567c2b551f4dd89a321d6d796dfe495e1b662d23"
     }
    ],
    "writer_analysis_error": null,
@@ -28709,11 +28713,11 @@
    "undeclared_governed_tables": [
     "fac_native_nontribal_single_audits.csv"
    ],
-   "source_sha256": "fb4857fd6c1b329d1e9d335ddaff44a63800a2a964b4d2772127c64eeb1305fa",
+   "source_sha256": "f02a7813281c1a1315f78b87a83ea2da3f02eba80afdb649a4130f384324934a",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "protected output writer lacks proved current ownership/cutover: <unresolved>/data/clean/codebook_master.csv",
-    "source_sha256": "fb4857fd6c1b329d1e9d335ddaff44a63800a2a964b4d2772127c64eeb1305fa",
+    "source_sha256": "f02a7813281c1a1315f78b87a83ea2da3f02eba80afdb649a4130f384324934a",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -28792,28 +28796,28 @@
       "table": null
      },
      {
-      "line": 1302,
+      "line": 1332,
       "operation": "shutil.copy2",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1374,
+      "line": 1404,
       "operation": "shutil.copy2",
       "target": "<unresolved>/data/clean/fac_native_nontribal_single_audits.csv",
       "scope": "governed_table",
       "table": "fac_native_nontribal_single_audits.csv"
      },
      {
-      "line": 1507,
+      "line": 1537,
       "operation": "shutil.copy2",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1508,
+      "line": 1538,
       "operation": "open",
       "target": "<unresolved>/data/clean/codebook_master.csv",
       "scope": "protected_surface",
@@ -33050,12 +33054,13 @@
    "duplicate_number": false,
    "kind": "enricher",
    "evidence": [
-    "read-modify-writes: 06_nonprofit.csv, np_orgs.csv, np_placename_precision_strata_2026-09-02.json"
+    "read-modify-writes: 06_nonprofit.csv, cedar_entity_spine.csv, np_orgs.csv, np_placename_precision_strata_2026-09-02.json"
    ],
    "never_run": false,
    "never_run_reason": "",
    "writes": [
     "06_nonprofit.csv",
+    "cedar_entity_spine.csv",
     "np_orgs.csv",
     "np_placename_precision_applied_audit_2026-09-02.csv",
     "np_placename_precision_sample_2026-09-02.csv",
@@ -33072,15 +33077,17 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
+   "mentions": 5,
+   "mentioned_outside_history": 5,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 1123,
+   "last_modified": "2026-09-25",
+   "lines": 1170,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
-   "static_consumers": [],
+   "static_consumers": [
+    "server/tests/test_field_map.py"
+   ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -33095,7 +33102,7 @@
     "np_ein_uei_bridge.csv",
     "np_schedule_i_grants.csv"
    ],
-   "embedded_test_functions": 1,
+   "embedded_test_functions": 2,
    "standalone_test_evidence": {
     "unittest_classes": [],
     "pytest_import": false,
@@ -33110,7 +33117,7 @@
      "target": "<unresolved>/review/np_placename_precision_strata_2026-09-02.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ca94b275c0ee7e751c558e73b1e8ef97d06da6752e0565981fb4fee99a01863b"
+     "signature": "59faa08fc2e243af6139ed37b90a5049b5cb2fa0144250fed1fea058ec090040"
     },
     {
      "line": 544,
@@ -33118,7 +33125,7 @@
      "target": "<unresolved>/review/np_placename_precision_sample_2026-09-02.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "aca5c776b90643b35cb761b419e9ccaf7b5439199993864d465223feec2a9b82"
+     "signature": "9cc9bcda223c1f7e62516d78dcc1b92d2f15ef1d62801942867fbadf636a0af2"
     },
     {
      "line": 771,
@@ -33126,15 +33133,15 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9f693c66b53115eba2e68606f6096a21cceec7c54b3f365f5b397ac5400c3147"
+     "signature": "e4ac79a07923f5a7d1e92942b18a080a85030d168c7604d56189334459284457"
     },
     {
      "line": 814,
      "operation": "NP.open",
-     "target": "<unresolved>/data/clean/np_orgs.csv",
-     "scope": "governed_table",
-     "table": "np_orgs.csv",
-     "signature": "28e5a3ed26a3c442856ea968e378b89a76edf0df6c2656425df946e5cdfed90d"
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "ae10f81e86b650529080106f77e9ee770797fd4e5f3e3d50acd0adca0d0faca8"
     },
     {
      "line": 935,
@@ -33142,7 +33149,7 @@
      "target": "<unresolved>/review/np_placename_precision_applied_strata_2026-09-02.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "24ee80891e0ec13f59116a3095bf63119f6eb4aab61f23a3f6ec035f95e78999"
+     "signature": "6a5ad4d614d66c6192ebd5b1f3edb9a7bf656045a6b5c3cb89591c55df379c78"
     },
     {
      "line": 938,
@@ -33150,7 +33157,7 @@
      "target": "<unresolved>/review/np_placename_precision_applied_audit_2026-09-02.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b06bd32919ea85fe3573b144bf9f32a0369d0240097ce01d6e2e5809d854950a"
+     "signature": "dc54d7df4f94cca55515acb53c6a823637e049a620cbd43a5e355044d1258299"
     },
     {
      "line": 1014,
@@ -33158,7 +33165,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "8a5ed09d320a350f93775dc2855de418da523a4df16633f26bf1627fcd023a8e"
+     "signature": "cf3aefe46fb293fdf5a263f8979b6c96d09262cb11b3d24f1d93df399c22919d"
     },
     {
      "line": 1016,
@@ -33166,67 +33173,89 @@
      "target": "<unresolved>/data/clean/codebook/06_nonprofit.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "4eb15087ab487b81fb349606aac52c4a3618edc172095b08dab7f00fa86c696b"
+     "signature": "6437ffefeb37c6fc5d232836bc7949fe2fc1afa57e8fcd48db7a84089e54dd1c"
     },
     {
-     "line": 1081,
+     "line": 1062,
+     "operation": ".write_text",
+     "target": "<unresolved>/code/cedar_publication.py",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "8c68333e1601c1dcc00b3e3bd681ca1ac01621b6ed693e60ca1938180bf411f4"
+    },
+    {
+     "line": 1064,
+     "operation": "SPINE.open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "6e5e31f3bf631dfe74dc7e86b2921a74e1fbd95a53d9ce7ed776885786e488a5"
+    },
+    {
+     "line": 1072,
+     "operation": "NP.open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "ae10f81e86b650529080106f77e9ee770797fd4e5f3e3d50acd0adca0d0faca8"
+    },
+    {
+     "line": 1128,
      "operation": "NP.write_text",
-     "target": "<unresolved>/data/clean/np_orgs.csv",
-     "scope": "governed_table",
-     "table": "np_orgs.csv",
-     "signature": "60964762decc95695bdb141f984dcab5013efa1ae92029e9a40059616b06b668"
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "5b2cedca8ebff758e338203475783086056e1caac93d6a9db4980a907317064b"
     },
     {
-     "line": 1089,
+     "line": 1136,
      "operation": "NP.write_bytes",
-     "target": "<unresolved>/data/clean/np_orgs.csv",
-     "scope": "governed_table",
-     "table": "np_orgs.csv",
-     "signature": "1ee159fc6f7caa5a3b03c2ac442b130b787604c7f2ef06b3add00be46588878a"
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "e4457b76b66015455255ee171cae87e96cb4a77bfb4e6ab384256cd949edaac1"
     },
     {
-     "line": 1091,
+     "line": 1138,
      "operation": "pub_path.write_text",
      "target": "<unresolved>/code/cedar_publication.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "0f38d2554e84f1a21b255cf81bd4a28313ffb1812731539a8e6cb66813817244"
+     "signature": "885c6099231f242b78f0d8f1221b0d09f70bcdd4035996338632ec8896b79e99"
     },
     {
-     "line": 1099,
+     "line": 1146,
      "operation": "pub_path.write_bytes",
      "target": "<unresolved>/code/cedar_publication.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6e96ca30b1cd8a03dd8584aaa51cdcdbb4111c3aab2f8dcad95d6218b7e27d1d"
+     "signature": "daf6acbf71c0d2104e3e3252f0d3960c69957f03c22de89b8f2d9b5207c8a509"
     },
     {
-     "line": 1101,
+     "line": 1148,
      "operation": "NP.write_bytes",
-     "target": "<unresolved>/data/clean/np_orgs.csv",
-     "scope": "governed_table",
-     "table": "np_orgs.csv",
-     "signature": "1ee159fc6f7caa5a3b03c2ac442b130b787604c7f2ef06b3add00be46588878a"
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "e4457b76b66015455255ee171cae87e96cb4a77bfb4e6ab384256cd949edaac1"
     },
     {
-     "line": 1102,
+     "line": 1149,
      "operation": "pub_path.write_bytes",
      "target": "<unresolved>/code/cedar_publication.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6e96ca30b1cd8a03dd8584aaa51cdcdbb4111c3aab2f8dcad95d6218b7e27d1d"
+     "signature": "daf6acbf71c0d2104e3e3252f0d3960c69957f03c22de89b8f2d9b5207c8a509"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P1_protected_surface_write_candidate",
-   "undeclared_governed_tables": [
-    "np_orgs.csv"
-   ],
-   "source_sha256": "eb62a23d22b6fe728cd99afd27fc4e2fba12c45beae54424fa1110dbe1d82694",
+   "undeclared_governed_tables": [],
+   "source_sha256": "e167b1dc16e28ebcca545c876972b3436ef6122c35a5ebf7956de856d6ab703e",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "protected output writer lacks proved current ownership/cutover: <unresolved>/data/clean/codebook/06_nonprofit.csv",
-    "source_sha256": "eb62a23d22b6fe728cd99afd27fc4e2fba12c45beae54424fa1110dbe1d82694",
+    "source_sha256": "e167b1dc16e28ebcca545c876972b3436ef6122c35a5ebf7956de856d6ab703e",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -33265,9 +33294,9 @@
      {
       "line": 814,
       "operation": "NP.open",
-      "target": "<unresolved>/data/clean/np_orgs.csv",
-      "scope": "governed_table",
-      "table": "np_orgs.csv"
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
      },
      {
       "line": 935,
@@ -33298,42 +33327,63 @@
       "table": null
      },
      {
-      "line": 1081,
+      "line": 1062,
+      "operation": ".write_text",
+      "target": "<unresolved>/code/cedar_publication.py",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 1064,
+      "operation": "SPINE.open",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 1072,
+      "operation": "NP.open",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 1128,
       "operation": "NP.write_text",
-      "target": "<unresolved>/data/clean/np_orgs.csv",
-      "scope": "governed_table",
-      "table": "np_orgs.csv"
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
      },
      {
-      "line": 1089,
+      "line": 1136,
       "operation": "NP.write_bytes",
-      "target": "<unresolved>/data/clean/np_orgs.csv",
-      "scope": "governed_table",
-      "table": "np_orgs.csv"
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
      },
      {
-      "line": 1091,
+      "line": 1138,
       "operation": "pub_path.write_text",
       "target": "<unresolved>/code/cedar_publication.py",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1099,
+      "line": 1146,
       "operation": "pub_path.write_bytes",
       "target": "<unresolved>/code/cedar_publication.py",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 1101,
+      "line": 1148,
       "operation": "NP.write_bytes",
-      "target": "<unresolved>/data/clean/np_orgs.csv",
-      "scope": "governed_table",
-      "table": "np_orgs.csv"
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
      },
      {
-      "line": 1102,
+      "line": 1149,
       "operation": "pub_path.write_bytes",
       "target": "<unresolved>/code/cedar_publication.py",
       "scope": "unresolved_target",
@@ -96047,29 +96097,31 @@
    "duplicate_number": false,
    "kind": "enricher",
    "evidence": [
-    "read-modify-writes: NONPROFIT_DISPOSITION.json"
+    "read-modify-writes: manifest.json"
    ],
    "never_run": false,
    "never_run_reason": "",
    "writes": [
-    "NONPROFIT_DISPOSITION.json",
     "_952_selftest_fixture.csv",
+    "manifest.json",
     "np_orgs.csv"
    ],
    "reads": [
-    "NONPROFIT_DISPOSITION.json"
+    "manifest.json"
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 5,
-   "mentioned_outside_history": 5,
+   "mentions": 6,
+   "mentioned_outside_history": 6,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 456,
+   "last_modified": "2026-09-25",
+   "lines": 483,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
-   "static_consumers": [],
+   "static_consumers": [
+    "server/tests/test_field_map.py"
+   ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -96077,8 +96129,10 @@
      "verify"
     ]
    },
-   "unknown_io_literals": [],
-   "embedded_test_functions": 1,
+   "unknown_io_literals": [
+    "NONPROFIT_DISPOSITION.json"
+   ],
+   "embedded_test_functions": 2,
    "standalone_test_evidence": {
     "unittest_classes": [],
     "pytest_import": false,
@@ -96093,7 +96147,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "8cba8fe5c1ab13deb5cccd4e471a9cc30d3141c53b983ac37ae66660a114e759"
+     "signature": "ca3cea58f9cbde14be7c55b0636ddb07ab593b8b15996dd1283e9b97a4f53f9f"
     },
     {
      "line": 249,
@@ -96101,15 +96155,15 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "8c9f20ed8617cdfe719febb9793c20e124625d5a5661093219b63b15677e628c"
+     "signature": "c3efdc3c2db2314971e40c670f472e08d224a04a16beb72724724f2b3d1decf0"
     },
     {
      "line": 251,
      "operation": "os.replace",
-     "target": "<unresolved>/data/clean/np_orgs.csv",
-     "scope": "governed_table",
-     "table": "np_orgs.csv",
-     "signature": "ac9008dd4bba0656d7b62bbdd8a2597e1398f6a5ca21742a4a12820e6691e85e"
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "ab270940a812c89af4fe3430f032d0817d38b44a562d283c6987da4da9331a54"
     },
     {
      "line": 254,
@@ -96117,51 +96171,65 @@
      "target": "<unresolved>/review/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "69e41181bbfa0a764eaefba80b93257911ee5e1deb44faccb6cf9127673517de"
+     "signature": "f3f980bb51953f035af9f46dc3debcafb14c0b69ba96d22a8917217f88decf75"
     },
     {
      "line": 275,
      "operation": "MANIFEST.write_text",
-     "target": "<unresolved>/docs/NONPROFIT_DISPOSITION.json",
+     "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "40869d1963c1fa884c96067072d6f9047ce2b2d4d1db513cb78840ccb3862baf"
+     "signature": "db220e0699b875fe50d5d24a61c030bd61e78d884d74bfaaaf8be48deec2704e"
     },
     {
-     "line": 366,
+     "line": 363,
+     "operation": "TABLE.open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "6ccc2d9990cd934ee589f7273cf63a0f01577c9a5f6fa197314dee9b04fa9d22"
+    },
+    {
+     "line": 372,
+     "operation": "MANIFEST.write_text",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "db220e0699b875fe50d5d24a61c030bd61e78d884d74bfaaaf8be48deec2704e"
+    },
+    {
+     "line": 393,
      "operation": "fix.open",
      "target": "<unresolved>/data/clean/_952_selftest_fixture.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "7bae58791e0133821c2331980d8b3c18ee679c52e03d6c7a3f267ac6dcab3f55"
+     "signature": "2f379a257a094c5a49206576d757ed6f94439e4606175ae78f7c81173628d536"
     },
     {
-     "line": 385,
+     "line": 412,
      "operation": "MANIFEST.write_text",
-     "target": "<unresolved>/docs/NONPROFIT_DISPOSITION.json",
+     "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "40869d1963c1fa884c96067072d6f9047ce2b2d4d1db513cb78840ccb3862baf"
+     "signature": "db220e0699b875fe50d5d24a61c030bd61e78d884d74bfaaaf8be48deec2704e"
     },
     {
-     "line": 430,
+     "line": 457,
      "operation": "MANIFEST.write_text",
-     "target": "<unresolved>/docs/NONPROFIT_DISPOSITION.json",
+     "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "40869d1963c1fa884c96067072d6f9047ce2b2d4d1db513cb78840ccb3862baf"
+     "signature": "db220e0699b875fe50d5d24a61c030bd61e78d884d74bfaaaf8be48deec2704e"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P1_protected_surface_write_candidate",
-   "undeclared_governed_tables": [
-    "np_orgs.csv"
-   ],
-   "source_sha256": "86e1c63f6c609342c1804a2a15ec96f23f6102c3f1fbee2467a6db705f733166",
+   "undeclared_governed_tables": [],
+   "source_sha256": "8e62bae753e508c603e68d8bd8f8bcf8d6d265fb8b58f8a469bdd50465457748",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "protected output writer lacks proved current ownership/cutover: <unresolved>/data/clean/_952_selftest_fixture.csv",
-    "source_sha256": "86e1c63f6c609342c1804a2a15ec96f23f6102c3f1fbee2467a6db705f733166",
+    "source_sha256": "8e62bae753e508c603e68d8bd8f8bcf8d6d265fb8b58f8a469bdd50465457748",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -96191,9 +96259,9 @@
      {
       "line": 251,
       "operation": "os.replace",
-      "target": "<unresolved>/data/clean/np_orgs.csv",
-      "scope": "governed_table",
-      "table": "np_orgs.csv"
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
      },
      {
       "line": 254,
@@ -96205,28 +96273,42 @@
      {
       "line": 275,
       "operation": "MANIFEST.write_text",
-      "target": "<unresolved>/docs/NONPROFIT_DISPOSITION.json",
+      "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 366,
+      "line": 363,
+      "operation": "TABLE.open",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 372,
+      "operation": "MANIFEST.write_text",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 393,
       "operation": "fix.open",
       "target": "<unresolved>/data/clean/_952_selftest_fixture.csv",
       "scope": "protected_surface",
       "table": null
      },
      {
-      "line": 385,
+      "line": 412,
       "operation": "MANIFEST.write_text",
-      "target": "<unresolved>/docs/NONPROFIT_DISPOSITION.json",
+      "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 430,
+      "line": 457,
       "operation": "MANIFEST.write_text",
-      "target": "<unresolved>/docs/NONPROFIT_DISPOSITION.json",
+      "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      }
@@ -96432,15 +96514,17 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 2,
-   "mentioned_outside_history": 2,
+   "mentions": 3,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-23",
-   "lines": 328,
+   "last_modified": "2026-09-25",
+   "lines": 356,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
-   "static_consumers": [],
+   "static_consumers": [
+    "server/tests/test_field_map.py"
+   ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -96453,7 +96537,7 @@
     "np_orgs.csv",
     "prime_contracts.csv"
    ],
-   "embedded_test_functions": 1,
+   "embedded_test_functions": 2,
    "standalone_test_evidence": {
     "unittest_classes": [],
     "pytest_import": false,
@@ -96463,38 +96547,46 @@
    },
    "writer_evidence": [
     {
-     "line": 299,
+     "line": 307,
+     "operation": ".open",
+     "target": "<unresolved>/<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "a32d1d51c7d244cffbd6159f85261f9010f0c341409a2727a1501e8cb79d1b6a"
+    },
+    {
+     "line": 327,
      "operation": "shutil.copyfile",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "393065e92a4c6e479db3dbc3d6e235b8eb0bc889e1dcb145f0eba2202e8afe3f"
+     "signature": "0206033f38bc672ac2481ad4b64dd3533f9ae8dc375e4031ee85b68b33e718f8"
     },
     {
-     "line": 311,
+     "line": 339,
      "operation": "shutil.copyfile",
-     "target": "<unresolved>/data/clean/codebook_master.csv",
-     "scope": "protected_surface",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
      "table": null,
-     "signature": "4771ca3b855a76595ea00ff879f12222a9856f81c574d88309361ed618bbed10"
+     "signature": "62e50a020f51fda48017b638b774de5fccf847e3d0ab137ff6feed70d5ea6469"
     },
     {
-     "line": 314,
+     "line": 342,
      "operation": "shutil.copyfile",
-     "target": "<unresolved>/data/clean/codebook_master.csv",
-     "scope": "protected_surface",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
      "table": null,
-     "signature": "4771ca3b855a76595ea00ff879f12222a9856f81c574d88309361ed618bbed10"
+     "signature": "62e50a020f51fda48017b638b774de5fccf847e3d0ab137ff6feed70d5ea6469"
     }
    ],
    "writer_analysis_error": null,
-   "writer_risk": "P1_protected_surface_write_candidate",
+   "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "dfd23c0e371064255802cd5c6039798f1a2edd3e84e5d938d98ddbc93e5b1a9d",
+   "source_sha256": "4dbd61ed3af99d1294dca27cf08371f43c8e0f2646a8cd3874bcd814a8d2a882",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
-    "reason": "protected output writer lacks proved current ownership/cutover: <unresolved>/data/clean/codebook_master.csv",
-    "source_sha256": "dfd23c0e371064255802cd5c6039798f1a2edd3e84e5d938d98ddbc93e5b1a9d",
+    "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/<unresolved>",
+    "source_sha256": "4dbd61ed3af99d1294dca27cf08371f43c8e0f2646a8cd3874bcd814a8d2a882",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -96505,27 +96597,34 @@
     "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
     "retirement_authorized": false,
     "review_owner": "Codex",
-    "review_priority": "P1_protected_surface_write_candidate",
+    "review_priority": "P2_unresolved_write_target",
     "review_write_sites": [
      {
-      "line": 299,
+      "line": 307,
+      "operation": ".open",
+      "target": "<unresolved>/<unresolved>",
+      "scope": "unresolved_target",
+      "table": null
+     },
+     {
+      "line": 327,
       "operation": "shutil.copyfile",
       "target": "<unresolved>",
       "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 311,
+      "line": 339,
       "operation": "shutil.copyfile",
-      "target": "<unresolved>/data/clean/codebook_master.csv",
-      "scope": "protected_surface",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
       "table": null
      },
      {
-      "line": 314,
+      "line": 342,
       "operation": "shutil.copyfile",
-      "target": "<unresolved>/data/clean/codebook_master.csv",
-      "scope": "protected_surface",
+      "target": "<unresolved>",
+      "scope": "unresolved_target",
       "table": null
      }
     ],
@@ -106938,10 +107037,10 @@
   "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
   "unresolved_writer_risk_counts": {
    "P0_forbidden_entrypoint": 1,
-   "P1_protected_surface_write_candidate": 71,
+   "P1_protected_surface_write_candidate": 70,
    "P1_undeclared_governed_write_candidate": 39,
    "P2_declared_governed_write_candidate": 4,
-   "P2_unresolved_write_target": 429,
+   "P2_unresolved_write_target": 430,
    "P3_no_detected_write_not_readonly_certified": 33,
    "P3_other_literal_write_candidate": 7
   },
