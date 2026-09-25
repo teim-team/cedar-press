@@ -204,9 +204,9 @@ REFUSED_AS_SAMPLED = {
         ("cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"),
         pub.NEEDAffiliationPublicationHold,
     ),
-    # entity_id and cedar_spine_entity_id both disagree with cedar_uid on the
-    # Menominee row: neither is an alias, and neither is deleted unadjudicated.
-    "nonprofits": (("entity_id", "cedar_spine_entity_id"), pub.UnadjudicatedIdentifier),
+    # The governed nonprofit projection must supply its classification; the
+    # compatibility applier cannot treat a delegated rule as a local builder.
+    "nonprofits": (("classification_ruling",), pub.OwedDerivation),
     # The beneficiary note carries caveats that must reach research_note
     # before it leaves (Codex, PR #67).
     "natural-resources": (("beneficiary_note",), pub.OwedDerivation),
@@ -239,7 +239,16 @@ def supply_owed_targets(collection: str, rows) -> set:
     the rest of the contract can be asserted. Returns the targets supplied."""
     entry = pub.field_map()[collection]
     rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
-    built = [n["column"] for n in entry["new"] if not n.get("status")]
+    # These fixtures supply external producer outputs; they do not implement
+    # the governed Lumecon derivations in Cedar's compatibility applier.
+    source_of = {target: source for source, target in rename.items()}
+    def built_here(n):
+        spec = n.get("from", "")
+        return not n.get("status") and (
+            not spec.startswith("rule:")
+            or bool(rows) and pub._rule(entry, spec, rows[0], source_of) is not None
+        )
+    built = [n["column"] for n in entry["new"] if built_here(n)]
     supplied = set()
     carriers = {
         f["column"]
@@ -250,7 +259,7 @@ def supply_owed_targets(collection: str, rows) -> set:
         if target in [
             n["column"]
             for n in entry["new"]
-            if not n.get("status") and n.get("from") != "rule:blank"
+            if built_here(n) and not f.get("blocking")
         ]:
             continue
         for r in rows:
@@ -269,6 +278,9 @@ def neutralised(collection: str, header, rows):
         for r in rows:
             r[col] = value
     supply_owed_targets(collection, rows)
+    if collection == "federal-register":
+        for row in rows:
+            row["entity_link_status"] = "unresolved"  # supplied fixture, no linkage claim
     return header, rows
 
 
@@ -542,10 +554,11 @@ class TestApplyFieldMap(unittest.TestCase):
         header, rows = sample("deals", "deals_classified")
         neutralised("deals", header, rows)
         result = pub.apply_field_map("deals", header, rows, set(header))
-        # The party's own role stays; the block's role is owed and absent,
-        # never an ambiguous constant (Codex, PR #67).
-        self.assertIn("cedar_entity_role", result["owed"])
-        self.assertNotIn("cedar_entity_role", header)
+        # The party's source-described role stays; the governed contract now
+        # includes an explicitly blank unresolved block role, never an owner claim.
+        self.assertNotIn("cedar_entity_role", result["owed"])
+        self.assertIn("cedar_entity_role", header)
+        self.assertTrue(all(r["cedar_entity_role"] == "" for r in rows))
         self.assertIn("native_party_role", header)
         self.assertTrue(all(r["native_party_role"] for r in rows))
         self.assertNotIn("Notes", header)
@@ -1030,20 +1043,12 @@ class TestApplyFieldMap(unittest.TestCase):
             "basis": "x",
         }
 
-        def supplied(el):
-            header, rows = sample("federal-register", "consultation_events")
-            neutralised("federal-register", header, rows)
-            header.append("collective_scopes")
-            for r in rows:
-                r["collective_scopes"] = json.dumps([el])
-            return header, rows, set(header) - {"collective_scopes"}
-
-        header, rows, own = supplied(element)
+        # Current FR contract deliberately publishes null applicability. Test
+        # the shared scope validator directly instead of pretending the former
+        # optional external scope column is still the product contract.
         with self.assertRaises(pub.ScopeRefused) as caught:
-            pub.apply_field_map("federal-register", header, rows, own)
+            pub.scope_elements(json.dumps([element]), "federal-register", "collective_scopes")
         self.assertEqual(caught.exception.columns, ["collective_scopes"])
-        # Without a basis, with an unknown relationship, or a parameterised
-        # scope without its parameter, likewise; a good element ships.
         for bad in (
             dict(element, scope="indian-country", basis=""),
             dict(element, scope="indian-country", relationship="covers"),
@@ -1053,15 +1058,13 @@ class TestApplyFieldMap(unittest.TestCase):
             dict(element, scope="indian-country", as_of="2026-02-30"),
             dict(element, scope="indian-country", as_of_rule="record_date", as_of=None),
         ):
-            header, rows, own = supplied(bad)
             with self.assertRaises(pub.ScopeRefused):
-                pub.apply_field_map("federal-register", header, rows, own)
-        header, rows, own = supplied(dict(element, scope="federally-recognized-tribes-in-state:OK"))
-        pub.apply_field_map("federal-register", header, rows, own)
-        self.assertIn("collective_scopes", header)
-        # Right after the opening block, where the order puts it; the owed
-        # entity_link_status before it is absent until supplied.
-        self.assertEqual(header.index("collective_scopes"), 4)
+                pub.scope_elements(json.dumps([bad]), "federal-register", "collective_scopes")
+        valid = dict(element, scope="federally-recognized-tribes-in-state:OK")
+        self.assertEqual(
+            pub.scope_elements(json.dumps([valid]), "federal-register", "collective_scopes"),
+            [valid],
+        )
         # A scope code where an identity belongs stops a singular table too.
         header, rows = sample("contractors", "prime_contracts")
         neutralised("contractors", header, rows)
@@ -1069,14 +1072,15 @@ class TestApplyFieldMap(unittest.TestCase):
         with self.assertRaises(pub.ScopeRefused) as caught:
             pub.apply_field_map("contractors", header, rows, set(header))
         self.assertEqual(caught.exception.columns, ["cedar_uid"])
-        # The Federal Register owes both columns; the writer ships without them
-        # rather than inventing either.
+        # The current FR contract retains supplied link status and explicitly
+        # unevaluated applicability; neither is an inferred relationship.
         header, rows = sample("federal-register", "consultation_events")
         neutralised("federal-register", header, rows)
         result = pub.apply_field_map("federal-register", header, rows, set(header))
-        self.assertIn("collective_scopes", result["owed"])
-        self.assertIn("entity_link_status", result["owed"])
-        self.assertNotIn("collective_scopes", header)
+        self.assertNotIn("collective_scopes", result["owed"])
+        self.assertNotIn("entity_link_status", result["owed"])
+        self.assertTrue(all(r["collective_scopes"] == "null" for r in rows))
+        self.assertTrue(all(r["entity_link_status"] == "unresolved" for r in rows))
 
     def test_an_unmapped_collection_is_left_alone(self):
         header = ["facility_id", "name", "built_date"]
