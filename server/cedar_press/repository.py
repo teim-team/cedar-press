@@ -23,6 +23,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import math
 import os
 import re
 import sqlite3
@@ -276,6 +277,12 @@ def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
     base = os.environ.get("CEDAR_PRESS_DATA_API", "").rstrip("/")
     token = os.environ.get("CEDAR_PRESS_DATA_TOKEN", "")
     environment = os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development")
+    try:
+        timeout = float(os.environ.get("CEDAR_PRESS_DATA_TIMEOUT_SECONDS", "30"))
+    except ValueError:
+        raise FullReleaseUnavailable("Invalid data service timeout") from None
+    if not math.isfinite(timeout) or not 1 <= timeout <= 300:
+        raise FullReleaseUnavailable("Data service timeout must be between 1 and 300 seconds")
     parsed = urlparse(base)
     if environment not in {"development", "staging", "production"}:
         raise FullReleaseUnavailable("Unknown service environment")
@@ -318,7 +325,7 @@ def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
             raise FullReleaseUnavailable("Data service redirects are refused")
 
     request = Request(base + path, headers={"Authorization": "Bearer " + token})
-    with build_opener(NoRedirect()).open(request, timeout=30) as response:
+    with build_opener(NoRedirect()).open(request, timeout=timeout) as response:
         content = response.read(limit + 1)
     if len(content) > limit:
         raise FullReleaseUnavailable("Data response exceeds configured safety limit")

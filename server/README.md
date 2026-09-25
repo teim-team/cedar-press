@@ -93,6 +93,10 @@ Server-only configuration (never Vite/browser variables):
 - `CEDAR_PRESS_DATA_API`: the Lumecon API origin. HTTPS is required; HTTP loopback
   is allowed only in development. Staging/production reject loopback and insecure cookies.
 - `CEDAR_PRESS_DATA_TOKEN`: a dataset-scoped backend grant; never a subscriber credential.
+- `CEDAR_PRESS_DATA_TIMEOUT_SECONDS`: bounded data-service socket wait, 1–300 seconds
+  (default 30). Cold validation of large multipart releases may require a measured
+  higher value in development. Invalid/nonfinite values fail before a request.
+  This does not change byte limits, verification, entitlement or production gates.
 - Staging/production also require explicit secrets of at least 32 characters, a
   Postgres `DATABASE_URL`, and no development `CEDAR_PRESS_ACCOUNTS` fallback.
   Configuration validation is not proof of database availability or deployment readiness.
