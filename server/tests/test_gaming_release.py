@@ -446,12 +446,20 @@ def _skip_or_fail(reason):
 
 
 def _fixture_cli(store):
-    """`lumecon-data gaming fixture-release --store <store>` through the installed package."""
+    """`lumecon-data gaming fixture-release --store <store>` through the installed package.
+
+    The fixture is a synthetic rehearsal release, which Lumecon builds only in
+    an explicitly declared nonproduction review environment. That setting is
+    scoped to this one build subprocess; the server under test keeps its own
+    production default unless a test opts into review.
+    """
+    env = dict(os.environ, LUMECON_ENVIRONMENT="review")
     out = subprocess.run(
         [sys.executable, "-m", "lumecon_data", "gaming", "fixture-release", "--store", str(store)],
         capture_output=True,
         text=True,
         check=True,
+        env=env,
     )
     return json.loads(out.stdout)
 
@@ -486,6 +494,12 @@ class PinnedLumeconReleaseTest(_ServerCase):
     @classmethod
     def setUpClass(cls):
         cls.work = None
+        # The fixture is a synthetic rehearsal: Lumecon builds and verifies
+        # rehearsals only where LUMECON_ENVIRONMENT=review. This suite is that
+        # review environment on the Lumecon side; Cedar's own production
+        # refusal is exercised separately, and so is Lumecon's.
+        cls._lumecon_env = patch.dict(os.environ, {"LUMECON_ENVIRONMENT": "review"})
+        cls._lumecon_env.start()
         cls.lumecon = _lumecon_release_module()
         if cls.lumecon is None:
             _skip_or_fail(
@@ -510,6 +524,7 @@ class PinnedLumeconReleaseTest(_ServerCase):
     def tearDownClass(cls):
         if cls.work is not None:
             cls.work.cleanup()
+        cls._lumecon_env.stop()
 
     def setUp(self):
         super().setUp()
@@ -607,6 +622,13 @@ class PinnedLumeconReleaseTest(_ServerCase):
                 self.assertFalse(any(p.endswith("/download") for p in self.fetched))
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     repository.grove_full_release("gaming", release, component=SERVED)
+        # Lumecon at its production default refuses to verify the rehearsal,
+        # so Cedar fails closed even with its own review setting.
+        with patch.dict(os.environ, {"LUMECON_ENVIRONMENT": ""}):
+            self.fetched.clear()
+            response, _events = self.get(SERVED, release)
+            self.assertEqual(response.status_code, 503)
+            self.assertFalse(any(p.endswith("/download") for p in self.fetched))
         # Review still never serves a synthetic release unless that is widened too.
         with patch.object(repository, "GROVE_SERVE_SYNTHETIC", False):
             self.assertEqual(self.get(SERVED, release)[0].status_code, 503)

@@ -119,7 +119,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: b683def02123bf49276b7265d73015329eb3fc9d  # Lumecon-data claude/gaming-grove-release
+      LUMECON_DATA_SHA: 3189a94c3202bd896d81b424bf8f8c971f12ecb7  # Lumecon-data claude/gaming-grove-release
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token
@@ -164,6 +164,9 @@ jobs:
           rm -rf .lumecon-data
       - name: Build the synthetic Gaming fixture release (smoke)
         run: python -m lumecon_data gaming fixture-release --store "$RUNNER_TEMP/gaming-fixture-store"
+        env:
+          # Synthetic rehearsal fixture: Lumecon builds rehearsals only in review.
+          LUMECON_ENVIRONMENT: review
       - name: Run the Gaming consumer tests without silent skips
         run: |
           python - <<'PY'

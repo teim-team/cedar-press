@@ -170,11 +170,26 @@ download permission, and one catalog entry. Cedar refuses a per-table catalog.
   registry snapshot hash for Lumecon to pin.
 - **Not authorized and not run.**
 
-**Payments handling.** `<PAYMENTS_DESIGN: orchestrator fills in from the
-Lumecon agent's design>`
+**Payments handling.** The 16 MiB external-source limit is unchanged. Lumecon
+partitions an over-limit component deterministically into bounded parts inside
+the one collection release; the collection manifest lists every part's
+SHA-256 and row count. `gaming_government_payments` (47,528,409 bytes, 53,124
+public rows) ships as 6 parts, the largest 16,346,413 bytes. Each part
+downloads on its own, and a joined download re-verifies every part hash
+before serving. Rollback covers all parts atomically. Cedar does not present
+payments today and refuses a multi-part component rather than assembling one;
+serving parts through the adapter is the next consumer step when payments is
+presented.
 
-**Temporary typing and coverage debt.** `<TYPING_COVERAGE_DEBT: orchestrator
-fills in>`
+**Temporary typing and coverage debt.** Coverage debt is closed: the ported
+Gaming producers now meet the repository floor, with no exclusions. Measured
+on Windows at 95.26%, the floor was raised from 88% to 93%; Linux CI must
+confirm it. Typing debt remains: the six ported producer modules have mypy
+overrides for unannotated functions and per-file ignores for nine style rules
+(line length, list concatenation, loop names and similar) until they are
+typed; new Gaming modules are strict. That exception is
+listed in Lumecon's review ledger, together with three producer quirks the
+new tests found and did not change.
 
 **Reproduction.**
 
