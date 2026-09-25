@@ -75,94 +75,94 @@
      "decision": "rename",
      "to": "transaction_id",
      "why": "The transaction's own key.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "assistance_award_unique_key",
      "decision": "rename",
      "to": "award_id",
      "why": "The award's key; the source page is built from it.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "award_id_fain",
      "decision": "rename",
      "to": "fain",
      "why": "The Federal Award Identification Number.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "action_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "fiscal_year",
      "decision": "keep",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "fy_partial_flag",
      "decision": "keep",
      "why": "Control: a partial fiscal year is not a year.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "obligated_usd",
      "decision": "rename",
      "to": "obligations_usd",
      "why": "The incremental obligation; negatives stay.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "assistance_type",
      "decision": "rename",
      "to": "assistance_type_code",
      "why": "The source's code, defined in the dictionary.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "assistance_type_description",
      "decision": "rename",
      "to": "assistance_type",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "cfda",
      "decision": "rename",
      "to": "program_code",
      "why": "The Assistance Listing number.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "cfda_title",
      "decision": "rename",
      "to": "program_name",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "awarding_agency_name",
      "decision": "rename",
      "to": "awarding_agency",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "awarding_sub_agency_name",
      "decision": "rename",
      "to": "awarding_subagency",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "recipient_uei",
      "decision": "keep",
      "why": "Official identifier.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "recipient_duns",
@@ -180,179 +180,179 @@
      "column": "recipient_name",
      "decision": "keep",
      "why": "The actual recipient's name, never overwritten by the register's.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "recipient_city_name",
      "decision": "rename",
      "to": "recipient_city",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "recipient_state_code",
      "decision": "rename",
      "to": "recipient_state",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "canonical_name",
      "decision": "keep",
      "why": "The register's name, rewritten from the register by uid at build time.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "attribution_method",
      "decision": "internal",
      "why": "Not in the approved list; attribution_status carries the reader's qualification.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "attribution_source_line",
      "decision": "internal",
      "why": "Attribution-rule transcript.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "attribution_rule",
      "decision": "internal",
      "why": "Attribution-rule transcript.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "exclusion_reason",
      "decision": "internal",
      "why": "Exclusion log.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "exclusion_source_line",
      "decision": "internal",
      "why": "Exclusion log.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "exclusion_rule",
      "decision": "internal",
      "why": "Exclusion log.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "ak_flag",
      "decision": "internal",
      "why": "Build flag.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "excluded_flag",
      "decision": "internal",
      "why": "An excluded row does not reach the file.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "attributed_flag",
      "decision": "keep",
      "why": "Control: which amounts can be counted.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "confidence_tier",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "face_value_of_loan",
      "decision": "rename",
      "to": "loan_face_value_usd",
      "why": "Loan measure; never combined with the cumulative one.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "original_loan_subsidy_cost",
      "decision": "rename",
      "to": "loan_subsidy_cost_usd",
      "why": "Loan measure.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "total_face_value_of_loan",
      "decision": "rename",
      "to": "total_loan_face_value_usd",
      "why": "Cumulative loan measure.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "total_loan_subsidy_cost",
      "decision": "rename",
      "to": "total_loan_subsidy_cost_usd",
      "why": "Cumulative loan measure.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "credit_instrument_flag",
      "decision": "internal",
      "why": "Not in the approved list; assistance_type says whether the row is a loan.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "business_types_code",
      "decision": "combine",
      "to": "recipient_type",
      "why": "One of three overlapping recipient-type fields, consolidated through the source-code dictionary with conflict checks.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "business_types_description",
      "decision": "combine",
      "to": "recipient_type",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "obligated_usd_real2025",
      "decision": "rename",
      "to": "obligations_usd_real2025",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "deflator_factor_2025",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "inflation_base_year",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "population_basis",
      "decision": "internal",
      "why": "Pipeline population marker.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "state_agreement",
      "decision": "internal",
      "why": "Matching diagnostic.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "source_archive_stamp",
      "decision": "derive",
      "to": "source_vintage",
      "why": "The archive stamp is the vintage the approved list keeps; source_vintage already carries it.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "fetched_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "attribution_status",
@@ -371,125 +371,125 @@
      "column": "attribution_basis",
      "decision": "internal",
      "why": "Matcher transcript naming spine files.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "source_vintage",
      "decision": "keep",
      "why": "The archive vintage; source_system is read off it.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "source_vintage_basis",
      "decision": "internal",
      "why": "Explains the stamp.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "business_types_description_normalized",
      "decision": "combine",
      "to": "recipient_type",
      "why": "The normalized spelling, the third of the three.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "business_types_description_normalized_basis",
      "decision": "internal",
      "why": "Explains the normalization.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_recipient_county_fips",
      "decision": "rename",
      "to": "recipient_county_fips",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_recipient_county_name",
      "decision": "rename",
      "to": "recipient_county",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_recipient_state_fips",
      "decision": "internal",
      "why": "recipient_state carries the state.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_recipient_place_dominance_share",
      "decision": "derive",
      "to": "recipient_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_recipient_place_ambiguous",
      "decision": "derive",
      "to": "recipient_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_pop_county_fips",
      "decision": "rename",
      "to": "performance_county_fips",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_pop_county_name",
      "decision": "rename",
      "to": "performance_county",
      "why": "",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_pop_state_fips",
      "decision": "internal",
      "why": "Derivable from the county FIPS.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_pop_place_dominance_share",
      "decision": "derive",
      "to": "performance_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_pop_place_ambiguous",
      "decision": "derive",
      "to": "performance_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_key_tier",
      "decision": "derive",
      "to": "recipient_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_key_basis",
      "decision": "internal",
      "why": "Explains the key tier.",
-     "spec": "Â§1"
+     "spec": "§1"
     },
     {
      "column": "geo_built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§1"
+     "spec": "§1"
     }
    ],
    "new": [
@@ -623,242 +623,242 @@
      "column": "consultation_event_id",
      "decision": "keep",
      "why": "Not necessarily a unique row key.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "channel",
      "decision": "internal",
      "why": "Constant and vague; activity_type says what the row is.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "agency",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "sub_agency",
      "decision": "rename",
      "to": "subagency",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "program",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "consultation_type",
      "decision": "rename",
      "to": "activity_type",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "topic",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "notice_date",
      "decision": "keep",
      "why": "The publication date, kept apart from the event dates.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "event_start_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "event_end_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "location",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "format",
      "decision": "rename",
      "to": "event_format",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "tribe_name",
      "decision": "internal",
      "why": "participant_name carries the name as published.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "participant_name_as_published",
      "decision": "rename",
      "to": "participant_name",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "participant_role",
      "decision": "keep",
      "why": "The role as the notice states it, beside the constant cedar_entity_role.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "comment_deadline",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "has_written_comments",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "has_summary",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "has_transcript",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "federal_register_citation",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "source_quote",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "fetched_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "tier",
      "decision": "internal",
      "why": "Confidence shorthand.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "confidence",
      "decision": "internal",
      "why": "Confidence shorthand.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "match_method",
      "decision": "internal",
      "why": "Matching machinery.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "Blank where no participant is enumerated.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "fr_document_number",
      "decision": "keep",
      "why": "",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "nagpra_notice_overlap",
      "decision": "internal",
      "why": "Internal overlap check.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "nagpra_bridge_overlap",
      "decision": "internal",
      "why": "Internal overlap check.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "nagpra_coverage_window",
      "decision": "internal",
      "why": "Internal overlap check.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "event_date_basis",
      "decision": "derive",
      "to": "event_date_precision",
      "why": "The date qualification, translated into a precision field (owed: the basis text is an extraction note, not a precision).",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "event_date_source_quote",
      "decision": "internal",
      "why": "Extraction note.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "location_basis",
      "decision": "derive",
      "to": "research_note",
      "why": "A location qualification that changes interpretation goes to research_note (owed editorial pass).",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "location_source_quote",
      "decision": "internal",
      "why": "Extraction note.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "document_role",
      "decision": "keep",
      "why": "Control.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "n_participant_rows_for_event",
      "decision": "rename",
      "to": "participant_rows_per_event",
      "why": "Control.",
-     "spec": "Â§2"
+     "spec": "§2"
     },
     {
      "column": "is_event_primary_row",
      "decision": "keep",
      "why": "Control.",
-     "spec": "Â§2"
+     "spec": "§2"
     }
    ],
    "new": [
@@ -979,233 +979,233 @@
      "column": "bill_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "congress",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "chamber",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "number",
      "decision": "rename",
      "to": "bill_number",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "title",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "policy_area",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "bill_scope",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "affected_entities",
      "decision": "rename",
      "to": "affected_entities_as_published",
      "why": "The affected entities as the source names them; empty in the sample and kept.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "sponsor",
      "decision": "rename",
      "to": "sponsor_name",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "introduced_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "latest_action",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "outcome",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "companion_bill_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "bill_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "sponsor_bioguide_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "latest_action_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "cosponsor_count",
      "decision": "keep",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "n_rollcalls",
      "decision": "rename",
      "to": "rollcall_count",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "has_rollcall",
      "decision": "derive",
      "to": "rollcall_count",
      "why": "Removed once the terminal proves rollcall_count and the documented coverage rules preserve it (owed proof).",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "bill_scope_basis",
      "decision": "internal",
      "why": "Classification narrative.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "outcome_basis",
      "decision": "internal",
      "why": "Internal evidence path.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "companion_basis",
      "decision": "internal",
      "why": "Classification narrative.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "classification_source",
      "decision": "internal",
      "why": "Classification bookkeeping.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "classification_kappa",
      "decision": "internal",
      "why": "Agreement statistic.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "record_basis",
      "decision": "internal",
      "why": "Build bookkeeping.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "build_date",
      "decision": "internal",
      "why": "Build flag.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "pre_2000_flag",
      "decision": "internal",
      "why": "Build flag.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "floor_basis_field",
      "decision": "internal",
      "why": "Build bookkeeping.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "has_resolved_entity",
      "decision": "internal",
      "why": "Duplicate entity count.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "n_entities_resolved",
      "decision": "rename",
      "to": "resolved_entity_count",
      "why": "",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "entity_cedar_uids",
      "decision": "derive",
      "to": "cedar_uids",
      "why": "The pipe list becomes the aligned JSON array (rule plural_block).",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "entity_names",
      "decision": "derive",
      "to": "canonical_names",
      "why": "Register names, aligned; not the names as published.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "entity_link_tiers",
      "decision": "derive",
      "to": "entity_link_statuses",
      "why": "Aligned JSON array of link tiers (rule plural_block).",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "entity_link_basis",
      "decision": "internal",
      "why": "Matching note.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "entity_class_scope",
      "decision": "rename",
      "to": "affected_entity_classes",
      "why": "Class-wide legislative scope, kept apart from the named entities' registry classes.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "n_entity_classes",
      "decision": "internal",
      "why": "Duplicate count.",
-     "spec": "Â§3"
+     "spec": "§3"
     },
     {
      "column": "entity_class_scope_basis",
      "decision": "internal",
      "why": "Explains the scope.",
-     "spec": "Â§3"
+     "spec": "§3"
     }
    ],
    "new": [
@@ -1326,207 +1326,207 @@
      "decision": "rename",
      "to": "deal_id",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Date",
      "decision": "rename",
      "to": "event_date",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Date_precision",
      "decision": "rename",
      "to": "event_date_precision",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Date_not_before",
      "decision": "rename",
      "to": "event_date_not_before",
      "why": "The interval bound; a precision label alone does not preserve it.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Date_not_after",
      "decision": "rename",
      "to": "event_date_not_after",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Year",
      "decision": "rename",
      "to": "event_year",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Quarter",
      "decision": "internal",
      "why": "Derivable.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Month",
      "decision": "internal",
      "why": "Derivable.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Deal_Title",
      "decision": "rename",
      "to": "title",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Native_Party",
      "decision": "rename",
      "to": "native_party_name",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Native_Party_Type",
      "decision": "rename",
      "to": "native_party_type",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Counterparty_or_Funder",
      "decision": "rename",
      "to": "counterparty_or_funder",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Deal_Category",
      "decision": "combine",
      "to": "deal_type",
      "why": "Consolidated through a value-level crosswalk, not by keeping whichever is nonblank.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Industry",
      "decision": "rename",
      "to": "industry",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Event_Type",
      "decision": "combine",
      "to": "transaction_structure",
      "why": "The structure of the transaction, consolidated through a value-level crosswalk.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Status",
      "decision": "combine",
      "to": "deal_status",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Announced_Value_USD",
      "decision": "rename",
      "to": "announced_value_usd",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Value_Type",
      "decision": "rename",
      "to": "value_basis",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Project_Total_Value_USD",
      "decision": "rename",
      "to": "project_total_value_usd",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "State",
      "decision": "rename",
      "to": "state",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Location",
      "decision": "rename",
      "to": "location",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Description",
      "decision": "rename",
      "to": "description",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Native_Connection",
      "decision": "rename",
      "to": "native_connection",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Source_1",
      "decision": "rename",
      "to": "source_url",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Source_1_Type",
      "decision": "rename",
      "to": "source_type",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Source_2",
      "decision": "derive",
      "to": "additional_sources",
      "why": "Becomes an object in the additional_sources list (rule additional_sources).",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Source_2_Type",
      "decision": "derive",
      "to": "additional_sources",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Verification_Status",
      "decision": "rename",
      "to": "verification_status",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Confidence",
      "decision": "internal",
      "why": "Generic confidence letter; verification_status carries the meaning.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Notes",
      "decision": "derive",
      "to": "research_note",
      "why": "Substantive notes (closing-date disclaimers, uncertain status, ownership-share limits) become concise research_note text by an editorial pass (owed); harvest bookkeeping is dropped. BLOCKING: the writer refuses the dataset while Notes is populated and no research_note has been supplied, so a caveat such as 'do not sum the announced value and the project total' cannot be dropped before it reaches the customer.",
-     "spec": "Â§4",
+     "spec": "§4",
      "blocking": true
     },
     {
@@ -1534,7 +1534,7 @@
      "decision": "derive",
      "to": "research_note",
      "why": "Preserve the publish-time factual qualification in research_note; never substitute it for the owed substantive Notes editorial pass.",
-     "spec": "Â§4",
+     "spec": "§4",
      "blocking": true
     },
     {
@@ -1542,77 +1542,77 @@
      "decision": "derive",
      "to": "research_note",
      "why": "Preserve the publish-time factual qualification in research_note; never substitute it for the owed substantive Notes editorial pass.",
-     "spec": "Â§4",
+     "spec": "§4",
      "blocking": true
     },
     {
      "column": "research_note",
      "decision": "keep",
      "why": "Approved public target supplied by the editorial pass and cedar_publication.deals_public_view. Preserve Caveat and Candidate_Status qualifications without waiving the blocking substantive Notes editorial pass.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Date_Added",
      "decision": "internal",
      "why": "Classification timestamp.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "Data_As_Of",
      "decision": "document",
      "why": "Release metadata.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "sector",
      "decision": "keep",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "transaction_type",
      "decision": "combine",
      "to": "deal_type",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "capital_source",
      "decision": "keep",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "native_party_role",
      "decision": "keep",
      "why": "The party's role in the deal, kept apart from cedar_entity_role.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "deal_status_std",
      "decision": "combine",
      "to": "deal_status",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "native_party_canonical_name",
      "decision": "rename",
      "to": "canonical_name",
      "why": "The register's name, rewritten by uid at build time.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "native_party_attribution_tier",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§4"
+     "spec": "§4"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§4"
+     "spec": "§4"
     }
    ],
    "new": [
@@ -1748,431 +1748,431 @@
      "column": "document_number",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "publication_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "publication_year",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "notice_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "notice_title_form",
      "decision": "internal",
      "why": "The same fact as notice_type.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "statute_stage",
      "decision": "rename",
      "to": "process_stage",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "is_correction",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "title",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_primary",
      "decision": "internal",
      "why": "Duplicates institution_name.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_names_all",
      "decision": "derive",
      "to": "additional_institution_names",
      "why": "The additional institutions beyond the designated one (rule additional_institutions).",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_city",
      "decision": "keep",
      "why": "Applies to the designated institution.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_state",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_count",
      "decision": "internal",
      "why": "Derivable.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_name_basis",
      "decision": "internal",
      "why": "Extraction bookkeeping.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_type_derived",
      "decision": "rename",
      "to": "institution_type",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "responsible_party_statement",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "object_categories",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "mni_total_stated",
      "decision": "rename",
      "to": "individuals_stated",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "mni_basis",
      "decision": "internal",
      "why": "Extraction bookkeeping.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "mni_statement_count",
      "decision": "internal",
      "why": "Extraction bookkeeping.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "mni_statements",
      "decision": "rename",
      "to": "individuals_statement",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_associated_funerary_objects_stated",
      "decision": "rename",
      "to": "associated_funerary_objects_stated",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_unassociated_funerary_objects_stated",
      "decision": "rename",
      "to": "unassociated_funerary_objects_stated",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_sacred_objects_stated",
      "decision": "rename",
      "to": "sacred_objects_stated",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_objects_of_cultural_patrimony_stated",
      "decision": "rename",
      "to": "cultural_patrimony_objects_stated",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "cultural_items_total_stated",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "removal_counties",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "removal_states",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "removal_location_statements",
      "decision": "rename",
      "to": "removal_location",
      "why": "Ships with the existing restrictions on sensitive location applied to the cell before export (the terminal's gate).",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "removal_location_basis",
      "decision": "internal",
      "why": "Extraction bookkeeping.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "repatriation_eligible_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "response_deadline_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "window_days_derived",
      "decision": "internal",
      "why": "Derivable.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_consulted_named",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_consulted_resolved",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "consulted_entity_ids",
      "decision": "derive",
      "to": "cedar_uids",
      "why": "Folds into the aligned arrays with role consulted (rule plural_block).",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_affiliated_named",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_affiliated_resolved",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "affiliated_entity_ids",
      "decision": "derive",
      "to": "cedar_uids",
      "why": "Folds into the aligned arrays with role affiliated.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_disposition_priority_named",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_disposition_priority_resolved",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "disposition_priority_entity_ids",
      "decision": "derive",
      "to": "cedar_uids",
      "why": "Role disposition priority.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_repatriation_recipient_named",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_repatriation_recipient_resolved",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "repatriation_recipient_entity_ids",
      "decision": "derive",
      "to": "cedar_uids",
      "why": "Role repatriation recipient.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_letter_of_support_named",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_letter_of_support_resolved",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "letter_of_support_entity_ids",
      "decision": "derive",
      "to": "cedar_uids",
      "why": "Role letter of support.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_aboriginal_land_named",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_aboriginal_land_resolved",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "aboriginal_land_entity_ids",
      "decision": "derive",
      "to": "cedar_uids",
      "why": "Role aboriginal land.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_parties_named",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "n_entities_resolved",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "has_resolved_entity",
      "decision": "internal",
      "why": "Derivable.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "lineal_descendant_determination",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "culturally_unidentifiable",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "parse_template",
      "decision": "internal",
      "why": "Parser template.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "spans_found",
      "decision": "internal",
      "why": "Span counts.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "agency_names",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "html_url",
      "decision": "internal",
      "why": "Duplicate URL representation.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "pdf_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "full_text_url",
      "decision": "internal",
      "why": "Duplicate URL representation.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "parent_dataset",
      "decision": "internal",
      "why": "Names an internal table.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "fetched_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "artifact_mtime",
      "decision": "internal",
      "why": "Artifact timestamp.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_split_flag",
      "decision": "keep",
      "why": "",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "institution_split_basis",
      "decision": "internal",
      "why": "Extraction bookkeeping.",
-     "spec": "Â§5"
+     "spec": "§5"
     },
     {
      "column": "fr_nagpra_title_index__notice_kind",
@@ -2343,7 +2343,7 @@
      "decision": "rename",
      "to": "source_record_id",
      "why": "The filing UUID stays available here; activity_id is built from it.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "entity_id",
@@ -2361,26 +2361,26 @@
      "column": "canonical_name",
      "decision": "keep",
      "why": "Rewritten from the register by uid at build time.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "entity_type",
      "decision": "rename",
      "to": "entity_class",
      "why": "The register's class, rewritten by uid at build time.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "entity_state",
      "decision": "internal",
      "why": "The register carries it.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "client_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "client_id",
@@ -2398,13 +2398,13 @@
      "column": "client_state",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "registrant_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "registrant_id",
@@ -2422,161 +2422,161 @@
      "column": "registrant_state",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "self_filed",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "filing_year",
      "decision": "rename",
      "to": "reporting_year",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "filing_period",
      "decision": "rename",
      "to": "reporting_period",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "filing_type",
      "decision": "internal",
      "why": "The code; the readable type is the activity title.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "filing_type_display",
      "decision": "rename",
      "to": "activity_title",
      "why": "For a filing, the filing type (registration, quarterly report, amendment).",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "income_usd",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "expenses_usd",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "spend_usd",
      "decision": "rename",
      "to": "reported_amount_usd",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "spend_basis",
      "decision": "rename",
      "to": "amount_basis",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "lobbying_issues_codes",
      "decision": "rename",
      "to": "issue_codes",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "specific_issues_text",
      "decision": "rename",
      "to": "issues_text",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "government_entities",
      "decision": "rename",
      "to": "government_bodies",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "affiliated_organizations",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "dt_posted",
      "decision": "rename",
      "to": "activity_date",
      "why": "For a filing, the posting date, which is not the day lobbying occurred (documented by source type).",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "termination_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "filing_url",
      "decision": "rename",
      "to": "source_url",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "attribution_method",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "match_confidence",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "matched_alias",
      "decision": "internal",
      "why": "Matched alias.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "pull_keyword",
      "decision": "internal",
      "why": "Pull keyword.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "org_type_barred",
      "decision": "internal",
      "why": "Exclusion diagnostic, applied before export.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "org_type_reason",
      "decision": "internal",
      "why": "Exclusion diagnostic.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "filing_url_original",
      "decision": "internal",
      "why": "Redundant URL.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "attribution_withdrawn",
      "decision": "keep",
      "why": "Control.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "attribution_withdrawn_entity_id",
@@ -2594,44 +2594,44 @@
      "column": "attribution_withdrawn_reason",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "attribution_withdrawn_date",
      "decision": "internal",
      "why": "Correction bookkeeping.",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "supersession_group_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "supersession_status",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "is_superseded",
      "decision": "keep",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     },
     {
      "column": "superseded_by_filing_uuid",
      "decision": "rename",
      "to": "superseded_by_record_id",
      "why": "",
-     "spec": "Â§6"
+     "spec": "§6"
     }
    ],
    "new": [
@@ -2775,274 +2775,274 @@
      "column": "contract_number",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "parent_contract_number",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "fiscal_year",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "pre_2000_flag",
      "decision": "internal",
      "why": "Build flag.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "awardee_name",
      "decision": "withhold",
      "why": "The actual awardee name; masked where the carve-out applies.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "awardee_uei",
      "decision": "withhold",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "cage_code",
      "decision": "withhold",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "parent_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "parent_uei",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "total_obligations",
      "decision": "rename",
      "to": "obligations_usd",
      "why": "Renamed only once the terminal verifies it is the incremental transaction measure; a column name is not proof.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "total_award_value",
      "decision": "rename",
      "to": "cumulative_award_value_usd",
      "why": "Labelled cumulative; never summed across rows.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "total_obligations_real2025",
      "decision": "rename",
      "to": "obligations_usd_real2025",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "total_award_value_real2025",
      "decision": "internal",
      "why": "Repeated cumulative-value deflation.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "deflator_factor_2025",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "inflation_base_year",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "setaside",
      "decision": "rename",
      "to": "set_aside_classification",
      "why": "Cedar's set-aside classification, kept apart from what was reported (confirm which column is which against the build script).",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "reported_8a",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "reported_buy_indian",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "reported_indian_business",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "reported_native_preference",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "setaside_reported",
      "decision": "rename",
      "to": "set_aside_reported",
      "why": "Whether a set-aside was reported.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "extent_competed",
      "decision": "combine",
      "to": "competition_type",
      "why": "Raw and normalized competition labels consolidated through a validated dictionary.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "funding_agency",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "sector",
      "decision": "combine",
      "to": "sector",
      "why": "The two-digit sector code and the readable group consolidated into one readable sector through the dictionary.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "supersector",
      "decision": "combine",
      "to": "sector",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "defense",
      "decision": "internal",
      "why": "Derivable from the agency.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "recipient_city_name",
      "decision": "rename",
      "to": "recipient_city",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "recipient_state_code",
      "decision": "rename",
      "to": "recipient_state",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "place_of_perform_city",
      "decision": "rename",
      "to": "performance_city",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "place_of_perform_state",
      "decision": "rename",
      "to": "performance_state",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "canonical_name",
      "decision": "keep",
      "why": "Rewritten from the register by uid at build time.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "attribution_method",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "confidence_tier",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "attributed_flag",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "source_authority",
      "decision": "derive",
      "to": "source_system",
      "why": "The archive named here becomes the source_system value.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "ruling_status",
      "decision": "internal",
      "why": "Ruling diagnostic.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "ruling_applied_date",
      "decision": "internal",
      "why": "Ruling diagnostic.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "extent_competed_normalized",
      "decision": "combine",
      "to": "competition_type",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "extent_competed_normalized_basis",
      "decision": "internal",
      "why": "Explains the normalization.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "owner_attribution_status",
      "decision": "rename",
      "why": "Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance.",
-     "spec": "Â§7",
+     "spec": "§7",
      "to": "affiliation_attribution_status"
     },
     {
      "column": "owner_as_of_transaction_cedar_uid",
      "decision": "rename",
      "why": "Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance.",
-     "spec": "Â§7",
+     "spec": "§7",
      "to": "affiliation_as_of_transaction_cedar_uid"
     },
     {
@@ -3050,188 +3050,188 @@
      "decision": "rename",
      "to": "transaction_id",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "contract_award_unique_key",
      "decision": "rename",
      "to": "award_id",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "naics_code",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "naics_description",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "action_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "award_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "product_or_service_code",
      "decision": "rename",
      "to": "psc_code",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "product_or_service_code_description",
      "decision": "rename",
      "to": "psc_description",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "award_base_description",
      "decision": "rename",
      "to": "description",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "award_attributes_basis",
      "decision": "internal",
      "why": "Explains attributes.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "identifier_ruling_method",
      "decision": "internal",
      "why": "Ruling diagnostic.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "identifier_ruling_tier",
      "decision": "internal",
      "why": "Ruling diagnostic.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "identifier_ruling_quarantined",
      "decision": "internal",
      "why": "Ruling diagnostic; applied at the gate.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "identifier_ruling_basis",
      "decision": "internal",
      "why": "Ruling diagnostic.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "identifier_ruling_review",
      "decision": "internal",
      "why": "Review queue.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_recipient_county_fips",
      "decision": "rename",
      "to": "recipient_county_fips",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_recipient_county_name",
      "decision": "rename",
      "to": "recipient_county",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_recipient_state_fips",
      "decision": "internal",
      "why": "recipient_state carries it.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_recipient_place_dominance_share",
      "decision": "derive",
      "to": "recipient_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_recipient_place_ambiguous",
      "decision": "derive",
      "to": "recipient_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_pop_county_fips",
      "decision": "rename",
      "to": "performance_county_fips",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_pop_county_name",
      "decision": "rename",
      "to": "performance_county",
      "why": "",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_pop_state_fips",
      "decision": "internal",
      "why": "performance_state carries it.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_pop_place_dominance_share",
      "decision": "derive",
      "to": "performance_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_pop_place_ambiguous",
      "decision": "derive",
      "to": "performance_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_key_tier",
      "decision": "derive",
      "to": "recipient_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_key_basis",
      "decision": "internal",
      "why": "Explains the key tier.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_award_unique_key",
      "decision": "internal",
      "why": "Duplicates award_id.",
-     "spec": "Â§7"
+     "spec": "§7"
     },
     {
      "column": "geo_built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§7"
+     "spec": "§7"
     }
    ],
    "new": [
@@ -3378,497 +3378,497 @@
      "decision": "rename",
      "to": "subcontractor_uei",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_cage",
      "decision": "rename",
      "to": "subcontractor_cage",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_name",
      "decision": "rename",
      "to": "subcontractor_name",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_state",
      "decision": "rename",
      "to": "subcontractor_state",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_uei",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_cage",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_award_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_amount",
      "decision": "rename",
      "to": "subaward_amount_usd",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "fiscal_year",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "naics",
      "decision": "rename",
      "to": "naics_code",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "psc",
      "decision": "rename",
      "to": "psc_code",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "description",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "direction",
      "decision": "rename",
      "to": "native_direction",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "fetched_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_number",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_parent_uei",
      "decision": "rename",
      "to": "subcontractor_parent_uei",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_parent_cage",
      "decision": "rename",
      "to": "subcontractor_parent_cage",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_parent_name",
      "decision": "rename",
      "to": "subcontractor_parent_name",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_parent_uei",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_parent_cage",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_parent_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "naics_title",
      "decision": "rename",
      "to": "naics_description",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "psc_title",
      "decision": "rename",
      "to": "psc_description",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_top_awarding_agency",
      "decision": "rename",
      "to": "awarding_agency",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_set_aside",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "pre_2000_flag",
      "decision": "internal",
      "why": "Build flag.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "floor_basis_field",
      "decision": "internal",
      "why": "Build bookkeeping.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "source_dataset",
      "decision": "rename",
      "to": "source_system",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "source_population",
      "decision": "internal",
      "why": "Pipeline population marker.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "award_kind",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_award_unique_key",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_award_amount",
      "decision": "rename",
      "to": "prime_award_amount_usd",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_to_prime_ratio",
      "decision": "keep",
      "why": "Kept with its validated amount, period and version definitions; never recomputed from incompatible snapshots.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_exceeds_prime_flag",
      "decision": "keep",
      "why": "Control.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "action_date_precedes_ffata_flag",
      "decision": "keep",
      "why": "Control.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_sam_report_year",
      "decision": "rename",
      "to": "report_year",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_native_tier",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_native_tier",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_business_types",
      "decision": "rename",
      "to": "subcontractor_business_types",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_awarding_sub_agency",
      "decision": "rename",
      "to": "awarding_subagency",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "duplicate_status",
      "decision": "keep",
      "why": "Control.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "promoted_date",
      "decision": "internal",
      "why": "Promotion timestamp.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_amount_real2025",
      "decision": "rename",
      "to": "subaward_amount_usd_real2025",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "deflator_factor_2025",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "inflation_base_year",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_sam_report_id",
      "decision": "rename",
      "to": "report_id",
      "why": "The SAM report id: the version's identifier.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_sam_report_month",
      "decision": "internal",
      "why": "The year ships.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_sam_report_last_modified_date",
      "decision": "internal",
      "why": "Not in the approved list; report_id and report_year carry the version.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_sam_report_id_basis",
      "decision": "internal",
      "why": "Identifier-basis field.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_source_record_id",
      "decision": "rename",
      "to": "subaward_record_id",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "subaward_source_record_id_basis",
      "decision": "internal",
      "why": "Identifier-basis field.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "prime_cedar_uid",
      "decision": "keep",
      "why": "Role-specific link.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "sub_cedar_uid",
      "decision": "keep",
      "why": "Role-specific link.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_prime_award_recipient_county_fips",
      "decision": "internal",
      "why": "Unrelated prime-geography enrichment.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_prime_award_recipient_county_name",
      "decision": "internal",
      "why": "Unrelated prime-geography enrichment.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_prime_award_recipient_state_fips",
      "decision": "internal",
      "why": "Unrelated prime-geography enrichment.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_prime_award_pop_county_fips",
      "decision": "internal",
      "why": "Unrelated prime-geography enrichment.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_prime_award_pop_county_name",
      "decision": "internal",
      "why": "Unrelated prime-geography enrichment.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_prime_award_pop_state_fips",
      "decision": "internal",
      "why": "Unrelated prime-geography enrichment.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_key_tier",
      "decision": "internal",
      "why": "Keys the prime geography.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_key_basis",
      "decision": "internal",
      "why": "Explains the key tier.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_county_gap_reason",
      "decision": "internal",
      "why": "Names a script.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_city",
      "decision": "rename",
      "to": "subcontractor_city",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_state_code",
      "decision": "internal",
      "why": "subcontractor_state carries it.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_zip5",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_country_code",
      "decision": "rename",
      "to": "subcontractor_country",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_county_fips",
      "decision": "rename",
      "to": "subcontractor_county_fips",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_county_name",
      "decision": "rename",
      "to": "subcontractor_county",
      "why": "",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_state_fips",
      "decision": "internal",
      "why": "subcontractor_state carries it.",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_place_dominance_share",
      "decision": "derive",
      "to": "subcontractor_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_place_ambiguous",
      "decision": "derive",
      "to": "subcontractor_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§8"
+     "spec": "§8"
     },
     {
      "column": "geo_subawardee_basis",
      "decision": "derive",
      "to": "subcontractor_geography_status",
      "why": "Geographic matching machinery; translated into the geography-status field before it leaves (rule geography_status).",
-     "spec": "Â§8"
+     "spec": "§8"
     }
    ],
    "new": [
@@ -3993,7 +3993,7 @@
      "column": "resource_revenue_event_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "recipient_entity_id",
@@ -4012,7 +4012,7 @@
      "decision": "rename",
      "to": "recipient_name",
      "why": "The recipient as the source names it; canonical_name is the register's.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "beneficiary_entity_id",
@@ -4031,14 +4031,14 @@
      "decision": "rename",
      "to": "beneficiary_name",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "beneficiary_note",
      "decision": "derive",
      "to": "research_note",
      "why": "A factual beneficiary qualification goes to research_note (owed editorial pass). BLOCKING: the writer refuses the dataset while the note is populated and no research_note has been supplied.",
-     "spec": "Â§9",
+     "spec": "§9",
      "blocking": true
     },
     {
@@ -4058,7 +4058,7 @@
      "decision": "rename",
      "to": "payer_name",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "operator_entity_id",
@@ -4077,218 +4077,218 @@
      "decision": "rename",
      "to": "operator_name",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "related_asset_ids",
      "decision": "keep",
      "why": "Kept even where sparse.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "source_system",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "source_record_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "revenue_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "resource_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "commodity",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "product",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "mineral_lease_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "period_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "period_start",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "period_end",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "payment_date",
      "decision": "keep",
      "why": "Its meaning is measurement_status.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "amount_usd",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "amount_usd_real2025",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "deflator_factor_2025",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "inflation_base_year",
      "decision": "document",
      "why": "The deflator and base year are release-level facts stated once in the guide beside the *_real2025 column.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "measurement_status",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "aggregation_level",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "land_status",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "land_status_basis",
      "decision": "internal",
      "why": "Explains the land status.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "allocation_formula",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "allocation_formula_effective_start",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "allocation_formula_effective_end",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "allocation_formula_source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "amount_sign_meaning",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "geography_note",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "confidence",
      "decision": "internal",
      "why": "Generic confidence letter.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "fetched_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "cedar_uid_basis",
      "decision": "internal",
      "why": "Attribution implementation note.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "record_scope_basis",
      "decision": "internal",
      "why": "Attribution implementation note.",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "entity_attribution_status",
      "decision": "rename",
      "to": "attribution_status",
      "why": "",
-     "spec": "Â§9"
+     "spec": "§9"
     },
     {
      "column": "entity_attribution_basis",
      "decision": "internal",
      "why": "Attribution implementation note.",
-     "spec": "Â§9"
+     "spec": "§9"
     }
    ],
    "new": [
@@ -4423,20 +4423,20 @@
      "column": "enterprise_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "enterprise_name_normalized",
      "decision": "internal",
      "why": "Normalized-name plumbing.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "name_variants_observed",
      "decision": "rename",
      "to": "alternative_names",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "owner_hub_cedar_uid",
@@ -4454,146 +4454,146 @@
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "owner_hub_name",
      "decision": "rename",
      "to": "canonical_name",
      "why": "Rewritten from the register by uid at build time.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "owner_hub_entity_class",
      "decision": "rename",
      "to": "entity_class",
      "why": "Rewritten from the register by uid at build time.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "owner_class",
      "decision": "internal",
      "why": "Not in the approved list; entity_class carries the owner's class.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "owner_hub_state",
      "decision": "internal",
      "why": "The register carries it.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "parent_enterprise_id",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "parent_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "parent_is_hub",
      "decision": "internal",
      "why": "Not in the approved list; parent_enterprise_id blank says the parent is the entity itself.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "hierarchy_level",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "relationship",
      "decision": "derive",
      "to": "relationship_type",
      "why": "The finer relationship folds into relationship_type's vocabulary (owed crosswalk); relationship_as_recorded keeps the source's words.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "relation_class",
      "decision": "rename",
      "to": "relationship_type",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "relationship_as_recorded",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "ownership_percent_stated",
      "decision": "rename",
      "to": "ownership_percent",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "sector",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "status",
      "decision": "rename",
      "to": "operating_status",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "status_basis",
      "decision": "internal",
      "why": "Explains the status.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "city",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "state_province",
      "decision": "rename",
      "to": "state",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "address_basis",
      "decision": "internal",
      "why": "Explains the address.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "address_is_publishable",
      "decision": "internal",
      "why": "Applied at the gate.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "uei",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "cage_code",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "identifier_basis",
      "decision": "internal",
      "why": "Explains the identifier.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "uei_candidate",
@@ -4611,82 +4611,82 @@
      "column": "uei_candidate_basis",
      "decision": "internal",
      "why": "Proposed UEI.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "identifier_status",
      "decision": "internal",
      "why": "Identifier bookkeeping.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "in_federal_contracting",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "in_federal_contracting_basis",
      "decision": "internal",
      "why": "Explains the flag.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "identity_scope",
      "decision": "internal",
      "why": "Population marker.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "assertion_class",
      "decision": "internal",
      "why": "Duplicates relationship_type.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "evidence_class",
      "decision": "rename",
      "to": "relationship_evidence_status",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "n_source_observations",
      "decision": "internal",
      "why": "Observation bookkeeping.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "n_distinct_sources",
      "decision": "rename",
      "to": "source_count",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "evidence_human_reviewed",
      "decision": "derive",
      "to": "relationship_evidence_status",
      "why": "Human review folds into the evidence status vocabulary (owed crosswalk).",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "n_auto_ruled_observations",
      "decision": "internal",
      "why": "Observation bookkeeping.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "first_observed_year",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "last_observed_year",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "enterprise_existing_cedar_uid",
@@ -4704,135 +4704,135 @@
      "column": "constellation_edge_id",
      "decision": "internal",
      "why": "Constellation diagnostic.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "constellation_note",
      "decision": "internal",
      "why": "Constellation diagnostic.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "source_id",
      "decision": "internal",
      "why": "Internal source code.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "source_document",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "source_edition_date",
      "decision": "keep",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "hub_resolution_method",
      "decision": "internal",
      "why": "Matcher note.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "hub_resolution_note",
      "decision": "internal",
      "why": "Matcher note.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "population_basis",
      "decision": "internal",
      "why": "Population marker.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "publishable",
      "decision": "internal",
      "why": "Applied at the gate.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "publishable_basis",
      "decision": "internal",
      "why": "Applied at the gate.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "retrieved_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "fpds_parent_corroboration",
      "decision": "rename",
      "to": "federal_parent_corroboration",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "fpds_parent_corroboration_route",
      "decision": "internal",
      "why": "Corroboration machinery.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "fpds_declared_parent_uei",
      "decision": "internal",
      "why": "Corroboration machinery.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "fpds_declared_parent_name",
      "decision": "rename",
      "to": "reported_federal_parent_name",
      "why": "",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "fpds_declared_parent_observations",
      "decision": "internal",
      "why": "Corroboration machinery.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "fpds_parent_resolves_to",
      "decision": "internal",
      "why": "Corroboration machinery.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "fpds_parent_corroboration_basis",
      "decision": "internal",
      "why": "Corroboration machinery.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "duplicate_name_variant_group",
      "decision": "internal",
      "why": "Duplicate-group diagnostic.",
-     "spec": "Â§11"
+     "spec": "§11"
     },
     {
      "column": "duplicate_name_variant_basis",
      "decision": "internal",
      "why": "Duplicate-group diagnostic.",
-     "spec": "Â§11"
+     "spec": "§11"
     }
    ],
    "new": [
@@ -4943,7 +4943,7 @@
      "decision": "rename",
      "to": "ein",
      "why": "Text, leading zeros kept.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "entity_id",
@@ -4962,253 +4962,253 @@
      "decision": "rename",
      "to": "organization_name",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "classification_ruling",
      "decision": "combine",
      "to": "inclusion_category",
      "why": "Classification and linkage outcomes consolidated into one category.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "evidence",
      "decision": "internal",
      "why": "Internal review narrative.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "tier",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "tier_basis",
      "decision": "internal",
      "why": "Explains the tier.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "state",
      "decision": "keep",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "city",
      "decision": "keep",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "ntee_code",
      "decision": "keep",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "confidence_tier",
      "decision": "internal",
      "why": "Funnel confidence.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "funnel_stage",
      "decision": "internal",
      "why": "Funnel stage.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "review_flag",
      "decision": "internal",
      "why": "Review queue.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "review_flag_token",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "excluded_by_prior_ruling",
      "decision": "internal",
      "why": "Exclusion bookkeeping.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "exclusion_reason",
      "decision": "internal",
      "why": "Exclusion bookkeeping.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "canonical_name_token_match",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "n_coders_agree",
      "decision": "internal",
      "why": "Coder agreement count.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_in_snapshot",
      "decision": "internal",
      "why": "Build bookkeeping.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_status",
      "decision": "rename",
      "to": "irs_status",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_subsection",
      "decision": "rename",
      "to": "irs_subsection",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_filing_req_cd",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_foundation_cd",
      "decision": "rename",
      "to": "irs_foundation_code",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_irs_ruling_yyyymm",
      "decision": "rename",
      "to": "irs_ruling_month",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_tax_period",
      "decision": "rename",
      "to": "tax_period",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_revenue_amt",
      "decision": "rename",
      "to": "bmf_revenue_usd",
      "why": "Under its source definition.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_asset_amt",
      "decision": "rename",
      "to": "bmf_assets_usd",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_income_amt",
      "decision": "rename",
      "to": "bmf_income_usd",
      "why": "Not profit or net income.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "source_files",
      "decision": "internal",
      "why": "Funnel labels.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "source_dataset",
      "decision": "rename",
      "to": "source_system",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "bmf_vintage_fetched",
      "decision": "rename",
      "to": "bmf_as_of_date",
      "why": "The snapshot date, kept apart from tax_period.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "built_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "placename_risk_flag",
      "decision": "internal",
      "why": "Review queue.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "ruling_authority",
      "decision": "internal",
      "why": "Ruling bookkeeping.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "ruling_confidence",
      "decision": "internal",
      "why": "Ruling bookkeeping.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "ruling_date",
      "decision": "internal",
      "why": "Ruling bookkeeping.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "tribe_canonical_name",
      "decision": "internal",
      "why": "Duplicates the register name.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "entity_match_method",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "entity_tier",
      "decision": "combine",
      "to": "entity_link_status",
      "why": "Linkage outcomes consolidated into one status.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "entity_match_basis",
      "decision": "internal",
      "why": "Matching transcript.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "entity_keyed_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_spine_entity_id",
@@ -5227,120 +5227,120 @@
      "decision": "rename",
      "to": "canonical_name",
      "why": "Rewritten from the register by uid at build time.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_spine_entity_class",
      "decision": "rename",
      "to": "entity_class",
      "why": "Rewritten from the register by uid at build time.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_native_entity_class",
      "decision": "rename",
      "to": "organization_entity_class",
      "why": "The organization's own kind.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_link_tier",
      "decision": "combine",
      "to": "entity_link_status",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_link_basis",
      "decision": "internal",
      "why": "Matching transcript.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_link_key",
      "decision": "internal",
      "why": "Matching key.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_link_sources",
      "decision": "internal",
      "why": "Matching bookkeeping.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "cedar_uid",
      "decision": "keep",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "disposition",
      "decision": "combine",
      "to": "inclusion_category",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "disposition_basis",
      "decision": "internal",
      "why": "Explains the disposition.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "name_match_support",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "name_match_shared_tokens",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "name_match_support_measured_against",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "keyed_name_match_support",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "keyed_name_match_shared_tokens",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "keyed_name_match_residue",
      "decision": "internal",
      "why": "Token comparison.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "keyed_state_agreement",
      "decision": "internal",
      "why": "Matching diagnostic.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "key_review_disposition",
      "decision": "combine",
      "to": "entity_link_status",
      "why": "",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "key_review_basis",
      "decision": "internal",
      "why": "Review narrative.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "key_redirect_proposed_entity_id",
@@ -5358,25 +5358,25 @@
      "column": "key_redirect_proposed_name",
      "decision": "internal",
      "why": "Redirect proposal.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "placename_refusal_rung",
      "decision": "internal",
      "why": "Review queue.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "placename_refusal_basis",
      "decision": "internal",
      "why": "Review queue.",
-     "spec": "Â§12"
+     "spec": "§12"
     },
     {
      "column": "placename_refusal_date",
      "decision": "internal",
      "why": "Review queue.",
-     "spec": "Â§12"
+     "spec": "§12"
     }
    ],
    "new": [
@@ -5480,19 +5480,19 @@
      "column": "business_source_id",
      "decision": "keep",
      "why": "The listing's own identifier in its source.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "source_id",
      "decision": "internal",
      "why": "The source's internal code; certifying_authority_name and directory_type say what the source is.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "source_business_key",
      "decision": "internal",
      "why": "Matching key.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "certifying_authority_entity_id",
@@ -5510,7 +5510,7 @@
      "column": "certifying_authority_name",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "nation_id",
@@ -5529,26 +5529,26 @@
      "decision": "rename",
      "to": "program_name",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "business_name_raw",
      "decision": "rename",
      "to": "business_name",
      "why": "The business name as listed; masked where the publication policy withholds it, never reintroduced through aliases or fallback fields.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "business_name_normalized",
      "decision": "internal",
      "why": "Normalization plumbing.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "business_name_is_person_name",
      "decision": "internal",
      "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "business_entity_id",
@@ -5566,256 +5566,256 @@
      "column": "business_entity_name",
      "decision": "internal",
      "why": "The register's name for the business entity; business_name carries the listing's name and the register name is reachable by business_entity_id.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "business_entity_class",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "resolution_method",
      "decision": "internal",
      "why": "Matching method.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "record_scope",
      "decision": "internal",
      "why": "Pipeline scope marker.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "assertion_class",
      "decision": "keep",
      "why": "The authority's substantive claim: ownership, membership, vendor listing.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "directory_type",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "identity_scope",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "identity_claim_text",
      "decision": "keep",
      "why": "The verbatim ownership or relationship claim; masked where the policy withholds it.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "inclusion_basis",
      "decision": "internal",
      "why": "Not in the approved list; assertion_class and identity_scope carry why the row is in Cedar.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "ownership_percent",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "ownership_threshold_min",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "verification_basis",
      "decision": "internal",
      "why": "Verification note.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "certification_number",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "certification_tier",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "certification_start",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "certification_expiration",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "business_license_number",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "federal_contract_number",
      "decision": "internal",
      "why": "Not in the approved list.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "service_category_raw",
      "decision": "rename",
      "to": "service_category",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "naics",
      "decision": "rename",
      "to": "naics_code",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "city",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "state_province",
      "decision": "rename",
      "to": "state",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "owner_name_present",
      "decision": "internal",
      "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "n_owners_named",
      "decision": "internal",
      "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "withheld_fields",
      "decision": "internal",
      "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "source_url",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "source_edition",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "source_last_updated",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "harvest_date",
      "decision": "internal",
      "why": "Build timestamp.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "first_seen",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "last_seen",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "is_current",
      "decision": "keep",
      "why": "",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "ingestion_method",
      "decision": "internal",
      "why": "Raw diagnostic.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "ocr_mean_confidence",
      "decision": "internal",
      "why": "OCR diagnostic.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "raw_snapshot_uri",
      "decision": "internal",
      "why": "Raw snapshot.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "source_terms_status",
      "decision": "internal",
      "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "consent_status",
      "decision": "internal",
      "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "suppression_key",
      "decision": "internal",
      "why": "Suppression machinery.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "publishable",
      "decision": "internal",
      "why": "A publication-gate input: applied before export (the gate decides what the row may carry), never published.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "validation_flags",
      "decision": "internal",
      "why": "Diagnostics.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "record_hash",
      "decision": "internal",
      "why": "Build bookkeeping.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "built_by_script",
      "decision": "internal",
      "why": "Script name.",
-     "spec": "Â§10"
+     "spec": "§10"
     },
     {
      "column": "publishable_basis",
