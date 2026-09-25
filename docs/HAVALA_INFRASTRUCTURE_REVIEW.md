@@ -1,7 +1,222 @@
 # Havala infrastructure review packet
 
 <!-- BEGIN CURRENT-LAUNCH-DASHBOARD -->
-## Current launch dashboard
+## Read this first: thirteen-profile foundation, September 25
+
+**Scope:** twelve Cedar Press profiles plus Gaming for Cedar Grove. This is an
+executable code-foundation review, not certification of thirteen datasets.
+Six Press adapters build flagship candidates, six stop at explicit tested gates,
+and Gaming builds a multi-component rehearsal with proposed identity bindings.
+No production deployment, release promotion, identity issuance or R7 import occurred.
+
+### One operational authority
+
+The diagram is the target lifecycle; this batch proves the pinned-source-to-download segment. Legacy acquisition callers remain transitional.
+
+```text
+registered source + immutable evidence + versioned decisions
+  -> Lumecon intake / collection-specific producer
+  -> validated component + keyed held-row receipt
+  -> immutable release + catalog/manifest pin
+  -> development release index / versioned storage
+  -> Cedar Press or Grove adapter -> entitlement -> exact JSONL download
+  -> redacted audit + verified prior-version rollback
+```
+
+| Responsibility | Canonical owner / path |
+|---|---|
+| Intake, source registry, acquisition receipts | Lumecon `intake.py`, `intake/profiles/`; authoritative [data-intake.md](https://github.com/teim-team/Lumecon-data/blob/codex/collection-release-closure/docs/data-intake.md) |
+| Schema, rights, exact identity references | Lumecon `contracts.py`; existing issued registers and human rulings remain immutable inputs |
+| Press transforms and admission gates | Lumecon `collections/legislation.py`, `natural_resources.py`, `press_candidates.py`, `press_blocked.py`; shared `projection.py` |
+| Gaming transforms | Existing Lumecon `gaming/` package integrated from `68e6c81`; not copied into Cedar Press |
+| Immutable releases/storage/validation | Lumecon `pipeline.py`, `storage.py`, `collection.py`; one CLI `lumecon-data` |
+| Development catalog/database index | Lumecon `catalog.py`; idempotent SQLite metadata indexing, not a claim of deployed Postgres |
+| Presentation, sessions, entitlement, download | Cedar application `server/cedar_press/repository.py`; Grove's separate multi-component adapter |
+| Operator dispatch | Cedar `code/build.py release-pilot` delegates all twelve to Lumecon; Gaming uses `lumecon-data gaming` |
+
+The shared intake implementation comes from the existing `76b22a8` work. The
+prior competing `SourceIntakeProfile`/`SourceIntakeRecord` code and
+`schemas/source-intake.v1.json` are retired, not left as another live authority.
+The thirteen typed profiles inventory 108 sources; an inventoried source is not
+proof of an executed live refresh. Source acquisitions not yet migrated remain
+explicit transitional dependencies. No canonical dataset was committed to Cedar.
+
+### Measured profile outcomes
+
+Counts below are source -> projected flagship / held. Annual counts use the
+stated source date; directories are nonannual. These are private candidates.
+`Implemented/gated` means an executable receipt-producing pipeline, not a
+completed customer transform. All remaining engineering work belongs to Codex.
+
+| Profile | Producer / command suffix | Source -> output / held | 2025 / 2026 basis | Pipeline and exact remaining gate |
+|---|---|---:|---|---|
+| Federal Funding | `press_blocked`; `collection-build funding` | 701,955 -> 0 / 701,955 | 43,254 / 18,325 action dates | **BLOCKED**; implemented admission gate: recipient-type vocabulary and attribution conflict projection |
+| Federal Register | `press_blocked`; `collection-build federal-register` | 11,402 -> 0 / 11,402 | 8 / 6 consultation rows, not broad documents | **BLOCKED**; implemented admission gate: participant grain/key and date precision |
+| Legislation | `legislation`; `collection-build legislation` | 3,069 -> 3,058 / 11 | 130 / 24 introductions | **READY WITH DISCLOSED GAPS** flagship candidate; bills only, votes/actions separately unproved |
+| Indian Country Deals | `press_blocked`; `collection-build deals` | 1,073 -> 0 / 1,073 | 104 / 103 dated years (2025: 99 day + 5 month); 105 / 103 reported years | **BLOCKED**; implemented admission gate: public type/status/substantive-note projection |
+| NAGPRA | `press_candidates`; `collection-build nagpra` | 6,792 -> 6,792 / 0 | 900 / 633 publication dates | **READY WITH DISCLOSED GAPS** flagship candidate; notice count does not mean completed repatriations |
+| Advocacy & Engagement | `press_candidates`; `collection-build lobbying` | 27,825 -> 27,825 / 0 | 1,377 / 672 reporting years; 1,343 / 1,041 posting years | **READY WITH DISCLOSED GAPS** disclosure candidate only; other promised engagement components unproved |
+| Prime Contracting | `press_blocked`; `collection-build contractors` | 1,217,768 -> 0 / 1,217,768 | 47,599 / 55,014 action dates | **BLOCKED**; implemented admission gate: transaction key/grain, sector and source-qualified attribution |
+| Subcontracting | `press_candidates`; `collection-build subcontracting` | 89,809 -> 70,054 / 19,755 | 6,080 / 1,974 eligible action dates | **READY WITH DISCLOSED GAPS** flagship candidate; prime/sub roles distinct; third-party redistribution holds |
+| Native-Owned | `press_candidates`; `collection-build owned` | 4,273 -> 3,725 / 548 | Nonannual source-dated register | **READY WITH DISCLOSED GAPS** flagship candidate; 523 accuracy, 6 non-firm, 19 unchecked-permission holds |
+| Native Nonprofits | `press_blocked`; `collection-build nonprofits` | 12,764 -> 0 / 12,764 | Nonannual organization register | **BLOCKED**; implemented admission gate: versioned ruling propagation and object mapping |
+| Natural Resources | `natural_resources`; `collection-build natural-resources` | 11,305 -> 11,120 / 185 | 496 / 280 period starts | **READY WITH DISCLOSED GAPS** flagship candidate; ANCSA source qualification remains held |
+| Cedar NEED | `press_blocked`; `collection-build need` | 5,820 -> 0 / 5,820 | Nonannual enterprise register | **BLOCKED**; implemented admission gate: publication hold; enterprise and relationship identities preserved |
+| Cedar Grove Gaming | `gaming/`; `gaming build`, `gaming release` | 97,693 -> 69,335 downloadable / 28,358 held | Different component periods, deliberately bounded scopes | **BLOCKED** for production; candidate/rehearsal reproduced, proposed IDs, source/field rights and component download restrictions remain |
+
+**Conservation:** Legislation holds eleven source keys: five treaty documents
+and six reservation-name false inclusions. The earlier five-record shorthand
+was incomplete. Natural Resources holds exactly 185 keyed ANCSA records; none
+were silently dropped. Subcontracting holds 18,366 repeated reports, 846
+superseded versions and 543 HigherGov-primary records. Native-Owned's field gate
+label `publishable` is not the substantive reason for its final 25 holds: six
+are non-firm artifacts and nineteen lack checked permission.
+
+Deals' extra 2025 reported-year record is `FA-HUD-9002`: fiscal-year allocation
+only, no event date. Five other 2025 records are month-precise; the scanner reports 99 day-precise 2025 records, not 104. PDF creation date is not substituted. The gated scanner's
+case-sensitive date selector was corrected to `Event_Date`; earlier receipts
+reporting all Deals dates missing are superseded by the frozen run.
+
+### Consolidation result and remaining debt
+
+Existing scripts-only census: **684 files = 76 active producers + 8 validation/
+review utilities + 7 consumers/shared services + 5 test/fixture files + 588
+unresolved**. Historical and safe-to-retire counts are zero *established by this
+census*, not a claim that no historical code exists. It also identifies 124
+embedded self-tests and 570 undeclared/unresolved files that are not authorized
+production writers. These overlapping diagnostics must not be added to 684.
+
+Twelve former full/sample projection routes now refuse before writing and direct
+operators to Lumecon. No numbered Python file was physically deleted. Ancillary
+legacy acquisition and research code remains; this is not twelve complete
+source-acquisition migrations. Removal requires caller/output/recovery proof.
+The former duplicate intake implementation and generated schema were removed.
+No new numbered production script was added.
+
+The census was regenerated with the declared Python 3.12 runtime. Its AST-based
+writer signatures differ under Python 3.14; unsupported-runtime output must not
+be mistaken for changed producer code. CI must use the declared runtime.
+
+### Reproduction and boundaries
+
+Use the Lumecon locked environment (`uv sync --locked --extra api --group dev`).
+`lumecon-data intake-check` validates all thirteen profiles. Each Press command:
+
+```text
+lumecon-data collection-build <profile> --source <pinned-source.csv>
+  --field-map <reviewed-map.json> --register <pinned-register.json>
+  --scopes <pinned-scopes.json> --policy <pinned-publication-policy.json>
+  --legacy-crosswalk <pinned-crosswalk.json> --as-of 2026-09-25
+  --code-sha <full-producer-commit> --root <outside-Git-candidate-store>
+```
+
+Legislation requires `--actions <native_bill_actions.csv>` and omits `--legacy-crosswalk`; its exact native IDs are not crosswalked.
+Six gated profiles return nonzero with an immutable candidate manifest and
+keyed withheld receipt, never a release/catalog/current pointer. Funding and
+Prime use bounded-memory two-pass CSV/SQLite indexing rather than loading their
+662 MB / 1.60 GB sources into RAM. Partial parsing remains an explicit failure.
+The six successful flagships use a measured 128 MiB source/256 MiB artifact cap;
+Subcontracting's exact JSONL is about 139.5 MiB. Oversize refusal remains tested.
+
+```text
+python -B server/tests/release_download_rehearsal.py --store <store> --catalog <exact-catalog.json>
+```
+
+Run from the owned Cedar checkout with both packages and Cedar server dependencies
+available. The exact Windows environment used was:
+
+```powershell
+$env:PYTHONPATH = 'C:\Users\esm247\Desktop\lumecon-release-closure\src;C:\Users\esm247\Desktop\cedar-press-codex\server'
+& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store '<store>' --catalog '<catalog>'
+```
+
+For a fresh development environment use the existing `make cedar-setup
+CEDAR_CHECKOUT=<exact-checkout>` after Lumecon `make setup`; this installs the
+Cedar server's declared development dependencies. Keep production database
+variables absent: the rehearsal refuses inherited database configuration.
+
+This runs local Lumecon API -> real Cedar subscriber login -> 401/403/200 ->
+exact pinned JSONL -> redacted audit -> idempotent metadata import -> prior-pin
+rollback. **JSONL is both immutable transport and current full customer format**;
+CSV samples do not establish a verified full-CSV download. No production account,
+AWS or Postgres rehearsal is claimed. No raw snapshot or candidate is in Git.
+Gaming uses `gaming build --previous <prior-candidate>`, `gaming release --class
+rehearsal`, and its Grove collection catalog. Proposed IDs never become issued.
+A bounded snapshot can pass with disclosed gaps; unexpected truncation, lost
+pagination, partial retrieval, changed schema or missing partitions fail closed.
+
+### Fixed review pair and final verification
+
+- [Lumecon draft PR #9](https://github.com/teim-team/Lumecon-data/pull/9),
+  branch `codex/collection-release-closure`, current producer head
+  `9f4cc210b5b32ca17b620be668eb754eba7024e4`; today?s range
+  `88ba2b6232c8064fce91e7c17fe5c011b06d569d..9f4cc210b5b32ca17b620be668eb754eba7024e4`.
+  It remains stacked on PR #8 (`f882fb14ab9179b287222b27b33cb6462378e6e1`).
+- [Cedar draft PR #122](https://github.com/teim-team/cedar-press/pull/122),
+  branch `codex/legislation-release-consumer`, tested consumer runtime
+  `6464f0e7e14b5c05225517b698df2a562ea040a2`; today?s runtime range
+  `567d280fce5f6f1d7695663e09991446dd32ca41..6464f0e7e14b5c05225517b698df2a562ea040a2`.
+  This packet/runbook update follows as documentation only; the consumer code
+  stays exactly at the CI pin.
+- **Final Ubuntu [36164566828](https://github.com/teim-team/Lumecon-data/actions/runs/36164566828)
+  is green:** Python 3.12 and 3.13, 878 tests, measured Python 3.13 coverage
+  **88.23%**, unchanged 88% floor; lint, types, schema freshness, dependency audit
+  and isolated offline wheel verification passed. Exact pinned Press and Grove
+  compatibility jobs passed. Real symlink containment tests ran on Ubuntu.
+- Local Cedar: 89 passed, one unchanged Windows symlink skip. Six real flagship
+  download/metadata-version rollback rehearsals passed. Gaming real candidate
+  and immutable rehearsal passed; Grove application compatibility uses fixtures.
+
+No production collection certification is claimed. The remaining Cedar frontend
+fixture mismatch below still prevents calling the entire application PR green.
+Windows offline socketpair and symlink limitations remain recorded, not bypassed.
+
+### Current cross-repository check evidence
+
+Cedar runtime `6464f0e7e14b5c05225517b698df2a562ea040a2` passed 89 focused
+checks locally with one unchanged Windows symlink skip. Its Ubuntu subscriber
+storage workflow [36162583750](https://github.com/teim-team/cedar-press/actions/runs/36162583750)
+is green. Application [36162583660](https://github.com/teim-team/cedar-press/actions/runs/36162583660)
+passed lint and generated checks, then failed one of 399 JavaScript tests:
+`src/features/grove/explore.test.js:598`, Deals source/sample header assertion.
+The map now includes internal `Candidate_Status`, `Caveat`, `research_note`; the
+frontend fixture omits them. Claude's frontend owner must distinguish full
+source contract from published sample fields; adding these internal fields to
+public samples would be the wrong fix. No frontend file was edited here.
+Later application steps were skipped, not passed.
+
+Initial Lumecon [36162342880](https://github.com/teim-team/Lumecon-data/actions/runs/36162342880)
+passed all 808 tests and pinned Press/Grove consumer jobs. Its unchanged 88%
+coverage floor failed at 83.47% after importing Gaming. Meaningful source,
+identity and rights boundary tests are being added; this initial run is not green.
+One negative control exposed and fixed a `.gov/` URL-path false-positive in
+Gaming's official-source classifier. Only validated host suffixes qualify.
+
+### Human review and merge limits
+
+No new evidence-complete ambiguous linkage cards were produced by this engineering
+batch. The retained R7 83-pair queue and prior NEED decisions remain their existing
+authorities, not thirteen datasets' readiness status. Do not re-ask recorded
+rulings or infer approval from notes. Remaining source, schema, rights and
+projection work stays with Codex; Havala reviews implementation and boundaries.
+Gaming proposed facility/CE/CB links remain held until evidence/issuance permits
+use; a rehearsal does not resolve them.
+
+Review order: (1) single intake authority and bounded/partial distinction;
+(2) keyed conservation and rights filtering; (3) twelve dispatch cutovers and
+remaining writer risks; (4) exact-release entitlement and rollback;
+(5) Gaming proposed-binding and component restrictions; (6) paired CI evidence.
+
+Do not merge either side alone. Review the Lumecon PR #8 dependency, then the
+paired Lumecon PR #9/Cedar PR #122 changes, with exact consumer commits in CI.
+Rollback selects a verified prior immutable release/catalog; it never rewrites
+artifact contents. Source and decision backups remain checksum-pinned outside
+Git. AWS, production storage/versioning, secret provisioning, Postgres migration,
+alerts, restore rehearsal and deployment require separate authorized work.
+<!-- END CURRENT-LAUNCH-DASHBOARD -->
+
+
+## Historical checkpoint: September 24 (superseded by the current table)
 ### Release closure and repository cutover (2026-09-24)
 
 Current coordinated review surfaces:
@@ -336,9 +551,9 @@ The two nonprofit conflicts are automated filters, not individual Elijah rulings
 
 Current changes remain uncommitted on `codex/legislation-release-consumer` at `3195e7069d8717f81a33849f592b65b16f293e84`; no new CI run is claimed. No frontend, rounding, canonical producer execution or publication was performed in this update. Remaining immediate work: isolated nonprofit/bridge comparisons, Native-Owned source-column correction, and researched linkage backlog across the other collections.
 
-<!-- END CURRENT-LAUNCH-DASHBOARD -->
 
-## Read this first
+
+## Historical reading guide (superseded by the September 25 section)
 
 ### Owner-review boundary ? correction
 
@@ -1343,7 +1558,7 @@ certified by this inventory. Missing publication/consumer contracts remain produ
 blockers even if the LDA projection independently passes its infrastructure tests.
 
 
-## Current batch closeout
+## Historical September 24 batch closeout
 
 Both frozen-runtime real releases pass actual login, denied/approved access,
 malformed and nonexistent pin refusal, exact-byte download, exactly eight current-run
@@ -1365,3 +1580,298 @@ Checkpoint 2026-09-24 20:35 UTC: READY WITH WARNINGS - twelve-collection dashboa
 2026-09-24 22:18 UTC - READY WITH WARNINGS: candidate repairs committed; release and broad CI gates remain explicitly blocked.
 
 2026-09-24 23:21 UTC - READY WITH WARNINGS: shared Lumecon intake contract and guards committed; Ubuntu Python 3.12/3.13 and pinned Cedar compatibility pass; two corrected flagship download/import/rollback rehearsals pass. Gaming source remains explicitly partial; live acquisition, ancillary components, remaining collections, frontend sample reconciliation and production remain gated. NEED hold preserved.
+
+
+## September 25 frozen candidate and download receipts
+
+Producer code pin for these Press runs: `5535323ade0ccc4039c22558c56fc176f5e2977b` (also recorded in each
+`run-results.json` command and the immutable contract caveat). Later Gaming-only
+rights corrections do not change these Press producer bytes. Private evidence
+root: `C:/Users/esm247/cedar-takeover-checkpoint/foundation-frozen-2026-09-25/`.
+`run-results.json` records exact commands, hashes, scope and process exits.
+
+All six following candidates passed the existing real local data API and Cedar
+subscriber/login rehearsal: 401 anonymous, 403 wrong entitlement, 200 exact
+JSONL, malformed/missing/stale refusal, eight redacted audit events per run,
+idempotent metadata import and metadata-version rollback (the second version changes the title, not data bytes). Revised-data-content rollback was not exercised here. The original release files
+remained byte-identical; no production pointer was promoted. Each collection
+folder contains `rehearsal-result.json` and `download-rehearsal.audit.jsonl`.
+
+| Profile | Immutable release ID | Public manifest SHA256 | Rows / held |
+|---|---|---|---:|
+| legislation | `540c1607cf90373a9608a47e2e8ac0daaf3d85a81ea1191d45dc90359707fbe9` | `247575fa704a313764507e9bc1b27fb65fac147fd12e930b3bb29cf4ea22a0e7` | 3,058 / 11 |
+| natural-resources | `1d5653c1b21e81377e38c8befbfbdc09e08585f65f007f588af5e23735fcdabe` | `67d29c25024cea2adbb229509de57bedcc009ac8de23993565e7e4c73f8697f4` | 11,120 / 185 |
+| nagpra | `20633d7eccdedac4894a3bb6cbe483dc07f2048a107639754e2de3dc662c1970` | `60d40d703062371a2e7bb6cbddb980f5ab29b62687c84f13cfe2b0beccaf2d7d` | 6,792 / 0 |
+| lobbying | `18cc49c047f8465e88590934610eb7e8c895880d6e5bfa42e0e01b8b10dd5f0d` | `5ed75b03429d05cad51a5f79771eb26972ead35982ff2a4bb1713f2e9b388c02` | 27,825 / 0 |
+| subcontracting | `391b780143cc985eddfdde129583772cdb35b272ad3a931b77446b24a4d97a36` | `6d1bd97a4e97b75af183e61a2621eb2c47aed469445fa59b58dd75ab083f3dec` | 70,054 / 19,755 |
+| owned | `07b3665438bbc0ab5131bb93b1772d04399e41dfc4e07331192a9d9d55e6b291` | `ebf395f6508cb5f554e05e366e526413f46515102912cd7be1d1d9d8b189c056` | 3,725 / 548 |
+
+Keyed receipt locations use each result's `receipt_sha256` under
+`<profile>/review/<profile>-governed-source/<receipt_sha256>.json`.
+
+| Profile | Receipt SHA256 |
+|---|---|
+| legislation | `d710cdb2410a817b131a620095909521d76e29977c929ce794674064386afc01` |
+| natural-resources | `ff831ea83e58837e5afbfbcb7aeec1ac5c3907b0a36c8ac17b58f82939ca4cf7` |
+| nagpra | `7234d9c525d4d2a66e29366b8b8f2da30f713554cd34e2119aceab5320a82ca1` |
+| lobbying | `4e45fb522a588ce677663dd4dc1dc8c05c8213e4001ab527f33231694db03651` |
+| subcontracting | `d4b6ebc7cdb691d5b9768a85c5e6636f1b76ee8b68be065c094fe492c951af8f` |
+| owned | `cc8136e65f482d4cb3c6cda55ff8871bcc552269b56a7033c7f0654502094753` |
+
+For the six blocked profiles, `<profile>/candidates/<profile>/<candidate_id>/`
+contains the immutable manifest, versioned small inputs and `withheld.jsonl`.
+Source bytes are hash-referenced in place; raw data was not duplicated into Git.
+Each source hash matches the earlier run. `source_complete=true` certifies that
+the supplied CSV was parsed completely, not that its source universe is complete.
+
+| Profile | Immutable blocked candidate ID | Source / held |
+|---|---|---:|
+| funding | `eee7b91a74034514a888238e5ba5a0e52c1afb79832c9feb8f2622402b370dc3` | 701,955 / 701,955 |
+| federal-register | `aa2ecc0e01acb464874bbd5acbaef0fffaa58e607a8d136cfbb217aed7092c59` | 11,402 / 11,402 |
+| deals | `3069fb52cf91a01cf3d6c6c994571aa303266e9085a4d182c4db82b9c9725a3e` | 1,073 / 1,073 |
+| contractors | `472245a201a72117354f4099c74836048a8b3e0f55aeceedd7ac13c97f0ab6a1` | 1,217,768 / 1,217,768 |
+| nonprofits | `0bdc7434fada5d5aa536995e1725a86158605144b8d56685b311c60dd999f183` | 12,764 / 12,764 |
+| need | `5e3cc7cfce14d55b962cdd955bd7af21a9d1f035853c7223153737245776e5c6` | 5,820 / 5,820 |
+
+**Stage distinction:** all twelve Press admission/build paths executed. Six usable
+flagship candidates reproduced and integrated through the actual local consumer;
+six produced held candidates only. No whole collection is newly certified for
+production here. Component coverage, source qualification, operational production
+checks and existing identity/publication holds remain as shown in the current
+table. No engineering gate creates an Elijah adjudication task.
+
+## September 25 Gaming receipt
+
+Gaming remains Cedar Grove. All 27 component/reference CSVs match the prior
+`lumecon-cand-1` bytes exactly after the URL-host fix and count regression repair.
+The 25 non-runner component tables conserve **97,693 rows = 69,335
+component-download-eligible + 28,358 held**. These are not distinct events.
+24 components enter the rehearsal manifest, nine with download permission; the
+remaining source component is wholly held. No otherwise-eligible component was
+omitted for size or missing-identity-binding reasons.
+
+Held rows comprise 10,395 row/field-rights exclusions and 17,963 rows present in
+restricted projections but not downloadable (13,439 internal; 4,524 in
+`source_limited` components). Component scope and row rights are separate. This
+batch keeps existing conservative component-download restrictions unchanged;
+reviewing independently public-qualified bounded subsets is remaining engineering
+work, not permission to publish secondary/vendor evidence.
+
+The private receipt contains 28,358 unique table/source-index records, with exact
+keys/reasons and zero conservation errors. Public attestations contain only
+hashes and aggregate counts, never held keys or private paths. **93,824 bindings
+remain PROPOSED; no issued snapshot or production certification exists.**
+
+- Rehearsal release: `621d32fb13475672fc4b0c0f7fb96dac4424d8ffbbed244a65aa4742b34202df`.
+- Public manifest SHA256: `f3b150483e7c291376b3dcf155ea0ead940064c986997955e1d87d3fcdbd62a0`.
+- Full private manifest file SHA256: `ca2fa2ee6e75468c64559da4fc98eb5f859add4dd2a49bcf593eb4cab4ae31b9`.
+- Private held receipt SHA256: `eb60f78dded0d4d8acfe2b0edf7bb65af29eab63743573b018c67790e09da6ac`.
+
+Exact reproduction uses the committed CLI, no new runner:
+
+```text
+lumecon-data gaming build --input-root <preserved-Cedar-input-root>
+  --output-root <empty-candidate-root> --as-of 2026-09-24
+  --online-sports-root <delivered-tribal_sports-package>
+  --fourwheeler-root <vendor-internal-QA-package>
+  --decisions-root <Lumecon-checkout> --previous <lumecon-cand-1>
+lumecon-data gaming release --candidate <candidate-root>
+  --store <outside-Git-Gaming-store> --class rehearsal
+```
+
+Current private paths: `foundation-frozen-2026-09-25/gaming-candidate-final` and
+`gaming-store-final` under the checkpoint root above. Final receipts are
+`gaming-release-final.stdout.json` and the release's attestation-pinned receipt.
+Grove's exact public consumer commit `136255fbb14e401e9c3ca8139f9e82b1865de16f`
+is tested in Ubuntu with synthetic fixtures. This is consumer-contract
+integration, not a real-data production entitlement rehearsal. Ongoing uncommitted
+Claude Gaming work was not imported over this pinned implementation and must be
+reconciled deliberately before merge.
+
+## September 25 bounded commits, exclusions and review instructions
+
+Lumecon `6ad0d26` integrates the existing intake/Gaming work, six Press candidate
+adapters and six blocking adapters as one dependent runtime batch; the current
+profile table maps each collection to its exact owner. `e7af3be` contains the
+single intake contract and Grove CI; `5535323` pins the Cedar cutover; `a4ce295`
+fixes the official-source URL false positive; `46eea33` and `9f4cc21` add negative
+source/identity/field-contract tests. Cedar `6464f0e` contains the twelve dispatch
+cutovers, size contract, generated writer inventory and matching tests.
+
+Exact changed paths follow; these commands reproduce the full review ranges:
+
+```text
+git -C <Lumecon> diff --stat 88ba2b6..9f4cc21
+git -C <Lumecon> diff --check 88ba2b6..9f4cc21
+git -C <Cedar> diff --stat 567d280..6464f0e
+git -C <Cedar> diff --check 567d280..6464f0e
+uv run pytest tests/test_intake.py tests/test_collection_build.py tests/test_press_candidates.py tests/test_press_blocked.py tests/gaming tests/test_collection.py
+make check
+make package
+make cedar-setup CEDAR_CHECKOUT=<pinned-Cedar-checkout>
+make cedar-check CEDAR_CHECKOUT=<pinned-Cedar-checkout>
+make grove-setup GROVE_CHECKOUT=<pinned-Grove-consumer-checkout>
+make grove-check GROVE_CHECKOUT=<pinned-Grove-consumer-checkout>
+python -B code/521_inventory.py check-scripts
+python -B -m unittest server.tests.test_candidate_review server.tests.test_field_map server.tests.test_pipeline_registration server.tests.test_release_download
+```
+
+Use Python 3.12 for Cedar writer inventory. `make check` is fully authoritative on
+Ubuntu; Windows does not substitute weakened tests. All source/candidate evidence
+is outside Git. Lumecon's review worktree is clean at the listed head. Cedar's
+pre-existing excluded changes remain untouched: entity-types CSV, NEED
+corroboration, terminal handoff, R7 CURRENT/locks/bundle, and owner-decision queue.
+No published files, issued-ID registers, active review HTML, frontend or rounding
+implementation was edited by this batch. The source hashes in both rounds agree.
+
+Prioritized Havala questions (implementation review, not Elijah adjudication):
+
+1. Is the single intake authority and typed thirteen-profile dispatch clear, including transitional acquisitions?
+2. Are blocking-gate receipts conservative and complete, without confusing whole-product readiness with a flagship?
+3. Do the 11/185 and other keyed hold receipts establish conservation and appropriate privacy boundaries?
+4. Are exact catalog/manifest pins, rights checks and entitlement refusal sufficient before staging?
+5. Does the metadata-only catalog database boundary and tested rollback need changes before a real Postgres migration?
+6. Are Gaming proposed-binding restrictions and source-limited component restrictions correctly preserved?
+7. Which of the 588 unresolved legacy files should be reviewed next, without retiring unproved acquisition/recovery paths?
+8. What additional production restore, monitoring and account-persistence rehearsal is needed before authorization?
+
+<details>
+<summary>Exact changed paths per bounded commit</summary>
+
+```text
+6ad0d266d3b85c13b8e371aa32065d67746f0310 Unify thirteen intake profiles and governed collection adapters
+
+.gitattributes
+.gitignore
+decisions/gaming/GAMING_VP_DISPOSITIONS_2026-09-24.csv
+intake/contracts/federal-register-bia-documents.json
+intake/existing-material.csv
+intake/profiles/contractors.json
+intake/profiles/deals.json
+intake/profiles/federal-register.json
+intake/profiles/funding.json
+intake/profiles/gaming.json
+intake/profiles/legislation.json
+intake/profiles/lobbying.json
+intake/profiles/nagpra.json
+intake/profiles/natural-resources.json
+intake/profiles/need.json
+intake/profiles/nonprofits.json
+intake/profiles/owned.json
+intake/profiles/subcontracting.json
+schemas/acquisition-receipt.v1.json
+schemas/dataset-contract.v1.json
+schemas/gaming/contracts.json
+schemas/source-intake.v1.json
+schemas/source-profile.v1.json
+scripts/export_schemas.py
+src/lumecon_data/api.py
+src/lumecon_data/cli.py
+src/lumecon_data/collection.py
+src/lumecon_data/collections/press_blocked.py
+src/lumecon_data/collections/press_candidates.py
+src/lumecon_data/collections/projection.py
+src/lumecon_data/contracts.py
+src/lumecon_data/gaming/__init__.py
+src/lumecon_data/gaming/candidate.py
+src/lumecon_data/gaming/cli.py
+src/lumecon_data/gaming/compacts_regulatory.py
+src/lumecon_data/gaming/contract.py
+src/lumecon_data/gaming/export.py
+src/lumecon_data/gaming/facilities.py
+src/lumecon_data/gaming/fixtures/components/gaming_compacts.csv
+src/lumecon_data/gaming/fixtures/components/gaming_facility_history.csv
+src/lumecon_data/gaming/fixtures/components/gaming_regional_revenue.csv
+src/lumecon_data/gaming/fixtures/identity/data/spine/cedar_identity_register.csv
+src/lumecon_data/gaming/fixtures/identity/data/spine/cedar_nest_id_register.csv
+src/lumecon_data/gaming/fixtures/identity/data/spine/cedar_place_id_register.csv
+src/lumecon_data/gaming/fixtures/identity/data/spine/cedar_retired_neid_crosswalk.csv
+src/lumecon_data/gaming/labor_advocacy.py
+src/lumecon_data/gaming/leak_gate.py
+src/lumecon_data/gaming/online_sports.py
+src/lumecon_data/gaming/release.py
+src/lumecon_data/gaming/revenue.py
+src/lumecon_data/intake.py
+src/lumecon_data/pipeline.py
+tests/fixtures/intake/README.md
+tests/fixtures/intake/federal_register_next_window.json
+tests/fixtures/intake/federal_register_page1.json
+tests/fixtures/intake/federal_register_page2.json
+tests/fixtures/intake/online_sports_delivery/_DELIVERED_MANIFEST.csv
+tests/fixtures/intake/online_sports_delivery/monthly_SYNTHETIC.csv
+tests/fixtures/intake/online_sports_delivery/review_SYNTHETIC.md
+tests/gaming/__init__.py
+tests/gaming/conftest.py
+tests/gaming/test_candidate.py
+tests/gaming/test_compacts_regulatory.py
+tests/gaming/test_end_to_end.py
+tests/gaming/test_facilities.py
+tests/gaming/test_labor_advocacy.py
+tests/gaming/test_online_sports.py
+tests/gaming/test_release.py
+tests/gaming/test_revenue.py
+tests/test_api.py
+tests/test_collection.py
+tests/test_collection_build.py
+tests/test_intake.py
+tests/test_press_blocked.py
+tests/test_press_candidates.py
+```
+
+```text
+e7af3be965cfe01371c14481039b57b2408fb50c Document shared intake authority and pin Grove consumer CI
+
+.github/workflows/ci.yml
+AGENTS.md
+Makefile
+docs/README.md
+docs/data-contracts.md
+docs/data-intake.md
+docs/developer-guide.md
+docs/gaming-contract.md
+docs/glossary.md
+```
+
+```text
+5535323ade0ccc4039c22558c56fc176f5e2977b Pin twelve-profile Cedar consumer in paired compatibility checks
+
+.github/workflows/ci.yml
+```
+
+```text
+a4ce295d4ac01aea73bc3901dcb5d4bad3b76ce8 Reject government-looking URL paths as official Gaming evidence
+
+src/lumecon_data/gaming/facilities.py
+tests/gaming/test_facilities.py
+```
+
+```text
+46eea33c45122997c553c7b3c6b461d580f7c6d4 Exercise source boundaries and all Press CLI admission routes
+
+tests/gaming/test_compacts_regulatory.py
+tests/gaming/test_labor_advocacy.py
+tests/gaming/test_revenue.py
+tests/test_cli.py
+```
+
+```text
+9f4cc210b5b32ca17b620be668eb754eba7024e4 Verify Press field derivations preserve identity roles and source evidence
+
+tests/test_press_candidates.py
+```
+
+```text
+6464f0e7e14b5c05225517b698df2a562ea040a2 Delegate all twelve Press projection routes to governed Lumecon adapters
+
+code/build.py
+code/cedar_pipeline.py
+docs/schema/inventory.json
+server/cedar_press/repository.py
+server/tests/test_candidate_review.py
+server/tests/test_field_map.py
+server/tests/test_pipeline_registration.py
+```
+
+</details>
+
+2026-09-25T13:07-04:00 ? READY WITH WARNINGS: thirteen executable profiles, six real Press consumer rehearsals, Gaming rehearsal only; production, held collections, legacy acquisition cutover and the frontend fixture mismatch remain open.

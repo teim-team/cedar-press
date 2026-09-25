@@ -9,14 +9,22 @@ command. The fixed infrastructure review range, current proofs and blockers are 
 `docs/HAVALA_INFRASTRUCTURE_REVIEW.md`; the existing terminal handoff retains the
 workspace takeover context.
 
-### Migrated flagship release path (2026-09-24)
+### Governed flagship release path (2026-09-25)
 
-Legislation bills and Natural Resources revenue now use Lumecon Data's
+All twelve Cedar Press flagship adapters now dispatch through Lumecon Data's
 `collection-build` command, documented in its existing `docs/developer-guide.md`.
 Their source-registration rules are defined once in Lumecon's
 `docs/data-intake.md`. Cedar's `release-pilot` is a compatibility caller;
 the old customer-combine and review-bundle producer routes refuse these
 flagships before writing. Do not restore a second producer to fix that refusal.
+The six engineering/publication-gated adapters return exit 1 and a keyed held
+receipt; this is not a release. Gaming uses the same intake framework and its
+existing multi-component `gaming build` / `gaming release` path for Cedar Grove.
+Keep source profiles under Lumecon `intake/profiles/`; use `--code-sha` for the
+reviewed producer commit and preserve all input hashes. The bounded JSONL
+artifact/download ceiling is 256 MiB (Subcontracting measures 139.5 MiB); raw
+projection inputs remain bounded at 128 MiB and JSON mappings at 16 MiB. Large
+Funding/Prime admission scans use a disk-backed key index, not a bulk memory read.
 
 Use an explicit outside-Git store and immutable source/field-map/register/scope
 snapshots. Run Lumecon `verify`, then `catalog-import` twice to prove retry
@@ -167,7 +175,7 @@ No secret value belongs in Git, a catalog, an audit event or a command transcrip
 **Registered collection rehearsal.** Follow the short
 [Add a collection procedure](../data/cedar/README.md#add-a-collection-to-the-governed-release-path).
 `code/build.py release-pilot` is the supported Cedar entry point for the reviewed
-Legislation and Natural Resources flagships; it calls the existing Lumecon
+twelve Press flagships; it calls the existing Lumecon
 contract/build/catalog functions. Use the exact pinned source, authority inputs,
 environment and isolated store from the Havala packet. No new endpoint or
 collection-specific release format is required.
