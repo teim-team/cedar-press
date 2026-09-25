@@ -73629,7 +73629,8 @@
     "RELEASE_STAMP.json",
     "_id_registry.json",
     "manifest.json",
-    "need-candidate.json"
+    "need-candidate.json",
+    "publication-policy.json"
    ],
    "reads": [
     "cedar_nest_id_register.csv",
@@ -73643,8 +73644,8 @@
    "mentioned_outside_history": 86,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 695,
+   "last_modified": "2026-09-25",
+   "lines": 732,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -73670,6 +73671,7 @@
    ],
    "operational_call_evidence": {
     "publication_calls": [
+     "publication.denied_ueis",
      "publication.field_map",
      "publication.neid_map",
      "publication.register",
@@ -73724,7 +73726,7 @@
      "target": "<unresolved>/docs/RELEASE_STAMP.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "aa8afd8d14520ee18e91d910847618aa14285f927c94661bb35b5ea5c0d02561"
+     "signature": "f120bd6146f157dd6ea2a8fb36d40131147b1930234382d1a8eeacce688862ff"
     },
     {
      "line": 517,
@@ -73732,7 +73734,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ce85b312f6d37e23dac674d2528a0584a81e0d58435f7de8e600557556657cc8"
+     "signature": "3ca61c5f175c91d99e60ae05389c1e82ccfff6119ec45d2215db5b79aa9611ae"
     },
     {
      "line": 519,
@@ -73740,7 +73742,7 @@
      "target": "<unresolved>/requirements.txt",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "d3ecaad1943f85583e610facf5fd5b7cbd5b92241b33f06c12fe7a0bb3ddf328"
+     "signature": "265416ea31202eb4a4ea7da07c710f122fb3d9028e70483245d1ef5a59bdff44"
     },
     {
      "line": 525,
@@ -73748,7 +73750,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ce85b312f6d37e23dac674d2528a0584a81e0d58435f7de8e600557556657cc8"
+     "signature": "3ca61c5f175c91d99e60ae05389c1e82ccfff6119ec45d2215db5b79aa9611ae"
     },
     {
      "line": 534,
@@ -73756,7 +73758,7 @@
      "target": "<unresolved>/logs/need-candidate.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "d485d7759e10768f48716f5f98f455f35121425af11f0492e8abb1645da7a1e3"
+     "signature": "f9f0725e17dae1c07a999311e9dd68da5eb01aa245ffe897733119d4e6540044"
     },
     {
      "line": 553,
@@ -73764,7 +73766,7 @@
      "target": "<unresolved>/logs/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "94659f89e4387729c5551e9f6375fa636af768b9e14474f8e873129b0f625b22"
+     "signature": "985c2ae69aba389205f99d559d00b909f4c1cc256fa478e6d1fd0d60fbae42fc"
     }
    ],
    "writer_analysis_error": null,
@@ -75333,12 +75335,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 29,
-   "mentioned_outside_history": 28,
+   "mentions": 28,
+   "mentioned_outside_history": 27,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-24",
-   "lines": 1720,
+   "last_modified": "2026-09-25",
+   "lines": 1725,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75449,20 +75451,20 @@
    },
    "writer_evidence": [
     {
-     "line": 1625,
+     "line": 1630,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "c44229e4b86382802d0d8665fe17de09ddbdebc1e2e040d721589f27449c0a4d"
+     "signature": "d85dcbda96eb2056aeb9d3f6339e3071ce295d07b47ad392e536755fd255a06a"
     },
     {
-     "line": 1712,
+     "line": 1717,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "707797c12d05c38cee15e061ead224209e2b8fdfe493b745d8577550087b3ce6"
+     "signature": "2b7c3ef15b9ed5f3d8e756c0ddde7c415cc2a523e62239ece61c4d827d10302c"
     }
    ],
    "writer_analysis_error": null,
@@ -77257,7 +77259,7 @@
   }
  },
  "script_census": {
-  "generated": "2026-09-24",
+  "generated": "2026-09-25",
   "generator": "code/521_inventory.py scripts-only",
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
   "scripts": 684,

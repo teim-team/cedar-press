@@ -19,8 +19,8 @@ policy = importlib.import_module("cedar_publication")
 
 class CandidateReviewTest(unittest.TestCase):
     def test_migrated_producers_refuse_before_reads_or_writes(self):
-        for collection, filename in (("legislation", "native_bills.csv"),
-                                     ("natural-resources", "resource_revenue.csv")):
+        for collection in __import__("cedar_pipeline").RELEASE_PILOTS:
+            filename = policy.FLAGSHIP[collection]
             with self.subTest(collection=collection):
                 with patch.object(Path, "open") as opened:
                     with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
@@ -123,7 +123,7 @@ class CandidateReviewTest(unittest.TestCase):
             )
             self.assertEqual(row, {"title": "safe", "publishable": "Y"})
 
-    def test_refused_schema_keeps_filtered_preview_but_no_release(self):
+    def test_retired_candidate_preview_refuses_before_output_creation(self):
         with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
             base = Path(directory)
             source = base / "source"
@@ -209,25 +209,10 @@ class CandidateReviewTest(unittest.TestCase):
                 bundle.candidate_review(source, base / "retired-output", queue)
             self.assertFalse((base / "retired-output").exists())
             queue.write_text(saved_queue)
-            with redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
                 bundle.candidate_review(source, base / "output", queue)
-            rows = json.loads((base / "output/measurements.json").read_text())
-            self.assertEqual(len(rows), 12)
-            for result in rows:
-                self.assertEqual(
-                    (result["rows"], result["row_policy_eligible"], result["withheld"]), (3, 2, 1)
-                )
-                self.assertEqual(result["candidate_projection_rows"], 0)
-                self.assertEqual(result["release_eligible_rows"], 0)
-                self.assertTrue(result["source_unchanged"])
-            self.assertEqual(list((base / "output").glob("*__candidate.csv")), [])
-            preview = (base / "output/fixture-0.html").read_text()
-            self.assertNotIn("<script>bad", preview)
-            self.assertNotIn("private", preview)
-            self.assertIn("&lt;script&gt;bad", preview)
+            self.assertFalse((base / "output").exists())
             self.assertEqual(file.read_bytes(), raw)
-            with self.assertRaises(ValueError):
-                bundle.candidate_review(source, base / "output", queue)
 
     def test_repository_and_source_output_paths_refused(self):
         with self.assertRaises(ValueError):

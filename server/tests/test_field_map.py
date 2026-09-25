@@ -354,8 +354,14 @@ class TestCombinedPlan(unittest.TestCase):
                 for key, value in replacements.items():
                     stack.enter_context(patch.object(combine, key, value))
                 emit = stack.enter_context(patch.object(combine, "emit"))
-                with self.assertRaises(ReachedPublication):
-                    combine.build(dry=dry, only=("nagpra",))
+                if dry:
+                    with self.assertRaises(ReachedPublication):
+                        combine.build(dry=True, only=("nagpra",))
+                else:
+                    with patch.object(combine, "load") as source_load:
+                        with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                            combine.build(dry=False, only=("nagpra",))
+                        source_load.assert_not_called()
                 emit.assert_not_called()
 
 
@@ -391,8 +397,14 @@ class TestNeedExportHold(unittest.TestCase):
                 for key, value in replacements.items():
                     stack.enter_context(patch.object(combine, key, value))
                 emit = stack.enter_context(patch.object(combine, "emit"))
-                with self.assertRaises(pub.NEEDAffiliationPublicationHold):
-                    combine.build(dry=dry, only=("need",))
+                if dry:
+                    with self.assertRaises(pub.NEEDAffiliationPublicationHold):
+                        combine.build(dry=True, only=("need",))
+                else:
+                    with patch.object(combine, "load") as source_load:
+                        with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                            combine.build(dry=False, only=("need",))
+                        source_load.assert_not_called()
                 emit.assert_not_called()
 
 

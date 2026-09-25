@@ -188,7 +188,7 @@ def cmd_list(_args) -> int:
 
 def cmd_plan(args) -> int:
     p = plan_for(args.collection)
-    print(f"\n{p['name']}  Â·  {p['id']}  Â·  {p['shelf']} shelf")
+    print(f"\n{p['name']}  Ãƒâ€šÃ‚Â·  {p['id']}  Ãƒâ€šÃ‚Â·  {p['shelf']} shelf")
     print(f"{len(p['tables'])} clean tables\n")
 
     if p["blocked"]:
@@ -617,36 +617,72 @@ def cmd_release_pilot(args):
     from lumecon_data.storage import canonical_json, checked_path
     import cedar_publication as publication
 
-    collection = args.collection
-    if collection not in CP.RELEASE_PILOTS:
+    collection = publication.PRODUCT_ID.get(args.collection, args.collection)
+    if args.collection not in CP.RELEASE_PILOTS:
         raise SystemExit("REFUSED: collection has no migrated producer")
     source = Path(args.source).resolve()
-    if source.name != publication.FLAGSHIP[collection]:
+    if source.name != publication.FLAGSHIP[args.collection]:
         raise SystemExit("REFUSED: source filename must match the declared flagship")
     target = checked_path(Path(args.output_root)).resolve()
     assert_pilot_target(source, target)
     authorities = pilot_authority_hashes(HERE.parent)
-    inputs = {source: source.read_bytes()}
+    # Snapshot the existing policy, not a competing Cedar implementation.
+    def plain(value):
+        if isinstance(value, dict):
+            return {key: plain(item) for key, item in value.items()}
+        if isinstance(value, (set, frozenset)):
+            return [plain(item) for item in sorted(value)]
+        if isinstance(value, (tuple, list)):
+            return [plain(item) for item in value]
+        return value
+
+    gated = {"funding", "federal-register", "deals", "contractors", "nonprofits", "need"}
+    components = {"nagpra", "lobbying", "subcontracting", "owned"}
+    # Large held sources are hashed/parsed by Lumecon's streaming admission path.
+    inputs = {} if collection in gated else {source: source.read_bytes()}
     actions = None
     crosswalk = None
+    policy = None
     if collection == "legislation":
         dependency = source.with_name("native_bill_actions.csv")
         inputs[dependency] = dependency.read_bytes()
         actions = inputs[dependency]
-    elif collection == "natural-resources":
+    elif collection == "natural-resources" or collection in components:
         crosswalk = canonical_json(publication.neid_map())
+    if collection in components or collection in gated:
+        policy = canonical_json(plain({
+            "gates": publication.GATES, "never": publication.NEVER,
+            "blocked_states": publication.BLOCKED_STATES,
+            "blocked_combinations": publication.BLOCKED_COMBINATIONS,
+            "mask_cols": publication.MASK_COLS, "mask_flags": publication.MASK_FLAGS,
+            "party_uei_cols": publication.PARTY_UEI_COLS,
+            "uid_cols_by_side": publication._UID_COLS_BY_SIDE,
+            "denied_ueis": publication.denied_ueis(),
+        }))
     field_map = canonical_json(publication.field_map()[collection])
     register = canonical_json(publication.register())
     scopes = canonical_json(publication.scopes())
     if pilot_authority_hashes(HERE.parent) != authorities:
         raise SystemExit("REFUSED: metadata changed while its snapshot was captured")
-    result = build_collection_release(
-        target, collection, source_bytes=inputs[source], field_map_bytes=field_map,
-        register_bytes=register, scopes_bytes=scopes, as_of=args.as_of,
-        actions_bytes=actions, legacy_crosswalk_bytes=crosswalk)
+    if collection in gated:
+        from lumecon_data.collections.press_blocked import build_blocked_press_candidate
+        result = build_blocked_press_candidate(
+            target, collection, source, field_map_bytes=field_map,
+            register_bytes=register, scopes_bytes=scopes,
+            decision_inputs={"publication-policy.json": policy})
+    else:
+        result = build_collection_release(
+            target, collection, source_bytes=inputs[source], field_map_bytes=field_map,
+            register_bytes=register, scopes_bytes=scopes, as_of=args.as_of,
+            actions_bytes=actions, legacy_crosswalk_bytes=crosswalk, policy_bytes=policy,
+            code_sha=getattr(args, "code_sha", None))
     if (any(path.read_bytes() != content for path, content in inputs.items())
             or pilot_authority_hashes(HERE.parent) != authorities):
         raise SystemExit("REFUSED: source or metadata changed during delegated candidate build")
+    if "manifest" not in result:
+        # A complete held receipt is an admission result, never a release success.
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 1
     manifest = result["manifest"]
     print(json.dumps({"release_id": manifest["release_id"],
         "record_count": manifest["record_count"], "catalog": result["catalog_path"],
@@ -672,6 +708,7 @@ def main() -> int:
     pilot.add_argument("--source", required=True)
     pilot.add_argument("--output-root", required=True)
     pilot.add_argument("--as-of", required=True)
+    pilot.add_argument("--code-sha", help="Exact reviewed Lumecon producer commit")
     pilot.set_defaults(func=cmd_release_pilot)
     sh = sub.add_parser("ship", help="run the documented ship chain (7 steps)")
     sh.add_argument("--execute", action="store_true",

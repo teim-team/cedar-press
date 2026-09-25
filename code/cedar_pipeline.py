@@ -56,7 +56,12 @@ REFERENCE_PRESERVATION_AUTHORITY = {
 }
 # Compatibility command allowlist, not producer metadata or release authority.
 # Collection schemas, rights and transformations live in Lumecon-data.
-RELEASE_PILOTS = ("legislation", "natural-resources")
+RELEASE_PILOTS = (
+    "funding", "federal-register", "legislation", "deals", "nagpra", "lobbying",
+    "contractors", "subcontracting", "native-owned-businesses", "nonprofits", "natural-resources", "need",
+)
+# Admission is not release certification. Gated producers return held receipts;
+# the former Cedar customer/sample writers remain retired for these flagships.
 
 
 def retired_table_writer(script, table):

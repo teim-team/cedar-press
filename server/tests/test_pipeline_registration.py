@@ -60,6 +60,58 @@ class ProducerRegistrationTest(unittest.TestCase):
             self.assertFalse((base / "store").exists())
             self.assertEqual(source.read_bytes(), b"fixture source bytes")
 
+    def test_twelve_collection_allowlist_excludes_other_products(self):
+        self.assertEqual(set(PIPELINE.RELEASE_PILOTS), {
+            "funding", "federal-register", "legislation", "deals", "nagpra", "lobbying",
+            "contractors", "subcontracting", "native-owned-businesses", "nonprofits", "natural-resources", "need",
+        })
+
+    def test_blocked_adapter_streams_source_and_returns_failure_receipt(self):
+        spec = importlib.util.spec_from_file_location("blocked_build", ROOT / "code/build.py")
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        publication = __import__("cedar_publication")
+        pipeline = types.ModuleType("lumecon_data.pipeline")
+        pipeline.build_collection_release = Mock()
+        blocked = types.ModuleType("lumecon_data.collections.press_blocked")
+        blocked.build_blocked_press_candidate = Mock(return_value={
+            "status": "BLOCKED", "source_rows": 1, "withheld_rows": 1,
+            "candidate_id": "held-fixture", "blockers": ["engineering_gate"]})
+        storage = types.ModuleType("lumecon_data.storage")
+        storage.checked_path = lambda value: value
+        storage.canonical_json = lambda value: json.dumps(value, sort_keys=True).encode()
+        modules = {"lumecon_data": types.ModuleType("lumecon_data"),
+                   "lumecon_data.pipeline": pipeline, "lumecon_data.storage": storage,
+                   "lumecon_data.collections": types.ModuleType("lumecon_data.collections"),
+                   "lumecon_data.collections.press_blocked": blocked}
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            source = base / "source" / "federal_funding_transactions.csv"
+            source.parent.mkdir()
+            source.write_bytes(b"source-key\nsource-record\n")
+            args = argparse.Namespace(collection="funding", source=str(source),
+                                      output_root=str(base / "store"), as_of="2026-09-25")
+            original_read = Path.read_bytes
+            def guarded_read(path):
+                if path == source:
+                    raise AssertionError("Bulk source must not be materialized by Cedar")
+                return original_read(path)
+            output = io.StringIO()
+            with (patch.dict(sys.modules, modules),
+                  patch.object(Path, "read_bytes", guarded_read),
+                  patch.object(publication, "field_map", return_value={"funding": {}}),
+                  patch.object(publication, "register", return_value={}),
+                  patch.object(publication, "scopes", return_value={}),
+                  patch.object(publication, "denied_ueis", return_value={}),
+                  contextlib.redirect_stdout(output)):
+                self.assertEqual(runner.cmd_release_pilot(args), 1)
+            call = blocked.build_blocked_press_candidate.call_args
+            self.assertEqual(call.args, (base / "store", "funding", source))
+            self.assertIn("publication-policy.json", call.kwargs["decision_inputs"])
+            self.assertEqual(json.loads(output.getvalue())["withheld_rows"], 1)
+            pipeline.build_collection_release.assert_not_called()
+            self.assertFalse((base / "store").exists())
+
     def test_writer_authority_refresh_preserves_measurements_and_input(self):
         spec = importlib.util.spec_from_file_location(
             "contract_refresh", ROOT / "code/512_build_dataset_contracts.py"

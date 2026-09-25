@@ -267,7 +267,7 @@ def _canonical_bytes(value):
     ).encode("utf-8")
 
 
-MAX_RELEASE_BYTES = 128 * 1024 * 1024
+MAX_RELEASE_BYTES = 256 * 1024 * 1024
 
 
 def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
