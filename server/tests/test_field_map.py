@@ -27,10 +27,12 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import io
 import json
 import sys
+import tempfile
 import unittest
-from contextlib import ExitStack
+from contextlib import ExitStack, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -1109,6 +1111,57 @@ class TestApplyFieldMap(unittest.TestCase):
                 if f["decision"] in ("keep", "withhold", "rename")
             }
             self.assertTrue(ships <= listed | generated, (coll, sorted(ships - listed - generated)))
+
+
+class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
+    def test_success_and_exception_preserve_canonical_files_and_restore_paths(self):
+        spec = importlib.util.spec_from_file_location(
+            "money_codebook_isolation", CODE / "1149_codebook_money_fed.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for fail in (False, True):
+            with self.subTest(injected_failure=fail), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                clean = root / "data" / "clean"
+                fragment = clean / "codebook"
+                fragment.mkdir(parents=True)
+                master = clean / "codebook_master.csv"
+                master.write_bytes(b"canonical master sentinel\r\n")
+                (fragment / "11e_nagpra_nps_grant_awards.csv").write_bytes(
+                    b"canonical fragment sentinel\r\n"
+                )
+                before = {
+                    p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
+                }
+                paths = (root, clean, fragment, master)
+                with ExitStack() as stack:
+                    for owner, names in (
+                        (module, ("ROOT", "CLEAN", "FRAG", "MASTER")),
+                        (module.cb, ("CEDAR", "CLEAN", "FRAG", "MASTER")),
+                    ):
+                        for name, value in zip(names, paths):
+                            stack.enter_context(patch.object(owner, name, value))
+                    if fail:
+                        stack.enter_context(
+                            patch.object(module.cb, "build", side_effect=RuntimeError("injected"))
+                        )
+                    with redirect_stdout(io.StringIO()) as output:
+                        if fail:
+                            with self.assertRaisesRegex(RuntimeError, "injected"):
+                                module.selftest()
+                        else:
+                            self.assertEqual(module.selftest(), 0)
+                            for invariant in ("CBM-1", "CBM-2", "CBM-3"):
+                                self.assertIn(f"{invariant}: exit 1, FIRED", output.getvalue())
+                    self.assertEqual((module.ROOT, module.CLEAN, module.FRAG, module.MASTER), paths)
+                    self.assertEqual(
+                        (module.cb.CEDAR, module.cb.CLEAN, module.cb.FRAG, module.cb.MASTER), paths
+                    )
+                self.assertEqual(
+                    {p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()},
+                    before,
+                )
 
 
 if __name__ == "__main__":
