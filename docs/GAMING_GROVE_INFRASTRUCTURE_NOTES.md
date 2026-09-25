@@ -30,7 +30,7 @@ that branch:
 | `data/cedar/grove_release_pin.json` | THE pin: one immutable Lumecon release per Grove collection | Consumer choice of release; reviewed like code |
 | `server/cedar_press/repository.py` `grove_release_pin`, `grove_full_release`, `grove_component_contract`, `grove_release_metadata` | Pin, catalog and manifest verification, per-component schema check against the field map, exact component bytes | Consumer adapter |
 | `server/cedar_press/app.py` `full_download` | Entitlement (grove/tree), redacted audit naming the component, 503 with a clear "not pinned" error | Entitlement belongs to the product |
-| `data/cedar/field_map.json` `gaming/gaming_regional_revenue` | Presentation entry: order, default viewer, per-field `rights_class` | Presentation contract. It is checked against the pinned contract and is never the schema authority |
+| `data/cedar/field_map.json` `gaming/gaming_regional_revenue` and `gaming/gaming_government_payments` | Presentation entry: order, default viewer, per-field `rights_class` | Presentation contract. It is checked against the pinned contract and is never the schema authority |
 | `cedar_ids.GAMING_BLOCKS` and `code/build.py gaming-issue-ids` | Block reservation and the ONE issuance step | Cedar's identity service is the sole ID issuer |
 | `cedar_publication.field_map_entries` / `field_map_entry` / `apply_field_map(table=)` | Keyed field-map accessors | A second `<collection>/<table>` entry must not silently overwrite the first |
 | `code/build.py release-pilot` hardening: `pilot_registered_reference`, `RetiredHandleMatcher`, unmapped-collection refusal, `pilot_table_contract` | Single-flagship pilots only | Natural Resources carries `cedar_uid`, so a Press pilot uses it (`code/build_test.py`) |
@@ -108,9 +108,9 @@ online sportsbook module, `build.py candidate gaming`, `grove-contracts`,
    must agree with its part entries in this manifest. Every part must be
    present with the same record count and `records.jsonl` hash, and the
    logical count must be their sum. Otherwise the whole release is refused.
-7. The component is not partitioned: a logical partitioned component and
-   each of its parts is refused, because Cedar never assembles parts and none
-   is presented today. Its embedded contract has public/publishable rights,
+7. A logical partitioned component is assembled in manifest order into a
+   temporary disk spool, after each part passes the same contract checks.
+   Direct part requests remain refused. Every part has public/publishable rights,
    redistribution, and `download_permitted: true`. Its field names, in order,
    equal the field-map `order`, and each shipped field's `rights_class` equals
    the contract's `metadata.field_rights`. Its primary key is within the header, and the count and
@@ -119,6 +119,16 @@ online sportsbook module, `build.py candidate gaming`, `grove-contracts`,
    `/v1/collections/<id>/releases/<rid>/components/<name>/download`. They
    match the manifest's size and SHA-256, the record count
    and schema, and the primary keys are nonblank and unique.
+
+For partitioned downloads, all parts must agree on fields and primary keys.
+A disk-backed unique-key index checks keys across the entire logical table.
+Every bounded part is verified before any response bytes are sent; a missing,
+restricted, malformed or tampered final part refuses the entire download.
+The successful response streams the verified spool in 64 KiB chunks and closes
+it on completion or disconnect. The response hash is the SHA-256 of the exact
+manifest-ordered concatenation; metadata exposes individual pinned part hashes.
+JSONL remains the internal and customer transport here; no CSV conversion is implied.
+This adapter does not itself establish scientific validity or production eligibility.
 
 The response is exact JSONL with `X-Cedar-Release`, `X-Cedar-SHA256`,
 `X-Cedar-Component`, `X-Cedar-Rows`, `X-Cedar-Citation`

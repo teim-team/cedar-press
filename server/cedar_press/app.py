@@ -60,6 +60,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from starlette.background import BackgroundTask
 
 from cedar_press import (
     cedar_service,
@@ -637,6 +638,20 @@ def full_download(
     }
     if release.get("component"):
         headers["X-Cedar-Component"] = release["component"]
+    if "content_file" in release:
+        spool = release["content_file"]
+
+        def verified_chunks():
+            try:
+                while chunk := spool.read(64 * 1024):
+                    yield chunk
+            finally:
+                spool.close()
+
+        return StreamingResponse(
+            verified_chunks(), media_type=release["media_type"], headers=headers,
+            background=BackgroundTask(spool.close),
+        )
     return Response(content=release["content"], media_type=release["media_type"], headers=headers)
 
 

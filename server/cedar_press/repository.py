@@ -25,7 +25,10 @@ import importlib.util
 import json
 import os
 import re
+import sqlite3
+import tempfile
 from collections.abc import Mapping
+from contextlib import closing
 from functools import lru_cache
 from http.client import HTTPException
 from pathlib import Path
@@ -523,7 +526,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             "filename": f"{collection_id}-{release_id}.jsonl",
             "media_type": "application/x-ndjson",
         }
-    except (OSError, HTTPException, ValueError, KeyError, TypeError) as error:
+    except (OSError, HTTPException, ValueError, KeyError, TypeError, sqlite3.Error) as error:
         raise FullReleaseUnavailable(
             "Pinned full release unavailable or failed verification"
         ) from error
@@ -691,8 +694,9 @@ def _grove_partitioned_parts(manifest: dict[str, Any]) -> frozenset[str]:
     """Every component name that belongs to a partitioned (bounded-parts) component.
 
     Lumecon ships a large table (Gaming payments) as ordinary part components
-    plus one ``partitioned_components`` entry naming them. Cedar never assembles
-    parts and serves none of them today. The declaration must still agree with
+    plus one ``partitioned_components`` entry naming them. Logical downloads
+    are verified and disk-spooled before serving; direct part requests refuse.
+    The declaration must still agree with
     the part entries of this same pinned manifest (every part present, its
     record count and ``records.jsonl`` hash identical, the logical count their
     sum); any disagreement is an incomplete or unverified release, refused whole.
@@ -701,27 +705,49 @@ def _grove_partitioned_parts(manifest: dict[str, Any]) -> frozenset[str]:
     if not isinstance(declared, list):
         raise FullReleaseUnavailable("Malformed partitioned components")
     names: set[str] = set()
+    logical_names: set[str] = set()
     for logical in declared:
         parts = logical.get("parts") if isinstance(logical, dict) else None
         name = logical.get("name") if isinstance(logical, dict) else None
-        if not isinstance(name, str) or name in manifest["components"] or not parts:
+        if (
+            not isinstance(name, str) or not _COMPONENT_ID.fullmatch(name)
+            or name in manifest["components"] or name in logical_names or not parts
+            or type(logical.get("record_count")) is not int
+            or logical["record_count"] < 0
+        ):
             raise FullReleaseUnavailable("Malformed partitioned components")
         if not isinstance(parts, list):
             raise FullReleaseUnavailable("Malformed partitioned components")
+        logical_names.add(name)
         total = 0
+        labels: set[tuple[tuple[str, str], ...]] = set()
         for part in parts:
             component = part.get("component") if isinstance(part, dict) else None
             entry = manifest["components"].get(component) if isinstance(component, str) else None
+            files = entry.get("files") if isinstance(entry, dict) else None
+            artifact = files.get("records.jsonl") if isinstance(files, dict) else None
+            label = part.get("partition") if isinstance(part, dict) else None
             if (
                 not isinstance(entry, dict)
+                or not isinstance(component, str) or not _COMPONENT_ID.fullmatch(component)
+                or not isinstance(label, dict) or not label
+                or any(not isinstance(k, str) or not isinstance(v, str) for k, v in label.items())
+                or tuple(sorted(label.items())) in labels
+                or not isinstance(artifact, dict)
+                or type(artifact.get("bytes")) is not int or artifact["bytes"] < 1
+                or not isinstance(artifact.get("sha256"), str)
+                or not _SHA256.fullmatch(artifact["sha256"])
+                or type(entry.get("record_count")) is not int
                 or component in names
                 or type(part.get("record_count")) is not int
+                or part["record_count"] < 0
                 or part["record_count"] != entry.get("record_count")
-                or part.get("records.jsonl") != (entry.get("files") or {}).get("records.jsonl")
+                or part.get("records.jsonl") != artifact
             ):
                 raise FullReleaseUnavailable(
                     "Partitioned component parts are incomplete or unverified"
                 )
+            labels.add(tuple(sorted(label.items())))
             total += part["record_count"]
             names.add(component)
         if logical.get("record_count") != total:
@@ -730,11 +756,13 @@ def _grove_partitioned_parts(manifest: dict[str, Any]) -> frozenset[str]:
     return frozenset(names)
 
 
-def grove_component_contract(manifest: dict[str, Any], collection_id: str, component: str):
+def grove_component_contract(
+    manifest: dict[str, Any], collection_id: str, component: str, *, presentation_component=None
+):
     """One component's embedded contract, checked against Cedar's presentation
     entry ``<collection>/<component>`` in the field map (no schema copy here:
     the field map may only present what the pinned contract declares)."""
-    if component in _grove_partitioned_parts(manifest):
+    if presentation_component is None and component in _grove_partitioned_parts(manifest):
         # Parts are never assembled here, and no part is presented today.
         raise FullReleaseUnavailable("A partitioned component is not served by Cedar")
     contract = manifest["components"].get(component)
@@ -752,7 +780,7 @@ def grove_component_contract(manifest: dict[str, Any], collection_id: str, compo
     if not isinstance(fields, list) or any(not isinstance(f, dict) for f in fields):
         raise FullReleaseUnavailable("Malformed component contract")
     header = [field.get("name") for field in fields]
-    entry = _field_map_tables().get(f"{collection_id}/{component}")
+    entry = _field_map_tables().get(f"{collection_id}/{presentation_component or component}")
     if not entry or entry.get("collection") != collection_id or header != entry.get("order"):
         raise FullReleaseUnavailable("Full release does not match product field map")
     declared_rights = (contract.get("metadata") or {}).get("field_rights") or {}
@@ -778,6 +806,88 @@ def grove_component_contract(manifest: dict[str, Any], collection_id: str, compo
     ):
         raise FullReleaseUnavailable("Invalid or oversized release artifact")
     return contract, header, primary_key, count, expected
+
+
+def _grove_partitioned_release(pin, manifest, logical, *, metadata_only=False):
+    """Verify all bounded parts before exposing a disk-spooled customer artifact.
+
+    The concatenation order and each exact part hash come from the one pinned
+    manifest. SQLite checks global primary keys without retaining them in RAM.
+    No response begins until every part has passed; failures discard the spool.
+    """
+    collection_id, release_id = pin["collection_id"], pin["release_id"]
+    component = logical["name"]
+    contracts = []
+    reference = None
+    for part in logical["parts"]:
+        contract = grove_component_contract(
+            manifest, collection_id, part["component"], presentation_component=component
+        )
+        signature = (contract[0]["fields"], contract[2])
+        if reference is not None and signature != reference:
+            raise FullReleaseUnavailable("Partition schemas or primary keys disagree")
+        reference = signature
+        contracts.append(contract)
+    header, primary_key = contracts[0][1:3]
+    if metadata_only:
+        return {
+            "kind": "full", "release_id": release_id, "schema_version": 1,
+            "record_count": logical["record_count"], "fields": header,
+            "table_id": component, "scope": "All manifest-ordered verified component parts",
+            "format": "jsonl", "parts": logical["parts"],
+            "download_path": f"/press/collections/{collection_id}/full-download"
+            f"?release_id={release_id}&component={component}",
+        }
+    spool = tempfile.TemporaryFile(mode="w+b")  # noqa: SIM115 - response owns close after streaming
+    digest = hashlib.sha256()
+    total = 0
+    try:
+        with closing(sqlite3.connect("")) as keys:
+            keys.execute("CREATE TABLE keys (value TEXT PRIMARY KEY)")
+            for part, contract in zip(logical["parts"], contracts, strict=True):
+                count, expected = contract[3:5]
+                content = _release_bytes(
+                    _grove_prefix(pin) + f"/components/{part['component']}/download",
+                    limit=expected["bytes"],
+                )
+                if (len(content) != expected["bytes"]
+                        or hashlib.sha256(content).hexdigest() != expected["sha256"]
+                        or not content.endswith(b"\n")):
+                    raise FullReleaseUnavailable("Partition bytes differ from pinned release")
+                observed = 0
+                for line in content.splitlines():
+                    row = json.loads(line)
+                    if not isinstance(row, dict) or set(row) != set(header):
+                        raise FullReleaseUnavailable("Partition schema mismatch")
+                    key = [row[name] for name in primary_key]
+                    if any(value is None or value == "" or isinstance(value, (dict, list, bool))
+                           for value in key):
+                        raise FullReleaseUnavailable("Invalid partition primary key")
+                    try:
+                        keys.execute("INSERT INTO keys VALUES (?)", (json.dumps(key),))
+                    except sqlite3.IntegrityError as error:
+                        raise FullReleaseUnavailable(
+                            "Duplicate primary key across parts"
+                        ) from error
+                    observed += 1
+                if observed != count:
+                    raise FullReleaseUnavailable("Partition row count mismatch")
+                total += observed
+                digest.update(content)
+                spool.write(content)
+            if total != logical["record_count"]:
+                raise FullReleaseUnavailable("Partition total count mismatch")
+        spool.seek(0)
+        return {
+            "content_file": spool, "release_id": release_id, "record_count": total,
+            "sha256": digest.hexdigest(), "fields": header, "component": component,
+            "citation": f"Cedar Grove {collection_id}/{component}, release {release_id}",
+            "filename": f"{collection_id}--{component}-{release_id}.jsonl",
+            "media_type": "application/x-ndjson",
+        }
+    except BaseException:
+        spool.close()
+        raise
 
 
 def grove_full_release(
@@ -811,6 +921,10 @@ def grove_full_release(
             raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
+        logical = next((entry for entry in manifest.get("partitioned_components", [])
+                        if entry["name"] == component), None)
+        if logical is not None:
+            return _grove_partitioned_release(pin, manifest, logical, metadata_only=metadata_only)
         _contract, header, primary_key, count, expected = grove_component_contract(
             manifest, collection_id, component
         )
@@ -863,7 +977,7 @@ def grove_full_release(
         }
     except FullReleaseUnavailable:
         raise
-    except (OSError, HTTPException, ValueError, KeyError, TypeError) as error:
+    except (OSError, HTTPException, ValueError, KeyError, TypeError, sqlite3.Error) as error:
         raise FullReleaseUnavailable(
             "Pinned full release unavailable or failed verification"
         ) from error

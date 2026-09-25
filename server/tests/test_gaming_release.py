@@ -217,9 +217,8 @@ class GamingConsumerBoundaryTest(_ServerCase):
                 "gaming",
                 "gaming_government_payments",
             )
-        # And payments is not a presented Grove component today, so the route
-        # refuses it before any pin, catalog or artifact read.
-        self.assertNotIn("gaming_government_payments", repository.grove_components("gaming"))
+        # Presented payments still refuse without an approved whole-release pin.
+        self.assertIn("gaming_government_payments", repository.grove_components("gaming"))
         self.session("grove")
         response, _events = self.get("gaming_government_payments")
         self.assertEqual(response.status_code, 503)
@@ -285,6 +284,26 @@ class GamingConsumerBoundaryTest(_ServerCase):
                        declared(parts="gaming_payments__part_a")):
             with self.assertRaisesRegex(repository.FullReleaseUnavailable,
                                         "incomplete or unverified|Malformed"):
+                repository._grove_partitioned_parts(broken)
+        import copy
+
+        mutations = {
+            "duplicate logical name": lambda m: m["partitioned_components"].append(
+                copy.deepcopy(m["partitioned_components"][0])),
+            "boolean total": lambda m: m["partitioned_components"][0].update(record_count=True),
+            "negative count": lambda m:
+                m["partitioned_components"][0]["parts"][0].update(record_count=-1),
+            "malformed files": lambda m:
+                m["components"]["gaming_payments__part_a"].update(files="bad"),
+            "malformed label": lambda m:
+                m["partitioned_components"][0]["parts"][0].update(partition=[]),
+            "duplicate label": lambda m:
+                m["partitioned_components"][0]["parts"][1].update(partition={"range": "a"}),
+        }
+        for label, mutate in mutations.items():
+            broken = copy.deepcopy(declared())
+            mutate(broken)
+            with self.subTest(label=label), self.assertRaises(repository.FullReleaseUnavailable):
                 repository._grove_partitioned_parts(broken)
         # Payments is not presented, so the route never reaches a pin for it.
         self.assertNotIn("gaming_payments", repository.grove_components("gaming"))
@@ -358,7 +377,10 @@ class GamingConsumerBoundaryTest(_ServerCase):
     def test_declaration_is_the_existing_grove_shelf_and_storefront_is_unchanged(self):
         self.assertEqual([e["id"] for e in launch.GROVE_RELEASE_COLLECTIONS], ["gaming"])
         self.assertEqual({e["shelf"] for e in launch.GROVE_RELEASE_COLLECTIONS}, {"grove"})
-        self.assertEqual(repository.grove_components("gaming"), (self.COMPONENT,))
+        self.assertEqual(
+            repository.grove_components("gaming"),
+            ("gaming_government_payments", self.COMPONENT),
+        )
         self.assertEqual(repository.grove_components("legislation"), ())
         for tier in ("press", "press_pro", "grove", "tree", "unknown"):
             with self.subTest(tier=tier):
@@ -727,10 +749,19 @@ class PinnedLumeconReleaseTest(_ServerCase):
         manifest = self.metadata(self.verify(self.store_a, "gaming", self.a["release_id"]))
         tables = repository._field_map_tables()
         presented = [k for k, e in tables.items() if e.get("collection") == "gaming"]
-        self.assertEqual(presented, ["gaming/" + SERVED])
+        self.assertEqual(set(presented), {"gaming/" + SERVED, "gaming/gaming_government_payments"})
         for key in presented:
             entry, component = tables[key], key.split("/", 1)[1]
             with self.subTest(component=component):
+                if component == "gaming_government_payments":
+                    from lumecon_data.gaming.contract import PUBLIC_RIGHTS
+                    from lumecon_data.gaming.revenue import PAY_CONTRACT
+
+                    public_fields = [name for name in PAY_CONTRACT["header"]
+                                     if PAY_CONTRACT["field_rights"][name] in PUBLIC_RIGHTS]
+                    self.assertEqual(entry["order"], public_fields)
+                    self.assertNotIn(component, manifest["components"])
+                    continue  # Minimal regional fixture deliberately has no payments.
                 contract = manifest["components"][component]
                 self.assertEqual([f["name"] for f in contract["fields"]], entry["order"])
                 rights = contract["metadata"]["field_rights"]
@@ -788,9 +819,11 @@ class PinnedLumeconReleaseTest(_ServerCase):
             catalog["collection_releases"][0]["manifest_sha256"], self.a["manifest_sha256"]
         )
         metadata = repository.grove_release_metadata("gaming")
-        self.assertEqual([m["table_id"] for m in metadata], [SERVED])
+        by_table = {item["table_id"]: item for item in metadata}
+        self.assertEqual(set(by_table), {SERVED, "gaming_government_payments"})
+        self.assertEqual(by_table["gaming_government_payments"]["status"], "unavailable")
         self.assertEqual(
-            metadata[0]["records_sha256"], self.a["components"][SERVED]["records_jsonl_sha256"]
+            by_table[SERVED]["records_sha256"], self.a["components"][SERVED]["records_jsonl_sha256"]
         )
 
     def test_entitlement_anonymous_wrong_tier_and_stale_account_with_a_real_pin(self):
@@ -908,3 +941,104 @@ class PinnedLumeconReleaseTest(_ServerCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(HAVE_SERVER, "requires the Cedar server development dependencies")
+class PartitionedConsumerTest(_ServerCase):
+    def setUp(self):
+        super().setUp()
+        self.release_id = "c" * 64
+        self.contents = {}
+        components, parts = {}, []
+        for index in range(6):
+            name = f"payments_part_{index}"
+            content = (json.dumps({"payment_id": str(index), "amount": "-0.50"}) + "\n").encode()
+            self.contents[name] = content
+            artifact = {"bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}
+            components[name] = {
+                "rights": {"publication_class": "public", "redistribution": True},
+                "download_permitted": True, "fields": [{"name": "payment_id"}, {"name": "amount"}],
+                "primary_key": ["payment_id"], "record_count": 1,
+                "files": {"records.jsonl": artifact},
+            }
+            parts.append({"component": name, "partition": {"index": str(index)},
+                          "record_count": 1, "records.jsonl": artifact})
+        self.manifest = {"components": components, "partitioned_components": [
+            {"name": "gaming_payments", "parts": parts, "record_count": 6}]}
+        self.pin_value = {"collection_id": "gaming", "release_id": self.release_id}
+        for patcher in (
+            patch.object(
+                repository, "grove_release_pin", side_effect=lambda _: dict(self.pin_value)
+            ),
+            patch.object(repository, "_grove_catalog"),
+            patch.object(repository, "_grove_manifest", side_effect=lambda _: self.manifest),
+            patch.object(repository, "grove_components", return_value=["gaming_payments"]),
+            patch.object(repository, "_field_map_tables", return_value={"gaming/gaming_payments": {
+                "collection": "gaming", "order": ["payment_id", "amount"], "fields": []}}),
+            patch.object(repository, "_release_bytes", side_effect=self.fetch),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        self.session("grove")
+
+    def fetch(self, path, limit=None):
+        self.fetched.append(path)
+        return self.contents[path.split("/")[-2]]
+
+    def test_six_parts_entitlement_exact_bytes_audit_and_rollback(self):
+        for tier, status in ((None, 401), ("press", 403)):
+            self.session(tier)
+            response, _ = self.get("gaming_payments")
+            self.assertEqual(response.status_code, status)
+            self.assertEqual(self.fetched, [])
+        self.session("grove")
+        original = b"".join(self.contents.values())
+        original_part = self.contents["payments_part_5"]
+        for release_id in ("c" * 64, "d" * 64, "c" * 64):
+            self.pin_value["release_id"] = release_id
+            changed = (original_part.replace(b"-0.50", b"-1.50")
+                       if release_id == "d" * 64 else original_part)
+            self.contents["payments_part_5"] = changed
+            artifact = {"bytes": len(changed), "sha256": hashlib.sha256(changed).hexdigest()}
+            self.manifest["components"]["payments_part_5"]["files"]["records.jsonl"] = artifact
+            self.manifest["partitioned_components"][0]["parts"][5]["records.jsonl"] = artifact
+            expected = b"".join(self.contents.values())
+            if release_id == "d" * 64:
+                self.assertNotEqual(expected, original)
+            else:
+                self.assertEqual(expected, original)
+            response, events = self.get("gaming_payments", release_id)
+            self.assertEqual(response.status_code, 200, response.text)
+            self.assertEqual(response.content, expected)
+            self.assertEqual(
+                response.headers["x-cedar-sha256"], hashlib.sha256(expected).hexdigest()
+            )
+            self.assertEqual(response.headers["x-cedar-rows"], "6")
+            self.assertEqual(events[-1]["outcome"], "authorized_prepared")
+        self.assertEqual(len(self.fetched), 18)
+
+    def test_tampered_last_part_refuses_entire_download(self):
+        self.contents["payments_part_5"] += b"tamper"
+        response, events = self.get("gaming_payments")
+        self.assertEqual(response.status_code, 503)
+        self.assertNotIn(b"payment_id", response.content)
+        self.assertEqual(events[-1]["outcome"], "unavailable")
+
+    def test_duplicate_key_across_verified_parts_refused(self):
+        content = self.contents["payments_part_0"]
+        self.contents["payments_part_5"] = content
+        artifact = {"bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}
+        self.manifest["components"]["payments_part_5"]["files"]["records.jsonl"] = artifact
+        self.manifest["partitioned_components"][0]["parts"][5]["records.jsonl"] = artifact
+        response, _ = self.get("gaming_payments")
+        self.assertEqual(response.status_code, 503)
+
+    def test_unpublishable_or_missing_part_refused_before_bytes(self):
+        self.manifest["components"]["payments_part_5"]["download_permitted"] = False
+        response, _ = self.get("gaming_payments")
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(self.fetched, [])
+        del self.manifest["components"]["payments_part_5"]
+        response, _ = self.get("gaming_payments")
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(self.fetched, [])

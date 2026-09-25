@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: 9f4cc210b5b32ca17b620be668eb754eba7024e4  # Lumecon-data PR #9 codex/collection-release-closure
+      LUMECON_DATA_SHA: 2b0ab3b74f9ae543729034e9f96188171f32b53b  # Lumecon-data PR #10 gaming hardening
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token
@@ -165,6 +165,23 @@ jobs:
         run: |
           pip install './.lumecon-data[api]'
           rm -rf .lumecon-data
+      - name: Require real Linux symlink containment capability
+        run: |
+          python - <<'PY'
+          import os
+          import tempfile
+          from pathlib import Path
+          if os.name != "posix":
+              raise SystemExit("Authoritative storage safety requires Linux")
+          with tempfile.TemporaryDirectory() as directory:
+              root = Path(directory)
+              target = root / "target"
+              target.write_text("containment-fixture")
+              link = root / "link"
+              link.symlink_to(target)
+              if not link.is_symlink() or link.resolve() != target:
+                  raise SystemExit("Real symlinks are required; storage tests cannot skip")
+          PY
       - name: Build the synthetic Gaming fixture release (smoke)
         run: python -m lumecon_data gaming fixture-release --store "$RUNNER_TEMP/gaming-fixture-store"
         env:

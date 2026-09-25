@@ -14,7 +14,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const read = (name) =>
-  readFileSync(new URL(`../../../.github/workflows/${name}`, import.meta.url), "utf8");
+  readFileSync(new URL(`../../../.github/workflows/${name}`, import.meta.url), "utf8").replace(/\r\n/g, "\n");
 const CI = read("ci.yml");
 const JOB = "gaming-release-consumer";
 
@@ -169,6 +169,9 @@ export function trustBoundaryViolations(workflow, jobName = JOB) {
   if (!/CEDAR_REQUIRE_LUMECON_GAMING:\s*"1"/.test(body)) {
     problems.push("consumer tests may skip without Lumecon");
   }
+  if (!body.includes("link.symlink_to(target)") || !body.includes("not link.is_symlink()")) {
+    problems.push("real Linux symlink capability is not required");
+  }
   return problems;
 }
 
@@ -198,6 +201,7 @@ test("every action in the job is pinned to the SHA the other workflows use", () 
 // ── Each rule catches the edit it exists to stop ────────────────────────────
 
 const mutations = {
+  "missing real symlink probe": (s) => s.replace("link.symlink_to(target)", "pass"),
   "a branch ref": (s) =>
     s.replace("ref: ${{ env.LUMECON_DATA_SHA }}", "ref: claude/gaming-grove-release"),
   "a short SHA": (s) =>
