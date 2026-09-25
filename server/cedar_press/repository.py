@@ -25,6 +25,8 @@ import importlib.util
 import json
 import os
 import re
+import sqlite3
+import tempfile
 from collections.abc import Mapping
 from functools import lru_cache
 from http.client import HTTPException
@@ -337,6 +339,228 @@ def _publication_policy():
     return module
 
 
+def _partitioned_release(catalog, collection_id, requested_release_id, metadata_only):
+    """Development-only assembly of one manifest-pinned logical table.
+
+    Every part is verified before returning any bytes. The full artifact and key
+    index live on disk; memory is bounded by one declared part, never the table.
+    """
+    if (
+        os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development") != "development"
+        or os.environ.get("CEDAR_PRESS_PARTITIONED_REHEARSAL") != "1"
+    ):
+        raise FullReleaseUnavailable("Partitioned delivery requires explicit development rehearsal")
+    pins = catalog.get("collection_releases")
+    if not isinstance(pins, list) or any(not isinstance(p, dict) for p in pins):
+        raise FullReleaseUnavailable("Malformed collection catalog")
+    matches = [p for p in pins if p.get("collection_id") == collection_id]
+    if len(matches) != 1:
+        raise FullReleaseUnavailable("Exactly one collection pin required")
+    pin = matches[0]
+    rid = pin["release_id"]
+    if not isinstance(rid, str) or not re.fullmatch(r"[0-9a-f]{64}", rid):
+        raise FullReleaseUnavailable("Malformed collection release ID")
+    if not metadata_only and rid != requested_release_id:
+        raise FullReleaseUnavailable("Requested release is not the approved pin")
+    prefix = f"/v1/collections/{collection_id}/releases/{rid}"
+    if pin.get("manifest_path") != prefix + "/manifest":
+        raise FullReleaseUnavailable("Untrusted manifest route")
+    manifest = _release_json(prefix + "/manifest")
+    if not isinstance(manifest, dict):
+        raise FullReleaseUnavailable("Malformed collection manifest")
+    if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != pin.get("manifest_sha256"):
+        raise FullReleaseUnavailable("Collection manifest differs from catalog pin")
+    for key in ("collection_id", "release_id", "release_class", "synthetic", "omitted_components"):
+        if manifest.get(key) != pin.get(key):
+            raise FullReleaseUnavailable("Collection catalog metadata mismatch")
+    if (
+        manifest.get("product") != "cedar_press"
+        or manifest.get("schema_version") != 1
+        or manifest.get("release_class") != "rehearsal"
+        or manifest.get("synthetic") is not False
+        or manifest.get("omitted_components") != []
+    ):
+        raise FullReleaseUnavailable("Not a complete real rehearsal table")
+    components = manifest.get("components")
+    catalog_parts = pin.get("components")
+    if (
+        not isinstance(components, dict)
+        or not components
+        or not isinstance(catalog_parts, list)
+        or any(not isinstance(c, dict) for c in catalog_parts)
+        or len(catalog_parts) != len(components)
+        or {c.get("name") for c in catalog_parts} != set(components)
+    ):
+        raise FullReleaseUnavailable("Missing, duplicate or undeclared part")
+    fields = None
+    primary_key = None
+    table = None
+    ordered = []
+    for part in catalog_parts:
+        name = part["name"]
+        if not re.fullmatch(r"[a-zA-Z0-9_-]+", name):
+            raise FullReleaseUnavailable("Unsafe component name")
+        entry = components[name]
+        if (
+            not isinstance(entry, dict)
+            or not isinstance(entry.get("rights"), dict)
+            or not isinstance(entry.get("metadata"), dict)
+        ):
+            raise FullReleaseUnavailable("Malformed component contract")
+        for key in (
+            "dataset_id",
+            "title",
+            "row_grain",
+            "primary_key",
+            "record_count",
+            "fields",
+            "rights",
+            "download_permitted",
+            "contract_sha256",
+            "metadata",
+        ):
+            if part.get(key) != entry.get(key):
+                raise FullReleaseUnavailable("Component differs from catalog")
+        expected = entry["files"]["records.jsonl"]
+        if part.get("files", {}).get("records.jsonl") != expected:
+            raise FullReleaseUnavailable("Component artifact pin differs")
+        if part.get("path") != prefix + "/components/" + name:
+            raise FullReleaseUnavailable("Untrusted component route")
+        rights = entry["rights"]
+        if (
+            rights.get("publication_class") not in {"public", "publishable"}
+            or rights.get("redistribution") is not True
+            or entry.get("download_permitted") is not True
+        ):
+            raise FullReleaseUnavailable("Component rights prohibit delivery")
+        meta = entry["metadata"]
+        ordinal = meta.get("ordinal")
+        if (
+            type(ordinal) is not int
+            or ordinal < 0
+            or not isinstance(meta.get("logical_table"), str)
+        ):
+            raise FullReleaseUnavailable("Missing explicit table or partition order")
+        if fields is None:
+            fields, primary_key, table = (
+                entry["fields"],
+                entry["primary_key"],
+                meta["logical_table"],
+            )
+        if (
+            fields != entry["fields"]
+            or primary_key != entry["primary_key"]
+            or table != meta["logical_table"]
+        ):
+            raise FullReleaseUnavailable("Partition schema, key or table mismatch")
+        if (
+            type(entry["record_count"]) is not int
+            or entry["record_count"] < 1
+            or type(expected["bytes"]) is not int
+            or not 0 < expected["bytes"] <= MAX_RELEASE_BYTES
+            or not isinstance(expected["sha256"], str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected["sha256"])
+        ):
+            raise FullReleaseUnavailable("Invalid partition size, count or digest")
+        ordered.append((ordinal, name, entry))
+    ordered.sort()
+    if [p[0] for p in ordered] != list(range(len(ordered))):
+        raise FullReleaseUnavailable("Partition ordinals must be contiguous and unique")
+    header = [field["name"] for field in fields]
+    fmap = json.loads(
+        (Path(__file__).resolve().parents[2] / "data/cedar/field_map.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    contract = fmap["tables"].get(collection_id + "/" + table)
+    if (
+        not contract
+        or header != contract["order"]
+        or len(set(header)) != len(header)
+        or not isinstance(primary_key, list)
+        or not primary_key
+        or not set(primary_key) <= set(header)
+    ):
+        raise FullReleaseUnavailable("Partition schema does not match the product contract")
+    count = sum(entry["record_count"] for _, _, entry in ordered)
+    if type(pin.get("record_count")) is not int or pin["record_count"] != count:
+        raise FullReleaseUnavailable("Collection count mismatch")
+    result = {
+        "kind": "full",
+        "release_id": rid,
+        "record_count": count,
+        "fields": header,
+        "table_id": table,
+        "format": "jsonl",
+        "schema_version": 1,
+        "scope": "Development rehearsal; complete pinned logical table in manifest ordinal order",
+        "filename": f"{collection_id}-{rid}.jsonl",
+        "media_type": "application/x-ndjson",
+        "citation": f"Cedar Press {collection_id}/{table}, release {rid}",
+        "download_path": f"/press/collections/{collection_id}/full-download?release_id={rid}",
+    }
+    if metadata_only:
+        return result
+    # Lifetime intentionally transfers to StreamingResponse after verification.
+    spool = tempfile.TemporaryFile(mode="w+b")  # noqa: SIM115
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar-release-keys-") as temporary:
+            database = sqlite3.connect(str(Path(temporary) / "keys.sqlite"))
+            try:
+                database.execute("CREATE TABLE row_keys (key TEXT PRIMARY KEY)")
+                digest = hashlib.sha256()
+                for _, name, entry in ordered:
+                    expected = entry["files"]["records.jsonl"]
+                    content = _release_bytes(
+                        prefix + "/components/" + name + "/download", limit=expected["bytes"]
+                    )
+                    if (
+                        len(content) != expected["bytes"]
+                        or hashlib.sha256(content).hexdigest() != expected["sha256"]
+                        or not content.endswith(b"\n")
+                    ):
+                        raise FullReleaseUnavailable("Partition bytes differ from approved release")
+                    actual = 0
+                    for line in content.splitlines():
+                        row = json.loads(
+                            line,
+                            parse_constant=lambda _: (_ for _ in ()).throw(
+                                ValueError("Nonfinite JSON")
+                            ),
+                        )
+                        if not isinstance(row, dict) or set(row) != set(header):
+                            raise FullReleaseUnavailable("Partition row schema mismatch")
+                        key = [row[k] for k in primary_key]
+                        if any(
+                            not isinstance(v, (str, int)) or isinstance(v, bool) or v == ""
+                            for v in key
+                        ):
+                            raise FullReleaseUnavailable("Invalid partition primary key")
+                        try:
+                            database.execute(
+                                "INSERT INTO row_keys VALUES (?)",
+                                (json.dumps(key, ensure_ascii=False, separators=(",", ":")),),
+                            )
+                        except sqlite3.IntegrityError as error:
+                            raise FullReleaseUnavailable(
+                                "Duplicate key across collection parts"
+                            ) from error
+                        actual += 1
+                    if actual != entry["record_count"]:
+                        raise FullReleaseUnavailable("Partition row count mismatch")
+                    spool.write(content)
+                    digest.update(content)
+                database.commit()
+            finally:
+                database.close()
+        spool.seek(0)
+        result.update(spool=spool, sha256=digest.hexdigest())
+        return result
+    except BaseException:
+        spool.close()
+        raise
+
+
 def full_release(collection_id, requested_release_id=None, *, metadata_only=False):
     """Exact pinned Lumecon artifact, checked against the existing product field map.
 
@@ -358,9 +582,12 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
         raise FullReleaseUnavailable("No pinned release catalog configured")
     try:
         catalog = json.loads(Path(location).read_text(encoding="utf-8"))
-        if not isinstance(catalog, dict) or not isinstance(catalog.get("collections"), list):
+        if not isinstance(catalog, dict):
             raise FullReleaseUnavailable("Malformed catalog")
-        if any(not isinstance(item, dict) for item in catalog["collections"]):
+        if catalog.get("catalog_kind") != "collection_releases" and (
+            not isinstance(catalog.get("collections"), list)
+            or any(not isinstance(item, dict) for item in catalog["collections"])
+        ):
             raise FullReleaseUnavailable("Malformed catalog entries")
         catalog_id = catalog.pop("catalog_id")
         if hashlib.sha256(_canonical_bytes(catalog)).hexdigest() != catalog_id:
@@ -372,6 +599,8 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             or catalog.get("entitlement_required") is not True
         ):
             raise FullReleaseUnavailable("Wrong product catalog")
+        if catalog.get("catalog_kind") == "collection_releases":
+            return _partitioned_release(catalog, collection_id, requested_release_id, metadata_only)
         pins = [item for item in catalog["collections"] if item["dataset_id"] == collection_id]
         if len(pins) != 1:
             raise FullReleaseUnavailable("Exactly one pinned collection release required")
@@ -475,7 +704,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
             "filename": f"{collection_id}-{release_id}.jsonl",
             "media_type": "application/x-ndjson",
         }
-    except (OSError, HTTPException, ValueError, KeyError, TypeError) as error:
+    except (OSError, HTTPException, ValueError, KeyError, TypeError, sqlite3.Error) as error:
         raise FullReleaseUnavailable(
             "Pinned full release unavailable or failed verification"
         ) from error

@@ -596,18 +596,33 @@ def full_download(
         _download_audit(collection_id, "unavailable", requested_release_id=release_id)
         raise HTTPException(status_code=503, detail="Full release unavailable") from error
     _download_audit(collection_id, "authorized_prepared", release, release_id)
-    return Response(
-        content=release["content"],
-        media_type=release["media_type"],
-        headers={
-            "Content-Disposition": f'attachment; filename="{release["filename"]}"',
-            "X-Cedar-Release": release["release_id"],
-            "X-Cedar-SHA256": release["sha256"],
-            "X-Cedar-Rows": str(release["record_count"]),
-            "X-Cedar-Citation": release["citation"],
-            "Cache-Control": "private, no-store",
-        },
-    )
+    headers = {
+        "Content-Disposition": f'attachment; filename="{release["filename"]}"',
+        "X-Cedar-Release": release["release_id"],
+        "X-Cedar-SHA256": release["sha256"],
+        "X-Cedar-Rows": str(release["record_count"]),
+        "X-Cedar-Citation": release["citation"],
+        "Cache-Control": "private, no-store",
+    }
+    if "spool" in release:
+        from starlette.background import BackgroundTask
+
+        spool = release["spool"]
+
+        def chunks():
+            try:
+                while content := spool.read(64 * 1024):
+                    yield content
+            finally:
+                spool.close()
+
+        return StreamingResponse(
+            chunks(),
+            media_type=release["media_type"],
+            headers=headers,
+            background=BackgroundTask(spool.close),
+        )
+    return Response(content=release["content"], media_type=release["media_type"], headers=headers)
 
 
 @app.get("/press/collections/{collection_id}/download")
