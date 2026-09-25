@@ -2487,6 +2487,7 @@
 .teim-rd .cp-hero3__title em { font-style: normal; color: var(--dteal); }
 .teim-rd .cp-hero3__lede { font-size: clamp(1.02rem, 1.25vw, 1.15rem); line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 40ch; text-wrap: pretty; }
 .teim-rd .cp-hero3__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.3rem; }
+.teim-rd .cp-hero3__reach { margin: 0.9rem 0 0; max-width: 38rem; font-size: 0.92rem; line-height: 1.5; color: var(--door-ink-3); }
 .teim-rd .cp-hero3__facts { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem 1.2rem; margin: 1.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--door-rule); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--door-ink-3); }
 .teim-rd .cp-hero3__facts b { font-weight: 700; color: var(--ink); }
 
