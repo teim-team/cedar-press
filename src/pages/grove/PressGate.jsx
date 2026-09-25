@@ -532,7 +532,7 @@ export default function PressGate({ user }) {
               The <em>data</em> behind Indian Country.
             </h1>
             <p className="cp-hero3__lede cp-fade">
-              Original collections built from fragmented records, connected through original
+              Original collections built from publicly available sources, connected through original
               research, and maintained as Indian Country changes. Every record traces back to the
               document it came from.
             </p>

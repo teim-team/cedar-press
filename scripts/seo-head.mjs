@@ -88,7 +88,7 @@ export function graph() {
         url: `${SITE}/`,
         brand: { "@id": ORG },
         description:
-          "A subscriber intelligence service covering the money, policy, transactions, institutions and public actions that shape Indian Country's economy. Every collection begins with public records and carries its own citation.",
+          "A subscriber intelligence service covering the money, policy, transactions, institutions and public actions that shape Indian Country's economy. Every collection is built on publicly available sources and carries its own citation.",
         category: "Economic data and research",
       },
       {
