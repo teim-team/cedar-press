@@ -73,6 +73,15 @@ RE-READ from disk and verified (rule 4) - not trusted from the run log.
     py -3 code/255_fix_gaming_property_deal_counts.py --dry-run  # report only
 """
 
+# FENCED 2026-09-25 (Gaming consolidation): superseded by Lumecon-data Gaming.
+# `cedar_pipeline.guard` refuses before anything is read or written; the reason
+# and the replacement are in `cedar_pipeline.GAMING_SUPERSEDED_BY_LUMECON`.
+import sys as _fence_sys  # noqa: E402
+from pathlib import Path as _FencePath  # noqa: E402
+_fence_sys.path.insert(0, str(_FencePath(__file__).resolve().parent))
+import cedar_pipeline as _fence_cp  # noqa: E402
+_fence_cp.guard(_FencePath(__file__).name)
+
 import csv
 import shutil
 import sys

@@ -36472,12 +36472,12 @@
    },
    "writer_evidence": [
     {
-     "line": 42,
+     "line": 51,
      "operation": "shutil.copy2",
      "target": "<unresolved>/data/clean/<unresolved>",
      "scope": "protected_surface",
      "table": null,
-     "signature": "ceeec10c0fd4ca60c96e863194939997d01c91f1ed96ccf72cadccc7fde2e007"
+     "signature": "7909a7d169f587549add9b8fbf63afe1f7ecfed0ee5f91726535815e2f09a35b"
     }
    ],
    "writer_analysis_error": null,
@@ -38857,20 +38857,20 @@
    },
    "writer_evidence": [
     {
-     "line": 105,
+     "line": 114,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "520b158562758b46e7d8f189dc6ee9e503edca07e4b49d8d79e9165baf3ada90"
+     "signature": "d59676319dc45da2c4f89923820182dc4116818933f749c5866bd665e4a884d9"
     },
     {
-     "line": 194,
+     "line": 203,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "25d3e5e615fc845c7cb7101f7042e247f83424d9489ee3a86a9760c541413e52"
+     "signature": "47c14fc5a388b921aae5c3722872ea3ad3b84fb95e583f33b09e62eafc49f34d"
     }
    ],
    "writer_analysis_error": null,
@@ -44155,20 +44155,20 @@
    },
    "writer_evidence": [
     {
-     "line": 105,
+     "line": 114,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6d72e433b1516d3348af8ad04934669bbf0cca8afefd649c8b28f49b9ab381b9"
+     "signature": "48a51cf831e9e5d440801bab38f0ed9ff5c90278ce828ab9da0ef766d56ea7ad"
     },
     {
-     "line": 187,
+     "line": 196,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "3fd04c1034bca21ad57db4b847708cd264a2a890162b384f1daff0861ad039b4"
+     "signature": "b1e9e744f8d0708ba53a3b40a768270d33017155ae21f7323fecb23c875ce01d"
     }
    ],
    "writer_analysis_error": null,
@@ -59327,20 +59327,20 @@
    },
    "writer_evidence": [
     {
-     "line": 79,
+     "line": 88,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "bd7c9d87d79e14a0bd903b45671a30a0e90d0998ec74a84c98c3f4d5d46531b4"
+     "signature": "35d1d02e3a1ddbb67ff1e07df54d4aa3aa4683d3d26e7dcde88a937a16bf4ac6"
     },
     {
-     "line": 80,
+     "line": 89,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "70c97215f03a8eb076c8b8bcaaae53ccfe23f216dafde56571439a7084430234"
+     "signature": "aece7238ac3c5fc9c5ba77caa11320d333986007ed459d01cbcebaaf889ef592"
     }
    ],
    "writer_analysis_error": null,
@@ -65096,20 +65096,20 @@
    },
    "writer_evidence": [
     {
-     "line": 190,
+     "line": 199,
      "operation": "open",
      "target": "<unresolved>/data/clean/gaming_property_capacity_history.csv",
      "scope": "governed_table",
      "table": "gaming_property_capacity_history.csv",
-     "signature": "c13e075ded2389906b4f68295635b4c6abb05ccc19d0ad66da0e45ae53c159b0"
+     "signature": "9758b107fa9aef4aa1b14a00c69fd4d2d7addf5f02c221421548df4f1beaf07f"
     },
     {
-     "line": 312,
+     "line": 321,
      "operation": "open",
      "target": "<unresolved>/data/clean/gaming_properties.csv",
      "scope": "governed_table",
      "table": "gaming_properties.csv",
-     "signature": "4286069f8d4bc88ea3db262e851a3c58842d38f1a527242b2a803585a464c0d7"
+     "signature": "7f0d359ab0d25726ee23a0e657f5d622b03d470149e0507aae3e8076e84c8a84"
     }
    ],
    "writer_analysis_error": null,
@@ -75571,20 +75571,20 @@
    },
    "writer_evidence": [
     {
-     "line": 1630,
+     "line": 1667,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "d85dcbda96eb2056aeb9d3f6339e3071ce295d07b47ad392e536755fd255a06a"
+     "signature": "983bc3d41980f0fe75c7156c7a42584e46862799e6d62b587857459501c40394"
     },
     {
-     "line": 1717,
+     "line": 1754,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "2b7c3ef15b9ed5f3d8e756c0ddde7c415cc2a523e62239ece61c4d827d10302c"
+     "signature": "41da88bc196ae4bf8d84c58afa4244fd3743d1a612a2929b5f6bddc5f6b22fd1"
     }
    ],
    "writer_analysis_error": null,

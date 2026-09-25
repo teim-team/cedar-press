@@ -79,6 +79,41 @@ Running `py -3 code/build.py plan gaming --verbose` in the live checkout finds *
 
 Authoritative **for scoped source extraction** are 84_build_nigc_regions.py, 91_build_nigc_declinations.py, 95_parse_compact_terms.py, 103_build_california_gaming.py, 105_build_florida_gaming.py, 92_build_gaming_capacity_official.py, 156_stage_form5500_gaming_employment.py, 157_reconcile_nigc_roster.py, 32b_build_gaming_nepa_pilot.py and their source manifests. 1141_gaming_quality_pass.py, 1095_gaming_bounds_summability_and_seal_typing.py, 960_promote_gaming_facility_class_and_revenue_reach.py, 1129_place_ids.py and 814_gaming_nr_grain_and_conservation.py are checks/enrichers, not new source acquisition. 586_promote_nigc_gaming.py and 587_gaming_facility_corrections.py are promotion/correction history requiring replay order. 23d_build_gaming_facilities.py must precede 960, and 82_build_gaming_property_dataset.py must precede 160_sync_published_gaming_view.py, or enriched columns can be lost. Votingpatterns v1/v2/v3 revenue and compact files are successive candidate versions, not additive. _1080_facility_aliases.py, .bak files and scripts outside the declared plan remain **unreferenced or historical until a caller and output contract are proved**; no deletion is authorized. A file named FINAL or a passing selftest is not current authority. Use [dependency_manifest.json](../schema/dependency_manifest.json) and [gaming_sources.md](../datasets/gaming_sources.md) to enumerate writers, but verify live call paths and exact inputs, writes, side effects and semantic diffs before a supported build route.
 
+### Gaming producer inventory and consolidation (updated 2026-09-25)
+
+Since the repository split (2026-09-24), Lumecon-data `lumecon_data/gaming/` is the canonical Gaming producer, validator and release, and its one command surface is `lumecon-data gaming {intake-verify,build,validate,certify-bindings,release}` (Lumecon-data `docs/gaming-contract.md`, "Command surface"). Cedar keeps two roles: it is the sole ID issuer (`cedar_ids.GAMING_BLOCKS`, `code/build.py gaming-issue-ids`) and the consumer of the pinned release (`server/`). This inventory is a static read of `code/` in this worktree and in the live checkout. It is read-only: no script was run. The two trees carry the same Gaming producers; they differ only in line endings, except for `build.py`, `cedar_ids.py`, `cedar_pipeline.py`, `1137` and `1169`.
+
+| Class | Count | Scripts |
+| --- | ---: | --- |
+| canonical (Cedar still owns it) | 9 | `cedar_ids.py` (GAMING_BLOCKS), `build.py gaming-issue-ids`, `1129_place_ids.py` (CEDAR-PLACE), `cedar_pipeline.py`, `525_event_ids.py`, `1169_release_verify.py`, `server/cedar_press/{repository,app,collections}.py`, the Gaming server tests, `scripts/audit_gaming_inventory.py` (read-only) |
+| transitional input producer (Lumecon reads the output; **stays runnable**) | 44 | 23d, 960, 143, 23b, 15b, 15e, 95, 32a, 32b, 84, 106, 92, 91, 100, 103, 105, 107, 104, 119, 860, 142, 147, 148, 155, 157_reconcile, 156, 157_stage, 158_merge, 118, 122, 153, 88, 89, 165, 344, 586, 1094, 980, 1096, 1080, `_1080_adjudication`, `_1080_facility_aliases`, 1097, plus 1129's registers |
+| superseded (Lumecon does this job and does not read the output) | 18 | **fenced:** 82, 160_sync_published_gaming_view, 175, 255. **Held, not fenced:** 159, 173_fill, 343 (`gaming_facility_metrics` also carries the CT official monthly series, which has no Lumecon equivalent yet); 101 (its geocode leg is still a 102 input); 102 (`62_no_regression_check` imports it); 23e (diagnostic join only); 117, 127, 91_extract, 149 (no Lumecon table yet); 510, 1126 and `160_ship_gap_report` (multi-collection); the codebook and dist writers (shared; Gaming output is dropped from the Grove path, not from the scripts) |
+| duplicate | 1 | **588 fenced**: a full `w` rebuild of the self-published claims and assertions tables. It reverts the maintained 1094 merge, and Lumecon pins those bytes. Also noted, both writers kept: 15b ↔ 15e (`compacts.csv`) and 23d ↔ 23f (`gaming_facilities.csv`) |
+| one-off (dated repair, already applied) | 17 | 23f, 158_extend, 162, 172, 264, 1078, 587, 1141, 1095, 1159, 814, 262, 265, 583, 589, 266, 174_backfill, 70, 327, 382–384, 92_stage, 161, 1142, 1116 |
+| historical | 2 | `41_build_codebooks.py` (`NEVER_RUN`); acquisition and QA helpers 15a, 23a, 23c, 93–97, 211–218, 585, 846 |
+
+**Fence (this branch).** `cedar_pipeline.GAMING_SUPERSEDED_BY_LUMECON` names the five fenced scripts with a reason and a replacement. It is merged into `NEVER_RUN`, and each script's first statement after its docstring is `cedar_pipeline.guard(...)`. [`server/tests/test_gaming_writer_fence.py`](../../server/tests/test_gaming_writer_fence.py) proves four things:
+
+- each fenced script is `NEVER_RUN`;
+- the guard runs before any other import or statement;
+- a direct run in an isolated copy exits non-zero with `REFUSED` and creates, changes or deletes nothing;
+- the supported runner refuses the script as `FORBIDDEN_PRODUCER`, and none of the kept input producers above is fenced.
+
+The writer ratchet baseline in `docs/schema/inventory.json` was refreshed for these five records and `cedar_pipeline.py` only. Their write targets are unchanged; the signatures moved because the guard changed each file's AST digest. The fenced code is not deleted. Once every consumer of `gaming_properties.csv` reads the Grove release, it retires to `graveyard/<date>_gaming_superseded/` with a `GRAVEYARD_INDEX.md`, following the existing convention.
+
+**Cautions carried forward:**
+
+- 23a–23e, 15a/15b/15e and 32a/32b have no `if __name__` guard; importing them writes.
+- `RELEASE_PILOTS` excludes gaming, so `1137 build gaming` still writes the legacy `dist/customer/gaming.csv`.
+- Rerunning any transitional producer changes bytes that Lumecon pins in `intake/profiles/gaming.json`. Its build then refuses with `FAILED_INTAKE_REGISTRY` until the new file is registered, so every rerun is a reviewed event.
+
+**Lumecon side (Lumecon-data branch `claude/gaming-consolidation`):**
+
+- The duplicate `candidate.sha_bytes` and `candidate.csv_bytes` now alias `storage.sha256` and `contract.csv_bytes`; they are byte-identical on every fixture component.
+- The unused `release.read_table` is retired.
+- `gaming certify-bindings` is the read-only pre-issuance certificate that `gaming-issue-ids --execute --certificate` expects.
+- The retired-modules index is in Lumecon-data `docs/gaming-contract.md`.
+
 ## Website promise and governed-release path
 
 On origin/main, [pressCatalog.js](../../src/features/grove/pressCatalog.js) explicitly says the Gaming Intelligence Grove preview was withdrawn on 2026-09-04; the storefront has twelve, and Gaming is excluded pending readiness. [pressSources.js](../../src/features/grove/pressSources.js) also withholds NIGC from storefront source claims. The older dirty Desktop/cedar-press-repo checkout still has a Gaming catalog card and PressShelf invitation; it is **stale candidate copy**, not current release authority. The current site does not promise a Gaming download or cadence. Broader Cedar Grove language does not validate tribe-level gaming revenue.
