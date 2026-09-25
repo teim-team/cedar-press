@@ -53,6 +53,7 @@ The approved header, in the owner's exact order (24 columns, of which 0 are owed
 | 5 | `ein` (was `EIN`) | EIN | The organization's Employer Identification Number. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `organization_name` (was `org_name`) | Organization | The organization's name as the IRS records it. | text | the source states none, or not applicable to this row |
 | 7 | `organization_entity_class` (was `cedar_native_entity_class`) | Organization type | Whether the organization is itself a tribe, an ANC, a Native organization. | text | the source states none, or not applicable to this row |
+| 8 | `inclusion_category` | inclusion category | Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk. | text | See source qualification; not inferred from a legacy sample |
 | 9 | `city` | City | Its city. | text | the source states none, or not applicable to this row |
 | 10 | `state` | State | The organization's state. | text | the source states none, or not applicable to this row |
 | 11 | `ntee_code` | NTEE code | The IRS activity code for what the organization does. | text | the source states none, or not applicable to this row |
@@ -65,6 +66,7 @@ The approved header, in the owner's exact order (24 columns, of which 0 are owed
 | 18 | `bmf_assets_usd` (was `bmf_asset_amt`) | Assets | Assets in that return. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 19 | `bmf_income_usd` (was `bmf_income_amt`) | Income | Income in that return. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 20 | `bmf_as_of_date` (was `bmf_vintage_fetched`) | IRS file date | The date of the IRS file these figures come from. | date (YYYY-MM-DD) | the source states no date |
+| 21 | `entity_link_status` | entity link status | One linkage status through a documented crosswalk. | text | See source qualification; not inferred from a legacy sample |
 | 22 | `source_system` (was `source_dataset`) | Source system | The source: the IRS Exempt Organizations Business Master File. | text | the source states none, or not applicable to this row |
 | 23 | `source_url` | Source | The IRS Business Master File. | web address | the source states none, or not applicable to this row |
 | 24 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |

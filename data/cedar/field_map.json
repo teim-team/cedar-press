@@ -606,7 +606,7 @@
    "plural": false,
    "entity_role": "constant:participant",
    "columns_today": 39,
-   "columns_target": 33,
+   "columns_target": 34,
    "default_viewer": [
     "canonical_name",
     "notice_date",

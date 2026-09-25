@@ -50,6 +50,9 @@ The approved header, in the owner's exact order (34 columns, of which 0 are owed
 | 2 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
 | 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
 | 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: participant. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 5 | `entity_link_status` | entity link status | Existing registered link is resolved; not_enumerated with no link means no_individual_named; other blank links remain unresolved. | text | See source qualification; not inferred from a legacy sample |
+| 6 | `collective_scopes` | collective scopes | Source applicability has not been evaluated; null is not an empty or universal scope. | text | See source qualification; not inferred from a legacy sample |
+| 7 | `consultation_record_key` | consultation record key | JSON tuple of original source values, scoped to this table; not an issued event or entity ID. | text | See source qualification; not inferred from a legacy sample |
 | 8 | `consultation_event_id` | Event ID | Cedar's identifier for the consultation event. | identifier, as text | the source states none, or not applicable to this row |
 | 9 | `fr_document_number` | Document number | The Federal Register document number. | identifier, as text | the source states none, or not applicable to this row |
 | 10 | `agency` | Agency | The department holding the consultation. | text | the source states none, or not applicable to this row |
@@ -61,6 +64,7 @@ The approved header, in the owner's exact order (34 columns, of which 0 are owed
 | 16 | `notice_date` | Notice date | The date the Federal Register document was published. | date (YYYY-MM-DD) | the source states no date |
 | 17 | `event_start_date` | Event start | When the consultation began, as the notice states it. | date (YYYY-MM-DD) | the source states no date |
 | 18 | `event_end_date` | Event end | When it ended, where stated. | date (YYYY-MM-DD) | the source states no date |
+| 19 | `event_date_precision` | event date precision | Validated source date syntax gives day/month/year; absent date is unstated. Missing extraction basis is disclosed separately. | text | See source qualification; not inferred from a legacy sample |
 | 20 | `participant_name` (was `participant_name_as_published`) | Participant as published | The tribe or organization named in the document, as it spells it. | text | the source states none, or not applicable to this row |
 | 21 | `participant_role` | Entity role | Why the entity is on this row: read from participant_role. | text | the source states none, or not applicable to this row |
 | 22 | `location` | Location | Where the consultation was held. | text | the source states none, or not applicable to this row |
