@@ -42,7 +42,7 @@ A newer BMF snapshot is not a new annual financial observation. The organization
 
 ## Field dictionary
 
-The approved header, in the owner's exact order (24 columns, of which 2 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
+The approved header, in the owner's exact order (24 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
@@ -53,7 +53,6 @@ The approved header, in the owner's exact order (24 columns, of which 2 are owed
 | 5 | `ein` (was `EIN`) | EIN | The organization's Employer Identification Number. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `organization_name` (was `org_name`) | Organization | The organization's name as the IRS records it. | text | the source states none, or not applicable to this row |
 | 7 | `organization_entity_class` (was `cedar_native_entity_class`) | Organization type | Whether the organization is itself a tribe, an ANC, a Native organization. | text | the source states none, or not applicable to this row |
-| 8 | `inclusion_category` | inclusion category | Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk. | — | owed: not in the file until the terminal builds it |
 | 9 | `city` | City | Its city. | text | the source states none, or not applicable to this row |
 | 10 | `state` | State | The organization's state. | text | the source states none, or not applicable to this row |
 | 11 | `ntee_code` | NTEE code | The IRS activity code for what the organization does. | text | the source states none, or not applicable to this row |
@@ -66,7 +65,6 @@ The approved header, in the owner's exact order (24 columns, of which 2 are owed
 | 18 | `bmf_assets_usd` (was `bmf_asset_amt`) | Assets | Assets in that return. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 19 | `bmf_income_usd` (was `bmf_income_amt`) | Income | Income in that return. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 20 | `bmf_as_of_date` (was `bmf_vintage_fetched`) | IRS file date | The date of the IRS file these figures come from. | date (YYYY-MM-DD) | the source states no date |
-| 21 | `entity_link_status` | entity link status | One linkage status through a documented crosswalk. | — | owed: not in the file until the terminal builds it |
 | 22 | `source_system` (was `source_dataset`) | Source system | The source: the IRS Exempt Organizations Business Master File. | text | the source states none, or not applicable to this row |
 | 23 | `source_url` | Source | The IRS Business Master File. | web address | the source states none, or not applicable to this row |
 | 24 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
@@ -106,15 +104,7 @@ A blank is never zero and never an invented date. A blank JSON-list cell means u
 
 ## What is still owed
 
-Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):
-
-- `entity_id`: unknown: an earlier or different entity link that disagrees with cedar_uid on at least one row (adjudicate).
-- `cedar_spine_entity_id`: the spine entity the organization was keyed to before a redirect that cedar_uid reflects and this column does not, on at least one row (adjudicate).
-
-Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
-
-- `inclusion_category` (combine:classification_ruling\|disposition): Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk.
-- `entity_link_status` (combine:entity_tier\|cedar_link_tier\|key_review_disposition): One linkage status through a documented crosswalk.
+Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
