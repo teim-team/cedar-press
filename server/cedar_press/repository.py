@@ -273,7 +273,8 @@ def _canonical_bytes(value):
 MAX_RELEASE_BYTES = 256 * 1024 * 1024
 
 
-def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
+def _release_response(path):
+    """Open one authenticated, bounded-wait request; the caller must close it."""
     base = os.environ.get("CEDAR_PRESS_DATA_API", "").rstrip("/")
     token = os.environ.get("CEDAR_PRESS_DATA_TOKEN", "")
     environment = os.environ.get("CEDAR_PRESS_ENVIRONMENT", "development")
@@ -325,7 +326,11 @@ def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
             raise FullReleaseUnavailable("Data service redirects are refused")
 
     request = Request(base + path, headers={"Authorization": "Bearer " + token})
-    with build_opener(NoRedirect()).open(request, timeout=timeout) as response:
+    return build_opener(NoRedirect()).open(request, timeout=timeout)
+
+
+def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
+    with _release_response(path) as response:
         content = response.read(limit + 1)
     if len(content) > limit:
         raise FullReleaseUnavailable("Data response exceeds configured safety limit")
@@ -514,49 +519,33 @@ def _partitioned_release(catalog, collection_id, requested_release_id, metadata_
         with tempfile.TemporaryDirectory(prefix="cedar-release-keys-") as temporary:
             database = sqlite3.connect(str(Path(temporary) / "keys.sqlite"))
             try:
+                database.execute("PRAGMA cache_size = -65536")
                 database.execute("CREATE TABLE row_keys (key TEXT PRIMARY KEY)")
                 digest = hashlib.sha256()
-                for _, name, entry in ordered:
-                    expected = entry["files"]["records.jsonl"]
-                    content = _release_bytes(
-                        prefix + "/components/" + name + "/download", limit=expected["bytes"]
-                    )
+                with _release_response(prefix + "/download") as response:
+                    total_bytes = sum(e["files"]["records.jsonl"]["bytes"] for _, _, e in ordered)
                     if (
-                        len(content) != expected["bytes"]
-                        or hashlib.sha256(content).hexdigest() != expected["sha256"]
-                        or not content.endswith(b"\n")
-                    ):
-                        raise FullReleaseUnavailable("Partition bytes differ from approved release")
-                    actual = 0
-                    for line in content.splitlines():
-                        row = json.loads(
-                            line,
-                            parse_constant=lambda _: (_ for _ in ()).throw(
-                                ValueError("Nonfinite JSON")
-                            ),
+                        response.headers.get("X-Lumecon-Release") != rid
+                        or response.headers.get("X-Lumecon-Rows") != str(count)
+                        or response.headers.get("Content-Length") != str(total_bytes)
+                        or not re.fullmatch(
+                            r"[0-9a-f]{64}", response.headers.get("X-Lumecon-SHA256", "")
                         )
-                        if not isinstance(row, dict) or set(row) != set(header):
-                            raise FullReleaseUnavailable("Partition row schema mismatch")
-                        key = [row[k] for k in primary_key]
-                        if any(
-                            not isinstance(v, (str, int)) or isinstance(v, bool) or v == ""
-                            for v in key
-                        ):
-                            raise FullReleaseUnavailable("Invalid partition primary key")
-                        try:
-                            database.execute(
-                                "INSERT INTO row_keys VALUES (?)",
-                                (json.dumps(key, ensure_ascii=False, separators=(",", ":")),),
-                            )
-                        except sqlite3.IntegrityError as error:
-                            raise FullReleaseUnavailable(
-                                "Duplicate key across collection parts"
-                            ) from error
-                        actual += 1
-                    if actual != entry["record_count"]:
-                        raise FullReleaseUnavailable("Partition row count mismatch")
-                    spool.write(content)
-                    digest.update(content)
+                    ):
+                        raise FullReleaseUnavailable("Logical table response metadata mismatch")
+                    for _, _name, entry in ordered:
+                        expected = entry["files"]["records.jsonl"]
+                        content = response.read(expected["bytes"])
+                        _validate_partition(content, expected, entry, header, primary_key, database)
+                        spool.write(content)
+                        digest.update(content)
+                    if (
+                        response.read(1)
+                        or digest.hexdigest() != response.headers["X-Lumecon-SHA256"]
+                    ):
+                        raise FullReleaseUnavailable(
+                            "Logical table response digest or size mismatch"
+                        )
                 database.commit()
             finally:
                 database.close()
@@ -566,6 +555,37 @@ def _partitioned_release(catalog, collection_id, requested_release_id, metadata_
     except BaseException:
         spool.close()
         raise
+
+
+def _validate_partition(content, expected, entry, header, primary_key, database):
+    """Validate one manifest-bounded part within the single verified table response."""
+    if (
+        len(content) != expected["bytes"]
+        or hashlib.sha256(content).hexdigest() != expected["sha256"]
+        or not content.endswith(b"\n")
+    ):
+        raise FullReleaseUnavailable("Partition bytes differ from approved release")
+    actual = 0
+    for line in content.splitlines():
+        row = json.loads(
+            line,
+            parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Nonfinite JSON")),
+        )
+        if not isinstance(row, dict) or set(row) != set(header):
+            raise FullReleaseUnavailable("Partition row schema mismatch")
+        key = [row[k] for k in primary_key]
+        if any(not isinstance(v, (str, int)) or isinstance(v, bool) or v == "" for v in key):
+            raise FullReleaseUnavailable("Invalid partition primary key")
+        try:
+            database.execute(
+                "INSERT INTO row_keys VALUES (?)",
+                (json.dumps(key, ensure_ascii=False, separators=(",", ":")),),
+            )
+        except sqlite3.IntegrityError as error:
+            raise FullReleaseUnavailable("Duplicate key across collection parts") from error
+        actual += 1
+    if actual != entry["record_count"]:
+        raise FullReleaseUnavailable("Partition row count mismatch")
 
 
 def full_release(collection_id, requested_release_id=None, *, metadata_only=False):

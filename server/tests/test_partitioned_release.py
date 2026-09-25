@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import io
 import json
 import os
 import tempfile
@@ -80,8 +81,8 @@ class PartitionedReleaseTest(unittest.TestCase):
         self.addCleanup(self.fetch.stop)
         self.raw = patch.object(
             repository,
-            "_release_bytes",
-            side_effect=lambda path, **_: self.parts[path.split("/")[-2]],
+            "_release_response",
+            side_effect=self.table_response,
         )
         self.mock_raw = self.raw.start()
         self.addCleanup(self.raw.stop)
@@ -100,6 +101,20 @@ class PartitionedReleaseTest(unittest.TestCase):
         self.addCleanup(sub.stop)
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
+
+    def table_response(self, path):
+        self.assertEqual(path, f"/v1/collections/legislation/releases/{self.rid}/download")
+        content = b"".join(self.parts.values())
+        response = io.BytesIO(content)
+        response.headers = {
+            "Content-Length": str(len(content)),
+            "X-Lumecon-Release": self.rid,
+            "X-Lumecon-Rows": str(
+                sum(p["record_count"] for p in self.manifest["components"].values())
+            ),
+            "X-Lumecon-SHA256": hashlib.sha256(content).hexdigest(),
+        }
+        return response
 
     def approve(self):
         parts = [
@@ -155,7 +170,7 @@ class PartitionedReleaseTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, expected)
         self.assertEqual(response.headers["x-cedar-sha256"], hashlib.sha256(expected).hexdigest())
-        self.assertEqual(self.mock_raw.call_count, 3)
+        self.assertEqual(self.mock_raw.call_count, 1)
         self.assertTrue(files and all(f.closed for f in files))
         self.assertNotIn("partition@example.invalid", str(log.output))
 
@@ -166,6 +181,32 @@ class PartitionedReleaseTest(unittest.TestCase):
         )
         self.approve()
         self.assertEqual(self.request().status_code, 503)
+
+    def test_logical_table_headers_and_body_bounds_fail_closed(self):
+        for field, value in (
+            ("Content-Length", "0"),
+            ("X-Lumecon-Rows", "4"),
+            ("X-Lumecon-Release", "f" * 64),
+            ("X-Lumecon-SHA256", "f" * 64),
+        ):
+            with self.subTest(field=field):
+                response = self.table_response(self.prefix + "/download")
+                response.headers[field] = value
+                self.mock_raw.side_effect = None
+                self.mock_raw.return_value = response
+                self.assertEqual(self.request().status_code, 503)
+                self.assertTrue(response.closed)
+        content = b"".join(self.parts.values())
+        for body in (content[:-1], content + b"x", b"".join(reversed(self.parts.values()))):
+            with self.subTest(body_size=len(body)):
+                original = self.table_response(self.prefix + "/download")
+                response = io.BytesIO(body)
+                response.headers = original.headers
+                original.close()
+                self.mock_raw.side_effect = None
+                self.mock_raw.return_value = response
+                self.assertEqual(self.request().status_code, 503)
+                self.assertTrue(response.closed)
 
     def test_last_part_tamper_refused_before_response(self):
         self.parts["part-2"] += b" "

@@ -106,8 +106,14 @@ explicit release equality, schema, publication holds, rights, exact artifact
 bytes/hash, row count and primary keys. No matching or cleaning happens in the
 consumer. Missing, stale or malformed pins and service failures do not fall back
 to a sample. NEED remains held by `code/cedar_publication.py`. Unconfigured
-collections fail closed. Artifacts larger than 128 MiB require a reviewed streaming
-extension; the cap is not silently raised or bypassed.
+collections fail closed. Single artifacts and individual manifest parts are bounded
+at 256 MiB. Larger logical tables require the explicit development-only
+`CEDAR_PRESS_PARTITIONED_REHEARSAL=1` contract; staging/production refuse that path.
+The paired Lumecon collection `/download` endpoint verifies every component once
+and returns the exact manifest-ordered JSONL concatenation. Cedar verifies each
+part boundary, digest, schema and row count plus global primary-key uniqueness
+before releasing bytes. Temporary disk storage bounds memory to one part and a
+64 MiB key-index cache. An older producer without this endpoint fails closed.
 
 `cedar_press.download` emits redacted structured INFO events to stderr for denial,
 invalid requests, verification failure and authorized/prepared responses. An event
