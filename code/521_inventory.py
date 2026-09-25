@@ -624,7 +624,7 @@ def refresh_script_census():
         "scripts": len(scripts),
         "operational_role_counts": dict(sorted(Counter(s["operational_role"] for s in scripts).items())),
         "maintenance_status_counts": {status: sum(s.get("maintenance_status") == status for s in scripts)
-                                      for status in ("ACTIVE", "DUPLICATE", "SUPERSEDED", "HISTORICAL-RETAIN", "UNKNOWN")},
+                                      for status in ("ACTIVE", "DUPLICATE", "SUPERSEDED", "HISTORICAL-RETAIN", "SAFE-DELETE-CANDIDATE", "REQUIRES-REVIEW")},
         "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
         "unresolved_writer_risk_counts": dict(sorted(Counter(s["writer_risk"] for s in scripts
                                                              if s["operational_role"] == "unresolved").items())),
@@ -652,13 +652,38 @@ def _call_name(node):
     return ""
 
 
-def _runtime_script_references(tree):
+def _runtime_script_references(tree, *, authoritative_runner=False):
     """Conservative literal imports/dispatch, not arbitrary string mentions.
 
     Dynamic variable targets and transitive execution require separate review.
     A reference is evidence of a potential runtime edge, not reachability proof.
     """
     targets = set()
+    # A local loader is evidence only if its body really creates and executes
+    # an import spec. A function merely named load_module is not sufficient.
+    local_loaders = set()
+    for function in tree.body:
+        if not isinstance(function, ast.FunctionDef):
+            continue
+        calls = {_call_name(node.func) for node in ast.walk(function) if isinstance(node, ast.Call)}
+        if ("importlib.util.spec_from_file_location" in calls
+                and any(call.endswith(".exec_module") for call in calls)):
+            local_loaders.add(function.name)
+    if authoritative_runner:
+        for assignment in tree.body:
+            if not isinstance(assignment, ast.Assign):
+                continue
+            names = {target.id for target in assignment.targets if isinstance(target, ast.Name)}
+            if not names & {"SHIP_CHAIN", "POST_CHAIN"}:
+                continue
+            try:
+                declared = ast.literal_eval(assignment.value)
+            except (ValueError, TypeError):
+                continue
+            rows = declared if "SHIP_CHAIN" in names else [declared]
+            for row in rows:
+                if isinstance(row, (list, tuple)) and row and isinstance(row[0], str) and row[0].endswith(".py"):
+                    targets.add(Path(row[0]).name)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             targets.update(alias.name.split(".")[-1] + ".py" for alias in node.names)
@@ -671,7 +696,7 @@ def _runtime_script_references(tree):
                     targets.add(node.args[0].value.split(".")[-1] + ".py")
             elif call in {"subprocess.run", "subprocess.call", "subprocess.check_call",
                           "subprocess.check_output", "subprocess.Popen", "runpy.run_path",
-                          "importlib.util.spec_from_file_location", "spec_from_file_location"}:
+                          "importlib.util.spec_from_file_location", "spec_from_file_location"} or call in local_loaders:
                 # Only the actual command/path argument. Ignore output/log/error text.
                 index = 1 if call.endswith("spec_from_file_location") else 0
                 if len(node.args) > index:
@@ -850,7 +875,7 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
             except SyntaxError:
                 continue
             if not _test_reference(path.relative_to(ROOT), tree):
-                for target in _runtime_script_references(tree):
+                for target in _runtime_script_references(tree, authoritative_runner=relative == "code/build.py"):
                     runtime_consumers[target].add(relative)
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
@@ -1057,7 +1082,21 @@ def add_maintenance_classification(scripts, references):
         elif peers:
             status, reason = "DUPLICATE", "byte-identical source peer; removal safety not established"
         else:
-            status, reason = "UNKNOWN", "no sufficient maintained, superseded or historical evidence"
+            status = "REQUIRES-REVIEW"
+            if record.get("never_run"):
+                reason = "existing forbidden-entrypoint authority; preserve evidence and verify all direct-call guards"
+            elif record.get("writer_analysis_error"):
+                reason = "write analysis failed: " + str(record["writer_analysis_error"])
+            elif any(site.get("scope") == "protected_surface" for site in record.get("writer_evidence", [])):
+                reason = "protected output writer lacks proved current ownership/cutover: " + ", ".join(sorted({site["target"] for site in record["writer_evidence"] if site.get("scope") == "protected_surface"}))
+            elif record.get("undeclared_governed_tables"):
+                reason = "governed output is not admitted: " + ", ".join(record["undeclared_governed_tables"])
+            elif record.get("writer_evidence"):
+                reason = "writer targets/callers need runtime confirmation before ownership or retirement: " + ", ".join(sorted({str(site.get("target", "<unresolved>")) for site in record["writer_evidence"]}))
+            elif documented_calls[path]:
+                reason = "documented invocation has not been established as current: " + ", ".join(sorted(documented_calls[path]))
+            else:
+                reason = "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified"
         # Existing retirement evidence is output-scoped. Only classify a whole
         # script superseded when every observed writer is explicitly retired,
         # with no dynamic targets, runtime callers, documentation or CI entry.
@@ -1083,6 +1122,11 @@ def add_maintenance_classification(scripts, references):
             "output_authority_sha256": hashlib.sha256(json.dumps(provenance, sort_keys=True).encode()).hexdigest(),
             "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
             "retirement_authorized": False,
+            "review_owner": "Codex" if status == "REQUIRES-REVIEW" else None,
+            "review_priority": record.get("writer_risk", "P3_unmeasured") if status == "REQUIRES-REVIEW" else None,
+            "review_write_sites": [{key: site.get(key) for key in ("line", "operation", "target", "scope", "table")}
+                                   for site in record.get("writer_evidence", [])] if status == "REQUIRES-REVIEW" else [],
+            "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
         }
 
 

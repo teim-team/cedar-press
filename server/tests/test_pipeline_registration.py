@@ -221,6 +221,18 @@ class ProducerRegistrationTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.refresh_writer_markdown("missing section", refreshed)
 
+    def test_forbidden_codebook_entrypoint_keeps_helpers_without_writing(self):
+        spec = importlib.util.spec_from_file_location("retired_codebook", ROOT / "code/41_build_codebooks.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.assertTrue(callable(module.access_tier))
+        self.assertTrue(callable(module.describe))
+        import cedar_pipeline
+        with patch.object(Path, "mkdir", side_effect=AssertionError("forbidden writer created output")), \
+             patch("builtins.open", side_effect=AssertionError("forbidden writer performed IO")):
+            with self.assertRaises(cedar_pipeline.ForbiddenScript):
+                module.main()
+
     def test_funding_plan_cuts_over_discovered_retired_edges_without_build(self):
         spec = importlib.util.spec_from_file_location("funding_build", ROOT / "code/build.py")
         runner = importlib.util.module_from_spec(spec)
@@ -599,6 +611,30 @@ class ScriptCensusTest(unittest.TestCase):
                 ["check"],
             )
 
+    def test_runtime_discovery_proves_local_loader_and_authoritative_chain(self):
+        import ast
+        tree = ast.parse("""
+import importlib.util
+SHIP_CHAIN = [("ship.py", [], "description.py", "")]
+POST_CHAIN = ("post.py", "post stage", "")
+def load_module(path):
+    spec = importlib.util.spec_from_file_location("loaded", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+def pretend_loader(path):
+    return path
+load_module(ROOT / "actual.py")
+pretend_loader("not_executed.py")
+""")
+        ordinary = self.inventory._runtime_script_references(tree)
+        self.assertIn("actual.py", ordinary)
+        for absent in ("ship.py", "post.py", "description.py", "not_executed.py"):
+            self.assertNotIn(absent, ordinary)
+        authoritative = self.inventory._runtime_script_references(tree, authoritative_runner=True)
+        self.assertTrue({"actual.py", "ship.py", "post.py"} <= authoritative)
+        self.assertNotIn("description.py", authoritative)
+
     def test_runtime_roles_require_executable_edges_and_calls(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -689,14 +725,18 @@ class ScriptCensusTest(unittest.TestCase):
                 by_name = {r["script"]: r for r in records}
                 expected = {"main.py": "ACTIVE", "helper.py": "ACTIVE", "ci.py": "ACTIVE",
                             "copy_a.py": "DUPLICATE", "old.py": "HISTORICAL-RETAIN",
-                            "unknown.py": "UNKNOWN", "old_writer.py": "SUPERSEDED"}
+                            "unknown.py": "REQUIRES-REVIEW", "old_writer.py": "SUPERSEDED"}
                 for name, status in expected.items():
                     self.assertEqual(by_name[name]["maintenance_status"], status, name)
                 before = by_name["unknown.py"]["source_sha256"]
                 (root / "code/unknown.py").write_text("VALUE = 30\n", encoding="utf-8")
                 records[-1]["writer_evidence"].append({"table": None, "target": "<unresolved>"})
                 self.inventory.add_maintenance_classification(records, [workflow])
-                self.assertEqual(by_name["old_writer.py"]["maintenance_status"], "UNKNOWN")
+                self.assertEqual(by_name["old_writer.py"]["maintenance_status"], "REQUIRES-REVIEW")
+                self.assertEqual(by_name["old_writer.py"]["maintenance_evidence"]["review_owner"], "Codex")
+                self.assertIn("<unresolved>", by_name["old_writer.py"]["maintenance_evidence"]["reason"])
+                self.assertEqual(by_name["old_writer.py"]["maintenance_evidence"]["review_write_sites"][-1]["target"], "<unresolved>")
+                self.assertFalse(any(r["maintenance_status"] == "SAFE-DELETE-CANDIDATE" for r in records))
                 self.assertNotEqual(by_name["unknown.py"]["source_sha256"], before)
                 self.assertTrue(all(not r["maintenance_evidence"]["retirement_authorized"] for r in records))
                 replay = {"spine.csv": {"order": ["unknown.py"], "mints": ["unknown.py"],
