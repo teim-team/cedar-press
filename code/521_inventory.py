@@ -623,6 +623,9 @@ def refresh_script_census():
         "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
         "scripts": len(scripts),
         "operational_role_counts": dict(sorted(Counter(s["operational_role"] for s in scripts).items())),
+        "maintenance_status_counts": {status: sum(s.get("maintenance_status") == status for s in scripts)
+                                      for status in ("ACTIVE", "DUPLICATE", "SUPERSEDED", "HISTORICAL-RETAIN", "UNKNOWN")},
+        "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
         "unresolved_writer_risk_counts": dict(sorted(Counter(s["writer_risk"] for s in scripts
                                                              if s["operational_role"] == "unresolved").items())),
         "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
@@ -831,7 +834,7 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
         names = set(contract.get("rebuilt_by", []) + contract.get("enriched_by", []))
         names.update(name for ordering in cp.KNOWN_ORDERINGS if ordering["file"] == table
                      for name in (ordering["rebuild"], ordering["enricher"]))
-        for name in sorted(names):
+        for name in cp.active_table_writers(table, sorted(names)):
             producers[name].append({"collection": contract["collection"], "output": table,
                                     "entrypoint": contract.get("rebuild_command", "")})
     consumers = defaultdict(set)
@@ -976,6 +979,111 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
             risk = "P3_no_detected_write_not_readonly_certified"
         script.update({"writer_evidence": writes, "writer_analysis_error": analysis_error,
                        "writer_risk": risk, "undeclared_governed_tables": sorted(set(undeclared))})
+
+
+    add_maintenance_classification(scripts, references)
+
+
+def add_maintenance_classification(scripts, references):
+    """Classify maintenance evidence without granting write or deletion authority.
+
+    Exact duplicate bytes are evidence of duplication, not proof that an entry
+    point can be removed: relative paths and external callers still matter.
+    A table-scoped retirement never retires all of a multi-output script.
+    """
+    by_path = {}
+    by_name = defaultdict(list)
+    hashes = defaultdict(list)
+    for record in scripts:
+        relative = (Path("code") / record["dir"].replace(".", "/") / record["script"]).as_posix()
+        path = ROOT / relative
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        by_path[relative] = record
+        by_name[record["script"]].append(relative)
+        hashes[digest].append(relative)
+        record["source_sha256"] = digest
+    workflow_calls = defaultdict(set)
+    documented_calls = defaultdict(set)
+    for path in references:
+        relative = path.relative_to(ROOT).as_posix()
+        if path.name in _CATALOGUE or any(part in {"archive", "graveyard"} for part in path.parts):
+            continue
+        if path.suffix not in {".md", ".yml", ".yaml", ".ps1"}:
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        # Literal command evidence only. Mentions and historical prose do not
+        # become execution edges. Workflow roots remain reviewable evidence.
+        for line in text.splitlines():
+            if not re.search(r"(?:python(?:3(?:\.\d+)?)?|py(?: -3)?|uv run python)\s", line):
+                continue
+            for name in re.findall(r"(?:code/|code\\)([A-Za-z0-9_./\\-]+\.py)", line):
+                target = (Path("code") / name.replace("\\", "/")).as_posix()
+                if target not in by_path:
+                    continue
+                documented_calls[target].add(relative)
+                if relative.startswith(".github/workflows/"):
+                    workflow_calls[target].add(relative)
+    active_roles = {"active producer", "active validator/migration/review",
+                    "product consumer/shared service", "test/fixture"}
+    active = {path for path, record in by_path.items()
+              if record.get("operational_role") in active_roles or workflow_calls[path]}
+    # Follow actual Python import/dispatch candidates only from maintained
+    # roots, not from every unreferenced script that mentions another module.
+    changed = True
+    while changed:
+        changed = False
+        for path, record in by_path.items():
+            if path in active or len(by_name[record["script"]]) != 1:
+                continue
+            if set(record.get("runtime_consumer_candidates", [])) & active:
+                active.add(path)
+                changed = True
+    for path, record in by_path.items():
+        peers = sorted(other for other in hashes[record["source_sha256"]] if other != path)
+        retired = [{"output": rule["file"], "replacement": rule["rebuild"],
+                    "required_component": rule["enricher"]}
+                   for rule in cp.KNOWN_ORDERINGS
+                   if record["script"] in rule.get("retired_writers", [])]
+        replay = [{"output": output, "evidence": item.get("evidence", ""),
+                   "mints_issued_ids": record["script"] in item.get("mints", [])}
+                  for output, item in cp.REPLAY_ORDERS.items()
+                  if record["script"] in item.get("order", [])]
+        if path in active:
+            status, reason = "ACTIVE", "declared operational role, CI invocation or reachable Python dependency"
+        elif replay:
+            status, reason = "HISTORICAL-RETAIN", "explicit authoritative replay dependency; retention is not permission to execute"
+        elif record.get("operational_role") == "historical":
+            status, reason = "HISTORICAL-RETAIN", "explicit existing historical directory; retain provenance"
+        elif peers:
+            status, reason = "DUPLICATE", "byte-identical source peer; removal safety not established"
+        else:
+            status, reason = "UNKNOWN", "no sufficient maintained, superseded or historical evidence"
+        # Existing retirement evidence is output-scoped. Only classify a whole
+        # script superseded when every observed writer is explicitly retired,
+        # with no dynamic targets, runtime callers, documentation or CI entry.
+        writes = record.get("writer_evidence", [])
+        retired_tables = {item["output"] for item in retired}
+        fully_retired = (retired_tables and writes and not record.get("writer_analysis_error")
+                         and all(site.get("table") in retired_tables for site in writes)
+                         and not record.get("runtime_consumer_candidates")
+                         and not documented_calls[path] and not workflow_calls[path]
+                         and not record.get("unknown_io_literals"))
+        if fully_retired and path not in active:
+            status, reason = "SUPERSEDED", "all observed output writers retired by existing authority; no known caller"
+        provenance = record.get("collection_output_entrypoints", [])
+        record["maintenance_status"] = status
+        record["maintenance_evidence"] = {
+            "reason": reason, "source_sha256": record["source_sha256"],
+            "identical_source_peers": peers,
+            "ci_commands": sorted(workflow_calls[path]),
+            "documented_commands": sorted(documented_calls[path]),
+            "active_runtime_callers": sorted(set(record.get("runtime_consumer_candidates", [])) & active),
+            "superseded_output_edges": retired,
+            "historical_replay_evidence": replay,
+            "output_authority_sha256": hashlib.sha256(json.dumps(provenance, sort_keys=True).encode()).hexdigest(),
+            "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+            "retirement_authorized": False,
+        }
 
 
 def classify_script(s):

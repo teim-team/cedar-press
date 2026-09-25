@@ -180,6 +180,47 @@ class ProducerRegistrationTest(unittest.TestCase):
         )
         self.assertEqual(PIPELINE.active_table_writers("historical.csv", retired), retired)
 
+    def test_retired_funding_direct_entrypoints_refuse_before_io_even_with_force(self):
+        for name in ("335_harmonize_assistance_seams_in_place.py",
+                     "336_correct_scheme_resolution_by_spine_membership.py"):
+            spec = importlib.util.spec_from_file_location("retired_funding", ROOT / "code" / name)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            with self.subTest(script=name), \
+                 patch.object(sys, "argv", [name, "--force-retired-cicd-crosswalk"]), \
+                 patch("builtins.open", side_effect=AssertionError("retired entry point performed IO")), \
+                 patch.object(Path, "exists", side_effect=AssertionError("retired entry point inspected data")), \
+                 patch.object(Path, "stat", side_effect=AssertionError("retired entry point inspected data")), \
+                 patch.object(module.shutil, "copy2", side_effect=AssertionError("retired entry point wrote backup")):
+                with self.assertRaisesRegex(SystemExit, "RETIRED_TABLE_WRITER"):
+                    module.main()
+
+    def test_dependency_snapshot_refresh_removes_only_retired_edges(self):
+        spec = importlib.util.spec_from_file_location("dependency_refresh", ROOT / "code/287_build_dependency_manifest.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        table = "federal_funding_transactions.csv"
+        retired = "335_harmonize_assistance_seams_in_place.py"
+        original = {"generated": "2026-09-02", "columns_lost_vs_backup": {"legacy": ["x"]},
+                    "writers": {table: [retired, "24_funding_merge.py", "503_identity.py"]},
+                    "contested_files": {table: {"rebuilders": ["24_funding_merge.py", retired],
+                                                "enrichers": [retired, "503_identity.py"]}}}
+        before = copy.deepcopy(original)
+        refreshed = module.refresh_writer_authority(original)
+        self.assertEqual(original, before)
+        self.assertEqual(refreshed["generated"], before["generated"])
+        self.assertEqual(refreshed["columns_lost_vs_backup"], before["columns_lost_vs_backup"])
+        self.assertNotIn(retired, refreshed["writers"][table])
+        self.assertEqual(module.refresh_writer_authority(refreshed), refreshed)
+        text = "Dated introduction\n## Contested files (1)\nold\n## Survival check\nmeasured historic result\n"
+        rendered = module.refresh_writer_markdown(text, refreshed)
+        self.assertNotIn(retired, rendered)
+        self.assertIn("503_identity.py", rendered)
+        self.assertTrue(rendered.endswith("## Survival check\nmeasured historic result\n"))
+        self.assertEqual(module.refresh_writer_markdown(rendered, refreshed), rendered)
+        with self.assertRaises(ValueError):
+            module.refresh_writer_markdown("missing section", refreshed)
+
     def test_funding_plan_cuts_over_discovered_retired_edges_without_build(self):
         spec = importlib.util.spec_from_file_location("funding_build", ROOT / "code/build.py")
         runner = importlib.util.module_from_spec(spec)
@@ -617,6 +658,54 @@ class ScriptCensusTest(unittest.TestCase):
             self.assertEqual(
                 by_name["real_product.py"]["runtime_consumer_candidates"], ["code/caller.py"]
             )
+
+    def test_maintenance_classification_requires_evidence_and_never_authorizes_removal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "code/history").mkdir(parents=True)
+            (root / ".github/workflows").mkdir(parents=True)
+            bodies = {"main.py": "import helper\n", "helper.py": "VALUE = 1\n",
+                      "copy_a.py": "VALUE = 2\n", "copy_b.py": "VALUE = 2\n",
+                      "unknown.py": "VALUE = 3\n", "history/old.py": "VALUE = 4\n",
+                      "ci.py": "VALUE = 5\n", "old_writer.py": "VALUE = 6\n"}
+            records = []
+            for relative, body in bodies.items():
+                path = root / "code" / relative
+                path.write_text(body, encoding="utf-8")
+                role = "active producer" if relative == "main.py" else (
+                    "historical" if relative.startswith("history/") else "unresolved")
+                records.append({"script": path.name, "dir": "history" if "/" in relative else "",
+                                "operational_role": role,
+                                "runtime_consumer_candidates": ["code/main.py"] if relative == "helper.py" else [],
+                                "writer_evidence": [], "unknown_io_literals": []})
+            workflow = root / ".github/workflows/test.yml"
+            workflow.write_text("run: python code/ci.py\n", encoding="utf-8")
+            records[-1]["writer_evidence"] = [{"table": "retired.csv"}]
+            retirement = [{"file": "retired.csv", "rebuild": "main.py", "enricher": "helper.py",
+                           "retired_writers": ["old_writer.py"]}]
+            with (patch.object(self.inventory, "ROOT", root),
+                  patch.object(self.inventory.cp, "KNOWN_ORDERINGS", retirement)):
+                self.inventory.add_maintenance_classification(records, [workflow])
+                by_name = {r["script"]: r for r in records}
+                expected = {"main.py": "ACTIVE", "helper.py": "ACTIVE", "ci.py": "ACTIVE",
+                            "copy_a.py": "DUPLICATE", "old.py": "HISTORICAL-RETAIN",
+                            "unknown.py": "UNKNOWN", "old_writer.py": "SUPERSEDED"}
+                for name, status in expected.items():
+                    self.assertEqual(by_name[name]["maintenance_status"], status, name)
+                before = by_name["unknown.py"]["source_sha256"]
+                (root / "code/unknown.py").write_text("VALUE = 30\n", encoding="utf-8")
+                records[-1]["writer_evidence"].append({"table": None, "target": "<unresolved>"})
+                self.inventory.add_maintenance_classification(records, [workflow])
+                self.assertEqual(by_name["old_writer.py"]["maintenance_status"], "UNKNOWN")
+                self.assertNotEqual(by_name["unknown.py"]["source_sha256"], before)
+                self.assertTrue(all(not r["maintenance_evidence"]["retirement_authorized"] for r in records))
+                replay = {"spine.csv": {"order": ["unknown.py"], "mints": ["unknown.py"],
+                                        "evidence": "issued-ID restore history"}}
+                with patch.object(self.inventory.cp, "REPLAY_ORDERS", replay):
+                    self.inventory.add_maintenance_classification(records, [workflow])
+                self.assertEqual(by_name["unknown.py"]["maintenance_status"], "HISTORICAL-RETAIN")
+                self.assertTrue(by_name["unknown.py"]["maintenance_evidence"]["historical_replay_evidence"][0]["mints_issued_ids"])
+
 
     def test_script_refresh_preserves_prior_table_snapshot(self):
         with tempfile.TemporaryDirectory() as directory:
