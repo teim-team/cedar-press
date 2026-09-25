@@ -1702,7 +1702,8 @@ One implementation: cedar-press `claude/gaming-consumer-hardening`, stacked on
 #122 ([cedar-press #124](https://github.com/teim-team/cedar-press/pull/124)), paired with Lumecon-data
 `claude/gaming-release-hardening` on PR #9 ([Lumecon-data #10](https://github.com/teim-team/Lumecon-data/pull/10)).
 CI pins `LUMECON_DATA_SHA` to that branch's pushed head
-`2b0ab3b74f9ae543729034e9f96188171f32b53b`. It supersedes
+`e71094a627d39abb418abcbd19436ca176587e93` (updated from `2b0ab3b` on
+2026-09-25 after the final Gaming integration). It supersedes
 `claude/gaming-grove-consumer` (not for merge). Merge order: Lumecon #8, #9,
 the Lumecon Gaming hardening PR, cedar-press #122, then the consumer PR after its
 `LUMECON_DATA_SHA` names the merged Lumecon commit. Server checks are in
@@ -1743,6 +1744,47 @@ the Lumecon Gaming hardening PR, cedar-press #122, then the consumer PR after it
   a missing, restricted or tampered part.
 - **Zero duplication.** A Cedar test fails if a Gaming producer, binding
   register, component CSV or schema copy reappears in cedar-press.
+
+## September 25 Gaming final integration (Lumecon-data #10 at `e71094a`)
+
+What changed since the receipt above:
+
+- **Identifier continuity.** Every successor build is seeded with the pinned
+  September 24 register (93,824 PROPOSED). A build or release that is not
+  seeded, or in which any prior binding changed or disappeared, is refused.
+  Final rehearsal result: 93,824 identical, 0 changed, 0 missing, 632 new.
+  The 5,021 relationship IDs an unseeded build had renumbered are restored.
+- **Release blocker fixed.** Facility rows whose publication status is not
+  public no longer reach the public projection. Before the fix, all 702 rows
+  passed; now 379 do.
+- **Fact checks.** Every build, every release and `gaming validate` now run
+  these rules, and all real defects found are fixed: CA annual-per-report
+  sums, FL empty cells and unit spellings, dash-as-zero, overlap flags, the
+  disclosure measure key, and rights classes for QA and local-path fields.
+- **Affiliation.** 619 reviewed decision rows are loaded (466 official, 148
+  first-party under the owner's standing rule, 3 rejections, and the Chilocco
+  merge). Facilities: official 401, first-party 74, weak or held 226,
+  conflict 0. 75 same-address pairs stay HELD with their remaining question.
+- **Consolidation.** One Gaming command surface
+  (`intake-verify / build / validate / certify-bindings / release`). The
+  duplicate helpers are retired and indexed, and five superseded Cedar
+  Gaming writers are fenced in this repository (not deleted).
+- **Typing and lint.** There are zero exceptions. No mypy overrides or Gaming
+  ruff per-file ignores exist on this lineage. The five non-facility ported
+  producers pass `mypy --strict`, and facilities.py passes
+  `--disallow-any-generics`.
+- **Final rehearsal.** Two builds are byte-identical except the timing log.
+  Rehearsal release `708e3c0158e1348f7e8f8e8fb2611b264f1c9d961a177e3dd7efa06bb4674c74`,
+  manifest `8d6e557d078abb3aa25df194f7749c27c9f73ef6dc90ecd009eb05bafb297cd1`;
+  29 verified components including the six payment parts (53,124 rows); leak
+  gate 0. Cedar `_id_registry.json` is unchanged.
+- **Binding certificate.** `gaming certify-bindings` gives
+  CERTIFIED_WITH_HOLDS, certificate
+  `b35f4b80576f39d133b57f9a49c3a815862a7d1341b7becd95f5c4691576af90`, with
+  these holds: 24 stub or alias facility bindings, 5 prior bindings carried
+  but no longer used, and 89 relationships to operators with unbound businesses.
+  Against Cedar's live `cedar_ids` it is REFUSED until this PR lands. Nothing
+  was issued.
 
 ## September 25 bounded commits, exclusions and review instructions
 

@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: read
     env:
-      LUMECON_DATA_SHA: 2b0ab3b74f9ae543729034e9f96188171f32b53b  # Lumecon-data PR #10 gaming hardening
+      LUMECON_DATA_SHA: e71094a627d39abb418abcbd19436ca176587e93  # Lumecon-data PR #10 gaming hardening
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - name: Require the Lumecon-data read token
