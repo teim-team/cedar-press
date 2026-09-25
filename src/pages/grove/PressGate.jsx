@@ -693,6 +693,14 @@ export default function PressGate({ user }) {
                 merge and change hands. That is what makes {LAUNCH_COLLECTION.length} datasets
                 answer as one collection.
               </p>
+              {/* Owner copy, 2026-09-25. The records say what happened; the
+                  reporting says what it means. No count of relationships is
+                  given because none has been measured. */}
+              <p className="cp-why__lede cp-why__lede--tbn cp-fade">
+                The records carry the facts. Tribal Business News carries the context: relationships
+                across Indian Country cultivated through years of investigative journalism, so a
+                figure arrives with an understanding of the nations and enterprises behind it.
+              </p>
             </div>
             <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
               {SHELVES.map(({ tier, entries }) => (
