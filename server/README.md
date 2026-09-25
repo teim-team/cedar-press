@@ -93,6 +93,10 @@ Server-only configuration (never Vite/browser variables):
 - `CEDAR_PRESS_DATA_API`: the Lumecon API origin. HTTPS is required; HTTP loopback
   is allowed only in development. Staging/production reject loopback and insecure cookies.
 - `CEDAR_PRESS_DATA_TOKEN`: a dataset-scoped backend grant; never a subscriber credential.
+- `CEDAR_PRESS_DATA_TIMEOUT_SECONDS`: bounded data-service socket wait, 1–300 seconds
+  (default 30). Cold validation of large multipart releases may require a measured
+  higher value in development. Invalid/nonfinite values fail before a request.
+  This does not change byte limits, verification, entitlement or production gates.
 - Staging/production also require explicit secrets of at least 32 characters, a
   Postgres `DATABASE_URL`, and no development `CEDAR_PRESS_ACCOUNTS` fallback.
   Configuration validation is not proof of database availability or deployment readiness.
@@ -102,8 +106,14 @@ explicit release equality, schema, publication holds, rights, exact artifact
 bytes/hash, row count and primary keys. No matching or cleaning happens in the
 consumer. Missing, stale or malformed pins and service failures do not fall back
 to a sample. NEED remains held by `code/cedar_publication.py`. Unconfigured
-collections fail closed. Artifacts larger than 128 MiB require a reviewed streaming
-extension; the cap is not silently raised or bypassed.
+collections fail closed. Single artifacts and individual manifest parts are bounded
+at 256 MiB. Larger logical tables require the explicit development-only
+`CEDAR_PRESS_PARTITIONED_REHEARSAL=1` contract; staging/production refuse that path.
+The paired Lumecon collection `/download` endpoint verifies every component once
+and returns the exact manifest-ordered JSONL concatenation. Cedar verifies each
+part boundary, digest, schema and row count plus global primary-key uniqueness
+before releasing bytes. Temporary disk storage bounds memory to one part and a
+64 MiB key-index cache. An older producer without this endpoint fails closed.
 
 `cedar_press.download` emits redacted structured INFO events to stderr for denial,
 invalid requests, verification failure and authorized/prepared responses. An event

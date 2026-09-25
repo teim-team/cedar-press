@@ -186,14 +186,24 @@ function guideFor(collection) {
     p("| # | Column | Label | Definition | Type | Blank means |");
     p("|---|---|---|---|---|---|");
     const byShipped = new Map();
-    for (const f of book.fields) byShipped.set(f.rename_to ?? f.column, f);
     const decisionOf = new Map(map.fields.map((f) => [f.column, f]));
+    for (const f of book.fields) {
+      const decision = decisionOf.get(f.column);
+      const target = decision?.decision === "rename" ? decision.to : (f.rename_to ?? f.column);
+      const changed = target !== (f.rename_to ?? f.column);
+      byShipped.set(target, changed
+        ? { ...f, rename_to: target, label: target.replace(/_/g, " "), meaning: decision.why || f.meaning }
+        : f);
+    }
     const values = (col) => (sample?.rows ?? []).map((r) => r[col]);
     map.order.forEach((col, i) => {
       const field = byShipped.get(col);
       const added = map.new.find((n) => n.column === col);
-      if (!field && added?.status) {
-        p(`| ${i + 1} | \`${col}\` | ${esc(col.replace(/_/g, " "))} | ${esc(added.why || "Owed: see below.")} | — | owed: not in the file until the terminal builds it |`);
+      if (!field && added) {
+        const availability = added.status
+          ? "owed: not in the file until the producer builds it"
+          : "See source qualification; not inferred from a legacy sample";
+        p(`| ${i + 1} | \`${col}\` | ${esc(col.replace(/_/g, " "))} | ${esc(added.why || "See the declared field contract.")} | ${GUIDES.types.text} | ${availability} |`);
         return;
       }
       if (!field) return;

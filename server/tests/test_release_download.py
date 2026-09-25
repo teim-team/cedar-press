@@ -78,7 +78,8 @@ class ReleaseDownloadTest(unittest.TestCase):
         )
         self.addCleanup(app.dependency_overrides.clear)
         self.subscriber_lookup = patch.object(
-            subscribers, "find",
+            subscribers,
+            "find",
             return_value=subscribers.Subscriber("fixture@example.invalid", "press_pro", "fixture"),
         )
         self.mock_subscriber = self.subscriber_lookup.start()
@@ -269,7 +270,8 @@ class ReleaseDownloadTest(unittest.TestCase):
         self.rows[0]["title"] = "changed upstream claim"
         content = b"".join(repository._canonical_bytes(row) for row in self.rows)
         self.manifest["files"]["records.jsonl"] = {
-            "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()
+            "bytes": len(content),
+            "sha256": hashlib.sha256(content).hexdigest(),
         }
         with self.assertLogs("cedar_press.download", level="INFO") as logs:
             response = self.client.get(
@@ -298,10 +300,18 @@ class ReleaseDownloadTest(unittest.TestCase):
         )
         cases = [
             (None, None, 401, "denied_account"),
-            (subscribers.Subscriber("fixture@example.invalid", "press", "fixture"),
-             None, 403, "denied_entitlement"),
-            (subscribers.Subscriber("fixture@example.invalid", "unknown", "fixture"),
-             None, 403, "denied_entitlement"),
+            (
+                subscribers.Subscriber("fixture@example.invalid", "press", "fixture"),
+                None,
+                403,
+                "denied_entitlement",
+            ),
+            (
+                subscribers.Subscriber("fixture@example.invalid", "unknown", "fixture"),
+                None,
+                403,
+                "denied_entitlement",
+            ),
             (None, RuntimeError("secret-database-connection"), 503, "authorization_unavailable"),
         ]
         for account, error, status, event in cases:
@@ -611,3 +621,38 @@ class ReleaseConfigurationTest(unittest.TestCase):
                 with self.assertRaises(repository.FullReleaseUnavailable):
                     repository._release_bytes("/v1/datasets")
                 opener.assert_not_called()
+
+    def test_release_timeout_is_bounded_and_invalid_values_fail_before_network(self):
+        configured = {
+            "CEDAR_PRESS_DATA_API": "http://127.0.0.1:9999",
+            "CEDAR_PRESS_DATA_TOKEN": "fixture-token",
+            "CEDAR_PRESS_ENVIRONMENT": "development",
+        }
+        for value in ("", "bad", "NaN", "Infinity", "-Infinity", "0", "-1", "301"):
+            with (
+                self.subTest(value=value),
+                patch.dict(
+                    os.environ,
+                    {**configured, "CEDAR_PRESS_DATA_TIMEOUT_SECONDS": value},
+                    clear=True,
+                ),
+                patch.object(repository, "build_opener") as opener,
+            ):
+                with self.assertRaises(repository.FullReleaseUnavailable):
+                    repository._release_bytes("/v1/datasets")
+                opener.assert_not_called()
+        for value in ("1", "180", "300"):
+            with (
+                self.subTest(value=value),
+                patch.dict(
+                    os.environ,
+                    {**configured, "CEDAR_PRESS_DATA_TIMEOUT_SECONDS": value},
+                    clear=True,
+                ),
+                patch.object(repository, "build_opener") as opener,
+            ):
+                response = opener.return_value.open.return_value.__enter__.return_value
+                response.read.return_value = b"{}"
+                self.assertEqual(repository._release_json("/v1/datasets"), {})
+                self.assertEqual(opener.return_value.open.call_args.kwargs["timeout"], float(value))
+                response.read.assert_called_once_with(4 * 1024 * 1024 + 1)

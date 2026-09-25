@@ -606,7 +606,7 @@
    "plural": false,
    "entity_role": "constant:participant",
    "columns_today": 39,
-   "columns_target": 33,
+   "columns_target": 34,
    "default_viewer": [
     "canonical_name",
     "notice_date",
@@ -874,15 +874,13 @@
     },
     {
      "column": "entity_link_status",
-     "from": "pending:terminal reads the source: no_individual_named, resolved, unresolved or withheld",
-     "why": "Why the Cedar block is filled or blank on this row: a notice addressed to a population names no individual entity, which is not a failed match (owner's decision of 2026-09-05, docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md).",
-     "status": "pending"
+     "from": "rule:participant_link_status",
+     "why": "Existing registered link is resolved; not_enumerated with no link means no_individual_named; other blank links remain unresolved."
     },
     {
      "column": "collective_scopes",
-     "from": "pending:terminal reads the source's addressee, applicability or eligibility clause into elements of data/cedar/scopes.json",
-     "why": "JSON array of collective scopes: the population the notice addresses or applies to, with the relationship, the as-of date and rule, and the source words; null until evaluated, [] when the notice names none.",
-     "status": "pending"
+     "from": "constant:null",
+     "why": "Source applicability has not been evaluated; null is not an empty or universal scope."
     },
     {
      "column": "cedar_entity_role",
@@ -891,9 +889,8 @@
     },
     {
      "column": "event_date_precision",
-     "from": "derive:event_date_basis",
-     "why": "day, month, year or unstated, translated from the date qualification.",
-     "status": "pending"
+     "from": "rule:validated_date_precision",
+     "why": "Validated source date syntax gives day/month/year; absent date is unstated. Missing extraction basis is disclosed separately."
     },
     {
      "column": "source_system",
@@ -902,8 +899,13 @@
     },
     {
      "column": "research_note",
-     "from": "rule:blank",
-     "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."
+     "from": "rule:participant_limitations",
+     "why": "Distinguishes invitation from participation, unevaluated scope and legacy extraction qualifications."
+    },
+    {
+     "column": "consultation_record_key",
+     "from": "rule:source_composite_key:consultation_event_id|participant_name_as_published|participant_role",
+     "why": "JSON tuple of original source values, scoped to this table; not an issued event or entity ID."
     }
    ],
    "order": [
@@ -913,6 +915,7 @@
     "cedar_entity_role",
     "entity_link_status",
     "collective_scopes",
+    "consultation_record_key",
     "consultation_event_id",
     "fr_document_number",
     "agency",
@@ -1303,7 +1306,7 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "pending: party, or owner of the party, per row from the party attribution table; absent until supplied",
+   "entity_role": "Explicit party relationship only when supported; blank until evaluated, never presumed ownership.",
    "columns_today": 40,
    "columns_target": 33,
    "default_viewer": [
@@ -1620,27 +1623,23 @@
     },
     {
      "column": "cedar_entity_role",
-     "from": "pending:party attribution",
-     "why": "party, or owner of the party, per row, once the party attribution table supplies it; absent until then rather than an ambiguous constant.",
-     "status": "pending"
+     "from": "rule:unresolved_party_role",
+     "why": "Publish a specific party relationship only when source evidence establishes it; otherwise leave blank. Never presume ownership."
     },
     {
      "column": "deal_type",
-     "from": "combine:Deal_Category|transaction_type",
-     "why": "One taxonomy through a value-level crosswalk.",
-     "status": "pending"
+     "from": "rule:reviewed_deal_taxonomy",
+     "why": "One taxonomy through a value-level crosswalk."
     },
     {
      "column": "transaction_structure",
-     "from": "combine:Event_Type",
-     "why": "Through a value-level crosswalk.",
-     "status": "pending"
+     "from": "rule:source_event_type",
+     "why": "Through a value-level crosswalk."
     },
     {
      "column": "deal_status",
-     "from": "combine:Status|deal_status_std",
-     "why": "Through a value-level crosswalk.",
-     "status": "pending"
+     "from": "rule:reviewed_deal_status",
+     "why": "Through a value-level crosswalk."
     },
     {
      "column": "additional_sources",
@@ -1649,8 +1648,8 @@
     },
     {
      "column": "research_note",
-     "from": "rule:blank",
-     "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."
+     "from": "rule:preserve_substantive_qualifications",
+     "why": "Preserve substantive source notes and evidence limitations through the authoritative Lumecon Deals projection."
     }
    ],
    "order": [
@@ -2751,7 +2750,7 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "constant:owner of the awardee",
+   "entity_role": "source-attributed affiliation of awardee",
    "entity_roles": [
     {
      "column": "owner_as_of_transaction_cedar_uid",
@@ -3034,15 +3033,17 @@
     },
     {
      "column": "owner_attribution_status",
-     "decision": "keep",
-     "why": "",
-     "spec": "§7"
+     "decision": "rename",
+     "why": "Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance.",
+     "spec": "§7",
+     "to": "affiliation_attribution_status"
     },
     {
      "column": "owner_as_of_transaction_cedar_uid",
-     "decision": "keep",
-     "why": "Transaction-date ownership attribution; UNKNOWN ships as unknown.",
-     "spec": "§7"
+     "decision": "rename",
+     "why": "Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance.",
+     "spec": "§7",
+     "to": "affiliation_as_of_transaction_cedar_uid"
     },
     {
      "column": "contract_transaction_unique_key",
@@ -3241,8 +3242,8 @@
     },
     {
      "column": "cedar_entity_role",
-     "from": "constant:owner of the awardee",
-     "why": "owner of the awardee."
+     "from": "constant:source-attributed affiliation of awardee",
+     "why": "Evidence-qualified affiliation, not Cedar-certified ownership."
     },
     {
      "column": "sector",
@@ -3327,8 +3328,8 @@
     "recipient_geography_status",
     "performance_geography_status",
     "attributed_flag",
-    "owner_attribution_status",
-    "owner_as_of_transaction_cedar_uid",
+    "affiliation_attribution_status",
+    "affiliation_as_of_transaction_cedar_uid",
     "source_system",
     "source_url",
     "research_note"
@@ -5381,25 +5382,23 @@
    "new": [
     {
      "column": "cedar_entity_role",
-     "from": "constant:associated Native entity",
+     "from": "rule:source_attributed_relationship",
      "why": "associated Native entity (controlled by, serves, or is)."
     },
     {
      "column": "inclusion_category",
-     "from": "combine:classification_ruling|disposition",
-     "why": "Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk.",
-     "status": "pending"
+     "from": "rule:primary_source_inclusion",
+     "why": "Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk."
     },
     {
      "column": "entity_link_status",
-     "from": "combine:entity_tier|cedar_link_tier|key_review_disposition",
-     "why": "One linkage status through a documented crosswalk.",
-     "status": "pending"
+     "from": "rule:validated_existing_link",
+     "why": "One linkage status through a documented crosswalk."
     },
     {
      "column": "research_note",
-     "from": "rule:blank",
-     "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."
+     "from": "rule:source_qualification",
+     "why": "Source-attributed inclusion basis, dates and limitations from the authoritative Lumecon nonprofit projection."
     }
    ],
    "order": [
@@ -5430,15 +5429,15 @@
    ],
    "retire": [
     {
-     "identifies": "unknown: an earlier or different entity link that disagrees with cedar_uid on at least one row",
-     "disposition": "adjudicate",
-     "replacement": "cedar_uid",
+     "identifies": "Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects.",
+     "disposition": "internal_crosswalk",
+     "replacement": "No automatic replacement; cedar_uid retains its separately evidenced relationship role.",
      "column": "entity_id"
     },
     {
-     "identifies": "the spine entity the organization was keyed to before a redirect that cedar_uid reflects and this column does not, on at least one row",
-     "disposition": "adjudicate",
-     "replacement": "cedar_uid",
+     "identifies": "Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects.",
+     "disposition": "internal_crosswalk",
+     "replacement": "No automatic replacement; cedar_uid retains its separately evidenced relationship role.",
      "column": "cedar_spine_entity_id"
     },
     {

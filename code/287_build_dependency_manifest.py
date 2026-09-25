@@ -4,6 +4,8 @@
 
     py -3 code/287_build_dependency_manifest.py
     py -3 code/287_build_dependency_manifest.py --check <table.csv>
+    py -3 code/287_build_dependency_manifest.py --refresh-writer-authority
+        # stored-snapshot retirement refresh only; no data scans
 
 WHAT WENT WRONG, TWICE IN ONE DAY
 ---------------------------------
@@ -49,6 +51,8 @@ Claimed 2026-08-26 with script numbers 284-292.
 
 import json
 import sys
+import copy
+import re
 from collections import defaultdict
 from datetime import date, datetime
 from pathlib import Path
@@ -106,8 +110,46 @@ def check_table(table, verbose=True):
     return safe, rep
 
 
+def refresh_writer_authority(doc):
+    """Filter explicit retirements only; preserve dated measurements and raw IO evidence."""
+    result = copy.deepcopy(doc)
+    for table, writers in result["writers"].items():
+        result["writers"][table] = CP.active_table_writers(table, writers)
+    for table, roles in list(result["contested_files"].items()):
+        for role in ("rebuilders", "enrichers"):
+            roles[role] = CP.active_table_writers(table, roles[role])
+        if not roles["rebuilders"] or not roles["enrichers"] or set(roles["rebuilders"]) == set(roles["enrichers"]):
+            del result["contested_files"][table]
+    return result
+
+
+def refresh_writer_markdown(text, doc):
+    """Render only the existing contested-writer section, without refreshing data claims."""
+    rows = [f"## Contested files ({len(doc['contested_files'])})", "",
+            "A full rebuild and an in-place enricher both write these. Explicitly retired",
+            "writer edges are excluded; data measurements retain their original date.", "",
+            "| file | rebuilders | enrichers |", "|---|---|---|"]
+    for table, roles in sorted(doc["contested_files"].items()):
+        rebuilders = ", ".join(f"`{name}`" for name in roles["rebuilders"])
+        enrichers = ", ".join(f"`{name}`" for name in roles["enrichers"])
+        rows.append(f"| `{table}` | {rebuilders} | {enrichers} |")
+    result, count = re.subn(r"(?ms)^## Contested files \(\d+\).*?(?=^## Survival check)",
+                            lambda match: "\n".join(rows) + "\n\n", text)
+    if count != 1:
+        raise ValueError("expected one generated contested-writer section")
+    return result
+
+
 def main():
     started = datetime.now()
+    if sys.argv[1:] == ["--refresh-writer-authority"]:
+        original = json.loads(OUT_JSON.read_text(encoding="utf-8"))
+        refreshed = refresh_writer_authority(original)
+        markdown = refresh_writer_markdown(OUT_MD.read_text(encoding="utf-8"), refreshed)
+        OUT_JSON.write_text(json.dumps(refreshed, indent=1, sort_keys=True), encoding="utf-8")
+        OUT_MD.write_text(markdown, encoding="utf-8")
+        print("Refreshed explicit writer retirements; preserved source measurements and dates")
+        return 0
     if "--check" in sys.argv:
         i = sys.argv.index("--check")
         tables = sys.argv[i + 1:]
@@ -146,7 +188,8 @@ def main():
         # appended its own name twice and the printed manifest looked like
         # two agents were fighting over a file only one touches.
         for w in io["writes"] + io["read_modify_write"]:
-            writers[w].add(p.name)
+            if not CP.retired_table_writer(p.name, w):
+                writers[w].add(p.name)
         for r in io["reads"]:
             readers[r].add(p.name)
 

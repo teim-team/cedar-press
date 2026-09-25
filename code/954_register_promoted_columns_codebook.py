@@ -289,6 +289,34 @@ def verify() -> int:
 
 
 def selftest() -> int:
+    """Exercise registry failures in a synthetic TEMP tree, not the live master."""
+    import tempfile
+    global ROOT, CLEAN, FRAG, MASTER
+    original = ROOT, CLEAN, FRAG, MASTER
+    writer_original = cb.CEDAR, cb.CLEAN, cb.FRAG, cb.MASTER
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar954-") as tmp:
+            ROOT = Path(tmp)
+            CLEAN = ROOT / "data" / "clean"
+            FRAG = CLEAN / "codebook"
+            MASTER = CLEAN / "codebook_master.csv"
+            cb.CEDAR, cb.CLEAN, cb.FRAG, cb.MASTER = ROOT, CLEAN, FRAG, MASTER
+            CLEAN.mkdir(parents=True)
+            for (_dataset, table), specs in BLOCKS.items():
+                columns = [spec[0] for spec in specs]
+                with (CLEAN / table).open("w", encoding="utf-8", newline="") as fh:
+                    writer = csv.DictWriter(fh, fieldnames=columns)
+                    writer.writeheader()
+                    writer.writerow(dict.fromkeys(columns, "fixture"))
+            if register() != 0:
+                return 1
+            return _selftest_cases()
+    finally:
+        ROOT, CLEAN, FRAG, MASTER = original
+        cb.CEDAR, cb.CLEAN, cb.FRAG, cb.MASTER = writer_original
+
+
+def _selftest_cases() -> int:
     """Prove INV-REGISTERED fires: hide one block, expect exit 1."""
     import contextlib
     import io

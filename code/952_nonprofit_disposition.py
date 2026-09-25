@@ -349,6 +349,33 @@ def verify(path: Path | None = None) -> int:
 
 
 def selftest() -> int:
+    """Run negative controls on synthetic temporary inputs, never live metadata."""
+    import tempfile
+    global ROOT, TABLE, MANIFEST
+    original = ROOT, TABLE, MANIFEST
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar952-") as tmp:
+            ROOT = Path(tmp)
+            TABLE = ROOT / "data" / "clean" / "np_orgs.csv"
+            MANIFEST = ROOT / "manifest.json"
+            TABLE.parent.mkdir(parents=True)
+            columns = ["EIN", "org_name", *NEW]
+            with TABLE.open("w", encoding="utf-8", newline="") as fh:
+                writer = csv.DictWriter(fh, fieldnames=columns)
+                writer.writeheader()
+                for index in range(400):
+                    writer.writerow({"EIN": str(index), "org_name": "Fixture organization",
+                                     "disposition": "CANDIDATE_NAME_MATCH_GENERIC_TOKEN_ONLY",
+                                     "disposition_basis": "synthetic negative control",
+                                     "name_match_support": "generic_token_only",
+                                     "name_match_shared_tokens": "UNITED"})
+            MANIFEST.write_text(json.dumps({"rows": 400, "md5_base_fields": "fixture"}), encoding="utf-8")
+            return _selftest_cases()
+    finally:
+        ROOT, TABLE, MANIFEST = original
+
+
+def _selftest_cases() -> int:
     """Prove each NAMED invariant fires, one injection at a time."""
     import contextlib
     if not MANIFEST.exists():

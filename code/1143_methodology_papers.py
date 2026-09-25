@@ -6,6 +6,7 @@ Cedar Press - 1143: THIRTEEN datasets, thirteen methodology papers. One each.
     py -3 code/1143_methodology_papers.py report
     py -3 code/1143_methodology_papers.py build
     py -3 code/1143_methodology_papers.py build need # one dataset
+    py -3 code/1143_methodology_papers.py refresh-writer-authority funding # no data scan
     py -3 code/1143_methodology_papers.py verify     # exits 1 on missing OR stale
 
 WHY THIS EXISTS
@@ -111,6 +112,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import cedar_pipeline as CP
 from cedar_publication import (          # noqa: E402
     FLAGSHIP, BUILD_SHELVES, STOREFRONT_SHELVES, N_BUILT_EXPECTED, shelves,
 )
@@ -847,7 +849,8 @@ def render_measured(did: str, m: dict, man: dict, ready: dict, con: dict,
                       key=lambda t: (t["table"] != flag, t["table"]))
         shown = 0
         for t in tabs:
-            rb, eb = t.get("rebuilt_by") or [], t.get("enriched_by") or []
+            rb = CP.active_table_writers(t["table"], t.get("rebuilt_by") or [])
+            eb = CP.active_table_writers(t["table"], t.get("enriched_by") or [])
             if not rb and not eb and t["table"] != flag:
                 continue
             star = " **(flagship)**" if t["table"] == flag else ""
@@ -873,13 +876,16 @@ def render_measured(did: str, m: dict, man: dict, ready: dict, con: dict,
                  "reverts of one file in a single day.")
         L.append("")
 
-    L.append(f"The delivered spreadsheet is then assembled by "
-             f"`code/1137_customer_dataset_combine.py`, which folds supporting "
-             f"tables onto the flagship **only where the measured cardinality on "
-             f"the shared key is one**, reverts any join that moved the row "
-             f"count, and prefixes every joined column with its source table's "
-             f"stem. One-to-many tables contribute a count column instead of "
-             f"rows, so a money total cannot be multiplied by a join.")
+    if did in CP.RELEASE_PILOTS:
+        L.append(release_route_description(did))
+    else:
+        L.append(f"The delivered spreadsheet is then assembled by "
+                 f"`code/1137_customer_dataset_combine.py`, which folds supporting "
+                 f"tables onto the flagship **only where the measured cardinality on "
+                 f"the shared key is one**, reverts any join that moved the row "
+                 f"count, and prefixes every joined column with its source table's "
+                 f"stem. One-to-many tables contribute a count column instead of "
+                 f"rows, so a money total cannot be multiplied by a join.")
     L.append("")
 
     # ---- M3 attribution ---------------------------------------------------
@@ -1352,6 +1358,72 @@ def _title(did: str, man: dict) -> str:
     return f"# Methodology — {man.get(did, {}).get('name', did)}"
 
 
+def release_route_description(did: str) -> str:
+    return (
+        f"For `{did}`, Cedar's supported unpublished release adapter is "
+        f"`py -3 code/build.py release-pilot {did} --source <pinned-source.csv> "
+        "--output-root <isolated-store> --as-of <YYYY-MM-DD> --code-sha <reviewed-lumecon-sha>`. "
+        "It delegates candidate construction to Lumecon Data's existing collection-build contract; "
+        "it does not authorize publication. The former 1137 customer writer refuses this collection. "
+        "Legacy acquisition and source-table maintenance remain separate responsibilities. "
+        "The dated counts and table statuses in this paper are historical measurements, not current release certification."
+    )
+
+
+def refresh_pipeline_authority(text: str, did: str) -> str:
+    """Refresh only generated M2 writer instructions; do not measure or rewrite editorial content."""
+    if did not in CP.RELEASE_PILOTS:
+        raise ValueError("collection has no declared release adapter")
+    marker = text.find(MARK_M_B)
+    if marker < 0:
+        raise ValueError("missing generated measurement block")
+    end_marker = text.find(MARK_M_E, marker)
+    if end_marker < 0:
+        raise ValueError("missing generated measurement end")
+    block = text[marker:end_marker]
+    match = re.search(r"(?ms)^## M2 .*?(?=^## M3 )", block)
+    if match is None:
+        raise ValueError("missing bounded generated M2/M3 section")
+    section = match.group(0)
+    updated = []
+    for line in section.splitlines(keepends=True):
+        if line.startswith("| `"):
+            cells = line.split("|")
+            table = re.search(r"`([^`]+)`", cells[1])
+            if len(cells) != 6 or table is None:
+                raise ValueError("malformed generated writer row")
+            for index in (2, 3):
+                names = re.findall(r"`([^`]+)`", cells[index])
+                active = CP.active_table_writers(table.group(1), names)
+                if active != names:
+                    cells[index] = " " + (", ".join(f"`{name}`" for name in active) or "?") + " "
+            line = "|".join(cells)
+        updated.append(line)
+    section = "".join(updated)
+    paragraphs = section.split("\n\n")
+    found = False
+    for index, paragraph in enumerate(paragraphs):
+        if paragraph.startswith("The delivered spreadsheet is then assembled by ") or paragraph.startswith(f"For `{did}`, Cedar's supported unpublished release adapter is "):
+            paragraphs[index] = release_route_description(did)
+            found = True
+    if not found:
+        raise ValueError("missing expected release-route paragraph")
+    start, end = marker + match.start(), marker + match.end()
+    return text[:start] + "\n\n".join(paragraphs) + text[end:]
+
+
+def cmd_refresh_writer_authority(did: str) -> int:
+    # Membership check occurs before constructing the requested path.
+    if did not in CP.RELEASE_PILOTS:
+        raise ValueError("collection has no declared release adapter")
+    path = PAPERS / f"{did}.md"
+    previous = path.read_text(encoding="utf-8")
+    refreshed = refresh_pipeline_authority(previous, did)
+    path.write_text(refreshed, encoding="utf-8")
+    print(f"Refreshed {path}: generated M2 writer authority only; no data scan or new readiness claim")
+    return 0
+
+
 def cmd_build(only: str | None) -> int:
     man, con, ready = manifest(), contracts(), readiness()
     vocab, fences = attribution_vocabulary(), money_fences()
@@ -1569,6 +1641,8 @@ def main() -> int:
         return cmd_report()
     if cmd == "build":
         return cmd_build(args[1] if len(args) > 1 else None)
+    if cmd == "refresh-writer-authority" and len(args) == 2:
+        return cmd_refresh_writer_authority(args[1])
     if cmd == "verify":
         return cmd_verify()
     print(__doc__)

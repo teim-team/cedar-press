@@ -40,6 +40,7 @@ import csv
 import importlib.util
 import shutil
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 
@@ -497,6 +498,37 @@ def verify(quiet: bool = False) -> int:
 
 
 def selftest() -> int:
+    """Exercise failures against synthetic tables, never the live registry.
+
+    TemporaryDirectory follows the configured TEMP/TMP location. Redirect both
+    this script and the shared writer before the first fixture write; restoring
+    globals in finally also protects callers when an injected failure raises.
+    """
+    global ROOT, CLEAN, FRAG, MASTER
+    original = ROOT, CLEAN, FRAG, MASTER
+    writer_original = cb.CEDAR, cb.CLEAN, cb.FRAG, cb.MASTER
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar-codebook-money-") as tmp:
+            ROOT = Path(tmp)
+            CLEAN = ROOT / "data" / "clean"
+            FRAG = CLEAN / "codebook"
+            MASTER = CLEAN / "codebook_master.csv"
+            cb.CEDAR, cb.CLEAN, cb.FRAG, cb.MASTER = ROOT, CLEAN, FRAG, MASTER
+            CLEAN.mkdir(parents=True)
+            for table, descriptions in BLOCKS.values():
+                with (CLEAN / table).open("w", encoding="utf-8", newline="") as fh:
+                    writer = csv.DictWriter(fh, fieldnames=list(descriptions))
+                    writer.writeheader()
+                    writer.writerow(dict.fromkeys(descriptions, "fixture"))
+            if register() != 0:
+                return 1
+            return _selftest_cases()
+    finally:
+        ROOT, CLEAN, FRAG, MASTER = original
+        cb.CEDAR, cb.CLEAN, cb.FRAG, cb.MASTER = writer_original
+
+
+def _selftest_cases() -> int:
     if verify(quiet=True) != 0:
         print("  UNMEASURED: the registry already fails verify.")
         return 1

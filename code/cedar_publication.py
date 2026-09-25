@@ -1489,6 +1489,7 @@ def apply_field_map(collection: str, header: list, rows: list,
     rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
     source_of = {to: c for c, to in rename.items()}
     built_cols = []
+    external_rule_targets = set()
     per_row = [dict() for _ in rows]
     for n in entry.get("new", []):
         src = n.get("from", "")
@@ -1512,6 +1513,10 @@ def apply_field_map(collection: str, header: list, rows: list,
                 continue
             for b, row in zip(per_row, rows, strict=True):
                 v = _rule(entry, src, row, source_of)
+                if v is None:
+                    # A named Lumecon rule is not an implementation here.
+                    # Require its supplied result before retiring source cells.
+                    external_rule_targets.add(target)
                 b[target] = (row.get(target) or "") if v is None else v
             built_cols.append(target)
     if plural:
@@ -1537,7 +1542,8 @@ def apply_field_map(collection: str, header: list, rows: list,
     # terminal delivers the target; the refusal names both columns and the
     # rows that would have lost something. A source that is blank on every
     # row loses nothing and may go.
-    for f, target, stuck in owed_derivations(entry, rename, built_cols, rows):
+    for f, target, stuck in owed_derivations(
+            entry, rename, [c for c in built_cols if c not in external_rule_targets], rows):
         if stuck:
             raise OwedDerivation(collection, f["column"], target, stuck)
     # A combine whose target carries one of its own sources' names (contractors'
@@ -1637,11 +1643,11 @@ def apply_field_map(collection: str, header: list, rows: list,
         for row in rows:
             scope_elements(row.get("collective_scopes"), collection, "collective_scopes")
     # The link-status vocabulary, where the map declares the column as that
-    # vocabulary (the Federal Register's owed column names the four values);
+    # vocabulary (the Federal Register contract owns these link statuses);
     # nonprofits' column of the same name is a combine of link tiers with a
     # vocabulary of its own, and is not held to this one.
-    declared = any(n["column"] == "entity_link_status" and "no_individual_named" in n.get("from", "")
-                   for n in entry.get("new", []))
+    declared = collection == "federal-register" and any(
+        n["column"] == "entity_link_status" for n in entry.get("new", []))
     if "entity_link_status" in header and declared:
         allowed = set(scopes()["link_statuses"])
         bad = [row["entity_link_status"] for row in rows

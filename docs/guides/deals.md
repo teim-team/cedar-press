@@ -42,14 +42,14 @@ A new source confirming an existing transaction enriches the row; a press releas
 
 ## Field dictionary
 
-The approved header, in the owner's exact order (33 columns, of which 4 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
+The approved header, in the owner's exact order (33 columns, of which 0 are owed and marked so). Data types are read off the ten-row sample the site serves; identifiers are text and keep leading zeros; a JSON array cell is one list, aligned with its neighbours where the dictionary says so.
 
 | # | Column | Label | Definition | Type | Blank means |
 |---|---|---|---|---|---|
 | 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 2 | `canonical_name` (was `native_party_canonical_name`) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
 | 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
-| 4 | `cedar_entity_role` | cedar entity role | party, or owner of the party, per row, once the party attribution table supplies it; absent until then rather than an ambiguous constant. | — | owed: not in the file until the terminal builds it |
+| 4 | `cedar_entity_role` | cedar entity role | Publish a specific party relationship only when source evidence establishes it; otherwise leave blank. Never presume ownership. | text | See source qualification; not inferred from a legacy sample |
 | 5 | `deal_id` (was `Deal_ID`) | Deal ID | Cedar's identifier for the deal. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `event_date` (was `Event_Date`) | Date | When the deal happened or was announced. | text | the source states none, or not applicable to this row |
 | 7 | `event_date_precision` (was `Event_Date_precision`) | Date precision | Whether the date is known to the day, the month or the year. | text | the source states none, or not applicable to this row |
@@ -61,12 +61,12 @@ The approved header, in the owner's exact order (33 columns, of which 4 are owed
 | 13 | `native_party_type` (was `Native_Party_Type`) | Native party type as published | How the source describes the Native party. | text | the source states none, or not applicable to this row |
 | 14 | `native_party_role` | Entity role | Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller). | text | the source states none, or not applicable to this row |
 | 15 | `counterparty_or_funder` (was `Counterparty_or_Funder`) | Counterparty or funder | The other side of the deal. | text | the source states none, or not applicable to this row |
-| 16 | `deal_type` | deal type | One taxonomy through a value-level crosswalk. | — | owed: not in the file until the terminal builds it |
-| 17 | `transaction_structure` | transaction structure | Through a value-level crosswalk. | — | owed: not in the file until the terminal builds it |
+| 16 | `deal_type` | deal type | One taxonomy through a value-level crosswalk. | text | See source qualification; not inferred from a legacy sample |
+| 17 | `transaction_structure` | transaction structure | Through a value-level crosswalk. | text | See source qualification; not inferred from a legacy sample |
 | 18 | `industry` (was `Industry`) | Industry | The industry the deal is in. | text | the source states none, or not applicable to this row |
 | 19 | `sector` | Sector | The broad sector the deal belongs to, beside the finer industry. | text | the source states none, or not applicable to this row |
 | 20 | `capital_source` | Capital source | Where the capital comes from: public, private or tribal. | text | the source states none, or not applicable to this row |
-| 21 | `deal_status` | deal status | Through a value-level crosswalk. | — | owed: not in the file until the terminal builds it |
+| 21 | `deal_status` | deal status | Through a value-level crosswalk. | text | See source qualification; not inferred from a legacy sample |
 | 22 | `announced_value_usd` (was `Announced_Value_USD`) | Announced value | The dollar value announced, where one was. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 23 | `value_basis` (was `Value_Type`) | What the value is | What the announced figure represents (consideration paid, grant amount, project cost). | text | the source states none, or not applicable to this row |
 | 24 | `project_total_value_usd` (was `Project_Total_Value_USD`) | Project total | The total project value, where larger than the announced value. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
@@ -115,12 +115,7 @@ A blank is never zero and never an invented date. A blank JSON-list cell means u
 
 ## What is still owed
 
-Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
-
-- `cedar_entity_role` (pending:party attribution): party, or owner of the party, per row, once the party attribution table supplies it; absent until then rather than an ambiguous constant.
-- `deal_type` (combine:Deal_Category\|transaction_type): One taxonomy through a value-level crosswalk.
-- `transaction_structure` (combine:Event_Type): Through a value-level crosswalk.
-- `deal_status` (combine:Status\|deal_status_std): Through a value-level crosswalk.
+Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 

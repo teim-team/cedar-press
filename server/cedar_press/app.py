@@ -638,8 +638,10 @@ def full_download(
     }
     if release.get("component"):
         headers["X-Cedar-Component"] = release["component"]
-    if "content_file" in release:
-        spool = release["content_file"]
+    # A Grove component arrives as a verified `content_file`; a partitioned Press
+    # flagship as a verified `spool`. Both are disk spools the response closes.
+    spool = release.get("content_file") or release.get("spool")
+    if spool is not None:
 
         def verified_chunks():
             try:
@@ -649,7 +651,9 @@ def full_download(
                 spool.close()
 
         return StreamingResponse(
-            verified_chunks(), media_type=release["media_type"], headers=headers,
+            verified_chunks(),
+            media_type=release["media_type"],
+            headers=headers,
             background=BackgroundTask(spool.close),
         )
     return Response(content=release["content"], media_type=release["media_type"], headers=headers)

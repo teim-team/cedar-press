@@ -623,6 +623,9 @@ def refresh_script_census():
         "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
         "scripts": len(scripts),
         "operational_role_counts": dict(sorted(Counter(s["operational_role"] for s in scripts).items())),
+        "maintenance_status_counts": {status: sum(s.get("maintenance_status") == status for s in scripts)
+                                      for status in ("ACTIVE", "DUPLICATE", "SUPERSEDED", "HISTORICAL-RETAIN", "SAFE-DELETE-CANDIDATE", "REQUIRES-REVIEW")},
+        "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
         "unresolved_writer_risk_counts": dict(sorted(Counter(s["writer_risk"] for s in scripts
                                                              if s["operational_role"] == "unresolved").items())),
         "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
@@ -649,13 +652,38 @@ def _call_name(node):
     return ""
 
 
-def _runtime_script_references(tree):
+def _runtime_script_references(tree, *, authoritative_runner=False):
     """Conservative literal imports/dispatch, not arbitrary string mentions.
 
     Dynamic variable targets and transitive execution require separate review.
     A reference is evidence of a potential runtime edge, not reachability proof.
     """
     targets = set()
+    # A local loader is evidence only if its body really creates and executes
+    # an import spec. A function merely named load_module is not sufficient.
+    local_loaders = set()
+    for function in tree.body:
+        if not isinstance(function, ast.FunctionDef):
+            continue
+        calls = {_call_name(node.func) for node in ast.walk(function) if isinstance(node, ast.Call)}
+        if ("importlib.util.spec_from_file_location" in calls
+                and any(call.endswith(".exec_module") for call in calls)):
+            local_loaders.add(function.name)
+    if authoritative_runner:
+        for assignment in tree.body:
+            if not isinstance(assignment, ast.Assign):
+                continue
+            names = {target.id for target in assignment.targets if isinstance(target, ast.Name)}
+            if not names & {"SHIP_CHAIN", "POST_CHAIN"}:
+                continue
+            try:
+                declared = ast.literal_eval(assignment.value)
+            except (ValueError, TypeError):
+                continue
+            rows = declared if "SHIP_CHAIN" in names else [declared]
+            for row in rows:
+                if isinstance(row, (list, tuple)) and row and isinstance(row[0], str) and row[0].endswith(".py"):
+                    targets.add(Path(row[0]).name)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             targets.update(alias.name.split(".")[-1] + ".py" for alias in node.names)
@@ -668,7 +696,7 @@ def _runtime_script_references(tree):
                     targets.add(node.args[0].value.split(".")[-1] + ".py")
             elif call in {"subprocess.run", "subprocess.call", "subprocess.check_call",
                           "subprocess.check_output", "subprocess.Popen", "runpy.run_path",
-                          "importlib.util.spec_from_file_location", "spec_from_file_location"}:
+                          "importlib.util.spec_from_file_location", "spec_from_file_location"} or call in local_loaders:
                 # Only the actual command/path argument. Ignore output/log/error text.
                 index = 1 if call.endswith("spec_from_file_location") else 0
                 if len(node.args) > index:
@@ -831,7 +859,7 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
         names = set(contract.get("rebuilt_by", []) + contract.get("enriched_by", []))
         names.update(name for ordering in cp.KNOWN_ORDERINGS if ordering["file"] == table
                      for name in (ordering["rebuild"], ordering["enricher"]))
-        for name in sorted(names):
+        for name in cp.active_table_writers(table, sorted(names)):
             producers[name].append({"collection": contract["collection"], "output": table,
                                     "entrypoint": contract.get("rebuild_command", "")})
     consumers = defaultdict(set)
@@ -847,7 +875,7 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
             except SyntaxError:
                 continue
             if not _test_reference(path.relative_to(ROOT), tree):
-                for target in _runtime_script_references(tree):
+                for target in _runtime_script_references(tree, authoritative_runner=relative == "code/build.py"):
                     runtime_consumers[target].add(relative)
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
@@ -976,6 +1004,174 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
             risk = "P3_no_detected_write_not_readonly_certified"
         script.update({"writer_evidence": writes, "writer_analysis_error": analysis_error,
                        "writer_risk": risk, "undeclared_governed_tables": sorted(set(undeclared))})
+
+
+    add_maintenance_classification(scripts, references)
+
+
+# Bounded human-read source evidence for the existing census, not dispatch or
+# producer admission. Tuple: source SHA256, retained status, role, evidence and
+# remaining cutover condition. A source change invalidates this evidence.
+_REVIEWED_MAINTENANCE = {
+    "41_build_codebooks.py": ("6dcc4b00ac676cb3db30c89b9be1ab094df5cbaa2dd279b281190b3b49d30517", "ACTIVE", "shared helper; forbidden writer", "166/263/392/941/cedar_register_codebook import helpers; main guard precedes writes", "Move helper consumers before removing file; never re-enable whole-master writer"),
+    "1072_tribally_owned_enterprises.py": ("93ce32e6cef2110c0ccd672d881403a95e9e8388c2e07a36aa70da734e534bca", "ACTIVE", "controlled migration/producer", "build.py NEED candidate stages invoke migrate-legacy/build/verify; 1130/1133 consume helpers", "Preserve issued IDs and migration replay; publication hold remains"),
+    "1129_place_ids.py": ("d034f6948893e331a59cc2edae567cd0e65db712981758aa0bf2466fbeb16811", "ACTIVE", "controlled migration/validation", "mint/migrate --apply mutate place register; protected literals also occur in fixtures", "Retain issued-place identity and replay authority until explicit cutover"),
+    "1180_entity_official_names.py": ("6d3a5179f9586adb70fd3ba799f89dd3cd3fe9f25b1f14623921c1c900d0d140", "ACTIVE", "canonical-name utility", "build --apply writes cedar_entity_names.csv consumed by cedar_publication and build.py pins", "Replace canonical-name generation and consumers together"),
+    "1183_native_nonprofit_entities.py": ("22f922f846747f68411b2086909bdd634a14f9434b9f877518219d579ddc0bfc", "ACTIVE", "controlled identity migration", "build writes identity register, EIN links and entity types; projection does not replace minting", "Preserve issued identities and ruled object mappings; no automatic promotion"),
+    "525_event_ids.py": ("e7d924c034ef49d2f2807ac3a212a26e44877b0f8a557c976445c833876da162", "ACTIVE", "record-grain registry utility", "Produces cedar_event_id_registry.csv and EVENT_IDS.md; subcontracting contract cites this authority", "Move event grain declarations into surviving contract before retirement"),
+    "843_retire_cicd_scheme.py": ("52840f6fe8dea16f6bb72ba6dbbfaa7bc5e9799dda865a343b1a903bb15cc90e", "HISTORICAL-RETAIN", "historical migration", "One-time CICD retirement preserves crosswalk, backups and identity/funding replay", "Retain recovery provenance; not admitted to ordinary dispatch"),
+    "02_extract_exclusion_rulings.py": ("7b5dd843cec17b1d304da137d5bddaf4bb2c8033bcb6e642b79f428110933718", "HISTORICAL-RETAIN", "historical evidence extraction", "Extracts hci_analysis.do human exclusions; output consumed by 03 and 1163 negative decisions", "Preserve original rulings and reproducible extraction"),
+    "1000_harvest_business_identifiers.py": ("2d503b47ede4645a231c633e0e119860e1867f0a0f102d98e6e7f16239633996", "ACTIVE", "transitional identifier acquisition", "sweep/web/promote; open_crosswalk duplicates 1001 non-atomic rewrite preserving other built_by rows", "Centralize crosswalk mutation with 1001; preserve distinct acquisition evidence"),
+    "1001_link_businesses_to_contracting.py": ("24651371f0288768454cc5e5325ad7a2819e9dabdfbdadc8185f471c50a13cd8", "ACTIVE", "transitional reconciliation", "Directory/federal identifier linkage; open_crosswalk duplicates 1000 mutation", "One atomic crosswalk writer after both callers cut over; retain linkage/hold outputs"),
+    "109_build_variable_registry.py": ("ec588dc4f3ad47de39f69423f8cb858e181615c3e87ffc5bf2b019624742d779", "ACTIVE", "metadata utility", "variable_registry.csv is consumed by 374_build_cedar_taxonomy_export.py", "Prove semantic metadata parity and cut over 374 before retirement"),
+    "1090_dtll_agency_harvest.py": ("ffe8ba11c0f75cbcc387acdc6e58e3b82eca086b8e2c1e8e9c3d7eb6e40aace1", "ACTIVE", "transitional acquisition", "Agency Dear Tribal Leader letters/coverage are distinct Advocacy components, not Federal Register", "Migrate acquisition and codebook fragment registration without losing component coverage"),
+    "1105_newsletter_corpus_ship.py": ("a924f5bc24761ee339aee603524d61f1e057730a497cc7f8094c1ee6095adcda", "ACTIVE", "conservation/registration utility", "Validates 990/991 newsletter outputs and writes conservation/codebook metadata", "Keep unique conservation checks; cut metadata writes over to canonical fragment writer"),
+    "1135_full_dataset_review_bundle.py": ("29eaa7dd4a7b0561b08761186e1037ed86e5a700379414049777c866502416ae", "ACTIVE", "review utility; transitional ancillary export", "Candidate review retained; build calls refuse_migrated_producers; ancillary full-table route distinct", "Retire only proven replaced output routes, not whole review utility"),
+    "1149_codebook_money_fed.py": ("40817ad385ba14109247e4a3afb23c7e6b4b850ab3bf1fcfc0e8a123dd2c7ef9", "ACTIVE", "codebook registration/validation", "Eleven table fragments; selftest now redirects script and shared writer to synthetic temporary tree", "Preserve fragment definitions and negative controls through codebook owner cutover"),
+    "1151_customer_preview_ten.py": ("c5b0430b158e2548129b649ef264f46e94ad799e8c5bb64064a5c25313d3415c", "ACTIVE", "transitional preview producer", "1162 calls verify; DATASET_NORTH_STAR documents dist/preview producer", "Replace 1162 validation and documentation with pinned release samples before retirement"),
+    "1169_release_verify.py": ("31c6915eb5d64b19d0154d8f678f416a5af826d0671c4d43e32e7cf8f647c461", "ACTIVE", "release validator", "Default verify read-only; _fixture_fails redirects protected-looking writes into TemporaryDirectory", "Retain negative release tests; fixture literals are not canonical writes"),
+    "1181_native_entities_spreadsheet.py": ("c6adbed6e7643134208775138a616ed70b3d7588d69f4736753dfa041baa031e", "ACTIVE", "entity-reference export", "dist/customer/native_entities.csv consumed by 1174 QC bundle", "Replace entity-reference product and 1174 consumer together"),
+    "1184_deals_public_presentation.py": ("2e33f4e4373d74d6fda64087de2c2e6c1b41e1853ceac6277040ef56d7b413e9", "ACTIVE", "presentation helper; legacy standalone writer", "cedar_publication.deals_public_view dynamically imports helper; standalone deals_presentation unused there", "Cut helper consumers over before file retirement; standalone writer can be separately fenced"),
+    "1186_federal_awards_rebuild.py": ("337d701f28233a5573c51dbf8792774920c468e04c352badd2a30c14897438d7", "ACTIVE", "transitional award-grain producer", "federal_awards_2025_2026.csv consumed by 1174/1176; award grain differs from transaction release", "Declare award-grain replacement and cut consumers over; transaction release alone is insufficient"),
+}
+
+
+def add_maintenance_classification(scripts, references):
+    """Classify maintenance evidence without granting write or deletion authority.
+
+    Exact duplicate bytes are evidence of duplication, not proof that an entry
+    point can be removed: relative paths and external callers still matter.
+    A table-scoped retirement never retires all of a multi-output script.
+    """
+    by_path = {}
+    by_name = defaultdict(list)
+    hashes = defaultdict(list)
+    for record in scripts:
+        relative = (Path("code") / record["dir"].replace(".", "/") / record["script"]).as_posix()
+        path = ROOT / relative
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        by_path[relative] = record
+        by_name[record["script"]].append(relative)
+        hashes[digest].append(relative)
+        record["source_sha256"] = digest
+    reviewed = {
+        path: _REVIEWED_MAINTENANCE[record["script"]]
+        for path, record in by_path.items()
+        if path == "code/" + record["script"]
+        and record["script"] in _REVIEWED_MAINTENANCE
+        and record["source_sha256"] == _REVIEWED_MAINTENANCE[record["script"]][0]
+    }
+    workflow_calls = defaultdict(set)
+    documented_calls = defaultdict(set)
+    for path in references:
+        relative = path.relative_to(ROOT).as_posix()
+        if path.name in _CATALOGUE or any(part in {"archive", "graveyard"} for part in path.parts):
+            continue
+        if path.suffix not in {".md", ".yml", ".yaml", ".ps1"}:
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        # Literal command evidence only. Mentions and historical prose do not
+        # become execution edges. Workflow roots remain reviewable evidence.
+        for line in text.splitlines():
+            if not re.search(r"(?:python(?:3(?:\.\d+)?)?|py(?: -3)?|uv run python)\s", line):
+                continue
+            for name in re.findall(r"(?:code/|code\\)([A-Za-z0-9_./\\-]+\.py)", line):
+                target = (Path("code") / name.replace("\\", "/")).as_posix()
+                if target not in by_path:
+                    continue
+                documented_calls[target].add(relative)
+                if relative.startswith(".github/workflows/"):
+                    workflow_calls[target].add(relative)
+    active_roles = {"active producer", "active validator/migration/review",
+                    "product consumer/shared service", "test/fixture"}
+    active = {path for path, record in by_path.items()
+              if record.get("operational_role") in active_roles or workflow_calls[path]}
+    active.update(path for path, review in reviewed.items() if review[1] == "ACTIVE")
+    # Follow actual Python import/dispatch candidates only from maintained
+    # roots, not from every unreferenced script that mentions another module.
+    changed = True
+    while changed:
+        changed = False
+        for path, record in by_path.items():
+            if path in active or len(by_name[record["script"]]) != 1:
+                continue
+            if set(record.get("runtime_consumer_candidates", [])) & active:
+                active.add(path)
+                changed = True
+    for path, record in by_path.items():
+        peers = sorted(other for other in hashes[record["source_sha256"]] if other != path)
+        retired = [{"output": rule["file"], "replacement": rule["rebuild"],
+                    "required_component": rule["enricher"]}
+                   for rule in cp.KNOWN_ORDERINGS
+                   if record["script"] in rule.get("retired_writers", [])]
+        replay = [{"output": output, "evidence": item.get("evidence", ""),
+                   "mints_issued_ids": record["script"] in item.get("mints", [])}
+                  for output, item in cp.REPLAY_ORDERS.items()
+                  if record["script"] in item.get("order", [])]
+        if path in reviewed:
+            status, reason = reviewed[path][1], reviewed[path][3]
+        elif path in active:
+            status, reason = "ACTIVE", "declared operational role, CI invocation or reachable Python dependency"
+        elif replay:
+            status, reason = "HISTORICAL-RETAIN", "explicit authoritative replay dependency; retention is not permission to execute"
+        elif record.get("operational_role") == "historical":
+            status, reason = "HISTORICAL-RETAIN", "explicit existing historical directory; retain provenance"
+        elif peers:
+            status, reason = "DUPLICATE", "byte-identical source peer; removal safety not established"
+        else:
+            status = "REQUIRES-REVIEW"
+            if record.get("never_run"):
+                reason = "existing forbidden-entrypoint authority; preserve evidence and verify all direct-call guards"
+            elif record.get("writer_analysis_error"):
+                reason = "write analysis failed: " + str(record["writer_analysis_error"])
+            elif any(site.get("scope") == "protected_surface" for site in record.get("writer_evidence", [])):
+                reason = "protected output writer lacks proved current ownership/cutover: " + ", ".join(sorted({site["target"] for site in record["writer_evidence"] if site.get("scope") == "protected_surface"}))
+            elif record.get("undeclared_governed_tables"):
+                reason = "governed output is not admitted: " + ", ".join(record["undeclared_governed_tables"])
+            elif record.get("writer_evidence"):
+                reason = "writer targets/callers need runtime confirmation before ownership or retirement: " + ", ".join(sorted({str(site.get("target", "<unresolved>")) for site in record["writer_evidence"]}))
+            elif documented_calls[path]:
+                reason = "documented invocation has not been established as current: " + ", ".join(sorted(documented_calls[path]))
+            else:
+                reason = "no detected writer is not proof of read-only behavior; external callers, unique outputs and restoration value remain unverified"
+        # Existing retirement evidence is output-scoped. Only classify a whole
+        # script superseded when every observed writer is explicitly retired,
+        # with no dynamic targets, runtime callers, documentation or CI entry.
+        writes = record.get("writer_evidence", [])
+        retired_tables = {item["output"] for item in retired}
+        fully_retired = (retired_tables and writes and not record.get("writer_analysis_error")
+                         and all(site.get("table") in retired_tables for site in writes)
+                         and not record.get("runtime_consumer_candidates")
+                         and not documented_calls[path] and not workflow_calls[path]
+                         and not record.get("unknown_io_literals"))
+        if fully_retired and path not in active and path not in reviewed:
+            status, reason = "SUPERSEDED", "all observed output writers retired by existing authority; no known caller"
+        provenance = record.get("collection_output_entrypoints", [])
+        record["maintenance_status"] = status
+        record["maintenance_evidence"] = {
+            "reason": reason, "source_sha256": record["source_sha256"],
+            "identical_source_peers": peers,
+            "ci_commands": sorted(workflow_calls[path]),
+            "documented_commands": sorted(documented_calls[path]),
+            "active_runtime_callers": sorted(set(record.get("runtime_consumer_candidates", [])) & active),
+            "superseded_output_edges": retired,
+            "historical_replay_evidence": replay,
+            "output_authority_sha256": hashlib.sha256(json.dumps(provenance, sort_keys=True).encode()).hexdigest(),
+            "output_artifact_hashes": "NOT_MEASURED_BY_SCRIPT_CENSUS",
+            "retirement_authorized": False,
+            "review_owner": "Codex" if status == "REQUIRES-REVIEW" else None,
+            "review_priority": record.get("writer_risk", "P3_unmeasured") if status == "REQUIRES-REVIEW" else None,
+            "review_write_sites": [{key: site.get(key) for key in ("line", "operation", "target", "scope", "table")}
+                                   for site in record.get("writer_evidence", [])] if status == "REQUIRES-REVIEW" else [],
+            "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
+            "bounded_source_review": ({"source_sha256": reviewed[path][0],
+                                       "role": reviewed[path][2],
+                                       "retirement_condition": reviewed[path][4],
+                                       "grants_execution_permission": False}
+                                      if path in reviewed else None),
+            "source_review_stale": (record["script"] in _REVIEWED_MAINTENANCE
+                                    and path == "code/" + record["script"] and path not in reviewed),
+        }
 
 
 def classify_script(s):
