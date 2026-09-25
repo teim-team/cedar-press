@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      LUMECON_DATA_SHA: 2ea57b5af924d1b324ec8e5416887f1488df5625  # claude/gaming-grove-release; local until pushed
+      LUMECON_DATA_SHA: b683def02123bf49276b7265d73015329eb3fc9d  # claude/gaming-grove-release; local until pushed
       CEDAR_REQUIRE_LUMECON_GAMING: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
