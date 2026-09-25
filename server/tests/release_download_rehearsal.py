@@ -72,7 +72,9 @@ def main():
     ).fetchone()[0] == 1
     assert select_catalog_release(database, args.store, dataset, pin["release_id"],
                                   product="cedar_press") == first_catalog
-    import_catalog_release(database, args.store, dataset, second["release_id"], product="cedar_press")
+    import_catalog_release(
+        database, args.store, dataset, second["release_id"], product="cedar_press"
+    )
     token = secrets.token_hex(32)
     password = secrets.token_hex(32)
     os.environ["CEDAR_PRESS_ENVIRONMENT"] = "development"

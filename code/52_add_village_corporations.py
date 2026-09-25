@@ -99,6 +99,7 @@ def read_csv(p):
 
 
 def main():
+    raise SystemExit("Retired ANVC- issuance is disabled; mint CE- through 503_identity after review")
     print("=== Cedar Press 52: add ANCSA village + group corporations ===\n")
 
     spine = read_csv(SPINE)

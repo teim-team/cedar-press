@@ -571,6 +571,18 @@ const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
 // Mirrors cedar_publication.PROHIBITED_PUBLIC_COLUMN: a competing entity
 // identifier or build bookkeeping never reaches an approved header.
 const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
+// Columns the publish-time presentation layer ADDS to a flagship before the
+// field map projects it, so the map must decide them although the raw sample
+// (an excerpt of the canonical flagship) never carries them. Read from
+// cedar_publication.py itself, never restated: deals_public_view appends
+// DEALS_PRESENTATION_COLUMNS and the `research_note` target they qualify.
+const PUBLICATION_SOURCE = readFileSync(fileURLToPath(new URL("../../../code/cedar_publication.py", import.meta.url)), "utf8");
+const DEALS_PRESENTATION_COLUMNS = [...(/^DEALS_PRESENTATION_COLUMNS = \(([^)]*)\)/m.exec(PUBLICATION_SOURCE)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+const PUBLISH_TIME_COLUMNS = { deals: [...DEALS_PRESENTATION_COLUMNS, "research_note"] };
+
+test("the publish-time deals columns are read from cedar_publication.py, not guessed", () => {
+  assert.deepEqual(DEALS_PRESENTATION_COLUMNS, ["Caveat", "Candidate_Status"]);
+});
 
 test("the field map decides every column of every sampled flagship in the owner's exact order, retires every competing identifier, and the codebook lists exactly what ships", () => {
   const script = fileURLToPath(new URL("../../../scripts/field-map-markdown.mjs", import.meta.url));
@@ -595,7 +607,24 @@ test("the field map decides every column of every sampled flagship in the owner'
     sampled += 1;
     const { columns } = load(key);
     const decided = map.fields.map((f) => f.column);
-    assert.deepEqual([...decided].sort(), [...columns].sort(), `${key}: the map and the sample header disagree`);
+    const publishTime = PUBLISH_TIME_COLUMNS[dataset.id] ?? [];
+    for (const name of publishTime) {
+      assert.ok(decided.includes(name), `${key}: publish-time column ${name} has no field-map decision`);
+      assert.ok(!columns.includes(name), `${key}: publish-time column ${name} appears in the raw sample`);
+    }
+    // A column the combine step synthesizes from a sibling table of the same
+    // collection (`<sibling>__<column>` or the count `n_<sibling>`) is decided
+    // by the map but is not a column of the flagship's raw sample. It may
+    // only be decided `internal`: a synthesized join never ships unreviewed.
+    const siblings = exploreTables(dataset.id).map((t) => t.key.split("/")[1]).filter((stem) => stem !== key.split("/")[1]);
+    const synthesized = (name) => siblings.some((stem) => name === `n_${stem}` || name.startsWith(`${stem}__`));
+    for (const f of map.fields) {
+      if (!columns.includes(f.column) && synthesized(f.column)) {
+        assert.equal(f.decision, "internal", `${key}.${f.column}: a synthesized join column must stay internal`);
+      }
+    }
+    const raw = decided.filter((name) => !publishTime.includes(name) && (columns.includes(name) || !synthesized(name)));
+    assert.deepEqual([...raw].sort(), [...columns].sort(), `${key}: the map and the sample header disagree`);
     assert.equal(new Set(decided).size, decided.length, `${key}: a column is decided twice`);
     for (const f of map.fields) {
       assert.ok(FIELD_MAP_DECISIONS.includes(f.decision), `${key}.${f.column}: unknown decision ${f.decision}`);
@@ -648,7 +677,9 @@ test("the field map decides every column of every sampled flagship in the owner'
   assert.equal(owned.columns_today, 53);
   assert.match(owned.header_source, /builder declaration/);
   assert.match(owned.entity_role, /certifying_authority/);
-  assert.ok(owned.fields.some((f) => f.column === "nation_id" && f.retire?.disposition === "adjudicate"));
+  // nation_id is source-association context, not the business's identity or
+  // its certifier (1ac3272): preserved internally, never shipped or equated.
+  assert.ok(owned.fields.some((f) => f.column === "nation_id" && f.decision === "internal" && f.retire?.disposition === "internal_crosswalk"));
 });
 
 test("a JSON-array cell reads as a list in the viewer, before and after the export changes shape", () => {

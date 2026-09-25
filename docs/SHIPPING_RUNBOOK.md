@@ -287,6 +287,70 @@ from independent backups in staging; approve a specific catalog/release and test
 actual production denial/download/rollback. No AWS resource, deployment, public
 release or production pointer was changed by this procedure. NEED remains held.
 
+### Cedar Grove Gaming: consuming the pinned Lumecon release (2026-09-24)
+
+Gaming is a **Cedar Grove** collection. It is not one of the twelve Press
+shelves and never enters the ship chain below. Since the 2026-09-24
+repository split, **Cedar does not build Gaming**. The producers, the candidate,
+the leak gate, the data contract and the release/catalog build are in
+Lumecon-data (PR #9 and `claude/gaming-release-hardening`, `lumecon-data gaming ...`). Cedar
+does three things: it issues Gaming IDs, it pins one Lumecon release, and it
+serves authorized components of that release. The ownership map and the full
+cross-repository sequence are in `docs/HAVALA_INFRASTRUCTURE_REVIEW.md`. The
+server's checks are in `docs/GAMING_GROVE_INFRASTRUCTURE_NOTES.md`.
+
+1. **Build and rehearse in Lumecon-data.** Use `lumecon-data gaming build`
+   from the Cedar input root and a pinned Cedar registry snapshot, then
+   `lumecon-data gaming release` into a store outside Git. A release built from
+   PROPOSED IDs is a **rehearsal**: Cedar never pins one in production. A
+   nonproduction review server may serve one only with
+   `CEDAR_GROVE_ENVIRONMENT=review` (Lumecon: `LUMECON_ENVIRONMENT=review`);
+   that setting in a `CEDAR_PRESS_ENVIRONMENT=production` service refuses
+   every Grove download.
+2. **Issue the Gaming IDs (Cedar, the one issuer). NOT AUTHORIZED YET.**
+   Preconditions: Codex's certificate of the candidate, and an owner decision
+   ID. First do a dry run, which writes nothing:
+   `py -3 code/build.py gaming-issue-ids --proposed <Lumecon PROPOSED bindings artifact> --proposed-sha256 <its hash> --registry-sha256 <registry snapshot the proposal used, or ABSENT>`.
+   Then execute by adding
+   `--execute --certificate <c> --decision-id <d> --approved-by <name>`.
+   - The command refuses:
+     - an artifact whose hash differs from the pin;
+     - a proposal built from an older registry;
+     - a dropped, changed or reassigned live binding;
+     - an ID outside its `cedar_ids` block;
+     - a row that claims ISSUED without Cedar issuance.
+   - It writes `data/spine/gaming_id_bindings.csv` once. The prior bytes are
+     kept as `.bak_<date>_pre_issuance`.
+   - It appends to `data/spine/gaming_id_issuance_log.jsonl` and writes
+     `data/spine/gaming_id_registry_snapshots/gaming_id_bindings.<sha>.csv`.
+     Hand that SHA-256 to Lumecon.
+3. **Production release (Lumecon-data).** Lumecon rebuilds against the issued
+   snapshot and produces ONE `gaming` release, with one collection manifest and
+   components under it, plus one `cedar_grove` catalog.
+4. **Pin (Cedar PR).** Put `catalog_id`, `catalog_sha256` (over the exact
+   catalog file), `collection_id: "gaming"`, `release_id` and `manifest_sha256`
+   into `data/cedar/grove_release_pin.json`. Deploy those exact catalog bytes
+   at `CEDAR_GROVE_RELEASE_CATALOG`, and give the Lumecon API grant for
+   dataset `gaming`. Until this step the route answers `503 No released data
+   is pinned for this collection yet`, which is the intended production state
+   today.
+5. **Verify.**
+   - Run the `gaming-release-consumer` CI job at the Lumecon commit that built
+     the release.
+   - Then, as a grove or tree subscriber:
+     `GET /press/collections/gaming/full-download?release_id=<pinned>&component=<stem>`.
+     It must return the exact bytes, with `X-Cedar-SHA256` equal to the
+     component's manifest hash.
+6. **Rollback.** Revert the pin PR. The prior release is immutable in the
+   Lumecon store, and all components switch back together.
+
+Tests (Lumecon `.venv` Python, with `PYTHONPATH` set to the Lumecon-data
+`src` directory of the Lumecon commit pinned as `LUMECON_DATA_SHA` in `.github/workflows/ci.yml` and the Cedar `server`
+directory):
+`python -m unittest discover -s server/tests -t server -p "test_gaming_*.py"`.
+Set `CEDAR_REQUIRE_LUMECON_GAMING=1` to turn a missing Lumecon fixture release
+into a failure instead of a skip.
+
 <!-- END CODEX-ISOLATED-CANDIDATE-RUNBOOK -->
 
 

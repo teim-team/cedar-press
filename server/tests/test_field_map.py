@@ -165,9 +165,11 @@ class MigratedProducerDelegationTest(unittest.TestCase):
         module.qualify_rows = Mock(side_effect=ValueError("unreviewed evidence"))
         rows = [{"beneficiary_note": "original"}]
         header = ["beneficiary_note"]
-        with patch.dict(sys.modules, {module.__name__: module}):
-            with self.assertRaisesRegex(ValueError, "unreviewed evidence"):
-                pub.recompute_derived("natural-resources", header, rows)
+        with (
+            patch.dict(sys.modules, {module.__name__: module}),
+            self.assertRaisesRegex(ValueError, "unreviewed evidence"),
+        ):
+            pub.recompute_derived("natural-resources", header, rows)
         self.assertEqual(rows, [{"beneficiary_note": "original"}])
         self.assertEqual(header, ["beneficiary_note"])
         module.qualify_rows.assert_called_once_with(rows)
@@ -180,7 +182,9 @@ class MigratedProducerDelegationTest(unittest.TestCase):
         module.legislation_admission_hold = Mock(return_value="evidence_hold")
         row = {"bill_id": "fixture-id"}
         with patch.dict(sys.modules, {module.__name__: module}):
-            self.assertEqual(pub.is_publication_eligible(row), (False, "evidence_hold", pub.WITHHOLD))
+            self.assertEqual(
+                pub.is_publication_eligible(row), (False, "evidence_hold", pub.WITHHOLD)
+            )
         module.legislation_admission_hold.assert_called_once_with(row)
 
 
@@ -1081,7 +1085,8 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_an_unmapped_collection_is_left_alone(self):
         header = ["facility_id", "name", "built_date"]
         rows = [{"facility_id": "1", "name": "x", "built_date": "2026-01-01"}]
-        result = pub.apply_field_map("gaming", header, rows, set(header))
+        # Fictional id: gaming now has a generated Grove field-map entry.
+        result = pub.apply_field_map("fixture-unmapped", header, rows, set(header))
         self.assertEqual(result, {"mapped": False})
         self.assertEqual(header, ["facility_id", "name", "built_date"])
 

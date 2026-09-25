@@ -47,7 +47,8 @@ class ProducerRegistrationTest(unittest.TestCase):
             args = argparse.Namespace(collection="legislation", source=str(source),
                                       output_root=str(base / "store"), as_of="2026-09-24")
             with (patch.dict(sys.modules, modules),
-                  patch.object(publication, "field_map", return_value={"legislation": {"fixture": "map"}}),
+                  patch.object(publication, "field_map",
+                               return_value={"legislation": {"fixture": "map"}}),
                   patch.object(publication, "register", return_value={}),
                   patch.object(publication, "scopes", return_value={}),
                   contextlib.redirect_stdout(io.StringIO())):
@@ -63,7 +64,8 @@ class ProducerRegistrationTest(unittest.TestCase):
     def test_twelve_collection_allowlist_excludes_other_products(self):
         self.assertEqual(set(PIPELINE.RELEASE_PILOTS), {
             "funding", "federal-register", "legislation", "deals", "nagpra", "lobbying",
-            "contractors", "subcontracting", "native-owned-businesses", "nonprofits", "natural-resources", "need",
+            "contractors", "subcontracting", "native-owned-businesses", "nonprofits",
+            "natural-resources", "need",
         })
 
     def test_blocked_adapter_streams_source_and_returns_failure_receipt(self):

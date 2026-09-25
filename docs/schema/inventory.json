@@ -14920,8 +14920,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 26,
-   "mentioned_outside_history": 25,
+   "mentions": 27,
+   "mentioned_outside_history": 26,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -15300,8 +15300,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 20,
-   "mentioned_outside_history": 19,
+   "mentions": 21,
+   "mentioned_outside_history": 20,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -19276,8 +19276,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 3,
-   "mentioned_outside_history": 3,
+   "mentions": 4,
+   "mentioned_outside_history": 4,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -20074,7 +20074,7 @@
    "mentions": 7,
    "mentioned_outside_history": 7,
    "oneoff_shaped": false,
-   "has_run_receipt": true,
+   "has_run_receipt": false,
    "last_modified": "2026-09-23",
    "lines": 742,
    "operational_role": "unresolved",
@@ -22923,8 +22923,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 16,
-   "mentioned_outside_history": 15,
+   "mentions": 17,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -24757,8 +24757,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 5,
-   "mentioned_outside_history": 5,
+   "mentions": 6,
+   "mentioned_outside_history": 6,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -27799,8 +27799,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 3,
-   "mentioned_outside_history": 2,
+   "mentions": 4,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -28172,6 +28172,7 @@
    "writes": [
     "cedar_identity_register.csv",
     "entity_aliases.csv",
+    "gaming.csv",
     "r.csv",
     "x.csv",
     "x__10.csv"
@@ -28188,12 +28189,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 6,
-   "mentioned_outside_history": 5,
+   "mentions": 8,
+   "mentioned_outside_history": 7,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 1028,
+   "lines": 1074,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [],
@@ -28227,116 +28228,132 @@
    },
    "writer_evidence": [
     {
-     "line": 750,
+     "line": 775,
      "operation": ".write_text",
      "target": "<unresolved>/customer/x.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f152bb73613b90fd3a8fe610c4f124aaf6f2f8d939b114cd21c9d49b1a238827"
+     "signature": "1a65436877cb4814c1a9dd0b7489dfd0390a3ab30c5617233b31d60d2c4eacb2"
     },
     {
-     "line": 777,
+     "line": 785,
      "operation": ".write_text",
      "target": "<unresolved>/customer/x.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f152bb73613b90fd3a8fe610c4f124aaf6f2f8d939b114cd21c9d49b1a238827"
+     "signature": "1a65436877cb4814c1a9dd0b7489dfd0390a3ab30c5617233b31d60d2c4eacb2"
     },
     {
-     "line": 790,
+     "line": 795,
+     "operation": ".write_text",
+     "target": "<unresolved>/customer/gaming.csv",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "d164c49be5b4199d54de12f1f3d54f77871b8d0855dbc566581a72d192bae0b7"
+    },
+    {
+     "line": 823,
      "operation": ".write_text",
      "target": "<unresolved>/customer/x.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f152bb73613b90fd3a8fe610c4f124aaf6f2f8d939b114cd21c9d49b1a238827"
+     "signature": "1a65436877cb4814c1a9dd0b7489dfd0390a3ab30c5617233b31d60d2c4eacb2"
     },
     {
-     "line": 806,
+     "line": 836,
+     "operation": ".write_text",
+     "target": "<unresolved>/customer/x.csv",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "1a65436877cb4814c1a9dd0b7489dfd0390a3ab30c5617233b31d60d2c4eacb2"
+    },
+    {
+     "line": 852,
      "operation": ".write_text",
      "target": "<unresolved>/data/clean/cedar_identifier_ledger_final.csv",
      "scope": "governed_table",
      "table": "cedar_identifier_ledger_final.csv",
-     "signature": "c698ad65389d729cc677bdde0f7d66513d3ab9d9090f15bb8172d8d186d25c67"
+     "signature": "930276f61ae7685553eb525c85d6bb6e669b09bc068c049cb8ec2b291b7a74c1"
     },
     {
-     "line": 810,
+     "line": 856,
      "operation": ".write_text",
      "target": "<unresolved>/data/clean/entity_aliases.csv",
      "scope": "governed_table",
      "table": "entity_aliases.csv",
-     "signature": "e2bfbb16e336541d13986a24e23d852045894184e292e6e1a929ba0c835e21e9"
+     "signature": "2097d4a6f137db56c9b02a91c1ac95d9585279a8f32ce0ed91c358eeaa3b7c92"
     },
     {
-     "line": 812,
+     "line": 858,
      "operation": ".write_text",
      "target": "<unresolved>/data/spine/cedar_identity_register.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "072d68707ef03f94d0ed63135471d045bf755cb705f2b246ab18e7bcf8c1a199"
+     "signature": "83e3cfe575f44579e681e00ea2b7b8e4bc0149889b13df97d5b381419ca1b7a8"
     },
     {
-     "line": 839,
+     "line": 885,
      "operation": ".write_text",
      "target": "<unresolved>/clean/federal_funding_transactions.csv",
      "scope": "governed_table",
      "table": "federal_funding_transactions.csv",
-     "signature": "ff437eba0bd51a42374cd44e2b92d0ebc03313bed49b6d2de343992294c548a7"
+     "signature": "f1a5256ca233082d0927a813457fa041f9cd98c3440459e2c0b8627c8b21d207"
     },
     {
-     "line": 843,
+     "line": 889,
      "operation": "_RULING_OVERRIDE.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b41985e472b473853747ef05efe70c399100021dc7200b19ac4c91bf9f3c2f25"
+     "signature": "fc13c5200766538d9c8aaee4a3f480ac41ea7df0b3ccd9e118ae4a995b687389"
     },
     {
-     "line": 860,
+     "line": 906,
      "operation": ".write_text",
      "target": "<unresolved>/docs/datasets/_descriptors.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "4ad4323af9971e285757aab4667f7733cad0bd6c0b55a8a52bd398bb49035702"
+     "signature": "350d3e3b769fd18cc5861259262f41f0ed3ab46a002d15dc8004082d49bf3651"
     },
     {
-     "line": 865,
+     "line": 911,
      "operation": ".write_text",
      "target": "<unresolved>/src/features/grove/pressCatalog.js",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "556adc175aec099378ddc6805696784133d55a8b62481aef329d4f5ee49d29bd"
+     "signature": "8cbb3578026c5acf6e2e12e14ac8c9e1c41f563d179adedda17f3f3c5c4e576b"
     },
     {
-     "line": 882,
+     "line": 928,
      "operation": ".write_text",
      "target": "<unresolved>/MANIFEST.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "e9e0d7a0cfb4597001a9944646442e21f745de7771e522ab79ccc20a26f16f62"
+     "signature": "d1fd4bfe7fe19a95f9e31dd2e7043ce4f5153f944eb03077ac578dbe916aacec"
     },
     {
-     "line": 886,
+     "line": 932,
      "operation": ".write_text",
      "target": "<unresolved>/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "571913569b1f55ee5270ef39c1ff0d41ef99db91ccf1cb6ba64426e75f4a0015"
+     "signature": "73180c205d9ed492cdc99a820c77ffd0a29fa32bc89e4c8af0639d4522581bcb"
     },
     {
-     "line": 939,
+     "line": 985,
      "operation": ".write_text",
      "target": "<unresolved>/dist/review/samples/gaming/x__10.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "e905c2ddaff6f700eaee958332b81857a71cf0b4b923372d385a5a2b6ba1c918"
+     "signature": "e5d6c7dc1c3462175b2da1c0b7e154d0e9f05c4594a4cdfe6177d3563df27c46"
     },
     {
-     "line": 958,
+     "line": 1004,
      "operation": ".write_text",
      "target": "<unresolved>/dist/review/samples/gaming/x__10.csv",
      "scope": "protected_surface",
      "table": null,
-     "signature": "e905c2ddaff6f700eaee958332b81857a71cf0b4b923372d385a5a2b6ba1c918"
+     "signature": "e5d6c7dc1c3462175b2da1c0b7e154d0e9f05c4594a4cdfe6177d3563df27c46"
     }
    ],
    "writer_analysis_error": null,
@@ -28480,8 +28497,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-17",
@@ -29087,7 +29104,7 @@
    "mentions": 3,
    "mentioned_outside_history": 3,
    "oneoff_shaped": true,
-   "has_run_receipt": true,
+   "has_run_receipt": false,
    "last_modified": "2026-09-23",
    "lines": 331,
    "operational_role": "unresolved",
@@ -35474,8 +35491,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 17,
-   "mentioned_outside_history": 17,
+   "mentions": 18,
+   "mentioned_outside_history": 18,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -35547,8 +35564,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 12,
-   "mentioned_outside_history": 12,
+   "mentions": 13,
+   "mentioned_outside_history": 13,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -36428,8 +36445,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 13,
-   "mentioned_outside_history": 12,
+   "mentions": 14,
+   "mentioned_outside_history": 13,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -36722,12 +36739,12 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 22,
-   "mentioned_outside_history": 21,
+   "mentions": 23,
+   "mentioned_outside_history": 22,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 1095,
+   "lines": 1096,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -36736,7 +36753,8 @@
     "code/741_hub_grain_and_rebuild.py",
     "code/cedar_ids.py",
     "code/cedar_pipeline.py",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_identifier_retirement.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -36762,7 +36780,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "7c588971af6da60f9605c27648025bb4e8c44257c478f563469ae5278dcfe355"
+     "signature": "d5ba89a8e8bd998b517410ffaab206aceee114d85d0f2620249099aed48cbf8b"
     },
     {
      "line": 344,
@@ -36770,7 +36788,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "5013418b303cc56df32ac594aeb49a6dfda8d1617d354bf3222dc1cebe5f200c"
+     "signature": "51bbc6a240153cd24a239ebde66c30c3225714362f74bb756871883a2f85f20c"
     },
     {
      "line": 358,
@@ -36778,23 +36796,23 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "5013418b303cc56df32ac594aeb49a6dfda8d1617d354bf3222dc1cebe5f200c"
+     "signature": "51bbc6a240153cd24a239ebde66c30c3225714362f74bb756871883a2f85f20c"
     },
     {
-     "line": 984,
+     "line": 985,
      "operation": ".write_text",
      "target": "<unresolved>/logs/163_promote_nho_universe.check.log",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f7bdc264279c2a7dfe0b300a2cc9c820cee172ee23ad0d252ce2fd7a2845fc9b"
+     "signature": "e3372426993d355c5cfbd1a23208beda8ee7ff8b4cb5e490fcab7c49f4d56053"
     },
     {
-     "line": 1089,
+     "line": 1090,
      "operation": ".write_text",
      "target": "<unresolved>/logs/163_promote_nho_universe.log",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "310336772ba72191da9ecbbc8b5860fb054a401d43480f23f0358187b3b36f07"
+     "signature": "c71c9337297d25c90b3fcdc565b00c60ce58a09ceaed909beaa29766e7b81288"
     }
    ],
    "writer_analysis_error": null,
@@ -43012,8 +43030,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 19,
-   "mentioned_outside_history": 18,
+   "mentions": 20,
+   "mentioned_outside_history": 19,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -47219,8 +47237,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
+   "mentions": 5,
+   "mentioned_outside_history": 5,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -51478,7 +51496,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "bdd8232a3a7d7632d878cb3dbe93dfbff86234f40d4acc6ac20b0b18e5f44c11"
+     "signature": "4c23bf27a9783cc1b495e6c0df8b594395e0d57510e49e4718ad574bec7d9c8c"
     },
     {
      "line": 488,
@@ -51486,7 +51504,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "2d3d09341dd9b125d54946bba959a7d47cf7e499517fd232446fdfec5d6367a6"
+     "signature": "e545f2b16b6965367ca12e09ec3e8862d4adb1faf590dcd11f3d024587ca9127"
     }
    ],
    "writer_analysis_error": null,
@@ -51800,8 +51818,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 93,
-   "mentioned_outside_history": 92,
+   "mentions": 94,
+   "mentioned_outside_history": 93,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -52164,19 +52182,20 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 10,
-   "mentioned_outside_history": 10,
+   "mentions": 12,
+   "mentioned_outside_history": 12,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 371,
+   "lines": 375,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
     "code/741_hub_grain_and_rebuild.py",
     "code/cedar_pipeline.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_identifier_retirement.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -52194,28 +52213,28 @@
    },
    "writer_evidence": [
     {
-     "line": 326,
+     "line": 330,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "264593fd0766abcb3da8e5089d9f4d0f633f691e177487602b1e0e182a4581f2"
+     "signature": "f55c3aa15b4ea68afa10d39b6f4caebfc29f6487ea84a264606a2d291549e8a3"
     },
     {
-     "line": 330,
+     "line": 334,
      "operation": "open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "02051e5976373e2fb6f3bb3f32dbc6320a77bdd78dfb285bfcec284e72568bb3"
+     "signature": "7079bee5436a7ba0fa37b00abc2212e6167fd743217d268a33bbea85edafde8f"
     },
     {
-     "line": 341,
+     "line": 345,
      "operation": "os.replace",
      "target": "<unresolved>/data/spine/cedar_entity_spine.csv",
      "scope": "protected_surface",
      "table": "cedar_entity_spine.csv",
-     "signature": "9df4ff28d0c581bdad11027253184c2f46af99fdf5129867dea2fd520a2f0678"
+     "signature": "8951e3b1ad82e9570eaaddb31cd8667f2590d22c1e9ba408deaedbd89b788594"
     }
    ],
    "writer_analysis_error": null,
@@ -53813,8 +53832,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 3,
-   "mentioned_outside_history": 3,
+   "mentions": 2,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -54520,8 +54539,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 44,
-   "mentioned_outside_history": 43,
+   "mentions": 46,
+   "mentioned_outside_history": 45,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
@@ -56010,18 +56029,19 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 9,
-   "mentioned_outside_history": 8,
+   "mentions": 10,
+   "mentioned_outside_history": 9,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 1940,
+   "lines": 1941,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
     "code/741_hub_grain_and_rebuild.py",
     "code/cedar_pipeline.py",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_identifier_retirement.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -56047,44 +56067,44 @@
    },
    "writer_evidence": [
     {
-     "line": 1192,
+     "line": 1193,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "808c27eefcabe034e983a5eb4eb4ebf185c7e1b70884caf7323eb5e01f2a6c6c"
+     "signature": "60533598f00ec020fa4a649116314ce7ee791eef734f3a554033fe7128e8bb13"
     },
     {
-     "line": 1193,
+     "line": 1194,
      "operation": "SPINE_CSV.open",
      "target": "<unresolved>/data/spine/cedar_entity_spine.csv",
      "scope": "protected_surface",
      "table": "cedar_entity_spine.csv",
-     "signature": "50e624199e6f61a88c4b1b3955a53e7eb37ffcfa7010406f3bf2d0af5d92631e"
+     "signature": "3eafaac6480e326871045e9cc768b018ce9f4c2daac05b2fb6e0e5f581c921f9"
     },
     {
-     "line": 1202,
+     "line": 1203,
      "operation": "prom_path.open",
      "target": "<unresolved>/review/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "679d37d89024eb8cdd248630a9eb99a1bdf29491541e6be35a56724c9691f605"
+     "signature": "cb3e20b997e2d850b98e3171565f72e2ab201a07a2de36a30c5df78f6caf06c0"
     },
     {
-     "line": 1221,
+     "line": 1222,
      "operation": "ref_path.open",
      "target": "<unresolved>/review/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "02f9e2210f09e644d7f3d0bed59d692911e915035db8fe51a63b3ea61c44fe5c"
+     "signature": "c2bcaff97f163540b6fb44951c0ffa6e78cc0b5198d1b7a884b835fbafc10184"
     },
     {
-     "line": 1842,
+     "line": 1843,
      "operation": "OUT.write_text",
      "target": "<unresolved>/docs/ORG_UNIVERSE_AUDIT.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ee392f8ff80c06faa7600291c7bd5238b88174c9276a1cc2186c764a01860438"
+     "signature": "1c1609259b467016300169b8018356bf6f78750fa3509f20ad1be59a5465d5de"
     }
    ],
    "writer_analysis_error": null,
@@ -56428,12 +56448,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 15,
-   "mentioned_outside_history": 15,
+   "mentions": 16,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 218,
+   "lines": 219,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -56441,7 +56461,8 @@
     "code/cedar_domain.py",
     "code/cedar_ids.py",
     "code/cedar_pipeline.py",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_identifier_retirement.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -56459,28 +56480,28 @@
    },
    "writer_evidence": [
     {
-     "line": 188,
+     "line": 189,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "1371a590888e32a6b15cd9eb23b91a551b45a3bf7f966a0ba09496a9caab7dd7"
+     "signature": "3e929de907482a991c7c63bd15be5fa66dfd4734b10c752dd249598b4e5e138b"
     },
     {
-     "line": 189,
+     "line": 190,
      "operation": "open",
      "target": "<unresolved>/data/spine/cedar_entity_spine.csv",
      "scope": "protected_surface",
      "table": "cedar_entity_spine.csv",
-     "signature": "bcb8f60d9ca2e1b862a6023f8df117d2fd12984578475ffe7907cf625cc8b4a7"
+     "signature": "6a905b4e16ba0141fe3f0a1b5e90cf6d570a153a2551a7545797d749f67308ff"
     },
     {
-     "line": 198,
+     "line": 199,
      "operation": "open",
      "target": "<unresolved>/review/village_corp_namesake_pairs.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "48df9d66a35669dd5298e335f59954a7c304dd00bf0f5d8016e378274d8cb82d"
+     "signature": "640f01fdab0c39dc70e61de3898811d8f1dec8d0a378b12d2a2bca6fa1f54c27"
     }
    ],
    "writer_analysis_error": null,
@@ -59104,8 +59125,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 10,
-   "mentioned_outside_history": 10,
+   "mentions": 11,
+   "mentioned_outside_history": 11,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -59189,8 +59210,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 2,
-   "mentioned_outside_history": 2,
+   "mentions": 3,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -60669,12 +60690,12 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 25,
-   "mentioned_outside_history": 25,
+   "mentions": 26,
+   "mentioned_outside_history": 26,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 610,
+   "lines": 611,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -60683,7 +60704,8 @@
     "code/741_hub_grain_and_rebuild.py",
     "code/cedar_ids.py",
     "code/cedar_pipeline.py",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_identifier_retirement.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -60706,31 +60728,31 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "d18487f350f09cbf01cc214e8f01969aa74d575c0e1c0e349bb23d54dae728b0"
+     "signature": "d5a1aac19a2e418f422dcaff240b95cc2de81a1fb752a6600e48cf8c8bd60f83"
     },
     {
-     "line": 510,
+     "line": 511,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "af0d94ecd347140e3cb5239b52a2ff804bf17a7a442d3e1d4595b3515adde7f9"
+     "signature": "618afd87bddcb2340b0e8d96863380668047e9c167d9f8d92d2ef5502252d5cd"
     },
     {
-     "line": 512,
+     "line": 513,
      "operation": "open",
      "target": "<unresolved>/data/spine/cedar_entity_spine.csv",
      "scope": "protected_surface",
      "table": "cedar_entity_spine.csv",
-     "signature": "a6a7596d4f79fb5599d49000825695e3d2774b9ab10dd1e9fb3a94636f528653"
+     "signature": "b85c4bd7a5a5663f1cd6f14776a9eaae96b7c97759041212e6439a62b458a508"
     },
     {
-     "line": 605,
+     "line": 606,
      "operation": ".write_text",
      "target": "<unresolved>/logs/61_add_nho_intertribal.log",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f08a0f17cc451299537fd2779be8ae7a774cd42971841150866079b07c7375dd"
+     "signature": "010ef4ccc2bf0e0afe7a72abdb8cf70156ee69b975aa916aa234948b4a2fe6ec"
     }
    ],
    "writer_analysis_error": null,
@@ -62738,19 +62760,20 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 23,
-   "mentioned_outside_history": 22,
+   "mentions": 24,
+   "mentioned_outside_history": 23,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 1707,
+   "lines": 1708,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
     "code/741_hub_grain_and_rebuild.py",
     "code/cedar_pipeline.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_identifier_retirement.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -62782,7 +62805,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "37815917326ff9e4654d6da38c6cdd8ded31b72e0057ad3c885aecff3b8cc3cb"
+     "signature": "f487031b0a33e20df23a45fffb944ffe9c27d65f183107b05fc1ef4c2d914f0f"
     },
     {
      "line": 515,
@@ -62790,7 +62813,7 @@
      "target": "<unresolved>/data/raw/external/tcu_cdfi/aihec_tcu_roster_2026-08-06.txt",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "9c9ed05985159523282bab37e09dba82374753c39056457c1bec618c8ecf9a97"
+     "signature": "48c35b3ca497d3e277d06e6d033aa036f7a273f11b90e41d7cf0020f95512ae5"
     },
     {
      "line": 895,
@@ -62798,7 +62821,7 @@
      "target": "<unresolved>/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "8852132cdb58f879749e3716ee9a3b4af0719f7cffa91f214aecd42856ae6853"
+     "signature": "81a9e8982c81b6c8609ef67db90b7cbd310189e0b11524665a3d566fb01e0794"
     },
     {
      "line": 909,
@@ -62806,7 +62829,7 @@
      "target": "<unresolved>/data/raw/external/tcu_cdfi/_org_fetch_state.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "1b6663b4f515e7f85dfe939db2d0de0a1d331d855c7d101a9ec241b2e41ebbe0"
+     "signature": "d30c46f9d0e18fd0acf7f8e33c70dbb8bb5e62aee47adaf8fec49cec4ecb465f"
     },
     {
      "line": 913,
@@ -62814,31 +62837,31 @@
      "target": "<unresolved>/data/raw/external/tcu_cdfi/_org_fetch_state.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "1b6663b4f515e7f85dfe939db2d0de0a1d331d855c7d101a9ec241b2e41ebbe0"
+     "signature": "d30c46f9d0e18fd0acf7f8e33c70dbb8bb5e62aee47adaf8fec49cec4ecb465f"
     },
     {
-     "line": 1208,
+     "line": 1209,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "57c70feac8e8ed93eb7f519dce68bbbbba9f3b66f741580bd2dcff1336606538"
+     "signature": "91d2687348273502721406360a1b75ec68c4d1111e3c9980a387f1dd914b1b23"
     },
     {
-     "line": 1209,
+     "line": 1210,
      "operation": "open",
      "target": "<unresolved>/data/spine/cedar_entity_spine.csv",
      "scope": "protected_surface",
      "table": "cedar_entity_spine.csv",
-     "signature": "700ace43ec2d80f69235d555445576c51d7c799c06bbbc91ce0c752fcc1e311c"
+     "signature": "cc2d80e465e622c5767b54458311965c117292d9c66a67e1491027523bcee5c9"
     },
     {
-     "line": 1683,
+     "line": 1684,
      "operation": "p.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "d107e75e8ae5210d040b249931d44bfd0c2976797c9da9f5852f0d89a109c4ba"
+     "signature": "6e06b3b17d54eb883aea8542ea9f415e4165d05396d61237296bd0fcecb8f984"
     }
    ],
    "writer_analysis_error": null,
@@ -63355,12 +63378,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 17,
-   "mentioned_outside_history": 17,
+   "mentions": 18,
+   "mentioned_outside_history": 18,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 1490,
+   "lines": 1491,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -63368,7 +63391,8 @@
     "code/741_hub_grain_and_rebuild.py",
     "code/cedar_pipeline.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_identifier_retirement.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -63397,7 +63421,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "fc0b5931eaf8c657908731f25106f1181ae49aa9f3372a7c8bf15e56db3a6fdf"
+     "signature": "551b74b1a877a5ac054abd3771111c2a358f973b31d7eb2a77ada5350742158b"
     },
     {
      "line": 289,
@@ -63405,55 +63429,55 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "280db1b50ff8458aa28c10576cafec3cd2e72bee8f38ce950aa3444e158af158"
+     "signature": "19cc0dabd4d922c7355ab4dd1fbffad1f053d2e3183b1ba24a9818cb1e0912e3"
     },
     {
-     "line": 1112,
+     "line": 1113,
      "operation": "shutil.copy2",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "8de6d6db686a2b3cd9a4d460284159cd084bbd5e2659c82e8b2ff024632adb39"
+     "signature": "c3d5ea1a2172b750dc5db40ba696691b4b3ede9ba6fe38e7f7c43bb05f53c2f0"
     },
     {
-     "line": 1113,
+     "line": 1114,
      "operation": "open",
      "target": "<unresolved>/data/spine/cedar_entity_spine.csv",
      "scope": "protected_surface",
      "table": "cedar_entity_spine.csv",
-     "signature": "7f515a9bb54a0cb044cb30a1407e0afb6bcd1fcda41af6c5d8096149587f73c9"
+     "signature": "c014a898bdbbaeed3b2487f33d56eacbebbfa2763be1bf8a9d86fd24eddd3fc9"
     },
     {
-     "line": 1128,
+     "line": 1129,
      "operation": "open",
      "target": "<unresolved>/data/clean/bie_uio_identifier_links.csv",
      "scope": "governed_table",
      "table": "bie_uio_identifier_links.csv",
-     "signature": "be5752ddafa03bead51b8cde24b543ad0454daafa3664c590d2fb375035d9038"
+     "signature": "547ddb65f8aac229a6bbf6afd6e1c8725c2b0d0b8cd35830589b509be1fd0cdd"
     },
     {
-     "line": 1167,
+     "line": 1168,
      "operation": "open",
      "target": "<unresolved>/data/clean/bie_uio_dollars_by_entity.csv",
      "scope": "governed_table",
      "table": "bie_uio_dollars_by_entity.csv",
-     "signature": "8116da165b7e7900e2144a43d95d6da99256cf99442eda24a7e5e3ab79a688be"
+     "signature": "780ddc092b2ada5e1bb5649751ef06c2e54a4ec8fe8f9078dd97617c41e67abb"
     },
     {
-     "line": 1177,
+     "line": 1178,
      "operation": "open",
      "target": "<unresolved>/review/bie_uio_refusals.csv",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "e75423e197e1a51cc9dfcf16f66322c13a347c36c624b323f0205cc5d34c9b8d"
+     "signature": "3e413066a3f851560452e2ab74f462a478eaa2533789d23d77ee7480ca5b023d"
     },
     {
-     "line": 1485,
+     "line": 1486,
      "operation": "p.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "91b5d68dfb1f922af6bce4d9fb78fdb44a19ddcd8b08fad00d03ead0901b92e1"
+     "signature": "59b482718a0f7e7404b7f5148852b8c6560a4b2167da8315353ff804e7465a2a"
     }
    ],
    "writer_analysis_error": null,
@@ -64831,8 +64855,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 10,
-   "mentioned_outside_history": 10,
+   "mentions": 11,
+   "mentioned_outside_history": 11,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -65044,8 +65068,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 16,
-   "mentioned_outside_history": 15,
+   "mentions": 17,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -65811,8 +65835,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 16,
-   "mentioned_outside_history": 15,
+   "mentions": 17,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -67292,8 +67316,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 39,
-   "mentioned_outside_history": 39,
+   "mentions": 40,
+   "mentioned_outside_history": 40,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -68527,8 +68551,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 15,
-   "mentioned_outside_history": 15,
+   "mentions": 16,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -68673,8 +68697,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 25,
-   "mentioned_outside_history": 24,
+   "mentions": 26,
+   "mentioned_outside_history": 25,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -69830,8 +69854,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 25,
-   "mentioned_outside_history": 24,
+   "mentions": 26,
+   "mentioned_outside_history": 25,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -70010,8 +70034,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 7,
-   "mentioned_outside_history": 7,
+   "mentions": 8,
+   "mentioned_outside_history": 8,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -71938,8 +71962,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 3,
-   "mentioned_outside_history": 3,
+   "mentions": 4,
+   "mentioned_outside_history": 4,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
@@ -73614,6 +73638,48 @@
    "registration_status": "declared_dependency"
   },
   {
+   "script": "audit_retired_ids.py",
+   "dir": "",
+   "number": "",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 1,
+   "mentioned_outside_history": 1,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-25",
+   "lines": 70,
+   "operational_role": "unresolved",
+   "collection_output_entrypoints": [],
+   "static_consumers": [],
+   "runtime_consumer_candidates": [],
+   "operational_call_evidence": {
+    "publication_calls": [],
+    "validation_calls": []
+   },
+   "unknown_io_literals": [],
+   "embedded_test_functions": 0,
+   "standalone_test_evidence": {
+    "unittest_classes": [],
+    "pytest_import": false,
+    "filename_convention": false,
+    "assertion_nodes": 0,
+    "local_check_harness_calls": []
+   },
+   "writer_evidence": [],
+   "writer_analysis_error": null,
+   "writer_risk": "P3_no_detected_write_not_readonly_certified",
+   "undeclared_governed_tables": [],
+   "registration_status": "unresolved_not_authorized"
+  },
+  {
    "script": "build.py",
    "dir": "",
    "number": "",
@@ -73640,12 +73706,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 87,
-   "mentioned_outside_history": 86,
+   "mentions": 94,
+   "mentioned_outside_history": 93,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-25",
-   "lines": 732,
+   "lines": 905,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -73656,6 +73722,7 @@
     "code/521_inventory.py",
     "code/build_test.py",
     "code/cedar_pipeline.py",
+    "data/cedar/grove_release_pin.json",
     "docs/defect_class_retro_sweep.json",
     "docs/releases/nagpra-0de7096/manifest.json",
     "docs/releases/nagpra-6c92a41/manifest.json",
@@ -73663,6 +73730,8 @@
     "docs/releases/natural-resources-6c92a41/manifest.json",
     "docs/releases/subcontracting-6c92a41/manifest.json",
     "docs/schema/dataset_contracts.json",
+    "server/tests/test_gaming_issuance.py",
+    "server/tests/test_gaming_release.py",
     "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [
@@ -73699,6 +73768,7 @@
     "fpds_uei_cage_map.csv",
     "fpds_uei_edges.csv",
     "fragments -> codebook_master.csv",
+    "gaming_id_bindings.csv",
     "need_enterprise_relations.csv",
     "need_enterprises.csv",
     "need_entity_dual_role.csv",
@@ -73723,10 +73793,10 @@
     {
      "line": 431,
      "operation": "stamp.write_text",
-     "target": "<unresolved>/docs/RELEASE_STAMP.json",
+     "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f120bd6146f157dd6ea2a8fb36d40131147b1930234382d1a8eeacce688862ff"
+     "signature": "7cced810e5f528535f37b16754a9be45b3c81344fd375f1aeaf3786d5d6f940c"
     },
     {
      "line": 517,
@@ -73734,7 +73804,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "3ca61c5f175c91d99e60ae05389c1e82ccfff6119ec45d2215db5b79aa9611ae"
+     "signature": "4f77ca7384c0b7313d034ddaed12f4a6f13aacc509e9febf2dc53bdb158dc839"
     },
     {
      "line": 519,
@@ -73742,7 +73812,7 @@
      "target": "<unresolved>/requirements.txt",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "265416ea31202eb4a4ea7da07c710f122fb3d9028e70483245d1ef5a59bdff44"
+     "signature": "b48acd4fceed13d27f06df21b3fc3a60f3330ee991799bcb3930ab148d1e1e52"
     },
     {
      "line": 525,
@@ -73750,7 +73820,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "3ca61c5f175c91d99e60ae05389c1e82ccfff6119ec45d2215db5b79aa9611ae"
+     "signature": "4f77ca7384c0b7313d034ddaed12f4a6f13aacc509e9febf2dc53bdb158dc839"
     },
     {
      "line": 534,
@@ -73758,7 +73828,7 @@
      "target": "<unresolved>/logs/need-candidate.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "f9f0725e17dae1c07a999311e9dd68da5eb01aa245ffe897733119d4e6540044"
+     "signature": "8b22758bd3f47ddec2f4bcb7ddc01a0082d7699fc7e42c40e4e9aa233abb9262"
     },
     {
      "line": 553,
@@ -73766,11 +73836,51 @@
      "target": "<unresolved>/logs/<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "985c2ae69aba389205f99d559d00b909f4c1cc256fa478e6d1fd0d60fbae42fc"
+     "signature": "a3299bfc91273f550c50111cef8699b8e1d41781c49131ae7c40ccfe5d66f271"
+    },
+    {
+     "line": 840,
+     "operation": "backup.write_bytes",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "2465da71b8a0db332e518f40174b61d860ae7e953a14e38120dd9db7bf909b50"
+    },
+    {
+     "line": 842,
+     "operation": "tmp.write_bytes",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "d8247720266abc41645bbab216fb15c3b53c1bd29b3ee99c54395fefae12591c"
+    },
+    {
+     "line": 843,
+     "operation": "os.replace",
+     "target": "<unresolved>/data/spine/gaming_id_bindings.csv",
+     "scope": "protected_surface",
+     "table": null,
+     "signature": "914cf168c46af750e6820c7239081def102657ac7460daa6d673d4cee7a986d9"
+    },
+    {
+     "line": 846,
+     "operation": "snapshot.write_bytes",
+     "target": "<unresolved>/data/spine/gaming_id_registry_snapshots/<unresolved>",
+     "scope": "protected_surface",
+     "table": null,
+     "signature": "6c84936c70431aa9ffb7b5f0fa633ce7597aec10679616a096868c3e4643dc57"
+    },
+    {
+     "line": 850,
+     "operation": ".open",
+     "target": "<unresolved>/gaming_id_issuance_log.jsonl",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "9000d7d3ed58de68d353b25946852204236378311fd06c48b19b35b91806bc58"
     }
    ],
    "writer_analysis_error": null,
-   "writer_risk": "P2_unresolved_write_target",
+   "writer_risk": "P1_protected_surface_write_candidate",
    "undeclared_governed_tables": [],
    "registration_status": "unresolved_not_authorized"
   },
@@ -73944,12 +74054,12 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 3,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-23",
-   "lines": 47,
+   "lines": 62,
    "operational_role": "test/fixture",
    "collection_output_entrypoints": [],
    "static_consumers": [],
@@ -73961,10 +74071,11 @@
    "unknown_io_literals": [
     "one.csv"
    ],
-   "embedded_test_functions": 3,
+   "embedded_test_functions": 5,
    "standalone_test_evidence": {
     "unittest_classes": [
-     "PlanSafetyTests"
+     "PlanSafetyTests",
+     "GamingIsNotAPressPilotTests"
     ],
     "pytest_import": false,
     "filename_convention": true,
@@ -74898,7 +75009,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 1281,
+   "lines": 1357,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -74906,6 +75017,7 @@
     "code/1072_tribally_owned_enterprises.py",
     "code/1129_place_ids.py",
     "code/1135_full_dataset_review_bundle.py",
+    "code/1169_release_verify.py",
     "code/158_extend_gaming_facilities.py",
     "code/241_promote_individual_native_firms_in_place.py",
     "code/264_add_missing_osha_tribal_facilities.py",
@@ -74920,13 +75032,17 @@
     "code/84_build_nigc_regions.py",
     "code/85_build_admin_region_crosswalk.py",
     "code/97_build_aliases_and_relationships.py",
+    "code/audit_retired_ids.py",
     "code/build.py",
-    "docs/CONSOLIDATION_DOC_INVENTORY.json"
+    "code/cedar_publication.py",
+    "docs/CONSOLIDATION_DOC_INVENTORY.json",
+    "server/tests/test_gaming_issuance.py"
    ],
    "runtime_consumer_candidates": [
     "code/1072_tribally_owned_enterprises.py",
     "code/1129_place_ids.py",
     "code/1135_full_dataset_review_bundle.py",
+    "code/1169_release_verify.py",
     "code/264_add_missing_osha_tribal_facilities.py",
     "code/284_audit_nondeterministic_keys.py",
     "code/328_audit_id_service_bypass.py",
@@ -74936,7 +75052,10 @@
     "code/418_build_entity_alias_layer.py",
     "code/84_build_nigc_regions.py",
     "code/85_build_admin_region_crosswalk.py",
-    "code/97_build_aliases_and_relationships.py"
+    "code/97_build_aliases_and_relationships.py",
+    "code/audit_retired_ids.py",
+    "code/build.py",
+    "code/cedar_publication.py"
    ],
    "operational_call_evidence": {
     "publication_calls": [],
@@ -74977,20 +75096,20 @@
    },
    "writer_evidence": [
     {
-     "line": 244,
+     "line": 303,
      "operation": "os.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "22acbc0c29b9aa9b377b0306a8c5913cc230c4e5fe19c0e29ffacb16dcd9c200"
+     "signature": "a0df32eb39491d46d9ce8a860fb3552102b0ebc17c6d3ed580d416d04cd071f6"
     },
     {
-     "line": 276,
+     "line": 335,
      "operation": "tmp.write_text",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "dd9c069a6314ef45ed51733ad51560a8e3b8da03c4bc6f6281269301bf76f8e4"
+     "signature": "f6bd1fe939fe6ea1e815a192bc868b2ac8f73b421f2f6aa0b94260eec4fd39a7"
     }
    ],
    "writer_analysis_error": null,
@@ -75335,8 +75454,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 28,
-   "mentioned_outside_history": 27,
+   "mentions": 30,
+   "mentioned_outside_history": 29,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-25",
@@ -75372,6 +75491,7 @@
     "code/build.py",
     "docs/CONSOLIDATION_DOC_INVENTORY.json",
     "docs/defect_class_retro_sweep.json",
+    "server/tests/test_gaming_release.py",
     "server/tests/test_pipeline_registration.py"
    ],
    "runtime_consumer_candidates": [
@@ -75603,7 +75723,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-24",
-   "lines": 3179,
+   "lines": 3260,
    "operational_role": "product consumer/shared service",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75630,6 +75750,7 @@
     "code/build.py",
     "server/cedar_press/repository.py",
     "server/tests/test_field_map.py",
+    "src/features/grove/explore.test.js",
     "src/features/grove/pressAccess.js",
     "src/features/grove/pressAccess.test.js",
     "src/features/grove/pressCatalog.js"
@@ -75699,20 +75820,20 @@
    },
    "writer_evidence": [
     {
-     "line": 2798,
+     "line": 2879,
      "operation": "COMPAT_FILE.write_text",
      "target": "<unresolved>/code/770_sample_extracts.py",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "0b157310624cf04a6bd63c5073ff2671fbf67f76d7531bb0f3b7f86e495bf785"
+     "signature": "b4b8f7188eb3da3b8ca465fd9b5006e71484a704f9bb0ab25ba537d4bdf99294"
     },
     {
-     "line": 3047,
+     "line": 3128,
      "operation": "path.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "c0a7fa5f57d74574f649ffc5bb3312c8df434f1fd28e5139f66dd6c2488f8150"
+     "signature": "82a13ba9193cd5a230ac7f04e4e60cde242563d9cbbfc5f500fe9d803326141b"
     }
    ],
    "writer_analysis_error": null,
@@ -77262,13 +77383,13 @@
   "generated": "2026-09-25",
   "generator": "code/521_inventory.py scripts-only",
   "scope": "code/**/*.py; caller mentions restricted to Git-tracked project text",
-  "scripts": 684,
+  "scripts": 685,
   "operational_role_counts": {
    "active producer": 76,
    "active validator/migration/review": 8,
    "product consumer/shared service": 7,
    "test/fixture": 5,
-   "unresolved": 588
+   "unresolved": 589
   },
   "unresolved_writer_risk_counts": {
    "P0_forbidden_entrypoint": 1,
@@ -77276,14 +77397,14 @@
    "P1_undeclared_governed_write_candidate": 39,
    "P2_declared_governed_write_candidate": 4,
    "P2_unresolved_write_target": 430,
-   "P3_no_detected_write_not_readonly_certified": 33,
+   "P3_no_detected_write_not_readonly_certified": 34,
    "P3_other_literal_write_candidate": 7
   },
   "writer_risk_scope": "Potential AST write sites with conservative binding expansion, not executed writes. Existing unregistered edges remain pending; inventory receipt is not authorization. Imported custom writers, shell dispatch and dynamic output resolution require runtime review.",
   "operational_precedence": "Standalone test evidence; explicit historical directory; launch producer declaration; Python runtime-reference candidate plus operational call evidence; existing unreferenced archive candidate; unresolved",
   "reference_scope": "Static references retain tests, path literals and tracked configuration. Runtime candidates require Python imports or literal dispatch paths from non-test files; these are not verified reachability, external scheduler or runtime invocations. Dynamic targets and non-Python dispatch remain unresolved.",
   "embedded_selftest_files": 124,
-  "unresolved_not_authorized": 570,
+  "unresolved_not_authorized": 571,
   "table_snapshot_preserved_sha256": "c46a1097785af2a92ee0d50d35858f75f7c4f3cf1c40a0c31f3c96fcdb9e49ee",
   "data_generated_unchanged": "2026-09-02",
   "limitation": "Static census is not runtime write proof or authorization to run a producer."
