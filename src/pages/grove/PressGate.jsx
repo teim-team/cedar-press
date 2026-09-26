@@ -46,7 +46,6 @@ import { coverageFrom } from "../../features/grove/pressAccess";
 import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS, STOREFRONT_CATALOG, collectionsOnShelf } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { SOURCE_COUNT } from "../../features/grove/pressSources.js";
 import { SOURCE_REACH_CLAIM, SOURCE_REACH_FIGURE, SOURCE_ROTATION } from "../../features/grove/sourceRotation.js";
 import {
   PRESS_METHODS_PATH,
@@ -681,25 +680,27 @@ export default function PressGate({ user }) {
                   up does not exist, and Cedar mints it and maintains it.
                   The lede also opened on a federal contract, which made a
                   twelve-collection product read as a contracting product with
-                  eleven extras. It names four kinds of record now. */}
+                  eleven extras. It names three kinds of record now, in one
+                  sentence rather than three clipped ones (owner, 2026-09-26). */}
               <h2 className="cp-why__title cp-fade" id="cp-why-title">
                 The hard part is knowing who a record is about.
               </h2>
               <p className="cp-why__lede cp-fade">
-                A contract names a vendor. A 990 names a filer. A royalty statement names a payee.
-                None of them says whether those are one nation or three, and no public system will
-                tell you. Cedar reads {SOURCE_COUNT} kinds of source, assigns every organization it
-                can resolve a permanent identifier, and maintains that identifier as they rename,
-                merge and change hands. That is what makes {LAUNCH_COLLECTION.length} datasets
-                answer as one collection.
+                A federal contract names the company that won it, a Form 990 names the nonprofit
+                that filed it, and a royalty statement names whoever was paid. None of them says
+                whether those names belong to one nation or three, and no public system keeps
+                track. Lumecon draws on more than 500 source websites to settle that question,
+                giving every organization it can resolve a permanent identifier and keeping it
+                current as organizations rename, merge and change hands. That is how{" "}
+                {LAUNCH_COLLECTION.length} datasets come to answer as one collection.
               </p>
               {/* Owner copy, 2026-09-25. The records say what happened; the
                   reporting says what it means. No count of relationships is
                   given because none has been measured. */}
               <p className="cp-why__lede cp-why__lede--tbn cp-fade">
-                The records carry the facts. Tribal Business News carries the context: relationships
-                across Indian Country cultivated through years of investigative journalism, so a
-                figure arrives with an understanding of the nations and enterprises behind it.
+                Tribal Business News adds what the records cannot: context from relationships across
+                Indian Country built over years of investigative journalism, so each figure arrives
+                with an understanding of the nations and enterprises behind it.
               </p>
             </div>
             <ul className="cp-why__shelves cp-fade" aria-label="The shelves">
