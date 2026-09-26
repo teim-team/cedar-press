@@ -75370,7 +75370,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "11b13e0c9af0379878d35932391d812c447d9cd9a70b046205a8ee56a5d07100"
+     "signature": "e1f66571fa94ead980bb572cd8050d44cbfa18cf7b0aaf3572ddbd6c047c08b0"
     },
     {
      "line": 642,
@@ -75378,7 +75378,7 @@
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a168f227e6f659a5d65763c478b56e4c7a77c8580c9be415cdefad1a9d69e813"
+     "signature": "eda31ed21abee7c00886e33faea3d155ef402e5dbb95b45152421f10dfb6733a"
     },
     {
      "line": 1810,
@@ -75386,7 +75386,7 @@
      "target": "<unresolved>/docs/INVENTORY.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "154f3c4641d23477dd5822f69f1e20f5a9da153c7a79b044b3536b6d92f5a4df"
+     "signature": "b78792e69b5d3a67786a951e56df2b34919c8a600893c46f88c39be3bcd81c6b"
     },
     {
      "line": 1811,
@@ -75394,17 +75394,17 @@
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "a168f227e6f659a5d65763c478b56e4c7a77c8580c9be415cdefad1a9d69e813"
+     "signature": "eda31ed21abee7c00886e33faea3d155ef402e5dbb95b45152421f10dfb6733a"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "9665b22e7071f1f1fe0851ec1f202ca40ce8742687f3cf5c601798b6264e8ed3",
+   "source_sha256": "0f98200c3997c14f50011ee31a984b4e1fd9325540e54d58466bd3a723c64fb6",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/docs/INVENTORY.md, <unresolved>/docs/schema/inventory.json",
-    "source_sha256": "9665b22e7071f1f1fe0851ec1f202ca40ce8742687f3cf5c601798b6264e8ed3",
+    "source_sha256": "0f98200c3997c14f50011ee31a984b4e1fd9325540e54d58466bd3a723c64fb6",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [
@@ -95711,34 +95711,35 @@
    "kind": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: NOB_FEDERAL_IDENTIFIER_CANDIDATES.json"
+    "read-modify-writes: manifest.json"
    ],
    "never_run": false,
    "never_run_reason": "",
    "writes": [
-    "NOB_FEDERAL_IDENTIFIER_CANDIDATES.json",
     "_953_selftest_crosswalk.csv",
     "_953_selftest_fixture.csv",
+    "fpds_uei_cage_map.csv",
+    "manifest.json",
     "native_owned_businesses.csv"
    ],
    "reads": [
-    "NOB_FEDERAL_IDENTIFIER_CANDIDATES.json",
-    "fpds_uei_cage_map.csv",
+    "manifest.json",
     "native_business_identifier_crosswalk.csv"
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 6,
-   "mentioned_outside_history": 6,
+   "mentions": 7,
+   "mentioned_outside_history": 7,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-26",
-   "lines": 540,
+   "lines": 584,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
     "code/521_inventory.py",
-    "docs/defect_class_retro_sweep.json"
+    "docs/defect_class_retro_sweep.json",
+    "server/tests/test_field_map.py"
    ],
    "runtime_consumer_candidates": [],
    "operational_call_evidence": {
@@ -95748,11 +95749,12 @@
     ]
    },
    "unknown_io_literals": [
+    "NOB_FEDERAL_IDENTIFIER_CANDIDATES.json",
     "gapfill_recipient_universe.csv",
     "prime_contracts.csv",
     "subawards.csv"
    ],
-   "embedded_test_functions": 1,
+   "embedded_test_functions": 2,
    "standalone_test_evidence": {
     "unittest_classes": [],
     "pytest_import": false,
@@ -95767,7 +95769,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b3abc59fd6154dae35bc2011b71160803966cb033f6306c0b680e9c87447d615"
+     "signature": "4f6ecda09c2da3ef12067ed1b4b183fe834e9f3869ffb1baa96f656458b71a2e"
     },
     {
      "line": 295,
@@ -95775,51 +95777,75 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "eb8c2707907744a4e6cb557711bdc839cb5e34d26835ef54a1e3b9ffad1a0567"
+     "signature": "97179ee00bba2fa9e019b17eab9d974710538a35520b6623feaccc4c0e0a7fed"
     },
     {
      "line": 297,
      "operation": "os.replace",
-     "target": "<unresolved>/data/clean/native_owned_businesses.csv",
-     "scope": "governed_table",
-     "table": "native_owned_businesses.csv",
-     "signature": "99ddeff98fa804835962485ac83cd64b33181791d276c4db33cda9057bc02664"
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "cee37122b681aa35e549f798af36af0f3b5ae4d1f212e6a59439411a1c5a7315"
     },
     {
      "line": 312,
      "operation": "MANIFEST.write_text",
-     "target": "<unresolved>/docs/NOB_FEDERAL_IDENTIFIER_CANDIDATES.json",
+     "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "78216612a657d36b3f5abd3943c9145ea66a8616bbdad35aff01b4777a343f67"
+     "signature": "4aa7c933dc51e763aa2f18741ad0894bc1a8afd3852e37ce4693bc684fddd0cd"
     },
     {
-     "line": 445,
-     "operation": "fix.open",
-     "target": "<unresolved>/data/clean/_953_selftest_fixture.csv",
-     "scope": "protected_surface",
+     "line": 446,
+     "operation": "universe.open",
+     "target": "<unresolved>/fpds_uei_cage_map.csv",
+     "scope": "governed_table",
+     "table": "fpds_uei_cage_map.csv",
+     "signature": "ddd059f840f87990366c5f24e4134d761e981608cee99be2e933da21078c5c5e"
+    },
+    {
+     "line": 461,
+     "operation": "TABLE.open",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
      "table": null,
-     "signature": "0926132ae5f311ab03e3e54362a0cac6fbf8325171fd7ce338122bcfbd65b558"
+     "signature": "71dbfc969b99530e48ac6a67dead523c89797c1c6bc849d8d49343ac610b5ebf"
     },
     {
-     "line": 501,
+     "line": 467,
+     "operation": "MANIFEST.write_text",
+     "target": "<unresolved>",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "4aa7c933dc51e763aa2f18741ad0894bc1a8afd3852e37ce4693bc684fddd0cd"
+    },
+    {
+     "line": 489,
+     "operation": "fix.open",
+     "target": "<unresolved>/_953_selftest_fixture.csv",
+     "scope": "unresolved_target",
+     "table": null,
+     "signature": "86346ddc89d84455081760d171455f9a03be71fdacd48e5bb399c0e567dc521f"
+    },
+    {
+     "line": 545,
      "operation": "tmpx.open",
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "6e5aa01b9fac923c8701baee01bf352f163b49775c5d860fda2a1de1c365dbaf"
+     "signature": "f3d43f60c4742ef5784dca21de7df17587a343deb2d94e4898d67f59169ec77f"
     }
    ],
    "writer_analysis_error": null,
-   "writer_risk": "P1_protected_surface_write_candidate",
+   "writer_risk": "P1_undeclared_governed_write_candidate",
    "undeclared_governed_tables": [
-    "native_owned_businesses.csv"
+    "fpds_uei_cage_map.csv"
    ],
-   "source_sha256": "1e4492d329d44efdc3d260290414092f8dd8f69f0f852089b1e3b7b034a890a4",
+   "source_sha256": "2720010104b1003bf3f11217c5c70a3b7e2f7c57e58fa1c61d4da4fed0b86dcc",
    "maintenance_status": "ACTIVE",
    "maintenance_evidence": {
     "reason": "954 registers its candidate fields; verify rederives candidates and checks crosswalk agreement without claiming canonical equivalence",
-    "source_sha256": "1e4492d329d44efdc3d260290414092f8dd8f69f0f852089b1e3b7b034a890a4",
+    "source_sha256": "2720010104b1003bf3f11217c5c70a3b7e2f7c57e58fa1c61d4da4fed0b86dcc",
     "identical_source_peers": [],
     "ci_commands": [],
     "documented_commands": [],
@@ -95834,9 +95860,9 @@
     "review_write_sites": [],
     "safe_delete_proof": "NOT_ESTABLISHED: external callers, unique output and recovery value are not exhausted by static scans",
     "bounded_source_review": {
-     "source_sha256": "1e4492d329d44efdc3d260290414092f8dd8f69f0f852089b1e3b7b034a890a4",
+     "source_sha256": "2720010104b1003bf3f11217c5c70a3b7e2f7c57e58fa1c61d4da4fed0b86dcc",
      "role": "candidate identifier enrichment utility",
-     "retirement_condition": "Preserve candidate-versus-identity distinction; selftest still writes _953 fixtures under data/clean and needs TEMP isolation before execution",
+     "retirement_condition": "Preserve candidate-versus-identity distinction; selftest uses synthetic TEMP inputs and restores all source paths on success or interruption",
      "grants_execution_permission": false
     },
     "source_review_stale": false
@@ -106359,8 +106385,8 @@
   "maintenance_scope": "Existing inventory evidence only; duplication does not authorize deletion and table retirement does not retire unrelated outputs.",
   "unresolved_writer_risk_counts": {
    "P0_forbidden_entrypoint": 1,
-   "P1_protected_surface_write_candidate": 70,
-   "P1_undeclared_governed_write_candidate": 39,
+   "P1_protected_surface_write_candidate": 69,
+   "P1_undeclared_governed_write_candidate": 40,
    "P2_declared_governed_write_candidate": 4,
    "P2_unresolved_write_target": 430,
    "P3_no_detected_write_not_readonly_certified": 33,

@@ -1121,6 +1121,12 @@ class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
         cases = (
             ("952_nonprofit_disposition.py", "selftest", ("ROOT", "TABLE", "MANIFEST"), "TABLE"),
             (
+                "953_nob_federal_identifier_candidates.py",
+                "selftest",
+                ("ROOT", "CLEAN", "TABLE", "MANIFEST", "XWALK"),
+                "TABLE",
+            ),
+            (
                 "954_register_promoted_columns_codebook.py",
                 "selftest",
                 ("ROOT", "CLEAN", "FRAG", "MASTER"),
@@ -1155,6 +1161,11 @@ class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
                     with ExitStack() as stack:
                         for name, path in paths.items():
                             stack.enter_context(patch.object(module, name, path))
+                        original_sources = getattr(module, "SOURCES", None)
+                        if hasattr(module, "SOURCES"):
+                            # A sentinel that would fail if the selftest read live inputs.
+                            original_sources = [(root / "missing-live-source.csv", "name", "uei")]
+                            stack.enter_context(patch.object(module, "SOURCES", original_sources))
                         if hasattr(module, "cb"):
                             writer_paths = {
                                 "CEDAR": root,
@@ -1185,6 +1196,8 @@ class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
                                 result = getattr(module, entrypoint)()
                                 self.assertEqual(result, 0, output.getvalue())
                         self.assertEqual({name: getattr(module, name) for name in names}, paths)
+                        if hasattr(module, "SOURCES"):
+                            self.assertIs(module.SOURCES, original_sources)
                         if hasattr(module, "cb"):
                             self.assertEqual(
                                 {name: getattr(module.cb, name) for name in writer_paths},
