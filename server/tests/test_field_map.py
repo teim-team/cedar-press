@@ -30,9 +30,9 @@ import importlib.util
 import json
 import sys
 import unittest
-from unittest.mock import patch
 from contextlib import ExitStack
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 CODE = ROOT / "code"
@@ -165,7 +165,8 @@ class TestCombinedPlan(unittest.TestCase):
                 replacements = {
                     "contracts": lambda: contract, "shelves": lambda: {"nagpra": "standard"},
                     "FLAGSHIP": {"nagpra": "flag.csv"}, "find": lambda n: Path(n),
-                    "load": fixture_load, "one_per_key": lambda meta, key: meta["table"] == "one.csv",
+                    "load": fixture_load,
+                    "one_per_key": lambda meta, key: meta["table"] == "one.csv",
                     "publishable_columns": lambda columns: columns,
                     "recompute_derived": lambda *args: {}, "apply_field_map": inspect_schema,
                 }
@@ -272,7 +273,10 @@ class TestApplyFieldMap(unittest.TestCase):
                 }}), self.assertRaises(pub.NEEDAffiliationPublicationHold):
                     pub.apply_field_map("need", header, rows, set(header))
                 self.assertEqual((header, rows), before)
-        with patch.object(pub, "field_map", return_value={}), self.assertRaises(pub.NEEDAffiliationPublicationHold):
+        with (
+            patch.object(pub, "field_map", return_value={}),
+            self.assertRaises(pub.NEEDAffiliationPublicationHold),
+        ):
             pub.apply_field_map("need", [], [], set())
         pub.assert_collection_publishable("nagpra")
 

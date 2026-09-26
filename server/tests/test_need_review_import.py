@@ -7,8 +7,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "code" / "09_import_rulings.py"
@@ -40,7 +40,8 @@ class TestNeedReceiptImport(unittest.TestCase):
                         entity_or_firm="Fixture enterprise", question="Affiliation?",
                         YOUR_RULING="HOLD", YOUR_NOTE="Need evidence", decision_id="test-1",
                         reviewer="Fixture reviewer", decided_at="2026-01-01T00:00:00Z",
-                        evidence_fingerprint="a"*64, queue_version="fixture-v1", target_cedar_uid="CE-HUB")
+                        evidence_fingerprint="a"*64, queue_version="fixture-v1",
+                        target_cedar_uid="CE-HUB")
 
     def run_import(self, rows=None):
         with self.csv.open("w", encoding="utf-8", newline="") as handle:
@@ -60,7 +61,8 @@ class TestNeedReceiptImport(unittest.TestCase):
         self.assertIn("ALREADY_RECORDED", again.stdout)
         self.assertEqual(before, self.receipt.read_bytes())
         revised = dict(self.row, decision_id="test-2", YOUR_RULING="SUPPORT",
-                       YOUR_NOTE="Explicit revised evidence judgment", supersedes_decision_id="test-1")
+                       YOUR_NOTE="Explicit revised evidence judgment",
+                       supersedes_decision_id="test-1")
         result = self.run_import([revised])
         self.assertEqual(result.returncode, 0, result.stderr)
         ledger = json.loads(self.receipt.read_text())
