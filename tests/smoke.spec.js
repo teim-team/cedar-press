@@ -22,6 +22,9 @@ import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
 import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
+// Test-only: the announced material, to prove the build carries none of it.
+import { gatedPhrases } from "../src/features/grove/pressAnnounced.js";
+import { PRESS_AUDIENCES } from "../src/features/grove/pressAudiences.js";
 
 // The throwaway account playwright.config.js provisions into the build it
 // starts. It is not a credential and it opens nothing that is deployed
@@ -1776,6 +1779,70 @@ test.describe("the bundle", () => {
     // Without this the test would pass just as happily against a build with
     // no account configured at all, which proves nothing about the digest.
     expect(digestSeen, "the configured digest is not in the build").toBe(true);
+  });
+
+  // THE ANNOUNCED COLLECTIONS ARE NOT IN THE BUILD AT ALL.
+  //
+  // PLOT has no producer and Foundation & Corporate Giving is under rights
+  // review, so neither may be readable in the shipped JavaScript, not merely
+  // unrendered: a string in a bundle is public to anyone with devtools. The
+  // gate is that nothing the page loads imports `pressAnnounced.js` or
+  // `pressAnnouncedIcons.jsx`. This checks the result: every name, id,
+  // description and gated sentence those files declare, and the path data of
+  // both marks, read from the files themselves so the list cannot drift, and
+  // searched for in every file the production build emitted.
+  test("carries nothing about the announced collections", async () => {
+    const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
+    const assets = await readdir(dir, { recursive: true, withFileTypes: true });
+    const files = assets.filter((entry) => entry.isFile() && /\.(js|css|html|json|map|xml|txt)$/.test(entry.name));
+    expect(files.length, "nothing was built to check").toBeGreaterThan(0);
+
+    const icons = await readFile(new URL("../src/pages/grove/pressAnnouncedIcons.jsx", import.meta.url), "utf8");
+    const paths = [...icons.matchAll(/\bd="([^"]+)"/g)].map((m) => m[1]);
+    expect(paths.length, "path data read from the announced marks").toBeGreaterThanOrEqual(5);
+    // Whole strings, and every run of five consecutive words from them: a
+    // partial quote typed into a page ("Foundation, corporate and bank
+    // funding publicly disclosed.") leaks as surely as the whole description,
+    // and the first version of this test, matching whole strings only, let
+    // exactly that through. A run the released copy also uses ("Native
+    // nations, organizations and enterprises") is not a secret and is skipped.
+    const words = (text) => text.split(/\s+/).filter(Boolean);
+    const runs = (text) => {
+      const w = words(text);
+      return w.length < 5 ? [] : w.slice(0, w.length - 4).map((_, i) => w.slice(i, i + 5).join(" "));
+    };
+    const releasedText = [
+      ...STOREFRONT_CATALOG.flatMap((entry) => [entry.blurb, entry.linkage ?? ""]),
+      ...PRESS_AUDIENCES.flatMap((audience) => [audience.now?.use ?? "", audience.atLaunch?.use ?? ""]),
+    ];
+    const releasedRuns = new Set(releasedText.flatMap(runs));
+    const fragments = gatedPhrases().flatMap(runs).filter((run) => !releasedRuns.has(run));
+    expect(fragments.length, "fragments derived from the gated copy").toBeGreaterThan(50);
+    const needles = [...new Set([...gatedPhrases(), ...fragments, ...paths])];
+    // A short token ("PLOT", "plot") is matched as a whole word; a sentence or
+    // a path as an exact substring.
+    const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const matchers = needles.map((needle) => ({
+      needle,
+      test: needle.length <= 5 ? (body) => new RegExp(`\\b${escape(needle)}\\b`).test(body) : (body) => body.includes(needle),
+    }));
+
+    expect(matchers.length, "nothing to search for: the proof would pass vacuously").toBeGreaterThan(50);
+
+    // The control: a released description IS in the build, so a scan of the
+    // wrong directory, or of nothing, cannot pass.
+    const released = STOREFRONT_CATALOG.find((entry) => entry.id === "funding").blurb;
+    let releasedSeen = false;
+    const found = [];
+    for (const entry of files) {
+      const body = await readFile(`${entry.parentPath}/${entry.name}`, "utf8");
+      if (body.includes(released)) releasedSeen = true;
+      for (const { needle, test: hit } of matchers) {
+        if (hit(body)) found.push(`${entry.name}: ${needle.slice(0, 60)}`);
+      }
+    }
+    expect(releasedSeen, "the scan did not find a released description: wrong or empty build").toBe(true);
+    expect(found, "announced material shipped in the build").toEqual([]);
   });
 });
 

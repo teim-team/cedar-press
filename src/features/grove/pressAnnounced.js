@@ -1,13 +1,18 @@
 /**
  * REVIEW OWNER: Havala
  *
- * Collections that are announced to this codebase but not released.
+ * Collections that are announced to this codebase but not released, and every
+ * word the door will say about them at launch.
  *
- * WHY THIS IS NOT IN pressCatalog.js
- * `PRESS_CATALOG` is the storefront: every entry in it is sold, measured and
- * pinned to a release, and `collection.js`, the release gate (1169) and
- * `server/tests/test_access.py` all hold it to that. The two collections below
- * are written for and not yet published:
+ * NOTHING THE PAGE LOADS IMPORTS THIS FILE. That is the gate, and it is
+ * structural rather than a flag: a module no runtime module imports is not in
+ * the bundle, so these names, descriptions and sentences cannot be read out of
+ * the shipped JavaScript by anyone with devtools. Foundation & Corporate
+ * Giving is still under rights review, and PLOT has no producer. Two checks
+ * hold it: `pressAudiences.test.js` fails if any non-test module imports this
+ * file or `pressAnnouncedIcons.jsx`, and the smoke suite's "the bundle" test
+ * greps the production build for every string declared here and for the two
+ * icons' path data.
  *
  *   plot                         PLOT. No producer exists in any repository
  *                                yet (checked 2026-09-26).
@@ -19,23 +24,28 @@
  *                                the grantmaker-database publication ruling is
  *                                still open.
  *
- * The owner's brief (2026-09-26) is explicit that neither is wired into the
- * catalog until its verified release, entitlement pin and publication approval
- * exist, and that every claim the public page displays is grounded in a
- * current release. So they are declared HERE, once, with the owner's names and
- * descriptions, and nothing on a public page resolves an id from this list.
- * The public resolver (`liveCollection` below) reads the catalog only.
+ * WHAT IS HERE
+ *   ANNOUNCED_COLLECTIONS  the owner's names and descriptions (2026-09-26)
+ *   LAUNCH_COPY            the owner's use-case sentences that cite either
+ *                          collection, keyed by audience id; the page shows
+ *                          each audience's interim `now` copy until then
+ *   ANNOUNCED_AUDIENCES    audiences that exist only for a gated collection
+ *                          (Foundations and philanthropy), with where each
+ *                          goes in the selector
+ *   pressAnnouncedIcons.jsx  the two marks, drawn with the family
  *
- * THE GATE
- * An id is live when, and only when, the storefront catalog carries it.
- * Launching one of these is therefore: move the entry into `PRESS_CATALOG`
- * (with its measured coverage and shelf), delete it from this list, and let
- * the parity tests (catalog <-> manifest <-> server) tell you what else has to
- * move with it. `pressAudiences.test.js` fails if an id is ever in both.
- *
- * Icons are keyed by these ids in `pressCollectionIcons.jsx`, drawn with the
- * rest of the family; the key is named here as `icon`.
+ * LAUNCHING ONE (all in the same change, once the verified release,
+ * entitlement pin and publication approval exist):
+ *   1. move its entry from ANNOUNCED_COLLECTIONS into `PRESS_CATALOG`, with
+ *      its measured coverage and shelf;
+ *   2. move its mark from `pressAnnouncedIcons.jsx` into `COLLECTION_ICONS`;
+ *   3. move every LAUNCH_COPY entry and ANNOUNCED_AUDIENCES entry whose
+ *      collections are now all live into `PRESS_AUDIENCES` as its `atLaunch`.
+ * The tests name each step that was missed: a collection in both places, a
+ * live collection with no mark, and launch copy left here whose collections
+ * are all live each fail.
  */
+import { PRESS_AUDIENCES, liveIdsOf } from "./pressAudiences.js";
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
 
 export const ANNOUNCED_COLLECTIONS = Object.freeze([
@@ -81,18 +91,105 @@ export function isAnnounced(id) {
   return ANNOUNCED_IDS.includes(id);
 }
 
-/**
- * The ids a public page may resolve. Defaults to the storefront; a test passes
- * its own catalog to see what the page would do once a collection launches.
- */
-export function liveIdsOf(catalog = STOREFRONT_CATALOG) {
-  return new Set(catalog.map((entry) => entry.id));
+/** Whether an id is one a use case may cite: released, or deliberately gated. */
+export function isCitable(id, catalog = STOREFRONT_CATALOG) {
+  return liveIdsOf(catalog).has(id) || isAnnounced(id);
 }
 
 /**
- * A live catalog entry by id, or null. Never an announced entry: the gate is
- * that this function only ever reads the catalog it is handed.
+ * The owner's sentences (2026-09-26) that cite a gated collection, by audience
+ * id. Two are EXTENDED from the owner's text so every collection has a home,
+ * marked where they are.
  */
-export function liveCollection(id, catalog = STOREFRONT_CATALOG) {
-  return catalog.find((entry) => entry.id === id) ?? null;
+export const LAUNCH_COPY = Object.freeze({
+  // EXTENDED: "and resource revenue" added so Natural Resources has a home.
+  // Advocacy carries "agency and congressional activity", so the Federal
+  // Register chip made way for it; the Register stays on Journalists and
+  // Advisors. "Associated with" implies no payment chain the royalty records
+  // do not establish.
+  "tribal-nations": Object.freeze({
+    use: "Review federal and philanthropic funding and resource revenue associated with your nation, follow relevant agency and congressional activity, and connect enterprise and property records to the same Native entities.",
+    collections: Object.freeze(["funding", "foundation-corporate-giving", "natural-resources", "lobbying", "plot"]),
+  }),
+  "ancs-nhos": Object.freeze({
+    use: "Follow subsidiaries and joint ventures, federal contracting, announced transactions and property activity across an enterprise network.",
+    collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "plot"]),
+  }),
+  "banks-lenders": Object.freeze({
+    use: "Resolve an organization to the Native entity and enterprise structure behind it, then review federal business, public funding, announced financings and parcel activity as part of diligence.",
+    collections: Object.freeze(["need", "contractors", "funding", "deals", "plot"]),
+  }),
+  "native-nonprofits": Object.freeze({
+    use: "Compare an organization's public record with federal assistance and disclosed private giving, research prospective funders, and examine funding relationships among peer organizations.",
+    collections: Object.freeze(["nonprofits", "funding", "foundation-corporate-giving", "lobbying"]),
+  }),
+  journalists: Object.freeze({
+    use: "Start with a nation, organization or event and follow the underlying record across policy, money, organizations, property and transactions while retaining the original sources.",
+    collections: Object.freeze(["federal-register", "lobbying", "deals", "foundation-corporate-giving", "plot"]),
+  }),
+  advisors: Object.freeze({
+    use: "Build a sourced picture of an organization, market or project before diligence, strategy work, negotiations or client outreach.",
+    collections: Object.freeze(["need", "deals", "federal-register", "lobbying", "plot"]),
+  }),
+});
+
+/** Audiences that exist only for a gated collection, and where each goes. */
+export const ANNOUNCED_AUDIENCES = Object.freeze([
+  Object.freeze({
+    after: "native-nonprofits",
+    audience: Object.freeze({
+      id: "foundations-philanthropy",
+      label: "Foundations and philanthropy",
+      atLaunch: Object.freeze({
+        use: "See which Native nations and organizations appear in disclosed private giving, compare philanthropic activity with federal funding, and examine funding patterns by recipient, geography and purpose.",
+        collections: Object.freeze(["foundation-corporate-giving", "nonprofits", "funding"]),
+      }),
+      now: null,
+    }),
+  }),
+]);
+
+/**
+ * The page's audiences as they will stand at launch: each gated sentence
+ * restored as its audience's `atLaunch`, and each gated audience put back in
+ * its place. What `pressAudiences.js`'s own gate then does with them is the
+ * runtime code, unchanged.
+ */
+export function withLaunchCopy(audiences = PRESS_AUDIENCES) {
+  const merged = [];
+  for (const audience of audiences) {
+    const launch = LAUNCH_COPY[audience.id];
+    merged.push(launch ? Object.freeze({ ...audience, atLaunch: launch }) : audience);
+    for (const extra of ANNOUNCED_AUDIENCES) {
+      if (extra.after === audience.id) merged.push(extra.audience);
+    }
+  }
+  return Object.freeze(merged);
+}
+
+/** The catalog as it would stand with every announced collection launched. */
+export function launchedCatalog(ids = ANNOUNCED_IDS, catalog = STOREFRONT_CATALOG) {
+  return Object.freeze([
+    ...catalog,
+    ...ANNOUNCED_COLLECTIONS.filter((entry) => ids.includes(entry.id)).map((entry) => ({ ...entry, shelf: "pro" })),
+  ]);
+}
+
+/** Every string declared here that must never reach the shipped bundle. */
+export function gatedPhrases() {
+  const out = new Set();
+  for (const entry of ANNOUNCED_COLLECTIONS) {
+    for (const value of [entry.id, entry.short, entry.name, entry.blurb]) out.add(value);
+  }
+  for (const copy of Object.values(LAUNCH_COPY)) {
+    // The advisors sentence is the owner's and ships today as interim copy;
+    // only sentences the page does not already say are secrets.
+    if (!PRESS_AUDIENCES.some((audience) => audience.now?.use === copy.use)) out.add(copy.use);
+  }
+  for (const { audience } of ANNOUNCED_AUDIENCES) {
+    out.add(audience.id);
+    out.add(audience.label);
+    out.add(audience.atLaunch.use);
+  }
+  return [...out];
 }

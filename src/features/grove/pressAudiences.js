@@ -10,25 +10,24 @@
  * `COLLECTION_ICONS`, so there is no second list of collections here.
  *
  * TWO VERSIONS OF EACH SENTENCE, AND A GATE BETWEEN THEM
- * The owner's copy (2026-09-26) cites two collections that are not released:
- * PLOT and Foundation & Corporate Giving (`pressAnnounced.js`). A public page
- * may only say what a current release supports, so each audience carries:
+ * Each audience can carry:
  *
- *   atLaunch  the owner's sentence and collections. Verbatim except where
- *             marked EXTENDED: two sentences gained a few words so every
- *             collection has a home (see COVERAGE below).
- *   now       a sentence that cites live collections only and says nothing
- *             about parcels or private giving. Absent (null) where the whole
- *             use case depends on a gated collection.
+ *   atLaunch  the owner's sentence and collections (2026-09-26). Verbatim
+ *             except where marked EXTENDED.
+ *   now       a sentence that cites released collections only. Absent (null)
+ *             where the owner's own sentence already does.
  *
  * `atLaunch` is chosen when every collection it cites is live, `now`
- * otherwise, so launching PLOT or the giving collection switches the copy
- * with no edit here. An audience whose chosen version has fewer than
- * `MIN_COLLECTIONS` live collections, or has no `now` at all, is hidden until
- * launch rather than shown thin.
+ * otherwise, and an audience with neither live, or with fewer than
+ * `MIN_COLLECTIONS` live collections, is hidden rather than shown thin.
  *
- * Where the owner's sentence cites only live collections, `now` is omitted and
- * the owner's copy is what renders today.
+ * Some of the owner's sentences cite collections that are announced but not
+ * released. Those sentences, and the one audience that exists only for such a
+ * collection, are NOT in this file: they live in `pressAnnounced.js`, which
+ * nothing the page loads imports, so they are not in the shipped bundle at
+ * all. Here, those audiences carry `now` only. Launching a collection moves
+ * its sentences in as `atLaunch` (steps in that file; the tests name any step
+ * missed), and the gate below then picks them with no other change.
  *
  * COVERAGE
  * Every live collection appears in at least one shown audience, today and
@@ -40,30 +39,31 @@
  * rendered page.
  */
 import { STOREFRONT_CATALOG } from "./pressCatalog.js";
-import { isAnnounced, liveCollection, liveIdsOf } from "./pressAnnounced.js";
+
+/** The ids a page may resolve: the storefront's, and nothing else. */
+export function liveIdsOf(catalog = STOREFRONT_CATALOG) {
+  return new Set(catalog.map((entry) => entry.id));
+}
+
+/** A live catalog entry by id, or null. Only ever reads the catalog it is handed. */
+export function liveCollection(id, catalog = STOREFRONT_CATALOG) {
+  return catalog.find((entry) => entry.id === id) ?? null;
+}
 
 /** Fewer than this and the example does not show collections combining. */
 export const MIN_COLLECTIONS = 3;
 
-// INTERIM COPY FOR REVIEW. Every `now.use` below was written on 2026-09-26 for
-// the period before PLOT and Foundation & Corporate Giving launch, by trimming
-// the owner's sentence to what the live collections support. None is the
-// owner's text. Each is replaced automatically by `atLaunch` once every
-// collection that version cites is in the catalog.
+// INTERIM COPY FOR REVIEW. Every `now.use` below was written on 2026-09-26
+// by trimming the owner's sentence to what the released collections support,
+// and none is the owner's text, except the advisors sentence, which is the
+// owner's and only its collection list is trimmed. Each gives way to the
+// owner's copy when its collections are released (see `pressAnnounced.js`).
 export const PRESS_AUDIENCES = Object.freeze([
   Object.freeze({
     id: "tribal-nations",
     label: "Tribal Nations",
-    // EXTENDED from the owner's sentence, 2026-09-26: "and resource revenue"
-    // added so Natural Resources has a home at launch. Advocacy carries
-    // "agency and congressional activity" (agency meetings, consultations,
-    // comments, testimony), so the Federal Register chip made way for it;
-    // the Register stays on Journalists and Advisors. "Associated with"
-    // implies no payment chain the royalty records do not establish.
-    atLaunch: Object.freeze({
-      use: "Review federal and philanthropic funding and resource revenue associated with your nation, follow relevant agency and congressional activity, and connect enterprise and property records to the same Native entities.",
-      collections: Object.freeze(["funding", "foundation-corporate-giving", "natural-resources", "lobbying", "plot"]),
-    }),
+    // The owner's sentence, extended with "and resource revenue", is in
+    // `pressAnnounced.js`; this interim version keeps that extension.
     now: Object.freeze({
       use: "Review federal funding and resource revenue associated with your nation, follow relevant agency and congressional activity, and connect enterprise records to the same Native entities.",
       collections: Object.freeze(["funding", "natural-resources", "legislation", "lobbying", "need"]),
@@ -72,10 +72,6 @@ export const PRESS_AUDIENCES = Object.freeze([
   Object.freeze({
     id: "ancs-nhos",
     label: "ANCs and NHOs",
-    atLaunch: Object.freeze({
-      use: "Follow subsidiaries and joint ventures, federal contracting, announced transactions and property activity across an enterprise network.",
-      collections: Object.freeze(["need", "contractors", "subcontracting", "deals", "plot"]),
-    }),
     now: Object.freeze({
       use: "Follow subsidiaries and joint ventures, federal contracting and announced transactions across an enterprise network.",
       collections: Object.freeze(["need", "contractors", "subcontracting", "deals"]),
@@ -96,10 +92,6 @@ export const PRESS_AUDIENCES = Object.freeze([
     // Nothing in either sentence implies a credit score or a substitute for
     // underwriting; keep it that way.
     label: "Banks and lenders",
-    atLaunch: Object.freeze({
-      use: "Resolve an organization to the Native entity and enterprise structure behind it, then review federal business, public funding, announced financings and parcel activity as part of diligence.",
-      collections: Object.freeze(["need", "contractors", "funding", "deals", "plot"]),
-    }),
     now: Object.freeze({
       use: "Resolve an organization to the Native entity and enterprise structure behind it, then review federal business, public funding and announced financings as part of diligence.",
       collections: Object.freeze(["need", "contractors", "funding", "deals"]),
@@ -108,25 +100,10 @@ export const PRESS_AUDIENCES = Object.freeze([
   Object.freeze({
     id: "native-nonprofits",
     label: "Native nonprofits",
-    atLaunch: Object.freeze({
-      use: "Compare an organization's public record with federal assistance and disclosed private giving, research prospective funders, and examine funding relationships among peer organizations.",
-      collections: Object.freeze(["nonprofits", "funding", "foundation-corporate-giving", "lobbying"]),
-    }),
     now: Object.freeze({
       use: "Compare an organization's public record with the federal assistance it receives, research the federal programs that fund peer organizations, and follow their documented federal engagement.",
       collections: Object.freeze(["nonprofits", "funding", "lobbying"]),
     }),
-  }),
-  Object.freeze({
-    id: "foundations-philanthropy",
-    label: "Foundations and philanthropy",
-    atLaunch: Object.freeze({
-      use: "See which Native nations and organizations appear in disclosed private giving, compare philanthropic activity with federal funding, and examine funding patterns by recipient, geography and purpose.",
-      collections: Object.freeze(["foundation-corporate-giving", "nonprofits", "funding"]),
-    }),
-    // Hidden until launch: the whole use case is disclosed private giving.
-    // Without that collection there is nothing philanthropy-specific to show.
-    now: null,
   }),
   Object.freeze({
     id: "businesses",
@@ -153,10 +130,6 @@ export const PRESS_AUDIENCES = Object.freeze([
   Object.freeze({
     id: "journalists",
     label: "Journalists and newsrooms",
-    atLaunch: Object.freeze({
-      use: "Start with a nation, organization or event and follow the underlying record across policy, money, organizations, property and transactions while retaining the original sources.",
-      collections: Object.freeze(["federal-register", "lobbying", "deals", "foundation-corporate-giving", "plot"]),
-    }),
     now: Object.freeze({
       use: "Start with a nation, organization or event and follow the underlying record across policy, federal money, organizations and transactions while retaining the original sources.",
       collections: Object.freeze(["federal-register", "lobbying", "deals", "funding", "need"]),
@@ -165,12 +138,6 @@ export const PRESS_AUDIENCES = Object.freeze([
   Object.freeze({
     id: "advisors",
     label: "Advisors and professional services",
-    atLaunch: Object.freeze({
-      use: "Build a sourced picture of an organization, market or project before diligence, strategy work, negotiations or client outreach.",
-      collections: Object.freeze(["need", "deals", "federal-register", "lobbying", "plot"]),
-    }),
-    // The owner's sentence names nothing gated; only PLOT drops from the
-    // collections, so the sentence is the owner's and the list is interim.
     now: Object.freeze({
       use: "Build a sourced picture of an organization, market or project before diligence, strategy work, negotiations or client outreach.",
       collections: Object.freeze(["need", "deals", "federal-register", "lobbying"]),
@@ -228,11 +195,6 @@ export function uncoveredIds(catalog = STOREFRONT_CATALOG, audiences = PRESS_AUD
     visibleAudiences(catalog, audiences).flatMap((audience) => audience.collections.map((entry) => entry.id)),
   );
   return catalog.map((entry) => entry.id).filter((id) => !cited.has(id));
-}
-
-/** Whether an id is one the band may cite: live now, or deliberately gated. */
-export function isCitable(id, catalog = STOREFRONT_CATALOG) {
-  return liveIdsOf(catalog).has(id) || isAnnounced(id);
 }
 
 /** "01 / 09": the counter, from the shown set, never from the declared ten. */
