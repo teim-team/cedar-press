@@ -1,5 +1,10 @@
 # Havala infrastructure review packet
 
+Paths below name places by role, not by one person's machine:
+`<cedar-press checkout>`, `<lumecon-data checkout>`, `<data workspace>` (the
+private data tree, outside Git) and `<checkpoint root>` (private receipts,
+outside Git). Set them to wherever those live on your machine.
+
 <!-- BEGIN CURRENT-LAUNCH-DASHBOARD -->
 ## Read this first: thirteen-profile foundation, September 25
 
@@ -126,8 +131,8 @@ Run from the owned Cedar checkout with both packages and Cedar server dependenci
 available. The exact Windows environment used was:
 
 ```powershell
-$env:PYTHONPATH = 'C:\Users\esm247\Desktop\lumecon-release-closure\src;C:\Users\esm247\Desktop\cedar-press-codex\server'
-& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store '<store>' --catalog '<catalog>'
+$env:PYTHONPATH = '<lumecon-data checkout>\src;<cedar-press checkout>\server'
+& '<lumecon-data checkout>\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store '<store>' --catalog '<catalog>'
 ```
 
 For a fresh development environment use the existing `make cedar-setup
@@ -184,6 +189,13 @@ frontend fixture omits them. Claude's frontend owner must distinguish full
 source contract from published sample fields; adding these internal fields to
 public samples would be the wrong fix. No frontend file was edited here.
 Later application steps were skipped, not passed.
+
+**Update, 2026-09-26.** Resolved on #122 at `9fa3fed`: the Deals assertion now
+mirrors `apply_field_map` (publish-time and internal columns allowed, public
+samples untouched), Federal Register ships 34 columns, the ten write-time
+columns have codebook entries, and every gate passes, including Python 3.12,
+3.13 and 3.14. #124 carries it at `2619ab6`; Lumecon-data #9 and #10 pin those
+heads.
 
 Initial Lumecon [36162342880](https://github.com/teim-team/Lumecon-data/actions/runs/36162342880)
 passed all 808 tests and pinned Press/Grove consumer jobs. Its unchanged 88%
@@ -275,7 +287,7 @@ has 171 distinct licensee-month observations (36 from 2025, 18 from 2026), but
 its fixed-limit retrieval does not prove the source universe. The typed guard
 refused it as partial; no Gaming release was created. Its immutable validation
 receipt is
-`C:/Users/esm247/cedar-takeover-checkpoint/intake-ct-validation/bd1ad644b1d830df2a3942ca34bebc501fece6a1a678d4b9e04eb3a9afeab5ba.json`.
+`<checkpoint root>/intake-ct-validation/bd1ad644b1d830df2a3942ca34bebc501fece6a1a678d4b9e04eb3a9afeab5ba.json`.
 The filename matches its SHA256. Revalidating the embedded `SourceIntakeRecord`
 against the original raw bytes reproduces the refusal. Complete Gaming/federal
 and incremental-window tests use explicitly synthetic fixtures, not invented
@@ -301,8 +313,8 @@ redacted audit events, malformed/missing/stale release refusal and two-version
 rollback passed. Development SQLite catalog import was repeated without a
 duplicate, and pin rollback retained original artifacts. PostgreSQL, production
 access and advertised ancillary tables are not certified. Receipts are
-`C:/Users/esm247/cedar-takeover-checkpoint/lumecon-legislation-locked-final-2026-09-24/rehearsal-result.json`
-and `C:/Users/esm247/cedar-takeover-checkpoint/lumecon-resources-final-2026-09-24/rehearsal-result.json`.
+`<checkpoint root>/lumecon-legislation-locked-final-2026-09-24/rehearsal-result.json`
+and `<checkpoint root>/lumecon-resources-final-2026-09-24/rehearsal-result.json`.
 
 Cedar checkpoint `6aa8eb3` passed subscriber storage CI run
 [36068685079](https://github.com/teim-team/cedar-press/actions/runs/36068685079).
@@ -336,7 +348,7 @@ passed real local login/API, anonymous 401, wrong entitlement 403, authorized
 and rollback from `3ade173422020a3cc1aa997b5ff9bbb2b9bca932899b6c2b23ae85f90d1fd0e7`.
 Downloaded SHA-256:
 `e5f8672190ab801370d4cf001baa30ea066253cbef12e7d7e15d6d245f57f650`.
-Receipt: `C:/Users/esm247/cedar-takeover-checkpoint/closure-legislation-corrected-2026-09-24/rehearsal-result.json`.
+Receipt: `<checkpoint root>/closure-legislation-corrected-2026-09-24/rehearsal-result.json`.
 This certifies neither the advertised supporting tables nor completed producer
 migration; it is the corrected transport regression reference for cutover.
 
@@ -396,7 +408,7 @@ Updated 2026-09-24 22:18 UTC. All twelve full scans completed. These are interna
 
 **Concrete corrections:** shared row-policy execution now serves both 1135 and 1137; two obsolete Funding dispatch edges (335/336) were removed from the existing generated contract and build consumer. No historical script was deleted. Deals purchase-allocation wording corrected 14 published-view classifications without changing source rows. Subcontracting public contract/codebook no longer assert ownership. The NEID instrument-description false positive is narrowly fixed while genuine retired IDs still refuse. Prime competition uses the existing DAIMS dictionary: all 1,217,768 rows checked, zero undefined codes and zero disagreements with stored normalization.
 
-**Internal validation receipts:** `C:/Users/esm247/cedar-takeover-checkpoint/launch-candidates-2026-09-24/measurements.json` and `launch-candidates-2026-09-24-repaired/measurements.json`. All twelve source SHA-256 values match before/after. Subcontracting now produces 70,597 rows, SHA-256 `712b724ac3beabf2832b4d026bc5b9acdbfb4e583d97aff091044e47ff74a979`. The initial Legislation scan matched the prior 3,069-row pinned projection (`d38902f...`); Natural Resources matches prior 11,305-row projection (`b66526a...`). Neither equality proves source relevance or completeness.
+**Internal validation receipts:** `<checkpoint root>/launch-candidates-2026-09-24/measurements.json` and `launch-candidates-2026-09-24-repaired/measurements.json`. All twelve source SHA-256 values match before/after. Subcontracting now produces 70,597 rows, SHA-256 `712b724ac3beabf2832b4d026bc5b9acdbfb4e583d97aff091044e47ff74a979`. The initial Legislation scan matched the prior 3,069-row pinned projection (`d38902f...`); Natural Resources matches prior 11,305-row projection (`b66526a...`). Neither equality proves source relevance or completeness.
 
 **Additional content checks:** Legislation: 591 linked bills, 3,061 source URLs, zero duplicate bill IDs; eight missing URLs need repair, including five treaty-shaped records. NAGPRA: 6,169 linked notices, all 6,792 source URLs, zero duplicate document IDs; identity bridge evidence still requires validation. Advocacy disclosures: 26,513 linked rows, all 27,825 source URLs; 1,312 unlinked rows are not automatically erroneous. Missing NAGPRA item counts remain unknown, never zero.
 
@@ -418,7 +430,7 @@ Implementation commits after `fcde1c693bb30f96174e7ddec112878f9d4daa9a` (all on 
 
 Excluded and unchanged by these commits: pre-existing `data/spine/cedar_entity_types.csv`, `docs/NEED_CORROBORATION.json`, `docs/TERMINAL_HANDOFF.md`, `docs/imports/r7_audit/CURRENT.json`, `review/OWNER_DECISION_QUEUE.md`, R7 locks and bundle `f37240f77e40bf5e390219ae`. Candidate CSV/HTML/receipts remain outside Git. No frontend, production release pointer, AWS resource, source row or issued ID was committed.
 
-Reproduce isolated candidates with `python -B code/1135_full_dataset_review_bundle.py candidate --input-root "C:/Users/esm247/Desktop/Cedar Press" --output-root "<new directory outside Git>" --queue review/launch_control.json --need-root "C:/Users/esm247/cedar-takeover-checkpoint/need-candidate-d"`. Optional repeated `--collection` selects a bounded rerun. Run the 80-test command above, `python -B -m unittest server.tests.test_pipeline_registration`, and the existing release-download command in this packet. Never reuse an output directory or interpret a `.partial` file as a candidate.
+Reproduce isolated candidates with `python -B code/1135_full_dataset_review_bundle.py candidate --input-root "<data workspace>" --output-root "<new directory outside Git>" --queue review/launch_control.json --need-root "<checkpoint root>/need-candidate-d"`. Optional repeated `--collection` selects a bounded rerun. Run the 80-test command above, `python -B -m unittest server.tests.test_pipeline_registration`, and the existing release-download command in this packet. Never reuse an output directory or interpret a `.partial` file as a candidate.
 
 ### Latest bounded corrections and internal receipts
 
@@ -426,7 +438,7 @@ The Prime rerun completed on all 1,217,768 rows: competition passes; `supersecto
 
 Legislation now projects **3,064** rows, withholding five source-preserved treaty records under a named inclusion hold. The old 3,069-row artifact remains unchanged and is transport evidence only, not the current approved content. New candidate SHA-256: `1ae0dfa33112fe6ab6a7b2e3c8c3318a26e85a6b59a51504269cb25b0906edb8`. Upstream `votingpatterns/44_classify_senate_tribal_votes.py` matched generic treaty reservations: 34 of 141 selected Senate votes depend only on that pattern, across 12 bill IDs and 22 bill-less votes. White Earth is a genuine counterexample: no blanket deletion. Codex must reconcile the remaining route and related tables. Primary checks include [NATO treaty document](https://www.congress.gov/117/cdoc/tdoc3/CDOC-117tdoc3.pdf) and [Spain tax protocol](https://www.govinfo.gov/app/details/CDOC-113tdoc4).
 
-Native-Owned: 19 fields traced to 615/953/1001/1100 are now explicitly internal. The 548 withheld rows split into **523 explicit accuracy holds plus 25 other publishability holds**; `publish_hold=Y` overrides stale `publishable=Y`. No candidate identifiers become customer identities. The initial `nation_id` refusal was traced and corrected: it is source-association context, not the certifier. All 4,001 populated source values (3,453 eligible rows) remain internal, without CE substitution. The final projection passes on 3,725 rows; SHA-256 `4c1bc38818bc268ce906dfb3018764354d9f0dcd0e496e0d8d21cc48b23aef1c`. The final receipt is `launch-candidates-2026-09-24-owned-context/measurements.json`. Receipt: `C:/Users/esm247/cedar-takeover-checkpoint/launch-candidates-2026-09-24-admission/measurements.json`.
+Native-Owned: 19 fields traced to 615/953/1001/1100 are now explicitly internal. The 548 withheld rows split into **523 explicit accuracy holds plus 25 other publishability holds**; `publish_hold=Y` overrides stale `publishable=Y`. No candidate identifiers become customer identities. The initial `nation_id` refusal was traced and corrected: it is source-association context, not the certifier. All 4,001 populated source values (3,453 eligible rows) remain internal, without CE substitution. The final projection passes on 3,725 rows; SHA-256 `4c1bc38818bc268ce906dfb3018764354d9f0dcd0e496e0d8d21cc48b23aef1c`. The final receipt is `launch-candidates-2026-09-24-owned-context/measurements.json`. Receipt: `<checkpoint root>/launch-candidates-2026-09-24-admission/measurements.json`.
 
 Protected original inputs rechecked: 19 NEED, 12 NAGPRA and two publication-manifest files match their preservation hashes. No issued IDs, original source rows, active owner-review artifact or published datasets were intentionally written by these commands.
 
@@ -577,7 +589,7 @@ histories are retained; Codex imports returned exports. No canonical decisions w
 
 Claude owns rounding. Codex's verified uncommitted rounding changes were removed,
 with recovery copies and before/after hashes outside the repositories at
-`C:\Users\esm247\cedar-takeover-checkpoint\rounding-removal-2026-09-24`.
+`<checkpoint root>\rounding-removal-2026-09-24`.
 The Cedar priorities implementation and test files match HEAD again. The remaining
 non-rounding Lumecon semantic/documentation checks pass: **68 passed**. This is a
 cleanup check, not a claim that Claude's rounding implementation was tested here.
@@ -586,7 +598,7 @@ All **83 unique R7 pairs** now have a recorded first-pass research outcome in th
 existing `review/r7_launch_review.json` input. No owner card is qualified yet.
 Thirteen retrieved USAspending API snapshots support exact corporate parent UEI/name
 bindings and preserve distinct contractor identifiers. The response bytes and SHA256
-receipts are outside Git at `C:\Users\esm247\cedar-takeover-checkpoint\r7-primary-evidence`.
+receipts are outside Git at `<checkpoint root>\r7-primary-evidence`.
 Seven pairs carry explicit conflicts requiring reconciliation: Shee Atika's exclusion,
 UIC and Tikigaq's mixed-object evidence, Aleknagik and Bering Straits' federal parent
 labels, and Minto Development and Natives of Kodiak's classifications. Other missing
@@ -778,12 +790,12 @@ does not contain all raw data. `--as-of` is an operator-supplied check date, not
 the source cutoff. The environment below imports both repositories' packages:
 
 ```powershell
-Set-Location 'C:\Users\esm247\Desktop\cedar-press-codex'
-$env:PYTHONPATH='C:\Users\esm247\Desktop\Lumecon-data\src;C:\Users\esm247\Desktop\cedar-press-codex\server'
-& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B code/build.py release-pilot legislation --source 'C:\Users\esm247\Desktop\Cedar Press\data\clean\native_bills.csv' --output-root 'C:\Users\esm247\cedar-takeover-checkpoint\legislation-release-store' --as-of 2026-09-23
+Set-Location '<cedar-press checkout>'
+$env:PYTHONPATH='<lumecon-data checkout>\src;<cedar-press checkout>\server'
+& '<lumecon-data checkout>\.venv\Scripts\python.exe' -B code/build.py release-pilot legislation --source '<data workspace>\data\clean\native_bills.csv' --output-root '<checkpoint root>\legislation-release-store' --as-of 2026-09-23
 # Use the exact catalog path printed above:
-& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store 'C:\Users\esm247\cedar-takeover-checkpoint\legislation-release-store' --catalog '<printed-catalog-path>'
-& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B -m unittest discover -s server/tests -t server -p test_release_download.py
+& '<lumecon-data checkout>\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store '<checkpoint root>\legislation-release-store' --catalog '<printed-catalog-path>'
+& '<lumecon-data checkout>\.venv\Scripts\python.exe' -B -m unittest discover -s server/tests -t server -p test_release_download.py
 ```
 
 The local rehearsal receipt and audit log stay beside the actual artifacts under
@@ -805,7 +817,7 @@ Lumecon's Ubuntu suite tests actual filesystem containment and immutable storage
 | Access/audit | Anonymous401, wrong-tier403, authorized200; explicit stale pin503; redacted timestamped audit events |
 | Remaining scope | Eight historic source URLs missing; actions, votes and ancillary tables not included in this bill-table proof |
 
-The local receipt is `C:/Users/esm247/cedar-takeover-checkpoint/legislation-release-store/rehearsal-result.json`.
+The local receipt is `<checkpoint root>/legislation-release-store/rehearsal-result.json`.
 The store and all real artifacts remain ignored and are not in either PR. Projection
 intake now uses `intake/legislation/<content-sha>.csv`, so a second source snapshot
 does not overwrite the first. Duplicate immutable releases are verified, not replaced.
@@ -835,7 +847,7 @@ respected; the rehearsal authorizes the appropriate pro subscriber.
 | Real consumer proof | Lumecon loopback API, real Cedar login/cookie, anonymous401, wrong-tier403, authorized200, audit and rollback passed |
 | Date/scope limits | 505/280 rows by 2025/2026 `period_start`, versus 36/24 by `payment_date`; mixed periods/measures and suppression remain, source cutoff unmeasured |
 
-Receipt: `C:/Users/esm247/cedar-takeover-checkpoint/natural-resources-release-store/rehearsal-result.json`.
+Receipt: `<checkpoint root>/natural-resources-release-store/rehearsal-result.json`.
 This proves another flagship delivery path; it does not refresh the source, prove
 its completeness, make incompatible financial measures additive or release its
 ancillary tables. The output is an unpublished local candidate.
@@ -848,10 +860,10 @@ aggregates, 508 per-headright rates, 167 state aggregates, 779 entity-specific
 observations and 60 components. They cannot be summed as one financial total.
 
 ```powershell
-Set-Location 'C:\Users\esm247\Desktop\cedar-press-codex'
-$env:PYTHONPATH='C:\Users\esm247\Desktop\Lumecon-data\src;C:\Users\esm247\Desktop\cedar-press-codex\server'
-& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B code/build.py release-pilot natural-resources --source 'C:\Users\esm247\Desktop\Cedar Press\data\clean\resource_revenue.csv' --output-root 'C:\Users\esm247\cedar-takeover-checkpoint\natural-resources-release-store' --as-of 2026-09-23
-& 'C:\Users\esm247\Desktop\Lumecon-data\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store 'C:\Users\esm247\cedar-takeover-checkpoint\natural-resources-release-store' --catalog 'C:\Users\esm247\cedar-takeover-checkpoint\natural-resources-release-store\catalogs\2a82c64231ef0cc6098500ed4677835f6b7b00494c17e62b5317c9757daee013.json'
+Set-Location '<cedar-press checkout>'
+$env:PYTHONPATH='<lumecon-data checkout>\src;<cedar-press checkout>\server'
+& '<lumecon-data checkout>\.venv\Scripts\python.exe' -B code/build.py release-pilot natural-resources --source '<data workspace>\data\clean\resource_revenue.csv' --output-root '<checkpoint root>\natural-resources-release-store' --as-of 2026-09-23
+& '<lumecon-data checkout>\.venv\Scripts\python.exe' -B server/tests/release_download_rehearsal.py --store '<checkpoint root>\natural-resources-release-store' --catalog '<checkpoint root>\natural-resources-release-store\catalogs\2a82c64231ef0cc6098500ed4677835f6b7b00494c17e62b5317c9757daee013.json'
 ```
 
 The pilot now has two entries in `code/cedar_pipeline.py::RELEASE_PILOTS`.
@@ -1157,7 +1169,7 @@ importer recorded 20 `RECORDED_PENDING_APPLICATION` receipts; a repeat returned
 20 `ALREADY_RECORDED` with byte-identical receipt ledger. Canonical relationship
 application remains pending; no affirmative replacement information was promoted.
 
-Recovery location: `C:/Users/esm247/cedar-takeover-checkpoint/recovered-browser-decisions/`.
+Recovery location: `<checkpoint root>/recovered-browser-decisions/`.
 CSV `cedar_need_decisions_recovered.csv` SHA256:
 `b0231e8824996eb3aeae6a79ce148627e4445a759798384187ab000cd849fa9c`.
 The review generator now supports visible saved/exported counts, completion export,
@@ -1587,7 +1599,7 @@ Checkpoint 2026-09-24 20:35 UTC: READY WITH WARNINGS - twelve-collection dashboa
 Producer code pin for these Press runs: `5535323ade0ccc4039c22558c56fc176f5e2977b` (also recorded in each
 `run-results.json` command and the immutable contract caveat). Later Gaming-only
 rights corrections do not change these Press producer bytes. Private evidence
-root: `C:/Users/esm247/cedar-takeover-checkpoint/foundation-frozen-2026-09-25/`.
+root: `<checkpoint root>/foundation-frozen-2026-09-25/`.
 `run-results.json` records exact commands, hashes, scope and process exits.
 
 All six following candidates passed the existing real local data API and Cedar

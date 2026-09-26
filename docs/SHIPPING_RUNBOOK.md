@@ -64,7 +64,7 @@ ruling is implemented. No replacement affiliation is promoted automatically.
 Run from Desktop/cedar-press-codex, using a NEW output root each time:
 
 ```
-py -3 -B code/build.py candidate need --input-root C:/Users/esm247/Desktop/cedar-press-codex --owner-dir C:/Users/esm247/Desktop/cedar-press-codex/data/raw/external/need_owner --output-root C:/Users/esm247/cedar-takeover-checkpoint/need-candidate-NEW --as-of 2026-09-23
+py -3 -B code/build.py candidate need --input-root <cedar-press checkout> --owner-dir <cedar-press checkout>/data/raw/external/need_owner --output-root <checkpoint root>/need-candidate-NEW --as-of 2026-09-23
 ```
 
 The supported runner declares NEED_INPUTS/NEED_OUTPUTS in code/build.py, copies
