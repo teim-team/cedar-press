@@ -202,7 +202,18 @@ const TIER_DECLARATIONS = Object.freeze([
  *
  * Everything below was measured on 2026-09-02 against the file a subscriber
  * receives, `dist/customer/<id>.csv`. A value here is a claim to a paying
- * customer. It is not editable without re-measuring.
+ * customer. It is not editable without re-measuring. *
+ * THE BLURBS ARE THE OWNER'S, 2026-09-26
+ * Each says what kind of record the collection holds and what it lets a
+ * reader follow or compare; grain, inclusion rules and caveats belong on
+ * About and Methods. Ten were replaced verbatim from the owner's brief. Two
+ * were not, and on purpose: `deals` and `lobbying` carry the release
+ * system's canonical definition (`cedar_publication.DATASET_DEFINITION`),
+ * which the release gate (1169) compares with this file character for
+ * character and which also feeds the manifest's `tracks` and the codebooks.
+ * The owner's new text for those two is a change to a published data
+ * definition, so it goes through the data workspace and a regenerated
+ * release, not through this file. Until then the two blurbs stay as ruled.
  */
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
@@ -216,7 +227,7 @@ export const PRESS_CATALOG = Object.freeze([
     // three months of. The old catalog claimed 2001, which is in no file.
     coverage: Object.freeze({ kind: "series", from: 2007 }),
     blurb:
-      "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
+      "Federal assistance transactions reported for Native nations, organizations, enterprises and other identified recipients, including grants, loans and direct payments. Follow funding by recipient, program, agency, amount and year.",
     linkage:
       "Recipients resolved to the Native entity behind them, so an award to a subsidiary, a housing authority or a consortium is attributed to the nation or organization it belongs to.",
   }),
@@ -228,7 +239,7 @@ export const PRESS_CATALOG = Object.freeze([
     // Series. Floor: min(notice_date) in dist/customer/federal-register.csv.
     coverage: Object.freeze({ kind: "series", from: 1994 }),
     blurb:
-      "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
+      "Federal Register notices and agency actions concerning tribes, Native organizations, lands, resources, recognition and other Indian Country matters. Follow published actions, consultations and comment periods across agencies and time.",
     linkage:
       "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names.",
   }),
@@ -243,7 +254,7 @@ export const PRESS_CATALOG = Object.freeze([
     // this is the year the record opens, not a dense series from 1973.
     coverage: Object.freeze({ kind: "series", from: 1973 }),
     blurb:
-      "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
+      "Bills, resolutions, sponsorship and roll-call votes concerning tribes and Indian Country. Follow legislation from introduction through congressional action and examine sponsorship and voting records.",
     linkage:
       "Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them.",
   }),
@@ -271,7 +282,7 @@ export const PRESS_CATALOG = Object.freeze([
     // notice under it published in 1994.
     coverage: Object.freeze({ kind: "series", from: 1994 }),
     blurb:
-      "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
+      "Public records of activity under the Native American Graves Protection and Repatriation Act, including notices, inventories and repatriation-related actions. Follow records by institution, Native entity, notice type and date.",
     linkage:
       "Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades.",
   }),
@@ -303,7 +314,7 @@ export const PRESS_CATALOG = Object.freeze([
     // roughly FY2000 (docs/datasets/native-owned-businesses.md).
     coverage: Object.freeze({ kind: "series", from: 2000 }),
     blurb:
-      "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
+      "Federal contract transactions awarded directly to Native governments, enterprises, organizations and identified Native-owned businesses. Examine awarding agencies, recipients, industries, obligations, procurement mechanisms and set-asides.",
     linkage:
       "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation.",
   }),
@@ -324,7 +335,7 @@ export const PRESS_CATALOG = Object.freeze([
     // floor to 2010 on the nose, which is the statutory floor.
     coverage: Object.freeze({ kind: "series", from: 2010 }),
     blurb:
-      "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
+      "Reported federal subawards to Native entities and businesses beneath prime contracts. Follow the prime relationship, subrecipient, amount, industry and timing of reported subcontracting activity.",
     linkage:
       "Subawards matched to the same resolved entities as the prime contracts above them.",
   }),
@@ -338,7 +349,7 @@ export const PRESS_CATALOG = Object.freeze([
     // Council and carried as dated revenue events with amounts.
     coverage: Object.freeze({ kind: "series", from: 1880 }),
     blurb:
-      "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
+      "Public records of energy and mineral production, revenues, royalties and related disbursements associated with tribal trust and restricted lands. Compare reported activity by commodity, Native entity, location and period.",
     linkage:
       "Production and disbursements matched to the nations and allottees they belong to.",
   }),
@@ -358,7 +369,7 @@ export const PRESS_CATALOG = Object.freeze([
     // max(harvest_date) in dist/customer/native-owned-businesses.csv.
     coverage: Object.freeze({ kind: "roster", captured: "2026-09-01" }),
     blurb:
-      "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
+      "Individually owned Native businesses identified through tribal TERO offices, commerce programs and other documented Native-business registries. Records preserve the issuing source, reported affiliation or certification, location and industry where available.",
     linkage:
       "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office.",
   }),
@@ -373,14 +384,16 @@ export const PRESS_CATALOG = Object.freeze([
     // SNAPSHOT, not a series."
     //
     // min(bmf_tax_period) is 1983, and it is one defunct filer's last return,
-    // not the start of anything. The annual filings this collection's blurb
-    // describes live in np_financials (tax_year 1996-2025, thin to 2000) and
-    // are not folded into the delivered file; when they are, this becomes a
-    // series and this field should change shape with it. Captured:
+    // not the start of anything. The annual filings live in np_financials
+    // (tax_year 1996-2025, thin to 2000) and are not folded into the
+    // delivered file; when they are, this becomes a series and this field
+    // should change shape with it. The blurb says "available federal filing
+    // information" and promises no year-over-year comparison until the
+    // delivered release carries the annual series. Captured:
     // bmf_vintage_fetched, which is one value across all 12,764 rows.
     coverage: Object.freeze({ kind: "roster", captured: "2026-04-29" }),
     blurb:
-      "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
+      "A maintained roster of Native-led, Native-serving and Native-focused nonprofit organizations, with EINs and available federal filing information kept distinct by organization type. Identify organizations and connect them to other Cedar records without treating Native-led and Native-serving as the same thing.",
     linkage:
       "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately.",
   }),
@@ -406,7 +419,7 @@ export const PRESS_CATALOG = Object.freeze([
     // series with a left edge rather than a roster.
     coverage: Object.freeze({ kind: "series", from: 2016 }),
     blurb:
-      "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
+      "Enterprises owned or controlled by Native nations, Alaska Native corporations and other Native entities, including subsidiaries, holding companies and joint ventures. Follow parent relationships and organizational changes over time.",
     linkage:
       "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
   }),

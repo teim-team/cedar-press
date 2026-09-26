@@ -78,7 +78,7 @@ import {
 import CollectionPreview from "./PressCollectionPreview";
 import PressCollectionRail from "./PressCollectionRail.jsx";
 import PressDoorCedar from "./PressDoorCedar";
-import PressDoorCollections from "./PressDoorCollections";
+import PressAudienceExample from "./PressAudienceExample";
 import { PressPreviewNotice } from "./PressChrome";
 import { TierName } from "./TierName";
 import PressReleaseSpecimen from "./PressReleaseSpecimen";
@@ -536,6 +536,15 @@ export default function PressGate({ user }) {
               research, and maintained as Indian Country changes. Every record traces back to the
               document it came from.
             </p>
+            {/* Who made it, on the first screen (owner's brief, 2026-09-26):
+                one restrained line rather than logos, so the product frame
+                stays the proof object. The foot and the navy passage still
+                say what each partner contributes. */}
+            <p className="cp-hero3__by cp-fade">
+              Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a> in
+              partnership with{" "}
+              <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+            </p>
             <p className="cp-hero3__reach cp-fade">{SOURCE_REACH_CLAIM}</p>
             <div className="cp-hero3__cta cp-fade">
               <a className="cp-btn cp-btn--primary cp-btn--lg" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
@@ -614,21 +623,18 @@ export default function PressGate({ user }) {
 
         </div>
 
-        {/* THE TWELVE, AT A SIZE YOU CAN ACTUALLY POINT AT.
-            Its own band under the hero, full page width. Inside the hero's
-            split it landed in the right-hand column and every tile shrank to
-            one character wide.
-
-            The frame's rail lists all twelve and has always been clickable,
-            but the frame renders the real app at 1280px and scales it to fit,
-            so a rail row is about seventeen pixels tall in six-point type:
-            visible, not pointable. A visitor deciding whether to subscribe
-            should be able to see what the twelve are and what each holds.
-
-            Pointing at one drives the frame above and answers in the line
-            below, so it works whether or not the frame is still on screen. */}
-        <PressDoorCollections
-          selectedId={selectedId}
+        {/* THE SPACE UNDER THE HERO IS HOW THE COLLECTIONS GET USED.
+            This slot held the full-size collection shelf, which was there
+            because the frame renders the real app at 1280px and scales it to
+            fit, so a rail row is about seventeen pixels tall: visible, not
+            pointable. The owner replaced the shelf on 2026-09-26 (it repeated
+            what the viewer already shows) with the use-case band, which keeps
+            the shelf's jobs: its chips preview a collection in the frame on
+            point and commit it on click through the same `pick`, and the
+            selected collection's description sits under it. Every live
+            collection is cited by some use case (pressAudiences.test.js). */}
+        <PressAudienceExample
+          selected={selected}
           onPick={pick}
           onPoint={setSelectedId}
         />

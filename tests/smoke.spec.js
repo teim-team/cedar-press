@@ -21,6 +21,7 @@ import { EMAIL, HASH, PASSWORD, PRESS_EMAIL } from "./demoAccount.js";
 // The twelve, read from the catalog rather than typed: a list typed here
 // would pass while the door advertised something else.
 import { STOREFRONT_CATALOG } from "../src/features/grove/pressCatalog.js";
+import { LUMECON_URL, TBN_URL } from "../src/features/grove/pressArticles.js";
 
 // The throwaway account playwright.config.js provisions into the build it
 // starts. It is not a credential and it opens nothing that is deployed
@@ -400,7 +401,10 @@ test.describe("the gate", () => {
     await page.waitForSelector('[data-testid="stage-record"]');
     await page.locator('[data-testid="collection-stage"]').getByRole("button", { name: /Ask Cedar/ }).click();
     await expect(page.locator(".cp-dc__msg--you").last()).toContainText("Federal Funding");
-    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText("federal government");
+    // The catalog's own words, not a phrase typed here: the blurb is owner copy
+    // and changes on the owner's say.
+    const blurb = STOREFRONT_CATALOG.find((entry) => entry.id === "funding").blurb;
+    await expect(page.locator(".cp-dc__msg--bot").last()).toContainText(blurb.slice(0, 60));
   });
 
   test("the door does not scroll sideways", async ({ page }) => {
@@ -1091,29 +1095,241 @@ test.describe("About this collection", () => {
   });
 });
 
-test.describe("the door's twelve", () => {
-  // A visitor deciding whether to subscribe should be able to see what the
-  // twelve are and what each holds without signing in. The product frame's
-  // rail has always been clickable, but the frame renders at about 0.63
-  // scale: seventeen-pixel rows in six-point type.
-  test("the pre-login page previews all twelve and drives the frame", async ({ page }, testInfo) => {
+test.describe("the use cases drive the viewer", () => {
+  // The door's collection shelf was replaced by the use-case band
+  // (owner, 2026-09-26). The shelf existed because the frame's rail renders at
+  // about 0.63 scale, seventeen-pixel rows in six-point type; the band's chips
+  // do its job now, and these hold them to everything the shelf's test held
+  // it to: every collection reachable, the plan split visible, the selected
+  // description shown, the address round-tripping.
+  const chips = (page) => page.locator(".cp-aud__panel.is-on .cp-aud__col");
+
+  test("pointing previews, a click commits, and the address round-trips", async ({ page }, testInfo) => {
     const errors = watchConsole(page);
     await page.goto("/");
-    const tiles = page.locator(".cp-dcol__tile");
-    await tiles.first().waitFor();
-    await expect(tiles).toHaveCount(12);
-    // Grouped by the plan each comes with, which is the question a visitor has.
-    await expect(page.locator(".cp-dcol__tier")).toHaveCount(2);
-    await expect(page.locator(".cp-dcol__shelf").first()).toContainText("See what's happening");
-
+    await page.locator(".cp-aud").scrollIntoViewIfNeeded();
     const pane = page.locator(".cp-app__pane");
+    const note = page.locator(".cp-aud__note");
+    const first = STOREFRONT_CATALOG[0];
+    await expect(note).toContainText(first.blurb);
+
+    // The first example cites something other than the collection in hand.
+    const chip = chips(page).filter({ hasNot: page.locator(`[data-collection="${first.id}"]`) }).first();
+    const id = await chip.getAttribute("data-collection");
+    const entry = STOREFRONT_CATALOG.find((e) => e.id === id);
     const before = await pane.innerText();
-    const target = tiles.nth(8);
-    if (testInfo.project.name === "desktop") await target.hover(); else await target.tap();
-    // The line under the strip answers whether or not the frame is on screen,
-    // and the frame above follows the same selection.
-    await expect(page.locator(".cp-dcol__note")).not.toContainText(/for what it holds|window above/);
+    if (testInfo.project.name === "desktop") {
+      await chip.hover();
+      // A preview: the frame and the line follow, the address does not.
+      await expect(note).toContainText(entry.blurb);
+      await expect(pane).not.toHaveText(before);
+      expect(new URL(page.url()).searchParams.get("collection")).toBeNull();
+    }
+    await chip.click();
+    await expect(page).toHaveURL(new RegExp(`[?&]collection=${id}(&|$)`));
+    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    await expect(note).toContainText(entry.blurb);
     await expect(pane).not.toHaveText(before);
+    // A choice inside the band stops it turning.
+    await expect(page.locator(".cp-aud")).toHaveAttribute("data-stopped", "true");
+
+    // The address brings the same collection back.
+    await page.goto(`/?collection=${id}`);
+    await expect(page.locator(".cp-aud__note")).toContainText(entry.blurb);
+    expect(errors).toEqual([]);
+  });
+
+  test("every collection is reachable through the use cases, at this width", async ({ page }) => {
+    // Run on both projects: on the phone (390 wide) this is the answer to "how
+    // does a visitor reach each collection": pick a use case in the scrolling
+    // selector, then tap one of its chips.
+    await page.goto("/");
+    await page.locator(".cp-aud").scrollIntoViewIfNeeded();
+    const reached = new Set();
+    const tabs = page.locator(".cp-aud__tab");
+    const count = await tabs.count();
+    for (let i = 0; i < count; i += 1) {
+      await tabs.nth(i).click();
+      const visible = chips(page);
+      const n = await visible.count();
+      for (let j = 0; j < n; j += 1) {
+        const chip = visible.nth(j);
+        const id = await chip.getAttribute("data-collection");
+        if (reached.has(id)) continue;
+        await chip.click();
+        await expect(page).toHaveURL(new RegExp(`[?&]collection=${id}(&|$)`));
+        reached.add(id);
+      }
+    }
+    expect([...reached].sort()).toEqual(STOREFRONT_CATALOG.map((entry) => entry.id).sort());
+  });
+
+  test("the plan split is on the chips and in the line under them", async ({ page }) => {
+    await page.goto("/");
+    const all = page.locator(".cp-aud__col");
+    const shelves = await all.evaluateAll((els) => els.map((el) => [el.dataset.shelf, Boolean(el.querySelector(".cp-plus"))]));
+    expect(shelves.length).toBeGreaterThan(0);
+    for (const [shelf, plus] of shelves) expect(plus, `a ${shelf} chip`).toBe(shelf === "pro");
+    const pro = STOREFRONT_CATALOG.find((entry) => entry.shelf === "pro");
+    await page.goto(`/?collection=${pro.id}`);
+    await expect(page.locator(".cp-aud__meta")).toContainText("Cedar Press");
+    await expect(page.locator(".cp-aud__meta .cp-plus")).toHaveCount(1);
+  });
+
+  test("the rotation never changes the collection in hand", async ({ page }) => {
+    await page.clock.install();
+    await page.goto("/");
+    await page.locator(".cp-aud").evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    if (!test.info().project.use.hasTouch) await page.mouse.move(2, 2);
+    // Turning before the clock is advanced: the band starts once it is seen
+    // on screen, which is an observer callback, not a timer.
+    await expect(page.locator(".cp-aud")).toHaveAttribute("data-rotating", "true");
+    const note = page.locator(".cp-aud__note");
+    const before = await note.innerText();
+    const url = page.url();
+    await page.clock.runFor(40_000);
+    await expect(page.locator(".cp-aud__count")).not.toHaveText(/^01 \//);
+    expect(await note.innerText()).toBe(before);
+    expect(page.url()).toBe(url);
+  });
+});
+
+test.describe("the door's use cases", () => {
+  // One audience at a time, under the hero (PressAudienceExample). The rules
+  // are held in milliseconds by pressAudiences.test.js; these check that the
+  // built page actually obeys them. The clock is Playwright's, so eight
+  // seconds of rotation cost nothing.
+  const band = (page) => page.locator(".cp-aud");
+  const counter = (page) => page.locator(".cp-aud__count");
+
+  async function reach(page) {
+    // Instant, not the page's smooth scroll: with Playwright's clock installed
+    // a smooth scroll never finishes, and the band never comes on screen.
+    await band(page).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect(band(page)).toBeVisible();
+    // Seen, by the band's own observer, before any clock is advanced; under
+    // reduced motion it is seen and still does not turn.
+    await expect.poll(() => band(page).evaluate((el) => el.dataset.rotating === "true" || matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
+    // Off the band, so a fine pointer is not resting on it and pausing it.
+    if (!test.info().project.use.hasTouch) await page.mouse.move(2, 2);
+  }
+
+  test("shows one example, from the catalog, and never an unreleased collection", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await reach(page);
+    const shown = await page.locator(".cp-aud__panel").count();
+    await expect(counter(page)).toHaveText(`01 / ${String(shown).padStart(2, "0")}`);
+    await expect(page.locator(".cp-aud__panel.is-on")).toHaveCount(1);
+    await expect(page.locator(".cp-aud__tab")).toHaveCount(shown);
+    // Every collection named in the band is one the strip below sells.
+    const cited = await page.locator(".cp-aud__col").evaluateAll((els) => [...new Set(els.map((el) => el.dataset.collection))]);
+    const sold = new Set(STOREFRONT_CATALOG.map((entry) => entry.id));
+    for (const id of cited) expect(sold.has(id), `${id} is not a live collection`).toBe(true);
+    // The two announced collections render nowhere on the door: no tile, no
+    // chip, no audience that exists only for them, no sentence about them.
+    for (const id of ["plot", "foundation-corporate-giving"]) {
+      await expect(page.locator(`[data-collection="${id}"]`)).toHaveCount(0);
+    }
+    const body = await page.locator("body").innerText();
+    for (const phrase of ["PLOT", "Corporate Giving", "Foundations and philanthropy", "private giving"]) {
+      expect(body, phrase).not.toContain(phrase);
+    }
+    const bandText = await band(page).evaluate((el) => el.textContent);
+    expect(bandText).not.toMatch(/parcel|philanthrop/i);
+    expect(errors).toEqual([]);
+  });
+
+  test("it turns slowly, and a choice stops it for good", async ({ page }, testInfo) => {
+    await page.clock.install();
+    await page.goto("/");
+    await reach(page);
+    await expect(counter(page)).toHaveText(/^01 \//);
+    await page.clock.runFor(8_100);
+    await expect(counter(page)).toHaveText(/^02 \//);
+
+    if (testInfo.project.name === "desktop") {
+      // Hovered, it holds; released, it carries on.
+      await band(page).hover();
+      await page.clock.runFor(20_000);
+      await expect(counter(page)).toHaveText(/^02 \//);
+      await page.mouse.move(2, 2);
+      await page.clock.runFor(8_100);
+      await expect(counter(page)).toHaveText(/^03 \//);
+    }
+
+    const tab = page.locator(".cp-aud__tab").nth(4);
+    await tab.click();
+    await expect(tab).toHaveAttribute("aria-selected", "true");
+    await expect(counter(page)).toHaveText(/^05 \//);
+    await expect(band(page)).toHaveAttribute("data-stopped", "true");
+    if (!testInfo.project.use.hasTouch) await page.mouse.move(2, 2);
+    await page.locator("body").evaluate((el) => el.focus?.());
+    await page.clock.runFor(60_000);
+    await expect(counter(page)).toHaveText(/^05 \//);
+  });
+
+  test("under reduced motion it never cycles", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.clock.install();
+    await page.goto("/");
+    await reach(page);
+    await expect(band(page)).toHaveAttribute("data-rotating", "false");
+    await page.clock.runFor(60_000);
+    await expect(counter(page)).toHaveText(/^01 \//);
+    // The controls still work: reduced motion removes the cycling, not the choice.
+    await page.getByRole("button", { name: "Next use case" }).click();
+    await expect(counter(page)).toHaveText(/^02 \//);
+  });
+
+  test("changing the example does not move the page", async ({ page }) => {
+    await page.goto("/");
+    await reach(page);
+    // Page coordinates, not viewport ones: a click may scroll the window, and
+    // that is not the layout moving.
+    // Layout offsets, not rects: the sections below arrive with a `.cp-fade`
+    // rise, and a transform mid-reveal is not the layout moving.
+    const measure = () => page.evaluate(() => {
+      const top = (sel) => {
+        let y = 0;
+        for (let node = document.querySelector(sel); node; node = node.offsetParent) y += node.offsetTop;
+        return y;
+      };
+      return { height: document.querySelector(".cp-aud").offsetHeight, below: top(".cp-hero3__proof") };
+    });
+    const before = await measure();
+    const total = await page.locator(".cp-aud__panel").count();
+    for (let i = 0; i < total; i += 1) {
+      await page.getByRole("button", { name: "Next use case" }).click();
+      const now = await measure();
+      expect(Math.abs(now.height - before.height), "band height").toBeLessThan(0.5);
+      expect(Math.abs(now.below - before.below), "the band below it").toBeLessThan(0.5);
+    }
+  });
+
+  test("the partners are named on the first screen, and each name links to its site", async ({ page }) => {
+    await page.goto("/");
+    const line = page.locator(".cp-hero3__by");
+    await expect(line).toHaveText("Built by Lumecon in partnership with Tribal Business News.");
+    await expect(line.getByRole("link", { name: "Lumecon" })).toHaveAttribute("href", LUMECON_URL);
+    await expect(line.getByRole("link", { name: "Tribal Business News" })).toHaveAttribute("href", TBN_URL);
+    // Teal text is --dteal (#0A7F74), and the door's own `a { color: inherit }`
+    // must not win over it.
+    await expect(line.getByRole("link", { name: "Lumecon" })).toHaveCSS("color", "rgb(10, 127, 116)");
+  });
+
+  // THE PREVIEW LOGIN. The named reviewer at Indian Country Media signs in to
+  // the standalone preview through this door's "Log in" tab, with an account
+  // the deploy provisions from a repository secret (pressDemoGate.test.js
+  // holds that wiring). This is the same path with the suite's own Cedar
+  // Press account, after the band was added above the strip: the door still
+  // opens the form and the form still lets the reviewer in.
+  test("the preview login still signs a Cedar Press reader in through the door", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/");
+    await expect(band(page)).toHaveCount(1);
+    await signIn(page, PRESS_ACCOUNT);
+    await expect(page.locator(".cp-aud")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 });
@@ -1612,16 +1828,16 @@ test.describe("crawlers", () => {
   }
 
   test("the door names all twelve collections in the HTML a crawler fetches", async ({ request }) => {
-    // The strip is what a visitor uses to preview what they get, and it is
-    // also the only place the door spells the twelve out at readable size.
-    // Prerendered, so it is text in the document rather than something that
-    // appears after a script runs; a crawler and a reader with JS off both
-    // get the list.
+    // The viewer's rail and the use cases' chips (every example is in the
+    // document, one shown at a time) spell the collections out. Prerendered,
+    // so it is text in the document rather than something that appears after
+    // a script runs; a crawler and a reader with JS off both get the list.
     const body = await (await request.get("/")).text();
     const names = STOREFRONT_NAMES;
     expect(names).toHaveLength(12);
     for (const name of names) expect(body).toContain(name);
-    expect(body).toContain("Twelve collections");
+    // The count is the hero's own fact line, read from the catalog.
+    expect(body).toMatch(new RegExp(`<b>${names.length}</b> collections`));
   });
 
   test("a page behind the gate is not offered to crawlers", async ({ request }) => {
@@ -2206,124 +2422,65 @@ const settledDeep = (el) =>
 /** The one curve, as Chromium serialises it. */
 const THE_CURVE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-/**
- * A window where the twelve are a reveal. Measured on the built door: at
- * 1280x720, 1366x768, 1536x864, 1440x900 and 1920x1080 the strip's top sits
- * at 0.77 to 1.01 of the window height — inside the hook's first-screen
- * slack (1.1), so it is revealed with the page, untransitioned, and the
- * stagger does not apply. That is the hook's rule, not a defect. At 1024x768
- * the strip is at 2.0 window heights and on a phone at 3.6, and there the
- * stagger is what a reader sees. The phone project keeps its own viewport.
+/*
+ * The door's collection shelf, and its staggered arrival, were replaced by the
+ * use-case band on 2026-09-26. Its chips carry the tiles' response contract:
+ * a 2px lift on the curve for a fine pointer or keyboard focus, immediate
+ * under reduced motion, nothing for a finger.
  */
-async function whereTheTwelveAreAReveal(page, testInfo) {
-  if (testInfo.project.name === "desktop") await page.setViewportSize({ width: 1024, height: 768 });
-}
+const settledBand = async (page) => {
+  const band = page.locator(".cp-aud");
+  await band.scrollIntoViewIfNeeded();
+  await expect(band).toHaveClass(/\bis-in\b/);
+  await band.evaluate(settledDeep);
+  return page.locator(".cp-aud__panel.is-on .cp-aud__col");
+};
 
-test.describe("the door's twelve arrive and respond", () => {
-  test("the tiles arrive in order once the strip is scrolled to, and settle", async ({ page }, testInfo) => {
-    const errors = watchConsole(page);
-    await whereTheTwelveAreAReveal(page, testInfo);
-    await page.goto("/");
-    const strip = page.locator(".cp-dcol");
-    await page.locator(".cp-dcol__tile").first().waitFor();
-    await page.evaluate(() => document.fonts.ready);
-    // Below the fold on arrival, so this is a reveal and not the first
-    // screen. The hook marks anything on the first screen `cp-fade--now`
-    // and the stagger does not apply there, by design.
-    const top = await strip.evaluate((el) => el.getBoundingClientRect().top / window.innerHeight);
-    expect(top, "the strip sits below the fold on arrival").toBeGreaterThan(1.1);
-    await expect(strip).not.toHaveClass(/is-in/);
-    expect(await strip.evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
-
-    await strip.scrollIntoViewIfNeeded();
-    await expect(strip).toHaveClass(/\bis-in\b/);
-    await expect(strip).not.toHaveClass(/cp-fade--now/);
-
-    // Each shelf's six run left to right on their own beats.
-    const delays = await page.locator(".cp-dcol__grid").evaluateAll((grids) =>
-      grids.map((grid) => [...grid.children].map((li) => ({
-        name: getComputedStyle(li).animationName,
-        delay: parseFloat(getComputedStyle(li).animationDelay),
-      }))));
-    expect(delays).toHaveLength(2);
-    for (const shelf of delays) {
-      expect(shelf.map((t) => t.name)).toEqual(Array(shelf.length).fill("cp-tile-in"));
-      shelf.forEach((t, i) => expect(t.delay).toBeCloseTo(i * 0.045, 3));
-    }
-
-    // And then they are simply there: opaque, untransformed, nothing running.
-    await strip.evaluate(settledDeep);
-    const rest = await page.locator(".cp-dcol__grid > li").evaluateAll((items) =>
-      items.map((li) => [getComputedStyle(li).opacity, getComputedStyle(li).transform]));
-    expect(rest).toEqual(Array(12).fill(["1", "none"]));
-    expect(errors).toEqual([]);
-  });
-
-  test("a tile lifts under a fine pointer on the site's curve, and the shelf in hand says so", async ({ page }, testInfo) => {
+test.describe("the use-case chips respond", () => {
+  test("a chip lifts under a fine pointer on the site's curve, and keyboard focus lifts it too", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "a fine pointer");
     await page.goto("/");
-    const tiles = page.locator(".cp-dcol__tile");
-    await tiles.first().waitFor();
-    const strip = page.locator(".cp-dcol");
-    await strip.scrollIntoViewIfNeeded();
-    await strip.evaluate(settledDeep);
+    const chips = await settledBand(page);
+    const chip = chips.nth(1);
+    expect((await chip.evaluate(readMotion)).transform, "rests untransformed").toBe("none");
 
-    const tile = tiles.nth(7); // second shelf
-    const shelves = page.locator(".cp-dcol__shelf");
-    expect((await tile.evaluate(readMotion)).transform, "rests untransformed").toBe("none");
-    await expect(shelves.nth(1)).not.toHaveClass(/is-active/);
-
-    await tile.hover();
-    // -2px on the curve; the transition is 180ms, so any later sample has landed.
+    await chip.hover();
     await expect
-      .poll(async () => (await tile.evaluate(readMotion)).translateY, { message: "the tile lifts" })
+      .poll(async () => (await chip.evaluate(readMotion)).translateY, { message: "the chip lifts" })
       .toBeLessThanOrEqual(-1.5);
-    const lifted = await tile.evaluate(readMotion);
+    const lifted = await chip.evaluate(readMotion);
     expect(lifted.translateY).toBeGreaterThanOrEqual(-2.5);
     expect(lifted.shadow, "a soft shadow under the lift").not.toBe("none");
-    // One curve per transitioned property, and nothing else in the list.
     expect(lifted.timing.replaceAll(THE_CURVE, "").replace(/[, ]/g, ""), `on ${THE_CURVE}, got ${lifted.timing}`).toBe("");
-    // The shelf the pointed collection sits on takes the accent; the other does not.
-    await expect(shelves.nth(1)).toHaveClass(/is-active/);
-    await expect(shelves.nth(0)).not.toHaveClass(/is-active/);
 
-    // Leave: the pointer moves to a different empty spot on every sample.
     let nudge = 0;
     await expect
       .poll(async () => {
         nudge = (nudge + 1) % 4;
         await page.mouse.move(2 + nudge, 2 + nudge);
-        return (await tile.evaluate(readMotion)).transform;
+        return (await chip.evaluate(readMotion)).transform;
       }, { message: "settles back on leave", timeout: 8000 })
       .toBe("none");
 
-    // Keyboard focus lifts the same way.
-    await tiles.nth(2).focus();
+    await chips.nth(2).focus();
     await expect
-      .poll(async () => (await tiles.nth(2).evaluate(readMotion)).translateY, { message: "focus lifts" })
+      .poll(async () => (await chips.nth(2).evaluate(readMotion)).translateY, { message: "focus lifts" })
       .toBeLessThanOrEqual(-1.5);
-    await expect(shelves.nth(0)).toHaveClass(/is-active/);
   });
 
-  test("reduced motion: the twelve are simply there, and a lift is immediate", async ({ page }, testInfo) => {
-    await whereTheTwelveAreAReveal(page, testInfo);
+  test("reduced motion: the example is simply there, and a lift is immediate", async ({ page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    const strip = page.locator(".cp-dcol");
-    await page.locator(".cp-dcol__tile").first().waitFor();
-    await strip.scrollIntoViewIfNeeded();
-    await expect(strip).toHaveClass(/\bis-in\b/);
-    const items = await page.locator(".cp-dcol__grid > li").evaluateAll((list) =>
-      list.map((li) => [getComputedStyle(li).animationName, getComputedStyle(li).opacity, getComputedStyle(li).transform]));
-    expect(items).toEqual(Array(12).fill(["none", "1", "none"]));
+    const chips = await settledBand(page);
+    const panel = page.locator(".cp-aud__panel.is-on");
+    for (const duration of (await panel.evaluate(readMotion)).transition.match(/[\d.e-]+(?=s)/g)) {
+      expect(Number(duration)).toBeLessThanOrEqual(0.001);
+    }
     if (testInfo.project.name !== "desktop") return;
-    const tile = page.locator(".cp-dcol__tile").nth(3);
-    await tile.hover();
-    // Response kept, travel dropped: raised on the next read, no transition.
-    const lifted = await tile.evaluate(readMotion);
+    const chip = chips.nth(0);
+    await chip.hover();
+    const lifted = await chip.evaluate(readMotion);
     expect(lifted.transform).toBe("matrix(1, 0, 0, 1, 0, -2)");
-    // The stylesheet says `transition: none`; the app's global reduced-motion
-    // rule floors durations at a microsecond, so Chromium reports 1e-06s.
     for (const duration of lifted.transition.match(/[\d.e-]+(?=s)/g)) expect(Number(duration)).toBeLessThanOrEqual(0.001);
   });
 });
@@ -2331,30 +2488,22 @@ test.describe("the door's twelve arrive and respond", () => {
 test.describe("a finger gets no hover state", () => {
   test.use({ hasTouch: true });
 
-  test("a tapped tile is chosen, never raised", async ({ page }) => {
+  test("a tapped chip is chosen, never raised", async ({ page }) => {
     await page.goto("/");
     const emulated = await page.evaluate(() => matchMedia("(hover: none)").matches);
     test.skip(!emulated, "this engine does not emulate a hoverless pointer from hasTouch");
-    const tiles = page.locator(".cp-dcol__tile");
-    await tiles.first().waitFor();
-    await page.locator(".cp-dcol").scrollIntoViewIfNeeded();
-    await page.locator(".cp-dcol").evaluate(settledDeep);
-    const tile = tiles.nth(9);
-    await tile.tap();
-    await expect(tile).toHaveAttribute("aria-pressed", "true");
-    // The tap's own state answers, and the shelf follows it.
-    await expect(tile).toHaveClass(/is-on/);
-    await expect(page.locator(".cp-dcol__shelf").nth(1)).toHaveClass(/is-active/);
-    // A pointer parked over a tile on this screen — what a touch browser
-    // does to the last thing tapped — raises nothing: the lift is written
-    // for `(hover: hover) and (pointer: fine)` and this screen is neither.
-    // `hover()` rather than a second tap, because a tap here does not leave
-    // :hover behind, and a test that cannot reach the rule cannot fail when
-    // the rule is unguarded (checked: with the guard removed, a tap-only
-    // version still passed).
-    await tiles.nth(4).hover();
+    const chips = await settledBand(page);
+    const chip = chips.nth(1);
+    await chip.tap();
+    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    await expect(chip).toHaveClass(/is-on/);
+    // A pointer parked over a chip on this screen raises nothing: the lift is
+    // written for `(hover: hover) and (pointer: fine)`. `hover()` rather than
+    // a second tap, because a tap does not leave :hover behind and could not
+    // reach an unguarded rule.
+    await chips.nth(2).hover();
     await page.waitForTimeout(400);
-    expect((await tiles.nth(4).evaluate(readMotion)).transform, "no lift for a finger").toBe("none");
+    expect((await chips.nth(2).evaluate(readMotion)).transform, "no lift for a finger").toBe("none");
     // The four claims respond to nothing under a finger either.
     const claim = page.locator(".cp-why__item").first();
     await claim.scrollIntoViewIfNeeded();

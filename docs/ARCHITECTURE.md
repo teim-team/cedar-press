@@ -63,9 +63,9 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 119 — `features/grove` 78, `pages/grove` 38, `components/grove` 1, `styles/grove` 2 |
-| Path references to rewrite | 361, across 88 files |
-| Referencing files inside `src/` | 45 — `pages/` 31, `features/` 10, `context/` 2, `components/` 1, `main.jsx` 1 |
+| Files to move | 122 — `features/grove` 81, `pages/grove` 38, `components/grove` 1, `styles/grove` 2 |
+| Path references to rewrite | 361, across 89 files |
+| Referencing files inside `src/` | 46 — `pages/` 31, `features/` 11, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 43 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 12, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |
 
 The reason this was deferred has expired. The table used to carry a fifth row

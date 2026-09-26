@@ -159,6 +159,28 @@ const OwnedIcon = (
   </svg>
 );
 
+/** An open palm holding one coin up: disclosed private giving. Announced, not
+ *  released (`pressAnnounced.js`); nothing renders it until the collection
+ *  enters the catalog, because every lookup here is by a live entry's id. */
+const GivingIcon = (
+  <svg {...glyph}>
+    <circle cx="16.5" cy="8.6" r="4.4" />
+    <path d="M3.5 17.2h3.8c1.2 0 2.3.4 3.2 1.1l1.6 1.2h4.6a1.9 1.9 0 0 1 0 3.8h-5" />
+    <path d="m16.7 23.3 5.3-2.8a1.9 1.9 0 0 1 2.2 3.1l-6.1 3.1H3.5" />
+  </svg>
+);
+
+/** An irregular parcel with two survey corners marked: defined parcel
+ *  geometry, not a map. Announced, not released, as above. The boundary stops
+ *  short of each marker so the corners read as monuments, not as nodes. */
+const PlotIcon = (
+  <svg {...glyph}>
+    <path d="M7.8 7.6 17.5 4.5 23.5 12l-2.3 8.7" />
+    <path d="M17.7 23 7.5 21 5.6 11.3" />
+    <path d="M2.9 6.4h4.2v4.2H2.9zM18.4 21.4h4.2v4.2h-4.2z" />
+  </svg>
+);
+
 /** A square with a plus: what has not been built yet. */
 const NewIcon = (
   <svg {...glyph}>
@@ -191,6 +213,10 @@ export const COLLECTION_ICONS = {
   owned: OwnedIcon,
   nonprofits: NonprofitsIcon,
   need: NeedIcon,
+  // Announced collections (`pressAnnounced.js`). Keyed now so the mark is
+  // reviewed with its family before launch; resolved only once live.
+  plot: PlotIcon,
+  "foundation-corporate-giving": GivingIcon,
   census: CensusIcon,
   labor: LaborIcon,
   economy: EconomyIcon,
