@@ -1,6 +1,6 @@
 # Native-Owned Businesses: a researcher's guide
 
-Collection `owned` · public file `owned.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `owned` · public file `owned.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -26,7 +26,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** Tribal TERO offices, business licensing departments and enterprise registers, harvested from each nation's own publication. Contributing authorities are acknowledged in every release.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 4,273. This is the count the release recorded for `native_owned_businesses.csv`, not the sum of the collection's 8 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 4,273. This is the count the release recorded for `native_owned_businesses.csv`, not the sum of the collection's 8 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -111,9 +111,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Native-Owned Businesses" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Native-Owned Businesses" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** The strength of each certification is preserved rather than flattened, because the authorities do not mean the same thing: a firm certified at 100% enrolled-member ownership, one on an any-Native list, one qualifying through a shareholder's spouse or descendant, and a vendor with no ownership relation at all are recorded as different claims on the same scale. The relation published is affiliation with a named nation, not an ownership assertion the source never made. Sources whose terms forbid reuse are excluded by every route and named as excluded.
 

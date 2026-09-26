@@ -530,18 +530,27 @@
   "releases": {
     "funding": {
       "name": "Federal Funding to Indian Country",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated monthly",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 14 tables, 3,646,750 rows.",
+            "A 10-row preview of federal_funding_transactions.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 14 tables, 3,646,750 rows.",
-            "A 10-row preview of federal_funding_transactions.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of federal_funding_transactions.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -557,18 +566,27 @@
     },
     "federal-register": {
       "name": "Federal Register — Indian Affairs",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated as records arrive",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 23 tables, 502,483 rows.",
+            "A 10-row preview of consultation_events.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 23 tables, 502,483 rows.",
-            "A 10-row preview of consultation_events.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of consultation_events.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -584,18 +602,27 @@
     },
     "legislation": {
       "name": "Native Legislation and Votes",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated monthly",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 15 tables, 206,354 rows.",
+            "A 10-row preview of native_bills.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 15 tables, 206,354 rows.",
-            "A 10-row preview of native_bills.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of native_bills.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -611,18 +638,27 @@
     },
     "deals": {
       "name": "Indian Country Deals",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated continuously",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 15 tables, 2,662 rows.",
+            "A 10-row preview of deals_classified.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 15 tables, 2,662 rows.",
-            "A 10-row preview of deals_classified.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of deals_classified.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -638,18 +674,27 @@
     },
     "nagpra": {
       "name": "NAGPRA Notices",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated as records arrive",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 12 tables, 100,786 rows.",
+            "A 10-row preview of nagpra_notices.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 12 tables, 100,786 rows.",
-            "A 10-row preview of nagpra_notices.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of nagpra_notices.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -665,18 +710,27 @@
     },
     "lobbying": {
       "name": "Native Federal Advocacy and Engagement",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated as records arrive",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 35 tables, 264,478 rows.",
+            "A 10-row preview of native_entity_lobbying_disclosures.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 35 tables, 264,478 rows.",
-            "A 10-row preview of native_entity_lobbying_disclosures.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of native_entity_lobbying_disclosures.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -692,18 +746,27 @@
     },
     "contractors": {
       "name": "Native Federal Contractors",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated monthly",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 10 tables, 3,345,971 rows.",
+            "A 10-row preview of prime_contracts.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 10 tables, 3,345,971 rows.",
-            "A 10-row preview of prime_contracts.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of prime_contracts.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -719,18 +782,27 @@
     },
     "subcontracting": {
       "name": "Native Federal Subcontracting",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated monthly",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 3 tables, 90,479 rows.",
+            "A 10-row preview of subawards.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 3 tables, 90,479 rows.",
-            "A 10-row preview of subawards.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of subawards.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -746,18 +818,27 @@
     },
     "owned": {
       "name": "Native-Owned Businesses",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated as records arrive",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 7 tables, 5,930 rows.",
+            "A 10-row preview of native_owned_businesses.csv, the collection's flagship table, was produced with this release and is not published on the shelf yet."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 7 tables, 5,930 rows.",
-            "A 10-row preview of native_owned_businesses.csv, the collection's flagship table, was produced with this release and is not published on the shelf yet."
+            "A 10-row preview of native_owned_businesses.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -774,18 +855,27 @@
     },
     "need": {
       "name": "Cedar Native Entity Enterprise Dataset (NEED)",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated as records arrive",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 3 tables, 14,868 rows.",
+            "A 10-row preview of need_enterprises.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 3 tables, 14,868 rows.",
-            "A 10-row preview of need_enterprises.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of need_enterprises.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -801,18 +891,27 @@
     },
     "natural-resources": {
       "name": "Tribal Natural Resource Revenue",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated quarterly",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 9 tables, 283,716 rows.",
+            "A 10-row preview of resource_revenue.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 9 tables, 283,716 rows.",
-            "A 10-row preview of resource_revenue.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of resource_revenue.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {
@@ -828,18 +927,27 @@
     },
     "nonprofits": {
       "name": "Native Nonprofits",
-      "version": "v1",
-      "updated": "2026-09-04",
+      "version": "v2",
+      "updated": "2026-09-26",
       "cadence": "Updated annually",
       "retired": false,
       "history": [
+        {
+          "version": "v2",
+          "date": "2026-09-26",
+          "kind": "data",
+          "changed": [
+            "Release: 12 tables, 131,090 rows.",
+            "A 10-row preview of np_orgs.csv, the collection's flagship table, downloads from the shelf."
+          ]
+        },
         {
           "version": "v1",
           "date": "2026-09-04",
           "kind": "data",
           "changed": [
             "Release: 12 tables, 131,090 rows.",
-            "A 10-row preview of np_orgs.csv, the collection's flagship table, downloads from the shelf."
+            "A 10-row preview of np_orgs.csv, the collection's flagship table, was published with this release; the shelf now serves the current release's preview."
           ]
         },
         {

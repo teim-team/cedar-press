@@ -1,6 +1,6 @@
 # Tribal Advocacy and Lobbying: a researcher's guide
 
-Collection `lobbying` · public file `lobbying.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `lobbying` · public file `lobbying.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** Senate and House lobbying disclosure; Federal Register consultation and ex parte notices; FERC and NRC dockets; IBIA and IBLA appeals; regulations.gov; IRS Form 990 Schedule C.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 27,825. This is the count the release recorded for `native_entity_lobbying_disclosures.csv`, not the sum of the collection's 39 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 27,825. This is the count the release recorded for `native_entity_lobbying_disclosures.csv`, not the sum of the collection's 39 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -117,9 +117,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Tribal Advocacy and Lobbying" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Tribal Advocacy and Lobbying" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Built on the premise that the Lobbying Disclosure Act sees only a fraction of tribal advocacy: 300 entities appear in LDA filings, 669 appear in a non-LDA channel, and only 4 are visible to the LDA and nowhere else. Each channel is kept as its own record type rather than merged into a single misleading total, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one.
 

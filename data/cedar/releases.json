@@ -27,6 +27,19 @@
           "of": 701955
         },
         "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
+        "name": "Federal Funding to Indian Country",
+        "tables": 14,
+        "rowsLabel": "3,646,750 rows",
+        "preview": {
+          "table": "federal_funding_transactions.csv",
+          "rows": 10,
+          "of": 701955
+        },
+        "blockers": []
       }
     ],
     "federal-register": [
@@ -46,6 +59,19 @@
       {
         "version": "v1",
         "date": "2026-09-04",
+        "name": "Federal Register — Indian Affairs",
+        "tables": 23,
+        "rowsLabel": "502,483 rows",
+        "preview": {
+          "table": "consultation_events.csv",
+          "rows": 10,
+          "of": 11402
+        },
+        "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
         "name": "Federal Register — Indian Affairs",
         "tables": 23,
         "rowsLabel": "502,483 rows",
@@ -83,6 +109,19 @@
           "of": 3069
         },
         "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
+        "name": "Native Legislation and Votes",
+        "tables": 15,
+        "rowsLabel": "206,354 rows",
+        "preview": {
+          "table": "native_bills.csv",
+          "rows": 10,
+          "of": 3069
+        },
+        "blockers": []
       }
     ],
     "deals": [
@@ -102,6 +141,19 @@
       {
         "version": "v1",
         "date": "2026-09-04",
+        "name": "Indian Country Deals",
+        "tables": 15,
+        "rowsLabel": "2,662 rows",
+        "preview": {
+          "table": "deals_classified.csv",
+          "rows": 10,
+          "of": 1073
+        },
+        "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
         "name": "Indian Country Deals",
         "tables": 15,
         "rowsLabel": "2,662 rows",
@@ -139,6 +191,19 @@
           "of": 6792
         },
         "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
+        "name": "NAGPRA Notices",
+        "tables": 12,
+        "rowsLabel": "100,786 rows",
+        "preview": {
+          "table": "nagpra_notices.csv",
+          "rows": 10,
+          "of": 6792
+        },
+        "blockers": []
       }
     ],
     "lobbying": [
@@ -158,6 +223,19 @@
       {
         "version": "v1",
         "date": "2026-09-04",
+        "name": "Native Federal Advocacy and Engagement",
+        "tables": 35,
+        "rowsLabel": "264,478 rows",
+        "preview": {
+          "table": "native_entity_lobbying_disclosures.csv",
+          "rows": 10,
+          "of": 27825
+        },
+        "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
         "name": "Native Federal Advocacy and Engagement",
         "tables": 35,
         "rowsLabel": "264,478 rows",
@@ -195,6 +273,19 @@
           "of": 1217768
         },
         "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
+        "name": "Native Federal Contractors",
+        "tables": 10,
+        "rowsLabel": "3,345,971 rows",
+        "preview": {
+          "table": "prime_contracts.csv",
+          "rows": 10,
+          "of": 1217768
+        },
+        "blockers": []
       }
     ],
     "subcontracting": [
@@ -214,6 +305,19 @@
       {
         "version": "v1",
         "date": "2026-09-04",
+        "name": "Native Federal Subcontracting",
+        "tables": 3,
+        "rowsLabel": "90,479 rows",
+        "preview": {
+          "table": "subawards.csv",
+          "rows": 10,
+          "of": 89809
+        },
+        "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
         "name": "Native Federal Subcontracting",
         "tables": 3,
         "rowsLabel": "90,479 rows",
@@ -251,6 +355,19 @@
           "of": 4273
         },
         "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
+        "name": "Native-Owned Businesses",
+        "tables": 7,
+        "rowsLabel": "5,930 rows",
+        "preview": {
+          "table": "native_owned_businesses.csv",
+          "rows": 10,
+          "of": 4273
+        },
+        "blockers": []
       }
     ],
     "need": [
@@ -270,6 +387,19 @@
       {
         "version": "v1",
         "date": "2026-09-04",
+        "name": "Cedar Native Entity Enterprise Dataset (NEED)",
+        "tables": 3,
+        "rowsLabel": "14,868 rows",
+        "preview": {
+          "table": "need_enterprises.csv",
+          "rows": 10,
+          "of": 5820
+        },
+        "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
         "name": "Cedar Native Entity Enterprise Dataset (NEED)",
         "tables": 3,
         "rowsLabel": "14,868 rows",
@@ -307,6 +437,19 @@
           "of": 11305
         },
         "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
+        "name": "Tribal Natural Resource Revenue",
+        "tables": 9,
+        "rowsLabel": "283,716 rows",
+        "preview": {
+          "table": "resource_revenue.csv",
+          "rows": 10,
+          "of": 11305
+        },
+        "blockers": []
       }
     ],
     "nonprofits": [
@@ -326,6 +469,19 @@
       {
         "version": "v1",
         "date": "2026-09-04",
+        "name": "Native Nonprofits",
+        "tables": 12,
+        "rowsLabel": "131,090 rows",
+        "preview": {
+          "table": "np_orgs.csv",
+          "rows": 10,
+          "of": 12764
+        },
+        "blockers": []
+      },
+      {
+        "version": "v2",
+        "date": "2026-09-26",
         "name": "Native Nonprofits",
         "tables": 12,
         "rowsLabel": "131,090 rows",

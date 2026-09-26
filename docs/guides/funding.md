@@ -1,6 +1,6 @@
 # Federal Funding to Indian Country: a researcher's guide
 
-Collection `funding` · public file `funding.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `funding` · public file `funding.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -26,7 +26,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** USAspending assistance transactions; FAADS historical archives for the pre-2008 record.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 701,955. This is the count the release recorded for `federal_funding_transactions.csv`, not the sum of the collection's 20 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 701,955. This is the count the release recorded for `federal_funding_transactions.csv`, not the sum of the collection's 20 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -135,9 +135,9 @@ Target columns the specification asks for that the terminal has not yet built fr
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Federal Funding to Indian Country" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Federal Funding to Indian Country" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Recipients are matched to the entity layer and the basis for inclusion is carried on the row, so a payment to a tribal government, to an intertribal consortium acting for many tribes, and to a Native-serving non-Native organisation are distinguishable. Apparent duplicate transactions are retained: they are usually distinct modifications to one award that agree on every published field, and removing them would have destroyed $8.29B of real obligations.
 

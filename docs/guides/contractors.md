@@ -1,6 +1,6 @@
 # Native Federal Contractors: a researcher's guide
 
-Collection `contractors` · public file `contractors.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `contractors` · public file `contractors.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** FPDS via USAspending; SAM entity registrations; parent-published subsidiary disclosures, including ANCSA audited filings under Alaska Statute 45.55.139.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 1,217,768. This is the count the release recorded for `prime_contracts.csv`, not the sum of the collection's 11 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 1,217,768. This is the count the release recorded for `prime_contracts.csv`, not the sum of the collection's 11 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -141,9 +141,9 @@ Target columns the specification asks for that the terminal has not yet built fr
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Native Federal Contractors" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Native Federal Contractors" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Awardees are matched to a Native entity by identifier first (UEI, CAGE, declared parent UEI) and by name only with corroboration, because a subsidiary's legal name routinely shares no token with its owner — ASRC Federal's operating companies file as BROADLEAF, INUTEQ and VISTRONIX. Attribution tier is recorded on every row and a tier is never promoted by a name match alone. Known limits are published, not hidden: coverage begins at FY2000 because Native identification does not exist in the pre-2000 federal record at all, and $65.2B of candidate rows remain unattributed rather than being assigned to a plausible owner.
 

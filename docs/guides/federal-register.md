@@ -1,6 +1,6 @@
 # Federal Register — Indian Affairs: a researcher's guide
 
-Collection `federal-register` · public file `federal-register.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `federal-register` · public file `federal-register.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** federalregister.gov, by agency and by subject, back to 1994.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 11,402. This is the count the release recorded for `consultation_events.csv`, not the sum of the collection's 29 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 11,402. This is the count the release recorded for `consultation_events.csv`, not the sum of the collection's 29 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -113,9 +113,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Federal Register — Indian Affairs" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Federal Register — Indian Affairs" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Scope is recorded per document because it genuinely varies: a notice can name one tribe, several, or all of Indian Country, and each is a different fact. Participants in consultation events are resolved to the entity layer where the notice names them and left unresolved where it does not, rather than inferred. The consultation table's composition is stated rather than smoothed: 10,888 of its 11,402 rows (95.5%) are NAGPRA consultation reported inside a NAGPRA notice, because that is what the Federal Register carries at volume. Policy consultation is the smaller remainder and is typed separately. The Federal Register is not the ceiling for Dear Tribal Leader letters and this copy said it nearly was. Probed on 2026-09-02 the Register holds 46 documents carrying the phrase, and that reading was used here to call a thin count close to the source's limit, with the agencies' own websites recorded as not yet acquired. They have since been acquired and the surface is 17.5 times larger: 807 letters spanning 2000–2026 — Indian Health Service 783, Bureau of Indian Education 14, Bureau of Indian Affairs 10. What had looked like an absent source was a request that the host answered with 406 until its headers were shaped correctly, which is a fact about the request and not about the publisher.
 

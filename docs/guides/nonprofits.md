@@ -1,6 +1,6 @@
 # Native Nonprofits: a researcher's guide
 
-Collection `nonprofits` · public file `nonprofits.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `nonprofits` · public file `nonprofits.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** IRS Business Master File; Form 990 e-file returns; the 990-N e-Postcard corpus; ProPublica Nonprofit Explorer.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 12,764. This is the count the release recorded for `np_orgs.csv`, not the sum of the collection's 14 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 12,764. This is the count the release recorded for `np_orgs.csv`, not the sum of the collection's 14 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -110,9 +110,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Native Nonprofits" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Native Nonprofits" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Native status is established from what an organisation says about itself in its own filing, never from an NTEE code and never from a name. A mission statement naming a specific nation is a stronger claim than one describing Native-serving work generally, and the two are recorded separately. The dataset states plainly what it cannot see: tribal instrumentalities largely do not file 990s under IRC section 7871, so the largest tribal institutions can be absent by law, and place-named organisations that are not Native are identified and excluded rather than left to inflate the totals — 4,651 of 12,764 rows are excluded by a prior ruling. The disposition of a row is carried in `funnel_stage`, not in `classification_ruling`, which holds an explicit ruling for only 398 rows; 1,831 rows sit at `canonical_name_match` as unruled candidates, and the token the match turned on ships with each so a reader can see the ones that are wrong rather than take the tier on trust.
 
