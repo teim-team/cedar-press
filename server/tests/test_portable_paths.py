@@ -92,7 +92,6 @@ GRANDFATHERED = frozenset({
     "docs/releases/subcontracting-6c92a41/replay_compare.json",
     "docs/schema/c8_rebuild_proof.json",
     "docs/schema/inventory.json",
-    "src/features/grove/pressReleases.test.js",
 })
 
 
