@@ -6,13 +6,73 @@ private data tree, outside Git) and `<checkpoint root>` (private receipts,
 outside Git). Set them to wherever those live on your machine.
 
 <!-- BEGIN CURRENT-LAUNCH-DASHBOARD -->
-## Read this first: thirteen-profile foundation, September 25
+## Read this first: thirteen-profile foundation, September 26
 
 **Scope:** twelve Cedar Press profiles plus Gaming for Cedar Grove. This is an
 executable code-foundation review, not certification of thirteen datasets.
-Six Press adapters build flagship candidates, six stop at explicit tested gates,
+Eleven Press adapters now build candidates; NEED retains its publication gate,
 and Gaming builds a multi-component rehearsal with proposed identity bindings.
 No production deployment, release promotion, identity issuance or R7 import occurred.
+
+### September 26 integration checkpoint
+
+The completed Funding/Nonprofit negative-test work is preserved in
+[Lumecon #13](https://github.com/teim-team/Lumecon-data/pull/13), stacked on #9.
+Its base is `428ede7a8dbac2216d1edf9ea9d96d7da9205513`; current local review head
+is `f14c8879fd390680639390caa2a60881b08fc35b`. The shared #9 branch advanced to
+`ec21f6683f31f98b478eba7823e6f8dbb84adcf3` independently; those CI/Gaming changes
+were not overwritten. Cedar #122 advanced to `0413b4f`; the isolated consumer closure branch starts at
+that committed revision and ports the census evidence into its platform-stable
+implementation. The original dirty worktree remains preserved. No shared branch was force-pushed or PR merged.
+
+- Funding tests: 93 passed. Nonprofit tests: 90 passed. Notice/disclosure tests:
+  64 passed. The coverage-floor regression has three passing cases.
+- The previous green workflow was not sufficient evidence: coverage reported
+  87.73%, below the unchanged 88% threshold, but default reporting precision
+  let the process succeed. #13 sets two-decimal coverage precision and exercises
+  the actual gate. [Ubuntu run 36274017466](https://github.com/teim-team/Lumecon-data/actions/runs/36274017466)
+  now passes on Python 3.12 and 3.13: **1,164 tests, 88.63% coverage**, with
+  no skips reported. Both pinned consumer compatibility jobs, lint, typing,
+  schema export, dependency audit and wheel smoke checks also pass.
+- A combined local run had 211 passes and two known Windows asyncio/socket-guard
+  failures; one prose test was deselected. This is not a full-suite pass.
+  Neither the offline-network guard nor Linux symlink checks was weakened.
+- Deals: 978 customer rows, release `f9f50ccadc3bfe10089e47a0c8710a3ac382651703571f38ed6a2d57ba47623b`,
+  exact JSONL SHA-256 `ea38ddf16d72502818f420fef3c3a1905226006d86375cfc35e83e6318cac8e6`.
+- Nonprofits: 89 customer rows, release `bb679c5bb80b210fc42ab22a5241941220c1fc823e85dcda5d6a11e0045a24a6`,
+  exact JSONL SHA-256 `a6786d8cb5cf6ea3b8644d48b43d5dbd6e43641407507e829bf1490f8e6683cf`.
+  The 92-record evidence input is not the output denominator. Three existing
+  identity-mask refresh gates remain held (Native Hawaiian Legal Corporation,
+  Council for Tribal Employment Rights, White Earth Investment Initiative).
+  Existing exclusions and proposed/conflicting rulings remain effective. Of the
+  89 included records, eight retain qualified CE links and 23 masks are audited;
+  all have source URLs and source-attributed rights. Remaining holds comprise
+  7,636 missing inclusion evidence, 4,960 existing exclusions, 73 proposed rulings,
+  two conflicts, one missing validated primary snapshot and three mask-refresh gates.
+  Evidence dates: 2025:20; 2024:40; 2023:14; earlier:3; unstated:12. These are
+  source-dated organization observations, not 2026 filing completeness.
+- Both receipts prove real local producer/Cedar HTTP, login, 401/403/200, audit
+  redaction, missing/malformed release refusal, metadata-import retry and rollback.
+  Source and prior release bytes stayed unchanged. SQLite development metadata
+  was exercised; production Postgres and deployment were not.
+- Funding: 640,942 exact customer rows / 61,013 held; 24 immutable parts,
+  930,637,454 bytes, SHA-256 `a5a8a99696cc707f5b1d2a0f08638cccdb333c2ee32b959db591e24f92661724`.
+  Real producer/Cedar HTTP, 401/403/200, redacted audit, stale-pin refusal and
+  whole-release rollback passed. Release `6ba2dd2144d0a7cad1a0e8b57e801f170cbd47c4c5464d38c42b97999c0a837c`;
+  the prior and alternate release bytes remained unchanged. The persistent
+  subscriber database and production were not exercised.
+- Prime's complete build finished successfully: 1,217,768 = 841,002 candidate +
+  376,766 held; release `4df9d034a1bbb9b788ba63b5106a37e2da48cecb1c5ffdb2345a03e01456c7e3`.
+  The 154,847 masked affiliations are a subset of candidate rows, not extra holds.
+  Historical aggregates require separate grains and vendor-rights/acquisition evidence;
+  underlying federal facts do not automatically grant redistribution rights to a vendor file.
+
+Exact local receipts are under the approved candidate root, in
+`press-20260925T183131Z-68c50d2b/builds/`: `nonprofits-filed-20260926T214101Z-1a973d76`,
+`deals-corrected-20260925T194533Z-8b176330`, and
+`contractors-complete-20260925T201848Z-fa3c54d6`. Each has hashed command/build receipts;
+the first two also have successful `download.stdout.json` receipts. This evidence
+supersedes older pending-download statements below, not full-product qualification.
 
 ### One operational authority
 
@@ -32,7 +92,7 @@ registered source + immutable evidence + versioned decisions
 |---|---|
 | Intake, source registry, acquisition receipts | Lumecon `intake.py`, `intake/profiles/`; authoritative [data-intake.md](https://github.com/teim-team/Lumecon-data/blob/codex/collection-release-closure/docs/data-intake.md) |
 | Schema, rights, exact identity references | Lumecon `contracts.py`; existing issued registers and human rulings remain immutable inputs |
-| Press transforms and admission gates | Lumecon `collections/legislation.py`, `natural_resources.py`, `press_candidates.py`, `press_blocked.py`; shared `projection.py` |
+| Press transforms and admission gates | Lumecon `collections/legislation.py`, `natural_resources.py`, `press_candidates.py`, `financial.py`, `federal_register.py`, `deals.py`, `nonprofits.py`, `press_blocked.py`; shared `projection.py` |
 | Gaming transforms | Existing Lumecon `gaming/` package integrated from `68e6c81`; not copied into Cedar Press |
 | Immutable releases/storage/validation | Lumecon `pipeline.py`, `storage.py`, `collection.py`; one CLI `lumecon-data` |
 | Development catalog/database index | Lumecon `catalog.py`; idempotent SQLite metadata indexing, not a claim of deployed Postgres |
@@ -49,22 +109,22 @@ explicit transitional dependencies. No canonical dataset was committed to Cedar.
 ### Measured profile outcomes
 
 Counts below are source -> projected flagship / held. Annual counts use the
-stated source date; directories are nonannual. These are private candidates.
+stated source date; directories are nonannual. These are private candidates. Status applies to the named component and measured scope, not every advertised product component.
 `Implemented/gated` means an executable receipt-producing pipeline, not a
 completed customer transform. All remaining engineering work belongs to Codex.
 
 | Profile | Producer / command suffix | Source -> output / held | 2025 / 2026 basis | Pipeline and exact remaining gate |
 |---|---|---:|---|---|
-| Federal Funding | `press_blocked`; `collection-build funding` | 701,955 -> 0 / 701,955 | 43,254 / 18,325 action dates | **BLOCKED**; implemented admission gate: recipient-type vocabulary and attribution conflict projection |
-| Federal Register | `press_blocked`; `collection-build federal-register` | 11,402 -> 0 / 11,402 | 8 / 6 consultation rows, not broad documents | **BLOCKED**; implemented admission gate: participant grain/key and date precision |
+| Federal Funding | `financial`; `collection-build funding` | 701,955 -> 640,942 / 61,013 | 42,781 / 18,166 eligible action dates | **READY WITH DISCLOSED GAPS** local flagship candidate; exact download, denial, audit, stale-pin refusal and rollback passed; 61,000 source exclusions and 13 attribution-without-entity holds; zero duplicate public keys |
+| Federal Register | `federal_register`; `collection-build federal-register` | 11,402 -> 11,402 / 0 | 8 / 6 consultation rows, not broad documents | **READY WITH DISCLOSED GAPS** participant candidate; local exact download, denial, audit and rollback passed; broader document scope remains unproved |
 | Legislation | `legislation`; `collection-build legislation` | 3,069 -> 3,058 / 11 | 130 / 24 introductions | **READY WITH DISCLOSED GAPS** flagship candidate; bills only, votes/actions separately unproved |
-| Indian Country Deals | `press_blocked`; `collection-build deals` | 1,073 -> 0 / 1,073 | 104 / 103 dated years (2025: 99 day + 5 month); 105 / 103 reported years | **BLOCKED**; implemented admission gate: public type/status/substantive-note projection |
+| Indian Country Deals | `deals`; `collection-build deals` | 1,073 -> 978 / 95 | Source: 104 / 103 dated years; 105 / 103 reported years | **Local corrected exact-download, denial, audit, import retry and rollback passed**; 90 unverified candidates, three missing URLs and two observation-only claims held; source-attributed factual summaries, no ownership promotion |
 | NAGPRA | `press_candidates`; `collection-build nagpra` | 6,792 -> 6,792 / 0 | 900 / 633 publication dates | **READY WITH DISCLOSED GAPS** flagship candidate; notice count does not mean completed repatriations |
 | Advocacy & Engagement | `press_candidates`; `collection-build lobbying` | 27,825 -> 27,825 / 0 | 1,377 / 672 reporting years; 1,343 / 1,041 posting years | **READY WITH DISCLOSED GAPS** disclosure candidate only; other promised engagement components unproved |
-| Prime Contracting | `press_blocked`; `collection-build contractors` | 1,217,768 -> 0 / 1,217,768 | 47,599 / 55,014 action dates | **BLOCKED**; implemented admission gate: transaction key/grain, sector and source-qualified attribution |
+| Prime Contracting | `financial`; `collection-build contractors` | 1,217,768 -> 841,002 / 376,766 | 47,599 / 55,014 eligible action dates | **Immutable candidate built; full download/rollback pending**; transaction projection passed, 53 parts; held historical award-year-vendor grain requires separate qualification; 154,847 retained transactions have withdrawn affiliations masked |
 | Subcontracting | `press_candidates`; `collection-build subcontracting` | 89,809 -> 70,054 / 19,755 | 6,080 / 1,974 eligible action dates | **READY WITH DISCLOSED GAPS** flagship candidate; prime/sub roles distinct; third-party redistribution holds |
 | Native-Owned | `press_candidates`; `collection-build owned` | 4,273 -> 3,725 / 548 | Nonannual source-dated register | **READY WITH DISCLOSED GAPS** flagship candidate; 523 accuracy, 6 non-firm, 19 unchecked-permission holds |
-| Native Nonprofits | `press_blocked`; `collection-build nonprofits` | 12,764 -> 0 / 12,764 | Nonannual organization register | **BLOCKED**; implemented admission gate: versioned ruling propagation and object mapping |
+| Native Nonprofits | `nonprofits`; `collection-build nonprofits` | 12,764 -> 89 / 12,675 | Nonannual organization register | **BLOCKED** for meaningful launch coverage; 89 source-backed inclusions built with proposed links masked; exact download, denial, audit, import retry and rollback passed; remaining inclusion research is Codex-owned |
 | Natural Resources | `natural_resources`; `collection-build natural-resources` | 11,305 -> 11,120 / 185 | 496 / 280 period starts | **READY WITH DISCLOSED GAPS** flagship candidate; ANCSA source qualification remains held |
 | Cedar NEED | `press_blocked`; `collection-build need` | 5,820 -> 0 / 5,820 | Nonannual enterprise register | **BLOCKED**; implemented admission gate: publication hold; enterprise and relationship identities preserved |
 | Cedar Grove Gaming | `gaming/`; `gaming build`, `gaming release` | 97,693 -> 69,335 downloadable / 28,358 held | Different component periods, deliberately bounded scopes | **BLOCKED** for production; candidate/rehearsal reproduced, proposed IDs, source/field rights and component download restrictions remain |
@@ -84,12 +144,15 @@ reporting all Deals dates missing are superseded by the frozen run.
 
 ### Consolidation result and remaining debt
 
-Existing scripts-only census: **684 files = 76 active producers + 8 validation/
-review utilities + 7 consumers/shared services + 5 test/fixture files + 588
-unresolved**. Historical and safe-to-retire counts are zero *established by this
-census*, not a claim that no historical code exists. It also identifies 124
-embedded self-tests and 570 undeclared/unresolved files that are not authorized
-production writers. These overlapping diagnostics must not be added to 684.
+Maintenance classification now covers **684 files: 162 ACTIVE, 20 HISTORICAL-RETAIN,
+502 REQUIRES-REVIEW**. The two preserved batches add 26 source-hash-bound reviews
+onto the current platform-stable generator; they do not grant execution authority.
+No file was established as duplicate, superseded or safe to delete in these batches.
+The separate static operational-role classifier reports 76 producers, 11 validators,
+8 shared consumers, 5 standalone tests and 584 unresolved roles. These are different
+measures and must not be combined. All 341 prior table measurements remain unchanged.
+This continuation retired zero files and added zero fences or consumer cutovers;
+those outcomes must not be inferred from classification.
 
 Twelve former full/sample projection routes now refuse before writing and direct
 operators to Lumecon. No numbered Python file was physically deleted. Ancillary
@@ -1744,7 +1807,7 @@ Prioritized Havala questions (implementation review, not Elijah adjudication):
 4. Are exact catalog/manifest pins, rights checks and entitlement refusal sufficient before staging?
 5. Does the metadata-only catalog database boundary and tested rollback need changes before a real Postgres migration?
 6. Are Gaming proposed-binding restrictions and source-limited component restrictions correctly preserved?
-7. Which of the 588 unresolved legacy files should be reviewed next, without retiring unproved acquisition/recovery paths?
+7. Do the evidence-bound maintenance classifications and preserved dispatch boundaries give adequate review visibility while the remaining 502 files are investigated?
 8. What additional production restore, monitoring and account-persistence rehearsal is needed before authorization?
 
 <details>
@@ -1886,4 +1949,5 @@ server/tests/test_pipeline_registration.py
 
 </details>
 
-2026-09-25T13:07-04:00 ? READY WITH WARNINGS: thirteen executable profiles, six real Press consumer rehearsals, Gaming rehearsal only; production, held collections, legacy acquisition cutover and the frontend fixture mismatch remain open.
+
+2026-09-26T17:51-04:00 ? READY WITH WARNINGS: Funding, Deals and expanded Nonprofits pass local exact download and rollback; Prime follow-through continues; Ubuntu 1,164 tests pass on both declared Python versions. NEED publication hold, source qualification and production gates remain.
