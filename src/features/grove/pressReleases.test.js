@@ -165,7 +165,7 @@ test("a retired collection stays in the feed as read-only history", () => {
 // overwritten with the manifest's current releases alone.
 test("the ledger script refuses a file that is not a ledger", () => {
   // fileURLToPath, not .pathname. On Windows .pathname yields
-  // "/C:/Users/.../Cedar%20Press/..." - a leading slash Node cannot resolve
+  // "/C:/<home>/Cedar%20Press/..." - a leading slash Node cannot resolve
   // and a percent-encoded space - so this test failed on every Windows
   // checkout whose path contains a space, which is every checkout of this
   // repo. It passed in CI, so the breakage was invisible where it was run.
