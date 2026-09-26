@@ -2487,7 +2487,11 @@
 .teim-rd .cp-hero3__title em { font-style: normal; color: var(--dteal); }
 .teim-rd .cp-hero3__lede { font-size: clamp(1.02rem, 1.25vw, 1.15rem); line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 40ch; text-wrap: pretty; }
 .teim-rd .cp-hero3__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.3rem; }
-.teim-rd .cp-hero3__reach { margin: 0.9rem 0 0; max-width: 38rem; font-size: 0.92rem; line-height: 1.5; color: var(--door-ink-3); }
+/* The reach line keeps the lede's measure: its size is the lede's divided by
+   1.25 at every width, so 50ch here is the lede's 40ch and the two lines end
+   together. Below 560px the column sets the width, so the text can be larger. */
+.teim-rd .cp-hero3__reach { margin: 0.9rem 0 0; max-width: 50ch; font-size: clamp(0.816rem, 1vw, 0.92rem); line-height: 1.55; color: var(--door-ink-3); text-wrap: pretty; }
+@media (max-width: 560px) { .teim-rd .cp-hero3__reach { font-size: 0.92rem; max-width: none; } }
 .teim-rd .cp-hero3__facts { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem 1.2rem; margin: 1.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--door-rule); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--door-ink-3); }
 .teim-rd .cp-hero3__facts b { font-weight: 700; color: var(--ink); }
 
