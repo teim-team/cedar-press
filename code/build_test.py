@@ -43,5 +43,20 @@ class PlanSafetyTests(unittest.TestCase):
                 self.assertIn(invariant, stream.getvalue())
                 run.assert_not_called()
 
+
+class GamingIsNotAPressPilotTests(unittest.TestCase):
+    """Gaming is Cedar Grove: Lumecon-data builds its release and Cedar only
+    pins and serves it (data/cedar/grove_release_pin.json). No Press release
+    pilot may build Gaming or carry a multi-component release unit."""
+
+    def test_gaming_is_never_a_release_pilot(self):
+        self.assertNotIn("gaming", build.CP.RELEASE_PILOTS)
+        self.assertTrue(all(isinstance(pilot, str) for pilot in build.CP.RELEASE_PILOTS))
+        self.assertFalse(hasattr(build.CP, "GROVE_COMPONENTS"))
+
+    def test_gaming_issuance_is_a_registered_command(self):
+        self.assertTrue(callable(build.cmd_gaming_issue_ids))
+
+
 if __name__ == "__main__":
     unittest.main()

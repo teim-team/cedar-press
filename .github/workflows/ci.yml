@@ -90,6 +90,121 @@ jobs:
       - run: make audit-python
       - run: make audit-node
 
+  # Cedar consumes Gaming from Lumecon-data (repository split 2026-09-24). This
+  # job proves the consumer against the EXACT Lumecon commit it is paired with.
+  #
+  # TRUST BOUNDARY (linted by the node test gamingConsumerCi.test.js):
+  # - Lumecon-data is checked out at the full commit SHA in LUMECON_DATA_SHA,
+  #   never a branch, tag, `main` or `current`, and the job fails unless
+  #   `git rev-parse HEAD` equals that pin after checkout.
+  # - teim-team/Lumecon-data is private. It is read with the secret
+  #   LUMECON_DATA_READ_TOKEN: read-only, scoped to that one repository, passed
+  #   only to actions/checkout's `token` input, never echoed and never put in a
+  #   URL. `persist-credentials: false` keeps it out of .git/config, so no
+  #   later step can reuse it. The package is installed from the local path.
+  # - Fail closed: when the secret is absent (a fork, or not configured) the
+  #   first step fails naming it. The job never skips and never passes without
+  #   running the consumer tests; CEDAR_REQUIRE_LUMECON_GAMING=1 turns a
+  #   missing Lumecon fixture into a failure too.
+  # - `contents: read` only; triggered by `pull_request`, never
+  #   `pull_request_target`, so a fork's code never runs with this secret.
+  #
+  # The pinned commit is the pushed head of Lumecon-data PR #9
+  # (`codex/collection-release-closure`), or of the Gaming hardening branch
+  # stacked on it (`claude/gaming-release-hardening`) once that is pushed.
+  # Update LUMECON_DATA_SHA to the MERGED Lumecon commit in the same pull
+  # request that updates data/cedar/grove_release_pin.json (merge order:
+  # Lumecon-data #8, #9, the Lumecon Gaming hardening PR, cedar-press #122,
+  # then this consumer).
+  gaming-release-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      LUMECON_DATA_SHA: e71094a627d39abb418abcbd19436ca176587e93  # Lumecon-data PR #10 gaming hardening
+      CEDAR_REQUIRE_LUMECON_GAMING: "1"
+    steps:
+      - name: Require the Lumecon-data read token
+        env:
+          HAS_LUMECON_DATA_READ_TOKEN: ${{ secrets.LUMECON_DATA_READ_TOKEN != '' }}
+        run: |
+          if [ "$HAS_LUMECON_DATA_READ_TOKEN" != "true" ]; then
+            echo "::error title=Missing secret LUMECON_DATA_READ_TOKEN::The gaming-release-consumer job needs the repository secret LUMECON_DATA_READ_TOKEN (read-only, scoped to teim-team/Lumecon-data). It is absent: forks and unconfigured repositories fail here by design rather than skipping."
+            exit 1
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Check out Lumecon-data at the pinned commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: teim-team/Lumecon-data
+          ref: ${{ env.LUMECON_DATA_SHA }}
+          token: ${{ secrets.LUMECON_DATA_READ_TOKEN }}
+          persist-credentials: false
+          path: .lumecon-data
+      - name: Verify the Lumecon-data checkout is exactly the pin
+        run: |
+          if ! printf '%s' "$LUMECON_DATA_SHA" | grep -Eqx '[0-9a-f]{40}'; then
+            echo "::error::LUMECON_DATA_SHA must be a full 40-character commit SHA, not a branch or ref"
+            exit 1
+          fi
+          actual="$(git -C .lumecon-data rev-parse HEAD)"
+          if [ "$actual" != "$LUMECON_DATA_SHA" ]; then
+            echo "::error::Lumecon-data checkout is $actual, expected the pinned $LUMECON_DATA_SHA"
+            exit 1
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -e 'server[dev]' httpx2
+      # A regular (non-editable) install from the verified local checkout; the
+      # checkout is then removed so the tests can only see the installed commit.
+      - name: Install Lumecon-data from the verified checkout
+        run: |
+          pip install './.lumecon-data[api]'
+          rm -rf .lumecon-data
+      - name: Require real Linux symlink containment capability
+        run: |
+          python - <<'PY'
+          import os
+          import tempfile
+          from pathlib import Path
+          if os.name != "posix":
+              raise SystemExit("Authoritative storage safety requires Linux")
+          with tempfile.TemporaryDirectory() as directory:
+              root = Path(directory)
+              target = root / "target"
+              target.write_text("containment-fixture")
+              link = root / "link"
+              link.symlink_to(target)
+              if not link.is_symlink() or link.resolve() != target:
+                  raise SystemExit("Real symlinks are required; storage tests cannot skip")
+          PY
+      - name: Build the synthetic Gaming fixture release (smoke)
+        run: python -m lumecon_data gaming fixture-release --store "$RUNNER_TEMP/gaming-fixture-store"
+        env:
+          # Synthetic rehearsal fixture: Lumecon builds rehearsals only in review.
+          LUMECON_ENVIRONMENT: review
+      - name: Run the Gaming consumer tests without silent skips
+        run: |
+          python - <<'PY'
+          import sys
+          import unittest
+          sys.path.insert(0, "server")
+          suite = unittest.defaultTestLoader.loadTestsFromNames([
+              "tests.test_gaming_release",
+              "tests.test_gaming_issuance",
+          ])
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if result.skipped:
+              raise SystemExit("Gaming consumer run unexpectedly skipped tests")
+          if not result.testsRun:
+              raise SystemExit("Gaming consumer run found no tests")
+          raise SystemExit(0 if result.wasSuccessful() else 1)
+          PY
+
 # Not a step: `ruff format --check server`. It would reformat 18 of 30
 # files today. That is a real cleanup with its own review, not something to
 # slip into a CI pass -- and adopting the gate while it is red teaches people

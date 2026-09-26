@@ -201,6 +201,43 @@ NEVER_RUN = {
         "Use cedar_codebook.write_fragment() or cedar_register_codebook.py.",
 }
 
+#: CEDAR GAMING WRITERS SUPERSEDED BY LUMECON-DATA (fenced 2026-09-25).
+#:
+#: Repository split 2026-09-24: Lumecon-data (`lumecon_data/gaming/`) builds,
+#: validates and releases Cedar Grove Gaming; Cedar issues its IDs and consumes
+#: the pinned release. These scripts wrote a Gaming table whose job the Lumecon
+#: package now does and which Lumecon does NOT read, or (588) duplicate the
+#: maintained writer of a table Lumecon does read. Every other writer of a Cedar
+#: table Lumecon still reads stays runnable (inventory and kept list in
+#: docs/handoffs/GAMING_INTELLIGENCE_AUDIT_HANDOFF_2026-09-24.md). FENCED, NOT
+#: DELETED: each calls `guard()` first, the supported runner refuses them as
+#: FORBIDDEN_PRODUCER, and server/tests/test_gaming_writer_fence.py proves a
+#: direct run refuses before any read or write. Retire to
+#: `graveyard/<date>_gaming_superseded/` only after every consumer of
+#: `gaming_properties.csv` is cut over to the Grove release.
+GAMING_SUPERSEDED_BY_LUMECON = {
+    "82_build_gaming_property_dataset.py":
+        "Rebuilds gaming_properties.csv and gaming_property_capacity_history.csv "
+        "(Casino City licensed; may never ship) from a stale upstream. Superseded "
+        "by Lumecon-data gaming_grove_facilities.csv and gaming_facility_capacity.csv.",
+    "160_sync_published_gaming_view.py":
+        "Patches dates into the gaming_properties.csv view. The view is "
+        "superseded by Lumecon-data gaming_grove_facilities.csv / "
+        "gaming_facility_history.csv.",
+    "175_sync_published_property_view_entities.py":
+        "Re-keys entities on the gaming_properties.csv view. Superseded by "
+        "Lumecon-data gaming_grove_facilities.csv and gaming_facility_relationships.csv.",
+    "255_fix_gaming_property_deal_counts.py":
+        "Rewrites deal counts on the gaming_properties.csv view. Superseded with "
+        "the view by Lumecon-data gaming_grove_facilities.csv.",
+    "588_promote_self_published_claims.py":
+        "DUPLICATE WRITER: a full 'w' rebuild of gaming_property_self_published_"
+        "claims/assertions.csv from 2026-08-26 staging that reverts the "
+        "1094_merge_web_harvest_into_gaming_claims.py merge. Lumecon-data pins "
+        "those tables' bytes; the maintained writer is 1094.",
+}
+NEVER_RUN.update(GAMING_SUPERSEDED_BY_LUMECON)
+
 #: SCRIPTS THAT USED TO BE IN `NEVER_RUN` AND ARE NOT ANY MORE.
 #:
 #: They came off the list on 2026-09-01 (workstream C8) because the reason

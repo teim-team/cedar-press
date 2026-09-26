@@ -60,6 +60,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from starlette.background import BackgroundTask
 
 from cedar_press import (
     cedar_service,
@@ -535,43 +536,58 @@ if not DOWNLOAD_LOG.handlers:
     DOWNLOAD_LOG.addHandler(logging.StreamHandler())
 
 
-def _download_audit(collection_id, outcome, release=None, requested_release_id=None):
+def _download_audit(
+    collection_id, outcome, release=None, requested_release_id=None, component=None
+):
+    grove = repository.is_grove_release(collection_id)
     safe_collection = (
         collection_id
-        if any(item.id == collection_id for item in repository.launch.LAUNCH_COLLECTION)
+        if grove or any(item.id == collection_id for item in repository.launch.LAUNCH_COLLECTION)
         else "unknown"
     )
-    DOWNLOAD_LOG.info(
-        json.dumps(
-            {
-                "event": "full_download",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "requested_release_id": requested_release_id
-                if isinstance(requested_release_id, str)
-                and re.fullmatch(r"[0-9a-f]{64}", requested_release_id)
-                else None,
-                "request_id": uuid.uuid4().hex,
-                "collection_id": safe_collection,
-                "outcome": outcome,
-                "release_id": release.get("release_id") if release else None,
-                "sha256": release.get("sha256") if release else None,
-            },
-            sort_keys=True,
+    event = {
+        "event": "full_download",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "requested_release_id": requested_release_id
+        if isinstance(requested_release_id, str)
+        and re.fullmatch(r"[0-9a-f]{64}", requested_release_id)
+        else None,
+        "request_id": uuid.uuid4().hex,
+        "collection_id": safe_collection,
+        "outcome": outcome,
+        "release_id": release.get("release_id") if release else None,
+        "sha256": release.get("sha256") if release else None,
+    }
+    if grove:
+        # A Grove collection is several governed components: the record names
+        # which one, redacted like the collection when it is not a declared one.
+        event["component"] = (
+            component
+            if component in repository.grove_components(collection_id)
+            else ("unknown" if component is not None else None)
         )
-    )
+    DOWNLOAD_LOG.info(json.dumps(event, sort_keys=True))
 
 
 @app.get("/press/collections/{collection_id}/full-download")
 def full_download(
     collection_id: str,
     release_id: str | None = None,
+    component: str | None = None,
     session: Session | None = Depends(current_session),
 ):
+    """One pinned full release: a Press flagship, or one governed component of a
+    collection the reviewed Grove declaration names (``component`` required).
+    Entitlement is decided before any catalog or artifact is read."""
+
+    def audit(outcome, release=None, requested=release_id):
+        _download_audit(collection_id, outcome, release, requested, component)
+
     if session is None:
-        _download_audit(collection_id, "denied_anonymous", requested_release_id=release_id)
+        audit("denied_anonymous")
         raise HTTPException(status_code=401, detail="Authentication required")
-    if not repository.may_open(session.tier, collection_id):
-        _download_audit(collection_id, "denied_entitlement", requested_release_id=release_id)
+    if not repository.may_download_full(session.tier, collection_id):
+        audit("denied_entitlement")
         raise HTTPException(status_code=403, detail="Collection not included")
     # A signed cookie proves a prior login, not a current subscription. Use the
     # existing account authority before touching a protected release; an account
@@ -579,23 +595,39 @@ def full_download(
     try:
         subscriber = subscribers.find(session.email)
     except Exception as error:
-        _download_audit(collection_id, "authorization_unavailable", requested_release_id=release_id)
+        audit("authorization_unavailable")
         raise HTTPException(status_code=503, detail="Authorization unavailable") from error
     if subscriber is None:
-        _download_audit(collection_id, "denied_account", requested_release_id=release_id)
+        audit("denied_account")
         raise HTTPException(status_code=401, detail="Authentication required")
-    if not repository.may_open(subscriber.tier, collection_id):
-        _download_audit(collection_id, "denied_entitlement", requested_release_id=release_id)
+    if not repository.may_download_full(subscriber.tier, collection_id):
+        audit("denied_entitlement")
         raise HTTPException(status_code=403, detail="Collection not included")
     try:
         if not release_id or not re.fullmatch(r"[0-9a-f]{64}", release_id):
-            _download_audit(collection_id, "invalid_release_request")
+            audit("invalid_release_request", requested=None)
             raise HTTPException(status_code=400, detail="Explicit release ID required")
-        release = repository.full_release(collection_id, release_id)
+        if repository.is_grove_release(collection_id) and component is None:
+            audit("invalid_release_request")
+            raise HTTPException(status_code=400, detail="Explicit component required")
+        if repository.is_grove_release(collection_id):
+            release = repository.grove_full_release(collection_id, release_id, component=component)
+        elif component is not None:
+            audit("invalid_release_request")
+            raise HTTPException(status_code=400, detail="A Press flagship has no components")
+        else:
+            release = repository.full_release(collection_id, release_id)
+    except repository.GroveReleaseNotPinned as error:
+        # Production state until the Gaming IDs are issued: say so plainly,
+        # never substitute a sample or an unpinned file.
+        audit("not_pinned")
+        raise HTTPException(
+            status_code=503, detail="No released data is pinned for this collection yet"
+        ) from error
     except repository.FullReleaseUnavailable as error:
-        _download_audit(collection_id, "unavailable", requested_release_id=release_id)
+        audit("unavailable")
         raise HTTPException(status_code=503, detail="Full release unavailable") from error
-    _download_audit(collection_id, "authorized_prepared", release, release_id)
+    audit("authorized_prepared", release)
     headers = {
         "Content-Disposition": f'attachment; filename="{release["filename"]}"',
         "X-Cedar-Release": release["release_id"],
@@ -604,20 +636,22 @@ def full_download(
         "X-Cedar-Citation": release["citation"],
         "Cache-Control": "private, no-store",
     }
-    if "spool" in release:
-        from starlette.background import BackgroundTask
+    if release.get("component"):
+        headers["X-Cedar-Component"] = release["component"]
+    # A Grove component arrives as a verified `content_file`; a partitioned Press
+    # flagship as a verified `spool`. Both are disk spools the response closes.
+    spool = release.get("content_file") or release.get("spool")
+    if spool is not None:
 
-        spool = release["spool"]
-
-        def chunks():
+        def verified_chunks():
             try:
-                while content := spool.read(64 * 1024):
-                    yield content
+                while chunk := spool.read(64 * 1024):
+                    yield chunk
             finally:
                 spool.close()
 
         return StreamingResponse(
-            chunks(),
+            verified_chunks(),
             media_type=release["media_type"],
             headers=headers,
             background=BackgroundTask(spool.close),

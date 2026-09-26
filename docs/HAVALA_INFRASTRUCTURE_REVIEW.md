@@ -37,6 +37,8 @@ registered source + immutable evidence + versioned decisions
 | Immutable releases/storage/validation | Lumecon `pipeline.py`, `storage.py`, `collection.py`; one CLI `lumecon-data` |
 | Development catalog/database index | Lumecon `catalog.py`; idempotent SQLite metadata indexing, not a claim of deployed Postgres |
 | Presentation, sessions, entitlement, download | Cedar application `server/cedar_press/repository.py`; Grove's separate multi-component adapter |
+| Which Grove release is served | Cedar `data/cedar/grove_release_pin.json`: one collection release plus manifest hash; per-table pins refused |
+| Gaming ID issuance | Cedar only: `cedar_ids.GAMING_BLOCKS` and `code/build.py gaming-issue-ids`; Lumecon proposes, never issues |
 | Operator dispatch | Cedar `code/build.py release-pilot` delegates all twelve to Lumecon; Gaming uses `lumecon-data gaming` |
 
 The shared intake implementation comes from the existing `76b22a8` work. The
@@ -189,6 +191,12 @@ frontend fixture omits them. Claude's frontend owner must distinguish full
 source contract from published sample fields; adding these internal fields to
 public samples would be the wrong fix. No frontend file was edited here.
 Later application steps were skipped, not passed.
+Fixed on the Grove consumer PR (below) without touching samples: the test now
+reads the publish-time columns from `cedar_publication.DEALS_PRESENTATION_COLUMNS`
+(plus their `research_note` target), requires each to be decided and absent from
+the raw sample, and allows a combine-synthesized `<sibling>__<column>` or
+`n_<sibling>` column only when decided `internal` (NAGPRA's seven). It also
+asserts Native-Owned `nation_id` as `internal`/`internal_crosswalk` per `1ac3272`.
 
 **Update, 2026-09-26.** Resolved on #122 at `9fa3fed`: the Deals assertion now
 mirrors `apply_field_map` (publish-time and internal columns allowed, public
@@ -1696,9 +1704,99 @@ Current private paths: `foundation-frozen-2026-09-25/gaming-candidate-final` and
 `gaming-release-final.stdout.json` and the release's attestation-pinned receipt.
 Grove's exact public consumer commit `136255fbb14e401e9c3ca8139f9e82b1865de16f`
 is tested in Ubuntu with synthetic fixtures. This is consumer-contract
-integration, not a real-data production entitlement rehearsal. Ongoing uncommitted
-Claude Gaming work was not imported over this pinned implementation and must be
-reconciled deliberately before merge.
+integration, not a real-data production entitlement rehearsal. The Claude Gaming
+consumer work is reconciled onto this implementation in one stacked PR; see
+the next section.
+
+### Grove Gaming consumer: consolidated trust boundary
+
+One implementation: cedar-press `claude/gaming-consumer-hardening`, stacked on
+#122 ([cedar-press #124](https://github.com/teim-team/cedar-press/pull/124)), paired with Lumecon-data
+`claude/gaming-release-hardening` on PR #9 ([Lumecon-data #10](https://github.com/teim-team/Lumecon-data/pull/10)).
+CI pins `LUMECON_DATA_SHA` to that branch's pushed head
+`e71094a627d39abb418abcbd19436ca176587e93` (updated from `2b0ab3b` on
+2026-09-25 after the final Gaming integration). It supersedes
+`claude/gaming-grove-consumer` (not for merge). Merge order: Lumecon #8, #9,
+the Lumecon Gaming hardening PR, cedar-press #122, then the consumer PR after its
+`LUMECON_DATA_SHA` names the merged Lumecon commit. Server checks are in
+[GAMING_GROVE_INFRASTRUCTURE_NOTES.md](GAMING_GROVE_INFRASTRUCTURE_NOTES.md).
+
+- **CI trust boundary.** Cedar job `gaming-release-consumer` checks out
+  Lumecon-data at a full 40-hex `LUMECON_DATA_SHA` and fails unless
+  `git rev-parse HEAD` equals it. The private repository is read with
+  `LUMECON_DATA_READ_TOKEN` passed only to `actions/checkout` (never in a URL or
+  log), `persist-credentials: false`, `contents: read`, `pull_request` only. A
+  missing secret fails the first step. The package is installed from the
+  verified checkout, which is then deleted. The Gaming tests run with
+  `CEDAR_REQUIRE_LUMECON_GAMING=1` and the job fails on any skip. Twelve node
+  tests (`src/features/grove/gamingConsumerCi.test.js`) lint these rules.
+- **One pin, one declaration.** `data/cedar/grove_release_pin.json` names one
+  collection release, its catalog bytes and manifest hash. The only Grove
+  declaration is `collections.GROVE_RELEASE_IDS`, presented through
+  `gaming/*` field-map entries checked against the pinned embedded contracts.
+  The production pin is empty, so the route answers 503 until IDs are issued.
+- **Review-only rehearsals.** A rehearsal is served only with
+  `CEDAR_GROVE_ENVIRONMENT=review` and never beside
+  `CEDAR_PRESS_ENVIRONMENT=production`. Synthetic releases stay unservable. If
+  Lumecon runs at its production default, it refuses to verify a rehearsal and
+  Cedar fails closed.
+- **ID authority.** Cedar is the sole issuer. `build.py gaming-issue-ids` is a
+  dry run unless `--execute --certificate --decision-id --approved-by`, and it
+  has not been run. Legacy class-prefixed and `CEDAR-ENT`/`CEDAR-HOLD` issuance is
+  retired to read-only compatibility.
+- **Payments parts.** A partitioned component is served only as the logical
+  download (`gaming_government_payments`). Direct requests for a part are
+  refused. Every part is verified before the first response byte:
+  - it passes its own contract, rights and field-map checks;
+  - it matches the exact pinned `records.jsonl` hash and row count;
+  - all parts share one schema and primary key, unique across the whole table.
+
+  Verified parts are spooled to disk in manifest order and streamed. A
+  declaration that disagrees with its parts refuses the whole release. So does
+  a missing, restricted or tampered part.
+- **Zero duplication.** A Cedar test fails if a Gaming producer, binding
+  register, component CSV or schema copy reappears in cedar-press.
+
+## September 25 Gaming final integration (Lumecon-data #10 at `e71094a`)
+
+What changed since the receipt above:
+
+- **Identifier continuity.** Every successor build is seeded with the pinned
+  September 24 register (93,824 PROPOSED). A build or release that is not
+  seeded, or in which any prior binding changed or disappeared, is refused.
+  Final rehearsal result: 93,824 identical, 0 changed, 0 missing, 632 new.
+  The 5,021 relationship IDs an unseeded build had renumbered are restored.
+- **Release blocker fixed.** Facility rows whose publication status is not
+  public no longer reach the public projection. Before the fix, all 702 rows
+  passed; now 379 do.
+- **Fact checks.** Every build, every release and `gaming validate` now run
+  these rules, and all real defects found are fixed: CA annual-per-report
+  sums, FL empty cells and unit spellings, dash-as-zero, overlap flags, the
+  disclosure measure key, and rights classes for QA and local-path fields.
+- **Affiliation.** 619 reviewed decision rows are loaded (466 official, 148
+  first-party under the owner's standing rule, 3 rejections, and the Chilocco
+  merge). Facilities: official 401, first-party 74, weak or held 226,
+  conflict 0. 75 same-address pairs stay HELD with their remaining question.
+- **Consolidation.** One Gaming command surface
+  (`intake-verify / build / validate / certify-bindings / release`). The
+  duplicate helpers are retired and indexed, and five superseded Cedar
+  Gaming writers are fenced in this repository (not deleted).
+- **Typing and lint.** There are zero exceptions. No mypy overrides or Gaming
+  ruff per-file ignores exist on this lineage. The five non-facility ported
+  producers pass `mypy --strict`, and facilities.py passes
+  `--disallow-any-generics`.
+- **Final rehearsal.** Two builds are byte-identical except the timing log.
+  Rehearsal release `708e3c0158e1348f7e8f8e8fb2611b264f1c9d961a177e3dd7efa06bb4674c74`,
+  manifest `8d6e557d078abb3aa25df194f7749c27c9f73ef6dc90ecd009eb05bafb297cd1`;
+  29 verified components including the six payment parts (53,124 rows); leak
+  gate 0. Cedar `_id_registry.json` is unchanged.
+- **Binding certificate.** `gaming certify-bindings` gives
+  CERTIFIED_WITH_HOLDS, certificate
+  `b35f4b80576f39d133b57f9a49c3a815862a7d1341b7becd95f5c4691576af90`, with
+  these holds: 24 stub or alias facility bindings, 5 prior bindings carried
+  but no longer used, and 89 relationships to operators with unbound businesses.
+  Against Cedar's live `cedar_ids` it is REFUSED until this PR lands. Nothing
+  was issued.
 
 ## September 25 bounded commits, exclusions and review instructions
 

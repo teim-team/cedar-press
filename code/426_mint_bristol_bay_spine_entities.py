@@ -180,6 +180,10 @@ def read_csv(p):
 
 
 def main():
+    raise SystemExit(
+        "Retired class-prefixed ID issuance is disabled. Preserve the source "
+        "finding and mint a CE- uid through 503_identity after identity review."
+    )
     check = "--check" in sys.argv
     print(f"=== Cedar Press 426: mint the Bristol Bay spine entities "
           f"(FA-04) ===\n")

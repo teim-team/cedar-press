@@ -117,7 +117,12 @@ export function permissionBlocks(source) {
 
 test("the pull request runs the same gates the deploy runs", () => {
   const deploy = gatesOf(workflow("deploy.yml"));
-  const checks = gatesOf(workflow("ci.yml"));
+  // Only ci.yml's `gates` job mirrors the deploy. Its other job,
+  // `gaming-release-consumer`, is a pull-request proof against a pinned
+  // Lumecon-data commit that the deploy has no counterpart for.
+  const gatesJob = jobsOf(workflow("ci.yml")).find((job) => job.name === "gates");
+  assert.ok(gatesJob, "ci.yml has no `gates` job");
+  const checks = gatesJob.steps;
   assert.ok(deploy.length >= 8, `only found ${deploy.length} gate steps in deploy.yml`);
   assert.deepEqual(
     checks,

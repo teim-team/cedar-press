@@ -1,0 +1,7 @@
+{
+ "schema_version": 1,
+ "product": "cedar_grove",
+ "status": "UNPINNED: no production Gaming release exists. Gaming object IDs are PROPOSED, not ISSUED; production pin stays empty until Cedar issues them (code/build.py gaming-issue-ids) and Lumecon-data builds a production release from the issued registry snapshot.",
+ "rule": "One immutable Lumecon-data collection release per Grove collection: catalog_id, catalog_sha256 (SHA-256 of the exact catalog file bytes at CEDAR_GROVE_RELEASE_CATALOG), collection_id (= the Grove collection id; per-table releases are refused), release_id and manifest_sha256 (the collection-level manifest). Update only by a reviewed pull request; rollback is the revert of that pull request. Rehearsal and synthetic fixture releases are never pinned here.",
+ "pins": {}
+}

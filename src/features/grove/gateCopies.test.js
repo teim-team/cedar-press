@@ -49,6 +49,23 @@ export function runSteps(source) {
   return runs;
 }
 
+/**
+ * One job's lines of a workflow (from its `  <name>:` key to the next job),
+ * so a check list is compared with the job that runs it and not with every
+ * job in the file.
+ */
+export function jobSource(source, name) {
+  const lines = source.split("\n");
+  const start = lines.findIndex((line) => line === `  ${name}:`);
+  if (start === -1) return "";
+  const body = [];
+  for (const line of lines.slice(start + 1)) {
+    if (/^ {2}[A-Za-z0-9_-]+:\s*$/.test(line) || /^\S/.test(line)) break;
+    body.push(line);
+  }
+  return body.join("\n");
+}
+
 /** The fenced block that follows an `<!-- gate:<name> -->` marker, as commands. */
 export function markedBlock(markdown, name) {
   const marker = `<!-- gate:${name} -->`;
@@ -168,7 +185,7 @@ test("AGENTS.md's check list is ci.yml's, step for step", () => {
   assert.ok(documented, "AGENTS.md has no <!-- gate:ci-steps --> block");
   assert.deepEqual(
     documented,
-    runSteps(read(".github/workflows/ci.yml")),
+    runSteps(jobSource(read(".github/workflows/ci.yml"), "gates")),
     "AGENTS.md's check list and ci.yml's run steps differ; update the one that is wrong",
   );
 });
