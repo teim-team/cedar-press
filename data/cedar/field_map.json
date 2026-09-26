@@ -2766,7 +2766,7 @@
     "funding_agency",
     "description",
     "obligations_usd",
-    "owner_attribution_status",
+    "affiliation_attribution_status",
     "source_url"
    ],
    "header_source": "sample",

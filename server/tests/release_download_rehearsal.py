@@ -156,8 +156,12 @@ def main():
             endpoint = f"/press/collections/{dataset}/full-download"
             assert client.get(endpoint, params={"release_id": "../outside"}).status_code == 400
             assert client.get(endpoint, params={"release_id": "0" * 64}).status_code == 503
-            assert select_catalog_release(database, args.store, dataset, second["release_id"],
-                                          product="cedar_press") == second_catalog
+            assert (
+                select_catalog_release(
+                    database, args.store, dataset, second["release_id"], product="cedar_press"
+                )
+                == second_catalog
+            )
             os.environ["CEDAR_PRESS_RELEASE_CATALOG"] = str(second_path)
             assert client.get(route).status_code == 503  # Stale pins cannot silently follow latest.
             newer = client.get(
@@ -167,8 +171,17 @@ def main():
                 newer.status_code == 200
                 and newer.headers["x-cedar-release"] == second["release_id"]
             )
-            assert select_catalog_release(database, args.store, dataset, pin["release_id"],
-                                          product="cedar_press", rollback=True) == first_catalog
+            assert (
+                select_catalog_release(
+                    database,
+                    args.store,
+                    dataset,
+                    pin["release_id"],
+                    product="cedar_press",
+                    rollback=True,
+                )
+                == first_catalog
+            )
             os.environ["CEDAR_PRESS_RELEASE_CATALOG"] = str(args.catalog)
             restored = client.get(route)
             assert restored.content == before.content

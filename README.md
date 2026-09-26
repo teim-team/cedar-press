@@ -24,7 +24,7 @@ Alongside these, `/tribal-data-request` carries the tribal data request
 policy and `/research-access` the limited research access path — each on its
 own URL, so either can be sent to a council office or a researcher directly.
 
-Every collection begins with public records, is extended through original
+Every collection is built on publicly available sources, is extended through original
 research and entity resolution, and stays current as new information arrives.
 Every download carries its own citation, so a figure can be traced back to the
 release it came from.

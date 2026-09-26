@@ -722,6 +722,20 @@ def _test_reference(path, tree):
                    for node in ast.walk(tree)))
 
 
+def _stable_dump(node):
+    """`ast.dump` in one format on every Python the pipeline runs on.
+
+    Writer signatures hash this text, and the committed baseline in
+    docs/schema/inventory.json was measured on Python 3.12. Python 3.13 made
+    `ast.dump` omit empty lists and None fields by default, so the same tree
+    dumped differently and every signature read as a new, unregistered write
+    (2,683 of them). `show_empty=True` restores the 3.12 text on 3.13+.
+    """
+    if sys.version_info >= (3, 13):
+        return ast.dump(node, include_attributes=False, show_empty=True)
+    return ast.dump(node, include_attributes=False)
+
+
 def writer_evidence(path, table_contracts):
     """Potential write sites from AST operations, never inferred from comments.
 
@@ -749,7 +763,7 @@ def writer_evidence(path, table_contracts):
             return expand(node.args[0], seen)
         return "<unresolved>"
 
-    context_digest = hashlib.sha256(ast.dump(tree, include_attributes=False).encode()).hexdigest()
+    context_digest = hashlib.sha256(_stable_dump(tree).encode()).hexdigest()
     sites = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -785,11 +799,11 @@ def writer_evidence(path, table_contracts):
         declared_clean = governed and "/data/clean/" in normalized
         scope = "governed_table" if declared_clean else "protected_surface" if protected else "governed_table" if governed else "unresolved_target" if "<unresolved>" in destination else "other_literal_target"
         # Include bindings, so retargeting OUT without changing OUT.open fires.
-        dependencies = sorted({ast.dump(value, include_attributes=False)
+        dependencies = sorted({_stable_dump(value)
                                for item in ast.walk(target) if isinstance(item, ast.Name)
                                for value in bindings[item.id]})
         unresolved_context = context_digest if "<unresolved>" in destination else None
-        signature = hashlib.sha256(json.dumps([ast.dump(target, include_attributes=False), destination,
+        signature = hashlib.sha256(json.dumps([_stable_dump(target), destination,
                                               dependencies, method, unresolved_context], sort_keys=True).encode()).hexdigest()
         sites.append({"line": node.lineno, "operation": name, "target": destination,
                       "scope": scope, "table": governed, "signature": signature})
@@ -1012,6 +1026,17 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
 # Bounded human-read source evidence for the existing census, not dispatch or
 # producer admission. Tuple: source SHA256, retained status, role, evidence and
 # remaining cutover condition. A source change invalidates this evidence.
+def source_digest(path):
+    """SHA-256 of a script with CRLF read as LF.
+
+    A review hash names the source a person inspected, not the checkout's line
+    endings: the same commit hashed on Windows (CRLF) and on Linux CI (LF)
+    must agree, or a review recorded on one machine reads as stale on the
+    other. Three hashes recorded on a Windows checkout failed CI this way.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 _REVIEWED_MAINTENANCE = {
     "41_build_codebooks.py": ("6dcc4b00ac676cb3db30c89b9be1ab094df5cbaa2dd279b281190b3b49d30517", "ACTIVE", "shared helper; forbidden writer", "166/263/392/941/cedar_register_codebook import helpers; main guard precedes writes", "Move helper consumers before removing file; never re-enable whole-master writer"),
     "1072_tribally_owned_enterprises.py": ("93ce32e6cef2110c0ccd672d881403a95e9e8388c2e07a36aa70da734e534bca", "ACTIVE", "controlled migration/producer", "build.py NEED candidate stages invoke migrate-legacy/build/verify; 1130/1133 consume helpers", "Preserve issued IDs and migration replay; publication hold remains"),
@@ -1049,7 +1074,7 @@ def add_maintenance_classification(scripts, references):
     for record in scripts:
         relative = (Path("code") / record["dir"].replace(".", "/") / record["script"]).as_posix()
         path = ROOT / relative
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        digest = source_digest(path)
         by_path[relative] = record
         by_name[record["script"]].append(relative)
         hashes[digest].append(relative)

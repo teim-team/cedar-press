@@ -63,7 +63,7 @@ git ls-files src/<dir>/grove                                   # files to move
 
 | | |
 |---|---|
-| Files to move | 119 — `features/grove` 78, `pages/grove` 38, `components/grove` 1, `styles/grove` 2 |
+| Files to move | 120 — `features/grove` 79, `pages/grove` 38, `components/grove` 1, `styles/grove` 2 |
 | Path references to rewrite | 377, across 90 files |
 | Referencing files inside `src/` | 45 — `pages/` 31, `features/` 10, `context/` 2, `components/` 1, `main.jsx` 1 |
 | Referencing files outside `src/` | 45 — `server/cedar_press/` 8, `scripts/` 8, `docs/` 14, `code/` 5, `server/tests/` 3, `tests/` 2, `data/` 1, `.github/` 1, `.env.example` 1, `AGENTS.md` 1, `eslint.config.js` 1 |

@@ -1,6 +1,6 @@
 # Indian Country Deals: a researcher's guide
 
-Collection `deals` · public file `deals.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `deals` · public file `deals.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** Tribal newsletters and tribal press; trade and journalist coverage; ANCSA shareholder filings; and Cedar's own federal contracting record, cited as a source where a transaction is visible only there.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 1,073. This is the count the release recorded for `deals_classified.csv`, not the sum of the collection's 20 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 1,073. This is the count the release recorded for `deals_classified.csv`, not the sum of the collection's 20 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -49,7 +49,7 @@ The approved header, in the owner's exact order (33 columns, of which 0 are owed
 | 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 2 | `canonical_name` (was `native_party_canonical_name`) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
 | 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
-| 4 | `cedar_entity_role` | cedar entity role | Publish a specific party relationship only when source evidence establishes it; otherwise leave blank. Never presume ownership. | text | See source qualification; not inferred from a legacy sample |
+| 4 | `cedar_entity_role` | Entity role | The Native entity's relationship to the deal, published only when a source establishes it and blank otherwise. A blank role never implies that the entity owns, controls or funds any party to the deal. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 5 | `deal_id` (was `Deal_ID`) | Deal ID | Cedar's identifier for the deal. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `event_date` (was `Event_Date`) | Date | When the deal happened or was announced. | text | the source states none, or not applicable to this row |
 | 7 | `event_date_precision` (was `Event_Date_precision`) | Date precision | Whether the date is known to the day, the month or the year. | text | the source states none, or not applicable to this row |
@@ -61,12 +61,12 @@ The approved header, in the owner's exact order (33 columns, of which 0 are owed
 | 13 | `native_party_type` (was `Native_Party_Type`) | Native party type as published | How the source describes the Native party. | text | the source states none, or not applicable to this row |
 | 14 | `native_party_role` | Entity role | Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller). | text | the source states none, or not applicable to this row |
 | 15 | `counterparty_or_funder` (was `Counterparty_or_Funder`) | Counterparty or funder | The other side of the deal. | text | the source states none, or not applicable to this row |
-| 16 | `deal_type` | deal type | One taxonomy through a value-level crosswalk. | text | See source qualification; not inferred from a legacy sample |
-| 17 | `transaction_structure` | transaction structure | Through a value-level crosswalk. | text | See source qualification; not inferred from a legacy sample |
+| 16 | `deal_type` | Deal type | The kind of deal under Cedar's one reviewed deal taxonomy, mapped value by value from the source's own category. | text | the source states none, or not applicable to this row |
+| 17 | `transaction_structure` | Transaction structure | How the transaction is structured, mapped value by value from the source's own event type. | text | the source states none, or not applicable to this row |
 | 18 | `industry` (was `Industry`) | Industry | The industry the deal is in. | text | the source states none, or not applicable to this row |
 | 19 | `sector` | Sector | The broad sector the deal belongs to, beside the finer industry. | text | the source states none, or not applicable to this row |
 | 20 | `capital_source` | Capital source | Where the capital comes from: public, private or tribal. | text | the source states none, or not applicable to this row |
-| 21 | `deal_status` | deal status | Through a value-level crosswalk. | text | See source qualification; not inferred from a legacy sample |
+| 21 | `deal_status` | Deal status | Where the deal stands under Cedar's reviewed status list, mapped value by value from the source's own status. | text | the source states none, or not applicable to this row |
 | 22 | `announced_value_usd` (was `Announced_Value_USD`) | Announced value | The dollar value announced, where one was. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 23 | `value_basis` (was `Value_Type`) | What the value is | What the announced figure represents (consideration paid, grant amount, project cost). | text | the source states none, or not applicable to this row |
 | 24 | `project_total_value_usd` (was `Project_Total_Value_USD`) | Project total | The total project value, where larger than the announced value. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
@@ -119,9 +119,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Indian Country Deals" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Indian Country Deals" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** This is the one Cedar dataset that does not exist elsewhere, so every row carries a source link. Announced and closed are labelled separately and a transaction enters totals only when its status is confirmed. Where an ownership change is visible in federal contracting but was never publicly announced, Cedar reports it and cites the contracting record with the identifier and years so a reader can re-run the check — and a change of reporting parent within one tribal corporate family is not treated as a transaction.
 

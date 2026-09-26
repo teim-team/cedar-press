@@ -1,6 +1,6 @@
 # Native Nonprofits: a researcher's guide
 
-Collection `nonprofits` · public file `nonprofits.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `nonprofits` · public file `nonprofits.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** IRS Business Master File; Form 990 e-file returns; the 990-N e-Postcard corpus; ProPublica Nonprofit Explorer.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 12,764. This is the count the release recorded for `np_orgs.csv`, not the sum of the collection's 14 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 12,764. This is the count the release recorded for `np_orgs.csv`, not the sum of the collection's 14 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -53,7 +53,7 @@ The approved header, in the owner's exact order (24 columns, of which 0 are owed
 | 5 | `ein` (was `EIN`) | EIN | The organization's Employer Identification Number. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `organization_name` (was `org_name`) | Organization | The organization's name as the IRS records it. | text | the source states none, or not applicable to this row |
 | 7 | `organization_entity_class` (was `cedar_native_entity_class`) | Organization type | Whether the organization is itself a tribe, an ANC, a Native organization. | text | the source states none, or not applicable to this row |
-| 8 | `inclusion_category` | inclusion category | Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk. | text | See source qualification; not inferred from a legacy sample |
+| 8 | `inclusion_category` | Inclusion basis | Why the organization is in the collection, read from primary sources through a documented crosswalk: Native-serving, Native-controlled, tribal government, or candidate. Candidate means inclusion is not yet confirmed. | text | the source states none, or not applicable to this row |
 | 9 | `city` | City | Its city. | text | the source states none, or not applicable to this row |
 | 10 | `state` | State | The organization's state. | text | the source states none, or not applicable to this row |
 | 11 | `ntee_code` | NTEE code | The IRS activity code for what the organization does. | text | the source states none, or not applicable to this row |
@@ -66,7 +66,7 @@ The approved header, in the owner's exact order (24 columns, of which 0 are owed
 | 18 | `bmf_assets_usd` (was `bmf_asset_amt`) | Assets | Assets in that return. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 19 | `bmf_income_usd` (was `bmf_income_amt`) | Income | Income in that return. | amount in US dollars, as recorded (no rounding; negative where the source records a reduction) | the source reports no amount; never zero |
 | 20 | `bmf_as_of_date` (was `bmf_vintage_fetched`) | IRS file date | The date of the IRS file these figures come from. | date (YYYY-MM-DD) | the source states no date |
-| 21 | `entity_link_status` | entity link status | One linkage status through a documented crosswalk. | text | See source qualification; not inferred from a legacy sample |
+| 21 | `entity_link_status` | Entity link status | Whether the organization's link to a Cedar entity has been validated, as one status through a documented crosswalk. An unvalidated link is not a finding that no Native entity is associated. | text | the source states none, or not applicable to this row |
 | 22 | `source_system` (was `source_dataset`) | Source system | The source: the IRS Exempt Organizations Business Master File. | text | the source states none, or not applicable to this row |
 | 23 | `source_url` | Source | The IRS Business Master File. | web address | the source states none, or not applicable to this row |
 | 24 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
@@ -110,9 +110,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Native Nonprofits" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Native Nonprofits" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Native status is established from what an organisation says about itself in its own filing, never from an NTEE code and never from a name. A mission statement naming a specific nation is a stronger claim than one describing Native-serving work generally, and the two are recorded separately. The dataset states plainly what it cannot see: tribal instrumentalities largely do not file 990s under IRC section 7871, so the largest tribal institutions can be absent by law, and place-named organisations that are not Native are identified and excluded rather than left to inflate the totals — 4,651 of 12,764 rows are excluded by a prior ruling. The disposition of a row is carried in `funnel_stage`, not in `classification_ruling`, which holds an explicit ruling for only 398 rows; 1,831 rows sit at `canonical_name_match` as unruled candidates, and the token the match turned on ships with each so a reader can see the ones that are wrong rather than take the tier on trust.
 

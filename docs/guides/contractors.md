@@ -1,6 +1,6 @@
 # Native Federal Contractors: a researcher's guide
 
-Collection `contractors` · public file `contractors.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `contractors` · public file `contractors.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** FPDS via USAspending; SAM entity registrations; parent-published subsidiary disclosures, including ANCSA audited filings under Alaska Statute 45.55.139.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 1,217,768. This is the count the release recorded for `prime_contracts.csv`, not the sum of the collection's 11 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 1,217,768. This is the count the release recorded for `prime_contracts.csv`, not the sum of the collection's 11 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -94,8 +94,8 @@ The approved header, in the owner's exact order (49 columns, of which 2 are owed
 | 42 | `recipient_geography_status` | Recipient geography status | Whether the recipient's address was placed in a county: placed, placed with an ambiguous place name, or unplaced. | text | the source states none, or not applicable to this row |
 | 43 | `performance_geography_status` | Performance geography status | The same for the place of performance. | text | the source states none, or not applicable to this row |
 | 44 | `attributed_flag` | Attributed (yes or no) | Whether the row is attributed to the Native entity in the opening block; the totals count attributed rows only. | yes or no (1 or 0) | not stated; 0 is no |
-| 45 | `affiliation_attribution_status` (was `owner_attribution_status`) | affiliation attribution status | Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance. | text | the source states none, or not applicable to this row |
-| 46 | `affiliation_as_of_transaction_cedar_uid` (was `owner_as_of_transaction_cedar_uid`) | affiliation as of transaction cedar uid | Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 45 | `affiliation_attribution_status` (was `owner_attribution_status`) | Affiliation status at the time | How the sources describe the entity's relationship to the awardee as of the transaction. A source-described assessment: Cedar does not independently certify ownership. | text | the source states none, or not applicable to this row |
+| 46 | `affiliation_as_of_transaction_cedar_uid` (was `owner_as_of_transaction_cedar_uid`) | Affiliated entity as of the action | The Cedar ID of the entity the sources associate with the contractor on the action date, where the affiliation history resolves it; UNKNOWN where it does not. Never today's affiliation assumed backwards, and not a certification of ownership. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 47 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
 | 48 | `source_url` | Source | The official page for this record, written into the file so it cites itself. | web address | the source states none, or not applicable to this row |
 | 49 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
@@ -141,9 +141,9 @@ Target columns the specification asks for that the terminal has not yet built fr
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Native Federal Contractors" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Native Federal Contractors" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Awardees are matched to a Native entity by identifier first (UEI, CAGE, declared parent UEI) and by name only with corroboration, because a subsidiary's legal name routinely shares no token with its owner — ASRC Federal's operating companies file as BROADLEAF, INUTEQ and VISTRONIX. Attribution tier is recorded on every row and a tier is never promoted by a name match alone. Known limits are published, not hidden: coverage begins at FY2000 because Native identification does not exist in the pre-2000 federal record at all, and $65.2B of candidate rows remain unattributed rather than being assigned to a plausible owner.
 

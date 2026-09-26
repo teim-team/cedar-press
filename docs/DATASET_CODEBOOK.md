@@ -80,7 +80,7 @@ Collection `federal-register` · table `consultation_events` · 11,402 rows in t
 
 **Where:** workspace dist/customer/federal-register.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/federal-register/consultation_events.csv; built from Federal Register documents.
 
-**Columns a subscriber sees (30):**
+**Columns a subscriber sees (34):**
 
 | # | Column | Label | Meaning |
 |---|---|---|---|
@@ -89,31 +89,35 @@ Collection `federal-register` · table `consultation_events` · 11,402 rows in t
 | 3 | `entity_class` (*to add*) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. |
 | 4 | `cedar_entity_role` (*to add*) | Entity role | Why the entity is on this row: participant. |
 | 5 | `consultation_event_id` | Event ID | Cedar's identifier for the consultation event. |
-| 6 | `fr_document_number` | Document number | The Federal Register document number. |
-| 7 | `agency` | Agency | The department holding the consultation. |
-| 8 | `sub_agency` (*rename to `subagency`*) | Office | The office within the department. |
-| 9 | `program` | Program | The program or matter the consultation concerns, where the document names one. |
-| 10 | `consultation_type` (*rename to `activity_type`*) | Kind of consultation | Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document. |
-| 11 | `topic` | Topic | What the consultation was about, from the document's title. |
-| 12 | `document_role` | Document role | Whether the document announces a consultation or reports one that already happened. |
-| 13 | `notice_date` | Notice date | The date the Federal Register document was published. |
-| 14 | `event_start_date` | Event start | When the consultation began, as the notice states it. |
-| 15 | `event_end_date` | Event end | When it ended, where stated. |
-| 16 | `participant_name_as_published` (*rename to `participant_name`*) | Participant as published | The tribe or organization named in the document, as it spells it. |
-| 17 | `participant_role` | Entity role | Why the entity is on this row: read from participant_role. |
-| 18 | `location` | Location | Where the consultation was held. |
-| 19 | `format` (*rename to `event_format`*) | Format | In person, virtual, teleconference, written comment, or a combination. |
-| 20 | `comment_deadline` | Comment deadline | The date written comments were due, where stated. |
-| 21 | `has_written_comments` | Written comments invited | Whether the document invites written comments (yes or no). |
-| 22 | `has_summary` | Summary available (yes or no) | Whether a summary of the consultation is available from the source. |
-| 23 | `has_transcript` | Transcript available (yes or no) | Whether a transcript is available from the source. |
-| 24 | `is_event_primary_row` | Counts as one consultation | One row per event carries yes; the rest are additional participants of the same event. Count consultations by this column, not by rows. |
-| 25 | `n_participant_rows_for_event` (*rename to `participant_rows_per_event`*) | Participant rows for this event | How many rows this event has in the file. |
-| 26 | `federal_register_citation` | Citation | The Federal Register citation (volume FR page). |
-| 27 | `source_system` (*to add*) | Source system | Which source the record came from. |
-| 28 | `source_url` | Source | The document on federalregister.gov. |
-| 29 | `source_quote` | Source passage | The sentence in the document this row was read from. |
-| 30 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
+| 6 | `consultation_record_key` (*to add*) | Record key | Identifies this row within this collection: a JSON array of the notice's consultation event ID, the participant name as published and the participant's role. Use it to cite or deduplicate a row. It is not a Cedar ID and identifies no event or entity outside this table. |
+| 7 | `fr_document_number` | Document number | The Federal Register document number. |
+| 8 | `agency` | Agency | The department holding the consultation. |
+| 9 | `sub_agency` (*rename to `subagency`*) | Office | The office within the department. |
+| 10 | `program` | Program | The program or matter the consultation concerns, where the document names one. |
+| 11 | `consultation_type` (*rename to `activity_type`*) | Kind of consultation | Whether this is a consultation session, a notice of consultation, or a consultation reported inside another document. |
+| 12 | `topic` | Topic | What the consultation was about, from the document's title. |
+| 13 | `document_role` | Document role | Whether the document announces a consultation or reports one that already happened. |
+| 14 | `notice_date` | Notice date | The date the Federal Register document was published. |
+| 15 | `event_start_date` | Event start | When the consultation began, as the notice states it. |
+| 16 | `event_end_date` | Event end | When it ended, where stated. |
+| 17 | `event_date_precision` (*to add*) | Date precision | Whether the event date is known to the day, the month or the year, read from the date as the notice writes it; unstated when the notice gives no date. |
+| 18 | `participant_name_as_published` (*rename to `participant_name`*) | Participant as published | The tribe or organization named in the document, as it spells it. |
+| 19 | `participant_role` | Entity role | Why the entity is on this row: read from participant_role. |
+| 20 | `entity_link_status` (*to add*) | Entity link status | Whether the participant on this row is linked to a Cedar entity: resolved when a registered link exists, no_individual_named when the notice names no individual participant, and unresolved when a participant is named but not yet linked. Unresolved is not a finding that no Native entity took part. |
+| 21 | `collective_scopes` (*to add*) | Collective scopes | Not yet evaluated for this collection, so always null here. Null means the notice has not been checked for a population it applies to (such as every federally recognized tribe); it is neither an empty scope nor a universal one. |
+| 22 | `location` | Location | Where the consultation was held. |
+| 23 | `format` (*rename to `event_format`*) | Format | In person, virtual, teleconference, written comment, or a combination. |
+| 24 | `comment_deadline` | Comment deadline | The date written comments were due, where stated. |
+| 25 | `has_written_comments` | Written comments invited | Whether the document invites written comments (yes or no). |
+| 26 | `has_summary` | Summary available (yes or no) | Whether a summary of the consultation is available from the source. |
+| 27 | `has_transcript` | Transcript available (yes or no) | Whether a transcript is available from the source. |
+| 28 | `is_event_primary_row` | Counts as one consultation | One row per event carries yes; the rest are additional participants of the same event. Count consultations by this column, not by rows. |
+| 29 | `n_participant_rows_for_event` (*rename to `participant_rows_per_event`*) | Participant rows for this event | How many rows this event has in the file. |
+| 30 | `federal_register_citation` | Citation | The Federal Register citation (volume FR page). |
+| 31 | `source_system` (*to add*) | Source system | Which source the record came from. |
+| 32 | `source_url` | Source | The document on federalregister.gov. |
+| 33 | `source_quote` | Source passage | The sentence in the document this row was read from. |
+| 34 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
 ### Legislation
 
@@ -166,44 +170,48 @@ Collection `deals` · table `deals_classified` · 1,073 rows in the full table �
 
 **Where:** workspace dist/customer/deals.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/deals/deals_classified.csv; assembled from announcements, filings and agency award lists.
 
-**Columns a subscriber sees (34):**
+**Columns a subscriber sees (38):**
 
 | # | Column | Label | Meaning |
 |---|---|---|---|
 | 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. |
 | 2 | `native_party_canonical_name` (*rename to `canonical_name`*) | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. |
 | 3 | `entity_class` (*to add*) | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. |
-| 4 | `Deal_ID` (*rename to `deal_id`*) | Deal ID | Cedar's identifier for the deal. |
-| 5 | `Event_Date` (*rename to `event_date`*) | Date | When the deal happened or was announced. |
-| 6 | `Event_Date_precision` (*rename to `event_date_precision`*) | Date precision | Whether the date is known to the day, the month or the year. |
-| 7 | `Event_Date_not_before` (*rename to `event_date_not_before`*) | Date not before | The earliest date the event could have happened, where the source gives an interval rather than a day. |
-| 8 | `Event_Date_not_after` (*rename to `event_date_not_after`*) | Date not after | The latest date the event could have happened. |
-| 9 | `Event_Year` (*rename to `event_year`*) | Year | The year of the event date. |
-| 10 | `Deal_Title` (*rename to `title`*) | Title | A one-line description of the deal. |
-| 11 | `Native_Party` (*rename to `native_party_name`*) | Native party as published | The Native party's name as the source gives it. |
-| 12 | `Native_Party_Type` (*rename to `native_party_type`*) | Native party type as published | How the source describes the Native party. |
-| 13 | `native_party_role` | Entity role | Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller). |
-| 14 | `Counterparty_or_Funder` (*rename to `counterparty_or_funder`*) | Counterparty or funder | The other side of the deal. |
-| 15 | `Deal_Category` (*combines into `deal_type`*) | Category | Acquisition, grant or public financing, joint venture, and so on. |
-| 16 | `transaction_type` (*combines into `deal_type`*) | Transaction type | The third of three overlapping classifications; shown until the one taxonomy replaces all three. |
-| 17 | `Event_Type` (*combines into `transaction_structure`*) | Event | What kind of event this row records (an acquisition of a 90% interest, an award). |
-| 18 | `Industry` (*rename to `industry`*) | Industry | The industry the deal is in. |
-| 19 | `sector` | Sector | The broad sector the deal belongs to, beside the finer industry. |
-| 20 | `capital_source` | Capital source | Where the capital comes from: public, private or tribal. |
-| 21 | `Status` (*combines into `deal_status`*) | Status | Completed, announced, awarded, pending. |
-| 22 | `deal_status_std` (*combines into `deal_status`*) | Status (standardized) | The standardized status; shown until one status column replaces the two. |
-| 23 | `Announced_Value_USD` (*rename to `announced_value_usd`*) | Announced value | The dollar value announced, where one was. |
-| 24 | `Value_Type` (*rename to `value_basis`*) | What the value is | What the announced figure represents (consideration paid, grant amount, project cost). |
-| 25 | `Project_Total_Value_USD` (*rename to `project_total_value_usd`*) | Project total | The total project value, where larger than the announced value. |
-| 26 | `State` (*rename to `state`*) | State | The state the deal is located in. |
-| 27 | `Location` (*rename to `location`*) | Location | The place, as the source gives it. |
-| 28 | `Description` (*rename to `description`*) | Description | A longer description of the deal. |
-| 29 | `Native_Connection` (*rename to `native_connection`*) | Native connection | Why this deal is in the collection: how the Native party is connected. |
-| 30 | `Verification_Status` (*rename to `verification_status`*) | Verification | Whether the deal was verified against a primary source. |
-| 31 | `Source_1` (*rename to `source_url`*) | Source | The primary source document or page. |
-| 32 | `Source_1_Type` (*rename to `source_type`*) | Source type | What kind of document the primary source is. |
-| 33 | `additional_sources` (*to add*) | Additional sources | Further public sources beyond the primary one, as a JSON list of {url, source_type}. |
-| 34 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
+| 4 | `cedar_entity_role` (*to add*) | Entity role | The Native entity's relationship to the deal, published only when a source establishes it and blank otherwise. A blank role never implies that the entity owns, controls or funds any party to the deal. |
+| 5 | `Deal_ID` (*rename to `deal_id`*) | Deal ID | Cedar's identifier for the deal. |
+| 6 | `Event_Date` (*rename to `event_date`*) | Date | When the deal happened or was announced. |
+| 7 | `Event_Date_precision` (*rename to `event_date_precision`*) | Date precision | Whether the date is known to the day, the month or the year. |
+| 8 | `Event_Date_not_before` (*rename to `event_date_not_before`*) | Date not before | The earliest date the event could have happened, where the source gives an interval rather than a day. |
+| 9 | `Event_Date_not_after` (*rename to `event_date_not_after`*) | Date not after | The latest date the event could have happened. |
+| 10 | `Event_Year` (*rename to `event_year`*) | Year | The year of the event date. |
+| 11 | `Deal_Title` (*rename to `title`*) | Title | A one-line description of the deal. |
+| 12 | `Native_Party` (*rename to `native_party_name`*) | Native party as published | The Native party's name as the source gives it. |
+| 13 | `Native_Party_Type` (*rename to `native_party_type`*) | Native party type as published | How the source describes the Native party. |
+| 14 | `native_party_role` | Entity role | Why the entity is on this row: read from native_party_role (acquirer, borrower, issuer, partner, grantee, seller). |
+| 15 | `Counterparty_or_Funder` (*rename to `counterparty_or_funder`*) | Counterparty or funder | The other side of the deal. |
+| 16 | `Deal_Category` (*combines into `deal_type`*) | Category | Acquisition, grant or public financing, joint venture, and so on. |
+| 17 | `deal_type` (*to add*) | Deal type | The kind of deal under Cedar's one reviewed deal taxonomy, mapped value by value from the source's own category. |
+| 18 | `transaction_type` (*combines into `deal_type`*) | Transaction type | The third of three overlapping classifications; shown until the one taxonomy replaces all three. |
+| 19 | `Event_Type` (*combines into `transaction_structure`*) | Event | What kind of event this row records (an acquisition of a 90% interest, an award). |
+| 20 | `transaction_structure` (*to add*) | Transaction structure | How the transaction is structured, mapped value by value from the source's own event type. |
+| 21 | `Industry` (*rename to `industry`*) | Industry | The industry the deal is in. |
+| 22 | `sector` | Sector | The broad sector the deal belongs to, beside the finer industry. |
+| 23 | `capital_source` | Capital source | Where the capital comes from: public, private or tribal. |
+| 24 | `Status` (*combines into `deal_status`*) | Status | Completed, announced, awarded, pending. |
+| 25 | `deal_status_std` (*combines into `deal_status`*) | Status (standardized) | The standardized status; shown until one status column replaces the two. |
+| 26 | `deal_status` (*to add*) | Deal status | Where the deal stands under Cedar's reviewed status list, mapped value by value from the source's own status. |
+| 27 | `Announced_Value_USD` (*rename to `announced_value_usd`*) | Announced value | The dollar value announced, where one was. |
+| 28 | `Value_Type` (*rename to `value_basis`*) | What the value is | What the announced figure represents (consideration paid, grant amount, project cost). |
+| 29 | `Project_Total_Value_USD` (*rename to `project_total_value_usd`*) | Project total | The total project value, where larger than the announced value. |
+| 30 | `State` (*rename to `state`*) | State | The state the deal is located in. |
+| 31 | `Location` (*rename to `location`*) | Location | The place, as the source gives it. |
+| 32 | `Description` (*rename to `description`*) | Description | A longer description of the deal. |
+| 33 | `Native_Connection` (*rename to `native_connection`*) | Native connection | Why this deal is in the collection: how the Native party is connected. |
+| 34 | `Verification_Status` (*rename to `verification_status`*) | Verification | Whether the deal was verified against a primary source. |
+| 35 | `Source_1` (*rename to `source_url`*) | Source | The primary source document or page. |
+| 36 | `Source_1_Type` (*rename to `source_type`*) | Source type | What kind of document the primary source is. |
+| 37 | `additional_sources` (*to add*) | Additional sources | Further public sources beyond the primary one, as a JSON list of {url, source_type}. |
+| 38 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
 ### NAGPRA
 
@@ -379,8 +387,8 @@ Collection `contractors` · table `prime_contracts` · 1,217,768 rows in the ful
 | 44 | `recipient_geography_status` (*to add*) | Recipient geography status | Whether the recipient's address was placed in a county: placed, placed with an ambiguous place name, or unplaced. |
 | 45 | `performance_geography_status` (*to add*) | Performance geography status | The same for the place of performance. |
 | 46 | `attributed_flag` | Attributed (yes or no) | Whether the row is attributed to the Native entity in the opening block; the totals count attributed rows only. |
-| 47 | `owner_attribution_status` | Ownership at the time | Whether the entity's ownership of the awardee was confirmed as of the transaction. |
-| 48 | `owner_as_of_transaction_cedar_uid` | Owner as of the action | The Cedar ID of the entity that owned the contractor on the action date where the ownership history resolves it; UNKNOWN where it does not. Never the current owner assumed backwards. |
+| 47 | `owner_attribution_status` (*rename to `affiliation_attribution_status`*) | Affiliation status at the time | How the sources describe the entity's relationship to the awardee as of the transaction. A source-described assessment: Cedar does not independently certify ownership. |
+| 48 | `owner_as_of_transaction_cedar_uid` (*rename to `affiliation_as_of_transaction_cedar_uid`*) | Affiliated entity as of the action | The Cedar ID of the entity the sources associate with the contractor on the action date, where the affiliation history resolves it; UNKNOWN where it does not. Never today's affiliation assumed backwards, and not a certification of ownership. |
 | 49 | `source_system` (*to add*) | Source system | Which source the record came from. |
 | 50 | `source_url` (*to add*) | Source | The official page for this record, written into the file so it cites itself. |
 | 51 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
@@ -599,7 +607,7 @@ Collection `nonprofits` · table `np_orgs` · 12,764 rows in the full table · C
 
 **Where:** workspace dist/customer/nonprofits.csv (the customer file, written by code/1137_customer_dataset_combine.py); the review copy is dist/review/spreadsheets/nonprofits/np_orgs.csv; built from the IRS Exempt Organizations Business Master File and Native-led directories.
 
-**Columns a subscriber sees (27):**
+**Columns a subscriber sees (29):**
 
 | # | Column | Label | Meaning |
 |---|---|---|---|
@@ -610,26 +618,28 @@ Collection `nonprofits` · table `np_orgs` · 12,764 rows in the full table · C
 | 5 | `EIN` (*rename to `ein`*) | EIN | The organization's Employer Identification Number. |
 | 6 | `org_name` (*rename to `organization_name`*) | Organization | The organization's name as the IRS records it. |
 | 7 | `cedar_native_entity_class` (*rename to `organization_entity_class`*) | Organization type | Whether the organization is itself a tribe, an ANC, a Native organization. |
-| 8 | `classification_ruling` (*combines into `inclusion_category`*) | Relationship to the entity | Whether the organization is tribally controlled, tribally affiliated, or unruled. |
-| 9 | `disposition` (*combines into `inclusion_category`*) | Inclusion basis | Why the organization is in Cedar: verified strictly, verified, or a candidate. |
-| 10 | `city` | City | Its city. |
-| 11 | `state` | State | The organization's state. |
-| 12 | `ntee_code` | NTEE code | The IRS activity code for what the organization does. |
-| 13 | `bmf_status` (*rename to `irs_status`*) | IRS status code | The organization's status code in the Business Master File, defined in the dictionary. |
-| 14 | `bmf_subsection` (*rename to `irs_subsection`*) | Tax subsection | The 501(c) subsection (3 for charities). |
-| 15 | `bmf_foundation_cd` (*rename to `irs_foundation_code`*) | Foundation code | The IRS foundation classification code, defined in the dictionary. |
-| 16 | `bmf_irs_ruling_yyyymm` (*rename to `irs_ruling_month`*) | IRS ruling date | When the IRS recognized the organization (year and month). |
-| 17 | `bmf_tax_period` (*rename to `tax_period`*) | Latest tax period | The most recent tax period in the file. |
-| 18 | `bmf_revenue_amt` (*rename to `bmf_revenue_usd`*) | Revenue | Revenue in the latest return the IRS holds. |
-| 19 | `bmf_asset_amt` (*rename to `bmf_assets_usd`*) | Assets | Assets in that return. |
-| 20 | `bmf_income_amt` (*rename to `bmf_income_usd`*) | Income | Income in that return. |
-| 21 | `bmf_vintage_fetched` (*rename to `bmf_as_of_date`*) | IRS file date | The date of the IRS file these figures come from. |
-| 22 | `entity_tier` (*combines into `entity_link_status`*) | Match confidence | Cedar's confidence in the link to the entity: A is strongest. |
-| 23 | `cedar_link_tier` (*combines into `entity_link_status`*) | Cedar link tier | Shown until the combined column replaces it. |
-| 24 | `key_review_disposition` (*combines into `entity_link_status`*) | Key review disposition | Shown until the combined column replaces it. |
-| 25 | `source_dataset` (*rename to `source_system`*) | Source system | The source: the IRS Exempt Organizations Business Master File. |
-| 26 | `source_url` | Source | The IRS Business Master File. |
-| 27 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
+| 8 | `inclusion_category` (*to add*) | Inclusion basis | Why the organization is in the collection, read from primary sources through a documented crosswalk: Native-serving, Native-controlled, tribal government, or candidate. Candidate means inclusion is not yet confirmed. |
+| 9 | `classification_ruling` (*combines into `inclusion_category`*) | Relationship to the entity | Whether the organization is tribally controlled, tribally affiliated, or unruled. |
+| 10 | `disposition` (*combines into `inclusion_category`*) | Inclusion basis | Why the organization is in Cedar: verified strictly, verified, or a candidate. |
+| 11 | `city` | City | Its city. |
+| 12 | `state` | State | The organization's state. |
+| 13 | `ntee_code` | NTEE code | The IRS activity code for what the organization does. |
+| 14 | `bmf_status` (*rename to `irs_status`*) | IRS status code | The organization's status code in the Business Master File, defined in the dictionary. |
+| 15 | `bmf_subsection` (*rename to `irs_subsection`*) | Tax subsection | The 501(c) subsection (3 for charities). |
+| 16 | `bmf_foundation_cd` (*rename to `irs_foundation_code`*) | Foundation code | The IRS foundation classification code, defined in the dictionary. |
+| 17 | `bmf_irs_ruling_yyyymm` (*rename to `irs_ruling_month`*) | IRS ruling date | When the IRS recognized the organization (year and month). |
+| 18 | `bmf_tax_period` (*rename to `tax_period`*) | Latest tax period | The most recent tax period in the file. |
+| 19 | `bmf_revenue_amt` (*rename to `bmf_revenue_usd`*) | Revenue | Revenue in the latest return the IRS holds. |
+| 20 | `bmf_asset_amt` (*rename to `bmf_assets_usd`*) | Assets | Assets in that return. |
+| 21 | `bmf_income_amt` (*rename to `bmf_income_usd`*) | Income | Income in that return. |
+| 22 | `bmf_vintage_fetched` (*rename to `bmf_as_of_date`*) | IRS file date | The date of the IRS file these figures come from. |
+| 23 | `entity_tier` (*combines into `entity_link_status`*) | Match confidence | Cedar's confidence in the link to the entity: A is strongest. |
+| 24 | `cedar_link_tier` (*combines into `entity_link_status`*) | Cedar link tier | Shown until the combined column replaces it. |
+| 25 | `entity_link_status` (*to add*) | Entity link status | Whether the organization's link to a Cedar entity has been validated, as one status through a documented crosswalk. An unvalidated link is not a finding that no Native entity is associated. |
+| 26 | `key_review_disposition` (*combines into `entity_link_status`*) | Key review disposition | Shown until the combined column replaces it. |
+| 27 | `source_dataset` (*rename to `source_system`*) | Source system | The source: the IRS Exempt Organizations Business Master File. |
+| 28 | `source_url` | Source | The IRS Business Master File. |
+| 29 | `research_note` (*to add*) | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. |
 
 ## Questions for the reviewer
 

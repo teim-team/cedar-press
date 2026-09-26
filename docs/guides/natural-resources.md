@@ -1,6 +1,6 @@
 # Tribal Natural Resource Revenue: a researcher's guide
 
-Collection `natural-resources` · public file `natural-resources.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `natural-resources` · public file `natural-resources.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** ONRR disbursements and monthly revenue; historical MMS American Indian collections; OSMRE Abandoned Mine Land distributions; state severance distributions; ANCSA section 7(i) and 7(j) filings; Osage Minerals Council payment history.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 11,305. This is the count the release recorded for `resource_revenue.csv`, not the sum of the collection's 10 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 11,305. This is the count the release recorded for `resource_revenue.csv`, not the sum of the collection's 10 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -121,9 +121,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Tribal Natural Resource Revenue" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Tribal Natural Resource Revenue" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Attribution routes through a party table rather than a single owner column, because one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law the row is published as an aggregate and labelled as one — 88.1% (9,791 national plus 167 state of 11,305 rows) of rows are aggregate for that reason, and none are unattributed for want of effort. Individual allottee detail is never published: Osage rows carry a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier.
 

@@ -1,6 +1,6 @@
 # Native Legislation and Votes: a researcher's guide
 
-Collection `legislation` · public file `legislation.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `legislation` · public file `legislation.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** Congress.gov API; Voteview roll-call records; committee and hearing records.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 3,069. This is the count the release recorded for `native_bills.csv`, not the sum of the collection's 17 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 3,069. This is the count the release recorded for `native_bills.csv`, not the sum of the collection's 17 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -107,9 +107,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Native Legislation and Votes" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Native Legislation and Votes" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Most legislation affecting Indian Country names no single tribe, so records are scoped to Indian Country as a whole rather than forced onto an entity — an unattached row here is the correct representation, not a gap. Subject classification is recorded with the basis on which a bill was judged Native-relevant.
 
