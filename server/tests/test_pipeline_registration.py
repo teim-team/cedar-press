@@ -846,6 +846,13 @@ pretend_loader("not_executed.py")
                 self.assertIsNone(records[0]["maintenance_evidence"]["bounded_source_review"])
 
     def test_bounded_review_hashes_identify_the_inspected_sources(self):
+        # Inspection alone does not settle conflicting ownership or a
+        # replacement whose consumers/decision state have not been cut over.
+        for unresolved in ("152_build_assistance_id_crosswalk.py",
+                           "1162_twelve_dataset_report.py", "1166_owner_queue_card_builder.py",
+                           "94_rescan_universes.py", "80_build_instrument_taxonomy.py",
+                           "1088_merge_staged_deals.py"):
+            self.assertNotIn(unresolved, self.inventory._REVIEWED_MAINTENANCE)
         for name, review in self.inventory._REVIEWED_MAINTENANCE.items():
             with self.subTest(script=name):
                 self.assertEqual(self.inventory.source_digest(ROOT / "code" / name), review[0])
