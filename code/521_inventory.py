@@ -722,6 +722,20 @@ def _test_reference(path, tree):
                    for node in ast.walk(tree)))
 
 
+def _stable_dump(node):
+    """`ast.dump` in one format on every Python the pipeline runs on.
+
+    Writer signatures hash this text, and the committed baseline in
+    docs/schema/inventory.json was measured on Python 3.12. Python 3.13 made
+    `ast.dump` omit empty lists and None fields by default, so the same tree
+    dumped differently and every signature read as a new, unregistered write
+    (2,683 of them). `show_empty=True` restores the 3.12 text on 3.13+.
+    """
+    if sys.version_info >= (3, 13):
+        return ast.dump(node, include_attributes=False, show_empty=True)
+    return ast.dump(node, include_attributes=False)
+
+
 def writer_evidence(path, table_contracts):
     """Potential write sites from AST operations, never inferred from comments.
 
@@ -749,7 +763,7 @@ def writer_evidence(path, table_contracts):
             return expand(node.args[0], seen)
         return "<unresolved>"
 
-    context_digest = hashlib.sha256(ast.dump(tree, include_attributes=False).encode()).hexdigest()
+    context_digest = hashlib.sha256(_stable_dump(tree).encode()).hexdigest()
     sites = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -785,11 +799,11 @@ def writer_evidence(path, table_contracts):
         declared_clean = governed and "/data/clean/" in normalized
         scope = "governed_table" if declared_clean else "protected_surface" if protected else "governed_table" if governed else "unresolved_target" if "<unresolved>" in destination else "other_literal_target"
         # Include bindings, so retargeting OUT without changing OUT.open fires.
-        dependencies = sorted({ast.dump(value, include_attributes=False)
+        dependencies = sorted({_stable_dump(value)
                                for item in ast.walk(target) if isinstance(item, ast.Name)
                                for value in bindings[item.id]})
         unresolved_context = context_digest if "<unresolved>" in destination else None
-        signature = hashlib.sha256(json.dumps([ast.dump(target, include_attributes=False), destination,
+        signature = hashlib.sha256(json.dumps([_stable_dump(target), destination,
                                               dependencies, method, unresolved_context], sort_keys=True).encode()).hexdigest()
         sites.append({"line": node.lineno, "operation": name, "target": destination,
                       "scope": scope, "table": governed, "signature": signature})
@@ -1012,9 +1026,20 @@ def add_operational_roles(scripts, references, table_contracts=None, launch_coll
 # Bounded human-read source evidence for the existing census, not dispatch or
 # producer admission. Tuple: source SHA256, retained status, role, evidence and
 # remaining cutover condition. A source change invalidates this evidence.
+def source_digest(path):
+    """SHA-256 of a script with CRLF read as LF.
+
+    A review hash names the source a person inspected, not the checkout's line
+    endings: the same commit hashed on Windows (CRLF) and on Linux CI (LF)
+    must agree, or a review recorded on one machine reads as stale on the
+    other. Three hashes recorded on a Windows checkout failed CI this way.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 _REVIEWED_MAINTENANCE = {
-    "41_build_codebooks.py": ("81a509e2b7e396ca691a1be8b43332ac0931944253afef386e8612a28619d470", "ACTIVE", "shared helper; forbidden writer", "166/263/392/941/cedar_register_codebook import helpers; main guard precedes writes", "Move helper consumers before removing file; never re-enable whole-master writer"),
-    "1072_tribally_owned_enterprises.py": ("3f0ceda259353037b3d2eaa6b121a459bb0e83cbb5307305436522afcda1b640", "ACTIVE", "controlled migration/producer", "build.py NEED candidate stages invoke migrate-legacy/build/verify; 1130/1133 consume helpers", "Preserve issued IDs and migration replay; publication hold remains"),
+    "41_build_codebooks.py": ("6dcc4b00ac676cb3db30c89b9be1ab094df5cbaa2dd279b281190b3b49d30517", "ACTIVE", "shared helper; forbidden writer", "166/263/392/941/cedar_register_codebook import helpers; main guard precedes writes", "Move helper consumers before removing file; never re-enable whole-master writer"),
+    "1072_tribally_owned_enterprises.py": ("93ce32e6cef2110c0ccd672d881403a95e9e8388c2e07a36aa70da734e534bca", "ACTIVE", "controlled migration/producer", "build.py NEED candidate stages invoke migrate-legacy/build/verify; 1130/1133 consume helpers", "Preserve issued IDs and migration replay; publication hold remains"),
     "1129_place_ids.py": ("d034f6948893e331a59cc2edae567cd0e65db712981758aa0bf2466fbeb16811", "ACTIVE", "controlled migration/validation", "mint/migrate --apply mutate place register; protected literals also occur in fixtures", "Retain issued-place identity and replay authority until explicit cutover"),
     "1180_entity_official_names.py": ("6d3a5179f9586adb70fd3ba799f89dd3cd3fe9f25b1f14623921c1c900d0d140", "ACTIVE", "canonical-name utility", "build --apply writes cedar_entity_names.csv consumed by cedar_publication and build.py pins", "Replace canonical-name generation and consumers together"),
     "1183_native_nonprofit_entities.py": ("22f922f846747f68411b2086909bdd634a14f9434b9f877518219d579ddc0bfc", "ACTIVE", "controlled identity migration", "build writes identity register, EIN links and entity types; projection does not replace minting", "Preserve issued identities and ruled object mappings; no automatic promotion"),
@@ -1026,7 +1051,7 @@ _REVIEWED_MAINTENANCE = {
     "109_build_variable_registry.py": ("ec588dc4f3ad47de39f69423f8cb858e181615c3e87ffc5bf2b019624742d779", "ACTIVE", "metadata utility", "variable_registry.csv is consumed by 374_build_cedar_taxonomy_export.py", "Prove semantic metadata parity and cut over 374 before retirement"),
     "1090_dtll_agency_harvest.py": ("ffe8ba11c0f75cbcc387acdc6e58e3b82eca086b8e2c1e8e9c3d7eb6e40aace1", "ACTIVE", "transitional acquisition", "Agency Dear Tribal Leader letters/coverage are distinct Advocacy components, not Federal Register", "Migrate acquisition and codebook fragment registration without losing component coverage"),
     "1105_newsletter_corpus_ship.py": ("a924f5bc24761ee339aee603524d61f1e057730a497cc7f8094c1ee6095adcda", "ACTIVE", "conservation/registration utility", "Validates 990/991 newsletter outputs and writes conservation/codebook metadata", "Keep unique conservation checks; cut metadata writes over to canonical fragment writer"),
-    "1135_full_dataset_review_bundle.py": ("63c25e432765ded638fbeca158d760e3dd69ba0e3d1d8c59d473c9e575d5829e", "ACTIVE", "review utility; transitional ancillary export", "Candidate review retained; build calls refuse_migrated_producers; ancillary full-table route distinct", "Retire only proven replaced output routes, not whole review utility"),
+    "1135_full_dataset_review_bundle.py": ("29eaa7dd4a7b0561b08761186e1037ed86e5a700379414049777c866502416ae", "ACTIVE", "review utility; transitional ancillary export", "Candidate review retained; build calls refuse_migrated_producers; ancillary full-table route distinct", "Retire only proven replaced output routes, not whole review utility"),
     "1149_codebook_money_fed.py": ("40817ad385ba14109247e4a3afb23c7e6b4b850ab3bf1fcfc0e8a123dd2c7ef9", "ACTIVE", "codebook registration/validation", "Eleven table fragments; selftest now redirects script and shared writer to synthetic temporary tree", "Preserve fragment definitions and negative controls through codebook owner cutover"),
     "1151_customer_preview_ten.py": ("c5b0430b158e2548129b649ef264f46e94ad799e8c5bb64064a5c25313d3415c", "ACTIVE", "transitional preview producer", "1162 calls verify; DATASET_NORTH_STAR documents dist/preview producer", "Replace 1162 validation and documentation with pinned release samples before retirement"),
     "1169_release_verify.py": ("6840dd9ff44786a3c270f812d1ca3ead5141e7a5c04ddf3c047302eb1bdb9149", "ACTIVE", "release validator", "Default verify read-only; _fixture_fails redirects protected-looking writes into TemporaryDirectory", "Retain negative release tests; fixture literals are not canonical writes"),
@@ -1049,7 +1074,7 @@ def add_maintenance_classification(scripts, references):
     for record in scripts:
         relative = (Path("code") / record["dir"].replace(".", "/") / record["script"]).as_posix()
         path = ROOT / relative
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        digest = source_digest(path)
         by_path[relative] = record
         by_name[record["script"]].append(relative)
         hashes[digest].append(relative)

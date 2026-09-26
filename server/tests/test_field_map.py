@@ -167,9 +167,11 @@ class MigratedProducerDelegationTest(unittest.TestCase):
         module.qualify_rows = Mock(side_effect=ValueError("unreviewed evidence"))
         rows = [{"beneficiary_note": "original"}]
         header = ["beneficiary_note"]
-        with patch.dict(sys.modules, {module.__name__: module}):
-            with self.assertRaisesRegex(ValueError, "unreviewed evidence"):
-                pub.recompute_derived("natural-resources", header, rows)
+        with (
+            patch.dict(sys.modules, {module.__name__: module}),
+            self.assertRaisesRegex(ValueError, "unreviewed evidence"),
+        ):
+            pub.recompute_derived("natural-resources", header, rows)
         self.assertEqual(rows, [{"beneficiary_note": "original"}])
         self.assertEqual(header, ["beneficiary_note"])
         module.qualify_rows.assert_called_once_with(rows)
@@ -182,7 +184,9 @@ class MigratedProducerDelegationTest(unittest.TestCase):
         module.legislation_admission_hold = Mock(return_value="evidence_hold")
         row = {"bill_id": "fixture-id"}
         with patch.dict(sys.modules, {module.__name__: module}):
-            self.assertEqual(pub.is_publication_eligible(row), (False, "evidence_hold", pub.WITHHOLD))
+            self.assertEqual(
+                pub.is_publication_eligible(row), (False, "evidence_hold", pub.WITHHOLD)
+            )
         module.legislation_admission_hold.assert_called_once_with(row)
 
 
@@ -244,12 +248,15 @@ def supply_owed_targets(collection: str, rows) -> set:
     # These fixtures supply external producer outputs; they do not implement
     # the governed Lumecon derivations in Cedar's compatibility applier.
     source_of = {target: source for source, target in rename.items()}
+
     def built_here(n):
         spec = n.get("from", "")
         return not n.get("status") and (
             not spec.startswith("rule:")
-            or bool(rows) and pub._rule(entry, spec, rows[0], source_of) is not None
+            or bool(rows)
+            and pub._rule(entry, spec, rows[0], source_of) is not None
         )
+
     built = [n["column"] for n in entry["new"] if built_here(n)]
     supplied = set()
     carriers = {
@@ -258,11 +265,7 @@ def supply_owed_targets(collection: str, rows) -> set:
         if f["decision"] == "combine" and f["to"] == f["column"]
     }
     for f, target, _stuck in pub.owed_derivations(entry, rename, built, rows):
-        if target in [
-            n["column"]
-            for n in entry["new"]
-            if built_here(n) and not f.get("blocking")
-        ]:
+        if target in [n["column"] for n in entry["new"] if built_here(n) and not f.get("blocking")]:
             continue
         for r in rows:
             if target in carriers:
@@ -1117,17 +1120,31 @@ class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
     def test_legacy_negative_controls_never_mutate_canonical_sources(self):
         cases = (
             ("952_nonprofit_disposition.py", "selftest", ("ROOT", "TABLE", "MANIFEST"), "TABLE"),
-            ("954_register_promoted_columns_codebook.py", "selftest", ("ROOT", "CLEAN", "FRAG", "MASTER"), "MASTER"),
-            ("1132_fac_nontribal_native_audits.py", "cmd_selftest",
-             ("ROOT", "CLEAN", "SPINE", "BULK", "OUT_CENSUS", "OUT_SEFA", "OUT_COV"), "OUT_CENSUS"),
+            (
+                "954_register_promoted_columns_codebook.py",
+                "selftest",
+                ("ROOT", "CLEAN", "FRAG", "MASTER"),
+                "MASTER",
+            ),
+            (
+                "1132_fac_nontribal_native_audits.py",
+                "cmd_selftest",
+                ("ROOT", "CLEAN", "SPINE", "BULK", "OUT_CENSUS", "OUT_SEFA", "OUT_COV"),
+                "OUT_CENSUS",
+            ),
             ("1155_np_placename_precision.py", "cmd_selftest", ("ROOT", "NP", "SPINE"), "NP"),
         )
         for filename, entrypoint, names, writable in cases:
-            spec = importlib.util.spec_from_file_location("isolated_" + filename[:-3], CODE / filename)
+            spec = importlib.util.spec_from_file_location(
+                "isolated_" + filename[:-3], CODE / filename
+            )
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
             for fail in (False, True):
-                with self.subTest(script=filename, injected_failure=fail), tempfile.TemporaryDirectory() as tmp:
+                with (
+                    self.subTest(script=filename, injected_failure=fail),
+                    tempfile.TemporaryDirectory() as tmp,
+                ):
                     root = Path(tmp)
                     paths = {name: root / name for name in names}
                     paths["ROOT"] = root
@@ -1139,26 +1156,43 @@ class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
                         for name, path in paths.items():
                             stack.enter_context(patch.object(module, name, path))
                         if hasattr(module, "cb"):
-                            writer_paths = {"CEDAR": root, "CLEAN": paths["CLEAN"],
-                                            "FRAG": paths["FRAG"], "MASTER": paths["MASTER"]}
+                            writer_paths = {
+                                "CEDAR": root,
+                                "CLEAN": paths["CLEAN"],
+                                "FRAG": paths["FRAG"],
+                                "MASTER": paths["MASTER"],
+                            }
                             for name, path in writer_paths.items():
                                 stack.enter_context(patch.object(module.cb, name, path))
                         if fail:
-                            def interrupted():
-                                getattr(module, writable).write_bytes(b"injected fixture corruption")
+
+                            def interrupted(module=module, writable=writable):
+                                getattr(module, writable).write_bytes(
+                                    b"injected fixture corruption"
+                                )
                                 raise RuntimeError("injected fixture interruption")
-                            stack.enter_context(patch.object(module, "_selftest_cases", side_effect=interrupted))
+
+                            stack.enter_context(
+                                patch.object(module, "_selftest_cases", side_effect=interrupted)
+                            )
                         with redirect_stdout(io.StringIO()) as output:
                             if fail:
-                                with self.assertRaisesRegex(RuntimeError, "injected fixture interruption"):
+                                with self.assertRaisesRegex(
+                                    RuntimeError, "injected fixture interruption"
+                                ):
                                     getattr(module, entrypoint)()
                             else:
                                 result = getattr(module, entrypoint)()
                                 self.assertEqual(result, 0, output.getvalue())
                         self.assertEqual({name: getattr(module, name) for name in names}, paths)
                         if hasattr(module, "cb"):
-                            self.assertEqual({name: getattr(module.cb, name) for name in writer_paths}, writer_paths)
-                    self.assertEqual({p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}, before)
+                            self.assertEqual(
+                                {name: getattr(module.cb, name) for name in writer_paths},
+                                writer_paths,
+                            )
+                    self.assertEqual(
+                        {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}, before
+                    )
                     self.assertFalse(any(p.is_dir() for p in root.iterdir()))
 
     def test_success_and_exception_preserve_canonical_files_and_restore_paths(self):
@@ -1187,7 +1221,7 @@ class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
                         (module, ("ROOT", "CLEAN", "FRAG", "MASTER")),
                         (module.cb, ("CEDAR", "CLEAN", "FRAG", "MASTER")),
                     ):
-                        for name, value in zip(names, paths):
+                        for name, value in zip(names, paths, strict=True):
                             stack.enter_context(patch.object(owner, name, value))
                     if fail:
                         stack.enter_context(

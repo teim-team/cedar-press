@@ -280,6 +280,12 @@
      "meaning": "Cedar's identifier for the consultation event."
     },
     {
+     "column": "consultation_record_key",
+     "label": "Record key",
+     "meaning": "Identifies this row within this collection: a JSON array of the notice's consultation event ID, the participant name as published and the participant's role. Use it to cite or deduplicate a row. It is not a Cedar ID and identifies no event or entity outside this table.",
+     "add": true
+    },
+    {
      "column": "fr_document_number",
      "label": "Document number",
      "meaning": "The Federal Register document number."
@@ -332,6 +338,12 @@
      "meaning": "When it ended, where stated."
     },
     {
+     "column": "event_date_precision",
+     "label": "Date precision",
+     "meaning": "Whether the event date is known to the day, the month or the year, read from the date as the notice writes it; unstated when the notice gives no date.",
+     "add": true
+    },
+    {
      "column": "participant_name_as_published",
      "label": "Participant as published",
      "meaning": "The tribe or organization named in the document, as it spells it.",
@@ -341,6 +353,18 @@
      "column": "participant_role",
      "label": "Entity role",
      "meaning": "Why the entity is on this row: read from participant_role."
+    },
+    {
+     "column": "entity_link_status",
+     "label": "Entity link status",
+     "meaning": "Whether the participant on this row is linked to a Cedar entity: resolved when a registered link exists, no_individual_named when the notice names no individual participant, and unresolved when a participant is named but not yet linked. Unresolved is not a finding that no Native entity took part.",
+     "add": true
+    },
+    {
+     "column": "collective_scopes",
+     "label": "Collective scopes",
+     "meaning": "Not yet evaluated for this collection, so always null here. Null means the notice has not been checked for a population it applies to (such as every federally recognized tribe); it is neither an empty scope nor a universal one.",
+     "add": true
     },
     {
      "column": "location",
@@ -611,6 +635,12 @@
      "add": true
     },
     {
+     "column": "cedar_entity_role",
+     "label": "Entity role",
+     "meaning": "The Native entity's relationship to the deal, published only when a source establishes it and blank otherwise. A blank role never implies that the entity owns, controls or funds any party to the deal.",
+     "add": true
+    },
+    {
      "column": "Deal_ID",
      "label": "Deal ID",
      "meaning": "Cedar's identifier for the deal.",
@@ -682,6 +712,12 @@
      "combine_into": "deal_type"
     },
     {
+     "column": "deal_type",
+     "label": "Deal type",
+     "meaning": "The kind of deal under Cedar's one reviewed deal taxonomy, mapped value by value from the source's own category.",
+     "add": true
+    },
+    {
      "column": "transaction_type",
      "label": "Transaction type",
      "meaning": "The third of three overlapping classifications; shown until the one taxonomy replaces all three.",
@@ -692,6 +728,12 @@
      "label": "Event",
      "meaning": "What kind of event this row records (an acquisition of a 90% interest, an award).",
      "combine_into": "transaction_structure"
+    },
+    {
+     "column": "transaction_structure",
+     "label": "Transaction structure",
+     "meaning": "How the transaction is structured, mapped value by value from the source's own event type.",
+     "add": true
     },
     {
      "column": "Industry",
@@ -720,6 +762,12 @@
      "label": "Status (standardized)",
      "meaning": "The standardized status; shown until one status column replaces the two.",
      "combine_into": "deal_status"
+    },
+    {
+     "column": "deal_status",
+     "label": "Deal status",
+     "meaning": "Where the deal stands under Cedar's reviewed status list, mapped value by value from the source's own status.",
+     "add": true
     },
     {
      "column": "Announced_Value_USD",
@@ -1561,13 +1609,15 @@
     },
     {
      "column": "owner_attribution_status",
-     "label": "Ownership at the time",
-     "meaning": "Whether the entity's ownership of the awardee was confirmed as of the transaction."
+     "label": "Affiliation status at the time",
+     "meaning": "How the sources describe the entity's relationship to the awardee as of the transaction. A source-described assessment: Cedar does not independently certify ownership.",
+     "rename_to": "affiliation_attribution_status"
     },
     {
      "column": "owner_as_of_transaction_cedar_uid",
-     "label": "Owner as of the action",
-     "meaning": "The Cedar ID of the entity that owned the contractor on the action date where the ownership history resolves it; UNKNOWN where it does not. Never the current owner assumed backwards."
+     "label": "Affiliated entity as of the action",
+     "meaning": "The Cedar ID of the entity the sources associate with the contractor on the action date, where the affiliation history resolves it; UNKNOWN where it does not. Never today's affiliation assumed backwards, and not a certification of ownership.",
+     "rename_to": "affiliation_as_of_transaction_cedar_uid"
     },
     {
      "column": "source_system",
@@ -2503,6 +2553,12 @@
      "rename_to": "organization_entity_class"
     },
     {
+     "column": "inclusion_category",
+     "label": "Inclusion basis",
+     "meaning": "Why the organization is in the collection, read from primary sources through a documented crosswalk: Native-serving, Native-controlled, tribal government, or candidate. Candidate means inclusion is not yet confirmed.",
+     "add": true
+    },
+    {
      "column": "classification_ruling",
      "label": "Relationship to the entity",
      "meaning": "Whether the organization is tribally controlled, tribally affiliated, or unruled.",
@@ -2594,6 +2650,12 @@
      "label": "Cedar link tier",
      "meaning": "Shown until the combined column replaces it.",
      "combine_into": "entity_link_status"
+    },
+    {
+     "column": "entity_link_status",
+     "label": "Entity link status",
+     "meaning": "Whether the organization's link to a Cedar entity has been validated, as one status through a documented crosswalk. An unvalidated link is not a finding that no Native entity is associated.",
+     "add": true
     },
     {
      "column": "key_review_disposition",

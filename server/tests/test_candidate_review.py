@@ -1,12 +1,11 @@
 """Isolated candidate evidence must not become a publishable release by accident."""
 
 import importlib
-import io
 import json
 import sys
 import tempfile
 import unittest
-from contextlib import ExitStack, redirect_stdout
+from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
@@ -30,11 +29,15 @@ class CandidateReviewTest(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Lumecon Data collection-build"):
                         customer.build(dry=False, only=(collection,))
                     contracts.assert_not_called()
-                with patch.object(bundle, "collections", return_value={collection: {filename: True}}):
-                    with patch.object(bundle, "find") as find:
-                        with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
-                            bundle.build("samples")
-                        find.assert_not_called()
+                with (
+                    patch.object(
+                        bundle, "collections", return_value={collection: {filename: True}}
+                    ),
+                    patch.object(bundle, "find") as find,
+                ):
+                    with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                        bundle.build("samples")
+                    find.assert_not_called()
 
     def test_load_receipts_conserve_withheld_rows(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -154,7 +157,10 @@ class CandidateReviewTest(unittest.TestCase):
                             {
                                 "collection": "lobbying",
                                 "tables": [
-                                    {"table": "native_entity_lobbying_disclosures.csv", "primary_key": ["record_id"]}
+                                    {
+                                        "table": "native_entity_lobbying_disclosures.csv",
+                                        "primary_key": ["record_id"],
+                                    }
                                 ],
                             }
                         ]
@@ -204,7 +210,9 @@ class CandidateReviewTest(unittest.TestCase):
                 stack.enter_context(patch.object(customer, name))
             stack.enter_context(patch.object(customer, "enforce_denials", return_value=0))
             saved_queue = queue.read_text()
-            queue.write_text(saved_queue.replace("native_entity_lobbying_disclosures.csv", "native_bills.csv"))
+            queue.write_text(
+                saved_queue.replace("native_entity_lobbying_disclosures.csv", "native_bills.csv")
+            )
             with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
                 bundle.candidate_review(source, base / "retired-output", queue)
             self.assertFalse((base / "retired-output").exists())

@@ -45,13 +45,21 @@ class ProducerRegistrationTest(unittest.TestCase):
             source.write_bytes(b"fixture source bytes")
             actions = source.with_name("native_bill_actions.csv")
             actions.write_bytes(b"fixture action bytes")
-            args = argparse.Namespace(collection="legislation", source=str(source),
-                                      output_root=str(base / "store"), as_of="2026-09-24")
-            with (patch.dict(sys.modules, modules),
-                  patch.object(publication, "field_map", return_value={"legislation": {"fixture": "map"}}),
-                  patch.object(publication, "register", return_value={}),
-                  patch.object(publication, "scopes", return_value={}),
-                  contextlib.redirect_stdout(io.StringIO())):
+            args = argparse.Namespace(
+                collection="legislation",
+                source=str(source),
+                output_root=str(base / "store"),
+                as_of="2026-09-24",
+            )
+            with (
+                patch.dict(sys.modules, modules),
+                patch.object(
+                    publication, "field_map", return_value={"legislation": {"fixture": "map"}}
+                ),
+                patch.object(publication, "register", return_value={}),
+                patch.object(publication, "scopes", return_value={}),
+                contextlib.redirect_stdout(io.StringIO()),
+            ):
                 self.assertEqual(runner.cmd_release_pilot(args), 0)
             call = pipeline.build_collection_release.call_args
             self.assertEqual(call.args, (base / "store", "legislation"))
@@ -62,10 +70,23 @@ class ProducerRegistrationTest(unittest.TestCase):
             self.assertEqual(source.read_bytes(), b"fixture source bytes")
 
     def test_twelve_collection_allowlist_excludes_other_products(self):
-        self.assertEqual(set(PIPELINE.RELEASE_PILOTS), {
-            "funding", "federal-register", "legislation", "deals", "nagpra", "lobbying",
-            "contractors", "subcontracting", "native-owned-businesses", "nonprofits", "natural-resources", "need",
-        })
+        self.assertEqual(
+            set(PIPELINE.RELEASE_PILOTS),
+            {
+                "funding",
+                "federal-register",
+                "legislation",
+                "deals",
+                "nagpra",
+                "lobbying",
+                "contractors",
+                "subcontracting",
+                "native-owned-businesses",
+                "nonprofits",
+                "natural-resources",
+                "need",
+            },
+        )
 
     def test_blocked_adapter_streams_source_and_returns_failure_receipt(self):
         spec = importlib.util.spec_from_file_location("blocked_build", ROOT / "code/build.py")
@@ -75,36 +96,53 @@ class ProducerRegistrationTest(unittest.TestCase):
         pipeline = types.ModuleType("lumecon_data.pipeline")
         pipeline.build_collection_release = Mock()
         blocked = types.ModuleType("lumecon_data.collections.press_blocked")
-        blocked.build_blocked_press_candidate = Mock(return_value={
-            "status": "BLOCKED", "source_rows": 1, "withheld_rows": 1,
-            "candidate_id": "held-fixture", "blockers": ["engineering_gate"]})
+        blocked.build_blocked_press_candidate = Mock(
+            return_value={
+                "status": "BLOCKED",
+                "source_rows": 1,
+                "withheld_rows": 1,
+                "candidate_id": "held-fixture",
+                "blockers": ["engineering_gate"],
+            }
+        )
         storage = types.ModuleType("lumecon_data.storage")
         storage.checked_path = lambda value: value
         storage.canonical_json = lambda value: json.dumps(value, sort_keys=True).encode()
-        modules = {"lumecon_data": types.ModuleType("lumecon_data"),
-                   "lumecon_data.pipeline": pipeline, "lumecon_data.storage": storage,
-                   "lumecon_data.collections": types.ModuleType("lumecon_data.collections"),
-                   "lumecon_data.collections.press_blocked": blocked}
+        modules = {
+            "lumecon_data": types.ModuleType("lumecon_data"),
+            "lumecon_data.pipeline": pipeline,
+            "lumecon_data.storage": storage,
+            "lumecon_data.collections": types.ModuleType("lumecon_data.collections"),
+            "lumecon_data.collections.press_blocked": blocked,
+        }
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             source = base / "source" / "federal_funding_transactions.csv"
             source.parent.mkdir()
             source.write_bytes(b"source-key\nsource-record\n")
-            args = argparse.Namespace(collection="funding", source=str(source),
-                                      output_root=str(base / "store"), as_of="2026-09-25")
+            args = argparse.Namespace(
+                collection="funding",
+                source=str(source),
+                output_root=str(base / "store"),
+                as_of="2026-09-25",
+            )
             original_read = Path.read_bytes
+
             def guarded_read(path):
                 if path == source:
                     raise AssertionError("Bulk source must not be materialized by Cedar")
                 return original_read(path)
+
             output = io.StringIO()
-            with (patch.dict(sys.modules, modules),
-                  patch.object(Path, "read_bytes", guarded_read),
-                  patch.object(publication, "field_map", return_value={"funding": {}}),
-                  patch.object(publication, "register", return_value={}),
-                  patch.object(publication, "scopes", return_value={}),
-                  patch.object(publication, "denied_ueis", return_value={}),
-                  contextlib.redirect_stdout(output)):
+            with (
+                patch.dict(sys.modules, modules),
+                patch.object(Path, "read_bytes", guarded_read),
+                patch.object(publication, "field_map", return_value={"funding": {}}),
+                patch.object(publication, "register", return_value={}),
+                patch.object(publication, "scopes", return_value={}),
+                patch.object(publication, "denied_ueis", return_value={}),
+                contextlib.redirect_stdout(output),
+            ):
                 self.assertEqual(runner.cmd_release_pilot(args), 1)
             call = blocked.build_blocked_press_candidate.call_args
             self.assertEqual(call.args, (base / "store", "funding", source))
@@ -182,30 +220,52 @@ class ProducerRegistrationTest(unittest.TestCase):
         self.assertEqual(PIPELINE.active_table_writers("historical.csv", retired), retired)
 
     def test_retired_funding_direct_entrypoints_refuse_before_io_even_with_force(self):
-        for name in ("335_harmonize_assistance_seams_in_place.py",
-                     "336_correct_scheme_resolution_by_spine_membership.py"):
+        for name in (
+            "335_harmonize_assistance_seams_in_place.py",
+            "336_correct_scheme_resolution_by_spine_membership.py",
+        ):
             spec = importlib.util.spec_from_file_location("retired_funding", ROOT / "code" / name)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-            with self.subTest(script=name), \
-                 patch.object(sys, "argv", [name, "--force-retired-cicd-crosswalk"]), \
-                 patch("builtins.open", side_effect=AssertionError("retired entry point performed IO")), \
-                 patch.object(Path, "exists", side_effect=AssertionError("retired entry point inspected data")), \
-                 patch.object(Path, "stat", side_effect=AssertionError("retired entry point inspected data")), \
-                 patch.object(module.shutil, "copy2", side_effect=AssertionError("retired entry point wrote backup")):
-                with self.assertRaisesRegex(SystemExit, "RETIRED_TABLE_WRITER"):
-                    module.main()
+            with (
+                self.subTest(script=name),
+                patch.object(sys, "argv", [name, "--force-retired-cicd-crosswalk"]),
+                patch(
+                    "builtins.open", side_effect=AssertionError("retired entry point performed IO")
+                ),
+                patch.object(
+                    Path, "exists", side_effect=AssertionError("retired entry point inspected data")
+                ),
+                patch.object(
+                    Path, "stat", side_effect=AssertionError("retired entry point inspected data")
+                ),
+                patch.object(
+                    module.shutil,
+                    "copy2",
+                    side_effect=AssertionError("retired entry point wrote backup"),
+                ),self.assertRaisesRegex(SystemExit, "RETIRED_TABLE_WRITER")
+            ):
+                module.main()
 
     def test_dependency_snapshot_refresh_removes_only_retired_edges(self):
-        spec = importlib.util.spec_from_file_location("dependency_refresh", ROOT / "code/287_build_dependency_manifest.py")
+        spec = importlib.util.spec_from_file_location(
+            "dependency_refresh", ROOT / "code/287_build_dependency_manifest.py"
+        )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         table = "federal_funding_transactions.csv"
         retired = "335_harmonize_assistance_seams_in_place.py"
-        original = {"generated": "2026-09-02", "columns_lost_vs_backup": {"legacy": ["x"]},
-                    "writers": {table: [retired, "24_funding_merge.py", "503_identity.py"]},
-                    "contested_files": {table: {"rebuilders": ["24_funding_merge.py", retired],
-                                                "enrichers": [retired, "503_identity.py"]}}}
+        original = {
+            "generated": "2026-09-02",
+            "columns_lost_vs_backup": {"legacy": ["x"]},
+            "writers": {table: [retired, "24_funding_merge.py", "503_identity.py"]},
+            "contested_files": {
+                table: {
+                    "rebuilders": ["24_funding_merge.py", retired],
+                    "enrichers": [retired, "503_identity.py"],
+                }
+            },
+        }
         before = copy.deepcopy(original)
         refreshed = module.refresh_writer_authority(original)
         self.assertEqual(original, before)
@@ -213,7 +273,10 @@ class ProducerRegistrationTest(unittest.TestCase):
         self.assertEqual(refreshed["columns_lost_vs_backup"], before["columns_lost_vs_backup"])
         self.assertNotIn(retired, refreshed["writers"][table])
         self.assertEqual(module.refresh_writer_authority(refreshed), refreshed)
-        text = "Dated introduction\n## Contested files (1)\nold\n## Survival check\nmeasured historic result\n"
+        text = (
+            "Dated introduction\n## Contested files (1)\nold\n"
+            "## Survival check\nmeasured historic result\n"
+        )
         rendered = module.refresh_writer_markdown(text, refreshed)
         self.assertNotIn(retired, rendered)
         self.assertIn("503_identity.py", rendered)
@@ -223,25 +286,40 @@ class ProducerRegistrationTest(unittest.TestCase):
             module.refresh_writer_markdown("missing section", refreshed)
 
     def test_forbidden_codebook_entrypoint_keeps_helpers_without_writing(self):
-        spec = importlib.util.spec_from_file_location("retired_codebook", ROOT / "code/41_build_codebooks.py")
+        spec = importlib.util.spec_from_file_location(
+            "retired_codebook", ROOT / "code/41_build_codebooks.py"
+        )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         self.assertTrue(callable(module.access_tier))
         self.assertTrue(callable(module.describe))
         import cedar_pipeline
-        with patch.object(Path, "mkdir", side_effect=AssertionError("forbidden writer created output")), \
-             patch("builtins.open", side_effect=AssertionError("forbidden writer performed IO")):
-            with self.assertRaises(cedar_pipeline.ForbiddenScript):
-                module.main()
+
+        with (
+            patch.object(
+                Path, "mkdir", side_effect=AssertionError("forbidden writer created output")
+            ),
+            patch("builtins.open", side_effect=AssertionError("forbidden writer performed IO")),
+            self.assertRaises(cedar_pipeline.ForbiddenScript),
+        ):
+            module.main()
 
     def test_methodology_authority_refresh_preserves_all_measurements_and_editorial(self):
-        spec = importlib.util.spec_from_file_location("methodology_refresh", ROOT / "code/1143_methodology_papers.py")
+        spec = importlib.util.spec_from_file_location(
+            "methodology_refresh", ROOT / "code/1143_methodology_papers.py"
+        )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         before = (ROOT / "docs/methodology/funding.md").read_text(encoding="utf-8")
         # Exercise a stale stored section even after its committed regeneration.
-        before = before.replace("| `24_funding_merge.py` |", "| `24_funding_merge.py`, `335_harmonize_assistance_seams_in_place.py` |", 1)
-        with patch.object(module, "measure", side_effect=AssertionError("no data measurement allowed")):
+        before = before.replace(
+            "| `24_funding_merge.py` |",
+            "| `24_funding_merge.py`, `335_harmonize_assistance_seams_in_place.py` |",
+            1,
+        )
+        with patch.object(
+            module, "measure", side_effect=AssertionError("no data measurement allowed")
+        ):
             after = module.refresh_pipeline_authority(before, "funding")
             self.assertEqual(module.refresh_pipeline_authority(after, "funding"), after)
         prefix, section = before.split("## M2 ", 1)
@@ -640,6 +718,7 @@ class ScriptCensusTest(unittest.TestCase):
 
     def test_runtime_discovery_proves_local_loader_and_authoritative_chain(self):
         import ast
+
         tree = ast.parse("""
 import importlib.util
 SHIP_CHAIN = [("ship.py", [], "description.py", "")]
@@ -730,14 +809,30 @@ pretend_loader("not_executed.py")
             digest = hashlib.sha256(body).hexdigest()
             (root / "code/reviewed.py").write_bytes(body)
             (root / "code/archive/reviewed.py").write_bytes(body)
-            records = [{"script": "reviewed.py", "dir": directory,
-                        "operational_role": "unresolved", "writer_evidence": [],
-                        "runtime_consumer_candidates": [], "unknown_io_literals": []}
-                       for directory in ("", "archive")]
-            review = {"reviewed.py": (digest, "ACTIVE", "controlled migration",
-                                      "Existing consumer requires its unique output", "Cut over consumer")}
-            with (patch.object(self.inventory, "ROOT", root),
-                  patch.object(self.inventory, "_REVIEWED_MAINTENANCE", review)):
+            records = [
+                {
+                    "script": "reviewed.py",
+                    "dir": directory,
+                    "operational_role": "unresolved",
+                    "writer_evidence": [],
+                    "runtime_consumer_candidates": [],
+                    "unknown_io_literals": [],
+                }
+                for directory in ("", "archive")
+            ]
+            review = {
+                "reviewed.py": (
+                    digest,
+                    "ACTIVE",
+                    "controlled migration",
+                    "Existing consumer requires its unique output",
+                    "Cut over consumer",
+                )
+            }
+            with (
+                patch.object(self.inventory, "ROOT", root),
+                patch.object(self.inventory, "_REVIEWED_MAINTENANCE", review),
+            ):
                 self.inventory.add_maintenance_classification(records, [])
                 evidence = records[0]["maintenance_evidence"]
                 self.assertEqual(records[0]["maintenance_status"], "ACTIVE")
@@ -753,41 +848,82 @@ pretend_loader("not_executed.py")
     def test_bounded_review_hashes_identify_the_inspected_sources(self):
         for name, review in self.inventory._REVIEWED_MAINTENANCE.items():
             with self.subTest(script=name):
-                self.assertEqual(hashlib.sha256((ROOT / "code" / name).read_bytes()).hexdigest(), review[0])
+                self.assertEqual(self.inventory.source_digest(ROOT / "code" / name), review[0])
                 self.assertIn(review[1], {"ACTIVE", "HISTORICAL-RETAIN"})
                 self.assertTrue(all(review[2:]))
+
+    def test_review_digest_ignores_line_endings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lf, crlf = Path(directory) / "lf.py", Path(directory) / "crlf.py"
+            lf.write_bytes(b"A = 1\nB = 2\n")
+            crlf.write_bytes(b"A = 1\r\nB = 2\r\n")
+            self.assertEqual(self.inventory.source_digest(lf), self.inventory.source_digest(crlf))
+            crlf.write_bytes(b"A = 1\r\nB = 3\r\n")
+            digest = self.inventory.source_digest
+            self.assertNotEqual(digest(lf), digest(crlf))
 
     def test_maintenance_classification_requires_evidence_and_never_authorizes_removal(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "code/history").mkdir(parents=True)
             (root / ".github/workflows").mkdir(parents=True)
-            bodies = {"main.py": "import helper\n", "helper.py": "VALUE = 1\n",
-                      "copy_a.py": "VALUE = 2\n", "copy_b.py": "VALUE = 2\n",
-                      "unknown.py": "VALUE = 3\n", "history/old.py": "VALUE = 4\n",
-                      "ci.py": "VALUE = 5\n", "old_writer.py": "VALUE = 6\n"}
+            bodies = {
+                "main.py": "import helper\n",
+                "helper.py": "VALUE = 1\n",
+                "copy_a.py": "VALUE = 2\n",
+                "copy_b.py": "VALUE = 2\n",
+                "unknown.py": "VALUE = 3\n",
+                "history/old.py": "VALUE = 4\n",
+                "ci.py": "VALUE = 5\n",
+                "old_writer.py": "VALUE = 6\n",
+            }
             records = []
             for relative, body in bodies.items():
                 path = root / "code" / relative
                 path.write_text(body, encoding="utf-8")
-                role = "active producer" if relative == "main.py" else (
-                    "historical" if relative.startswith("history/") else "unresolved")
-                records.append({"script": path.name, "dir": "history" if "/" in relative else "",
-                                "operational_role": role,
-                                "runtime_consumer_candidates": ["code/main.py"] if relative == "helper.py" else [],
-                                "writer_evidence": [], "unknown_io_literals": []})
+                role = (
+                    "active producer"
+                    if relative == "main.py"
+                    else ("historical" if relative.startswith("history/") else "unresolved")
+                )
+                records.append(
+                    {
+                        "script": path.name,
+                        "dir": "history" if "/" in relative else "",
+                        "operational_role": role,
+                        "runtime_consumer_candidates": ["code/main.py"]
+                        if relative == "helper.py"
+                        else [],
+                        "writer_evidence": [],
+                        "unknown_io_literals": [],
+                    }
+                )
             workflow = root / ".github/workflows/test.yml"
             workflow.write_text("run: python code/ci.py\n", encoding="utf-8")
             records[-1]["writer_evidence"] = [{"table": "retired.csv"}]
-            retirement = [{"file": "retired.csv", "rebuild": "main.py", "enricher": "helper.py",
-                           "retired_writers": ["old_writer.py"]}]
-            with (patch.object(self.inventory, "ROOT", root),
-                  patch.object(self.inventory.cp, "KNOWN_ORDERINGS", retirement)):
+            retirement = [
+                {
+                    "file": "retired.csv",
+                    "rebuild": "main.py",
+                    "enricher": "helper.py",
+                    "retired_writers": ["old_writer.py"],
+                }
+            ]
+            with (
+                patch.object(self.inventory, "ROOT", root),
+                patch.object(self.inventory.cp, "KNOWN_ORDERINGS", retirement),
+            ):
                 self.inventory.add_maintenance_classification(records, [workflow])
                 by_name = {r["script"]: r for r in records}
-                expected = {"main.py": "ACTIVE", "helper.py": "ACTIVE", "ci.py": "ACTIVE",
-                            "copy_a.py": "DUPLICATE", "old.py": "HISTORICAL-RETAIN",
-                            "unknown.py": "REQUIRES-REVIEW", "old_writer.py": "SUPERSEDED"}
+                expected = {
+                    "main.py": "ACTIVE",
+                    "helper.py": "ACTIVE",
+                    "ci.py": "ACTIVE",
+                    "copy_a.py": "DUPLICATE",
+                    "old.py": "HISTORICAL-RETAIN",
+                    "unknown.py": "REQUIRES-REVIEW",
+                    "old_writer.py": "SUPERSEDED",
+                }
                 for name, status in expected.items():
                     self.assertEqual(by_name[name]["maintenance_status"], status, name)
                 before = by_name["unknown.py"]["source_sha256"]
@@ -795,19 +931,40 @@ pretend_loader("not_executed.py")
                 records[-1]["writer_evidence"].append({"table": None, "target": "<unresolved>"})
                 self.inventory.add_maintenance_classification(records, [workflow])
                 self.assertEqual(by_name["old_writer.py"]["maintenance_status"], "REQUIRES-REVIEW")
-                self.assertEqual(by_name["old_writer.py"]["maintenance_evidence"]["review_owner"], "Codex")
-                self.assertIn("<unresolved>", by_name["old_writer.py"]["maintenance_evidence"]["reason"])
-                self.assertEqual(by_name["old_writer.py"]["maintenance_evidence"]["review_write_sites"][-1]["target"], "<unresolved>")
-                self.assertFalse(any(r["maintenance_status"] == "SAFE-DELETE-CANDIDATE" for r in records))
+                self.assertEqual(
+                    by_name["old_writer.py"]["maintenance_evidence"]["review_owner"], "Codex"
+                )
+                self.assertIn(
+                    "<unresolved>", by_name["old_writer.py"]["maintenance_evidence"]["reason"]
+                )
+                self.assertEqual(
+                    by_name["old_writer.py"]["maintenance_evidence"]["review_write_sites"][-1][
+                        "target"
+                    ],
+                    "<unresolved>",
+                )
+                self.assertFalse(
+                    any(r["maintenance_status"] == "SAFE-DELETE-CANDIDATE" for r in records)
+                )
                 self.assertNotEqual(by_name["unknown.py"]["source_sha256"], before)
-                self.assertTrue(all(not r["maintenance_evidence"]["retirement_authorized"] for r in records))
-                replay = {"spine.csv": {"order": ["unknown.py"], "mints": ["unknown.py"],
-                                        "evidence": "issued-ID restore history"}}
+                self.assertTrue(
+                    all(not r["maintenance_evidence"]["retirement_authorized"] for r in records)
+                )
+                replay = {
+                    "spine.csv": {
+                        "order": ["unknown.py"],
+                        "mints": ["unknown.py"],
+                        "evidence": "issued-ID restore history",
+                    }
+                }
                 with patch.object(self.inventory.cp, "REPLAY_ORDERS", replay):
                     self.inventory.add_maintenance_classification(records, [workflow])
                 self.assertEqual(by_name["unknown.py"]["maintenance_status"], "HISTORICAL-RETAIN")
-                self.assertTrue(by_name["unknown.py"]["maintenance_evidence"]["historical_replay_evidence"][0]["mints_issued_ids"])
-
+                self.assertTrue(
+                    by_name["unknown.py"]["maintenance_evidence"]["historical_replay_evidence"][0][
+                        "mints_issued_ids"
+                    ]
+                )
 
     def test_script_refresh_preserves_prior_table_snapshot(self):
         with tempfile.TemporaryDirectory() as directory:

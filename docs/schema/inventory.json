@@ -9055,7 +9055,7 @@
    "rows": 1610,
    "n_cols": 59,
    "grain_declared": true,
-   "grain": "one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md \u00a72). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in need_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.",
+   "grain": "one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md §2). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in need_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.",
    "primary_key": [
     "enterprise_id"
    ],
@@ -45342,7 +45342,7 @@
    },
    "unknown_io_literals": [
     "documents.json",
-    "\u2026unresolved_candidates.csv"
+    "…unresolved_candidates.csv"
    ],
    "embedded_test_functions": 0,
    "standalone_test_evidence": {
@@ -75806,7 +75806,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-25",
-   "lines": 1771,
+   "lines": 1796,
    "operational_role": "unresolved",
    "collection_output_entrypoints": [],
    "static_consumers": [
@@ -75842,7 +75842,7 @@
      "target": "<unresolved>",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "e8331d8bafc750ee9ae1fd02fb15f9aeb42703458de761a2c3fd5a33c5b38f1d"
+     "signature": "0a0c20dafcd8ad6433c2921c6c4385646dcd838903f41768947eb0d3f7c2f5f6"
     },
     {
      "line": 642,
@@ -75850,29 +75850,29 @@
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ff19248a56964d1ccebebe89339a442ce531b67dc3f55de6976a4d63f40e822d"
+     "signature": "88c7c5977f5db0423069d1943a08047b2174b74d95b31136bcfa3bfa37821ed7"
     },
     {
-     "line": 1759,
+     "line": 1784,
      "operation": "OUT_MD.write_text",
      "target": "<unresolved>/docs/INVENTORY.md",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "b2c36019b39958009e87e1eb1d38f4bdb07ff31e8d8baa566434724d86af501c"
+     "signature": "faadf51c157e449685227173517a1e8cc74fcd10240161ab6f3cb40813b9df74"
     },
     {
-     "line": 1760,
+     "line": 1785,
      "operation": "OUT_JSON.write_text",
      "target": "<unresolved>/docs/schema/inventory.json",
      "scope": "unresolved_target",
      "table": null,
-     "signature": "ff19248a56964d1ccebebe89339a442ce531b67dc3f55de6976a4d63f40e822d"
+     "signature": "88c7c5977f5db0423069d1943a08047b2174b74d95b31136bcfa3bfa37821ed7"
     }
    ],
    "writer_analysis_error": null,
    "writer_risk": "P2_unresolved_write_target",
    "undeclared_governed_tables": [],
-   "source_sha256": "e0eca2e4f49f0411a2e631f018537401991c67b8ff4a62a1528eb4109678c8b3",
+   "source_sha256": "2e77e2a12a4579aafc05771e17a48b55cf5400e3ff488c0fa77af8df11e99ba8",
    "maintenance_status": "REQUIRES-REVIEW",
    "maintenance_evidence": {
     "reason": "writer targets/callers need runtime confirmation before ownership or retirement: <unresolved>, <unresolved>/docs/INVENTORY.md, <unresolved>/docs/schema/inventory.json",

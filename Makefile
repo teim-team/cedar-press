@@ -96,6 +96,7 @@ hooks:
 check-generated:
 	node scripts/codebook-markdown.mjs --check
 	node scripts/derive-explore.mjs --check
+	node scripts/dump-press.mjs --check
 	node scripts/field-map-markdown.mjs --check
 	node scripts/guides-markdown.mjs --check
 	node scripts/measure-samples.mjs --check
