@@ -293,6 +293,14 @@ list, all of which this project has paid for:
   subscribers already hold cite themselves. The lobbying collection's rename to
   `Native Federal Advocacy and Engagement` moved six sources together and is the
   worked example.
+- **Build and write it as the shipped product.** No surface, route or copy
+  describes Cedar Press as a prototype or a pilot. Something that is not real
+  yet is labelled plainly for what it does today and tracked as a gap, never
+  called a prototype. Pilots run as ordinary accounts or access codes, not a
+  separate code path. Payment for Cedar Press is owned by Tribal Business News
+  today (`server/cedar_press/codes.py`); Lumecon's side is codes and
+  entitlement. Lumecon's own Stripe account, with Brian Kim and Kaylyn Lee as
+  admins, carries Cedar Grove payments: teim-team/teim-app#186.
 
 ## 7. How this doc gets updated
 
