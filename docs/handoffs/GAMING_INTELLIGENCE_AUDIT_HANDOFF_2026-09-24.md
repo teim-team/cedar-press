@@ -2,7 +2,7 @@
 
 **Scope and verdict.** Gaming is a **Cedar Grove** collection, outside the twelve Cedar Press storefront collections. No Gaming release is ready today. This is a read-only audit of the live ignored data in Desktop/Cedar Press, tracked origin/main code at 6d445f4, the fetched origin/codex/legislation-release-consumer release proof, Desktop/4wheeler, Desktop/votingpatterns, Desktop/cedar-press-repo, and Desktop/Lumecon-data. The audit branch is codex/gaming-intelligence-audit. Existing launch worktrees, canonical CSVs, and the twelve-collection review queue were not changed. The only new code is the read-only inventory command [audit_gaming_inventory.py](../../scripts/audit_gaming_inventory.py).
 
-**Measurement contract.** Appendix A records exact current row counts, full SHA-256 hashes, column counts, and selected observed year ranges for 74 gaming-related clean CSVs. Run `py -3 scripts/audit_gaming_inventory.py 'C:\Users\esm247\Desktop\Cedar Press\data\clean'` for every header, identifier fill/distinct count, 2025–2026 count, and ISO retrieval-date range. The script emits JSON lines to stdout and writes nothing. Its year scan is lexical; a year in a quote, URL, or scheduled future obligation is not a coverage claim. CSV headers and per-table contracts at docs/schema/tables are the schemas; contracts need checking against live bytes. The local clean tree is ignored by Git and may change independently of this branch. All counts below are observations of that tree on 2026-09-24, not a frozen canonical release.
+**Measurement contract.** Appendix A records exact current row counts, full SHA-256 hashes, column counts, and selected observed year ranges for 74 gaming-related clean CSVs. Run `py -3 scripts/audit_gaming_inventory.py '<data workspace>\data\clean'` for every header, identifier fill/distinct count, 2025–2026 count, and ISO retrieval-date range. The script emits JSON lines to stdout and writes nothing. Its year scan is lexical; a year in a quote, URL, or scheduled future obligation is not a coverage claim. CSV headers and per-table contracts at docs/schema/tables are the schemas; contracts need checking against live bytes. The local clean tree is ignored by Git and may change independently of this branch. All counts below are observations of that tree on 2026-09-24, not a frozen canonical release.
 
 ## Readiness by component
 
@@ -148,7 +148,7 @@ Each commit belongs on a **separate Gaming branch**, preserves canonical inputs 
 
 ## Appendix A — live clean-file inventory
 
-SHA-256 hashes are of complete CSV bytes in C:/Users/esm247/Desktop/Cedar Press/data/clean on 2026-09-24. Date is the chosen observation/source column and min–max lexical year, not a claim of full coverage. “—” means no suitable dated field in this compact index. Run the inventory command above for all columns and dates. Being present does not mean shippable.
+SHA-256 hashes are of complete CSV bytes in <data workspace>/data/clean on 2026-09-24. Date is the chosen observation/source column and min–max lexical year, not a claim of full coverage. “—” means no suitable dated field in this compact index. Run the inventory command above for all columns and dates. Being present does not mean shippable.
 
 | Clean CSV | Rows | Columns | Date | SHA-256 |
 |---|---:|---:|---|---|
@@ -375,7 +375,7 @@ The figures are exact but mislabelled:
 - 565 of the 616 rows are Form 5500 plan participants rather than employees.
 - The 22 events cover 13 tribes, three of them non-gaming businesses.
 
-Rerunning 13 would delete the only copy, so the bundle is preserved with a verified SHA-256 manifest at `C:\Users\esm247\cedar-grove-gaming-work\preserved\4wheeler_share_2026-08-12\`. The 74-table inventory reproduced exactly (rows, columns, SHA-256).
+Rerunning 13 would delete the only copy, so the bundle is preserved with a verified SHA-256 manifest at `<gaming work root>\preserved\4wheeler_share_2026-08-12\`. The 74-table inventory reproduced exactly (rows, columns, SHA-256).
 
 **Evidence rules applied.**
 - Operator and casino websites are `public_first_party`: usable for self-description, never proof of ownership, control, revenue allocation or retention. The former 25 owner / 23 operator rows are now 33 self-described affiliations.

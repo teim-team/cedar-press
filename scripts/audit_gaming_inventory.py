@@ -1,6 +1,6 @@
 """Read-only inventory of local gaming-related CSVs; prints JSON lines to stdout.
 
-Usage: py -3 scripts/audit_gaming_inventory.py "C:/Users/esm247/Desktop/Cedar Press/data/clean"
+Usage: python scripts/audit_gaming_inventory.py "<data workspace>/data/clean"
 """
 
 import csv
