@@ -586,6 +586,48 @@ def audit(quiet=False):
 def selftest() -> int:
     """Prove the three tests FIRE. Each is exercised on a synthetic fixture
     rather than on the shipped tables."""
+    import importlib
+
+    builder = importlib.import_module("77_build_nagpra_dataset")
+    # FR 98-5406, https://www.govinfo.gov/content/pkg/FR-1998-03-03/html/98-5406.htm
+    # The named tribe must not be displaced by its college or financial enterprise.
+    name = "San Carlos Apache Tribe of the San Carlos Reservation"
+    tribe = {"tribe_id": "TRBF-SNCRLS-00", "canonical_name": "San Carlos",
+             "entity_class": "Federally recognized tribe",
+             "aliases": name + ", Arizona"}
+    college = {"tribe_id": "TCU-SNCRL1-00", "canonical_name": "San Carlos Apache College",
+               "entity_class": "Tribal College or University", "aliases": ""}
+    enterprise = {"tribe_id": "CDFI-SNCRL2-00",
+                  "canonical_name": "San Carlos Apache Tribe Relending Enterprise",
+                  "entity_class": "Native Community Development Financial Institution",
+                  "aliases": ""}
+    spine = [college, enterprise, tribe]
+    before = json.dumps(spine, sort_keys=True)
+    assert builder.resolve_entity(name, spine)[2].startswith("ambiguous_containment")
+    view = builder.party_candidate_view(name, spine)
+    assert view == [tribe]
+    assert builder.resolve_entity(name, view)[0] == tribe["tribe_id"]
+    assert builder.resolve_entity(name, builder.party_candidate_view(
+        name, [college, enterprise]))[0] is None
+    # Two eligible governments stay ambiguous; filtering is not adjudication.
+    competing = dict(tribe, tribe_id="TRBF-FIXTURE-00")
+    assert builder.resolve_entity(name, builder.party_candidate_view(
+        name, [tribe, competing]))[0] is None
+    for row in (college, enterprise):
+        view = builder.party_candidate_view(row["canonical_name"], spine)
+        assert row in view
+        assert builder.resolve_entity(row["canonical_name"], view)[0] == row["tribe_id"]
+    # ANC and NHO names retain the existing routes, even when they mention a tribe.
+    for label, cls in [("Koniag, Incorporated", "Alaska Native Regional Corporation"),
+                       ("Hawaiian Civic Club", "Native Hawaiian Organization"),
+                       ("Example Tribe Foundation", "Native Hawaiian Organization")]:
+        row = {"tribe_id": "FIXTURE", "canonical_name": label,
+               "entity_class": cls, "aliases": ""}
+        assert builder.resolve_entity(label, builder.party_candidate_view(
+            label, [row]))[0] == "FIXTURE"
+    assert builder.party_candidate_view("San Carlos", spine) == spine
+    assert json.dumps(spine, sort_keys=True) == before, "candidate view mutated the spine"
+
     # R1: a party name that is not in the source text must be caught.
     t = norm("the museum consulted the Pueblo of Acoma, New Mexico.")
     assert norm("Pueblo of Acoma, New Mexico") in t
@@ -646,7 +688,8 @@ def selftest() -> int:
     print("  1104 selftest OK: R1's substring test discriminates and survives "
           "GPO line wrapping, R2 folds a correction chain and two identical "
           "texts to ONE family while keeping three real notices at three, "
-          "and R3's verbatim test rejects an inferred sentence")
+          "R3's verbatim test rejects an inferred sentence, and party candidate "
+          "classes refuse institutional substitution without resolving ambiguity")
     return 0
 
 

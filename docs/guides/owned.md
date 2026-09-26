@@ -107,10 +107,6 @@ A blank is never zero and never an invented date. A blank JSON-list cell means u
 
 ## What is still owed
 
-Identifier retirement findings that stop this dataset until they are settled (see `docs/IDENTIFIER_RETIREMENT_2026-09-05.md`):
-
-- `nation_id`: the certifying nation, in a namespace the declaration does not name (adjudicate).
-
 Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method

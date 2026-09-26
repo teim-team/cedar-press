@@ -4,7 +4,7 @@
 
 ## Workspace and ownership
 
-Codex worktree: C:/Users/esm247/Desktop/cedar-press-codex, branch
+Codex worktree: <cedar-press checkout>, branch
 codex/early-access-takeover, base b6abb374a7a40216a7648ef79fc1df9e5b471f79.
 Dirty changes are intentional, uncommitted and unpushed. Scope is recorded in
 `docs/ARCHITECTURE_DECISIONS.md`. Original Desktop/Cedar Press remains on
@@ -12,11 +12,11 @@ collections-coverage-audit at 49c846a4c39c5f2ec1995753ac17f1a9044bd466.
 Six tracked edits and eight untracked files were preserved with checksums before
 integration. Do not reset, clean, pull blindly, or write in the original worktree.
 
-Lumecon Data: C:/Users/esm247/Desktop/Lumecon-data, branch codex/cedar-press-pilot,
+Lumecon Data: <lumecon-data checkout>, branch codex/cedar-press-pilot,
 base 0ae36dda36d650b1b3861173fb122e7603b0dc3f. Foundation/hardening PRs are merged.
 Python 3.13 environment installed with uv; no real collection transfer completed.
 
-Checkpoint root: C:/Users/esm247/cedar-takeover-checkpoint. It holds working-set,
+Checkpoint root: <checkpoint root>. It holds working-set,
 NEED/owner/R7/publication/NAGPRA input receipts and independent candidate folders.
 Machine baseline: 20 physical / 28 logical cores, about 16 GB RAM, only 3.2 GB
 available initially. Run large transforms sequentially, DuckDB 512 MB / one thread.

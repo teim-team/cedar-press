@@ -44,6 +44,23 @@ def resolve(tid, name):
     return M.resolve_intertribal(tid, name, REG, ALIAS)
 
 
+print("=== canonical enterprise normalization ===")
+check("1130 delegates normalization to the canonical 1072 function",
+      M.norm is M._norm_builder.norm)
+_normalization_cases = {
+    "": "",
+    "  Example   Enterprises, LLC  ": "example enterprises",
+    "Example Corporation Inc. LLC": "example",
+    "Gana-A'Yoo, Ltd.": "gana a'yoo",
+    "O\u2019Brien Holdings, Inc.": "o'brien holdings",
+    "123 Company": "123",
+}
+for original, expected in _normalization_cases.items():
+    check("normalization fixture " + repr(original), M.norm(original) == expected)
+check("all current canonical register names use builder normalization",
+      all(M.norm(row.get("canonical_name", "")) ==
+          M._norm_builder.norm(row.get("canonical_name", "")) for row in REG))
+
 print("=== INTERTRIBAL resolution rules ===")
 
 # 1. exact organisation-to-organisation match resolves

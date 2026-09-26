@@ -19,7 +19,12 @@ class PlanSafetyTests(unittest.TestCase):
         return result
 
     def test_valid_plan(self):
-        self.assertEqual(build.plan_problems(self.plan()), [])
+        with patch.object(build.CP, "registration_problems", return_value=[]) as registration:
+            self.assertEqual(build.plan_problems(self.plan()), [])
+            registration.assert_called_once()
+
+    def test_unregistered_plan_is_refused(self):
+        self.assertIn("UNREGISTERED_COLLECTION", " ".join(build.plan_problems(self.plan())))
 
     def test_incomplete_plans_never_dispatch(self):
         cases = [

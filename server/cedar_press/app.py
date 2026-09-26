@@ -45,7 +45,12 @@ or open the server-rendered shelf directly::
 from __future__ import annotations
 
 import io
+import json
+import logging
 import os
+import re
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -98,6 +103,13 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type"],
+    expose_headers=[
+        "Content-Disposition",
+        "X-Cedar-Release",
+        "X-Cedar-SHA256",
+        "X-Cedar-Rows",
+        "X-Cedar-Citation",
+    ],
 )
 
 #: The repository root, from ``server/cedar_press/app.py``.
@@ -255,7 +267,9 @@ def influence(session: Session = Depends(require_session)) -> dict[str, object]:
 
 @app.post("/press/priorities/{priority_id}/points")
 def move_points(
-    priority_id: str, move: PointsMove, session: Session = Depends(require_session),
+    priority_id: str,
+    move: PointsMove,
+    session: Session = Depends(require_session),
 ) -> dict[str, object]:
     """Put points on a priority (positive) or take them back (negative)."""
     account = _account(session)
@@ -316,9 +330,7 @@ def write_profile(
 
 
 @app.post("/auth/login")
-def login(
-    credentials: Credentials, request: Request, response: Response
-) -> dict[str, object]:
+def login(credentials: Credentials, request: Request, response: Response) -> dict[str, object]:
     _guard(request, "login", ratelimit.LOGIN_ATTEMPTS)
     session = sign_in(credentials.email, credentials.password, response)
     if session is None:
@@ -408,9 +420,7 @@ def validate_code(check: CodeCheck, request: Request) -> None:
 
 
 @app.post("/press/activation")
-def activate(
-    activation: Activation, request: Request, response: Response
-) -> dict[str, object]:
+def activate(activation: Activation, request: Request, response: Response) -> dict[str, object]:
     """Step two: create the account and sign them in.
 
     The code is re-checked rather than trusted from step one. Step one set no
@@ -519,10 +529,104 @@ def articles(session: Session = Depends(require_session)) -> dict[str, object]:
     return {"articles": repository.articles()}
 
 
+DOWNLOAD_LOG = logging.getLogger("cedar_press.download")
+DOWNLOAD_LOG.setLevel(logging.INFO)
+if not DOWNLOAD_LOG.handlers:
+    DOWNLOAD_LOG.addHandler(logging.StreamHandler())
+
+
+def _download_audit(collection_id, outcome, release=None, requested_release_id=None):
+    safe_collection = (
+        collection_id
+        if any(item.id == collection_id for item in repository.launch.LAUNCH_COLLECTION)
+        else "unknown"
+    )
+    DOWNLOAD_LOG.info(
+        json.dumps(
+            {
+                "event": "full_download",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "requested_release_id": requested_release_id
+                if isinstance(requested_release_id, str)
+                and re.fullmatch(r"[0-9a-f]{64}", requested_release_id)
+                else None,
+                "request_id": uuid.uuid4().hex,
+                "collection_id": safe_collection,
+                "outcome": outcome,
+                "release_id": release.get("release_id") if release else None,
+                "sha256": release.get("sha256") if release else None,
+            },
+            sort_keys=True,
+        )
+    )
+
+
+@app.get("/press/collections/{collection_id}/full-download")
+def full_download(
+    collection_id: str,
+    release_id: str | None = None,
+    session: Session | None = Depends(current_session),
+):
+    if session is None:
+        _download_audit(collection_id, "denied_anonymous", requested_release_id=release_id)
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_open(session.tier, collection_id):
+        _download_audit(collection_id, "denied_entitlement", requested_release_id=release_id)
+        raise HTTPException(status_code=403, detail="Collection not included")
+    # A signed cookie proves a prior login, not a current subscription. Use the
+    # existing account authority before touching a protected release; an account
+    # outage must not fall back to the cookie's stale tier.
+    try:
+        subscriber = subscribers.find(session.email)
+    except Exception as error:
+        _download_audit(collection_id, "authorization_unavailable", requested_release_id=release_id)
+        raise HTTPException(status_code=503, detail="Authorization unavailable") from error
+    if subscriber is None:
+        _download_audit(collection_id, "denied_account", requested_release_id=release_id)
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if not repository.may_open(subscriber.tier, collection_id):
+        _download_audit(collection_id, "denied_entitlement", requested_release_id=release_id)
+        raise HTTPException(status_code=403, detail="Collection not included")
+    try:
+        if not release_id or not re.fullmatch(r"[0-9a-f]{64}", release_id):
+            _download_audit(collection_id, "invalid_release_request")
+            raise HTTPException(status_code=400, detail="Explicit release ID required")
+        release = repository.full_release(collection_id, release_id)
+    except repository.FullReleaseUnavailable as error:
+        _download_audit(collection_id, "unavailable", requested_release_id=release_id)
+        raise HTTPException(status_code=503, detail="Full release unavailable") from error
+    _download_audit(collection_id, "authorized_prepared", release, release_id)
+    headers = {
+        "Content-Disposition": f'attachment; filename="{release["filename"]}"',
+        "X-Cedar-Release": release["release_id"],
+        "X-Cedar-SHA256": release["sha256"],
+        "X-Cedar-Rows": str(release["record_count"]),
+        "X-Cedar-Citation": release["citation"],
+        "Cache-Control": "private, no-store",
+    }
+    if "spool" in release:
+        from starlette.background import BackgroundTask
+
+        spool = release["spool"]
+
+        def chunks():
+            try:
+                while content := spool.read(64 * 1024):
+                    yield content
+            finally:
+                spool.close()
+
+        return StreamingResponse(
+            chunks(),
+            media_type=release["media_type"],
+            headers=headers,
+            background=BackgroundTask(spool.close),
+        )
+    return Response(content=release["content"], media_type=release["media_type"], headers=headers)
+
+
 @app.get("/press/collections/{collection_id}/download")
-def download(
-    collection_id: str, session: Session = Depends(require_session)
-) -> StreamingResponse:
+def download(collection_id: str, session: Session = Depends(require_session)) -> StreamingResponse:
     """A release file.
 
     The entitlement check is here and not only on the shelf: a reader who
@@ -664,9 +768,7 @@ def _not_included_answer(
     return {
         "answer": f"{description}\n\n{reach}" if description else reach,
         "basis": None,
-        "answerBasis": _answer_basis(
-            "release", profile, collection_id, opened=False
-        ),
+        "answerBasis": _answer_basis("release", profile, collection_id, opened=False),
         "collectionId": collection_id,
         # The description came off the release, so the basis is a release and
         # says so. `source` names the answerer, and no answerer ran past the
@@ -723,9 +825,7 @@ def _ask_which_collection(thread_id: str | None) -> dict[str, object]:
 
 
 @app.post("/cedar/ask")
-def ask_cedar(
-    question: Question, session: Session = Depends(require_session)
-) -> dict[str, object]:
+def ask_cedar(question: Question, session: Session = Depends(require_session)) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
 
     THE ENTITLEMENT IS DECIDED HERE, BEFORE EITHER ANSWERER SEES THE ID.
@@ -780,9 +880,7 @@ def ask_cedar(
         if repository.is_sold(question.collectionId) and not repository.may_open(
             session.tier, question.collectionId
         ):
-            return _not_included_answer(
-                profile, question.collectionId, question.threadId
-            )
+            return _not_included_answer(profile, question.collectionId, question.threadId)
         collection_name = profile.get("collection_name")
         answered = repository.cedar_answer(question.question, question.collectionId)
         if answered:

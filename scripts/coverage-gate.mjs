@@ -95,7 +95,8 @@ export function parseLcov(text) {
     const value = rest.join(":");
     if (key === "SF") {
       current = { lf: 0, lh: 0, brf: 0, brh: 0, fnf: 0, fnh: 0 };
-      records.set(value, current);
+      // Git paths use forward slashes; Node emits native separators on Windows.
+      records.set(value.replaceAll("\\", "/"), current);
     } else if (key === "end_of_record") {
       current = null;
     } else if (current && ["LF", "LH", "BRF", "BRH", "FNF", "FNH"].includes(key)) {

@@ -36,8 +36,8 @@ The opening block of every row is `cedar_uid`, `canonical_name`, `entity_class` 
 
 Further role-specific links on the row, each an entity of the record the viewer finds it by:
 
-- `sub_cedar_uid`: owner of the subcontractor
-- `prime_cedar_uid`: owner of the prime
+- `sub_cedar_uid`: subcontractor-side Native attribution
+- `prime_cedar_uid`: prime-contractor-side Native attribution
 
 Joining detailed collections on `cedar_uid` alone multiplies rows: one entity has many transactions here and many elsewhere. Aggregate each collection to the entity, or the entity and year, before joining measures.
 
@@ -54,7 +54,7 @@ The approved header, in the owner's exact order (54 columns, of which 0 are owed
 | 1 | `cedar_uid` | Cedar ID | Cedar's permanent identifier for the canonical Native entity this record is associated with. The join key across every collection; never the record's own ID. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 2 | `canonical_name` | Native entity | That entity's name as Cedar's register spells it, so one entity reads the same in every collection. The record's own names (recipient, contractor, organization) stay in their own columns. | text | the source states none, or not applicable to this row |
 | 3 | `entity_class` | Entity type | Which of Cedar's eighteen classes the entity is (federally recognized tribe, Alaska Native village, ANCSA corporation, Native nonprofit, and so on), from the register. | text | the source states none, or not applicable to this row |
-| 4 | `cedar_entity_role` | Entity role | Why the entity is on this row: from native_direction: owner of the subcontractor, of the prime, or of both. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 4 | `cedar_entity_role` | Entity role | Source-based Native attribution on the subcontractor side, prime-contractor side, or both. Separate prime_cedar_uid and sub_cedar_uid retain the roles. These links do not establish ownership or legal equivalence; both does not mean one entity owns both parties. | text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 5 | `subaward_record_id` (was `subaward_source_record_id`) | Subaward ID | The subaward report's identifier. | identifier, as text | the source states none, or not applicable to this row |
 | 6 | `subaward_number` | Subaward number | The subaward's own number as the prime reported it. | identifier, as text | the source states none, or not applicable to this row |
 | 7 | `report_id` (was `subaward_sam_report_id`) | Report ID | The SAM subaward report's identifier: the version of the report this row comes from. | identifier, as text | the source states none, or not applicable to this row |

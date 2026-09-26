@@ -571,6 +571,17 @@ const OPENING_PLURAL = FIELD_MAP_JSON.opening.plural;
 // Mirrors cedar_publication.PROHIBITED_PUBLIC_COLUMN: a competing entity
 // identifier or build bookkeeping never reaches an approved header.
 const PROHIBITED_PUBLIC_COLUMN = /duns|neid|cicd|casino[ _-]?city|tribe_id|_candidate|proposed|resolver|built_date|fetched_date|retrieved_date|promoted_date|artifact_mtime/i;
+// Columns cedar_publication.deals_public_view adds to the deals header at
+// publish time, after the ten-row sample was cut: DEALS_PRESENTATION_COLUMNS
+// plus the research_note it writes them into. Read from the Python module so
+// the list cannot drift from the writer.
+const DEALS_PRESENTATION_COLUMNS = (() => {
+  const source = readFileSync(fileURLToPath(new URL("../../../code/cedar_publication.py", import.meta.url)), "utf8");
+  const match = source.match(/^DEALS_PRESENTATION_COLUMNS = \(([^)]*)\)/m);
+  assert.ok(match, "cedar_publication.DEALS_PRESENTATION_COLUMNS not found");
+  return [...match[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+})();
+const PUBLISH_TIME_COLUMNS = { "deals/deals_classified": [...DEALS_PRESENTATION_COLUMNS, "research_note"] };
 
 test("the field map decides every column of every sampled flagship in the owner's exact order, retires every competing identifier, and the codebook lists exactly what ships", () => {
   const script = fileURLToPath(new URL("../../../scripts/field-map-markdown.mjs", import.meta.url));
@@ -578,8 +589,10 @@ test("the field map decides every column of every sampled flagship in the owner'
   assert.equal(run.status, 0, run.stderr || run.stdout);
   assert.deepEqual(OPENING_SINGULAR, ["cedar_uid", "canonical_name", "entity_class", "cedar_entity_role"]);
   assert.deepEqual(OPENING_PLURAL, ["cedar_uids", "canonical_names", "entity_classes", "entity_roles", "entity_names_as_published"]);
-  // The owner's column counts, exactly; Funding is 39 because DUNS is retired.
-  const EXPECTED = { funding: 39, "federal-register": 33, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, need: 30, nonprofits: 24 };
+  // The owner's column counts, exactly; Funding is 39 because DUNS is retired,
+  // and Federal Register is 34 because the producer now builds
+  // consultation_record_key at write time (field_map.json, 6f620ec).
+  const EXPECTED = { funding: 39, "federal-register": 34, legislation: 30, deals: 33, nagpra: 52, lobbying: 38, contractors: 49, subcontracting: 54, "natural-resources": 38, owned: 32, need: 30, nonprofits: 24 };
   let sampled = 0;
   for (const dataset of LAUNCH_COLLECTION) {
     const map = Object.values(FIELD_MAP).find((t) => t.collection === dataset.id);
@@ -595,7 +608,16 @@ test("the field map decides every column of every sampled flagship in the owner'
     sampled += 1;
     const { columns } = load(key);
     const decided = map.fields.map((f) => f.column);
-    assert.deepEqual([...decided].sort(), [...columns].sort(), `${key}: the map and the sample header disagree`);
+    // Every sample column is decided. A decided column the sample lacks is
+    // allowed only where apply_field_map allows it: a joined input marked
+    // internal (projected out), or a column the publish step adds. Once a
+    // refreshed sample carries a publish-time column, its exemption must go.
+    const publishTime = PUBLISH_TIME_COLUMNS[key] ?? [];
+    for (const name of publishTime) assert.ok(!columns.includes(name), `${key}: ${name} is now in the sample; drop it from PUBLISH_TIME_COLUMNS`);
+    assert.deepEqual(columns.filter((c) => !decided.includes(c)), [], `${key}: sample columns the map does not decide`);
+    const decisionByColumn = new Map(map.fields.map((f) => [f.column, f.decision]));
+    const unexplained = decided.filter((c) => !columns.includes(c) && !publishTime.includes(c) && decisionByColumn.get(c) !== "internal");
+    assert.deepEqual(unexplained, [], `${key}: the map decides columns the sample lacks that are neither internal joins nor added at publish`);
     assert.equal(new Set(decided).size, decided.length, `${key}: a column is decided twice`);
     for (const f of map.fields) {
       assert.ok(FIELD_MAP_DECISIONS.includes(f.decision), `${key}.${f.column}: unknown decision ${f.decision}`);
@@ -648,7 +670,12 @@ test("the field map decides every column of every sampled flagship in the owner'
   assert.equal(owned.columns_today, 53);
   assert.match(owned.header_source, /builder declaration/);
   assert.match(owned.entity_role, /certifying_authority/);
-  assert.ok(owned.fields.some((f) => f.column === "nation_id" && f.retire?.disposition === "adjudicate"));
+  // nation_id is source-association context, kept internal and never used to
+  // fill a Cedar identity (field map, 2026-09-24).
+  const nation = owned.fields.find((f) => f.column === "nation_id");
+  assert.equal(nation?.decision, "internal");
+  assert.equal(nation?.retire?.disposition, "internal_crosswalk");
+  assert.ok(Object.keys(FIELD_MAP_JSON.dispositions).includes("internal_crosswalk"));
 });
 
 test("a JSON-array cell reads as a list in the viewer, before and after the export changes shape", () => {

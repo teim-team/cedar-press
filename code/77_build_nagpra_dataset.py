@@ -1922,6 +1922,30 @@ def parse_notice(meta, text):
     return row, parties
 
 
+def party_candidate_view(name, spine):
+    """Refuse institutional candidates for an explicitly governmental party.
+
+    FR 98-5406 names the San Carlos Apache Tribe, not its college or relending
+    enterprise. Those longer names otherwise outscore the tribe's short spine
+    name in the shared containment resolver. This only narrows candidate types;
+    it neither matches names nor creates aliases, identities or relationships.
+    Explicit institution/corporation names retain their existing resolver route.
+    """
+    government = re.search(r"\b(?:tribes?|nation|native village|pueblo of)\b", name, re.I)
+    institution = re.search(
+        r"\b(?:college|university|school|enterprise|relending|financial|bank|"
+        r"business|organization|association|foundation|housing|hospital|clinic|"
+        r"health|civic club|consortium)\b", name, re.I)
+    if not government or institution or CORP_FORM_RE.search(name):
+        return list(spine)
+    refused = {
+        "Tribal College or University", "BIE School",
+        "Native Community Development Financial Institution",
+        "Native Financial Institution", "Individually Native-owned business",
+    }
+    return [row for row in spine if row.get("entity_class") not in refused]
+
+
 def build_stage():
     spine_raw = read_csv(SPINE / "cedar_entity_spine.csv")
     # A read-only VIEW. `resolve_entity` searches canonical_name and aliases;
@@ -2095,7 +2119,9 @@ def build_stage():
         """
         blocked = _blocked or set()
         base = spine_all if CORP_FORM_RE.search(name) else spine_nocorp
-        view = [r for r in base if r["tribe_id"] not in blocked] if blocked else base
+        view = party_candidate_view(name, base)
+        if blocked:
+            view = [r for r in view if r["tribe_id"] not in blocked]
         tid, canon, how = resolve_entity(name, view)
         if tid and not accept(name, canon, how):
             stats["containment_rejected"] += 1

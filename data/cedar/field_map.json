@@ -606,7 +606,7 @@
    "plural": false,
    "entity_role": "constant:participant",
    "columns_today": 39,
-   "columns_target": 33,
+   "columns_target": 34,
    "default_viewer": [
     "canonical_name",
     "notice_date",
@@ -874,15 +874,13 @@
     },
     {
      "column": "entity_link_status",
-     "from": "pending:terminal reads the source: no_individual_named, resolved, unresolved or withheld",
-     "why": "Why the Cedar block is filled or blank on this row: a notice addressed to a population names no individual entity, which is not a failed match (owner's decision of 2026-09-05, docs/COLLECTIVE_SCOPE_DECISION_2026-09-05.md).",
-     "status": "pending"
+     "from": "rule:participant_link_status",
+     "why": "Existing registered link is resolved; not_enumerated with no link means no_individual_named; other blank links remain unresolved."
     },
     {
      "column": "collective_scopes",
-     "from": "pending:terminal reads the source's addressee, applicability or eligibility clause into elements of data/cedar/scopes.json",
-     "why": "JSON array of collective scopes: the population the notice addresses or applies to, with the relationship, the as-of date and rule, and the source words; null until evaluated, [] when the notice names none.",
-     "status": "pending"
+     "from": "constant:null",
+     "why": "Source applicability has not been evaluated; null is not an empty or universal scope."
     },
     {
      "column": "cedar_entity_role",
@@ -891,9 +889,8 @@
     },
     {
      "column": "event_date_precision",
-     "from": "derive:event_date_basis",
-     "why": "day, month, year or unstated, translated from the date qualification.",
-     "status": "pending"
+     "from": "rule:validated_date_precision",
+     "why": "Validated source date syntax gives day/month/year; absent date is unstated. Missing extraction basis is disclosed separately."
     },
     {
      "column": "source_system",
@@ -902,8 +899,13 @@
     },
     {
      "column": "research_note",
-     "from": "rule:blank",
-     "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."
+     "from": "rule:participant_limitations",
+     "why": "Distinguishes invitation from participation, unevaluated scope and legacy extraction qualifications."
+    },
+    {
+     "column": "consultation_record_key",
+     "from": "rule:source_composite_key:consultation_event_id|participant_name_as_published|participant_role",
+     "why": "JSON tuple of original source values, scoped to this table; not an issued event or entity ID."
     }
    ],
    "order": [
@@ -913,6 +915,7 @@
     "cedar_entity_role",
     "entity_link_status",
     "collective_scopes",
+    "consultation_record_key",
     "consultation_event_id",
     "fr_document_number",
     "agency",
@@ -1303,7 +1306,7 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "pending: party, or owner of the party, per row from the party attribution table; absent until supplied",
+   "entity_role": "Explicit party relationship only when supported; blank until evaluated, never presumed ownership.",
    "columns_today": 40,
    "columns_target": 33,
    "default_viewer": [
@@ -1527,6 +1530,28 @@
      "blocking": true
     },
     {
+     "column": "Caveat",
+     "decision": "derive",
+     "to": "research_note",
+     "why": "Preserve the publish-time factual qualification in research_note; never substitute it for the owed substantive Notes editorial pass.",
+     "spec": "§4",
+     "blocking": true
+    },
+    {
+     "column": "Candidate_Status",
+     "decision": "derive",
+     "to": "research_note",
+     "why": "Preserve the publish-time factual qualification in research_note; never substitute it for the owed substantive Notes editorial pass.",
+     "spec": "§4",
+     "blocking": true
+    },
+    {
+     "column": "research_note",
+     "decision": "keep",
+     "why": "Approved public target supplied by the editorial pass and cedar_publication.deals_public_view. Preserve Caveat and Candidate_Status qualifications without waiving the blocking substantive Notes editorial pass.",
+     "spec": "§4"
+    },
+    {
      "column": "Date_Added",
      "decision": "internal",
      "why": "Classification timestamp.",
@@ -1598,27 +1623,23 @@
     },
     {
      "column": "cedar_entity_role",
-     "from": "pending:party attribution",
-     "why": "party, or owner of the party, per row, once the party attribution table supplies it; absent until then rather than an ambiguous constant.",
-     "status": "pending"
+     "from": "rule:unresolved_party_role",
+     "why": "Publish a specific party relationship only when source evidence establishes it; otherwise leave blank. Never presume ownership."
     },
     {
      "column": "deal_type",
-     "from": "combine:Deal_Category|transaction_type",
-     "why": "One taxonomy through a value-level crosswalk.",
-     "status": "pending"
+     "from": "rule:reviewed_deal_taxonomy",
+     "why": "One taxonomy through a value-level crosswalk."
     },
     {
      "column": "transaction_structure",
-     "from": "combine:Event_Type",
-     "why": "Through a value-level crosswalk.",
-     "status": "pending"
+     "from": "rule:source_event_type",
+     "why": "Through a value-level crosswalk."
     },
     {
      "column": "deal_status",
-     "from": "combine:Status|deal_status_std",
-     "why": "Through a value-level crosswalk.",
-     "status": "pending"
+     "from": "rule:reviewed_deal_status",
+     "why": "Through a value-level crosswalk."
     },
     {
      "column": "additional_sources",
@@ -1627,8 +1648,8 @@
     },
     {
      "column": "research_note",
-     "from": "rule:blank",
-     "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."
+     "from": "rule:preserve_substantive_qualifications",
+     "why": "Preserve substantive source notes and evidence limitations through the authoritative Lumecon Deals projection."
     }
    ],
    "order": [
@@ -2152,6 +2173,48 @@
      "decision": "internal",
      "why": "Extraction bookkeeping.",
      "spec": "§5"
+    },
+    {
+     "column": "fr_nagpra_title_index__notice_kind",
+     "decision": "internal",
+     "why": "Title-discovery classification from the ancillary index; the approved notice_type remains the customer meaning. Preserve the index as source/discovery evidence.",
+     "spec": "?5; explicit ancillary-input disposition, 2026-09-24 engineering reconciliation"
+    },
+    {
+     "column": "fr_nagpra_title_index__has_abstract",
+     "decision": "internal",
+     "why": "Source-discovery availability diagnostic; absence of an abstract is not absence of a notice or consultation.",
+     "spec": "?5; explicit ancillary-input disposition, 2026-09-24 engineering reconciliation"
+    },
+    {
+     "column": "fr_nagpra_title_index__relevance_tier_from_tier_rule",
+     "decision": "internal",
+     "why": "Search/discovery rule output, not a Native-identity evidence tier or public notice assertion.",
+     "spec": "?5; explicit ancillary-input disposition, 2026-09-24 engineering reconciliation"
+    },
+    {
+     "column": "fr_nagpra_title_index__missed_by_tier_rule",
+     "decision": "internal",
+     "why": "Acquisition regression diagnostic; keep in the source index for coverage checks.",
+     "spec": "?5; explicit ancillary-input disposition, 2026-09-24 engineering reconciliation"
+    },
+    {
+     "column": "fr_nagpra_title_index__basis",
+     "decision": "internal",
+     "why": "Rationale for the title-discovery rule, not evidence of a named party relationship. Retain in the source index.",
+     "spec": "?5; explicit ancillary-input disposition, 2026-09-24 engineering reconciliation"
+    },
+    {
+     "column": "n_nagpra_notice_entity_bridge",
+     "decision": "internal",
+     "why": "Raw bridge-row count across relationship roles; not distinct tribes, named consultations, remains or repatriations. Approved role-specific named/resolved counts remain public and the bridge remains a separate table.",
+     "spec": "?5; explicit ancillary-input disposition, 2026-09-24 engineering reconciliation"
+    },
+    {
+     "column": "n_nagpra_notice_institutions",
+     "decision": "internal",
+     "why": "Derived ancillary row count. The existing contract already keeps institution_count internal; preserve institution names and the separate institution table.",
+     "spec": "?5; explicit ancillary-input disposition, 2026-09-24 engineering reconciliation"
     }
    ],
    "new": [
@@ -2687,7 +2750,7 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "constant:owner of the awardee",
+   "entity_role": "source-attributed affiliation of awardee",
    "entity_roles": [
     {
      "column": "owner_as_of_transaction_cedar_uid",
@@ -2703,7 +2766,7 @@
     "funding_agency",
     "description",
     "obligations_usd",
-    "owner_attribution_status",
+    "affiliation_attribution_status",
     "source_url"
    ],
    "header_source": "sample",
@@ -2970,15 +3033,17 @@
     },
     {
      "column": "owner_attribution_status",
-     "decision": "keep",
-     "why": "",
-     "spec": "§7"
+     "decision": "rename",
+     "why": "Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance.",
+     "spec": "§7",
+     "to": "affiliation_attribution_status"
     },
     {
      "column": "owner_as_of_transaction_cedar_uid",
-     "decision": "keep",
-     "why": "Transaction-date ownership attribution; UNKNOWN ships as unknown.",
-     "spec": "§7"
+     "decision": "rename",
+     "why": "Source-described relationship assessment; Cedar does not independently certify ownership. Original source field remains internal provenance.",
+     "spec": "§7",
+     "to": "affiliation_as_of_transaction_cedar_uid"
     },
     {
      "column": "contract_transaction_unique_key",
@@ -3177,8 +3242,8 @@
     },
     {
      "column": "cedar_entity_role",
-     "from": "constant:owner of the awardee",
-     "why": "owner of the awardee."
+     "from": "constant:source-attributed affiliation of awardee",
+     "why": "Evidence-qualified affiliation, not Cedar-certified ownership."
     },
     {
      "column": "sector",
@@ -3188,9 +3253,9 @@
     },
     {
      "column": "competition_type",
-     "from": "combine:extent_competed|extent_competed_normalized",
-     "why": "Consolidated through a validated dictionary.",
-     "status": "pending"
+     "from": "projection:cedar_extent_competed.normalize",
+     "why": "Built by cedar_publication.recompute_derived using the shared source-versioned dictionary; rejects conflicts.",
+     "status": "supplied_by_recompute_derived"
     },
     {
      "column": "recipient_geography_status",
@@ -3263,8 +3328,8 @@
     "recipient_geography_status",
     "performance_geography_status",
     "attributed_flag",
-    "owner_attribution_status",
-    "owner_as_of_transaction_cedar_uid",
+    "affiliation_attribution_status",
+    "affiliation_as_of_transaction_cedar_uid",
     "source_system",
     "source_url",
     "research_note"
@@ -3283,15 +3348,15 @@
    ],
    "entity_uid": "cedar_uid",
    "plural": false,
-   "entity_role": "from native_direction: owner of the subcontractor, of the prime, or of both",
+   "entity_role": "from native_direction: source-based Native attribution on the subcontractor side, prime-contractor side, or both; not ownership or legal equivalence",
    "entity_roles": [
     {
      "column": "sub_cedar_uid",
-     "role": "owner of the subcontractor"
+     "role": "subcontractor-side Native attribution"
     },
     {
      "column": "prime_cedar_uid",
-     "role": "owner of the prime"
+     "role": "prime-contractor-side Native attribution"
     }
    ],
    "columns_today": 78,
@@ -5317,25 +5382,23 @@
    "new": [
     {
      "column": "cedar_entity_role",
-     "from": "constant:associated Native entity",
+     "from": "rule:source_attributed_relationship",
      "why": "associated Native entity (controlled by, serves, or is)."
     },
     {
      "column": "inclusion_category",
-     "from": "combine:classification_ruling|disposition",
-     "why": "Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk.",
-     "status": "pending"
+     "from": "rule:primary_source_inclusion",
+     "why": "Native-serving, Native-controlled, tribal-government or candidate, through a documented crosswalk."
     },
     {
      "column": "entity_link_status",
-     "from": "combine:entity_tier|cedar_link_tier|key_review_disposition",
-     "why": "One linkage status through a documented crosswalk.",
-     "status": "pending"
+     "from": "rule:validated_existing_link",
+     "why": "One linkage status through a documented crosswalk."
     },
     {
      "column": "research_note",
-     "from": "rule:blank",
-     "why": "A concise factual qualification that changes interpretation; blank when unnecessary. Built blank at write time."
+     "from": "rule:source_qualification",
+     "why": "Source-attributed inclusion basis, dates and limitations from the authoritative Lumecon nonprofit projection."
     }
    ],
    "order": [
@@ -5366,15 +5429,15 @@
    ],
    "retire": [
     {
-     "identifies": "unknown: an earlier or different entity link that disagrees with cedar_uid on at least one row",
-     "disposition": "adjudicate",
-     "replacement": "cedar_uid",
+     "identifies": "Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects.",
+     "disposition": "internal_crosswalk",
+     "replacement": "No automatic replacement; cedar_uid retains its separately evidenced relationship role.",
      "column": "entity_id"
     },
     {
-     "identifies": "the spine entity the organization was keyed to before a redirect that cedar_uid reflects and this column does not, on at least one row",
-     "disposition": "adjudicate",
-     "replacement": "cedar_uid",
+     "identifies": "Preserved organization/object evidence. Do not alias to the affiliated Native entity; explicit pinned source evidence must distinguish the objects.",
+     "disposition": "internal_crosswalk",
+     "replacement": "No automatic replacement; cedar_uid retains its separately evidenced relationship role.",
      "column": "cedar_spine_entity_id"
     },
     {
@@ -5452,12 +5515,12 @@
     {
      "column": "nation_id",
      "decision": "internal",
-     "why": "An identifier of the certifying nation in another namespace; its equivalence to certifying_authority_entity_id is not settled from the declaration. Stops the dataset until adjudicated.",
+     "why": "330_build_native_owned_businesses.rec takes this source-association slug from source configuration or a staging-row override; the builder preserves it separately from the certifying authority. Its codebook defines the nation the source associates with the business, not a verified business identity. For example, a Tulalip directory entry may name Makah or Three Affiliated Tribes here. Preserve internally without asserting equivalence, ownership or affiliation, and never use it to fill a Cedar identity.",
      "spec": "retirement",
      "retire": {
-      "identifies": "the certifying nation, in a namespace the declaration does not name",
-      "disposition": "adjudicate",
-      "replacement": "certifying_authority_entity_id",
+      "identifies": "source-associated nation or authority context from source configuration or staging; not the business legal identity",
+      "disposition": "internal_crosswalk",
+      "replacement": "Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid.",
       "column": "nation_id"
      }
     },
@@ -5753,6 +5816,101 @@
      "decision": "internal",
      "why": "Script name.",
      "spec": "§10"
+    },
+    {
+     "column": "publishable_basis",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_uei_candidate",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_cage_candidate",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_identifier_match_status",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_identifier_match_basis",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_status",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_tier",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_method",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_rung",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_uei_linked",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_cage_linked",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_corroboration",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_publish_gate",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_no_match_reason",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "federal_link_relation",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection. The firm-link, not ownership, qualification must accompany any future exposure of linked identifiers under a separate reviewed contract."
+    },
+    {
+     "column": "publishable_before_1100",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection. Recovery history does not override current permission."
+    },
+    {
+     "column": "publish_hold",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "publish_hold_basis",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
+    },
+    {
+     "column": "person_name_check_1100",
+     "decision": "internal",
+     "why": "Internal source/matching or publication control from 615/953/1001/1100; never a customer identity claim. Row holds are enforced before projection."
     }
    ],
    "new": [
@@ -5824,9 +5982,9 @@
      "column": "certifying_authority_entity_id"
     },
     {
-     "identifies": "the certifying nation, in a namespace the declaration does not name",
-     "disposition": "adjudicate",
-     "replacement": "certifying_authority_entity_id",
+     "identifies": "source-associated nation or authority context from source configuration or staging; not the business legal identity",
+     "disposition": "internal_crosswalk",
+     "replacement": "Preserve internally as unvalidated source context; no automatic equivalence to certifying_authority_entity_id or cedar_uid.",
      "column": "nation_id"
     },
     {

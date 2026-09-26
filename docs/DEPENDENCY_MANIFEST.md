@@ -70,8 +70,8 @@ The enricher runs **last**. Each row is a measured loss.
 
 ## Contested files (68)
 
-A full rebuild and an in-place enricher both write these. This is the list
-of places the 133/168 collision can happen again.
+A full rebuild and an in-place enricher both write these. Explicitly retired
+writer edges are excluded; data measurements retain their original date.
 
 | file | rebuilders | enrichers |
 |---|---|---|
@@ -98,7 +98,7 @@ of places the 133/168 collision can happen again.
 | `fac_audit_sefa_gaming_programs.csv` | `147_build_fac_single_audits.py`, `814_gaming_nr_grain_and_conservation.py` | `814_gaming_nr_grain_and_conservation.py` |
 | `fac_tribal_single_audits.csv` | `1132_fac_nontribal_native_audits.py`, `147_build_fac_single_audits.py` | `1132_fac_nontribal_native_audits.py` |
 | `federal_actions.csv` | `11_classify_federal_actions.py`, `70_key_unjoined_datasets.py` | `70_key_unjoined_datasets.py` |
-| `federal_funding_transactions.csv` | `1140_linkage_close.py`, `115_pull_assistance_archive.py`, `24_funding_merge.py`, `335_harmonize_assistance_seams_in_place.py`, `336_correct_scheme_resolution_by_spine_membership.py`, `503_identity.py` | `1131_attribution_method_vocabulary.py`, `1140_linkage_close.py`, `115_pull_assistance_archive.py`, `335_harmonize_assistance_seams_in_place.py`, `336_correct_scheme_resolution_by_spine_membership.py`, `503_identity.py` |
+| `federal_funding_transactions.csv` | `1140_linkage_close.py`, `115_pull_assistance_archive.py`, `24_funding_merge.py`, `503_identity.py` | `1131_attribution_method_vocabulary.py`, `1140_linkage_close.py`, `115_pull_assistance_archive.py`, `503_identity.py` |
 | `ferc_docket_filings.csv` | `133_build_ferc_advocacy.py`, `168_link_adjudication_hubs.py`, `781_upstream_grain_columns.py` | `168_link_adjudication_hubs.py`, `781_upstream_grain_columns.py` |
 | `ferc_ex_parte_communications.csv` | `133_build_ferc_advocacy.py`, `573_ws3_grain_and_money.py` | `573_ws3_grain_and_money.py` |
 | `ferc_ex_parte_parties.csv` | `133_build_ferc_advocacy.py`, `168_link_adjudication_hubs.py` | `168_link_adjudication_hubs.py` |

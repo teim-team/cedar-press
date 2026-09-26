@@ -5,7 +5,48 @@
 
 This section supersedes the August gaming chain below for the Codex takeover.
 That chain is retained as historical recovery documentation, not a current launch
-command. Current state and blockers belong in docs/TERMINAL_HANDOFF.md.
+command. The fixed infrastructure review range, current proofs and blockers are in
+`docs/HAVALA_INFRASTRUCTURE_REVIEW.md`; the existing terminal handoff retains the
+workspace takeover context.
+
+### Governed flagship release path (2026-09-25)
+
+All twelve Cedar Press flagship adapters now dispatch through Lumecon Data's
+`collection-build` command, documented in its existing `docs/developer-guide.md`.
+Their source-registration rules are defined once in Lumecon's
+`docs/data-intake.md`. Cedar's `release-pilot` is a compatibility caller;
+the old customer-combine and review-bundle producer routes refuse these
+flagships before writing. Do not restore a second producer to fix that refusal.
+The six engineering/publication-gated adapters return exit 1 and a keyed held
+receipt; this is not a release. Gaming uses the same intake framework and its
+existing multi-component `gaming build` / `gaming release` path for Cedar Grove.
+Keep source profiles under Lumecon `intake/profiles/`; use `--code-sha` for the
+reviewed producer commit and preserve all input hashes. The bounded JSONL
+artifact/download ceiling is 256 MiB (Subcontracting measures 139.5 MiB); raw
+projection inputs remain bounded at 128 MiB and JSON mappings at 16 MiB. Large
+Funding/Prime admission scans use a disk-backed key index, not a bulk memory read.
+
+Use an explicit outside-Git store and immutable source/field-map/register/scope
+snapshots. Run Lumecon `verify`, then `catalog-import` twice to prove retry
+idempotency. Select the reviewed release using `catalog-select`; rollback uses
+the same command with a previously selected release and `--rollback`.
+These commands affect only the development metadata index, not production.
+Preserve the complete immutable store plus operational database/audit history;
+restore into a separate root, reverify hashes, reimport manifests and select the
+prior pin. Never overwrite a release to repair a failed build.
+
+The real local consumer rehearsal is:
+
+```text
+python -B server/tests/release_download_rehearsal.py --store <verified-store> --catalog <pinned-catalog.json>
+```
+
+Run with the reviewed Lumecon package and Cedar server dependencies installed.
+It verifies local login, entitlement denial/success, exact pinned bytes, redacted
+audit events, catalog-import retry and two-version rollback. It creates only
+development test state inside the chosen store. The Havala packet records exact
+release IDs and receipts; PostgreSQL, production provisioning and ancillary
+component certification remain separate gates.
 
 ### Systemic hold supersedes the prior candidate command
 
@@ -23,7 +64,7 @@ ruling is implemented. No replacement affiliation is promoted automatically.
 Run from Desktop/cedar-press-codex, using a NEW output root each time:
 
 ```
-py -3 -B code/build.py candidate need --input-root C:/Users/esm247/Desktop/cedar-press-codex --owner-dir C:/Users/esm247/Desktop/cedar-press-codex/data/raw/external/need_owner --output-root C:/Users/esm247/cedar-takeover-checkpoint/need-candidate-NEW --as-of 2026-09-23
+py -3 -B code/build.py candidate need --input-root <cedar-press checkout> --owner-dir <cedar-press checkout>/data/raw/external/need_owner --output-root <checkpoint root>/need-candidate-NEW --as-of 2026-09-23
 ```
 
 The supported runner declares NEED_INPUTS/NEED_OUTPUTS in code/build.py, copies
@@ -97,6 +138,155 @@ seven Makefile check-generated commands before app checks/build; a data-less clo
 validates committed release metadata, not missing raw data or the entire pipeline.
 Do not run import_cedar_manifest.py --audit assuming it is read-only: it mutates
 manifest/publication outputs. Release ledger history must be preserved.
+
+### Release infrastructure: local proof and production boundary (2026-09-24)
+
+The implementation and measured release/CI results are recorded in
+`docs/HAVALA_INFRASTRUCTURE_REVIEW.md`. This section defines operating boundaries;
+it does not certify a deployed service. Lumecon Data owns governed snapshots,
+release contracts, validation and immutable storage. Existing acquisition and
+collection transforms remain transitional Cedar stages until a tested ownership
+transfer retires them; the publication projection currently remains in Cedar.
+Cedar Press owns its
+catalog adapter, sessions, entitlement checks, download responses and audit events.
+The existing Lumecon CLI is the operator interface; no additional runner or
+manifest format is required.
+
+| Environment | Store and credentials | Permitted operation |
+| --- | --- | --- |
+| Development | Explicit isolated local root; loopback API; disposable development accounts and dataset-scoped service grant | Candidate builds, verification, denial/success tests and rollback rehearsal |
+| Staging | Separate approved private store, database and service identity; production-like TLS and entitlement configuration | Restore and deployment rehearsal after its owner authorizes provisioning; never share production grants or current pointers |
+| Production | Approved private versioned object store, persistent Postgres accounts/codes, restricted service identity and HTTPS | Explicit approved release/catalog selection; no direct browser access to raw evidence or service grants |
+
+`CEDAR_PRESS_ENVIRONMENT` is validated as development, staging or production.
+Nondevelopment release access refuses HTTP/loopback, insecure cookies, missing or
+short explicit session/service secrets, non-Postgres DATABASE_URL and environment
+account fallback. These guards do not certify database availability or implement
+session expiry/revocation; those remain production gates.
+`DATABASE_URL` selects the existing Postgres-backed stores. When absent, the
+application retains development environment accounts/in-memory activation and
+SQLite behavior. Do not certify restart persistence from development tests.
+`CEDAR_PRESS_DATA_API`, `CEDAR_PRESS_DATA_TOKEN` and
+`CEDAR_PRESS_RELEASE_CATALOG` configure the release consumer; the service token
+stays on the backend. `CEDAR_PRESS_INSECURE_COOKIE=1` is local-only. Production
+must set the persistent session secret, allowed origins and database explicitly.
+No secret value belongs in Git, a catalog, an audit event or a command transcript.
+
+**Registered collection rehearsal.** Follow the short
+[Add a collection procedure](../data/cedar/README.md#add-a-collection-to-the-governed-release-path).
+`code/build.py release-pilot` is the supported Cedar entry point for the reviewed
+twelve Press flagships; it calls the existing Lumecon
+contract/build/catalog functions. Use the exact pinned source, authority inputs,
+environment and isolated store from the Havala packet. No new endpoint or
+collection-specific release format is required.
+
+Full downloads require an approved catalog with `manifest_sha256`; regenerate
+older catalogs from verified releases rather than weakening the consumer. The
+digest binds the safe API manifest and its artifact hashes. Full downloads are
+exact JSONL, while existing product samples remain CSV. A full customer CSV or
+frontend control needs a separate verified implementation.
+
+The full-download route checks both the signed cookie's tier and the current
+subscriber store before fetching an artifact. Removed accounts return 401;
+downgraded accounts return 403; lookup failures return a redacted 503 and never
+fall back to stale cookie authorization. Upgraded subscribers sign in again.
+Session expiry/revocation and other routes' existing behavior remain separate
+production work. The current two-collection proof covers real login, 401/403/200,
+exact bytes, redacted current-run audit events and selection of a prior valid
+catalog without modifying either release. `authorized_prepared` records response
+preparation, not proof that the network delivered the entire response.
+
+**Object layout.** Preserve the existing Lumecon layout within each independent
+store: `raw/<source_id>/<snapshot_id>/source.csv`, `receipts/<source_id>/`,
+`staging/`, `releases/<dataset_id>/<release_id>/` and `current/<dataset_id>.json`.
+The pilot also keeps content-addressed catalog JSON under `catalogs/`. Release
+files are `manifest.json`, `contract.json`, `records.jsonl`, `records.parquet` and
+`validation.json`; hashes and schema checks belong to the existing verifier.
+An approved future S3 backing store should preserve those relative keys under
+separate environment roots, with private access, versioning and conditional
+immutable creation. **The current filesystem implementation is not an S3
+backend.** Provisioning, adapter implementation and restore proof remain required;
+copying files to a bucket does not implement the storage contract. Keep restricted
+raw evidence separate from publicly distributable artifacts and website assets.
+
+The repository deployment workflow identifies a static-site S3 bucket and
+CloudFront distribution for `cedarpress.ai`. It synchronizes built site assets
+with deletion enabled; it is not an appropriate destination or retention job for
+immutable dataset releases. The AWS certificate is an owner-reported existing
+asset. This read-only session found no AWS CLI, no local `.aws` directory and no
+AWS environment-variable names; it did not authenticate or inspect live AWS.
+Certificate validity, DNS routing, bucket versioning, delivery permissions,
+API hosting and monitoring therefore remain **NOT VERIFIED**, not absent.
+
+**Catalog database boundary (specification only).** The current immutable
+catalog JSON remains the source contract; do not introduce a second authoritative
+manifest. If the operational database needs indexing, project its existing fields
+into release rows keyed by `(dataset_id, release_id)` with `catalog_id`, schema
+version, manifest/artifact hashes, row count and storage key/version references.
+Maintain environment/product catalog selection and append-only promotion/audit
+receipts separately. Foreign keys point to verified releases; transactions change
+selection atomically. Product entitlements continue to reference existing
+account/organization policy, never a manifest's service grant. Bulk records,
+raw evidence, secret grants and regenerated competing identity registers do not
+belong in this catalog projection. No such database migration was executed.
+
+**Existing local verification, promotion and rollback commands.** From Lumecon
+Data with its declared environment activated (substitute explicit approved IDs):
+
+```sh
+python -m lumecon_data.cli verify --root STORE --dataset DATASET --release CANDIDATE
+python -m lumecon_data.cli compare --root STORE --dataset DATASET --before PRIOR --after CANDIDATE
+python -m lumecon_data.cli catalog --root STORE --product cedar_press --dataset-release DATASET:CANDIDATE
+python -m lumecon_data.cli promote --root DEV_STORE --dataset DATASET --release CANDIDATE
+python -m lumecon_data.cli promote --root DEV_STORE --dataset DATASET --release PRIOR
+python -m lumecon_data.cli verify --root DEV_STORE --dataset DATASET --release PRIOR
+```
+
+`catalog` prints the existing contract; the supported pilot stores canonical bytes
+immutably. `promote` verifies first and atomically changes only the local current
+pointer. Cedar's pinned consumer does not follow that pointer automatically:
+rollback must select the previously verified immutable catalog through its
+configured catalog path, then repeat entitlement, artifact-hash and audit checks.
+Compare release-file hashes before and after; none may change. The promotion
+commands above are development examples, not production authorization. There is
+no existing backup/restore CLI: do not invent one in operator instructions.
+
+**Backup and retention.** Preserve immutable source bytes, approved contracts,
+reviewed decisions/issued-ID lineage, released artifacts and their manifests;
+retain every release still cited or needed for rollback. Failed candidates and
+logs remain until unique evidence and decisions have been checked. Disposable
+recomputable caches are not backups. Git retains code, small reviewed contracts,
+metadata and manifests; the central producer/store retains bulk canonical data;
+Postgres retains operational accounts, codes, entitlements and audit metadata.
+
+Read-only volume measurement on 2026-09-24 found C: NTFS Fixed, 506,332,180,480
+bytes total and approximately 15.07 GB free; D: NTFS Fixed, 1,000,186,310,656 bytes
+total and 904,739,921,920 bytes free. D: contains `Archive/tero`. Windows reports
+it as Fixed, so removability and sequential throughput have not been established
+by that label. No data was moved or copied in this inventory. Keep writing builds
+sequential and reserve room for both candidate and restoration copies.
+
+The external drive may hold a separately authorized offline backup of immutable
+source/release material, never the only copy or the live production store. Every
+archive needs a relative-path inventory, byte size, SHA-256, source/release IDs,
+creation time, rights classification and producing commit. Verify hashes after
+copying and again before recovery. Retain another independent verified copy.
+Restore into a new isolated local store, verify each released dataset with the
+existing CLI, and exercise the customer download/rollback rehearsal before any
+pointer selection. Database recovery additionally requires an authorized
+consistent Postgres backup and a tested restore into a separate database;
+credentials, retention, recovery objectives and restoration commands must be
+established by its operator before production readiness is claimed.
+
+**Production-only completion steps requiring authorization:** provision or select
+private versioned artifact storage; implement/test its existing-contract adapter;
+verify certificate/domain and API deployment; configure scoped service identities,
+secrets, persistent Postgres and customer entitlements; establish audit retention,
+request-failure alerts, verification-failure alerts and backup monitoring; restore
+from independent backups in staging; approve a specific catalog/release and test
+actual production denial/download/rollback. No AWS resource, deployment, public
+release or production pointer was changed by this procedure. NEED remains held.
+
 <!-- END CODEX-ISOLATED-CANDIDATE-RUNBOOK -->
 
 

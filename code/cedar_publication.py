@@ -1080,6 +1080,24 @@ def owed_derivations(entry: dict, rename: dict, built_cols: list, rows: list):
         yield f, target, stuck
 
 
+def retired_identifier_in_value(collection: str, column: str, value: str) -> bool:
+    """Distinguish a researched instrument homonym from Cedar identity leakage.
+
+    NOIRLab identifies NEID as an astronomical spectrograph:
+    https://noirlab.edu/public/programs/kitt-peak-national-observatory/wiyn-35m-telescope/neid/
+    The subaward description for ASST_NON_80NSSC25K0179_080 discusses its
+    observations and stellar characterization. Only that scientific phrase is
+    ignored by the token check; source text is never edited, and every other
+    identifier token in the same value still fails closed.
+    """
+    inspected = value
+    if collection == "subcontracting" and column == "description" and re.search(
+            r"\bstellar characterization\b", value, re.I):
+        inspected = re.sub(r"\bNEID\s+observations\b", "instrument observations", value,
+                           flags=re.I)
+    return bool(RETIRED_TOKEN.search(inspected))
+
+
 class RetiredIdentifierPresent(FieldMapRefusal):
     def __init__(self, collection: str, where: str, n: int, example: str):
         super().__init__(collection, [where],
@@ -1149,7 +1167,8 @@ def _ordinal(n: int) -> str:
 _BILL_TYPES = {"hr": "house-bill", "s": "senate-bill", "hjres": "house-joint-resolution",
                "sjres": "senate-joint-resolution", "hconres": "house-concurrent-resolution",
                "sconres": "senate-concurrent-resolution", "hres": "house-resolution",
-               "sres": "senate-resolution"}
+               "sres": "senate-resolution",
+               "hre": "house-resolution", "hjr": "house-joint-resolution"}
 
 
 def _geography_status(row: dict, prefix: str) -> str:
@@ -1332,7 +1351,13 @@ def apply_field_map(collection: str, header: list, rows: list,
     # A column outside the flagship that IS an approved target (a supplied
     # research_note, names as published from the bridge) is the terminal
     # delivering an owed derivation, and is welcome.
-    joined = [c for c in header if c not in own and c not in entry["order"]]
+    # An explicitly internal joined input has a reviewed destination: it is
+    # removed by the same projection as internal flagship fields. It must not
+    # be added to the public order just to make the schema check accept it.
+    # No inferred dispositions: unknown joins and undeclared public targets
+    # still refuse before any row is changed.
+    joined = [c for c in header if c not in own and c not in entry["order"]
+              and decision.get(c, {}).get("decision") != "internal"]
     if joined:
         raise UndecidedColumns(collection, joined)
     uid_col = entry["entity_uid"]
@@ -1383,6 +1408,7 @@ def apply_field_map(collection: str, header: list, rows: list,
     rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
     source_of = {to: c for c, to in rename.items()}
     built_cols = []
+    external_rule_targets = set()
     per_row = [dict() for _ in rows]
     for n in entry.get("new", []):
         src = n.get("from", "")
@@ -1406,6 +1432,10 @@ def apply_field_map(collection: str, header: list, rows: list,
                 continue
             for b, row in zip(per_row, rows, strict=True):
                 v = _rule(entry, src, row, source_of)
+                if v is None:
+                    # A named Lumecon rule is not an implementation here.
+                    # Require its supplied result before retiring source cells.
+                    external_rule_targets.add(target)
                 b[target] = (row.get(target) or "") if v is None else v
             built_cols.append(target)
     if plural:
@@ -1431,7 +1461,8 @@ def apply_field_map(collection: str, header: list, rows: list,
     # terminal delivers the target; the refusal names both columns and the
     # rows that would have lost something. A source that is blank on every
     # row loses nothing and may go.
-    for f, target, stuck in owed_derivations(entry, rename, built_cols, rows):
+    for f, target, stuck in owed_derivations(
+            entry, rename, [c for c in built_cols if c not in external_rule_targets], rows):
         if stuck:
             raise OwedDerivation(collection, f["column"], target, stuck)
     # A combine whose target carries one of its own sources' names (contractors'
@@ -1531,11 +1562,11 @@ def apply_field_map(collection: str, header: list, rows: list,
         for row in rows:
             scope_elements(row.get("collective_scopes"), collection, "collective_scopes")
     # The link-status vocabulary, where the map declares the column as that
-    # vocabulary (the Federal Register's owed column names the four values);
+    # vocabulary (the Federal Register contract owns these link statuses);
     # nonprofits' column of the same name is a combine of link tiers with a
     # vocabulary of its own, and is not held to this one.
-    declared = any(n["column"] == "entity_link_status" and "no_individual_named" in n.get("from", "")
-                   for n in entry.get("new", []))
+    declared = collection == "federal-register" and any(
+        n["column"] == "entity_link_status" for n in entry.get("new", []))
     if "entity_link_status" in header and declared:
         allowed = set(scopes()["link_statuses"])
         bad = [row["entity_link_status"] for row in rows
@@ -1558,7 +1589,7 @@ def apply_field_map(collection: str, header: list, rows: list,
         raise RetiredIdentifierPresent(collection, "the header", len(bad_names),
                                        ", ".join(bad_names))
     for c in header:
-        hits = [row[c] for row in rows if RETIRED_TOKEN.search(row.get(c) or "")]
+        hits = [row[c] for row in rows if retired_identifier_in_value(collection, c, row.get(c) or "")]
         if hits:
             raise RetiredIdentifierPresent(collection, c, len(hits), hits[0][:60])
     return {"mapped": True, "renamed": rename, "dropped": drop,
@@ -2045,6 +2076,36 @@ def recompute_derived(collection: str, header, rows) -> dict:
     caller can report it rather than assert silently.
     """
     changed = {}
+    if str(collection).strip().lower() == "contractors":
+        from cedar_extent_competed import normalize, UNDEFINED
+        prepared = []
+        for row in rows:
+            label, _ = normalize(row.get("extent_competed", ""))
+            previous = row.get("extent_competed_normalized", "").strip()
+            if label == UNDEFINED or (previous and previous != label):
+                raise FieldMapRefusal(collection, ["extent_competed", "extent_competed_normalized"],
+                                      "Competition dictionary is undefined or disagrees with the stored normalization")
+            if row.get("competition_type") and row["competition_type"] != label:
+                raise FieldMapRefusal(collection, ["competition_type"], "Conflicting competition projection")
+            prepared.append(label)
+        if "competition_type" not in header:
+            header.append("competition_type")
+        for row, label in zip(rows, prepared):
+            row["competition_type"] = label
+        return {"competition_type": len(prepared)}
+    if str(collection).strip().lower() == "natural-resources":
+        # Historical diagnostic compatibility only. Production builds moved to
+        # Lumecon; no independently maintained qualification logic remains here.
+        from lumecon_data.collections.natural_resources import qualify_rows
+        prepared = qualify_rows(rows)
+        changes = sum(old.get("research_note") != new.get("research_note")
+                      for old, new in zip(rows, prepared))
+        if "research_note" not in header:
+            header.append("research_note")
+        for old, new in zip(rows, prepared):
+            old.clear()
+            old.update(new)
+        return {"research_note": changes} if changes else {}
     if str(collection).strip().lower() != "deals":
         return changed
     have_month = {"day", "month"}
@@ -2117,16 +2178,49 @@ def deals_public_view(header, rows) -> dict:
     describe the row is not applied), and the presentation counts. A refused
     correction is reported, never silently skipped; the caller prints it.
     """
-    out = {"corrections": 0, "refused": [], "caveats": 0, "unmapped": {}}
+    out = {"corrections": 0, "refused": [], "caveats": 0, "unmapped": {},
+           "purchase_allocation_corrections": []}
     fact = _script("1185", "deals_fact_check_2025_2026")
     log, skipped, _n13, _n14 = fact.apply_all(rows)
     out["corrections"] = len(log)
     out["refused"] = [(f, d, why) for f, d, why in skipped
                       if why != "row not found"]
+    # Reuse the canonical taxonomy's bounded accounting correction before
+    # deriving caveats. Otherwise a purchase-price allocation invents a public
+    # award and its misleading recipient-level aggregation warning. This only
+    # changes derived publication-copy fields; canonical source rows stay put.
+    taxonomy = _script("88", "build_deals_taxonomy")
+    for row in rows:
+        if (row.get("Deal_Category") == "Acquisition"
+                and row.get("record_class") == "PUBLIC_AWARD"
+                and row.get("transaction_type") == "Grant / Public Award"
+                and taxonomy.purchase_allocation_context(row)
+                and taxonomy.classify_record(row) == "TRANSACTION"):
+            row["record_class"] = "TRANSACTION"
+            row["transaction_type"] = taxonomy.classify(
+                row["Deal_Category"], taxonomy.TXN_TYPE)
+            out["purchase_allocation_corrections"].append(row.get("Deal_ID", ""))
     present = _script("1184", "deals_public_presentation")
     unmapped, stats = present.transform(rows)
     out["unmapped"] = unmapped
     out["caveats"] = stats.get("caveats", 0)
+    for row in rows:
+        # A short derived caveat cannot stand in for the owed editorial pass
+        # on substantive Notes. Leave its target absent so that gate still
+        # refuses. Once supplied, retain it and both factual qualifications.
+        note = row.get("research_note") or ""
+        if row.get("Notes") and not note:
+            continue
+        additions = [row.get("Caveat") or ""]
+        if row.get("Candidate_Status"):
+            additions.append("Candidate status: " + row["Candidate_Status"])
+        for qualification in additions:
+            if qualification and qualification not in note:
+                note = (note + " " + qualification).strip()
+        if note:
+            row["research_note"] = note
+            if "research_note" not in header:
+                header.append("research_note")
     for col in DEALS_PRESENTATION_COLUMNS + ("Source_1_Type_detail",
                                              "Source_2_Type_detail"):
         if col not in header:
@@ -2332,6 +2426,11 @@ def mask_attribution(r, state_reason: str) -> int:
     return cleared
 
 
+# Collection-specific inclusion and qualification rules are owned by
+# lumecon_data.collections. Legacy diagnostics delegate; supported producer
+# commands for migrated collections refuse before writing Cedar artifacts.
+
+
 def is_publication_eligible(r) -> tuple[bool, str, str]:
     """THE gate. (eligible, reason, disposition).
 
@@ -2346,6 +2445,13 @@ def is_publication_eligible(r) -> tuple[bool, str, str]:
     strictly safer than the old behaviour but is not the policy - so 1137 and
     1135 both apply it, and `verify` checks they do.
     """
+    if str(r.get("publish_hold") or "").strip().upper() in {"Y", "YES", "TRUE", "1"}:
+        return False, "publish_hold", WITHHOLD
+    if r.get("bill_id") or r.get("vote_id"):
+        from lumecon_data.collections.legislation import legislation_admission_hold
+        reason = legislation_admission_hold(r)
+        if reason:
+            return False, reason, WITHHOLD
     ok, why = row_ok(r)
     if not ok:
         return False, why, WITHHOLD

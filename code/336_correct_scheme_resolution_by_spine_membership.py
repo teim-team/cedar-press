@@ -86,6 +86,8 @@ from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from cedar_pipeline import retired_table_writer
+
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 DOCS = CEDAR / "docs"
@@ -124,6 +126,11 @@ def load_spine_ids():
 
 
 def main():
+    # Preserve this historical implementation without allowing a direct CLI
+    # call (including legacy force flags) to bypass the shared retirement.
+    if retired_table_writer(Path(__file__).name, "federal_funding_transactions.csv"):
+        raise SystemExit("RETIRED_TABLE_WRITER: use code/build.py for the supported "
+                         "Funding path; this historical writer cannot mutate canonical data.")
     print("=== Cedar Press 336: scheme by spine membership ===\n")
     spine = load_spine_ids()
     print(f"  spine ids loaded: {len(spine):,}")

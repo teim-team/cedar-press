@@ -105,6 +105,7 @@ gets a manifest line saying so rather than an empty file that looks complete.
 from __future__ import annotations
 
 import csv
+import io
 import json
 import re
 import sys
@@ -186,16 +187,57 @@ def find(name):
 # `cedar_publication`. It was reimplemented identically here and in 1135.
 
 
-def load(path, gate=True, masked=None):
+def publication_row(raw, header, *, gate=True, masked=None):
+    """One row policy path for customer exports and review samples.
+
+    Field-map/schema validation remains a separate mandatory collection gate.
+    A rejected row is represented explicitly, never silently dropped by callers.
+    """
+    if masked is None:
+        masked = defaultdict(int)
+    row = {column: raw.get(column, "") for column in header}
+    translate_neid_values(row)
+    apply_official_names(row)
+    if enforce_denials(row):
+        masked[DENIAL_MASK_REASON] += 1
+    if gate:
+        ok, why, disposition = is_publication_eligible(row)
+        if not ok:
+            return None, why
+        if disposition == MASK and mask_attribution(row, why):
+            masked[why] += 1
+    return row, ""
+
+
+def refuse_migrated_producers(collections):
+    """Retired writers cannot mutate releases now owned by Lumecon Data."""
+    from cedar_pipeline import RELEASE_PILOTS
+    migrated = sorted(set(collections) & set(RELEASE_PILOTS))
+    if migrated:
+        raise ValueError("RETIRED PRODUCER: " + ", ".join(migrated)
+                         + "; use Lumecon Data collection-build with pinned inputs, or "
+                         "code/build.py release-pilot as its compatibility adapter")
+
+
+def load(path, gate=True, masked=None, *, source_bytes=None, decision_receipt=None):
     """Read a table through THE publication gate.
 
     `masked` is an optional counter the caller passes in to collect the
     attribution masks - `is_publication_eligible` returns three things, not
     two, and a caller that reads only the boolean silently reverts CP-017.
+    A release caller supplies its already hashed `source_bytes` so a concurrent
+    source rewrite cannot change the projected rows after snapshot validation.
+    The path still identifies the table's existing publication rules.
     """
+    refuse_migrated_producers(k for k, name in FLAGSHIP.items() if name == path.name)
     if masked is None:
         masked = defaultdict(int)
-    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+    stream = (
+        path.open(encoding="utf-8-sig", errors="replace", newline="")
+        if source_bytes is None
+        else io.StringIO(source_bytes.decode("utf-8-sig"), newline="")
+    )
+    with stream as fh:
         rd = csv.DictReader(fh)
         raw_hdr = list(rd.fieldnames or [])
         source = rd
@@ -216,9 +258,7 @@ def load(path, gate=True, masked=None):
                       f"no rule and ships blank")
         hdr = publishable_columns(raw_hdr)
         rows, held = [], defaultdict(int)
-        neid_translated, neid_ambiguous, neid_denied = [0], [0], [0]
-        renamed = [0]
-        for r in source:
+        for source_row_index, r in enumerate(source):
             # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
             # so projecting first removes the personal-contact fields; running
             # `row_ok` on the RAW row instead fires its NEVER backstop on the
@@ -226,52 +266,22 @@ def load(path, gate=True, masked=None):
             # order: 582 of 587 rows of the BIA tribal leaders directory,
             # withheld whole for carrying a phone number that was never going
             # to be published.
-            r = {c: r.get(c, "") for c in hdr}
-            # TRANSLATE THE RETIRED SCHEME, DO NOT JUST DROP ITS COLUMN NAMES.
-            # `publishable_columns` removes columns whose NAME says NEID; it
-            # cannot see a NEID sitting in `entity_id`, `owner_hub_handle` or
-            # `affiliated_entity_ids`. Measured 2026-09-03, AFTER the name gate
-            # shipped: 89,680 retired values still leaving on 45,213 rows in 22
-            # columns across 8 datasets. Deleting them is not available -
-            # `nagpra` and `native-owned-businesses` hold no cedar_uid at all
-            # and these are their only entity keys - so they are rewritten to
-            # Cedar's own key. The 12 NEIDs that claim more than one uid are
-            # refused and left standing rather than guessed.
-            n_tr, n_amb = translate_neid_values(r)
-            # AND THE SHORT HANDLE, which is the same class of defect one
-            # layer up. `translate_neid_values` retires a bad IDENTIFIER;
-            # this retires a bad NAME. Owner, 2026-09-04: "there should be no
-            # short handle we cant use it reliable". Seven customer datasets
-            # carried `Confederated Yakama` for the Confederated Tribes and
-            # Bands of the Yakama Nation, because the register's short handle
-            # propagated into every one of them.
-            renamed[0] += apply_official_names(r)
-            # A VERIFIED DENIAL IS A CONSTRAINT ON EVERY DATASET.
-            # Applying the municipal-PHA ruling to the assistance table left 14
-            # rows of the DELIVERED subcontracting.csv still carrying
-            # sub_cedar_uid = CE-0017W-FN for the Omaha city housing authority,
-            # $3,221,778.36. Per-table application cannot close that; this can.
-            # Counted as the MASK it is, under its own reason, so the manifest's
-            # `rows_attribution_masked` / `attribution_masked_why` carry it
-            # (Codex, PR #51: the cell counter here was never read).
-            if enforce_denials(r):
-                masked[DENIAL_MASK_REASON] += 1
-            neid_translated[0] += n_tr
-            neid_ambiguous[0] += n_amb
-            if gate:
-                # THE gate: licensing + personal data (`row_ok`, unchanged)
-                # plus the deny-by-default adjudication policy added
-                # 2026-09-02. Three outcomes, not two - a MASK keeps the row
-                # and withholds the Cedar attribution on it, because a prime
-                # contract whose ownership ruling was withdrawn is still a real
-                # federal award and dropping it would lose public record.
-                ok, why, disp = is_publication_eligible(r)
-                if not ok:
-                    held[why] += 1
-                    continue
-                if disp == MASK and mask_attribution(r, why):
-                    masked[why] += 1
-            rows.append(r)
+            before_masks = dict(masked) if decision_receipt is not None else {}
+            projected, why = publication_row(r, hdr, gate=gate, masked=masked)
+            if projected is None:
+                held[why] += 1
+                if decision_receipt is not None:
+                    decision_receipt.append({"event": "withheld", "source_row_index": source_row_index, "reason": why,
+                                             **{k: r[k] for k in ("bill_id", "vote_id", "record_id") if k in r}})
+            else:
+                rows.append(projected)
+                if decision_receipt is not None:
+                    reasons = {k: v - before_masks.get(k, 0) for k, v in masked.items() if v > before_masks.get(k, 0)}
+                    if reasons:
+                        identity = [k for k in r if "cedar_uid" in k]
+                        decision_receipt.append({"event": "masked", "source_row_index": source_row_index,
+                                                 "reasons": reasons, "before": {k: r[k] for k in identity},
+                                                 "after": {k: projected.get(k, "") for k in identity}})
     return hdr, rows, held
 
 
@@ -762,6 +772,9 @@ def build(dry: bool, only: tuple = ()) -> int:
     than replaced - a partial build that dropped the other twelve lines would
     orphan twelve spreadsheets that are still on disk and still correct.
     """
+    if not dry:
+        from cedar_pipeline import RELEASE_PILOTS
+        refuse_migrated_producers(only or RELEASE_PILOTS)
     cs, sh = contracts(), shelves()
     built = [c for c in cs if sh.get(c) in BUILD_SHELVES]
     unknown = [c for c in only if c not in built]

@@ -4,6 +4,8 @@ Cedar Press - 512: dataset BUILD CONTRACTS. Mission Phase 1.
 
     py -3 code/512_build_dataset_contracts.py           # generate + verify
     py -3 code/512_build_dataset_contracts.py verify    # read-only, exit 1 on breach
+    py -3 code/512_build_dataset_contracts.py --refresh-writer-authority
+        # retire declared writer edges in stored contracts; no data remeasurement
 
 WHAT A CONTRACT IS
 ------------------
@@ -49,6 +51,7 @@ violation count in the JSON.
 from __future__ import annotations
 
 import csv
+import copy
 import importlib.util
 import json
 import sys
@@ -4368,6 +4371,8 @@ def build_contracts():
                                if o.get("rebuild")})
             enrichers = sorted({o.get("enricher", "") for o in orderings
                                 if o.get("enricher")})
+            rebuilds = CP.active_table_writers(name, rebuilds)
+            enrichers = CP.active_table_writers(name, enrichers)
             for s in rebuilds + enrichers:
                 # 293's io map records scripts by BARE NAME wherever they live
                 # under code/ (lobbying_pull/05_match_filings_v2.py appears as
@@ -5135,7 +5140,34 @@ def write_audit(doc):
     AUDIT_MD.write_text("\n".join(L), encoding="utf-8")
 
 
+def refresh_writer_authority(doc):
+    """Apply explicit retirement only, preserving all stored measurements.
+
+    No newly discovered producer is admitted. built_date still describes the
+    original measurement run, not fresh data validation. This bounded refresh
+    is suitable for a checkout without ignored production tables.
+    """
+    refreshed = copy.deepcopy(doc)
+    if not isinstance(refreshed, dict) or not isinstance(refreshed.get("contracts"), list):
+        raise ValueError("stored contracts are malformed")
+    for contract in refreshed["contracts"]:
+        for table in contract["tables"]:
+            for field in ("rebuilt_by", "enriched_by"):
+                scripts = table[field]
+                if not isinstance(scripts, list) or any(not isinstance(s, str) for s in scripts):
+                    raise ValueError("stored writer list is malformed")
+                table[field] = CP.active_table_writers(table["table"], scripts)
+    return refreshed
+
+
 def main() -> int:
+    if sys.argv[1:] == ["--refresh-writer-authority"]:
+        doc = refresh_writer_authority(json.loads(OUT_JSON.read_text(encoding="utf-8")))
+        OUT_JSON.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+        write_md(doc)
+        print("Refreshed writer retirement only: dataset_contracts.json and DATASET_CONTRACTS.md; "
+              "stored measurements and their date preserved, no data validation run")
+        return 0
     if len(sys.argv) > 1 and sys.argv[1] == "probe":
         return probe(sys.argv[2:])
     verify_only = len(sys.argv) > 1 and sys.argv[1] == "verify"

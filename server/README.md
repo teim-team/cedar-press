@@ -74,3 +74,56 @@ which is ignored). Unset, the store lives in memory and a restart forgets it:
 right for the tests, wrong for a deployment. An account record in
 `CEDAR_PRESS_ACCOUNTS` may carry `"account": "acct-name"` so several seats share
 one subscription's ledger.
+
+
+## Pinned governed release downloads
+
+The existing sample download remains a sample. The additive
+`GET /press/collections/{collection_id}/full-download?release_id=<sha256>`
+serves the exact immutable `records.jsonl` artifact from an approved Lumecon
+release. The adapter is shared across collections; the local Legislation
+flagship is the first real-data proof. A passing table is not a complete product.
+`GET /press/collections` exposes separate `fullRelease` metadata with the table,
+format, rows, release, checksum and explicit pinned download URL.
+
+Server-only configuration (never Vite/browser variables):
+
+- `CEDAR_PRESS_ENVIRONMENT`: `development` (default), `staging`, or `production`.
+- `CEDAR_PRESS_RELEASE_CATALOG`: a reviewed local catalog from Lumecon `build_catalog`.
+- `CEDAR_PRESS_DATA_API`: the Lumecon API origin. HTTPS is required; HTTP loopback
+  is allowed only in development. Staging/production reject loopback and insecure cookies.
+- `CEDAR_PRESS_DATA_TOKEN`: a dataset-scoped backend grant; never a subscriber credential.
+- `CEDAR_PRESS_DATA_TIMEOUT_SECONDS`: bounded data-service socket wait, 1–300 seconds
+  (default 30). Cold validation of large multipart releases may require a measured
+  higher value in development. Invalid/nonfinite values fail before a request.
+  This does not change byte limits, verification, entitlement or production gates.
+- Staging/production also require explicit secrets of at least 32 characters, a
+  Postgres `DATABASE_URL`, and no development `CEDAR_PRESS_ACCOUNTS` fallback.
+  Configuration validation is not proof of database availability or deployment readiness.
+
+Cedar enforces subscriber access before fetching data, checks catalog integrity,
+explicit release equality, schema, publication holds, rights, exact artifact
+bytes/hash, row count and primary keys. No matching or cleaning happens in the
+consumer. Missing, stale or malformed pins and service failures do not fall back
+to a sample. NEED remains held by `code/cedar_publication.py`. Unconfigured
+collections fail closed. Single artifacts and individual manifest parts are bounded
+at 256 MiB. Larger logical tables require the explicit development-only
+`CEDAR_PRESS_PARTITIONED_REHEARSAL=1` contract; staging/production refuse that path.
+The paired Lumecon collection `/download` endpoint verifies every component once
+and returns the exact manifest-ordered JSONL concatenation. Cedar verifies each
+part boundary, digest, schema and row count plus global primary-key uniqueness
+before releasing bytes. Temporary disk storage bounds memory to one part and a
+64 MiB key-index cache. An older producer without this endpoint fails closed.
+
+`cedar_press.download` emits redacted structured INFO events to stderr for denial,
+invalid requests, verification failure and authorized/prepared responses. An event
+records no account, token or row data. Prepared bytes are not proof of completed
+network delivery. Production still needs durable log collection and tested session
+expiry/revocation; the local fixture is not production approval.
+
+Rollback selects a previous verified catalog pin, without mutating either release.
+The old client pin is refused after a catalog switch. Run
+`server/tests/release_download_rehearsal.py --store <root> --catalog <catalog>`
+with both existing packages for real local login, 401/403/200, exact download,
+stale-pin and byte-preserving rollback checks. See
+`docs/HAVALA_INFRASTRUCTURE_REVIEW.md` for exact revisions and results.

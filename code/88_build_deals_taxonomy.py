@@ -246,6 +246,31 @@ def classify(text, table):
     return ""
 
 
+def purchase_allocation_context(row):
+    """Whether allocation is described in an explicit acquisition's price."""
+    value = row.get("Value_Type") or ""
+    return bool(row.get("Deal_Category") == "Acquisition"
+                and re.search(r"acqui|purchas", row.get("Event_Type") or "", re.I)
+                and re.search(r"consideration|purchase price|acquisition|paid in cash",
+                              value, re.I)
+                and re.search(r"\ballocat\w*\b", value, re.I))
+
+
+def classify_record(row):
+    """Classify the record without mistaking purchase accounting for an award.
+
+    An explicitly recorded acquisition's purchase-price allocation assigns its
+    consideration to assets; it does not allocate a public award. Other award
+    evidence (including a grant funding an acquisition) remains effective.
+    """
+    value = row.get("Value_Type") or ""
+    if purchase_allocation_context(row):
+        value = re.sub(r"\ballocat\w*\b", "", value, flags=re.I)
+    evidence = " ".join(filter(None, [row.get("Deal_Category"),
+                                      row.get("Event_Type"), value]))
+    return "PUBLIC_AWARD" if PUBLIC_AWARD.search(evidence) else "TRANSACTION"
+
+
 def main(dry_run=False):
     print("=== Cedar Press 88: deals taxonomy (APPEND-MERGE) ===")
     print("    DRY RUN - nothing will be written\n" if dry_run else "")
@@ -282,12 +307,7 @@ def main(dry_run=False):
             r.get("Deal_Title"), r.get("Description"), r.get("Value_Type"),
             r.get("Native_Party_Type"), r.get("Status")]))
 
-        cls = ("PUBLIC_AWARD"
-               if PUBLIC_AWARD.search(
-                   " ".join(filter(None, [r.get("Deal_Category"),
-                                          r.get("Event_Type"),
-                                          r.get("Value_Type")])) or "")
-               else "TRANSACTION")
+        cls = classify_record(r)
 
         sector = classify(blob, SECTOR)
         # `record_class` decides the transaction_type family BEFORE the

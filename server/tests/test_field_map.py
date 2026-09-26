@@ -27,10 +27,12 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import io
 import json
 import sys
+import tempfile
 import unittest
-from contextlib import ExitStack
+from contextlib import ExitStack, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -43,13 +45,150 @@ sys.path.insert(0, str(CODE))
 
 def _load_publication():
     spec = importlib.util.spec_from_file_location(
-        "cedar_publication", CODE / "cedar_publication.py")
+        "cedar_publication", CODE / "cedar_publication.py"
+    )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
 pub = _load_publication()
+
+
+class DealsQualificationTest(unittest.TestCase):
+    def test_purchase_allocation_is_not_public_award(self):
+        taxonomy = pub._script("88", "build_deals_taxonomy")
+        for value in (
+            "Fair value of consideration; purchase price allocation finalized",
+            "The note allocates the total purchase price to tangible assets",
+            "Acquisition-date allocation table totals the consideration",
+            "The consideration was paid in cash and allocated entirely to property",
+        ):
+            row = {
+                "Deal_Category": "Acquisition",
+                "Event_Type": "100% stock acquisition",
+                "Value_Type": value,
+            }
+            self.assertEqual(taxonomy.classify_record(row), "TRANSACTION")
+            self.assertEqual(
+                taxonomy.classify_record(dict(row, Value_Type=value + "; federal grant awarded")),
+                "PUBLIC_AWARD",
+            )
+        self.assertEqual(
+            taxonomy.classify_record(
+                {"Deal_Category": "Grant / public financing", "Value_Type": "Allocation"}
+            ),
+            "PUBLIC_AWARD",
+        )
+
+    def test_publication_reuses_taxonomy_before_caveats_and_is_idempotent(self):
+        row = {
+            "Deal_ID": "FIXTURE-PURCHASE",
+            "Deal_Category": "Acquisition",
+            "Event_Type": "100% stock acquisition",
+            "Value_Type": "Purchase price allocation",
+            "record_class": "PUBLIC_AWARD",
+            "transaction_type": "Grant / Public Award",
+            "Confidence": "High",
+            "Verification_Status": "Verified",
+        }
+        header, rows = list(row), [row]
+        result = pub.deals_public_view(header, rows)
+        self.assertEqual(result["purchase_allocation_corrections"], ["FIXTURE-PURCHASE"])
+        self.assertEqual(row["record_class"], "TRANSACTION")
+        self.assertEqual(row["transaction_type"], "Acquisition")
+        self.assertNotIn("recipient-level", row["Caveat"])
+        self.assertEqual(pub.deals_public_view(header, rows)["purchase_allocation_corrections"], [])
+
+    def test_caveat_and_candidate_qualification_survive_without_overwriting_note(self):
+        row = {
+            "Deal_ID": "FIXTURE-NOTE",
+            "record_class": "PUBLIC_AWARD",
+            "Confidence": "Candidate from source",
+            "research_note": "Closing date uncertain.",
+            "Notes": "Internal editorial source",
+            "Verification_Status": "",
+        }
+        header = list(row)
+        pub.deals_public_view(header, [row])
+        note = row["research_note"]
+        self.assertIn("Closing date uncertain.", note)
+        self.assertIn(row["Caveat"], note)
+        self.assertIn("Candidate status: Candidate - not hand-verified", note)
+        pub.deals_public_view(header, [row])
+        self.assertEqual(row["research_note"], note)
+
+    def test_derived_caveat_cannot_satisfy_missing_substantive_notes(self):
+        row = {
+            "Deal_ID": "FIXTURE-OWED",
+            "Notes": "Do not add contingent earnout to price.",
+            "record_class": "PUBLIC_AWARD",
+            "Confidence": "Candidate from source",
+        }
+        header = list(row)
+        pub.deals_public_view(header, [row])
+        self.assertTrue(row["Caveat"])
+        self.assertNotIn("research_note", row)
+        header = pub.publishable_columns(header)
+        row = {key: value for key, value in row.items() if key in header}
+        with self.assertRaises(pub.OwedDerivation) as caught:
+            pub.apply_field_map("deals", header, [row], set(header))
+        self.assertEqual(caught.exception.columns, ["Notes"])
+
+    def test_derived_note_is_declared_when_in_real_owned_header(self):
+        row = {
+            "Deal_ID": "FIXTURE-OWNED-NOTE",
+            "Notes": "",
+            "record_class": "PUBLIC_AWARD",
+            "Confidence": "Candidate from source",
+        }
+        header = list(row)
+        pub.deals_public_view(header, [row])
+        expected = row["research_note"]
+        self.assertIn("Public award record", expected)
+        self.assertIn("Candidate - not hand-verified", expected)
+        header = pub.publishable_columns(header)
+        row = {key: value for key, value in row.items() if key in header}
+        # The real loader sees the publish-time target as part of its header.
+        # Declare it explicitly instead of exempting it from unknown-field gates.
+        self.assertIn("research_note", header)
+        pub.apply_field_map("deals", header, [row], set(header))
+        self.assertEqual(row["research_note"], expected)
+        self.assertNotIn("Caveat", header)
+        self.assertNotIn("Candidate_Status", header)
+
+
+class MigratedProducerDelegationTest(unittest.TestCase):
+    def test_resource_qualification_uses_lumecon_without_mutating_on_failure(self):
+        from types import ModuleType
+        from unittest.mock import Mock
+
+        module = ModuleType("lumecon_data.collections.natural_resources")
+        module.qualify_rows = Mock(side_effect=ValueError("unreviewed evidence"))
+        rows = [{"beneficiary_note": "original"}]
+        header = ["beneficiary_note"]
+        with (
+            patch.dict(sys.modules, {module.__name__: module}),
+            self.assertRaisesRegex(ValueError, "unreviewed evidence"),
+        ):
+            pub.recompute_derived("natural-resources", header, rows)
+        self.assertEqual(rows, [{"beneficiary_note": "original"}])
+        self.assertEqual(header, ["beneficiary_note"])
+        module.qualify_rows.assert_called_once_with(rows)
+
+    def test_legislation_diagnostic_uses_canonical_admission_result(self):
+        from types import ModuleType
+        from unittest.mock import Mock
+
+        module = ModuleType("lumecon_data.collections.legislation")
+        module.legislation_admission_hold = Mock(return_value="evidence_hold")
+        row = {"bill_id": "fixture-id"}
+        with patch.dict(sys.modules, {module.__name__: module}):
+            self.assertEqual(
+                pub.is_publication_eligible(row), (False, "evidence_hold", pub.WITHHOLD)
+            )
+        module.legislation_admission_hold.assert_called_once_with(row)
+
 
 #: Datasets whose samples the applier must REFUSE as they stand, with the
 #: column that stops them. These are findings, not fixture defects: the
@@ -67,11 +206,13 @@ REFUSED_AS_SAMPLED = {
     "federal-register": (("event_date_basis",), pub.OwedDerivation),
     "deals": (("Deal_Category", "Notes"), pub.OwedDerivation),
     "contractors": (("extent_competed",), pub.OwedDerivation),
-    "need": (("cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"),
-             pub.NEEDAffiliationPublicationHold),
-    # entity_id and cedar_spine_entity_id both disagree with cedar_uid on the
-    # Menominee row: neither is an alias, and neither is deleted unadjudicated.
-    "nonprofits": (("entity_id", "cedar_spine_entity_id"), pub.UnadjudicatedIdentifier),
+    "need": (
+        ("cedar_uid", "owner_hub_cedar_uid", "need_enterprise_relations"),
+        pub.NEEDAffiliationPublicationHold,
+    ),
+    # The governed nonprofit projection must supply its classification; the
+    # compatibility applier cannot treat a delegated rule as a local builder.
+    "nonprofits": (("classification_ruling",), pub.OwedDerivation),
     # The beneficiary note carries caveats that must reach research_note
     # before it leaves (Codex, PR #67).
     "natural-resources": (("beneficiary_note",), pub.OwedDerivation),
@@ -104,17 +245,31 @@ def supply_owed_targets(collection: str, rows) -> set:
     the rest of the contract can be asserted. Returns the targets supplied."""
     entry = pub.field_map()[collection]
     rename = {f["column"]: f["to"] for f in entry["fields"] if f["decision"] == "rename"}
-    built = [n["column"] for n in entry["new"] if not n.get("status")]
+    # These fixtures supply external producer outputs; they do not implement
+    # the governed Lumecon derivations in Cedar's compatibility applier.
+    source_of = {target: source for source, target in rename.items()}
+
+    def built_here(n):
+        spec = n.get("from", "")
+        return not n.get("status") and (
+            not spec.startswith("rule:")
+            or bool(rows)
+            and pub._rule(entry, spec, rows[0], source_of) is not None
+        )
+
+    built = [n["column"] for n in entry["new"] if built_here(n)]
     supplied = set()
-    carriers = {f["column"] for f in entry["fields"]
-                if f["decision"] == "combine" and f["to"] == f["column"]}
+    carriers = {
+        f["column"]
+        for f in entry["fields"]
+        if f["decision"] == "combine" and f["to"] == f["column"]
+    }
     for f, target, _stuck in pub.owed_derivations(entry, rename, built, rows):
-        if target in [n["column"] for n in entry["new"] if not n.get("status")
-                      and n.get("from") != "rule:blank"]:
+        if target in [n["column"] for n in entry["new"] if built_here(n) and not f.get("blocking")]:
             continue
         for r in rows:
             if target in carriers:
-                r[f["column"]] = ""          # folded into the carrier, for the test only
+                r[f["column"]] = ""  # folded into the carrier, for the test only
             elif (r.get(f["column"]) or "").strip() and not (r.get(target) or "").strip():
                 r[target] = f"supplied from {f['column']}"
         supplied.add(target)
@@ -128,29 +283,68 @@ def neutralised(collection: str, header, rows):
         for r in rows:
             r[col] = value
     supply_owed_targets(collection, rows)
+    if collection == "federal-register":
+        for row in rows:
+            row["entity_link_status"] = "unresolved"  # supplied fixture, no linkage claim
     return header, rows
 
 
 class TestCombinedPlan(unittest.TestCase):
-    def test_plan_and_build_check_joined_schema_without_matching_empty_keys(self):
+    def test_pinned_bytes_use_publication_gate_without_reopening_changed_source(self):
         spec = importlib.util.spec_from_file_location(
-            "customer_combine_test", CODE / "1137_customer_dataset_combine.py")
+            "pinned_customer_combine_test", CODE / "1137_customer_dataset_combine.py"
+        )
         combine = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(combine)
-        contract = {"nagpra": {"tables": [
-            {"table": "flag.csv", "key_columns": ["key"]},
-            {"table": "one.csv", "key_columns": ["key"], "status": "shippable"},
-            {"table": "many.csv", "key_columns": ["key"], "status": "shippable"},
-        ]}}
+        pinned = b"record_id,note\nfixture-1,original source claim\n"
+        with (
+            patch.object(Path, "open", side_effect=AssertionError("mutable source reopened")),
+            patch.object(combine, "publishable_columns", side_effect=lambda columns: columns),
+            patch.object(combine, "translate_neid_values", return_value=(0, 0)),
+            patch.object(combine, "apply_official_names", return_value=0),
+            patch.object(combine, "enforce_denials", return_value=False),
+            patch.object(
+                combine, "is_publication_eligible", return_value=(True, "", False)
+            ) as gate,
+        ):
+            header, rows, held = combine.load(Path("fixture.csv"), source_bytes=pinned)
+        self.assertEqual(header, ["record_id", "note"])
+        self.assertEqual(rows, [{"record_id": "fixture-1", "note": "original source claim"}])
+        self.assertEqual(dict(held), {})
+        gate.assert_called_once()
+
+    def test_plan_and_build_check_joined_schema_without_matching_empty_keys(self):
+        spec = importlib.util.spec_from_file_location(
+            "customer_combine_test", CODE / "1137_customer_dataset_combine.py"
+        )
+        combine = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(combine)
+        contract = {
+            "nagpra": {
+                "tables": [
+                    {"table": "flag.csv", "key_columns": ["key"]},
+                    {"table": "one.csv", "key_columns": ["key"], "status": "shippable"},
+                    {"table": "many.csv", "key_columns": ["key"], "status": "shippable"},
+                ]
+            }
+        }
+
         class ReachedPublication(Exception):
             pass
+
         def fixture_load(path, **kwargs):
-            rows = ({"flag.csv": [{"key": "a"}, {"key": ""}],
-                     "one.csv": [{"key": "a", "detail": "supported"},
-                                 {"key": "", "detail": "must not link"}],
-                     "many.csv": [{"key": "a"}, {"key": "a"},
-                                  {"key": ""}, {"key": ""}]})[path.name]
+            rows = (
+                {
+                    "flag.csv": [{"key": "a"}, {"key": ""}],
+                    "one.csv": [
+                        {"key": "a", "detail": "supported"},
+                        {"key": "", "detail": "must not link"},
+                    ],
+                    "many.csv": [{"key": "a"}, {"key": "a"}, {"key": ""}, {"key": ""}],
+                }
+            )[path.name]
             return list(rows[0]), [dict(r) for r in rows], {}
+
         def inspect_schema(collection, header, rows, own):
             self.assertEqual(len(rows), 2)
             self.assertIn("one__detail", header)
@@ -160,48 +354,74 @@ class TestCombinedPlan(unittest.TestCase):
             self.assertEqual(rows[0]["n_many"], "2")
             self.assertEqual(rows[1]["n_many"], "0")
             raise ReachedPublication()
+
         for dry in (True, False):
             with self.subTest(dry=dry), ExitStack() as stack:
                 replacements = {
-                    "contracts": lambda: contract, "shelves": lambda: {"nagpra": "standard"},
-                    "FLAGSHIP": {"nagpra": "flag.csv"}, "find": lambda n: Path(n),
+                    "contracts": lambda: contract,
+                    "shelves": lambda: {"nagpra": "standard"},
+                    "FLAGSHIP": {"nagpra": "flag.csv"},
+                    "find": lambda n: Path(n),
                     "load": fixture_load,
                     "one_per_key": lambda meta, key: meta["table"] == "one.csv",
                     "publishable_columns": lambda columns: columns,
-                    "recompute_derived": lambda *args: {}, "apply_field_map": inspect_schema,
+                    "recompute_derived": lambda *args: {},
+                    "apply_field_map": inspect_schema,
                 }
                 for key, value in replacements.items():
                     stack.enter_context(patch.object(combine, key, value))
                 emit = stack.enter_context(patch.object(combine, "emit"))
-                with self.assertRaises(ReachedPublication):
-                    combine.build(dry=dry, only=("nagpra",))
+                if dry:
+                    with self.assertRaises(ReachedPublication):
+                        combine.build(dry=True, only=("nagpra",))
+                else:
+                    with patch.object(combine, "load") as source_load:
+                        with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                            combine.build(dry=False, only=("nagpra",))
+                        source_load.assert_not_called()
                 emit.assert_not_called()
 
 
 class TestNeedExportHold(unittest.TestCase):
     def test_plan_and_build_stop_without_writing_even_when_cross_reference_is_blank(self):
         spec = importlib.util.spec_from_file_location(
-            "need_customer_combine_test", CODE / "1137_customer_dataset_combine.py")
+            "need_customer_combine_test", CODE / "1137_customer_dataset_combine.py"
+        )
         combine = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(combine)
         contract = {"need": {"tables": [{"table": "flag.csv", "key_columns": ["enterprise_id"]}]}}
         for dry in (True, False):
             with self.subTest(dry=dry), ExitStack() as stack:
+
                 def fixture_load(path, **kwargs):
-                    row = {"enterprise_id": "CEDAR-NEST-TEST", "cedar_uid": "CE-00001-AA",
-                           "enterprise_existing_cedar_uid": ""}
+                    row = {
+                        "enterprise_id": "CEDAR-NEST-TEST",
+                        "cedar_uid": "CE-00001-AA",
+                        "enterprise_existing_cedar_uid": "",
+                    }
                     return list(row), [row], {}
+
                 replacements = {
-                    "contracts": lambda: contract, "shelves": lambda: {"need": "pro"},
-                    "FLAGSHIP": {"need": "flag.csv"}, "find": lambda n: Path(n),
-                    "load": fixture_load, "publishable_columns": lambda columns: columns,
-                    "recompute_derived": lambda *args: {}, "apply_field_map": pub.apply_field_map,
+                    "contracts": lambda: contract,
+                    "shelves": lambda: {"need": "pro"},
+                    "FLAGSHIP": {"need": "flag.csv"},
+                    "find": lambda n: Path(n),
+                    "load": fixture_load,
+                    "publishable_columns": lambda columns: columns,
+                    "recompute_derived": lambda *args: {},
+                    "apply_field_map": pub.apply_field_map,
                 }
                 for key, value in replacements.items():
                     stack.enter_context(patch.object(combine, key, value))
                 emit = stack.enter_context(patch.object(combine, "emit"))
-                with self.assertRaises(pub.NEEDAffiliationPublicationHold):
-                    combine.build(dry=dry, only=("need",))
+                if dry:
+                    with self.assertRaises(pub.NEEDAffiliationPublicationHold):
+                        combine.build(dry=True, only=("need",))
+                else:
+                    with patch.object(combine, "load") as source_load:
+                        with self.assertRaisesRegex(ValueError, "RETIRED PRODUCER"):
+                            combine.build(dry=False, only=("need",))
+                        source_load.assert_not_called()
                 emit.assert_not_called()
 
 
@@ -228,17 +448,23 @@ class TestApplyFieldMap(unittest.TestCase):
                 self.assertTrue(result["mapped"])
                 expected = [c for c in entry["order"] if c not in result["owed"]]
                 opening = [c for c in entry["opening"] if c not in result["owed"]]
-                self.assertEqual(header[:len(opening)], opening)
+                self.assertEqual(header[: len(opening)], opening)
                 self.assertEqual(header, expected)
                 self.assertEqual(header[-1], "research_note")
                 # Nothing internal, documented, combined or derived survives,
                 # except a combine's carrier: the source that already bears
                 # the target's name (contractors' sector), kept as the target.
                 targets = {f["to"] for f in entry["fields"] if f["decision"] == "rename"}
-                carriers = {f["column"] for f in entry["fields"]
-                            if f["decision"] == "combine" and f["to"] == f["column"]}
-                gone = {f["column"] for f in entry["fields"]
-                        if f["decision"] in ("internal", "document", "combine", "derive")}
+                carriers = {
+                    f["column"]
+                    for f in entry["fields"]
+                    if f["decision"] == "combine" and f["to"] == f["column"]
+                }
+                gone = {
+                    f["column"]
+                    for f in entry["fields"]
+                    if f["decision"] in ("internal", "document", "combine", "derive")
+                }
                 gone -= targets | carriers
                 self.assertFalse(gone & set(header))
                 for r in rows:
@@ -246,7 +472,7 @@ class TestApplyFieldMap(unittest.TestCase):
                     self.assertEqual(set(r), set(header))
                 for f in entry["fields"]:
                     if f["decision"] == "rename":
-                        if f["column"] not in targets:   # a chain: the name is reused
+                        if f["column"] not in targets:  # a chain: the name is reused
                             self.assertNotIn(f["column"], header)
                         self.assertIn(f["to"], header)
                 # No prohibited name, no retired scheme's name anywhere shipped.
@@ -255,22 +481,42 @@ class TestApplyFieldMap(unittest.TestCase):
                     for r in rows:
                         self.assertIsNone(pub.RETIRED_TOKEN.search(r[c] or ""), (c, r[c]))
                 # Every retirement entry is reported with its rows.
-                self.assertEqual({r["column"] for r in result["retirement"]},
-                                 {r["column"] for r in entry["retire"]})
+                self.assertEqual(
+                    {r["column"] for r in result["retirement"]},
+                    {r["column"] for r in entry["retire"]},
+                )
 
     def test_need_affiliation_hold_survives_blank_removed_or_internal_cross_reference(self):
         from copy import deepcopy
+
         for cross_reference in ("CE-00001-AA", "", None):
             with self.subTest(cross_reference=cross_reference):
-                row = {"enterprise_id": "CEDAR-NEST-TEST", "cedar_uid": "CE-00002-AA",
-                       "owner_hub_cedar_uid": "CE-00002-AA"}
+                row = {
+                    "enterprise_id": "CEDAR-NEST-TEST",
+                    "cedar_uid": "CE-00002-AA",
+                    "owner_hub_cedar_uid": "CE-00002-AA",
+                }
                 if cross_reference is not None:
                     row["enterprise_existing_cedar_uid"] = cross_reference
                 rows, header = [row], list(row)
                 before = deepcopy((header, rows))
-                with patch.object(pub, "field_map", return_value={"need": {
-                    "fields": [{"column": "enterprise_existing_cedar_uid", "decision": "internal"}]
-                }}), self.assertRaises(pub.NEEDAffiliationPublicationHold):
+                with (
+                    patch.object(
+                        pub,
+                        "field_map",
+                        return_value={
+                            "need": {
+                                "fields": [
+                                    {
+                                        "column": "enterprise_existing_cedar_uid",
+                                        "decision": "internal",
+                                    }
+                                ]
+                            }
+                        },
+                    ),
+                    self.assertRaises(pub.NEEDAffiliationPublicationHold),
+                ):
                     pub.apply_field_map("need", header, rows, set(header))
                 self.assertEqual((header, rows), before)
         with (
@@ -282,9 +528,12 @@ class TestApplyFieldMap(unittest.TestCase):
 
     def test_the_singular_block_is_filled_from_the_register(self):
         reg = pub.register()
-        singular = (("contractors", "prime_contracts"), ("subcontracting", "subawards"),
-                    ("natural-resources", "resource_revenue"),
-                    ("lobbying", "native_entity_lobbying_disclosures"))
+        singular = (
+            ("contractors", "prime_contracts"),
+            ("subcontracting", "subawards"),
+            ("natural-resources", "resource_revenue"),
+            ("lobbying", "native_entity_lobbying_disclosures"),
+        )
         for coll, table in singular:
             header, rows = sample(coll, table)
             neutralised(coll, header, rows)
@@ -310,10 +559,11 @@ class TestApplyFieldMap(unittest.TestCase):
         header, rows = sample("deals", "deals_classified")
         neutralised("deals", header, rows)
         result = pub.apply_field_map("deals", header, rows, set(header))
-        # The party's own role stays; the block's role is owed and absent,
-        # never an ambiguous constant (Codex, PR #67).
-        self.assertIn("cedar_entity_role", result["owed"])
-        self.assertNotIn("cedar_entity_role", header)
+        # The party's source-described role stays; the governed contract now
+        # includes an explicitly blank unresolved block role, never an owner claim.
+        self.assertNotIn("cedar_entity_role", result["owed"])
+        self.assertIn("cedar_entity_role", header)
+        self.assertTrue(all(r["cedar_entity_role"] == "" for r in rows))
         self.assertIn("native_party_role", header)
         self.assertTrue(all(r["native_party_role"] for r in rows))
         self.assertNotIn("Notes", header)
@@ -345,8 +595,9 @@ class TestApplyFieldMap(unittest.TestCase):
                             expected.append((uid.strip(), declared["role"]))
                 got = list(zip(cols["cedar_uids"], cols["entity_roles"], strict=True))
                 self.assertEqual(got, expected)
-                aligned = zip(cols["cedar_uids"], cols["canonical_names"],
-                              cols["entity_classes"], strict=True)
+                aligned = zip(
+                    cols["cedar_uids"], cols["canonical_names"], cols["entity_classes"], strict=True
+                )
                 for uid, name, cls in aligned:
                     if uid in reg:
                         self.assertEqual((name, cls), reg[uid])
@@ -357,8 +608,10 @@ class TestApplyFieldMap(unittest.TestCase):
                 for r in rows:
                     statuses = json.loads(r["entity_link_statuses"])
                     self.assertEqual(len(statuses), len(json.loads(r["cedar_uids"])))
-                    self.assertTrue(r["source_url"].startswith("https://www.congress.gov/bill/"),
-                                    r["source_url"])
+                    self.assertTrue(
+                        r["source_url"].startswith("https://www.congress.gov/bill/"),
+                        r["source_url"],
+                    )
             else:
                 for r in rows:
                     additional = json.loads(r["additional_institution_names"])
@@ -396,7 +649,7 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_an_alias_of_cedar_uid_is_verified_row_by_row(self):
         header, rows = sample("natural-resources", "resource_revenue")
         neutralised("natural-resources", header, rows)
-        rows[3]["recipient_entity_id"] = "CE-00000-00"      # disagrees with cedar_uid
+        rows[3]["recipient_entity_id"] = "CE-00000-00"  # disagrees with cedar_uid
         with self.assertRaises(pub.AliasDisagreement) as caught:
             pub.apply_field_map("natural-resources", header, rows, set(header))
         self.assertIn("recipient_entity_id", caught.exception.columns)
@@ -428,7 +681,7 @@ class TestApplyFieldMap(unittest.TestCase):
     def test_a_retired_scheme_in_a_shipped_value_or_name_stops_the_dataset(self):
         header, rows = sample("contractors", "prime_contracts")
         neutralised("contractors", header, rows)
-        rows[0]["award_base_description"] = "keyed via NEID TRBF-0001"   # ships as `description`
+        rows[0]["award_base_description"] = "keyed via NEID TRBF-0001"  # ships as `description`
         # (the sample carries 'Oneida' in several cells, which must not match)
         rows[1]["awardee_name"] = "ONEIDA NATION ENTERPRISES"
         with self.assertRaises(pub.RetiredIdentifierPresent) as caught:
@@ -469,19 +722,55 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertEqual(rows[0]["business_name"], "Example Builders LLC")
         self.assertIn("certifying_authority_entity_id", header)
         self.assertNotIn("nation_id", header)
-        adjudicated = [r["column"] for r in result["retirement"]
-                       if r["disposition"] == "adjudicate"]
-        self.assertEqual(adjudicated, ["nation_id"])
-        # A populated nation_id stops the dataset until it is adjudicated.
-        rows2 = [dict(r) for r in rows]
-        header2 = [f["column"] for f in entry["fields"]]
-        rows2 = [{c: "" for c in header2} for _ in range(1)]
-        rows2[0]["nation_id"] = "NATION-17"
-        with self.assertRaises(pub.UnadjudicatedIdentifier):
-            pub.apply_field_map("owned", header2, rows2, set(header2))
+        adjudicated = [
+            r["column"] for r in result["retirement"] if r["disposition"] == "adjudicate"
+        ]
+        self.assertEqual(adjudicated, [])
+
+    def test_owned_source_nation_is_internal_context_not_certifier_or_business_identity(self):
+        entry = pub.field_map()["owned"]
+        header = [f["column"] for f in entry["fields"]]
+        # These source contexts occur in the Tulalip NAOB directory. They
+        # do not assert that the business or its certifier is the named nation.
+        authority = "TRBF-TULALP-00"
+        source_rows = []
+        for name, nation, certifier in (
+            ("Akana", "bia:three-affiliated-tribes", authority),
+            ("Diverse Contractors", "bia:makah", authority),
+            ("Unresolved business", "bia:makah", ""),
+        ):
+            row = dict.fromkeys(header, "")
+            row.update(
+                business_name_raw=name,
+                nation_id=nation,
+                certifying_authority_entity_id=certifier,
+                programme_name="TERO vendor list",
+            )
+            source_rows.append(row)
+        preserved = [dict(row) for row in source_rows]
+        candidate = [dict(row) for row in source_rows]
+        result = pub.apply_field_map("owned", header, candidate, set(header))
+        self.assertEqual(source_rows, preserved)
+        self.assertNotIn("nation_id", header)
+        for source, published in zip(source_rows, candidate, strict=True):
+            self.assertNotIn("nation_id", published)
+            self.assertEqual(
+                published["certifying_authority_entity_id"],
+                source["certifying_authority_entity_id"],
+            )
+            self.assertEqual(published["cedar_uid"], source["certifying_authority_entity_id"])
+            self.assertEqual(published["business_entity_id"], "")
+        retirement = next(r for r in result["retirement"] if r["column"] == "nation_id")
+        self.assertEqual(retirement["disposition"], "internal_crosswalk")
+        self.assertEqual(retirement["rows_affected"], 3)
+        self.assertEqual(retirement["unresolved"], 0)
+        field = next(f for f in entry["fields"] if f["column"] == "nation_id")
+        declared = next(r for r in entry["retire"] if r["column"] == "nation_id")
+        self.assertEqual(field["retire"], declared)
 
     def test_a_withheld_register_name_never_falls_back_to_a_raw_name(self):
         import cedar_domain
+
         reg = pub.register()
         withheld_class = cedar_domain.INDIVIDUAL_NATIVE_CLASS
         withheld = [uid for uid, (name, cls) in reg.items() if cls == withheld_class]
@@ -527,6 +816,42 @@ class TestApplyFieldMap(unittest.TestCase):
         with self.assertRaises(pub.UndecidedColumns) as caught:
             pub.apply_field_map("contractors", header, rows, own)
         self.assertEqual(caught.exception.columns, ["n_prime_contracts_awards"])
+
+    def test_explicitly_internal_join_is_projected_without_public_schema_change(self):
+        header, rows = sample("legislation", "native_bills")
+        own = set(header)
+        field = "source_index__parser_diagnostic"
+        header.append(field)
+        for row in rows:
+            row[field] = "internal extraction bookkeeping"
+        mapping = json.loads(json.dumps(pub.field_map()))
+        mapping["legislation"]["fields"].append(
+            {"column": field, "decision": "internal", "why": "Fixture reviewed disposition"}
+        )
+        with patch.object(pub, "field_map", return_value=mapping):
+            pub.apply_field_map("legislation", header, rows, own)
+        self.assertNotIn(field, header)
+        self.assertTrue(all(field not in row for row in rows))
+        self.assertEqual(len(rows), 10)
+
+    def test_joined_keep_without_public_target_still_refuses_before_mutation(self):
+        header, rows = sample("legislation", "native_bills")
+        own = set(header)
+        field = "source_index__unapproved_public_field"
+        header.append(field)
+        for row in rows:
+            row[field] = "must not silently ship or disappear"
+        before = [dict(row) for row in rows]
+        mapping = json.loads(json.dumps(pub.field_map()))
+        mapping["legislation"]["fields"].append(
+            {"column": field, "decision": "keep", "why": "Missing public target"}
+        )
+        with (
+            patch.object(pub, "field_map", return_value=mapping),
+            self.assertRaises(pub.UndecidedColumns),
+        ):
+            pub.apply_field_map("legislation", header, rows, own)
+        self.assertEqual(rows, before)
 
     def test_nothing_leaves_before_its_replacement_exists(self):
         # A combine whose target the terminal has not delivered holds the
@@ -587,8 +912,10 @@ class TestApplyFieldMap(unittest.TestCase):
         supply_owed_targets("deals", rows)
         header.append("research_note")
         for r in rows:
-            r["research_note"] = ("Announced value is the Native party's consideration; "
-                                  "the project total is the whole project.")
+            r["research_note"] = (
+                "Announced value is the Native party's consideration; "
+                "the project total is the whole project."
+            )
         pub.apply_field_map("deals", header, rows, set(header) - {"research_note"})
         self.assertNotIn("Notes", header)
         self.assertIn("deal_type", header)
@@ -610,8 +937,9 @@ class TestApplyFieldMap(unittest.TestCase):
         header.append("entity_names_as_published")
         for r in rows:
             r["entity_names_as_published"] = json.dumps(["one name only"])
-        misaligned = [r for r in rows
-                      if len([u for u in r["entity_cedar_uids"].split("|") if u.strip()]) != 1]
+        misaligned = [
+            r for r in rows if len([u for u in r["entity_cedar_uids"].split("|") if u.strip()]) != 1
+        ]
         if misaligned:
             own = set(header) - {"entity_names_as_published"}
             with self.assertRaises(pub.FieldMapRefusal):
@@ -624,7 +952,7 @@ class TestApplyFieldMap(unittest.TestCase):
         header, rows = sample("legislation", "native_bills")
         rows[0]["bill_scope"] = ""
         nobody = next(r for r in rows[1:] if r["bill_scope"] == "general")
-        nobody["entity_cedar_uids"] = ""            # a general bill naming nobody
+        nobody["entity_cedar_uids"] = ""  # a general bill naming nobody
         pub.apply_field_map("legislation", header, rows, set(header))
         self.assertIn("collective_scopes", header)
         for r in rows[1:]:
@@ -640,8 +968,9 @@ class TestApplyFieldMap(unittest.TestCase):
         # The scope never fills the entity block: the general bill naming
         # nobody has an empty array of uids, not a scope code in it.
         self.assertEqual(json.loads(nobody["cedar_uids"]), [])
-        self.assertEqual(json.loads(nobody["collective_scopes"])[0]["scope"],
-                         "federally-recognized-tribes")
+        self.assertEqual(
+            json.loads(nobody["collective_scopes"])[0]["scope"], "federally-recognized-tribes"
+        )
         # A class the vocabulary does not know stops the dataset.
         header, rows = sample("legislation", "native_bills")
         rows[0]["bill_scope"] = "general"
@@ -655,23 +984,28 @@ class TestApplyFieldMap(unittest.TestCase):
         for r in rows:
             r["bill_scope"] = "general"
         rows[0]["entity_class_scope"] = ""
-        rows[1]["entity_class_scope"] = ("Federally Recognized Tribe|"
-                                         "Alaska Native Village Corporation")
-        rows[2]["entity_class_scope"] = ("Alaska Native Regional Corporation|"
-                                         "Alaska Native Village Corporation")
+        rows[1]["entity_class_scope"] = (
+            "Federally Recognized Tribe|Alaska Native Village Corporation"
+        )
+        rows[2]["entity_class_scope"] = (
+            "Alaska Native Regional Corporation|Alaska Native Village Corporation"
+        )
         rows[3]["entity_class_scope"] = "Alaska Native Village Government"
         rows[4]["entity_class_scope"] = "Intertribal Organization"
         rows[5]["entity_class_scope"] = "Native Hawaiian Organization"
         pub.apply_field_map("legislation", header, rows, set(header))
         got = [[e["scope"] for e in json.loads(r["collective_scopes"])] for r in rows[:6]]
-        self.assertEqual(got, [["indian-country"],
-                               ["federally-recognized-tribes",
-                                "alaska-native-village-corporations"],
-                               ["alaska-native-regional-corporations",
-                                "alaska-native-village-corporations"],
-                               ["alaska-native-villages"],
-                               ["intertribal-organizations"],
-                               ["native-hawaiian-organizations"]])
+        self.assertEqual(
+            got,
+            [
+                ["indian-country"],
+                ["federally-recognized-tribes", "alaska-native-village-corporations"],
+                ["alaska-native-regional-corporations", "alaska-native-village-corporations"],
+                ["alaska-native-villages"],
+                ["intertribal-organizations"],
+                ["native-hawaiian-organizations"],
+            ],
+        )
         # So does a bill_scope value the rule does not know: it is not
         # "evaluated and names none" (Codex, PR #69).
         header, rows = sample("legislation", "native_bills")
@@ -706,39 +1040,36 @@ class TestApplyFieldMap(unittest.TestCase):
         self.assertIn("entity_link_status", header)
         # The Federal Register's column is owed and supplied by the terminal:
         # a supplied element outside the vocabulary is refused, by column.
-        element = {"scope": "all-tribes-everywhere", "relationship": "addressed",
-                   "as_of": None, "as_of_rule": "unknown", "basis": "x"}
+        element = {
+            "scope": "all-tribes-everywhere",
+            "relationship": "addressed",
+            "as_of": None,
+            "as_of_rule": "unknown",
+            "basis": "x",
+        }
 
-        def supplied(el):
-            header, rows = sample("federal-register", "consultation_events")
-            neutralised("federal-register", header, rows)
-            header.append("collective_scopes")
-            for r in rows:
-                r["collective_scopes"] = json.dumps([el])
-            return header, rows, set(header) - {"collective_scopes"}
-
-        header, rows, own = supplied(element)
+        # Current FR contract deliberately publishes null applicability. Test
+        # the shared scope validator directly instead of pretending the former
+        # optional external scope column is still the product contract.
         with self.assertRaises(pub.ScopeRefused) as caught:
-            pub.apply_field_map("federal-register", header, rows, own)
+            pub.scope_elements(json.dumps([element]), "federal-register", "collective_scopes")
         self.assertEqual(caught.exception.columns, ["collective_scopes"])
-        # Without a basis, with an unknown relationship, or a parameterised
-        # scope without its parameter, likewise; a good element ships.
-        for bad in (dict(element, scope="indian-country", basis=""),
-                    dict(element, scope="indian-country", relationship="covers"),
-                    dict(element, scope="federally-recognized-tribes-in-state"),
-                    dict(element, scope="indian-country", as_of="2026"),
-                    dict(element, scope="indian-country", as_of="2026-99-99"),
-                    dict(element, scope="indian-country", as_of="2026-02-30"),
-                    dict(element, scope="indian-country", as_of_rule="record_date", as_of=None)):
-            header, rows, own = supplied(bad)
+        for bad in (
+            dict(element, scope="indian-country", basis=""),
+            dict(element, scope="indian-country", relationship="covers"),
+            dict(element, scope="federally-recognized-tribes-in-state"),
+            dict(element, scope="indian-country", as_of="2026"),
+            dict(element, scope="indian-country", as_of="2026-99-99"),
+            dict(element, scope="indian-country", as_of="2026-02-30"),
+            dict(element, scope="indian-country", as_of_rule="record_date", as_of=None),
+        ):
             with self.assertRaises(pub.ScopeRefused):
-                pub.apply_field_map("federal-register", header, rows, own)
-        header, rows, own = supplied(dict(element, scope="federally-recognized-tribes-in-state:OK"))
-        pub.apply_field_map("federal-register", header, rows, own)
-        self.assertIn("collective_scopes", header)
-        # Right after the opening block, where the order puts it; the owed
-        # entity_link_status before it is absent until supplied.
-        self.assertEqual(header.index("collective_scopes"), 4)
+                pub.scope_elements(json.dumps([bad]), "federal-register", "collective_scopes")
+        valid = dict(element, scope="federally-recognized-tribes-in-state:OK")
+        self.assertEqual(
+            pub.scope_elements(json.dumps([valid]), "federal-register", "collective_scopes"),
+            [valid],
+        )
         # A scope code where an identity belongs stops a singular table too.
         header, rows = sample("contractors", "prime_contracts")
         neutralised("contractors", header, rows)
@@ -746,14 +1077,15 @@ class TestApplyFieldMap(unittest.TestCase):
         with self.assertRaises(pub.ScopeRefused) as caught:
             pub.apply_field_map("contractors", header, rows, set(header))
         self.assertEqual(caught.exception.columns, ["cedar_uid"])
-        # The Federal Register owes both columns; the writer ships without them
-        # rather than inventing either.
+        # The current FR contract retains supplied link status and explicitly
+        # unevaluated applicability; neither is an inferred relationship.
         header, rows = sample("federal-register", "consultation_events")
         neutralised("federal-register", header, rows)
         result = pub.apply_field_map("federal-register", header, rows, set(header))
-        self.assertIn("collective_scopes", result["owed"])
-        self.assertIn("entity_link_status", result["owed"])
-        self.assertNotIn("collective_scopes", header)
+        self.assertNotIn("collective_scopes", result["owed"])
+        self.assertNotIn("entity_link_status", result["owed"])
+        self.assertTrue(all(r["collective_scopes"] == "null" for r in rows))
+        self.assertTrue(all(r["entity_link_status"] == "unresolved" for r in rows))
 
     def test_an_unmapped_collection_is_left_alone(self):
         header = ["facility_id", "name", "built_date"]
@@ -769,9 +1101,148 @@ class TestApplyFieldMap(unittest.TestCase):
                 continue
             book = codebook["tables"][entry["key"]]
             listed = {f["column"] for f in book["fields"] if not f.get("add")}
-            ships = {f["column"] for f in entry["fields"]
-                     if f["decision"] in ("keep", "withhold", "rename")}
-            self.assertTrue(ships <= listed, (coll, sorted(ships - listed)))
+            # A generated public target can arrive in the real loader header
+            # and therefore also need an explicit keep declaration. Accept it
+            # only when BOTH authorities identify it as a generated output;
+            # raw kept fields still require a non-add codebook entry.
+            generated = {f["column"] for f in book["fields"] if f.get("add")} & {
+                f["column"] for f in entry.get("new", [])
+            }
+            ships = {
+                f["column"]
+                for f in entry["fields"]
+                if f["decision"] in ("keep", "withhold", "rename")
+            }
+            self.assertTrue(ships <= listed | generated, (coll, sorted(ships - listed - generated)))
+
+
+class MoneyCodebookSelftestIsolationTest(unittest.TestCase):
+    def test_legacy_negative_controls_never_mutate_canonical_sources(self):
+        cases = (
+            ("952_nonprofit_disposition.py", "selftest", ("ROOT", "TABLE", "MANIFEST"), "TABLE"),
+            (
+                "954_register_promoted_columns_codebook.py",
+                "selftest",
+                ("ROOT", "CLEAN", "FRAG", "MASTER"),
+                "MASTER",
+            ),
+            (
+                "1132_fac_nontribal_native_audits.py",
+                "cmd_selftest",
+                ("ROOT", "CLEAN", "SPINE", "BULK", "OUT_CENSUS", "OUT_SEFA", "OUT_COV"),
+                "OUT_CENSUS",
+            ),
+            ("1155_np_placename_precision.py", "cmd_selftest", ("ROOT", "NP", "SPINE"), "NP"),
+        )
+        for filename, entrypoint, names, writable in cases:
+            spec = importlib.util.spec_from_file_location(
+                "isolated_" + filename[:-3], CODE / filename
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            for fail in (False, True):
+                with (
+                    self.subTest(script=filename, injected_failure=fail),
+                    tempfile.TemporaryDirectory() as tmp,
+                ):
+                    root = Path(tmp)
+                    paths = {name: root / name for name in names}
+                    paths["ROOT"] = root
+                    for name, path in paths.items():
+                        if name != "ROOT":
+                            path.write_bytes(b"canonical sentinel\r\n")
+                    before = {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}
+                    with ExitStack() as stack:
+                        for name, path in paths.items():
+                            stack.enter_context(patch.object(module, name, path))
+                        if hasattr(module, "cb"):
+                            writer_paths = {
+                                "CEDAR": root,
+                                "CLEAN": paths["CLEAN"],
+                                "FRAG": paths["FRAG"],
+                                "MASTER": paths["MASTER"],
+                            }
+                            for name, path in writer_paths.items():
+                                stack.enter_context(patch.object(module.cb, name, path))
+                        if fail:
+
+                            def interrupted(module=module, writable=writable):
+                                getattr(module, writable).write_bytes(
+                                    b"injected fixture corruption"
+                                )
+                                raise RuntimeError("injected fixture interruption")
+
+                            stack.enter_context(
+                                patch.object(module, "_selftest_cases", side_effect=interrupted)
+                            )
+                        with redirect_stdout(io.StringIO()) as output:
+                            if fail:
+                                with self.assertRaisesRegex(
+                                    RuntimeError, "injected fixture interruption"
+                                ):
+                                    getattr(module, entrypoint)()
+                            else:
+                                result = getattr(module, entrypoint)()
+                                self.assertEqual(result, 0, output.getvalue())
+                        self.assertEqual({name: getattr(module, name) for name in names}, paths)
+                        if hasattr(module, "cb"):
+                            self.assertEqual(
+                                {name: getattr(module.cb, name) for name in writer_paths},
+                                writer_paths,
+                            )
+                    self.assertEqual(
+                        {p.name: p.read_bytes() for p in root.iterdir() if p.is_file()}, before
+                    )
+                    self.assertFalse(any(p.is_dir() for p in root.iterdir()))
+
+    def test_success_and_exception_preserve_canonical_files_and_restore_paths(self):
+        spec = importlib.util.spec_from_file_location(
+            "money_codebook_isolation", CODE / "1149_codebook_money_fed.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for fail in (False, True):
+            with self.subTest(injected_failure=fail), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                clean = root / "data" / "clean"
+                fragment = clean / "codebook"
+                fragment.mkdir(parents=True)
+                master = clean / "codebook_master.csv"
+                master.write_bytes(b"canonical master sentinel\r\n")
+                (fragment / "11e_nagpra_nps_grant_awards.csv").write_bytes(
+                    b"canonical fragment sentinel\r\n"
+                )
+                before = {
+                    p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
+                }
+                paths = (root, clean, fragment, master)
+                with ExitStack() as stack:
+                    for owner, names in (
+                        (module, ("ROOT", "CLEAN", "FRAG", "MASTER")),
+                        (module.cb, ("CEDAR", "CLEAN", "FRAG", "MASTER")),
+                    ):
+                        for name, value in zip(names, paths, strict=True):
+                            stack.enter_context(patch.object(owner, name, value))
+                    if fail:
+                        stack.enter_context(
+                            patch.object(module.cb, "build", side_effect=RuntimeError("injected"))
+                        )
+                    with redirect_stdout(io.StringIO()) as output:
+                        if fail:
+                            with self.assertRaisesRegex(RuntimeError, "injected"):
+                                module.selftest()
+                        else:
+                            self.assertEqual(module.selftest(), 0)
+                            for invariant in ("CBM-1", "CBM-2", "CBM-3"):
+                                self.assertIn(f"{invariant}: exit 1, FIRED", output.getvalue())
+                    self.assertEqual((module.ROOT, module.CLEAN, module.FRAG, module.MASTER), paths)
+                    self.assertEqual(
+                        (module.cb.CEDAR, module.cb.CLEAN, module.cb.FRAG, module.cb.MASTER), paths
+                    )
+                self.assertEqual(
+                    {p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()},
+                    before,
+                )
 
 
 if __name__ == "__main__":

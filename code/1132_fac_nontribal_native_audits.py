@@ -1287,6 +1287,36 @@ def cmd_verify():
 
 
 def cmd_selftest():
+    """Run the real verifier on synthetic temporary census/source fixtures."""
+    import tempfile
+    global ROOT, CLEAN, SPINE, BULK, OUT_CENSUS, OUT_SEFA, OUT_COV
+    original = ROOT, CLEAN, SPINE, BULK, OUT_CENSUS, OUT_SEFA, OUT_COV
+    try:
+        with tempfile.TemporaryDirectory(prefix="cedar1132-") as tmp:
+            ROOT = Path(tmp)
+            CLEAN, SPINE, BULK = ROOT / "clean", ROOT / "spine", ROOT / "bulk"
+            for directory in (CLEAN, SPINE, BULK):
+                directory.mkdir()
+            OUT_CENSUS, OUT_SEFA, OUT_COV = (CLEAN / name for name in ("census.csv", "sefa.csv", "coverage.csv"))
+            entities = [f"fixture-entity-{i}" for i in range(FLOOR_ENTITIES)]
+            rows = [dict.fromkeys(CENSUS_COLS, "") for _ in range(FLOOR_ROWS)]
+            for i, row in enumerate(rows):
+                row.update(report_id=f"fixture-report-{i}", entity_id=entities[i % len(entities)],
+                           entity_tier="B", entity_tier_inherited_from="synthetic fixture",
+                           total_amount_expended="1", discovery_net="auditee_name",
+                           entity_match_method="exact", entity_type="nonprofit", is_public="1")
+            write_csv(OUT_CENSUS, rows, CENSUS_COLS)
+            write_csv(SPINE / "cedar_entity_spine.csv", [{"tribe_id": x} for x in entities], ["tribe_id"])
+            write_csv(CLEAN / "fac_tribal_single_audits.csv",
+                      [{"report_id": "existing-report", "entity_id": "existing-entity"}], ["report_id", "entity_id"])
+            write_csv(BULK / "general.csv", [{"report_id": r["report_id"], "is_public": "t"} for r in rows], ["report_id", "is_public"])
+            write_csv(OUT_SEFA, [{"report_id": rows[0]["report_id"], "aln": "00.000"}], ["report_id", "aln"])
+            return _selftest_cases()
+    finally:
+        ROOT, CLEAN, SPINE, BULK, OUT_CENSUS, OUT_SEFA, OUT_COV = original
+
+
+def _selftest_cases():
     """Prove verify FIRES. Inject each violation, assert exit 1 AND that the
     NAMED invariant is the one that fired, restore, assert exit 0.
     """

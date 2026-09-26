@@ -82,7 +82,7 @@ The approved header, in the owner's exact order (49 columns, of which 2 are owed
 | 30 | `reported_buy_indian` | Buy Indian Act reported (yes or no) | Whether the award reports use of the Buy Indian Act preference. Reported use, not eligibility. | yes or no (1 or 0) | not stated; 0 is no |
 | 31 | `reported_indian_business` | Indian business reported (yes or no) | Whether the award reports the contractor as an Indian business under the relevant preference. | yes or no (1 or 0) | not stated; 0 is no |
 | 32 | `reported_native_preference` | Native preference reported | Whether the award reports a Native preference (yes or no). | yes or no (1 or 0) | not stated; 0 is no |
-| 33 | `competition_type` | competition type | Consolidated through a validated dictionary. | — | owed: not in the file until the terminal builds it |
+| 33 | `competition_type` | competition type | Built by cedar_publication.recompute_derived using the shared source-versioned dictionary; rejects conflicts. | text | owed: not in the file until the producer builds it |
 | 34 | `recipient_city` (was `recipient_city_name`) | Awardee city | City of the awardee's address. | text | the source states none, or not applicable to this row |
 | 35 | `recipient_state` (was `recipient_state_code`) | Awardee state | Its state. | text | the source states none, or not applicable to this row |
 | 36 | `recipient_county` (was `geo_recipient_county_name`) | Recipient county | The county of the contractor's address, which is not where the work is performed. | text | the source states none, or not applicable to this row |
@@ -94,8 +94,8 @@ The approved header, in the owner's exact order (49 columns, of which 2 are owed
 | 42 | `recipient_geography_status` | Recipient geography status | Whether the recipient's address was placed in a county: placed, placed with an ambiguous place name, or unplaced. | text | the source states none, or not applicable to this row |
 | 43 | `performance_geography_status` | Performance geography status | The same for the place of performance. | text | the source states none, or not applicable to this row |
 | 44 | `attributed_flag` | Attributed (yes or no) | Whether the row is attributed to the Native entity in the opening block; the totals count attributed rows only. | yes or no (1 or 0) | not stated; 0 is no |
-| 45 | `owner_attribution_status` | Ownership at the time | Whether the entity's ownership of the awardee was confirmed as of the transaction. | text | the source states none, or not applicable to this row |
-| 46 | `owner_as_of_transaction_cedar_uid` | Owner as of the action | The Cedar ID of the entity that owned the contractor on the action date where the ownership history resolves it; UNKNOWN where it does not. Never the current owner assumed backwards. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
+| 45 | `affiliation_attribution_status` (was `owner_attribution_status`) | Affiliation status at the time | How the sources describe the entity's relationship to the awardee as of the transaction. A source-described assessment: Cedar does not independently certify ownership. | text | the source states none, or not applicable to this row |
+| 46 | `affiliation_as_of_transaction_cedar_uid` (was `owner_as_of_transaction_cedar_uid`) | Affiliated entity as of the action | The Cedar ID of the entity the sources associate with the contractor on the action date, where the affiliation history resolves it; UNKNOWN where it does not. Never today's affiliation assumed backwards, and not a certification of ownership. | identifier, as text | unattributed or unresolved, with the reason in the attribution status where the table carries one; never non-Native |
 | 47 | `source_system` | Source system | Which source the record came from. | text | the source states none, or not applicable to this row |
 | 48 | `source_url` | Source | The official page for this record, written into the file so it cites itself. | web address | the source states none, or not applicable to this row |
 | 49 | `research_note` | Research note | A concise factual qualification that changes how the row should be read (an uncertain closing date, an amount covering a whole joint venture, a geography that cannot be assigned precisely). Blank when nothing needs saying. | text | the source states none, or not applicable to this row |
@@ -137,7 +137,7 @@ A blank is never zero and never an invented date. A blank JSON-list cell means u
 Target columns the specification asks for that the terminal has not yet built from the full table. Each is absent until it exists, never blank.
 
 - `sector` (combine:sector\|supersector): One readable sector through the dictionary.
-- `competition_type` (combine:extent_competed\|extent_competed_normalized): Consolidated through a validated dictionary.
+- `competition_type` (projection:cedar_extent_competed.normalize): Built by cedar_publication.recompute_derived using the shared source-versioned dictionary; rejects conflicts.
 
 ## Release, citation and method
 
