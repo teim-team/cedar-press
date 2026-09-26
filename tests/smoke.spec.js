@@ -1117,7 +1117,7 @@ test.describe("the use cases drive the viewer", () => {
     await expect(note).toContainText(first.blurb);
 
     // The first example cites something other than the collection in hand.
-    const chip = chips(page).filter({ hasNot: page.locator(`[data-collection="${first.id}"]`) }).first();
+    const chip = page.locator(`.cp-aud__panel.is-on .cp-aud__col:not([data-collection="${first.id}"])`).first();
     const id = await chip.getAttribute("data-collection");
     const entry = STOREFRONT_CATALOG.find((e) => e.id === id);
     const before = await pane.innerText();
@@ -1140,6 +1140,53 @@ test.describe("the use cases drive the viewer", () => {
     await page.goto(`/?collection=${id}`);
     await expect(page.locator(".cp-aud__note")).toContainText(entry.blurb);
     expect(errors).toEqual([]);
+  });
+
+  test("a preview is cleared when hover preview switches off under the pointer", async ({ page }, testInfo) => {
+    // PR #131, Codex thread 4113064956: if the preview media flips off (a
+    // narrowed window, a pointer change) while a mouse is on a chip, the
+    // leave that follows was guarded on the *current* media and skipped its
+    // clear, so the frame kept a collection the address does not name.
+    // The fine-pointer query is flipped directly, with no layout change, so
+    // the chip stays under the pointer and nothing else can clear it.
+    test.skip(testInfo.project.name !== "desktop", "hover preview exists on desktop only");
+    await page.addInitScript(() => {
+      const real = window.matchMedia.bind(window);
+      const listeners = new Set();
+      let fine = true;
+      window.__setFinePointer = (on) => {
+        fine = on;
+        for (const fn of listeners) fn({ matches: fine });
+      };
+      window.matchMedia = (query) => {
+        if (!query.includes("pointer: fine")) return real(query);
+        return {
+          get matches() { return fine; },
+          media: query,
+          addEventListener: (_type, fn) => listeners.add(fn),
+          removeEventListener: (_type, fn) => listeners.delete(fn),
+          addListener: (fn) => listeners.add(fn),
+          removeListener: (fn) => listeners.delete(fn),
+        };
+      };
+    });
+    await page.goto("/");
+    await page.locator(".cp-aud").scrollIntoViewIfNeeded();
+    const note = page.locator(".cp-aud__note");
+    const first = STOREFRONT_CATALOG[0];
+    await expect(note).toContainText(first.blurb);
+    const chip = page.locator(`.cp-aud__panel.is-on .cp-aud__col:not([data-collection="${first.id}"])`).first();
+    const id = await chip.getAttribute("data-collection");
+    const entry = STOREFRONT_CATALOG.find((e) => e.id === id);
+    await chip.hover();
+    await expect(note).toContainText(entry.blurb);
+    await page.evaluate(() => window.__setFinePointer(false));
+    const box = await page.locator(".cp-aud").boundingBox();
+    // Inside the band, outside the chip list: the hero rail also sets the
+    // preview on hover, so leaving through it would mask the bug.
+    await page.mouse.move(box.x + 2, box.y + 2);
+    await expect(note).toContainText(first.blurb);
+    expect(new URL(page.url()).searchParams.get("collection")).toBeNull();
   });
 
   test("every collection is reachable through the use cases, at this width", async ({ page }) => {

@@ -100,6 +100,24 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
   const wide = useMedia(PREVIEW_WIDTH);
   const fine = useMedia(FINE_POINTER);
   const hoverPreview = wide && fine;
+  // Whether this band currently holds a preview in the parent. Clearing keys
+  // off this, not off `hoverPreview`: the media can flip (a narrowed window, a
+  // pointer change) between the hover that set a preview and the leave that
+  // should clear it, and a guard on the current media then skipped the clear,
+  // leaving the frame on a collection the address does not name (PR #131,
+  // Codex thread 4113064956).
+  const previewingRef = useRef(false);
+  const preview = (id) => {
+    previewingRef.current = id != null;
+    onPoint?.(id);
+  };
+  const clearPreview = () => {
+    if (previewingRef.current) preview(null);
+  };
+  useEffect(() => {
+    if (!wide || !fine) clearPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wide, fine]);
   const rootRef = useRef(null);
   const tabRefs = useRef([]);
   const rotating = shouldRotate(state, { reducedMotion, total });
@@ -236,9 +254,9 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
               <ul
                 className="cp-aud__cols"
                 aria-label="Collections this uses"
-                onPointerLeave={(event) => { if (hoverPreview && event.pointerType === "mouse") onPoint?.(null); }}
+                onPointerLeave={(event) => { if (event.pointerType === "mouse") clearPreview(); }}
                 onBlur={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget)) onPoint?.(null);
+                  if (!event.currentTarget.contains(event.relatedTarget)) clearPreview();
                 }}
               >
                 {audience.collections.map((entry) => {
@@ -252,8 +270,8 @@ export default function PressAudienceExample({ selected, onPick, onPoint }) {
                         data-shelf={entry.shelf}
                         aria-pressed={chosen}
                         onClick={() => commit(entry)}
-                        onPointerEnter={(event) => { if (hoverPreview && event.pointerType === "mouse") onPoint?.(entry.id); }}
-                        onFocus={(event) => { if (wide && event.currentTarget.matches(":focus-visible")) onPoint?.(entry.id); }}
+                        onPointerEnter={(event) => { if (hoverPreview && event.pointerType === "mouse") preview(entry.id); }}
+                        onFocus={(event) => { if (wide && event.currentTarget.matches(":focus-visible")) preview(entry.id); }}
                       >
                         <span className="cp-aud__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id] ?? null}</span>
                         <ChipName entry={entry} />
