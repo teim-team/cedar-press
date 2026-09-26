@@ -1,6 +1,6 @@
 # Native Federal Subcontracting: a researcher's guide
 
-Collection `subcontracting` · public file `subcontracting.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `subcontracting` · public file `subcontracting.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** FSRS subaward reporting via USAspending, keyed to the prime award.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 89,809. This is the count the release recorded for `subawards.csv`, not the sum of the collection's 5 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 89,809. This is the count the release recorded for `subawards.csv`, not the sum of the collection's 5 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -138,9 +138,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "Native Federal Subcontracting" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "Native Federal Subcontracting" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Both sides of every subaward are resolved independently, so a Native prime paying a non-Native sub and the reverse are distinguishable rather than collapsed. Repeat monthly filings of one subaward are retained and flagged in-band rather than deleted, because the filings are real events: summing without that filter lands 63.4% above the correct total ($57.02B unfiltered against $34.91B correct, a $22.11B difference), and the denominator is stated because the same difference is 38.8% of the unfiltered figure and quoting the two without saying which is which makes an honest warning look like an arithmetic error. A subaward is a slice of a prime award and must never be added to the prime contracting dataset — the totalling rules ship with the data.
 

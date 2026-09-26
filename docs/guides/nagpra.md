@@ -1,6 +1,6 @@
 # NAGPRA Notices: a researcher's guide
 
-Collection `nagpra` · public file `nagpra.csv` · v1 · 2026-09-04. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
+Collection `nagpra` · public file `nagpra.csv` · v2 · 2026-09-26. Generated from `data/cedar/guides.json`, `data/cedar/field_map.json`, `data/cedar/codebook.json` and the collection descriptor by `scripts/guides-markdown.mjs`; edit those, not this file. Written 2026-09-05 under `docs/PUBLIC_DATASET_SPEC_2026-09-05.md`.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This pass changes columns, never rows: no aggregation, deduplication, change of 
 
 **Sources:** Federal Register NAGPRA notices, full text.
 
-**Rows in the flagship table as released (recorded 2026-09-04):** 6,792. This is the count the release recorded for `nagpra_notices.csv`, not the sum of the collection's 12 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
+**Rows in the flagship table as released (recorded 2026-09-26):** 6,792. This is the count the release recorded for `nagpra_notices.csv`, not the sum of the collection's 12 tables; the finished public table is re-measured at release and the count here is replaced by that measurement.
 
 ## Time and geography
 
@@ -138,9 +138,9 @@ Nothing beyond the grain and harmonization work named above.
 
 ## Release, citation and method
 
-**Version:** v1. **Release date:** 2026-09-04.
+**Version:** v2. **Release date:** 2026-09-26.
 
-**Cite as:** Lumecon, "NAGPRA Notices" (v1), Cedar Press collection, cedarpress.ai. Add the date accessed.
+**Cite as:** Lumecon, "NAGPRA Notices" (v2), Cedar Press collection, cedarpress.ai. Add the date accessed.
 
 **Method:** Tribal affiliations are taken from the notice's own text, which is the legally operative statement of affiliation, and an alias is only accepted into the identity layer when it appears across at least three independent notices. Cultural detail beyond what the notice publishes is not extracted, and no inference is made about ancestral remains or objects beyond the notice's own words.
 
