@@ -9603,4 +9603,16 @@ repository does once the register exists, and records the owner's two further de
 the id carries two check characters over the uid's alphabet, and the
 individually owned entity class closes to new mints. Documentation only; no
 code changed.
+<!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The isolated Giving/PLOT worker branch adds only server integration surfaces:
+`governed_collections.py`, the authenticated 15-target release registry,
+Press component pin/catalog configuration, and existing full-release verifier
+dispatch. Original-12 frontend declarations and the PR #131 presentation
+worktree remain separate. Giving is standard Press/shared Grove, PLOT is
+Press+/shared Grove, Gaming remains Grove exclusive. The default shared pin is
+empty. Real reproduction is `server/tests/shared_collection_rehearsal.py` using
+both installed packages and an immutable store: no listener or subprocess.
+Actual PLOT 1,242 permits/3,210 events served with exact hashes; Giving's real14
+remained rights-held. Root owns integrated pins, database proof and final CI.
+<!-- END CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
 
