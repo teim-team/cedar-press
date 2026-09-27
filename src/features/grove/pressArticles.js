@@ -127,14 +127,14 @@ export const PRESS_ARTICLES = Object.freeze([
     draws: Object.freeze(["owned"]),
     tag: "Original Research",
     title: "The first nation-shared roster of individually owned Native businesses is in",
-    dek: "White Earth Nation's TERO shared its certified Indian-owned business list directly with the project, the first roster in a consent-first dataset of the businesses no federal register counts.",
+    dek: "White Earth Nation's TERO sent its certified Indian-owned business list in answer to a request through the office's public contact, the first roster in a consent-first dataset of the businesses no federal register counts.",
     date: "August 2026",
     byline: "Elijah S. Moreno",
     minutes: 3,
     // Three headlines from the piece for the highlights box beside the
     // lead picture (owner, 2026-09-27).
     highlights: Object.freeze([
-      "White Earth Nation's TERO shared its certified Indian-owned business list, the first roster in the collection",
+      "White Earth Nation's TERO sent its certified Indian-owned business list on request, the first roster in the collection",
       "The roster certifies 22 individually owned businesses, 17 at first preference, mostly in the building trades",
       "Each nation decides how its list may be used; until it does, its businesses appear only in aggregate",
     ]),
@@ -150,7 +150,7 @@ export const PRESS_ARTICLES = Object.freeze([
       Object.freeze({
         kind: BLOCK.P,
         text:
-          "The Owned collection is built to close that gap the only defensible way: by asking. Each nation's office is approached directly, each decides whether and how its list may be used, and a roster enters the dataset only under the terms its office states. White Earth Nation's TERO answered first, sharing its current Certified Indian Owned Businesses list the morning after the request went out.",
+          "The Owned collection is built to close that gap the only defensible way: by asking. Each nation's office is asked through its public contact, each decides whether and how its list may be used, and a roster enters the dataset only under the terms its office states. White Earth Nation's TERO answered first, sending its current Certified Indian Owned Businesses list the morning after the request went out.",
       }),
       Object.freeze({
         kind: BLOCK.PULL,

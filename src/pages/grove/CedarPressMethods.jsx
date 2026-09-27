@@ -388,10 +388,12 @@ export default function CedarPressMethods() {
                   <p>
                     Every source is available to the public: government records, regulatory
                     and securities filings, and published reporting, so the document a record
-                    cites is one anyone can obtain. The one exception is Owned, where a nation
-                    may share its certified-business roster with Lumecon directly. Those listings
-                    are published only on the terms the nation sets, and until it sets them
-                    Owned reports aggregates from the roster, not its entries.
+                    cites is one anyone can obtain. Owned&rsquo;s certified-business rosters
+                    are requested from each nation&rsquo;s TERO or commerce office through its
+                    publicly listed contact, and whether the office releases one is the
+                    office&rsquo;s decision. Owned listings are published only on the terms the
+                    nation sets, and until it sets them Owned reports aggregates from the
+                    roster, not its entries.
                   </p>
                   <p>
                     Select a collection in the figure to see which sources it is built from and
