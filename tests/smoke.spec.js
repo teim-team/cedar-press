@@ -1516,23 +1516,27 @@ test.describe("the use-case card", () => {
     const img = on(page).locator(".cp-aud__media img");
     await expect.poll(() => img.evaluate((el) => el.complete && el.naturalWidth > 0)).toBe(true);
     // The photograph fills its panel and the panel is the card's own height.
-    const media = await on(page).locator(".cp-aud__media").boundingBox();
-    const shot = await img.boundingBox();
+    // All three boxes in one read: the section's fade-in rise moves the band
+    // between separate reads, which is not the layout.
+    const boxes = () => on(page).evaluate((panel) => {
+      const box = (sel) => { const r = panel.querySelector(sel).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; };
+      return { media: box(".cp-aud__media"), shot: box(".cp-aud__media img"), text: box(".cp-aud__text") };
+    });
+    await page.waitForTimeout(600);
+    const { media, shot, text } = await boxes();
     expect(Math.abs(media.height - shot.height)).toBeLessThan(1);
     expect(Math.abs(media.width - shot.width)).toBeLessThan(1);
     if (testInfo.project.name === "phone") {
       // A banner on top, at 5:2.
       expect(Math.abs(media.width / media.height - 2.5)).toBeLessThan(0.05);
-      const text = await on(page).locator(".cp-aud__text").boundingBox();
       expect(media.y + media.height).toBeLessThanOrEqual(text.y + 1);
     } else {
       // Beside the text, and the side alternates from one use case to the next.
-      const text = await on(page).locator(".cp-aud__text").boundingBox();
       expect(media.x + media.width).toBeLessThanOrEqual(text.x + 1);
       await page.getByRole("button", { name: "Next use case" }).click();
-      const media2 = await on(page).locator(".cp-aud__media").boundingBox();
-      const text2 = await on(page).locator(".cp-aud__text").boundingBox();
-      expect(text2.x + text2.width).toBeLessThanOrEqual(media2.x + 1);
+      await expect.poll(async () => (await boxes()).shot.width).toBeGreaterThan(0);
+      const next = await boxes();
+      expect(next.text.x + next.text.width).toBeLessThanOrEqual(next.media.x + 1);
     }
   });
 
