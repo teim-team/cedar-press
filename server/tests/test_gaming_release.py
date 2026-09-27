@@ -808,6 +808,19 @@ class PinnedLumeconReleaseTest(_ServerCase):
             with patch.object(repository, "_field_map_tables", return_value=drifted):
                 self.assertEqual(self.get(SERVED, self.a["release_id"])[0].status_code, 503)
 
+    def test_missing_or_partial_gaming_field_rights_are_refused(self):
+        original = self.metadata(self.verify(self.store_a, "gaming", self.a["release_id"]))
+        for removal in ("all", "one"):
+            with self.subTest(removal=removal):
+                malformed = copy.deepcopy(original)
+                metadata = malformed["components"][SERVED]["metadata"]
+                if removal == "all":
+                    metadata.pop("field_rights")
+                else:
+                    metadata["field_rights"].pop(next(iter(metadata["field_rights"])))
+                with self.assertRaisesRegex(repository.FullReleaseUnavailable, "incomplete"):
+                    repository.grove_component_contract(malformed, "gaming", SERVED)
+
     def test_manifest_hash_agreement_and_exact_component_download(self):
         self.pin(self.a)
         expected = self.component_bytes(self.a)

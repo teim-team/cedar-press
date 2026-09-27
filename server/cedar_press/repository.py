@@ -1079,6 +1079,12 @@ def grove_component_contract(
     if not entry or entry.get("collection") != collection_id or header != entry.get("order"):
         raise FullReleaseUnavailable("Full release does not match product field map")
     declared_rights = (contract.get("metadata") or {}).get("field_rights") or {}
+    if collection_id == "gaming" and (
+        not isinstance(declared_rights, dict)
+        or set(declared_rights) != set(header)
+        or any(not isinstance(value, str) or not value for value in declared_rights.values())
+    ):
+        raise FullReleaseUnavailable("Gaming field-rights metadata is incomplete")
     for item in entry.get("fields", []):
         if (
             item.get("decision") in {"keep", "rename"}
