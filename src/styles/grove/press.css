@@ -2774,16 +2774,16 @@
  * passage, above the shelves. Same run and mask as before; light on dark. */
 .teim-rd .cp-why__head > .cp-why__side { display: flex; flex-direction: column; gap: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; align-self: stretch; }
 .teim-rd .cp-why__sources { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 14rem; max-width: none; margin: 0; border-radius: 10px; background: #fff; border-color: #fff; box-shadow: 0 0 0 1px rgba(95, 217, 204, 0.18), 0 22px 44px -22px rgba(95, 217, 204, 0.55), 0 10px 24px -12px rgba(0, 0, 0, 0.55); -webkit-backdrop-filter: none; backdrop-filter: none; }
-.teim-rd .cp-why__sources .cp-hero3__prooflabel { color: var(--dteal); }
-.teim-rd .cp-why__sources .cp-hero3__prooflabel:hover, .teim-rd .cp-why__sources .cp-hero3__prooflabel:focus-visible { color: var(--dteal); border-bottom-color: currentColor; }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel { color: var(--door-navy); }
+.teim-rd .cp-why__sources .cp-hero3__prooflabel:hover, .teim-rd .cp-why__sources .cp-hero3__prooflabel:focus-visible { color: var(--door-navy); border-bottom-color: currentColor; }
 .teim-rd .cp-why__runs { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; gap: 0.55rem; }
 .teim-rd .cp-hero3__marquee--back { animation-direction: reverse; }
 .teim-rd .cp-why__runs { position: relative; -webkit-user-select: none; user-select: none; }
 .teim-rd .cp-why__runs::after { content: ''; position: absolute; inset: 0; z-index: 1; }
 .teim-rd .cp-why__sources .cp-hero3__marquee:hover, .teim-rd .cp-why__sources .cp-hero3__marquee:focus-within { animation-play-state: running; }
-.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--dteal); }
-.teim-rd .cp-why__sources .cp-hero3__run li { color: var(--dteal); }
-.teim-rd .cp-why__sources .cp-hero3__run li::before { background: var(--teal-line); }
+.teim-rd .cp-why__sources .cp-hero3__proofcount { color: var(--door-navy); }
+.teim-rd .cp-why__sources .cp-hero3__run li { color: var(--door-navy); }
+.teim-rd .cp-why__sources .cp-hero3__run li::before { background: rgba(9, 19, 43, 0.18); }
 .teim-rd .cp-why__lede a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.45); text-underline-offset: 0.18em; }
 .teim-rd .cp-why__lede a:hover, .teim-rd .cp-why__lede a:focus-visible { text-decoration-color: currentColor; }
 .teim-rd .cp-why__shelves { list-style: none; margin: 0; padding: 1rem 0 0; border-top: 1px solid rgba(255, 255, 255, 0.22); display: grid; gap: 0.7rem; }
@@ -3217,7 +3217,7 @@
  * so a guarded rule is the difference between a response and a stuck one. */
 @media (hover: hover) and (pointer: fine) {
   .teim-rd .cp-hero3__run li:hover { color: var(--dteal); }
-  .teim-rd .cp-why__sources .cp-hero3__run li:hover { color: var(--dteal); }
+  .teim-rd .cp-why__sources .cp-hero3__run li:hover { color: var(--door-navy); }
   .teim-rd .cp-ways__row:hover { border-bottom-color: var(--dteal); }
   .teim-rd .cp-ways__row:hover .cp-ways__label { color: var(--ink); }
   .teim-rd .cp-hero3__stage:hover .cp-hero3__frame { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.98), 0 4px 8px rgba(10, 28, 52, 0.08), 0 26px 54px -24px rgba(10, 28, 52, 0.3), 0 60px 110px -56px rgba(10, 28, 52, 0.38); }
