@@ -2864,19 +2864,25 @@ test.describe("the loop between the records and the journalism", () => {
   // authors and picture first, then its key facts and the collections it
   // used, each one open to this reader; and its figures sit in the text,
   // two or three to a piece, rather than one lifted to lead the page.
-  test("a research brief opens on its title, authors, picture, facts and collections", async ({ page }) => {
+  test("a research brief opens on its title, authors, picture, highlights and collections", async ({ page }) => {
     const errors = watchConsole(page);
     await signIn(page);
     await page.goto("/articles/brief-deals");
     const hero = page.locator(".cp-ar__hero");
     await expect(hero.getByRole("heading", { level: 1 })).toContainText("Announced deals");
     await expect(hero.locator(".cp-ar__by")).toContainText("Cedar Press research desk");
-    await expect(hero.locator("img.cp-ar__art")).toBeVisible();
-    expect(await hero.locator(".cp-ar__fact").count()).toBeGreaterThanOrEqual(2);
-    await expect(hero.locator(".cp-ar__use").first()).toContainText("Deals");
+    await expect(page.locator(".cp-ar__lead img.cp-ar__art")).toBeVisible();
+    // Three headlines from the piece, in a box beside the picture.
+    await expect(page.locator(".cp-ar__highlights li")).toHaveCount(3);
+    const uses = page.locator(".cp-ar__uses .cp-ar__use");
+    await expect(uses.first()).toContainText("Deals");
     expect(await page.locator(".cp-ar__body .cp-ar__fig").count()).toBeGreaterThanOrEqual(2);
     await expect(page.locator(".cp-ar__fig--lead")).toHaveCount(0);
-    await hero.locator(".cp-ar__use").first().getByRole("link", { name: /Open the data/ }).click();
+    await expect(page.locator(".cp-ar__quote")).toHaveCount(1);
+    // Example sponsor units, labelled as examples, beside the one invitation.
+    expect(await page.locator(".cp-ad--example").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.locator(".cp-ad--example .cp-ad__cap").first()).toHaveText("Sponsored · Example");
+    await uses.first().getByRole("link", { name: /Open the data/ }).click();
     await expect(page).toHaveURL(/\/data\?c=deals/);
     expect(errors).toEqual([]);
   });

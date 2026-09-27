@@ -26,7 +26,7 @@
 // chart: a figure is its caption, its source and its provenance, because a
 // chart nobody can interrogate is the fake dashboard this product avoids.
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
 
@@ -331,6 +331,14 @@ export default function CedarPressArticle() {
   // scaled to headline size and the piece opened on a chart instead of on
   // what it is and who wrote it.
   const body = article.body;
+  // Authors with a face and a role; a piece that names only a byline still
+  // gets a row, with initials where the photograph would be.
+  const authors = article.authors?.length ? article.authors : [{ name: article.byline }];
+  // An example sponsor unit sits in the text before the second section
+  // heading, where a reader has settled into the piece (owner, 2026-09-27:
+  // "it needs ad space examples").
+  const headings = body.flatMap((b, i) => (b.kind === BLOCK.H2 ? [i] : []));
+  const inlineAdAt = headings[1] ?? -1;
 
   return (
     <div className="teim-rd teim-rd--paper">
@@ -342,68 +350,97 @@ export default function CedarPressArticle() {
         <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
 
         <article className="cp-ar">
-          {/* THE HEAD OF THE PAGE (owner, 2026-09-27): title, authors and the
-              picture first, then two or three key facts and the collections
-              the piece was built from, each one open to a reader who has it
-              and priced for one who does not. On the house duotone, navy
-              with the teal. */}
+          {/* THE HEAD OF THE PAGE, IN THE SHAPE THE CENTER FOR INDIAN COUNTRY
+              DEVELOPMENT'S RESEARCH USES (owner, 2026-09-27): a navy band with
+              the title, the dek, the date and the authors, each with a face
+              and a role; then the lead picture, with three headlines from the
+              piece in a box over its right side; then the collections the
+              piece used, open to a reader who has them and priced for one who
+              does not. */}
           <header className="cp-ar__hero cp-fade">
-            <div className="cp-ar__heroin">
-              <div className="cp-ar__herotext">
-                <p className="cp-ar__tag">{article.tag}</p>
-                <h1 className="cp-ar__title">{article.title}</h1>
-                <p className="cp-ar__dek">{article.dek}</p>
-                <p className="cp-ar__meta">
-                  <span className="cp-ar__by">By {article.byline}</span>
-                  <span>{article.date}</span>
-                  {article.minutes ? <span>{article.minutes} min read</span> : null}
-                </p>
-              </div>
-              <figure className="cp-ar__figure cp-ar__heroimg">
-                <img
-                  className="cp-ar__art"
-                  src={article.image}
-                  alt={article.imageAlt}
-                  width={ARTICLE_IMAGE.width}
-                  height={ARTICLE_IMAGE.height}
-                  fetchPriority="high"
-                />
-                <figcaption className="cp-ar__cap">
-                  {article.caption ?? article.imageAlt}
-                  {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
-                </figcaption>
-              </figure>
-            </div>
-            <div className="cp-ar__herofoot">
-              {article.facts?.length ? (
-                <dl className="cp-ar__facts" aria-label="Key facts">
-                  {article.facts.map((fact) => (
-                    <div className="cp-ar__fact" key={fact.label}>
-                      <dt>{fact.value}</dt>
-                      <dd>{fact.label}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-              <div className="cp-ar__uses">
-                <span className="cp-ar__usecap">
-                  {drawn.length > 1 ? "Collections used" : "Collection used"}
-                </span>
-                <ul className="cp-ar__uselist">
-                  {drawn.map((id) => <UsedCollection key={id} id={id} user={user} />)}
-                </ul>
-              </div>
-            </div>
+            <p className="cp-ar__tag">{article.tag}</p>
+            <h1 className="cp-ar__title">{article.title}</h1>
+            <span className="cp-ar__rule" aria-hidden="true" />
+            <p className="cp-ar__dek">{article.dek}</p>
+            <p className="cp-ar__meta">
+              <span>{article.date}</span>
+              {article.minutes ? <span>{article.minutes} min read</span> : null}
+            </p>
+            <section className="cp-ar__authors" aria-label="Authors">
+              <h2 className="cp-ar__authorscap">{authors.length > 1 ? "Authors" : "Author"}</h2>
+              <ul className="cp-ar__authorlist">
+                {authors.map((author) => (
+                  <li className="cp-ar__author" key={author.name}>
+                    {author.photo ? (
+                      <img className="cp-ar__face" src={author.photo} alt="" width="72" height="72" loading="lazy" />
+                    ) : (
+                      <span className="cp-ar__face cp-ar__face--mark" aria-hidden="true">
+                        {author.name.split(/\s+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("")}
+                      </span>
+                    )}
+                    <span className="cp-ar__authorid">
+                      <span className="cp-ar__by">{author.name}</span>
+                      {author.role ? <span className="cp-ar__role">{author.role}</span> : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </header>
+
+          <div className="cp-ar__lead cp-fade">
+            <figure className="cp-ar__figure cp-ar__heroimg">
+              <img
+                className="cp-ar__art"
+                src={article.image}
+                alt={article.imageAlt}
+                width={ARTICLE_IMAGE.width}
+                height={ARTICLE_IMAGE.height}
+                fetchPriority="high"
+              />
+              <figcaption className="cp-ar__cap">
+                {article.caption ?? article.imageAlt}
+                {article.credit ? <span className="cp-ar__credit">{article.credit}</span> : null}
+              </figcaption>
+            </figure>
+            {article.highlights?.length ? (
+              <aside className="cp-ar__highlights" aria-label="Article highlights">
+                <h2 className="cp-ar__hlcap">Article highlights</h2>
+                <ul className="cp-ar__hllist">
+                  {article.highlights.map((line) => <li key={line}>{line}</li>)}
+                </ul>
+              </aside>
+            ) : null}
+          </div>
+
+          <div className="cp-ar__uses">
+            <span className="cp-ar__usecap">
+              {drawn.length > 1 ? "Collections used" : "Collection used"}
+            </span>
+            <ul className="cp-ar__uselist">
+              {drawn.map((id) => <UsedCollection key={id} id={id} user={user} />)}
+            </ul>
+          </div>
 
           <div className="cp-ar__grid">
             <div className="cp-ar__body">
               {body.map((block, index) => {
                 if (block.kind === BLOCK.H2) {
-                  return <h2 key={index} className="cp-ar__h2">{block.text}</h2>;
+                  return (
+                    <Fragment key={index}>
+                      {index === inlineAdAt ? <PressAd slot={AD_SLOT.ARTICLE_INLINE} example /> : null}
+                      <h2 className="cp-ar__h2">{block.text}</h2>
+                    </Fragment>
+                  );
                 }
                 if (block.kind === BLOCK.PULL) {
-                  return <p key={index} className="cp-ar__pull">{block.text}</p>;
+                  // The quote box: the line from the piece a reader should
+                  // leave with, set apart rather than italicised in place.
+                  return (
+                    <blockquote key={index} className="cp-ar__quote">
+                      <p className="cp-ar__pull">{block.text}</p>
+                    </blockquote>
+                  );
                 }
                 if (block.kind === BLOCK.FIGURE) {
                   return <Figure key={index} block={block} />;
@@ -443,13 +480,13 @@ export default function CedarPressArticle() {
                   How these are built <span aria-hidden="true">&#8594;</span>
                 </Link>
               </div>
-              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_LOWER} /> : null}
-              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_END} /> : null}
+              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_LOWER} example /> : null}
+              {longEnough ? <PressAd slot={AD_SLOT.ARTICLE_RAIL_END} example /> : null}
             </aside>
           </div>
         </article>
 
-        <PressAd slot={AD_SLOT.ARTICLE_END} />
+        <PressAd slot={AD_SLOT.ARTICLE_END} example />
 
         {/* The end of every hosted piece: the data it came from, resolved
             against what this reader can open. */}
