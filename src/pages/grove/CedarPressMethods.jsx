@@ -387,12 +387,13 @@ export default function CedarPressMethods() {
                   </p>
                   <p>
                     Every source is available to the public: government records, regulatory
-                    and securities filings, published reporting and, for Owned, the
-                    certified-business rosters that nations&rsquo; TERO and commerce offices
-                    send on request through their public contacts. The document a record cites
-                    is one anyone can obtain or request. Owned listings are published only on
-                    the terms the nation sets, and until it sets them Owned reports aggregates
-                    from the roster, not its entries.
+                    and securities filings, and published reporting, so the document a record
+                    cites is one anyone can obtain. Owned&rsquo;s certified-business rosters
+                    are requested from each nation&rsquo;s TERO or commerce office through its
+                    publicly listed contact, and whether the office releases one is the
+                    office&rsquo;s decision. Owned listings are published only on the terms the
+                    nation sets, and until it sets them Owned reports aggregates from the
+                    roster, not its entries.
                   </p>
                   <p>
                     Select a collection in the figure to see which sources it is built from and
