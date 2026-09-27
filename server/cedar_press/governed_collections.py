@@ -11,7 +11,13 @@ from pathlib import Path
 
 def component_declarations(collection_id: str) -> dict:
     """Maintained presentation metadata; never a runtime publication decision."""
-    if collection_id not in {"gaming", "need", "plot", "foundation-corporate-giving"}:
+    if collection_id not in {
+        "gaming",
+        "need",
+        "plot",
+        "foundation-corporate-giving",
+        "federal-register",
+    }:
         return {}
     filename = collection_id.replace("-", "_") + "_component_contracts.json"
     path = Path(__file__).resolve().parents[2] / "data/cedar" / filename
@@ -24,6 +30,11 @@ def component_declarations(collection_id: str) -> dict:
 
 
 SHARED_COLLECTIONS = {
+    "federal-register": {
+        "name": "Federal Register - Indian Affairs",
+        "shelf": "standard",
+        "components": ("consultation_participants", "federal_actions"),
+    },
     "need": {
         "name": "Native Entity Enterprise Dataset",
         "shelf": "pro",

@@ -254,6 +254,42 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.assertEqual(response.headers["X-Cedar-Component"], "environmental_events")
         self.assertIn("Cedar Press", response.headers["X-Cedar-Citation"])
 
+    def test_federal_document_and_participant_components_preserve_standard_access(self):
+        self.session("press")
+        for component in ("federal_actions", "consultation_participants"):
+            columns = governed_collections.presentation("federal-register", component)["order"]
+            _, _, content = self.fixture("federal-register", component, columns=columns)
+            response = self.client.get(
+                "/press/collections/federal-register/full-download",
+                params={"release_id": "c" * 64, "component": component},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, content)
+            self.assertEqual(response.headers["X-Cedar-Component"], component)
+
+    def test_legacy_federal_download_still_uses_its_explicit_native_pin(self):
+        self.session("press")
+        content = b'{"consultation_record_key":"SYNTHETIC"}\n'
+        released = {
+            "content": content, "release_id": "b" * 64,
+            "sha256": hashlib.sha256(content).hexdigest(), "record_count": 1,
+            "citation": "Synthetic compatibility fixture", "filename": "fixture.jsonl",
+            "media_type": "application/x-ndjson",
+        }
+        with (
+            patch.object(repository, "full_release", return_value=released) as native,
+            patch.object(
+                repository, "grove_full_release", side_effect=AssertionError("No replacement")
+            ),
+        ):
+            response = self.client.get(
+                "/press/collections/federal-register/full-download",
+                params={"release_id": "b" * 64},
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, content)
+        native.assert_called_once_with("federal-register", "b" * 64)
+
     def test_press_tier_cannot_fetch_plot_and_stale_account_cannot_fetch(self):
         self.fixture()
         for cookie_tier, account_tier in (("press", "press_pro"), ("press_pro", "press")):

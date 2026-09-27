@@ -688,10 +688,17 @@ def full_download(
             audit("invalid_release_request", requested=None)
             raise HTTPException(status_code=400, detail="Explicit release ID required")
         repository.assert_collection_publishable(collection_id)
-        if repository.is_component_release(collection_id) and component is None:
+        # Retain the exact legacy participant download when a native release is
+        # still pinned. New collection releases require an explicit component;
+        # no ambiguous combined table or silent release substitution is offered.
+        legacy_federal = collection_id == "federal-register" and component is None
+        if (
+            repository.is_component_release(collection_id)
+            and component is None and not legacy_federal
+        ):
             audit("invalid_release_request")
             raise HTTPException(status_code=400, detail="Explicit component required")
-        if repository.is_component_release(collection_id):
+        if repository.is_component_release(collection_id) and not legacy_federal:
             release = repository.grove_full_release(collection_id, release_id, component=component)
         elif component is not None:
             audit("invalid_release_request")

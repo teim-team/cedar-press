@@ -196,6 +196,7 @@ data/restricted/
 # this directory, then allow exactly these files; bulk and private data stay ignored.
 !/data/cedar/
 /data/cedar/*
+!/data/cedar/federal_register_component_contracts.json
 !/data/cedar/codebook.json
 !/data/cedar/collections.manifest.json
 !/data/cedar/field_map.json
