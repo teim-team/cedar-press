@@ -11,6 +11,8 @@ export default function SourceCitation({ source, compact = false }) {
       {!compact ? <>
         {source.publicationDate ? <span className="cp-rec__fine">Published: {source.publicationDate}</span> : null}
         {source.snapshotDate ? <span className="cp-rec__fine">Source snapshot: {source.snapshotDate}</span> : null}
+        {source.retrievedDate ? <span className="cp-rec__fine">Retrieved: {source.retrievedDate}</span> : null}
+        {source.originalDocumentSha256 ? <span className="cp-rec__fine">Original document SHA-256: <code>{source.originalDocumentSha256}</code></span> : null}
         <p>{source.citation}</p>
         {source.gaps.map((gap) => <span className="cp-rec__fine" key={gap}>{gap}</span>)}
       </> : null}

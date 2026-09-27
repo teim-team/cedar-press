@@ -56,11 +56,15 @@ export function sourcePresentation(collection, row, recordUrl) {
   if (!url) gaps.push("A public source URL is not recorded.");
   if (collection === "plot" && !safeSourceUrl(row.source_record_url)) gaps.push("A dataset or query link does not establish a citation to the individual parent record.");
   const periodText = Object.entries(reportingPeriod).map(([key, value]) => `${key.replaceAll("_", " ")}: ${value}`).join("; ");
+  const originalDocumentSha256 = (spec.documentHashFields ?? []).map((name) => row[name])
+    .find((value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value)) ?? null;
+  const retrievedDate = (spec.retrievedFields ?? []).map((name) => text(row[name])).find(Boolean) ?? null;
   return {
     publisher, issuingAuthority, title, titleBasis,
     url, reportingPeriod, periodText, eventDates, locators,
     publicationDate: (spec.publishedFields ?? [spec.published]).map((name) => text(row[name])).find(Boolean) ?? null,
     snapshotDate: text(row[spec.snapshot]),
+    originalDocumentSha256, retrievedDate,
     citation: [publisher ?? "Publisher not established", issuingAuthority ? `Issued by: ${issuingAuthority}` : null, title ? `${titleBasis}: ${title}` : null, Object.values(locators).join("; ") || null, periodText || null, url].filter(Boolean).join(". "),
     gaps,
   };

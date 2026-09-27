@@ -130,6 +130,22 @@ def present(collection, row, component=None):
     period = fields(spec.get("periods"))
     locators = fields(spec.get("locators"))
     period_text = "; ".join(key.replace("_", " ") + ": " + value for key, value in period.items())
+    document_hash = next(
+        (
+            row[name]
+            for name in spec.get("documentHashFields", [])
+            if isinstance(row.get(name), str) and re.fullmatch(r"[a-f0-9]{64}", row[name])
+        ),
+        None,
+    )
+    retrieved = next(
+        (
+            readable(row.get(name))
+            for name in spec.get("retrievedFields", [])
+            if readable(row.get(name))
+        ),
+        None,
+    )
     gaps = []
     if not publisher:
         gaps.append("Original publisher has not been established for this record.")
@@ -172,6 +188,8 @@ def present(collection, row, component=None):
             None,
         ),
         "snapshotDate": readable(row.get(spec.get("snapshot"))),
+        "originalDocumentSha256": document_hash,
+        "retrievedDate": retrieved,
         "citation": citation,
         "gaps": gaps,
     }

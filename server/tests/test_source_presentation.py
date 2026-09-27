@@ -6,6 +6,21 @@ from cedar_press.source_presentation import present, safe_url
 
 
 class SourcePresentationTest(unittest.TestCase):
+    def test_original_document_hash_never_comes_from_the_ingestion_file_hash(self):
+        row = {
+            "source_document_sha256": "a" * 64,
+            "source_retrieved_date": "2026-09-27",
+            "sha256": "b" * 64,
+            "source_inbox": "D:/private/extract.csv",
+        }
+        value = present("foundation-corporate-giving", row)
+        self.assertEqual(value["originalDocumentSha256"], "a" * 64)
+        self.assertEqual(value["retrievedDate"], "2026-09-27")
+        row["source_document_sha256"] = "not a document hash"
+        self.assertIsNone(present("foundation-corporate-giving", row)["originalDocumentSha256"])
+        self.assertIsNone(present("contractors", row)["originalDocumentSha256"])
+        self.assertNotIn("private", str(value))
+
     def test_official_host_fallback_is_exact_and_preserves_date_meaning(self):
         row = {
             "source_url": "https://www.federalregister.gov/d/2014-09591",

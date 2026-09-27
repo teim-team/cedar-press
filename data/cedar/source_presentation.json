@@ -190,6 +190,8 @@
       ]
     },
     "foundation-corporate-giving": {
+      "documentHashFields": ["source_document_sha256"],
+      "retrievedFields": ["source_retrieved_date"],
       "locators": [
         "disclosure_id",
         "source_locator"

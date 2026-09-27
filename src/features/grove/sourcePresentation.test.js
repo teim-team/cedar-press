@@ -2,6 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { safeSourceUrl, sourcePresentation } from "./sourcePresentation.js";
 
+test("an original-document digest remains distinct from an ingestion-file digest", () => {
+  const row = { source_document_sha256: "a".repeat(64), sha256: "b".repeat(64), source_retrieved_date: "2026-09-27" };
+  const value = sourcePresentation("foundation-corporate-giving", row, null);
+  assert.equal(value.originalDocumentSha256, row.source_document_sha256);
+  assert.equal(value.retrievedDate, "2026-09-27");
+  assert.equal(sourcePresentation("contractors", row, null).originalDocumentSha256, null);
+  row.source_document_sha256 = "extract.csv";
+  assert.equal(sourcePresentation("foundation-corporate-giving", row, null).originalDocumentSha256, null);
+});
+
 test("verified Federal Register hosts identify the publisher without inventing the report title", () => {
   const row = { notice_date: "2025-03-01" };
   const source = sourcePresentation("federal-register", row, "https://www.federalregister.gov/d/2014-09591");
