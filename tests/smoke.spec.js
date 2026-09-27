@@ -145,6 +145,40 @@ test.describe("the gate", () => {
     await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ documented upstream sources");
   });
 
+  // The greeting note above Ask Cedar (owner, 2026-09-27): it rises once the
+  // reader scrolls in, stays until answered, and dismissing it holds for the
+  // visit. No emoji.
+  test("the door's Cedar greets on scroll and stays dismissed once dismissed", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
+    await page.goto("/");
+    const note = page.locator(".cp-greet");
+    await expect(note).toHaveCount(0);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await expect(note).toBeVisible({ timeout: 5_000 });
+    await expect(note).toContainText("Hi, I’m Cedar.");
+    await expect(note).not.toContainText(/\p{Extended_Pictographic}/u);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(400);
+    await expect(note).toBeVisible();
+    await note.getByRole("button", { name: "Dismiss this message" }).click();
+    await expect(note).toHaveCount(0);
+    await page.reload();
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    await page.waitForTimeout(2_500);
+    await expect(note).toHaveCount(0);
+  });
+
+  test("clicking the greeting opens the door's Cedar", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the phone launcher waits out the hero");
+    await page.goto("/");
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
+    const note = page.locator(".cp-greet");
+    await expect(note).toBeVisible({ timeout: 5_000 });
+    await note.locator(".cp-greet__open").click();
+    await expect(page.locator(".cp-dc.is-open")).toHaveCount(1);
+    await expect(note).toHaveCount(0);
+  });
+
   // The sticky masthead is opaque (owner, 2026-09-27): no alpha, no blur,
   // and the hero's old source-reach line under the partners is gone.
   test("the masthead is opaque and the hero carries no source-reach line", async ({ page }) => {

@@ -2969,6 +2969,27 @@
 }
 .teim-rd .cp-dc__statusdot { flex: 0 0 auto; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--teal); }
 
+/* THE GREETING NOTE (owner, 2026-09-27; CedarGreeting.jsx). It sits in the
+ * launcher's own column, so it rises from whatever corner the launcher is in,
+ * and it is hidden wherever the launcher is. White card, the launcher's teal
+ * hairline, a tail pointing down at the pill. The text itself is the button
+ * that opens Cedar; the cross dismisses it. */
+.teim-rd .cp-greet { position: relative; width: min(290px, calc(100vw - 2rem)); margin-bottom: 0.15rem; border: 1px solid var(--teal-line); border-radius: 10px; background: var(--door-surface, #fff); box-shadow: 0 12px 32px rgba(10, 15, 38, 0.14), 0 4px 12px rgba(10, 15, 38, 0.08); animation: cp-greet-in 0.28s var(--door-ease, ease) both; }
+.teim-rd .cp-greet::after { content: ''; position: absolute; right: 28px; bottom: -7px; width: 12px; height: 12px; background: var(--door-surface, #fff); border-right: 1px solid var(--teal-line); border-bottom: 1px solid var(--teal-line); transform: rotate(45deg); }
+.teim-rd .cp-greet__open { display: block; width: 100%; margin: 0; padding: 0.85rem 2.6rem 0.85rem 1rem; border: 0; background: none; color: var(--ink); font-family: var(--sans); font-size: 0.88rem; line-height: 1.45; text-align: left; cursor: pointer; border-radius: 10px; }
+.teim-rd .cp-greet__open:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+.teim-rd .cp-greet__dismiss { position: absolute; top: 0.2rem; right: 0.2rem; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; }
+.teim-rd .cp-greet__dismiss:hover { color: var(--ink); background: var(--teal-tint); }
+.teim-rd .cp-greet__dismiss:focus-visible { outline: 2px solid var(--dteal); outline-offset: 2px; }
+@keyframes cp-greet-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-greet { animation: none; } }
+/* Wherever the launcher steps aside, so does the note. */
+body[data-cp-preview-in-view] .teim-rd .cp-dc .cp-greet,
+body[data-cp-explore-in-view] .teim-rd .cedar-widget .cp-greet { display: none; }
+@media (max-width: 720px) {
+  body[data-cp-launcher-away] .teim-rd .cp-dc .cp-greet { display: none; }
+}
+
 /* Docked, not floating. The panel is `fixed` in its own right rather than a
    flex item above the launcher: pinned to the bottom edge, top corners only,
    so it reads as a surface the viewport raised instead of a card hovering in

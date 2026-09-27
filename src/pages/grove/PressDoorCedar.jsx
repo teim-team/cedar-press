@@ -60,6 +60,7 @@ import { PRESS_METHODS_PATH, PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { useCedarThread } from "../../features/grove/useCedarThread.js";
 import { CedarPanel, Paragraphs } from "./CedarPanel";
+import { CedarGreeting } from "./CedarGreeting";
 
 /** The routes an answer can offer, by the key an intent names. */
 const LINKS = {
@@ -229,6 +230,7 @@ export default function PressDoorCedar() {
         />
       ) : null}
 
+      <CedarGreeting cedarOpen={open} onOpen={() => setOpen(true)} />
       <button
         type="button"
         ref={fabRef}
