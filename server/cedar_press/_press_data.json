@@ -987,43 +987,57 @@
   "workKinds": [
     {
       "id": "tribal_government",
-      "label": "Tribal government"
-    },
-    {
-      "id": "tribal_enterprise",
-      "label": "Tribal enterprise or corporation"
+      "label": "Tribal Nation or tribal government"
     },
     {
       "id": "anc_nho",
       "label": "ANC or NHO"
     },
     {
-      "id": "native_nonprofit",
-      "label": "Native nonprofit or association"
-    },
-    {
-      "id": "federal",
-      "label": "Federal agency"
-    },
-    {
-      "id": "state_local",
-      "label": "State or local government"
+      "id": "tribal_enterprise",
+      "label": "Native enterprise"
     },
     {
       "id": "lender_investor",
-      "label": "Lender, investor or fund"
+      "label": "Bank, lender or investor (CDFIs included)"
     },
     {
-      "id": "advisor",
-      "label": "Law, accounting or consulting firm"
+      "id": "native_nonprofit",
+      "label": "Native nonprofit"
     },
     {
-      "id": "media",
-      "label": "Newsroom or media"
+      "id": "foundation",
+      "label": "Foundation or philanthropy"
+    },
+    {
+      "id": "business",
+      "label": "Business working in Indian Country"
     },
     {
       "id": "academic",
-      "label": "University or research institute"
+      "label": "University or research institution"
+    },
+    {
+      "id": "media",
+      "label": "Newsroom or journalist"
+    },
+    {
+      "id": "advisor",
+      "label": "Advisor or professional services firm"
+    },
+    {
+      "id": "economic_development",
+      "label": "Economic development organization or outside partner"
+    },
+    {
+      "id": "federal",
+      "label": "Federal agency",
+      "retired": true
+    },
+    {
+      "id": "state_local",
+      "label": "State or local government",
+      "retired": true
     }
   ],
   "cedarQuestions": {

@@ -2711,6 +2711,39 @@ test.describe("dead ends", () => {
   });
 });
 
+test.describe("Settings: your work", () => {
+  // The offered answers are the landing audiences; a retired stored answer
+  // is shown under its own label, to its holder only (readerWork.js).
+  const OFFERED = [
+    "Tribal Nation or tribal government",
+    "ANC or NHO",
+    "Native enterprise",
+    "Bank, lender or investor (CDFIs included)",
+    "Native nonprofit",
+    "Foundation or philanthropy",
+    "Business working in Indian Country",
+    "University or research institution",
+    "Newsroom or journalist",
+    "Advisor or professional services firm",
+    "Economic development organization or outside partner",
+  ];
+
+  test("offers the landing audiences, in order", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/settings");
+    await expect(page.locator("#cp-work option")).toHaveText(["Rather not say", ...OFFERED]);
+  });
+
+  test("keeps a retired stored answer under its original label", async ({ page }) => {
+    await signIn(page);
+    await page.evaluate(() => localStorage.setItem("cedar-press-work", "federal"));
+    await page.goto("/settings");
+    const select = page.locator("#cp-work");
+    await expect(select).toHaveValue("federal");
+    await expect(select.locator("option")).toHaveText(["Rather not say", "Federal agency", ...OFFERED]);
+  });
+});
+
 /* ── Interaction: arrival, response, state ─────────────────────────────────
  * The motion contract is docs/DESIGN_SYSTEM.md, "Motion". These measure it
  * in a browser: the twelve arrive in order once they are scrolled to and
