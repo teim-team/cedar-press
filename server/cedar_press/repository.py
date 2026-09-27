@@ -435,8 +435,11 @@ def _release_bytes(path, *, limit=MAX_RELEASE_BYTES):
     return content
 
 
-def _release_json(path):
-    return json.loads(_release_bytes(path, limit=4 * 1024 * 1024))
+MAX_COLLECTION_MANIFEST_BYTES = 32 * 1024 * 1024
+
+
+def _release_json(path, *, limit=4 * 1024 * 1024):
+    return json.loads(_release_bytes(path, limit=limit))
 
 
 @lru_cache(maxsize=1)
@@ -475,7 +478,7 @@ def _partitioned_release(catalog, collection_id, requested_release_id, metadata_
     prefix = f"/v1/collections/{collection_id}/releases/{rid}"
     if pin.get("manifest_path") != prefix + "/manifest":
         raise FullReleaseUnavailable("Untrusted manifest route")
-    manifest = _release_json(prefix + "/manifest")
+    manifest = _release_json(prefix + "/manifest", limit=MAX_COLLECTION_MANIFEST_BYTES)
     if not isinstance(manifest, dict):
         raise FullReleaseUnavailable("Malformed collection manifest")
     if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != pin.get("manifest_sha256"):
@@ -984,7 +987,9 @@ def _grove_catalog(pin: dict[str, str]) -> dict[str, Any]:
 
 def _grove_manifest(pin: dict[str, str]) -> dict[str, Any]:
     """The one collection-level manifest, byte-verified against the pin."""
-    manifest = _release_json(_grove_prefix(pin) + "/manifest")
+    manifest = _release_json(
+        _grove_prefix(pin) + "/manifest", limit=MAX_COLLECTION_MANIFEST_BYTES
+    )
     if not isinstance(manifest, dict):
         raise FullReleaseUnavailable("Malformed manifest")
     if hashlib.sha256(_canonical_bytes(manifest)).hexdigest() != pin["manifest_sha256"]:

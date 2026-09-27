@@ -3,6 +3,8 @@
 import copy
 import hashlib
 import importlib.util
+import io
+import json
 import os
 import tempfile
 import unittest
@@ -33,6 +35,38 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         )
         self.account.start()
         self.addCleanup(self.account.stop)
+
+    def test_collection_manifests_have_a_separate_bounded_transport_limit(self):
+        # Full PLOT has 163 parts and a 14 MB manifest. Catalogs remain small.
+        payload = json.dumps({"fixture": "x" * (4 * 1024 * 1024)}).encode()
+        with (
+            patch.object(repository, "_release_response", return_value=io.BytesIO(payload)),
+            self.assertRaisesRegex(repository.FullReleaseUnavailable, "safety limit"),
+        ):
+            repository._release_json("/catalog")
+        with patch.object(repository, "_release_response", return_value=io.BytesIO(payload)):
+            self.assertEqual(
+                len(repository._release_json(
+                    "/manifest", limit=repository.MAX_COLLECTION_MANIFEST_BYTES
+                )["fixture"]), 4 * 1024 * 1024,
+            )
+        class TooLarge:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def read(self, size):
+                return b" " * size
+
+        with (
+            patch.object(repository, "_release_response", return_value=TooLarge()),
+            self.assertRaisesRegex(repository.FullReleaseUnavailable, "safety limit"),
+        ):
+            repository._release_json(
+                "/manifest", limit=repository.MAX_COLLECTION_MANIFEST_BYTES
+            )
 
     def session(self, tier):
         app.dependency_overrides[current_session] = lambda: Session(
