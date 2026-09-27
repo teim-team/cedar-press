@@ -272,6 +272,41 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["collections"]), 15)
 
+    def test_matching_presentation_never_clears_held_or_missing_field_rights(self):
+        for collection in ("gaming", "plot", "foundation-corporate-giving", "need"):
+            for rights in (
+                {"id": "PUBLIC_OFFICIAL", "secret": "INTERNAL_VENDOR"},
+                {"id": "PUBLIC_OFFICIAL", "secret": "UNRECOGNIZED"},
+                {"id": "PUBLIC_OFFICIAL"},
+                {},
+            ):
+                with self.subTest(collection=collection, rights=rights):
+                    entry = {
+                        "collection": collection,
+                        "order": ["id", "secret"],
+                        "fields": [
+                            {"column": name, "decision": "keep", "rights_class": value}
+                            for name, value in rights.items()
+                        ],
+                    }
+                    contract = {
+                        "rights": {"publication_class": "publishable", "redistribution": True},
+                        "download_permitted": True,
+                        "fields": [{"name": "id"}, {"name": "secret"}],
+                        "metadata": {"field_rights": rights},
+                    }
+                    with (
+                        patch.object(repository, "_field_map_tables", return_value={
+                            f"{collection}/facts": entry
+                        }),
+                        self.assertRaisesRegex(
+                            repository.FullReleaseUnavailable, "incomplete|held or unknown"
+                        ),
+                    ):
+                        repository.grove_component_contract(
+                            {"components": {"facts": contract}}, collection, "facts"
+                        )
+
     def test_real_rehearsal_refuses_inherited_database_before_imports_or_artifacts(self):
         path = Path(__file__).with_name("shared_collection_rehearsal.py")
         spec = importlib.util.spec_from_file_location("isolated_shared_rehearsal", path)

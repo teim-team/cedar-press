@@ -1105,13 +1105,22 @@ def grove_component_contract(
         entry = governed_collections.presentation(collection_id, display_component)
     if not entry or entry.get("collection") != collection_id or header != entry.get("order"):
         raise FullReleaseUnavailable("Full release does not match product field map")
-    declared_rights = (contract.get("metadata") or {}).get("field_rights") or {}
-    if collection_id == "gaming" and (
-        not isinstance(declared_rights, dict)
-        or set(declared_rights) != set(header)
-        or any(not isinstance(value, str) or not value for value in declared_rights.values())
-    ):
-        raise FullReleaseUnavailable("Gaming field-rights metadata is incomplete")
+    declared_rights = (contract.get("metadata") or {}).get("field_rights")
+    if collection_id == "gaming" or declared_rights is not None:
+        if (
+            not isinstance(declared_rights, dict)
+            or set(declared_rights) != set(header)
+            or any(not isinstance(value, str) or not value for value in declared_rights.values())
+        ):
+            raise FullReleaseUnavailable("Component field-rights metadata is incomplete")
+        # Downloads stream exact verified bytes. A presentation declaration
+        # cannot clear or silently remove a restricted column from that file.
+        public_rights = {
+            "public", "publishable", "public_official", "public_derived", "public_first_party"
+        }
+        if any(value.lower() not in public_rights for value in declared_rights.values()):
+            raise FullReleaseUnavailable("Raw component includes a held or unknown field")
+    declared_rights = declared_rights or {}
     for item in entry.get("fields", []):
         if (
             item.get("decision") in {"keep", "rename"}
