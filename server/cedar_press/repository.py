@@ -693,14 +693,7 @@ def full_release(collection_id, requested_release_id=None, *, metadata_only=Fals
     """
     if not any(item.id == collection_id for item in launch.LAUNCH_COLLECTION):
         raise FullReleaseUnavailable("Unknown collection")
-    try:
-        policy = _publication_policy()
-    except (OSError, ImportError, AttributeError) as error:
-        raise FullReleaseUnavailable("Publication policy unavailable") from error
-    try:
-        policy.assert_collection_publishable(collection_id)
-    except policy.FieldMapRefusal as error:
-        raise FullReleaseUnavailable("Collection publication is held") from error
+    assert_collection_publishable(collection_id)
     location = os.environ.get("CEDAR_PRESS_RELEASE_CATALOG")
     if not location:
         raise FullReleaseUnavailable("No pinned release catalog configured")
@@ -1248,14 +1241,7 @@ def grove_full_release(
         raise FullReleaseUnavailable("A Grove release names a well-formed component")
     if component not in grove_components(collection_id):
         raise FullReleaseUnavailable("Component is not offered for this collection")
-    try:
-        policy = _publication_policy()
-    except (OSError, ImportError, AttributeError) as error:
-        raise FullReleaseUnavailable("Publication policy unavailable") from error
-    try:
-        policy.assert_collection_publishable(collection_id)
-    except policy.FieldMapRefusal as error:
-        raise FullReleaseUnavailable("Collection publication is held") from error
+    assert_collection_publishable(collection_id)
     try:
         pin = grove_release_pin(collection_id)
         release_id = pin["release_id"]
@@ -1349,6 +1335,18 @@ def grove_release_metadata(collection_id):
         except FullReleaseUnavailable:
             out.append({"kind": "full", "table_id": component, "status": "unavailable"})
     return out
+
+
+def assert_collection_publishable(collection_id):
+    """Run the maintained policy before component selection or release lookup."""
+    try:
+        policy = _publication_policy()
+    except (OSError, ImportError, AttributeError) as error:
+        raise FullReleaseUnavailable("Publication policy unavailable") from error
+    try:
+        policy.assert_collection_publishable(collection_id)
+    except policy.FieldMapRefusal as error:
+        raise FullReleaseUnavailable("Collection publication is held") from error
 
 
 def full_release_metadata(collection_id):

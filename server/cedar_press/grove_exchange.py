@@ -34,9 +34,11 @@ class ExchangeRefusal(ValueError):
 def _validate(request: dict) -> str:
     if not isinstance(request, dict) or request.get("protocol_version") != PROTOCOL_VERSION:
         raise ExchangeRefusal(400, "Unsupported Grove consumer protocol")
-    if request.get("tier") not in {"grove", "tree"}:
+    if request.get("tier") not in ("grove", "tree"):
         raise ExchangeRefusal(403, "Cedar Grove entitlement required")
     operation = request.get("operation")
+    if not isinstance(operation, str):
+        raise ExchangeRefusal(400, "Invalid Grove consumer operation")
     extra = {
         "discover": set(),
         "profile": {"cedar_uid"},
@@ -65,11 +67,15 @@ def exchange(request: dict, output_directory: Path | None = None) -> dict:
         or not re.fullmatch(r"[a-z][a-z0-9-]{0,63}", collection)
         or not isinstance(rid, str)
         or not re.fullmatch(r"[0-9a-f]{64}", rid)
-        or (component is not None and not re.fullmatch(r"[a-z0-9][a-z0-9_]{0,59}", component))
+        or (component is not None and (
+            not isinstance(component, str)
+            or not re.fullmatch(r"[a-z0-9][a-z0-9_]{0,59}", component)
+        ))
     ):
         raise ExchangeRefusal(400, "Invalid collection, component or release identity")
     if not repository.may_download_full(request["tier"], collection):
         raise ExchangeRefusal(403, "Collection is unavailable to this plan")
+    repository.assert_collection_publishable(collection)
     if output_directory is None or not output_directory.is_dir() or output_directory.is_symlink():
         raise ExchangeRefusal(503, "Private download storage is unavailable")
     if repository.is_component_release(collection):
@@ -139,7 +145,7 @@ def response(request: dict, output_directory: Path | None = None) -> dict:
             "status": 404,
             "error": "No registered entity profile",
         }
-    except (repository.FullReleaseUnavailable, OSError, ValueError, TypeError):
+    except (repository.FullReleaseUnavailable, OSError, ValueError, TypeError, KeyError):
         # Source configuration may contain a private URL. Never emit exception text.
         return {
             "protocol_version": PROTOCOL_VERSION,

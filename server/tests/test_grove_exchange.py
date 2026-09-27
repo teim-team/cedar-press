@@ -23,6 +23,8 @@ class GroveExchange(unittest.TestCase):
                 (self.request(protocol_version=2), 400),
                 (self.request(store="arbitrary"), 400),
                 (self.request(operation="sql"), 400),
+                (self.request(operation=[]), 400),
+                (self.request(tier=[]), 403),
                 ([], 400),
             ]:
                 self.assertEqual(exchange.response(request)["status"], status)

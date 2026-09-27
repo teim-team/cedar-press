@@ -643,6 +643,7 @@ def full_download(
         if not release_id or not re.fullmatch(r"[0-9a-f]{64}", release_id):
             audit("invalid_release_request", requested=None)
             raise HTTPException(status_code=400, detail="Explicit release ID required")
+        repository.assert_collection_publishable(collection_id)
         if repository.is_component_release(collection_id) and component is None:
             audit("invalid_release_request")
             raise HTTPException(status_code=400, detail="Explicit component required")
