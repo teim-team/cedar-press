@@ -26,7 +26,7 @@
 // chart: a figure is its caption, its source and its provenance, because a
 // chart nobody can interrogate is the fake dashboard this product avoids.
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 
 
@@ -267,6 +267,43 @@ function UsedCollection({ id, user }) {
   );
 }
 
+/**
+ * How far through the piece the reader is, as a teal line along the top edge.
+ * Written straight to the element's transform on each frame rather than kept
+ * in state, so scrolling never re-renders the article.
+ */
+function ReadingProgress() {
+  const bar = useRef(null);
+  useEffect(() => {
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      const body = document.querySelector(".cp-ar__body");
+      if (!body || !bar.current) return;
+      const box = body.getBoundingClientRect();
+      const span = box.height - window.innerHeight * 0.6;
+      const done = span > 0 ? Math.min(1, Math.max(0, -box.top / span)) : 1;
+      bar.current.style.transform = `scaleX(${done})`;
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
+  return (
+    <div className="cp-ar__progress" aria-hidden="true">
+      <span ref={bar} />
+    </div>
+  );
+}
+
 export default function CedarPressArticle() {
   const { articleId } = useParams();
   const { user, loading } = useAuth();
@@ -353,7 +390,8 @@ export default function CedarPressArticle() {
 
         {/* Back goes to the briefs, not the hub: a piece belongs to the
             articles page, and the footer carries the rest of the map. */}
-        <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
+        <PressBack label="All Research Briefs" to={PRESS_ARTICLES_PATH} />
+        <ReadingProgress />
 
         <article className="cp-ar">
           {/* THE HEAD OF THE PAGE (owner, 2026-09-27). The structure of the

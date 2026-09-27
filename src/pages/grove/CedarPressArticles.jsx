@@ -27,9 +27,11 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 
-function ArticleCard({ article, compact = false }) {
+function ArticleCard({ article }) {
   const dataset = LAUNCH_COLLECTION.find((item) => item.id === article.datasetId);
-  const className = compact ? "cp-art cp-art--compact" : "cp-art cp-art--lead";
+  // One square card per brief, all alike (owner, 2026-09-27: "a menu of
+  // cards, like squares you can click on").
+  const className = "cp-art cp-art--square";
   const inner = (
     <>
       {/* Sector photography stands in until the real brief publishes with
@@ -41,11 +43,7 @@ function ArticleCard({ article, compact = false }) {
           arrive, so the card is its final height from the first layout. It
           was measured without them: the lead card's body was laid out at
           y=446 and moved to y=783 when the picture landed — a 337px jump,
-          and 0.051 of the 0.052 CLS this page recorded.
-
-          The lead card is the largest thing on the first screen, so it is
-          fetched eagerly and at high priority; the ones stacked beside and
-          below it stay lazy. */}
+          and 0.051 of the 0.052 CLS this page recorded. */}
       <div className="cp-art__art">
         <img
           className={`cp-art__img ${toneClass(article.tone)}`}
@@ -53,8 +51,7 @@ function ArticleCard({ article, compact = false }) {
           alt={article.imageAlt}
           width={ARTICLE_IMAGE.width}
           height={ARTICLE_IMAGE.height}
-          loading={compact ? "lazy" : "eager"}
-          fetchPriority={compact ? undefined : "high"}
+          loading="lazy"
         />
       </div>
       <div className="cp-art__body">
@@ -66,9 +63,9 @@ function ArticleCard({ article, compact = false }) {
           <b>{dataset?.name || article.tag}</b>
         </span>
         <h2 className="cp-art__title">{article.title}</h2>
-        <p className="cp-art__dek">{article.dek}</p>
         <span className="cp-art__meta">
-          {article.date} · from {dataset?.name}
+          {/* The collection is already named in the tag above. */}
+          {article.date}
           {article.hosted ? null : " · on Tribal Business News"}
         </span>
       </div>
@@ -123,17 +120,16 @@ export default function CedarPressArticles() {
         <section className="cp-surf cp-surf--paper cp-fade" id="briefs" aria-label="Latest research">
           <Contours strength={1} />
           <div className="cp-surf__in">
-            <div className="cp-artgrid">
-              <ArticleCard article={PRESS_ARTICLES[0]} />
-              <div className="cp-artstack">
-                {PRESS_ARTICLES.slice(1).map((article) => (
-                  <ArticleCard key={article.id} article={article} compact />
-                ))}
-                <a className="cp-artmore" href={TBN_URL} target="_blank" rel="noreferrer">
-                  Selected Cedar Press research also publishes with Tribal Business News →
-                </a>
-              </div>
-            </div>
+            <ul className="cp-briefgrid">
+              {PRESS_ARTICLES.map((article) => (
+                <li key={article.id}>
+                  <ArticleCard article={article} />
+                </li>
+              ))}
+            </ul>
+            <a className="cp-artmore" href={TBN_URL} target="_blank" rel="noreferrer">
+              Selected Cedar Press research also publishes with Tribal Business News →
+            </a>
             <PressAd slot={AD_SLOT.BRIEFS} />
           </div>
         </section>

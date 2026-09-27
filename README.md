@@ -15,7 +15,7 @@ Built by [Lumecon](https://lumecon.ai). Available exclusively through
 | Section | What it holds |
 | --- | --- |
 | Overview | The service at a glance, with each section's current standing. |
-| Articles | Data Briefs: original research built from the collections. |
+| Articles | Research Briefs: original research built from the collections. |
 | Data | The collections themselves — coverage, method and the release. |
 | What's new | Every release, dated and versioned, for tracing a cited figure. |
 | Methods | How collections are sourced, resolved and kept current. |

@@ -2894,6 +2894,25 @@ test.describe("the loop between the records and the journalism", () => {
     expect(errors).toEqual([]);
   });
 
+  // The index is a menu of square cards (owner, 2026-09-27), one per brief,
+  // each picture in its piece's own wash, and every card opens the brief.
+  test("Research Briefs lists every brief as a square card in its own tone", async ({ page }) => {
+    const errors = watchConsole(page);
+    await signIn(page);
+    await page.goto("/articles");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Research Briefs.");
+    const cards = page.locator(".cp-briefgrid .cp-art--square");
+    expect(await cards.count()).toBeGreaterThanOrEqual(4);
+    const tones = await page.locator(".cp-briefgrid img.cp-art__img").evaluateAll((imgs) =>
+      imgs.map((img) => getComputedStyle(img).filter),
+    );
+    expect(new Set(tones).size).toBeGreaterThan(1);
+    await cards.filter({ hasText: "Federal contracting to Native" }).click();
+    await expect(page).toHaveURL(/\/articles\/brief-contractors/);
+    await expect(page.getByRole("link", { name: /All Research Briefs/ })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
   // A research brief opens on what it is (owner, 2026-09-27): title,
   // authors and picture first, then its key facts and the collections it
   // used, each one open to this reader; and its figures sit in the text,

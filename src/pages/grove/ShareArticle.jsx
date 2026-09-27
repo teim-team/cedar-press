@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { applyDuotone } from "../../features/grove/duotone.js";
-import { buildArticlePdf, pdfFileName, shareEmail } from "../../features/grove/articlePdf.js";
+import { PDF_LEAD, buildArticlePdf, pdfFileName, shareEmail } from "../../features/grove/articlePdf.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 
 /**
@@ -37,9 +37,25 @@ const STYLE_PROPS = [
  * the stylesheet's custom properties survive leaving the page. */
 async function rasterize(svg) {
   const box = svg.viewBox?.baseVal;
-  const w = box?.width || svg.clientWidth || 460;
-  const h = box?.height || svg.clientHeight || 190;
+  let x0 = box?.x || 0;
+  let y0 = box?.y || 0;
+  let w = box?.width || svg.clientWidth || 460;
+  let h = box?.height || svg.clientHeight || 190;
+  // Labels can sit outside the viewBox (the page lets them overflow); widen
+  // the frame to the drawing's own bounds so none is cut off in the PDF.
+  try {
+    const bb = svg.getBBox();
+    const x1 = Math.max(x0 + w, bb.x + bb.width);
+    const y1 = Math.max(y0 + h, bb.y + bb.height);
+    x0 = Math.min(x0, Math.floor(bb.x) - 2);
+    y0 = Math.min(y0, Math.floor(bb.y) - 2);
+    w = Math.ceil(x1 - x0) + 2;
+    h = Math.ceil(y1 - y0) + 2;
+  } catch {
+    // Not rendered: keep the viewBox.
+  }
   const clone = svg.cloneNode(true);
+  clone.setAttribute("viewBox", `${x0} ${y0} ${w} ${h}`);
   const from = [svg, ...svg.querySelectorAll("*")];
   const to = [clone, ...clone.querySelectorAll("*")];
   from.forEach((node, i) => {
@@ -75,12 +91,11 @@ function loadImage(src) {
   });
 }
 
-/** The lead photograph cropped to the band's proportion and toned with the
- * piece's wash, as it reads on the page. */
+/** The lead photograph cropped to the PDF band's proportion and toned with
+ * the piece's wash, as it reads on the page. */
 async function tonedLead(src, tone) {
   const img = await loadImage(src);
-  const w = 1200;
-  const h = Math.round((w * 7) / 16);
+  const { w, h } = PDF_LEAD;
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
