@@ -1,13 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { evidenceSections, isEnterpriseSubject, NEED_EVIDENCE_EMPTY } from "./needEvidence.js";
+import { attributionLabel, evidenceSections, NEED_EVIDENCE_EMPTY } from "./needEvidence.js";
 
-test("NEED preserves issued enterprise IDs and distinguishes a Native entity", () => {
-  assert.equal(isEnterpriseSubject("CEDAR-NEST-000570-HT"), true);
-  assert.equal(isEnterpriseSubject("CB-SYNTHETIC"), true);
-  assert.equal(isEnterpriseSubject("CE-SYNTHETIC"), false);
-  assert.equal(isEnterpriseSubject(null), false);
+test("An empty NEED profile does not claim absence of underlying facts", () => {
   assert.match(NEED_EVIDENCE_EMPTY, /does not establish/);
+  assert.match(attributionLabel({ profile_attribution: { kind: "registered_entity" } }), /this registered entity/);
+  assert.match(attributionLabel({ profile_attribution: { kind: "related_enterprise" } }), /not assigned to the profile entity/);
 });
 
 test("Held, missing and unsafe-source facts never become visible evidence", () => {

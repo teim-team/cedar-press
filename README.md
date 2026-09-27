@@ -12,13 +12,16 @@ Built by [Lumecon](https://lumecon.ai). Available exclusively through
 
 ## The service
 
-NEED enterprise profiles use the same pinned, verified collection releases as
-downloads. Patent observations and rating histories attach to exact enterprise
-IDs; affiliated Native entities do not inherit them. The NEED collection
+Registered Native entity profiles use the same pinned, verified collection releases as
+downloads. NEED records remain named related records, without a separate public
+profile. Patent observations and ratings attach to the exact legal owner or issuer:
+a registered entity, its evidenced NEED counterpart, or a related enterprise.
+Showing a related record does not transfer its facts to the parent. The NEED collection
 publication hold currently returns an explicit empty state before release
 transport. Internal review candidates remain separate from customer eligibility.
 The authenticated evidence endpoint is
-`GET /press/need/enterprises/{enterprise_id}/evidence`.
+`GET /press/entities/{cedar_uid}/need-evidence`. The entity register is internal
+infrastructure and is not an additional customer collection.
 
 | Section | What it holds |
 | --- | --- |

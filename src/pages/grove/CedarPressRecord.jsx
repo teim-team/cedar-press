@@ -471,11 +471,6 @@ export default function CedarPressRecord() {
                 entity's own page. */}
             <p className="cp-rec__ids" data-testid="record-identity">
               {item.subject ? <span className="cp-rec__as">Recorded as <b>{item.subject}</b></span> : null}
-              {item.collection === "need" && row.enterprise_id ? (
-                <Link className="cp-rec__profile" to={profileHref(row.enterprise_id)}>
-                  View enterprise patents and ratings <span aria-hidden="true">&#8594;</span>
-                </Link>
-              ) : null}
               {item.entity.uid ? (
                 <span className="cp-rec__uid">
                   <code>{item.entity.uid}</code>

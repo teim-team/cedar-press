@@ -42,9 +42,8 @@ import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
-import NeedEnterpriseEvidence from "./NeedEnterpriseEvidence";
+import NeedEntityEvidence from "./NeedEntityEvidence";
 import PressGate from "./PressGate";
-import { isEnterpriseSubject } from "../../features/grove/needEvidence.js";
 
 /** Where an entity action goes: the table, narrowed and ordered for it. */
 function entityActionHref(action, uid) {
@@ -82,8 +81,7 @@ export default function CedarPressEntity() {
   const entity = register.byUid.get(uid) ?? null;
   // The register has loaded and this id is not in it. The page then has no
   // entity to describe records for, and no table to open narrowed to it.
-  const enterpriseSubject = isEnterpriseSubject(uid);
-  const unknown = !entity && !enterpriseSubject && register.entities.length > 0;
+  const unknown = !entity && register.entities.length > 0;
   const mine = useMemo(
     () => rows.filter((item) => item.entity.entities.some((e) => e.uid === uid)),
     [rows, uid],
@@ -137,7 +135,7 @@ export default function CedarPressEntity() {
   const notice = samplesLoading
     ? "Reading the published previews…"
     : `Records Cedar Press has resolved to this entity, from the published previews — up to ten sample rows per table, never a count of a release. The name each source used stays visible.${locked ? ` ${locked} more collections open on Cedar Press+.` : ""}`;
-  const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? (enterpriseSubject ? "Enterprise profile" : null);
+  const name = entity?.withheld ? WITHHELD_TEXT : entity?.name ?? null;
 
   /**
    * DERIVED FIGURES, AND WHERE THEY GO ON A PHONE.
@@ -294,7 +292,7 @@ export default function CedarPressEntity() {
           ) : null}
         </header>
 
-        {opened.has("need") ? <NeedEnterpriseEvidence enterpriseId={uid} /> : null}
+        {entity && !entity.withheld && opened.has("need") ? <NeedEntityEvidence cedarUid={uid} /> : null}
 
         {samplesLoading && !groups.length ? (
           <p className="cp-rec__fine cp-ent__empty">Reading the published samples…</p>

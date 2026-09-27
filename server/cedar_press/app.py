@@ -490,9 +490,9 @@ def release_collections(session: Session = Depends(require_session)) -> dict[str
     return repository.release_targets_for(session.tier)
 
 
-@app.get("/press/need/enterprises/{enterprise_id}/evidence")
-def need_enterprise_evidence(
-    enterprise_id: str,
+@app.get("/press/entities/{cedar_uid}/need-evidence")
+def need_entity_evidence(
+    cedar_uid: str,
     response: Response,
     session: Session = Depends(require_session),
 ) -> dict:
@@ -509,11 +509,13 @@ def need_enterprise_evidence(
         raise HTTPException(status_code=403, detail="Collection not included")
     response.headers["Cache-Control"] = "private, no-store"
     try:
-        return need_profiles.enterprise_evidence(enterprise_id)
+        return need_profiles.entity_evidence(cedar_uid)
+    except need_profiles.UnregisteredEntity as error:
+        raise HTTPException(status_code=404, detail="No registered Native entity") from error
     except repository.FullReleaseUnavailable as error:
         raise HTTPException(status_code=503, detail="Verified NEED evidence unavailable") from error
     except ValueError as error:
-        raise HTTPException(status_code=400, detail="Invalid enterprise identifier") from error
+        raise HTTPException(status_code=400, detail="Invalid entity identifier") from error
 
 
 @app.get("/press/shelf", response_class=HTMLResponse)
