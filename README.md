@@ -22,6 +22,9 @@ transport. Internal review candidates remain separate from customer eligibility.
 The authenticated evidence endpoint is
 `GET /press/entities/{cedar_uid}/need-evidence`. The entity register is internal
 infrastructure and is not an additional customer collection.
+NEED keeps its existing Press+ and Grove access. Its component declarations
+describe the producer's logical tables, including bounded partitions; they do
+not grant publication rights or add another collection to the fifteen targets.
 
 | Section | What it holds |
 | --- | --- |

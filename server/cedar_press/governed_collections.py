@@ -10,9 +10,12 @@ from pathlib import Path
 
 def component_declarations(collection_id: str) -> dict:
     """Maintained presentation metadata; never a runtime publication decision."""
-    if collection_id != "gaming":
+    if collection_id not in {"gaming", "need", "plot", "foundation-corporate-giving"}:
         return {}
-    path = Path(__file__).resolve().parents[2] / "data/cedar/gaming_component_contracts.json"
+    filename = collection_id.replace("-", "_") + "_component_contracts.json"
+    path = Path(__file__).resolve().parents[2] / "data/cedar" / filename
+    if not path.exists() and collection_id in {"plot", "foundation-corporate-giving"}:
+        return {}  # Existing fixed declarations until their component expansion lands.
     declaration = json.loads(path.read_text(encoding="utf-8"))
     if declaration.get("schema_version") != 1 or declaration.get("collection") != collection_id:
         raise ValueError("Invalid governed component presentation declaration")
@@ -20,6 +23,11 @@ def component_declarations(collection_id: str) -> dict:
 
 
 SHARED_COLLECTIONS = {
+    "need": {
+        "name": "Native Entity Enterprise Dataset",
+        "shelf": "pro",
+        "components": (),
+    },
     "foundation-corporate-giving": {
         "name": "Foundation and Corporate Giving",
         "shelf": "standard",

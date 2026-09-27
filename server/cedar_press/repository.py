@@ -224,7 +224,9 @@ def grove_components(collection_id: str) -> tuple[str, ...]:
     catalog does not pin is still listed here and is refused at download.
     """
     if collection_id in governed_collections.SHARED_COLLECTIONS:
-        return governed_collections.SHARED_COLLECTIONS[collection_id]["components"]
+        existing = governed_collections.SHARED_COLLECTIONS[collection_id]["components"]
+        additional = governed_collections.component_declarations(collection_id)
+        return tuple(dict.fromkeys((*existing, *additional)))
     if not is_grove_release(collection_id):
         return ()
     prefix = collection_id + "/"
@@ -1211,10 +1213,17 @@ def _grove_partitioned_release(pin, manifest, logical, *, metadata_only=False):
             if total != logical["record_count"]:
                 raise FullReleaseUnavailable("Partition total count mismatch")
         spool.seek(0)
+        product_name = (
+            "Cedar Press" if collection_id in governed_collections.SHARED_COLLECTIONS
+            else "Cedar Grove"
+        )
         return {
             "content_file": spool, "release_id": release_id, "record_count": total,
             "sha256": digest.hexdigest(), "fields": header, "component": component,
-            "citation": f"Cedar Grove {collection_id}/{component}, release {release_id}",
+            "citation": (
+                f"{product_name} "
+                f"{collection_id}/{component}, release {release_id}"
+            ),
             "filename": f"{collection_id}--{component}-{release_id}.jsonl",
             "media_type": "application/x-ndjson",
         }
@@ -1361,6 +1370,8 @@ def release_targets_for(tier: str) -> dict[str, Any]:
         {"id": key, "name": value["name"], "shelf": value["shelf"]}
         for key, value in governed_collections.SHARED_COLLECTIONS.items()
     ] + [dict(item) for item in launch.GROVE_RELEASE_COLLECTIONS]
+    # NEED is already one of the original twelve; a component transport adds no collection.
+    targets = list({item["id"]: item for item in reversed(targets)}.values())[::-1]
     visible = []
     for target in targets:
         key = target["id"]

@@ -1,0 +1,1886 @@
+{
+  "schema_version": 1,
+  "collection": "need",
+  "scope": "Presentation only. The internal entity register is infrastructure, not a customer collection. Registered CE profiles may present exact NEED legal subjects and attributed related enterprise records. All current source tables remain restricted.",
+  "source_release_id": "fdf797fb7d4ef9486effce8c605e9cae49e85d50a1070c5f4fc555f0e4adc39f",
+  "source_manifest_file_sha256": "ab88fd74799326076c6d2a59a3c6fe1504dae355ec2085f2dacb0292b0f92c9e",
+  "components": {
+    "duplicate_candidates": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "disposition",
+        "enterprise_id",
+        "enterprise_name",
+        "group_id",
+        "n_distinct_sources",
+        "n_source_observations",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_name",
+        "parenthetical_stripped_name",
+        "relationship",
+        "source_id",
+        "variant_kind"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "disposition",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "group_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_distinct_sources",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_source_observations",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parenthetical_stripped_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "variant_kind",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "enterprise_register": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "registered_enterprise_id",
+        "enterprise_name_normalized",
+        "minted",
+        "minted_basis",
+        "minted_by",
+        "asserted_owner_hub_cedar_uid"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "registered_enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name_normalized",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "minted",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "minted_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "minted_by",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "enterprises": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "address_basis",
+        "address_is_publishable",
+        "assertion_class",
+        "built_by_script",
+        "built_date",
+        "cage_code",
+        "asserted_cedar_uid",
+        "city",
+        "constellation_edge_id",
+        "constellation_note",
+        "duplicate_name_variant_basis",
+        "duplicate_name_variant_group",
+        "asserted_enterprise_existing_cedar_uid",
+        "enterprise_id",
+        "enterprise_name",
+        "enterprise_name_normalized",
+        "evidence_class",
+        "evidence_human_reviewed",
+        "first_observed_year",
+        "fpds_declared_parent_name",
+        "fpds_declared_parent_observations",
+        "fpds_declared_parent_uei",
+        "fpds_parent_corroboration",
+        "fpds_parent_corroboration_basis",
+        "fpds_parent_corroboration_route",
+        "fpds_parent_resolves_to",
+        "hierarchy_level",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "identifier_basis",
+        "identifier_status",
+        "identity_scope",
+        "in_federal_contracting",
+        "in_federal_contracting_basis",
+        "last_observed_year",
+        "n_auto_ruled_observations",
+        "n_distinct_sources",
+        "n_source_observations",
+        "name_variants_observed",
+        "owner_class",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_entity_class",
+        "owner_hub_name",
+        "owner_hub_state",
+        "ownership_percent_stated",
+        "parent_enterprise_id",
+        "parent_is_hub",
+        "parent_name",
+        "population_basis",
+        "recorded_publishable",
+        "recorded_publishable_basis",
+        "record_scope",
+        "relation_class",
+        "relationship",
+        "relationship_as_recorded",
+        "retrieved_date",
+        "sector",
+        "source_document",
+        "source_edition_date",
+        "source_id",
+        "source_url",
+        "state_province",
+        "status",
+        "status_basis",
+        "uei",
+        "uei_candidate",
+        "uei_candidate_basis"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "address_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "address_is_publishable",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "assertion_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by_script",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cage_code",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "city",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "constellation_edge_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "constellation_note",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "duplicate_name_variant_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "duplicate_name_variant_group",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_enterprise_existing_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name_normalized",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_human_reviewed",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "first_observed_year",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_observations",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_uei",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_corroboration",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_corroboration_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_corroboration_route",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_parent_resolves_to",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hierarchy_level",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_method",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_note",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identifier_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identifier_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identity_scope",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "in_federal_contracting",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "in_federal_contracting_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "last_observed_year",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_auto_ruled_observations",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_distinct_sources",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "n_source_observations",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "name_variants_observed",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_entity_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_state",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_percent_stated",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_is_hub",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "population_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "recorded_publishable",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "recorded_publishable_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "record_scope",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship_as_recorded",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "sector",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_edition_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "state_province",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "status_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "uei",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "uei_candidate",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "uei_candidate_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "evidence_conflicts": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "adjudicated_by",
+        "adjudicated_date",
+        "recorded_adjudication",
+        "audited_filing_says",
+        "built_by_script",
+        "conflict_kind",
+        "enterprise_id",
+        "enterprise_name",
+        "owner_hub_name",
+        "published_value",
+        "resolution",
+        "third_source",
+        "third_source_says",
+        "web_list_says"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "adjudicated_by",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "adjudicated_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "recorded_adjudication",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "audited_filing_says",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by_script",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "conflict_kind",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "published_value",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "resolution",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "third_source",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "third_source_says",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "web_list_says",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "fpds_contradictions": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "disposition",
+        "enterprise_id",
+        "enterprise_name",
+        "fpds_declared_parent_name",
+        "fpds_declared_parent_observations",
+        "fpds_declared_parent_uei",
+        "ledger_resolves_parent_to",
+        "need_evidence_class",
+        "need_n_distinct_sources",
+        "asserted_need_owner_hub_cedar_uid",
+        "need_owner_hub_name",
+        "need_relationship",
+        "note",
+        "route"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "disposition",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_observations",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "fpds_declared_parent_uei",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ledger_resolves_parent_to",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_evidence_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_n_distinct_sources",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_need_owner_hub_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_owner_hub_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "need_relationship",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "note",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "route",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "parent_crosswalk": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by",
+        "built_date",
+        "cedar_canonical_name",
+        "cedar_entity_class",
+        "cedar_handle",
+        "asserted_cedar_uid",
+        "crosswalk_basis",
+        "crosswalk_method",
+        "crosswalk_status",
+        "owner_canonical_name",
+        "owner_rows",
+        "owner_tribe_id"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cedar_canonical_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cedar_entity_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "cedar_handle",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "crosswalk_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "crosswalk_method",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "crosswalk_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_canonical_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_rows",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_tribe_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "reconciliation": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by",
+        "built_date",
+        "asserted_cedar_uid",
+        "enterprise_name",
+        "enterprise_name_normalized",
+        "hub_disagreement_basis",
+        "hub_disagreement_class",
+        "matched_need_enterprise_id",
+        "matched_need_relation_class",
+        "matched_need_relationship",
+        "owner_attribution_methods",
+        "owner_cage",
+        "owner_data_sources",
+        "owner_ein",
+        "owner_evidence_families",
+        "owner_hq_city",
+        "owner_hq_state",
+        "owner_is_8a",
+        "owner_is_federal_contractor",
+        "owner_is_nonprofit",
+        "owner_rows_in_cluster",
+        "owner_uei",
+        "owner_verification_sources",
+        "owner_verified_date",
+        "ownership_claim_basis",
+        "ownership_claim_carried",
+        "reconciliation_basis",
+        "reconciliation_status",
+        "relation_class_basis",
+        "relation_class_proposed"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name_normalized",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_disagreement_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_disagreement_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "matched_need_enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "matched_need_relation_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "matched_need_relationship",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_attribution_methods",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_cage",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_data_sources",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_ein",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_evidence_families",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hq_city",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hq_state",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_is_8a",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_is_federal_contractor",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_is_nonprofit",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_rows_in_cluster",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_uei",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_verification_sources",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_verified_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_claim_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_claim_carried",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "reconciliation_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "reconciliation_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class_basis",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class_proposed",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "relationship_observations": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "built_by_script",
+        "asserted_cedar_uid",
+        "child_name_as_recorded",
+        "depth_as_recorded",
+        "enterprise_edge_id",
+        "enterprise_id",
+        "evidence_class",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "asserted_owner_hub_cedar_uid",
+        "owner_hub_name",
+        "ownership_percent_stated",
+        "parent_name_as_recorded",
+        "quote",
+        "relation_class",
+        "relationship",
+        "relationship_as_recorded",
+        "retrieved_date",
+        "source_document",
+        "source_edition_date",
+        "source_fiscal_year",
+        "source_id",
+        "source_review_status",
+        "source_url"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "built_by_script",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_name_as_recorded",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "depth_as_recorded",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_edge_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_method",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_note",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_owner_hub_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_hub_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_percent_stated",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_name_as_recorded",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "quote",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relation_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship_as_recorded",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_edition_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_fiscal_year",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "source_records": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "attribution_method",
+        "award_purpose_category",
+        "canonical_name",
+        "ceased_year",
+        "data_sources",
+        "enterprise_cage_code",
+        "enterprise_ein",
+        "enterprise_name",
+        "enterprise_uei",
+        "entity_type_normalized",
+        "founded_year",
+        "hq_address_line",
+        "hq_city",
+        "hq_county_geoid",
+        "hq_lat",
+        "hq_long",
+        "hq_place_geoid",
+        "hq_state",
+        "hq_zip",
+        "industry_sector",
+        "is_8a_certified",
+        "is_federal_contractor",
+        "is_nonprofit",
+        "ntee_code",
+        "parent_entity_type",
+        "sector_master_prime",
+        "supersector_master_prime",
+        "total_master_prime_dol_m",
+        "tribe_id",
+        "verification_source",
+        "verified_date"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "attribution_method",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "award_purpose_category",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "canonical_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ceased_year",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "data_sources",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_cage_code",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_ein",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_uei",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "entity_type_normalized",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "founded_year",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_address_line",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_city",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_county_geoid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_lat",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_long",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_place_geoid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_state",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hq_zip",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "industry_sector",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "is_8a_certified",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "is_federal_contractor",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "is_nonprofit",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ntee_code",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_entity_type",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "sector_master_prime",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "supersector_master_prime",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "total_master_prime_dol_m",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "tribe_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "verification_source",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "verified_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "staged_observations": {
+      "collection": "need",
+      "order": [
+        "source_record_id",
+        "source_row_number",
+        "source_row_sha256",
+        "review_status",
+        "hold_codes",
+        "child_cage",
+        "child_city",
+        "child_name_raw",
+        "child_state",
+        "child_uei",
+        "depth_hint",
+        "asserted_enterprise_existing_cedar_uid",
+        "evidence_class",
+        "asserted_hub_cedar_uid",
+        "hub_entity_class",
+        "hub_handle",
+        "hub_hint_name",
+        "hub_name",
+        "hub_resolution_method",
+        "hub_resolution_note",
+        "hub_state",
+        "identity_scope",
+        "owner_class_hint",
+        "ownership_percent",
+        "asserted_parent_cedar_uid",
+        "parent_handle",
+        "parent_name",
+        "quote",
+        "relationship",
+        "retrieved_date",
+        "sector",
+        "source_document",
+        "source_edition_date",
+        "source_fy",
+        "source_id",
+        "source_review_status",
+        "source_terms_status",
+        "source_url"
+      ],
+      "fields": [
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_sha256",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_codes",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_cage",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_city",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_name_raw",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_state",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "child_uei",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "depth_hint",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_enterprise_existing_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "evidence_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_hub_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_entity_class",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_handle",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_hint_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_method",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_resolution_note",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hub_state",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "identity_scope",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "owner_class_hint",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "ownership_percent",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "asserted_parent_cedar_uid",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_handle",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "parent_name",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "quote",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "relationship",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "retrieved_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "sector",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_document",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_edition_date",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_fy",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_review_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_terms_status",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_url",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    },
+    "linkage_holds": {
+      "collection": "need",
+      "order": [
+        "hold_id",
+        "source_record_id",
+        "source_table",
+        "source_row_number",
+        "enterprise_id",
+        "hold_code",
+        "hold_category"
+      ],
+      "fields": [
+        {
+          "column": "hold_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_record_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_table",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "source_row_number",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "enterprise_id",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_code",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        },
+        {
+          "column": "hold_category",
+          "decision": "keep",
+          "rights_class": "INTERNAL_RESEARCH_ONLY"
+        }
+      ]
+    }
+  }
+}

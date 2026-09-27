@@ -137,6 +137,12 @@ class SharedCollectionReleaseTest(unittest.TestCase):
                 self.assertEqual((target["target_count"], target["press_target_count"]), (15, 14))
                 ids = {entry["id"] for entry in target["collections"]}
                 self.assertIn("foundation-corporate-giving", ids)
+                self.assertEqual("need" in ids, tier != "press")
+                self.assertEqual(
+                    sum(entry["id"] == "need" for entry in target["collections"]),
+                    int(tier != "press"),
+                )
+                self.assertNotIn("entity-register", ids)
                 self.assertEqual("plot" in ids, tier != "press")
                 self.assertEqual("gaming" in ids, tier in {"grove", "tree"})
                 self.assertTrue(
@@ -148,12 +154,20 @@ class SharedCollectionReleaseTest(unittest.TestCase):
         self.assertFalse(repository.may_download_full("guest", "plot"))
         self.assertFalse(repository.is_grove_release("plot"))
         self.assertTrue(repository.is_component_release("plot"))
+        self.assertTrue(repository.is_component_release("need"))
+        self.assertIn("enterprises", repository.grove_components("need"))
 
     def test_unpinned_shared_collection_is_explicitly_unavailable(self):
         for collection in governed_collections.SHARED_COLLECTIONS:
             with self.assertRaises(repository.GroveReleaseNotPinned):
                 repository.grove_release_pin(collection)
-            self.assertIsNone(repository.grove_release_metadata(collection))
+            metadata = repository.grove_release_metadata(collection)
+            if collection == "need":
+                # The collection-wide hold is checked before any pin is read.
+                self.assertTrue(metadata)
+                self.assertTrue(all(item["status"] == "unavailable" for item in metadata))
+            else:
+                self.assertIsNone(metadata)
 
     def test_plot_component_download_uses_existing_hash_path(self):
         _manifest, _pin, content = self.fixture()

@@ -292,8 +292,6 @@ export default function CedarPressEntity() {
           ) : null}
         </header>
 
-        {entity && !entity.withheld && opened.has("need") ? <NeedEntityEvidence cedarUid={uid} /> : null}
-
         {samplesLoading && !groups.length ? (
           <p className="cp-rec__fine cp-ent__empty">Reading the published samples…</p>
         ) : groups.length ? (
@@ -354,6 +352,8 @@ export default function CedarPressEntity() {
             reads those.
           </p>
         )}
+
+        {entity && !entity.withheld && opened.has("need") ? <NeedEntityEvidence cedarUid={uid} /> : null}
 
         {/* The glance, on a phone: after the ledger, for the reason above it
             in `glance`. On a wide screen this renders nothing, because the
