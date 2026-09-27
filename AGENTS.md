@@ -9604,6 +9604,13 @@ the id carries two check characters over the uid's alphabet, and the
 individually owned entity class closes to new mints. Documentation only; no
 code changed.
 <!-- BEGIN CEDAR-GIVING-PLOT-CONSUMER-20260926 -->
+The coordinator also assigned this worker the legacy NEED conflict-writer defect
+in `code/1102_need_corroboration_adjudication.py`. The script no longer assigns
+the Chugach narrative to every conflict. Its recognizable prior claims are cleared
+to an explicit unadjudicated hold; original assertions, values and IDs survive.
+Archived candidates remain untouched. Three focused regressions cover distinct
+enterprises, the actual synthetic builder, idempotency and separate human reviews.
+The collection-wide publication hold remains binding.
 The same worker subsequently added bounded queue replay in
 `server/tests/stream_release_rehearsal.py` and fenced legacy dataset v1 delivery
 to explicit development/review. Staging/production refusal occurs before source
