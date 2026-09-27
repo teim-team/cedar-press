@@ -17,7 +17,7 @@ import { usePriorities } from "../../features/grove/usePriorities.js";
 import { PressInfluence } from "./PressInfluence";
 import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
-import { WORK_KINDS, loadWork, saveWork } from "../../features/grove/readerWork.js";
+import { loadWork, saveWork, workOptions } from "../../features/grove/readerWork.js";
 import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
@@ -86,7 +86,9 @@ function WorkCard() {
         </label>
         <select id="cp-work" value={work} onChange={(event) => setWork(event.target.value)}>
           <option value="">Rather not say</option>
-          {WORK_KINDS.map((kind) => (
+          {/* The landing audiences, plus the reader's own stored answer
+              first when it is a retired one, so saving never drops it. */}
+          {workOptions(saved).map((kind) => (
             <option key={kind.id} value={kind.id}>
               {kind.label}
             </option>

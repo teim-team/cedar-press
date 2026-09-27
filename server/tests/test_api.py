@@ -158,6 +158,41 @@ class TestCatalog(unittest.TestCase):
         client.cookies.clear()
         self.assertEqual(client.get("/press/profile").status_code, 401)
 
+    def test_every_legacy_work_answer_round_trips_unchanged(self) -> None:
+        """A stored answer keeps its id, including the two retired ones.
+
+        `federal` and `state_local` left the offered list (2026-09-26) but are
+        not remapped: a federal agency is not an economic development
+        organization, and rewriting a reader's answer on read would change
+        what they said. So the service still accepts both, and hands back
+        exactly what it was given.
+        """
+        legacy = (
+            "tribal_government",
+            "tribal_enterprise",
+            "anc_nho",
+            "native_nonprofit",
+            "federal",
+            "state_local",
+            "lender_investor",
+            "advisor",
+            "media",
+            "academic",
+        )
+        def save(work: str) -> str:
+            return client.patch("/press/profile", json={"work": work}).json()["work"]
+
+        for work in legacy:
+            with self.subTest(work=work):
+                self.assertIn(work, press_catalog.WORK_KINDS)
+                self.assertEqual(save(work), work)
+                self.assertEqual(client.get("/press/profile").json()["work"], work)
+        for work in ("foundation", "business", "economic_development"):
+            with self.subTest(work=work):
+                self.assertEqual(save(work), work)
+        self.assertEqual(len(press_catalog.WORK_KINDS), 13)
+        client.patch("/press/profile", json={"work": None})
+
     def test_articles_are_served(self) -> None:
         self.assertTrue(client.get("/press/articles").json()["articles"])
 
