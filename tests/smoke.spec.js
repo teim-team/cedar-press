@@ -142,7 +142,7 @@ test.describe("the gate", () => {
     for (const label of ["Patent publication and family records", "Historical S&P and Fitch ratings", "AM Best insurance financial-strength releases", "IRS Form 990-PF grant schedules", "Recorded deeds and land transfers"]) {
       await expect(panel).toContainText(label);
     }
-    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ publicly available sources");
+    await expect(panel.locator(".cp-hero3__proofcount")).toContainText("600+ documented upstream sources");
   });
 
   // The sticky masthead is opaque (owner, 2026-09-27): no alpha, no blur,
@@ -154,7 +154,7 @@ test.describe("the gate", () => {
     await expect(bar).toHaveCSS("backdrop-filter", "none");
     await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
     await expect(page.locator(".cp-hero3")).not.toContainText("Lumecon builds its datasets and research from");
-    await expect(page.locator(".cp-hero3__proofcount")).toContainText("600+ publicly available sources");
+    await expect(page.locator(".cp-hero3__proofcount")).toContainText("600+ documented upstream sources");
   });
 
   // The landing layout of 2026-09-27: the source banner in the navy

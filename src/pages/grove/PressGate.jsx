@@ -714,18 +714,24 @@ export default function PressGate({ user }) {
                 whether those names belong to one nation or three, and no public system keeps
                 track.
               </p>
-              {/* Owner copy, 2026-09-27: who does the work and how, then what
-                  Tribal Business News adds. Three paragraphs of about equal
-                  length; both partners and the team page are linked. */}
+              {/* Owner copy, 2026-09-27 (second pass), verbatim: what the
+                  researchers do with public material and what it produces,
+                  then what Tribal Business News adds. The team page stays
+                  linked from "researchers". The closing line naming the
+                  Native Entity Enterprise Dataset as the identity foundation
+                  was dropped on the owner's note: the spine is Lumecon's own
+                  dataset on Native entities. */}
               <p className="cp-why__lede cp-fade">
                 <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>&rsquo;s{" "}
-                <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">team</a> of economists
-                and researchers has spent years producing published research and tribal economic
-                studies, and led the original construction of the Native Entity Enterprise Dataset.
-                Across more than 600 publicly available sources, agentic models and machine learning pipelines
-                propose matches and human reviewers confirm them, giving each organization a
-                permanent identifier. That is how {STOREFRONT_CATALOG.length} datasets answer as
-                one collection.
+                <a href={LUMECON_TEAM_URL} target="_blank" rel="noreferrer">researchers</a> turn
+                material that is public but scattered, difficult to find, or structured for compliance
+                rather than analysis into original datasets. We extract evidence from agency APIs,
+                state and tribal databases, annual reports, filings, regulatory calendars, PDFs, parcel
+                and permit registers, organizational websites, public announcements, and news
+                reporting. We standardize dates and measures, reconcile duplicate events and changing
+                names, and check proposed Native entity links against source evidence with human
+                review. That work creates searchable data no single publisher provides, while
+                preserving the evidence and known limits behind each published record.
               </p>
               <p className="cp-why__lede cp-fade">
                 <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a> reports
@@ -745,7 +751,7 @@ export default function PressGate({ user }) {
                     Sources Lumecon draws on
                   </Link>
                   <span className="cp-hero3__proofcount">
-                    {SOURCE_REACH_FIGURE} publicly available sources ·{" "}
+                    {SOURCE_REACH_FIGURE} documented upstream sources ·{" "}
                     <span className="cp-nowrap">{STOREFRONT_CATALOG.length} collections</span>
                   </span>
                 </div>

@@ -32,7 +32,7 @@ test("the reach figure is the stated one", () => {
   assert.equal(SOURCE_REACH_FIGURE, "600+");
 });
 
-// Owner, 2026-09-27: the source count is "publicly available sources", never
+// Owner, 2026-09-27: the source count is "documented upstream sources", never
 // "websites", on the landing page and in Cedar's answers alike.
 test("the source count is never worded as websites", () => {
   const files = [
@@ -43,6 +43,6 @@ test("the source count is never worded as websites", () => {
   for (const file of files) {
     const text = readFileSync(file, "utf8");
     assert.doesNotMatch(text, /(?:600\+?|SOURCE_REACH_FIGURE\}?|distinct|source) (?:source )?websites/i, file.pathname);
-    assert.match(text, /publicly available sources/, file.pathname);
+    assert.match(text, /documented upstream sources/, file.pathname);
   }
 });

@@ -32,16 +32,16 @@
  * state environmental label says "state" so it does not read as the federal
  * EPA line. `sourceRotation.test.js` refuses a repeated label.
  *
- * THE FIGURE IS NOT THIS LIST. SOURCE_REACH_FIGURE counts distinct publicly
- * available sources, stated by the owner (2026-09-27: 600+, up from the
- * audited 560 behind 500+, with the Giving, PLOT, patent and ratings sources
- * added and deduplicated). It is always worded "publicly available sources",
- * never "websites" (owner, 2026-09-27). The labels below name kinds of
+ * THE FIGURE IS NOT THIS LIST. SOURCE_REACH_FIGURE counts distinct upstream
+ * sources, stated by the owner (2026-09-27: 600+, up from the audited 560
+ * behind 500+, with the Giving, PLOT, patent and ratings sources added and
+ * deduplicated). It is worded "documented upstream sources", never
+ * "websites" (owner, 2026-09-27). The labels below name kinds of
  * source, not a count, and add nothing to it.
  */
 
 export const SOURCE_REACH_CLAIM =
-  "Lumecon builds its datasets and research from 600+ trusted, publicly available sources.";
+  "Lumecon builds its datasets and research from public material drawn from 600+ documented upstream sources.";
 
 export const SOURCE_REACH_FIGURE = "600+";
 
