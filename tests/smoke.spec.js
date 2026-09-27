@@ -145,6 +145,18 @@ test.describe("the gate", () => {
     await expect(panel.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
   });
 
+  // The sticky masthead is opaque (owner, 2026-09-27): no alpha, no blur,
+  // and the hero's old source-reach line under the partners is gone.
+  test("the masthead is opaque and the hero carries no source-reach line", async ({ page }) => {
+    await page.goto("/");
+    const bar = page.locator(".cp-door__bar");
+    await expect(bar).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(bar).toHaveCSS("backdrop-filter", "none");
+    await expect(page.locator(".cp-hero3__reach")).toHaveCount(0);
+    await expect(page.locator(".cp-hero3")).not.toContainText("distinct source websites in dataset construction");
+    await expect(page.locator(".cp-hero3__proofcount")).toContainText("500+ source websites");
+  });
+
   test("a reader who closed the old private-preview note sees the early access note once", async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => sessionStorage.setItem("cedar-press-private-preview-notice", "dismissed"));
@@ -1431,7 +1443,7 @@ test.describe("the door's use cases", () => {
     expect(errors).toEqual([]);
   });
 
-  test("it turns slowly, and a choice stops it for good", async ({ page }, testInfo) => {
+  test("it turns slowly, a choice holds it, and it turns again once the visitor is idle", async ({ page }, testInfo) => {
     await page.clock.install();
     await page.goto("/");
     await reach(page);
@@ -1454,10 +1466,19 @@ test.describe("the door's use cases", () => {
     await expect(tab).toHaveAttribute("aria-selected", "true");
     await expect(counter(page)).toHaveText(/^05 \//);
     await expect(band(page)).toHaveAttribute("data-stopped", "true");
-    if (!testInfo.project.use.hasTouch) await page.mouse.move(2, 2);
-    await page.locator("body").evaluate((el) => el.focus?.());
-    await page.clock.runFor(60_000);
+    // Playwright's click is a mouse click on the phone project too, and the
+    // pointer would stay over the band and hold it; a finger leaves nothing
+    // hovering, so the pointer is moved off in both projects.
+    await page.mouse.move(2, 2);
+    await page.locator(".cp-aud__tab").nth(4).evaluate((el) => el.blur());
+    // Held while the visitor is still about (under twelve seconds)...
+    await page.clock.runFor(11_000);
     await expect(counter(page)).toHaveText(/^05 \//);
+    // ...then it turns again, one step at a time.
+    await page.clock.runFor(1_100);
+    await expect(band(page)).toHaveAttribute("data-stopped", "false");
+    await page.clock.runFor(8_100);
+    await expect(counter(page)).toHaveText(/^06 \//);
   });
 
   test("under reduced motion it never cycles", async ({ page }) => {

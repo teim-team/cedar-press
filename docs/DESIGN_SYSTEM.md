@@ -115,8 +115,8 @@ Lumecon cards). Nothing around the lifted element moves.
 the provenance marquee (hover or focus stops it; reduced motion turns it into
 a wrapped list) and the use-case band (`PressAudienceExample`), which changes
 its example every eight seconds by a 0.35s crossfade in place. The band pauses
-while hovered or focused, stops for good once the visitor picks anything in
-it, does not turn while off screen, and never turns under reduced motion. It
+while hovered or focused, holds the example once the visitor picks anything in
+it and turns again after twelve idle seconds, does not turn while off screen, and never turns under reduced motion. It
 changes the EXAMPLE only, never the selected collection. Every example sits in
 one grid cell, so the band is as tall as its longest example and nothing
 below it moves. Its chips preview a collection in the hero frame only above
