@@ -26,6 +26,16 @@ NEED keeps its existing Press+ and Grove access. Its component declarations
 describe the producer's logical tables, including bounded partitions; they do
 not grant publication rights or add another collection to the fifteen targets.
 
+The Grove application in `teim-team/teim-app` can use
+`python -m cedar_press.grove_exchange` as a local process interface after resolving
+its authenticated account and sponsorship. Version 1 accepts bounded JSON on
+stdin for discovery, registered entity evidence and downloads. It calls the same
+release consumer and publication gates as the Press API. Completed downloads go
+to the caller's private `CEDAR_GROVE_EXCHANGE_DIRECTORY`; stdout carries metadata
+only. The caller must pin this checkout, verify its commit, stream the completed
+file and remove its own temporary directory. This interface does not issue a
+session or authenticate a browser request.
+
 | Section | What it holds |
 | --- | --- |
 | Overview | The service at a glance, with each section's current standing. |
