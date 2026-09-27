@@ -40,9 +40,10 @@ export function sourcePresentation(collection, row, recordUrl) {
     /^(held|withheld|contested|restricted|internal_|withheld_)/i.test(value ?? ""))) return null;
   const family = collection === "plot" ? PLOT_SOURCES[text(row.source_id)] : null;
   const registered = registeredSources.sources[`${collection}/${text(row.source_id)}`];
-  const publisher = family?.[0] ?? registered?.publisher ?? spec.publisher ?? spec.systems?.[text(row.source_system)] ?? null;
+  const identifiedPublisher = family?.[0] ?? registered?.publisher ?? spec.publisher ?? spec.systems?.[text(row.source_system)] ?? null;
   const title = family?.[1] ?? sourceTitle(row[spec.title]) ?? registered?.source_title ?? spec.dataset ?? null;
   const url = safeSourceUrl(collection === "plot" ? row.source_record_url : null) ?? safeSourceUrl(recordUrl);
+  const publisher = identifiedPublisher ?? (url ? presentation.publishers_by_host?.[new URL(url).hostname] : null) ?? null;
   const fields = (names) => Object.fromEntries((names ?? []).flatMap((name) => text(row[name]) ? [[name, text(row[name])]] : []));
   const reportingPeriod = fields(spec.periods);
   const eventDates = fields(spec.events);
@@ -57,7 +58,8 @@ export function sourcePresentation(collection, row, recordUrl) {
   return {
     publisher, title, titleBasis,
     url, reportingPeriod, periodText, eventDates, locators,
-    publicationDate: text(row[spec.published]), snapshotDate: text(row[spec.snapshot]),
+    publicationDate: (spec.publishedFields ?? [spec.published]).map((name) => text(row[name])).find(Boolean) ?? null,
+    snapshotDate: text(row[spec.snapshot]),
     citation: [publisher ?? "Publisher not established", title ? `${titleBasis}: ${title}` : null, Object.values(locators).join("; ") || null, periodText || null, url].filter(Boolean).join(". "),
     gaps,
   };

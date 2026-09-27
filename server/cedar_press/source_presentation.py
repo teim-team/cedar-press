@@ -112,6 +112,9 @@ def present(collection, row, component=None):
         "urls", ["source_record_url", "source_url", "evidence_url", "fr_notice_url", "url"]
     )
     url = next((safe_url(row.get(k)) for k in urls if safe_url(row.get(k))), None)
+    publisher = publisher or SPEC.get("publishers_by_host", {}).get(
+        urlsplit(url).hostname if url else None
+    )
 
     def fields(names):
         return {name: readable(row.get(name)) for name in names or [] if readable(row.get(name))}
@@ -150,7 +153,14 @@ def present(collection, row, component=None):
         "periodText": period_text,
         "eventDates": fields(spec.get("events")),
         "locators": locators,
-        "publicationDate": readable(row.get(spec.get("published"))),
+        "publicationDate": next(
+            (
+                readable(row.get(k))
+                for k in spec.get("publishedFields", [spec.get("published")])
+                if readable(row.get(k))
+            ),
+            None,
+        ),
         "snapshotDate": readable(row.get(spec.get("snapshot"))),
         "citation": citation,
         "gaps": gaps,

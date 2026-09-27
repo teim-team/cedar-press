@@ -1027,15 +1027,15 @@ test.describe("Explore the collections", () => {
     await expect(atlas.getByTestId("atlas-row")).toHaveCount(STOREFRONT_CATALOG.length);
     // Every collection on the reader's shelf is included and every one on
     // the Plus shelf is offered, Foundation & Corporate Giving and PLOT like
-    // the rest (owner, 2026-09-27). Owned alone is its own state: a release
-    // whose sample preview is not published.
+    // the rest (owner, 2026-09-27). Owned and NEED have withheld previews.
+    // NEED's collection-wide policy hold also applies to this static surface.
     await expect(atlas.locator(".cp-atlas__included")).toHaveCount(
       STOREFRONT_CATALOG.filter((entry) => entry.shelf === "standard").length,
     );
     await expect(atlas.locator(".cp-atlas__locked")).toHaveCount(
-      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && entry.id !== "owned").length,
+      STOREFRONT_CATALOG.filter((entry) => entry.shelf === "pro" && !["owned", "need"].includes(entry.id)).length,
     );
-    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(1);
+    await expect(atlas.locator(".cp-atlas__pending")).toHaveCount(2);
     await expect(atlas).not.toContainText(/not yet published|first release/i);
     // Neither states a row count, a span or a version: the cells are empty
     // rather than holding a placeholder.
@@ -1901,7 +1901,8 @@ test.describe("the record page", () => {
     await signIn(page);
     await page.goto("/record?k=federal-register/fr_ex_parte_party_entity_links&r=2014-09591");
     await expect(page.getByTestId("record-head")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Open the source record/ })).toHaveAttribute("href", "https://www.federalregister.gov/d/2014-09591");
+    await expect(page.getByRole("link", { name: /Open cited source/ })).toHaveAttribute("href", "https://www.federalregister.gov/d/2014-09591");
+    await expect(page.locator(".cp-rec__source")).toContainText("Office of the Federal Register");
     await page.getByTestId("record-more").click();
     for (const summary of await page.locator(".cp-rec__group summary").all()) await summary.click();
     const body = await page.locator("main").innerText();

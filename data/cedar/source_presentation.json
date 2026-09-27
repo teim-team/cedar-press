@@ -1,6 +1,10 @@
 {
   "schema_version": 1,
   "scope": "Presentation mappings only; publisher source identifiers must match exactly. Rights and entitlement remain authoritative.",
+  "publishers_by_host": {
+    "federalregister.gov": "Office of the Federal Register (NARA) and GPO",
+    "www.federalregister.gov": "Office of the Federal Register (NARA) and GPO"
+  },
   "collections": {
     "contractors": {
       "systems": {
@@ -116,14 +120,18 @@
     },
     "federal-register": {
       "systems": {
-        "federal_register": "Office of the Federal Register (NARA) and GPO"
+        "federal_register": "Office of the Federal Register (NARA) and GPO",
+        "Federal Register": "Office of the Federal Register (NARA) and GPO"
       },
+      "title": "title",
+      "titleBasis": "Notice or document title",
       "locators": [
         "fr_document_number",
         "federal_register_citation",
         "consultation_event_id"
       ],
       "published": "notice_date",
+      "publishedFields": ["publication_date", "notice_date"],
       "events": [
         "event_start_date",
         "event_end_date",

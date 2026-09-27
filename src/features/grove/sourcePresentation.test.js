@@ -2,6 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { safeSourceUrl, sourcePresentation } from "./sourcePresentation.js";
 
+test("verified Federal Register hosts identify the publisher without inventing the report title", () => {
+  const row = { notice_date: "2025-03-01" };
+  const source = sourcePresentation("federal-register", row, "https://www.federalregister.gov/d/2014-09591");
+  assert.match(source.publisher, /Office of the Federal Register/);
+  assert.equal(source.title, null);
+  assert.equal(source.publicationDate, "2025-03-01");
+  assert.equal(sourcePresentation("federal-register", row, "https://www.federalregister.gov.example.org/d/2014-09591").publisher, null);
+  assert.equal(sourcePresentation("federal-register", { publication_date: "2026-03-01", effective_date: "2026-04-01", source_system: "Federal Register" }, null).publicationDate, "2026-03-01");
+});
+
 test("ingest filenames and seed URLs cannot become the source publisher", () => {
   const source = sourcePresentation("deals", { title: "extract.csv", source_inbox: "C:/private/awards.csv", source_type: "Company press" }, null);
   assert.equal(source.publisher, null);
