@@ -127,6 +127,28 @@ class SharedCollectionReleaseTest(unittest.TestCase):
             self.addCleanup(patcher.stop)
         return manifest, pin, content
 
+    def test_discovery_verifies_manifest_once_per_request_and_rejects_later_tampering(self):
+        manifest, _, _ = self.fixture()
+        with (
+            patch.object(repository, "_release_json", return_value=manifest) as fetch,
+            patch.object(repository, "_grove_catalog", wraps=repository._grove_catalog) as catalog,
+            patch.object(repository, "_release_bytes", side_effect=AssertionError("No row download")),
+        ):
+            first = repository.grove_release_metadata("plot")
+            self.assertEqual(len(first), len(repository.grove_components("plot")))
+            self.assertEqual(sum(row.get("record_count", 0) for row in first), 1)
+            self.assertEqual((fetch.call_count, catalog.call_count), (1, 1))
+            repository.grove_release_metadata("plot")
+            self.assertEqual((fetch.call_count, catalog.call_count), (2, 2))
+            manifest["components"]["environmental_events"]["record_count"] += 1
+            changed = repository.grove_release_metadata("plot")
+            self.assertTrue(all(row["status"] == "unavailable" for row in changed))
+            self.assertEqual(fetch.call_count, 3)
+
+    def test_held_discovery_does_not_read_pins_or_sources(self):
+        with patch.object(repository, "grove_release_pin", side_effect=AssertionError("No pin lookup")):
+            self.assertTrue(all(row["status"] == "unavailable" for row in repository.grove_release_metadata("need")))
+
     def test_fifteen_targets_preserve_tiers_and_never_invent_samples(self):
         with (
             patch.object(repository, "grove_release_metadata", return_value=None),

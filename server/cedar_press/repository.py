@@ -1234,6 +1234,72 @@ def _grove_partitioned_release(pin, manifest, logical, *, metadata_only=False):
         raise
 
 
+def _grove_component_release(pin, manifest, component, *, metadata_only=False):
+    """Read a component from this request's already verified manifest."""
+    collection_id, release_id = pin["collection_id"], pin["release_id"]
+    logical = next((entry for entry in manifest.get("partitioned_components", [])
+                    if entry["name"] == component), None)
+    if logical is not None:
+        return _grove_partitioned_release(pin, manifest, logical, metadata_only=metadata_only)
+    _contract, header, primary_key, count, expected = grove_component_contract(
+        manifest, collection_id, component
+    )
+    route = (
+        f"/press/collections/{collection_id}/full-download"
+        f"?release_id={release_id}&component={component}"
+    )
+    if metadata_only:
+        return {
+            "kind": "full",
+            "release_id": release_id,
+            "schema_version": 1,
+            "record_count": count,
+            "fields": header,
+            "table_id": component,
+            "scope": "One governed component of a pinned collection release",
+            "format": "jsonl",
+            "records_sha256": expected["sha256"],
+            "download_path": route,
+        }
+    content = _release_bytes(
+        _grove_prefix(pin) + f"/components/{component}/download", limit=expected["bytes"]
+    )
+    if (
+        len(content) != expected["bytes"]
+        or hashlib.sha256(content).hexdigest() != expected["sha256"]
+    ):
+        raise FullReleaseUnavailable("Served bytes differ from verified release artifact")
+    rows = [json.loads(line) for line in content.splitlines()]
+    if len(rows) != count or any(
+        not isinstance(row, dict) or set(row) != set(header) for row in rows
+    ):
+        raise FullReleaseUnavailable("Record count or schema mismatch")
+    keys = [tuple(row[key] for key in primary_key) for row in rows]
+    if (
+        any(any(value is None or value == "" for value in key) for key in keys)
+        or len(set(keys)) != count
+    ):
+        raise FullReleaseUnavailable("Invalid primary keys")
+    product_name = (
+        "Cedar Press" if collection_id in governed_collections.SHARED_COLLECTIONS
+        else "Cedar Grove"
+    )
+    return {
+        "content": content,
+        "release_id": release_id,
+        "record_count": count,
+        "sha256": expected["sha256"],
+        "fields": header,
+        "component": component,
+        "citation": (
+            f"{product_name} "
+            f"{collection_id}/{component}, release {release_id}"
+        ),
+        "filename": f"{collection_id}--{component}-{release_id}.jsonl",
+        "media_type": "application/x-ndjson",
+    }
+
+
 def grove_full_release(
     collection_id, requested_release_id=None, *, component=None, metadata_only=False
 ):
@@ -1258,67 +1324,7 @@ def grove_full_release(
             raise FullReleaseUnavailable("Requested release is not the approved catalog pin")
         _grove_catalog(pin)
         manifest = _grove_manifest(pin)
-        logical = next((entry for entry in manifest.get("partitioned_components", [])
-                        if entry["name"] == component), None)
-        if logical is not None:
-            return _grove_partitioned_release(pin, manifest, logical, metadata_only=metadata_only)
-        _contract, header, primary_key, count, expected = grove_component_contract(
-            manifest, collection_id, component
-        )
-        route = (
-            f"/press/collections/{collection_id}/full-download"
-            f"?release_id={release_id}&component={component}"
-        )
-        if metadata_only:
-            return {
-                "kind": "full",
-                "release_id": release_id,
-                "schema_version": 1,
-                "record_count": count,
-                "fields": header,
-                "table_id": component,
-                "scope": "One governed component of a pinned collection release",
-                "format": "jsonl",
-                "records_sha256": expected["sha256"],
-                "download_path": route,
-            }
-        content = _release_bytes(
-            _grove_prefix(pin) + f"/components/{component}/download", limit=expected["bytes"]
-        )
-        if (
-            len(content) != expected["bytes"]
-            or hashlib.sha256(content).hexdigest() != expected["sha256"]
-        ):
-            raise FullReleaseUnavailable("Served bytes differ from verified release artifact")
-        rows = [json.loads(line) for line in content.splitlines()]
-        if len(rows) != count or any(
-            not isinstance(row, dict) or set(row) != set(header) for row in rows
-        ):
-            raise FullReleaseUnavailable("Record count or schema mismatch")
-        keys = [tuple(row[key] for key in primary_key) for row in rows]
-        if (
-            any(any(value is None or value == "" for value in key) for key in keys)
-            or len(set(keys)) != count
-        ):
-            raise FullReleaseUnavailable("Invalid primary keys")
-        product_name = (
-            "Cedar Press" if collection_id in governed_collections.SHARED_COLLECTIONS
-            else "Cedar Grove"
-        )
-        return {
-            "content": content,
-            "release_id": release_id,
-            "record_count": count,
-            "sha256": expected["sha256"],
-            "fields": header,
-            "component": component,
-            "citation": (
-                f"{product_name} "
-                f"{collection_id}/{component}, release {release_id}"
-            ),
-            "filename": f"{collection_id}--{component}-{release_id}.jsonl",
-            "media_type": "application/x-ndjson",
-        }
+        return _grove_component_release(pin, manifest, component, metadata_only=metadata_only)
     except FullReleaseUnavailable:
         raise
     except (OSError, HTTPException, ValueError, KeyError, TypeError, sqlite3.Error) as error:
@@ -1335,14 +1341,26 @@ def grove_release_metadata(collection_id):
     """
     if not is_component_release(collection_id):
         return None
+    components = grove_components(collection_id)
+    unavailable = [{"kind": "full", "table_id": name, "status": "unavailable"}
+                   for name in components]
+    try:
+        assert_collection_publishable(collection_id)
+        pin = grove_release_pin(collection_id)
+        _grove_catalog(pin)
+        manifest = _grove_manifest(pin)
+    except GroveReleaseNotPinned:
+        return None
+    except (FullReleaseUnavailable, OSError, HTTPException, ValueError,
+            KeyError, TypeError, sqlite3.Error):
+        return unavailable
     out = []
-    for component in grove_components(collection_id):
+    for component, missing in zip(components, unavailable):
         try:
-            out.append(grove_full_release(collection_id, component=component, metadata_only=True))
-        except GroveReleaseNotPinned:
-            return None
-        except FullReleaseUnavailable:
-            out.append({"kind": "full", "table_id": component, "status": "unavailable"})
+            out.append(_grove_component_release(pin, manifest, component, metadata_only=True))
+        except (FullReleaseUnavailable, OSError, HTTPException, ValueError,
+                KeyError, TypeError, sqlite3.Error):
+            out.append(missing)
     return out
 
 
