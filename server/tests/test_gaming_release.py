@@ -193,7 +193,7 @@ class GamingConsumerBoundaryTest(_ServerCase):
             "fields": [{"name": name} for name in header],
             "primary_key": ["payment_id"],
             "record_count": 2,
-            "metadata": {"field_rights": {}},
+            "metadata": {"field_rights": dict.fromkeys(header, "public_official")},
             "files": {"records.part-0001.jsonl": part, "records.part-0002.jsonl": part},
         }
         manifest = {"components": {"gaming_government_payments": contract}}
@@ -239,7 +239,7 @@ class GamingConsumerBoundaryTest(_ServerCase):
                 "fields": [{"name": name} for name in header],
                 "primary_key": ["payment_id"],
                 "record_count": count,
-                "metadata": {"field_rights": {}},
+                "metadata": {"field_rights": dict.fromkeys(header, "public_official")},
                 "files": {"records.jsonl": {"bytes": 10, "sha256": sha}},
             }
 
@@ -1011,6 +1011,9 @@ class PartitionedConsumerTest(_ServerCase):
                 "rights": {"publication_class": "public", "redistribution": True},
                 "download_permitted": True,
                 "fields": [{"name": "payment_id"}, {"name": "amount"}],
+                "metadata": {
+                    "field_rights": {"payment_id": "public_derived", "amount": "public_official"}
+                },
                 "primary_key": ["payment_id"],
                 "record_count": 1,
                 "files": {"records.jsonl": artifact},
